@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   AttachmentPanel,
@@ -25,6 +26,34 @@ import {
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
+import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
+
+type FieldCapsMapping = string | { readonly type: string; readonly aggregatable: boolean };
+
+/** Mock `_field_caps`. A plain `text` mapping is not aggregatable; list several mappings for a conflict. */
+const createFieldCapsEsClient = (
+  fields: Readonly<Record<string, FieldCapsMapping | readonly FieldCapsMapping[]>>
+) => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  esClient.fieldCaps.mockResolvedValue({
+    indices: ['kibana_sample_data_logs'],
+    fields: Object.fromEntries(
+      Object.entries(fields).map(([fieldName, mappings]) => [
+        fieldName,
+        Object.fromEntries(
+          [mappings].flat().map((mapping) => {
+            const { type, aggregatable } =
+              typeof mapping === 'string'
+                ? { type: mapping, aggregatable: mapping !== 'text' }
+                : mapping;
+            return [type, { type, aggregatable, searchable: true, metadata_field: false }];
+          })
+        ),
+      ])
+    ),
+  });
+  return esClient;
+};
 
 const createMockLogger = (): Logger =>
   ({
@@ -71,6 +100,39 @@ describe('executeDashboardOperations', () => {
     id,
     type: MARKDOWN_EMBEDDABLE_TYPE,
     config: { content },
+    grid,
+  });
+
+  const createAnomalyChartsPanel = (
+    id: string,
+    jobIds: string[] = ['job-1'],
+    grid: AttachmentPanel['grid'] = { x: 0, y: 0, w: 24, h: 15 }
+  ): AttachmentPanel => ({
+    id,
+    type: 'ml_anomaly_charts',
+    config: { job_ids: jobIds },
+    grid,
+  });
+
+  const createAnomalySwimlanePanel = (
+    id: string,
+    jobIds: string[] = ['job-1'],
+    grid: AttachmentPanel['grid'] = { x: 0, y: 0, w: 48, h: 12 }
+  ): AttachmentPanel => ({
+    id,
+    type: 'ml_anomaly_swimlane',
+    config: { job_ids: jobIds, swimlane_type: 'overall' },
+    grid,
+  });
+
+  const createSingleMetricViewerPanel = (
+    id: string,
+    jobIds: string[] = ['job-1'],
+    grid: AttachmentPanel['grid'] = { x: 0, y: 0, w: 24, h: 15 }
+  ): AttachmentPanel => ({
+    id,
+    type: 'ml_single_metric_viewer',
+    config: { job_ids: jobIds },
     grid,
   });
 
@@ -1942,6 +2004,278 @@ describe('executeDashboardOperations', () => {
       );
     });
 
+    it('edits an ML anomaly charts panel in place by panelId', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createAnomalyChartsPanel('charts-1')],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'ml_anomaly_charts',
+                panelId: 'charts-1',
+                config: {
+                  job_ids: ['job-1'],
+                  title: 'Anomaly charts of job-1 with severity > 50',
+                  severity_threshold: 50,
+                },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([]);
+
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0]).toEqual(
+        expect.objectContaining({
+          id: 'charts-1',
+          type: 'ml_anomaly_charts',
+          config: {
+            job_ids: ['job-1'],
+            title: 'Anomaly charts of job-1 with severity > 50',
+            severity_threshold: [{ min: 50 }],
+          },
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+        })
+      );
+    });
+
+    it('records a failure when an ML charts config-source edit targets a non-ML panel', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createLensPanel('panel-1', 0)],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'ml_anomaly_charts',
+                panelId: 'panel-1',
+                config: { job_ids: ['job-1'] },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([
+        {
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+          identifier: 'panel-1',
+          error: `Panel "panel-1" with type "${LENS_EMBEDDABLE_TYPE}" cannot be edited as anomaly charts.`,
+        },
+      ]);
+    });
+
+    it('edits an ML anomaly swimlane panel in place by panelId', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createAnomalySwimlanePanel('swim-1')],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'ml_anomaly_swimlane',
+                panelId: 'swim-1',
+                config: {
+                  job_ids: ['job-1'],
+                  swimlane_type: 'overall',
+                  severity_threshold: 75,
+                  title: 'Overall anomalies of job-1 (high severity)',
+                },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([]);
+
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0]).toEqual(
+        expect.objectContaining({
+          id: 'swim-1',
+          type: 'ml_anomaly_swimlane',
+          config: {
+            job_ids: ['job-1'],
+            swimlane_type: 'overall',
+            severity_threshold: 75,
+            title: 'Overall anomalies of job-1 (high severity)',
+          },
+          grid: { x: 0, y: 0, w: 48, h: 12 },
+        })
+      );
+    });
+
+    it('records a failure when an ML swimlane config-source edit targets a non-swimlane panel', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createLensPanel('panel-1', 0)],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'ml_anomaly_swimlane',
+                panelId: 'panel-1',
+                config: { job_ids: ['job-1'], swimlane_type: 'overall' },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([
+        {
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+          identifier: 'panel-1',
+          error: `Panel "panel-1" with type "${LENS_EMBEDDABLE_TYPE}" cannot be edited as anomaly swim lane.`,
+        },
+      ]);
+    });
+
+    it('edits an ML single metric viewer panel in place by panelId', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createSingleMetricViewerPanel('smv-1')],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'ml_single_metric_viewer',
+                panelId: 'smv-1',
+                config: {
+                  job_ids: ['job-1'],
+                  selected_entities: { 'host.name': 'web-01' },
+                  title: 'Metric viewer for web-01',
+                },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([]);
+
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0]).toEqual(
+        expect.objectContaining({
+          id: 'smv-1',
+          type: 'ml_single_metric_viewer',
+          config: {
+            job_ids: ['job-1'],
+            selected_entities: { 'host.name': 'web-01' },
+            title: 'Metric viewer for web-01',
+          },
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+        })
+      );
+    });
+
+    it('records a failure when an ML single metric viewer config-source edit targets a non-SMV panel', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createLensPanel('panel-1', 0)],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'ml_single_metric_viewer',
+                panelId: 'panel-1',
+                config: { job_ids: ['job-1'] },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([
+        {
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+          identifier: 'panel-1',
+          error: `Panel "panel-1" with type "${LENS_EMBEDDABLE_TYPE}" cannot be edited as single metric viewer.`,
+        },
+      ]);
+    });
+
     it('edits a custom_content panel in place by panelId, passing the existing template to the resolver', async () => {
       const resolvePanelContent = jest.fn<
         ReturnType<ResolvePanelContent>,
@@ -2492,7 +2826,7 @@ describe('add_controls / remove_controls operations', () => {
           operation: 'add_controls',
           controls: [
             { type: 'time_slider_control' },
-            { type: 'time_slider_control' },
+            { type: 'time_slider_control', user_requested: true },
             { type: 'options_list_control', field_name: 'service.name', index: 'logs-*' },
           ],
         },
@@ -2516,7 +2850,7 @@ describe('add_controls / remove_controls operations', () => {
     ]);
   });
 
-  it('add_controls skips adding a second time_slider_control to an existing dashboard', async () => {
+  it('add_controls silently skips an unrequested second time_slider_control on an existing dashboard', async () => {
     const { dashboardData: withTimeSlider } = await executeDashboardOperations({
       dashboardData: emptyDashboard,
       operations: [{ operation: 'add_controls', controls: [{ type: 'time_slider_control' }] }],
@@ -2530,13 +2864,7 @@ describe('add_controls / remove_controls operations', () => {
     });
 
     expect(dashboardData.pinned_panels).toHaveLength(1);
-    expect(failures).toEqual([
-      {
-        type: 'add_controls',
-        identifier: 'controls[0]',
-        error: 'A dashboard can contain at most one time_slider_control.',
-      },
-    ]);
+    expect(failures).toEqual([]);
   });
 
   it('add_controls appends to existing controls', async () => {
@@ -2563,6 +2891,176 @@ describe('add_controls / remove_controls operations', () => {
     });
 
     expect(after2.pinned_panels).toHaveLength(2);
+  });
+
+  describe('field validation', () => {
+    type ControlsInput = Extract<DashboardOperation, { operation: 'add_controls' }>['controls'];
+    const index = 'kibana_sample_data_logs';
+
+    const addControls = (
+      controls: ControlsInput,
+      esClient: ReturnType<typeof createFieldCapsEsClient>,
+      dashboardData: DashboardAttachmentData = emptyDashboard
+    ) =>
+      executeDashboardOperations({
+        dashboardData,
+        operations: [{ operation: 'add_controls', controls }],
+        logger,
+        resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({ esClient }),
+      });
+
+    const getEsqlQueries = ({ pinned_panels: pinnedPanels = [] }: DashboardAttachmentData) =>
+      pinnedPanels.map(
+        (panel) => (panel as unknown as { config: { esql_query?: string } }).config.esql_query
+      );
+
+    it('keeps controls on supported field types', async () => {
+      const { dashboardData, failures } = await addControls(
+        [
+          { type: 'options_list_control', field_name: 'client.ip', index },
+          { type: 'options_list_control', field_name: 'status', index },
+          { type: 'range_slider_control', field_name: 'bytes', index },
+        ],
+        createFieldCapsEsClient({ 'client.ip': 'ip', status: 'keyword', bytes: 'long' })
+      );
+
+      expect(failures).toEqual([]);
+      expect(getEsqlQueries(dashboardData)).toEqual([
+        `FROM ${index} | STATS BY \`client.ip\``,
+        `FROM ${index} | STATS BY status`,
+        `FROM ${index} | STATS BY bytes`,
+      ]);
+    });
+
+    it.each([
+      ['a non-aggregatable text field', 'text'],
+      ['an aggregatable text field', { type: 'text', aggregatable: true }],
+    ] as const)('uses the keyword sibling of %s', async (_, hostMapping) => {
+      const { dashboardData, failures } = await addControls(
+        [{ type: 'options_list_control', field_name: 'host', index }],
+        createFieldCapsEsClient({ host: hostMapping, 'host.keyword': 'keyword' })
+      );
+
+      expect(failures).toEqual([]);
+      expect(getEsqlQueries(dashboardData)).toEqual([`FROM ${index} | STATS BY \`host.keyword\``]);
+    });
+
+    const notMapped = `Not mapped on index "${index}".`;
+    const notAggregatable = `Is not aggregatable on index "${index}".`;
+    const conflicting = `Has conflicting mappings on index "${index}".`;
+    const optionsListType = `options_list_control needs a keyword, numeric, date, ip, boolean, or version field on index "${index}".`;
+    const rangeSliderType = `range_slider_control needs a numeric field on index "${index}".`;
+
+    it.each([
+      ['options_list_control', 'is not mapped', {}, notMapped],
+      [
+        'options_list_control',
+        'is text without a keyword sibling',
+        { field: 'text' },
+        notAggregatable,
+      ],
+      [
+        'options_list_control',
+        'is keyword and text across indices',
+        { field: ['keyword', 'text'] },
+        conflicting,
+      ],
+      [
+        'range_slider_control',
+        'is long and integer across indices',
+        { field: ['long', 'integer'] },
+        conflicting,
+      ],
+      [
+        'options_list_control',
+        'is aggregate_metric_double',
+        { field: 'aggregate_metric_double' },
+        optionsListType,
+      ],
+      ['options_list_control', 'is geo_point', { field: 'geo_point' }, optionsListType],
+      ['range_slider_control', 'is keyword', { field: 'keyword' }, rangeSliderType],
+      [
+        'range_slider_control',
+        'is aggregate_metric_double',
+        { field: 'aggregate_metric_double' },
+        rangeSliderType,
+      ],
+    ] as const)('reports a user-requested %s whose field %s', async (type, _, fields, error) => {
+      const { dashboardData, failures } = await addControls(
+        [{ type, field_name: 'field', index, user_requested: true }],
+        createFieldCapsEsClient(fields)
+      );
+
+      expect(getEsqlQueries(dashboardData)).toEqual([]);
+      expect(failures).toEqual([
+        { type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls, identifier: 'field', error },
+      ]);
+    });
+
+    it('silently leaves out an unresolved control the user did not request', async () => {
+      const { dashboardData, failures } = await addControls(
+        [{ type: 'options_list_control', field_name: 'method', index }],
+        createFieldCapsEsClient({})
+      );
+
+      expect(getEsqlQueries(dashboardData)).toEqual([]);
+      expect(failures).toEqual([]);
+    });
+
+    it('groups user-requested failures that share a reason', async () => {
+      const { failures } = await addControls(
+        ['http_method', 'status_code'].map((fieldName) => ({
+          type: 'options_list_control' as const,
+          field_name: fieldName,
+          index,
+          user_requested: true,
+        })),
+        createFieldCapsEsClient({})
+      );
+
+      expect(failures).toEqual([
+        {
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+          identifier: 'http_method, status_code',
+          error: notMapped,
+        },
+      ]);
+    });
+
+    it('requests only candidate fields, once per index, with the dashboard project routing', async () => {
+      const esClient = createFieldCapsEsClient({ host: 'keyword' });
+
+      await addControls(
+        [
+          { type: 'options_list_control', field_name: 'host', index },
+          { type: 'options_list_control', field_name: 'service.name', index },
+        ],
+        esClient,
+        { ...emptyDashboard, project_routing: '_alias:*' }
+      );
+
+      expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index,
+          fields: ['host', 'host.keyword', 'service.name', 'service.name.keyword'],
+          project_routing: '_alias:*',
+        })
+      );
+    });
+
+    it('keeps controls unvalidated when field loading fails', async () => {
+      const esClient = createFieldCapsEsClient({});
+      esClient.fieldCaps.mockRejectedValue(new Error('field caps unavailable'));
+
+      const { dashboardData, failures } = await addControls(
+        [{ type: 'options_list_control', field_name: 'host', index, user_requested: true }],
+        esClient
+      );
+
+      expect(failures).toEqual([]);
+      expect(getEsqlQueries(dashboardData)).toEqual([`FROM ${index} | STATS BY host`]);
+    });
   });
 
   it('remove_controls removes by id and leaves others intact', async () => {

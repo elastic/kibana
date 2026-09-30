@@ -12,6 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { DescriptionPanel } from './description_panel';
 
@@ -46,7 +47,8 @@ const renderWithProviders = (
 };
 
 const EMPTY_FALLBACK = /No description yet/;
-const ADD_ONE_HINT = /Add one to help agents understand this AI index/;
+const ADD_ONE_HINT =
+  /Add a description to shape suggested automations and help agents decide when this AI index is relevant/;
 
 describe('DescriptionPanel', () => {
   it('renders the provided description when not loading', () => {
@@ -68,8 +70,11 @@ describe('DescriptionPanel', () => {
       <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
     );
 
+    expect(screen.getByTestId('contextAiIndexDescriptionEmpty')).toBeInTheDocument();
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
     expect(screen.getByText(ADD_ONE_HINT)).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
   });
 
   it('renders read-only empty fallback for managed AI indexes', () => {
@@ -222,7 +227,35 @@ describe('DescriptionPanel', () => {
     expect(screen.getByTestId('contextDescriptionTextArea')).toHaveValue('My custom description');
   });
 
-  it('shows a loading state on the Save button while the PUT is in flight', async () => {
+  it('shows a warning when the description is within 5% of the max length', () => {
+    renderWithProviders(
+      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+    );
+
+    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH - 10) },
+    });
+
+    expect(screen.getByText(/10 characters remaining/)).toBeInTheDocument();
+    expect(screen.getByTestId('contextDescriptionSaveButton')).toBeEnabled();
+  });
+
+  it('shows an error and disables Save when the description exceeds the max length', () => {
+    renderWithProviders(
+      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+    );
+
+    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH + 1) },
+    });
+
+    expect(screen.getByText(/1 character over the 2,048 character limit/)).toBeInTheDocument();
+    expect(screen.getByTestId('contextDescriptionSaveButton')).toBeDisabled();
+  });
+
+  it('returns to read-only view while the PUT is in flight', async () => {
     const testServices = coreMock.createStart();
     testServices.http.put.mockImplementation(() => new Promise(() => {}));
 
@@ -243,7 +276,9 @@ describe('DescriptionPanel', () => {
     fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('contextDescriptionSaveButton')).toBeDisabled();
+      expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextDescriptionSaveButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('contextEditDescriptionButton')).toBeDisabled();
     });
   });
 });

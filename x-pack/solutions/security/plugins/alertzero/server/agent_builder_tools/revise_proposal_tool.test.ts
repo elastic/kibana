@@ -6,7 +6,7 @@
  */
 
 import { reviseProposalTool } from './revise_proposal_tool';
-import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 
 const logger = () => ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() });
 
@@ -16,7 +16,7 @@ const agenticWith = (opts: {
   assertCanManage?: jest.Mock;
   revise?: jest.Mock;
   getLatestRevision?: jest.Mock;
-}): (() => AgenticInvestigationsPluginStart) => {
+}): (() => ProposalsPluginStart) => {
   const assertCanManage = opts.assertCanManage ?? jest.fn().mockResolvedValue(undefined);
   const revise =
     opts.revise ?? jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 });
@@ -33,16 +33,16 @@ const agenticWith = (opts: {
     ({
       getProposalPrivileges: () => ({ assertCanManage }),
       getProposalsService: () => ({ revise, getLatestRevision }),
-    } as unknown as AgenticInvestigationsPluginStart);
+    } as unknown as ProposalsPluginStart);
 };
 
 const run = async (
-  getAgenticInvestigations: () => AgenticInvestigationsPluginStart,
+  getProposals: () => ProposalsPluginStart,
   // Derived from the tool itself rather than restated: a literal copy drifts
   // from the schema the moment the schema gains a field.
   input: Parameters<ReturnType<typeof reviseProposalTool>['handler']>[0]
 ) => {
-  const tool = reviseProposalTool(getAgenticInvestigations);
+  const tool = reviseProposalTool(getProposals);
   const result = await tool.handler(input, {
     logger: logger(),
     request: requestMock,
@@ -73,7 +73,8 @@ describe('reviseProposalTool', () => {
     expect(getLatestRevision).toHaveBeenCalledWith('proposal-1', 'default');
     expect(revise).toHaveBeenCalledWith(
       { id: 'proposal-1', comment: 'Tightened the match' },
-      'default'
+      'default',
+      requestMock
     );
   });
 
@@ -88,7 +89,11 @@ describe('reviseProposalTool', () => {
     });
 
     expect(getLatestRevision).toHaveBeenCalledWith('proposal-1', 'default');
-    expect(revise).toHaveBeenCalledWith({ id: 'proposal-2', impact: 'critical' }, 'default');
+    expect(revise).toHaveBeenCalledWith(
+      { id: 'proposal-2', impact: 'critical' },
+      'default',
+      requestMock
+    );
     expect(result.results[0].data).toMatchObject({
       proposalId: 'proposal-3',
       supersedes: 'proposal-2',

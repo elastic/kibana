@@ -61,7 +61,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       }
       return JSON.parse(injectedMetadata.getAttribute('data')!);
     });
-  const exists = (selector: string) => testSubjects.exists(selector, { timeout: 5000 });
+  const exists = (selector: string) => testSubjects.exists(selector);
   const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage', 5000);
   const getRenderingSession = () =>
     browser.execute(() => {
@@ -343,7 +343,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
         'xpack.searchAssistant.ui.enabled (boolean?)',
         'xpack.searchInferenceEndpoints.ui.enabled (boolean?)',
-        'xpack.searchPlayground.ui.enabled (boolean?)',
         'xpack.security.loginAssistanceMessage (string?)',
         'xpack.security.sameSiteCookies (Strict?|Lax?|None?)',
         'xpack.security.showInsecureClusterWarning (boolean?)',

@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { UseEuiTheme } from '@elastic/eui';
-import { euiFontSizeFromScale, euiShadow } from '@elastic/eui';
+import { euiCanAnimate, euiFontSizeFromScale } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { VisorMode } from './mode_selector';
 
-export const visorWidthPercentage = 0.5;
-export const dropdownWidthPercentage = 0.35;
-export const MODE_SELECT_WIDTH_KQL = 80;
-export const MODE_SELECT_WIDTH_NL = 160;
-const VISOR_INNER_PADDING = '2px';
 // Cap the expanded NL textarea height to roughly a third of the viewport,
 // offset by 100px to leave room for the editor chrome above and below.
 // Matches the max-height used by the KQL QueryStringInput textarea.
@@ -23,79 +17,39 @@ export const NL_TEXTAREA_MAX_HEIGHT = 'calc(35vh - 100px)';
 
 export const visorStyles = (
   euiThemeContext: UseEuiTheme,
-  comboBoxWidth: number,
-  isSpaceReduced: boolean,
-  isVisible: boolean,
-  mode: VisorMode
+  isInline: boolean,
+  isVisible: boolean = true
 ) => {
   const { euiTheme } = euiThemeContext;
   const fontSize = euiFontSizeFromScale('xs', euiTheme);
-  const modeSelectWidth = mode === VisorMode.KQL ? MODE_SELECT_WIDTH_KQL : MODE_SELECT_WIDTH_NL;
   const borderRadius = euiTheme.border.radius.medium;
-
-  const boxStyles = css`
-    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
-    border-radius: ${borderRadius};
-    ${euiShadow(euiThemeContext, 'xs')}
-  `;
 
   return {
     visorContainer: css`
       background-color: ${euiTheme.colors.backgroundBasePlain};
-      width: ${isSpaceReduced ? '98%' : `calc(${visorWidthPercentage * 100}%)`};
-      margin: ${isVisible ? `0 auto ${euiTheme.size.base}` : '0 auto 0'};
-      height: ${isVisible ? `calc(${euiTheme.size.xl} + ${VISOR_INNER_PADDING})` : '0'};
-      opacity: ${isVisible ? 1 : 0};
-      pointer-events: ${isVisible ? 'auto' : 'none'};
-      transition: all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+      width: 100%;
+      ${isInline
+        ? `
+          min-height: ${isVisible ? euiTheme.size.xl : '0'};
+          height: ${isVisible ? 'auto' : '0'};
+          max-height: ${isVisible ? NL_TEXTAREA_MAX_HEIGHT : '0'};
+          opacity: ${isVisible ? 1 : 0};
+          pointer-events: ${isVisible ? 'auto' : 'none'};
+          overflow: ${isVisible ? 'visible' : 'hidden'};
+          transition: min-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), max-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        `
+        : `min-height: ${euiTheme.size.xl};`}
     `,
     visorWrapper: css`
-      width: calc(100% - ${euiTheme.size.xl});
-    `,
-    visorBox: css`
-      ${boxStyles}
-    `,
-    comboBoxWrapper: css`
-      justify-content: center;
-      padding-left: ${euiTheme.size.xs};
-      flex-grow: 1;
-      max-width: ${isSpaceReduced ? `calc(${visorWidthPercentage * 100}%)` : `${comboBoxWidth}px`};
-      overflow: hidden;
-    `,
-    closeButtonWrapper: css`
-      ${boxStyles}
-      margin-left: ${euiTheme.size.xs};
-    `,
-    closeButton: css`
-      border-radius: ${borderRadius};
-      border: none;
-    `,
-    separator: css`
-      width: 1px;
-      height: ${euiTheme.size.xl};
-      flex-shrink: 0;
-      align-self: stretch;
-      position: relative;
-      &::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        transform: translateY(-50%);
-        width: 1px;
-        height: ${euiTheme.size.base};
-        background-color: ${euiTheme.colors.borderBasePlain};
-      }
+      width: 100%;
     `,
     searchWrapper: css`
       justify-content: center;
-      padding-right: ${euiTheme.size.xs};
+      position: relative;
+      min-width: 0;
 
       .euiFormControlLayout--group {
         border-radius: ${borderRadius};
-      }
-      .euiFormControlLayout--group::after {
-        border: none;
       }
 
       .euiFormControlLayout__append {
@@ -109,78 +63,121 @@ export const visorStyles = (
         font-size: ${fontSize} !important;
         padding-left: ${euiTheme.size.s} !important;
         padding-top: ${euiTheme.size.s} !important;
-        box-shadow: none;
-        &:focus,
-        &:hover {
-          box-shadow: none !important;
-          outline: none !important;
-        }
       }
     `,
-    techPreviewIcon: css`
-      padding-left: ${euiTheme.size.s};
+    searchInner: css`
+      width: 100%;
+    `,
+    submitButtonWrapper: css`
+      padding-left: ${euiTheme.size.xs};
       flex-shrink: 0;
-      flex-grow: 0;
+    `,
+    modeToggleWrapper: css`
+      padding-left: ${euiTheme.size.xs};
+      flex-shrink: 0;
       display: flex;
       align-items: center;
     `,
-    modeSelectWrapper: css`
-      flex-shrink: 0;
-      flex-grow: 0;
-      width: ${modeSelectWidth}px;
-      transition: width ${euiTheme.animation.slow} ease-in-out;
+    modeToggle: css`
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      box-sizing: border-box;
+      gap: ${euiTheme.size.xs};
+      block-size: ${euiTheme.size.xl};
+      max-block-size: ${euiTheme.size.xl};
+      padding: ${euiTheme.size.xs};
+      border-radius: ${euiTheme.border.radius.small};
 
-      .euiComboBox__inputWrap {
-        border: none !important;
-        box-shadow: none !important;
-        outline: none !important;
-        background: transparent !important;
-        font-size: ${fontSize} !important;
-        &:hover,
-        &:focus,
-        &:focus-within,
-        &:focus-visible {
-          box-shadow: none !important;
-          outline: none !important;
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.components.forms.border};
+        border-radius: inherit;
+        pointer-events: none;
+      }
+    `,
+    kqlModeButton: css`
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      inline-size: ${euiTheme.size.l};
+      block-size: ${euiTheme.size.l};
+      border-radius: ${euiTheme.border.radius.small};
+    `,
+    kqlModeButtonActive: css`
+      background-color: ${euiTheme.colors.backgroundLightText};
+    `,
+    aiButtonSparkleHover: css`
+      overflow: visible;
+      box-sizing: border-box;
+      block-size: ${euiTheme.size.l};
+      max-block-size: ${euiTheme.size.l};
+
+      /* The group already draws the border. Keep the outlined gradient on the icon and label. */
+      &::after {
+        content: none;
+      }
+
+      /* Starts at the resting icon so hover eases in instead of snapping to the dim frame. */
+      @keyframes esqlVisorSparkleTwinkle {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.45;
+          transform: scale(0.85);
         }
       }
-      .euiComboBox__input {
-        font-size: ${fontSize} !important;
+
+      ${euiCanAnimate} {
+        &:hover svg path,
+        &:focus-visible svg path {
+          transform-box: fill-box;
+          transform-origin: center;
+          animation-name: esqlVisorSparkleTwinkle;
+          animation-duration: calc(${euiTheme.animation.extraSlow} * 2);
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+
+        &:hover svg path:nth-of-type(2),
+        &:focus-visible svg path:nth-of-type(2) {
+          animation-delay: ${euiTheme.animation.slow};
+        }
+
+        &:hover svg path:nth-of-type(3),
+        &:focus-visible svg path:nth-of-type(3) {
+          animation-delay: ${euiTheme.animation.extraSlow};
+        }
       }
+    `,
+    aiButtonSelected: css`
+      /* Same gradient AiButton outlined uses on hover, so the selected fill stays visible at size xs. */
+      background: linear-gradient(
+        180deg,
+        ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
+        ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
+      ) !important;
     `,
     nlInputWrapper: css`
-      height: ${euiTheme.size.xl};
-      padding-right: ${euiTheme.size.xs};
-      overflow: visible;
-      position: relative;
+      justify-content: center;
+      min-width: 0;
     `,
     nlInput: css`
-      box-shadow: none !important;
-      border: none !important;
-      background-color: transparent;
-      font-size: ${fontSize} !important;
-      padding: calc(${euiTheme.size.xs} + ${VISOR_INNER_PADDING}) ${euiTheme.size.s} !important;
-      margin: 0;
-      resize: none;
-      overflow: hidden;
-      min-height: ${euiTheme.size.xl};
-      border-radius: ${borderRadius} !important;
-      position: relative;
-      z-index: ${euiTheme.levels.flyout};
-      &:focus,
-      &:hover {
-        box-shadow: none !important;
-        outline: none !important;
-      }
-    `,
-    searchFieldStyles: css`
-      box-shadow: none;
-      border-radius: 0;
-      font-size: ${fontSize} !important;
-      &:focus,
-      &:hover {
-        box-shadow: none !important;
-        outline: none !important;
+      .euiTextArea {
+        box-sizing: border-box;
+        height: ${euiTheme.size.xl};
+        min-height: ${euiTheme.size.xl};
+        padding-block-start: ${euiTheme.size.xxs};
+        padding-block-end: 0;
+        padding-inline: ${euiTheme.size.s};
+        font-size: ${fontSize};
+        line-height: calc(${euiTheme.size.xl} - (${euiTheme.border.width.thin} * 2));
+        overflow: hidden;
       }
     `,
   };

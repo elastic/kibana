@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import type { attachmentApiV1 } from '../../../../common/types/api';
 import { CASE_FIND_ATTACHMENTS_URL } from '../../../../common/constants';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
@@ -36,12 +37,13 @@ export const findCommentsRoute = createCasesRoute({
       const client = await caseContext.getCasesClient();
       const query = request.query as attachmentApiV1.FindAttachmentsQueryParams;
 
-      const res = toLegacyFindResponse(
-        await client.attachments.find({
-          caseID: request.params.case_id,
-          findQueryParams: query,
-        })
-      );
+      // `find` resolves any type; this route only ever surfaces comments. `type`
+      // must be the unified string — `find` no longer recognizes legacy spellings.
+      const { data, ...rest } = await client.attachments.find({
+        caseID: request.params.case_id,
+        findQueryParams: { ...query, type: [COMMENT_ATTACHMENT_TYPE] },
+      });
+      const res = toLegacyFindResponse({ comments: data, ...rest });
 
       return response.ok({
         body: res,

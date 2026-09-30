@@ -12,7 +12,10 @@ import type { SuggestAutomationProvider } from '@kbn/context-engine-plugin/publi
 import { i18n } from '@kbn/i18n';
 import { EMPTY, switchMap } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
+import {
+  CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
+  CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+} from '../common/agent_builder_tools';
 import type { AiIndexAttachmentData } from '../common/agent_builder_attachment_schemas';
 import { CONTEXT_ENGINE_SETUP_AGENT_ID } from '../common/agent_builder_agents';
 
@@ -22,6 +25,7 @@ const WORKFLOWS_MANAGEMENT_CAPABILITY = 'workflowsManagement';
 
 const AUTOMATION_REFRESH_TOOL_IDS: ReadonlySet<string> = new Set([
   CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+  CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
 ]);
 
 /**
@@ -84,12 +88,13 @@ export const createSuggestAutomationProvider = ({
         {
           id: aiIndex.id,
           type: AI_INDEX_ATTACHMENT_TYPE,
-          description:
-            aiIndex.description ??
-            i18n.translate('xpack.contextEngine.aiIndexDetail.automations.suggestAttachmentLabel', {
+          description: i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.automations.suggestAttachmentLabel',
+            {
               defaultMessage: 'AI index {name}',
               values: { name: aiIndex.id },
-            }),
+            }
+          ),
           data: attachmentData,
         },
       ],

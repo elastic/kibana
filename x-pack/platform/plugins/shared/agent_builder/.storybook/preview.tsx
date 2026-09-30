@@ -16,3 +16,12 @@ configure({ testIdAttribute: 'data-test-subj' });
 const I18nDecorator: Decorator = (storyFn) => <I18nProvider>{storyFn()}</I18nProvider>;
 
 export const decorators = [I18nDecorator];
+
+// Pin the Overview landing page to the top of the sidebar; everything else keeps its order.
+export const parameters = {
+  options: {
+    storySort: {
+      order: ['Overview'],
+    },
+  },
+};

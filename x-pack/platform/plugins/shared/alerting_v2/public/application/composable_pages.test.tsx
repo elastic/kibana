@@ -21,6 +21,8 @@ const ALL_CAPABILITIES = {
   alerting_v2_execution_history: { read: true, all: true },
 };
 
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
+
 jest.mock('@kbn/core-di-browser', () => {
   const actual = jest.requireActual('react');
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -31,6 +33,9 @@ jest.mock('@kbn/core-di-browser', () => {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
         return new ActualUserCapabilities({ capabilities: ALL_CAPABILITIES });
+      }
+      if (token === 'uiSettings') {
+        return { get: () => mockAlertingV2ExperimentalFeaturesEnabled };
       }
       return {};
     },
@@ -253,6 +258,19 @@ describe('composable pages', () => {
         <AlertingV2RulesPage {...defaultProps()} />
       );
       expect(screen.getByTestId('ruleDetailsRoute')).toBeInTheDocument();
+    });
+
+    it('RulesPage redirects sequence-builder URLs to the list when experimental features are disabled', () => {
+      mockAlertingV2ExperimentalFeaturesEnabled = false;
+      renderAtRoute(
+        '/rules/v2',
+        '/rules/v2/sequence/create',
+        <AlertingV2RulesPage {...defaultProps()} />
+      );
+
+      expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
+      expect(screen.queryByTestId('sequenceBuilderPage')).not.toBeInTheDocument();
+      mockAlertingV2ExperimentalFeaturesEnabled = true;
     });
 
     it('ActionPoliciesPage renders list when parent route matches', () => {

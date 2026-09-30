@@ -19,9 +19,11 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
 import { FilterStateStore } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
-import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
-import type { DiscoverSessionApiData, DiscoverSessionApiResponse } from '../../server';
-import type { DiscoverSessionClient, DiscoverSessionGetResult } from './api_client';
+import type {
+  DiscoverSessionInternalData,
+  DiscoverSessionInternalResponse,
+} from '../../server/api/internal_schema';
+import type { DiscoverSessionClient, DiscoverSessionClientGetResult } from './api_client';
 import { createSessionService } from './session_service';
 
 const runtimeTab: DiscoverSessionTab = {
@@ -37,7 +39,7 @@ const runtimeTab: DiscoverSessionTab = {
   serializedSearchSource: { index: 'logs-data-view' },
 };
 
-const apiData: DiscoverSessionApiData = {
+const apiData: DiscoverSessionInternalData = {
   title: 'Session',
   description: '',
   tabs: [
@@ -56,13 +58,13 @@ const apiData: DiscoverSessionApiData = {
   ],
 };
 
-const apiResponse: DiscoverSessionApiResponse = {
+const apiResponse: DiscoverSessionInternalResponse = {
   id: 'session-id',
   data: apiData,
   meta: { managed: false },
 };
 
-const apiGetResponse: DiscoverSessionGetResult = {
+const apiGetResponse: DiscoverSessionClientGetResult = {
   ...apiResponse,
   resolve: {
     outcome: 'conflict',
@@ -143,9 +145,9 @@ describe('Discover session service', () => {
       const beforeSave = cloneDeep(submittedSession);
       const apiClient = createApiClient();
       const legacyClient = savedSearchPluginMock.createStartContract();
-      // The API omits pin markers, inline IDs, the live fingerprint, and control order numbers.
+      // The API omits pin markers, the live fingerprint, and control order numbers.
       // Saving must keep those local values without rebuilding the tabs from this response.
-      const saveResponse: DiscoverSessionApiResponse = {
+      const saveResponse: DiscoverSessionInternalResponse = {
         id: savedId,
         data,
         meta: { managed: true },
@@ -168,7 +170,19 @@ describe('Discover session service', () => {
         ...beforeSave,
         id: savedId,
         managed: true,
-        references: [{ id: 'tag-1', type: 'tag', name: 'tag-ref-tag-1' }],
+        references: [
+          { id: 'tag-1', type: 'tag', name: 'tag-ref-tag-1' },
+          {
+            id: 'runtime-inline-a',
+            type: 'index-pattern',
+            name: 'tab_inline-a.kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          },
+          {
+            id: 'runtime-inline-b',
+            type: 'index-pattern',
+            name: 'tab_inline-b.kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          },
+        ],
       });
       expect(submittedSession).toStrictEqual(beforeSave);
       expect(apiClient.get).not.toHaveBeenCalled();
@@ -315,30 +329,35 @@ const createSaveFixture = () => {
     ],
   };
 
-  const data: DiscoverSessionApiData = {
+  const data: DiscoverSessionInternalData = {
     ...apiData,
     tags: ['tag-1'],
     tabs: [
-      ...['inline-a', 'inline-b'].map(
-        (id): DiscoverSessionApiTab => ({
-          id,
-          label: id,
-          type: DiscoverTabType.Default,
-          sort: [],
-          column_order: [],
-          filters: [{ type: 'dsl', dsl: { query: { match_all: {} } } }],
-          data_source: {
-            type: 'data_view_spec',
-            index_pattern: 'logs-*',
-            time_field: '@timestamp',
-            allow_hidden_indices: false,
-            field_filters: ['secret.*'],
+      ...['inline-a', 'inline-b'].map((id): DiscoverSessionInternalData['tabs'][number] => ({
+        id,
+        label: id,
+        type: DiscoverTabType.Default,
+        sort: [],
+        column_order: [],
+        filters: [
+          {
+            type: 'dsl',
+            dsl: { query: { match_all: {} } },
+            data_view_id: `runtime-${id}`,
           },
-          view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-          hide_chart: false,
-          hide_table: false,
-        })
-      ),
+        ],
+        data_source: {
+          type: 'data_view_spec',
+          id: `runtime-${id}`,
+          index_pattern: 'logs-*',
+          time_field: '@timestamp',
+          allow_hidden_indices: false,
+          field_filters: ['secret.*'],
+        },
+        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+        hide_chart: false,
+        hide_table: false,
+      })),
       {
         id: 'esql',
         label: 'ES|QL',

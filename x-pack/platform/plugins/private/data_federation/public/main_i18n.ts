@@ -162,9 +162,6 @@ export const mainTranslations = {
   },
 
   filters: {
-    dataSource: i18n.translate('xpack.dataFederation.filters.dataSource', {
-      defaultMessage: 'Data source',
-    }),
     allDataSources: i18n.translate('xpack.dataFederation.filters.allDataSources', {
       defaultMessage: 'Data sources',
     }),

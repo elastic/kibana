@@ -266,6 +266,21 @@ Each eval suite lives in its own `kbn-evals-suite-<name>` package. The package c
 
 To scaffold a new suite, you can use the [`evals-create-suite`](../../../../../.agents/skills/evals-create-suite/SKILL.md) skill (available to AI coding agents) or follow its templates manually. Register suites in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) for CI labeling and `node scripts/evals list`.
 
+### Suite-owned secrets (`scoutHook`)
+
+A suite whose Scout server needs secrets from the evals config can map them into env with a hook in its own package, rather than teaching the shared evals tooling about them. Point `scoutHook` in its `evals.suites.json` entry at a repo-relative bash script:
+
+```json
+{
+  "id": "my-suite",
+  "configPath": "x-pack/.../kbn-evals-suite-my-suite/playwright.config.ts",
+  "serverConfigSet": "evals_my_suite",
+  "scoutHook": "x-pack/.../kbn-evals-suite-my-suite/scout/scout_hook.sh"
+}
+```
+
+The hook reads the evals config JSON (the `--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI) on stdin and prints `{ "env"?: Record<string, string> }`. `node scripts/evals start`/`run` and `run_suite.sh` export that env to Scout and the Playwright run, so the suite's server config set can read it. Kibana also resolves `${VAR}` references in YAML config files from its environment, so a config set can pass a suite-owned YAML file with `--config` and keep secrets out of files and process arguments. Scout restarts when the hook output changes. Keep suite-specific keys in the evals config; the shared schema allows unknown blocks. See [the Nightshift investigations hook](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh) for an example.
+
 ### Playwright config
 
 ```ts
@@ -577,7 +592,10 @@ Grants:
 
 - Write/read `.evaluation-scores*` (results)
 - Write/read `traces-*` (OTLP traces)
+- Read evidence events from `logs-*`, restricted by document-level security
 - Write/read/delete `.evaluation-dataset*` (managed datasets)
 - Kibana `evals` feature privilege (`all`)
+
+The log-event allowlist is embedded in the API key. Regenerate existing keys when support for a new log-backed instrumentation profile or event name is added.
 
 With `--profile dev-vault`, these keys are read from Vault automatically.
