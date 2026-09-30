@@ -48,6 +48,7 @@ test.describe(
     test('sets the logs data source profile and clears it outside Discover', async ({
       page,
       pageObjects,
+      discoverEbt,
     }) => {
       const { discover } = pageObjects;
       await discover.goto({ queryMode: 'esql' });
@@ -73,11 +74,7 @@ test.describe(
         .toStrictEqual([]);
     });
 
-    test('does not set EBT context for Discover embeddables', async ({
-      page,
-      pageObjects,
-      discoverEbt,
-    }) => {
+    test('does not set EBT context for Discover embeddables', async ({ page, pageObjects }) => {
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.datePicker.setAbsoluteRange({
         from: 'Sep 19, 2015 @ 06:31:44.000',

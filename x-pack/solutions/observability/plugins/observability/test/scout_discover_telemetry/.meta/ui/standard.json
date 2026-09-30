@@ -1,5 +1,5 @@
 {
-  "sha1": "f8dc0988732dca32c49cc841993445705dd2ef57",
+  "sha1": "b71a8d1b159d50c5f839a3835a2761b3207a02f5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -40,7 +40,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_discover_telemetry/ui/tests/context.spec.ts",
         "line": 66,
-        "column": 34
+        "column": 26
       }
     },
     {

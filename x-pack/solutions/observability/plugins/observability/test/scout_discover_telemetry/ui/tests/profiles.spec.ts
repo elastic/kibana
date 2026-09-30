@@ -29,6 +29,7 @@ test.describe(
     test('sends profile resolved events when the data source changes', async ({
       page,
       pageObjects,
+      discoverEbt,
     }) => {
       const { discover } = pageObjects;
       await discover.goto({ queryMode: 'classic' });
@@ -66,6 +67,7 @@ test.describe(
     test('sends a profile resolved event when a document profile is resolved', async ({
       page,
       pageObjects,
+      discoverEbt,
     }) => {
       const { discover, dataGrid } = pageObjects;
       await discover.goto({ queryMode: 'esql' });
