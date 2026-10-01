@@ -17,6 +17,5 @@ export default createTestConfig('spaces_only', {
   // deterministic regardless of the plugin default (mirrors `config_trial.ts`).
   kbnServerArgs: [
     '--xpack.cases.templates.enabled=true',
-    '--xpack.cases.bidirectionalSync.enabled=true',
   ],
 });

@@ -31,7 +31,7 @@ describe('config validation', () => {
             "enabled": true,
           },
           "bidirectionalSync": Object {
-            "enabled": false,
+            "enabled": true,
           },
           "chat": Object {
             "enabled": true,
@@ -200,9 +200,9 @@ describe('config validation', () => {
       expect(config.templates.enabled).toBe(false);
     });
 
-    it('sets bidirectionalSync.enabled default to false', () => {
+    it('sets bidirectionalSync.enabled default to true', () => {
       const config = ConfigSchema.validate({});
-      expect(config.bidirectionalSync.enabled).toBe(false);
+      expect(config.bidirectionalSync.enabled).toBe(true);
     });
 
     it('sets runWorkflows.enabled default to false', () => {
