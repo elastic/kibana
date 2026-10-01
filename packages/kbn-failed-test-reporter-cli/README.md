@@ -31,8 +31,8 @@ those issues is left to a later iteration, so is the stale `failed-test` sweep c
 of suites that drop out of the report.
 
 Flaky tests that were skipped since are left out first (`--no-omit-skipped-tests` keeps them):
-on every branch the test failed on, its latest run was a skip, at least 12 hours after it last ran.
-A suite left with no test gets no issue (`all-tests-skipped`).
+on every branch the test failed on, every setup (pipeline, config, target) that ran it skipped it
+in its latest run. A suite left with no test gets no issue (`all-tests-skipped`).
 
 The body ends with hidden `flaky-test-suite` metadata (`<!-- kibanaCiData = … -->`): the suite's
 file, title, framework and test ids, the branches a test of the suite failed on (`suite.branches`,

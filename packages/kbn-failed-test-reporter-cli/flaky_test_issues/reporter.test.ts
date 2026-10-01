@@ -373,13 +373,7 @@ describe('reportFlakySuiteIssues', () => {
     const skippedTest = (overrides: Parameters<typeof flakyTest>[0] = {}) =>
       flakyTest({
         ...overrides,
-        byBranch: [
-          {
-            ...flakyTest().byBranch[0],
-            latestExecutionAt: new Date('2026-09-07T10:00:00.000Z'),
-            latestRun: { status: 'skipped', timestamp: new Date('2026-09-09T06:00:00.000Z') },
-          },
-        ],
+        byBranch: [{ ...flakyTest().byBranch[0], skipped: true }],
       });
 
     it('files no issue for a suite whose every flaky test was skipped, without spending a slot on it', async () => {

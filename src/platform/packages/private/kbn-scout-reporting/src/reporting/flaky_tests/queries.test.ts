@@ -9,6 +9,7 @@
 
 import { ESQL_ROW_LIMIT } from './esql';
 import {
+  buildBranchSetupsQuery,
   buildBranchStatsQuery,
   buildFailingFilesQuery,
   buildBranchCountsQuery,
@@ -147,6 +148,26 @@ describe('buildBranchStatsQuery', () => {
   });
 });
 
+describe('buildBranchSetupsQuery', () => {
+  it('reads the latest run per setup, then counts the setups and those that skipped the test', () => {
+    const query = buildBranchSetupsQuery(scope, ['jest', 'ftr'], ['t1']);
+
+    expect(query).toContain(
+      '(event.action == "test-end" AND reporter.type IN ("jest", "ftr")) AND test.id IN ("t1")'
+    );
+    expect(query).toContain(
+      'setup = CONCAT(COALESCE(buildkite.pipeline.slug, "-"), " ", ' +
+        'COALESCE(test_run.config.file.path, "-"), " ", COALESCE(test_run.target.mode, "-"), " ", ' +
+        'COALESCE(test_run.target.type, "-"))'
+    );
+    expect(query).toContain(
+      'STATS latest_status = LAST(status, @timestamp) BY test.id, buildkite.branch, setup | ' +
+        'STATS setups = COUNT(*), skipped_setups = SUM(CASE(latest_status == "skipped", 1, 0)) ' +
+        'BY test.id, buildkite.branch'
+    );
+  });
+});
+
 describe('fetchBranchStats', () => {
   it('returns an empty map without a query when there are no tests', async () => {
     const { client, esql } = mockEs([]);
@@ -215,9 +236,18 @@ describe('fetchBranchStats', () => {
         latest_job_id: 'job-1',
       },
     ];
-    esql
-      .mockReturnValueOnce({ toRecords: jest.fn().mockResolvedValue({ records: attemptRows }) })
-      .mockReturnValueOnce({ toRecords: jest.fn().mockResolvedValue({ records: outcomeRows }) });
+    const setupRows = [{ test_id: 'j1', branch: 'main', setups: 2, skipped_setups: 2 }];
+    esql.mockImplementation(({ query }: { query: string }) => {
+      const playwright = query.includes('"playwright"');
+      const rows = query.includes('skipped_setups')
+        ? playwright
+          ? []
+          : setupRows
+        : playwright
+        ? outcomeRows
+        : attemptRows;
+      return { toRecords: jest.fn().mockResolvedValue({ records: rows }) };
+    });
 
     const stats = await fetchBranchStats(client, scope, [
       { testId: 'j1', framework: 'jest' },
@@ -225,8 +255,13 @@ describe('fetchBranchStats', () => {
       { testId: 'p1', framework: 'playwright' },
     ]);
 
-    expect(esql).toHaveBeenCalledTimes(2);
-    const queries = esql.mock.calls.map(([{ query }]) => query as string);
+    // the stats of each execution model, then the setups of the tests whose newest run is a skip
+    expect(esql).toHaveBeenCalledTimes(3);
+    const [setupsQuery, ...others] = esql.mock.calls
+      .map(([{ query }]) => query as string)
+      .sort((a, b) => Number(b.includes('skipped_setups')) - Number(a.includes('skipped_setups')));
+    expect(setupsQuery).toContain('test.id IN ("j1")');
+    const queries = others;
     expect(queries[0]).toContain('reporter.type IN ("jest", "ftr")');
     expect(queries[0]).toContain('test.id IN ("j1", "f1")');
     expect(queries[1]).toContain('reporter.type IN ("playwright")');
@@ -246,6 +281,8 @@ describe('fetchBranchStats', () => {
           timestamp: new Date('2026-09-06T06:00:00.000Z'),
           buildUrl: undefined,
         },
+        // its newest run is not a skip, so a setup still runs it
+        skipped: false,
       },
       {
         branch: 'main',
@@ -259,6 +296,7 @@ describe('fetchBranchStats', () => {
           timestamp: new Date('2026-09-06T12:00:00.000Z'),
           buildUrl: 'https://b/9',
         },
+        skipped: true,
       },
       {
         branch: '9.4',
@@ -268,6 +306,7 @@ describe('fetchBranchStats', () => {
         lastFailedAt: undefined,
         latestExecutionAt: undefined,
         latestRun: undefined,
+        skipped: false,
       },
     ]);
     expect(stats.get('p1')).toEqual([
@@ -286,6 +325,7 @@ describe('fetchBranchStats', () => {
           buildUrl: 'https://b/1',
           jobId: 'job-1',
         },
+        skipped: false,
       },
     ]);
     expect(stats.has('f1')).toBe(false);
