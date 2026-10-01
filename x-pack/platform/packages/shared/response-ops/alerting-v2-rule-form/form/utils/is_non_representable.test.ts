@@ -160,12 +160,23 @@ describe('isNonRepresentableRule', () => {
     ).toBe(false);
   });
 
-  it('returns false for a combined recovering phase when recovery is manual', () => {
+  it('returns true for a combined recovering phase when recovery is manual', () => {
     expect(
       isNonRepresentableRule(
         createMockRule({
           recovery: { strategy: recoveryStrategy.manual },
           state_transition: { recovering: { count: 4, timeframe: '20m', operator: 'and' } },
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('returns false for a single-dimension recovering phase when recovery is manual', () => {
+    expect(
+      isNonRepresentableRule(
+        createMockRule({
+          recovery: { strategy: recoveryStrategy.manual },
+          state_transition: { pending: { count: 3 }, recovering: { count: 4 } },
         })
       )
     ).toBe(false);
@@ -266,7 +277,7 @@ describe('isNonRepresentableFormState', () => {
     ).toBe(true);
   });
 
-  it('returns false when recovering joins both thresholds but recovery is manual', () => {
+  it('returns true when recovering joins both thresholds and recovery is manual', () => {
     expect(
       isNonRepresentableFormState({
         ...baseFormValues,
@@ -276,6 +287,16 @@ describe('isNonRepresentableFormState', () => {
           recoveringTimeframe: '20m',
           recoveringOperator: 'and',
         },
+      })
+    ).toBe(true);
+  });
+
+  it('returns false for a single-dimension recovering phase when recovery is manual', () => {
+    expect(
+      isNonRepresentableFormState({
+        ...baseFormValues,
+        recovery: { strategy: recoveryStrategy.manual },
+        stateTransition: { pendingCount: 3, recoveringCount: 4 },
       })
     ).toBe(false);
   });

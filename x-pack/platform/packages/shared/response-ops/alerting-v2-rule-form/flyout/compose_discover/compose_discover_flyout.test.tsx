@@ -1662,6 +1662,105 @@ describe('ComposeDiscoverFlyout', () => {
       }
     );
 
+    it('keeps the form toggle locked when recovery becomes manual while recovering still joins both thresholds', () => {
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          ...representableRule,
+          recovery: { strategy: 'no_breach' as const },
+          state_transition: {
+            pending: { count: 3 },
+            recovering: { count: 4, timeframe: '20m', operator: 'and' as const },
+          },
+        } as any,
+      });
+
+      screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button')
+        .forEach((btn) => expect(btn).toBeDisabled());
+
+      const stillCombined: FormValues = {
+        ...defaultYamlFormValues,
+        kind: 'alert',
+        recovery: { strategy: 'manual' },
+        noData: { strategy: 'ignore' },
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
+        stateTransition: {
+          pendingCount: 3,
+          pendingTimeframe: null,
+          recoveringCount: 4,
+          recoveringTimeframe: '20m',
+          recoveringOperator: 'and',
+        },
+        stateTransitionAlertDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'duration',
+      };
+      mockParseYamlToFormValues = () => ({ values: stillCombined, error: null });
+      act(() => {
+        yamlRuleFormProps?.onBlurSync(stillCombined);
+      });
+
+      screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button')
+        .forEach((btn) => expect(btn).toBeDisabled());
+
+      clickEditMode('form');
+
+      expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('composeDiscoverFormMock')).not.toBeInTheDocument();
+    });
+
+    it('unlocks the form toggle once a manual rule no longer joins both recovering thresholds', () => {
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          ...representableRule,
+          recovery: { strategy: 'manual' as const },
+          state_transition: {
+            pending: { count: 3 },
+            recovering: { count: 4, timeframe: '20m', operator: 'and' as const },
+          },
+        } as any,
+      });
+
+      screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button')
+        .forEach((btn) => expect(btn).toBeDisabled());
+
+      const singleDimension: FormValues = {
+        ...defaultYamlFormValues,
+        kind: 'alert',
+        recovery: { strategy: 'manual' },
+        noData: { strategy: 'ignore' },
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE count > 100' } },
+        stateTransition: {
+          pendingCount: 3,
+          recoveringCount: 4,
+          recoveringTimeframe: null,
+          recoveringOperator: null,
+        },
+        stateTransitionAlertDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'recoveries',
+      };
+      mockParseYamlToFormValues = () => ({ values: singleDimension, error: null });
+      act(() => {
+        yamlRuleFormProps?.onBlurSync(singleDimension);
+      });
+
+      screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button')
+        .forEach((btn) => expect(btn).not.toBeDisabled());
+
+      clickEditMode('form');
+
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('yamlRuleFormMock')).not.toBeInTheDocument();
+    });
+
     it('unlocks the form toggle once YAML no longer joins both delay thresholds', () => {
       renderFlyout({
         mode: 'edit',
@@ -1819,6 +1918,28 @@ describe('ComposeDiscoverFlyout', () => {
         buttons.forEach((btn) => expect(btn).toBeDisabled());
       }
     );
+
+    it('stays in YAML mode when recovering joins both thresholds and recovery is manual', () => {
+      toggleToFormWith({
+        ...defaultYamlFormValues,
+        kind: 'alert',
+        recovery: { strategy: 'manual' },
+        stateTransition: {
+          pendingCount: 3,
+          recoveringCount: 4,
+          recoveringTimeframe: '20m',
+          recoveringOperator: 'and',
+        },
+        stateTransitionAlertDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'duration',
+      });
+
+      expect(screen.getByTestId('composeDiscoverYamlBadge')).toBeInTheDocument();
+      const buttons = screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button');
+      buttons.forEach((btn) => expect(btn).toBeDisabled());
+    });
 
     it('returns to Form view for an alert recovering on a condition', () => {
       toggleToFormWith({

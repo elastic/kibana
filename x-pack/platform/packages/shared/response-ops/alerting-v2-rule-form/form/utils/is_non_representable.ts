@@ -8,7 +8,6 @@
 import type { RuleKind, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../types';
-import { isRecoveryEnabled } from './lifecycle_mappers';
 
 /** The lifecycle blocks read structurally, so a form value and a response both fit. */
 interface LifecycleShape {
@@ -32,8 +31,9 @@ interface LifecycleShape {
  *   and has no control for the `operator` (`and` | `or`) that joins them.
  *   Combined phases stay in the YAML editor, which is where the operator is
  *   edited. Load, edit, and save keep an explicit operator and do not default
- *   a missing one. A recovering phase is ignored when recovery is `manual`,
- *   because the write path drops it.
+ *   a missing one. A recovering phase that still sets both thresholds stays
+ *   YAML-only after recovery is set to `manual`. Save omits that phase, but
+ *   switching to the form first would drop `operator` from the buffer.
  */
 const isNonRepresentable = (
   kind: RuleKind,
@@ -59,21 +59,17 @@ const phaseCombinesThresholds = (phase?: PhaseThresholds | null): boolean =>
 
 const stateTransitionIsYamlOnly = (
   pending?: PhaseThresholds | null,
-  recovering?: PhaseThresholds | null,
-  recoveryEnabled = true
-): boolean =>
-  phaseCombinesThresholds(pending) || (recoveryEnabled && phaseCombinesThresholds(recovering));
+  recovering?: PhaseThresholds | null
+): boolean => phaseCombinesThresholds(pending) || phaseCombinesThresholds(recovering);
 
 /** True when the rule can only be edited through the YAML fallback. */
 export const isNonRepresentableRule = (rule: RuleResponse): boolean => {
   if (rule.kind !== 'alert') return false;
   if (isNonRepresentable(rule.kind, rule)) return true;
 
-  const recoveryEnabled = rule.recovery?.strategy !== recoveryStrategy.manual;
   return stateTransitionIsYamlOnly(
     rule.state_transition?.pending,
-    rule.state_transition?.recovering,
-    recoveryEnabled
+    rule.state_transition?.recovering
   );
 };
 
@@ -92,7 +88,6 @@ export const isNonRepresentableFormState = (
     {
       count: stateTransition?.recoveringCount,
       timeframe: stateTransition?.recoveringTimeframe,
-    },
-    isRecoveryEnabled(values)
+    }
   );
 };
