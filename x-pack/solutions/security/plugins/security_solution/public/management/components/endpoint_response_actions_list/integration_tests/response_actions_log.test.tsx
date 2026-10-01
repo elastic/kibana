@@ -25,7 +25,6 @@ import {
   RESPONSE_ACTION_TYPE,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
-import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import { TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
@@ -147,7 +146,6 @@ describe('Response actions history', () => {
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
-  let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
 
   const filterByHosts = async (selectedOptionIndexes: number[]) => {
     const { getByTestId, getAllByTestId } = renderResult;
@@ -281,10 +279,6 @@ describe('Response actions history', () => {
   });
 
   describe('With Data', () => {
-    beforeEach(() => {
-      apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
-    });
-
     it('should show table when there is data', async () => {
       render();
 
@@ -1048,10 +1042,6 @@ describe('Response actions history', () => {
   });
 
   describe('Row actions', () => {
-    beforeEach(() => {
-      apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
-    });
-
     it('should not render a cancel button for completed actions', async () => {
       // Default mock has isCompleted: true for all actions
       render();
