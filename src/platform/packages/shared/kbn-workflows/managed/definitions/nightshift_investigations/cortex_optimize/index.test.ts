@@ -12,6 +12,9 @@ import { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW, NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLO
 
 const workflow = parse(NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW.yaml) as {
   name: string;
+  triggers: Array<{
+    inputs: { properties: Record<string, { type: string; maxLength?: number }> };
+  }>;
   steps: Array<{ name: string; type?: string; with?: Record<string, unknown> }>;
 };
 
@@ -27,8 +30,23 @@ describe('cortex optimize workflow', () => {
     ]);
   });
 
-  // Liquid `{{ }}` would stringify the array, leaving the optimizer with no tool calls to read.
-  it('hands the round tool calls to the optimizer as an array', () => {
+  it('forwards strict and round model inputs to the optimizer', () => {
+    expect(workflow.triggers[0].inputs.properties).toEqual(
+      expect.objectContaining({
+        connector_id: expect.objectContaining({ type: 'string', maxLength: 500 }),
+        round_connector_id: expect.objectContaining({ type: 'string', maxLength: 500 }),
+      })
+    );
+    expect(workflow.steps[0].with).toEqual(
+      expect.objectContaining({
+        connector_id: '{{ inputs.connector_id }}',
+        round_connector_id: '{{ inputs.round_connector_id }}',
+      })
+    );
+  });
+
+  // Liquid `{{ }}` would stringify the arrays, leaving the optimizer without tool output.
+  it('hands round tool calls and results to the optimizer as arrays', () => {
     expect(workflow.steps[0].with?.tool_calls).toBe('${{ inputs.tool_calls }}');
     expect(workflow.steps[0].with?.tool_results).toBe('${{ inputs.tool_results }}');
   });
