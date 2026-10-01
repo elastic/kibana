@@ -2353,7 +2353,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),
             updated_by: options?.user?.username ?? 'system',
-            package_agent_version_condition: pkgInfo?.conditions?.agent?.version,
+            // Explicitly clear the stored condition (rather than omitting the key) when the
+            // target package has none, otherwise a partial SO update leaves the stale value in
+            // place and computeMinAgentVersionData keeps advertising the old minimum version.
+            package_agent_version_condition: pkgInfo?.conditions?.agent?.version ?? null,
           },
           version,
         });

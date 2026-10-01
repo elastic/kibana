@@ -328,7 +328,7 @@ export const PackagePolicyBaseSchema = {
       }),
     ])
   ),
-  package_agent_version_condition: schema.maybe(schema.string()),
+  package_agent_version_condition: schema.maybe(schema.nullable(schema.string())),
   condition: schema.maybe(
     schema.nullable(
       schema.string({

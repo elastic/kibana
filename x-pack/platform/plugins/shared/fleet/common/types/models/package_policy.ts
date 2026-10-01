@@ -139,7 +139,7 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   updated_by: string;
   created_at: string;
   created_by: string;
-  package_agent_version_condition?: string;
+  package_agent_version_condition?: string | null;
 }
 
 export type DryRunPackagePolicy = NewPackagePolicy & {
