@@ -107,7 +107,7 @@ export const MergeCandidates = ({ mergeCandidates, onSetControl }: MergeCandidat
         const onMergeTerm2ToTerm1Click = () => performMerge(mc.id1, mc.id2);
 
         return (
-          <div>
+          <div key={`${mc.id1}-${mc.id2}`}>
             <span>
               <EuiToolTip content={mergeTerm1ToTerm2ButtonMsg} disableScreenReaderOutput>
                 <EuiButtonIcon
