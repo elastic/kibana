@@ -354,6 +354,23 @@ apiTest.describe(
       );
     };
 
+    const attachmentUrl = (conversationId: string, attachmentId?: string) =>
+      `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}/attachments${
+        attachmentId ? `/${encodeURIComponent(attachmentId)}` : ''
+      }`;
+
+    const createAttachmentAs = async (
+      apiClient: any,
+      user: { username: string; password: string },
+      conversationId: string
+    ) => {
+      return apiClient.post(attachmentUrl(conversationId), {
+        headers: headersFor(user),
+        body: { type: 'text', data: { content: 'Attachment access test' } },
+        responseType: 'json',
+      });
+    };
+
     const markConversationReadAs = async (
       apiClient: any,
       user: { username: string; password: string },
@@ -552,6 +569,34 @@ apiTest.describe(
             });
             expect(continueResponse).toHaveStatusCode(200);
             await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+          }
+        );
+
+        await apiTest.step(
+          'Bob can create, update and delete attachments on a public conversation',
+          async () => {
+            const createResponse = await createAttachmentAs(
+              apiClient,
+              bob,
+              publicConversation.conversation_id
+            );
+            expect(createResponse).toHaveStatusCode(200);
+
+            const { attachment } = createResponse.body as { attachment: { id: string } };
+            const url = attachmentUrl(publicConversation.conversation_id, attachment.id);
+
+            const updateResponse = await apiClient.put(url, {
+              headers: headersFor(bob),
+              body: { data: { content: 'Bob updated content' } },
+              responseType: 'json',
+            });
+            expect(updateResponse).toHaveStatusCode(200);
+
+            const deleteResponse = await apiClient.delete(url, {
+              headers: headersFor(bob),
+              responseType: 'json',
+            });
+            expect(deleteResponse).toHaveStatusCode(200);
           }
         );
 
@@ -810,6 +855,18 @@ apiTest.describe(
         });
 
         await apiTest.step(
+          'Bob cannot add attachments to Alice private conversations',
+          async () => {
+            const createResponse = await createAttachmentAs(
+              apiClient,
+              bob,
+              privateConversation.conversation_id
+            );
+            expect(createResponse).toHaveStatusCode(404);
+          }
+        );
+
+        await apiTest.step(
           'Bob cannot continue or mark read Alice private conversations',
           async () => {
             const continuePrivateResponse = await apiClient.post(
@@ -854,6 +911,13 @@ apiTest.describe(
               { headers: headersFor(bob), responseType: 'json' }
             );
             expect(getPublicResponse).toHaveStatusCode(404);
+
+            const createAttachmentResponse = await createAttachmentAs(
+              apiClient,
+              bob,
+              publicConversation.conversation_id
+            );
+            expect(createAttachmentResponse).toHaveStatusCode(404);
 
             const getOwnPublicResponse = await apiClient.get(
               `${accessControlApiBase}/conversations/${encodeURIComponent(
