@@ -128,7 +128,7 @@ export const cleanupStaleEvents = async ({
         updateLimit(() =>
           updateSignificantEventStatus({
             eventClient,
-            eventUuid: event.event_uuid,
+            eventId: event.event_id,
             status: 'closed',
             assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
             alertEventsClient,

@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiComboBox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -73,7 +74,21 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     handleNext,
   } = useServiceSettings({ onContinue });
 
-  const { awsServicesMap, detectAndReviewStep } = useOnboardingFlow();
+  const { awsServicesMap, detectAndReviewStep, servicesStep, refetchAwsServiceMatrix } =
+    useOnboardingFlow();
+  const { selectedServiceIds } = servicesStep;
+
+  // Gate Next on optional package manifests that are still in-flight or have errored.
+  // Errored manifests must also block here: an error leaves dataStreams/vars empty, so
+  // incompleteInstances would report nothing missing even though required fields aren't loaded.
+  const hasUnloadedSelectedManifests = selectedServiceIds.some((id) => {
+    const entry = awsServicesMap?.get(id);
+    return entry && !entry.isManifestLoaded && !entry.isManifestError;
+  });
+  const hasErroredSelectedManifests = selectedServiceIds.some((id) => {
+    const entry = awsServicesMap?.get(id);
+    return entry?.isManifestError === true;
+  });
 
   const isRegionDisabled =
     Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0 ||
@@ -123,8 +138,21 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
   const selectedGlobalRegionOption = globalRegion ? [{ label: globalRegion }] : [];
 
   const continueTooltipContent = useMemo(() => {
-    if (isReady) return undefined;
+    if (isReady && !hasUnloadedSelectedManifests && !hasErroredSelectedManifests) return undefined;
     const reasons: string[] = [];
+    if (hasErroredSelectedManifests) {
+      reasons.push(
+        i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.erroredManifests', {
+          defaultMessage: 'Service details failed to load — retry to continue',
+        })
+      );
+    } else if (hasUnloadedSelectedManifests) {
+      reasons.push(
+        i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.loadingManifests', {
+          defaultMessage: 'Loading service details',
+        })
+      );
+    }
     if (!globalRegion.trim()) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.noRegion', {
@@ -142,7 +170,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       );
     }
     return reasons.join(' · ');
-  }, [isReady, globalRegion, incompleteInstances]);
+  }, [
+    isReady,
+    hasUnloadedSelectedManifests,
+    hasErroredSelectedManifests,
+    globalRegion,
+    incompleteInstances,
+  ]);
 
   const columns: Array<EuiBasicTableColumn<ServiceInstance>> = useMemo(
     () => [
@@ -461,6 +495,42 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
 
       <EuiSpacer size="m" />
 
+      {hasErroredSelectedManifests && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.serviceSettingsStep.manifestErrorCallout.title"
+                defaultMessage="Could not load service details"
+              />
+            }
+            iconType="warning"
+            color="danger"
+            data-test-subj="serviceSettingsStep-manifestErrorCallout"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ingestHub.serviceSettingsStep.manifestErrorCallout.body"
+                defaultMessage="One or more integration packages could not be loaded. Retry to continue."
+              />
+            </p>
+            <EuiButton
+              size="s"
+              color="danger"
+              onClick={refetchAwsServiceMatrix}
+              data-test-subj="serviceSettingsStep-manifestRetryButton"
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.serviceSettingsStep.manifestErrorCallout.retryButton"
+                defaultMessage="Retry"
+              />
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+
       {incompleteInstances.length > 0 && (
         <>
           <KbnWarningCallout
@@ -528,7 +598,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
               <EuiButton
                 fill
                 onClick={handleNext}
-                disabled={!isReady}
+                disabled={!isReady || hasUnloadedSelectedManifests || hasErroredSelectedManifests}
+                isLoading={hasUnloadedSelectedManifests}
                 data-test-subj="serviceSettingsStep-continueButton"
               >
                 <FormattedMessage

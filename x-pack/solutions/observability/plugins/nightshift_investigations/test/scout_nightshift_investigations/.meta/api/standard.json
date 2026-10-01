@@ -1,5 +1,5 @@
 {
-  "sha1": "b4d4192708960a4b54c53dc1b7aa1acbae9563f4",
+  "sha1": "00e582e02eb01783698c0210422ff4d6d4e9ea18",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -421,6 +421,102 @@
       }
     },
     {
+      "id": "5634887a4dd65b3-15179325f34e902",
+      "title": "/internal/nightshift/sandbox_secrets stores secrets and only ever returns their keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
+        "line": 66,
+        "column": 27
+      }
+    },
+    {
+      "id": "5634887a4dd65b3-63eb4e1841adf74",
+      "title": "/internal/nightshift/sandbox_secrets rejects new keys without a value, too short or multi-line values and reserved keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
+        "line": 131,
+        "column": 18
+      }
+    },
+    {
+      "id": "5634887a4dd65b3-ed89ab4d3a81891",
+      "title": "/internal/nightshift/sandbox_secrets keeps secrets isolated per space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
+        "line": 160,
+        "column": 19
+      }
+    },
+    {
+      "id": "5634887a4dd65b3-e70ee20f53d6a87",
+      "title": "/internal/nightshift/sandbox_secrets lets read-only users list keys but not change secrets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "5634887a4dd65b3-64dda8fa872ad46",
+      "title": "/internal/nightshift/sandbox_secrets rejects users without any Nightshift privilege in the space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
+        "line": 197,
+        "column": 30
+      }
+    },
+    {
+      "id": "5634887a4dd65b3-7bb1a377ae1bfdf",
+      "title": "/internal/nightshift/sandbox_secrets returns 404 while Nightshift is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
+        "line": 207,
+        "column": 24
+      }
+    },
+    {
       "id": "339d855bf92e6e6-afca8ce6de73e20",
       "title": "investigations are isolated per space GET returns the investigation in the space it was created in",
       "expectedStatus": "passed",
@@ -549,8 +645,8 @@
       }
     },
     {
-      "id": "2bd6d8da5d00a5a-d29b9decd15410e",
-      "title": "POST /internal/nightshift/investigations returns 400 for a significant event body without a title",
+      "id": "2bd6d8da5d00a5a-0052c9640bd5a03",
+      "title": "POST /internal/nightshift/investigations returns 400 for a significant event subject, which is not accepted by this route",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -576,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 50,
-        "column": 28
+        "line": 51,
+        "column": 30
       }
     },
     {
@@ -592,7 +688,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 62,
+        "line": 65,
         "column": 58
       }
     },
@@ -608,7 +704,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 75,
+        "line": 78,
         "column": 27
       }
     },

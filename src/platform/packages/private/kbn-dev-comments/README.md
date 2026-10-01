@@ -13,8 +13,8 @@ const services: CommentsHostServices = {
   navigateToPath, // opens the page of a comment being navigated to
   getCurrentUser, // who is commenting
   captureViewport,// optional: screenshots
+  formatDate,     // dates in the host's locale: @kbn/i18n-react's
   ignoreSelectors,// optional: host UI to leave alone
-  RelativeTime,   // optional: how timestamps are shown, e.g. FormattedRelative
 };
 
 <CommentsButton services={services} />;
@@ -24,9 +24,12 @@ const services: CommentsHostServices = {
 
 ## Comment mode
 
-- Click an element to comment on it. Pins mark the page's comments; the panel lists all of them, grouped by page.
+- Click an element to comment on it. Pins mark the page's comments; the panel lists all of them, grouped by page. Resolved comments are left out of the list unless the panel's filter shows them.
+- Hold `Alt` (`⌥`) to click through to the page instead: open a flyout, follow a link. The page gets the click without the modifier, and it counts towards the trail like any other.
+- Tooltips can be commented on. A tooltip would go as the pointer left its element for it; in comment mode, it stays showing while the pointer heads over to it from the element, straight or not, to be clicked, and while the pointer is on it or on its pin, thread or composer; meanwhile the page is told nothing of the pointer, so neither what is under the tooltip nor the pin's own tooltip takes it down (with `Alt` held, the pointer is the page's again, and the tooltip goes as it would). With the keyboard, an arrow key aims at the tooltip the focused element shows (and back at the element), for `Enter` to comment on it; the tooltip stays showing while the composer or thread at it has focus, which goes back to the element after. The pin is on the tooltip whenever it shows, and its thread opens at the pin; a comment saved after its tooltip has gone is shown in the panel. The hover is recorded as the last step of the trail: "Take me there" asks the reader to repeat it, and opens the thread once the tooltip is there.
 - Comments are Markdown. They can be replied to and resolved, never deleted.
-- A comment whose element is not on screen has a navigate action in the panel: it opens the comment's page and highlights the author's clicks one at a time until the element appears.
+- A click on a comment in the panel takes the reader to it: its pin when the element is on screen; otherwise the comment's page, highlighting the author's clicks one at a time until the element appears.
+- When the element cannot be found, as when the UI has changed since, the comment can be viewed in the panel instead, with its screenshot and replies (also from the comment's menu in the list).
 
 ## Keyboard
 
@@ -34,6 +37,8 @@ const services: CommentsHostServices = {
 | --- | --- |
 | `⌘⇧K` / `Ctrl+Shift+K` | Toggle comment mode |
 | `Tab`, `Enter` / `Space` | In comment mode: move through the page, comment on the focused element |
+| `Alt` / `⌥` + click | In comment mode: click through to the page |
+| `↑` `↓` `←` `→` | In comment mode: aim at the tooltip the focused element shows, and back at the element |
 | `Esc` | Discard the draft, stop navigating to a comment, close the thread, leave comment mode |
 | `⌘↵` / `Ctrl+Enter` | Submit a comment or reply |
 

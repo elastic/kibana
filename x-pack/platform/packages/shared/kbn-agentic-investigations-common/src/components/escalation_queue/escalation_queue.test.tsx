@@ -13,6 +13,7 @@ import { EscalationQueue } from './escalation_queue';
 
 const openItem: EscalationQueueItem = {
   id: 'esc-1',
+  agentId: 'agent-1',
   title: 'Unusual admin activity',
   status: 'open',
   createdAt: '2024-01-01T00:00:00Z',
@@ -118,5 +119,22 @@ describe('EscalationQueue', () => {
       />
     );
     expect(screen.queryByTestId('escalationQueueLoadMore-open')).not.toBeInTheDocument();
+  });
+
+  it('passes the href from getHref to each card', () => {
+    const getHref = jest.fn((e: EscalationQueueItem) => `/chat/${e.id}`);
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[openItem]}
+        onClickCard={jest.fn()}
+        getHref={getHref}
+        renderAssignees={() => <span />}
+      />
+    );
+
+    expect(getHref).toHaveBeenCalledWith(openItem);
+    const link = screen.getByTestId(`escalationCardLink-${openItem.id}`);
+    expect(link).toHaveAttribute('href', `/chat/${openItem.id}`);
   });
 });

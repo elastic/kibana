@@ -18,38 +18,25 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { Investigation } from '../../../types';
-import { investigationEntityIds } from './entity_ids';
+import { impactPills } from './impact_pills';
 import { IMPACT_LABELS } from './translations';
 
 interface ImpactProps {
   investigations: Investigation[];
-  surfaceFilter: string | null;
-  onSurfaceFilterChange: (surface: string | null) => void;
+  entityFilter: string | null;
+  onEntityFilterChange: (entityId: string | null) => void;
 }
 
 export const Impact: React.FC<ImpactProps> = ({
   investigations,
-  surfaceFilter,
-  onSurfaceFilterChange,
+  entityFilter,
+  onEntityFilterChange,
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const surfaces = useMemo(() => {
-    const seen = new Set<string>();
-    const labels: string[] = [];
-    for (const investigation of investigations) {
-      for (const surface of investigationEntityIds(investigation)) {
-        if (seen.has(surface)) {
-          continue;
-        }
-        seen.add(surface);
-        labels.push(surface);
-      }
-    }
-    return labels;
-  }, [investigations]);
+  const pills = useMemo(() => impactPills(investigations), [investigations]);
 
-  if (surfaces.length === 0) {
+  if (pills.length === 0) {
     return null;
   }
 
@@ -66,23 +53,27 @@ export const Impact: React.FC<ImpactProps> = ({
         alignItems="center"
         aria-label={IMPACT_LABELS.title}
       >
-        {surfaces.map((surface) => (
-          <EuiFlexItem key={surface} grow={false}>
+        {pills.map((pill) => (
+          <EuiFlexItem key={pill.entityId} grow={false}>
             <EuiBadge
               style={{ padding: euiTheme.size.xs, textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-              onClick={() => onSurfaceFilterChange(surfaceFilter === surface ? null : surface)}
-              onClickAriaLabel={surface}
+              onClick={() =>
+                onEntityFilterChange(entityFilter === pill.entityId ? null : pill.entityId)
+              }
+              onClickAriaLabel={pill.entityId}
               css={css({
                 background:
-                  surfaceFilter === surface
+                  entityFilter === pill.entityId
                     ? euiTheme.colors.backgroundBaseHighlighted
                     : euiTheme.colors.emptyShade,
                 border: `1px solid ${
-                  surfaceFilter === surface ? euiTheme.colors.darkShade : euiTheme.colors.lightShade
+                  entityFilter === pill.entityId
+                    ? euiTheme.colors.darkShade
+                    : euiTheme.colors.lightShade
                 }`,
                 '&:hover': {
                   border: `1px solid ${
-                    surfaceFilter === surface
+                    entityFilter === pill.entityId
                       ? euiTheme.colors.darkShade
                       : euiTheme.colors.borderInteractiveFormsHoverPlain
                   }`,
@@ -97,16 +88,11 @@ export const Impact: React.FC<ImpactProps> = ({
               >
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" style={{ padding: `0 ${euiTheme.size.xs}` }}>
-                    <EuiTextTruncate text={surface} width={120} truncation="end" />
+                    <EuiTextTruncate text={pill.entityId} width={120} truncation="end" />
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">
-                    {
-                      investigations.filter((i) => investigationEntityIds(i).includes(surface))
-                        .length
-                    }
-                  </EuiBadge>
+                  <EuiBadge color="hollow">{pill.count}</EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiBadge>

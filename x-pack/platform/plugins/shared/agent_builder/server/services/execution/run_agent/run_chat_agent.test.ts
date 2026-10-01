@@ -8,7 +8,8 @@
 import { Overwrite, type Command } from '@langchain/langgraph';
 import type {
   BrowserApiToolMetadata,
-  CompactionStep,
+  CompactionSummary,
+  PreExecutionWorkflowStep,
   ToolCallStep,
 } from '@kbn/agent-builder-common';
 import {
@@ -16,6 +17,7 @@ import {
   ChatEventType,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  HookLifecycle,
   ToolOrigin,
   createAskUserQuestionStep,
 } from '@kbn/agent-builder-common';
@@ -44,6 +46,7 @@ import { RunTracker } from './run_tracker';
 import { steps as nodeNames } from './constants';
 import { applyStepUpdates, stepUpdates } from './step_state';
 import { createRootStateChunkEvent } from '../../../test_utils/graph_stream';
+import { timelineFromRounds } from '../../../test_utils/timeline';
 import type { StateType } from './state';
 
 // the real fold, so resume tests exercise the actual pending-turn detection
@@ -57,15 +60,10 @@ jest.mock('./utils', () => ({
   getPendingTurn: jest.fn(() => undefined),
   createPreExecutionSteps: jest.fn(() => []),
   addRoundCompleteEvent: jest.fn(() => (source$: any) => source$),
-  estimatePerRoundTokens: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock('./tools/register_internal_tools', () => ({
   registerInternalTools: jest.fn(),
-}));
-
-jest.mock('./utils/create_result_transformer', () => ({
-  createResultTransformer: jest.fn(() => ({})),
 }));
 
 jest.mock('./utils/image_resolver', () => ({
@@ -102,6 +100,7 @@ const createImageResolverMock = createImageResolver as jest.MockedFn<typeof crea
 describe('runDefaultAgentMode', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    createPreExecutionStepsMock.mockReturnValue([]);
   });
 
   it('adds static and dynamic tools to the toolManager', async () => {
@@ -234,6 +233,83 @@ describe('runDefaultAgentMode', () => {
     );
 
     expect(context.toolManager.setMaxToolResultTokens).toHaveBeenCalledWith(20_000);
+  });
+
+  it('seeds workflow context as a step while keeping the user-authored input clean', async () => {
+    const context = createAgentHandlerContextMock();
+    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      connector: { name: 'test-connector', connectorId: 'current-connector' },
+      chatModel: {},
+    } as any);
+    context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+    context.toolManager.getDynamicToolIds.mockReturnValue([]);
+    getPendingTurnMock.mockReturnValue(undefined);
+    selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+    prepareConversationMock.mockResolvedValue({
+      timeline: [],
+      nextInput: { message: 'user task', attachments: [] },
+      attachments: [],
+      attachmentTypes: [],
+      attachmentStateManager: context.attachmentStateManager,
+    } as any);
+    extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+    createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    const preExecutionWorkflow = {
+      model_context: '<system_update>hydrated context</system_update>',
+      workflow_context: {
+        'nightshift.semantic_memory.recall': {
+          version: 1,
+          data: { recalled_ids: ['memory-1', 'memory-2'] },
+        },
+      },
+    };
+    const preExecutionWorkflowStep: PreExecutionWorkflowStep = {
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      ...preExecutionWorkflow,
+    };
+    createPreExecutionStepsMock.mockReturnValue([preExecutionWorkflowStep]);
+    (context.hooks.run as jest.Mock).mockImplementation(
+      async (lifecycle: HookLifecycle, hookContext: any) =>
+        lifecycle === HookLifecycle.beforeAgent
+          ? {
+              ...hookContext,
+              preExecutionWorkflow,
+            }
+          : hookContext
+    );
+
+    await runDefaultAgentMode(
+      {
+        nextInput: { message: 'user task' },
+        agentConfiguration: { tools: [] } as any,
+      },
+      context
+    );
+
+    expect(createPromptFactoryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        processedConversation: expect.objectContaining({
+          nextInput: { message: 'user task', attachments: [] },
+        }),
+      })
+    );
+    expect(createPreExecutionStepsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ preExecutionWorkflow })
+    );
+    const command = createAgentGraphMock.mock.results[0].value.streamEvents.mock.calls[0][0];
+    expect(command.update.steps).toEqual(new Overwrite([preExecutionWorkflowStep]));
+    const roundStarted = (context.events.emit as jest.Mock).mock.calls
+      .map(([event]) => event)
+      .find((event) => event.type === ChatEventType.roundStarted);
+    expect(roundStarted.data.input).toEqual({
+      message: 'user task',
+      attachments: [],
+      attachment_refs: undefined,
+    });
+    expect(context.hooks.run).toHaveBeenCalledWith(
+      HookLifecycle.afterExecution,
+      expect.objectContaining({ connectorId: 'current-connector' })
+    );
   });
 
   describe('plugin skill id filtering', () => {
@@ -614,15 +690,24 @@ describe('runDefaultAgentMode', () => {
       results: [],
       progression: [],
     };
+    const initialWorkflowStep = {
+      type: ConversationRoundStepType.preExecutionWorkflow,
+      model_context: '<system_update>initial context</system_update>',
+    } as const;
 
-    it('resumes at executeTool when the pending turn has a paused tool call', async () => {
+    it('runs beforeAgent on resume without replacing the initial workflow step', async () => {
       const { context, streamEvents } = setup();
+      (context.hooks.run as jest.Mock).mockImplementation(async (_lifecycle, hookContext) => ({
+        ...hookContext,
+        nextInput: { ...hookContext.nextInput, message: 'hook rewrite' },
+        preExecutionWorkflow: { model_context: 'must not be seeded on resume' },
+      }));
       const conversation = createEmptyConversation({
         rounds: [
           createRound({
             id: 'round-1',
             status: ConversationRoundStatus.awaitingPrompt,
-            steps: [pausedCall],
+            steps: [initialWorkflowStep, pausedCall],
             pending_prompts: [
               { id: 'p1', type: AgentPromptType.confirmation, title: 't', message: 'm' },
             ],
@@ -660,6 +745,7 @@ describe('runDefaultAgentMode', () => {
       const command = initialCommand(streamEvents);
       expect(command.goto).toEqual([nodeNames.executeTool]);
       expect(command.update).toMatchObject({
+        steps: new Overwrite([initialWorkflowStep, pausedCall]),
         pendingToolCallIds: ['call-1'],
         currentCycle: 3,
         researchOutcome: {
@@ -668,18 +754,136 @@ describe('runDefaultAgentMode', () => {
         },
         toolRenderState: { 'call-1': { toolName: 'my_tool', kind: 'server' } },
       });
+      expect(createPreExecutionStepsMock).not.toHaveBeenCalled();
+      expect(context.hooks.run).toHaveBeenCalledWith(
+        HookLifecycle.beforeAgent,
+        expect.objectContaining({ roundExecutionIndex: 1 })
+      );
+      expect(createPromptFactoryMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          processedConversation: expect.objectContaining({
+            nextInput: expect.objectContaining({ message: 'hook rewrite' }),
+          }),
+        })
+      );
       expect(context.attachmentStateManager.clearAccessTracking).not.toHaveBeenCalled();
     });
 
-    it('appends the compaction step to a resumed turn as a step owned by the resume execution', async () => {
+    const storedSummary: CompactionSummary = {
+      summarized_up_to: { round_id: 'round-0', tool_call_id: 'call-0' },
+      summarized_round_count: 0,
+      covered_round_ids: [],
+      created_at: '2026-01-01T00:00:00.000Z',
+      token_count: 10,
+      structured_data: {
+        discussion_summary: 'earlier work',
+        user_intent: 'intent',
+        key_topics: [],
+        entities: [],
+        outcomes_and_decisions: [],
+        unanswered_questions: [],
+        agent_actions: [],
+        tool_calls_summary: [],
+      },
+    };
+
+    it('passes the context-management dependencies and the previous round hints to the graph', async () => {
+      const { context } = setup();
+      const timeline = timelineFromRounds([
+        {
+          id: 'round-0',
+          input: { message: 'earlier' },
+          model_usage: {
+            connector_id: 'connector-1',
+            llm_calls: 1,
+            input_tokens: 100,
+            output_tokens: 1,
+            last_call_input_tokens: 42,
+          },
+        },
+      ]);
+      prepareConversationMock.mockResolvedValue({
+        timeline,
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+        context
+      );
+
+      const { contextManagement } = createAgentGraphMock.mock.calls[0][0];
+      expect(contextManagement).toMatchObject({
+        connector: { connectorId: 'connector-1' },
+        resultStore: context.resultStore,
+        logger: context.logger,
+        previousRound: { connectorId: 'connector-1', lastCallInputTokens: 42 },
+      });
+      expect(contextManagement.previousRound?.terminatedAt).toEqual(expect.any(String));
+      expect(contextManagement.resultTransformer).toEqual(expect.any(Function));
+      expect(createPromptFactoryMock.mock.calls[0][0]).toMatchObject({
+        resultStore: context.resultStore,
+        logger: context.logger,
+        resultTransformer: contextManagement.resultTransformer,
+      });
+    });
+
+    it('seeds the stored compaction summary into a fresh run', async () => {
       const { context, streamEvents } = setup();
-      const compaction: CompactionStep = {
-        type: ConversationRoundStepType.compaction,
-        token_count_before: 100,
-        token_count_after: 10,
-        summarized_round_count: 1,
-      };
-      createPreExecutionStepsMock.mockReturnValue([compaction]);
+      const conversation = createEmptyConversation({
+        rounds: [createRound({ id: 'round-0', status: ConversationRoundStatus.completed })],
+        state: { compaction_summary: storedSummary },
+      });
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any, conversation },
+        context
+      );
+
+      const command = initialCommand(streamEvents);
+      expect(command.update).toMatchObject({ compactionSummary: storedSummary });
+      const tracker = createAgentGraphMock.mock.calls[0][0].toolExecutionBuffer as RunTracker;
+      expect(tracker.latestState().compactionSummary).toEqual(storedSummary);
+    });
+
+    it('lets a blocking beforeAgent hook abort a resumed round', async () => {
+      const { context } = setup();
+      const conversation = createEmptyConversation({
+        rounds: [
+          createRound({
+            id: 'round-1',
+            status: ConversationRoundStatus.awaitingPrompt,
+            steps: [pausedCall],
+            pending_prompts: [
+              { id: 'p1', type: AgentPromptType.confirmation, title: 't', message: 'm' },
+            ],
+          }),
+        ],
+      });
+      getPendingTurnMock.mockImplementation(realGetPendingTurn);
+      (context.hooks.run as jest.Mock).mockRejectedValue(new Error('blocked on resume'));
+
+      await expect(
+        runDefaultAgentMode(
+          {
+            nextInput: { prompts: { p1: { allow: true } } },
+            agentConfiguration: { tools: [] } as any,
+            conversation,
+          },
+          context
+        )
+      ).rejects.toThrow('blocked on resume');
+      expect(context.hooks.run).toHaveBeenCalledWith(
+        HookLifecycle.beforeAgent,
+        expect.objectContaining({ roundExecutionIndex: 1 })
+      );
+    });
+
+    it('seeds the stored compaction summary and the last call usage into a resumed turn', async () => {
+      const { context, streamEvents } = setup();
       const conversation = createEmptyConversation({
         rounds: [
           createRound({
@@ -707,9 +911,29 @@ describe('runDefaultAgentMode', () => {
             },
           }),
         ],
+        state: { compaction_summary: storedSummary },
       });
       getPendingTurnMock.mockImplementation(realGetPendingTurn);
       (context.promptManager.dump as jest.Mock).mockReturnValue({ responses: {} });
+      prepareConversationMock.mockResolvedValue({
+        timeline: timelineFromRounds([
+          {
+            id: 'round-0',
+            input: { message: 'earlier' },
+            model_usage: {
+              connector_id: 'connector-1',
+              llm_calls: 1,
+              input_tokens: 100,
+              output_tokens: 1,
+              last_call_input_tokens: 42,
+            },
+          },
+        ]),
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
 
       await runDefaultAgentMode(
         {
@@ -720,20 +944,20 @@ describe('runDefaultAgentMode', () => {
         context
       );
 
-      // the graph is seeded with the inherited steps plus the compaction step
       const command = initialCommand(streamEvents);
-      expect(command.update).toMatchObject({ steps: new Overwrite([pausedCall, compaction]) });
-      // the tracker attributes the compaction step to this execution, not to the paused one
+      expect(command.update).toMatchObject({
+        steps: new Overwrite([pausedCall]),
+        compactionSummary: storedSummary,
+        lastCallUsage: { inputTokens: 42 },
+      });
       const tracker = createAgentGraphMock.mock.calls[0][0].toolExecutionBuffer as RunTracker;
-      expect(tracker.latestState().steps).toEqual([pausedCall, compaction]);
+      expect(tracker.latestState().compactionSummary).toEqual(storedSummary);
       expect(tracker.executionProjection()).toEqual([
         expect.objectContaining({ tool_call_id: 'call-1' }),
-        compaction,
       ]);
-      createPreExecutionStepsMock.mockReturnValue([]);
     });
 
-    it('resumes at researchAgent when the turn only paused on an ask_user_question', async () => {
+    it('resumes at contextManagement when the turn only paused on an ask_user_question', async () => {
       const { context, streamEvents } = setup();
       const question = { question: 'Pick', options: [{ label: 'a' }], multi_select: false };
       const conversation = createEmptyConversation({
@@ -767,7 +991,7 @@ describe('runDefaultAgentMode', () => {
       );
 
       const command = initialCommand(streamEvents);
-      expect(command.goto).toEqual([nodeNames.researchAgent]);
+      expect(command.goto).toEqual([nodeNames.contextManagement]);
       expect(command.update).toMatchObject({ pendingToolCallIds: [], researchOutcome: undefined });
       // the consumed answer is removed from the prompt manager and replayed as an event
       expect(context.promptManager.delete).toHaveBeenCalledWith('q1');
