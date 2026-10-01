@@ -1035,6 +1035,7 @@ export const optimizeMemory = async ({
     answer: assistantMessage,
     investigation,
     toolCalls,
+    evidenceOnly: true,
   });
   const evidenceTranscript = renderMemoryTranscript({
     task,

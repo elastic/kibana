@@ -1783,6 +1783,47 @@ describe('optimizeMemory', () => {
     expect(proposeExtractions.mock.calls[0][0].transcript).not.toContain('## Final answer');
   });
 
+  it('keeps seeded Cortex reads out of every Memory call but keeps memory reads', async () => {
+    const store = createStore({
+      get: jest.fn().mockImplementation(async (id: string) => page(id)),
+    });
+    const proposeLabels = jest.fn().mockResolvedValue({ useful: [], harmful: [] });
+    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [] });
+
+    await optimizeMemory({
+      store,
+      recalledIds: ['memory_a'],
+      proposeLabels,
+      proposeExtractions,
+      userMessage: 'why is checkout slow?',
+      assistantMessage: 'Redis evictions on checkout.',
+      toolCalls: [],
+      investigation: [
+        {
+          kind: 'tool',
+          toolId: 'nightshift_sandbox_view_file',
+          params: { file_path: '/workspace/cortex/INDEX.md' },
+          resultText: 'CORTEX_INDEX',
+          isError: false,
+        },
+        {
+          kind: 'tool',
+          toolId: 'nightshift_sandbox_view_file',
+          params: { file_path: '/workspace/memories/a.md' },
+          resultText: 'MEMORY_A',
+          isError: false,
+        },
+      ],
+      logger: loggerMock.create(),
+    });
+
+    for (const propose of [proposeLabels, proposeExtractions]) {
+      const { transcript } = propose.mock.calls[0][0];
+      expect(transcript).not.toContain('CORTEX_INDEX');
+      expect(transcript).toContain('MEMORY_A');
+    }
+  });
+
   it('writes every entry with the extraction transcript and the other entries topics', async () => {
     const recalled = page('memory_redis', 'Redis', 'Checkout Redis evicts keys under load.');
     const store = createStore({
