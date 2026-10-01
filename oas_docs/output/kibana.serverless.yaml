@@ -77118,6 +77118,12 @@ paths:
       description: Retrieve all Kibana roles.
       operationId: get-security-role
       parameters:
+        - description: If true, include built-in roles on serverless. By default, serverless returns only custom roles. Other deployments always include built-in roles.
+          in: query
+          name: includeReservedRoles
+          required: false
+          schema:
+            type: boolean
         - description: If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.
           in: query
           name: replaceDeprecatedPrivileges
