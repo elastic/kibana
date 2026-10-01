@@ -141,9 +141,18 @@ export const runPackageReport = async ({
     // later sweep hunts it again. Closing here would have that sweep write its findings --
     // a real hit included -- into an Investigation this run had already closed.
     if (!hasConfirmedHit && huntStatus === 'success') {
+      // No SSE means no technique-level detail either, so this writes the same report-scoped
+      // fallback subject `deriveCoverageSubjects` already emits when a run's SSE names no
+      // techniques -- the one piece of "we looked" this run can honestly claim is the reportId.
+      const subjects = deriveCoverageSubjects({
+        spaceId,
+        state: { reportId, techniques: [], hasConfirmedHit: false },
+        investigationConversationId,
+      });
+      const coverage = await deps.writeCoverageKis(subjects);
       return {
         status: 'packaged',
-        coverage: { written: [], skipped: [] },
+        coverage,
         proposals: [],
         dismiss: true,
         closureSummary: `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`,
