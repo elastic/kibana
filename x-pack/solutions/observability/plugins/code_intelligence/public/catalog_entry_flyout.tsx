@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import type { CatalogItem } from './api';
+import { SeverityBadge } from './severity_badge';
 import { SignalTypeBadge } from './signal_type_badge';
 
 interface Props {
@@ -156,9 +157,9 @@ export const CatalogEntryFlyout = ({ item, onClose }: Props) => {
       : [
           {
             title: i18n.translate('xpack.codeIntelligence.catalogEntry.severity', {
-              defaultMessage: 'Severity score',
+              defaultMessage: 'Severity',
             }),
-            description: String(item.severity_score),
+            description: <SeverityBadge score={item.severity_score} />,
           },
         ]),
     ...(item.updated_at === undefined

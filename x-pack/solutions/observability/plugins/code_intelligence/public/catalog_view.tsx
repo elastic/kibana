@@ -10,14 +10,12 @@ import {
   EuiCode,
   EuiEmptyPrompt,
   EuiFieldSearch,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
   EuiPagination,
   EuiPanel,
   EuiProgress,
-  EuiSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -25,9 +23,17 @@ import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 
+import {
+  CATALOG_SEVERITIES,
+  CATALOG_SIGNAL_TYPES,
+  type CatalogSeverity,
+  type CatalogSignalType,
+} from '../common/catalog_filters';
 import type { CatalogItem, CatalogResponse, Repository } from './api';
 import { getCatalog } from './api';
 import { CatalogEntryFlyout } from './catalog_entry_flyout';
+import { CatalogFilterPopover } from './catalog_filter_popover';
+import { SeverityBadge, severityLabels } from './severity_badge';
 import { SignalTypeBadge, signalTypeLabels } from './signal_type_badge';
 
 interface Props {
@@ -37,8 +43,6 @@ interface Props {
   repositoriesError?: string;
   reloadRepositories: () => void;
 }
-
-type Kind = '' | 'log' | 'trace' | 'metric';
 
 const CatalogRow = ({ item, onOpen }: { item: CatalogItem; onOpen: () => void }) => (
   <EuiPanel
@@ -55,6 +59,11 @@ const CatalogRow = ({ item, onOpen }: { item: CatalogItem; onOpen: () => void })
       <EuiFlexItem grow={false}>
         <SignalTypeBadge signalType={item.signal_type} />
       </EuiFlexItem>
+      {item.severity_score !== undefined && (
+        <EuiFlexItem grow={false}>
+          <SeverityBadge score={item.severity_score} />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
           {item.repository}
@@ -85,8 +94,9 @@ export const CatalogView = ({
   repositoriesError,
   reloadRepositories,
 }: Props) => {
-  const [repository, setRepository] = useState('');
-  const [kind, setKind] = useState<Kind>('');
+  const [selectedRepositories, setSelectedRepositories] = useState<string[]>([]);
+  const [kinds, setKinds] = useState<CatalogSignalType[]>([]);
+  const [severities, setSeverities] = useState<CatalogSeverity[]>([]);
   const [queryInput, setQueryInput] = useState('');
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -97,19 +107,14 @@ export const CatalogView = ({
   const [requestSequence, setRequestSequence] = useState(0);
 
   useEffect(() => {
-    if (repository === '' && repositories[0] !== undefined) {
-      setRepository(repositories[0].repository);
-    }
-  }, [repositories, repository]);
-
-  useEffect(() => {
-    if (repository === '') return;
+    if (repositoriesLoading || repositories.length === 0) return;
     let active = true;
     setLoading(true);
     setError(undefined);
     void getCatalog(http, {
-      repository: repository.slice(0, 256),
-      ...(kind === '' ? {} : { kind }),
+      repositories: selectedRepositories,
+      kinds,
+      severities,
       ...(query === '' ? {} : { q: query.slice(0, 512) }),
       page: Math.min(Math.max(page, 1), 100),
     })
@@ -132,7 +137,17 @@ export const CatalogView = ({
     return () => {
       active = false;
     };
-  }, [http, kind, page, query, repository, requestSequence]);
+  }, [
+    http,
+    kinds,
+    page,
+    query,
+    repositories.length,
+    repositoriesLoading,
+    requestSequence,
+    selectedRepositories,
+    severities,
+  ]);
 
   if (!repositoriesLoading && repositoriesError !== undefined) {
     return (
@@ -181,96 +196,87 @@ export const CatalogView = ({
 
   return (
     <>
-      <EuiForm
-        component="form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setPage(1);
-          setQuery(queryInput.trim().slice(0, 512));
-        }}
-      >
-        <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
-          <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate('xpack.codeIntelligence.catalog.repositoryFilter', {
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+        <EuiFlexItem css={{ minWidth: 240 }}>
+          <EuiFieldSearch
+            data-test-subj="codeIntelligenceQueryFilter"
+            placeholder={i18n.translate('xpack.codeIntelligence.catalog.queryPlaceholder', {
+              defaultMessage: 'Search titles, descriptions, and queries',
+            })}
+            aria-label={i18n.translate('xpack.codeIntelligence.catalog.queryFilter', {
+              defaultMessage: 'Search',
+            })}
+            fullWidth
+            value={queryInput}
+            maxLength={512}
+            onChange={(event) => setQueryInput(event.target.value.slice(0, 512))}
+            onSearch={(value) => {
+              setPage(1);
+              setQuery(value.trim().slice(0, 512));
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <CatalogFilterPopover
+              filter="repository"
+              title={i18n.translate('xpack.codeIntelligence.catalog.repositoryFilter', {
                 defaultMessage: 'Repository',
               })}
-            >
-              <EuiSelect
-                data-test-subj="codeIntelligenceRepositoryFilter"
-                value={repository}
-                disabled={repositoriesLoading}
-                options={[
-                  {
-                    value: '',
-                    text: i18n.translate('xpack.codeIntelligence.catalog.repositoryPlaceholder', {
-                      defaultMessage: 'Select a repository',
-                    }),
-                  },
-                  ...repositories.map(({ repository: value }) => ({ value, text: value })),
-                ]}
-                onChange={(event) => {
-                  setRepository(event.target.value.slice(0, 256));
-                  setPage(1);
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate('xpack.codeIntelligence.catalog.kindFilter', {
+              searchable
+              width={360}
+              disabled={repositoriesLoading}
+              options={repositories.map(({ repository }) => ({
+                value: repository,
+                label: repository,
+              }))}
+              selected={selectedRepositories}
+              onChange={(next) => {
+                setSelectedRepositories(next);
+                setPage(1);
+              }}
+            />
+          </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <CatalogFilterPopover
+              filter="kind"
+              title={i18n.translate('xpack.codeIntelligence.catalog.kindFilter', {
                 defaultMessage: 'Kind',
               })}
-            >
-              <EuiSelect
-                data-test-subj="codeIntelligenceKindFilter"
-                value={kind}
-                options={[
-                  {
-                    value: '',
-                    text: i18n.translate('xpack.codeIntelligence.catalog.allKinds', {
-                      defaultMessage: 'All kinds',
-                    }),
-                  },
-                  { value: 'log', text: signalTypeLabels.log },
-                  { value: 'trace', text: signalTypeLabels.trace },
-                  { value: 'metric', text: signalTypeLabels.metric },
-                ]}
-                onChange={(event) => {
-                  setKind(event.target.value as Kind);
-                  setPage(1);
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={2}>
-            <EuiFormRow
-              label={i18n.translate('xpack.codeIntelligence.catalog.queryFilter', {
-                defaultMessage: 'Search',
+              options={CATALOG_SIGNAL_TYPES.map((value) => ({
+                value,
+                label: signalTypeLabels[value],
+              }))}
+              selected={kinds}
+              onChange={(next) => {
+                setKinds(next);
+                setPage(1);
+              }}
+            />
+          </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <CatalogFilterPopover
+              filter="severity"
+              title={i18n.translate('xpack.codeIntelligence.catalog.severityFilter', {
+                defaultMessage: 'Severity',
               })}
-            >
-              <EuiFieldSearch
-                data-test-subj="codeIntelligenceQueryFilter"
-                value={queryInput}
-                maxLength={512}
-                onChange={(event) => setQueryInput(event.target.value.slice(0, 512))}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="codeIntelligenceSearchButton"
-              type="submit"
-              fill
-              disabled={repository === ''}
-            >
-              {i18n.translate('xpack.codeIntelligence.catalog.searchAction', {
-                defaultMessage: 'Search',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiForm>
+              options={CATALOG_SEVERITIES.map((value) => ({
+                value,
+                label: severityLabels[value],
+              }))}
+              selected={severities}
+              onChange={(next) => {
+                setSeverities(next);
+                setPage(1);
+              }}
+            />
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer />
 

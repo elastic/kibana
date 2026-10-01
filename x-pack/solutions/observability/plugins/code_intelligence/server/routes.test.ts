@@ -16,6 +16,10 @@ import { registerRoutes, type RouteServices } from './routes';
 import { SourceUnavailableError } from './source_session';
 
 type Handler = (context: unknown, request: unknown, response: unknown) => Promise<unknown>;
+interface RouteConfig {
+  path: string;
+  validate?: false | { query?: { validate: (value: unknown) => unknown } };
+}
 
 /** Keeps settings documents in memory with the calls the settings store makes. */
 const fakeElasticsearch = (documents = new Map<string, Record<string, unknown>>()) => {
@@ -67,8 +71,11 @@ const setup = ({
   stored?: Array<ReturnType<typeof settings>>;
 } = {}) => {
   const handlers = new Map<string, Handler>();
-  const register = (method: string) => (config: { path: string }, handler: Handler) =>
+  const configs = new Map<string, RouteConfig>();
+  const register = (method: string) => (config: RouteConfig, handler: Handler) => {
     handlers.set(`${method} ${config.path}`, handler);
+    configs.set(`${method} ${config.path}`, config);
+  };
   const es = fakeElasticsearch(new Map(stored.map((entry) => [entry.repository, entry])));
   registerRoutes({
     catalogIndex: 'catalog',
@@ -100,7 +107,7 @@ const setup = ({
     await handler(context, request, response);
     return response;
   };
-  return { call, es };
+  return { call, configs, es };
 };
 
 const withStart = (start: ExtractionService['start']): Partial<RouteServices> => ({
@@ -433,5 +440,83 @@ describe('POST /internal/code_intelligence/extractions', () => {
         throw failure;
       })
     ).rejects.toBe(failure);
+  });
+});
+
+describe('GET /internal/code_intelligence/catalog', () => {
+  const route = 'GET /internal/code_intelligence/catalog';
+  const validateQuery = (query: Record<string, unknown>) => {
+    const validate = setup().configs.get(route)?.validate;
+    if (validate === undefined || validate === false || validate.query === undefined) {
+      throw new Error('The catalog route has no query validation.');
+    }
+    return validate.query.validate(query);
+  };
+
+  it('accepts no repository, a single value, or repeated values for each filter', () => {
+    expect(validateQuery({})).toEqual({ page: 1, perPage: 25 });
+    expect(validateQuery({ repository: 'elastic/a', kind: 'log', severity: 'high' })).toEqual(
+      expect.objectContaining({ repository: 'elastic/a', kind: 'log', severity: 'high' })
+    );
+    expect(
+      validateQuery({
+        repository: ['elastic/a', 'elastic/b'],
+        kind: ['log', 'trace'],
+        severity: ['high', 'critical'],
+      })
+    ).toEqual(
+      expect.objectContaining({
+        repository: ['elastic/a', 'elastic/b'],
+        kind: ['log', 'trace'],
+        severity: ['high', 'critical'],
+      })
+    );
+  });
+
+  it('rejects unknown kinds and severities', () => {
+    expect(() => validateQuery({ kind: 'span' })).toThrow();
+    expect(() => validateQuery({ severity: ['high', 'urgent'] })).toThrow();
+  });
+
+  it('searches with no filters when none are given', async () => {
+    const { call, es } = setup();
+    await call(route, { query: { page: 1, perPage: 25 } });
+    expect(es.client.search).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'catalog', query: { bool: { filter: [] } } })
+    );
+  });
+
+  it('matches any selected repository, kind, and severity range', async () => {
+    const { call, es } = setup();
+    await call(route, {
+      query: {
+        repository: ['elastic/a', 'elastic/b'],
+        kind: 'log',
+        severity: ['low', 'critical'],
+        page: 1,
+        perPage: 25,
+      },
+    });
+    expect(es.client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [
+              { terms: { repository: ['elastic/a', 'elastic/b'] } },
+              { terms: { signal_type: ['log'] } },
+              {
+                bool: {
+                  should: [
+                    { range: { severity_score: { gte: 0, lte: 39 } } },
+                    { range: { severity_score: { gte: 80, lte: 100 } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
   });
 });
