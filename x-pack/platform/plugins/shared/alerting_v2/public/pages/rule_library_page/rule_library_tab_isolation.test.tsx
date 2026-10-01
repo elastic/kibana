@@ -95,6 +95,14 @@ jest.mock('./v1_rule_templates_data_source', () => ({
   }),
 }));
 
+jest.mock('../../hooks/use_fetch_v1_rule_template_tags', () => ({
+  useFetchV1RuleTemplateTags: () => ({
+    data: [],
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
 jest.mock('../../hooks/use_fetch_rule_template_tags', () => ({
   useFetchRuleTemplateTags: () => ({
     data: [],

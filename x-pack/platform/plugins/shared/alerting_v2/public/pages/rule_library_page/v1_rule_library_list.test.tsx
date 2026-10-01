@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   getTriggersActionsManagementPath,
@@ -17,6 +17,7 @@ import { V1RuleLibraryList } from './v1_rule_library_list';
 
 const mockFindItems = jest.fn();
 const mockNavigateToApp = jest.fn();
+const mockUseFetchV1RuleTemplateTags = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -33,6 +34,11 @@ jest.mock('./v1_rule_templates_data_source', () => ({
     findItems: mockFindItems,
     debounceMs: 0,
   }),
+}));
+
+jest.mock('../../hooks/use_fetch_v1_rule_template_tags', () => ({
+  useFetchV1RuleTemplateTags: (params: { search?: string }) =>
+    mockUseFetchV1RuleTemplateTags(params),
 }));
 
 const template = {
@@ -54,6 +60,11 @@ describe('V1RuleLibraryList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFindItems.mockResolvedValue({ items: [], total: 0 });
+    mockUseFetchV1RuleTemplateTags.mockReturnValue({
+      data: ['prod'],
+      isLoading: false,
+      isError: false,
+    });
   });
 
   it('ignores URL search and sort when urlSync is off', async () => {
@@ -96,6 +107,32 @@ describe('V1RuleLibraryList', () => {
     expect(screen.getByText('prod')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Create' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Install' })).not.toBeInTheDocument();
+  });
+
+  it('applies a selected tag filter', async () => {
+    mockFindItems.mockResolvedValue({
+      items: [
+        {
+          id: template.id,
+          title: template.name,
+          description: template.description,
+          tags: template.tags,
+          template,
+        },
+      ],
+      total: 1,
+    });
+
+    renderList();
+    await screen.findByText('CPU usage');
+
+    fireEvent.click(screen.getByTestId('v1RuleLibraryTagsFilter'));
+    const options = await screen.findByTestId('v1RuleLibraryTagsFilter-list');
+    fireEvent.click(within(options).getByText('prod'));
+
+    await waitFor(() => {
+      expect(mockFindItems.mock.calls.at(-1)[0].filters.tag).toMatchObject({ include: ['prod'] });
+    });
   });
 
   it('opens the classic create-from-template form', async () => {

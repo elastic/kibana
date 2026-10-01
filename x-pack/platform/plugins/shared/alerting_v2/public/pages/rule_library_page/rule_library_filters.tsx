@@ -8,10 +8,16 @@
 import { TAG_FILTER_ID, type FieldDefinition } from '@kbn/content-list-provider';
 import { createTagsFilter } from '../../components/create_tags_filter';
 import { useFetchRuleTemplateTags } from '../../hooks/use_fetch_rule_template_tags';
+import { useFetchV1RuleTemplateTags } from '../../hooks/use_fetch_v1_rule_template_tags';
 
 export const RuleTemplateTagsFilter = createTagsFilter({
   useFetchTags: useFetchRuleTemplateTags,
   testSubjectPrefix: 'ruleLibraryTagsFilter',
+});
+
+export const V1RuleTemplateTagsFilter = createTagsFilter({
+  useFetchTags: useFetchV1RuleTemplateTags,
+  testSubjectPrefix: 'v1RuleLibraryTagsFilter',
 });
 
 export const RULE_LIBRARY_FEATURES_FIELDS: FieldDefinition[] = [

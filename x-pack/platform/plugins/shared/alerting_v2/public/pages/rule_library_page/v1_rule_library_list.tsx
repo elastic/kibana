@@ -23,6 +23,7 @@ import {
   getTriggersActionsManagementPath,
 } from '@kbn/rule-data-utils';
 import { MANAGEMENT_APP_ID, V1_RULE_TEMPLATES_CONTENT_LIST_ID } from '../../constants';
+import { RULE_LIBRARY_FEATURES_FIELDS, V1RuleTemplateTagsFilter } from './rule_library_filters';
 import {
   useV1RuleTemplatesDataSource,
   type V1RuleTemplateContentListItem,
@@ -130,10 +131,15 @@ export const V1RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => 
         pagination: { initialPageSize: 20 },
         search: true,
         selection: false,
+        fields: RULE_LIBRARY_FEATURES_FIELDS,
       }}
     >
       <ContentList emptyState={emptyState} data-test-subj="v1RuleLibraryList">
-        <ContentListToolbar />
+        <ContentListToolbar>
+          <ContentListToolbar.Filters>
+            <V1RuleTemplateTagsFilter />
+          </ContentListToolbar.Filters>
+        </ContentListToolbar>
         <ContentListTable
           title={RULE_LIBRARY_LIST_TITLE}
           scrollableInline
