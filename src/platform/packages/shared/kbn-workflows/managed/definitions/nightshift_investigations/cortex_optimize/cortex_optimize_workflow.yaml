@@ -30,11 +30,27 @@ triggers:
         agent_id:
           type: string
           description: Agent id that produced the round.
+        connector_id:
+          type: string
+          maxLength: 500
+          description: Optional strict model override for a direct workflow run.
+        round_connector_id:
+          type: string
+          maxLength: 500
+          description: Model used by the investigation round that triggered this workflow.
         tool_calls:
           type: array
           description: >
             Tool calls from the completed round. Shows the optimizer which services,
             indices, and integrations the investigator queried.
+          items:
+            type: object
+            additionalProperties: true
+        tool_results:
+          type: array
+          description: >
+            Results of the completed round's tool calls, keyed by tool_call_id.
+            Shows the optimizer what each query returned.
           items:
             type: object
             additionalProperties: true
@@ -49,7 +65,10 @@ steps:
       agent_id: '{{ inputs.agent_id }}'
       conversation_id: '{{ inputs.conversation_id }}'
       round_id: '{{ inputs.round_id }}'
+      connector_id: '{{ inputs.connector_id }}'
+      round_connector_id: '{{ inputs.round_connector_id }}'
       # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
       tool_calls: '${{ inputs.tool_calls }}'
+      tool_results: '${{ inputs.tool_results }}'
     on-failure:
       continue: true

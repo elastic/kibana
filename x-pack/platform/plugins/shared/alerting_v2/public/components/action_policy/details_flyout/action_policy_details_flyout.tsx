@@ -59,6 +59,7 @@ interface Props {
   isSnoozeLoading?: boolean;
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
+  size?: EuiFlyoutProps['size'];
 }
 
 const { Header, Body, Footer } = FlyoutTemplate;
@@ -80,6 +81,7 @@ export const ActionPolicyDetailsFlyout = ({
   isSnoozeLoading = false,
   session = 'never',
   ownFocus = false,
+  size = 'm',
 }: Props) => {
   const settings = useService(CoreStart('settings'));
   const dateTimeFormat = settings.client.get<string>('dateFormat');
@@ -125,7 +127,7 @@ export const ActionPolicyDetailsFlyout = ({
     <>
       <FlyoutTemplate
         type="overlay"
-        size="m"
+        size={size}
         resizable
         ownFocus={ownFocus}
         session={session}

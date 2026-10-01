@@ -14,6 +14,7 @@ export const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_D
 
 export interface OpenInDiscoverActionDeps {
   application: ApplicationStart;
+  isRuleAvailable: (ruleId: string) => boolean;
   /**
    * Resolves the Discover URL for an episode. May be async (e.g. if rule ES|QL is fetched on demand).
    * Caller returns undefined when no valid URL can be produced (rule without ES|QL, user lacks Discover access, etc.).
