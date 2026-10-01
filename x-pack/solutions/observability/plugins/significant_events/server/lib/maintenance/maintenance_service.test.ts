@@ -201,6 +201,8 @@ function makeUiSettingsClient(
 function makeService(params?: {
   management?: ReturnType<typeof makeManagementApi>['api'];
   ruleBackedRuleIds?: string[];
+  /** Rule ids whose owning source is disabled in the catalog; the others belong to an enabled one. */
+  disabledSourceRuleIds?: string[];
   v2RulesClient?: ReturnType<typeof makeV2RulesClient> | null;
   spacesGetAllThrows?: boolean;
   /** Space ids returned by SpacesClient.getAll (default: default only). */
@@ -221,8 +223,19 @@ function makeService(params?: {
   const v2RulesClient =
     params?.v2RulesClient === null ? undefined : params?.v2RulesClient ?? makeV2RulesClient();
   const getRuleBackedQueryLinks = jest.fn(async () =>
-    (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({ rule_id }))
+    (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({
+      rule_id,
+      stream_name: params?.disabledSourceRuleIds?.includes(rule_id)
+        ? 'disabled-source'
+        : 'enabled-source',
+    }))
   );
+  const sourcesClient = {
+    list: jest.fn(async ({ enabled }: { enabled?: boolean }) => {
+      const sources = enabled === false ? [{ id: 'disabled-source' }] : [{ id: 'enabled-source' }];
+      return { sources, total: sources.length };
+    }),
+  };
 
   const initialSettings = {
     [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED]:
@@ -304,6 +317,7 @@ function makeService(params?: {
     getKnowledgeIndicatorClient: async () => ({ getRuleBackedQueryLinks }),
     getSignificantEventsAlertingContext: async () => ({ alertingV2RulesClient: v2RulesClient }),
     uiSettingsClient: spaceUiSettingsClient,
+    sourcesClient,
   }));
 
   const service = createSignificantEventsMaintenanceService({
@@ -1009,6 +1023,21 @@ describe('SignificantEventsMaintenanceService', () => {
   });
 
   describe('resume', () => {
+    it('leaves the rules of a source disabled before or during the pause off', async () => {
+      const { api } = makeManagementApi();
+      const { service, v2RulesClient } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1', 'rule-2'],
+        disabledSourceRuleIds: ['rule-2'],
+      });
+
+      await service.pause({ request: REQUEST });
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(v2RulesClient?.bulkEnableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
+      expect(summary.rulesDisabled).toBe(0);
+    });
+
     it('re-enables exactly the workflows and rules that pause disabled', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service, v2RulesClient, spaceUiSettingsClient } = makeService({

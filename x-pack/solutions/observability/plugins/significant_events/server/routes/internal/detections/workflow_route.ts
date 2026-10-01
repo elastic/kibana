@@ -27,6 +27,7 @@ import {
 } from '../../../lib/significant_events/rules/schedule';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { listAllSources } from '../../utils/list_all_sources';
 
 interface AnalysisProfileGroup {
   config: AnalysisProfileConfig;
@@ -166,11 +167,17 @@ const changePointScanRoute = createServerRoute({
       logger,
     });
     const spaceId = await getSpaceId(request);
-    const [kiClient, sigEventsContext] = await Promise.all([
+    const [kiClient, sigEventsContext, enabledSources] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
       scopedClients.getSignificantEventsAlertingContext(),
+      listAllSources(scopedClients.sourcesClient, { enabled: true }),
     ]);
-    const queryLinks = await kiClient.getRuleBackedQueryLinks();
+    // A disabled source's rules are off, and the scan keeps trailing zeros on purpose so a rule
+    // that goes quiet reads as a drop. Scanning them would turn every disable into detections.
+    const enabledSourceIds = new Set(enabledSources.map(({ id }) => id));
+    const queryLinks = (await kiClient.getRuleBackedQueryLinks()).filter((link) =>
+      enabledSourceIds.has(link.stream_name)
+    );
 
     const defaultConfig = getAnalysisProfileConfig({ severity_score: 0 });
     const criticalLookback = params.body.lookback;
