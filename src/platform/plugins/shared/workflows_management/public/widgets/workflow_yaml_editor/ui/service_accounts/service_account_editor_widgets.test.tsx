@@ -205,7 +205,11 @@ describe('ServiceAccountEditorWidgets', () => {
   it('filters typed text but restores all accounts on explicit completion', async () => {
     const { directory, editor, model, action } = setup();
     directory.list.mockResolvedValue({
-      serviceAccounts: [account, { ...account, id: 'replacement', name: 'Different account' }],
+      serviceAccounts: [
+        account,
+        { ...account, id: 'replacement', name: 'Different account' },
+        { ...account, id: 'described', name: 'Auditor', description: 'Different team' },
+      ],
     });
     await screen.findByRole('option', { name: 'Investigation reader viewer' });
     Object.assign(model, createMockMonacoModel('settings:\n  run_as: Different'));
@@ -237,6 +241,7 @@ describe('ServiceAccountEditorWidgets', () => {
       });
     });
     await screen.findByRole('option', { name: 'Different account viewer' });
+    expect(screen.getByRole('option', { name: 'Auditor Different team viewer' })).toBeVisible();
     expect(
       screen.queryByRole('option', { name: 'Investigation reader viewer' })
     ).not.toBeInTheDocument();
@@ -335,7 +340,7 @@ describe('ServiceAccountEditorWidgets', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Load more service accounts');
     if (input === 'keyboard') await action('accept');
     else fireEvent.click(more);
-    await waitFor(() => expect(directory.list).toHaveBeenLastCalledWith('page-two'));
+    await waitFor(() => expect(directory.list).toHaveBeenLastCalledWith('page-two', false));
     expect(screen.getByRole('option', { name: /Investigation reader/ })).toBeVisible();
     expect(screen.queryByText('Loading service accounts…')).not.toBeInTheDocument();
     await act(async () => resolveSecondPage());

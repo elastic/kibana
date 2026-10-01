@@ -166,7 +166,7 @@ describe('service account editor', () => {
     });
     editor.loadMore();
     const second = await complete();
-    expect(directory.list).toHaveBeenLastCalledWith('page-b');
+    expect(directory.list).toHaveBeenLastCalledWith('page-b', false);
     expect(second?.suggestions.map((suggestion) => suggestion.insertText)).toEqual([
       JSON.stringify(account.id),
       '"b"',

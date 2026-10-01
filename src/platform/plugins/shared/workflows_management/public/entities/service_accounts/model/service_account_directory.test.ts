@@ -77,13 +77,25 @@ describe('service account directory', () => {
     }
   );
 
-  it('refreshes a cached failure when the user retries', async () => {
+  it('does not cache a failed page', async () => {
     http.get
       .mockRejectedValueOnce(new Error('Offline'))
       .mockResolvedValueOnce({ serviceAccounts: [] });
     const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
     expect(await directory.list()).toEqual({ error: 'unavailable' });
-    expect(await directory.list(undefined, true)).toEqual({ serviceAccounts: [] });
+    expect(await directory.list()).toEqual({ serviceAccounts: [] });
+    expect(http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('bypasses a cached page when the user retries', async () => {
+    http.get
+      .mockResolvedValueOnce({ serviceAccounts: [] })
+      .mockResolvedValueOnce({ serviceAccounts: [{ id: 'a', name: 'New' }] });
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+    await directory.list();
+    expect(await directory.list(undefined, true)).toEqual({
+      serviceAccounts: [{ id: 'a', name: 'New' }],
+    });
     expect(http.get).toHaveBeenCalledTimes(2);
   });
 

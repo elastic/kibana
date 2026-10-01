@@ -73,6 +73,27 @@ export const getRunAsValue = (
   };
 };
 
+/** Builds the edit that writes an account's ID into the `run_as` value at `range`. */
+export const createServiceAccountSuggestion = (
+  model: monaco.editor.ITextModel,
+  range: monaco.IRange,
+  account: WorkflowServiceAccount
+): ServiceAccountSuggestion => ({
+  label: account.name,
+  account,
+  kind: monaco.languages.CompletionItemKind.Value,
+  insertText:
+    (model.getLineContent(range.startLineNumber)[range.startColumn - 2] === ':' ? ' ' : '') +
+    JSON.stringify(account.id),
+  range,
+  filterText: `${account.name} ${account.id} "${account.name}" '${account.name}'`,
+  sortText: `a_${account.name}`,
+  detail: i18n.translate('workflows.editor.serviceAccountSuggestionLabel', {
+    defaultMessage: 'Service account',
+  }),
+  documentation: account.id,
+});
+
 export const createServiceAccountEditor = (directory: ServiceAccountDirectory) => {
   const cursors: Array<string | undefined> = [undefined];
   let nextPage: string | undefined;
@@ -93,7 +114,7 @@ export const createServiceAccountEditor = (directory: ServiceAccountDirectory) =
       const suggestions: ServiceAccountSuggestion[] = [];
       const seen = new Set<string>();
       for (const cursor of cursors) {
-        const page = await (refresh ? directory.list(cursor, true) : directory.list(cursor));
+        const page = await directory.list(cursor, refresh);
         if (token.isCancellationRequested) return { suggestions: [] };
         if (!page || 'error' in page) {
           cursors.splice(1);
@@ -104,22 +125,7 @@ export const createServiceAccountEditor = (directory: ServiceAccountDirectory) =
         for (const account of page.serviceAccounts) {
           if (account.enabled && account.assumable && !seen.has(account.id)) {
             seen.add(account.id);
-            suggestions.push({
-              label: account.name,
-              account,
-              kind: monaco.languages.CompletionItemKind.Value,
-              insertText:
-                (model.getLineContent(position.lineNumber)[value.range.startColumn - 2] === ':'
-                  ? ' '
-                  : '') + JSON.stringify(account.id),
-              range: value.range,
-              filterText: `${account.name} ${account.id} "${account.name}" '${account.name}'`,
-              sortText: `a_${account.name}`,
-              detail: i18n.translate('workflows.editor.serviceAccountSuggestionLabel', {
-                defaultMessage: 'Service account',
-              }),
-              documentation: account.id,
-            });
+            suggestions.push(createServiceAccountSuggestion(model, value.range, account));
           }
         }
       }
