@@ -21,6 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
+import type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
+import { registerStepDefinitions } from './step_types';
 import type {
   AgentBuilderIntegration,
   ContextEnginePluginSetup,
@@ -50,6 +52,7 @@ export class ContextEnginePlugin
 {
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> =
     Promise.resolve(undefined);
+  private appChromeAdapter: ContextEngineAppChromeAdapter | undefined;
 
   /** Registered suggest-automation hooks from context_engine_agent_builder. */
   private agentBuilderIntegration?: AgentBuilderIntegration;
@@ -57,11 +60,25 @@ export class ContextEnginePlugin
   constructor(_context: PluginInitializerContext) {}
 
   setup(
-    core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>
+    core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>,
+    setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
+    setupDeps.workflowsExtensions.registerStepDefinition(() =>
+      import('./step_types/verify_ki_step').then((m) => m.VerifyKiStepDefinition)
+    );
+
     this.setupAgentBuilderStart(core);
+    registerStepDefinitions({
+      workflowsExtensions: setupDeps.workflowsExtensions,
+      isContextEngineEnabled: async () => {
+        const [coreStart] = await core.getStartServices();
+        return coreStart.uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false);
+      },
+    });
+
     const startServices = core.getStartServices();
     const getAgentBuilder = () => this.agentBuilderPromise;
+    const getAppChromeAdapter = () => this.appChromeAdapter;
     const getAgentBuilderIntegration = (): AgentBuilderIntegration | undefined =>
       this.agentBuilderIntegration;
 
@@ -99,18 +116,25 @@ export class ContextEnginePlugin
         const agentBuilder = await getAgentBuilder();
         const chatOpener = createAnalyzeChatOpener({ coreStart, agentBuilder });
         coreStart.chrome.docTitle.change(APP_TITLE);
+        const appChrome = getAppChromeAdapter();
+        await appChrome?.handleOnAppMount();
         return mountApp({
           core: coreStart,
           plugins: pluginsStart,
           element: params.element,
           history: params.history,
           getChatOpener: () => chatOpener,
+          appChrome,
           getAgentBuilderIntegration,
         });
       },
     });
 
-    return {};
+    return {
+      registerAppChromeAdapter: (adapter: ContextEngineAppChromeAdapter) => {
+        this.appChromeAdapter = adapter;
+      },
+    };
   }
 
   private setupAgentBuilderStart(core: CoreSetup<ContextEngineStartDependencies>): void {

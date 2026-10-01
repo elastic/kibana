@@ -16,7 +16,7 @@
  *   @kbn/plugin-generator, which does not depend on @kbn/plugin-helpers.
  */
 
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 
 interface ImplicitConsumerRule {
   reason: string;

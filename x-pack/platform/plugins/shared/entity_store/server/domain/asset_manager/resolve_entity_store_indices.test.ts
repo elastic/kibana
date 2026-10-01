@@ -8,6 +8,7 @@
 import {
   resolveEntityStoreWriteTargets,
   resolveLatestEntitiesIndexName,
+  resolveHistorySnapshotIndexPatterns,
 } from './resolve_entity_store_indices';
 import {
   getLatestEntitiesIndexName,
@@ -98,5 +99,44 @@ describe('resolveEntityStoreWriteTargets', () => {
     await expect(resolveLatestEntitiesIndexName(esClient, namespace)).resolves.toBe(
       getLatestEntitiesIndexName(namespace)
     );
+  });
+
+  describe('resolveHistorySnapshotIndexPatterns', () => {
+    it('returns neutral and legacy patterns so un-migrated snapshots stay readable', async () => {
+      mockConcrete([]);
+
+      await expect(resolveHistorySnapshotIndexPatterns(esClient, namespace)).resolves.toEqual([
+        `.entities.v2.history.${namespace}.*`,
+        `.entities.v2.history.security_${namespace}.*`,
+      ]);
+    });
+
+    it('returns only the neutral pattern when space security_{namespace} owns the colliding names', async () => {
+      mockConcrete([]);
+      esClient.indices.getAlias.mockImplementation(async ({ name }: { name: string }) => {
+        if (name === `entities-latest-security_${namespace}`) {
+          return { some_index: { aliases: { [name]: {} } } };
+        }
+        throw notFoundError();
+      });
+
+      await expect(resolveHistorySnapshotIndexPatterns(esClient, namespace)).resolves.toEqual([
+        `.entities.v2.history.${namespace}.*`,
+      ]);
+    });
+
+    it('returns only the neutral pattern when strict=true and getAlias throws a non-404 error', async () => {
+      // Simulates a 403 Forbidden or 503 Service Unavailable during alias lookup.
+      // In strict mode this error must propagate rather than being silently treated as
+      // "no collision", otherwise a transient failure would authorize cross-Space deletion.
+      const serviceUnavailable = Object.assign(new Error('service_unavailable'), {
+        meta: { statusCode: 503 },
+      });
+      esClient.indices.getAlias.mockRejectedValue(serviceUnavailable);
+
+      await expect(
+        resolveHistorySnapshotIndexPatterns(esClient, namespace, undefined, true)
+      ).resolves.toEqual([`.entities.v2.history.${namespace}.*`]);
+    });
   });
 });

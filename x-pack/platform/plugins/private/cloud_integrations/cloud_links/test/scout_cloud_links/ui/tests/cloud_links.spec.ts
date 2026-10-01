@@ -119,5 +119,9 @@ test.describe('Cloud Links integration', { tag: tags.stateful.classic }, () => {
     await test.step('Appearance button is visible', async () => {
       expect(await cloudLinks.isAppearanceButtonVisible()).toBe(true);
     });
+
+    await test.step('Spaces configuration button is visible', async () => {
+      expect(await cloudLinks.isSpacesConfigurationButtonVisible()).toBe(true);
+    });
   });
 });

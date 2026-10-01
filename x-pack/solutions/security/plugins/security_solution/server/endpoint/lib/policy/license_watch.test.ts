@@ -15,6 +15,7 @@ import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
+import { ProtectionModes } from '../../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
 import { createMockEndpointAppContextService } from '../../mocks';
 
@@ -210,6 +211,51 @@ describe('Policy-Changing license watcher', () => {
       await pw.watch(Enterprise);
 
       expect(packagePolicySvcMock.update).not.toHaveBeenCalled();
+    });
+
+    it('sets custom_yara_signatures to false while leaving memory protection enabled, then converges', async () => {
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            pc.windows.memory_protection.mode = ProtectionModes.prevent;
+            pc.mac.memory_protection.mode = ProtectionModes.prevent;
+            pc.linux.memory_protection.mode = ProtectionModes.prevent;
+            pc.windows.memory_protection.custom_yara_signatures = true;
+            pc.mac.memory_protection.custom_yara_signatures = true;
+            pc.linux.memory_protection.custom_yara_signatures = true;
+            return pc;
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Platinum);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalledTimes(1);
+
+      const persistedPolicy = packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy
+        .value as PolicyConfig;
+
+      expect(persistedPolicy.windows.memory_protection.mode).not.toBe('off');
+      expect(persistedPolicy.mac.memory_protection.mode).not.toBe('off');
+      expect(persistedPolicy.linux.memory_protection.mode).not.toBe('off');
+      expect(persistedPolicy.windows.memory_protection.custom_yara_signatures).toBe(false);
+      expect(persistedPolicy.mac.memory_protection.custom_yara_signatures).toBe(false);
+      expect(persistedPolicy.linux.memory_protection.custom_yara_signatures).toBe(false);
+
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [MockPackagePolicyWithEndpointPolicy(() => persistedPolicy)],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      await pw.watch(Platinum);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalledTimes(1);
     });
   });
 

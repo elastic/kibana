@@ -79,7 +79,7 @@ export interface ProjectPickerStateProviderProps
    *
    * @default 'dynamic'
    */
-  projectRoutingStrategy?: ProjectRoutingStrategy;
+  projectRoutingStrategy?: Omit<ProjectRoutingStrategy, 'unknown'>;
   /**
    * Callback function invoked with the project routing string when the project selection changes
    */

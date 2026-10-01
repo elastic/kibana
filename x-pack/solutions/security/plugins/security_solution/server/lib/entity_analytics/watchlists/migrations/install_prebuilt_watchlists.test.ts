@@ -365,8 +365,45 @@ describe('installPrebuiltWatchlists', function () {
     });
   });
 
+  describe('with spaceId defined', () => {
+    it('skips space discovery and installs only for the specified space', async () => {
+      mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+      await installPrebuiltWatchlists({
+        auditLogger: mockAuditLogger,
+        logger: mockLogger,
+        getStartServices: mockGetStartServices,
+        kibanaVersion: '9.0.0',
+        hasEncryptionKey: true,
+        spaceId: 'my-space',
+      });
+
+      // Space discovery should be skipped — no call with the hidden 'space' type
+      expect(mockCreateInternalRepository).not.toHaveBeenCalledWith(['space']);
+      // Only one watchlist created — for 'my-space', not for 'default' or any other space
+      expect(mockWatchlistCreate).toHaveBeenCalledTimes(1);
+      expect(mockWatchlistCreate).toHaveBeenCalledWith(expect.anything(), {
+        id: getPrivilegedUserWatchlistSavedObjectId('my-space'),
+      });
+    });
+  });
+
   it('has no duplicate prebuilt watchlist names', () => {
     const names = getPrebuiltWatchlists('default').map((w) => w.name);
     expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('registers an index template for .entity_analytics.watchlists.*', async () => {
+    mockSoClient.find.mockResolvedValue(buildEmptySpacesResponse());
+    mockWatchlistGet.mockRejectedValue(new Error('not found'));
+
+    await callInstall();
+
+    expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'entity_analytics_watchlists',
+        index_patterns: ['.entity_analytics.watchlists.*'],
+      })
+    );
   });
 });

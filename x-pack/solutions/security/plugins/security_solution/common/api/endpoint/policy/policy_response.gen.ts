@@ -23,7 +23,7 @@ export const GetPolicyResponseRequestQuery = lazySchema(() =>
     /**
      * The agent ID to retrieve the policy response for.
      */
-    agentId: AgentId,
+    agentId: AgentId.describe('The agent ID to retrieve the policy response for.'),
   })
 );
 export type GetPolicyResponseRequestQuery = z.infer<typeof GetPolicyResponseRequestQuery>;

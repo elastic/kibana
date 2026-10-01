@@ -33,12 +33,10 @@ export interface ConfigureCasesFlyout<ExtraFlyoutType extends string = never> {
 
 /**
  * Shared state and handlers for the connector, closure-type, and observable-types
- * sections of the case settings page. Consumed by both the legacy `ConfigureCases`
- * page and the `ConfigureCasesRedesign` page so a bug fix to this logic only needs to
- * be made once while both pages coexist behind the `casesRedesign.settings` feature
- * flag. Callers that need additional flyout types of their own (e.g. the legacy page's
- * custom fields and templates flyouts) can pass those as the `ExtraFlyoutType` generic
- * so `setFlyOutVisibility` stays the single source of truth for "which flyout is open".
+ * sections of the case settings page. Callers that need additional flyout types of
+ * their own (e.g. the legacy page's custom fields and templates flyouts) can pass those
+ * as the `ExtraFlyoutType` generic so `setFlyOutVisibility` stays the single source of
+ * truth for "which flyout is open".
  */
 export const useConfigureCasesController = <ExtraFlyoutType extends string = never>() => {
   const { permissions } = useCasesContext();
@@ -46,7 +44,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
-  const { isObservablesFeatureEnabled } = useCasesFeatures();
+  const { isObservablesFeatureEnabled, isExtractObservablesEnabled } = useCasesFeatures();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] =
@@ -60,6 +58,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
   const {
     data: currentConfiguration,
     isLoading: loadingCaseConfigure,
+    isFetching: isFetchingCaseConfigure,
+    isError: isErrorCaseConfigure,
     refetch: refetchCaseConfigure,
   } = useGetCaseConfiguration();
 
@@ -72,6 +72,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     customFields,
     templates,
     observableTypes,
+    extractObservables,
   } = currentConfiguration;
 
   const {
@@ -198,6 +199,29 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     [
       configurationId,
       configurationVersion,
+      connector,
+      customFields,
+      templates,
+      persistCaseConfigure,
+    ]
+  );
+
+  const onChangeExtractObservables = useCallback(
+    (value: boolean) => {
+      persistCaseConfigure({
+        connector,
+        customFields,
+        templates,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+        extractObservables: value,
+      });
+    },
+    [
+      configurationId,
+      configurationVersion,
+      closureType,
       connector,
       customFields,
       templates,
@@ -356,6 +380,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     hasMinimumLicensePermissions,
     hasMinimumLicensePermissionsForObservables,
     isObservablesFeatureEnabled,
+    isExtractObservablesEnabled,
     configurationId,
     configurationVersion,
     closureType,
@@ -364,8 +389,11 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     customFields,
     templates,
     observableTypes,
+    extractObservables,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
+    isFetchingCaseConfiguration: isFetchingCaseConfigure,
+    isConfigurationFetchError: isErrorCaseConfigure,
     isLoadingConnectors,
     connectors,
     actionTypes,
@@ -379,6 +407,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     onAddNewConnector,
     onChangeConnector,
     onChangeClosureType,
+    onChangeExtractObservables,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,

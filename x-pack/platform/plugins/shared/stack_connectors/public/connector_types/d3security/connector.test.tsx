@@ -85,7 +85,7 @@ describe('D3ActionConnectorFields renders', () => {
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.d3security',
             name: 'd3security',

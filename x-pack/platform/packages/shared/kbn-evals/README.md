@@ -44,17 +44,17 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 
 #### Key flags
 
-| Flag                | Description                                      |
-| ------------------- | ------------------------------------------------ |
-| `--suite <id>`      | Suite to run (interactive prompt if omitted)     |
-| `--model <id>`      | Connector/model to evaluate (comma-separated OK) |
-| `--judge <id>`      | Connector for LLM-as-a-judge evaluators          |
-| `--grep <pattern>`  | Filter tests by name                             |
-| `--repetitions <n>` | Repeat each example N times                      |
+| Flag                | Description                                                            |
+| ------------------- | ---------------------------------------------------------------------- |
+| `--suite <id>`      | Suite to run (interactive prompt if omitted)                           |
+| `--model <id>`      | Connector/model to evaluate (comma-separated OK)                       |
+| `--judge <id>`      | Connector for LLM-as-a-judge evaluators                                |
+| `--grep <pattern>`  | Filter tests by name                                                   |
+| `--repetitions <n>` | Repeat each example N times                                            |
 | `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
-| `--skip-server`     | Skip EDOT/Scout startup (use existing services)  |
-| `--skip-init`       | Skip config and connector setup                  |
-| `--dry-run`         | Print configuration and exit                     |
+| `--skip-server`     | Skip EDOT/Scout startup (use existing services)                        |
+| `--skip-init`       | Skip config and connector setup                                        |
+| `--dry-run`         | Print configuration and exit                                           |
 
 #### EIS connector setup
 
@@ -84,15 +84,15 @@ node scripts/evals start --suite agent-builder --repetitions 3
 #### Advanced options
 
 <details>
-<summary>LiteLLM setup</summary>
+<summary>OpenRouter setup</summary>
 
-If you have access to the internal LiteLLM gateway:
+If you have an OpenRouter API key (from vault config or `OPENROUTER_API_KEY`):
 
 ```bash
-bash x-pack/platform/packages/shared/kbn-evals/scripts/litellm/dev_env.sh
+bash x-pack/platform/packages/shared/kbn-evals/scripts/openrouter/dev_env.sh
 ```
 
-This logs you in via SSO, generates a virtual key, and exports `KIBANA_TESTING_AI_CONNECTORS`.
+This generates connectors from the OpenRouter catalog and prints `export` lines for `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY`, and `KIBANA_TESTING_INFERENCE_ENDPOINTS`.
 
 </details>
 
@@ -190,7 +190,7 @@ Add GitHub labels to trigger evals in PR CI:
 | `models:weekly-eis-models`    | Per-suite EIS model alias (resolves from `evals.suites.json`)     |
 | `evals:skip-<suite-id>`       | Skip a suite, e.g. `evals:skip-smoke-tests`                       |
 
-Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>` for LiteLLM.
+Model groups follow the pattern `eis/<modelId>` for EIS or `openrouter/<provider>-<model>` for OpenRouter.
 
 PRs touching the eval framework get `evals:smoke-tests` automatically
 ([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
@@ -214,7 +214,7 @@ Run a suite on any branch without a PR:
 | Variable                          | Required           | Description                                                                                                  |
 | --------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
 | `EVAL_SUITE_ID`                   | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites                                      |
-| `EVAL_MODEL_GROUPS`               | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,llm-gateway/gpt-5.2`                                  |
+| `EVAL_MODEL_GROUPS`               | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,openrouter/openai-gpt-5.4`                            |
 | `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
 | `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
 | `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
@@ -265,6 +265,21 @@ EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 Each eval suite lives in its own `kbn-evals-suite-<name>` package. The package contains a Playwright config, evaluation specs, and optionally custom fixtures.
 
 To scaffold a new suite, you can use the [`evals-create-suite`](../../../../../.agents/skills/evals-create-suite/SKILL.md) skill (available to AI coding agents) or follow its templates manually. Register suites in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) for CI labeling and `node scripts/evals list`.
+
+### Suite-owned secrets (`scoutHook`)
+
+A suite whose Scout server needs secrets from the evals config can map them into env with a hook in its own package, rather than teaching the shared evals tooling about them. Point `scoutHook` in its `evals.suites.json` entry at a repo-relative bash script:
+
+```json
+{
+  "id": "my-suite",
+  "configPath": "x-pack/.../kbn-evals-suite-my-suite/playwright.config.ts",
+  "serverConfigSet": "evals_my_suite",
+  "scoutHook": "x-pack/.../kbn-evals-suite-my-suite/scout/scout_hook.sh"
+}
+```
+
+The hook reads the evals config JSON (the `--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI) on stdin and prints `{ "env"?: Record<string, string> }`. `node scripts/evals start`/`run` and `run_suite.sh` export that env to Scout and the Playwright run, so the suite's server config set can read it. Kibana also resolves `${VAR}` references in YAML config files from its environment, so a config set can pass a suite-owned YAML file with `--config` and keep secrets out of files and process arguments. Scout restarts when the hook output changes. Keep suite-specific keys in the evals config; the shared schema allows unknown blocks. See [the Nightshift investigations hook](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh) for an example.
 
 ### Playwright config
 
@@ -324,6 +339,7 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
       {
         name: 'equals',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async ({ output, expected }) => ({
           score: output?.content === expected?.content ? 1 : 0,
           metadata: { output: output?.content, expected: expected?.content },
@@ -333,6 +349,14 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
   );
 });
 ```
+
+`direction` sets the optimization goal for this evaluator's score:
+
+| Value      | When to use                          |
+| ---------- | ------------------------------------ |
+| `maximize` | Higher is better (quality, accuracy) |
+| `minimize` | Lower is better (latency)            |
+| `neutral`  | No clear better direction            |
 
 ### Tagging datasets
 
@@ -383,8 +407,8 @@ Built-in evaluator factories you can use directly or as inspiration for custom e
   - `Correctness` -- checks factual accuracy against expected output
   - `Groundedness` -- verifies claims are supported by provided context
 - **Trace-based** -- `createTraceBasedEvaluator` (token usage, latency, tool calls), `createSkillInvocationEvaluator` (checks agent skill reads)
-- **RAG** -- `createRagEvaluators` (Precision@K, Recall@K, F1@K)
-- **Code evaluators** -- any inline `{ name, kind: 'CODE', evaluate }` object
+- **IR (information retrieval)** -- `createIrEvaluators` (Precision@K, Recall@K, F1@K, HitRate@K, MRR@K, NDCG@K, MAP@K)
+- **Code evaluators** -- any inline `{ name, kind: 'CODE', direction, evaluate }` object
 
 You can use these as-is or build your own directly in the suite.
 
@@ -462,6 +486,73 @@ node scripts/evals dataplex sync --dry-run   # Preview changes
 
 ## 4. Developer details
 
+### Connector definitions and inference endpoints
+
+Model definitions come from two sources:
+
+1. `KIBANA_TESTING_INFERENCE_ENDPOINTS` — **inference endpoint definitions** (base64-encoded or raw JSON, set by CI or exported by `node scripts/evals init`).
+2. `KIBANA_TESTING_AI_CONNECTORS` or, locally, `xpack.actions.preconfigured` in `config/kibana.dev.yml` — **stack connector definitions** (Actions saved objects, e.g. the workflow suites' mock Slack/email connectors).
+
+`KIBANA_TESTING_INFERENCE_ENDPOINTS` example (decoded):
+
+```json
+{
+  "eis-anthropic-claude-sonnet-4-6": {
+    "name": "EIS anthropic-claude-sonnet-4-6",
+    "inferenceId": ".anthropic-claude-sonnet-4-6-chat_completion",
+    "provider": "elastic",
+    "taskType": "chat_completion",
+    "providerConfig": { "model_id": "anthropic-claude-sonnet-4-6" }
+  },
+  "openrouter-openai-gpt-4o": {
+    "name": "OpenRouter openai/gpt-4o",
+    "inferenceId": "openrouter-openai-gpt-4o",
+    "provider": "openai",
+    "taskType": "chat_completion",
+    "providerConfig": {
+      "model_id": "openai/gpt-4o",
+      "url": "https://openrouter.ai/api/v1/chat/completions"
+    },
+    "secrets": { "providerSecrets": { "api_key": "<api key>" } }
+  }
+}
+```
+
+#### Migrating `.gen-ai` definitions
+
+**deprecated `.gen-ai` stack connector**, `.gen-ai` definitions are no longer recognized as LLM definitions.
+
+Preferred replacement: an inference endpoint definition in `KIBANA_TESTING_INFERENCE_ENDPOINTS` (see the `openrouter-openai-gpt-4o` entry above). If you would rather keep the model in `kibana.dev.yml`, use a preconfigured `.inference` stack connector, Kibana creates the underlying endpoint at startup and evals reuses the preconfigured connector:
+
+```yaml
+# Before
+xpack.actions.preconfigured:
+  my-gpt:
+    name: My GPT
+    actionTypeId: .gen-ai
+    config:
+      apiUrl: https://openrouter.ai/api/v1/chat/completions
+      defaultModel: openai/gpt-4o
+    secrets:
+      apiKey: '<api key>'
+
+# After
+xpack.actions.preconfigured:
+  openrouter-openai-gpt-4o:
+    name: OpenRouter openai/gpt-4o
+    actionTypeId: .inference
+    config:
+      provider: openai
+      taskType: chat_completion
+      inferenceId: openrouter-openai-gpt-4o
+      providerConfig:
+        model_id: openai/gpt-4o
+        url: https://openrouter.ai/api/v1/chat/completions
+    secrets:
+      providerSecrets:
+        api_key: '<api key>'
+```
+
 ### Automated label sync
 
 `models:*` and `models:judge:*` labels are synced automatically:
@@ -501,7 +592,10 @@ Grants:
 
 - Write/read `.evaluation-scores*` (results)
 - Write/read `traces-*` (OTLP traces)
+- Read evidence events from `logs-*`, restricted by document-level security
 - Write/read/delete `.evaluation-dataset*` (managed datasets)
 - Kibana `evals` feature privilege (`all`)
+
+The log-event allowlist is embedded in the API key. Regenerate existing keys when support for a new log-backed instrumentation profile or event name is added.
 
 With `--profile dev-vault`, these keys are read from Vault automatically.

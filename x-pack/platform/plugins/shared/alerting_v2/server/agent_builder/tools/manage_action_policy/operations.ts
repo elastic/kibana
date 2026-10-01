@@ -13,30 +13,12 @@ import {
   groupingModeSchema,
   throttleStrategySchema,
   durationSchema,
-  tagsSchema,
+  policyMatcherSchema,
   PER_EPISODE_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
 } from '@kbn/alerting-v2-schemas';
-import { attachmentDataToActionPolicyPayload } from '../../../../common/agent_builder/action_policy_mappers';
-import { AGENT_BUILDER_TAG } from '../../common/constants';
-
-// Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
-// local to avoid forcing an export purely for this guard.
-const MAX_ACTION_POLICY_TAGS = 20;
-
-/**
- * Ensures the agent-builder provenance tag is present without clobbering any
- * tags the user or LLM already set. Skips silently if the tag cap is already
- * reached, so we never push a payload that fails schema validation.
- */
-const withAgentBuilderTag = (tags: string[] | undefined | null): string[] => {
-  const existing = tags ?? [];
-  if (existing.includes(AGENT_BUILDER_TAG) || existing.length >= MAX_ACTION_POLICY_TAGS) {
-    return existing;
-  }
-  return [...existing, AGENT_BUILDER_TAG];
-};
+import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
 // Derived from shared alerting-v2-schemas so tool-level validation stays
@@ -47,11 +29,8 @@ export const setMetadataOperationSchema = z
     operation: z.literal('set_metadata'),
     name: z.string().min(1).max(256).optional().describe('The action policy name.'),
     description: z.string().max(1024).optional().describe('A description of the action policy.'),
-    tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
   })
-  .describe(
-    'Use `set_metadata` to name the action policy and add a description or tags so the user can filter by it later.'
-  );
+  .describe('Use `set_metadata` to name the action policy and add a description.');
 
 export const setDestinationsOperationSchema = z
   .object({
@@ -69,11 +48,9 @@ export const setDestinationsOperationSchema = z
 export const setMatcherOperationSchema = z
   .object({
     operation: z.literal('set_matcher'),
-    matcher: z
-      .string()
-      .max(4096)
+    matcher: policyMatcherSchema
       .nullable()
-      .describe('A KQL query to match alert episodes, or null for a catch-all.'),
+      .describe('Structured matcher for alert episodes, or null for a catch-all.'),
   })
   .describe(
     'Use `set_matcher` to limit which alert episodes this policy notifies on. An empty or null matcher matches all episodes in the space.'
@@ -176,7 +153,6 @@ export const executeActionPolicyOperations = (
           ...next,
           name: mergedName,
           ...(op.description !== undefined ? { description: op.description } : {}),
-          ...(op.tags !== undefined ? { tags: op.tags } : {}),
         };
         break;
       }
@@ -229,13 +205,6 @@ export const executeActionPolicyOperations = (
       }
     }
   }
-
-  // Stamp the agent-builder provenance tag on every action policy created or
-  // edited via Agent Builder so they can be measured (telemetry) and filtered
-  // alongside agent-created rules. Merged after all operations so it never
-  // overwrites user/LLM-provided tags. Applied on edits too, so a policy that
-  // loses the tag regains it whenever the agent touches it.
-  next = { ...next, tags: withAgentBuilderTag(next.tags) };
 
   if (isNew && !next.name) {
     throw new ActionPolicyOperationValidationError(

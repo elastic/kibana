@@ -58,6 +58,17 @@ function renderPackageCard(props: PackageCardProps) {
   return { utils };
 }
 
+describe('package card layout', () => {
+  it('uses an EUI-derived default minimum height', () => {
+    const {
+      utils: { queryByTestId },
+    } = renderPackageCard(cardProps());
+
+    const card = queryByTestId('integration-card:card-1');
+    expect(card).toHaveStyle('min-height: 128px');
+  });
+});
+
 // FLAKY: https://github.com/elastic/kibana/issues/200848
 describe.skip('package card', () => {
   let mockNavigateToApp: jest.Mock;
@@ -129,17 +140,6 @@ describe.skip('package card', () => {
       );
       const badgeElement = await queryByTitle('Quickstart');
       expect(!!badgeElement).toEqual(isQuickstart);
-    }
-  );
-
-  it.each([true, false])(
-    'determines whether to render card with collection button when `isCollectionCard` is %s`',
-    async (isCollectionCard) => {
-      const {
-        utils: { queryByText },
-      } = renderPackageCard(cardProps({ isCollectionCard }));
-      const collectionButton = queryByText('View collection');
-      expect(!!collectionButton).toEqual(isCollectionCard);
     }
   );
 
@@ -220,5 +220,26 @@ describe.skip('package card', () => {
       );
       expect(mockGetLineClamp).toHaveBeenCalledWith(1);
     });
+  });
+});
+
+describe('package card — collection variant badge', () => {
+  it('renders a variant count badge when isCollectionCard and groupMembers are present', () => {
+    const {
+      utils: { queryByText },
+    } = renderPackageCard(
+      cardProps({
+        isCollectionCard: true,
+        groupMembers: [cardProps({ id: 'member-1' }) as any, cardProps({ id: 'member-2' }) as any],
+      })
+    );
+    expect(queryByText('2 variants')).toBeInTheDocument();
+  });
+
+  it('does not render a variant count badge when isCollectionCard is false', () => {
+    const {
+      utils: { queryByText },
+    } = renderPackageCard(cardProps({ isCollectionCard: false }));
+    expect(queryByText(/variant/)).not.toBeInTheDocument();
   });
 });

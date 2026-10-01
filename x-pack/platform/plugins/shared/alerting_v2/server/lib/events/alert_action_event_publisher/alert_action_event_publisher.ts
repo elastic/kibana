@@ -8,7 +8,12 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
-import type { AlertAction } from '../../../resources/datastreams/alert_actions';
+import type { AlertActionDocument } from '../../../resources/datastreams/alert_actions';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../../services/logger_service/logger_service';
 import type { EventBus } from '../event_bus';
 import {
   AlertingDomainEventBusToken,
@@ -46,7 +51,7 @@ import {
  */
 export interface AlertActionEventPublisherContract {
   /** Convenience batch wrapper over the possible emit methods. */
-  emitEpisodeActions(request: KibanaRequest, actions: readonly AlertAction[]): void;
+  emitEpisodeActions(request: KibanaRequest, actions: readonly AlertActionDocument[]): void;
 }
 
 /**
@@ -70,12 +75,17 @@ export interface AlertActionEventPublisherContract {
  */
 @injectable()
 export class AlertActionEventPublisher implements AlertActionEventPublisherContract {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(AlertingDomainEventBusToken)
-    private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
-  ) {}
+    private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('events');
+  }
 
-  public emitEpisodeActions(request: KibanaRequest, actions: readonly AlertAction[]): void {
+  public emitEpisodeActions(request: KibanaRequest, actions: readonly AlertActionDocument[]): void {
     const context = { request };
     for (const action of actions) {
       const event = this.buildEvent(action);
@@ -92,7 +102,7 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
    * The `assign` action fans out to two distinct events depending on whether
    * an assignee was set (`episode.assigned`) or cleared (`episode.unassigned`).
    */
-  private buildEvent(action: AlertAction): AlertActionEvent | undefined {
+  private buildEvent(action: AlertActionDocument): AlertActionEvent | undefined {
     const envelope = this.buildEnvelopeFromAction(action);
 
     switch (action.action_type) {
@@ -135,11 +145,21 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
           payload: { reason: action.reason! },
         };
       default:
+        this.logger.warn({
+          message: 'Alert action type has no domain event mapping',
+          code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_TYPE_UNMAPPED,
+          labels: {
+            resource: action.action_type,
+            ...(action.rule_id != null ? { rule_id: action.rule_id } : {}),
+            group_hash: action.group_hash,
+            ...(action.episode_id != null ? { episode_id: action.episode_id } : {}),
+          },
+        });
         return undefined;
     }
   }
 
-  private buildEnvelopeFromAction(action: AlertAction): AlertActionEventEnvelope {
+  private buildEnvelopeFromAction(action: AlertActionDocument): AlertActionEventEnvelope {
     return {
       occurredAt: action['@timestamp'] ?? new Date().toISOString(),
       groupHash: action.group_hash,

@@ -79,7 +79,7 @@ const getDeleteLabelFromRegistry = ({
   };
 
   const attachmentType = registry.get(attachmentTypeId);
-  const attachmentLabel = attachmentType.getAttachmentRemovalObject?.(props).event ?? null;
+  const attachmentLabel = attachmentType.getRemovalActivity?.(props).event ?? null;
 
   return attachmentLabel != null ? attachmentLabel : registeredAttachmentCommonLabel;
 };
@@ -133,9 +133,9 @@ const getCreateCommentUserAction = ({
   UserActionBuilderArgs,
   'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
-  // Migrated external-reference / `actions` attachments are projected to their unified
-  // shape by the cases server before reaching the client (UI reads always use
-  // `mode: 'unified'`), so legacy-shaped attachments have no client-side renderer.
+  // Migrated external-reference / `actions` attachments are projected to their
+  // unified shape by the cases server before reaching the client, so
+  // legacy-shaped attachments have no client-side renderer.
   if (isLegacyAttachmentRequest(attachment)) {
     return [];
   }

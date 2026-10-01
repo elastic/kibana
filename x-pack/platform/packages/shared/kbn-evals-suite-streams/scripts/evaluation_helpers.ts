@@ -88,19 +88,6 @@ export async function getStreams(): Promise<string[]> {
   );
 }
 
-export async function getConnectors(): Promise<string[]> {
-  const data = await fetch(`${KIBANA_URL}/api/actions/connectors`, {
-    method: 'GET',
-    headers: getKibanaAuthHeaders(),
-  }).then(async (res) => {
-    if (res.ok) {
-      return res.json();
-    }
-    throw new Error(`HTTP Response (${res.status}): ${await res.text()}`);
-  });
-  return Array.isArray(data) ? (data as Array<{ id: string }>).map((c) => c.id) : [];
-}
-
 export function extractMessages(
   sampleDocs: Array<Record<string, unknown>>,
   messageField: string = MESSAGE_FIELD

@@ -778,4 +778,65 @@ describe('find()', () => {
       `);
     });
   });
+
+  describe('per-hit authorization', () => {
+    // Simulates an ES response for a `_source: false` search: authorization fields are only
+    // available via the `fields` API, not `_source`.
+    const buildFieldsHit = (id: string, ruleTypeId: string, consumer: string) => ({
+      _index: '.alerts-observability.apm.alerts',
+      _id: id,
+      fields: {
+        [ALERT_RULE_TYPE_ID]: [ruleTypeId],
+        [ALERT_RULE_CONSUMER]: [consumer],
+        [ALERT_WORKFLOW_STATUS]: ['open'],
+        [SPACE_IDS]: [DEFAULT_SPACE],
+      },
+    });
+
+    const mockFieldsResponse = (hits: Array<ReturnType<typeof buildFieldsHit>>) =>
+      esClientMock.search.mockResponseOnce({
+        took: 5,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+        hits: { total: hits.length, max_score: 999, hits },
+      });
+
+    test('authorizes every unique rule type and consumer pair read from the `fields` API', async () => {
+      const alertsClient = new AlertsClient(alertsClientParams);
+      mockFieldsResponse([
+        buildFieldsHit('authorized', 'apm.error_rate', 'apm'),
+        buildFieldsHit('unauthorized', 'fake.rule', 'apm'),
+      ]);
+
+      await expect(
+        alertsClient.find({
+          query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+          index: '.alerts-observability.apm.alerts',
+        })
+      ).rejects.toThrow('Unauthorized for fake.rule and apm');
+
+      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(2);
+      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith(
+        expect.objectContaining({ ruleTypeId: 'apm.error_rate', consumer: 'apm' })
+      );
+      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith(
+        expect.objectContaining({ ruleTypeId: 'fake.rule', consumer: 'apm' })
+      );
+    });
+
+    test('deduplicates authorization checks for repeated rule type and consumer pairs', async () => {
+      const alertsClient = new AlertsClient(alertsClientParams);
+      mockFieldsResponse([
+        buildFieldsHit('1', 'apm.error_rate', 'apm'),
+        buildFieldsHit('2', 'apm.error_rate', 'apm'),
+      ]);
+
+      await alertsClient.find({
+        query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
+        index: '.alerts-observability.apm.alerts',
+      });
+
+      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+    });
+  });
 });

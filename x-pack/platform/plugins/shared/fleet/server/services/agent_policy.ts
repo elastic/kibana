@@ -124,6 +124,7 @@ import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
 } from '../constants';
 
 import {
@@ -153,7 +154,6 @@ import { unenrollForAgentPolicyId } from './agents';
 import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
 import {
   buildCurrentRevisionFilter,
-  getCompiledVersionsForAgentPolicy,
   getPackagePolicySavedObjectType,
   packagePolicyService,
 } from './package_policy';
@@ -180,6 +180,7 @@ import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpe
 import {
   getVersionSpecificPolicies,
   getAgentVersionsForVersionSpecificPolicies,
+  getAgentAssignedVersionsForPolicies,
   reassignAgentsFromVersionSpecificPolicies,
 } from './utils/version_specific_policies';
 import { scheduleReassignAgentsToVersionSpecificPoliciesTask } from './agent_policies/reassign_agents_to_version_specific_policies_task';
@@ -256,9 +257,13 @@ class AgentPolicyService {
       `Starting update of agent policy [${id}] with soClient scoped to [${soClient.getCurrentNamespace()}]`
     );
 
+    // Skip the (potentially large, O(n) package-policy-count) full package policy fetch when
+    // deploying asynchronously: the async branch below only schedules a deploy task by id/spaceId
+    // and never reads `existingAgentPolicy.package_policies` — the scheduled task fetches whatever
+    // it needs itself when it runs.
     const [savedObjectType, existingAgentPolicy] = await Promise.all([
       getAgentPolicySavedObjectType(),
-      this.get(soClient, id, true),
+      this.get(soClient, id, !options.asyncDeploy),
     ]);
 
     auditLoggingService.writeCustomSoAuditLog({
@@ -295,6 +300,7 @@ class AgentPolicyService {
         getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
+    agentPolicy = this.normalizeDownloadSourceFields(agentPolicy);
     await soClient
       .update<AgentPolicySOAttributes>(savedObjectType, id, {
         ...agentPolicy,
@@ -1191,6 +1197,7 @@ class AgentPolicyService {
           'data_output_id',
           'monitoring_output_id',
           'download_source_id',
+          'download_source_ids',
           'fleet_server_host_id',
           'supports_agentless',
           'global_data_tags',
@@ -1726,6 +1733,7 @@ class AgentPolicyService {
 
     if (agentPolicy?.supports_agentless) {
       logger.debug(`Starting  unenrolling agent from agentless policy ${id}`);
+      await unenrollForAgentPolicyId(soClient, esClient, id, { revoke: true });
       // unenroll  offline agents for agentless policies first to avoid 404 Save Object error
       await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
         spaceId: soClient.getCurrentNamespace(),
@@ -1808,20 +1816,41 @@ class AgentPolicyService {
         );
     }
 
-    await soClient
-      .delete(savedObjectType, id, {
+    // cleanup .fleet-policies docs BEFORE deleting the saved object so that if Elasticsearch is
+    // temporarily unavailable the saved object is preserved and the caller can retry the delete.
+    await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
+
+    try {
+      await soClient.delete(savedObjectType, id, {
         force: true, // need to delete through multiple space
-      })
-      .catch(catchAndSetErrorStackTrace.withMessage(`Failed to delete agent policy [${id}]`));
+      });
+    } catch (deleteErr: unknown) {
+      // .fleet-policies docs were already removed above. Redeploy them so fleet-server can
+      // continue delivering the policy to its agents while the caller retries the delete.
+      logger.error(
+        `[AgentPolicyService] Failed to delete saved object for agent policy [${id}]; ` +
+          `attempting to redeploy .fleet-policies documents to restore fleet-server delivery`
+      );
+      try {
+        await this.deployPolicy(soClient, id);
+      } catch (redeployErr) {
+        logger.error(
+          `[AgentPolicyService] Failed to redeploy agent policy [${id}] after saved object ` +
+            `delete failure — fleet-server may not be able to deliver this policy until it is ` +
+            `manually redeployed: ${redeployErr}`
+        );
+      }
+      return catchAndSetErrorStackTrace(
+        deleteErr as Error,
+        `Failed to delete agent policy [${id}]`
+      );
+    }
 
     if (!agentPolicy?.supports_agentless) {
       await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
         spaceId: soClient.getCurrentNamespace(),
       });
     }
-
-    // cleanup .fleet-policies docs on delete
-    await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
 
     logger.debug(`Deleted agent policy ${id}`);
     return {
@@ -1852,6 +1881,7 @@ class AgentPolicyService {
       throwOnAgentlessError?: boolean;
       throwOnAnyError?: boolean;
       agentVersions?: string[];
+      spaceId?: string;
     }
   ) {
     return withActiveSpan(
@@ -1886,7 +1916,9 @@ class AgentPolicyService {
           });
         }
 
-        const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds);
+        const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds, {
+          ...(options?.spaceId ? { spaceId: options.spaceId } : {}),
+        });
         const policiesMap = keyBy(policies, 'id');
 
         logger.debug(`Retrieving full agent policies`);
@@ -1900,6 +1932,7 @@ class AgentPolicyService {
             agentPolicyService
               .getFullAgentPolicy(soClient, agentPolicyId, {
                 agentPolicy: agentPolicies?.find((policy) => policy.id === agentPolicyId),
+                ...(options?.spaceId ? { spaceId: options.spaceId } : {}),
               })
               .then((response) => {
                 if (!response) {
@@ -1929,6 +1962,26 @@ class AgentPolicyService {
 
         const fleetServerPolicies: FleetServerPolicy[] = [];
 
+        // Hoist the agent-version resolution above the loop so we make one aggregation across all
+        // policies rather than one per policy. This runs only when version-specific policies are
+        // enabled and we are on the create/update path (not the task path that supplies
+        // `options.agentVersions` explicitly).
+        const enableVersionSpecificPolicies =
+          appContextService.getExperimentalFeatures().enableVersionSpecificPolicies;
+        let versionSpecificBoundedSet: string[] = [];
+        let agentVersionsByPolicy = new Map<string, Set<string>>();
+        if (enableVersionSpecificPolicies && !options?.agentVersions) {
+          const versionConditionPolicyIds = agentPolicyIds.filter(
+            (id) => policiesMap[id]?.has_agent_version_conditions
+          );
+          if (versionConditionPolicyIds.length > 0) {
+            [versionSpecificBoundedSet, agentVersionsByPolicy] = await Promise.all([
+              getAgentVersionsForVersionSpecificPolicies(),
+              getAgentAssignedVersionsForPolicies(esClient, versionConditionPolicyIds),
+            ]);
+          }
+        }
+
         for (const fullPolicy of fullPolicies) {
           if (!fullPolicy || !fullPolicy.revision) {
             continue;
@@ -1952,27 +2005,24 @@ class AgentPolicyService {
           if (!options?.agentVersions) {
             fleetServerPolicies.push(fleetServerPolicy);
           }
-          if (
-            appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
-            policy.has_agent_version_conditions
-          ) {
-            let agentVersionsToUse = options?.agentVersions;
-            if (!agentVersionsToUse) {
-              // Create/update path: merge default common versions with any extra versions already
-              // compiled in inputs_for_versions (e.g. 9.1 from an enrolled agent). Without this,
-              // agents on non-default versions would not receive a new .fleet-policies document
-              // when the agent policy is updated, and would be stuck on the old revision.
-              const [defaultVersions, extraVersions] = await Promise.all([
-                getAgentVersionsForVersionSpecificPolicies(),
-                getCompiledVersionsForAgentPolicy(soClient, policy.id),
-              ]);
-              agentVersionsToUse = [...new Set([...defaultVersions, ...extraVersions])];
-            }
+          if (enableVersionSpecificPolicies && policy.has_agent_version_conditions) {
+            // Task path: caller supplies exact versions to deploy (suppresses base doc write above).
+            // Create/update path: use the bounded set plus any version with an enrolled agent, so
+            // a policy update always refreshes every variant that serves a real agent — not just
+            // the three versions in the default bounded set. This is the Half-B fix for
+            // https://github.com/elastic/kibana/issues/283077.
+            const agentVersionsToUse = options?.agentVersions ?? [
+              ...new Set([
+                ...versionSpecificBoundedSet,
+                ...(agentVersionsByPolicy.get(policy.id) ?? []),
+              ]),
+            ];
             const versionSpecificPolicies = await getVersionSpecificPolicies(
               soClient,
               fleetServerPolicy,
               fullPolicy,
-              agentVersionsToUse
+              agentVersionsToUse,
+              options?.spaceId ? { spaceId: options.spaceId } : {}
             );
             fleetServerPolicies.push(...versionSpecificPolicies);
           }
@@ -2318,6 +2368,7 @@ class AgentPolicyService {
       agentPolicy?: AgentPolicy;
       agentVersion?: string;
       redactProxySecrets?: boolean;
+      spaceId?: string;
     }
   ): Promise<FullAgentPolicy | null> {
     const span = apm.startSpan(
@@ -2342,8 +2393,8 @@ class AgentPolicyService {
         .getInternalUserSOClientWithoutSpaceExtension()
         .find<AgentPolicySOAttributes>({
           type: savedObjectType,
-          fields: ['revision', 'download_source_id'],
-          searchFields: ['download_source_id'],
+          fields: ['revision', 'download_source_id', 'download_source_ids'],
+          searchFields: ['download_source_id', 'download_source_ids'],
           search: escapeSearchQueryPhrase(downloadSourceId),
           perPage: SO_SEARCH_LIMIT,
           namespaces: ['*'],
@@ -2365,6 +2416,9 @@ class AgentPolicyService {
                 agentPolicy.download_source_id === downloadSourceId
                   ? null
                   : agentPolicy.download_source_id,
+              download_source_ids: agentPolicy.download_source_ids?.filter(
+                (id) => id !== downloadSourceId
+              ),
             }
           ),
         {
@@ -2374,6 +2428,45 @@ class AgentPolicyService {
     }
   }
 
+  private async getSpacesForPoliciesMatching(
+    searchFields: string[],
+    searchValue: string
+  ): Promise<{ spaceIds: Set<string>; truncated: boolean }> {
+    const savedObjectType = await getAgentPolicySavedObjectType();
+    const result = await appContextService
+      .getInternalUserSOClientWithoutSpaceExtension()
+      .find<AgentPolicySOAttributes>({
+        type: savedObjectType,
+        fields: ['space_ids'],
+        searchFields,
+        search: escapeSearchQueryPhrase(searchValue),
+        perPage: SO_SEARCH_LIMIT,
+        namespaces: ['*'],
+      });
+    const spaceIds = new Set<string>();
+    for (const so of result.saved_objects) {
+      for (const ns of so.namespaces ?? []) {
+        spaceIds.add(ns);
+      }
+    }
+    return { spaceIds, truncated: result.saved_objects.length < result.total };
+  }
+
+  public getSpacesForPoliciesUsingOutput(outputId: string) {
+    return this.getSpacesForPoliciesMatching(['data_output_id', 'monitoring_output_id'], outputId);
+  }
+
+  public getSpacesForPoliciesUsingFleetServerHost(fleetServerHostId: string) {
+    return this.getSpacesForPoliciesMatching(['fleet_server_host_id'], fleetServerHostId);
+  }
+
+  public getSpacesForPoliciesUsingDownloadSource(downloadSourceId: string) {
+    return this.getSpacesForPoliciesMatching(
+      ['download_source_id', 'download_source_ids'],
+      downloadSourceId
+    );
+  }
+
   public async agentPoliciesExistForDownloadSourceId(downloadSourceId: string): Promise<boolean> {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const escapedId = escapeSearchQueryPhrase(downloadSourceId);
@@ -2381,7 +2474,7 @@ class AgentPolicyService {
       .getInternalUserSOClientWithoutSpaceExtension()
       .find<AgentPolicySOAttributes>({
         type: savedObjectType,
-        filter: `(${savedObjectType}.attributes.download_source_id:${escapedId})`,
+        filter: `(${savedObjectType}.attributes.download_source_id:${escapedId}) OR (${savedObjectType}.attributes.download_source_ids:${escapedId})`,
         fields: ['id'],
         perPage: 1,
         namespaces: ['*'],
@@ -2398,16 +2491,25 @@ class AgentPolicyService {
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
     const savedObjectType = await getAgentPolicySavedObjectType();
     const escapedId = escapeSearchQueryPhrase(downloadSourceId);
-    const filterClauses = [`(${savedObjectType}.attributes.download_source_id:${escapedId})`];
+    const filterClauses = [
+      `(${savedObjectType}.attributes.download_source_id:${escapedId})`,
+      `(${savedObjectType}.attributes.download_source_ids:${escapedId})`,
+    ];
     if (options?.isDefault) {
       filterClauses.push(`(NOT ${savedObjectType}.attributes.download_source_id:*)`);
+      // Policies holding a slot for whichever source is default track it by reference
+      filterClauses.push(
+        `(${savedObjectType}.attributes.download_source_ids:${escapeSearchQueryPhrase(
+          DEFAULT_DOWNLOAD_SOURCE_REFERENCE
+        )})`
+      );
     }
     const filter = filterClauses.join(' OR ');
 
     const currentPolicies =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: savedObjectType,
-        fields: ['revision', 'download_source_id', 'namespaces'],
+        fields: ['revision', 'download_source_id', 'download_source_ids', 'namespaces'],
         filter,
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
@@ -2779,11 +2881,34 @@ class AgentPolicyService {
     return { policiesWithSingleAP, policiesWithMultipleAP };
   }
 
+  private normalizeDownloadSourceFields<T extends Partial<AgentPolicySOAttributes>>(
+    agentPolicy: T
+  ): T {
+    if ('download_source_ids' in agentPolicy) {
+      // Deduplicate while preserving order (first occurrence wins).
+      const deduped = [...new Set(agentPolicy.download_source_ids ?? [])];
+      // Keep download_source_id in sync with the primary entry so older nodes
+      // that only read this field compile the correct sourceURI during rolling upgrades.
+      return {
+        ...agentPolicy,
+        download_source_ids: deduped,
+        download_source_id: deduped[0] ?? null,
+      };
+    }
+    if ('download_source_id' in agentPolicy) {
+      return {
+        ...agentPolicy,
+        download_source_ids: agentPolicy.download_source_id ? [agentPolicy.download_source_id] : [],
+      };
+    }
+    return agentPolicy;
+  }
+
   private prepareAsNewSo(
     agentPolicy: NewAgentPolicy,
     options: { username?: string }
   ): AgentPolicySOAttributes {
-    const { space_ids: _, ...baseAgentPolicySo } = agentPolicy;
+    const { space_ids: _, ...baseAgentPolicySo } = this.normalizeDownloadSourceFields(agentPolicy);
     const now = new Date().toISOString();
     return {
       ...baseAgentPolicySo,
@@ -2972,9 +3097,6 @@ class AgentPolicyService {
   ): Promise<void> {
     const logger = this.getLogger('deleteVerifierPolicy');
     try {
-      // Force-revoke agents before deleting the policy because the agentless deployment
-      // is destroyed immediately, so agents can never check in to acknowledge a graceful unenroll.
-      await unenrollForAgentPolicyId(soClient, esClient, policyId, { revoke: true });
       await this.delete(soClient, esClient, policyId, { force: true });
     } catch (err) {
       logger.error(

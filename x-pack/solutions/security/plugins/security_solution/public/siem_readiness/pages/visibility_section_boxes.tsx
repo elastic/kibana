@@ -73,13 +73,13 @@ const getBadge = (status: VisibilityStatus): { label: string; color: string; ico
           defaultMessage: 'No data',
         }),
         color: 'default',
-        icon: 'iInCircle',
+        icon: 'info',
       };
     default:
       return {
         label: '',
         color: 'default',
-        icon: 'iInCircle',
+        icon: 'info',
       };
   }
 };

@@ -80,6 +80,24 @@ describe('RelatedEpisodesGroupSubsection', () => {
     expect(screen.getByText('1 episodes')).toBeInTheDocument();
   });
 
+  it('keeps the subsection title as a heading when compressed', () => {
+    mockUseFetch.mockReturnValue({ data: [], isLoading: false } as any);
+
+    render(
+      <I18nProvider>
+        <RelatedEpisodesGroupSubsection
+          currentEpisodeId="ep-1"
+          groupHash="gh-1"
+          {...mockRuleProps}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+          compressed
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByRole('heading', { level: 4, name: 'Same alert group' })).toBeInTheDocument();
+  });
+
   it('shows a loading spinner while fetching', () => {
     mockUseFetch.mockReturnValue({ data: [], isLoading: true } as any);
 
@@ -94,7 +112,11 @@ describe('RelatedEpisodesGroupSubsection', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('alertingV2RelatedEpisodesGroupLoading')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2RelatedEpisodesGroupLoading')
+        .querySelector('.euiSkeletonRectangle')
+    ).not.toBeNull();
   });
 
   it('shows the empty state when there are no episodes', () => {

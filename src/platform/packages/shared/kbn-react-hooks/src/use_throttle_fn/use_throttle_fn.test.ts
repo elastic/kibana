@@ -24,20 +24,20 @@ describe('useThrottleFn hook', () => {
     });
 
     // Because leading is false, the fn won't be called immediately.
-    expect(fn).toBeCalledTimes(0);
+    expect(fn).toHaveBeenCalledTimes(0);
 
     act(() => {
       jest.advanceTimersByTime(200);
     });
 
-    expect(fn).toBeCalledTimes(1);
+    expect(fn).toHaveBeenCalledTimes(1);
 
     act(() => {
       result.current.run();
       jest.advanceTimersByTime(200);
     });
 
-    expect(fn).toBeCalledTimes(2);
+    expect(fn).toHaveBeenCalledTimes(2);
   });
 
   it('should cancel the throttled function call', () => {
@@ -53,7 +53,7 @@ describe('useThrottleFn hook', () => {
       jest.advanceTimersByTime(200);
     });
 
-    expect(fn).not.toBeCalled();
+    expect(fn).not.toHaveBeenCalled();
   });
 
   it('should flush the throttled function call', () => {
@@ -65,7 +65,7 @@ describe('useThrottleFn hook', () => {
       result.current.flush();
     });
 
-    expect(fn).toBeCalledTimes(1);
+    expect(fn).toHaveBeenCalledTimes(1);
   });
 
   it('should handle leading option correctly', () => {
@@ -76,7 +76,7 @@ describe('useThrottleFn hook', () => {
       result.current.run();
     });
 
-    expect(fn).toBeCalledTimes(1);
+    expect(fn).toHaveBeenCalledTimes(1);
 
     act(() => {
       jest.advanceTimersByTime(200);
@@ -86,7 +86,7 @@ describe('useThrottleFn hook', () => {
       result.current.run();
     });
 
-    expect(fn).toBeCalledTimes(2);
+    expect(fn).toHaveBeenCalledTimes(2);
   });
 
   it('should handle trailing option correctly', () => {
@@ -98,12 +98,12 @@ describe('useThrottleFn hook', () => {
       result.current.run();
     });
 
-    expect(fn).toBeCalledTimes(1);
+    expect(fn).toHaveBeenCalledTimes(1);
 
     act(() => {
       jest.advanceTimersByTime(200);
     });
 
-    expect(fn).toBeCalledTimes(2);
+    expect(fn).toHaveBeenCalledTimes(2);
   });
 });

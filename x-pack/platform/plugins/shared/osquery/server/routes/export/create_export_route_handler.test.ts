@@ -156,13 +156,13 @@ const createOsqueryContext = (options?: {
   getIntegrationNamespaces?: jest.Mock;
   useRbac?: boolean;
   authorizedPrivileges?: string[];
-  cpsEnabled?: boolean;
+  cpsActive?: boolean;
 }): OsqueryAppContext =>
   ({
     logFactory: { get: () => loggingSystemMock.createLogger() },
     experimentalFeatures: allowedExperimentalValues,
     security: createSecurityMock(options),
-    cpsEnabled: options?.cpsEnabled ?? false,
+    isCpsActive: jest.fn().mockResolvedValue(options?.cpsActive ?? false),
     service: {
       getIntegrationNamespaces: options?.getIntegrationNamespaces,
     },
@@ -570,7 +570,7 @@ describe('createExportRouteHandler', () => {
       return stream;
     });
 
-    const handler = createExportRouteHandler(createOsqueryContext({ cpsEnabled: true }));
+    const handler = createExportRouteHandler(createOsqueryContext({ cpsActive: true }));
     const response = httpServerMock.createResponseFactory();
     const request = createExportRequest({
       query: { format: 'ndjson' },

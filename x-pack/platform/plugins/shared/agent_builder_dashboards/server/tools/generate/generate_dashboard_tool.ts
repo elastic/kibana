@@ -18,9 +18,15 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
-import { dashboardTools } from '../../../common';
+import {
+  dashboardTools,
+  DASHBOARD_UPDATED_UI_EVENT,
+  type DashboardUpdatedUiEventData,
+} from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
+  createAttachmentPanelResolver,
+  createControlFieldCapabilitiesResolver,
   createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
@@ -88,24 +94,6 @@ const summarizeDashboard = (
   }),
 });
 
-const CUSTOM_CONTENT_TOOL_GUIDANCE = `
-8. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or panels that mix narrative text with live data values.
-
-**Custom content panel type selection:**
-Use custom content only as a last resort:
-- Any standard time series, bar, pie, metric, or data table → use Lens.
-- Scatter plots, faceted charts, layered charts, combination charts → use Vega.
-- Plain explanatory text with no data → use markdown.
-- The content needs an HTML/CSS layout no single Lens chart type can express, or mixes narrative text with live data, or the user explicitly asks for a custom/HTML panel → use custom content.
-
-**Creating a custom content panel:**
-- Set \`config.prompt\` to a concise description of what to display. Do not supply \`template\` — it is generated server-side from the prompt.
-- Optionally set \`config.esqlQuery\` when the panel needs live data.
-
-**Editing a custom content panel:**
-- Use \`edit_panels\` (\`source: "config"\`, \`type: "custom_content"\`) and set \`panelId\` to the target panel.
-- Supply only \`prompt\` and/or \`esqlQuery\` — omit fields that should stay unchanged. The server regenerates the template from the merged prompt and query. Do not supply \`template\`.`;
-
 /**
  * Kibana dashboard generation tool.
  *
@@ -118,11 +106,9 @@ Use custom content only as a last resort:
  * This keeps the heavy payload out of the LLM transcript — the model references
  * the attachment id to render it rather than copying it into the next tool call.
  */
-export const generateDashboardTool = ({
-  customContentEnabled = true,
-}: {
-  customContentEnabled?: boolean;
-} = {}): BuiltinSkillBoundedTool<typeof generateDashboardSchema> => {
+export const generateDashboardTool = (): BuiltinSkillBoundedTool<
+  typeof generateDashboardSchema
+> => {
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
@@ -132,14 +118,13 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Use operations[] to:
 1. set metadata
-2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
-3. edit existing Lens, Vega, or markdown panel content
+2. add panels: existing visualization attachments by id (\`source: "attachment"\`, preferred over copying their config), resolved panel configs (\`source: "config"\`), or Lens/Vega visualizations from a natural-language query (\`source: "request"\`; pick the engine with the panel "renderer" field, defaults to Lens)
+3. edit existing Lens, Vega, markdown, custom content, or ML anomaly panel content
 4. update panel layouts without changing content
 5. add / remove sections, including inline section panels during add_section
 6. remove panels
-7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)${
-      customContentEnabled ? CUSTOM_CONTENT_TOOL_GUIDANCE : ''
-    }`,
+7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
+8. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
@@ -166,9 +151,15 @@ Use operations[] to:
             events,
             esClient,
           }),
-          resolveCustomContentTemplate: customContentEnabled
-            ? createCustomContentTemplateResolver({ logger, modelProvider, esClient })
-            : undefined,
+          resolveCustomContentTemplate: createCustomContentTemplateResolver({
+            logger,
+            modelProvider,
+            esClient,
+          }),
+          resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
+          resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({
+            esClient: esClient.asCurrentUser,
+          }),
         });
 
         // Data-aware default time range computation
@@ -196,6 +187,18 @@ Use operations[] to:
         }
 
         logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
+
+        events.sendUiEvent<typeof DASHBOARD_UPDATED_UI_EVENT, DashboardUpdatedUiEventData>(
+          DASHBOARD_UPDATED_UI_EVENT,
+          {
+            attachment: {
+              id: attachment.id,
+              type: DASHBOARD_ATTACHMENT_TYPE,
+              data: finalDashboardData,
+              origin: attachment.origin,
+            },
+          }
+        );
 
         return {
           results: [
@@ -228,7 +231,7 @@ Use operations[] to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId, operations },
+                metadata: { dashboardAttachmentId: previousAttachmentId },
               },
             },
           ],

@@ -34,6 +34,13 @@ import { EditCustomContentFlyout } from './edit_custom_content_flyout';
 
 const mockUseEditFlyoutState = useEditFlyoutState as jest.Mock;
 
+const mockTelemetry = {
+  trackPanelSaved: jest.fn(),
+  trackGenerateWithChatClicked: jest.fn(),
+};
+
+jest.mock('../telemetry', () => ({ getTelemetry: () => mockTelemetry }));
+
 const baseFlyoutState = {
   draftEsqlQuery: '',
   setDraftEsqlQuery: jest.fn(),
@@ -45,12 +52,10 @@ const baseFlyoutState = {
   esqlDataError: null,
   handleFetchData: jest.fn(),
   isRenderLoading: false,
-  hasPreviewedCurrentDraft: false,
   handleRender: jest.fn(),
 };
 
 const defaultProps = {
-  embeddableId: 'panel-1',
   esqlQuery: undefined as string | undefined,
   template: undefined as string | undefined,
   timeRange: undefined,
@@ -58,6 +63,7 @@ const defaultProps = {
   projectRouting: undefined,
   query: undefined,
   filters: undefined,
+  esqlVariables: undefined,
   onSave: jest.fn(),
   onClose: jest.fn(),
   onRunPreview: jest.fn(),
@@ -67,7 +73,11 @@ const defaultProps = {
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseEditFlyoutState.mockReturnValue(baseFlyoutState);
-  (getServices as jest.Mock).mockReturnValue({});
+  (getServices as jest.Mock).mockReturnValue({
+    core: {
+      docLinks: { links: { visualize: { customPanels: 'https://docs.example/custom-panels' } } },
+    },
+  });
 });
 
 describe('EditCustomContentFlyout', () => {
@@ -99,7 +109,7 @@ describe('EditCustomContentFlyout', () => {
       expect(screen.getByRole('button', { name: 'Apply and close' })).not.toBeDisabled();
     });
 
-    it('calls onSave with the draft values and closes', async () => {
+    it('calls onSave with the draft values', async () => {
       const onSave = jest.fn();
       const onClose = jest.fn();
       mockUseEditFlyoutState.mockReturnValue({
@@ -112,8 +122,23 @@ describe('EditCustomContentFlyout', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Apply and close' }));
 
       expect(onSave).toHaveBeenCalledWith('FROM logs', '<div></div>');
-      expect(onClose).toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+      expect(mockTelemetry.trackPanelSaved).toHaveBeenCalledWith({
+        isNewPanel: false,
+        hasTemplate: true,
+        hasEsqlQuery: true,
+        templateSizeBytes: '<div></div>'.length,
+      });
     });
+  });
+
+  it('links to the custom panels docs', () => {
+    render(<EditCustomContentFlyout {...defaultProps} />);
+
+    expect(screen.getByTestId('customContentFlyoutDocsLink')).toHaveAttribute(
+      'href',
+      'https://docs.example/custom-panels'
+    );
   });
 
   describe('Cancel', () => {
@@ -130,7 +155,13 @@ describe('EditCustomContentFlyout', () => {
   });
 
   describe('Run Preview', () => {
-    it('is disabled when nothing has been edited', () => {
+    it('is disabled when the template is empty', () => {
+      mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftTemplate: '   ' });
+      render(<EditCustomContentFlyout {...defaultProps} />);
+      expect(screen.getByRole('button', { name: 'Run preview' })).toBeDisabled();
+    });
+
+    it('is enabled whenever there is a template, even with no unsaved edits', () => {
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
         draftEsqlQuery: 'FROM logs',
@@ -139,32 +170,16 @@ describe('EditCustomContentFlyout', () => {
       render(
         <EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" template="<p>hi</p>" />
       );
-      expect(screen.getByRole('button', { name: 'Run Preview' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Run preview' })).not.toBeDisabled();
     });
 
-    it('is enabled when the query differs from the saved value', () => {
-      mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftEsqlQuery: 'FROM other' });
-      render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" />);
-      expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
-    });
-
-    it('is enabled when the template differs from the saved value', () => {
+    it('is enabled when the draft differs from the saved value', () => {
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
         draftTemplate: '<p>edited</p>',
       });
       render(<EditCustomContentFlyout {...defaultProps} template="<p>hi</p>" />);
-      expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
-    });
-
-    it('is disabled after preview has been applied to the current draft', () => {
-      mockUseEditFlyoutState.mockReturnValue({
-        ...baseFlyoutState,
-        draftEsqlQuery: 'FROM other',
-        hasPreviewedCurrentDraft: true,
-      });
-      render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" />);
-      expect(screen.getByRole('button', { name: 'Run Preview' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Run preview' })).not.toBeDisabled();
     });
 
     it('calls handleRender when clicked', async () => {
@@ -172,11 +187,12 @@ describe('EditCustomContentFlyout', () => {
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
         draftEsqlQuery: 'FROM logs',
+        draftTemplate: '<p>hi</p>',
         handleRender,
       });
       render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM other" />);
 
-      await userEvent.click(screen.getByRole('button', { name: 'Run Preview' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Run preview' }));
 
       expect(handleRender).toHaveBeenCalled();
     });
@@ -216,6 +232,10 @@ describe('EditCustomContentFlyout', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Refine with chat' }));
 
       expect(onGenerateWithChat).toHaveBeenCalledWith('<p>hi</p>', 'FROM logs');
+      expect(mockTelemetry.trackGenerateWithChatClicked).toHaveBeenCalledWith({
+        triggerSource: 'flyout',
+        hasExistingTemplate: true,
+      });
     });
 
     it('calls onGenerateWithChat when clicked with an empty template', async () => {
@@ -225,6 +245,10 @@ describe('EditCustomContentFlyout', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Generate with chat' }));
 
       expect(onGenerateWithChat).toHaveBeenCalledWith('', undefined);
+      expect(mockTelemetry.trackGenerateWithChatClicked).toHaveBeenCalledWith({
+        triggerSource: 'flyout',
+        hasExistingTemplate: false,
+      });
     });
   });
 });

@@ -7,8 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { generateEsql, GenerateEsqlNoDataError } from '@kbn/agent-builder-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import {
+  generateEsql,
+  GenerateEsqlNoDataError,
+  setDefaultEsqlCacheKey,
+} from '@kbn/agent-builder-genai-utils';
+import { toHashedId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
@@ -29,9 +33,7 @@ const nlToEsqlToolSchema = z.object({
   index: z
     .string()
     .optional()
-    .describe(
-      '(optional) Index or index-pattern to search against. If not provided, will automatically select the best index to use based on the query.'
-    ),
+    .describe('(optional) Index, index-pattern, or ES|QL view to query. '),
   context: z
     .string()
     .optional()
@@ -67,7 +69,15 @@ const nlToEsqlToolSchema = z.object({
     ),
 });
 
-export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
+export const generateEsqlTool = ({
+  organizationId,
+}: {
+  /** Raw organization id used to derive a stable EIS session id for prompt-cache stickiness. */
+  organizationId?: string;
+} = {}): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
+  if (organizationId) {
+    setDefaultEsqlCacheKey(toHashedId(organizationId));
+  }
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
@@ -98,10 +108,11 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         nlQuery,
         index,
         additionalContext: context,
-        executeQuery,
+        execute: executeQuery ? 'data' : 'none',
         disableNamedParams,
         timeRange,
         includeDatasets: experimentalFeatures.datasets,
+        includeViews: true,
         modelProvider,
         esClient: esClient.asCurrentUser,
         logger,
@@ -122,23 +133,28 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
             message: esqlResponse.error,
           },
         });
-      } else {
-        if (esqlResponse.query) {
-          toolResults.push({
-            type: ToolResultType.query,
-            data: {
-              esql: esqlResponse.query,
-            },
-          });
-        }
-        if (esqlResponse.answer) {
-          toolResults.push({
-            type: ToolResultType.other,
-            data: {
-              answer: esqlResponse.answer,
-            },
-          });
-        }
+      } else if (esqlResponse.query) {
+        toolResults.push({
+          type: ToolResultType.query,
+          data: {
+            esql: esqlResponse.query,
+          },
+        });
+      }
+
+      // Returned on failure as well as success. `error` can be as unhelpful as "No query was
+      // generated", while the model's own response explains what actually went wrong — for
+      // instance that the question needs data the target index does not hold. Without it the
+      // caller cannot tell a transient failure from an impossible request. A query that failed is
+      // still not offered as a `query` result, so the caller has nothing it can hand to
+      // `execute_esql` (the prose may quote it, but not as a usable output).
+      if (esqlResponse.answer) {
+        toolResults.push({
+          type: ToolResultType.other,
+          data: {
+            answer: esqlResponse.answer,
+          },
+        });
       }
 
       return {

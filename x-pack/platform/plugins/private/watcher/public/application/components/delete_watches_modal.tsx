@@ -14,9 +14,11 @@ import { useAppContext } from '../app_context';
 export const DeleteWatchesModal = ({
   watchesToDelete,
   callback,
+  restoreMenuFocus,
 }: {
   watchesToDelete: string[];
   callback: (deleted?: string[]) => void;
+  restoreMenuFocus?: boolean;
 }) => {
   const { toasts } = useAppContext();
   const numWatchesToDelete = watchesToDelete.length;
@@ -52,6 +54,7 @@ export const DeleteWatchesModal = ({
       buttonColor="danger"
       data-test-subj="deleteWatchesConfirmation"
       title={confirmButtonText}
+      focusTrapProps={restoreMenuFocus ? { returnFocus: false } : undefined}
       onCancel={() => callback()}
       onConfirm={async () => {
         const { successes, errors } = await deleteWatches(watchesToDelete);

@@ -11,8 +11,15 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type {
+  DataTableRecord,
+  DataTableColumnsMeta,
+  ShouldShowFieldInTableHandler,
+} from '@kbn/discover-utils/types';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
+import type { DocumentsDisplayMode } from '../types';
+import { SOURCE_COLUMN } from './columns';
+import { sourceDocumentToJsonString } from './build_document_tree';
 
 interface ConvertedResult {
   formattedString: string;
@@ -29,6 +36,9 @@ export const convertValueToString = ({
   fieldFormats,
   columnsMeta,
   options,
+  documentsDisplayMode,
+  shouldShowFieldHandler,
+  selectedColumns,
 }: {
   rowIndex: number;
   rows: DataTableRecord[];
@@ -38,16 +48,32 @@ export const convertValueToString = ({
   columnsMeta: DataTableColumnsMeta | undefined;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
+    compatibleWithMarkdown?: boolean; // values as one-liner
   };
+  documentsDisplayMode?: DocumentsDisplayMode;
+  shouldShowFieldHandler?: ShouldShowFieldInTableHandler;
+  selectedColumns?: string[];
 }): ConvertedResult => {
-  if (!rows[rowIndex]) {
+  const row = rows[rowIndex];
+  if (!row) {
     return {
       formattedString: '',
       withFormula: false,
     };
   }
-  const rowFlattened = rows[rowIndex].flattened;
-  const value = rowFlattened?.[columnId];
+
+  if (documentsDisplayMode === 'json' && columnId === SOURCE_COLUMN && shouldShowFieldHandler) {
+    const multiline = !(options?.compatibleWithCSV || options?.compatibleWithMarkdown);
+    return {
+      formattedString: sourceDocumentToJsonString(
+        { row, dataView, columnsMeta, shouldShowFieldHandler, selectedColumns },
+        { multiline }
+      ),
+      withFormula: false,
+    };
+  }
+
+  const value = row.flattened?.[columnId];
   const field = getDataViewFieldOrCreateFromColumnMeta({
     fieldName: columnId,
     dataView,
@@ -58,7 +84,7 @@ export const convertValueToString = ({
     dataView,
     dataViewField: field,
     flattenedValue: value,
-    dataTableRecord: rows[rowIndex],
+    dataTableRecord: row,
     fieldFormats,
     options,
   });

@@ -21,6 +21,7 @@ import { getDeferred } from '../../../mocks/utils';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { DISABLED_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
 
 jest.mock('../../../services/policies/hooks', () => ({
   useGetEndpointSpecificPolicies: jest.fn(),
@@ -35,6 +36,7 @@ describe('When using the ArtifactListPage component', () => {
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
+  let coreStart: AppContextTestRender['coreStart'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
   let getFirstCard: ArtifactListPageRenderingSetup['getFirstCard'];
   let importExportUi: ReturnType<typeof getArtifactImportExportUiMocks>;
@@ -44,7 +46,7 @@ describe('When using the ArtifactListPage component', () => {
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, mockedApi, getFirstCard, setExperimentalFlag } = renderSetup);
+    ({ history, coreStart, mockedApi, getFirstCard, setExperimentalFlag } = renderSetup);
 
     mockUseGetEndpointSpecificPolicies.mockReturnValue({
       data: mockedApi.responseProvider.endpointPackagePolicyList(),
@@ -87,7 +89,11 @@ describe('When using the ArtifactListPage component', () => {
         render(props);
 
         await waitFor(() => {
-          expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
+          if (props?.showAsSimpleTable) {
+            expect(renderResult.getByTestId('testPage-simpleTable')).toBeInTheDocument();
+          } else {
+            expect(renderResult.getByTestId('testPage-list')).toBeInTheDocument();
+          }
           expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalled();
         });
 
@@ -119,12 +125,204 @@ describe('When using the ArtifactListPage component', () => {
       expect(getByTestId('testPage-showCount').textContent).toBe('Showing 20 artifacts');
     });
 
+    describe('and showAsSimpleTable is enabled', () => {
+      it('should render a table instead of cards', async () => {
+        const { getByTestId, queryByTestId, queryAllByTestId, getAllByRole } =
+          await renderWithListData({
+            showAsSimpleTable: true,
+          });
+
+        expect(queryAllByTestId('testPage-card')).toHaveLength(0);
+        expect(queryByTestId('testPage-list')).not.toBeInTheDocument();
+        expect(getByTestId('testPage-simpleTable')).toBeInTheDocument();
+        expect(getAllByRole('row')).toHaveLength(11); // header + 10 items
+      });
+
+      it('should not show the Enabled column by default', async () => {
+        const { queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        expect(queryByTestId('testPage-simpleTable-columnEnabled')).not.toBeInTheDocument();
+      });
+
+      it('should show the Enabled column when showEnabledColumn is true', async () => {
+        const { getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+        });
+
+        expect(getAllByTestId('testPage-simpleTable-columnEnabled').length).toBeGreaterThan(0);
+      });
+
+      it('should update the full artifact with the disabled tag when the switch is turned off', async () => {
+        const { getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnEnabled')[0]);
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppUpdate).toHaveBeenCalled();
+        });
+
+        const updateRequest = mockedApi.responseProvider.trustedAppUpdate.mock.calls[0][0];
+        const updateBody = JSON.parse(updateRequest.body as string);
+
+        expect(updateBody.tags).toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+        expect(updateBody).toEqual(
+          expect.objectContaining({
+            id: expect.any(String),
+            item_id: expect.any(String),
+            name: expect.any(String),
+            entries: expect.any(Array),
+            os_types: expect.any(Array),
+            type: expect.any(String),
+          })
+        );
+        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+          expect.stringContaining('disabled')
+        );
+      });
+
+      it('should show table row actions that open edit and delete', async () => {
+        const { getByTestId, getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-rowActions-button')[0]);
+
+        expect(getByTestId('testPage-simpleTable-cardEditAction')).toBeInTheDocument();
+        expect(getByTestId('testPage-simpleTable-cardDeleteAction')).toBeInTheDocument();
+      });
+
+      it('should display the Edit flyout when table edit action is clicked', async () => {
+        const { getByTestId, getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-rowActions-button')[0]);
+        await userEvent.click(getByTestId('testPage-simpleTable-cardEditAction'));
+
+        expect(getByTestId('testPage-flyout')).toBeTruthy();
+      });
+
+      it('should display the Delete modal when table delete action is clicked', async () => {
+        const { getByTestId, getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-rowActions-button')[0]);
+        await userEvent.click(getByTestId('testPage-simpleTable-cardDeleteAction'), {
+          pointerEventsCheck: 0,
+        });
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-deleteModal')).toBeTruthy();
+        });
+      });
+
+      it('should request list data with the default sort when the URL has no sort params', async () => {
+        await renderWithListData({ showAsSimpleTable: true });
+
+        expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              sort_field: 'created_at',
+              sort_order: 'desc',
+            }),
+          })
+        );
+      });
+
+      it('should request list data with the default sort field when the URL sortField is not sortable', async () => {
+        history.push('somepage?sortField=invalid_field&sortOrder=desc');
+
+        await renderWithListData({ showAsSimpleTable: true });
+
+        expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              sort_field: 'created_at',
+            }),
+          })
+        );
+      });
+
+      it('should request list data with a valid URL sortField', async () => {
+        history.push('somepage?sortField=name&sortOrder=asc');
+
+        await renderWithListData({ showAsSimpleTable: true });
+
+        expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              sort_field: 'name',
+              sort_order: 'asc',
+            }),
+          })
+        );
+      });
+
+      it('should request list data with the default sort order when the URL sortOrder is invalid', async () => {
+        history.push('somepage?sortField=name&sortOrder=ascending');
+
+        await renderWithListData({ showAsSimpleTable: true });
+
+        expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              sort_field: 'name',
+              sort_order: 'desc',
+            }),
+          })
+        );
+      });
+
+      it('should persist table sort to the URL and refetch with that sortField', async () => {
+        const { getByText } = await renderWithListData({ showAsSimpleTable: true });
+
+        await userEvent.click(getByText('Name'));
+
+        await waitFor(() => {
+          expect(history.location.search).toMatch(/sortField=name/);
+          expect(history.location.search).toMatch(/sortOrder=asc/);
+        });
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              query: expect.objectContaining({
+                sort_field: 'name',
+                sort_order: 'asc',
+              }),
+            })
+          );
+        });
+      });
+    });
+
     it('should show card actions', async () => {
       const { getByTestId } = await renderWithListData();
       await getFirstCard({ showActions: true });
 
       expect(getByTestId('testPage-card-cardEditAction')).toBeTruthy();
       expect(getByTestId('testPage-card-cardDeleteAction')).toBeTruthy();
+    });
+
+    it('should not clamp an invalid URL sortField when the list is shown as cards', async () => {
+      history.push('somepage?sortField=invalid_field&sortOrder=desc');
+
+      await renderWithListData();
+
+      expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            sort_field: 'invalid_field',
+          }),
+        })
+      );
     });
 
     it('should persist pagination `page` changes to the URL', async () => {

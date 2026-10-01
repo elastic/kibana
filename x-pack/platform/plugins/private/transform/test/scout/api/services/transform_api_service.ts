@@ -19,7 +19,10 @@ export interface TransformApiService {
   getTransformStats: (
     request: estypes.TransformGetTransformStatsRequest
   ) => Promise<estypes.TransformGetTransformStatsTransformStats>;
-  deleteTransform: (request: estypes.TransformDeleteTransformRequest) => Promise<void>;
+  deleteTransform: (
+    request: estypes.TransformDeleteTransformRequest,
+    options?: { ignoreErrors?: boolean }
+  ) => Promise<void>;
   cleanTransformIndices: () => Promise<void>;
   deleteIndices: (request: estypes.IndicesDeleteRequest) => Promise<void>;
 }
@@ -68,7 +71,10 @@ export function getTransformApiService(esClient: Client): TransformApiService {
       }
     },
 
-    async deleteTransform(request: estypes.TransformDeleteTransformRequest) {
+    async deleteTransform(
+      request: estypes.TransformDeleteTransformRequest,
+      options?: { ignoreErrors?: boolean }
+    ) {
       try {
         // Stop the transform first
         await esClient.transform.stopTransform({
@@ -80,6 +86,9 @@ export function getTransformApiService(esClient: Client): TransformApiService {
         // Then delete it
         await esClient.transform.deleteTransform(request);
       } catch (error) {
+        if (options?.ignoreErrors) {
+          return;
+        }
         throw new Error(`Failed to delete transform ${request.transform_id}: ${error}`);
       }
     },

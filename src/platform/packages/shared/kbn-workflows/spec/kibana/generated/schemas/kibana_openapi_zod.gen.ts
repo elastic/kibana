@@ -1065,22 +1065,3 @@ export const get_streams_name_request = z.object({
     }),
     query: z.optional(z.never())
 });
-
-export const get_streams_name_significant_events_request = z.object({
-    body: z.optional(z.union([
-        z.record(z.string(), z.never()),
-        z.enum(['null']),
-        z.unknown()
-    ])),
-    path: z.object({
-        name: z.string()
-    }),
-    query: z.object({
-        from: z.string(),
-        to: z.string(),
-        bucketSize: z.string(),
-        query: z.optional(z.string().register(z.globalRegistry, {
-            description: 'Query string to filter significant events on metadata fields'
-        }))
-    })
-});

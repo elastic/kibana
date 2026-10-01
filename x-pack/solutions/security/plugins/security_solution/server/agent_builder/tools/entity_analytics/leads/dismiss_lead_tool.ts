@@ -69,10 +69,7 @@ export const dismissLeadTool = (
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
-        if (
-          !privileges.adhoc.has_write_permissions ||
-          !privileges.scheduled.has_write_permissions
-        ) {
+        if (!privileges.has_write_permissions) {
           const errorMessage = 'You do not have permission to dismiss leads in this space.';
           telemetryTracker.recordFailure(errorMessage);
           return {

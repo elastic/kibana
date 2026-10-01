@@ -106,7 +106,7 @@ describe('HeaderMenu', () => {
     const wrapper = render(<HeaderMenu disableActions={false} actions={actions} />);
     fireEvent.click(wrapper.getByTestId('ButtonIcon'));
     fireEvent.click(wrapper.getByTestId('ActionItemedit'));
-    expect(onEdit).toBeCalled();
+    expect(onEdit).toHaveBeenCalled();
   });
 
   it('should render custom Actions', () => {

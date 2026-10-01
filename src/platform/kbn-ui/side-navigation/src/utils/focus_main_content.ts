@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAIN_CONTENT_SELECTORS } from '@kbn/ui-chrome-layout-constants';
+import { MAIN_CONTENT_SELECTORS } from '@kbn/ui-chrome-layout';
 
 /**
  * Utility function for focusing the main content landmark.

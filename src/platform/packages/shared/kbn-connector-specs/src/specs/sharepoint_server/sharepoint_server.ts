@@ -69,6 +69,7 @@ export const SharepointServer: ConnectorSpec = {
   actions: {
     getWeb: {
       isTool: true,
+      scope: 'read',
       description:
         'Get metadata about the SharePoint site (title, URL, description, locale). Use this as a starting point to confirm the site is reachable and to retrieve the site title before browsing lists or folders.',
       input: z.object({}).optional(),
@@ -85,6 +86,7 @@ export const SharepointServer: ConnectorSpec = {
 
     getLists: {
       isTool: true,
+      scope: 'read',
       description:
         "List all lists and document libraries on the SharePoint site. Returns each list's Id, Title, ItemCount, Description, Created, and LastItemModifiedDate. Use the Title field as input to getListItems, and RootFolder.ServerRelativeUrl as the path input to getFolderContents.",
       input: z.object({}).optional(),
@@ -106,6 +108,7 @@ export const SharepointServer: ConnectorSpec = {
 
     getListItems: {
       isTool: true,
+      scope: 'read',
       description:
         "Get items from a list or document library by its exact display name (Title). Call getLists first to discover available list titles. The listTitle must match the Title field exactly (case-sensitive). Examples of valid titles: 'Documents', 'Tasks', 'Site Pages'.",
       input: GetListItemsInputSchema,
@@ -127,6 +130,7 @@ export const SharepointServer: ConnectorSpec = {
 
     getFolderContents: {
       isTool: true,
+      scope: 'read',
       description:
         "List files and subfolders at a given server-relative folder path. The path starts with '/' and contains no hostname. Obtain a starting path from getLists (RootFolder.ServerRelativeUrl) or navigate deeper using ServerRelativeUrl from a previous getFolderContents result. Example path: '/sites/mysite/Shared Documents'.",
       input: GetFolderContentsInputSchema,
@@ -159,6 +163,7 @@ export const SharepointServer: ConnectorSpec = {
 
     downloadFile: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a file by its server-relative URL and return its raw content as UTF-8 text. Use getFolderContents to discover file paths (ServerRelativeUrl field). For plain-text files the text field contains the content directly. For binary files (PDF, .docx, etc.) the raw bytes are returned as text and should be processed through an Elasticsearch attachment ingest pipeline to extract readable content.',
       input: DownloadFileInputSchema,
@@ -183,6 +188,7 @@ export const SharepointServer: ConnectorSpec = {
 
     getSitePageContents: {
       isTool: true,
+      scope: 'read',
       description:
         "Get the content of a SharePoint site page by its integer item ID. To find the page ID, call getListItems with listTitle='Site Pages' and look for the Id field (an integer, not the GUID) on the desired page. Returns the page title and HTML content fields (CanvasContent1, WikiField).",
       input: GetSitePageContentsInputSchema,
@@ -206,6 +212,7 @@ export const SharepointServer: ConnectorSpec = {
 
     search: {
       isTool: true,
+      scope: 'read',
       description:
         "Search SharePoint site content using Keyword Query Language (KQL). Supports plain keyword search as well as field:value filters. Use 'from' and 'size' for pagination. Example queries: 'budget report', 'FileExtension:docx', 'author:Jane AND project plan', 'ContentType:Document AND title:policy'.",
       input: SearchInputSchema,

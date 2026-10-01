@@ -27,7 +27,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('Integration installation form should not be available without required PLI', async () => {
       await pageObjects.header.waitUntilLoadingHasFinished();
-      const pliBlockExists = await cisIntegration.checkIntegrationPliAuthBlockExists();
+      const pliBlockExists = await cisIntegration.waitForIntegrationPliAuthBlock();
 
       expect(pliBlockExists).to.be(true);
     });

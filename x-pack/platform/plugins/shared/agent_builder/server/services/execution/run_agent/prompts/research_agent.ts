@@ -8,20 +8,15 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
-import {
-  getSkillsInstructions,
-  getRelevantSkillsPointerInstructions,
-  createRelevantSkillsNoticeMessage,
-} from './utils/skills';
-import { convertPreviousRounds } from '../utils/to_langchain_messages';
+import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
+import { getSkillsInstructions, getRelevantSkillsPointerInstructions } from './utils/skills';
+import { renderVisibleContext } from '../utils/visible_context';
 import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
-import { formatResearcherActionHistory } from './utils/actions';
 import { getFileSystemInstructions } from './utils/filestore';
+import { getAiIndicesInstructions } from './utils/ai_indices';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
-import { renderVisualizationPrompt } from './utils/visualizations';
 import { renderRenderersPrompt } from './utils/renderers';
-import { getTemplate } from '../../../conversation/templates/registry';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
@@ -29,43 +24,29 @@ export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
   const {
-    actions,
-    cycleLimit,
+    run,
     processedConversation,
     resultTransformer,
-    toolManager,
+    resultStore,
+    logger,
     conversationTimestamp,
-    relevantSkillsEnabled,
-    relevantSkills,
+    imageResolver,
   } = params;
 
-  // Generate messages from the conversation's rounds, optionally
-  // injecting a compaction summary for older compacted rounds.
-  // The summary is sourced from processedConversation.compactionSummary,
-  // which is set during the compaction phase in the conversation pipeline.
-  const previousRoundsAsMessages = await convertPreviousRounds({
-    conversation: processedConversation,
-    resultTransformer,
-    compactionSummary: processedConversation.compactionSummary,
-    conversationTimestamp,
-  });
+  // History (behind the compaction summary, if any), then the current run; the relevant_skills
+  // step (if any) is rendered in place by the renderer.
+  const contextMessages = await renderVisibleContext(
+    {
+      conversation: processedConversation,
+      run,
+      phase: 'research',
+      imageResolver,
+      conversationTimestamp,
+    },
+    { resultStore, resultTransformer, logger }
+  );
 
-  const relevantSkillsMessages =
-    relevantSkillsEnabled && relevantSkills && relevantSkills.skills.length > 0
-      ? [createRelevantSkillsNoticeMessage(relevantSkills.skills)]
-      : [];
-
-  return [
-    ['system', await getAgentSystemMessage(params)],
-    ...previousRoundsAsMessages,
-    ...relevantSkillsMessages,
-    ...(await formatResearcherActionHistory({
-      actions,
-      cycleLimit,
-      resultTransformer,
-      toolManager,
-    })),
-  ];
+  return [['system', await getAgentSystemMessage(params)], ...contextMessages];
 };
 
 const renderFieldValue = (value: SerializedMetadataValue | undefined): string => {
@@ -74,11 +55,12 @@ const renderFieldValue = (value: SerializedMetadataValue | undefined): string =>
   return `**${value}**`;
 };
 
-const getConversationMetadataSection = (
+const getConversationMetadataSection = async (
   templateId: string | undefined,
-  metadata: Record<string, SerializedMetadataValue> | undefined
-): string => {
-  const template = templateId ? getTemplate(templateId) : undefined;
+  metadata: Record<string, SerializedMetadataValue> | undefined,
+  conversationTemplates: ConversationTemplatesService
+): Promise<string> => {
+  const template = templateId ? await conversationTemplates.get(templateId) : undefined;
   if (!template) return '';
 
   const fieldEntries = Object.entries(template.fields);
@@ -108,20 +90,26 @@ ${fieldLines}
 };
 
 const getAgentSystemMessage = async ({
-  configuration: { instructions: customInstructions },
+  configuration: { instructions: customInstructions, aiIndexCatalog },
   outputSchema,
   skills,
+  spaceId,
   experimentalFeatures,
   relevantSkillsEnabled,
-  capabilities,
   renderers,
   processedConversation,
+  conversationTemplates,
 }: ResearchAgentPromptParams): Promise<string> => {
   const conversationTemplateId = processedConversation.template_id;
   const conversationMetadata = processedConversation.metadata as
     | Record<string, SerializedMetadataValue>
     | undefined;
-  const visEnabled = capabilities.visualizations;
+
+  const conversationMetadataSection = await getConversationMetadataSection(
+    conversationTemplateId,
+    conversationMetadata,
+    conversationTemplates
+  );
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -187,7 +175,14 @@ ${
     : ''
 }
 
-${getConversationMetadataSection(conversationTemplateId, conversationMetadata)}
+${conversationMetadataSection}
+
+${getAiIndicesInstructions({
+  enabled: experimentalFeatures.aiIndices,
+  catalog: aiIndexCatalog ?? [],
+  spaceId,
+})}
+
 ## INSTRUCTIONS
 
 ${customInstructions}
@@ -214,8 +209,6 @@ Sub-actions listed in a connector attachment may carry a bracketed scope tag:
 - No tag — the action is read-only and has no external side effects.
 
 ## CUSTOM RENDERING
-
-${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ${renderAttachmentPrompt()}
 

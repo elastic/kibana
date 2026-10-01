@@ -7,32 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('../../affected-packages', () => ({
+jest.mock('../../affected-packages/index.ts', () => ({
   ALWAYS_RUN_JEST_INTEGRATION_CONFIGS: ['always/jest.integration.config.js'],
   CRITICAL_FILES_JEST_INTEGRATION_TESTS: ['CRITICAL_INT'],
-  CRITICAL_FILES_JEST_UNIT_TESTS: ['CRITICAL_UNIT'],
+  CRITICAL_FILES_JEST_UNIT_TESTS: ['CRITICAL_UNIT', 'global/**/*.ts'],
   getAffectedPackages: jest.fn(),
-  listChangedFiles: jest.fn(),
   filterFilesByPackages: (files: string[], pkgs: Set<string>) =>
     files.filter((f) => [...pkgs].some((pkg) => f.startsWith(pkg))),
-  touchedCriticalFiles: (files: string[], critical: string[]) =>
-    files.some((f) => critical.includes(f)),
+  createScopeMatcher: jest.requireActual('../../affected-packages/utils.ts').createScopeMatcher,
 }));
 
-jest.mock('./jest_configs', () => ({ SHARD_ANNOTATION_SEP: '||shard=' }));
+jest.mock('./jest_configs.ts', () => ({ SHARD_ANNOTATION_SEP: '||shard=' }));
 
-import type { SelectiveTestingContext } from './selective_testing';
+import type { SelectiveTestingContext } from './selective_testing.ts';
+import { getAffectedPackages } from '../../affected-packages/index.ts';
 import {
   filterJestIntegrationConfigsByAffected,
   filterJestUnitConfigsByAffected,
-} from './selective_testing';
+  resolveSelectiveTestingContext,
+} from './selective_testing.ts';
 
 const context = (
   affected: string[],
   changed: string[] = ['irrelevant.ts']
 ): SelectiveTestingContext => ({
   affectedPackages: new Set(affected),
-  prChangedFiles: changed,
+  changedFiles: changed,
 });
 
 describe('filterJestIntegrationConfigsByAffected', () => {
@@ -87,11 +87,71 @@ describe('filterJestIntegrationConfigsByAffected', () => {
 });
 
 describe('filterJestUnitConfigsByAffected', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('logs critical matches, including glob matches, without including unrelated changes', () => {
+    const log = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const configs = ['other/jest.config.js'];
+    expect(
+      filterJestUnitConfigsByAffected(
+        configs,
+        context([], ['CRITICAL_UNIT', 'global/transform/index.ts', 'unrelated.ts'])
+      )
+    ).toEqual(configs);
+    expect(log).toHaveBeenCalledWith(
+      'Not filtering Jest unit tests because critical files changed: CRITICAL_UNIT, global/transform/index.ts'
+    );
+  });
+
+  it('logs all 20 critical paths without an omitted count', () => {
+    const log = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const files = Array.from({ length: 20 }, (_, index) => `global/file_${index}.ts`);
+
+    filterJestUnitConfigsByAffected(['other/jest.config.js'], context([], files));
+
+    expect(log).toHaveBeenCalledWith(
+      `Not filtering Jest unit tests because critical files changed: ${files.join(', ')}`
+    );
+  });
+
+  it('logs the first 20 critical paths followed by the omitted count', () => {
+    const log = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const files = Array.from({ length: 20 }, (_, index) => `global/file_${index}.ts`);
+
+    filterJestUnitConfigsByAffected(
+      ['other/jest.config.js'],
+      context([], [...files, 'global/omitted.ts', 'unrelated.ts'])
+    );
+
+    expect(log).toHaveBeenCalledWith(
+      `Not filtering Jest unit tests because critical files changed: ${files.join(
+        ', '
+      )}, and 1 more`
+    );
+  });
+
   it('does not force always-run integration configs into unit runs', () => {
     const configs = ['always/jest.integration.config.js', 'affected/jest.config.js'];
 
     const result = filterJestUnitConfigsByAffected(configs, context(['affected/']));
 
     expect(result).toEqual(['affected/jest.config.js']);
+  });
+});
+
+describe('resolveSelectiveTestingContext', () => {
+  it('uses the same changed files for package detection and critical-file checks', async () => {
+    jest.mocked(getAffectedPackages).mockResolvedValueOnce(new Set(['affected/']));
+    const changedFiles = ['affected/index.ts'];
+
+    const result = await resolveSelectiveTestingContext(changedFiles);
+
+    expect(getAffectedPackages).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({ changedFiles, includeDownstream: true })
+    );
+    expect(result?.changedFiles).toBe(changedFiles);
   });
 });
