@@ -31,4 +31,4 @@ export const spaceTest = spaceBaseTest.extend<
   },
 });
 
-export { getPlaywrightTagsFor, tags } from '@kbn/scout-security';
+export { tags } from '@kbn/scout-security';

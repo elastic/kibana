@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import { getPlaywrightTagsFor, spaceTest, tags } from '../fixtures';
+import { spaceTest, tags } from '../fixtures';
 import {
   seedAlertFlyoutResponseAction,
   type SeededAlertFlyoutResponseAction,
@@ -27,10 +27,7 @@ spaceTest.describe(
     // Stateful classic, local and Cloud. Serverless is local Security complete
     // only: Cloud serverless (MKI) cannot provision the system-indices user
     // this seed uses.
-    tag: [
-      ...tags.stateful.classic,
-      ...getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
-    ],
+    tag: [...tags.stateful.classic, '@local-serverless-security_complete'],
   },
   () => {
     let seeded: SeededAlertFlyoutResponseAction | undefined;
