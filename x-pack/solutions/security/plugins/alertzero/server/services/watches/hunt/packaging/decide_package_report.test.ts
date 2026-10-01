@@ -7,6 +7,13 @@
 
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import {
+  ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+  ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import {
+  buildActionInput,
   buildProposalSubjectKey,
   buildProposalSummaryBullets,
   canFillRespondAction,
@@ -19,6 +26,8 @@ import {
 } from '../../../../../common/step_types/package_report';
 import type { CurrentRunHost, CurrentRunState, ProcessSelector, Subject } from './types';
 
+// Fake ids: these exercise the generic fan-out, which governs any fillable action the
+// selection table does not name.
 const isolateHost: ActionCatalogEntry = {
   workflowId: 'system-security-action-isolate-host',
   name: 'Isolate host',
@@ -107,6 +116,56 @@ const setAssetCriticality: ActionCatalogEntry = {
       comment: { type: 'string' },
     },
     required: ['id_field', 'id_value'],
+  },
+};
+
+// Real ids: these go through the selection table.
+const hostSchema = isolateHost.inputSchema;
+const processSchema = killProcess.inputSchema;
+const defendIsolate: ActionCatalogEntry = {
+  workflowId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  name: 'Isolate host',
+  category: 'respond',
+  impact: 'high',
+  inputSchema: hostSchema,
+};
+const defendKill: ActionCatalogEntry = {
+  workflowId: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  name: 'Kill process',
+  category: 'respond',
+  impact: 'high',
+  inputSchema: processSchema,
+};
+const defendSuspend: ActionCatalogEntry = {
+  workflowId: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+  name: 'Suspend process',
+  category: 'respond',
+  impact: 'medium',
+  inputSchema: processSchema,
+};
+const defendMemoryDump: ActionCatalogEntry = {
+  workflowId: ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+  name: 'Dump memory of process',
+  category: 'investigate',
+  impact: 'low',
+  inputSchema: processSchema,
+};
+const defendCatalog = [defendIsolate, defendKill, defendSuspend, defendMemoryDump];
+
+/** The forensics handoff: `investigate`, no `endpoint_ids`, required ids of its own. */
+const forensicsHandoff: ActionCatalogEntry = {
+  workflowId: 'system-alertzero-action-handoff-to-forensics',
+  name: 'Run a deep forensics investigation',
+  category: 'investigate',
+  impact: 'medium',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      ai_index_id: { type: 'string' },
+      attack_discovery_id: { type: 'string' },
+      investigation_id: { type: 'string' },
+    },
+    required: ['attack_discovery_id', 'investigation_id'],
   },
 };
 
@@ -797,6 +856,218 @@ describe('decidePackageReport', () => {
         ['user', 'dev-user', true],
         ['service', 'escalated-role', true],
       ]);
+    });
+  });
+
+  describe('Defend selection table', () => {
+    const ps1 = selector({
+      entityId: 'ent-1',
+      processKey: 'entity:ent-1',
+      processName: 'powershell.exe',
+    });
+    const rundll = selector({
+      entityId: 'ent-2',
+      processKey: 'entity:ent-2',
+      processName: 'rundll32.exe',
+    });
+    const withMemdump = enrolledHost('host-a', 'agent-a', ['memdump_process']);
+    const kinds = (proposals: Array<{ actionWorkflowId?: string }>) =>
+      proposals.map((p) => p.actionWorkflowId).sort();
+
+    it('mints suspend+dump per process and isolate for two processes on a memdump-capable host, never kill', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ hosts: [withMemdump], processSelectors: [ps1, rundll] }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      expect(result.proposals).toHaveLength(5);
+      expect(kinds(result.proposals)).toEqual([
+        ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+        ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+        ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+      ]);
+      expect(result.proposals.every((p) => p.comment.includes('Rule:'))).toBe(true);
+    });
+
+    it('mints suspend only and holds back isolate for one process on a host without memdump_process', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ processSelectors: [ps1] }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID]);
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('**Held back**');
+      expect(recommendation?.comment).toContain('Isolate host host-a was not proposed');
+      expect(recommendation?.comment).toContain('see Held back');
+    });
+
+    it('mints kill (not suspend/dump) on a confirmed destructive technique', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [withMemdump],
+          processSelectors: [ps1],
+          evidence: { tier1HitCount: 1, tier2Confirmed: [{ techniqueId: 'T1486', rowCount: 1 }] },
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID]);
+    });
+
+    it('mints kill on a critical finding whose process matched an IOC', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          severity: 'critical',
+          processSelectors: [selector({ ...ps1, iocMatched: true })],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([
+        ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+        ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+      ]);
+    });
+
+    it('only dumps a protected system process and explains the hold-back', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [withMemdump],
+          processSelectors: [
+            selector({ entityId: 'ent-700', processKey: 'entity:ent-700', processName: 'lsass.exe' }),
+          ],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID]);
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('lsass.exe');
+    });
+
+    it('mints nothing for a stale process and does not count it toward isolate', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          huntWindow: { from: '2026-09-01T00:00:00Z', to: '2026-09-30T00:00:00Z' },
+          processSelectors: [selector({ ...ps1, observedAt: '2026-08-15T00:00:00Z' })],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      expect(result.proposals.filter((p) => p.actionWorkflowId)).toEqual([]);
+      expect(result.proposals[0].comment).toContain('Held back');
+    });
+
+    it('mints isolate on a confirmed lateral-movement sub-technique with one process', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          processSelectors: [ps1],
+          evidence: {
+            tier1HitCount: 1,
+            tier2Confirmed: [{ techniqueId: 'T1021.002', rowCount: 1 }],
+          },
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      expect(kinds(result.proposals.filter((p) => p.actionWorkflowId))).toContain(
+        ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID
+      );
+    });
+
+    it('still mints suspend when memory dump is not installed', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ hosts: [withMemdump], processSelectors: [ps1] }),
+        catalog: { ok: true, actions: [defendIsolate, defendKill, defendSuspend] },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID]);
+    });
+
+    it('does not emit isolate hold-back lines when isolate is not installed', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ processSelectors: [ps1] }),
+        catalog: { ok: true, actions: [defendSuspend] },
+      });
+      expect(result.proposals).toHaveLength(1);
+      expect(result.proposals[0].actionWorkflowId).toBe(
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID
+      );
+    });
+
+    it('never mints the forensics handoff: investigate without endpoint_ids is not fillable', () => {
+      expect(canFillRespondAction({ entry: forensicsHandoff })).toBe(false);
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({ processSelectors: [ps1] }),
+        catalog: { ok: true, actions: [forensicsHandoff] },
+      });
+      expect(result.proposals.filter((p) => p.actionWorkflowId)).toEqual([]);
+    });
+
+    it('fills memory dump input with the process scope', () => {
+      expect(
+        buildActionInput({ entry: defendMemoryDump, agentId: 'agent-a', processSelector: rundll })
+      ).toEqual({
+        endpoint_ids: ['agent-a'],
+        parameters: { type: 'process', entity_id: 'ent-2' },
+      });
+      expect(
+        buildActionInput({ entry: defendSuspend, agentId: 'agent-a', processSelector: rundll })
+      ).toEqual({ endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-2' } });
+    });
+
+    it('keeps the kill/suspend/isolate subject keys byte-identical to the pre-table material', () => {
+      const processKey = 'pid:4212';
+      expect(
+        buildProposalSubjectKey({
+          conversationId,
+          endpointId: 'agent-a',
+          actionWorkflowId: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+          processKey,
+        })
+      ).toBe('f13e9429-d7c7-56a4-b6d7-220ca3f59315');
+      expect(
+        buildProposalSubjectKey({
+          conversationId,
+          endpointId: 'agent-a',
+          actionWorkflowId: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+          processKey,
+        })
+      ).toBe('75bb185c-5273-55cb-bcb3-5ebb05673d05');
+      expect(
+        buildProposalSubjectKey({
+          conversationId,
+          endpointId: 'agent-a',
+          actionWorkflowId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+        })
+      ).toBe('9336b59d-3846-5306-9cb9-1b588da3694b');
+    });
+
+    it('mints the same subject keys regardless of catalog order', () => {
+      const state = baseHitState({ hosts: [withMemdump], processSelectors: [ps1, rundll] });
+      const a = decidePackageReport({
+        conversationId,
+        state,
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const b = decidePackageReport({
+        conversationId,
+        state,
+        catalog: { ok: true, actions: [...defendCatalog].reverse() },
+      });
+      expect(new Set(a.proposals.map((p) => p.subjectKey))).toEqual(
+        new Set(b.proposals.map((p) => p.subjectKey))
+      );
     });
   });
 });

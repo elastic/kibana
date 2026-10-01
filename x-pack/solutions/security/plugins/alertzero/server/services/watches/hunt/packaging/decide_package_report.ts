@@ -18,6 +18,12 @@ import {
   buildProposalTitle,
   buildRecommendationComment,
 } from './proposal_copy';
+import {
+  DEFEND_ACTION_KINDS,
+  selectHostActions,
+  selectProcessActions,
+  type ProcessActionKind,
+} from './select_process_actions';
 import type {
   CurrentRunHost,
   CurrentRunState,
@@ -25,6 +31,9 @@ import type {
   Subject,
   SubjectKind,
 } from './types';
+
+/** Catalog categories packaging may mint from. `configure` entries are never fillable. */
+const PACKAGEABLE_CATEGORIES = ['respond', 'investigate'];
 
 /**
  * Fixed namespace for Same-Investigation Proposal subject keys. Frozen: changing
@@ -189,6 +198,11 @@ export const canFillRespondAction = ({
   if (!schemaRequiredKeys(schema).every((key) => supplied.includes(key))) {
     return false;
   }
+  if (subject.kind === 'host' || subject.kind === 'process') {
+    if (!schemaHasProperty(schema, 'endpoint_ids')) {
+      return false;
+    }
+  }
   if (subject.kind === 'process') {
     return subject.processSelector.entityId !== undefined;
   }
@@ -227,7 +241,10 @@ export const buildActionInput = ({
       const actionInput: Record<string, unknown> = { endpoint_ids: [agentId] };
       if (subject.kind === 'process' && needsProcessParameters(schema)) {
         // `canFillRespondAction` above already guarantees `processSelector.entityId` is set.
-        actionInput.parameters = { entity_id: subject.processSelector.entityId };
+        // Memory dump's request schema also takes `type`; only process dumps are proposed.
+        const scope =
+          DEFEND_ACTION_KINDS[entry.workflowId] === 'memory_dump' ? { type: 'process' } : {};
+        actionInput.parameters = { ...scope, entity_id: subject.processSelector.entityId };
       }
       return actionInput;
     }
@@ -314,6 +331,7 @@ const buildRecommendationReasonLines = ({
   hasUnnamedIdentityEntity,
   evidenceOutsideActionable,
   processUncovered,
+  hasHeldBack,
 }: {
   hasExecutable: boolean;
   unenrolledHosts: CurrentRunHost[];
@@ -326,6 +344,7 @@ const buildRecommendationReasonLines = ({
   hasUnnamedIdentityEntity: boolean;
   evidenceOutsideActionable: boolean;
   processUncovered: boolean;
+  hasHeldBack: boolean;
 }): string[] => {
   const lines: string[] = [];
   if (!hasExecutable) {
@@ -383,6 +402,9 @@ const buildRecommendationReasonLines = ({
   if (processUncovered) {
     lines.push('A process was implicated but could not be resolved to a live process to act on.');
   }
+  if (hasHeldBack) {
+    lines.push('Not every Defend action was proposed for this finding; see Held back.');
+  }
   return lines;
 };
 
@@ -390,10 +412,12 @@ const buildRecommendationProposal = ({
   conversationId,
   state,
   reasonLines,
+  heldBackLines,
 }: {
   conversationId: string;
   state: CurrentRunState;
   reasonLines: string[];
+  heldBackLines: string[];
 }): PackageReportMintPayload => ({
   subjectKey: buildRecommendationSubjectKey(conversationId),
   conversationId,
@@ -404,6 +428,7 @@ const buildRecommendationProposal = ({
     reasonLines,
     manualRemediation: state.manualRemediation,
     state,
+    heldBackLines,
   }),
   // TODO: give this its own queue category once the UI has a place to show it separately
   // from executable proposals; a stored keyword move, not a schema change.
@@ -412,7 +437,9 @@ const buildRecommendationProposal = ({
 });
 
 /**
- * Respond-action fan-out plus the analyst-recommendation mint rule. Pure: no I/O.
+ * Per-host Defend action selection (one primary response per process, conditional isolate),
+ * generic fan-out for any other fillable action, plus the analyst-recommendation mint rule.
+ * Pure: no I/O.
  */
 export const decidePackageReport = ({
   conversationId,
@@ -430,48 +457,132 @@ export const decidePackageReport = ({
   }
 
   const unenrolled = state.hosts.filter((h) => !h.enrolled || !h.agentId);
-  const respondActions = catalog.ok ? catalog.actions.filter((a) => a.category === 'respond') : [];
+  const actions = catalog.ok
+    ? catalog.actions.filter((a) => a.category && PACKAGEABLE_CATEGORIES.includes(a.category))
+    : [];
+  // The selection table governs the Defend actions it names; any other fillable entry keeps
+  // the generic fan-out so a future action is not silently dropped.
+  const known = new Map<ProcessActionKind | 'isolate', ActionCatalogEntry>();
+  const other: ActionCatalogEntry[] = [];
+  for (const entry of actions) {
+    const kind = DEFEND_ACTION_KINDS[entry.workflowId];
+    if (kind) {
+      known.set(kind, entry);
+    } else {
+      other.push(entry);
+    }
+  }
 
   const proposals: PackageReportMintPayload[] = [];
   const seenSubjectKeys = new Set<string>();
+  const heldBackLines: string[] = [];
 
-  for (const subject of collectSubjects(state).filter((s) => s.reachable)) {
+  const mint = ({
+    entry,
+    subject,
+    ruleLine,
+  }: {
+    entry: ActionCatalogEntry;
+    subject: Subject;
+    ruleLine?: string;
+  }): void => {
     const id = subjectId(subject);
-    if (id === undefined) {
-      continue;
+    const actionInput = buildActionInput({ entry, subject, state });
+    if (id === undefined || !actionInput) {
+      return;
     }
-    for (const entry of respondActions) {
-      const actionInput = buildActionInput({ entry, subject, state });
-      if (!actionInput) {
-        continue;
+    const subjectKey = buildProposalSubjectKey({
+      conversationId,
+      subjectId: id,
+      actionWorkflowId: entry.workflowId,
+      ...(subject.kind === 'process' && { processKey: subject.processSelector.processKey }),
+    });
+    if (seenSubjectKeys.has(subjectKey)) {
+      return;
+    }
+    seenSubjectKeys.add(subjectKey);
+    proposals.push({
+      subjectKey,
+      conversationId,
+      // Per-subject title so two process-scoped proposals on the same host (e.g.
+      // suspend for two different pids) read as distinct, not duplicates.
+      title: buildProposalTitle({ entry, subject, actionInput }),
+      comment: buildProposalComment({ entry, subject, state, actionInput, ruleLine }),
+      category: entry.category ?? 'respond',
+      impact: entry.impact,
+      actionWorkflowId: entry.workflowId,
+      actionInput,
+      // `hostName` stays populated for host and process mints; identity mints carry only `subject`.
+      ...((subject.kind === 'host' || subject.kind === 'process') && {
+        hostName: subject.host.name,
+      }),
+      subject: { kind: subject.kind, value: subject.value },
+    });
+  };
+
+  // A held-back line only makes sense for an action the catalog could have offered.
+  const processKinds: ProcessActionKind[] = ['kill', 'suspend', 'memory_dump'];
+  const hasProcessKinds = processKinds.some((kind) => known.has(kind));
+  const isolate = known.get('isolate');
+
+  if (catalog.ok && actions.length > 0) {
+    const reachable = collectSubjects(state).filter((s) => s.reachable);
+
+    // Defend actions the selection table governs apply to enrolled hosts and their processes.
+    for (const host of state.hosts.filter((h) => h.enrolled && h.agentId)) {
+      const hostProcessSelectors = state.processSelectors.filter(
+        (selector) => selector.hostName === host.name
+      );
+
+      let activeProcessCount = 0;
+      for (const processSelector of hostProcessSelectors) {
+        const decision = selectProcessActions({ selector: processSelector, host, state });
+        if (decision.rule !== 'stale') {
+          activeProcessCount += 1;
+        }
+        if (!hasProcessKinds) {
+          continue;
+        }
+        if (decision.heldBack) {
+          heldBackLines.push(decision.heldBack);
+        }
+        const subject: Subject = {
+          kind: 'process',
+          value: processSelector.processName,
+          reachable: true,
+          host,
+          processSelector,
+        };
+        for (const kind of decision.actions) {
+          // A kind the catalog does not have (e.g. memory dump not installed) is skipped; the
+          // rest of the decision still mints.
+          const entry = known.get(kind);
+          if (entry) {
+            mint({ entry, subject, ruleLine: decision.why });
+          }
+        }
       }
-      const subjectKey = buildProposalSubjectKey({
-        conversationId,
-        subjectId: id,
-        actionWorkflowId: entry.workflowId,
-        ...(subject.kind === 'process' && { processKey: subject.processSelector.processKey }),
-      });
-      if (seenSubjectKeys.has(subjectKey)) {
-        continue;
+
+      if (isolate) {
+        const hostDecision = selectHostActions({ host, state, activeProcessCount });
+        if (hostDecision.isolate) {
+          mint({
+            entry: isolate,
+            subject: { kind: 'host', value: host.name, reachable: true, host },
+            ruleLine: hostDecision.why,
+          });
+        } else if (hostDecision.heldBack) {
+          heldBackLines.push(hostDecision.heldBack);
+        }
       }
-      seenSubjectKeys.add(subjectKey);
-      proposals.push({
-        subjectKey,
-        conversationId,
-        // Per-subject title so two process-scoped proposals on the same host (e.g.
-        // kill-process for two different pids) read as distinct, not duplicates.
-        title: buildProposalTitle({ entry, subject, actionInput }),
-        comment: buildProposalComment({ entry, subject, state, actionInput }),
-        category: entry.category ?? 'respond',
-        impact: entry.impact,
-        actionWorkflowId: entry.workflowId,
-        actionInput,
-        // `hostName` stays populated for host and process mints; identity mints carry only `subject`.
-        ...((subject.kind === 'host' || subject.kind === 'process') && {
-          hostName: subject.host.name,
-        }),
-        subject: { kind: subject.kind, value: subject.value },
-      });
+    }
+
+    // Any other fillable action (identity actions included) keeps the generic fan-out over
+    // every reachable subject its declared kinds accept.
+    for (const subject of reachable) {
+      for (const entry of other) {
+        mint({ entry, subject });
+      }
     }
   }
 
@@ -496,7 +607,11 @@ export const decidePackageReport = ({
     !hasDurableProcessIdentity &&
     !proposals.some((p) => p.actionInput?.parameters !== undefined);
   const needsRecommendation =
-    !hasExecutable || unenrolled.length > 0 || notHostScoped || processUncovered;
+    !hasExecutable ||
+    unenrolled.length > 0 ||
+    notHostScoped ||
+    processUncovered ||
+    heldBackLines.length > 0;
 
   if (needsRecommendation) {
     const reasonLines = buildRecommendationReasonLines({
@@ -515,8 +630,11 @@ export const decidePackageReport = ({
       hasUnnamedIdentityEntity: state.hasUnnamedIdentityEntity,
       evidenceOutsideActionable,
       processUncovered,
+      hasHeldBack: heldBackLines.length > 0,
     });
-    proposals.push(buildRecommendationProposal({ conversationId, state, reasonLines }));
+    proposals.push(
+      buildRecommendationProposal({ conversationId, state, reasonLines, heldBackLines })
+    );
   }
 
   return { dismiss: false, proposals, closureSummary };

@@ -54,7 +54,11 @@ describe('makeResolveHostEnrollment', () => {
     const listAgents = jest
       .fn()
       .mockResolvedValue({ agents: [{ id: 'agent-1' }, { id: 'agent-2' }], total: 2 });
-    const resolve = makeResolveHostEnrollment({ listAgents } as unknown as AgentClient, logger);
+    const resolve = makeResolveHostEnrollment(
+      { listAgents } as unknown as AgentClient,
+      undefined,
+      logger
+    );
 
     await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
     expect(logger.warn).toHaveBeenCalledWith(

@@ -56,6 +56,12 @@ const isolateHost: ActionCatalogEntry = {
   category: 'respond',
 };
 
+const memoryDump: ActionCatalogEntry = {
+  workflowId: 'system-alertzero-action-memory-dump',
+  name: 'Dump memory of process',
+  category: 'investigate',
+};
+
 const configureSomething: ActionCatalogEntry = {
   workflowId: 'system-security-action-configure-something',
   name: 'Configure something',
@@ -392,6 +398,36 @@ describe('buildProposalComment', () => {
     });
     expect(comment).not.toContain('last seen');
   });
+
+  it('renders the selection rule as the first Why bullet when given', () => {
+    const comment = buildProposalComment({
+      entry: suspendProcess,
+      host,
+      state: baseState(),
+      processSelector: withPid,
+      ruleLine: 'Rule: suspend_only (no destructive technique, no memdump_process capability)',
+    });
+    const lines = comment.split('\n');
+    const whyIndex = lines.indexOf('**Why**');
+    expect(lines[whyIndex + 1]).toBe(
+      '- Rule: suspend_only (no destructive technique, no memdump_process capability).'
+    );
+  });
+
+  it('gives a memory dump proposal its own action line and rationale', () => {
+    const comment = buildProposalComment({
+      entry: memoryDump,
+      host,
+      state: baseState(),
+      processSelector: withPid,
+    });
+    expect(comment).toContain(
+      '**Action:** Dump memory of `powershell.exe` (PID 4212) on **WIN-ANALYST01** with Elastic Defend.'
+    );
+    expect(comment).toContain(
+      'Dumping its memory captures volatile evidence for offline analysis without changing the process.'
+    );
+  });
 });
 
 describe('buildRecommendationComment', () => {
@@ -428,5 +464,23 @@ describe('buildRecommendationComment', () => {
       state,
     });
     expect(comment).not.toContain('Recommended steps');
+    expect(comment).not.toContain('Held back');
+  });
+
+  it('renders held-back lines between Why and Recommended steps', () => {
+    const comment = buildRecommendationComment({
+      reasonLines: ['Not every Defend action was proposed for this finding; see Held back.'],
+      heldBackLines: [
+        'Isolate host WIN-ANALYST01 was not proposed: 1 suspicious process, no lateral movement, C2, or exfiltration technique confirmed, severity high',
+      ],
+      manualRemediation: ['Rotate credentials for role X.'],
+      state: baseState(),
+    });
+    expect(comment).toContain('**Held back**');
+    expect(comment).toContain(
+      '- Isolate host WIN-ANALYST01 was not proposed: 1 suspicious process'
+    );
+    expect(comment.indexOf('**Why**')).toBeLessThan(comment.indexOf('**Held back**'));
+    expect(comment.indexOf('**Held back**')).toBeLessThan(comment.indexOf('**Recommended steps**'));
   });
 });

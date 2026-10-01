@@ -40,7 +40,7 @@ const describeProcessForTitle = (selector: ProcessSelector): string =>
     : selector.processName;
 
 /** Markdown process label for the comment body, e.g. `` `powershell.exe` (PID 4212) ``. */
-const describeProcess = (selector: ProcessSelector): string => {
+export const describeProcess = (selector: ProcessSelector): string => {
   if (selector.pid !== undefined) {
     return `\`${selector.processName}\` (PID ${selector.pid})`;
   }
@@ -152,6 +152,9 @@ const buildActionRationale = ({
     }
     if (name.startsWith('suspend')) {
       return 'Suspending it pauses execution without terminating the process, preserving state for investigation';
+    }
+    if (name.startsWith('dump memory')) {
+      return 'Dumping its memory captures volatile evidence for offline analysis without changing the process';
     }
     return 'This action responds to the process directly';
   }
@@ -274,14 +277,21 @@ export const buildProposalComment = ({
   subject,
   state,
   actionInput,
+  ruleLine,
 }: {
   entry: ActionCatalogEntry;
   subject: Subject;
   state: CurrentRunState;
   actionInput: Record<string, unknown>;
+  /** The selection rule that chose this action; rendered as the first Why bullet when present. */
+  ruleLine?: string;
 }): string => {
   const actionLine = buildActionLine({ entry, subject, actionInput });
-  const whyLines = [...buildEvidenceLines(state, subject), buildActionRationale({ entry, subject })]
+  const whyLines = [
+    ruleLine,
+    ...buildEvidenceLines(state, subject),
+    buildActionRationale({ entry, subject }),
+  ]
     .filter((line): line is string => line !== undefined)
     .map(addPeriod);
 
@@ -297,10 +307,13 @@ export const buildRecommendationComment = ({
   reasonLines,
   manualRemediation,
   state,
+  heldBackLines = [],
 }: {
   reasonLines: string[];
   manualRemediation: string[];
   state: CurrentRunState;
+  /** Actions the selection table declined to propose, each with its reason. */
+  heldBackLines?: string[];
 }): string => {
   const sections = [
     '**Action:** Analyst follow-up. No automated action is proposed.',
@@ -308,6 +321,9 @@ export const buildRecommendationComment = ({
     '**Why**',
     ...reasonLines.map((line) => `- ${line}`),
   ];
+  if (heldBackLines.length > 0) {
+    sections.push('', '**Held back**', ...heldBackLines.map((line) => `- ${addPeriod(line)}`));
+  }
   if (manualRemediation.length > 0) {
     sections.push('', '**Recommended steps**', ...manualRemediation.map((line) => `- ${line}`));
   }
