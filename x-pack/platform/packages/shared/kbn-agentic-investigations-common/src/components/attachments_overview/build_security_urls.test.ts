@@ -155,19 +155,24 @@ describe('buildEntityAnalyticsPageUrl', () => {
 });
 
 describe('buildRulesPageUrl', () => {
-  it('links to /rules/management without a filter for multiple rules', () => {
-    const url = buildRulesPageUrl(getSecurityAppUrl, 3, 'Rule A');
+  it('links to /rules/management for multiple rules', () => {
+    const url = buildRulesPageUrl(getSecurityAppUrl, 3, 'rule-origin-1');
     expect(url).toBe('/app/security/rules/management');
   });
 
-  it('links to /rules/management without a filter when single rule but no label', () => {
+  it('links to /rules/management when single rule but no origin', () => {
     const url = buildRulesPageUrl(getSecurityAppUrl, 1, undefined);
     expect(url).toBe('/app/security/rules/management');
   });
 
-  it('adds rulesTable searchTerm for a single rule with a label', () => {
-    const url = buildRulesPageUrl(getSecurityAppUrl, 1, 'Suspicious PowerShell');
-    const params = parseParams(url) as Record<string, { searchTerm: string }>;
-    expect(params.rulesTable.searchTerm).toBe('Suspicious PowerShell');
+  it('links to the rule detail overview page for a single rule with an origin', () => {
+    const origin = '956914a4-ddba-45db-aa23-01cf9c22f772';
+    const url = buildRulesPageUrl(getSecurityAppUrl, 1, origin);
+    expect(url).toBe(`/app/security/rules/id/${origin}/overview`);
+  });
+
+  it('URL-encodes the origin id', () => {
+    const url = buildRulesPageUrl(getSecurityAppUrl, 1, 'id with spaces');
+    expect(url).toBe('/app/security/rules/id/id%20with%20spaces/overview');
   });
 });
