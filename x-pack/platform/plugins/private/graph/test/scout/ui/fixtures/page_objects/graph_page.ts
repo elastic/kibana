@@ -445,15 +445,19 @@ export class GraphPage {
   }
 
   /**
-   * Reduce the selection list to exactly `from` and `to`.
+   * Reduce the workspace to exactly the requested nodes.
    *
    * Deselecting a node removes its `<SelectedNodeItem>`, so snapshot labels
    * first; click each non-keep node via its own `graph-selected-<label>`
    * selector to avoid stale list-index handles.
    */
-  async isolateEdge(from: string, to: string) {
-    await this.selectNodes([from, to]);
+  async isolateNodes(labels: string[]) {
+    await this.selectNodes(labels);
     await this.invertSelectionButton.click();
     await this.removeSelectionButton.click();
+  }
+
+  async isolateEdge(from: string, to: string) {
+    await this.isolateNodes([from, to]);
   }
 }

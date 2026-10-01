@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { globalSetupHook } from '@kbn/scout';
+import { SECREPO_ES_ARCHIVE } from '../fixtures/constants';
 
-export default createPlaywrightConfig({
-  testDir: './parallel_tests',
-  workers: 2,
-  runGlobalSetup: true,
+globalSetupHook('load Graph test data', async ({ esArchiver }) => {
+  await esArchiver.loadIfNeeded(SECREPO_ES_ARCHIVE);
 });
