@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { monaco } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 import type { ServiceAccountPickerStatus } from '@kbn/security-plugin/public';
 import { ServiceAccountDetails } from './service_account_details';
@@ -42,7 +43,7 @@ export const ServiceAccountEditorWidgets = ({
   editor: monaco.editor.IStandaloneCodeEditor | null;
 }) => {
   const accounts = useServiceAccountEditor();
-  const { cloud, serverless, security, securityUi } = useKibana().services;
+  const { cloud, notifications, serverless, security, securityUi } = useKibana().services;
   const queryClient = useQueryClient();
   const [creation, setCreation] = useState<{
     model: monaco.editor.ITextModel;
@@ -235,6 +236,13 @@ export const ServiceAccountEditorWidgets = ({
       if (!result) {
         close();
         return;
+      }
+      if (result.loadMoreFailed) {
+        notifications.toasts.addDanger(
+          i18n.translate('workflows.editor.loadMoreServiceAccountsErrorMessage', {
+            defaultMessage: 'Unable to load more service accounts.',
+          })
+        );
       }
       hoverGeneration++;
       clearTimeout(hoverTimer);
@@ -464,7 +472,7 @@ export const ServiceAccountEditorWidgets = ({
       restoreHover();
       setPopup(null);
     };
-  }, [editor, node, accounts]);
+  }, [editor, node, accounts, notifications]);
 
   useEffect(() => {
     node?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });

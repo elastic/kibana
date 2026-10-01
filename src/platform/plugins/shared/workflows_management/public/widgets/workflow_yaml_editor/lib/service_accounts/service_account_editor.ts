@@ -108,14 +108,23 @@ export const createServiceAccountEditor = (directory: ServiceAccountDirectory) =
     ): Promise<{
       suggestions: ServiceAccountSuggestion[];
       error?: ServiceAccountDirectoryError['error'];
+      loadMoreFailed?: boolean;
     } | null> => {
       const value = getRunAsValue(model, position);
       if (!value || !directory.isEnabled()) return null;
       const suggestions: ServiceAccountSuggestion[] = [];
       const seen = new Set<string>();
-      for (const cursor of cursors) {
+      let loadMoreFailed = false;
+      for (const [index, cursor] of cursors.entries()) {
         const page = await directory.list(cursor, refresh);
         if (token.isCancellationRequested) return { suggestions: [] };
+        if (page && 'error' in page && page.error === 'unavailable' && index > 0) {
+          // Keep the pages already shown; Load more retries the page that failed.
+          cursors.splice(index);
+          nextPage = cursor;
+          loadMoreFailed = true;
+          break;
+        }
         if (!page || 'error' in page) {
           cursors.splice(1);
           nextPage = undefined;
@@ -149,7 +158,7 @@ export const createServiceAccountEditor = (directory: ServiceAccountDirectory) =
           sortText: 'z_load_more',
         });
       }
-      return { suggestions };
+      return loadMoreFailed ? { suggestions, loadMoreFailed } : { suggestions };
     },
   };
 
