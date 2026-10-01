@@ -316,7 +316,12 @@ export function useMiDeploy({
         return {
           hadFailures,
           allFailedIds: hadFailures
-            ? [...Object.keys(policyIdsByInstance), ...additionalFailedIds]
+            ? [
+                // Active instances only: deselected instances are cleanup targets and must not
+                // re-enter failedInstances once cleanup removes them from policyIdsByInstance.
+                ...Object.keys(policyIdsByInstance).filter((id) => activeInstanceIds.has(id)),
+                ...additionalFailedIds,
+              ]
             : [],
         };
       }

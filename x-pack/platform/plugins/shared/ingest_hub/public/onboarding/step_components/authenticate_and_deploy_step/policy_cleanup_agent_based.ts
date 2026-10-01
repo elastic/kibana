@@ -187,9 +187,9 @@ export async function updateAgentBasedPolicy(
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
-    // Prefer the user's current policy selection over the GET response: on a dirty redeploy
-    // after a policy-selection change, `existingPolicyIds` from the GET would keep the old
-    // agents attached, ignoring the new selection.
+    // A non-empty selectedAgentPolicyIds is an explicit override (policy-selection drift);
+    // otherwise keep the policy's current policy_ids so agent policies attached outside the
+    // wizard are not detached.
     policy_ids:
       selectedAgentPolicyIds.length > 0 ? selectedAgentPolicyIds : existingPolicyIds ?? [],
   } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1]);

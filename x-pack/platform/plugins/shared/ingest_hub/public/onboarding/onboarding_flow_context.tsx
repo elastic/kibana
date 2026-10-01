@@ -76,6 +76,12 @@ export interface DetectAndReviewStepState {
    * reassigned by an operator.
    */
   isAuthDirty?: boolean;
+  /**
+   * True when the selected agent policies differ from the last-deployed SO state. Subset of
+   * isDirty; gates overwriting package-policy `policy_ids` so a var-only redeploy does not
+   * detach agent policies attached outside the wizard.
+   */
+  isPolicySelectionDirty?: boolean;
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage.
@@ -123,6 +129,7 @@ interface PersistedDetectAndReviewStep {
   pendingCleanupPolicyIds?: Record<string, string>;
   isDirty?: boolean;
   isAuthDirty?: boolean;
+  isPolicySelectionDirty?: boolean;
 }
 
 const DEFAULT_SELECTED_IDS: string[] = [];
@@ -367,6 +374,10 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
               : prev?.pendingCleanupPolicyIds,
           isDirty: rest.isDirty !== undefined ? rest.isDirty : prev?.isDirty,
           isAuthDirty: rest.isAuthDirty !== undefined ? rest.isAuthDirty : prev?.isAuthDirty,
+          isPolicySelectionDirty:
+            rest.isPolicySelectionDirty !== undefined
+              ? rest.isPolicySelectionDirty
+              : prev?.isPolicySelectionDirty,
         });
       }
     },
@@ -397,6 +408,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         pendingCleanupPolicyIds: nextPendingCleanup,
         isDirty: prev?.isDirty,
         isAuthDirty: prev?.isAuthDirty,
+        isPolicySelectionDirty: prev?.isPolicySelectionDirty,
       });
     },
     [setDetectAndReviewStep]
@@ -435,6 +447,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         pendingCleanupPolicyIds: nextPendingCleanup,
         isDirty: prev?.isDirty,
         isAuthDirty: prev?.isAuthDirty,
+        isPolicySelectionDirty: prev?.isPolicySelectionDirty,
       });
     },
     [removeDeployInstance, setDetectAndReviewStep]

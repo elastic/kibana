@@ -88,7 +88,11 @@ export function useOnboardingDriftDetection({
           // SO does not exist or was cleared — nothing to compare against; treat as clean.
           // Also clear persisted drift flags so stale session state doesn't re-trigger callout.
           setDriftSettled(true);
-          updateDetectAndReviewStep({ isDirty: false, isAuthDirty: false });
+          updateDetectAndReviewStep({
+            isDirty: false,
+            isAuthDirty: false,
+            isPolicySelectionDirty: false,
+          });
           return;
         }
         // policyIdsByInstance is captured from the closure: it is hydrated at mount from the SO
@@ -130,6 +134,7 @@ export function useOnboardingDriftDetection({
         updateDetectAndReviewStep({
           isDirty: dirty || replaceFormDirtyRef.current,
           isAuthDirty: authDirty,
+          isPolicySelectionDirty: agentPoliciesDirty,
         });
         // Settle only after a successful compare. A failed or empty fetch leaves driftSettled=false
         // so Next stays blocked rather than enabling with a stale (default false) isDirty value.

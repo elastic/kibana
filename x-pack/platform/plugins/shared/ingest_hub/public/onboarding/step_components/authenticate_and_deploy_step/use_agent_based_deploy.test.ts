@@ -744,7 +744,8 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
     expect(mockCleanupAgentBasedPolicies).toHaveBeenCalledTimes(1);
     const cleanupCall = mockCleanupAgentBasedPolicies.mock.calls[0][0];
     expect(cleanupCall.pendingCleanupPolicyIds).toEqual({ instA: 'pkg-policy-A' });
-    expect(cleanupCall.selectedAgentPolicyIds).toEqual(['agent-policy-1']);
+    // Cleanup keeps each policy's current policy_ids (no override).
+    expect(cleanupCall.selectedAgentPolicyIds).toEqual([]);
     // Verify agentCredentials are passed through to cleanup opts.
     expect(cleanupCall).toHaveProperty('agentCredentials');
 

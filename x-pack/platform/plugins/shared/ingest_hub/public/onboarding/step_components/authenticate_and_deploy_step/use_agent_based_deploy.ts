@@ -203,12 +203,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
         // Clean up package policies for removed services before creating new ones.
         if (hasPendingCleanup) {
-          const targetPolicyIds =
-            agentHostsMode === 'existing'
-              ? selectedAgentPolicyIds ?? []
-              : agentPolicyId
-              ? [agentPolicyId]
-              : selectedAgentPolicyIds ?? [];
           const cleanupOps = await cleanupAgentBasedPolicies({
             pendingCleanupPolicyIds: effectivePendingCleanup,
             currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance ?? {},
@@ -218,7 +212,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             namespace,
             authenticateAndDeployStep,
             servicesMap: servicesMap ?? new Map(),
-            selectedAgentPolicyIds: targetPolicyIds,
+            // Cleanup never changes agent-policy selection; keep the policy's current policy_ids.
+            selectedAgentPolicyIds: [],
             agentCredentials: agentCredentialsRef.current,
           });
           // Only prune successfully cleaned instances — failures stay in pendingCleanupPolicyIds.
@@ -269,7 +264,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                   namespace,
                   authenticateAndDeployStep,
                   servicesMap: servicesMap ?? new Map(),
-                  selectedAgentPolicyIds: targetPolicyIds,
+                  // Only override policy_ids when the selection drifted; otherwise a var-only redeploy
+                  // would detach agent policies attached outside the wizard.
+                  selectedAgentPolicyIds: detectAndReviewStep.isPolicySelectionDirty
+                    ? targetPolicyIds
+                    : [],
                   agentCredentials: agentCredentialsRef.current,
                 })
               )
@@ -339,7 +338,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             setIsDeploying(false);
             // Clear stale failures so agentHasFailed doesn't linger after a successful dirty redeploy.
             setFailedInstances([]);
-            updateDetectAndReviewStep({ isDeploying: false, isDirty: false, failedInstances: [] });
+            updateDetectAndReviewStep({
+              isDeploying: false,
+              isDirty: false,
+              isPolicySelectionDirty: false,
+              failedInstances: [],
+            });
             return { failed: false };
           }
           // If cleanup partially failed OR there are new targets, fall through.
@@ -357,7 +361,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           // stale, so isDirty must remain true to prevent drift check from treating it as clean.
           updateDetectAndReviewStep({
             isDeploying: false,
-            ...(dirtyUpdateApplied && cleanupComplete ? { isDirty: false } : {}),
+            ...(dirtyUpdateApplied && cleanupComplete
+              ? { isDirty: false, isPolicySelectionDirty: false }
+              : {}),
           });
           if (onboardingDeploymentId && cleanupComplete) {
             // Build the post-cleanup policy map: exclude instance IDs removed by cleanup so the
@@ -566,7 +572,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           // Clear drift flag only when the SO write confirmed the new state — if the SO PUT
           // failed, the updated settings were not persisted, so isDirty must stay true to force
           // a retry rather than silently losing the change.
-          ...(dirtyUpdateApplied && mergedFailed.length === 0 && soOk ? { isDirty: false } : {}),
+          ...(dirtyUpdateApplied && mergedFailed.length === 0 && soOk
+            ? { isDirty: false, isPolicySelectionDirty: false }
+            : {}),
           // When switching to 'new' agent-policy mode, deployNewAgentPolicy created fresh package
           // policies. The old package policies (on previous agent policies) are now orphaned.
           // Stage them for cleanup on the next deploy ONLY after successful creation — staging
