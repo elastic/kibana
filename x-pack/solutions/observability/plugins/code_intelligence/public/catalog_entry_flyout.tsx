@@ -87,7 +87,8 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
 export const CatalogEntryFlyout = ({ item, onClose }: Props) => {
   const titleId = useGeneratedHtmlId({ prefix: 'codeIntelligenceCatalogEntryTitle' });
   const evidence = item.evidence ?? [];
-  const diagnostics = item.validation?.diagnostics ?? [];
+  const diagnostics =
+    item.validation?.status === 'skipped' ? [] : item.validation?.diagnostics ?? [];
 
   const details: Array<{ title: string; description: React.ReactNode }> = [
     {
