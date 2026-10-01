@@ -23,6 +23,13 @@ export const ESCALATION_BY_ID_PATH = (id: string) => `internal/investigations/es
 export const ESCALATION_LINK_PATH = (id: string) =>
   `internal/investigations/escalations/${id}/_link`;
 
+export const ESCALATION_ASSIGNEES_PATH = (id: string) =>
+  `internal/investigations/escalations/${id}/assignees`;
+
+export const INVESTIGATIONS_INTERNAL_PATH = 'internal/investigations/investigations';
+export const INVESTIGATION_ASSIGNEES_PATH = (id: string) =>
+  `internal/investigations/investigations/${id}/assignees`;
+
 /** Agent Builder public conversations API. */
 export const AB_CONVERSATIONS_PATH = 'api/agent_builder/conversations';
 export const AB_CONVERSATION_BY_ID_PATH = (id: string) => `api/agent_builder/conversations/${id}`;

@@ -22,10 +22,7 @@ import type {
   BulkCreateAttachmentsResult,
   ListAttachmentsResult,
 } from '@kbn/agent-builder-server';
-import type {
-  AttachmentStateManager,
-  AttachmentWriteAccess,
-} from '@kbn/agent-builder-server/attachments';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import {
   attachmentChangesToEvents,
   createAttachmentStateManager,
@@ -81,22 +78,17 @@ export const createAttachmentPublicClient = ({
    * Persists the state manager's attachments and, when something was created, versioned or
    * deleted, the matching attachment events in the same write. Metadata-only changes have no
    * event but still go through `appendEvents` so `reconcileAttachments` runs (race-safe).
-   *
-   * `access` controls the conversation permission gate forwarded to `appendEvents`. Defaults
-   * to `'owner'` so existing callers keep their behaviour unless they explicitly pass `'converse'`.
    */
   const persist = async ({
     conversation,
     conversationClient,
     stateManager,
     renderInline = false,
-    access = 'owner',
   }: {
     conversation: Conversation;
     conversationClient: ConversationClient;
     stateManager: AttachmentStateManager;
     renderInline?: boolean;
-    access?: AttachmentWriteAccess;
   }) => {
     const changes = stateManager.drainChanges();
     // The caller's identity: the authenticated Kibana user behind the HTTP request, or the user
@@ -119,7 +111,7 @@ export const createAttachmentPublicClient = ({
         events,
         attachments: { snapshot: conversation.attachments ?? [], produced: stateManager.getAll() },
       },
-      { access }
+      { access: 'converse' }
     );
   };
 
@@ -151,7 +143,6 @@ export const createAttachmentPublicClient = ({
       description,
       hidden,
       render_inline: renderInline,
-      access,
     }) {
       const { conversation, conversationClient, stateManager } = await loadState(conversationId);
 
@@ -178,19 +169,12 @@ export const createAttachmentPublicClient = ({
         throw createAttachmentInvalidError((e as Error).message);
       }
 
-      await persist({ conversation, conversationClient, stateManager, renderInline, access });
+      await persist({ conversation, conversationClient, stateManager, renderInline });
 
       return attachment;
     },
 
-    async update({
-      conversationId,
-      attachmentId,
-      data,
-      description,
-      render_inline: renderInline,
-      access,
-    }) {
+    async update({ conversationId, attachmentId, data, description, render_inline: renderInline }) {
       const { conversation, conversationClient, stateManager } = await loadState(conversationId);
       const existing = stateManager.getAttachmentRecord(attachmentId);
 
@@ -219,12 +203,12 @@ export const createAttachmentPublicClient = ({
         throw createAttachmentInvalidError(`Failed to update attachment '${attachmentId}'`);
       }
 
-      await persist({ conversation, conversationClient, stateManager, renderInline, access });
+      await persist({ conversation, conversationClient, stateManager, renderInline });
 
       return updated;
     },
 
-    async delete({ conversationId, attachmentId, permanent, access }) {
+    async delete({ conversationId, attachmentId, permanent }) {
       const { conversation, conversationClient, stateManager } = await loadState(conversationId);
       const existing = stateManager.getAttachmentRecord(attachmentId);
 
@@ -265,13 +249,12 @@ export const createAttachmentPublicClient = ({
         }
       }
 
-      await persist({ conversation, conversationClient, stateManager, access });
+      await persist({ conversation, conversationClient, stateManager });
     },
 
     async bulkCreate({
       conversationId,
       attachments,
-      access,
       render_inline: renderInline,
     }): Promise<BulkCreateAttachmentsResult> {
       const { conversation, conversationClient, stateManager } = await loadState(conversationId);
@@ -319,7 +302,7 @@ export const createAttachmentPublicClient = ({
       }
 
       if (created.length > 0) {
-        await persist({ conversation, conversationClient, stateManager, renderInline, access });
+        await persist({ conversation, conversationClient, stateManager, renderInline });
       }
 
       return { created, errors };

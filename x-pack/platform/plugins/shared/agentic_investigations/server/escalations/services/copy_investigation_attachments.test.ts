@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/core/server';
 import type { ConversationWithPermissions, VersionedAttachment } from '@kbn/agent-builder-common';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import { copyInvestigationAttachments } from './copy_investigation_attachments';
-import { ESCALATION_ATTACHMENT_WRITE_ACCESS } from '../../../common/escalations/constants';
 
 const makeAttachment = (overrides: Partial<VersionedAttachment> = {}): VersionedAttachment =>
   ({
@@ -80,7 +79,6 @@ describe('copyInvestigationAttachments', () => {
           data: { text: 'hello' },
         }),
       ],
-      access: ESCALATION_ATTACHMENT_WRITE_ACCESS,
       render_inline: true,
     });
   });

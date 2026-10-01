@@ -175,7 +175,7 @@ describe('escalation routes', () => {
           body: {
             linked_investigation_id: 'inv-1',
             visibility: 'private',
-            collaborators: ['user-1'],
+            assignees: ['user-1'],
           },
         }),
         response
@@ -294,6 +294,131 @@ describe('escalation routes', () => {
 
       expect(response.customError).toHaveBeenCalledWith(
         expect.objectContaining({ statusCode: 404 })
+      );
+    });
+  });
+
+  describe('assign escalation handler', () => {
+    const buildAssignService = (assignFn: jest.Mock) =>
+      ({
+        assign: assignFn,
+      } as unknown as AssignmentsService);
+
+    it('calls service.assign with the escalation id and assignees and returns 200', async () => {
+      const assign = jest.fn().mockResolvedValue(MOCK_ESCALATION);
+      const router = httpServiceMock.createRouter();
+      const puts: RegisteredRoute[] = [];
+      (router.versioned.get as jest.Mock).mockReturnValue({
+        addVersion: jest.fn(),
+      });
+      (router.versioned.post as jest.Mock).mockReturnValue({
+        addVersion: jest.fn(),
+      });
+      (router.versioned.patch as jest.Mock).mockReturnValue({
+        addVersion: jest.fn(),
+      });
+      (router.versioned.put as jest.Mock).mockImplementation((config) => ({
+        addVersion: (_version: unknown, handler: Handler) => puts.push({ config, handler }),
+      }));
+      (router.post as jest.Mock).mockReturnValue(undefined);
+
+      registerEscalationRoutes({
+        router,
+        logger: loggingSystemMock.createLogger(),
+        getEscalationsService: () => ({} as EscalationsService),
+        getAssignmentsService: () => buildAssignService(assign),
+        getSpaceId: () => 'default',
+        getSecurity: jest.fn(),
+      } as unknown as EscalationRouteDependencies);
+
+      const response = httpServerMock.createResponseFactory();
+      const route = puts.find(({ config }) => config.path === ESCALATION_ASSIGN_URL)!;
+
+      await route.handler(
+        {},
+        httpServerMock.createKibanaRequest({
+          params: { id: 'escalation-1' },
+          body: { assignees: ['user-1', 'user-2'] },
+        }),
+        response
+      );
+
+      expect(assign).toHaveBeenCalledTimes(1);
+      expect(response.ok).toHaveBeenCalledWith({ body: MOCK_ESCALATION });
+    });
+
+    it('maps WrongTemplateError to 404', async () => {
+      const { WrongTemplateError: WTE } = await import('../../assignments/assignments_service');
+      const assign = jest.fn().mockRejectedValue(new WTE('escalation-1', 'escalation'));
+      const router = httpServiceMock.createRouter();
+      const puts: RegisteredRoute[] = [];
+      (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+      (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+      (router.versioned.patch as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+      (router.versioned.put as jest.Mock).mockImplementation((config) => ({
+        addVersion: (_version: unknown, handler: Handler) => puts.push({ config, handler }),
+      }));
+      (router.post as jest.Mock).mockReturnValue(undefined);
+
+      registerEscalationRoutes({
+        router,
+        logger: loggingSystemMock.createLogger(),
+        getEscalationsService: () => ({} as EscalationsService),
+        getAssignmentsService: () => buildAssignService(assign),
+        getSpaceId: () => 'default',
+        getSecurity: jest.fn(),
+      } as unknown as EscalationRouteDependencies);
+
+      const response = httpServerMock.createResponseFactory();
+      const route = puts.find(({ config }) => config.path === ESCALATION_ASSIGN_URL)!;
+
+      await route.handler(
+        {},
+        httpServerMock.createKibanaRequest({
+          params: { id: 'escalation-1' },
+          body: { assignees: [] },
+        }),
+        response
+      );
+
+      expect(response.notFound).toHaveBeenCalled();
+    });
+
+    it('maps an unknown error to 500', async () => {
+      const assign = jest.fn().mockRejectedValue(new Error('unexpected'));
+      const router = httpServiceMock.createRouter();
+      const puts: RegisteredRoute[] = [];
+      (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+      (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+      (router.versioned.patch as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+      (router.versioned.put as jest.Mock).mockImplementation((config) => ({
+        addVersion: (_version: unknown, handler: Handler) => puts.push({ config, handler }),
+      }));
+      (router.post as jest.Mock).mockReturnValue(undefined);
+
+      registerEscalationRoutes({
+        router,
+        logger: loggingSystemMock.createLogger(),
+        getEscalationsService: () => ({} as EscalationsService),
+        getAssignmentsService: () => buildAssignService(assign),
+        getSpaceId: () => 'default',
+        getSecurity: jest.fn(),
+      } as unknown as EscalationRouteDependencies);
+
+      const response = httpServerMock.createResponseFactory();
+      const route = puts.find(({ config }) => config.path === ESCALATION_ASSIGN_URL)!;
+
+      await route.handler(
+        {},
+        httpServerMock.createKibanaRequest({
+          params: { id: 'escalation-1' },
+          body: { assignees: [] },
+        }),
+        response
+      );
+
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 500 })
       );
     });
   });

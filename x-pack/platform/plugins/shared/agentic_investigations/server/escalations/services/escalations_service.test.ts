@@ -146,7 +146,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     expect(client.create).toHaveBeenCalledWith(
@@ -160,7 +160,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     expect(client.create).toHaveBeenCalledWith(
@@ -176,7 +176,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     expect(applyTemplate).not.toHaveBeenCalled();
@@ -194,7 +194,7 @@ describe('EscalationsService.create', () => {
       service.create(request, {
         linked_investigation_id: 'inv-1',
         visibility: 'public',
-        collaborators: [],
+        assignees: ['user-a'],
       })
     ).rejects.toBeInstanceOf(InvalidLinkedInvestigationError);
   });
@@ -205,7 +205,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
@@ -218,7 +218,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
@@ -231,7 +231,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
@@ -251,7 +251,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
@@ -265,7 +265,7 @@ describe('EscalationsService.create', () => {
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { accessControl } = client.create.mock.calls[0][0];
@@ -273,13 +273,13 @@ describe('EscalationsService.create', () => {
     expect(accessControl).not.toHaveProperty('entries');
   });
 
-  it('sets access_mode: Private with mapped collaborator entries when visibility is "private"', async () => {
+  it('sets access_mode: Private with assignees mapped to ACL entries when visibility is "private"', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'private',
-      collaborators: ['user-a', 'user-b'],
+      assignees: ['user-a', 'user-b'],
     });
 
     const { accessControl } = client.create.mock.calls[0][0];
@@ -292,13 +292,44 @@ describe('EscalationsService.create', () => {
     expect(accessControl.entries[0]).not.toHaveProperty('added_at');
   });
 
+  it('deduplicates repeated assignees in both the private ACL entries and metadata', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'private',
+      assignees: ['user-a', 'user-b', 'user-a'],
+    });
+
+    const { accessControl, metadata } = client.create.mock.calls[0][0];
+    expect(accessControl.entries).toEqual([
+      { type: 'user', id: 'user-a', role: ConversationAccessControlRole.Member },
+      { type: 'user', id: 'user-b', role: ConversationAccessControlRole.Member },
+    ]);
+    expect(metadata.assignees).toEqual(['user-a', 'user-b']);
+  });
+
+  it('does not add ACL entries for a public escalation', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'public',
+      assignees: ['user-a'],
+    });
+
+    const { accessControl } = client.create.mock.calls[0][0];
+    expect(accessControl.access_mode).toBe(ConversationAccessControlMode.Public);
+    expect(accessControl.entries).toBeUndefined();
+  });
+
   it('uses the investigation title as the escalation initial title', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { title } = client.create.mock.calls[0][0];
@@ -312,7 +343,7 @@ describe('EscalationsService.create', () => {
       linked_investigation_id: 'inv-1',
       title: 'Custom escalation title',
       visibility: 'public',
-      collaborators: [],
+      assignees: ['user-a'],
     });
 
     const { title } = client.create.mock.calls[0][0];
@@ -327,37 +358,22 @@ describe('EscalationsService.create', () => {
       service.create(request, {
         linked_investigation_id: 'inv-1',
         visibility: 'public',
-        collaborators: [],
+        assignees: ['user-a'],
       })
     ).rejects.toThrow(/"escalation" not found/);
   });
 
-  it('sets assignees in metadata when provided', async () => {
+  it('always sets assignees in metadata', async () => {
     const { service, client } = makeService();
 
     await service.create(request, {
       linked_investigation_id: 'inv-1',
       visibility: 'public',
-      collaborators: [],
       assignees: ['uid-creator'],
     });
 
     const { metadata } = client.create.mock.calls[0][0];
     expect(metadata.assignees).toEqual(['uid-creator']);
-  });
-
-  it('does not set assignees in metadata when empty', async () => {
-    const { service, client } = makeService();
-
-    await service.create(request, {
-      linked_investigation_id: 'inv-1',
-      visibility: 'public',
-      collaborators: [],
-      assignees: [],
-    });
-
-    const { metadata } = client.create.mock.calls[0][0];
-    expect(metadata).not.toHaveProperty('assignees');
   });
 });
 

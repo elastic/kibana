@@ -6,7 +6,6 @@
  */
 
 import {
-  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
 } from '@kbn/agent-builder-common';
@@ -15,7 +14,11 @@ import {
   linkEscalationRequestSchema,
   listEscalationsQuerySchema,
 } from './escalation';
-import { MAX_ESCALATION_LINKED_INVESTIGATIONS, MAX_ESCALATIONS_PAGE_SIZE } from './constants';
+import {
+  MAX_ESCALATION_ASSIGNEES,
+  MAX_ESCALATION_LINKED_INVESTIGATIONS,
+  MAX_ESCALATIONS_PAGE_SIZE,
+} from './constants';
 
 // ---------------------------------------------------------------------------
 // createEscalationRequestSchema
@@ -25,13 +28,13 @@ describe('createEscalationRequestSchema', () => {
   const validPublic = {
     linked_investigation_id: 'inv-1',
     visibility: 'public',
-    // collaborators defaults to []
+    assignees: ['user-a'],
   };
 
   const validPrivate = {
     linked_investigation_id: 'inv-1',
     visibility: 'private',
-    collaborators: ['user-a'],
+    assignees: ['user-a'],
   };
 
   it('accepts a valid public creation', () => {
@@ -42,22 +45,37 @@ describe('createEscalationRequestSchema', () => {
     expect(() => createEscalationRequestSchema.parse(validPrivate)).not.toThrow();
   });
 
-  it('rejects private without collaborators', () => {
-    expect(() =>
-      createEscalationRequestSchema.parse({
-        ...validPrivate,
-        collaborators: [],
-      })
-    ).toThrow(/collaborators is required/);
+  it('rejects when assignees is empty', () => {
+    expect(() => createEscalationRequestSchema.parse({ ...validPublic, assignees: [] })).toThrow();
   });
 
-  it('rejects public with collaborators', () => {
+  it('rejects when assignees is missing', () => {
+    const { assignees: _a, ...rest } = validPublic;
+    expect(() => createEscalationRequestSchema.parse(rest)).toThrow();
+  });
+
+  it('rejects when an assignee id is empty', () => {
+    expect(() =>
+      createEscalationRequestSchema.parse({ ...validPublic, assignees: [''] })
+    ).toThrow();
+  });
+
+  it('rejects when an assignee id exceeds the max length', () => {
     expect(() =>
       createEscalationRequestSchema.parse({
         ...validPublic,
-        collaborators: ['user-a'],
+        assignees: ['a'.repeat(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH + 1)],
       })
-    ).toThrow(/collaborators must not be set/);
+    ).toThrow();
+  });
+
+  it('rejects when assignees exceeds the max count', () => {
+    expect(() =>
+      createEscalationRequestSchema.parse({
+        ...validPublic,
+        assignees: Array.from({ length: MAX_ESCALATION_ASSIGNEES + 1 }, (_, i) => `user-${i}`),
+      })
+    ).toThrow();
   });
 
   it('rejects when linked_investigation_id is empty', () => {
@@ -73,41 +91,6 @@ describe('createEscalationRequestSchema', () => {
         linked_investigation_id: 'a'.repeat(CONVERSATION_ID_MAX_LENGTH + 1),
       })
     ).toThrow();
-  });
-
-  it('rejects when a collaborator id is empty', () => {
-    expect(() =>
-      createEscalationRequestSchema.parse({
-        ...validPrivate,
-        collaborators: [''],
-      })
-    ).toThrow();
-  });
-
-  it('rejects when a collaborator id exceeds the max length', () => {
-    expect(() =>
-      createEscalationRequestSchema.parse({
-        ...validPrivate,
-        collaborators: ['a'.repeat(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH + 1)],
-      })
-    ).toThrow();
-  });
-
-  it('rejects when collaborators exceeds the max entry count', () => {
-    expect(() =>
-      createEscalationRequestSchema.parse({
-        ...validPrivate,
-        collaborators: Array.from(
-          { length: CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES + 1 },
-          (_, i) => `user-${i}`
-        ),
-      })
-    ).toThrow();
-  });
-
-  it('defaults collaborators to [] when omitted', () => {
-    const result = createEscalationRequestSchema.parse(validPublic);
-    expect(result.collaborators).toEqual([]);
   });
 
   it('rejects an unrecognised visibility value', () => {

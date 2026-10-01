@@ -163,7 +163,7 @@ describe('createAttachmentPublicClient', () => {
       expect(deps.conversationClient.update).not.toHaveBeenCalled();
       expect(deps.conversationClient.appendEvents).toHaveBeenCalledTimes(1);
       const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'owner' });
+      expect(options).toEqual({ access: 'converse' });
       expect(request.id).toBe('c1');
       expect(request.attachments).toEqual({
         snapshot: [],

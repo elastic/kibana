@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/core/server';
 import type { ConversationWithPermissions } from '@kbn/agent-builder-common';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentPublicClient, BulkCreateAttachmentInput } from '@kbn/agent-builder-server';
-import { ESCALATION_ATTACHMENT_WRITE_ACCESS } from '../../../common/escalations/constants';
 
 /**
  * Copies active, non-screen_context attachments from `investigation` to `escalation`.
@@ -60,7 +59,6 @@ export const copyInvestigationAttachments = async ({
   const { created, errors } = await attachmentsClient.bulkCreate({
     conversationId: escalation.id,
     attachments: inputs,
-    access: ESCALATION_ATTACHMENT_WRITE_ACCESS,
     render_inline: true,
   });
 
