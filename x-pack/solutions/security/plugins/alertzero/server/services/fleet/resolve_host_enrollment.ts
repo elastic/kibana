@@ -7,7 +7,14 @@
 
 import type { Logger } from '@kbn/logging';
 import type { AgentClient, AgentService } from '@kbn/fleet-plugin/server';
-import type { ResolveHostEnrollment } from '../../step_types/package_report/read_current_run_state';
+
+export type HostEnrollment = { enrolled: true; agentId: string } | { enrolled: false };
+
+/**
+ * Declared with its implementation so packaging depends on this service for the contract, rather
+ * than this service reaching into packaging for the shape of its own return value.
+ */
+export type ResolveHostEnrollment = (hostName: string) => Promise<HostEnrollment>;
 
 const escapeKuery = (value: string): string => value.replace(/(["\\])/g, '\\$1');
 
@@ -18,6 +25,11 @@ const escapeKuery = (value: string): string => value.replace(/(["\\])/g, '\\$1')
  * `host.hostname`, and the two routinely differ on one machine. `showInactive: false` matches
  * Fleet's own definition of an active agent. Reporting an enrolled host as unenrolled is not
  * cosmetic -- it downgrades an executable response action to a recommendation.
+ *
+ * A host name is not unique within a space either: a re-enrolled machine or a cloned image can
+ * leave two active agents answering to the same name. Two matches resolve to unenrolled rather
+ * than to whichever Fleet returned first, because the action this feeds isolates or kills on the
+ * agent id -- picking arbitrarily would act on a machine nobody named.
  */
 export const makeResolveHostEnrollment = (
   agentClient: AgentClient | undefined,
@@ -29,11 +41,19 @@ export const makeResolveHostEnrollment = (
   return async (hostName) => {
     const escaped = escapeKuery(hostName);
     try {
+      // Two, not one: a second match is the signal that the name is ambiguous, and the lookup
+      // cannot see that with a page size of one.
       const { agents } = await agentClient.listAgents({
         kuery: `local_metadata.host.hostname:"${escaped}" or local_metadata.host.name:"${escaped}"`,
         showInactive: false,
-        perPage: 1,
+        perPage: 2,
       });
+      if (agents.length > 1) {
+        logger?.warn(
+          `resolveHostEnrollment: "${hostName}" matches more than one active agent in this space, treating it as unenrolled`
+        );
+        return { enrolled: false };
+      }
       const agent = agents[0];
       return agent ? { enrolled: true, agentId: agent.id } : { enrolled: false };
     } catch (err) {

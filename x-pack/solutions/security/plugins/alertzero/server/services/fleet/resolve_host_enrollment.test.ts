@@ -26,8 +26,33 @@ describe('makeResolveHostEnrollment', () => {
     expect(listAgents).toHaveBeenCalledWith({
       kuery: 'local_metadata.host.hostname:"host-a" or local_metadata.host.name:"host-a"',
       showInactive: false,
-      perPage: 1,
+      perPage: 2,
     });
+  });
+
+  // A re-enrolled machine or a cloned image can leave two active agents answering to the same
+  // name. The proposal this feeds isolates or kills by agent id, so resolving to the first match
+  // would act on a machine nobody named.
+  it('treats a host name matching more than one active agent as unenrolled', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const listAgents = jest
+      .fn()
+      .mockResolvedValue({ agents: [{ id: 'agent-1' }, { id: 'agent-2' }], total: 2 });
+    const resolve = makeResolveHostEnrollment({ listAgents } as unknown as AgentClient, logger);
+
+    await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('matches more than one active agent')
+    );
+  });
+
+  it('reports an ambiguous host name even without a logger', async () => {
+    const listAgents = jest
+      .fn()
+      .mockResolvedValue({ agents: [{ id: 'agent-1' }, { id: 'agent-2' }], total: 2 });
+    const resolve = makeResolveHostEnrollment({ listAgents } as unknown as AgentClient);
+
+    await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
   });
 
   // The caller collects entities from either `host.name` or `host.hostname`, and the two
