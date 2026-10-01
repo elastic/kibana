@@ -18,6 +18,33 @@ export interface InferenceEndpointDefinition
   secrets?: Partial<InferenceEndpointRequestBody['secrets']>;
 }
 
+const REQUIRED_ENDPOINT_FIELDS = ['inferenceId', 'provider', 'taskType', 'name'] as const;
+
+/**
+ * Validates one entry of a `KIBANA_TESTING_INFERENCE_ENDPOINTS` map.
+ *
+ * Returns an error message when the entry cannot be installed as an inference
+ * endpoint, or `undefined` when it is usable. `loadInferenceEndpoints` throws on
+ * it at Playwright startup; callers that populate the map from a cache (see
+ * `cli/eis_connectors_cache.ts`) reject the same entries up front so a broken
+ * cache reports an actionable cache error instead of a startup crash.
+ */
+export const validateInferenceEndpointEntry = (id: string, def: unknown): string | undefined => {
+  if (typeof def !== 'object' || def === null || Array.isArray(def)) {
+    return `Inference endpoint "${id}" is missing required field "inferenceId"`;
+  }
+
+  const d = def as Record<string, unknown>;
+  for (const field of REQUIRED_ENDPOINT_FIELDS) {
+    const value = d[field];
+    if (typeof value !== 'string' || value.length === 0) {
+      return `Inference endpoint "${id}" is missing required field "${field}"`;
+    }
+  }
+
+  return undefined;
+};
+
 /**
  * Loads inference endpoint definitions from `KIBANA_TESTING_INFERENCE_ENDPOINTS`.
  * Accepts base64-encoded JSON or raw JSON. Returns an empty array if the env var is not set.
@@ -44,19 +71,14 @@ export function loadInferenceEndpoints(): InferenceEndpointDefinition[] {
   }
 
   return Object.entries(parsed as Record<string, unknown>).map(([id, def]) => {
-    const d = def as Record<string, unknown>;
-    if (typeof d.inferenceId !== 'string' || d.inferenceId.length === 0) {
-      throw new Error(`Inference endpoint "${id}" is missing required field "inferenceId"`);
+    const error = validateInferenceEndpointEntry(id, def);
+    if (error) {
+      throw new Error(error);
     }
-    if (typeof d.provider !== 'string' || d.provider.length === 0) {
-      throw new Error(`Inference endpoint "${id}" is missing required field "provider"`);
-    }
-    if (typeof d.taskType !== 'string' || d.taskType.length === 0) {
-      throw new Error(`Inference endpoint "${id}" is missing required field "taskType"`);
-    }
-    if (typeof d.name !== 'string' || d.name.length === 0) {
-      throw new Error(`Inference endpoint "${id}" is missing required field "name"`);
-    }
-    return { ...d, id, type: 'inference_endpoint' } as InferenceEndpointDefinition;
+    return {
+      ...(def as Record<string, unknown>),
+      id,
+      type: 'inference_endpoint',
+    } as InferenceEndpointDefinition;
   });
 }
