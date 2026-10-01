@@ -44,7 +44,6 @@
     "@kbn/data-views-plugin",
     "@kbn/config-schema",
     "@kbn/analytics",
-    "@kbn/field-types",
     "@kbn/ftr-screenshot-filename",
     "@kbn/es-archiver",
     "@kbn/core-application-browser",
