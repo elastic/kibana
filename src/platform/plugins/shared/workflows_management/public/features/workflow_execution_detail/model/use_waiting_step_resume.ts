@@ -10,7 +10,12 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import {
+  DEFAULT_WAIT_FOR_APPROVAL_APPROVE_LABEL,
+  DEFAULT_WAIT_FOR_APPROVAL_REJECT_LABEL,
+  ExecutionStatus,
+  getStepByNameFromNestedSteps,
+} from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { useStepExecution } from './use_step_execution';
 import type { ApprovalLabels } from '../ui/resume_execution_button';
@@ -25,6 +30,13 @@ export interface WaitingStepResume {
   hasResumeError: boolean;
   retryResume: () => void;
 }
+
+const approvalLabelsFrom = (approveLabel?: string, rejectLabel?: string): ApprovalLabels => ({
+  approveLabel:
+    typeof approveLabel === 'string' ? approveLabel : DEFAULT_WAIT_FOR_APPROVAL_APPROVE_LABEL,
+  rejectLabel:
+    typeof rejectLabel === 'string' ? rejectLabel : DEFAULT_WAIT_FOR_APPROVAL_REJECT_LABEL,
+});
 
 /** Resolves the active waitForInput pause and its resume copy for Provide action / Approve–Reject. */
 export function useWaitingStepResume(
@@ -48,6 +60,9 @@ export function useWaitingStepResume(
 
   const waitingStepExecutionId = waitingStep?.id;
   const waitingStepStartedAt = waitingStep?.startedAt;
+  const waitingStepType = waitingStep?.stepType;
+  const waitingStepId = waitingStep?.stepId;
+  const workflowSteps = workflowExecution?.workflowDefinition?.steps;
 
   const {
     data: pausedStepFullData,
@@ -73,11 +88,38 @@ export function useWaitingStepResume(
   }, [waitingStepExecutionId, executionId, queryClient]);
 
   return useMemo(() => {
-    if (
-      !waitingStepExecutionId ||
-      isPausedStepLoading ||
-      pausedStepFullData?.id !== waitingStepExecutionId
-    ) {
+    const inputReady =
+      Boolean(waitingStepExecutionId) &&
+      !isPausedStepLoading &&
+      pausedStepFullData?.id === waitingStepExecutionId;
+
+    if (!inputReady) {
+      if (waitingStepExecutionId && waitingStepType === 'waitForApproval') {
+        const definitionStep =
+          waitingStepId && workflowSteps
+            ? getStepByNameFromNestedSteps(workflowSteps, waitingStepId)
+            : null;
+        const withConfig =
+          definitionStep?.type === 'waitForApproval'
+            ? (definitionStep.with as
+                | {
+                    message?: string;
+                    approveLabel?: string;
+                    rejectLabel?: string;
+                  }
+                | undefined)
+            : undefined;
+
+        return {
+          waitingStepExecutionId,
+          waitingStepStartedAt,
+          resumeMessage: typeof withConfig?.message === 'string' ? withConfig.message : undefined,
+          resumeSchema: undefined,
+          approvalLabels: approvalLabelsFrom(withConfig?.approveLabel, withConfig?.rejectLabel),
+          hasResumeError,
+          retryResume,
+        };
+      }
       return {
         waitingStepExecutionId: undefined,
         waitingStepStartedAt: undefined,
@@ -97,17 +139,20 @@ export function useWaitingStepResume(
           rejectLabel?: string;
         }
       | undefined;
-    const labels =
-      typeof stepInput?.approveLabel === 'string' && typeof stepInput?.rejectLabel === 'string'
-        ? { approveLabel: stepInput.approveLabel, rejectLabel: stepInput.rejectLabel }
-        : undefined;
+    const stepType = pausedStepFullData?.stepType ?? waitingStepType;
+    const isApproval =
+      stepType === 'waitForApproval' ||
+      typeof stepInput?.approveLabel === 'string' ||
+      typeof stepInput?.rejectLabel === 'string';
 
     return {
       waitingStepExecutionId,
       waitingStepStartedAt,
       resumeMessage: stepInput?.message,
       resumeSchema: stepInput?.schema,
-      approvalLabels: labels,
+      approvalLabels: isApproval
+        ? approvalLabelsFrom(stepInput?.approveLabel, stepInput?.rejectLabel)
+        : undefined,
       hasResumeError,
       retryResume,
     };
@@ -117,6 +162,9 @@ export function useWaitingStepResume(
     pausedStepFullData,
     retryResume,
     waitingStepExecutionId,
+    waitingStepId,
     waitingStepStartedAt,
+    waitingStepType,
+    workflowSteps,
   ]);
 }

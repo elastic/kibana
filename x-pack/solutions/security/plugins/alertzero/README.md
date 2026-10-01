@@ -4,15 +4,15 @@ Security Watch investigation queue and catalog behind the `securitySolution:enab
 
 ## Enablement
 
-### Prerequisite: `xpack.agenticInvestigations.enabled`
+### Runtime dependencies
 
-AlertZero lists `agenticInvestigations` in `requiredPlugins`, so Kibana will not load the AlertZero plugin at all when `agenticInvestigations` is disabled. That plugin defaults to `false`, so on a stock deployment neither of the two gates below has any effect until this is set first:
+AlertZero's upgrade and access-denied screens can load when Agent Builder, Proposals, or Agentic Investigations is disabled. These plugins are optional dependencies of the shell, but all three are required to run the feature. For example, enable Agentic Investigations with:
 
 ```yaml
 xpack.agenticInvestigations.enabled: true
 ```
 
-Both gates described below are skipped — and the advanced setting is never registered — unless this prerequisite is satisfied.
+When a runtime dependency is absent, AlertZero does not register its managed-workflow owner or start feature services. Eligible users see an unavailable screen and the APIs return 503. An insufficient subscription still shows the appropriate upgrade gate first.
 
 ### Two independent gates, with different scopes and different jobs
 
@@ -32,7 +32,7 @@ It controls four things. Enabling takes effect live, but **disabling takes full 
 | Browser app `/app/alertzero` | Registered but `AppStatus.inaccessible`; every page renders core's "Application unavailable" |
 | Security solution navigation | AlertZero nodes disappear — core empties `visibleIn` and `deepLinks` for an inaccessible app, and chrome drops nav nodes whose link has no nav link. The navigation trees hold no check of their own |
 | HTTP `/internal/alertzero/*` | `404`, via the `withAlertZeroEnabled` wrapper on every route |
-| Agent Builder Investigation template and its tabs | Absent from the next page load. Agent Builder's conversation template contract has no deregistration counterpart, so a session that already registered them keeps them until it reloads; in that window opening one raises an error instead of loading an investigation |
+| Agent Builder Investigation template and its tabs | Absent from the next page load. Agent Builder's conversation template contract has no deregistration counterpart, so a session that already registered them keeps them until it reloads; in that window AlertZero-provided content shows the disabled gate instead of loading feature data |
 
 ### `xpack.alertzero.enabled` — the deployment kill switch
 
@@ -49,9 +49,27 @@ AlertZero reads live data only. To work on the UI without waiting for Workers to
 Everything in the table below is skipped when it is off — including registration of the advanced setting itself, which is why `withAlertZeroEnabled` can never read an unregistered key.
 
 
+### Subscription and authorization
+
+UI and HTTP API access additionally require:
+
+- ECH: an available, active license supporting Enterprise.
+- Serverless: the **Security** product's **Complete** tier. Security Serverless supplies this entitlement through `setServerlessTierAvailable` on the server setup and browser start contracts. Other products' Complete tiers do not qualify.
+- AlertZero **Read** to view content and **All** for AlertZero-owned write actions, such as worker settings. Existing dependent-feature privileges, such as managed-workflow update access, are still required.
+
+An insufficient subscription or missing AlertZero Read access removes AlertZero navigation and deep links while keeping direct URLs mountable for the environment-specific upgrade or access-denied screen. The queue additionally requires **Proposed Actions Read** (`proposals`); without it, the queue shows a gate naming the missing privilege before requesting queue data. This additional privilege does not affect navigation visibility or access to worker settings. AlertZero Read-only users cannot edit worker settings. Proposal approval, dismissal, and revision are governed by **Proposed Actions All/Manage**, independently of AlertZero Write. The revision tool still checks the per-space AlertZero setting. The application boundary prevents feature content from mounting until access is resolved and responds to license changes.
+
+Every AlertZero HTTP route uses `withAlertZeroEnabled` to check the per-space setting and subscription before running its handler, alongside declarative read/write authorization. Setting-off requests return 404 for otherwise authorized callers; subscription and authorization failures return 403.
+
+The proposed-actions panel and both AlertZero attachment renderers in Agent Builder also observe availability after registration. Losing eligibility unmounts their content and stops active query observers; restoring eligibility shows the content again. Stored attachments and the authorization of their underlying shared APIs are unchanged.
+
+These availability checks gate **UI and API access only**. They do not stop, disable, or unschedule background work when a subscription changes.
+
 ### Worker lifecycle
 
 Workers install when a user enables one or saves settings on one. There is no Watch-level enablement switch. Disable leaves the per-space Worker document and its settings in place. The only bulk cleanup is turning `xpack.alertzero.enabled` off and restarting — AlertZero then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space. Turning the *advanced setting* off does **not** trigger cleanup; it only hides the surfaces.
+
+Managed-workflow ownership remains registered when optional runtime dependencies are missing, so their absence does not cause installed AlertZero workflows to be deleted as orphans.
 
 To inspect a Worker's installed managed workflow — its rendered YAML, triggers, and executions — in the Workflows UI, also set:
 
@@ -163,7 +181,7 @@ Managed Worker definitions:
 - `system-security-floor-attack-discovery`
 - `system-security-hunt-continuous-threat-hunt`
 - `system-security-detection-rule-tuning`
-- `system-security-detection-rule-creation`
+- `system-security-detection-rule-coverage`
 - `system-security-forensics-endpoint-analysis`
 
 Those definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/`. Each Worker's settings contract is one `WorkerSettingsDeclaration` in `@kbn/alertzero-common` (`impl/worker_settings/`, one file per Watch team); AlertZero's `server/managed_workflows/workers/` derives defaults, validation, patch application and API projection from it, registered from `server/managed_workflows/worker_registry.ts`. Watch GET/list returns catalog placeholders only.
@@ -174,7 +192,9 @@ The prototype rule workflows remain static global installs and are not advertise
 
 - `system-security-rule-tuning-worker` — the tuning sweep; the Rule Tuning Worker dispatches it (`workflow.executeAsync`) on its schedule setting (default 2h) per enabled space, and it remains directly callable for manual runs
 - `system-security-rule-tuning-review` — launched per noisy rule by the tuning sweep, each run holding its own approval gate
-- `system-security-rule-creation` — implementation used by the Detection Rule Creation Worker
+- `system-security-coverage-worker` — the coverage sweep. The Rule Coverage Worker dispatches it (`workflow.execute`) on its schedule setting (default 1h) per enabled space with its lookback and max gaps settings
+- `system-security-coverage-review` — launched per pending coverage gap by the coverage sweep, each run holding its own approval gate
+- `system-security-rule-creation` — launched by a coverage review when nothing covers the gap
 - `system-security-rule-preview` — called by both of the above
 
 ### Managed definition `version` vs product “v1”
@@ -200,6 +220,7 @@ The current YAML files are Worker stubs rather than final Watch-team definitions
 6. A PATCH composes the next settings from the stored ones and validates the result with the same complete schema (semantics under [Worker-specific settings](#worker-specific-settings-extras)). Failures return 400 naming the field; nothing is written. Do not add per-Worker branches to the server path — extend the declaration.
 7. `toSettings` projects stored values into `WorkerSettings`: `workerId`, `autonomy`, `scheduleInterval` for schedule-driven Workers, `extras` for Workers that declare them. Read and PATCH use the same names and nesting.
 8. Add settings-module tests for defaults, patches, and that projected keys are not stripped. Add managed-definition tests for valid rendered YAML and registry tests for catalog/settings wiring. Imported YAML changes require an explicit managed-definition version decision.
+9. If the Worker only acts on records another Worker writes, so it has nothing to do while that Worker is off, add an entry to `WORKER_DEPENDENCIES` in `public/pages/watches/worker_dependencies/worker_dependencies.tsx`. The entry carries its own dialog and warning copy. Workers that merely get fewer inputs do not belong there.
 
 The Workers service owns per-space installation, reading persisted values, enable/disable, and upgrades. Settings responses carry a logical revision (`settingsRevision`, `null` before the per-space document exists). A settings PATCH sends the revision its draft was built from; the server returns 409 when the stored revision differs and the client keeps the draft. Compare-then-write, not an atomic guard.
 
@@ -207,7 +228,7 @@ The Workers service owns per-space installation, reading persisted values, enabl
 
 Not every Worker is schedule-driven — the rest are alert- or event-triggered — so a schedule is a per-Worker opt-in rather than part of `CommonWorkerTemplateValues`. A Worker without one carries no interval in its template values and none in its projected settings.
 
-Scheduled Workers today: `system-security-floor-attack-discovery` (default `24h`) and `system-security-detection-rule-tuning` (default `2h`, also keeps a `manual` trigger for on-demand sweeps).
+Scheduled Workers today: `system-security-floor-attack-discovery` (default `24h`), `system-security-detection-rule-tuning` (default `2h`) and `system-security-detection-rule-coverage` (default `1h`). The two Detection Workers also keep a `manual` trigger for on-demand sweeps.
 
 The interval is a positive count with a unit of minutes, hours or days (`'30m'`, `'24h'`, `'7d'`). It is validated by the `WorkerScheduleInterval` OpenAPI schema at the route boundary and rendered verbatim into the trigger's `every`. Seconds are not offered: the workflow engine only accepts `s` at 60 or above. Changing an interval rewrites the workflow YAML, and the post-install `updateWorkflow` call is what re-registers the Task Manager task.
 
@@ -265,6 +286,8 @@ Adding a field to an existing Worker touches only Watch-owned code (Rule Tuning'
 4. **Control** — build a real control in the Worker's own folder under `public/pages/watches/custom_settings/<worker>/` (Rule Tuning lives in `custom_settings/rule_tuning/`), registered by Worker id in `custom_settings/registry.ts`. It receives `settings` and `onExtrasChange(extras)` and hands back the complete `extras` object. It never calls an API and there is no form generator or app-load completeness check; cover it with a component test.
 
 The shared Watch page renders the interval control from the presence of `scheduleInterval`, offers only the Worker's `allowedAutonomyLevels` (one level renders as a fixed value), and mounts the registered custom component. Every edit, including Enabled, changes a draft. Save validates all dirty Workers, then writes Worker by Worker with the revision each draft started from; failed Workers keep draft and error; Discard drops unsaved edits without undoing successful writes.
+
+Hard Worker dependencies (`WORKER_DEPENDENCIES`) are judged client-side against every Worker's saved enabled state, with this page's draft on top, so they work across Watches. Turning off a Worker that an enabled Worker depends on asks for confirmation before the draft changes; turning a Worker on never asks. Each Worker header carries one warning icon listing its reasons. After Save, a Worker the save turned on that is still blocked gets an acknowledge-only notice; settings-only saves get none, and the notice never blocks the save.
 
 ### Pre-customer state
 

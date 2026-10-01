@@ -99,12 +99,27 @@ const isThresholdMet = (
 };
 
 /**
+ * A count of 0 skips the phase, unless a timeframe is ANDed with it: then the
+ * timeframe must still elapse, so the phase is entered.
+ *
+ * Elapsed time is measured against the previous evaluation's stored timestamp
+ * (see `getElapsedMs`), not against when the phase was entered, so it never
+ * accumulates past roughly one schedule interval. An ANDed timeframe therefore
+ * only resolves once the schedule interval itself is >= the timeframe; on a
+ * shorter schedule it holds the phase indefinitely. This is not specific to
+ * count 0 — any count combined with an ANDed timeframe has the same ceiling.
+ */
+const isPhaseSkipped = (phase?: StateTransitionPhase): boolean =>
+  phase?.count === 0 && !(phase.timeframe != null && phase.operator === 'and');
+
+/**
  * A transition strategy that extends the basic state machine with
  * configurable count (and future timeframe) thresholds for the
  * `pending → active` and `recovering → inactive` transitions.
  *
- * - pending count of 0 means skip pending entirely (inactive → active).
- * - recovering count of 0 means skip recovering entirely (active → inactive).
+ * - A count of N holds the phase for N evaluations and resolves it on evaluation N+1.
+ * - A count of 0 skips the phase entirely, unless a timeframe is ANDed with it
+ *   (see `isPhaseSkipped`).
  * - When no threshold is configured for a phase, the strategy behaves
  *   identically to the basic strategy for that phase.
  */
@@ -124,14 +139,13 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   }
 
   override getNextState(ctx: StateTransitionContext): StateTransitionResult {
-    const { rule, previousEpisode, alertEvent } = ctx;
+    const { rule, previousEpisode, alertEvent, evaluatedAt } = ctx;
     const stateTransition = rule.state_transition;
     const currentEpisodeStatus = previousEpisode?.last_episode_status;
     const currentStatusCount = this.getCurrentStatusCount(previousEpisode);
     const currentEpisodeTimestamp = previousEpisode?.last_episode_timestamp;
-    const alertEventTimestamp = alertEvent['@timestamp'];
 
-    const elapsedMs = this.getElapsedMs(alertEventTimestamp, currentEpisodeTimestamp);
+    const elapsedMs = this.getElapsedMs(evaluatedAt, currentEpisodeTimestamp);
 
     // Delegate to the inherited basic state machine to get the "natural" next state.
     const basicResult = super.getNextState(ctx);
@@ -220,14 +234,16 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     stateTransition: StateTransition,
     nextStatus: AlertEpisodeStatus
   ): boolean {
-    return stateTransition.pending?.count === 0 && nextStatus === alertEpisodeStatus.pending;
+    return isPhaseSkipped(stateTransition.pending) && nextStatus === alertEpisodeStatus.pending;
   }
 
   private shouldSkipRecovering(
     stateTransition: StateTransition,
     nextStatus: AlertEpisodeStatus
   ): boolean {
-    return stateTransition.recovering?.count === 0 && nextStatus === alertEpisodeStatus.recovering;
+    return (
+      isPhaseSkipped(stateTransition.recovering) && nextStatus === alertEpisodeStatus.recovering
+    );
   }
 
   private isPendingToActiveTransition(
@@ -271,14 +287,13 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     successStatus: AlertEpisodeStatus;
     stayStatus: AlertEpisodeStatus;
   }): StateTransitionResult {
-    const nextCount = currentStatusCount + 1;
     const config: ThresholdConfig = { operator, count, timeframeMs };
 
-    if (isThresholdMet(nextCount, elapsedMs, config)) {
+    if (isThresholdMet(currentStatusCount, elapsedMs, config)) {
       return { status: successStatus };
     }
 
-    return { status: stayStatus, statusCount: nextCount };
+    return { status: stayStatus, statusCount: currentStatusCount + 1 };
   }
 
   /**
@@ -308,12 +323,12 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     }
   }
 
-  private getElapsedMs(currentTimestamp?: string, previousTimestamp?: string | null): number {
-    if (!currentTimestamp || !previousTimestamp) {
+  private getElapsedMs(evaluatedAt: string, previousTimestamp?: string | null): number {
+    if (!previousTimestamp) {
       return 0;
     }
 
-    const currentMs = Date.parse(currentTimestamp);
+    const currentMs = Date.parse(evaluatedAt);
     const previousMs = Date.parse(previousTimestamp);
 
     if (Number.isNaN(currentMs) || Number.isNaN(previousMs)) {

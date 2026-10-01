@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags, type ElasticsearchRoleDescriptor } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   apiTest,
@@ -18,32 +18,6 @@ import {
   expectCreated,
   deleteConversations,
 } from '../../fixtures';
-
-const ESCALATIONS_ALL_PRIVILEGE = 'feature_agenticInvestigations.escalations_all';
-
-/**
- * Stateful editor is base Kibana All. Escalation manage is includeIn: 'none', so All
- * can list but cannot update. The owner-check test needs a collaborator who holds manage.
- */
-function editorWithEscalationManage(
-  editor: ElasticsearchRoleDescriptor
-): ElasticsearchRoleDescriptor {
-  const applications = (editor.applications ?? []).map((application) => {
-    if (!application.application.startsWith('kibana')) {
-      return application;
-    }
-    return {
-      ...application,
-      privileges: [...application.privileges, ESCALATIONS_ALL_PRIVILEGE],
-    };
-  });
-  if (
-    !applications.some((application) => application.privileges.includes(ESCALATIONS_ALL_PRIVILEGE))
-  ) {
-    throw new Error('editor role has no Kibana application privileges to extend');
-  }
-  return { ...editor, applications };
-}
 
 /**
  * Resolves the Kibana user profile uid for a user by having them create a temporary
@@ -86,7 +60,7 @@ async function resolveProfileUid(
 }
 
 apiTest.describe(
-  'Escalation access control — private escalations and collaborators',
+  'Escalation access control — private escalations and assignees',
   { tag: [...tags.stateful.classic] },
   () => {
     let adminCookieHeader: Record<string, string>;
@@ -100,10 +74,7 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       ({ cookieHeader: adminCookieHeader } = await samlAuth.asInteractiveUser('admin'));
-      const editorRole = await samlAuth.fetchBuiltInRoleDescriptor('editor');
-      ({ cookieHeader: editorCookieHeader } = await samlAuth.asInteractiveUser(
-        editorWithEscalationManage(editorRole)
-      ));
+      ({ cookieHeader: editorCookieHeader } = await samlAuth.asInteractiveUser('editor'));
       ({ cookieHeader: unrelatedCookieHeader } = await samlAuth.asInteractiveUser('viewer'));
 
       // Resolve the editor's profile uid by creating a probe conversation as them.
@@ -126,13 +97,13 @@ apiTest.describe(
       });
       investigationId = expectCreated(invResult, 'investigation');
 
-      // Create a private escalation owned by admin with the editor as collaborator.
+      // Create a private escalation owned by admin with the editor as assignee.
       const escResult = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
         body: {
           linked_investigation_id: investigationId,
           visibility: 'private',
-          collaborators: [editorProfileUid],
+          assignees: [editorProfileUid],
         },
         responseType: 'json',
       });
@@ -151,7 +122,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'a collaborator (editor) can see the private escalation in their list',
+      'an assignee (editor) can see the private escalation in their list',
       async ({ apiClient }) => {
         const response = await apiClient.get(LIST_ESCALATIONS_PATH, {
           headers: { ...INTERNAL_HEADERS, ...editorCookieHeader },
@@ -179,19 +150,17 @@ apiTest.describe(
     );
 
     apiTest(
-      'PATCH title from a collaborator returns 404 — title update requires owner access',
+      'PATCH title from an assignee returns 403 — assignee lacks manage_escalations',
       async ({ apiClient }) => {
-        // `client.update` (used for title changes) enforces `owner` access, so a collaborator
-        // holding manage_escalations receives 404 (not 403) on a title PATCH. This is intentional:
-        // assignment and metadata writes go through the dedicated PUT .../assignees route, which
-        // uses `converse` access and allows collaborators.
+        // The editor role does not include escalations_all (includeIn: 'none'), so the privilege
+        // gate fires before the ownership check and returns 403.
         const response = await apiClient.patch(ESCALATION_BY_ID_PATH(privateEscalationId), {
           headers: { ...INTERNAL_HEADERS, ...editorCookieHeader },
-          body: { title: 'Collaborator rename attempt' },
+          body: { title: 'Assignee rename attempt' },
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(404);
+        expect(response).toHaveStatusCode(403);
       }
     );
   }

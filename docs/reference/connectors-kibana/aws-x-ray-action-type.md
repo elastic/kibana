@@ -9,11 +9,15 @@ applies_to:
 
 # AWS X-Ray connector [aws-x-ray-action-type]
 
-The AWS X-Ray connector connects directly to the [AWS X-Ray API](https://docs.aws.amazon.com/xray/latest/api/welcome.html). It lets a workflow or agent react to a distributed-tracing anomaly without opening the X-Ray console: pull an open insight, read what broke, snapshot the service graph, search the traces behind it, and drill into full trace detail.
+The AWS X-Ray connector connects directly to the [AWS X-Ray API](https://docs.aws.amazon.com/xray/latest/api/welcome.html). It lets an agent react to a distributed-tracing anomaly without opening the X-Ray console: pull an open insight, read what broke, snapshot the service graph, search the traces behind it, and drill into full trace detail.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Overview
 
-This is a **custom connector** that signs requests to the AWS X-Ray API using AWS Signature Version 4 (SigV4). You configure an AWS Access Key ID, Secret Access Key, and AWS Region when creating the connector; every action runs under that account and region.
+The AWS X-Ray connector signs requests to the AWS X-Ray API using AWS Signature Version 4 (SigV4). You configure an AWS Access Key ID, Secret Access Key, and AWS Region when creating the connector; every action runs under that account and region.
 
 ## Create connectors in {{kib}} [define-aws-x-ray-ui]
 
