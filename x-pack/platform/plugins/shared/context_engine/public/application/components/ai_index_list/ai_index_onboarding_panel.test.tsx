@@ -50,5 +50,11 @@ describe('AiIndexOnboardingPanel', () => {
       )
     ).toBeInTheDocument();
     expect(screen.getByTestId('contextCreateAiIndexButton')).toHaveTextContent('Create AI Index');
+    const learnMoreLink = screen.getByTestId('contextAiIndexOnboardingLearnMoreLink');
+    expect(learnMoreLink).toHaveTextContent('Learn what an AI index is');
+    expect(learnMoreLink).toHaveAttribute(
+      'href',
+      core.docLinks.links.contextEngine.buildAndMaintainAiIndex
+    );
   });
 });

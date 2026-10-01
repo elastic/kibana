@@ -50,6 +50,7 @@ export const AiIndexManagedRowList = () => {
 
   return (
     <div data-test-subj="contextAiIndexManagedRowList">
+      <EuiSpacer size="xxl" />
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">

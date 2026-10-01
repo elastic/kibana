@@ -769,6 +769,7 @@ export interface DocLinks {
   };
   readonly contextEngine: {
     readonly overview: string;
+    readonly buildAndMaintainAiIndex: string;
   };
   readonly agentBuilder: {
     readonly agentBuilder: string;
