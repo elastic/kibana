@@ -51,9 +51,10 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.kind).toBe(body.kind);
-      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
+      expect(response.body.metadata).toStrictEqual(body.metadata);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
+      expect(response.body.version).toBe(1);
       // Actors are structured objects, not the legacy bare profile-UID string.
       expect(typeof response.body.created_by.profile_uid).toBe('string');
       expect(typeof response.body.updated_by.profile_uid).toBe('string');
@@ -61,7 +62,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       const persisted = await apiServices.alertingV2.rules.get(response.body.id);
       expect(persisted.id).toBe(response.body.id);
       expect(persisted.metadata.name).toBe('created-rule');
-      expect(persisted.metadata.version).toBe(1);
+      expect(persisted.version).toBe(1);
     }
   );
 
@@ -359,7 +360,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(201);
-      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
+      expect(response.body.metadata).toStrictEqual(body.metadata);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
       expect(response.body.state_transition).toStrictEqual(body.state_transition);

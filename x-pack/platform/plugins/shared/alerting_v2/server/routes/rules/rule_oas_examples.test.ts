@@ -18,7 +18,7 @@ import {
   matchRulesBodySchema,
   ruleResponseSchema,
   ruleTagsResponseSchema,
-  updateRuleBodySchema,
+  updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { BULK_GET_RULES_RESPONSE } from './bulk_get_rules_oas_example';
 import { RULE_TAGS_RESPONSE } from './get_rule_tags_oas_example';
@@ -41,8 +41,8 @@ describe('rule OAS example payloads', () => {
     expect(createRuleDataSchema.safeParse(CREATE_RULE_REQUEST).success).toBe(true);
   });
 
-  it('keeps update request example valid against updateRuleBodySchema', () => {
-    expect(updateRuleBodySchema.safeParse(UPDATE_RULE_REQUEST).success).toBe(true);
+  it('keeps update request example valid against updateRuleDataSchema', () => {
+    expect(updateRuleDataSchema.safeParse(UPDATE_RULE_REQUEST).success).toBe(true);
   });
 
   it('keeps bulk-operation request examples valid against bulkByIdsSchema', () => {
