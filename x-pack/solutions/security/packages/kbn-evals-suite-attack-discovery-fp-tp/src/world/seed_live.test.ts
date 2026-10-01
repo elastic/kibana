@@ -187,6 +187,20 @@ describe('seedFixture', () => {
     kbnRequest = jest.fn().mockResolvedValue({ statusCode: 200, body: {} });
   });
 
+  it('retries a 409 version conflict once before failing the seed', async () => {
+    esClient.create
+      .mockRejectedValueOnce(Object.assign(new Error('version conflict'), { statusCode: 409 }))
+      .mockResolvedValueOnce({});
+    await seedFixture({
+      esClient: esClient as unknown as EsClient,
+      kbnRequest,
+      world,
+      requireAttackDataStream: false,
+    });
+
+    expect(esClient.create).toHaveBeenCalledTimes(2);
+  });
+
   it('skips the data-stream preflight for the eval suite', async () => {
     esClient.indices.getDataStream.mockRejectedValueOnce(new Error('should not be called'));
 

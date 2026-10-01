@@ -84,6 +84,35 @@ const assertAttackDataStreamExists = async (esClient: EsClient, index: string): 
   }
 };
 
+/**
+ * Retries a create that 409s because a just-deleted document is still visible:
+ * serverless ignores the delete refresh, so reseeding the same id immediately
+ * can hit a stale version conflict. A short bounded retry lets the delete
+ * settle instead of failing the manual seed.
+ */
+const createWithConflictRetry = async (
+  esClient: EsClient,
+  params: { index: string; id: string; document: Record<string, unknown>; refresh?: string },
+  { attempts = 3, delayMs = 750 }: { attempts?: number; delayMs?: number } = {}
+): Promise<void> => {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await esClient.create({ ...params, refresh: params.refresh as never });
+      return;
+    } catch (error) {
+      const isConflict =
+        typeof error === 'object' &&
+        error !== null &&
+        ((error as { statusCode?: number }).statusCode === 409 ||
+          String((error as { meta?: { body?: { error?: { type?: string } } } }).meta?.body?.error?.type).includes('version_conflict'));
+      if (!isConflict || attempt >= attempts) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
+    }
+  }
+};
+
 const assertBulkOk = (label: string, result: { errors?: boolean; items?: unknown[] }): void => {
   if (result.errors !== true) {
     return;
@@ -484,7 +513,7 @@ export const seedFixture = async ({
       );
     }
     if (plan.attackDocument) {
-      await esClient.create({
+      await createWithConflictRetry(esClient, {
         index: plan.attackIndex,
         id: plan.attackId,
         document: plan.attackDocument,
