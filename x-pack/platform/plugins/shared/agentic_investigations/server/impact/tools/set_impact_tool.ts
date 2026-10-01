@@ -57,14 +57,16 @@ export const setImpactToolSchema = z.object({
     .string()
     .min(1)
     .max(MAX_EVIDENCE_TEXT_LENGTH)
+    .nullable()
     .optional()
     .describe(
-      'Business-facing account of the impact: what was affected, how badly, for how long, and how broadly (users, requests, regions).'
+      'Business-facing account of the impact: what was affected, how badly, for how long, and how broadly (users, requests, regions). Pass null to remove it.'
     ),
   evidence: investigationEvidenceSchema
+    .nullable()
     .optional()
     .describe(
-      'Evidence backing the summary when you do not report entities, ideally a chart of the user-facing failure signal.'
+      'Evidence backing the summary when you do not report entities, ideally a chart of the user-facing failure signal. Pass null to remove it.'
     ),
   entities: z
     .array(setImpactEntitySchema)
@@ -79,7 +81,7 @@ export type SetImpactToolParams = z.infer<typeof setImpactToolSchema>;
 
 const DESCRIPTION =
   'Record the impact of the investigated issue on the investigation, so it is shown to the user and kept with the conversation. ' +
-  'Each field you pass replaces the stored one; fields you leave out are kept. `entities` replaces the whole list. ' +
+  'Each field you pass replaces the stored one; fields you leave out are kept. `entities` replaces the whole list; pass `null` to remove `summary` or `evidence`, and `[]` to remove `entities`. ' +
   'Use one form: a `summary` with one top-level `evidence` for a single service or no specific component, or a `summary` with `entities` when two or more entities were affected in different ways, each with its own evidence. ' +
   'Call it again whenever your understanding of the impact changes. It does not end the investigation.';
 
@@ -87,7 +89,7 @@ export const SINGLE_IMPACT_ENTITY_WARNING =
   'The impact lists a single entity. Use the entity form only when two or more entities were affected in different ways: name the service in "summary", move its chart to "evidence", and pass "entities": []. Send a corrected call before your final output.';
 
 export const BOTH_IMPACT_FORMS_WARNING =
-  'The impact has both a top-level "evidence" and "entities". Use one or the other: top-level evidence for a single service or no specific component, entities only when two or more were affected in different ways. Send a corrected call before your final output.';
+  'The impact has both a top-level "evidence" and "entities". Use one or the other: top-level evidence for a single service or no specific component, entities only when two or more were affected in different ways. Remove the one you do not want with "evidence": null or "entities": []. Send a corrected call before your final output.';
 
 export const REMOVED_IMPACT_ATTACHMENT_NOTE =
   'The user removed the impact attachment from this conversation. The impact was recorded but is not shown in the conversation.';

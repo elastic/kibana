@@ -56,11 +56,24 @@ describe('getToolConversationId', () => {
             { type: 'agent', agentId: 'outer', conversationId: 'conv-outer' },
             { type: 'tool', toolId: 'x' },
             { type: 'agent', agentId: 'inner', conversationId: 'conv-inner' },
-            { type: 'agent', agentId: 'standalone' },
+            { type: 'tool', toolId: 'y' },
           ],
         },
       })
     ).toBe('conv-inner');
+  });
+
+  it('does not fall back to an outer conversation when the innermost agent has none', () => {
+    expect(
+      getToolConversationId({
+        runContext: {
+          stack: [
+            { type: 'agent', agentId: 'outer', conversationId: 'conv-outer' },
+            { type: 'agent', agentId: 'standalone' },
+          ],
+        },
+      })
+    ).toBeUndefined();
   });
 
   it('is undefined for a standalone run', () => {
