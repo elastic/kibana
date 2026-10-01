@@ -22,17 +22,21 @@ import type {
   Severity,
 } from '@kbn/nightshift-investigations-plugin/common';
 import type {
+  EvidenceChart,
+  EvidenceChartAnnotation,
+  EvidenceChartSeries,
+  InvestigationEvidence,
   InvestigationHypothesis,
   InvestigationImpact,
   InvestigationRecommendation,
 } from '@kbn/significant-events-schema';
 
 const SO_TYPE = 'nightshift-investigation';
-const TYPE_MIGRATION_VERSION = '10.3.0';
+const TYPE_MIGRATION_VERSION = '10.4.0';
 const ID_PREFIX = 'nightshift-seed-inv-';
 
-type Evidence = NonNullable<InvestigationHypothesis['evidence']>[number];
-type ImpactEntity = InvestigationImpact['entities'][number];
+type ImpactEntity = NonNullable<InvestigationImpact['entities']>[number];
+type ChartUnit = NonNullable<EvidenceChart['y_axis']['unit']>;
 
 interface InvestigationAttributes extends InvestigationStructuredOutput {
   title: string;
@@ -59,19 +63,102 @@ const now = Date.now();
 const iso = (minutesAgo: number): string =>
   new Date(now - minutesAgo * 60_000).toISOString().replace(/\.\d{3}Z$/, 'Z');
 
-const evidence = (description: string, esqlQuery: string, minutesAgo: number): Evidence => ({
-  description,
-  esql_query: esqlQuery,
-  time_range: { from: iso(minutesAgo + 60), to: iso(minutesAgo) },
+const GIB = 1024 ** 3;
+
+/** A time series whose last point is `endMinutesAgo` minutes ago, one point every `stepMinutes`. */
+const timeSeries = (
+  name: string,
+  endMinutesAgo: number,
+  values: number[],
+  stepMinutes = 5
+): EvidenceChartSeries => ({
+  name,
+  points: values.map((y, index) => ({
+    x: iso(endMinutesAgo + (values.length - 1 - index) * stepMinutes),
+    y,
+  })),
 });
+
+/** A point annotation, or a range annotation when `endMinutesAgo` is set. */
+const annotation = (
+  minutesAgo: number,
+  label: string,
+  endMinutesAgo?: number
+): EvidenceChartAnnotation => ({
+  x: iso(minutesAgo),
+  ...(endMinutesAgo !== undefined && { x_end: iso(endMinutesAgo) }),
+  label,
+});
+
+const timeChart = ({
+  title,
+  type = 'line',
+  yLabel,
+  unit,
+  stacked,
+  series,
+  annotations,
+}: {
+  title: string;
+  type?: EvidenceChart['type'];
+  yLabel: string;
+  unit?: ChartUnit;
+  stacked?: boolean;
+  series: EvidenceChartSeries[];
+  annotations?: EvidenceChartAnnotation[];
+}): EvidenceChart => ({
+  type,
+  title,
+  x_axis: { type: 'time' },
+  y_axis: { label: yLabel, ...(unit && { unit }) },
+  ...(stacked && { stacked }),
+  series,
+  ...(annotations && { annotations }),
+});
+
+const categoryChart = ({
+  title,
+  xLabel,
+  yLabel,
+  unit,
+  seriesName,
+  values,
+}: {
+  title: string;
+  xLabel: string;
+  yLabel: string;
+  unit?: ChartUnit;
+  seriesName: string;
+  values: Record<string, number>;
+}): EvidenceChart => ({
+  type: 'bar',
+  title,
+  x_axis: { type: 'category', label: xLabel },
+  y_axis: { label: yLabel, ...(unit && { unit }) },
+  series: [{ name: seriesName, points: Object.entries(values).map(([x, y]) => ({ x, y })) }],
+});
+
+const evidence = (description: string, chart?: EvidenceChart): InvestigationEvidence => ({
+  description,
+  ...(chart && { chart }),
+});
+
+/** Chart-only evidence, for when the surrounding text already says what the chart shows. */
+const chartEvidence = (chart: EvidenceChart): InvestigationEvidence => ({ chart });
 
 const hypothesis = (
   candidate: string,
   confidence: number,
   status: InvestigationHypothesis['status'],
   reason: string,
-  ...evidences: Evidence[]
-): InvestigationHypothesis => ({ candidate, confidence, status, reason, evidence: evidences });
+  ...evidences: InvestigationEvidence[]
+): InvestigationHypothesis => ({
+  candidate,
+  confidence,
+  status,
+  reason,
+  ...(evidences.length > 0 && { evidence: evidences }),
+});
 
 const recommendation = (
   title: string,
@@ -80,22 +167,18 @@ const recommendation = (
   code?: string
 ): InvestigationRecommendation => ({ title, confidence, description, ...(code && { code }) });
 
-const blindSpot = (title: string, confidence: number, description: string) => ({
-  title,
-  confidence,
-  description,
-});
-
 const entity = (
   name: string,
   type: string,
   streamName: string,
-  featureId?: string
+  featureId?: string,
+  entityEvidence?: InvestigationEvidence
 ): ImpactEntity => ({
   name,
   type,
   stream_name: streamName,
   ...(featureId && { feature_id: featureId }),
+  ...(entityEvidence && { evidence: entityEvidence }),
 });
 
 const completed = ({
@@ -105,17 +188,15 @@ const completed = ({
   minutesAgo,
   durationMinutes,
   triggerType = 'automatic',
-  entities,
   ...output
-}: Required<Pick<InvestigationStructuredOutput, 'summary' | 'conclusion'>> &
-  Pick<InvestigationStructuredOutput, 'hypotheses' | 'recommendations' | 'blind_spots'> & {
+}: Required<Pick<InvestigationStructuredOutput, 'summary' | 'conclusion' | 'impact'>> &
+  Pick<InvestigationStructuredOutput, 'hypotheses' | 'recommendations'> & {
     severity: Severity;
     title: string;
     subject: Subject;
     minutesAgo: number;
     durationMinutes: number;
     triggerType?: InvestigationTriggerType;
-    entities: ImpactEntity[];
   }): InvestigationAttributes => ({
   title,
   status: 'completed',
@@ -130,7 +211,6 @@ const completed = ({
   completed_at: iso(minutesAgo),
   executed_by: 'elastic',
   ...output,
-  impact: { entities },
 });
 
 const unfinished = ({
@@ -186,25 +266,43 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'confirmed',
         'Latency starts with the rollout, and only routes behind the auth middleware slow down.',
         evidence(
-          'P95 latency on web-frontend crosses 800ms within ten minutes of the deploy.',
-          'FROM logs.web-frontend\n| WHERE service.name == "web-frontend"\n| STATS p95 = PERCENTILE(transaction.duration.us, 95) BY minute = BUCKET(@timestamp, 5 minutes)\n| SORT minute DESC',
-          40
+          'P95 latency on web-frontend crosses **800ms** within ten minutes of the deploy.',
+          timeChart({
+            title: 'web-frontend P95 latency',
+            yLabel: 'P95 latency',
+            unit: 'ms',
+            series: [
+              timeSeries(
+                'P95 latency',
+                40,
+                [118, 121, 119, 124, 122, 410, 760, 870, 890, 885, 892, 888]
+              ),
+            ],
+            annotations: [annotation(70, 'api-gateway v2.8.1 rollout')],
+          })
         ),
         evidence(
-          'api-gateway logs show event loop lag warnings from the auth middleware.',
-          'FROM logs.api-gateway\n| WHERE message LIKE "*event loop lag*"\n| STATS count = COUNT(*) BY minute = BUCKET(@timestamp, 5 minutes)',
-          40
+          'api-gateway logs show event loop lag warnings from `authMiddleware` from the rollout onwards.',
+          timeChart({
+            title: 'Event loop lag warnings on api-gateway',
+            type: 'bar',
+            yLabel: 'Warnings per 5 minutes',
+            unit: 'number',
+            series: [
+              timeSeries('Warnings', 40, [0, 0, 0, 0, 0, 140, 310, 355, 362, 348, 371, 360]),
+            ],
+          })
         )
       ),
       hypothesis(
         'CDN cache miss storm after asset purge',
-        0.12,
+        0.03,
         'dismissed',
         'Static asset latency stayed flat. Only API routes slowed down.'
       ),
       hypothesis(
         'Postgres connection pool exhaustion',
-        0.35,
+        0.04,
         'dismissed',
         'Pool utilisation peaked at 60%. Blocked queries wait on the event loop, not on connections.'
       ),
@@ -222,17 +320,28 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'Keeps the new auth checks without a database round trip on each request.'
       ),
     ],
-    blind_spots: [
-      blindSpot(
-        'No database spans in traces',
-        0.6,
-        'api-gateway does not export Postgres spans, so query duration is inferred from logs.'
+    impact: {
+      summary:
+        'Signed-in users saw login and page loads slow from about 0.1s to 0.9s for the 35 minutes since the rollout. About 18% of login attempts timed out, across all regions.',
+      evidence: chartEvidence(
+        timeChart({
+          title: 'Login attempts by outcome',
+          type: 'bar',
+          yLabel: 'Attempts per 5 minutes',
+          unit: 'number',
+          stacked: true,
+          series: [
+            timeSeries(
+              'Succeeded',
+              40,
+              [4210, 4180, 4250, 4190, 4230, 3620, 3450, 3480, 3440, 3470, 3460, 3450]
+            ),
+            timeSeries('Timed out', 40, [8, 11, 9, 7, 10, 610, 760, 770, 780, 765, 772, 768]),
+          ],
+          annotations: [annotation(70, 'api-gateway v2.8.1 rollout')],
+        })
       ),
-    ],
-    entities: [
-      entity('web-frontend', 'service', 'logs.web-frontend', 'web-frontend'),
-      entity('api-gateway', 'service', 'logs.api-gateway', 'api-gateway'),
-    ],
+    },
   }),
   completed({
     severity: '80-critical',
@@ -255,14 +364,31 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'confirmed',
         'Heap growth rate matches payment throughput, and a heap dump shows millions of retained Transaction objects.',
         evidence(
-          'Heap used climbs linearly between restarts.',
-          'FROM logs.payment-service\n| STATS max_heap = MAX(jvm.memory.heap.used) BY minute = BUCKET(@timestamp, 5 minutes)\n| SORT minute DESC',
-          95
+          'Heap used climbs linearly between restarts and drops back to about 512MB after each OOM kill.',
+          timeChart({
+            title: 'payment-service heap used',
+            yLabel: 'Heap used',
+            unit: 'bytes',
+            series: [
+              timeSeries(
+                'Heap used',
+                95,
+                [0.55, 0.9, 1.3, 1.7, 2.0, 0.52, 0.88, 1.25, 1.65, 1.98, 0.54, 0.9].map((gib) =>
+                  Math.round(gib * GIB)
+                ),
+                15
+              ),
+            ],
+            annotations: [annotation(185, 'OOM kill'), annotation(110, 'OOM kill')],
+          })
+        ),
+        evidence(
+          'The heap dump from the last OOM kill is dominated by retained transactions:\n\n| Class | Instances | Retained |\n| --- | --- | --- |\n| `Transaction` | 2.1M | 1.4GB |\n| `BatchEntry` | 2.1M | 310MB |\n| `byte[]` | 0.9M | 120MB |'
         )
       ),
       hypothesis(
         'Container memory limit lowered in the last Helm release',
-        0.2,
+        0.05,
         'dismissed',
         'The limit has been 2Gi for three months.'
       ),
@@ -279,8 +405,19 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'Fixes the root cause so the flag can be enabled again.'
       ),
     ],
-    blind_spots: [],
-    entities: [entity('payment-service', 'service', 'logs.payment-service', 'payment-service')],
+    impact: {
+      summary:
+        'Each payment-service OOM restart drops the payments in flight on that pod. Over the last three hours about 1.2% of payment attempts failed, in short bursts roughly every 45 minutes.',
+      evidence: chartEvidence(
+        timeChart({
+          title: 'Failed payment attempts',
+          type: 'bar',
+          yLabel: 'Failures per 15 minutes',
+          unit: 'number',
+          series: [timeSeries('Failed payments', 95, [3, 4, 2, 5, 6, 212, 3, 4, 5, 6, 198, 4], 15)],
+        })
+      ),
+    },
   }),
   completed({
     severity: '80-critical',
@@ -303,14 +440,29 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'confirmed',
         'All oversized indices were created before the migration and have no lifecycle policy.',
         evidence(
-          'Disk used is above 85% on three data nodes.',
-          'FROM logs.elasticsearch\n| EVAL disk_used_pct = 100 - (elasticsearch.node.stats.fs.total.available_in_bytes / elasticsearch.node.stats.fs.total.total_in_bytes * 100)\n| WHERE disk_used_pct > 85\n| KEEP @timestamp, elasticsearch.node.name, disk_used_pct',
-          150
+          'Three data nodes are above the 90% high watermark.',
+          categoryChart({
+            title: 'Disk used per data node',
+            xLabel: 'Node',
+            yLabel: 'Disk used',
+            unit: 'percent',
+            seriesName: 'Disk used',
+            values: {
+              'es-data-0': 93,
+              'es-data-1': 91,
+              'es-data-2': 92,
+              'es-data-3': 71,
+              'es-data-4': 68,
+            },
+          })
+        ),
+        evidence(
+          'The largest hot-tier indices have no lifecycle policy:\n\n| Index | Size | ILM policy |\n| --- | --- | --- |\n| `logs-2026.08.01` | 412GB | none |\n| `logs-2026.08.02` | 405GB | none |\n| `logs-2026.08.03` | 398GB | none |'
         )
       ),
       hypothesis(
         'Ingest volume spike',
-        0.25,
+        0.03,
         'dismissed',
         'Ingest rate is within 5% of the weekly baseline.'
       ),
@@ -323,21 +475,21 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'PUT logs-2026.08.*/_settings\n{ "index.lifecycle.name": "logs-default" }'
       ),
     ],
-    blind_spots: [
-      blindSpot(
-        'Snapshot repository health not checked',
-        0.4,
-        'Deleting indices is only safe if the latest snapshot succeeded.'
+    impact: {
+      summary:
+        'About 7% of log ingest has been rejected for the last 40 minutes, so logs from all 12 services writing to this cluster are incomplete. Search on existing data is unaffected.',
+      evidence: chartEvidence(
+        timeChart({
+          title: 'Rejected bulk requests',
+          yLabel: 'Rejected share',
+          unit: 'percent',
+          series: [
+            timeSeries('Rejected', 150, [0, 0, 0.1, 0, 2.4, 6.8, 7.1, 7.3, 6.9, 7.2, 7.0, 7.1]),
+          ],
+          annotations: [annotation(185, 'es-data-2 crosses 90%')],
+        })
       ),
-    ],
-    entities: [
-      entity(
-        'Elasticsearch data nodes',
-        'infrastructure',
-        'logs.elasticsearch',
-        'elasticsearch-data'
-      ),
-    ],
+    },
   }),
   completed({
     severity: '60-high',
@@ -356,14 +508,21 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'confirmed',
         'All rejected tokens carry the new key ID, and pods restarted after the rotation accept them.',
         evidence(
-          '401 share on api-gateway doubles during the rotation window.',
-          'FROM logs.api-gateway\n| EVAL unauthorized = CASE(http.response.status_code == 401, 1, 0)\n| STATS rate = AVG(unauthorized) * 100 BY minute = BUCKET(@timestamp, 5 minutes)',
-          70
+          '401 share on api-gateway doubles during the rotation window. Every rejected token carries the new `kid`.',
+          timeChart({
+            title: '401 share on api-gateway',
+            yLabel: '401 share',
+            unit: 'percent',
+            series: [
+              timeSeries('401 share', 70, [4.1, 3.9, 4.2, 4.0, 8.6, 9.1, 8.8, 9.0, 8.7, 8.9]),
+            ],
+            annotations: [annotation(95, 'IdP key rotation')],
+          })
         )
       ),
       hypothesis(
         'Clock skew between pods and the IdP',
-        0.15,
+        0.04,
         'dismissed',
         'NTP offset is under 50ms on all nodes.'
       ),
@@ -380,11 +539,25 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'Prevents the same failure on the next rotation.'
       ),
     ],
-    blind_spots: [],
-    entities: [
-      entity('api-gateway', 'service', 'logs.api-gateway', 'api-gateway'),
-      entity('web-frontend', 'service', 'logs.web-frontend', 'web-frontend'),
-    ],
+    impact: {
+      summary:
+        'About one in five logins has failed since the key rotation 30 minutes ago. Users who were already signed in are unaffected until their token is refreshed.',
+      evidence: chartEvidence(
+        timeChart({
+          title: 'Failed logins on web-frontend',
+          yLabel: 'Failed share',
+          unit: 'percent',
+          series: [
+            timeSeries(
+              'Failed logins',
+              70,
+              [1.2, 1.1, 1.3, 1.2, 19.4, 21.0, 20.2, 20.8, 19.9, 20.5]
+            ),
+          ],
+          annotations: [annotation(95, 'IdP key rotation')],
+        })
+      ),
+    },
   }),
   completed({
     severity: '60-high',
@@ -407,20 +580,31 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'confirmed',
         'Retry warnings start with the outage and continue after the registry recovered.',
         evidence(
-          'Lag grows on all partitions after the outage.',
-          'FROM logs.kafka-cluster\n| WHERE kafka.consumergroup.id == "order-processors"\n| STATS max_lag = MAX(kafka.consumergroup.lag) BY minute = BUCKET(@timestamp, 5 minutes)',
-          30
+          'Lag grows on all partitions after the outage and keeps growing after the registry recovered.',
+          timeChart({
+            title: 'order-processors consumer lag',
+            yLabel: 'Messages behind',
+            unit: 'number',
+            series: [
+              timeSeries(
+                'Lag',
+                30,
+                [1200, 1500, 1100, 180000, 520000, 910000, 1300000, 1700000, 2050000, 2400000]
+              ),
+            ],
+            annotations: [annotation(62, 'Schema registry outage', 60)],
+          })
         )
       ),
       hypothesis(
         'Broker partition leader imbalance',
-        0.3,
+        0.05,
         'dismissed',
         'Leaders are balanced across brokers.'
       ),
       hypothesis(
         'Downstream order DB slowness',
-        0.2,
+        0.1,
         'investigating',
         'DB latency rose slightly but may be a side effect.'
       ),
@@ -432,17 +616,25 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'Clears the cached failure and restores throughput.'
       ),
     ],
-    blind_spots: [
-      blindSpot(
-        'No consumer-side metrics',
-        0.5,
-        'Only broker-side lag is available for this group.'
+    impact: {
+      summary:
+        'order-processing confirms orders about 25 minutes late and the delay is still growing. No orders have been lost: they are all waiting in Kafka.',
+      evidence: chartEvidence(
+        timeChart({
+          title: 'Orders processed per second',
+          yLabel: 'Orders per second',
+          unit: 'number',
+          series: [
+            timeSeries(
+              'Throughput',
+              30,
+              [15100, 14900, 15200, 3100, 2900, 3000, 3200, 2950, 3050, 3000]
+            ),
+          ],
+          annotations: [annotation(62, 'Schema registry outage', 60)],
+        })
       ),
-    ],
-    entities: [
-      entity('order-processors', 'consumer_group', 'logs.kafka-cluster', 'order-processors'),
-      entity('order-processing', 'service', 'logs.order-processing'),
-    ],
+    },
   }),
   completed({
     severity: '60-high',
@@ -465,9 +657,14 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'confirmed',
         'Error spikes and pod restarts share the same timestamps.',
         evidence(
-          'payment-service logs show restarts at each spike.',
-          'FROM logs.payment-service\n| WHERE message LIKE "*OOMKilled*"\n| KEEP @timestamp, message',
-          100
+          'payment-service pods were `OOMKilled` at each checkout error spike.',
+          timeChart({
+            title: 'payment-service pod restarts',
+            type: 'bar',
+            yLabel: 'Restarts per 10 minutes',
+            unit: 'number',
+            series: [timeSeries('Restarts', 100, [0, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0], 10)],
+          })
         )
       ),
     ],
@@ -478,11 +675,43 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'Avoids duplicate pages for one root cause.'
       ),
     ],
-    blind_spots: [],
-    entities: [
-      entity('payment-service', 'service', 'logs.payment-service', 'payment-service'),
-      entity('web-frontend', 'service', 'logs.web-frontend', 'web-frontend'),
-    ],
+    impact: {
+      summary:
+        'Checkout fails for about 8% of shoppers for roughly ten minutes after each payment-service restart, three times in the last two hours. Checkout is healthy in between.',
+      entities: [
+        entity(
+          'web-frontend',
+          'service',
+          'logs.web-frontend',
+          'web-frontend',
+          evidence(
+            'Shoppers get a payment error on the last step; their carts are kept, so most retry.',
+            timeChart({
+              title: 'Checkout error rate',
+              yLabel: 'Error rate',
+              unit: 'percent',
+              series: [
+                timeSeries(
+                  'Error rate',
+                  100,
+                  [0.4, 8.1, 3.2, 0.5, 0.4, 7.9, 2.9, 0.4, 8.3, 3.0, 0.5, 0.4],
+                  10
+                ),
+              ],
+            })
+          )
+        ),
+        entity(
+          'payment-service',
+          'service',
+          'logs.payment-service',
+          'payment-service',
+          evidence(
+            'Payment calls from checkout fail while each pod restarts:\n\n| Restart | Failed calls | Duration |\n| --- | --- | --- |\n| 1 | 212 | 9 min |\n| 2 | 198 | 11 min |\n| 3 | 205 | 10 min |'
+          )
+        ),
+      ],
+    },
   }),
   completed({
     severity: '40-medium',
@@ -505,9 +734,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'confirmed',
         'Only products created after the deploy are missing.',
         evidence(
-          'Empty search messages start at the deploy time.',
-          'FROM logs.web-frontend\n| WHERE message LIKE "*empty search*"\n| STATS count = COUNT(*) BY minute = BUCKET(@timestamp, 5 minutes)',
-          55
+          'The catalog index settings changed with the deploy:\n\n| Setting | Before | After |\n| --- | --- | --- |\n| `index.refresh_interval` | `1s` | `15m` |'
         )
       ),
     ],
@@ -518,14 +745,25 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'New SKUs become searchable again within seconds.'
       ),
     ],
-    blind_spots: [
-      blindSpot(
-        'Revenue impact unknown',
-        0.5,
-        'No conversion data is available for the affected SKUs.'
+    impact: {
+      summary:
+        'About 340 products published since the deploy do not show up in search for up to 15 minutes. Roughly 4% of searches return no results, up from 1%.',
+      evidence: chartEvidence(
+        timeChart({
+          title: 'Searches with no results',
+          yLabel: 'Empty-result share',
+          unit: 'percent',
+          series: [
+            timeSeries(
+              'Empty results',
+              55,
+              [1.0, 1.1, 0.9, 1.0, 3.2, 4.4, 5.1, 2.8, 4.1, 4.9, 2.9, 4.2]
+            ),
+          ],
+          annotations: [annotation(90, 'catalog-service deploy')],
+        })
       ),
-    ],
-    entities: [entity('web-frontend', 'service', 'logs.web-frontend', 'web-frontend')],
+    },
   }),
   completed({
     severity: '40-medium',
@@ -549,12 +787,19 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'confirmed',
         'Connection count peaks with the batch schedule.',
         evidence(
-          'Latency and connections rise at 02:00 each night.',
-          'FROM logs.cache-service\n| STATS p99 = PERCENTILE(event.duration, 99) BY hour = BUCKET(@timestamp, 1 hour)',
-          600
+          'Open connections hit the pool limit of **400** while the batch runs, and P99 latency follows.',
+          timeChart({
+            title: 'cache-service open connections',
+            yLabel: 'Connections',
+            unit: 'number',
+            series: [
+              timeSeries('Open connections', 600, [42, 45, 44, 400, 400, 400, 400, 60, 41, 44]),
+            ],
+            annotations: [annotation(630, 'price-sync batch', 610)],
+          })
         )
       ),
-      hypothesis('Redis RDB snapshot at 02:00', 0.3, 'dismissed', 'Snapshots run at 04:00.'),
+      hypothesis('Redis RDB snapshot at 02:00', 0.1, 'dismissed', 'Snapshots run at 04:00.'),
     ],
     recommendations: [
       recommendation(
@@ -563,8 +808,13 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'Keeps headroom for online traffic.'
       ),
     ],
-    blind_spots: [],
-    entities: [entity('cache-service', 'service', 'logs.cache-service', 'cache-service')],
+    impact: {
+      summary:
+        'For about 20 minutes each night, cart and pricing reads from cache-service slow from 2ms to 40ms P99. It is a low-traffic hour, so few shoppers notice, and there are no errors.',
+      evidence: evidence(
+        'P99 latency on cache-service during the batch window:\n\n| Window | P99 latency |\n| --- | --- |\n| 01:40–02:00 | 2ms |\n| 02:00–02:20 | 40ms |\n| 02:20–02:40 | 3ms |'
+      ),
+    },
   }),
   completed({
     severity: '20-low',
@@ -589,8 +839,9 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
       ),
     ],
     recommendations: [],
-    blind_spots: [],
-    entities: [entity('cache-service', 'service', 'logs.cache-service', 'cache-service')],
+    impact: {
+      summary: 'No user-facing impact. Throughput, latency, and error rates stayed flat.',
+    },
   }),
   completed({
     severity: '20-low',
@@ -613,9 +864,7 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
         'confirmed',
         'cert-manager logs show forbidden errors since the RBAC change.',
         evidence(
-          'Certificate expiry warnings on ingress.',
-          'FROM logs.ingress-controller\n| WHERE message LIKE "*certificate*expir*"\n| KEEP @timestamp, message',
-          1300
+          'cert-manager has failed every renewal attempt since the RBAC change with:\n\n```\nsecrets "dns01-solver" is forbidden: User "system:serviceaccount:cert-manager:cert-manager" cannot get resource "secrets"\n```'
         )
       ),
     ],
@@ -627,10 +876,13 @@ const INVESTIGATIONS: InvestigationAttributes[] = [
       ),
       recommendation('Alert on renewal failures', 0.7, 'Catches silent failures before expiry.'),
     ],
-    blind_spots: [],
-    entities: [
-      entity('Ingress controller', 'service', 'logs.ingress-controller', 'ingress-controller'),
-    ],
+    impact: {
+      summary:
+        'No user-facing impact yet. Without the manual renewal, every internal HTTPS endpoint behind the ingress controller would have failed TLS in 48 hours.',
+      evidence: evidence(
+        'The `*.internal` wildcard certificate served by the ingress was 48 hours from expiry before the manual renewal. The last automated renewal succeeded 58 days ago.'
+      ),
+    },
   }),
   unfinished({
     status: 'running',
