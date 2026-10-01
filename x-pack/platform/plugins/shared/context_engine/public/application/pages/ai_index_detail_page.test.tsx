@@ -137,6 +137,13 @@ const createServices = () => {
   services.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
   );
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    workflowsManagement: {
+      ...services.application.capabilities.workflowsManagement,
+      createWorkflow: true,
+    },
+  };
   return services;
 };
 

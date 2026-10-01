@@ -68,7 +68,22 @@ const sources: AiIndexSource[] = [
   { type: 'esql', value: 'FROM c' },
 ];
 
-const renderWithProviders = (ui: React.ReactElement, services = coreMock.createStart()) => {
+const createServices = (canReadConnectors = true) => {
+  const services = coreMock.createStart();
+  services.application.capabilities = {
+    ...services.application.capabilities,
+    actions: {
+      ...services.application.capabilities.actions,
+      show: canReadConnectors,
+    },
+  };
+  return services;
+};
+
+const renderWithProviders = (
+  ui: React.ReactElement,
+  services = createServices()
+) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <I18nProvider>
@@ -186,6 +201,23 @@ describe('SourcesPanel', () => {
     );
 
     expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: true });
+  });
+
+  it('does not fetch connectors for connector sources without Actions read', () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{
+          ...baseAiIndex,
+          sources: [{ type: 'connector', value: 'connector-gdrive' }],
+        }}
+        onSaved={jest.fn()}
+        isManaged={false}
+      />,
+      createServices(false)
+    );
+
+    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: false });
   });
 
   it('resolves the connector name for connector sources', () => {

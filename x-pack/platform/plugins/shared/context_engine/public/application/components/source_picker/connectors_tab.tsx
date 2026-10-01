@@ -27,6 +27,7 @@ import { noop } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { contextEngineQueryKeys } from '../../hooks/query_keys';
+import { useCanReadConnectors } from '../../hooks/use_can_read_connectors';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { AiIndexDetailPanelEmptyPrompt } from '../ai_index_detail/ai_index_detail_panel_empty_prompt';
@@ -188,7 +189,7 @@ export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabP
   } = useKibana();
 
   const canCreateConnector = application?.capabilities.actions?.save === true;
-  const canReadConnectors = application?.capabilities.actions?.show === true;
+  const canReadConnectors = useCanReadConnectors();
 
   const shouldLoadConnectors = hasFocused || searchValue.trim().length > 0;
 
