@@ -61,6 +61,7 @@ interface Props {
   isSnoozeLoading?: boolean;
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
+  size?: EuiFlyoutProps['size'];
 }
 
 const { Header, Body, Footer } = FlyoutTemplate;
@@ -82,6 +83,7 @@ export const ActionPolicyDetailsFlyout = ({
   isSnoozeLoading = false,
   session = 'start',
   ownFocus = false,
+  size = 'm',
 }: Props) => {
   const settings = useService(CoreStart('settings'));
   const canReadRules = useService(UserCapabilities).canRead('rules');
@@ -107,7 +109,7 @@ export const ActionPolicyDetailsFlyout = ({
     <>
       <FlyoutTemplate
         type="overlay"
-        size="m"
+        size={size}
         resizable
         ownFocus={ownFocus}
         session={session}

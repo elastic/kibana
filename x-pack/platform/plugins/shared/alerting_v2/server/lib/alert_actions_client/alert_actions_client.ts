@@ -195,7 +195,7 @@ export class AlertActionsClient {
       if (latestOfGroup?.episode_id !== episodeId) {
         throw Boom.conflict(getEpisodeNotLatestMessage(episodeId, alertEvent.group_hash), {
           code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
-          details: { episode_id: episodeId, group_hash: alertEvent.group_hash },
+          details: { alert_id: episodeId, group_hash: alertEvent.group_hash },
         });
       }
     }
@@ -358,7 +358,7 @@ export class AlertActionsClient {
       loadLatestAlertEventsByEpisodeId({
         queryService: this.queryService,
         spaceId: this.spaceId,
-        episodeIds: items.map((item) => item.episode_id),
+        episodeIds: items.map((item) => item.alert_id),
       }),
     ]);
 
@@ -368,7 +368,7 @@ export class AlertActionsClient {
     // every series a lifecycle item points at (see isLifecycleActionType).
     const lifecycleGroupHashes = items
       .filter((item) => isLifecycleActionType(item.action_type))
-      .map((item) => eventByEpisodeId.get(item.episode_id)?.group_hash)
+      .map((item) => eventByEpisodeId.get(item.alert_id)?.group_hash)
       .filter((groupHash): groupHash is string => groupHash !== undefined);
     const latestOfGroups = await loadLatestAlertEventsByGroupHash({
       queryService: this.queryService,
@@ -383,13 +383,13 @@ export class AlertActionsClient {
     const prepared: PreparedAction[] = [];
 
     for (const item of items) {
-      const alertEvent = eventByEpisodeId.get(item.episode_id);
+      const alertEvent = eventByEpisodeId.get(item.alert_id);
 
       if (!alertEvent) {
         errors.push(
-          toBulkActionError(item.episode_id, {
+          toBulkActionError(item.alert_id, {
             code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
-            message: getAlertEpisodeNotFoundMessage(item.episode_id),
+            message: getAlertEpisodeNotFoundMessage(item.alert_id),
           })
         );
         continue;
@@ -397,12 +397,12 @@ export class AlertActionsClient {
 
       if (
         isLifecycleActionType(item.action_type) &&
-        latestEpisodeIdByGroupHash.get(alertEvent.group_hash) !== item.episode_id
+        latestEpisodeIdByGroupHash.get(alertEvent.group_hash) !== item.alert_id
       ) {
         errors.push(
-          toBulkActionError(item.episode_id, {
+          toBulkActionError(item.alert_id, {
             code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
-            message: getEpisodeNotLatestMessage(item.episode_id, alertEvent.group_hash),
+            message: getEpisodeNotLatestMessage(item.alert_id, alertEvent.group_hash),
             details: { group_hash: alertEvent.group_hash },
           })
         );
@@ -420,7 +420,7 @@ export class AlertActionsClient {
         );
       } catch (error) {
         if (Boom.isBoom(error) && EXPECTED_BULK_ITEM_STATUS_CODES.has(error.output.statusCode)) {
-          errors.push(boomToBulkActionError(item.episode_id, error));
+          errors.push(boomToBulkActionError(item.alert_id, error));
           continue;
         }
         throw error;
@@ -445,7 +445,7 @@ export class AlertActionsClient {
     docEpisodeId: string | null;
   }): AlertActionDocument {
     const { action, alertEvent, userProfileUid, docEpisodeId } = params;
-    const actionData = omit(action, ['group_hash', 'episode_id', 'action_type']);
+    const actionData = omit(action, ['group_hash', 'alert_id', 'action_type']);
     const storageActionData =
       action.action_type === ALERT_EPISODE_ACTION_TYPE.SNOOZE
         ? { ...omit(actionData, ['snoozed_until']), expiry: action.snoozed_until }

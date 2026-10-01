@@ -31,9 +31,8 @@ export const ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH =
   `${ALERTING_V2_INTERNAL_RULE_API_PATH}/_match` as const;
 export const ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH =
   '/internal/alerting/v2/change_history/rules' as const;
-export const ALERTING_V2_ALERT_API_PATH = '/api/alerting/v2/alerts' as const;
 export const ALERTING_V2_INTERNAL_SERIES_API_PATH = '/internal/alerting/v2/series' as const;
-export const ALERTING_V2_EPISODES_API_PATH = '/api/alerting/v2/episodes' as const;
+export const ALERTING_V2_EPISODES_API_PATH = '/api/alerting/v2/alerts' as const;
 export const ALERTING_V2_ACTION_POLICY_API_PATH = '/api/alerting/v2/action_policies' as const;
 export const ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH =
   '/internal/alerting/v2/action_policies' as const;

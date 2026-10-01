@@ -197,10 +197,7 @@ export function CreateDatasetWizardPage({
                   id="settings"
                   label={createDatasetWizardStrings.additionalStepLabel}
                 >
-                  <div
-                    data-test-subj="createDatasetWizardContent"
-                    style={{ width: '100%', maxWidth: MAX_WIDTH_NARROW_PX }}
-                  >
+                  <div data-test-subj="createDatasetWizardContent">
                     <StepAdditional />
                   </div>
                 </FormWizardStep>
