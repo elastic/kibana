@@ -38,7 +38,7 @@ export const getRecommendedQueriesTemplates = ({
 }): QueryTemplate[] => {
   // Recommend TBUCKET for @timestamp fields as it is smarter and has easier to understand syntax
   const bucketExpression =
-    timeField === '@timestamp' ? 'TBUCKET(50)' : `BUCKET(${timeField}, 50, ?_tstart, ?_tend)`;
+    timeField === '@timestamp' ? 'TBUCKET(50)' : `BUCKET(${timeField}, 100, ?_tstart, ?_tend)`;
 
   const commentDescription =
     timeField !== '@timestamp'

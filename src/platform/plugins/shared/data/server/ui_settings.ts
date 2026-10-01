@@ -287,7 +287,7 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.histogram.barTargetTitle', {
         defaultMessage: 'Target buckets',
       }),
-      value: 50,
+      value: 100,
       description: i18n.translate('data.advancedSettings.histogram.barTargetText', {
         defaultMessage:
           'Attempt to generate around this many buckets when using "auto" interval in date and numeric histograms',

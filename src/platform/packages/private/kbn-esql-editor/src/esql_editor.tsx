@@ -194,7 +194,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const esqlService = kibana.services?.esql;
   const variablesService = esqlService?.variablesService;
-  const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
+  const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 100;
   const [code, setCode] = useState<string>(fixedQuery ?? '');
 
   // To make server side errors less "sticky", register the query that last errored
