@@ -41,8 +41,8 @@ are in, not of the analysis, and you find out from the tools you were given and 
 attachment or system prompt says:
 
 - **When the run says to apply**, load `ai-index-automations` and author the change through the
-  save path the run gives you. How to sequence that with the user — what to ask, when to show a
-  diff, when to save — comes from the run, not from here.
+  save path you were given. How to sequence that with the user — what to ask, when to show a
+  diff, when to save — comes from the agent's instructions, not from here.
 - **When nothing grants you that**, and always when the run is unattended, the proposal *is* the
   deliverable. Describe the change precisely enough to act on and stop there.
 

@@ -627,8 +627,8 @@ Present the subagent's summary and its pilot indicators before you save. The sav
 the workflow and the index but shows none of its content, so that account is the only thing the user
 has to approve on.
 
-**State the time estimate from the pilot in the same message.** The save dialog approves a run over
-the whole corpus, so the cost of that run has to be on the table before it opens. Take the pilot's
+**State the time estimate from the pilot in the same message.** The run dialog approves the full run
+over the filtered corpus, so the cost of that run has to be on the table before it opens. Take the pilot's
 duration and the number of units it wrote, divide to get a per-unit time, and multiply by the
 number of units the saved run will write: the unit count from the proposal's Unit section
 (units, not rows — a unit profile over 62,884 sales rows may have 2,517 units), or the
@@ -652,8 +652,8 @@ handful of documents that get deleted afterwards. Running the saved automation i
 it writes indicators across the whole corpus and costs model calls on every document it touches.
 
 Saving an automation and running it are two separate operations, each with its own confirmation
-dialog. That is `save_automation`. The install tool is neither: it does not
-confirm and it does not start a run.
+dialog: `save_automation` confirms the save and `run_automation` confirms the run. The install tool
+is neither: it does not confirm and it does not start a run.
 
 **Index metadata, bottom-up document and unit profile** — call
 `platform.context_engine.install_automation_template` once. Pass `template: index_metadata`,
@@ -662,7 +662,7 @@ write the YAML and do not call
 `platform.context_engine.save_automation` for these. If this template is already an automation on
 the AI index, the tool replaces that workflow's definition and keeps the same workflow id. The
 result says `replaced: true` when it did. It does not add a second automation and it does not start
-a run. Do not look for `run.started`. The document summary workflow is
+a run. The document summary workflow is
 `system-context-engine-document-summary`. It is not attached to the AI index.
 
 **Every other strategy** — call `platform.context_engine.save_automation`. The tool confirms the save

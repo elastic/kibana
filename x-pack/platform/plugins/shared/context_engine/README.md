@@ -452,8 +452,9 @@ only in the skill because the briefing is the one part of a run that cannot be
 replaced by configuring a different agent.
 
 The `platform.context_engine.ai_index` attachment is not used: it carries the
-`save_automation` tool and instructions to ask the user questions, which belong
-to the interactive setup conversation.
+install and save tools and the authority to write to the index, which belong to
+the interactive setup conversation. How that conversation asks the user is in
+the Context Engine agent's instructions.
 
 The `ai.agent` step runs under the workflow owner's identity — the user who
 turned analysis on. The conversation it creates is private to that user, Agent
