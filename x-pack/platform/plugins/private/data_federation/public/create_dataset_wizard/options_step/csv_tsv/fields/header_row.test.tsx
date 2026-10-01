@@ -35,22 +35,35 @@ const getInput = (getByTestId: ReturnType<typeof render>['getByTestId']): HTMLIn
   return input;
 };
 
+const openComboBox = async (getByTestId: ReturnType<typeof render>['getByTestId']) => {
+  await act(async () => {
+    fireEvent.click(getInput(getByTestId));
+  });
+};
+
 describe('HeaderRow', () => {
   it('reports the selected option as valid', async () => {
     const onChange = jest.fn();
     const { getByTestId, getByRole } = renderComponent({ onChange });
 
-    await act(async () => {
-      fireEvent.click(getInput(getByTestId));
-    });
+    await openComboBox(getByTestId);
 
     await act(async () => {
       fireEvent.click(
-        getByRole('option', { name: createDatasetWizardStrings.settingsHeaderRowFalse })
+        getByRole('option', { name: new RegExp(createDatasetWizardStrings.falseLabel) })
       );
     });
 
     expect(onChange).toHaveBeenLastCalledWith({ value: 'false', isValid: true });
+  });
+
+  it('shows a description for each option', async () => {
+    const { getByTestId, getByText } = renderComponent();
+
+    await openComboBox(getByTestId);
+
+    expect(getByText(createDatasetWizardStrings.settingsHeaderRowTrueDescription)).toBeVisible();
+    expect(getByText(createDatasetWizardStrings.settingsHeaderRowFalseDescription)).toBeVisible();
   });
 
   it('clearing the selection results in empty form value', async () => {
@@ -81,12 +94,12 @@ describe('HeaderRow', () => {
 
     await act(async () => {
       fireEvent.change(getInput(getByTestId), {
-        target: { value: createDatasetWizardStrings.settingsHeaderRowFalse.slice(0, 2) },
+        target: { value: createDatasetWizardStrings.falseLabel.slice(0, 2) },
       });
     });
     await act(async () => {
       fireEvent.click(
-        getByRole('option', { name: createDatasetWizardStrings.settingsHeaderRowFalse })
+        getByRole('option', { name: new RegExp(createDatasetWizardStrings.falseLabel) })
       );
     });
 

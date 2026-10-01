@@ -1,5 +1,5 @@
 {
-  "sha1": "cd6522b764938e6aaa4b8dbdc79f85e4f5b99b45",
+  "sha1": "b840194f895993f618f8208fd90dbf55e4a3ba0e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -169,7 +169,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 118,
+        "line": 123,
         "column": 28
       }
     },
@@ -182,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 130,
-        "column": 25
+        "line": 145,
+        "column": 13
       }
     },
     {
@@ -195,7 +195,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 160,
+        "line": 175,
         "column": 14
       }
     },
@@ -208,7 +208,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 160,
+        "line": 175,
         "column": 14
       }
     },
@@ -221,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 160,
+        "line": 175,
         "column": 14
       }
     },
@@ -234,7 +234,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
-        "line": 180,
+        "line": 195,
         "column": 20
       }
     },
@@ -353,6 +353,19 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/list_and_get_service_accounts.spec.ts",
         "line": 335,
         "column": 40
+      }
+    },
+    {
+      "id": "5ac4e5e6b743160-8ca300758f25a84",
+      "title": "Classify real requests authenticated with an Elasticsearch service account token classifies the request as that service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/principal_service_account.spec.ts",
+        "line": 68,
+        "column": 13
       }
     }
   ]

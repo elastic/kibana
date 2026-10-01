@@ -1247,7 +1247,7 @@ describe('CreateDatasetWizardPage', () => {
     });
     await act(async () => {
       fireEvent.click(
-        getByRole('option', { name: createDatasetWizardStrings.settingsHeaderRowFalse })
+        getByRole('option', { name: new RegExp(createDatasetWizardStrings.falseLabel) })
       );
     });
     await waitFor(() => expect(getByTestId('nextButton')).toBeEnabled());

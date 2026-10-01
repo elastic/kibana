@@ -45,7 +45,7 @@ const STEPS: Array<{ id: DatasetWizardStepId; label: string }> = [
 ];
 const LAST_STEP_INDEX = STEPS.length - 1;
 const INITIAL_STEP_CONTENT: DatasetWizardStepContent = { validate: async () => true };
-const NARROW_STEPS: DatasetWizardStepId[] = ['dataset', 'settings'];
+const NARROW_STEPS: DatasetWizardStepId[] = ['dataset'];
 
 const MAX_WIDTH_NARROW_PX = 600;
 const MAX_WIDTH_WIDE_PX = 1024;
