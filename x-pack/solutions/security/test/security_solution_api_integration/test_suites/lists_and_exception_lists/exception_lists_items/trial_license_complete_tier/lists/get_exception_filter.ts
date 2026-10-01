@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -100,6 +100,28 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           },
         });
+      });
+
+      it('should return 400 when exceptions exceeds 1000 items', async () => {
+        const oversizedExceptions = Array.from({ length: 1_001 }, () => ({
+          description: 'd',
+          entries: [
+            { field: 'a', operator: 'included' as const, type: 'match' as const, value: 'b' },
+          ],
+          list_id: 'l',
+          name: 'n',
+          type: 'simple' as const,
+        }));
+
+        const { body } = await supertest
+          .post(`${INTERNAL_EXCEPTION_FILTER}`)
+          .set('kbn-xsrf', 'true')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .send({ exceptions: oversizedExceptions, type: 'exception_items' })
+          .expect(400);
+
+        expect(body.message).to.contain('exceptions cannot contain more than 1000 items');
       });
 
       it('should return 400 when exception_list_ids exceeds 10000 items', async () => {

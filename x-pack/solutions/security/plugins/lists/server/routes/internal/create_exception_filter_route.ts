@@ -20,6 +20,7 @@ import { getExceptionFilterRequest } from '../../../common/api';
 import { buildRouteValidation, buildSiemResponse } from '../utils';
 
 const MAX_EXCEPTION_LIST_IDS = 10_000;
+const MAX_EXCEPTIONS = 1_000;
 
 export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
   router.versioned
@@ -110,6 +111,13 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
             exceptionItems.push(...items);
           } else {
             const { exceptions } = request.body;
+            if (exceptions.length > MAX_EXCEPTIONS) {
+              return siemResponse.error({
+                body: `exceptions cannot contain more than ${MAX_EXCEPTIONS} items`,
+                statusCode: 400,
+              });
+            }
+
             exceptionItems.push(...exceptions);
           }
 
