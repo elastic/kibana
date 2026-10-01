@@ -9,11 +9,10 @@
 
 import fs from 'fs';
 import { execSync } from 'child_process';
+import { isAllowedArchiveUrl, isAllowedGcsObjectUrl } from './archive_url.ts';
 import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config.ts';
 
-const GCS_BASE_URL = 'https://storage.googleapis.com';
-const ALLOWED_MANIFEST_URL_PREFIX = `${GCS_BASE_URL}/${BASE_BUCKET_DAILY}/`;
-const ES_CLOUD_IMAGE_PREFIX = 'docker.elastic.co/kibana-ci/elasticsearch-cloud-ess:';
+const ALLOWED_MANIFEST_URL_PREFIX = `https://storage.googleapis.com/${BASE_BUCKET_DAILY}/`;
 
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(-SNAPSHOT)?$/;
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
@@ -25,10 +24,6 @@ function getExpectedSnapshotBucket(version: string, id: string) {
   return `${BASE_BUCKET_DAILY}/${version}/archives/${id}`;
 }
 
-function isAllowedArchiveUrl(url: string, bucket: string) {
-  return url.startsWith(`${GCS_BASE_URL}/${bucket}/`) || url.startsWith(ES_CLOUD_IMAGE_PREFIX);
-}
-
 (async () => {
   try {
     const MANIFEST_URL = process.argv[2];
@@ -37,7 +32,7 @@ function isAllowedArchiveUrl(url: string, bucket: string) {
       throw Error('Manifest URL missing');
     }
 
-    if (!new URL(MANIFEST_URL).href.startsWith(ALLOWED_MANIFEST_URL_PREFIX)) {
+    if (!isAllowedGcsObjectUrl(MANIFEST_URL, BASE_BUCKET_DAILY)) {
       throw Error(`Manifest URL must start with ${ALLOWED_MANIFEST_URL_PREFIX}: ${MANIFEST_URL}`);
     }
 
