@@ -21,6 +21,7 @@ import {
 // Nightshift investigations live in the shared `agenticInvestigations` and `proposals` plugins,
 // whose routes require these API privileges. Cross-plugin server imports are forbidden, so the
 // values are spelled out; the test pins them to the owners' strings.
+const AGENTIC_INVESTIGATIONS_API_PRIVILEGE_READ = 'read_investigations';
 const AGENTIC_INVESTIGATIONS_API_PRIVILEGE_MANAGE = 'manage_investigations';
 const PROPOSALS_API_PRIVILEGE_READ = 'read_proposals';
 const PROPOSALS_API_PRIVILEGE_MANAGE = 'manage_proposals';
@@ -41,6 +42,7 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         api: [
           NIGHTSHIFT_API_PRIVILEGES.read,
           NIGHTSHIFT_API_PRIVILEGES.manage,
+          AGENTIC_INVESTIGATIONS_API_PRIVILEGE_READ,
           AGENTIC_INVESTIGATIONS_API_PRIVILEGE_MANAGE,
           PROPOSALS_API_PRIVILEGE_READ,
           PROPOSALS_API_PRIVILEGE_MANAGE,
@@ -51,10 +53,12 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
       },
       read: {
         app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
-        // `agenticInvestigations` has no read-only investigations privilege yet, so read-only
-        // Nightshift users cannot use its investigation routes.
-        // TODO(ns-1619 s3): grant the read investigations API privilege added by the query API.
-        api: [NIGHTSHIFT_API_PRIVILEGES.read, PROPOSALS_API_PRIVILEGE_READ],
+        // Read-only Nightshift users can read investigations through the shared query API.
+        api: [
+          NIGHTSHIFT_API_PRIVILEGES.read,
+          AGENTIC_INVESTIGATIONS_API_PRIVILEGE_READ,
+          PROPOSALS_API_PRIVILEGE_READ,
+        ],
         ui: [NIGHTSHIFT_UI_PRIVILEGES.show],
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
         savedObject: { all: [], read: [NIGHTSHIFT_SOURCE_SO_TYPE] },
