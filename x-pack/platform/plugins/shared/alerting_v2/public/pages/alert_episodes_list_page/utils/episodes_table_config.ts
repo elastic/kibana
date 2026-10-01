@@ -14,26 +14,9 @@ import { ALERTING_V2_EPISODES_APP_ID, ALERTING_V2_SECTION_ID } from '@kbn/alerti
 /** Namespace for alerts table config inside the `_a` app-state blob */
 export const ALERTS_TABLE_APP_STATE_KEY = 'alertsTable' as const;
 
-/**
- * Legacy namespace used before the episode → alert rename. Read as a fallback
- * when `ALERTS_TABLE_APP_STATE_KEY` is absent so existing bookmarks keep
- * resolving; writes always emit the new key and purge the old one. Follow-up
- * removes this once bookmarks have had a release to migrate.
- */
-export const EPISODES_TABLE_APP_STATE_KEY = 'episodesTable' as const;
-
 /** localStorage key for all alerts table display options (composed from the renamed APP_ID). */
 export const EPISODES_TABLE_CONFIG_STORAGE_KEY =
   `${ALERTING_V2_SECTION_ID}.${ALERTING_V2_EPISODES_APP_ID}.tableConfiguration` as const;
-
-/**
- * Legacy localStorage key used before the episode → alert rename. Hard-coded
- * so the slug flip in `ALERTING_V2_EPISODES_APP_ID` doesn't accidentally move
- * it. On first read of the new key, the migration copies the old value to the
- * new key and removes the old one. Follow-up removes this fallback.
- */
-export const LEGACY_EPISODES_TABLE_CONFIG_STORAGE_KEY =
-  'alertingV2.episodes.tableConfiguration' as const;
 
 const episodesTableColumnSettingSchema = z.object({
   width: z.number().optional(),
@@ -94,7 +77,6 @@ export const DEFAULT_EPISODES_TABLE_CONFIG: EpisodesTableConfig = {
 
 type AppStateRecord = Record<string, unknown> & {
   [ALERTS_TABLE_APP_STATE_KEY]?: unknown;
-  [EPISODES_TABLE_APP_STATE_KEY]?: unknown;
 };
 
 type EpisodesTableConfigKey = keyof EpisodesTableConfig;
@@ -152,19 +134,8 @@ export const mergeEpisodesTableConfig = (
 
 export const readEpisodesTableConfigFromStorage = (
   storage: Storage
-): Partial<EpisodesTableConfig> | undefined => {
-  const current = storage.get(EPISODES_TABLE_CONFIG_STORAGE_KEY);
-  if (current !== undefined && current !== null) {
-    return decodeEpisodesTableConfig(current) ?? undefined;
-  }
-  // One-shot migration from the pre-rename key. Copy the old value onto the
-  // new key then remove the old key so subsequent reads bypass this branch.
-  const legacy = storage.get(LEGACY_EPISODES_TABLE_CONFIG_STORAGE_KEY);
-  if (legacy === undefined || legacy === null) return undefined;
-  storage.set(EPISODES_TABLE_CONFIG_STORAGE_KEY, legacy);
-  storage.remove(LEGACY_EPISODES_TABLE_CONFIG_STORAGE_KEY);
-  return decodeEpisodesTableConfig(legacy) ?? undefined;
-};
+): Partial<EpisodesTableConfig> | undefined =>
+  decodeEpisodesTableConfig(storage.get(EPISODES_TABLE_CONFIG_STORAGE_KEY)) ?? undefined;
 
 export const writeEpisodesTableConfigToStorage = (
   storage: Storage,
@@ -183,8 +154,7 @@ export const writeEpisodesTableConfigToStorage = (
 export const readEpisodesTableConfigFromUrl = (
   urlStateStorage: IKbnUrlStateStorage
 ): Partial<EpisodesTableConfig> | undefined => {
-  const appState = urlStateStorage.get<AppStateRecord>('_a');
-  const raw = appState?.[ALERTS_TABLE_APP_STATE_KEY] ?? appState?.[EPISODES_TABLE_APP_STATE_KEY];
+  const raw = urlStateStorage.get<AppStateRecord>('_a')?.[ALERTS_TABLE_APP_STATE_KEY];
   return decodeEpisodesTableConfig(raw) ?? undefined;
 };
 
@@ -194,16 +164,13 @@ export const writeEpisodesTableConfigToUrl = async (
 ): Promise<void> => {
   const serialized = encodeEpisodesTableConfig(config);
   const appState = urlStateStorage.get<AppStateRecord>('_a') ?? {};
-  const {
-    [ALERTS_TABLE_APP_STATE_KEY]: _ignoredAlertsTableState,
-    [EPISODES_TABLE_APP_STATE_KEY]: _ignoredEpisodesTableState,
-    ...appStateWithoutTableState
-  } = appState;
+  const { [ALERTS_TABLE_APP_STATE_KEY]: _ignoredAlertsTableState, ...appStateWithoutAlertsTable } =
+    appState;
 
   const nextAppState: AppStateRecord =
     serialized === null
-      ? appStateWithoutTableState
-      : { ...appStateWithoutTableState, [ALERTS_TABLE_APP_STATE_KEY]: serialized };
+      ? appStateWithoutAlertsTable
+      : { ...appStateWithoutAlertsTable, [ALERTS_TABLE_APP_STATE_KEY]: serialized };
 
   // Use replace: true so display tweaks (especially column resizes) don't spam browser history
   await urlStateStorage.set('_a', nextAppState, { replace: true });

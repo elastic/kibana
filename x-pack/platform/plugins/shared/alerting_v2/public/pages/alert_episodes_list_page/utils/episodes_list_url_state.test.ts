@@ -11,23 +11,19 @@ import { createMemoryHistory } from 'history';
 import {
   ALERTS_LIST_APP_STATE_KEY,
   DEFAULT_EPISODES_LIST_TIME_RANGE,
-  EPISODES_LIST_APP_STATE_KEY,
   EPISODES_LIST_STATUS_URL_ALL,
   readEpisodesListAppStateFromUrlStorage,
   writeEpisodesListAppStateToUrlStorage,
 } from './episodes_list_url_state';
 
-async function createKbnTestUrlStorage(
-  alertsListPayload?: unknown,
-  { key = ALERTS_LIST_APP_STATE_KEY }: { key?: string } = {}
-): Promise<IKbnUrlStateStorage> {
+async function createKbnTestUrlStorage(alertsListPayload?: unknown): Promise<IKbnUrlStateStorage> {
   const storage = createKbnUrlStateStorage({
     history: createMemoryHistory({ initialEntries: ['/'] }),
     useHash: false,
     useHashQuery: false,
   });
   if (alertsListPayload !== undefined) {
-    await storage.set('_a', { [key]: alertsListPayload }, { replace: true });
+    await storage.set('_a', { [ALERTS_LIST_APP_STATE_KEY]: alertsListPayload }, { replace: true });
   }
   return storage;
 }
@@ -113,36 +109,6 @@ describe('episodes_list_url_state', () => {
       expect(
         readEpisodesListAppStateFromUrlStorage(storage).filterState.groupingValues
       ).toBeUndefined();
-    });
-
-    describe('legacy _a.episodesList fallback', () => {
-      it('reads filter state from the legacy episodesList key when alertsList is absent', async () => {
-        const storage = await createKbnTestUrlStorage(
-          { ruleId: 'legacy-rule', queryString: 'legacy' },
-          { key: EPISODES_LIST_APP_STATE_KEY }
-        );
-        expect(readEpisodesListAppStateFromUrlStorage(storage).filterState).toMatchObject({
-          ruleId: 'legacy-rule',
-          queryString: 'legacy',
-        });
-      });
-
-      it('prefers alertsList when both keys are present', async () => {
-        const storage = createKbnUrlStateStorage({
-          history: createMemoryHistory({ initialEntries: ['/'] }),
-          useHash: false,
-          useHashQuery: false,
-        });
-        await storage.set(
-          '_a',
-          {
-            [ALERTS_LIST_APP_STATE_KEY]: { ruleId: 'new-rule' },
-            [EPISODES_LIST_APP_STATE_KEY]: { ruleId: 'legacy-rule' },
-          },
-          { replace: true }
-        );
-        expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.ruleId).toBe('new-rule');
-      });
     });
   });
 
@@ -242,23 +208,6 @@ describe('episodes_list_url_state', () => {
           groupingValues: { 'host.name': 'web-01', region: null },
         },
       });
-    });
-
-    it('purges a pre-existing legacy episodesList key on write', async () => {
-      const storage = await createKbnTestUrlStorage(
-        { ruleId: 'legacy-rule' },
-        { key: EPISODES_LIST_APP_STATE_KEY }
-      );
-
-      await writeEpisodesListAppStateToUrlStorage(
-        storage,
-        { status: ['active'], ruleId: 'new-rule' },
-        DEFAULT_EPISODES_LIST_TIME_RANGE
-      );
-
-      const appState = storage.get<Record<string, unknown>>('_a') ?? {};
-      expect(appState[EPISODES_LIST_APP_STATE_KEY]).toBeUndefined();
-      expect(appState[ALERTS_LIST_APP_STATE_KEY]).toMatchObject({ ruleId: 'new-rule' });
     });
   });
 });

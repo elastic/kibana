@@ -13,14 +13,6 @@ import { isArray, isEqual, isNil, isPlainObject, isString, sortBy } from 'lodash
 /** Namespace for alerts list state inside the `_a` app-state blob */
 export const ALERTS_LIST_APP_STATE_KEY = 'alertsList' as const;
 
-/**
- * Legacy namespace used before the episode → alert rename. Read as a fallback
- * when `ALERTS_LIST_APP_STATE_KEY` is absent so existing bookmarks keep
- * resolving; writes always emit the new key and purge the old one. Follow-up
- * removes this once bookmarks have had a release to migrate.
- */
-export const EPISODES_LIST_APP_STATE_KEY = 'episodesList' as const;
-
 /** Serialized in `_a` so “all statuses” survives reload (distinct from default Active) */
 export const EPISODES_LIST_STATUS_URL_ALL = 'all' as const;
 
@@ -35,7 +27,6 @@ export const DEFAULT_EPISODES_LIST_TIME_RANGE: TimeRange = {
 
 type AppStateRecord = Record<string, unknown> & {
   [ALERTS_LIST_APP_STATE_KEY]?: unknown;
-  [EPISODES_LIST_APP_STATE_KEY]?: unknown;
 };
 
 const isNonEmptyString = (v: unknown): v is string => isString(v) && v.trim().length > 0;
@@ -161,8 +152,7 @@ export function readEpisodesListAppStateFromUrlStorage(storage: IKbnUrlStateStor
   timeRange?: TimeRange;
   histogramBreakdownField?: string;
 } {
-  const appState = storage.get<AppStateRecord>('_a');
-  const raw = appState?.[ALERTS_LIST_APP_STATE_KEY] ?? appState?.[EPISODES_LIST_APP_STATE_KEY];
+  const raw = storage.get<AppStateRecord>('_a')?.[ALERTS_LIST_APP_STATE_KEY];
   const { filter, timeRange, histogramBreakdownField } = splitEpisodesListRaw(raw);
   return {
     filterState: { ...DEFAULT_EPISODES_LIST_FILTER, ...filter },
@@ -179,16 +169,13 @@ export async function writeEpisodesListAppStateToUrlStorage(
 ): Promise<void> {
   const serialized = encodeEpisodesListRecord(filter, timeRange, histogramBreakdownField);
   const appState = storage.get<AppStateRecord>('_a') ?? {};
-  const {
-    [ALERTS_LIST_APP_STATE_KEY]: _ignoredAlertsListState,
-    [EPISODES_LIST_APP_STATE_KEY]: _ignoredEpisodesListState,
-    ...appStateWithoutListState
-  } = appState;
+  const { [ALERTS_LIST_APP_STATE_KEY]: _ignoredAlertsListState, ...appStateWithoutAlertsList } =
+    appState;
 
   const nextAppState: AppStateRecord =
     Object.keys(serialized).length === 0
-      ? appStateWithoutListState
-      : { ...appStateWithoutListState, [ALERTS_LIST_APP_STATE_KEY]: serialized };
+      ? appStateWithoutAlertsList
+      : { ...appStateWithoutAlertsList, [ALERTS_LIST_APP_STATE_KEY]: serialized };
 
   await storage.set('_a', nextAppState, { replace: false });
 }

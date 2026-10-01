@@ -11,7 +11,7 @@ import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { EPISODES_LIST_APP_STATE_KEY } from '../utils/episodes_list_url_state';
+import { ALERTS_LIST_APP_STATE_KEY } from '../utils/episodes_list_url_state';
 import { useEpisodesListUrlState } from './use_episodes_list_url_state';
 
 const createMockTimefilter = () => dataPluginMock.createStartContract().query.timefilter.timefilter;
@@ -29,7 +29,7 @@ describe('useEpisodesListUrlState', () => {
     await act(async () => {
       await urlStateStorage.set(
         '_a',
-        { [EPISODES_LIST_APP_STATE_KEY]: { status: 'active', ruleId: 'rule-123' } },
+        { [ALERTS_LIST_APP_STATE_KEY]: { status: 'active', ruleId: 'rule-123' } },
         { replace: true }
       );
     });
