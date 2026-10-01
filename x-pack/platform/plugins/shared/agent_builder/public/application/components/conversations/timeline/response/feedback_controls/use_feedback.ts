@@ -176,13 +176,6 @@ export const useFeedback = (
         .submitRoundFeedback({ conversationId, executionId, vote: next })
         .then(() => {
           invalidateConversation();
-          services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
-            round_id: executionId,
-            conversation_id: conversationId,
-            vote: next,
-            chips: [],
-            ...makeEbtPayload(ebtContext),
-          });
         })
         .catch(() => {
           addErrorToast({ title: labels.voteError });
@@ -201,8 +194,6 @@ export const useFeedback = (
       clearSubmittedTimers,
       invalidateConversation,
       addErrorToast,
-      ebtContext,
-      services.analytics,
     ]
   );
 

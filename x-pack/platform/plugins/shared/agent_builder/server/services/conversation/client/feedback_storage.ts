@@ -81,7 +81,7 @@ export class FeedbackClient {
       response = await this.esClient.search<FeedbackDocument>({
         index: feedbackIndexName,
         size: MAX_FEEDBACK_PER_CONVERSATION,
-        query: { term: { conversation_id: conversationId } },
+        query: { term: { 'conversation_id.keyword': conversationId } },
       });
     } catch (err) {
       if (err?.meta?.statusCode === 404 || err?.statusCode === 404) {
