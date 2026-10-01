@@ -8,20 +8,15 @@
 import React, { Suspense, useState } from 'react';
 import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AttachmentSummaryGroup, AttachmentSummaryRow } from '@kbn/agentic-investigations-common';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import { parseIocCategoryRows } from './parse_iocs';
 import type { IocCategoryRow } from './parse_iocs';
 
-const IOCS_TITLE = i18n.translate(
-  'xpack.securitySolution.agentBuilder.investigationIocs.summaryTitle',
-  { defaultMessage: 'IOC' }
-);
-
-const IOCS_TYPE_NAME = i18n.translate(
-  'xpack.securitySolution.agentBuilder.investigationIocs.summaryTypeLabel',
-  { defaultMessage: 'IOC' }
+const IOCS_LINK_TEXT = i18n.translate(
+  'xpack.securitySolution.agentBuilder.investigationIocs.overviewLinkText',
+  { defaultMessage: 'IOCs' }
 );
 
 const LazyIocsFlyoutOpener = React.lazy(() =>
@@ -31,26 +26,26 @@ const LazyIocsFlyoutOpener = React.lazy(() =>
   ).then((m) => ({ default: m.InvestigationIocsFlyoutOpener }))
 );
 
-interface IocsSummaryRowProps {
-  label: string;
+interface IocsOverviewLinkProps {
   categories: IocCategoryRow[];
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }
 
-const IocsSummaryRow = ({
-  label,
-  categories,
-  resolveSecurityCanvasContext,
-}: IocsSummaryRowProps) => {
+const IocsOverviewLink = ({ categories, resolveSecurityCanvasContext }: IocsOverviewLinkProps) => {
   const [openCount, setOpenCount] = useState(0);
 
   return (
-    <AttachmentSummaryRow
-      label={label}
-      typeName={IOCS_TYPE_NAME}
-      iconType="radar"
-      onClick={() => setOpenCount((count) => count + 1)}
-    >
+    <EuiText size="s">
+      <EuiLink
+        color="primary"
+        data-test-subj="investigationIocsOverviewLink"
+        onClick={(event) => {
+          event.currentTarget.blur();
+          setOpenCount((count) => count + 1);
+        }}
+      >
+        {IOCS_LINK_TEXT}
+      </EuiLink>
       {openCount > 0 ? (
         <div css={css({ display: 'none' })} key={openCount}>
           <Suspense fallback={null}>
@@ -61,12 +56,12 @@ const IocsSummaryRow = ({
           </Suspense>
         </div>
       ) : null}
-    </AttachmentSummaryRow>
+    </EuiText>
   );
 };
 
-/** One clickable row for an investigation indicators attachment. The values open in a flyout. */
-export const renderInvestigationIocsSummary = (
+/** IOCs link for the conversation details flyout. The click opens the indicators flyout. */
+export const renderInvestigationIocsDetails = (
   attachment: { data?: unknown },
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>
 ): ReactNode => {
@@ -76,16 +71,9 @@ export const renderInvestigationIocsSummary = (
   }
 
   return (
-    <AttachmentSummaryGroup
-      title={IOCS_TITLE}
-      rows={[
-        <IocsSummaryRow
-          key="iocs"
-          label={categories.map((category) => category.shortLabel).join(', ')}
-          categories={categories}
-          resolveSecurityCanvasContext={resolveSecurityCanvasContext}
-        />,
-      ]}
+    <IocsOverviewLink
+      categories={categories}
+      resolveSecurityCanvasContext={resolveSecurityCanvasContext}
     />
   );
 };

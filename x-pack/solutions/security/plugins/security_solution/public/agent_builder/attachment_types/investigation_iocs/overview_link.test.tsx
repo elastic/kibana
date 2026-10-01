@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { renderInvestigationIocsSummary } from './summary_rows';
+import { renderInvestigationIocsDetails } from './overview_link';
 
 const mockOpener = jest.fn((_props: unknown) => null);
 jest.mock('./open_iocs_flyout_on_mount', () => ({
@@ -18,33 +18,29 @@ jest.mock('./open_iocs_flyout_on_mount', () => ({
 
 const resolveSecurityCanvasContext = jest.fn();
 
-const renderSummary = (data: unknown) =>
+const renderDetails = (data: unknown) =>
   render(
     <I18nProvider>
-      {renderInvestigationIocsSummary({ data }, resolveSecurityCanvasContext)}
+      {renderInvestigationIocsDetails({ data }, resolveSecurityCanvasContext)}
     </I18nProvider>
   );
 
-describe('renderInvestigationIocsSummary', () => {
+describe('renderInvestigationIocsDetails', () => {
   beforeEach(() => {
     mockOpener.mockClear();
   });
 
-  it('renders one row labeled with the populated categories', async () => {
-    renderSummary({
+  it('renders one IOCs link that opens the indicators flyout', async () => {
+    renderDetails({
       ips: [{ value: '203.0.113.8', comment: 'C2 contacted by FIN-DB-02' }],
       shas: [{ value: 'abc123' }],
       file_paths: [{ value: 'C:\\Users\\Public\\update.dll' }],
     });
 
-    expect(screen.getByText('IOC')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument();
-    expect(screen.getByTestId('attachmentSummaryRowButton')).toHaveAccessibleName(
-      'IOC: SHAs, IPs, File paths'
-    );
+    expect(screen.getByTestId('investigationIocsOverviewLink')).toHaveAccessibleName('IOCs');
     expect(screen.queryByText('abc123')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('attachmentSummaryRowButton'));
+    await userEvent.click(screen.getByTestId('investigationIocsOverviewLink'));
 
     await waitFor(() => expect(mockOpener).toHaveBeenCalled());
     expect(mockOpener).toHaveBeenCalledWith(
@@ -64,7 +60,7 @@ describe('renderInvestigationIocsSummary', () => {
     ['empty categories', { shas: [], ips: [{ value: '' }] }],
     ['missing data', undefined],
   ])('renders nothing for %s', (_name, data) => {
-    const { container } = renderSummary(data);
+    const { container } = renderDetails(data);
     expect(container).toBeEmptyDOMElement();
   });
 });

@@ -13,7 +13,7 @@ import type {
   AttachmentRenderProps,
 } from '@kbn/agent-builder-browser/attachments';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { renderInvestigationTimelineSummary } from './summary_rows';
+import { renderInvestigationTimelineDetails } from './overview_link';
 import type { InvestigationTimelineAttachment } from './types';
 
 const DEFAULT_LABEL = i18n.translate(
@@ -40,5 +40,5 @@ export const createInvestigationTimelineAttachmentDefinition = ({
     </React.Suspense>
   ),
   renderConversationDetailsContent: ({ attachment }) =>
-    renderInvestigationTimelineSummary(attachment, resolveSecurityCanvasContext),
+    renderInvestigationTimelineDetails(attachment, resolveSecurityCanvasContext),
 });

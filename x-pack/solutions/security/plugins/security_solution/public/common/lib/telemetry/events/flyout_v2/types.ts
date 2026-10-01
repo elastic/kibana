@@ -203,6 +203,8 @@ export const FLYOUT_ORIGIN = {
   ROW_ACTION: 'row_action',
   // Clickable alert-id chip in the Attack Summary / Background markdown section.
   ATTACK_SUMMARY_ALERT: 'attack_summary_alert',
+  // Timeline or IOCs link in the investigation attachments overview.
+  ATTACHMENTS_OVERVIEW: 'attachments_overview',
 } as const;
 export type FlyoutOrigin = (typeof FLYOUT_ORIGIN)[keyof typeof FLYOUT_ORIGIN];
 

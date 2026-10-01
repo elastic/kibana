@@ -8,19 +8,14 @@
 import React, { Suspense, useState } from 'react';
 import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AttachmentSummaryGroup, AttachmentSummaryRow } from '@kbn/agentic-investigations-common';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import { parseTimelineEvents } from './parse_timeline_events';
 import type { InvestigationTimelineEvent } from './types';
 
-const TIMELINE_TITLE = i18n.translate(
-  'xpack.securitySolution.agentBuilder.investigationTimeline.summaryTitle',
-  { defaultMessage: 'Timeline' }
-);
-
-const TIMELINE_TYPE_NAME = i18n.translate(
-  'xpack.securitySolution.agentBuilder.investigationTimeline.summaryTypeLabel',
+const TIMELINE_LINK_TEXT = i18n.translate(
+  'xpack.securitySolution.agentBuilder.investigationTimeline.overviewLinkText',
   { defaultMessage: 'Timeline' }
 );
 
@@ -31,26 +26,29 @@ const LazyTimelineFlyoutOpener = React.lazy(() =>
   ).then((m) => ({ default: m.InvestigationTimelineFlyoutOpener }))
 );
 
-interface TimelineSummaryRowProps {
-  label: string;
+interface TimelineOverviewLinkProps {
   events: InvestigationTimelineEvent[];
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }
 
-const TimelineSummaryRow = ({
-  label,
+const TimelineOverviewLink = ({
   events,
   resolveSecurityCanvasContext,
-}: TimelineSummaryRowProps) => {
+}: TimelineOverviewLinkProps) => {
   const [openCount, setOpenCount] = useState(0);
 
   return (
-    <AttachmentSummaryRow
-      label={label}
-      typeName={TIMELINE_TYPE_NAME}
-      iconType="clock"
-      onClick={() => setOpenCount((count) => count + 1)}
-    >
+    <EuiText size="s">
+      <EuiLink
+        color="primary"
+        data-test-subj="investigationTimelineOverviewLink"
+        onClick={(event) => {
+          event.currentTarget.blur();
+          setOpenCount((count) => count + 1);
+        }}
+      >
+        {TIMELINE_LINK_TEXT}
+      </EuiLink>
       {openCount > 0 ? (
         <div css={css({ display: 'none' })} key={openCount}>
           <Suspense fallback={null}>
@@ -61,12 +59,12 @@ const TimelineSummaryRow = ({
           </Suspense>
         </div>
       ) : null}
-    </AttachmentSummaryRow>
+    </EuiText>
   );
 };
 
-/** One clickable row for an investigation timeline attachment. The full timeline opens in a flyout. */
-export const renderInvestigationTimelineSummary = (
+/** Timeline link for the conversation details flyout. The click opens the timeline flyout. */
+export const renderInvestigationTimelineDetails = (
   attachment: { data?: unknown },
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>
 ): ReactNode => {
@@ -76,16 +74,9 @@ export const renderInvestigationTimelineSummary = (
   }
 
   return (
-    <AttachmentSummaryGroup
-      title={TIMELINE_TITLE}
-      rows={[
-        <TimelineSummaryRow
-          key="timeline"
-          label={events[0].host}
-          events={events}
-          resolveSecurityCanvasContext={resolveSecurityCanvasContext}
-        />,
-      ]}
+    <TimelineOverviewLink
+      events={events}
+      resolveSecurityCanvasContext={resolveSecurityCanvasContext}
     />
   );
 };

@@ -6,11 +6,15 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { FLYOUT_ORIGIN, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../../common/lib/telemetry';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../../../flyout_v2/shared/hooks/use_open_flyout';
-import { useFlyoutSessionContext } from '../../../flyout_v2/session_context';
+import {
+  FlyoutSessionContextProvider,
+  useFlyoutSessionContext,
+} from '../../../flyout_v2/session_context';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import {
   INVESTIGATION_TIMELINE_FLYOUT_TITLE,
@@ -44,7 +48,7 @@ const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] 
         surface: FLYOUT_SURFACE.FLYOUT,
         flyoutType: FLYOUT_TYPE.INVESTIGATION_TIMELINE,
         session,
-        origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
+        origin: FLYOUT_ORIGIN.ATTACHMENTS_OVERVIEW,
       }
     );
   }, [defaultProperties, events, historyKey, openFlyout, session]);
@@ -58,8 +62,8 @@ export interface InvestigationTimelineFlyoutOpenerProps {
 }
 
 /**
- * The summary renders outside the Security app shell, so the opened flyout's dependencies are
- * re-established with `flyoutProviders`, the same way an alert summary row opens its flyout.
+ * The overview renders outside the Security app shell, so the opened flyout's dependencies are
+ * re-established with `flyoutProviders`, the same way an alert row opens its flyout.
  */
 export const InvestigationTimelineFlyoutOpener = ({
   events,
@@ -76,7 +80,7 @@ export const InvestigationTimelineFlyoutOpener = ({
         }
       })
       .catch((error) => {
-        window.console.warn('Attachment summary drill-down could not start Security', error);
+        window.console.warn('Investigation timeline flyout could not start Security', error);
       });
     return () => {
       isMounted = false;
@@ -90,6 +94,12 @@ export const InvestigationTimelineFlyoutOpener = ({
   return flyoutProviders({
     services: bundle.kibanaServices,
     store: bundle.store,
-    children: <OpenTimelineOnMount events={events} />,
+    children: (
+      <FlyoutSessionContextProvider
+        value={{ session: 'start', historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY }}
+      >
+        <OpenTimelineOnMount events={events} />
+      </FlyoutSessionContextProvider>
+    ),
   });
 };

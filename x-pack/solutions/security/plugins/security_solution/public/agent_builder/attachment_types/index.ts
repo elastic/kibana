@@ -25,6 +25,8 @@ import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import { createImpactAttachmentDefinition } from './impact';
+import { createInvestigationIocsAttachmentDefinition } from './investigation_iocs';
+import { createInvestigationTimelineAttachmentDefinition } from './investigation_timeline';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -100,8 +102,7 @@ export const registerAttachmentUiDefinitions = ({
 
 /**
  * Registers the `security.investigation.timeline` attachment renderer
- * (chronological event table for forensic artifacts). Registered synchronously so the
- * investigation flyout can list it on first paint; the event table stays behind React.lazy.
+ * (chronological event table for forensic artifacts). The event table stays behind React.lazy.
  */
 export const registerInvestigationTimelineAttachment = ({
   attachments,
@@ -118,8 +119,8 @@ export const registerInvestigationTimelineAttachment = ({
 
 /**
  * Registers the `security.investigation.iocs` attachment renderer
- * (category table of indicator badges for forensic artifacts). Registered synchronously so the
- * investigation flyout can list it on first paint; the category table stays behind React.lazy.
+ * (category table of indicator badges for forensic artifacts). The category table stays behind
+ * React.lazy.
  */
 export const registerInvestigationIocsAttachment = ({
   attachments,

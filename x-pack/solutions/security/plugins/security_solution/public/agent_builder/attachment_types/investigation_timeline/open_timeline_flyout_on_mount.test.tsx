@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import { FLYOUT_ORIGIN, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../../common/lib/telemetry';
 import { useOpenFlyout } from '../../../flyout_v2/shared/hooks/use_open_flyout';
 import { InvestigationTimelineFlyoutOpener } from './open_timeline_flyout_on_mount';
@@ -14,13 +15,27 @@ import { InvestigationTimelineFlyoutOpener } from './open_timeline_flyout_on_mou
 jest.mock('../../../flyout_v2/shared/hooks/use_open_flyout', () => ({
   useOpenFlyout: jest.fn(),
 }));
-jest.mock('../../../flyout_v2/session_context', () => ({
-  useFlyoutSessionContext: () => ({
-    session: 'start',
-    historyKey: Symbol.for('investigation-timeline-flyout-test'),
+jest.mock('../../../flyout_v2/session_context', () => {
+  const { createContext: createSessionContext, useContext: useSessionContext } = jest.requireActual(
+    'react'
+  ) as typeof import('react');
+  const fallbackKey = Symbol.for('investigation-timeline-flyout-test-fallback');
+  const SessionContext = createSessionContext({
+    session: 'inherit' as const,
+    historyKey: fallbackKey,
     isChildFlyout: false,
-  }),
-}));
+  });
+  return {
+    FlyoutSessionContextProvider: ({
+      value,
+      children,
+    }: {
+      value: { session: 'start' | 'inherit'; historyKey?: symbol; isChildFlyout?: boolean };
+      children: React.ReactNode;
+    }) => <SessionContext.Provider value={value}>{children}</SessionContext.Provider>,
+    useFlyoutSessionContext: () => useSessionContext(SessionContext),
+  };
+});
 jest.mock('../../../flyout_v2/shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: () => ({ size: 's' }),
 }));
@@ -61,12 +76,13 @@ describe('InvestigationTimelineFlyoutOpener', () => {
         paddingSize: 'l',
         title: 'Investigation timeline',
         session: 'start',
+        historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
       }),
       expect.objectContaining({
         surface: FLYOUT_SURFACE.FLYOUT,
         flyoutType: FLYOUT_TYPE.INVESTIGATION_TIMELINE,
         session: 'start',
-        origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
+        origin: FLYOUT_ORIGIN.ATTACHMENTS_OVERVIEW,
       })
     );
   });

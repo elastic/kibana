@@ -115,19 +115,21 @@ export const registerAgenticInvestigationTemplateUI = ({
 
   // Build the renderAttachmentsOverview callback once, captured in the tab closure.
   // LazyAttachmentsOverviewSection is module-level lazy so its chunk only loads when the first
-  // flyout opens, not on every plugin start.
+  // flyout opens, not on every plugin start. The attachments service is captured here so the
+  // section can render types through their conversation details renderer.
   const renderAttachmentsOverview = getSecurityAppUrl
     ? (attachments: VersionedAttachment[]) => (
         <Suspense fallback={null}>
           <LazyAttachmentsOverviewSection
             attachments={attachments}
             getSecurityAppUrl={getSecurityAppUrl}
+            getAttachmentUiDefinition={attachmentsService.getAttachmentUiDefinition}
           />
         </Suspense>
       )
     : undefined;
 
-  conversationTemplates.registerTab(overviewTabId, () => ({
+  conversationTemplates.registerTab(overviewTabId, ({ attachmentsService }) => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
     content: function OverviewTabContent({ conversation }) {
       return (

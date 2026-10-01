@@ -98,7 +98,7 @@ describe('registerAttachmentUiDefinitions', () => {
 });
 
 describe('registerInvestigationTimelineAttachment', () => {
-  it('registers the timeline summary synchronously', () => {
+  it('registers the timeline attachment synchronously', () => {
     const addAttachmentType = jest.fn();
     const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
 
@@ -110,6 +110,9 @@ describe('registerInvestigationTimelineAttachment', () => {
     expect(addAttachmentType).toHaveBeenCalledWith(
       SecurityAgentBuilderAttachments.investigationTimeline,
       expect.objectContaining({
+        getLabel: expect.any(Function),
+        getIcon: expect.any(Function),
+        renderInlineContent: expect.any(Function),
         renderConversationDetailsContent: expect.any(Function),
       })
     );
@@ -117,7 +120,7 @@ describe('registerInvestigationTimelineAttachment', () => {
 });
 
 describe('registerInvestigationIocsAttachment', () => {
-  it('registers the indicator summary synchronously', () => {
+  it('registers the indicators attachment synchronously', () => {
     const addAttachmentType = jest.fn();
     const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
 
@@ -129,6 +132,9 @@ describe('registerInvestigationIocsAttachment', () => {
     expect(addAttachmentType).toHaveBeenCalledWith(
       SecurityAgentBuilderAttachments.investigationIocs,
       expect.objectContaining({
+        getLabel: expect.any(Function),
+        getIcon: expect.any(Function),
+        renderInlineContent: expect.any(Function),
         renderConversationDetailsContent: expect.any(Function),
       })
     );
