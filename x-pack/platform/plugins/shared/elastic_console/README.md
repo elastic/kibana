@@ -107,6 +107,8 @@ OpenAI-compatible chat completions endpoint. Supports:
 - **Multi-turn conversations** — include full message history with `assistant` and `tool` role messages
 - **Image content** — base64 data URIs in user message content arrays
 
+Request bodies can be up to 20MB, to fit long agent conversations with large tool results or images.
+
 #### Request body
 
 ```json

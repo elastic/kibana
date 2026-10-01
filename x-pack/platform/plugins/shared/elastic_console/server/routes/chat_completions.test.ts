@@ -6,7 +6,13 @@
  */
 
 import { of } from 'rxjs';
-import type { CoreSetup, IRouter, KibanaRequest, RequestHandler } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  IRouter,
+  KibanaRequest,
+  RequestHandler,
+  RouteConfig,
+} from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
 import { registerChatCompletionsRoute } from './chat_completions';
@@ -32,8 +38,13 @@ const setup = () => {
   } as unknown as CoreSetup<ElasticConsoleStartDependencies, ElasticConsolePluginStart>;
 
   let handler: RequestHandler | undefined;
+  let routeConfig: RouteConfig<unknown, unknown, unknown, 'post'> | undefined;
   const router = {
-    post: (_config: unknown, routeHandler: RequestHandler) => {
+    post: (
+      config: RouteConfig<unknown, unknown, unknown, 'post'>,
+      routeHandler: RequestHandler
+    ) => {
+      routeConfig = config;
       handler = routeHandler;
     },
   } as unknown as IRouter;
@@ -62,8 +73,15 @@ const setup = () => {
     return response;
   };
 
-  return { chatComplete, call };
+  return { chatComplete, call, getRouteConfig: () => routeConfig };
 };
+
+describe('chat completions route config', () => {
+  it('accepts request bodies up to 20MB', () => {
+    const { getRouteConfig } = setup();
+    expect(getRouteConfig()?.options?.body?.maxBytes).toBe(20 * 1024 * 1024);
+  });
+});
 
 describe('chat completions route prompt caching', () => {
   it.each([true, false])(

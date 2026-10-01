@@ -33,6 +33,8 @@ import {
 import { isElasticConsoleEnabled } from './is_enabled';
 
 const SOCKET_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+// Agent conversations (long histories, tool results, base64 images) easily exceed the 1MB default.
+const MAX_BODY_BYTES = 20 * 1024 * 1024; // 20MB
 
 export const registerChatCompletionsRoute = ({
   router,
@@ -51,6 +53,9 @@ export const registerChatCompletionsRoute = ({
       },
       options: {
         access: 'internal',
+        body: {
+          maxBytes: MAX_BODY_BYTES,
+        },
         timeout: {
           idleSocket: SOCKET_TIMEOUT_MS,
         },
