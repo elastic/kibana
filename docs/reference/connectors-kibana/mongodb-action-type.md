@@ -12,7 +12,7 @@ applies_to:
 The MongoDB connector provides access to MongoDB collections using the native MongoDB driver. AI agents use it to query documents, run aggregation pipelines, and discover collection structure through the read-only actions (find, aggregate, count, listCollections). The write actions (insertOne, updateOne, deleteOne) are never exposed to agents and are not yet available. It supports any MongoDB deployment reachable through a connection URI, using either the `mongodb://` or `mongodb+srv://` (DNS seedlist) scheme: replica sets, sharded clusters, and standalone instances.
 
 ::::{note}
-This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 ::::
 
 ## Create connectors in {{kib}} [define-mongodb-ui]

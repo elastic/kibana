@@ -12,7 +12,7 @@ applies_to:
 The MySQL connector connects directly to a MySQL database so you can search, query, and explore schema from chat conversations.
 
 ::::{note}
-This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 ::::
 
 ## Requirements [mysql-requirements]

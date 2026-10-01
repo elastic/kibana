@@ -15,8 +15,7 @@ const SHAREPOINT_MAX_LIST_TITLE_LENGTH = 255;
 const SHAREPOINT_MAX_PATH_LENGTH = 1024;
 // Raw `_api/` paths can carry an OData query string ($filter, $select, ...).
 const SHAREPOINT_MAX_API_PATH_LENGTH = 4096;
-// Search sends KQL as a GET query parameter; ASP.NET rejects query strings over 2048 by default.
-const SHAREPOINT_MAX_KQL_LENGTH = 1500;
+const SHAREPOINT_MAX_KQL_LENGTH = 4096;
 
 export const ODataCollectionOutputSchema = lazySchema(() =>
   z.object({

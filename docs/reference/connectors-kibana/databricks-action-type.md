@@ -12,7 +12,7 @@ applies_to:
 The Databricks connector connects to the Databricks managed SQL MCP server at `https://<workspace>/api/2.0/mcp/sql` and the Databricks REST API. Agents use the connector to run SQL queries, inspect jobs, clusters, and SQL warehouses, and monitor alerts. The connector also supports other Databricks MCP servers such as Genie and AI Search by changing the server URL.
 
 ::::{note}
-This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents and become usable when workflow support is added.
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 ::::
 
 ## Create connectors in {{kib}} [define-databricks-ui]

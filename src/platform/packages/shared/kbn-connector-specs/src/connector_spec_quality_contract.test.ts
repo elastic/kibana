@@ -30,6 +30,7 @@ const AVAILABILITY_STATEMENTS = {
   workflowsOnly: /\*\*Workflows\*\* only/i,
 };
 type Availability = keyof typeof AVAILABILITY_STATEMENTS;
+const NOT_YET_AVAILABLE_MARKER = '_(not yet available)_';
 const WORKFLOW_USE_CLAIM =
   /\b(workflow[- ]only|reserved for workflows|available to workflows|(?:from|in|for|by) (?:a |your )?workflows?|workflows? or agents?|workflows and agents|workflow authors?)\b/gi;
 const INTERNAL_VOCABULARY =
@@ -182,6 +183,33 @@ describe('connector spec quality contracts', () => {
         const matches = fs.readFileSync(docsPagePath, 'utf8').match(WORKFLOW_USE_CLAIM) ?? [];
 
         expect(matches).toEqual([]);
+      }
+    );
+
+    it.each(allSpecs)(
+      '%s docs page marks every non-tool action as not yet available when workflows are not supported',
+      (_exportName, spec) => {
+        const docsPagePath = getDocsPagePath(spec);
+        if (
+          docsPagePath === undefined ||
+          !fs.existsSync(docsPagePath) ||
+          spec.metadata.supportedFeatureIds.includes('workflows')
+        ) {
+          return;
+        }
+        const nonToolActionCount = Object.values(spec.actions).filter(
+          (action) => !action.isTool
+        ).length;
+        const markedLineCount = fs
+          .readFileSync(docsPagePath, 'utf8')
+          .split('\n')
+          .filter(
+            (line) =>
+              line.includes(NOT_YET_AVAILABLE_MARKER) &&
+              !AVAILABILITY_STATEMENTS.agentBuilderOnly.test(line)
+          ).length;
+
+        expect(markedLineCount).toBeGreaterThanOrEqual(nonToolActionCount);
       }
     );
 

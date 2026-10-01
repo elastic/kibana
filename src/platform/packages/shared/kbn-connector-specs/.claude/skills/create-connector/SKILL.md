@@ -333,7 +333,8 @@ This step requires documentation skills from https://github.com/elastic/elastic-
      On an Agent Builder-only page, nothing else may suggest workflow use: not the opening sentence
      ("a workflow or agent can..."), and not the actions. An `isTool: false` action on such a connector
      is reachable only through the `_execute` API — mark it `_(not yet available)_` and explain the
-     marker in the note (see `databricks-action-type.md`) instead of calling it "workflow only".
+     marker in the note, linking the Run a connector API (copy the note from
+     `databricks-action-type.md`), instead of calling it "workflow only".
    - **Do not use internal vocabulary.** "custom connector", "MCP-native", "connector spec" and
      "stack connector" are our words for our implementation; a reader has no way to tell what a
      *non*-custom connector would be. Describe what the connector does instead.
