@@ -41,6 +41,8 @@ export const INVESTIGATIONS_PATH = 'internal/investigations/investigations';
 export const INVESTIGATION_BY_ID_PATH = (id: string) => `${INVESTIGATIONS_PATH}/${id}`;
 export const INVESTIGATIONS_SEVERITY_COUNTS_PATH = `${INVESTIGATIONS_PATH}/_severity_counts`;
 export const IMPACT_PATH = 'internal/investigations/impact';
+/** The caller's investigation API privileges. */
+export const INVESTIGATIONS_PRIVILEGES_PATH = 'internal/investigations/_privileges';
 
 /** Agent Builder without any agentic investigations privilege. */
 export const NO_INVESTIGATIONS_ROLE: KibanaRole = {
