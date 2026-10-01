@@ -38,11 +38,11 @@ export const getNotificationCenterUiSettings = (): Record<string, UiSettingsPara
       ...sharedParams,
       order: 0,
       name: i18n.translate('xpack.notificationCenter.uiSettings.enabledName', {
-        defaultMessage: 'Notification Center',
+        defaultMessage: 'Notification center',
       }),
       description: i18n.translate('xpack.notificationCenter.uiSettings.enabledDescription', {
         defaultMessage:
-          'Show the Notification Center in this space. Turn individual notification sources off below.',
+          'Show the Notification center in this space. Turn individual notification sources off below.',
       }),
     },
   };

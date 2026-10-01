@@ -1155,15 +1155,15 @@ groups:
           self: ga
           serverless: ga
 
-  - group: Notification Center
+  - group: Notification center
     id: kibana-notification-center-settings
-    note: "The Notification Center is in technical preview. These settings apply to the current space, and are not available on serverless projects. A pair of settings is added for each notification source, so this list grows as sources are registered."
+    note: "The Notification center is in technical preview. These settings apply to the current space, and are not available on serverless projects. A pair of settings is added for each notification source, so this list grows as sources are registered."
     settings:
 
       - setting: "notificationCenter:enabled"
         id: notification-center-enabled
         description: |
-          Shows the Notification Center in this space. Turn individual notification sources off with the settings below.
+          Shows the Notification center in this space. Turn individual notification sources off with the settings below.
         datatype: bool
         default: false
         applies_to:

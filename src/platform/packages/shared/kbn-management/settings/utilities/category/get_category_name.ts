@@ -55,7 +55,7 @@ const names: Record<string, string> = {
   [NOTIFICATION_CENTER_CATEGORY]: i18n.translate(
     'management.settings.categoryNames.notificationCenterLabel',
     {
-      defaultMessage: 'Notification Center',
+      defaultMessage: 'Notification center',
     }
   ),
   [VISUALIZATION_CATEGORY]: i18n.translate(

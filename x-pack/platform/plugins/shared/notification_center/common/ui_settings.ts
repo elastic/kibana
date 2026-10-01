@@ -10,6 +10,9 @@ import { NOTIFICATION_REGISTRY } from './notification_registry';
 /**
  * Advanced-settings category the Notification Center registers its rows under. Deliberately not
  * core's `notifications` category, which holds toast and banner lifetimes — an unrelated concept.
+ *
+ * Mirrors the identifier in `kbn-management/settings/utilities/category/const.ts`, a
+ * `shared-browser` package not consumable from plugin server code.
  */
 export const NOTIFICATION_CENTER_SETTINGS_CATEGORY = 'notificationCenter';
 
