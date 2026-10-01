@@ -52,7 +52,7 @@ consts:
 #   4. classify_alerts           — run the classification sub-workflow
 #   5. compute_fp_candidates     — filter verdicts to false_positive at or above the floor
 #   6. attach_impact             — entity × verdict summary
-#   7. set_az_tags               — static AZ classification tags (R5, always)
+#   7. set_az_tags               — static AZ classification tags (R5, always), in bulk
 #   8. add_verdict_notes         — verdict + Investigation reference per alert (R4/R13, always)
 #   9. gate_fp_close             — start the closure review and record its dispatch (if any FP candidates)
 #  10. close_investigation_no_fp — explicit close when there are no FP candidates
@@ -363,9 +363,43 @@ steps:
   # three being cleared. Listing abbreviations in tags_to_remove dodges the collision but
   # matches no real tag, leaving a re-analysed alert carrying both its old verdict and its new.
   # Same remove-then-add split alert_analysis_workflow.yaml uses for its own tags.
+  #
+  # Written in bulk, not per alert: kibana.SetAlertTags takes a list of ids, so the batch costs
+  # one remove call plus one add call per verdict class (four calls at most) instead of two
+  # calls per alert. Every step of a loop is recorded in the execution, so a per-alert loop
+  # over a thousand alerts is thousands of step records on the same event loop as the UI.
+  # The ids are partitioned by classification here, and the counts are materialised because an
+  # if-condition takes no filters (see compute_classification_guard_counts).
+  - name: compute_az_tag_ids
+    type: data.set
+    with:
+      az_all_ids: "${{ steps.classify_alerts.output.verdicts | map: 'alert_id' }}"
+      az_true_positive_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'true_positive'
+            | map: 'alert_id' }}
+      az_false_positive_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'false_positive'
+            | map: 'alert_id' }}
+      az_inconclusive_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'inconclusive'
+            | map: 'alert_id' }}
+
+  - name: count_az_tag_ids
+    type: data.set
+    with:
+      az_all_count: "${{ variables.az_all_ids | size }}"
+      az_true_positive_count: "${{ variables.az_true_positive_ids | size }}"
+      az_false_positive_count: "${{ variables.az_false_positive_ids | size }}"
+      az_inconclusive_count: "${{ variables.az_inconclusive_ids | size }}"
+
+  # `ids` needs at least one entry, so a batch with no verdicts (missing connector, skipped
+  # sub-workflow) writes nothing rather than failing here. The same holds for each class below.
   - name: set_az_tags
-    foreach: "${{ steps.classify_alerts.output.verdicts | json }}"
-    type: foreach
+    type: if
+    condition: "${{ variables.az_all_count > 0 }}"
     steps:
       - name: remove_stale_az_tags
         type: kibana.SetAlertTags
@@ -374,8 +408,7 @@ steps:
             max-attempts: 3
             delay: 5s
         with:
-          ids:
-            - "{{ foreach.item.alert_id }}"
+          ids: "${{ variables.az_all_ids }}"
           tags:
             tags_to_remove:
               - "az:true_positive"
@@ -383,19 +416,56 @@ steps:
               - "az:inconclusive"
             tags_to_add: []
 
-      - name: add_az_classification_tag
-        type: kibana.SetAlertTags
-        on-failure:
-          retry:
-            max-attempts: 3
-            delay: 5s
-        with:
-          ids:
-            - "{{ foreach.item.alert_id }}"
-          tags:
-            tags_to_remove: []
-            tags_to_add:
-              - "az:{{ foreach.item.classification }}"
+      - name: add_az_true_positive_tag
+        type: if
+        condition: "${{ variables.az_true_positive_count > 0 }}"
+        steps:
+          - name: add_az_true_positive_tag_call
+            type: kibana.SetAlertTags
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+            with:
+              ids: "${{ variables.az_true_positive_ids }}"
+              tags:
+                tags_to_remove: []
+                tags_to_add:
+                  - "az:true_positive"
+
+      - name: add_az_false_positive_tag
+        type: if
+        condition: "${{ variables.az_false_positive_count > 0 }}"
+        steps:
+          - name: add_az_false_positive_tag_call
+            type: kibana.SetAlertTags
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+            with:
+              ids: "${{ variables.az_false_positive_ids }}"
+              tags:
+                tags_to_remove: []
+                tags_to_add:
+                  - "az:false_positive"
+
+      - name: add_az_inconclusive_tag
+        type: if
+        condition: "${{ variables.az_inconclusive_count > 0 }}"
+        steps:
+          - name: add_az_inconclusive_tag_call
+            type: kibana.SetAlertTags
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+            with:
+              ids: "${{ variables.az_inconclusive_ids }}"
+              tags:
+                tags_to_remove: []
+                tags_to_add:
+                  - "az:inconclusive"
 
   # ---------------------------------------------------------------------------
   # 8. Write a verdict note to each alert referencing the Investigation (R4, R13).

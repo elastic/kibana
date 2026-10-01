@@ -414,8 +414,63 @@ describe('floor_alert_triage_review — retag_dismissed_alerts failure tracking'
     expect(
       evalExpr(recordFailure!.with!.failed_retag_count as string, {
         variables: { failed_retag_count: 1 },
+        foreach: { item: ['a'] },
       })
     ).toBe(2);
+  });
+
+  it('counts every alert of a failed chunk, so the comment reports alerts rather than calls', () => {
+    const recordFailure = stepByName('record_retag_failure');
+    expect(
+      evalExpr(recordFailure?.with?.failed_retag_count as string, {
+        variables: { failed_retag_count: 3 },
+        foreach: { item: Array.from({ length: 500 }, (_, i) => `alert-${i}`) },
+      })
+    ).toBe(503);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// retag_dismissed_alerts — candidates are re-tagged in bulk, not one call per alert
+// ---------------------------------------------------------------------------
+
+describe('floor_alert_triage_review — retag_dismissed_alerts chunking', () => {
+  const loop = stepByName('retag_dismissed_alerts');
+  const candidateIds = (count: number): string[] =>
+    Array.from({ length: count }, (_, i) => `alert-${i + 1}`);
+
+  const renderChunks = (ids: string[]): string[][] =>
+    JSON.parse(
+      renderString((loop?.foreach ?? '').replace(/^\$\{\{/, '{{').trim(), {
+        inputs: { fp_candidate_ids: ids },
+      })
+    );
+
+  it('iterates chunks of the candidate list rather than single ids', () => {
+    expect(loop?.type).toBe('foreach');
+    expect(loop?.foreach).toContain('inputs.fp_candidate_ids');
+    expect(loop?.foreach).toContain('chunk: 500');
+  });
+
+  it('passes the whole chunk as the ids of both tag calls', () => {
+    expect(stepByName('remove_fp_tag')?.with?.ids).toBe('${{ foreach.item }}');
+    expect(stepByName('add_dismissed_tag')?.with?.ids).toBe('${{ foreach.item }}');
+  });
+
+  it('makes two calls for a typical batch instead of two per alert', () => {
+    expect(renderChunks(candidateIds(50))).toHaveLength(1);
+    expect(renderChunks(candidateIds(500))).toHaveLength(1);
+  });
+
+  it('bounds the loop at 20 iterations for the largest accepted candidate list', () => {
+    const inputs = parsed.triggers.find(({ type }) => type === 'manual')?.inputs?.properties as {
+      fp_candidate_ids: { maxItems: number };
+    };
+    const chunks = renderChunks(candidateIds(inputs.fp_candidate_ids.maxItems));
+
+    expect(chunks).toHaveLength(20);
+    expect(chunks.flat()).toEqual(candidateIds(inputs.fp_candidate_ids.maxItems));
+    chunks.forEach((chunk) => expect(chunk.length).toBeLessThanOrEqual(500));
   });
 });
 

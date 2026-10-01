@@ -461,6 +461,137 @@ describe('floor_alert_triage — if-conditions', () => {
 });
 
 // ---------------------------------------------------------------------------
+// set_az_tags — the verdict tags are written in bulk, not one call per alert
+// ---------------------------------------------------------------------------
+describe('floor_alert_triage — set_az_tags', () => {
+  const idsStep = stepByName('compute_az_tag_ids');
+  const countsStep = stepByName('count_az_tag_ids');
+
+  const verdicts = [
+    { alert_id: 'tp-1', classification: 'true_positive' },
+    { alert_id: 'fp-1', classification: 'false_positive' },
+    { alert_id: 'fp-2', classification: 'false_positive' },
+    { alert_id: 'inc-1', classification: 'inconclusive' },
+  ];
+
+  const computeIds = (batch: typeof verdicts): Record<string, unknown> => {
+    const context = { steps: { classify_alerts: { output: { verdicts: batch } } } };
+    return Object.fromEntries(
+      Object.entries(idsStep?.with ?? {}).map(([key, expr]) => [
+        key,
+        evalExpr(expr as string, context),
+      ])
+    );
+  };
+
+  const computeCounts = (ids: Record<string, unknown>): Record<string, unknown> =>
+    Object.fromEntries(
+      Object.entries(countsStep?.with ?? {}).map(([key, expr]) => [
+        key,
+        evalExpr(expr as string, { variables: ids }),
+      ])
+    );
+
+  it('never loops over alerts: no step in the tag writes is a foreach', () => {
+    const tagSteps = flatten(stepByName('set_az_tags')?.steps ?? []);
+    expect(stepByName('set_az_tags')?.type).toBe('if');
+    expect(tagSteps.some((step) => step.type === 'foreach')).toBe(false);
+    expect(tagSteps.filter((step) => step.type === 'kibana.SetAlertTags')).toHaveLength(4);
+  });
+
+  it('partitions the alert ids by classification, every id landing in exactly one class', () => {
+    const ids = computeIds(verdicts);
+    expect(ids).toEqual({
+      az_all_ids: ['tp-1', 'fp-1', 'fp-2', 'inc-1'],
+      az_true_positive_ids: ['tp-1'],
+      az_false_positive_ids: ['fp-1', 'fp-2'],
+      az_inconclusive_ids: ['inc-1'],
+    });
+  });
+
+  it('counts each list so the guards compare numbers rather than filter a list', () => {
+    expect(computeCounts(computeIds(verdicts))).toEqual({
+      az_all_count: 4,
+      az_true_positive_count: 1,
+      az_false_positive_count: 2,
+      az_inconclusive_count: 1,
+    });
+  });
+
+  it('keeps every guard free of filters', () => {
+    const guards = [
+      stepByName('set_az_tags'),
+      ...flatten(stepByName('set_az_tags')?.steps ?? []),
+    ].filter((step) => step?.type === 'if');
+    expect(guards).toHaveLength(4);
+    guards.forEach((guard) => expect(guard?.condition).not.toContain('|'));
+  });
+
+  it('skips the writes for a batch with no verdicts, since `ids` needs at least one entry', () => {
+    const counts = computeCounts(computeIds([]));
+    const outer = stepByName('set_az_tags')?.condition ?? '';
+    expect(evalExpr(outer, { variables: counts })).toBe(false);
+  });
+
+  it('only writes a class tag when that class has alerts', () => {
+    const counts = computeCounts(
+      computeIds([{ alert_id: 'fp-1', classification: 'false_positive' }])
+    );
+    const guardOf = (name: string) => stepByName(name)?.condition ?? '';
+    expect(evalExpr(guardOf('set_az_tags'), { variables: counts })).toBe(true);
+    expect(evalExpr(guardOf('add_az_false_positive_tag'), { variables: counts })).toBe(true);
+    expect(evalExpr(guardOf('add_az_true_positive_tag'), { variables: counts })).toBe(false);
+    expect(evalExpr(guardOf('add_az_inconclusive_tag'), { variables: counts })).toBe(false);
+  });
+
+  it('clears the three classification tags before any tag is added, and never in the same call', () => {
+    const names = flatten(stepByName('set_az_tags')?.steps ?? [])
+      .filter((step) => step.type === 'kibana.SetAlertTags')
+      .map((step) => step.name);
+    expect(names[0]).toBe('remove_stale_az_tags');
+
+    const remove = stepByName('remove_stale_az_tags')?.with as {
+      tags: { tags_to_remove: string[]; tags_to_add: string[] };
+    };
+    expect(remove.tags.tags_to_remove).toEqual([
+      'az:true_positive',
+      'az:false_positive',
+      'az:inconclusive',
+    ]);
+    expect(remove.tags.tags_to_add).toEqual([]);
+
+    const adds = [
+      ['add_az_true_positive_tag_call', 'az:true_positive'],
+      ['add_az_false_positive_tag_call', 'az:false_positive'],
+      ['add_az_inconclusive_tag_call', 'az:inconclusive'],
+    ];
+    adds.forEach(([name, tag]) => {
+      const add = stepByName(name)?.with as {
+        tags: { tags_to_remove: string[]; tags_to_add: string[] };
+      };
+      expect(add.tags.tags_to_add).toEqual([tag]);
+      expect(add.tags.tags_to_remove).toEqual([]);
+    });
+  });
+
+  it('retries each write and fails the run when one still fails', () => {
+    flatten(stepByName('set_az_tags')?.steps ?? [])
+      .filter((step) => step.type === 'kibana.SetAlertTags')
+      .forEach((step) => {
+        expect(step['on-failure']?.retry?.['max-attempts']).toBe(3);
+        expect(step['on-failure']?.continue).toBeUndefined();
+      });
+  });
+
+  it('runs before the verdict notes and the review dispatch', () => {
+    const names = parsed.steps.map((step) => step.name);
+    expect(names.indexOf('compute_az_tag_ids')).toBeLessThan(names.indexOf('set_az_tags'));
+    expect(names.indexOf('count_az_tag_ids')).toBeLessThan(names.indexOf('set_az_tags'));
+    expect(names.indexOf('set_az_tags')).toBeLessThan(names.indexOf('add_verdict_notes'));
+  });
+});
+
+// ---------------------------------------------------------------------------
 // add_verdict_notes — the only verdict note on the Worker path
 // ---------------------------------------------------------------------------
 describe('floor_alert_triage — add_verdict_notes', () => {
