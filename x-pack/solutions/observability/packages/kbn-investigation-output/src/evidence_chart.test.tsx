@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import moment from 'moment-timezone';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { EvidenceChart as EvidenceChartSpec } from '@kbn/significant-events-schema';
+import type { EvidenceChart as EvidenceChartSpec } from '@kbn/agentic-investigations-plugin/common';
 import { EvidenceChart } from './evidence_chart';
 
 const mockSeriesProps = jest.fn();
