@@ -132,6 +132,20 @@ describe('Quick search visor', () => {
     expect(onUpdateAndSubmitQuery).not.toHaveBeenCalled();
   });
 
+  it('should not submit a KQL filter when the submit action is disabled', async () => {
+    const onUpdateAndSubmitQuery = jest.fn();
+    renderWithI18n(
+      renderESQLVisor({ ...props, disableSubmitAction: true, onUpdateAndSubmitQuery })
+    );
+
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onUpdateAndSubmitQuery).not.toHaveBeenCalled();
+  });
+
   it('should not submit a KQL filter when disabled', async () => {
     const onUpdateAndSubmitQuery = jest.fn();
     renderWithI18n(renderESQLVisor({ ...props, isDisabled: true, onUpdateAndSubmitQuery }));
@@ -222,13 +236,13 @@ describe('Quick search visor', () => {
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('submits natural language when the editor query is empty even if submit is disabled', async () => {
+    it('submits natural language when the editor query is empty and submit action is disabled', async () => {
       (corePluginMock.http.post as jest.Mock).mockResolvedValue({
         content: 'FROM logs | LIMIT 10',
       });
       const onNlResult = jest.fn();
       const { getByTestId } = renderWithI18n(
-        renderWithEnterprise({ ...props, query: '', isDisabled: true, onNlResult })
+        renderWithEnterprise({ ...props, query: '', disableSubmitAction: true, onNlResult })
       );
 
       await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
@@ -250,10 +264,14 @@ describe('Quick search visor', () => {
       await waitFor(() => expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10'));
     });
 
-    it('does not submit natural language when the visor is disabled and the editor has a query', async () => {
+    it.each([
+      ['the submit action is disabled and the editor has a query', { disableSubmitAction: true }],
+      ['the visor is disabled and the editor has a query', { isDisabled: true }],
+      ['the visor is disabled even if the editor query is empty', { isDisabled: true, query: '' }],
+    ])('does not submit natural language when %s', async (_, overrides) => {
       const onNlResult = jest.fn();
       const { getByTestId } = renderWithI18n(
-        renderWithEnterprise({ ...props, isDisabled: true, onNlResult })
+        renderWithEnterprise({ ...props, ...overrides, onNlResult })
       );
 
       await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());

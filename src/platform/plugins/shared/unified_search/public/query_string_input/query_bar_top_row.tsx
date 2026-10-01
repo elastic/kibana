@@ -1446,7 +1446,8 @@ export const QueryBarTopRow = React.memo(
                     }
                     onNlResult={visorNlResultHandlerReady ? onVisorNlResult : undefined}
                     onUpdateAndSubmitQuery={onVisorUpdateAndSubmit}
-                    isDisabled={isSubmitDisabled}
+                    isDisabled={Boolean(isDateRangeInvalid || props.isDisabled)}
+                    disableSubmitAction={Boolean(props.disableSubmitAction)}
                     onKqlSubmitted={focusEsqlEditor}
                   />
                 </EuiFlexItem>

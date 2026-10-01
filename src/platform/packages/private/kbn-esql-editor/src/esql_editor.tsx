@@ -972,7 +972,8 @@ const ESQLEditorInternal = function ESQLEditor({
           onUpdateAndSubmitQuery={(newQuery) =>
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
-          isDisabled={Boolean(isDisabled || disableSubmitAction)}
+          isDisabled={Boolean(isDisabled)}
+          disableSubmitAction={Boolean(disableSubmitAction)}
           onKqlSubmitted={focusEditorAfterVisorSubmit}
         />
       )}
