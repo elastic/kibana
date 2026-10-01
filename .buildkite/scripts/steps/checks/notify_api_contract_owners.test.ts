@@ -11,7 +11,11 @@ jest.mock('#pipeline-utils', () => ({
   upsertComment: jest.fn(),
 }));
 
-import { buildCommentBody, type ImpactEntry } from './notify_api_contract_owners.ts';
+import {
+  buildCommentBody,
+  dedupeByChange,
+  type ImpactEntry,
+} from './notify_api_contract_owners.ts';
 
 const entry = (overrides: Partial<ImpactEntry> = {}): ImpactEntry => ({
   path: '/api/spaces/space',
@@ -74,9 +78,22 @@ describe('buildCommentBody', () => {
 
   it('escapes pipe characters and newlines in the reason field', () => {
     const body = buildCommentBody([entry({ reason: 'a|b\nc' })]);
+    // Scoped to the table, where an unescaped pipe would break the column layout.
+    // The release-note snippet repeats the reason inside a fenced code block, where
+    // a raw pipe is harmless.
+    const table = body.slice(0, body.indexOf('### Recommended release note'));
 
-    expect(body).toContain('a\\|b c');
-    expect(body).not.toContain('a|b');
+    expect(table).toContain('a\\|b c');
+    expect(table).not.toContain('a|b');
+  });
+
+  it('JSON-escapes a newline in the reason inside the release-note snippet', () => {
+    const body = buildCommentBody([entry({ reason: 'a|b\nc' })]);
+    const snippet = body.slice(body.indexOf('### Recommended release note'));
+
+    // A raw newline would terminate the YAML scalar and corrupt the document.
+    expect(snippet).toContain('\\n');
+    expect(snippet).not.toMatch(/title: "[^"\n]*\n[^"]*"/);
   });
 
   it('omits the method badge when method is undefined', () => {
@@ -152,5 +169,131 @@ describe('buildCommentBody', () => {
     expect(body).not.toContain('were detected across the public OpenAPI surface');
     expect(body).not.toContain('**Fix the breaking change**');
     expect(body).not.toContain('allowlist.json');
+  });
+
+  it('generates title and impact from the endpoint and reason', () => {
+    const body = buildCommentBody([
+      entry({
+        path: '/api/alerting/rule/{id}',
+        method: 'put',
+        reason: "Property 'notify_when' removed",
+      }),
+    ]);
+
+    expect(body).toContain('title: "PUT /api/alerting/rule/{id}: Property \'notify_when\' removed"');
+    expect(body).toContain('impact: "Callers of PUT /api/alerting/rule/{id} are affected.');
+    // Only the author can say what callers should do, so it stays a placeholder.
+    expect(body).toContain('action: <what callers should do>');
+  });
+
+  it('notes the stable-since version in impact when present', () => {
+    expect(buildCommentBody([entry({ since: '8.12.0' })])).toContain('Stable since 8.12.0.');
+  });
+
+  it('renders products when the entry carries them', () => {
+    const body = buildCommentBody([entry({ products: ['cloud-serverless', 'kibana'] })]);
+
+    expect(body).toContain('  products:\n    - cloud-serverless\n    - kibana');
+  });
+
+  it('omits products rather than guessing when the entry has none', () => {
+    const body = buildCommentBody([entry()]);
+
+    expect(body).toContain('### Recommended release note');
+    expect(body).not.toContain('products:');
+  });
+
+  it('renders one release-note entry per gating change', () => {
+    const body = buildCommentBody([
+      entry({ path: '/api/one' }),
+      entry({ path: '/api/two', tier: 'tech_preview' }),
+    ]);
+
+    expect(body.match(/type: breaking-change/g)).toHaveLength(2);
+  });
+
+  it('keeps experimental changes out of the snippet while still reporting them', () => {
+    const body = buildCommentBody([
+      entry({ path: '/api/stable' }),
+      entry({ path: '/api/exp', tier: 'experimental' }),
+    ]);
+    const snippet = body.slice(body.indexOf('### Recommended release note'));
+
+    expect(snippet).toContain('/api/stable');
+    expect(snippet).not.toContain('/api/exp');
+  });
+
+  it('prompts for a changelog entry on report-only changes without generating one', () => {
+    const body = buildCommentBody([
+      entry({ path: '/api/stable' }),
+      entry({ path: '/api/additive', reportOnly: true, policyReason: 'Additive response variant.' }),
+    ]);
+    const snippet = body.slice(body.indexOf('### Recommended release note'));
+
+    expect(body).toContain('Consider adding a changelog entry if the change is noteworthy');
+    expect(snippet).not.toContain('/api/additive');
+  });
+
+  it('quotes a reason containing YAML metacharacters', () => {
+    const body = buildCommentBody([entry({ reason: 'response: changed #1 to "two"' })]);
+
+    // JSON-encoded, so the colon, hash and quotes cannot break the document.
+    expect(body).toContain('\\"two\\"');
+    expect(body).not.toContain('title: PUT');
+  });
+});
+
+describe('dedupeByChange', () => {
+  const base: ImpactEntry = {
+    path: '/api/x',
+    method: 'GET',
+    reason: 'Endpoint removed',
+    tier: 'stable',
+  };
+
+  it('unions products for the same change seen in both specs', () => {
+    const [merged] = dedupeByChange([
+      { ...base, products: ['kibana'] },
+      { ...base, products: ['cloud-serverless'] },
+    ]);
+
+    expect(merged.products).toEqual(['cloud-serverless', 'kibana']);
+  });
+
+  it('collapses the duplicate to a single row', () => {
+    expect(
+      dedupeByChange([
+        { ...base, products: ['kibana'] },
+        { ...base, products: ['cloud-serverless'] },
+      ])
+    ).toHaveLength(1);
+  });
+
+  it('sorts products so report read order does not change the output', () => {
+    const forward = dedupeByChange([
+      { ...base, products: ['kibana'] },
+      { ...base, products: ['cloud-serverless'] },
+    ]);
+    const reverse = dedupeByChange([
+      { ...base, products: ['cloud-serverless'] },
+      { ...base, products: ['kibana'] },
+    ]);
+
+    expect(forward[0].products).toEqual(reverse[0].products);
+  });
+
+  it('keeps distinct changes on the same endpoint apart', () => {
+    expect(
+      dedupeByChange([
+        { ...base, oasdiffId: 'response-property-removed' },
+        { ...base, oasdiffId: 'request-property-removed' },
+      ])
+    ).toHaveLength(2);
+  });
+
+  it('leaves products undefined when no report declared a distribution', () => {
+    const [merged] = dedupeByChange([{ ...base }]);
+
+    expect(merged.products).toBeUndefined();
   });
 });

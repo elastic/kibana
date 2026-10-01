@@ -160,6 +160,14 @@ Tier and rule policy are independent. A stable-tier change still doesn't gate wh
 
 CI posts (or updates) a PR comment whenever there is anything to report, **regardless of whether the check fails** (the check can exit 0 with nothing gating, e.g. when every gating break is allowlisted, only experimental changes were found, or only report-only rules matched). The comment groups gating changes by stability tier. Experimental changes and report-only rules each appear in their own non-blocking section. When there is nothing to report, no comment is posted.
 
+### Release note suggestions
+
+Gating changes (stable and Technical Preview) get a suggested `changelog.yml` entry in the comment. `title`, `products`, `subtype` and `impact` are generated from the change itself; `action` is left for the author, since only they know what callers should do. The entry is a suggestion in the comment, not a file written by CI.
+
+`products` comes from which distribution reported the change. The check runs once per distribution and each impact report records its own, so `stack` maps to `kibana`, `serverless` maps to `cloud-serverless`, and a change breaking both specs lists both. It is omitted rather than guessed when a report predates the `distribution` field.
+
+Report-only changes get a prompt to consider a changelog entry instead of a generated one, because an additive change often doesn't warrant one. Experimental changes get neither.
+
 ## Usage
 
 ### CI (automatic)

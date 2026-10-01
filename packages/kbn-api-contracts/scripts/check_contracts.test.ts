@@ -509,6 +509,7 @@ describe('check_contracts', () => {
       );
       expect(reportCall).toBeDefined();
       expect(JSON.parse(reportCall![1] as string)).toEqual({
+        distribution: 'stack',
         entries: [
           {
             path: '/api/exp',
@@ -548,6 +549,7 @@ describe('check_contracts', () => {
         String(path).endsWith('stack-impact.json')
       );
       expect(JSON.parse(reportCall![1] as string)).toEqual({
+        distribution: 'stack',
         entries: [
           {
             path: '/api/x',
@@ -650,6 +652,7 @@ describe('check_contracts', () => {
       );
       expect(reportCall).toBeDefined();
       expect(JSON.parse(reportCall![1] as string)).toEqual({
+        distribution: 'stack',
         entries: [
           {
             path: '/api/x',

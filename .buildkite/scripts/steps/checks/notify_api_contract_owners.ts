@@ -15,6 +15,17 @@ import { upsertComment } from '#pipeline-utils';
 // notifier only reads the JSON report
 type Tier = 'stable' | 'tech_preview' | 'experimental';
 
+// Mirrors ReportDistribution in @kbn/api-contracts.
+type Distribution = 'stack' | 'serverless';
+
+const PRODUCT_BY_DISTRIBUTION: Record<Distribution, string> = {
+  stack: 'kibana',
+  serverless: 'cloud-serverless',
+};
+
+const isDistribution = (value: unknown): value is Distribution =>
+  value === 'stack' || value === 'serverless';
+
 export interface ImpactEntry {
   path: string;
   method?: string;
@@ -25,9 +36,13 @@ export interface ImpactEntry {
   since?: string;
   reportOnly?: boolean;
   policyReason?: string;
+  // Changelog `products` values, accumulated across reports because the same
+  // change can appear in both specs.
+  products?: string[];
 }
 
 interface ImpactReport {
+  distribution?: Distribution;
   entries: ImpactEntry[];
 }
 
@@ -83,6 +98,63 @@ ${renderTable(entries)}
 `;
 };
 
+const RELEASE_NOTE_DOCS_URL =
+  'https://docs-v3-preview.elastic.dev/elastic/docs-builder/tree/main/data/release-notes/create#review';
+
+// YAML is a JSON superset, so a JSON-encoded scalar is always valid YAML and needs
+// no hand-rolled quoting for colons, hashes or quotes appearing in oasdiff text.
+const yamlScalar = (text: string): string => JSON.stringify(text);
+
+const endpointLabel = (entry: ImpactEntry): string =>
+  entry.method ? `${entry.method.toUpperCase()} ${entry.path}` : entry.path;
+
+const withoutTrailingPeriod = (text: string): string => text.replace(/\.$/, '');
+
+const titleFor = (entry: ImpactEntry): string =>
+  `${endpointLabel(entry)}: ${withoutTrailingPeriod(entry.reason)}`;
+
+const impactFor = (entry: ImpactEntry): string => {
+  const sinceNote = entry.since ? ` Stable since ${entry.since}.` : '';
+  return `Callers of ${endpointLabel(entry)} are affected. ${withoutTrailingPeriod(
+    entry.reason
+  )}.${sinceNote}`;
+};
+
+const renderReleaseNoteEntry = (entry: ImpactEntry): string => {
+  const lines = [
+    '- type: breaking-change',
+    '  subtype: api',
+    `  title: ${yamlScalar(titleFor(entry))}`,
+  ];
+
+  // Omitted rather than guessed when no report declared a distribution.
+  if (entry.products?.length) {
+    lines.push('  products:');
+    lines.push(...entry.products.map((product) => `    - ${product}`));
+  }
+
+  lines.push(`  impact: ${yamlScalar(impactFor(entry))}`);
+  lines.push('  action: <what callers should do>');
+  return lines.join('\n');
+};
+
+const renderReleaseNoteGuidance = (gatingEntries: ImpactEntry[]): string => {
+  if (gatingEntries.length === 0) {
+    return '';
+  }
+
+  return `### Recommended release note
+
+\`title\`, \`products\`, \`subtype\` and \`impact\` are generated from this check. Fill in \`action\`, and edit the rest for readability before committing. Dropping \`title\` falls back to the PR title with prefixes removed.
+
+\`\`\`yaml
+${gatingEntries.map(renderReleaseNoteEntry).join('\n')}
+\`\`\`
+
+See the [release note review guide](${RELEASE_NOTE_DOCS_URL}).
+`;
+};
+
 const renderReportOnlySection = (entries: ImpactEntry[]): string => {
   if (entries.length === 0) {
     return '';
@@ -93,7 +165,7 @@ const renderReportOnlySection = (entries: ImpactEntry[]): string => {
 
   return `### Reported only — not blocking merge (${entries.length})
 
-These match oasdiff rules Kibana treats as additive, so they do not fail this check. A release note may still be worth adding.
+These match oasdiff rules Kibana treats as additive, so they do not fail this check. Consider adding a changelog entry if the change is noteworthy for callers. Nothing is generated for these, since an additive change often doesn't warrant one. See the [release note review guide](${RELEASE_NOTE_DOCS_URL}) if you decide one is needed.
 
 ${reasons ? `${reasons}\n\n` : ''}${renderTable(entries)}
 `;
@@ -140,12 +212,18 @@ Nothing here blocks merge. Consider whether a release note is worth adding for t
 See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for tier definitions and the rule policy.`;
   }
 
+  // Only gating changes get a generated entry. Experimental breaks are allowed, and
+  // report-only changes get a prompt in their own section instead.
+  const releaseNoteGuidance = renderReleaseNoteGuidance(
+    gating.filter((e) => e.tier === 'stable' || e.tier === 'tech_preview')
+  );
+
   return `## API Contract Breaking Changes
 
 The following breaking change(s) were detected across the public OpenAPI surface, grouped by stability tier. Stable and Technical Preview changes fail the check and should be resolved; Experimental and reported-only changes are informational.
 
 ${sections}
-### What to do
+${releaseNoteGuidance}### What to do
 
 1. **Fix the breaking change** if it was unintentional.
 2. **If intentional**, add an approved entry to [\`${ALLOWLIST_PATH}\`](https://github.com/elastic/kibana/blob/main/${ALLOWLIST_PATH}) and coordinate with the owning team. Use the \`oasdiffId\` and \`source\` values from the table above to [scope the allowlist entry](https://github.com/elastic/kibana/blob/main/${README_PATH}#granular-suppression) to this specific change.
@@ -158,17 +236,37 @@ const isImpactReport = (report: unknown): report is ImpactReport =>
   report !== null &&
   Array.isArray((report as { entries?: unknown }).entries);
 
-// The same change appearing in both the stack and serverless specs collapses to
-// one row, keyed by endpoint + change identity.
-const dedupeByChange = (entries: ImpactEntry[]): ImpactEntry[] =>
-  Array.from(
-    new Map(
-      entries.map((e) => [
-        `${e.path}::${e.method ?? ''}::${e.oasdiffId ?? ''}::${e.source ?? ''}`,
-        e,
-      ])
-    ).values()
-  );
+const changeKey = (entry: ImpactEntry): string =>
+  `${entry.path}::${entry.method ?? ''}::${entry.oasdiffId ?? ''}::${entry.source ?? ''}`;
+
+/**
+ * Collapses a change seen in both specs to one row, unioning its `products`.
+ */
+export const dedupeByChange = (entries: ImpactEntry[]): ImpactEntry[] => {
+  const merged = new Map<string, ImpactEntry>();
+
+  for (const entry of entries) {
+    const key = changeKey(entry);
+    const existing = merged.get(key);
+
+    if (!existing) {
+      merged.set(key, { ...entry, products: [...(entry.products ?? [])] });
+      continue;
+    }
+
+    for (const product of entry.products ?? []) {
+      if (!existing.products?.includes(product)) {
+        existing.products?.push(product);
+      }
+    }
+  }
+
+  return Array.from(merged.values()).map((entry) => {
+    // Sorted so report read order can't change the rendered output.
+    const products = [...(entry.products ?? [])].sort();
+    return products.length ? { ...entry, products } : { ...entry, products: undefined };
+  });
+};
 
 async function main() {
   const reportPaths = process.argv.slice(2);
@@ -187,7 +285,14 @@ async function main() {
       continue;
     }
     if (isImpactReport(report)) {
-      entries.push(...report.entries);
+      // Tagged at read time: once the reports are merged, which spec an entry came
+      // from is no longer recoverable.
+      const product = isDistribution(report.distribution)
+        ? PRODUCT_BY_DISTRIBUTION[report.distribution]
+        : undefined;
+      entries.push(
+        ...report.entries.map((entry) => (product ? { ...entry, products: [product] } : entry))
+      );
     } else {
       console.error(`Report at ${reportPath} has no recognized shape, skipping`);
     }

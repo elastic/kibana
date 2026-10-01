@@ -263,7 +263,7 @@ run(
       });
 
       if (opts.reportPath) {
-        writeImpactReport(opts.reportPath, { entries });
+        writeImpactReport(opts.reportPath, { distribution: opts.distribution, entries });
         log.info(`Impact report written to ${opts.reportPath}`);
       }
 

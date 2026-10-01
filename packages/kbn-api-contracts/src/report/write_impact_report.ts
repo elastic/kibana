@@ -30,7 +30,12 @@ export interface ImpactReportEntry {
   policyReason?: string;
 }
 
+/** The published spec a report was produced from. One report covers one distribution. */
+export type ReportDistribution = 'stack' | 'serverless';
+
 export interface ImpactReport {
+  // Optional so a report written by an older revision still parses.
+  distribution?: ReportDistribution;
   entries: ImpactReportEntry[];
 }
 
