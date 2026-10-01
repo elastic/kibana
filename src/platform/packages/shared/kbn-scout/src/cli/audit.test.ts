@@ -48,7 +48,6 @@ jest.mock('./audit_config_sets', () => ({
     runtimeOnly: [],
     identical: [],
     subsets: [],
-    keptSeparate: [],
     runtimeKeys: [],
   })),
 }));
@@ -60,7 +59,6 @@ const emptyConfigSets = {
   runtimeOnly: [],
   identical: [],
   subsets: [],
-  keptSeparate: [],
   runtimeKeys: [],
 };
 
@@ -280,20 +278,6 @@ describe('formatAuditReportForSlack', () => {
       'small (stateful/x.config.ts) is covered by big (stateful/x.config.ts), bigger (stateful/x.config.ts)'
     );
     expect(text).not.toContain('dashboard');
-  });
-
-  it('lists the sets kept separate on purpose without counting them as findings', () => {
-    const text = formatAuditReportForSlack({
-      census: [{ key: 'dashboard', fileCount: 128, modules: ['a', 'b'] }],
-      duplicateClassNames: [],
-      configSets: {
-        ...emptyConfigSets,
-        keptSeparate: [{ set: 'trial_license', reason: 'tests downgrade the license' }],
-      },
-    });
-    expect(text).toContain('No findings.');
-    expect(text).toContain('*Config sets kept separate on purpose, skipped by the checks above*');
-    expect(text).toContain('• `trial_license`: tests downgrade the license');
   });
 
   it('says so when there is nothing to report', () => {

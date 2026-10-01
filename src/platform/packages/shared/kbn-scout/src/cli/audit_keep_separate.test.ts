@@ -32,11 +32,10 @@ describe('sets kept separate on purpose', () => {
     const [kept] = Object.keys(KEEP_SEPARATE);
     ['default', kept, 'plain'].forEach((name) => writeSet(repoRoot, name));
 
-    const { sameAsDefault, keptSeparate } = await auditConfigSets(repoRoot);
+    const { sameAsDefault } = await auditConfigSets(repoRoot);
 
     expect(loadRawServerConfig).not.toHaveBeenCalledWith(expect.stringContaining(`/${kept}/`));
     expect(sameAsDefault).toEqual(['`plain` (stateful)']);
-    expect(keptSeparate.map(({ set }) => set)).toEqual(Object.keys(KEEP_SEPARATE));
     Fs.rmSync(repoRoot, { recursive: true, force: true });
   });
 

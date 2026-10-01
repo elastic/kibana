@@ -336,12 +336,6 @@ export function formatAuditReportForSlack(report: AuditReport): string {
   );
 
   if (lines.length === 1) lines.push('', 'No findings.');
-
-  // Disclosure, not a finding: sets the audit skips on purpose, so the list stays reviewed.
-  section(
-    'Config sets kept separate on purpose, skipped by the checks above',
-    configSets.keptSeparate.map(({ set, reason }) => `\`${set}\`: ${reason}`)
-  );
   lines.push(
     '',
     `Checked ${census.length} core page objects and ${configSets.sets.length} config sets. Placement rules: docs/extend/testing/page-objects.md#scout-page-objects-placement`
