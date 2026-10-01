@@ -173,7 +173,7 @@ describe('graph_visualization', () => {
     instance.find('.gphNode').last().simulate('click', {});
 
     expect(defaultSelectionProps.onToggleNodeSelection).toHaveBeenCalledWith(nodes[2], true);
-    expect(selectSelectedMock).toHaveBeenCalledWith(nodes[2]);
+    expect(selectSelectedMock).toHaveBeenCalledWith(nodes[2].id);
   });
 
   it('should react to node deselection', () => {

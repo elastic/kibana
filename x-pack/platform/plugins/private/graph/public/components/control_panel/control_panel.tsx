@@ -44,11 +44,11 @@ export interface TargetOptions {
 interface ControlPanelProps {
   runtimeGraph: RuntimeGraph;
   control: ControlType;
-  selectedNode?: WorkspaceNode;
+  selectedNodeId?: string;
   colors: string[];
   mergeCandidates: TermIntersect[];
   onSetControl: (control: ControlType) => void;
-  selectSelected: (node: WorkspaceNode) => void;
+  selectSelected: (nodeId: string) => void;
 }
 
 interface ControlPanelStateProps {
@@ -61,7 +61,7 @@ const ControlPanelComponent = ({
   liveResponseFields,
   urlTemplates,
   control,
-  selectedNode,
+  selectedNodeId,
   colors,
   mergeCandidates,
   onSetControl,
@@ -73,6 +73,7 @@ const ControlPanelComponent = ({
     .map((nodeId) => runtimeGraph.nodesMap[nodeId])
     .filter((node): node is WorkspaceNode => node !== undefined);
   const hasNodes = runtimeGraph.nodes.length === 0;
+  const selectedNode = selectedNodeId ? runtimeGraph.nodesMap[selectedNodeId] : undefined;
 
   const openUrlTemplate = (template: UrlTemplate) => {
     const url = template.url;
@@ -84,7 +85,7 @@ const ControlPanelComponent = ({
   };
 
   const onSelectedFieldClick = (node: WorkspaceNode) => {
-    selectSelected(node);
+    selectSelected(node.id);
   };
 
   const onDeselectNode = (node: WorkspaceNode) => {
@@ -124,7 +125,7 @@ const ControlPanelComponent = ({
             <SelectedNodeItem
               key={node.id}
               node={node}
-              isHighlighted={selectedNode === node}
+              isHighlighted={selectedNodeId === node.id}
               onSelectedFieldClick={onSelectedFieldClick}
               onDeselectNode={onDeselectNode}
             />
