@@ -188,7 +188,13 @@ describe('seedFixture', () => {
           .mockResolvedValue({ data_streams: [{ name: FP_TP_ATTACK_INDEX }] }),
         getIndexTemplate: jest.fn().mockResolvedValue({
           index_templates: [
-            { name: '.alerts-security.alerts', index_template: { template: { mappings: {} } } },
+            {
+              name: '.alerts-security.alerts',
+              index_template: {
+                index_patterns: ['.alerts-security*'],
+                template: { mappings: {}, data_stream: {} },
+              },
+            },
           ],
         }),
         createDataStream: jest.fn().mockResolvedValue({}),
@@ -216,10 +222,10 @@ describe('seedFixture', () => {
     expect(secondCall.operations).toHaveLength(2);
   });
 
-  it('treats an already-exists race on createDataStream as provisioned', async () => {
+  it('accepts a lost createDataStream race only after re-verifying the stream exists', async () => {
     esClient.indices.getDataStream
-      .mockRejectedValueOnce(Object.assign(new Error('not found'), { statusCode: 404 }))
-      .mockResolvedValue({ data_streams: [] });
+      .mockRejectedValueOnce(Object.assign(new Error('not found'), { statusCode: 404 })) // preflight
+      .mockResolvedValueOnce({ data_streams: [{ name: FP_TP_ATTACK_INDEX }] }); // post-race recheck
     esClient.indices.createDataStream.mockRejectedValueOnce(
       Object.assign(new Error('resource_already_exists_exception'), { statusCode: 400 })
     );
@@ -227,6 +233,34 @@ describe('seedFixture', () => {
     await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
 
     expect(esClient.create).toHaveBeenCalled();
+  });
+
+  it('throws when createDataStream 400s and the stream still does not exist', async () => {
+    esClient.indices.getDataStream
+      .mockRejectedValue(Object.assign(new Error('not found'), { statusCode: 404 }));
+    esClient.indices.createDataStream.mockRejectedValueOnce(
+      Object.assign(new Error('invalid template'), { statusCode: 400 })
+    );
+
+    await expect(
+      seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world })
+    ).rejects.toThrow();
+    expect(esClient.create).not.toHaveBeenCalled();
+  });
+
+  it('refuses when only a non-data-stream template matches the target name', async () => {
+    esClient.indices.getDataStream.mockRejectedValue(Object.assign(new Error('not found'), { statusCode: 404 }));
+    esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+      index_templates: [
+        { name: '.alerts-security.alerts', index_template: { index_patterns: ['.alerts-security.alerts-*'], template: { mappings: {} } } },
+      ],
+    });
+
+    await expect(
+      seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world })
+    ).rejects.toThrow(/no data-stream/);
+    expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
+    expect(esClient.create).not.toHaveBeenCalled();
   });
 
   it('retries alert bulk item 409s after a delete-then-reseed race', async () => {
@@ -265,7 +299,7 @@ describe('seedFixture', () => {
 
     await expect(
       seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world })
-    ).rejects.toThrow(/no matching/);
+    ).rejects.toThrow(/no data-stream/);
     expect(esClient.create).not.toHaveBeenCalled();
     expect(esClient.bulk).not.toHaveBeenCalled();
   });

@@ -79,34 +79,53 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * with guidance — seeding that stack is unsafe no matter which path asks.
  */
 const ensureAttackDataStreamSafe = async (esClient: EsClient, index: string): Promise<void> => {
-  const streamExists = await esClient.indices
-    .getDataStream({ name: index })
-    .then((r) => r.data_streams.length > 0)
-    .catch((error: { statusCode?: number }) =>
-      // an exact name that does not exist rejects with 404 rather than an empty list
-      error.statusCode === 404 ? false : Promise.reject(error)
-    );
-  if (streamExists) {
+  const streamExists = () =>
+    esClient.indices
+      .getDataStream({ name: index })
+      .then((r) => r.data_streams.length > 0)
+      .catch((error: { statusCode?: number }) =>
+        // an exact name that does not exist rejects with 404 rather than an empty list
+        error.statusCode === 404 ? false : Promise.reject(error)
+      );
+
+  if (await streamExists()) {
     return;
   }
-  const template = await esClient.indices
-    .getIndexTemplate({ name: '.alerts-security*alert*' })
-    .then((r) => r.index_templates.find((entry) => entry.index_template?.template?.mappings !== undefined))
-    .catch((error: { statusCode?: number }) => (error.statusCode === 404 ? undefined : Promise.reject(error)));
-  if (template === undefined) {
+  // only a data-stream template whose index_patterns cover the target name can
+  // safely provision this stream; a mappings-only match would let
+  // createDataStream fail and the subsequent write auto-create a plain index
+  const templates = await esClient.indices
+    .getIndexTemplate({ name: '.alerts-security*' })
+    .then((r) => r.index_templates ?? [])
+    .catch((error: { statusCode?: number }) => (error.statusCode === 404 ? [] : Promise.reject(error)));
+  const matches = templates.filter((entry) => {
+    const tpl = entry.index_template as
+      | { index_patterns?: string[]; template?: { data_stream?: unknown } }
+      | undefined;
+    return (
+      tpl?.template?.data_stream !== undefined &&
+      (tpl.index_patterns ?? []).some((pattern) => new RegExp(`^${pattern.replace(/\*/g, '.*')}$`).test(index))
+    );
+  });
+  if (matches.length === 0) {
     throw new Error(
-      `Attack Discovery data stream ${index} does not exist and no matching `.concat(
-        'security alerts index template is installed; start the security solution (or run the Attack ',
+      `Attack Discovery data stream ${index} does not exist and no data-stream `.concat(
+        'template covering it is installed; start the security solution (or run the Attack ',
         'Discovery worker once) before seeding'
       )
     );
   }
-  await esClient.indices.createDataStream({ name: index }).catch((error: { statusCode?: number }) => {
-    // concurrent eval tasks can both observe the 404 and race to provision;
-    // already-exists means someone else made the stream — that is success
-    if (error.statusCode !== 400 && error.statusCode !== 409) {
-      throw error;
+  await esClient.indices.createDataStream({ name: index }).catch(async (error: { statusCode?: number }) => {
+    // concurrent eval tasks can both observe the 404 and race to provision.
+    // Accept the failure ONLY as evidence of a lost race: re-verify the stream
+    // exists; any other 400/409 is a real provisioning error and must throw so
+    // the write never falls through to auto-creating a plain index.
+    if (error.statusCode === 400 || error.statusCode === 409) {
+      if (await streamExists()) {
+        return;
+      }
     }
+    throw error;
   });
 };
 
