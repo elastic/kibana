@@ -459,4 +459,134 @@ describe('buildNativeEsqlExceptionQuery', () => {
       expect(getFromClause('ROW x = 1')).toBeUndefined();
     });
   });
+
+  describe('Lucene parity: text, date, field quoting, unsupported types', () => {
+    it('text match uses MATCH_PHRASE at the early position (analyzed, not exact)', () => {
+      const { query, skipped } = buildNativeEsqlExceptionQuery({
+        query: INPUT,
+        items: [itemWith([match('message', 'included', 'root')])],
+        source: schema({ message: 'text' }),
+        output: EMPTY,
+      });
+
+      expect(skipped).toEqual([]);
+      expect(query).toBe(
+        'FROM logs-* METADATA _id\n| WHERE NOT (MATCH_PHRASE(message, "root")) | WHERE event.category == "process"'
+      );
+    });
+
+    it('text match_any uses an OR of MATCH_PHRASE', () => {
+      const { query } = buildNativeEsqlExceptionQuery({
+        query: INPUT,
+        items: [itemWith([matchAny('message', 'included', ['root', 'admin'])])],
+        source: schema({ message: 'text' }),
+        output: EMPTY,
+      });
+
+      expect(query).toBe(
+        'FROM logs-* METADATA _id\n| WHERE NOT ((MATCH_PHRASE(message, "root") OR MATCH_PHRASE(message, "admin"))) | WHERE event.category == "process"'
+      );
+    });
+
+    it('a text match on a computed column falls back to exact MV_CONTAINS (no full-text after STATS)', () => {
+      const { query } = buildNativeEsqlExceptionQuery({
+        query: AGG_INPUT,
+        items: [itemWith([match('note', 'included', 'root')])],
+        source: schema({ 'user.name': 'keyword' }),
+        output: schema({ note: 'text', count: 'long' }),
+      });
+
+      expect(query).toBe(
+        'FROM logs-* METADATA _id | STATS count = COUNT(*) BY user.name | WHERE count > 5\n| WHERE NOT (MV_CONTAINS(note, "root"))'
+      );
+    });
+
+    it('a day-granularity date match compiles to a rounded half-open range', () => {
+      const { query, skipped } = buildNativeEsqlExceptionQuery({
+        query: INPUT,
+        items: [itemWith([match('event.ts', 'included', '2025-01-01')])],
+        source: schema({ 'event.ts': 'date' }),
+        output: EMPTY,
+      });
+
+      expect(skipped).toEqual([]);
+      expect(query).toBe(
+        'FROM logs-* METADATA _id\n| WHERE NOT (COALESCE((event.ts >= "2025-01-01T00:00:00.000Z"::date AND event.ts < "2025-01-02T00:00:00.000Z"::date), false)) | WHERE event.category == "process"'
+      );
+    });
+
+    it('a full-precision date match stays exact (MV_CONTAINS), preserving multi-valued parity', () => {
+      const { query } = buildNativeEsqlExceptionQuery({
+        query: INPUT,
+        items: [itemWith([match('event.ts', 'included', '2025-01-01T00:00:00.000Z')])],
+        source: schema({ 'event.ts': 'date' }),
+        output: EMPTY,
+      });
+
+      expect(query).toBe(
+        'FROM logs-* METADATA _id\n| WHERE NOT (MV_CONTAINS(event.ts, "2025-01-01T00:00:00.000Z"::date)) | WHERE event.category == "process"'
+      );
+    });
+
+    it('a field name that is not a plain identifier is backquoted per segment', () => {
+      const { query, skipped } = buildNativeEsqlExceptionQuery({
+        query: INPUT,
+        items: [itemWith([match('host-name', 'included', 'h1')])],
+        source: schema({ 'host-name': 'keyword' }),
+        output: EMPTY,
+      });
+
+      expect(skipped).toEqual([]);
+      expect(query).toBe(
+        'FROM logs-* METADATA _id\n| WHERE NOT (MV_CONTAINS(`host-name`, "h1")) | WHERE event.category == "process"'
+      );
+    });
+
+    it('quotes only the dotted segment that needs it', () => {
+      const { query } = buildNativeEsqlExceptionQuery({
+        query: INPUT,
+        items: [itemWith([match('a.b-c', 'included', 'v')])],
+        source: schema({ 'a.b-c': 'keyword' }),
+        output: EMPTY,
+      });
+
+      expect(query).toBe(
+        'FROM logs-* METADATA _id\n| WHERE NOT (MV_CONTAINS(a.`b-c`, "v")) | WHERE event.category == "process"'
+      );
+    });
+
+    it('reports an item on a column whose type conflicts across indices (unsupported)', () => {
+      const { query, skipped } = buildNativeEsqlExceptionQuery({
+        query: INPUT,
+        items: [itemWith([match('conf', 'included', 'x')])],
+        source: schema({ conf: 'unsupported' }),
+        output: EMPTY,
+      });
+
+      expect(query).toBe(INPUT);
+      expect(skipped).toEqual([
+        {
+          itemId: 'item-1',
+          reason: 'field "conf" has type "unsupported", which native compilation does not support',
+        },
+      ]);
+    });
+
+    it('reports an item on a counter field rather than emitting an invalid cast', () => {
+      const { query, skipped } = buildNativeEsqlExceptionQuery({
+        query: INPUT,
+        items: [itemWith([match('rate', 'included', '42')])],
+        source: schema({ rate: 'counter_long' }),
+        output: EMPTY,
+      });
+
+      expect(query).toBe(INPUT);
+      expect(skipped).toEqual([
+        {
+          itemId: 'item-1',
+          reason: 'field "rate" has type "counter_long", which native compilation does not support',
+        },
+      ]);
+    });
+  });
 });

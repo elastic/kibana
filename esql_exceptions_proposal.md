@@ -51,7 +51,7 @@ Preferring the early position whenever all fields are source columns is the dire
 
 ### Inserting the stages
 
-Both stages are added through the ES|QL AST (`@elastic/esql`: `Parser`, `Builder`, `mutate`, `BasicPrettyPrinter`), the same tooling `injectMetadataId` already uses. The early stage is inserted as the command immediately after the `FROM` source command; the late stage is appended as the last command. Using the AST rather than string splicing keeps the insertion correct across `METADATA`, comments, and quoted literals.
+The insertion point is located with the ES|QL AST (`@elastic/esql`: `Parser`), which gives the exact character offset where the `FROM` source command ends, then the early stage is spliced in there and the late stage is appended at the end. Locating the boundary with the parser rather than scanning for the first pipe keeps it correct across `METADATA` and quoted index names; splicing rather than pretty-printing the whole AST keeps the rule author's original query text byte-for-byte, adding only the `\n| WHERE NOT (...)` stages.
 
 ### Boolean structure and per-entry compilation
 
@@ -61,20 +61,27 @@ Each position collects the items assigned to it and emits one exclusion:
 WHERE NOT ( (item entries AND-ed) OR (item entries AND-ed) OR ... )
 ```
 
-Each entry compiles to one predicate; the `excluded` operator negates that single entry. The predicates are chosen so they reproduce the Lucene semantics the current exception filter uses, multi-valued fields included (see [Multi-valued fields](#multi-valued-fields)):
+Each entry compiles to one predicate; the `excluded` operator negates it. The predicate reproduces the Lucene semantics of the current exception filter (`match` / `match_any` are `match_phrase`; `wildcard` is a wildcard query), multi-valued fields included (see [Multi-valued fields](#multi-valued-fields)). Because `match_phrase` behaves differently per field type, the `match` / `match_any` predicate is chosen from the column's type:
 
-| Entry type | `included` | `excluded` |
+| Entry type | Column type | `included` predicate (negated for `excluded`) |
 | --- | --- | --- |
-| `match` | `MV_CONTAINS(field, value)` | `NOT MV_CONTAINS(field, value)` |
-| `match_any` | `(MV_CONTAINS(field, v1) OR MV_CONTAINS(field, v2) ...)` | `NOT (MV_CONTAINS(field, v1) OR ...)` |
-| `exists` | `field IS NOT NULL` | `field IS NULL` |
-| `wildcard` | `QSTR("field:pattern")` | `NOT QSTR("field:pattern")` |
+| `match` | keyword / ip / numeric / boolean | `MV_CONTAINS(field, value)` |
+| `match` | text | `MATCH_PHRASE(field, "value")` (early position; analyzed phrase) |
+| `match` | date / date_nanos, coarse value | `COALESCE((field >= lower AND field < upper), false)` (rounded range) |
+| `match` | date / date_nanos, full-precision value | `MV_CONTAINS(field, "value"::date)` (exact) |
+| `match_any` | any of the above | an `OR` of the per-value `match` predicate |
+| `exists` | any | `field IS NOT NULL` |
+| `wildcard` | any | `QSTR("field:pattern")` (early) or `COALESCE(field LIKE "pattern", false)` (late) |
 
-`MV_CONTAINS`, `IS NULL` / `IS NOT NULL`, and `QSTR` each return a real boolean on every input, including a null or absent field and a multi-valued field, so the exclusion needs no `COALESCE` wrapper: a condition on an absent field is `false` (not matched, alert kept), which is the two-valued behavior the Lucene filter has today. This is why `==`, `IN`, and `LIKE` are not used: on a multi-valued or null field they return `null`, which breaks both the null handling and any-element matching (again, see [Multi-valued fields](#multi-valued-fields)).
+`MV_CONTAINS`, `IS NULL` / `IS NOT NULL`, `MATCH_PHRASE`, and `QSTR` return a real boolean on every input, including a null / absent / multi-valued field, so those predicates need no `COALESCE`: a condition on an absent field is `false` (not matched, alert kept), the two-valued behavior the Lucene filter has today. The date range and the late `LIKE` can be null, so those two are wrapped in `COALESCE(..., false)`. `==`, `IN`, and `LIKE` on an indexed field are never used directly, because on a multi-valued or null value they return `null`, which breaks both null handling and any-element matching.
 
-### Literal typing
+### Why `match_phrase` and the date range
 
-`MV_CONTAINS` requires its second argument to match the column type exactly, so the literal is cast to the column's ES|QL type (from the source probe for early items, the output probe for late items): `keyword` / `text` as a quoted string and `boolean` as `true` / `false` (no cast), numeric types as `<value>::<type>` (for example `42::long`), and `ip` / `version` / `date` as a quoted string with a cast (for example `"10.0.0.1"::ip`). Quoted values escape `\` and `"`. For `wildcard`, the `QSTR` argument is `field:pattern` where the LIKE wildcards `*` and `?` are kept (they mean the same in a query string) and every other query-string metacharacter in the value is backslash-escaped, then the whole string is escaped for the ES|QL literal.
+A `match` on a **text** field must be analyzed phrase matching, not exact equality: today `message is root` suppresses an alert whose `message` is `"...failed for root"`. `MV_CONTAINS` is exact whole-value, so text uses `MATCH_PHRASE`, which is full-text and therefore valid only at the early position; a computed text column (late) falls back to exact `MV_CONTAINS` (a computed text column is not Lucene-backed and is not multi-valued in practice). A `match` on a **date** field rounds to the value's precision today (`2026-09-30` matches the whole day), so a coarse value compiles to a half-open range `[day, day+1)`; a full-precision value is an exact instant and stays `MV_CONTAINS`.
+
+### Literal typing, field quoting, and unsupported types
+
+`MV_CONTAINS` requires its second argument to match the column type exactly, so the literal is cast: `keyword` / `text` as a quoted string and `boolean` as `true` / `false` (no cast), numeric types as `<value>::<type>` (for example `42::long`), and `ip` / `version` / `date` as a quoted string with a cast (for example `"10.0.0.1"::ip`). Field names are quoted per dotted segment when a segment is not a plain identifier (`` `host-name` ``, `` a.`b-c` ``), so custom fields compile. A column whose ES|QL type the compiler cannot express safely (a cross-index type conflict resolves to `unsupported`, or `counter_*` / `geo_*`, which have no valid literal cast) is reported as not-inlineable rather than compiled, so the query never fails to parse. For `wildcard`, the `QSTR` argument is `field:pattern` with the `*` / `?` wildcards kept and every other query-string metacharacter backslash-escaped, then escaped again for the ES|QL string literal.
 
 ## Why inline into the query instead of the DSL pre-filter
 
@@ -183,7 +190,7 @@ Value lists (`list` entries) are not part of this delivery. Shipping correct nat
 
 ## How it was verified in the POC
 
-The workbench POC (`poc_esql_exceptions.mjs`, `poc_ab_compare.mjs`, `poc_perf_test.mjs`) exercises the compiler against a live Kibana and Elasticsearch. It currently covers the end position only; the source-position work adds the early injection and the source probe.
+The workbench POC (`poc_esql_exceptions.mjs`, `poc_ab_compare.mjs`, `poc_perf_test.mjs`) exercises the compiler against a live Kibana and Elasticsearch, and a Jest unit suite (`build_esql_native_exceptions.test.ts`) covers the compiler's generated ES|QL directly. Both the early (source) and late (computed-column) positions are implemented.
 
 - A per-type matrix (`poc_esql_exceptions.mjs`) builds one exception list and one ES|QL rule for every combination of entry type (`match`, `match_any`, `exists`, `wildcard`), data type, and operator (`included`, `excluded`), each scoped to a document that should be excluded and one that should survive, asserting exactly one alert.
 - An A/B harness (`poc_ab_compare.mjs`) previews the same rule and exception through the DSL path and the native path and diffs the surviving alerts per field type, treating the DSL path as the baseline.

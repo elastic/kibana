@@ -63,9 +63,10 @@ import type { ScheduleNotificationResponseActionsService } from '../../rule_resp
 
 const MAX_EXCLUDED_DOCUMENTS = 100 * 1000;
 
-// POC: when a rule's name contains this marker, detection exceptions are compiled
-// directly into the ES|QL query (LOOKUP JOIN + WHERE) instead of applied as a DSL
-// pre-filter. Name-based so the same rule can be A/B compared against the V1 path.
+// POC: when a rule's name contains this marker, scalar detection exceptions are
+// compiled into the ES|QL query (a `WHERE NOT (...)` stage, early or late) instead of
+// applied as a DSL pre-filter. Name-based so the same rule can be A/B compared
+// against the V1 path.
 const POC_NATIVE_ESQL_EXCEPTIONS_NAME_MARKER = 'POC EXCEPTIONS';
 
 export const esqlExecutor = async ({
