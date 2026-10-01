@@ -35,17 +35,18 @@ export const SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS = ['active'] as const;
 
 /**
  * One investigation run attached to this significant event.
- * `workflow_execution_id` is the investigation workflow execution id, used to fetch the full
- * investigation state (hypotheses, conclusion, etc.) from the corresponding workflow execution —
- * that workflow execution document is the single source of truth for the investigation's content,
- * so this entry intentionally carries no status of its own. The investigation is running while
- * `completed_at` is absent.
+ * `workflow_execution_id` holds the investigation id, which is its Agent Builder conversation id;
+ * the shared investigations API (`GET /internal/investigations/investigations/{id}`) is the
+ * single source of truth for the investigation's content, so this entry intentionally carries no
+ * status of its own. Entries written before investigations were conversations hold a workflow
+ * execution id, which that API does not know. The field keeps its name so stored events stay
+ * valid.
  */
 export const significantEventInvestigationSchema = z.object({
   workflow_execution_id: z
     .string()
     .max(MAX_ID_LENGTH)
-    .describe('ID of the investigation workflow execution.'),
+    .describe('ID of the investigation (its Agent Builder conversation id).'),
   started_at: z.iso.datetime({ offset: true }).describe('When this investigation run started.'),
   completed_at: z.iso
     .datetime({ offset: true })

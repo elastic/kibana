@@ -129,7 +129,7 @@ Use `platform.core.get_workflow_execution_status` with the `executionId` from th
 
 ### Recording the investigation on a Significant Event
 
-When you trigger an investigation for a Significant Event, record it on the event using `platform.streams.sig_events.event_investigation_attach` — once immediately when the investigation starts, and again once it reaches a terminal state. The event only tracks that a run happened and when; it does not track status — the full investigation state (hypotheses, conclusion) lives on the workflow execution itself, which the UI fetches or follows using `workflow_execution_id`.
+When you trigger an investigation for a Significant Event, record it on the event using `platform.streams.sig_events.event_investigation_attach` — once immediately when the investigation starts, and again once it reaches a terminal state. The event only tracks that a run happened and when; it does not track status — the full investigation state (hypotheses, conclusion) lives on the investigation itself, which the UI reads through the shared investigations API using `workflow_execution_id` as the investigation id.
 
 **On start** (right after `execute_workflow` returns an execution id):
 - `event_id` — the stable slug identifier of the Significant Event (same `event_id` returned by `event_write`; does not change across status changes).
