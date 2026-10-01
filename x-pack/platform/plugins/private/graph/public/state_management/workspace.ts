@@ -13,6 +13,7 @@ import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.'
 import { fillWorkspace } from '.';
 import { reset } from './global';
 import { datasourceSelector } from './datasource';
+import { settingsSelector } from './advanced_settings';
 import { liveResponseFieldsSelector, selectedFieldsSelector } from './fields';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
 import { makeEdgeId, makeNodeId } from '../services/workspace/graph_merge_planner';
@@ -525,8 +526,12 @@ export const registerWorkspaceListeners = (
 
       if (expandSelectedNodes.match(action)) {
         listenerApi.cancelActiveListeners();
-        const { exploreControls, indexName, vertex_fields: vertexFields } = workspace.options;
-        if (!exploreControls || !indexName || !vertexFields) return;
+        const state = listenerApi.getState();
+        const datasource = datasourceSelector(state).current;
+        if (datasource.type === 'none') return;
+        const exploreControls = settingsSelector(state);
+        const vertexFields = selectedFieldsSelector(state);
+        const indexName = datasource.title;
         const selectedNodes = listenerApi
           .getState()
           .workspace.selectedNodeIds.map((id) => workspace.nodesMap[id])
@@ -556,8 +561,11 @@ export const registerWorkspaceListeners = (
         }
       } else if (fillWorkspaceConnections.match(action)) {
         listenerApi.cancelActiveListeners();
-        const { exploreControls, indexName } = workspace.options;
-        if (!exploreControls || !indexName) return;
+        const state = listenerApi.getState();
+        const datasource = datasourceSelector(state).current;
+        if (datasource.type === 'none') return;
+        const exploreControls = settingsSelector(state);
+        const indexName = datasource.title;
         const selectedNodes = listenerApi
           .getState()
           .workspace.selectedNodeIds.map((id) => workspace.nodesMap[id])
@@ -704,8 +712,12 @@ export const registerWorkspaceListeners = (
       const workspace = getWorkspace() as RuntimeWorkspace;
       const liveResponseFields = liveResponseFieldsSelector(listenerApi.getState());
       const numHops = 2;
-      const { exploreControls, indexName, vertex_fields: vertexFields } = workspace.options;
-      if (!exploreControls || !indexName || !vertexFields) return;
+      const state = listenerApi.getState();
+      const datasource = datasourceSelector(state).current;
+      if (datasource.type === 'none') return;
+      const exploreControls = settingsSelector(state);
+      const vertexFields = selectedFieldsSelector(state);
+      const indexName = datasource.title;
 
       try {
         let request;

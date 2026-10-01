@@ -17,14 +17,15 @@ describe('graphui-workspace', function () {
     let mockedResult = null;
     let init = null;
     let runtimeSequence = 0;
+    const vertexFields = [{ name: 'field1' }, { name: 'field2' }];
     const mergeGraph = (workspace, graph) => {
       runtimeSequence = mergeRuntimeGraph(workspace, graph, runtimeSequence);
     };
     const mergeSearchResult = (workspace) => {
-      mergeGraph(workspace, transformSearchResponse(mockedResult, workspace.options.vertex_fields));
+      mergeGraph(workspace, transformSearchResponse(mockedResult, vertexFields));
     };
     const mergeExpandResult = (workspace) => {
-      mergeGraph(workspace, transformExpandResponse(mockedResult, workspace.options.vertex_fields));
+      mergeGraph(workspace, transformExpandResponse(mockedResult, vertexFields));
     };
 
     beforeEach(function () {
@@ -43,14 +44,7 @@ describe('graphui-workspace', function () {
         const options = {
           layoutController,
           indexName: 'indexName',
-          vertex_fields: [
-            {
-              name: 'field1',
-            },
-            {
-              name: 'field2',
-            },
-          ],
+          vertex_fields: vertexFields,
           graphExploreProxy: callNodeProxy,
           exploreControls: {
             useSignificance: false,
