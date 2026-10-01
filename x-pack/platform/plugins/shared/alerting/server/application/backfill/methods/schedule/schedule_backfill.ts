@@ -25,6 +25,7 @@ import type {
 import { scheduleBackfillParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain } from '../../../rule/transforms';
 import type { RawRule } from '../../../../types';
+import { getBackfillActions } from '../../../../backfill_client/lib';
 
 export async function scheduleBackfill(
   context: RulesClientContext,
@@ -158,19 +159,17 @@ export async function scheduleBackfill(
     );
   });
 
-  // if any rule being scheduled has actions that will run,
+  // if any rule being scheduled has actions that the backfill will run,
   // the caller must hold the connector-execute privilege on their own credentials.
   // Without this, a low-privileged user with only "Manual rule run" sub-feature could
   // trigger another user's connectors under that owner's stored API key.
   // Check every param rather than unique ruleIds: bulkQueue schedules each param independently,
   // so duplicate ruleIds with mixed runActions values must not skip the check.
-  const ruleIdsWithActions = new Set(
-    rules
-      .filter(({ actions, systemActions }) => actions.length > 0 || Boolean(systemActions?.length))
-      .map(({ id }) => id)
+  const ruleIdsWithBackfillActions = new Set(
+    rules.filter((rule) => getBackfillActions(rule).actions.length > 0).map(({ id }) => id)
   );
   const anyRuleHasActionsToRun = params.some(
-    ({ ruleId, runActions }) => runActions !== false && ruleIdsWithActions.has(ruleId)
+    ({ ruleId, runActions }) => runActions !== false && ruleIdsWithBackfillActions.has(ruleId)
   );
 
   if (anyRuleHasActionsToRun) {

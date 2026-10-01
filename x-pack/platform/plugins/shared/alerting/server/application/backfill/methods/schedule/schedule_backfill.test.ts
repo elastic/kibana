@@ -628,23 +628,39 @@ describe('scheduleBackfill()', () => {
     describe('connector-execute authorization', () => {
       const mockActionsClient = actionsClientMock.create();
 
-      const ruleWithActions = {
-        ...existingDecryptedRule1,
-        attributes: {
-          ...existingDecryptedRule1.attributes,
-          enabled: true,
-          actions: [
-            {
-              uuid: 'action-uuid-1',
-              group: 'default',
-              actionRef: 'action_0',
-              actionTypeId: '.index',
-              params: { documents: [{ fired: true }] },
-            },
-          ],
-        },
-        references: [{ name: 'action_0', type: 'action', id: 'connector-1' }],
-      } as typeof existingDecryptedRule1;
+      const createRuleWithAction = ({
+        frequency,
+        notifyWhen = null,
+      }: {
+        frequency?: { notifyWhen: string; summary: boolean; throttle: string | null };
+        notifyWhen?: string | null;
+      }) =>
+        ({
+          ...existingDecryptedRule1,
+          attributes: {
+            ...existingDecryptedRule1.attributes,
+            enabled: true,
+            notifyWhen,
+            actions: [
+              {
+                uuid: 'action-uuid-1',
+                group: 'default',
+                actionRef: 'action_0',
+                actionTypeId: '.index',
+                params: { documents: [{ fired: true }] },
+                ...(frequency ? { frequency } : {}),
+              },
+            ],
+          },
+          references: [{ name: 'action_0', type: 'action', id: 'connector-1' }],
+        } as typeof existingDecryptedRule1);
+
+      const ruleWithActions = createRuleWithAction({
+        frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+      });
+      const ruleWithUnsupportedActions = createRuleWithAction({
+        frequency: { notifyWhen: 'onActionGroupChange', summary: false, throttle: null },
+      });
 
       test('should check connector-execute authorization when rule has actions and runActions is true', async () => {
         mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [ruleWithActions] });
@@ -696,6 +712,100 @@ describe('scheduleBackfill()', () => {
 
         expect(actionsAuthorization.ensureAuthorized).not.toHaveBeenCalled();
       });
+
+      test.each([undefined, true])(
+        'should NOT check connector-execute authorization when rule only has actions unsupported by backfill and runActions is %s',
+        async (runActions) => {
+          mockCreatePointInTimeFinderAsInternalUser({
+            saved_objects: [ruleWithUnsupportedActions],
+          });
+          rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
+          rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+          actionsAuthorization.ensureAuthorized.mockRejectedValue(
+            new Error('Unauthorized to execute actions')
+          );
+
+          const mockData = [getMockData({ ruleId: '1', runActions })];
+
+          await rulesClient.scheduleBackfill(mockData);
+
+          expect(actionsAuthorization.ensureAuthorized).not.toHaveBeenCalled();
+          expect(backfillClient.bulkQueue).toHaveBeenCalledWith(
+            expect.objectContaining({ params: mockData })
+          );
+        }
+      );
+
+      test('should NOT check connector-execute authorization for a batch where no rule has actions supported by backfill', async () => {
+        mockCreatePointInTimeFinderAsInternalUser({
+          saved_objects: [
+            ruleWithUnsupportedActions,
+            {
+              ...existingDecryptedRule2,
+              attributes: { ...existingDecryptedRule2.attributes, enabled: true },
+            },
+          ],
+        });
+        rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
+        rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+        actionsAuthorization.ensureAuthorized.mockRejectedValue(
+          new Error('Unauthorized to execute actions')
+        );
+
+        const mockData = [
+          getMockData({ ruleId: '1', runActions: true }),
+          getMockData({ ruleId: '2', runActions: true }),
+        ];
+
+        await rulesClient.scheduleBackfill(mockData);
+
+        expect(actionsAuthorization.ensureAuthorized).not.toHaveBeenCalled();
+        expect(backfillClient.bulkQueue).toHaveBeenCalledWith(
+          expect.objectContaining({ params: mockData })
+        );
+      });
+
+      test('should check connector-execute authorization when any rule in the batch has actions supported by backfill', async () => {
+        mockCreatePointInTimeFinderAsInternalUser({
+          saved_objects: [ruleWithUnsupportedActions, { ...ruleWithActions, id: '2' }],
+        });
+        rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
+        rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
+        const mockData = [
+          getMockData({ ruleId: '1', runActions: true }),
+          getMockData({ ruleId: '2', runActions: true }),
+        ];
+
+        await rulesClient.scheduleBackfill(mockData);
+
+        expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({
+          operation: 'execute',
+        });
+      });
+
+      test.each([
+        ['onActiveAlert', 1],
+        ['onActionGroupChange', 0],
+        ['onThrottleInterval', 0],
+      ])(
+        'should apply rule-level notifyWhen %s to actions without frequency (authorization checks: %s)',
+        async (notifyWhen, expectedAuthorizationChecks) => {
+          mockCreatePointInTimeFinderAsInternalUser({
+            saved_objects: [createRuleWithAction({ notifyWhen })],
+          });
+          rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
+          rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
+          const mockData = [getMockData({ ruleId: '1', runActions: true })];
+
+          await rulesClient.scheduleBackfill(mockData);
+
+          expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledTimes(
+            expectedAuthorizationChecks
+          );
+        }
+      );
 
       test.each([
         [true, false],
