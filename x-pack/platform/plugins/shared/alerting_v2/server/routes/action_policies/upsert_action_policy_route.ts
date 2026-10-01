@@ -10,10 +10,10 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
 import {
-  createActionPolicyDataSchema,
+  putActionPolicyDataSchema,
   actionPolicyResponseSchema,
   errorResponseSchema,
-  type CreateActionPolicyData,
+  type PutActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { upsertActionPolicyOasExamples } from './upsert_action_policy_oas_example';
@@ -50,7 +50,7 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
 
   static schemas = {
     request: {
-      body: createActionPolicyDataSchema,
+      body: putActionPolicyDataSchema,
       params: actionPolicyIdParamsSchema,
     },
     response: {
@@ -85,7 +85,7 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof actionPolicyIdParamsSchema>,
       unknown,
-      CreateActionPolicyData
+      PutActionPolicyData
     >,
     @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient
   ) {

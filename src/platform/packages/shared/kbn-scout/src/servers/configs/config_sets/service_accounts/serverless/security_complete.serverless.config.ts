@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  rules: {
-    '@kbn/eslint/scout_require_api_client_in_api_test': 'off', // Workflows API tests use WorkflowsApiService (wrapping kbnClient/API) for workflow operations.
+import type { ScoutServerConfig } from '../../../../../types';
+import { servers as uiamConfig } from '../../uiam_local/serverless/security_complete.serverless.config';
+import { serviceAccountsServerArgs } from '../shared';
+
+export const servers: ScoutServerConfig = {
+  ...uiamConfig,
+  kbnTestServer: {
+    ...uiamConfig.kbnTestServer,
+    serverArgs: [...uiamConfig.kbnTestServer.serverArgs, ...serviceAccountsServerArgs],
   },
 };
