@@ -14,6 +14,7 @@ import { uniq, chunk } from 'lodash/fp';
 
 import { TelemetryChannel } from '../../../../telemetry/types';
 import { getThreatList, getThreatListCount } from './get_threat_list';
+import { reportIndicatorMatchTelemetry } from '../../utils/telemetry/indicator_match_threat_index_size_tracker';
 import type {
   CreateThreatSignalsOptions,
   CreateSignalInterface,
@@ -63,6 +64,7 @@ export const createThreatSignals = async ({
     completeRule,
     tuple,
     ruleExecutionLogger,
+    analytics,
   } = sharedParams;
   const hasDateNanosTimestampFields = dateNanosTimestampFields.length > 0;
 
@@ -180,6 +182,16 @@ export const createThreatSignals = async ({
   });
 
   ruleExecutionLogger.info(`Found threat indicators: ${threatListCount}`);
+
+  await reportIndicatorMatchTelemetry({
+    analytics,
+    logger: ruleExecutionLogger,
+    esClient: services.scopedClusterClient.asCurrentUser,
+    threatIndex,
+    isElasticRule: completeRule.ruleParams.immutable,
+    threatIndicatorCount: threatListCount,
+    threatMapping,
+  });
 
   const threatListConfig = {
     fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),

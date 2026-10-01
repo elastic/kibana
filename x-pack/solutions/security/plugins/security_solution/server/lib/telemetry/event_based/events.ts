@@ -2608,6 +2608,61 @@ export const NEW_TERMS_FIELD_CARDINALITY_EVENT: EventTypeOpts<{
   },
 };
 
+/**
+ * Indicator Match migration-sizing telemetry.
+ *
+ * Reports, per rule execution, the size of the threat-indicator index the rule matches against.
+ *
+ * This is a temporary measurement for the ES|QL migration sizing and should be removed once settled.
+ *
+ * Removal tracking issue: https://github.com/elastic/kibana/issues/294711
+ */
+export const INDICATOR_MATCH_THREAT_INDEX_SIZE_EVENT: EventTypeOpts<{
+  isElasticRule: boolean;
+  threatIndexTotalDocCount: number;
+  threatIndicatorCount: number;
+  threatMappingGroupCount: number;
+  maxFieldsPerThreatMappingGroup: number;
+}> = {
+  eventType: 'indicator_match_threat_index_size_on_rule_execution',
+  schema: {
+    isElasticRule: {
+      type: 'boolean',
+      _meta: {
+        description: 'True for an Elastic prebuilt rule, false for a user-created rule.',
+      },
+    },
+    threatIndexTotalDocCount: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of documents in the threat index pattern this execution, without applying the rule threat query, filters or exceptions.',
+      },
+    },
+    threatIndicatorCount: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of threat-indicator documents the rule matches against this execution, after applying the threat query, filters and exceptions.',
+      },
+    },
+    threatMappingGroupCount: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of groups in the rule threat mapping.',
+      },
+    },
+    maxFieldsPerThreatMappingGroup: {
+      type: 'long',
+      _meta: {
+        description:
+          'Largest number of field pairs in a single group of the rule threat mapping.',
+      },
+    },
+  },
+};
+
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
@@ -2625,6 +2680,7 @@ export const events = [
   ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT,
   ALERT_SUPPRESSION_EVENT,
   NEW_TERMS_FIELD_CARDINALITY_EVENT,
+  INDICATOR_MATCH_THREAT_INDEX_SIZE_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
