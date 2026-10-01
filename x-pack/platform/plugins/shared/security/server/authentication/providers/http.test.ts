@@ -561,7 +561,10 @@ describe('HTTPAuthenticationProvider', () => {
           supportedSchemes: new Set(['bearer']),
         });
         expect((await provider.authenticate(request)).succeeded()).toBe(true);
-        expect(uiam.exchangeOAuthToken).toHaveBeenCalledWith('essu_oauth_token', '/mock-server-basepath/path');
+        expect(uiam.exchangeOAuthToken).toHaveBeenCalledWith(
+          'essu_oauth_token',
+          '/mock-server-basepath/path'
+        );
       }
     );
 
@@ -592,7 +595,10 @@ describe('HTTPAuthenticationProvider', () => {
         supportedSchemes: new Set(['bearer']),
       });
       expect((await provider.authenticate(request)).succeeded()).toBe(true);
-      expect(uiam.exchangeOAuthToken).toHaveBeenCalledWith('essu_oauth_token', '/mock-server-basepath/path');
+      expect(uiam.exchangeOAuthToken).toHaveBeenCalledWith(
+        'essu_oauth_token',
+        '/mock-server-basepath/path'
+      );
     });
     it.each(['upstream-shared-secret', undefined])(
       'preserves client authentication %s for an inbound ephemeral token',
