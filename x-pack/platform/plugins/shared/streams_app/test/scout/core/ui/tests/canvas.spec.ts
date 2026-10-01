@@ -294,7 +294,9 @@ test.describe(
       await page.testSubj.click('canvasFlyoutStreamMenu-processingToggle');
       await expect(processingTab).toBeVisible();
       await expect(processingToggle).toHaveText('Remove processing');
-      await page.testSubj.click('canvasFlyoutStreamMenu-processingToggle');
+      await page.getByText('Remove processing').click();
+      await page.getByText("I understand this deletes all changes and can't be undone").click();
+      await page.getByText('Confirm removal').click();
       await expect(processingTab).toBeHidden();
     });
   }
