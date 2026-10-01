@@ -71,7 +71,7 @@ export const hasFieldsSelector = createSelector(
  */
 export const registerFieldsListeners = (
   startListening: StartGraphListening,
-  { getWorkspace, notifyReact }: GraphStoreDependencies
+  { getRuntimeGraph, notifyReact }: GraphStoreDependencies
 ) => {
   startListening({
     predicate: matchesOne(selectField, deselectField),
@@ -88,13 +88,13 @@ export const registerFieldsListeners = (
     matcher: matchesAction(updateFieldProperties),
     effect: (action: MatchedAction<InferActionType<typeof updateFieldProperties>>, listenerApi) => {
       listenerApi.cancelActiveListeners();
-      const workspace = getWorkspace();
-      if (!workspace) {
+      const runtimeGraph = getRuntimeGraph();
+      if (!runtimeGraph) {
         return;
       }
 
       const { color, icon } = action.payload.fieldProperties;
-      workspace.nodes.forEach((node) => {
+      runtimeGraph.nodes.forEach((node) => {
         if (node.data.field !== action.payload.fieldName) {
           return;
         }

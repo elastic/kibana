@@ -15,7 +15,7 @@ import type {
 import type { WorkspaceState } from '../../state_management/workspace';
 
 export const syncRuntimeTopology = (
-  workspace: RuntimeGraph,
+  runtimeGraph: RuntimeGraph,
   state: WorkspaceState,
   layoutController: WorkspaceLayoutController
 ): void => {
@@ -61,9 +61,9 @@ export const syncRuntimeTopology = (
     };
   });
 
-  workspace.nodesMap = nodesMap;
-  workspace.nodes = state.nodeIds.map((id) => nodesMap[id]);
-  workspace.edgesMap = edgesMap;
-  workspace.edges = state.edgeIds.map((id) => edgesMap[id]);
+  runtimeGraph.nodesMap = nodesMap;
+  runtimeGraph.nodes = state.nodeIds.map((id) => nodesMap[id]);
+  runtimeGraph.edgesMap = edgesMap;
+  runtimeGraph.edges = state.edgeIds.map((id) => edgesMap[id]);
   layoutController.start();
 };

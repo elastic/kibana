@@ -16,7 +16,7 @@ export interface OutlinkEncoder {
   id: string;
   title: string;
   description: string;
-  encode: (workspace: RuntimeGraph, selectedNodeIds: readonly string[]) => string;
+  encode: (runtimeGraph: RuntimeGraph, selectedNodeIds: readonly string[]) => string;
   type: 'kql' | 'lucene' | 'plain' | 'esq';
 }
 

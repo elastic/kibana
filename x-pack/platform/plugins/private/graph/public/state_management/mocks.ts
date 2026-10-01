@@ -68,8 +68,8 @@ export function createMockGraphStore({
     chrome: {
       setBreadcrumbs: jest.fn(),
     } as unknown as ChromeStart,
-    createRuntimeGraph: jest.fn((_index: string, _advancedSettings) => workspaceMock),
-    getWorkspace: jest.fn(() => workspaceMock),
+    createRuntimeGraph: jest.fn(() => workspaceMock),
+    getRuntimeGraph: jest.fn(() => workspaceMock),
     getLayoutController: jest.fn(() => layoutControllerMock),
     contentClient: {
       get: jest.fn(),

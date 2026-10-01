@@ -10,13 +10,13 @@ import { buildNodeQuery } from '../services/workspace/graph_request_builders';
 import { unpackGroupedNodes } from '../services/workspace/runtime_grouping';
 
 export const buildWorkspaceQuery = (
-  workspace: RuntimeGraph,
+  runtimeGraph: RuntimeGraph,
   nodes: WorkspaceNode[],
   loose = false
 ) => {
   const should = nodes
     .filter((node) => node.parent === undefined)
-    .map((node) => buildNodeQuery(unpackGroupedNodes([node], workspace.edges)));
+    .map((node) => buildNodeQuery(unpackGroupedNodes([node], runtimeGraph.edges)));
   return {
     bool: {
       should,
@@ -25,7 +25,10 @@ export const buildWorkspaceQuery = (
   };
 };
 
-export const buildLikeThisButNotThisQuery = (workspace: RuntimeGraph, nodes: WorkspaceNode[]) => {
+export const buildLikeThisButNotThisQuery = (
+  runtimeGraph: RuntimeGraph,
+  nodes: WorkspaceNode[]
+) => {
   const textByField: Record<string, string> = {};
   nodes.forEach((node) => {
     const existingText = textByField[node.data.field];
@@ -43,7 +46,7 @@ export const buildLikeThisButNotThisQuery = (workspace: RuntimeGraph, nodes: Wor
   }));
 
   const excludesByField: Record<string, string[]> = {};
-  [...workspace.nodes, ...workspace.blocklistedNodes].forEach((node) => {
+  [...runtimeGraph.nodes, ...runtimeGraph.blocklistedNodes].forEach((node) => {
     (excludesByField[node.data.field] ??= []).push(node.data.term);
   });
   const negativeShould = Object.entries(excludesByField).map(([field, terms]) => ({

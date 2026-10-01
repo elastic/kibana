@@ -15,24 +15,24 @@ function escapeQuotes(str: string) {
 }
 
 export function getSelectedOrAllNodes(
-  workspace: RuntimeGraph,
+  runtimeGraph: RuntimeGraph,
   selectedNodeIds: readonly string[]
 ): WorkspaceNode[] {
   if (selectedNodeIds.length === 0) {
-    return workspace.nodes;
+    return runtimeGraph.nodes;
   }
   const selectedNodes = selectedNodeIds
-    .map((nodeId) => workspace.nodesMap[nodeId])
+    .map((nodeId) => runtimeGraph.nodesMap[nodeId])
     .filter((node): node is WorkspaceNode => node !== undefined);
-  return unpackGroupedNodes(selectedNodes, workspace.edges);
+  return unpackGroupedNodes(selectedNodes, runtimeGraph.edges);
 }
 
 export function asKQL(
-  workspace: RuntimeGraph,
+  runtimeGraph: RuntimeGraph,
   selectedNodeIds: readonly string[],
   joinBy: 'and' | 'or'
 ) {
-  const nodes = getSelectedOrAllNodes(workspace, selectedNodeIds);
+  const nodes = getSelectedOrAllNodes(runtimeGraph, selectedNodeIds);
   const clauses = nodes.map(
     (node) => `"${escapeQuotes(node.data.field)}" : "${escapeQuotes(node.data.term)}"`
   );

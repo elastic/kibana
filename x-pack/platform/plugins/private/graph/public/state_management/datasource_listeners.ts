@@ -10,7 +10,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { GraphStoreDependencies, StartGraphListening } from './store';
 import { loadFields } from './fields';
 import { mapFields } from '../services/persistence';
-import { settingsSelector } from './advanced_settings';
 import type { IndexpatternDatasource } from './datasource';
 import { datasourceLoaded, setDatasource, requestDatasource } from './datasource';
 import type { MatchedAction } from './helpers';
@@ -52,7 +51,7 @@ export const registerDatasourceListeners = (
 
       listenerApi.dispatch(loadFields(mapFields(indexPattern)));
       listenerApi.dispatch(datasourceLoaded());
-      createRuntimeGraph(indexPattern.title, settingsSelector(listenerApi.getState()));
+      createRuntimeGraph();
       notifyReact();
     },
   });

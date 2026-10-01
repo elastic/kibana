@@ -129,11 +129,11 @@ export const WorkspaceRoute = ({
   };
 
   const mergeRuntimeGraph = (
-    workspace: RuntimeGraph,
+    runtimeGraph: RuntimeGraph,
     graph: Parameters<typeof applyRuntimeGraphMerge>[1]
   ) => {
     runtimeSequenceRef.current = applyRuntimeGraphMerge(
-      workspace,
+      runtimeGraph,
       graph,
       runtimeSequenceRef.current,
       layoutControllerRef.current!
@@ -156,12 +156,12 @@ export const WorkspaceRoute = ({
       basePath: getBasePath(),
       addBasePath,
       indexPatternProvider,
-      createRuntimeGraph: (indexPattern, exploreControls) => {
+      createRuntimeGraph: () => {
         layoutControllerRef.current?.stop();
         runtimeSequenceRef.current = 0;
         const layoutTopology = new ReduxLayoutTopology({
           getState: () => storeRef.current?.getState(),
-          getWorkspace: () => runtimeGraphRef.current,
+          getRuntimeGraph: () => runtimeGraphRef.current,
         });
         const layoutController = new GraphLayoutController({
           getNodes: () => layoutTopology.getNodes(),
@@ -177,7 +177,7 @@ export const WorkspaceRoute = ({
         }));
         return createdWorkspace;
       },
-      getWorkspace: () => runtimeGraphRef.current,
+      getRuntimeGraph: () => runtimeGraphRef.current,
       getLayoutController: () => layoutControllerRef.current,
       savePolicy: graphSavePolicy,
       contentClient,

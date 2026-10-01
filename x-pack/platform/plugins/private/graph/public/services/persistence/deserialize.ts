@@ -207,7 +207,7 @@ export function savedWorkspaceToAppState(
   savedWorkspace: GraphWorkspaceSavedObject,
   indexPattern: DataView,
   workspaceInstance: RuntimeGraph,
-  mergeRuntimeGraph: (workspace: RuntimeGraph, graph: GraphData) => void
+  mergeRuntimeGraph: (runtimeGraph: RuntimeGraph, graph: GraphData) => void
 ): {
   urlTemplates: UrlTemplate[];
   advancedSettings: AdvancedSettings;
