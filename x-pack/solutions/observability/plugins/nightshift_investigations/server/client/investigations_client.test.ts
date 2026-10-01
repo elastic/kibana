@@ -93,19 +93,16 @@ const makeConversation = ({
   title = 'Latency is too high',
   status,
   owner = true,
-  username = 'automation',
   templateId = 'investigation',
 }: {
   id: string;
   title?: string;
   status?: 'open' | 'closed';
   owner?: boolean;
-  username?: string;
   templateId?: string;
 }) => ({
   id,
   title,
-  user: { username },
   template_id: templateId,
   metadata: status ? { status } : {},
   permissions: { rename: owner, delete: owner, update_access_control: owner },
@@ -1488,20 +1485,6 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('inv-theirs'));
     expect(runInputs().message).not.toContain('This continues the investigation');
-  });
-
-  it("continues an investigation owned by the caller's username when profile ids differ", async () => {
-    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-mine' }]);
-    withConversations(makeConversation({ id: 'inv-mine', owner: false, username: 'automation' }));
-
-    await expect(
-      makeClient({ getCallerUsername: () => 'automation' }).start({
-        title: 'Latency is too high',
-        subject: { type: 'alert', id: 'alert-1' },
-        trigger_type: 'automatic',
-        context: { alerts: [makeAlert('alert-1')] },
-      })
-    ).resolves.toEqual({ investigation_id: 'inv-mine' });
   });
 
   it('opens a new investigation rather than continue one without room for the new subjects', async () => {

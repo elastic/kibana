@@ -569,7 +569,6 @@ export class NightshiftInvestigationsPlugin
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
       agenticInvestigations: this.agenticInvestigations,
-      getCallerUsername: () => this.security?.authc.getCurrentUser(request)?.username,
       agentAvailability: this.getInvestigationAvailability(),
       investigationQuotaCallback: this.investigationQuotaCallback,
       investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),

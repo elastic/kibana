@@ -76,7 +76,7 @@ Agent Builder lets only the conversation owner write subjects, metadata, and att
 
 A start will not continue an investigation it does not own. It opens a new one instead and logs a warning.
 
-The start judges ownership by Agent Builder's owner check, and also by username. The username check is there because one identity can resolve with a user profile id in one context and without one in another: an HTTP call made from a workflow step has the profile id, the step handler itself does not. If a run reaches an investigation it does not own anyway, the agent still works in the conversation, but subjects and the reopen are skipped. Cross-identity follow-ups need converse-access writes in Agent Builder.
+The start judges ownership by Agent Builder's owner check. (Agent Builder resolves the user profile id of an API key's creator for fake requests too, so a workflow step and the HTTP calls it makes count as the same owner.) If a run reaches an investigation it does not own anyway, the agent still works in the conversation, but subjects and the reopen are skipped. Cross-identity follow-ups need converse-access writes in Agent Builder.
 
 ### Slack threads
 
