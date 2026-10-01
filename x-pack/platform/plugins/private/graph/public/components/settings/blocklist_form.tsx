@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 
 import type { SettingsWorkspaceProps } from './settings';
-import { useListKeys } from './use_list_keys';
 import { IconRenderer } from '../icon_renderer';
 import { legacyIconStyles } from './legacy_icon.styles';
 
@@ -29,7 +28,6 @@ export function BlocklistForm({
   unblockNode,
   unblockAll,
 }: Pick<SettingsWorkspaceProps, 'blocklistedNodes' | 'unblockNode' | 'unblockAll'>) {
-  const getListKey = useListKeys(blocklistedNodes || []);
   const euiThemeContext = useEuiTheme();
   return (
     <>
@@ -68,7 +66,7 @@ export function BlocklistForm({
                     ]}
                   />
                 }
-                key={getListKey(node)}
+                key={node.id}
                 label={node.label}
                 extraAction={{
                   iconType: 'trash',

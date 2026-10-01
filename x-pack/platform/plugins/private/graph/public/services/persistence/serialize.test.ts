@@ -11,17 +11,20 @@ import type {
   RuntimeGraph,
   WorkspaceEdge,
   WorkspaceNode,
-  UrlTemplate,
   AdvancedSettings,
   WorkspaceField,
 } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import { createRuntimeGraphState, type IndexpatternDatasource } from '../../state_management';
+import {
+  createRuntimeGraphState,
+  type IndexpatternDatasource,
+  type UrlTemplateState,
+} from '../../state_management';
 
 describe('serialize', () => {
   let appState: {
     workspace: RuntimeGraph;
-    urlTemplates: UrlTemplate[];
+    urlTemplates: UrlTemplateState[];
     advancedSettings: AdvancedSettings;
     selectedIndex: IndexpatternDatasource;
     selectedFields: WorkspaceField[];
@@ -61,6 +64,7 @@ describe('serialize', () => {
       },
       urlTemplates: [
         {
+          id: 'internal-template-id',
           description: 'Template',
           encoder: outlinkEncoders[0],
           icon: { id: 'd', package: 'eui', label: '', prevName: '' },
