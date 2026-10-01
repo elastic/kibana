@@ -305,6 +305,46 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.state.failedRunCount).toBeUndefined();
     });
 
+    describe('lookback window', () => {
+      const runWithLastStartedAt = async (lastStartedAt: string) => {
+        const hasMWsChangedSpy = jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+          hasMWsChanged: false,
+          updatedMWs: [],
+          missingMWIds: [],
+          maintenanceWindows: [],
+        });
+        jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+        jest.spyOn(task, 'haveMWsUpdatedSince').mockResolvedValue(false);
+        jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+          {
+            id: 'pl-1',
+            label: 'Private Location 1',
+            isServiceManaged: false,
+            agentPolicyId: 'policy-1',
+          },
+        ]);
+
+        await task.runTask({ taskInstance: getMockTaskInstance({ lastStartedAt }) });
+
+        return hasMWsChangedSpy.mock.calls[0][0].lastStartedAt;
+      };
+
+      it('keeps the previous run start when it was the 24h safety-net interval ago', async () => {
+        const previousRun = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+        expect(await runWithLastStartedAt(previousRun)).toBe(previousRun);
+      });
+
+      it('falls back to a 10 minute lookback after a long outage', async () => {
+        const before = Date.now();
+        const lookback = await runWithLastStartedAt(
+          new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
+        );
+
+        expect(new Date(lookback).getTime()).toBeGreaterThanOrEqual(before - 10 * 60 * 1000);
+      });
+    });
+
     it('should update lastStartedAt to the current startedAt value', async () => {
       const initialLastStartedAt = '2023-01-01T12:00:00.000Z';
       const startedAt = new Date('2024-06-01T10:00:00.000Z');
