@@ -7,7 +7,12 @@
 
 import type { GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
-import { getEndpointArtifactsApiService, tags, type KbnClient } from '@kbn/scout-security';
+import {
+  getEndpointArtifactsApiService,
+  PUBLIC_API_HEADERS,
+  tags,
+  type KbnClient,
+} from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
@@ -113,8 +118,7 @@ apiTest.describe(
       headers = {
         ...adminApiCredentials.apiKeyHeader,
         'kbn-xsrf': 'true',
-        'elastic-api-version': '2023-10-31',
-        'x-elastic-internal-origin': 'kibana',
+        ...PUBLIC_API_HEADERS,
       };
       await setupFleetForEndpoint(kbnClient, log);
       await endpointArtifacts.deleteList(TRUSTED_APPS_LIST_ID);
