@@ -58,10 +58,6 @@ const openViewModeMenu = async (page: ScoutPage) => {
   await selectable.waitFor({ state: 'visible' });
 };
 
-export const assertViewModeToggleNotExists = async (page: ScoutPage) => {
-  await expect(page.testSubj.locator(VIEW_MODE_TOGGLE_BUTTON)).toBeHidden({ timeout: 2000 });
-};
-
 export const assertViewModeToggleExists = async (page: ScoutPage) => {
   await expect(page.testSubj.locator(VIEW_MODE_TOGGLE_BUTTON)).toBeVisible({ timeout: 2000 });
 };

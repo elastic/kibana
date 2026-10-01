@@ -485,12 +485,12 @@ describe('useDismissProposal', () => {
 
     await result.current.mutateAsync({
       id: 'p-1',
-      body: { dismissReason: 'wrong', rationale: 'Not relevant' },
+      body: { dismissReason: 'no_reason', rationale: 'Not relevant' },
     });
 
     expect(http.post).toHaveBeenCalledWith(`${PROPOSALS_INTERNAL_URL}/p-1/dismiss`, {
       version: PROPOSALS_API_VERSION,
-      body: JSON.stringify({ dismissReason: 'wrong', rationale: 'Not relevant' }),
+      body: JSON.stringify({ dismissReason: 'no_reason', rationale: 'Not relevant' }),
     });
   });
 
@@ -506,7 +506,7 @@ describe('useDismissProposal', () => {
     const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useDismissProposal(), { wrapper: Wrapper });
-    await result.current.mutateAsync({ id: 'p-1', body: { dismissReason: 'wrong' } });
+    await result.current.mutateAsync({ id: 'p-1', body: { dismissReason: 'no_reason' } });
 
     await waitFor(() => {
       expect(invalidateSpy).toHaveBeenCalledTimes(1);
@@ -525,7 +525,7 @@ describe('useDismissProposal', () => {
     const { result } = renderHook(() => useDismissProposal(), { wrapper: Wrapper });
 
     await expect(
-      result.current.mutateAsync({ id: 'p-1', body: { dismissReason: 'wrong' } })
+      result.current.mutateAsync({ id: 'p-1', body: { dismissReason: 'no_reason' } })
     ).rejects.toThrow('Conflict');
   });
 });
@@ -617,7 +617,7 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
     act(() => {
       mutatePromise = result.current.dismiss.mutateAsync({
         id: 'p-1',
-        body: { dismissReason: 'wrong' },
+        body: { dismissReason: 'no_reason' },
       });
     });
 
