@@ -46,7 +46,7 @@ export const buildAssumableBy = (
     {
       type: 'project-service-account',
       organization_id: organizationId,
-      project_type: 'elasticsearch', // projectType,
+      project_type: projectType,
       project_id: projectId,
     },
   ];
