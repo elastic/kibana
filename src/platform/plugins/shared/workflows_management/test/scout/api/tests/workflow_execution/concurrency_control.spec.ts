@@ -55,6 +55,12 @@ steps:
       message: "Hello from Scout API test 2"
 `;
 
+// Server-side gap between successive submissions for the same concurrency key, applied
+// via the run route's test-only `x-kbn-test-run-delay-ms` hook. Far above the jitter
+// between concurrently issued requests, and far below the ~10s the workflow above holds
+// its slot, so each submission lands inside its predecessor's slot.
+const SAME_KEY_SUBMISSION_STAGGER_MS = 2_000;
+
 spaceTest.describe(
   'Workflow execution concurrency control',
   { tag: tags.deploymentAgnostic },
@@ -77,22 +83,32 @@ spaceTest.describe(
         { env: 'dev', problem: 'issue-1' },
       ];
 
-      const schedule = async (event: (typeof events)[number]) => {
-        const response = await workflowsApi.run(workflowId, event);
+      // Runs sharing a concurrency key must reach the collision check one at a time,
+      // and while their predecessor still holds the slot. Submitting them together and
+      // staggering the server-side delay makes that ordering independent of submission
+      // latency, which on Cloud exceeds the workflow's runtime.
+      const submissionsByKey = new Map<string, number>();
+      const submissions = events.map((event) => {
+        const concurrencyKey = `${event.env}-${event.problem}-${isolationKey}`;
+        const priorSubmissionsForKey = submissionsByKey.get(concurrencyKey) ?? 0;
+        submissionsByKey.set(concurrencyKey, priorSubmissionsForKey + 1);
 
         return {
-          workflowExecutionId: response.workflowExecutionId,
-          concurrencyKey: `${event.env}-${event.problem}-${isolationKey}`,
+          event,
+          concurrencyKey,
+          runDelayMs: priorSubmissionsForKey * SAME_KEY_SUBMISSION_STAGGER_MS,
         };
-      };
+      });
 
-      const [firstEvent, ...remainingEvents] = events;
+      const scheduledExecutions = await Promise.all(
+        submissions.map(async ({ event, concurrencyKey, runDelayMs }) => {
+          const response = await workflowsApi.run(workflowId, event, {
+            'x-kbn-test-run-delay-ms': String(runDelayMs),
+          });
 
-      // Await the first run so it holds the slot, then submit the rest together to land inside it.
-      const scheduledExecutions = [
-        await schedule(firstEvent),
-        ...(await Promise.all(remainingEvents.map(schedule))),
-      ];
+          return { workflowExecutionId: response.workflowExecutionId, concurrencyKey };
+        })
+      );
 
       const terminalExecutions = await Promise.all(
         scheduledExecutions.map((scheduledExecution) =>
