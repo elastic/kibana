@@ -58,6 +58,9 @@ export const getLocationMonitors: SyntheticsRestApiRouteFactory<Payload> = () =>
       syntheticsMonitorClient
     );
 
+    // Intentional. A private location's monitor total is all-spaces, then limited
+    // to locations this caller can already see. browserCount is a split of that
+    // existing count, not a new read of monitors in other spaces.
     const locationMonitors = await soClient.find({
       type: syntheticsMonitorSOTypes,
       perPage: 0,
