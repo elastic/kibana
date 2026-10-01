@@ -64,7 +64,7 @@ export interface SmlSearchHttpResponse {
 /**
  * Per-hit shape returned by `POST /sml/_search`.
  * Baseline always includes id, type, title, origin, description. Optional fields
- * (content, tags, references) are included only when
+ * (content, tags, references, spaces) are included only when
  * explicitly requested via the `fields[]` parameter.
  */
 export interface SmlSearchHttpResultItem {
@@ -76,6 +76,7 @@ export interface SmlSearchHttpResultItem {
   content?: string;
   references?: Array<{ uri: string }>;
   tags?: string[];
+  spaces?: string[];
 }
 
 /**

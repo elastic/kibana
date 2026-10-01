@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { AI_INDEX_PRIVILEGES_PATH, buildAiIndexSpaceFilter } from './space_filter';
+import {
+  AI_INDEX_PRIVILEGES_PATH,
+  buildAiIndexSpaceFilter,
+  buildAiIndexSpaceWhere,
+} from './space_filter';
 
 describe('buildAiIndexSpaceFilter', () => {
   it('matches documents scoped to the space or to the global wildcard', () => {
@@ -42,5 +46,19 @@ describe('buildAiIndexSpaceFilter', () => {
         minimum_should_match: 1,
       },
     });
+  });
+});
+
+describe('buildAiIndexSpaceWhere', () => {
+  it('matches public documents, the space, or the global wildcard', () => {
+    expect(buildAiIndexSpaceWhere('marketing')).toBe(
+      'WHERE permissions.kibana.spaces IS NULL OR MV_CONTAINS(permissions.kibana.spaces, "marketing") OR MV_CONTAINS(permissions.kibana.spaces, "*")'
+    );
+  });
+
+  it('quotes the space id', () => {
+    expect(buildAiIndexSpaceWhere('a"b')).toContain(
+      'MV_CONTAINS(permissions.kibana.spaces, "a\\"b")'
+    );
   });
 });

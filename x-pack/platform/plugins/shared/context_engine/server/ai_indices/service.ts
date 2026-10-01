@@ -210,7 +210,7 @@ export class AiIndexService {
     existing: Awaited<ReturnType<typeof this.findDocument>>,
     options?: { docId?: string }
   ): Promise<'created' | 'updated'> {
-    await this.putView(aiIndexId, document.dest);
+    await this.putView(aiIndexId, document.dest, document.managed ? spaceId : undefined);
     try {
       return await this.writeDocument(aiIndexId, spaceId, document, existing, options);
     } catch (error) {
@@ -226,10 +226,19 @@ export class AiIndexService {
       await this.esClient.indices.refresh({ index: aiIndicesIndexName, ignore_unavailable: true });
       const current = await this.findDocument(aiIndexId, spaceId);
       if (current) {
-        await this.putView(aiIndexId, current.document.dest);
+        await this.putView(
+          aiIndexId,
+          current.document.dest,
+          current.document.managed ? spaceId : undefined
+        );
         return;
       }
-      await deleteKiView({ esClient: this.esClient, logger: this.logger, aiIndexId });
+      await deleteKiView({
+        esClient: this.esClient,
+        logger: this.logger,
+        aiIndexId,
+        spaceId: this.managedBootstrap?.isManaged(aiIndexId) ? spaceId : undefined,
+      });
     } catch (error) {
       this.logger.warn(
         `Failed to restore the view for AI index '${aiIndexId}' after a rejected write: ${
@@ -450,8 +459,8 @@ export class AiIndexService {
     }
   }
 
-  private putView(aiIndexId: string, dest: AiIndexDest): Promise<void> {
-    return putKiView({ esClient: this.esClient, aiIndexId, dest });
+  private putView(aiIndexId: string, dest: AiIndexDest, spaceId?: string): Promise<void> {
+    return putKiView({ esClient: this.esClient, aiIndexId, dest, spaceId });
   }
 
   private async searchSpace(spaceId: string): Promise<AiIndexHttpItem[]> {

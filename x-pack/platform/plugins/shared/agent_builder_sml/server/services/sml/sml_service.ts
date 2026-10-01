@@ -223,6 +223,8 @@ const PRIVILEGES_PATH = 'permissions.kibana.privileges' as const;
 const PERM_NAME_FIELD = `${PRIVILEGES_PATH}.name` as const;
 const PERM_SPACE_FIELD = `${PRIVILEGES_PATH}.space` as const;
 const PERM_COUNT_FIELD = `${PRIVILEGES_PATH}.count` as const;
+/** Flat `copy_to` sibling of `.space`, readable as an ES|QL column. */
+const PERM_SPACES_FLAT_FIELD = 'permissions.kibana.spaces' as const;
 
 /**
  * The `nested` sub-query selecting elements that apply in `spaceId`: the space's own elements plus
@@ -735,7 +737,7 @@ const buildSmlEsqlQuery = ({
   lines.push(`| LIMIT ${size}`);
 
   // description is included in the baseline (short summary, useful for triage).
-  // content, tags, references, and permissions are opt-in via the fields param.
+  // content, tags, references, and spaces are opt-in via the fields param.
   const DEFAULT_FIELDS = new Set(['description']);
   const shouldKeep = (f: string) =>
     fields !== undefined ? fields.includes(f) : DEFAULT_FIELDS.has(f);
@@ -743,6 +745,10 @@ const buildSmlEsqlQuery = ({
   // Materialize `references.uri` into a flat column before KEEP.
   if (shouldKeep('references')) {
     lines.push('| EVAL ref_uris = references.uri');
+  }
+
+  if (shouldKeep('spaces')) {
+    lines.push(`| EVAL spaces = ${PERM_SPACES_FLAT_FIELD}`);
   }
 
   const keepCols = [
@@ -753,6 +759,7 @@ const buildSmlEsqlQuery = ({
     ...(shouldKeep('description') ? ['description'] : []),
     ...(shouldKeep('tags') ? ['tags'] : []),
     ...(shouldKeep('references') ? ['ref_uris'] : []),
+    ...(shouldKeep('spaces') ? ['spaces'] : []),
     ...(shouldKeep('content') ? ['content'] : []),
   ];
   lines.push(`| KEEP ${keepCols.join(', ')}`);
@@ -981,6 +988,12 @@ const searchSml = async ({
       // Drop the origin; it is returned as `origin`.
       const refUris = toStringArray(row[refUrisIdx]).filter((uri) => uri !== result.origin.uri);
       if (refUris.length > 0) result.references = refUris.map((uri) => ({ uri }));
+    }
+
+    const spacesIdx = colIndex.get('spaces');
+    if (spacesIdx !== undefined) {
+      const rawSpaces = row[spacesIdx];
+      if (rawSpaces != null) result.spaces = toStringArray(rawSpaces);
     }
 
     return result;

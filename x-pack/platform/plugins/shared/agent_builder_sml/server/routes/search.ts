@@ -77,8 +77,9 @@ export const registerSearchRoute = ({
                 schema.literal('description'),
                 schema.literal('tags'),
                 schema.literal('references'),
+                schema.literal('spaces'),
               ]),
-              { maxSize: 4 }
+              { maxSize: 5 }
             )
           ),
         }),
@@ -119,6 +120,7 @@ export const registerSearchRoute = ({
             if (hit.description !== undefined) item.description = hit.description;
             if (hit.references !== undefined) item.references = hit.references;
             if (hit.tags !== undefined) item.tags = hit.tags;
+            if (hit.spaces !== undefined) item.spaces = hit.spaces;
             return item;
           }),
         };

@@ -741,8 +741,25 @@ describe('AiIndexService', () => {
         }),
       });
       expect(esClient.esql.putView).toHaveBeenCalledWith({
-        name: 'v-ai-index-elastic',
-        query: expect.stringContaining('FROM ai-index-idx-sml-data'),
+        name: `v-ai-index-elastic-${DEFAULT_SPACE}`,
+        query: [
+          'FROM ai-index-idx-sml-data METADATA _id, _index, _score',
+          'WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"',
+          'WHERE expires_at IS NULL OR expires_at > NOW()',
+          'DROP governance.*',
+          `WHERE permissions.kibana.spaces IS NULL OR MV_CONTAINS(permissions.kibana.spaces, "${DEFAULT_SPACE}") OR MV_CONTAINS(permissions.kibana.spaces, "*")`,
+        ].join('\n| '),
+      });
+    });
+
+    it('creates one view per space for a managed AI index', async () => {
+      mockValidIndexDest();
+
+      await service.putManaged('elastic', 'marketing', managedProperties);
+
+      expect(esClient.esql.putView).toHaveBeenCalledWith({
+        name: 'v-ai-index-elastic-marketing',
+        query: expect.stringContaining('MV_CONTAINS(permissions.kibana.spaces, "marketing")'),
       });
     });
 

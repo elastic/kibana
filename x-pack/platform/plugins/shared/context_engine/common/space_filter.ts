@@ -10,6 +10,19 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 export const AI_INDEX_PRIVILEGES_PATH = 'permissions.kibana.privileges';
 const SPACE_FIELD = `${AI_INDEX_PRIVILEGES_PATH}.space`;
 
+/** Flat `copy_to` sibling of the nested `.space` leaf; the managed mappings component defines it. */
+export const AI_INDEX_SPACES_FIELD = 'permissions.kibana.spaces';
+
+/**
+ * ES|QL `WHERE` equivalent of {@link buildAiIndexSpaceFilter} over the flat `copy_to` column, for
+ * Elastic-managed AI indices only. A `nested` request filter is skipped on views with a processing
+ * command; a `WHERE` is not.
+ */
+export const buildAiIndexSpaceWhere = (spaceId: string): string =>
+  `WHERE ${AI_INDEX_SPACES_FIELD} IS NULL OR MV_CONTAINS(${AI_INDEX_SPACES_FIELD}, ${JSON.stringify(
+    spaceId
+  )}) OR MV_CONTAINS(${AI_INDEX_SPACES_FIELD}, "*")`;
+
 /**
  * ES|QL `filter` for AI-index reads: docs with no `permissions.kibana.privileges`, or one scoped to
  * `spaceId` or `*`. Like SML `buildVisibilityFilter` minus Kibana object-privilege check; ES RBAC

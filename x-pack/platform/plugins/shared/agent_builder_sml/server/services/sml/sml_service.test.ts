@@ -742,6 +742,37 @@ describe('SmlService', () => {
       expect(result.results[0]).not.toHaveProperty('permissions');
     });
 
+    it('returns spaces from the flat copy_to column when requested', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esqlQueryMock.mockResolvedValue({
+        columns: makeEsqlColumns(false, true),
+        values: [
+          makeEsqlRow('entry-3', 'dashboard', 'Shared', 'dash-200', [], {
+            spaces: ['marketing', 'finance'],
+            includeContent: false,
+            includeSpaces: true,
+          }),
+        ],
+      } as any);
+
+      const result = await smlService.search({
+        query: 'shared',
+        size: 10,
+        spaceId: 'marketing',
+        esClient: scopedClient,
+        request,
+        fields: ['spaces'],
+      });
+
+      const { query } = esqlQueryMock.mock.calls[0]![0]! as { query: string };
+      expect(query).toContain('| EVAL spaces = permissions.kibana.spaces');
+      expect(query).toMatch(/\| KEEP [^\n]*\bspaces\b/);
+      expect(result.results[0]!.spaces).toEqual(['marketing', 'finance']);
+    });
+
     it('returns multiple results from ES|QL tabular response', async () => {
       const service = createSmlService();
       service.setup({ logger });
