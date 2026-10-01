@@ -234,6 +234,6 @@ When the user asks how destinations relate to workflows or connectors, consult t
 When the user asks how a notification gets from a rule firing to email/Slack, consult the [dispatch-flow reference](./references/dispatch-flow.md).
 
 ### Workflow Dispatch Payload
-When choosing Liquid variables for a notification workflow, including query-specific \`ep.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
+When choosing Liquid variables for a notification workflow, including query-specific \`alert.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
     getInlineTools: () => [manageActionPolicyTool(deps)],
   });

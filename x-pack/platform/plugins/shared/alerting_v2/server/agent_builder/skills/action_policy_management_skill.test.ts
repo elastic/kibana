@@ -106,9 +106,9 @@ describe('createActionPolicyManagementSkill', () => {
     expect(payloadRef?.content).toContain('### `data`');
     expect(payloadRef?.content).toContain('## Example');
     expect(payloadRef?.content).toContain('`policyId`');
-    expect(payloadRef?.content).toContain('`episodes`');
+    expect(payloadRef?.content).toContain('`alerts`');
     expect(payloadRef?.content).toContain('`rules`');
-    expect(payloadRef?.content).toContain('`episode_status`');
+    expect(payloadRef?.content).toContain('`alert_status`');
   });
 
   it('exposes schema-generated matcher, grouping, and throttle references', () => {

@@ -133,11 +133,19 @@ export interface ActionGroup {
 
 export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
 
+export type ActionPolicyWorkflowPayloadAlert = Omit<
+  AlertEpisode,
+  'episode_id' | 'episode_status'
+> & {
+  alert_id: string;
+  alert_status: AlertEpisodeStatus;
+};
+
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;
   policyId: ActionPolicyId;
   groupKey: Record<string, unknown>;
-  episodes: AlertEpisode[];
+  alerts: ActionPolicyWorkflowPayloadAlert[];
   rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
