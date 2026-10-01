@@ -1,5 +1,5 @@
 {
-  "sha1": "611e3a5158a077d009d276b48943d750516019dd",
+  "sha1": "5694f83dfb6848b49e83362cb2c90570107bec19",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 109,
-        "column": 11
+        "line": 118,
+        "column": 20
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 196,
-        "column": 24
+        "line": 215,
+        "column": 23
       }
     },
     {
@@ -42,8 +42,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 337,
-        "column": 11
+        "line": 369,
+        "column": 8
+      }
+    },
+    {
+      "id": "bf49e6d67d9de6a-1fa71fd1e9b5e47",
+      "title": "Onboarding Authenticate and Deploy step — AWS identity federation flag OFF offers only access keys as an authentication method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_aws_identity_federation_disabled.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "f15e544ef42c485-d507e5e70302bb3",
+      "title": "Onboarding Authenticate and Deploy step — AWS identity federation flag ON offers identity federation as an authentication method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_aws_identity_federation_enabled.spec.ts",
+        "line": 39,
+        "column": 7
       }
     },
     {

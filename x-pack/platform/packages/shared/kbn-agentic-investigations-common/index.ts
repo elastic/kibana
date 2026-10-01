@@ -9,6 +9,7 @@ export {
   EscalationQueue,
   EscalationCard,
   AssignToUsers,
+  AssigneeAvatarStack,
   EscalationMetaInfo,
   LinkedInvestigationsBadge,
   type EscalationQueueItem,
@@ -37,12 +38,11 @@ export {
 export {
   ConversationDetailsFlyoutFooter,
   type ConversationDetailsFlyoutFooterProps,
+  type CloseInvestigationModalRenderProps,
 } from './src/components/details/flyout_footer';
 export {
   ConversationHeaderBlocks,
   type ConversationHeaderBlocksProps,
-  InvestigationHeaderBlocks,
-  type InvestigationHeaderBlocksProps,
 } from './src/components/details/header_blocks';
 export {
   OverviewTab,
@@ -52,6 +52,7 @@ export {
   EscalationFlyoutHeader,
   type EscalationFlyoutHeaderProps,
 } from './src/components/details/escalation_flyout_header';
+export { StatusToggle, type StatusToggleProps } from './src/components/details/status_toggle';
 export { DetailsBlock } from './src/components/details/detail_block';
 export {
   ProposedActionButton,
@@ -63,8 +64,12 @@ export {
   type AttachmentSummarySectionProps,
   AttachmentSummaryList,
   type AttachmentSummaryListProps,
+  AttachmentSummaryGroup,
+  type AttachmentSummaryGroupProps,
+  DEFAULT_COLLAPSED_COUNT,
+  AttachmentSummaryRow,
+  type AttachmentSummaryRowProps,
   selectSummaryAttachments,
-  type SummaryAttachment,
   SUMMARY_ATTACHMENT_TYPES,
   type SummaryAttachmentType,
 } from './src/components/attachment_summary';
@@ -80,6 +85,8 @@ export {
 export {
   type RenderAssignees,
   type AssigneesSlotRenderProps,
+  type RenderStatus,
+  type StatusSlotRenderProps,
   type RenderLinkedInvestigations,
   type LinkedInvestigationsSlotRenderProps,
 } from './src/template_ui/types';
@@ -99,10 +106,15 @@ export {
   CONVERSATION_CATEGORY_COLORS,
 } from './src/types/queue';
 
-export { Impact, investigationEntityIds } from './src/components/filters/impact';
+export {
+  Impact,
+  impactPills,
+  investigationEntityIds,
+  matchesEntityFilter,
+  type ImpactPill,
+} from './src/components/filters/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
-export { AssignActionModal } from './src/components/modals/assign_action_modal';
 export { MODAL_TRANSLATIONS } from './src/components/modals/translations';
 export {
   InvestigationActionModals,

@@ -60,7 +60,8 @@ export interface JsonSchema {
 
   // Structure
   properties?: Record<string, JsonSchema>;
-  additionalProperties?: boolean;
+  /** `true`/`false`, or a schema describing the value of unknown keys (typed maps). */
+  additionalProperties?: boolean | JsonSchema;
   items?: JsonSchema | JsonSchema[];
   required?: string[];
 
@@ -83,6 +84,14 @@ export interface JsonSchema {
   maxItems?: number;
   uniqueItems?: boolean;
 }
+
+/** True when `additionalProperties` is a value schema rather than a boolean. */
+export const isSchemaValuedAdditionalProperties = (
+  additionalProperties: unknown
+): additionalProperties is JsonSchema =>
+  typeof additionalProperties === 'object' &&
+  additionalProperties !== null &&
+  !Array.isArray(additionalProperties);
 
 /**
  * JSON Schema property keywords available for autocomplete.
@@ -145,7 +154,7 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
 
       // --- Object Properties ---
       properties: z.record(z.string(), JsonModelShapeSchema).optional(),
-      additionalProperties: z.boolean().optional(),
+      additionalProperties: z.union([z.boolean(), JsonModelShapeSchema]).optional(),
       required: z.array(z.string()).optional(),
 
       // --- Array Properties ---
@@ -188,7 +197,7 @@ export const JsonModelRootShapeSchema = z
     description: z.string().optional(),
     $ref: builtinWorkflowInputDefinitionRefSchema.optional(),
     properties: z.record(z.string(), JsonModelShapeSchema).optional(),
-    additionalProperties: z.boolean().optional(),
+    additionalProperties: z.union([z.boolean(), JsonModelShapeSchema]).optional(),
     required: z.array(z.string()).optional(),
     definitions: z.record(z.string(), JsonModelShapeSchema).optional(),
     $defs: z.record(z.string(), JsonModelShapeSchema).optional(),

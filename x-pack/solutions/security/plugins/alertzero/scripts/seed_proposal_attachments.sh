@@ -113,6 +113,7 @@ ensure_index() {
           "properties": {
             "spaceId": { "type": "keyword", "ignore_above": 1024 },
             "conversationId": { "type": "keyword", "ignore_above": 1024 },
+            "title": { "type": "text" },
             "comment": { "type": "text" },
             "actionWorkflowId": { "type": "keyword", "ignore_above": 1024 },
             "actionInput": { "type": "flattened" },
@@ -127,8 +128,13 @@ ensure_index() {
             "category": { "type": "keyword", "ignore_above": 1024 },
             "origin": { "type": "keyword", "ignore_above": 1024 },
             "expiresAt": { "type": "date", "format": "strict_date_optional_time" },
-            "impactRank": { "type": "byte" },
-            "confidenceRank": { "type": "byte" },
+            "ranks": {
+              "type": "object",
+              "properties": {
+                "impact": { "type": "byte" },
+                "confidence": { "type": "byte" }
+              }
+            },
             "decidedBy": {
               "type": "object",
               "properties": {
@@ -142,6 +148,7 @@ ensure_index() {
             "dismissReason": { "type": "keyword", "ignore_above": 1024 },
             "rationale": { "type": "text" },
             "executionError": { "type": "text" },
+            "previousExecutionError": { "type": "text" },
             "workflowExecutionId": { "type": "keyword", "ignore_above": 1024 },
             "createdAt": { "type": "date", "format": "strict_date_optional_time" },
             "createdBy": {
@@ -194,10 +201,11 @@ index_proposal() {
 }
 
 # Creates an Agent Builder attachment that links to an existing proposal via
-# its `origin` field. Everything rendered is read live from the proposal, so the
-# attachment carries the id and nothing else. Only needed here because this
-# script writes proposals straight to Elasticsearch — a proposal created through
-# the service attaches itself.
+# its `origin` field. Everything rendered is read live from the proposal except
+# the card's label, which is drawn synchronously and so has to be stored here —
+# the same title the proposal carries. Only needed because this script writes
+# proposals straight to Elasticsearch; one created through the service attaches
+# itself.
 add_attachment() {
   local conversation_id="$1"
   local payload="$2"
@@ -229,6 +237,7 @@ index_proposal "$P1_ID" "$(jq -n \
     id: $id,
     spaceId: $space,
     conversationId: $cid,
+    title: "Block outbound \u2014 seed",
     comment: "Block outbound traffic from the compromised host to prevent data exfiltration. This change applies only to the host running qualys-scan on the DMZ scan pool.",
     actionWorkflowId: "system-alertzero-action-create-rule",
     actionInput: {
@@ -240,9 +249,8 @@ index_proposal "$P1_ID" "$(jq -n \
     impact: "low",
     confidence: "high",
     category: "configure",
-    origin: "worker",
-    impactRank: 3,
-    confidenceRank: 0,
+    origin: "alertzero",
+    ranks: { impact: 3, confidence: 0 },
     createdAt: $now,
     rootProposalId: $id,
     revision: 1
@@ -278,6 +286,7 @@ index_proposal "$P2_ID" "$(jq -n \
     id: $id,
     spaceId: $space,
     conversationId: $cid,
+    title: "Detect repeated SSH login failures",
     comment: "Create a detection rule for repeated SSH login failures from external IP ranges. The pattern observed correlates with credential-stuffing campaigns in our threat intel feed.",
     actionWorkflowId: "system-alertzero-action-create-rule",
     actionInput: {
@@ -289,10 +298,9 @@ index_proposal "$P2_ID" "$(jq -n \
     impact: "medium",
     confidence: "high",
     category: "configure",
-    origin: "worker",
+    origin: "alertzero",
     expiresAt: $expiry,
-    impactRank: 2,
-    confidenceRank: 0,
+    ranks: { impact: 2, confidence: 0 },
     createdAt: $now,
     rootProposalId: $id,
     revision: 1
@@ -327,18 +335,18 @@ index_proposal "$P3_ID" "$(jq -n \
     id: $id,
     spaceId: $space,
     conversationId: $cid,
+    title: "Proposed action",
     comment: "Create a detection rule for repeated failed logins from this IP range.",
     status: "no_action",
     decision: "dismissed",
     impact: "medium",
     confidence: "medium",
-    origin: "worker",
+    origin: "alertzero",
     decidedAt: $now,
     decidedBy: { username: "elastic", fullName: null, email: null },
     dismissReason: "already_handled",
     rationale: "We already have a rule covering this pattern from last sprint.",
-    impactRank: 2,
-    confidenceRank: 1,
+    ranks: { impact: 2, confidence: 1 },
     createdAt: $now,
     rootProposalId: $id,
     revision: 1
@@ -351,7 +359,7 @@ ATTACH3=$(add_attachment "$CONV3" "$(jq -n \
     type: $type,
     origin: $origin,
     render_inline: true,
-    data: { proposalId: $origin }
+    data: { proposalId: $origin, title: "Proposed action" }
   }')")
 
 echo "  conversation: $CONV3, proposal: $P3_ID, attachment: $ATTACH3"
