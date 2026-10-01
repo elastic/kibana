@@ -68,8 +68,12 @@ const renderStepIcon: RenderStepIcon = ({ stepType, isTrigger, size, color }) =>
 /**
  * Read-only workflow preview with a YAML / graph toggle, the same layout as the
  * workflow library template page. Clicking a graph node opens its step details.
+ * With `showGraph` false (experimental features off), it shows the YAML only.
  */
-export const WorkflowYamlCanvasPreview: React.FC<{ yaml: string }> = ({ yaml }) => {
+export const WorkflowYamlCanvasPreview: React.FC<{ yaml: string; showGraph: boolean }> = ({
+  yaml,
+  showGraph,
+}) => {
   const { euiTheme } = useEuiTheme();
   const [view, setView] = useState<WorkflowDetailBottomBarView>('graph');
   const [selectedStepId, setSelectedStepId] = useState<string | undefined>();
@@ -79,12 +83,15 @@ export const WorkflowYamlCanvasPreview: React.FC<{ yaml: string }> = ({ yaml }) 
   // new YAML version streams in or briefly fails to parse.
   const lastParsedRef = useRef<ParsedWorkflow | undefined>(undefined);
   const parsed = useMemo(() => {
+    if (!showGraph) {
+      return undefined;
+    }
     const next = parseWorkflowForGraph(yaml);
     if (next) {
       lastParsedRef.current = next;
     }
     return next ?? lastParsedRef.current;
-  }, [yaml]);
+  }, [yaml, showGraph]);
 
   const activeView = parsed ? view : 'yaml';
 
@@ -176,12 +183,14 @@ export const WorkflowYamlCanvasPreview: React.FC<{ yaml: string }> = ({ yaml }) 
           data-test-subj="workflowYamlCanvasPreview-yaml"
         />
       )}
-      <WorkflowDetailBottomBar
-        editorView={activeView}
-        onEditorViewChange={setView}
-        disableAutoCollapse={true}
-        showViewToggle={Boolean(parsed)}
-      />
+      {showGraph ? (
+        <WorkflowDetailBottomBar
+          editorView={activeView}
+          onEditorViewChange={setView}
+          disableAutoCollapse={true}
+          showViewToggle={Boolean(parsed)}
+        />
+      ) : null}
       {activeView === 'graph' && selectedTarget ? (
         <EuiFocusTrap returnFocus>
           <div

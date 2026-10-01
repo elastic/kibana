@@ -106,7 +106,7 @@ describe('parseWorkflowForGraph', () => {
 
 describe('WorkflowYamlCanvasPreview', () => {
   it('shows the graph view by default for valid workflow YAML', () => {
-    render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} />);
+    render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} showGraph />);
 
     expect(screen.getByTestId('mockGraphCanvas')).toBeInTheDocument();
     expect(screen.queryByTestId('workflowYamlCanvasPreview-yaml')).not.toBeInTheDocument();
@@ -114,7 +114,7 @@ describe('WorkflowYamlCanvasPreview', () => {
   });
 
   it('switches to the YAML view with the bottom bar toggle', () => {
-    render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} />);
+    render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} showGraph />);
 
     fireEvent.click(screen.getByTestId('mockToggleView'));
 
@@ -123,23 +123,31 @@ describe('WorkflowYamlCanvasPreview', () => {
   });
 
   it('shows only the YAML view and hides the toggle when the YAML cannot be graphed', () => {
-    render(<WorkflowYamlCanvasPreview yaml={'steps:\n  not: a list\n'} />);
+    render(<WorkflowYamlCanvasPreview yaml={'steps:\n  not: a list\n'} showGraph />);
 
     expect(screen.getByTestId('workflowYamlCanvasPreview-yaml')).toBeInTheDocument();
     expect(screen.queryByTestId('mockGraphCanvas')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockToggleView')).not.toBeInTheDocument();
   });
 
-  it('keeps the last graph when a later YAML version cannot be parsed', () => {
-    const { rerender } = render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} />);
+  it('shows only the YAML view without the bottom bar when the graph is disabled', () => {
+    render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} showGraph={false} />);
 
-    rerender(<WorkflowYamlCanvasPreview yaml={`${VALID_YAML}  - name: [`} />);
+    expect(screen.getByTestId('workflowYamlCanvasPreview-yaml')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockGraphCanvas')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockBottomBar')).not.toBeInTheDocument();
+  });
+
+  it('keeps the last graph when a later YAML version cannot be parsed', () => {
+    const { rerender } = render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} showGraph />);
+
+    rerender(<WorkflowYamlCanvasPreview yaml={`${VALID_YAML}  - name: [`} showGraph />);
 
     expect(screen.getByTestId('mockGraphCanvas')).toBeInTheDocument();
   });
 
   it('opens the step details when a graph node is selected', () => {
-    render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} />);
+    render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} showGraph />);
 
     fireEvent.click(screen.getByTestId('mockGraphCanvas'));
 
@@ -148,7 +156,7 @@ describe('WorkflowYamlCanvasPreview', () => {
   });
 
   it('closes the step details with Escape', () => {
-    render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} />);
+    render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} showGraph />);
     fireEvent.click(screen.getByTestId('mockGraphCanvas'));
 
     fireEvent.keyDown(screen.getByTestId('workflowYamlCanvasPreview-stepFlyout'), {
@@ -159,7 +167,7 @@ describe('WorkflowYamlCanvasPreview', () => {
   });
 
   it('switches to the YAML view from the step details', () => {
-    render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} />);
+    render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} showGraph />);
     fireEvent.click(screen.getByTestId('mockGraphCanvas'));
 
     fireEvent.click(screen.getByTestId('mockOpenInYaml'));
