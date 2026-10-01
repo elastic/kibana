@@ -22,7 +22,7 @@ export interface ReportingUserIdentity {
   ids: string[];
   /** Restricts a key to reports it created, even when its owner's IDs match other reports. */
   apiKeyId?: string;
-  /** For display and logging only; usernames are not unique across realms. */
+  /** Retains username ownership for legacy reports without ownership IDs. */
   username?: string;
 }
 

@@ -137,14 +137,14 @@ describe('isScheduledReportOwner', () => {
     );
 
     it.each([asUser(), asUser({ ids: [FILE_ID] }), asUser({ ids: [] })])(
-      'denies legacy documents to a same-username human with identity %j',
+      'preserves legacy username access for a human with identity %j',
       (currentUser) => {
         expect(
           isScheduledReportOwner({
             report: { createdBy: 'rshared' },
             currentUser,
           })
-        ).toBe(false);
+        ).toBe(true);
       }
     );
 
@@ -260,13 +260,13 @@ describe('isScheduledReportOwner', () => {
       ).toBe(false);
     });
 
-    it('denies legacy documents even when the key owner username matches', () => {
+    it('preserves legacy access when the key owner username matches', () => {
       expect(
         isScheduledReportOwner({
           report: { createdBy: 'rshared' },
           currentUser: asApiKey(),
         })
-      ).toBe(false);
+      ).toBe(true);
     });
 
     it('denies a legacy document belonging to a different username', () => {
@@ -307,70 +307,97 @@ describe('isScheduledReportOwner', () => {
 });
 
 describe('buildOwnedByFilter', () => {
-  it.each([{ ids: [] }, { ids: [], username: 'rshared' }])(
-    'returns undefined when the identity has no ownership IDs: %j',
-    (identity) => {
-      expect(buildOwnedByFilter(identity)).toBeUndefined();
-    }
-  );
+  const matchField = (field: string, value: string) => ({
+    bool: {
+      should: [{ match: { [`scheduled_report.attributes.${field}`]: value } }],
+      minimum_should_match: 1,
+    },
+  });
 
-  it('matches only stable IDs for a session, excluding legacy and key-only reports', () => {
-    const node = buildOwnedByFilter(asUser());
+  const legacyQuery = (username: string) => ({
+    bool: {
+      filter: [
+        matchField('createdBy', username),
+        ...['createdById', 'createdByApiKeyId'].map((field) => ({
+          bool: {
+            must_not: {
+              bool: {
+                should: [{ exists: { field: `scheduled_report.attributes.${field}` } }],
+                minimum_should_match: 1,
+              },
+            },
+          },
+        })),
+      ],
+    },
+  });
+
+  const queryFor = (identity: ReportingUserIdentity) => {
+    const node = buildOwnedByFilter(identity);
     if (!node) {
       throw new Error('Expected an ownership filter');
     }
-    expect(toElasticsearchQuery(node)).toEqual({
+    return toElasticsearchQuery(node);
+  };
+
+  it('returns undefined when no ownership IDs or username are available', () => {
+    expect(buildOwnedByFilter({ ids: [] })).toBeUndefined();
+  });
+
+  it('matches stable IDs or a legacy username for a session', () => {
+    expect(queryFor(asUser())).toEqual({
       bool: {
-        should: ['profile-123', NATIVE_ID].map((id) => ({
-          bool: {
-            should: [{ match: { 'scheduled_report.attributes.createdById': id } }],
-            minimum_should_match: 1,
-          },
-        })),
+        should: [
+          matchField('createdById', 'profile-123'),
+          matchField('createdById', NATIVE_ID),
+          legacyQuery('rshared'),
+        ],
         minimum_should_match: 1,
       },
     });
+  });
+
+  it('matches only legacy reports when the identity has only a username', () => {
+    expect(queryFor({ ids: [], username: 'rshared' })).toEqual(legacyQuery('rshared'));
   });
 
   it('builds an ID clause without a username', () => {
-    expect(buildOwnedByFilter({ ids: ['profile-123'] })).toMatchObject({
-      type: 'function',
-      function: 'is',
-    });
+    expect(queryFor({ ids: ['profile-123'] })).toEqual(matchField('createdById', 'profile-123'));
   });
 
-  it('restricts API keys to their own reports, excluding legacy reports and other owner IDs', () => {
-    const node = buildOwnedByFilter(asApiKey());
-    if (!node) {
-      throw new Error('Expected an ownership filter');
-    }
-    expect(toElasticsearchQuery(node)).toEqual({
+  it('restricts API keys to their own reports plus legacy reports of the same username', () => {
+    expect(queryFor(asApiKey())).toEqual({
       bool: {
-        should: [{ match: { 'scheduled_report.attributes.createdByApiKeyId': 'api-key-1' } }],
+        should: [matchField('createdByApiKeyId', 'api-key-1'), legacyQuery('rshared')],
         minimum_should_match: 1,
       },
     });
   });
 
-  it.each([asUser(), asApiKey(), asUser({ ids: [] })])(
-    'never uses the username to authorize listings for %j',
-    (identity) => {
-      expect(buildOwnedByFilter(identity)).toEqual(
-        buildOwnedByFilter({ ...identity, username: 'different"user*[name]' })
-      );
-    }
-  );
+  it('restricts API keys without a username to their own reports', () => {
+    expect(queryFor(asApiKey({ username: undefined }))).toEqual(
+      matchField('createdByApiKeyId', 'api-key-1')
+    );
+  });
+
+  it('uses wildcard is nodes so saved-object filters rewrite both missing ownership fields', () => {
+    const node = buildOwnedByFilter({ ids: [], username: 'rshared' });
+    expect(node).toMatchObject({
+      function: 'and',
+      arguments: [
+        { function: 'is' },
+        { function: 'not', arguments: [{ function: 'is' }] },
+        { function: 'not', arguments: [{ function: 'is' }] },
+      ],
+    });
+  });
+
+  it('matches a username containing KQL special characters exactly', () => {
+    const username = 'weird"user*[name]';
+    expect(queryFor({ ids: [], username })).toEqual(legacyQuery(username));
+  });
 
   it('matches a realm-qualified ID containing quotes and brackets exactly', () => {
-    const node = buildOwnedByFilter({ ids: [FILE_ID], username: 'rshared' });
-    if (!node) {
-      throw new Error('Expected an ownership filter');
-    }
-    expect(toElasticsearchQuery(node)).toEqual({
-      bool: {
-        should: [{ match: { 'scheduled_report.attributes.createdById': FILE_ID } }],
-        minimum_should_match: 1,
-      },
-    });
+    expect(queryFor({ ids: [FILE_ID] })).toEqual(matchField('createdById', FILE_ID));
   });
 });

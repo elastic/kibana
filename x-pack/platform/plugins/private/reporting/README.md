@@ -16,7 +16,7 @@ Although historically related to reporting, the CsvGenerator class has now be mo
 
 ## Legacy scheduled report ownership
 
-Scheduled reports without `createdById` or `createdByApiKeyId` require the space's Manage Reporting privilege to list, update, delete, enable, or disable. Their stored username cannot establish ownership across authentication realms. Updates do not assign ownership to the caller. To restore access for the original creator, a reporting manager can disable or delete the old schedule and have that user create a replacement with verified ownership IDs.
+Scheduled reports with neither `createdById` nor `createdByApiKeyId` retain username-based access for listing, updating, deleting, enabling, and disabling. Updates leave them without ownership IDs. Realm-aware ownership applies only to newly created reports; legacy reports retain the previous cross-realm username behavior.
 
 ## Serverless configuration
 

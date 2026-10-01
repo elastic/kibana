@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import type { KueryNode } from '@kbn/es-query';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { ReportingUserIdentity } from '../../../lib';
 import type { ScheduledReportType } from '../../../types';
 
+const CREATED_BY_FIELD = `${SCHEDULED_REPORT_SAVED_OBJECT_TYPE}.attributes.createdBy`;
 const CREATED_BY_ID_FIELD = `${SCHEDULED_REPORT_SAVED_OBJECT_TYPE}.attributes.createdById`;
 const CREATED_BY_API_KEY_ID_FIELD = `${SCHEDULED_REPORT_SAVED_OBJECT_TYPE}.attributes.createdByApiKeyId`;
 
@@ -27,6 +28,11 @@ export const isScheduledReportOwner = ({
   report: ScheduledReportOwnership;
   currentUser: ReportingUserIdentity;
 }): boolean => {
+  // Preserve username ownership only for reports created before ownership IDs were recorded.
+  if (report.createdById === undefined && report.createdByApiKeyId === undefined) {
+    return currentUser.username !== undefined && report.createdBy === currentUser.username;
+  }
+
   if (currentUser.apiKeyId !== undefined) {
     return report.createdByApiKeyId === currentUser.apiKeyId;
   }
@@ -35,18 +41,30 @@ export const isScheduledReportOwner = ({
     return report.createdById.some((id) => currentUser.ids.includes(id));
   }
 
-  // A legacy username cannot establish realm ownership; reporting managers handle these reports.
   return false;
 };
 
+// Saved-object filters rewrite wildcard `is` nodes to storage fields, but not bare `exists` nodes.
+const isAbsent = (field: string): KueryNode =>
+  nodeTypes.function.buildNode('not', nodeBuilder.is(field, nodeTypes.wildcard.buildNode('*')));
+
 /** Mirrors isScheduledReportOwner; callers must treat undefined as no access, not an unfiltered search. */
 export const buildOwnedByFilter = (currentUser: ReportingUserIdentity): KueryNode | undefined => {
-  const { ids, apiKeyId } = currentUser;
+  const { ids, apiKeyId, username } = currentUser;
+  const clauses =
+    apiKeyId !== undefined
+      ? [nodeBuilder.is(CREATED_BY_API_KEY_ID_FIELD, apiKeyId)]
+      : ids.map((id) => nodeBuilder.is(CREATED_BY_ID_FIELD, id));
 
-  if (apiKeyId !== undefined) {
-    return nodeBuilder.is(CREATED_BY_API_KEY_ID_FIELD, apiKeyId);
+  if (username !== undefined) {
+    clauses.push(
+      nodeBuilder.and([
+        nodeBuilder.is(CREATED_BY_FIELD, username),
+        isAbsent(CREATED_BY_ID_FIELD),
+        isAbsent(CREATED_BY_API_KEY_ID_FIELD),
+      ])
+    );
   }
 
-  const clauses = ids.map((id) => nodeBuilder.is(CREATED_BY_ID_FIELD, id));
   return clauses.length > 0 ? nodeBuilder.or(clauses) : undefined;
 };

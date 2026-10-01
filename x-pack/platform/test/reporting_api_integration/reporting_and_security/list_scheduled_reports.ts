@@ -166,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('returns a legacy report only to a reporting manager, even when its username matches', async () => {
+    it('returns a legacy report to its username owner and a reporting manager', async () => {
       const report = await reportingAPI.schedulePdf(
         reportingAPI.REPORTING_USER_USERNAME,
         reportingAPI.REPORTING_USER_PASSWORD,
@@ -191,7 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.REPORTING_USER_PASSWORD
       );
       const userReportIds = userReports.data.map((item: { id: string }) => item.id);
-      expect(userReportIds).not.to.contain(legacyReportId);
+      expect(userReportIds).to.contain(legacyReportId);
       expect(userReportIds).to.contain(report1Id);
 
       const managerReports = await reportingAPI.listScheduledReports(
