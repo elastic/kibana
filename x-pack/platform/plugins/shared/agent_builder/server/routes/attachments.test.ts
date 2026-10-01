@@ -381,7 +381,7 @@ describe('Attachment Routes', () => {
           id: 'conv-1',
           events: [expect.objectContaining({ type: 'attachment_added' })],
         }),
-        { access: 'owner' }
+        { access: 'converse' }
       );
     });
 
@@ -738,7 +738,7 @@ describe('Attachment Routes', () => {
             }),
           ],
         }),
-        { access: 'owner' }
+        { access: 'converse' }
       );
     });
 
