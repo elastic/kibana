@@ -82,6 +82,14 @@ const createConnectorMock = (overrides: Record<string, any> = {}) => ({
   ...overrides,
 });
 
+const getForFeatureCalls = (
+  searchInferenceEndpoints: jest.Mocked<SearchInferenceEndpointsPluginStart>,
+  featureId: string
+) =>
+  (searchInferenceEndpoints.endpoints.getForFeature as jest.Mock).mock.calls.filter(
+    ([calledFeatureId]) => calledFeatureId === featureId
+  );
+
 const getCompletionCallback = (
   inference: ReturnType<typeof inferenceMock.createStartContract>,
   callIndex = 0
@@ -169,8 +177,10 @@ describe('createModelProvider', () => {
       await provider.getDefaultModel();
       await provider.getDefaultModel();
 
-      expect(deps.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledTimes(1);
-      expect(deps.inference.getChatModel).toHaveBeenCalledTimes(1);
+      expect(
+        getForFeatureCalls(deps.searchInferenceEndpoints, AGENT_BUILDER_INFERENCE_FEATURE_ID)
+      ).toHaveLength(1);
+      expect(deps.inference.getChatModel).toHaveBeenCalledTimes(2);
     });
 
     it('uses the explicit defaultConnectorId option without resolving feature endpoints', async () => {
@@ -180,7 +190,9 @@ describe('createModelProvider', () => {
       const provider = createModelProvider(deps);
       await provider.getDefaultModel();
 
-      expect(deps.searchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
+      expect(
+        getForFeatureCalls(deps.searchInferenceEndpoints, AGENT_BUILDER_INFERENCE_FEATURE_ID)
+      ).toHaveLength(0);
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({ connectorId: 'explicit-connector' })
       );

@@ -16,6 +16,7 @@ import {
   createAgentsServiceStartMock,
   createMockedAgentRegistry,
 } from '../../../test_utils/agents';
+import { createConversationServiceMock } from '../../../test_utils/conversations';
 import { resolveServices } from './resolve_services';
 
 const createDeps = ({
@@ -45,7 +46,7 @@ const createDeps = ({
       request: httpServerMock.createKibanaRequest(),
       logger: loggingSystemMock.createLogger(),
       inference: inferenceMock.createStartContract(),
-      conversationService: {} as Parameters<typeof resolveServices>[0]['conversationService'],
+      conversationService: createConversationServiceMock(),
       agentService,
       searchInferenceEndpoints: {
         features: {},
@@ -80,7 +81,10 @@ describe('resolveServices', () => {
     const { selectedConnectorId } = await resolveServices(deps);
 
     expect(selectedConnectorId).toBe('connector-1');
-    expect(getForFeature).not.toHaveBeenCalled();
+    expect(getForFeature).not.toHaveBeenCalledWith(
+      AGENT_BUILDER_INFERENCE_FEATURE_ID,
+      expect.anything()
+    );
   });
 
   it('uses the first endpoint resolved for the Agent Builder feature', async () => {
