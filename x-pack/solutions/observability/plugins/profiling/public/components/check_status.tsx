@@ -20,11 +20,7 @@ import { ProfilingStatusErrorPrompt } from './profiling_status_error_prompt';
 
 // Pages that can be opened without any profiling data. The profiling router is not used to match
 // them because, at this point, the current route might not have all of its required params.
-const UTILITY_PATHNAMES = [
-  '/add-data-instructions',
-  '/delete_data_instructions',
-  '/profiling-not-enabled',
-];
+const UTILITY_PATHNAMES = ['/add-data-instructions', '/profiling-not-enabled'];
 
 export function CheckStatus({ children }: { children: React.ReactElement }) {
   const { status, data, error, refresh } = useProfilingStatus();
@@ -77,9 +73,13 @@ export function CheckStatus({ children }: { children: React.ReactElement }) {
   }
 
   if (data.universalProfiling.hasLegacyData) {
-    if (pathname !== '/delete_data_instructions') {
-      // If the cluster still has data from before 8.9.1, redirect to the deletion instructions
-      router.push('/delete_data_instructions', { path: {}, query: {} });
+    if (pathname !== '/add-data-instructions') {
+      // If the cluster still has data from before 8.9.1, redirect to the add data page,
+      // which shows the instructions to delete it
+      router.push('/add-data-instructions', {
+        path: {},
+        query: { selectedTab: AddDataTabs.Kubernetes },
+      });
       return null;
     }
     return children;

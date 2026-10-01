@@ -45,7 +45,11 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
 
   // No back button on the add data page unless we positively know there is data. While the
   // status is unresolved the button would otherwise render and then vanish once it reports no data.
-  if (pathname === '/add-data-instructions' && !hasProfilingData(data)) {
+  // With data from before 8.9.1, going back would only redirect to this page again.
+  if (
+    pathname === '/add-data-instructions' &&
+    (!hasProfilingData(data) || data?.universalProfiling.hasLegacyData)
+  ) {
     return undefined;
   }
 
