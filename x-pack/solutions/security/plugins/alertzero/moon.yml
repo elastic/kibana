@@ -60,6 +60,9 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/ui-callout'
   - '@kbn/core-http-browser-mocks'
+  - '@kbn/core-application-browser'
+  - '@kbn/security-solution-distribution-bar'
+  - '@kbn/test-jest-helpers'
   - '@kbn/user-profile-components'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/proposals-common'
@@ -68,7 +71,9 @@ dependsOn:
   - '@kbn/security-mitre-attack-common'
   - '@kbn/inference-plugin'
   - '@kbn/management-settings-ids'
-  - '@kbn/ui-callout'
+  - '@kbn/proposals-ui'
+  - '@kbn/core-chrome-browser-context-mocks'
+  - '@kbn/core-chrome-browser-mocks'
 tags:
   - plugin
   - prod

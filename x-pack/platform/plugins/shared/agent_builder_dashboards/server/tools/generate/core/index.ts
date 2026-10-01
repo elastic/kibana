@@ -15,4 +15,5 @@ export type { VisPanelResolutionRequest } from './operations/panels';
 
 export { createVisPanelResolver } from './resolvers/vis_panel_resolver';
 export { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
+export { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
 export type { VisPanelResolverDeps } from './resolvers/vis_panel_resolver';
