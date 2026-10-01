@@ -143,8 +143,7 @@ const labels = {
 
 const openAutomation = () => {};
 
-const getAutomationTags = (automation: Automation): string[] =>
-  automation.trigger.rows.flatMap((row) => ('tags' in row ? row.tags ?? [] : []));
+const getAutomationTags = (automation: Automation): string[] => automation.tags ?? [];
 
 const AutomationTags = ({ tags }: { tags: string[] }) => (
   <EuiToolTip
@@ -508,19 +507,15 @@ export const AutomationsPage = (): React.ReactElement => {
         const query = search.trim().toLowerCase();
         const matchesSearch =
           !query ||
-          [
-            automation.name,
-            automation.description ?? '',
-            ...automation.trigger.rows.flatMap((row) => ('tags' in row ? row.tags ?? [] : [])),
-          ].some((value) => value.toLowerCase().includes(query));
+          [automation.name, automation.description ?? '', ...getAutomationTags(automation)].some(
+            (value) => value.toLowerCase().includes(query)
+          );
         const matchesStatus =
           selectedStatus.length === 0 ||
           selectedStatus.includes(automation.isEnabled ? 'Active' : 'Paused');
         const matchesTags =
           selectedTags.length === 0 ||
-          automation.trigger.rows.some(
-            (row) => 'tags' in row && (row.tags ?? []).some((tag) => selectedTags.includes(tag))
-          );
+          getAutomationTags(automation).some((tag) => selectedTags.includes(tag));
         const matchesAuthors =
           selectedAuthors.length === 0 || selectedAuthors.includes(automation.author.username);
         const matchesTriggers =
@@ -811,11 +806,15 @@ export const AutomationsPage = (): React.ReactElement => {
         />
       )}
       {isCreateFlyoutOpen && (
-        <CreateAutomationFlyout onClose={() => setIsCreateFlyoutOpen(false)} />
+        <CreateAutomationFlyout
+          tagSuggestions={tags.map(({ label }) => label)}
+          onClose={() => setIsCreateFlyoutOpen(false)}
+        />
       )}
       {automationToClone && (
         <CreateAutomationFlyout
           automation={automationToClone}
+          tagSuggestions={tags.map(({ label }) => label)}
           onClose={() => setAutomationToClone(undefined)}
         />
       )}

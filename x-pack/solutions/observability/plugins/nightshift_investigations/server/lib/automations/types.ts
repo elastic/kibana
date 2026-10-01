@@ -58,6 +58,7 @@ export interface NightshiftAutomationRuntime {
 export interface NightshiftAutomationAttributes {
   name: string;
   description?: string;
+  tags?: string[];
   automationType: AutomationType;
   isEnabled: boolean;
   workflowId?: string;

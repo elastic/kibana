@@ -45,6 +45,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     body: z.object({
       name: z.string().min(1).max(500).optional(),
       description: z.string().max(5000).optional(),
+      tags: z.array(z.string().max(32)).max(50).optional(),
       isEnabled: z.boolean().optional(),
       trigger: z.object({ rows: z.array(triggerRowSchema).min(1) }).optional(),
       execution: z
@@ -93,6 +94,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       ...existing.attributes,
       ...(params.body.name !== undefined && { name: params.body.name }),
       ...(params.body.description !== undefined && { description: params.body.description }),
+      ...(params.body.tags !== undefined && { tags: params.body.tags }),
       ...(params.body.isEnabled !== undefined && { isEnabled: params.body.isEnabled }),
       ...(params.body.trigger !== undefined && { trigger: params.body.trigger }),
       ...(params.body.execution !== undefined && {

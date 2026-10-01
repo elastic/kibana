@@ -68,6 +68,8 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     body: z.object({
       name: z.string().min(1).max(500),
       description: z.string().max(5000).optional(),
+      tags: z.array(z.string().max(32)).max(50).optional(),
+      isEnabled: z.boolean().optional(),
       automationType: z.enum(['custom', 'managed']).optional(),
       trigger: triggerSchema,
       execution: executionSchema,
@@ -89,8 +91,9 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     const attributes: NightshiftAutomationAttributes = {
       name: params.body.name,
       description: params.body.description,
+      tags: params.body.tags,
       automationType: params.body.automationType ?? 'custom',
-      isEnabled: true,
+      isEnabled: params.body.isEnabled ?? true,
       trigger: params.body.trigger,
       execution: params.body.execution,
       completion: params.body.completion,

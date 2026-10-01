@@ -27,6 +27,10 @@ const automationAttributesSchemaV1 = schema.object({
   updatedAt: schema.string({ maxLength: 64 }),
 });
 
+const automationAttributesSchemaV2 = automationAttributesSchemaV1.extends({
+  tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 32 }), { maxSize: 50 })),
+});
+
 export const nightshiftAutomationSavedObjectType: SavedObjectsType<NightshiftAutomationAttributes> =
   {
     name: NIGHTSHIFT_AUTOMATION_SO_TYPE,
@@ -52,6 +56,13 @@ export const nightshiftAutomationSavedObjectType: SavedObjectsType<NightshiftAut
         schemas: {
           create: automationAttributesSchemaV1,
           forwardCompatibility: automationAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
+        },
+      },
+      2: {
+        changes: [],
+        schemas: {
+          create: automationAttributesSchemaV2,
+          forwardCompatibility: automationAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
         },
       },
     },

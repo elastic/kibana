@@ -110,7 +110,7 @@ export function NightshiftAppHeader({
               {
                 id: 'nightshiftInvestigations',
                 label: investigationsLabel,
-                iconType: 'magnifyExclamation',
+                iconType: 'reporter',
                 href: investigationsHref,
                 run: () => void onAutomationsClick(),
                 testId: 'nightshiftInvestigationsPrimaryAction',
