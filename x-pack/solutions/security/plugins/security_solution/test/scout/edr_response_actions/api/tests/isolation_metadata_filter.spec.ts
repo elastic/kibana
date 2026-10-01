@@ -74,8 +74,20 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async () => {
-      await unisolatedHosts?.cleanup();
-      await isolatedHosts?.cleanup();
+      const failures: unknown[] = [];
+      for (const seeded of [unisolatedHosts, isolatedHosts]) {
+        try {
+          await seeded?.cleanup();
+        } catch (error) {
+          failures.push(error);
+        }
+      }
+      if (failures.length === 1) {
+        throw failures[0];
+      }
+      if (failures.length > 1) {
+        throw new AggregateError(failures, 'Failed to clean up seeded endpoint hosts');
+      }
     });
 
     apiTest(

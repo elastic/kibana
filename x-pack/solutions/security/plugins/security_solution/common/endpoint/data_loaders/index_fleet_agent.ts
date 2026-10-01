@@ -10,6 +10,7 @@ import type {
   BulkRequest,
   DeleteByQueryResponse,
   IndexRequest,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { FleetServerAgent } from '@kbn/fleet-plugin/common';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
@@ -217,6 +218,15 @@ export const deleteIndexedFleetAgents = async (
       },
     };
     const index = [indexedData.fleetAgentsIndex, `${indexedData.fleetAgentsIndex}-*`];
+    const countAgents = (agentQuery: QueryDslQueryContainer) =>
+      esClient
+        .count({
+          index,
+          ignore_unavailable: true,
+          expand_wildcards: 'all',
+          query: agentQuery,
+        })
+        .catch(wrapErrorAndRejectPromise);
 
     for (let attempt = 0; attempt < 5; attempt++) {
       response.agents = await esClient
@@ -231,25 +241,25 @@ export const deleteIndexedFleetAgents = async (
         })
         .catch(wrapErrorAndRejectPromise);
 
-      const remaining = await esClient
-        .count({
-          index: indexedData.fleetAgentsIndex,
-          ignore_unavailable: true,
-          query,
-        })
-        .catch(wrapErrorAndRejectPromise);
+      const remaining = await countAgents(query);
 
       if (remaining.count === 0) {
         break;
       }
 
       if (attempt === 4) {
+        createToolingLogger().warning(
+          `Failed to delete ${remaining.count} seeded Fleet agents [${agentIds.join(
+            ', '
+          )}]. Marking them inactive so the agent policy can be removed.`
+        );
         await esClient
           .updateByQuery({
-            index: indexedData.fleetAgentsIndex,
+            index,
             refresh: true,
             conflicts: 'proceed',
             ignore_unavailable: true,
+            expand_wildcards: 'all',
             query,
             script: {
               source: 'ctx._source.active = false',
@@ -257,6 +267,26 @@ export const deleteIndexedFleetAgents = async (
             },
           })
           .catch(wrapErrorAndRejectPromise);
+
+        const stillActive = await countAgents({
+          bool: {
+            filter: [
+              query,
+              {
+                bool: {
+                  should: [{ term: { active: true } }, { term: { active: 'true' } }],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        });
+        if (stillActive.count > 0) {
+          const ids = agentIds.join(', ');
+          throw new Error(
+            `Failed to delete or deactivate ${stillActive.count} seeded Fleet agents [${ids}]`
+          );
+        }
         break;
       }
 

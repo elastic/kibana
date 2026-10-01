@@ -37,9 +37,12 @@ export const completeHostAction = async ({
     const fleetResponse = await sendFleetActionResponse(systemEsClient, action, {
       state: 'success',
     });
-    if (!fleetResponse.error) {
-      await sendEndpointActionResponse(systemEsClient, action, { state: 'success' });
+    if (fleetResponse.error) {
+      throw new Error(
+        `Fleet action response for ${action.command} ${action.id} failed: ${fleetResponse.error}`
+      );
     }
+    await sendEndpointActionResponse(systemEsClient, action, { state: 'success' });
   } finally {
     await systemEsClient.close();
   }
@@ -66,24 +69,30 @@ export const waitForHostIsolation = async ({
     agentId
   )}&agentType=endpoint`;
 
+  let lastError: unknown;
   while (Date.now() < deadline) {
-    const response = await kbnClient.request<AgentStatusResponse>({
-      method: 'GET',
-      path,
-      headers: {
-        'kbn-xsrf': 'scout',
-        ...INTERNAL_API_HEADERS,
-      },
-    });
+    try {
+      const response = await kbnClient.request<AgentStatusResponse>({
+        method: 'GET',
+        path,
+        headers: {
+          'kbn-xsrf': 'scout',
+          ...INTERNAL_API_HEADERS,
+        },
+      });
 
-    if (response.data?.data?.[agentId]?.isolated === isolated) {
-      return;
+      if (response.data?.data?.[agentId]?.isolated === isolated) {
+        return;
+      }
+    } catch (error) {
+      lastError = error;
     }
 
     await new Promise((resolve) => setTimeout(resolve, 1_000));
   }
 
+  const detail = lastError instanceof Error ? `: ${lastError.message}` : '';
   throw new Error(
-    `Timed out waiting for agent ${agentId} isolation to be ${isolated} in space ${spaceId}`
+    `Timed out waiting for agent ${agentId} isolation to be ${isolated} in space ${spaceId}${detail}`
   );
 };

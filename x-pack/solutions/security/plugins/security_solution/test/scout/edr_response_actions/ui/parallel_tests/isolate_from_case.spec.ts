@@ -53,8 +53,20 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async () => {
-      await cleanupCase?.();
-      await seeded?.cleanup();
+      const failures: unknown[] = [];
+      for (const cleanup of [cleanupCase, () => seeded?.cleanup()]) {
+        try {
+          await cleanup?.();
+        } catch (error) {
+          failures.push(error);
+        }
+      }
+      if (failures.length === 1) {
+        throw failures[0];
+      }
+      if (failures.length > 1) {
+        throw new AggregateError(failures, 'Failed to clean up the seeded case and host');
+      }
     });
 
     spaceTest(

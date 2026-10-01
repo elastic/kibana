@@ -100,6 +100,9 @@ export const startMetadataTransforms = usageTracker.track(
 
     // Host APIs read the united index. The current index can be ready while this
     // transform is still catching up, or while a parallel test has stopped it.
+    // METADATA_UNITED_INDEX is the v1 destination. isEndpointPackageV2() is still
+    // a stub; when it starts returning true, this index must follow the same
+    // versioning as unitedTransformId above.
     if (agentIds.length > 0) {
       await waitForMetadataDocs({
         esClient,

@@ -21,6 +21,9 @@ const FLEET_DATA_STREAM_NAMESPACE = 'default';
  * The endpoint data loader copies the active space id into the agent policy
  * `namespace`. That field is a data stream namespace, not a Kibana space id,
  * so rewrite invalid values to `default`.
+ *
+ * Only `request` is space-scoped. Other properties, including `savedObjects`,
+ * are the root client and still hit the default space.
  */
 export const scopeKbnClientToSpace = (kbnClient: KbnClient, spaceId: string): KbnClient => {
   if (spaceId === 'default') {
