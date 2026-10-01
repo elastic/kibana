@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { renderMemoryTranscript, stepsFromRound, type TranscriptStep } from './transcript';
+import {
+  renderMemoryTranscript,
+  stepsFromRound,
+  stepsFromToolCalls,
+  type TranscriptStep,
+} from './transcript';
 
 const tool = (
   toolId: string,
@@ -183,6 +188,43 @@ describe('stepsFromRound', () => {
         isError: true,
       },
       { kind: 'tool', toolId: 'x', params: {}, resultText: undefined, isError: false },
+    ]);
+  });
+});
+
+describe('stepsFromToolCalls', () => {
+  it('returns nothing when no call carries results', () => {
+    expect(
+      stepsFromToolCalls([{ tool_id: 'nightshift_sandbox_bash', params: { command: 'ls' } }])
+    ).toBeUndefined();
+  });
+
+  it('shows each call with its results, and marks calls without results', () => {
+    expect(
+      stepsFromToolCalls([
+        {
+          tool_id: 'nightshift_sandbox_bash',
+          tool_call_id: 'tc-1',
+          params: { command: 'esql' },
+          results: [{ type: 'other', data: { stdout: 'pool exhausted' } }],
+        },
+        { tool_id: 'nightshift_sandbox_bash', tool_call_id: 'tc-2', params: { command: 'ls' } },
+      ])
+    ).toEqual([
+      {
+        kind: 'tool',
+        toolId: 'nightshift_sandbox_bash',
+        params: { command: 'esql' },
+        resultText: 'pool exhausted',
+        isError: false,
+      },
+      {
+        kind: 'tool',
+        toolId: 'nightshift_sandbox_bash',
+        params: { command: 'ls' },
+        resultText: undefined,
+        isError: false,
+      },
     ]);
   });
 });

@@ -19,7 +19,8 @@ import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
  *  3. the final answer last, next to the instructions. It is a synthesis and can contain the
  *     agent's inferences, so facts should be backed by a result above.
  *
- * When the persisted round cannot be read, the investigation falls back to tool-call parameters.
+ * When the persisted round cannot be read, the investigation is built from the hook's tool calls
+ * and results, or falls back to tool-call parameters when no results were passed.
  */
 
 export type TranscriptStep =
@@ -207,4 +208,24 @@ export const stepsFromRound = (steps: readonly RoundStep[]): TranscriptStep[] =>
     }
   }
   return out;
+};
+
+/**
+ * Builds the investigation from the hook's tool calls when they carry results. It has no agent
+ * notes, but each call shows what it returned.
+ */
+export const stepsFromToolCalls = (
+  toolCalls: readonly InvestigationToolCall[]
+): TranscriptStep[] | undefined => {
+  if (!toolCalls.some((call) => call.results !== undefined)) {
+    return undefined;
+  }
+  return stepsFromRound(
+    toolCalls.map((call) => ({
+      type: 'tool_call',
+      tool_id: call.tool_id ?? 'unknown_tool',
+      params: call.params,
+      results: call.results as RoundResult[] | undefined,
+    }))
+  );
 };

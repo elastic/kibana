@@ -987,11 +987,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "ac6874bd3761a2b24c3bf9955b75c2ae318c1f4c9ce104ed5f44d345c476e73e"
+      "sha256": "66b5bfd5a698cc86f9a297797121a263ffffad22b2be77169a2b46a551eba939"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "c18918bce658f79063715f6feab82938bfbe9944809d5e3a024d07922d6d6062"
+      "sha256": "9cc0fe9709568ec797b2a86bffb1a0cc4761a68115153649c4c81fbfb3614427"
     }
   }
 }

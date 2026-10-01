@@ -58,6 +58,7 @@ describe('memoryOptimizeStepDefinition', () => {
       conversation_id?: string;
       round_id?: string;
       tool_calls?: unknown;
+      tool_results?: unknown;
     },
     spaceId = 'default'
   ) =>
@@ -96,7 +97,17 @@ describe('memoryOptimizeStepDefinition', () => {
         sandbox_id: 'default__conv-1',
         conversation_id: 'conv-1',
         round_id: 'round-1',
-        tool_calls: [{ tool_id: 'nightshift_sandbox_bash', params: { command: 'ls' } }],
+        tool_calls: [
+          { tool_id: 'nightshift_sandbox_bash', tool_call_id: 'tc-1', params: { command: 'ls' } },
+          { tool_id: 'nightshift_sandbox_bash', tool_call_id: 'tc-2', params: { command: 'pwd' } },
+        ],
+        tool_results: [
+          {
+            tool_id: 'nightshift_sandbox_bash',
+            tool_call_id: 'tc-1',
+            results: [{ type: 'other', data: { stdout: 'a b' } }],
+          },
+        ],
       })
     );
 
@@ -105,7 +116,15 @@ describe('memoryOptimizeStepDefinition', () => {
       agentId: 'nightshift.investigation',
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions.',
-      toolCalls: [{ tool_id: 'nightshift_sandbox_bash', params: { command: 'ls' } }],
+      toolCalls: [
+        {
+          tool_id: 'nightshift_sandbox_bash',
+          tool_call_id: 'tc-1',
+          params: { command: 'ls' },
+          results: [{ type: 'other', data: { stdout: 'a b' } }],
+        },
+        { tool_id: 'nightshift_sandbox_bash', tool_call_id: 'tc-2', params: { command: 'pwd' } },
+      ],
       conversationId: 'conv-1',
       roundId: 'round-1',
       recalledIds: ['memory_a'],

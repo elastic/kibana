@@ -14,7 +14,8 @@ import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runMemoryOptimize } from '../memory/register_memory';
 import type { NightshiftTelemetryClient } from '../telemetry';
-import { toolCallsSchema } from './tool_calls_schema';
+import { withToolResults } from './cortex_optimize';
+import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
@@ -60,7 +61,10 @@ export const memoryOptimizeStepDefinition = ({
         .optional()
         .describe('Supported agent policy selector; never used as a storage boundary.'),
       tool_calls: toolCallsSchema.describe(
-        'Investigator tool calls from this round (parameters only). Lets the optimizer see what the investigator queried.'
+        'Investigator tool calls from this round. Lets the optimizer see what the investigator queried.'
+      ),
+      tool_results: toolResultsSchema.describe(
+        'Results of the investigator tool calls, keyed by tool_call_id. Shows the optimizer what each query returned.'
       ),
       recalled_ids: z
         .array(z.string().max(2_000))
@@ -132,7 +136,10 @@ export const memoryOptimizeStepDefinition = ({
               agentId: context.input.agent_id,
               userMessage: context.input.prompt,
               assistantMessage: context.input.response,
-              toolCalls: (context.input.tool_calls ?? []) as InvestigationToolCall[],
+              toolCalls: withToolResults(
+                (context.input.tool_calls ?? []) as InvestigationToolCall[],
+                context.input.tool_results ?? []
+              ),
               conversationId: context.input.conversation_id,
               roundId: context.input.round_id,
               recalledIds: context.input.recalled_ids ?? [],

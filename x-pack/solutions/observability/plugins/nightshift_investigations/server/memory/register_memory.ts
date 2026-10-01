@@ -14,7 +14,7 @@ import {
 } from '../lib/create_optimize_model';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { previewText } from './log_format';
-import { stepsFromRound, type TranscriptStep } from './transcript';
+import { stepsFromRound, stepsFromToolCalls, type TranscriptStep } from './transcript';
 import { materializeMemory, type MaterializeMemoryResult } from './materialize';
 import {
   createLlmProposeMemoryExtractions,
@@ -126,7 +126,7 @@ export const loadRoundSteps = async ({
       lastProblem = (error as Error).message;
     }
   }
-  logger.warn('Memory optimize could not read the round; using tool-call parameters only');
+  logger.warn('Memory optimize could not read the round; using the hook tool calls');
   logger.debug(`Memory optimize round read gave up: ${lastProblem}`);
   return undefined;
 };
@@ -182,14 +182,15 @@ export const runMemoryOptimize = async ({
     return undefined;
   }
 
-  const investigation = await loadRoundSteps({
-    agentBuilder: getAgentBuilder(),
-    request,
-    conversationId,
-    roundId,
-    logger,
-    signal,
-  });
+  const investigation =
+    (await loadRoundSteps({
+      agentBuilder: getAgentBuilder(),
+      request,
+      conversationId,
+      roundId,
+      logger,
+      signal,
+    })) ?? stepsFromToolCalls(toolCalls);
 
   const store = createMemoryStore({ esClient, logger, spaceId, signal });
   return optimizeMemory({

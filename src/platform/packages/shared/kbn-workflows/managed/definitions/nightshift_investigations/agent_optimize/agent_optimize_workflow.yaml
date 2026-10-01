@@ -55,7 +55,7 @@ triggers:
         tool_calls:
           type: array
           description: >
-            Tool calls from the completed round (parameters only). Shows the Cortex and
+            Tool calls from the completed round (parameters). Shows the Cortex and
             Semantic Memory optimizers which services, indices, and integrations the
             investigator queried.
           items:
@@ -65,7 +65,7 @@ triggers:
           type: array
           description: >
             Results of the completed round's tool calls, keyed by tool_call_id.
-            Shows the Cortex optimizer what each query returned.
+            Shows the Cortex and Semantic Memory optimizers what each query returned.
           items:
             type: object
             additionalProperties: true
@@ -117,3 +117,4 @@ steps:
               recalled_ids: '${{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.recalled_ids }}'
               # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
               tool_calls: '${{ inputs.tool_calls }}'
+              tool_results: '${{ inputs.tool_results }}'

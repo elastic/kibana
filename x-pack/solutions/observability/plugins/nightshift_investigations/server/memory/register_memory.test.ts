@@ -102,6 +102,41 @@ describe('runMemoryOptimize', () => {
     expect(optimizeMemory).toHaveBeenCalledWith(expect.objectContaining({ toolCalls }));
   });
 
+  it('builds the investigation from the hook tool results when the round has no ids', async () => {
+    await runMemoryOptimize({
+      request,
+      agentId: 'nightshift.investigation',
+      userMessage: 'why?',
+      assistantMessage: 'redis',
+      toolCalls: [
+        {
+          tool_id: 'nightshift_sandbox_bash',
+          tool_call_id: 'tc-1',
+          params: { command: 'esql' },
+          results: [{ type: 'other', data: { stdout: 'pool exhausted' } }],
+        },
+      ],
+      recalledIds: [],
+      esClient: {} as never,
+      spaceId: 'default',
+      getAgentBuilder,
+      logger: loggerMock.create(),
+      interactionId: 'execution-1',
+    });
+
+    expect(optimizeMemory).toHaveBeenCalledWith(
+      expect.objectContaining({
+        investigation: [
+          expect.objectContaining({
+            kind: 'tool',
+            toolId: 'nightshift_sandbox_bash',
+            resultText: 'pool exhausted',
+          }),
+        ],
+      })
+    );
+  });
+
   it('hands the optimizer the round steps it read from the conversation', async () => {
     const get = jest.fn().mockResolvedValue({
       rounds: [
