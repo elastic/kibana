@@ -20,7 +20,7 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_policies_license_valid';
 import { UserCapabilities } from '../../../services/user_capabilities';
@@ -43,6 +43,7 @@ import { Column, SubsectionColumns } from './subsection_columns';
 
 const TAKE_ACTION_BUTTON_ID = 'actionPolicyDetailsFlyoutTakeAction';
 const EMPTY_VALUE = '-';
+const HISTORY_KEY = Symbol('actionPolicyDetailsFlyout');
 
 interface Props {
   policy: ActionPolicyResponse;
@@ -98,7 +99,6 @@ export const ActionPolicyDetailsFlyout = ({
 
   const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
   const [isAffectedRulesOpen, setIsAffectedRulesOpen] = useState(false);
-  const historyKey = useMemo(() => Symbol('actionPolicyDetailsFlyout'), []);
 
   return (
     <>
@@ -108,7 +108,7 @@ export const ActionPolicyDetailsFlyout = ({
         resizable
         ownFocus={ownFocus}
         session={session}
-        historyKey={historyKey}
+        historyKey={HISTORY_KEY}
         onClose={onClose}
         closeButtonProps={{ 'data-test-subj': 'detailsFlyoutCloseIcon' }}
         data-test-subj="actionPolicyDetailsFlyout"
@@ -330,7 +330,7 @@ export const ActionPolicyDetailsFlyout = ({
       {isAffectedRulesOpen && (
         <AffectedRulesFlyout
           matcher={policy.matcher}
-          historyKey={historyKey}
+          historyKey={HISTORY_KEY}
           ownFocus={ownFocus}
           onClose={() => setIsAffectedRulesOpen(false)}
         />
