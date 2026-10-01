@@ -9,14 +9,17 @@ import type { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
 import { createWorkspace } from '../workspace/graph_client_workspace';
 import { GraphLayoutController } from '../workspace/graph_layout_controller';
+import { mergeRuntimeGraph } from '../workspace/runtime_graph_merge';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
   let workspace: Workspace;
+  let runtimeSequence: number;
 
   beforeEach(() => {
+    runtimeSequence = 0;
     savedWorkspace = {
       title: '',
       description: '',
@@ -130,7 +133,10 @@ describe('deserialize', () => {
           { name: 'field3', type: 'string', aggregatable: true, isMapped: true },
         ],
       } as DataView,
-      workspace
+      workspace,
+      (runtimeWorkspace, graph) => {
+        runtimeSequence = mergeRuntimeGraph(runtimeWorkspace, graph, runtimeSequence);
+      }
     );
   }
 

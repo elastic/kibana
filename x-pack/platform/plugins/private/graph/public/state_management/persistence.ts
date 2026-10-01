@@ -100,7 +100,8 @@ export const registerPersistenceListeners = (
       const { urlTemplates, advancedSettings, allFields } = savedWorkspaceToAppState(
         savedWorkspace,
         indexPattern,
-        createdWorkspace
+        createdWorkspace,
+        deps.mergeRuntimeGraph
       );
 
       // put everything in the store
