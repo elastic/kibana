@@ -122,7 +122,6 @@ describe('CreateDataSourceFlyout', () => {
       name: 'ds',
       description: '',
       settings: {
-        region: '',
         endpoint: '',
         access_key: '',
         secret_key: '',
