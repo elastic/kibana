@@ -85,8 +85,10 @@ describe('CollectorDetailInfo', () => {
       },
     });
     const result = testRenderer.render(<CollectorDetailInfo agent={agent} />);
-    const panel = result.getByTestId('collectorDetailInfo');
-    expect(panel.textContent).toContain('collector-prod-west-1');
+    const terms = result.getAllByRole('term');
+    const definitions = result.getAllByRole('definition');
+    const nameIndex = terms.findIndex((t) => t.textContent === 'Name');
+    expect(definitions[nameIndex].textContent).toBe('collector-prod-west-1');
   });
 
   it('falls back to agent id when both elastic.display.name and hostname are absent', () => {
@@ -97,8 +99,10 @@ describe('CollectorDetailInfo', () => {
       },
     });
     const result = testRenderer.render(<CollectorDetailInfo agent={agent} />);
-    const panel = result.getByTestId('collectorDetailInfo');
-    expect(panel.textContent).toContain('opamp-collector-001');
+    const terms = result.getAllByRole('term');
+    const definitions = result.getAllByRole('definition');
+    const nameIndex = terms.findIndex((t) => t.textContent === 'Name');
+    expect(definitions[nameIndex].textContent).toBe('opamp-collector-001');
   });
 
   it('renders dashes for missing optional fields', () => {
