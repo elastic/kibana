@@ -2330,6 +2330,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
         }
 
+        const targetAgentVersionCondition = pkgInfo?.conditions?.agent?.version;
+
         policiesToUpdate.push({
           type: savedObjectType,
           id,
@@ -2355,8 +2357,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             updated_by: options?.user?.username ?? 'system',
             // A partial SO update drops undefined keys, so a stale condition would survive an
             // upgrade to a package without one. Write an empty string (falsy, and valid for the
-            // frozen model version schemas) to clear it.
-            package_agent_version_condition: pkgInfo?.conditions?.agent?.version ?? '',
+            // frozen model version schemas) to clear it, but only when there is a stale value, to
+            // avoid adding the key to policies that never had a condition.
+            ...((targetAgentVersionCondition !== undefined ||
+              oldPackagePolicy.package_agent_version_condition) && {
+              package_agent_version_condition: targetAgentVersionCondition ?? '',
+            }),
           },
           version,
         });
