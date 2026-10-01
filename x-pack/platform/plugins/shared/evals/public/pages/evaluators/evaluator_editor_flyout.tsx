@@ -582,6 +582,9 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiText size="s" color="subdued" data-test-subj="evalsEvaluatorScoresDescription">
+              <p>{i18n.SCORES_DESCRIPTION}</p>
+            </EuiText>
             {fieldErrors.scores ? (
               <EuiFormErrorText data-test-subj="evalsEvaluatorScoresError">
                 {fieldErrors.scores}

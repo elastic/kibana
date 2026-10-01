@@ -179,6 +179,10 @@ export const REFERENCE_DATA_HELP = i18n.translate(
 export const SCORES_TITLE = i18n.translate('xpack.evals.evaluators.scoresTitle', {
   defaultMessage: 'Output scores',
 });
+export const SCORES_DESCRIPTION = i18n.translate('xpack.evals.evaluators.scoresDescription', {
+  defaultMessage:
+    'Every score is read as higher is better, both for numbers and for the values given to labels. Phrase each one so that 1 is the best outcome, for example grounded rather than hallucinated.',
+});
 export const ADD_SCORE_BUTTON = i18n.translate('xpack.evals.evaluators.addScoreButtonLabel', {
   defaultMessage: 'Add score',
 });

@@ -244,6 +244,10 @@ The plugin UI is organized into five navigation tabs:
 - **Datasets** — manage evaluation datasets and examples (CRUD, JSON editor), tag and set the maturity of a dataset, and filter the listing by tag or maturity
 - **Evaluators** — a catalog of every evaluator in the space, searchable and filterable by kind (LLM judge or code) and origin (built-in or user-defined), showing each one's version and required inputs. Selecting a name opens a read-only view of the stored definition, including the versions saved before it. Built-ins are read-only; user-defined judges can be created, edited, and deleted here by users holding `manage_evals`. The editor collects the judge's prompts, the trace evidence it needs, and its output scores, and can run the draft against a real trace ID before saving — the connector chosen for that test is not stored on the definition.
 
+#### Score direction
+
+A user-defined judge is compiled with `direction: 'maximize'`, and direction is set once per evaluator, so every score it emits is read as higher is better. That covers both numeric scores and the values assigned to categorical labels. Comparisons depend on it: a judge whose score falls as quality improves, such as a hallucination rate, shows improvements as regressions. Phrase rubrics so that 1 is the best outcome, for example scoring groundedness rather than hallucination. The editor says the same above its score list.
+
 #### Evaluator versions
 
 Every saved change writes a new immutable version; saving without changing anything writes nothing. The semver level is **derived from the edit rather than chosen by the author**, because a judge offers no way to verify a claim that a change was safe — a one-word rubric change can move every score.
