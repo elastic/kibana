@@ -178,21 +178,20 @@ export const buildEntityAnalyticsPageUrl = (
 };
 
 /**
- * Builds a URL to the Security rules page.
- *
- * - Single rule → `/rules/id/<origin>/overview` (rule detail, Overview tab).
- *   `origin` is the saved-object id on UI-created attachments and the `rule_id`
- *   signature on workflow/server-created ones; both are accepted by the route.
- * - Multiple rules → `/rules/management` (list, unfiltered).
- *   `/rules` redirects and drops the query string, so we use `/rules/management`.
+ * Builds a URL to the Security rules management page.
+ * With a single rule and a label, pre-fills the search term.
+ * Always links to `/rules/management` (not `/rules`, which drops the query string on redirect).
  */
 export const buildRulesPageUrl = (
   getSecurityAppUrl: (path: string) => string,
   ruleCount: number,
-  firstRuleOrigin: string | undefined
+  firstRuleLabel: string | undefined
 ): string => {
-  if (ruleCount === 1 && firstRuleOrigin) {
-    return getSecurityAppUrl(`/rules/id/${encodeURIComponent(firstRuleOrigin)}/overview`);
+  if (ruleCount === 1 && firstRuleLabel) {
+    const rulesTable = risonEncode({ searchTerm: firstRuleLabel });
+    const params = new URLSearchParams();
+    params.set('rulesTable', rulesTable);
+    return getSecurityAppUrl(`/rules/management?${params.toString()}`);
   }
   return getSecurityAppUrl('/rules/management');
 };
