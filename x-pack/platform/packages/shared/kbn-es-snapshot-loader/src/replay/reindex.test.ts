@@ -63,7 +63,9 @@ describe('createTimestampPipeline', () => {
     const maxTimestamp = '2024-01-15T12:00:00.000Z';
     const pipelineName = 'test-pipeline';
 
-    await createTimestampPipeline({ esClient, log, pipelineName, maxTimestamp });
+    const nowMs = Date.parse('2024-01-15T13:00:00.000Z');
+
+    await createTimestampPipeline({ esClient, log, pipelineName, maxTimestamp, nowMs });
 
     expect(esClient.ingest.putPipeline).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -71,7 +73,7 @@ describe('createTimestampPipeline', () => {
         processors: expect.arrayContaining([
           expect.objectContaining({
             script: expect.objectContaining({
-              params: { max_timestamp: maxTimestamp },
+              params: { max_timestamp: maxTimestamp, now_ms: nowMs },
             }),
           }),
         ]),
