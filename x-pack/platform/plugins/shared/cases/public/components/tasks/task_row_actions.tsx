@@ -103,7 +103,7 @@ export const TaskRowActions: React.FC<TaskRowActionsProps> = ({
         anchorPosition="downRight"
         aria-label={i18n.TASK_ACTIONS_ARIA(task.title)}
         button={
-          <EuiToolTip content={i18n.COLUMN_ACTIONS} disableScreenReaderOutput>
+          <EuiToolTip content={i18n.TASK_ACTIONS} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="boxesHorizontal"
               aria-label={i18n.TASK_ACTIONS_ARIA(task.title)}

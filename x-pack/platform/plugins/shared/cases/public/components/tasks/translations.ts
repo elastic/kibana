@@ -199,3 +199,11 @@ export const SEARCH_USERS = i18n.translate('xpack.cases.tasks.fields.searchUsers
 export const ASSIGN_MYSELF = i18n.translate('xpack.cases.tasks.fields.assignMyself', {
   defaultMessage: 'Assign myself',
 });
+
+export const HIDE_COMPLETED = i18n.translate('xpack.cases.tasks.hideCompleted', {
+  defaultMessage: 'Hide completed',
+});
+
+export const TASK_ACTIONS = i18n.translate('xpack.cases.tasks.actions.tooltip', {
+  defaultMessage: 'Task actions',
+});

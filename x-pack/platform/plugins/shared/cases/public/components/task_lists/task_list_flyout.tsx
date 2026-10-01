@@ -23,6 +23,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTextArea,
   EuiTitle,
   EuiToolTip,
@@ -255,6 +256,24 @@ export const TaskListFlyout: React.FC<TaskListFlyoutProps> = ({ template, onClos
             fullWidth
           >
             <div>
+              <EuiFlexGroup gutterSize="s" responsive={false} css={{ paddingRight: 40 }}>
+                <EuiFlexItem>
+                  <EuiText size="xs" color="subdued">
+                    {i18n.TASK_TITLE_PLACEHOLDER}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} css={{ width: 120 }}>
+                  <EuiText size="xs" color="subdued">
+                    {i18n.PRIORITY}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} css={{ width: 110 }}>
+                  <EuiText size="xs" color="subdued">
+                    {i18n.DUE_IN_DAYS}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="xs" />
               {tasks.map((task, index) => (
                 <div key={index}>
                   <TaskRow

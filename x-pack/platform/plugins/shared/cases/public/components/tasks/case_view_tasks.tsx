@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
@@ -21,6 +24,7 @@ import {
 import type { CaseTask } from '../../../common/types/domain/task/v1';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetCaseTasks } from '../../containers/use_case_tasks';
+import { SidebarToggleButton } from '../case_view/components/sidebar/sidebar_toggle_button';
 import { ApplyTaskListModal } from './apply_task_list_modal';
 import { TaskFlyout } from './task_flyout';
 import { isTaskFinished, TasksTable } from './tasks_table';
@@ -40,16 +44,24 @@ export const CaseViewTasks: React.FC<CaseViewTasksProps> = ({ caseId }) => {
   const { permissions } = useCasesContext();
   const { data, isLoading, isError, refetch } = useGetCaseTasks(caseId);
   const [dialog, setDialog] = useState<Dialog>(null);
+  const [hideCompleted, setHideCompleted] = useState(false);
   const closeDialog = () => setDialog(null);
 
-  const tasks = data?.tasks ?? [];
+  const tasks = useMemo(() => data?.tasks ?? [], [data?.tasks]);
   const openCount = tasks.filter((task) => !isTaskFinished(task)).length;
+  // A sub-task stays visible while its parent is open so the hierarchy keeps its shape.
+  const visibleTasks = useMemo(() => {
+    if (!hideCompleted) return tasks;
+    const openIds = new Set(tasks.filter((task) => !isTaskFinished(task)).map(({ id }) => id));
+    return tasks.filter(
+      (task) => openIds.has(task.id) || (task.parent_task_id && openIds.has(task.parent_task_id))
+    );
+  }, [hideCompleted, tasks]);
 
   const actions = permissions.update
     ? [
         <EuiButtonEmpty
           key="apply"
-          size="s"
           iconType="documents"
           onClick={() => setDialog({ kind: 'apply' })}
           data-test-subj="cases-tasks-apply-list"
@@ -58,7 +70,7 @@ export const CaseViewTasks: React.FC<CaseViewTasksProps> = ({ caseId }) => {
         </EuiButtonEmpty>,
         <EuiButton
           key="add"
-          size="s"
+          fill
           iconType="plusInCircle"
           onClick={() => setDialog({ kind: 'add' })}
           data-test-subj="cases-tasks-add"
@@ -70,7 +82,7 @@ export const CaseViewTasks: React.FC<CaseViewTasksProps> = ({ caseId }) => {
 
   let content: React.ReactNode;
   if (isLoading) {
-    content = <EuiSkeletonText lines={3} data-test-subj="cases-tasks-loading" />;
+    content = <EuiSkeletonText lines={6} data-test-subj="cases-tasks-loading" />;
   } else if (isError) {
     content = (
       <EuiCallOut
@@ -95,22 +107,13 @@ export const CaseViewTasks: React.FC<CaseViewTasksProps> = ({ caseId }) => {
   } else {
     content = (
       <>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem>
-            <EuiText size="xs" color="subdued" data-test-subj="cases-tasks-count">
-              {i18n.SHOWING_TASKS(tasks.length, openCount)}
-            </EuiText>
-          </EuiFlexItem>
-          {actions.map((action) => (
-            <EuiFlexItem grow={false} key={action.key}>
-              {action}
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        <EuiText size="xs" color="subdued" data-test-subj="cases-tasks-count">
+          {i18n.SHOWING_TASKS(tasks.length, openCount)}
+        </EuiText>
         <EuiSpacer size="s" />
         <TasksTable
           caseId={caseId}
-          tasks={tasks}
+          tasks={visibleTasks}
           onEdit={(task) => setDialog({ kind: 'edit', task })}
           onAddSubtask={(parentTask) => setDialog({ kind: 'add', parentTask })}
         />
@@ -119,8 +122,36 @@ export const CaseViewTasks: React.FC<CaseViewTasksProps> = ({ caseId }) => {
   }
 
   return (
-    <div data-test-subj="case-view-tasks">
-      {content}
+    <EuiFlexItem grow={false} data-test-subj="case-view-tasks">
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup compressed={false}>
+            <EuiFilterButton
+              hasActiveFilters={hideCompleted}
+              onClick={() => setHideCompleted((value) => !value)}
+              isToggle
+              isSelected={hideCompleted}
+              data-test-subj="cases-tasks-hide-completed"
+            >
+              {i18n.HIDE_COMPLETED}
+            </EuiFilterButton>
+          </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem />
+        {actions.map((action) => (
+          <EuiFlexItem grow={false} key={action.key}>
+            {action}
+          </EuiFlexItem>
+        ))}
+        <EuiFlexItem grow={false}>
+          <SidebarToggleButton />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiPanel hasBorder paddingSize="m" hasShadow={false}>
+        {content}
+      </EuiPanel>
       {dialog?.kind === 'add' && (
         <TaskFlyout caseId={caseId} parentTask={dialog.parentTask} onClose={closeDialog} />
       )}
@@ -128,7 +159,7 @@ export const CaseViewTasks: React.FC<CaseViewTasksProps> = ({ caseId }) => {
         <TaskFlyout caseId={caseId} task={dialog.task} onClose={closeDialog} />
       )}
       {dialog?.kind === 'apply' && <ApplyTaskListModal caseId={caseId} onClose={closeDialog} />}
-    </div>
+    </EuiFlexItem>
   );
 };
 

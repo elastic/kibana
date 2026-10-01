@@ -17,10 +17,10 @@ import {
   EuiScreenReaderOnly,
   EuiText,
   EuiTextColor,
+  formatDate,
   useEuiTheme,
 } from '@elastic/eui';
 import { UserAvatar } from '@kbn/user-profile-components';
-import { FormattedDate } from '@kbn/i18n-react';
 import type { CaseSeverity } from '../../../common/types/domain';
 import type { CaseTask } from '../../../common/types/domain/task/v1';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
@@ -47,7 +47,7 @@ export const orderTasks = (tasks: CaseTask[]): CaseTask[] => {
 
 const STATUS_BADGES: Partial<Record<CaseTask['status'], { label: string; color: string }>> = {
   in_progress: { label: i18n.STATUS_IN_PROGRESS, color: 'primary' },
-  cancelled: { label: i18n.STATUS_CANCELLED, color: 'default' },
+  cancelled: { label: i18n.STATUS_CANCELLED, color: 'hollow' },
 };
 
 export interface TasksTableProps {
@@ -82,7 +82,8 @@ export const TasksTable: React.FC<TasksTableProps> = ({ caseId, tasks, onEdit, o
     {
       name: i18n.COLUMN_DONE,
       field: 'status',
-      width: '64px',
+      width: '56px',
+      align: 'center',
       render: (_: unknown, task: CaseTask) => {
         const done = task.status === 'completed';
         if (!permissions.update) {
@@ -113,47 +114,50 @@ export const TasksTable: React.FC<TasksTableProps> = ({ caseId, tasks, onEdit, o
     {
       name: i18n.COLUMN_TASK,
       field: 'title',
-      render: (title: string, task: CaseTask) => (
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="flexStart"
-          responsive={false}
-          css={{ paddingLeft: task.parent_task_id ? euiTheme.size.l : 0 }}
-        >
-          {task.parent_task_id && (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="branch" color="subdued" aria-hidden={true} />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <EuiText
-              size="s"
-              css={isTaskFinished(task) ? { textDecoration: 'line-through' } : undefined}
-            >
-              {title}
-            </EuiText>
-            {task.description && (
-              <EuiText size="xs" color="subdued">
-                {task.description}
-              </EuiText>
+      render: (title: string, task: CaseTask) => {
+        const badge = STATUS_BADGES[task.status];
+        return (
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="flexStart"
+            responsive={false}
+            css={{ paddingLeft: task.parent_task_id ? euiTheme.size.l : 0 }}
+          >
+            {task.parent_task_id && (
+              <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.size.xxs }}>
+                <EuiIcon type="branch" color="subdued" size="s" aria-hidden={true} />
+              </EuiFlexItem>
             )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    },
-    {
-      name: i18n.COLUMN_STATUS,
-      field: 'status',
-      width: '120px',
-      render: (status: CaseTask['status']) => {
-        const badge = STATUS_BADGES[status];
-        return badge ? <EuiBadge color={badge.color}>{badge.label}</EuiBadge> : null;
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+                <EuiFlexItem grow={false}>
+                  <EuiText
+                    size="s"
+                    css={isTaskFinished(task) ? { textDecoration: 'line-through' } : undefined}
+                  >
+                    {title}
+                  </EuiText>
+                </EuiFlexItem>
+                {badge && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color={badge.color}>{badge.label}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+              {task.description && (
+                <EuiText size="xs" color="subdued" css={{ marginTop: euiTheme.size.xxs }}>
+                  {task.description}
+                </EuiText>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
       },
     },
     {
       name: i18n.COLUMN_PRIORITY,
       field: 'priority',
-      width: '120px',
+      width: '110px',
       // Task priorities share the case severity scale, so the same health rendering applies.
       render: (priority: CaseTask['priority']) => (
         <SeverityHealth severity={priority as unknown as CaseSeverity} />
@@ -162,11 +166,9 @@ export const TasksTable: React.FC<TasksTableProps> = ({ caseId, tasks, onEdit, o
     {
       name: i18n.COLUMN_ASSIGNEES,
       field: 'assignees',
-      width: '140px',
+      width: '120px',
       render: (assignees: CaseTask['assignees']) =>
-        assignees.length === 0 ? (
-          <EuiTextColor color="subdued">{'—'}</EuiTextColor>
-        ) : (
+        assignees.length === 0 ? null : (
           <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
             {assignees.slice(0, MAX_AVATARS).map(({ uid }) => {
               const profile = profiles?.get(uid);
@@ -187,13 +189,13 @@ export const TasksTable: React.FC<TasksTableProps> = ({ caseId, tasks, onEdit, o
     {
       name: i18n.COLUMN_DUE,
       field: 'due_date',
-      width: '140px',
+      width: '120px',
       render: (dueDate: string | null, task: CaseTask) => {
         if (!dueDate) return null;
         const overdue = !isTaskFinished(task) && new Date(dueDate) < new Date();
         return (
           <EuiTextColor color={overdue ? 'danger' : undefined}>
-            <FormattedDate value={dueDate} year="numeric" month="short" day="2-digit" />
+            {formatDate(dueDate, 'date')}
             {overdue && (
               <EuiScreenReaderOnly>
                 <span>{` ${i18n.OVERDUE}`}</span>
@@ -206,8 +208,13 @@ export const TasksTable: React.FC<TasksTableProps> = ({ caseId, tasks, onEdit, o
     ...(permissions.update || permissions.delete
       ? [
           {
-            name: i18n.COLUMN_ACTIONS,
-            width: '64px',
+            name: (
+              <EuiScreenReaderOnly>
+                <span>{i18n.COLUMN_ACTIONS}</span>
+              </EuiScreenReaderOnly>
+            ),
+            width: '48px',
+            align: 'right',
             render: (task: CaseTask) => (
               <TaskRowActions
                 caseId={caseId}

@@ -20,6 +20,9 @@ import { CaseViewTasks } from './case_view_tasks';
 import { orderTasks } from './tasks_table';
 
 jest.mock('../../containers/use_case_tasks');
+jest.mock('../case_view/components/sidebar/sidebar_toggle_button', () => ({
+  SidebarToggleButton: () => null,
+}));
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles', () => ({
   useBulkGetUserProfiles: () => ({ data: new Map() }),
 }));
@@ -180,6 +183,19 @@ describe('CaseViewTasks', () => {
     expect(screen.getByTestId('cases-task-delete')).toBeInTheDocument();
     // Sub-tasks cannot have their own sub-tasks.
     expect(screen.queryByText('Add sub-task')).not.toBeInTheDocument();
+  });
+
+  it('hides completed tasks when the filter is on, keeping sub-tasks of open parents', async () => {
+    renderWithTestingProviders(<CaseViewTasks caseId="case-1" />, {
+      wrapperProps: { permissions: allCasesPermissions() },
+    });
+
+    await userEvent.click(screen.getByTestId('cases-tasks-hide-completed'));
+    expect(screen.queryByTestId('cases-task-row-root-2')).not.toBeInTheDocument();
+    expect(screen.getByTestId('cases-task-row-root-1')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-task-row-child-1')).toBeInTheDocument();
+    // The count reports the whole list, not the filtered view.
+    expect(screen.getByTestId('cases-tasks-count')).toHaveTextContent('Showing 4 tasks, 3 open');
   });
 
   it('opens the add task flyout', async () => {

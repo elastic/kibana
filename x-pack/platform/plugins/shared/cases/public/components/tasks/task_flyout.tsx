@@ -157,6 +157,12 @@ export const TaskFlyout: React.FC<TaskFlyoutProps> = ({ caseId, task, parentTask
               data-test-subj="cases-task-description"
             />
           </EuiFormRow>
+          {canAssign && (
+            <TaskAssigneesField
+              value={form.assignees}
+              onChange={(assignees) => setField('assignees', assignees)}
+            />
+          )}
           <EuiFormRow label={i18n.FIELD_PRIORITY} fullWidth>
             <EuiSelect
               fullWidth
@@ -175,12 +181,6 @@ export const TaskFlyout: React.FC<TaskFlyoutProps> = ({ caseId, task, parentTask
               data-test-subj="cases-task-due-date"
             />
           </EuiFormRow>
-          {canAssign && (
-            <TaskAssigneesField
-              value={form.assignees}
-              onChange={(assignees) => setField('assignees', assignees)}
-            />
-          )}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
