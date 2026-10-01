@@ -54,7 +54,6 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
       relevantSkills: false,
       todos: false,
       datasets: false,
-      askUserQuestion: false,
       bash: false,
       apiDiscovery: false,
     },

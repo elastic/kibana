@@ -337,7 +337,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       todos: experimentalEnabled,
       datasets: experimentalEnabled,
       // forcefully disabled until the UI is implemented
-      askUserQuestion: false, // isExperimentalEnabled,
       bash: bashEnabled,
       apiDiscovery: apiDiscoveryEnabled,
     };
