@@ -7,24 +7,24 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { AGENTIC_INVESTIGATIONS_API_VERSION } from '../../../common/constants';
-import { ESCALATION_BY_ID_URL } from '../../../common/escalations/constants';
-import { updateEscalationRequestSchema } from '../../../common/escalations/escalation';
+import { ESCALATION_LINK_URL } from '../../../common/escalations/constants';
+import { linkEscalationRequestSchema } from '../../../common/escalations/escalation';
 import { ESCALATIONS_API_PRIVILEGE_MANAGE } from '../constants';
 import type { EscalationRouteDependencies } from '../types';
 import { handleEscalationRouteError } from './handle_route_error';
 import { escalationIdParamsSchema } from './shared';
 
-export const registerUpdateEscalationRoute = ({
+export const registerLinkEscalationRoute = ({
   router,
   logger,
   getEscalationsService,
 }: EscalationRouteDependencies) => {
   router.versioned
-    .patch({
-      path: ESCALATION_BY_ID_URL,
+    .post({
+      path: ESCALATION_LINK_URL,
       access: 'internal',
       security: { authz: { requiredPrivileges: [ESCALATIONS_API_PRIVILEGE_MANAGE] } },
-      summary: 'Update an escalation title, linked investigations, or status',
+      summary: 'Link an investigation to an escalation',
     })
     .addVersion(
       {
@@ -32,29 +32,26 @@ export const registerUpdateEscalationRoute = ({
         validate: {
           request: {
             params: buildRouteValidationWithZod(escalationIdParamsSchema),
-            body: buildRouteValidationWithZod(updateEscalationRequestSchema),
+            body: buildRouteValidationWithZod(linkEscalationRequestSchema),
           },
         },
       },
       async (_context, request, response) => {
         try {
           const service = getEscalationsService();
-          const escalation = await service.update(request, request.params.id, request.body);
+          const escalation = await service.link(request, request.params.id, request.body);
 
           let attachmentsCopy: { copied: number; failed: number } | undefined;
-          const newInvestigationIds = request.body.linked_investigations;
-          if (newInvestigationIds?.length) {
-            try {
-              attachmentsCopy = await service.addAttachments(
-                request,
-                request.params.id,
-                newInvestigationIds
-              );
-            } catch (attachErr) {
-              logger.warn(
-                `[escalations] Attachment copy failed after investigation link; escalation was still updated. escalationId=${request.params.id} error=${(attachErr as Error).message}`
-              );
-            }
+          try {
+            attachmentsCopy = await service.addAttachments(
+              request,
+              request.params.id,
+              request.body.linked_investigations
+            );
+          } catch (attachErr) {
+            logger.warn(
+              `[escalations] Attachment copy failed after investigation link; escalation was still updated. escalationId=${request.params.id} error=${(attachErr as Error).message}`
+            );
           }
 
           return response.ok({

@@ -361,7 +361,7 @@ describe('EscalationsService.create', () => {
   });
 });
 
-describe('EscalationsService.update', () => {
+describe('EscalationsService.link', () => {
   it('throws NotAnEscalationError when target is not an escalation', async () => {
     const { service } = makeService({
       get: jest.fn().mockResolvedValue({
@@ -371,11 +371,11 @@ describe('EscalationsService.update', () => {
     });
 
     await expect(
-      service.update(request, 'not-an-escalation', { title: 'New title' })
+      service.link(request, 'not-an-escalation', { linked_investigations: ['inv-1'] })
     ).rejects.toBeInstanceOf(NotAnEscalationError);
   });
 
-  it('calls patchMetadata when linked_investigations are provided (appends, not replaces)', async () => {
+  it('calls patchMetadata with appended linked_investigations (not replace)', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
         id: 'escalation-1',
@@ -384,7 +384,7 @@ describe('EscalationsService.update', () => {
       }),
     });
 
-    await service.update(request, 'escalation-1', {
+    await service.link(request, 'escalation-1', {
       linked_investigations: ['inv-2'],
     });
 
@@ -406,7 +406,7 @@ describe('EscalationsService.update', () => {
       }),
     });
 
-    await service.update(request, 'escalation-1', {
+    await service.link(request, 'escalation-1', {
       linked_investigations: ['inv-2', 'inv-3'],
     });
 
@@ -415,35 +415,7 @@ describe('EscalationsService.update', () => {
     expect(updated).toEqual(['inv-1', 'inv-2', 'inv-3']);
   });
 
-  it('calls client.update when title is provided', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: {},
-      }),
-    });
-
-    await service.update(request, 'escalation-1', { title: 'Renamed' });
-
-    expect(client.update).toHaveBeenCalledWith({ id: 'escalation-1', title: 'Renamed' });
-  });
-
-  it('does not call patchMetadata for a title-only update', async () => {
-    const { service, client } = makeService({
-      get: jest.fn().mockResolvedValue({
-        id: 'escalation-1',
-        template_id: ESCALATION_TEMPLATE_ID,
-        metadata: {},
-      }),
-    });
-
-    await service.update(request, 'escalation-1', { title: 'Renamed' });
-
-    expect(client.patchMetadata).not.toHaveBeenCalled();
-  });
-
-  it('does not call client.update for a links-only update', async () => {
+  it('does not call client.update', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
         id: 'escalation-1',
@@ -452,7 +424,7 @@ describe('EscalationsService.update', () => {
       }),
     });
 
-    await service.update(request, 'escalation-1', {
+    await service.link(request, 'escalation-1', {
       linked_investigations: ['inv-1'],
     });
 

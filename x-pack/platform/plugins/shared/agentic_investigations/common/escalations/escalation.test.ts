@@ -9,12 +9,11 @@ import {
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
-  CONVERSATION_TITLE_MAX_LENGTH,
 } from '@kbn/agent-builder-common';
 import {
   createEscalationRequestSchema,
+  linkEscalationRequestSchema,
   listEscalationsQuerySchema,
-  updateEscalationRequestSchema,
 } from './escalation';
 import { MAX_ESCALATION_LINKED_INVESTIGATIONS, MAX_ESCALATIONS_PAGE_SIZE } from './constants';
 
@@ -129,57 +128,31 @@ describe('createEscalationRequestSchema', () => {
 });
 
 // ---------------------------------------------------------------------------
-// updateEscalationRequestSchema
+// linkEscalationRequestSchema
 // ---------------------------------------------------------------------------
 
-describe('updateEscalationRequestSchema', () => {
-  it('accepts a title-only update', () => {
+describe('linkEscalationRequestSchema', () => {
+  it('accepts a valid linked_investigations array', () => {
     expect(() =>
-      updateEscalationRequestSchema.parse({ title: 'Renamed escalation' })
+      linkEscalationRequestSchema.parse({ linked_investigations: ['inv-1'] })
     ).not.toThrow();
   });
 
-  it('accepts a links-only update', () => {
-    expect(() =>
-      updateEscalationRequestSchema.parse({ linked_investigations: ['inv-2'] })
-    ).not.toThrow();
-  });
-
-  it('rejects combining title and linked_investigations in one request', () => {
-    // The two fields map to separate storage writes; until agent_builder exposes an atomic
-    // combined mutation the schema rejects the combination so clients send separate PATCHes.
-    expect(() =>
-      updateEscalationRequestSchema.parse({ title: 'Renamed', linked_investigations: ['inv-2'] })
-    ).toThrow(/title and linked_investigations cannot be updated in the same request/);
-  });
-
-  it('rejects an empty body (no field provided)', () => {
-    expect(() => updateEscalationRequestSchema.parse({})).toThrow(
-      /at least one of title or linked_investigations must be provided/
-    );
-  });
-
-  it('rejects an empty title string', () => {
-    expect(() => updateEscalationRequestSchema.parse({ title: '' })).toThrow();
-  });
-
-  it('rejects a title that exceeds the max length', () => {
-    expect(() =>
-      updateEscalationRequestSchema.parse({ title: 'a'.repeat(CONVERSATION_TITLE_MAX_LENGTH + 1) })
-    ).toThrow();
+  it('rejects a missing linked_investigations field', () => {
+    expect(() => linkEscalationRequestSchema.parse({})).toThrow();
   });
 
   it('rejects an empty linked_investigations array (min: 1)', () => {
-    expect(() => updateEscalationRequestSchema.parse({ linked_investigations: [] })).toThrow();
+    expect(() => linkEscalationRequestSchema.parse({ linked_investigations: [] })).toThrow();
   });
 
   it('rejects when a linked investigation id is empty', () => {
-    expect(() => updateEscalationRequestSchema.parse({ linked_investigations: [''] })).toThrow();
+    expect(() => linkEscalationRequestSchema.parse({ linked_investigations: [''] })).toThrow();
   });
 
   it('rejects when a linked investigation id exceeds max length', () => {
     expect(() =>
-      updateEscalationRequestSchema.parse({
+      linkEscalationRequestSchema.parse({
         linked_investigations: ['a'.repeat(CONVERSATION_ID_MAX_LENGTH + 1)],
       })
     ).toThrow();
@@ -187,7 +160,7 @@ describe('updateEscalationRequestSchema', () => {
 
   it('rejects when linked_investigations exceeds the max count', () => {
     expect(() =>
-      updateEscalationRequestSchema.parse({
+      linkEscalationRequestSchema.parse({
         linked_investigations: Array.from(
           { length: MAX_ESCALATION_LINKED_INVESTIGATIONS + 1 },
           (_, i) => `inv-${i}`

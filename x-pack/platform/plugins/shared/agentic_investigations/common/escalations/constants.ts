@@ -53,7 +53,7 @@ export const ESCALATIONS_UI_CAPABILITY_MANAGE = 'manageEscalations' as const;
 
 /**
  * Access level used when writing attachments onto an escalation. Mirrors the `'converse'` access
- * that `EscalationsService.update` passes to `patchMetadata` — collaborators (and any user on
+ * that `EscalationsService.link` passes to `patchMetadata` — collaborators (and any user on
  * public escalations) can add attachments, not just the owner.
  */
 export const ESCALATION_ATTACHMENT_WRITE_ACCESS = 'converse' as const;
@@ -72,3 +72,6 @@ export const MAX_ESCALATIONS_RESULT_WINDOW = 10_000;
 export const ESCALATION_STATUS_URL = `${ESCALATIONS_INTERNAL_URL}/{id}/status` as const;
 export const ESCALATION_CLOSE_PREVIEW_URL =
   `${ESCALATIONS_INTERNAL_URL}/{id}/_close_preview` as const;
+
+/** URL for linking an investigation to an existing escalation (append-only). */
+export const ESCALATION_LINK_URL = `${ESCALATION_BY_ID_URL}/_link` as const;

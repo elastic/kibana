@@ -12,14 +12,14 @@ import {
   INTERNAL_HEADERS,
   PUBLIC_HEADERS,
   CREATE_ESCALATION_PATH,
-  ESCALATION_BY_ID_PATH,
+  ESCALATION_LINK_PATH,
   AB_CONVERSATIONS_PATH,
   expectCreated,
   deleteConversations,
 } from '../../fixtures';
 
 apiTest.describe(
-  'PATCH /internal/investigations/escalations/{id} — update escalation',
+  'POST /internal/investigations/escalations/{id}/_link — link investigation to escalation',
   { tag: [...tags.stateful.classic] },
   () => {
     let cookieHeader: Record<string, string>;
@@ -32,13 +32,11 @@ apiTest.describe(
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
       ({ cookieHeader: viewerCookieHeader } = await samlAuth.asInteractiveUser('viewer'));
 
-      // Create two investigations through the Agent Builder API so the index is
-      // managed by Kibana (direct esClient writes are rejected on restricted indices).
       const [inv1, inv2] = await Promise.all([
         apiClient.post(AB_CONVERSATIONS_PATH, {
           headers: { ...PUBLIC_HEADERS, ...cookieHeader },
           body: {
-            title: 'Scout update test investigation',
+            title: 'Scout link test investigation',
             template_id: 'investigation',
             access_control: { access_mode: 'public' },
             metadata: { status: 'open', severity: 'high' },
@@ -59,7 +57,6 @@ apiTest.describe(
       investigationId = expectCreated(inv1, 'first investigation');
       secondInvestigationId = expectCreated(inv2, 'second investigation');
 
-      // Create the escalation to update
       const createResponse = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: { linked_investigation_id: investigationId, visibility: 'public' },
@@ -76,19 +73,8 @@ apiTest.describe(
       );
     });
 
-    apiTest('renames the escalation and returns 200', async ({ apiClient }) => {
-      const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
-        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-        body: { title: 'Renamed by Scout test' },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.title).toBe('Renamed by Scout test');
-    });
-
     apiTest('appends a second linked investigation (does not replace)', async ({ apiClient }) => {
-      const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
+      const response = await apiClient.post(ESCALATION_LINK_PATH(escalationId), {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: { linked_investigations: [secondInvestigationId] },
         responseType: 'json',
@@ -103,9 +89,7 @@ apiTest.describe(
     apiTest(
       'deduplicates — appending the same id twice within one request produces no duplicate',
       async ({ apiClient }) => {
-        // Send both ids in the same payload so dedup of the incoming array is tested
-        // independently (not relying on a previous test having already appended the id).
-        const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
+        const response = await apiClient.post(ESCALATION_LINK_PATH(escalationId), {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
           body: { linked_investigations: [secondInvestigationId, secondInvestigationId] },
           responseType: 'json',
@@ -120,18 +104,8 @@ apiTest.describe(
       }
     );
 
-    apiTest('returns 400 for an empty body', async ({ apiClient }) => {
-      const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
-        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-        body: {},
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(400);
-    });
-
     apiTest('returns 400 for an empty linked_investigations array', async ({ apiClient }) => {
-      const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
+      const response = await apiClient.post(ESCALATION_LINK_PATH(escalationId), {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: { linked_investigations: [] },
         responseType: 'json',
@@ -140,27 +114,22 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest(
-      'returns 400 when both title and linked_investigations are supplied together',
-      async ({ apiClient }) => {
-        // The two fields map to separate storage writes; combining them is rejected
-        // at the schema layer until agent_builder exposes an atomic combined mutation.
-        const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
-          headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-          body: { title: 'Combined title', linked_investigations: [secondInvestigationId] },
-          responseType: 'json',
-        });
+    apiTest('returns 400 for a missing linked_investigations field', async ({ apiClient }) => {
+      const response = await apiClient.post(ESCALATION_LINK_PATH(escalationId), {
+        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+        body: {},
+        responseType: 'json',
+      });
 
-        expect(response).toHaveStatusCode(400);
-      }
-    );
+      expect(response).toHaveStatusCode(400);
+    });
 
     apiTest(
       'returns 403 for a caller without the manage_escalations privilege',
       async ({ apiClient }) => {
-        const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
+        const response = await apiClient.post(ESCALATION_LINK_PATH(escalationId), {
           headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
-          body: { title: 'Should not work' },
+          body: { linked_investigations: [secondInvestigationId] },
           responseType: 'json',
         });
 
@@ -169,9 +138,9 @@ apiTest.describe(
     );
 
     apiTest('returns 404 for a nonexistent escalation id', async ({ apiClient }) => {
-      const response = await apiClient.patch(ESCALATION_BY_ID_PATH('nonexistent-id-00000000'), {
+      const response = await apiClient.post(ESCALATION_LINK_PATH('nonexistent-id-00000000'), {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-        body: { title: 'Does not matter' },
+        body: { linked_investigations: [investigationId] },
         responseType: 'json',
       });
 
@@ -181,7 +150,7 @@ apiTest.describe(
     apiTest(
       'returns 404 when linked_investigations contains a nonexistent id',
       async ({ apiClient }) => {
-        const response = await apiClient.patch(ESCALATION_BY_ID_PATH(escalationId), {
+        const response = await apiClient.post(ESCALATION_LINK_PATH(escalationId), {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
           body: { linked_investigations: ['nonexistent-investigation-00000000'] },
           responseType: 'json',

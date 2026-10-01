@@ -12,7 +12,7 @@ import {
   INTERNAL_HEADERS,
   PUBLIC_HEADERS,
   LIST_ESCALATIONS_PATH,
-  ESCALATION_BY_ID_PATH,
+  ESCALATION_LINK_PATH,
   CREATE_ESCALATION_PATH,
   AB_CONVERSATIONS_PATH,
   expectCreated,
@@ -150,13 +150,13 @@ apiTest.describe(
     );
 
     apiTest(
-      'PATCH title from a collaborator returns 403 — collaborator lacks manage_escalations',
+      'POST _link from a collaborator returns 403 — collaborator lacks manage_escalations',
       async ({ apiClient }) => {
         // The editor role does not include escalations_all (includeIn: 'none'), so the privilege
         // gate fires before the ownership check and returns 403.
-        const response = await apiClient.patch(ESCALATION_BY_ID_PATH(privateEscalationId), {
+        const response = await apiClient.post(ESCALATION_LINK_PATH(privateEscalationId), {
           headers: { ...INTERNAL_HEADERS, ...editorCookieHeader },
-          body: { title: 'Collaborator rename attempt' },
+          body: { linked_investigations: [investigationId] },
           responseType: 'json',
         });
 

@@ -22,11 +22,11 @@ import type { ConversationSearchSort } from '@kbn/agent-builder-common';
 import type {
   CreateEscalationRequest,
   EscalationConversation,
+  LinkEscalationRequest,
   LinkedInvestigationSummary,
   ListEscalationsQuery,
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
-  UpdateEscalationRequest,
 } from '../../../common/escalations/escalation';
 import type {
   EscalationClosePreviewResponse,
@@ -189,10 +189,10 @@ export class EscalationsService {
     });
   }
 
-  async update(
+  async link(
     request: KibanaRequest,
     escalationId: string,
-    body: UpdateEscalationRequest
+    body: LinkEscalationRequest
   ): Promise<EscalationConversation> {
     const client = await this.getConversationClient(request);
 
@@ -201,60 +201,39 @@ export class EscalationsService {
       throw new NotAnEscalationError(escalationId);
     }
 
-    let result: EscalationConversation = current;
-
-    // Accumulate all metadata fields so they land in a single OCC-protected write.
-    // Sending them as separate patchMetadata calls would allow partial application:
-    // if a later write failed, earlier fields would already be committed.
-    const metadataUpdates: Record<string, MetadataFieldValue> = {};
-
-    if (body.linked_investigations?.length) {
-      // Validate that every id being appended is an accessible investigation.
-      // bulkGet omits inaccessible / non-existent ids silently, so we detect them
-      // via absence in the result map.
-      const toAdd = body.linked_investigations;
-      const resolved = await client.bulkGet(toAdd);
-      for (const id of toAdd) {
-        const conv = resolved.get(id);
-        if (!conv) {
-          throw createConversationNotFoundError({ conversationId: id });
-        }
-        if (conv.template_id !== INVESTIGATION_TEMPLATE_ID) {
-          throw new InvalidLinkedInvestigationError(id);
-        }
+    const toAdd = body.linked_investigations;
+    // bulkGet omits inaccessible / non-existent ids silently, so we detect them
+    // via absence in the result map.
+    const resolved = await client.bulkGet(toAdd);
+    for (const id of toAdd) {
+      const conv = resolved.get(id);
+      if (!conv) {
+        throw createConversationNotFoundError({ conversationId: id });
       }
-
-      const prev = (current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []) as string[];
-      // Use a Set so duplicates within the incoming payload and against prev are both removed.
-      const union = [...new Set([...prev, ...toAdd])];
-
-      if (union.length > MAX_ESCALATION_LINKED_INVESTIGATIONS) {
-        throw new TooManyLinkedInvestigationsError(
-          union.length,
-          MAX_ESCALATION_LINKED_INVESTIGATIONS
-        );
+      if (conv.template_id !== INVESTIGATION_TEMPLATE_ID) {
+        throw new InvalidLinkedInvestigationError(id);
       }
-
-      metadataUpdates[ESCALATION_LINKED_INVESTIGATIONS_FIELD] = union;
     }
 
-    if (Object.keys(metadataUpdates).length > 0) {
-      const { conversation } = await client.patchMetadata(escalationId, metadataUpdates, {
-        access: 'converse',
-      });
-      result = conversation;
+    const prev = (current.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []) as string[];
+    // Use a Set so duplicates within the incoming payload and against prev are both removed.
+    const union = [...new Set([...prev, ...toAdd])];
+
+    if (union.length > MAX_ESCALATION_LINKED_INVESTIGATIONS) {
+      throw new TooManyLinkedInvestigationsError(union.length, MAX_ESCALATION_LINKED_INVESTIGATIONS);
     }
 
-    if (body.title !== undefined) {
-      result = await client.update({ id: escalationId, title: body.title });
-    }
-
-    return result;
+    const { conversation } = await client.patchMetadata(
+      escalationId,
+      { [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: union },
+      { access: 'converse' }
+    );
+    return conversation;
   }
 
   /**
    * Copies all active, non-screen_context attachments from each of the given investigations to
-   * the escalation. Intended to be called from route handlers after `create` or `update` so that
+   * the escalation. Intended to be called from route handlers after `create` or `link` so that
    * the metadata write and the attachment copy are separate concerns.
    *
    * The method is best-effort: individual attachment failures are logged and counted but never
