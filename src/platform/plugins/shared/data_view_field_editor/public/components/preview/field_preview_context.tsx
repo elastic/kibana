@@ -318,9 +318,11 @@ export const FieldPreviewProvider: FC<
   }, [script?.source, controller]);
 
   /**
-   * The script validation resolves against the preview response, so the preview has to be
-   * flagged as loading as soon as one of the _execute params changes. Without it, a validation
-   * triggered during the 500ms debounce below resolves against the previous response.
+   * The script validation resolves against the preview response, so as soon as an _execute param
+   * changes the preview has to count as loading and the response of a request that is still in
+   * flight has to be discarded: it describes the previous form values, and the guard in
+   * updatePreview() only discards it once the next request has been issued, which the 500ms
+   * debounce below delays.
    */
   useEffect(() => {
     if (
@@ -328,6 +330,7 @@ export const FieldPreviewProvider: FC<
       controller.hasSomeParamsChanged(type, script?.source, currentDocId)
     ) {
       controller.setIsLoadingPreview(true);
+      controller.discardInFlightPreview();
     }
   }, [controller, type, script?.source, currentDocIndex, currentDocId]);
 
