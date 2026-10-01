@@ -962,6 +962,15 @@ describe('normalizeAPIConfig', () => {
     }
   );
 
+  it.each([[['secret']], [new Date()], [new Set()], [new String('secret')], [/regex/]])(
+    'rejects non-string params that are not a plain record of strings: %p',
+    (params) => {
+      expect(normalizeAPIConfig({ type: 'browser', params } as any).errorMessage).toMatch(
+        /^Invalid params: /
+      );
+    }
+  );
+
   it('accepts params objects with nested values', () => {
     const params = '{"retries":3,"options":{"mode":"fast"}}';
     expect(normalizeAPIConfig({ type: 'browser', params } as any)).toEqual({

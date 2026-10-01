@@ -254,38 +254,64 @@ describe('editSyntheticsMonitorRoute', () => {
     expect(spacesArg).toHaveLength(2);
   });
 
-  it('validates params against the stored value so unchanged params are not re-rejected', async () => {
-    const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
-      './monitor_locations_utils'
-    );
-    assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue({ status: 403 });
-    const { normalizeAPIConfig } = jest.requireMock('./monitor_validation');
+  describe('params that are not a JSON object', () => {
+    const editWithParams = async (storedParams: string, body: Record<string, unknown>) => {
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+        './monitor_locations_utils'
+      );
+      // Reaching the space authorization check means params validation let the edit through.
+      const forbidden = { status: 403 };
+      assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
+      const { normalizeAPIConfig } = jest.requireMock('./monitor_validation');
+      normalizeAPIConfig.mockImplementation(
+        jest.requireActual('./monitor_validation').normalizeAPIConfig
+      );
 
-    const { routeContext } = getRouteContextMock();
-    routeContext.request = {
-      params: { monitorId },
-      query: {},
-      body: { [ConfigKey.ENABLED]: false },
-    } as any;
-    routeContext.spaceId = 'default';
-    routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
-      decryptedMonitor: { id: monitorId, type: 'synthetics-monitor', namespaces: ['default'] },
-      normalizedMonitor: {
-        id: monitorId,
-        attributes: {
-          origin: 'ui',
-          [ConfigKey.MONITOR_TYPE]: 'browser',
-          [ConfigKey.PARAMS]: '["secret"]',
-          locations: [],
+      const { routeContext } = getRouteContextMock();
+      routeContext.request = { params: { monitorId }, query: {}, body } as any;
+      routeContext.spaceId = 'default';
+      routeContext.response = {
+        badRequest: jest.fn((r) => r),
+        customError: jest.fn((r) => r),
+      } as any;
+      routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+        decryptedMonitor: { id: monitorId, type: 'synthetics-monitor', namespaces: ['default'] },
+        normalizedMonitor: {
+          id: monitorId,
+          attributes: {
+            origin: 'ui',
+            [ConfigKey.MONITOR_TYPE]: 'browser',
+            [ConfigKey.PARAMS]: storedParams,
+            locations: [],
+          },
         },
-      },
+      });
+
+      const result = await editSyntheticsMonitorRoute().handler(routeContext);
+      return { result, forbidden, response: routeContext.response };
+    };
+
+    it('does not re-reject unchanged stored params on an unrelated edit', async () => {
+      const { result, forbidden } = await editWithParams('["secret"]', {
+        [ConfigKey.ENABLED]: false,
+      });
+
+      expect(result).toBe(forbidden);
     });
 
-    await editSyntheticsMonitorRoute().handler(routeContext);
+    it('rejects an edit that sets params to something that is not a JSON object', async () => {
+      const { result, forbidden, response } = await editWithParams('{"token":"secret"}', {
+        [ConfigKey.PARAMS]: '["secret"]',
+      });
 
-    expect(normalizeAPIConfig).toHaveBeenCalledWith(
-      expect.objectContaining({ [ConfigKey.PARAMS]: '["secret"]' }),
-      { previousParams: '["secret"]' }
-    );
+      expect(result).not.toBe(forbidden);
+      expect(response.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: 'Invalid params: Params must be a JSON object.',
+          }),
+        })
+      );
+    });
   });
 });

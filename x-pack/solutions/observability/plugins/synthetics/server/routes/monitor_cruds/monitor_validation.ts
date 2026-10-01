@@ -10,6 +10,7 @@ import { omit, isEmpty } from 'lodash';
 import { z } from '@kbn/zod';
 import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config_schema';
 import { formatZodErrors } from '../../../common/runtime_types/zod/format_errors';
+import { isJsonObjectString } from '../../../common/utils/is_json_object_string';
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import type {
@@ -404,11 +405,10 @@ const RecordSchema = z.record(z.string(), z.string());
 const validateParams = (jsonString: string | any, previousParams?: string) => {
   if (typeof jsonString === 'string') {
     try {
-      const parsed = JSON.parse(jsonString);
+      JSON.parse(jsonString);
       // Params are spread into an object before reaching Heartbeat, so arrays and scalars never
       // arrive intact. Stored values are exempt so unrelated edits of older monitors still save.
-      const isObject = parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed);
-      if (!isObject && jsonString !== previousParams) {
+      if (!isJsonObjectString(jsonString) && jsonString !== previousParams) {
         return { error: new Error('Params must be a JSON object.') };
       }
       return { value: jsonString };

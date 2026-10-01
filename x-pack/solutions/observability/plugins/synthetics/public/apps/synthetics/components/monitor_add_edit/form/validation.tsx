@@ -6,6 +6,7 @@
  */
 import type { MonitorFields, Validator, Validation } from '../types';
 import { ConfigKey, MonitorTypeEnum, ScheduleUnit } from '../types';
+import { isJsonObjectString } from '../../../../../../common/utils/is_json_object_string';
 
 export const DIGITS_ONLY = /^[0-9]*$/g;
 export const INCLUDES_VALID_PORT = /[^\:]+:[0-9]{1,5}$/g;
@@ -64,15 +65,6 @@ export const validJSONFormat = (value: string) => {
   }
 
   return true;
-};
-
-const validParamsJSONFormat = (value: string) => {
-  try {
-    const params = JSON.parse(value);
-    return params !== null && typeof params === 'object' && !Array.isArray(params);
-  } catch (e) {
-    return false;
-  }
 };
 
 // validation functions return true when invalid
@@ -163,7 +155,7 @@ const validateBrowser: ValidationLibrary = {
   [ConfigKey.PLAYWRIGHT_OPTIONS]: ({ [ConfigKey.PLAYWRIGHT_OPTIONS]: playwrightOptions }) =>
     playwrightOptions ? !validJSONFormat(playwrightOptions) : false,
   [ConfigKey.PARAMS]: ({ [ConfigKey.PARAMS]: params }) =>
-    params ? !validParamsJSONFormat(params) : false,
+    params ? !isJsonObjectString(params) : false,
 };
 
 // API monitors share validation with browser monitors except for throttling,
