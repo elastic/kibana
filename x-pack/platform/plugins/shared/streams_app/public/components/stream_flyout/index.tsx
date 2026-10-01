@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
@@ -167,8 +167,6 @@ function StreamFlyoutContent({
 }: StreamFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const { loading, definition } = useStreamFlyoutDetail();
-  const { push } = useStreamsAppRouter();
-  const { rangeFrom, rangeTo } = useTimeRange();
   const [uncontrolledTab, setUncontrolledTab] = useState<StreamFlyoutTabId>(DEFAULT_TAB);
   const selectTab = onSelectTab ?? setUncontrolledTab;
   const { quality, isQualityLoading } = useDataSetQuality(name, definition);
@@ -197,26 +195,40 @@ function StreamFlyoutContent({
     },
   } = useKibana();
 
-  const hasProcessingEnabled = useMemo(
+  const processors = useMemo(
     () =>
-      definition &&
-      Streams.ingest.all.GetResponse.is(definition) &&
-      'processors' in definition.stream.ingest.processing &&
-      definition.stream.ingest.processing.processors.length > 0,
+      (definition &&
+        Streams.ingest.all.GetResponse.is(definition) &&
+        'processors' in definition.stream.ingest.processing &&
+        definition.stream.ingest.processing.processors.length) ||
+      0,
     [definition]
   );
+
+  const hasProcessingEnabled = processors > 0;
 
   const [showProcessing, setShowProcessing] = useState(hasProcessingEnabled);
 
   // showProcessing is nullish to start, but then we can either toggle it on or off
   // once data has been loaded.
-  const isProcessingEnabled = showProcessing ?? hasProcessingEnabled;
+  const isProcessingEnabled = showProcessing || hasProcessingEnabled;
 
-  const canDeleteStream =
-    definition &&
-    Streams.ClassicStream.GetResponse.is(definition) &&
-    definition.privileges.manage &&
-    !definition.replicated;
+  const canDeleteStream = useMemo(
+    () =>
+      definition &&
+      Streams.ClassicStream.GetResponse.is(definition) &&
+      definition.privileges.manage &&
+      !definition.replicated,
+    [definition]
+  );
+
+  // Check if we are in an invalid state and then reset the processing tab selection
+  // to the overview tab.
+  useEffect(() => {
+    if (!loading && !isProcessingEnabled && selectedTab === 'processing') {
+      selectTab('overview');
+    }
+  }, [loading, isProcessingEnabled, selectedTab, selectTab]);
 
   const deleteStream = useCallback(async () => {
     if (!Streams.ingest.all.GetResponse.is(definition)) {
@@ -311,14 +323,23 @@ function StreamFlyoutContent({
       <EuiContextMenuItem
         data-test-subj="canvasFlyoutStreamMenu-processingToggle"
         key="processing-toggle"
-        disabled={hasProcessingEnabled}
         icon={isProcessingEnabled ? 'minus' : 'plus'}
+        disabled={hasProcessingEnabled}
+        toolTipContent={
+          hasProcessingEnabled
+            ? i18n.translate('xpack.streams.flyout.tab.removeProcessingNotice', {
+                defaultMessage:
+                  'You will need to remove all conditions/processors first before you can toggle the tab off.',
+              })
+            : undefined
+        }
         onClick={() => {
           const showing = !isProcessingEnabled;
-          setShowProcessing(showing);
           if (showing) {
             selectTab('processing');
-          } else {
+            setShowProcessing(showing);
+          } else if (!hasProcessingEnabled) {
+            setShowProcessing(false);
             selectTab('overview');
           }
         }}

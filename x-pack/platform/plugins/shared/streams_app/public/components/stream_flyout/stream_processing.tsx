@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiCallOut,
@@ -47,6 +47,11 @@ export function StreamProcessing({ name, refreshStreams }: StreamFlyoutProps) {
     [core, name, streamsRepositoryClient]
   );
 
+  const refreshAll = useCallback(() => {
+    refreshStreams?.();
+    refresh();
+  }, [refresh, refreshStreams]);
+
   if (loading && !value) {
     return (
       <EuiFlyoutBody>
@@ -79,7 +84,7 @@ export function StreamProcessing({ name, refreshStreams }: StreamFlyoutProps) {
       definition={value.definition}
       pipeline={value.pipeline}
       processingPersistenceAdapter={value.processingPersistenceAdapter}
-      refreshDefinition={refreshStreams ?? refresh}
+      refreshDefinition={refreshAll}
     >
       <EuiFlyoutBody
         css={css`

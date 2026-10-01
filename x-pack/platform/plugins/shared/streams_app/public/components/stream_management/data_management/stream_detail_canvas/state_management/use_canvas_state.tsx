@@ -10,7 +10,6 @@ import type { XYPosition } from '@xyflow/react';
 import type { Unit } from '../../../../../services/unit_repository';
 import type { CanvasCreateHistoryHandlers, CanvasStateServiceDeps } from './types';
 import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
-import type { Unit } from '../../../../../services/unit_repository';
 
 const CanvasStateContext = createActorContext(canvasStateMachine);
 const CanvasCreateHistoryContext =
