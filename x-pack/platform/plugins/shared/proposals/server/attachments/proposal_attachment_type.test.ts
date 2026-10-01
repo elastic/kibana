@@ -22,14 +22,14 @@ const proposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMe
   id: 'proposal-1',
   spaceId: SPACE_ID,
   conversationId: 'conv-1',
+  title: 'Tune the noisy rule',
   comment: 'Tune the noisy rule',
   status: 'pending',
   impact: 'high',
   confidence: 'high',
   category: 'configure',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2026-09-01T00:00:00.000Z',
-  expired: false,
   ...overrides,
 });
 
@@ -80,13 +80,12 @@ describe('proposalAttachmentType', () => {
   });
 
   describe('validate', () => {
-    it('should accept a bare proposal id', () => {
+    // The label is rendered synchronously, so an attachment without one has
+    // nothing to show — and `create()` always resolves a title to write here.
+    it('should reject a bare proposal id, with no title to label the card', () => {
       const { type } = createType();
 
-      expect(type.validate({ proposalId: 'proposal-1' })).toEqual({
-        valid: true,
-        data: { proposalId: 'proposal-1' },
-      });
+      expect(type.validate({ proposalId: 'proposal-1' })).toMatchObject({ valid: false });
     });
 
     // The only thing the synchronous card label has to go on, so it is the one
@@ -123,16 +122,11 @@ describe('proposalAttachmentType', () => {
       });
     });
 
-    // Reachable on every read now that `expired` is evaluated live: saying a
-    // decision was pending underneath the expiry banner contradicted it, and
-    // dropped the "do not decide this yourself" instruction exactly where it
-    // matters most.
-    it.each([
-      ['the deadline has passed', proposal({ status: 'pending', expired: true })],
-      ['the gate settled it as expired', proposal({ status: 'expired', expired: false })],
-    ])('should not report a pending decision when %s', async (_, expiredProposal) => {
+    // Saying a decision was pending underneath the expiry banner contradicted it, and dropped the
+    // "do not decide this yourself" instruction exactly where it matters most.
+    it('should not report a pending decision once the gate settles the proposal as expired', async () => {
       const { type, get } = createType();
-      get.mockResolvedValue(expiredProposal);
+      get.mockResolvedValue(proposal({ status: 'expired' }));
 
       const { value } = (await represent(type)) as { value: string };
 
@@ -147,7 +141,13 @@ describe('proposalAttachmentType', () => {
     it('should read the id from the payload when the attachment has no origin', async () => {
       const { type, get } = createType();
 
-      await represent(type, attachment({ origin: undefined, data: { proposalId: 'proposal-9' } }));
+      await represent(
+        type,
+        attachment({
+          origin: undefined,
+          data: { proposalId: 'proposal-9', title: 'Tune the noisy rule' },
+        })
+      );
 
       expect(get).toHaveBeenCalledWith('proposal-9', SPACE_ID, REQUEST);
     });

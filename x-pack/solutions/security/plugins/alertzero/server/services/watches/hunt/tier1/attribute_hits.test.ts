@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { attributeHits, type HitDocument } from './attribute_hits';
+import { attributeHits, isTier1SearchableIoc, type HitDocument } from './attribute_hits';
 
 const baseDoc = (
   source: Record<string, unknown> = {},
@@ -144,4 +144,35 @@ describe('attributeHits', () => {
     );
     expect(hit.matched).toBeUndefined();
   });
+});
+
+describe('isTier1SearchableIoc', () => {
+  it.each([32, 40, 64])('accepts a hash whose length names an algorithm (%i)', (length) => {
+    expect(isTier1SearchableIoc({ type: 'hash', value: 'a'.repeat(length) })).toBe(true);
+  });
+
+  it('trims before measuring, as huntForThreat does, so a padded md5 still counts and a padded short hash does not', () => {
+    expect(isTier1SearchableIoc({ type: 'hash', value: ` ${'a'.repeat(32)}` })).toBe(true);
+    expect(isTier1SearchableIoc({ type: 'hash', value: `${'a'.repeat(6)}${' '.repeat(26)}` })).toBe(
+      false
+    );
+  });
+
+  it('rejects a hash of a length no algorithm produces, since buildIocShould emits no clause for it', () => {
+    expect(isTier1SearchableIoc({ type: 'hash', value: 'abcdef' })).toBe(false);
+  });
+
+  it.each(['ip', 'domain', 'url', 'email'] as const)(
+    'rejects a blank %s, which huntForThreat drops before building a clause',
+    (type) => {
+      expect(isTier1SearchableIoc({ type, value: '   ' })).toBe(false);
+    }
+  );
+
+  it.each(['ip', 'domain', 'url', 'email'] as const)(
+    'accepts a %s, which always has fields to search',
+    (type) => {
+      expect(isTier1SearchableIoc({ type, value: 'anything' })).toBe(true);
+    }
+  );
 });

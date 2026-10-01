@@ -198,9 +198,12 @@ steps:
       ${{ inputs.autonomy_level == 'manual'
         and steps.create_investigation.output.conversation_id != null }}
     with:
-      workflow-id: system-create-proposal
+      workflow-id: system-create-alertzero-proposal
       inputs:
         conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+        # Raised before any diagnosis, so the comment's own heading is the only
+        # name this proposal has.
+        title: Review rule for tuning
         comment: |-
           **Review rule for tuning?**
 
@@ -640,6 +643,11 @@ steps:
   - name: compose_proposal
     type: data.set
     with:
+      # The same expression the comment's heading uses, lifted out so the
+      # proposal carries it as a field the queue can render as plain text.
+      # Truncated because the diagnosis schema does not bound its title and the
+      # proposal step rejects anything longer; the comment below keeps it whole.
+      title: '{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" | truncate: 256, "" }}'
       comment: |-
         **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
 
@@ -750,9 +758,10 @@ steps:
           - name: propose_query
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -769,9 +778,10 @@ steps:
           - name: propose_risk_score
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -789,9 +799,10 @@ steps:
           - name: propose_exception
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-add-rule-exception
                 actionInput:
@@ -820,9 +831,10 @@ steps:
           - name: propose_threshold
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -840,9 +852,10 @@ steps:
           - name: propose_schedule
             type: workflow.execute
             with:
-              workflow-id: system-create-proposal
+              workflow-id: system-create-alertzero-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
                 actionInput:
@@ -860,9 +873,10 @@ steps:
       - name: propose_manual
         type: workflow.execute
         with:
-          workflow-id: system-create-proposal
+          workflow-id: system-create-alertzero-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            title: "{{ steps.compose_proposal.output.title }}"
             comment: "{{ steps.compose_proposal.output.comment }}"
             impact: low
             # No action, so no inherited category; see the entry gate.
