@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Workspace } from '../../types/workspace_state';
+import type { RuntimeWorkspace } from '../../types/workspace_state';
 import type { WorkspaceState } from '../../state_management/workspace';
 import { syncRuntimeTopology } from './sync_runtime_topology';
 
 it('rebuilds mutable runtime references from normalized Redux topology', () => {
   const workspace = {
     runLayout: jest.fn(),
-  } as unknown as Workspace;
+  } as unknown as RuntimeWorkspace;
   const state: WorkspaceState = {
     isInitialized: true,
     isLayoutRunning: false,

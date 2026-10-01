@@ -85,7 +85,7 @@ export interface TermIntersect {
   overlap: number;
 }
 
-export interface Workspace {
+export interface RuntimeWorkspace {
   options: WorkspaceOptions;
   nodesMap: Record<string, WorkspaceNode>;
   edgesMap: Record<string, WorkspaceEdge>;

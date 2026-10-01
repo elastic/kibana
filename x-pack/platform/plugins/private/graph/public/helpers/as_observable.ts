@@ -16,7 +16,7 @@ interface Props {
  * It is roughly comparable to `reactDirective`, but does not have to be used from within a
  * template.
  *
- * This is a temporary solution until the state of Workspace internals is moved outside
+ * This is a temporary solution until the state of RuntimeWorkspace internals is moved outside
  * of mutable object to the redux state (at least blocklistedNodes, canEditDrillDownUrls and
  * unblocklist action in this case).
  *

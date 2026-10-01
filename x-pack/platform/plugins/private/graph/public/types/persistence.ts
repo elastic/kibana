@@ -12,7 +12,7 @@ import type { WorkspaceNode, WorkspaceEdge } from './workspace_state';
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 /**
- * Workspace fetched from server.
+ * RuntimeWorkspace fetched from server.
  */
 export interface GraphWorkspaceSavedObject {
   copyOnSave?: boolean;

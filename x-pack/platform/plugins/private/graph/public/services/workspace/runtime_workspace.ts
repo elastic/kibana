@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Workspace, WorkspaceOptions } from '../../types/workspace_state';
+import type { RuntimeWorkspace, WorkspaceOptions } from '../../types/workspace_state';
 
-export const createWorkspace = (options: WorkspaceOptions): Workspace => {
+export const createWorkspace = (options: WorkspaceOptions): RuntimeWorkspace => {
   const layoutController = options.layoutController;
 
   return {

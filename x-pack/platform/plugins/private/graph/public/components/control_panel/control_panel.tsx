@@ -14,7 +14,7 @@ import type {
   ControlType,
   TermIntersect,
   UrlTemplate,
-  Workspace,
+  RuntimeWorkspace,
   WorkspaceField,
   WorkspaceNode,
 } from '../../types';
@@ -42,7 +42,7 @@ export interface TargetOptions {
 }
 
 interface ControlPanelProps {
-  workspace: Workspace;
+  workspace: RuntimeWorkspace;
   control: ControlType;
   selectedNode?: WorkspaceNode;
   colors: string[];

@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ControlType, Workspace } from '../../types';
+import type { ControlType, RuntimeWorkspace } from '../../types';
 import {
   clearNodeSelection,
   invertNodeSelection,
@@ -21,7 +21,7 @@ import {
 } from '../../state_management';
 
 interface SelectionToolBarProps {
-  workspace: Workspace;
+  workspace: RuntimeWorkspace;
   onSetControl: (data: ControlType) => void;
 }
 
