@@ -8,11 +8,12 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { RuleTemplatesClient } from './rule_templates_client';
+import { buildRuleTemplateTagsAggregation } from './utils';
 
 const validTemplateAttributes = {
   engine: 'v2' as const,
@@ -27,12 +28,10 @@ const validTemplateAttributes = {
       every: '1m',
       lookback: '15m',
     },
-    state_transition: {
-      pending_count: 3,
-    },
-    recovery_strategy: 'no_breach' as const,
+    state_transition: { pending: { count: 3 } },
+    recovery: { strategy: 'no_breach' as const },
+    no_data: { strategy: 'ignore' as const },
     query: {
-      format: 'composed' as const,
       base: 'TS metrics-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name',
       breach: {
         segment: 'WHERE restarts > 0 | SORT restarts DESC | LIMIT 50',
@@ -54,6 +53,69 @@ const createClient = (
 };
 
 describe('RuleTemplatesClient', () => {
+  describe('getTags', () => {
+    it('aggregates v2 template tags independently of list pagination', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 60,
+        page: 1,
+        per_page: 0,
+        aggregations: { tags: { buckets: [{ key: 'nginx' }, { key: 'infra' }] } },
+      });
+      const { client } = createClient(savedObjectsClient);
+
+      await expect(client.getTags()).resolves.toEqual(['nginx', 'infra']);
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
+        type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter: nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.engine`, 'v2'),
+        aggs: buildRuleTemplateTagsAggregation(),
+      });
+    });
+
+    it('forwards the search prefix to the aggregation builder', async () => {
+      const search = 'pro';
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+        aggregations: { tags: { buckets: [] } },
+      });
+      const { client } = createClient(savedObjectsClient);
+
+      await client.getTags({ search });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aggs: buildRuleTemplateTagsAggregation(search),
+        })
+      );
+    });
+
+    it('returns no tags when aggregations are absent', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+      });
+      const { client } = createClient(savedObjectsClient);
+      await expect(client.getTags()).resolves.toEqual([]);
+    });
+
+    it('propagates saved object failures', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockRejectedValue(new Error('Unavailable'));
+      const { client } = createClient(savedObjectsClient);
+
+      await expect(client.getTags()).rejects.toThrow('Unavailable');
+    });
+  });
+
   describe('findRuleTemplates', () => {
     it('returns transformed templates with default paging', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
@@ -110,6 +172,7 @@ describe('RuleTemplatesClient', () => {
         sortField: 'tags',
         sortOrder: 'desc',
         tags: ['Kubernetes', 'production'],
+        excludedTags: ['deprecated'],
       });
 
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
@@ -133,6 +196,13 @@ describe('RuleTemplatesClient', () => {
                 'production'
               ),
             ]),
+            nodeTypes.function.buildNode(
+              'not',
+              nodeBuilder.is(
+                `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.rule.metadata.tags`,
+                'deprecated'
+              )
+            ),
           ]),
         })
       );

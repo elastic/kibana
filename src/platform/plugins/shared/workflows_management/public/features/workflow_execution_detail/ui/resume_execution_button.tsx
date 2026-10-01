@@ -74,6 +74,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(autoOpen && !approvalLabels);
   const [localSubmitting, setLocalSubmitting] = useState(false);
   const [localSubmitted, setLocalSubmitted] = useState(false);
+  const [pendingApproval, setPendingApproval] = useState<boolean | null>(null);
   const isSubmitting = submitState?.isSubmitting ?? localSubmitting;
   const isSubmitted = submitState?.isSubmitted ?? localSubmitted;
   const setIsSubmitting = submitState?.setSubmitting ?? setLocalSubmitting;
@@ -98,6 +99,12 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
     }
     setLocalSubmitted(false);
   }, [submitState, waitingStepExecutionId]);
+
+  useEffect(() => {
+    if (!isSubmitting) {
+      setPendingApproval(null);
+    }
+  }, [isSubmitting]);
 
   const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
     if (!resumeSchema || isApprovalMode) return undefined;
@@ -206,6 +213,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       if (modalOpenedAtRef.current == null) {
         modalOpenedAtRef.current = Date.now();
       }
+      setPendingApproval(approved);
       void handleSubmit({ approved });
     },
     [handleSubmit]
@@ -235,7 +243,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
                   iconType="check"
                   onClick={() => handleApprovalChoice(true)}
                   disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
-                  isLoading={isSubmitting}
+                  isLoading={isSubmitting && pendingApproval === true}
                   data-test-subj="approveActionButton"
                 >
                   {approvalLabels.approveLabel}
@@ -248,7 +256,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
                   iconType="cross"
                   onClick={() => handleApprovalChoice(false)}
                   disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
-                  isLoading={isSubmitting}
+                  isLoading={isSubmitting && pendingApproval === false}
                   data-test-subj="rejectActionButton"
                 >
                   {approvalLabels.rejectLabel}

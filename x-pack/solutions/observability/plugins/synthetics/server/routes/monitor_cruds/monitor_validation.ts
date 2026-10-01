@@ -23,6 +23,7 @@ import {
   CodeEditorMode,
   ConfigKey,
   FormMonitorType,
+  KerberosAuthType,
   MonitorTypeEnum,
   type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
@@ -166,6 +167,85 @@ export function validateMonitor(
       details: formatZodErrors(decodedMonitor.error, { input: monitorFields }).join(' | '),
       payload: monitorFields,
     };
+  }
+
+  if (monitorType === MonitorTypeEnum.HTTP) {
+    const hasBasicAuth = Boolean(
+      monitorFields[ConfigKey.USERNAME] || monitorFields[ConfigKey.PASSWORD]
+    );
+    const kerberos = monitorFields[ConfigKey.KERBEROS];
+    const ntlm = monitorFields[ConfigKey.NTLM];
+    const enabledAuthSchemes = [
+      hasBasicAuth,
+      Boolean(kerberos?.enabled),
+      Boolean(ntlm?.enabled),
+    ].filter(Boolean);
+
+    if (enabledAuthSchemes.length > 1) {
+      return {
+        valid: false,
+        reason: INVALID_AUTH_CONFIGURATION_ERROR,
+        details: INVALID_AUTH_CONFIGURATION_DETAILS,
+        payload: monitorFields,
+      };
+    }
+
+    // Heartbeat: exactly one of config_path / krb5_conf when Kerberos is enabled.
+    if (kerberos?.enabled) {
+      const hasPath = Boolean(kerberos.config_path?.trim());
+      const hasInline = Boolean(kerberos.krb5_conf?.trim());
+      if (hasPath === hasInline) {
+        return {
+          valid: false,
+          reason: INVALID_AUTH_CONFIGURATION_ERROR,
+          details: INVALID_KERBEROS_CONFIG_DETAILS,
+          payload: monitorFields,
+        };
+      }
+
+      if (kerberos.auth_type === KerberosAuthType.PASSWORD) {
+        if (!kerberos.username?.trim() || !kerberos.password?.trim()) {
+          return {
+            valid: false,
+            reason: INVALID_AUTH_CONFIGURATION_ERROR,
+            details: INVALID_KERBEROS_PASSWORD_CREDENTIALS_DETAILS,
+            payload: monitorFields,
+          };
+        }
+      } else if (kerberos.auth_type === KerberosAuthType.KEYTAB) {
+        // Heartbeat: NewWithKeytab(config.Username, ...) — principal is required with the keytab path.
+        if (!kerberos.username?.trim() || !kerberos.keytab?.trim()) {
+          return {
+            valid: false,
+            reason: INVALID_AUTH_CONFIGURATION_ERROR,
+            details: INVALID_KERBEROS_KEYTAB_CREDENTIALS_DETAILS,
+            payload: monitorFields,
+          };
+        }
+      }
+
+      // Host-file paths (config_path / keytab) are not provisionable on managed public locations.
+      const usesHostFile =
+        hasPath ||
+        (kerberos.auth_type === KerberosAuthType.KEYTAB && Boolean(kerberos.keytab?.trim()));
+      if (usesHostFile && hasPublicServiceLocation(monitorFields.locations)) {
+        return {
+          valid: false,
+          reason: INVALID_AUTH_CONFIGURATION_ERROR,
+          details: INVALID_KERBEROS_HOST_FILE_PUBLIC_LOCATION_DETAILS,
+          payload: monitorFields,
+        };
+      }
+    }
+
+    if (ntlm?.enabled && (!ntlm.username?.trim() || !ntlm.password?.trim())) {
+      return {
+        valid: false,
+        reason: INVALID_AUTH_CONFIGURATION_ERROR,
+        details: INVALID_NTLM_CREDENTIALS_DETAILS,
+        payload: monitorFields,
+      };
+    }
   }
 
   if (monitorType === MonitorTypeEnum.BROWSER || monitorType === MonitorTypeEnum.API) {
@@ -583,6 +663,58 @@ const INVALID_PAYLOAD_ERROR = i18n.translate(
 const INVALID_TYPE_ERROR = i18n.translate('xpack.synthetics.server.monitors.invalidTypeError', {
   defaultMessage: 'Monitor type is invalid',
 });
+
+const INVALID_AUTH_CONFIGURATION_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidAuthConfigurationError',
+  {
+    defaultMessage: 'Monitor authentication configuration is invalid',
+  }
+);
+
+const INVALID_AUTH_CONFIGURATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidAuthConfigurationDetails',
+  {
+    defaultMessage:
+      'Only one authentication method can be enabled per HTTP monitor. Choose one of basic authentication (username/password), Kerberos, or NTLM.',
+  }
+);
+
+const INVALID_KERBEROS_CONFIG_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosConfigDetails',
+  {
+    defaultMessage:
+      'Kerberos requires exactly one of config_path (file on the agent) or krb5_conf (inline krb5.conf body).',
+  }
+);
+
+const INVALID_KERBEROS_PASSWORD_CREDENTIALS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosPasswordCredentialsDetails',
+  {
+    defaultMessage: 'Kerberos password authentication requires both username and password.',
+  }
+);
+
+const INVALID_KERBEROS_KEYTAB_CREDENTIALS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosKeytabCredentialsDetails',
+  {
+    defaultMessage: 'Kerberos keytab authentication requires both username and a keytab path.',
+  }
+);
+
+const INVALID_KERBEROS_HOST_FILE_PUBLIC_LOCATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidKerberosHostFilePublicLocationDetails',
+  {
+    defaultMessage:
+      'Kerberos host-file settings (config_path or keytab) are only supported on private locations. Use an inline krb5_conf on public locations, or a private location for keytab auth.',
+  }
+);
+
+const INVALID_NTLM_CREDENTIALS_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.invalidNtlmCredentialsDetails',
+  {
+    defaultMessage: 'NTLM authentication requires both username and password.',
+  }
+);
 
 const INVALID_SCHEDULE_ERROR = i18n.translate(
   'xpack.synthetics.server.monitors.invalidScheduleError',

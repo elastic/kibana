@@ -436,13 +436,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await toasts.dismissAllWithChecks();
 
         await cases.common.waitForCaseViewToLoad();
-        if (await cases.common.isRedesignEnabled()) {
-          const redesignTitle = await testSubjects.find('appHeaderTitle');
-          expect(await redesignTitle.getVisibleText()).toContain(caseTitle);
-        } else {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-          expect(await title.getVisibleText()).toEqual(caseTitle);
-        }
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).toContain(caseTitle);
 
         await testSubjects.existOrFail('comment-lens-lens');
       });
@@ -468,13 +463,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await toasts.dismissAllWithChecks();
 
         await cases.common.waitForCaseViewToLoad();
-        if (await cases.common.isRedesignEnabled()) {
-          const redesignTitle = await testSubjects.find('appHeaderTitle');
-          expect(await redesignTitle.getVisibleText()).toContain(theCaseTitle);
-        } else {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-          expect(await title.getVisibleText()).toEqual(theCaseTitle);
-        }
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).toContain(theCaseTitle);
 
         await testSubjects.existOrFail('comment-lens-lens');
       });

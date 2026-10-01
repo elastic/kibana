@@ -10,13 +10,19 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import { buildOverviewStepExecutionFromContext } from './workflow_pseudo_step_context';
+import { useKibana } from '../../../hooks/use_kibana';
+import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
+import { createQueryClientWrapper } from '../../../shared/test_utils/query_client_wrapper';
+
+jest.mock('../../../hooks/use_kibana');
 
 const renderWithIntl = (component: React.ReactElement) => {
-  return render(component, { wrapper: I18nProvider });
+  return render(<I18nProvider>{component}</I18nProvider>, { wrapper: createQueryClientWrapper() });
 };
 
 jest.mock('./step_execution_data_view', () => ({
@@ -67,6 +73,28 @@ const createMockStepExecution = (
 });
 
 describe('WorkflowExecutionOverview', () => {
+  beforeEach(() => {
+    jest.mocked(useKibana).mockImplementation(() => createUseKibanaMockValue());
+  });
+
+  it('resolves the execution identity rather than a workflow definition account', async () => {
+    const services = createStartServicesMock();
+    services.security.serviceAccounts.isEnabled.mockReturnValue(true);
+    services.http.get.mockResolvedValue({ id: 'original-account', name: 'Original reader' });
+    jest.mocked(useKibana).mockReturnValue(createUseKibanaMockValue(services));
+    const stepExecution = createMockStepExecution({
+      input: {
+        execution: { effectiveIdentity: { type: 'service_account', id: 'original-account' } },
+        workflow: { settings: { run_as: 'replacement-account' } },
+      },
+    });
+    renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
+    expect(await screen.findByText('Original reader')).toBeInTheDocument();
+    expect(services.http.get).toHaveBeenCalledWith(
+      '/internal/security/service_account/original-account'
+    );
+  }, 20_000);
+
   it('renders persisted identity when credential validation failed before runtime setup', () => {
     const execution: WorkflowExecutionDto = {
       id: 'run-failed',

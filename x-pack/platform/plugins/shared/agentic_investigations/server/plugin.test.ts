@@ -14,6 +14,7 @@ import {
   ESCALATIONS_UI_CAPABILITY_SHOW,
 } from '../common/escalations/constants';
 import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
+import { ReopenInvestigationStepId } from '../common/investigations/step_types';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
@@ -21,6 +22,7 @@ import {
 } from './escalations/constants';
 import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from './investigations/constants';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
+import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import { AgenticInvestigationsPlugin } from './plugin';
 
 jest.mock('./impact/routes/register_routes', () => ({
@@ -29,6 +31,10 @@ jest.mock('./impact/routes/register_routes', () => ({
 
 jest.mock('./escalations/routes/register_routes', () => ({
   registerEscalationRoutes: jest.fn(),
+}));
+
+jest.mock('./investigations/routes/register_routes', () => ({
+  registerInvestigationRoutes: jest.fn(),
 }));
 
 const createContext = () =>
@@ -68,6 +74,8 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
         list: jest.fn(),
         search: jest.fn(),
         create: jest.fn(),
+        addAccessControlEntries: jest.fn(),
+        removeAccessControlEntries: jest.fn(),
         patchMetadata: jest.fn(),
         update: jest.fn(),
       }),
@@ -90,9 +98,8 @@ const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
   return { coreStart, contract, agentBuilder };
 };
 
-/** The single registered feature config, for assertions on its shape. */
-const registeredFeature = (features: { registerKibanaFeature: jest.Mock }) =>
-  features.registerKibanaFeature.mock.calls[0][0];
+const registeredFeature = (features: { registerKibanaFeature: jest.Mock }, id: string) =>
+  features.registerKibanaFeature.mock.calls.find(([f]: [{ id: string }]) => f.id === id)[0];
 
 describe('AgenticInvestigationsPlugin', () => {
   beforeEach(() => {
@@ -114,7 +121,7 @@ describe('AgenticInvestigationsPlugin', () => {
 
     it('leaves impact off the base privileges until it needs its own', () => {
       const { features } = setupPlugin();
-      const { privileges } = registeredFeature(features);
+      const { privileges } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
 
       expect(privileges.all.api).toEqual([]);
       expect(privileges.all.ui).toEqual([]);
@@ -122,13 +129,28 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(privileges.read.ui).toEqual([]);
     });
 
-    it('keeps escalation manage off the base privileges and joins view to Read', () => {
+    it('keeps investigations in a sub-feature with a manage privilege', () => {
       const { features } = setupPlugin();
-      const { subFeatures } = registeredFeature(features);
-      const [escalationsAll, escalationsRead] = subFeatures[0].privilegeGroups[0].privileges;
+      const { subFeatures } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+      const [investigationsAll] = subFeatures[0].privilegeGroups[0].privileges;
+
+      expect(investigationsAll).toEqual(
+        expect.objectContaining({
+          id: 'investigations_all',
+          includeIn: 'all',
+          api: [INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+        })
+      );
+    });
+
+    it('registers escalations as a sub-feature alongside investigations with all/read privileges', () => {
+      const { features } = setupPlugin();
+      const { subFeatures } = registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID);
+      const [escalationsAll, escalationsRead] = subFeatures[1].privilegeGroups[0].privileges;
 
       expect(escalationsAll).toEqual(
         expect.objectContaining({
+          id: 'escalations_all',
           includeIn: 'none',
           api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
           ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
@@ -136,23 +158,10 @@ describe('AgenticInvestigationsPlugin', () => {
       );
       expect(escalationsRead).toEqual(
         expect.objectContaining({
+          id: 'escalations_read',
           includeIn: 'read',
           api: [ESCALATIONS_API_PRIVILEGE_READ],
           ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
-        })
-      );
-    });
-
-    it('keeps investigations in a sub-feature with a manage privilege', () => {
-      const { features } = setupPlugin();
-      const { subFeatures } = registeredFeature(features);
-      const [investigationsAll] = subFeatures[1].privilegeGroups[0].privileges;
-
-      expect(investigationsAll).toEqual(
-        expect.objectContaining({
-          id: 'investigations_all',
-          includeIn: 'all',
-          api: [INVESTIGATIONS_API_PRIVILEGE_MANAGE],
         })
       );
     });
@@ -165,7 +174,11 @@ describe('AgenticInvestigationsPlugin', () => {
       const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(
         ([definition]) => definition.id
       );
-      expect(registeredIds).toEqual([AttachImpactStepId, GetImpactStepId]);
+      expect(registeredIds).toEqual([
+        AttachImpactStepId,
+        GetImpactStepId,
+        ReopenInvestigationStepId,
+      ]);
     });
 
     it('does not resolve the authorization service until a step actually runs', () => {
@@ -178,7 +191,9 @@ describe('AgenticInvestigationsPlugin', () => {
     it('grants no proposals privilege, which the proposals feature owns instead', () => {
       const { features } = setupPlugin();
 
-      expect(JSON.stringify(registeredFeature(features))).not.toMatch(/proposals/i);
+      expect(
+        JSON.stringify(registeredFeature(features, AGENTIC_INVESTIGATIONS_PLUGIN_ID))
+      ).not.toMatch(/proposals/i);
     });
 
     it('registers the HTTP routes for every entity', () => {
@@ -186,6 +201,7 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(registerImpactRoutes).toHaveBeenCalledTimes(1);
       expect(registerEscalationRoutes).toHaveBeenCalledTimes(1);
+      expect(registerInvestigationRoutes).toHaveBeenCalledTimes(1);
     });
   });
 
