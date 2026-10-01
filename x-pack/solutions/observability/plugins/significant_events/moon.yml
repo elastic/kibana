@@ -79,6 +79,7 @@ dependsOn:
   - '@kbn/apm-utils'
   - '@kbn/datemath'
   - '@kbn/core-http-server-utils'
+  - '@kbn/cps'
   - '@kbn/cps-server-utils'
   - '@kbn/esql-utils'
   - '@kbn/nightshift-investigations-plugin'
