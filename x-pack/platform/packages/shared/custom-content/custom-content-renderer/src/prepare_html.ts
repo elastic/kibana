@@ -35,8 +35,8 @@ export function injectStyleTag(html: string, style: string): string {
 }
 
 /**
- * Minimal baseline for the sandboxed iframe: font and text color, plus a margin, padding and
- * box-sizing reset. The host owns the panel surface and the template owns its internal spacing.
+ * Minimal baseline for the sandboxed iframe: font and text color, content padding, plus the margin
+ * and box-sizing reset. The host owns the panel surface.
  *
  * Emitted *before* any template CSS (`injectStyleTag` inserts at the top of `<head>`), so an author
  * or generated rule of equal specificity wins. A floor, not a lock-in — never append this after the
@@ -53,7 +53,7 @@ export function injectStyleTag(html: string, style: string): string {
  * pattern when you control the CSS; overriding CSS we did not write needs the opt-out form.
  */
 const BASE_STYLES = `
-body{margin:0;padding:0;box-sizing:border-box;font-family:var(--cc-font-family);color:var(--cc-color-text)}
+body{margin:0;padding:var(--cc-space-l);box-sizing:border-box;font-family:var(--cc-font-family);color:var(--cc-color-text)}
 *,*::before,*::after{box-sizing:inherit}
 @media screen and (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 `;

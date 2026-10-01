@@ -15,7 +15,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import type React from 'react';
 import type { MaybePromise } from '@kbn/utility-types';
-import type { DefaultPresentationPanelApi } from './panel_component/types';
+import type { DefaultPresentationPanelApi, PresentationPanelProps } from './panel_component/types';
 import type { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
 import type { SerializedDrilldowns } from '../../server';
 import type { PlacementStrategy } from './constants';
@@ -97,6 +97,11 @@ export interface EmbeddablePublicDefinition<
   buildEmbeddable: (
     props: BuildEmbeddableProps<SerializedState, Api>
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
+
+  /**
+   * Sets the EUI panel color used to frame this embeddable.
+   */
+  panelColor?: PresentationPanelProps['panelColor'];
 
   /**
    * Provide placement hints to customize initial placement

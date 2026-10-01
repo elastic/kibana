@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiPanelProps } from '@elastic/eui';
 import type {
   HasPanelCapabilities,
   PublishesHideBorder,
@@ -50,6 +51,7 @@ export interface PresentationPanelProps<
   showShadow?: boolean;
   showBorder?: boolean;
   showBadges?: boolean;
+  panelColor?: EuiPanelProps['color'];
 
   /**
    * Set to true to not show PanelLoader component while Panel is loading

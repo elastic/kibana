@@ -78,7 +78,7 @@ describe('applyHtmlTheme', () => {
     const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
 
     expect(result).toContain('font-family:var(--cc-font-family)');
-    expect(result).toContain('padding:0');
+    expect(result).toContain('padding:var(--cc-space-l)');
     expect(result).toContain('color:var(--cc-color-text)');
     expect(result).not.toContain('body{background:');
   });
@@ -89,7 +89,7 @@ describe('applyHtmlTheme', () => {
 
     const result = applyHtmlTheme(authored, 'LIGHT', euiTheme);
 
-    expect(result.indexOf('body{margin:0;padding:0')).toBeLessThan(
+    expect(result.indexOf('body{margin:0;padding:var(--cc-space-l)')).toBeLessThan(
       result.indexOf('body{padding:var(--cc-space-l)}')
     );
   });

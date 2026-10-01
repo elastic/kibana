@@ -105,6 +105,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   CustomContentApi
 > = {
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  panelColor: 'transparent',
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const { core, search, dataViews, agentBuilder } = getServices();
     const rendererServices: CustomContentRendererServices = {
