@@ -116,7 +116,7 @@ export class CloudExperimentsPlugin
       // Using basicLogger for now because we can't limit the level for now if we're using core's logger.
       logger: basicLogger({ level: ldConfig.client_log_level }),
       streaming: true, // Necessary to react to flag changes
-      application: {
+      applicationInfo: {
         id: 'kibana-browser',
         version:
           this.initializerContext.env.packageInfo.buildFlavor === 'serverless'
