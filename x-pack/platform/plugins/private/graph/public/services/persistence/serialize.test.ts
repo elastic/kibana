@@ -8,17 +8,20 @@
 import { reduxStateToSavedWorkspace } from './serialize';
 import type {
   GraphWorkspaceSavedObject,
-  UrlTemplate,
   AdvancedSettings,
   WorkspaceField,
 } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import type { IndexpatternDatasource, WorkspaceState } from '../../state_management';
+import type {
+  IndexpatternDatasource,
+  WorkspaceState,
+  UrlTemplateState,
+} from '../../state_management';
 
 describe('serialize', () => {
   let appState: {
     workspace: WorkspaceState;
-    urlTemplates: UrlTemplate[];
+    urlTemplates: UrlTemplateState[];
     advancedSettings: AdvancedSettings;
     selectedIndex: IndexpatternDatasource;
     selectedFields: WorkspaceField[];
@@ -58,6 +61,7 @@ describe('serialize', () => {
       },
       urlTemplates: [
         {
+          id: 'internal-template-id',
           description: 'Template',
           encoder: outlinkEncoders[0],
           icon: { id: 'd', package: 'eui', label: '', prevName: '' },
