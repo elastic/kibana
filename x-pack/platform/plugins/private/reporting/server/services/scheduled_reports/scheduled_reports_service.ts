@@ -65,17 +65,10 @@ interface BulkOperationResult {
 
 export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
 
-/**
- * Users who can manage reporting bypass every ownership check, so resolving their identity would
- * only add an Elasticsearch round trip -- and, for an API key, a lookup failure that turns a valid
- * request into an error.
- */
+// Reporting managers bypass ownership checks and must not depend on API-key owner lookups.
 const UNRESOLVED_IDENTITY: ReportingUserIdentity = { ids: [] };
 
-/**
- * Names the acting principal in authorization warnings. An API key is named by its id: a UIAM key
- * reports that id as its username, so a username alone would not identify the actor.
- */
+// UIAM usernames are key IDs, so label API keys explicitly.
 const describePrincipal = ({ username, apiKeyId }: ReportingUserIdentity): string =>
   apiKeyId !== undefined ? `API key "${apiKeyId}"` : `User "${username ?? 'unknown'}"`;
 
@@ -478,7 +471,6 @@ export class ScheduledReportsService {
     return bulkErrors;
   }
 
-  /** Resolves the acting principal's identity once per service instance (one per request). */
   private async _getIdentity(user: ReportingUser): Promise<ReportingUserIdentity> {
     if (!this.identityPromise) {
       this.identityPromise = getReportingUserIdentity({
@@ -549,7 +541,6 @@ export class ScheduledReportsService {
     }
   }
 
-  /** Checks whether `user` may update the scheduled report `id`. */
   private async _canUpdateReport({
     user,
     id,

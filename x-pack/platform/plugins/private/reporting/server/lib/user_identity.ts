@@ -17,17 +17,12 @@ import type { ReportingUser } from '../types';
 
 const MAX_REALM_ID_LENGTH = 1024;
 
-/** A stable, realm-aware identity for authorization checks on scheduled reports. */
 export interface ReportingUserIdentity {
-  /**
-   * Every id this human may own documents under: a profile uid and a realm id are the same
-   * principal. All of them are recorded when creating a document, because which ones a later
-   * request can derive varies -- a run-as request, for instance, never carries a profile uid.
-   */
+  /** Store all IDs so requests without a profile UID (such as run-as) retain access. */
   ids: string[];
-  /** Set for API-key auth. A key owns only what it created, so it is matched separately from `ids`. */
+  /** Restricts a key to reports it created, even when its owner's IDs match other reports. */
   apiKeyId?: string;
-  /** Display, logging, and matching documents created before ids existed. */
+  /** For display and logging only; usernames are not unique across realms. */
   username?: string;
 }
 
@@ -55,18 +50,13 @@ interface ApiKeyContext {
   isUiam: boolean;
 }
 
-// Derived bearer tokens retain the key descriptor and synthetic lookup realm. Run-as requests
-// instead have the effective human's lookup realm and no key descriptor, even with API-key auth.
+// Authentication type alone misses key-derived tokens and misclassifies API-key run-as requests.
 const isApiKeyPrincipal = ({
   api_key: apiKey,
   lookup_realm: realm,
 }: StableUserIdAuthUser): boolean =>
   apiKey !== undefined || realm?.type === '_es_api_key' || realm?.type === '_cloud_api_key';
 
-/**
- * Elasticsearch reports the key id on the authenticated user for both Elasticsearch- and
- * Cloud-managed keys; decoding the authorization header is a fallback for the former only.
- */
 const getApiKeyContext = ({
   user,
   request,
@@ -77,22 +67,17 @@ const getApiKeyContext = ({
   const authzHeader = HTTPAuthorizationHeader.parseFromRequest(request);
   const isUiam = user.api_key?.managed_by === 'cloud' || isUiamCredential(authzHeader ?? '');
 
-  // `decodeApiKeyId` assumes `base64(id:secret)`. A UIAM credential is a raw secret with no id
-  // envelope, so decoding one yields binary noise rather than an id.
-  const idFromHeader =
-    !isUiam && authzHeader?.scheme.toLowerCase() === 'apikey'
+  // UIAM credentials are raw secrets, not base64(id:secret).
+  const id =
+    user.api_key?.id ??
+    (!isUiam && authzHeader?.scheme.toLowerCase() === 'apikey'
       ? decodeApiKeyId(authzHeader.credentials)
-      : undefined;
+      : undefined);
 
-  return { id: user.api_key?.id ?? idFromHeader, isUiam };
+  return { id, isUiam };
 };
 
-/**
- * Resolves the creator of an Elasticsearch API key, when available.
- *
- * API-key auth often omits `profile_uid` and reports the same synthetic `_es_api_key` realm for
- * every key, so the creator can only be recovered from the key itself.
- */
+/** Resolves the creator's identity, which API-key authentication may omit. */
 export const resolveApiKeyOwner = async ({
   id,
   esClient,
@@ -121,10 +106,6 @@ export const resolveApiKeyOwner = async ({
   }
 };
 
-/**
- * Usernames are not unique across authentication realms (e.g. file vs native), so realm type and
- * name are encoded with them. The `realm:` prefix keeps these distinguishable from profile uids.
- */
 const toRealmId = (
   realmType: string | undefined,
   realmName: string | undefined,
@@ -139,16 +120,11 @@ const toRealmId = (
     return realmId;
   }
 
-  // An ID exceeding the mapping's ignore_above would look absent to the legacy ownership filter.
+  // Keep ownership IDs indexed so their creators can find the reports.
   return `realm:sha256:${createHash('sha256').update(realmId).digest('hex')}`;
 };
 
-/**
- * Builds every stable id the acting human may own documents under, preferred first.
- *
- * A principal resolves to a profile uid once they have an activated profile and to a realm id
- * otherwise, so documents created under either representation stay reachable.
- */
+/** Includes both identities so profile activation does not change report ownership. */
 export const toStableUserIds = async ({
   authUser,
   resolveApiKeyOwner: resolveOwner,
@@ -159,18 +135,14 @@ export const toStableUserIds = async ({
   const ids: Array<string | undefined> = [authUser.profile_uid];
 
   if (isApiKeyPrincipal(authUser)) {
-    // The realm reported for API-key auth is shared by every key, so the creator's real realm can
-    // only come from the key itself.
+    // API keys share a synthetic realm; ownership requires the creator's realm.
     const apiKeyOwner = await resolveOwner?.();
     ids.push(
       apiKeyOwner?.profileUid,
       toRealmId(apiKeyOwner?.realmType, apiKeyOwner?.realmName, apiKeyOwner?.username)
     );
   } else {
-    // `lookup_realm`, not `authentication_realm`: the former is where `username` was resolved, the
-    // latter is what authenticated the request. They differ when a proxy impersonates a user with
-    // `es-security-runas-user`, and such requests never carry a profile uid, so they always reach
-    // here.
+    // Run-as ownership follows the impersonated user's lookup realm, not the authenticator's realm.
     ids.push(
       toRealmId(authUser.lookup_realm?.type, authUser.lookup_realm?.name, authUser.username)
     );
@@ -179,10 +151,7 @@ export const toStableUserIds = async ({
   return [...new Set(ids.filter((id): id is string => id !== undefined))];
 };
 
-/**
- * Resolves the acting principal's identity for a request. Not cached: for API-key auth this
- * queries Elasticsearch, so callers making repeated ownership checks should resolve it once.
- */
+/** May query Elasticsearch for API-key ownership; callers should reuse the result per request. */
 export const getReportingUserIdentity = async ({
   user,
   request,

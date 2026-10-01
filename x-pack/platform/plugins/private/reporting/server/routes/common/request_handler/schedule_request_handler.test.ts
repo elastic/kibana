@@ -248,8 +248,7 @@ describe('Handle request to schedule', () => {
         } as ReportingUser,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',
-        // @ts-ignore
-        req: mockRequest,
+        req: httpServerMock.createKibanaRequest({ path: '/foo' }),
         res: mockResponseFactory,
         logger: mockLogger,
       });
@@ -288,13 +287,12 @@ describe('Handle request to schedule', () => {
         } as ReportingUser,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',
-        // @ts-ignore
-        req: {
-          ...mockRequest,
+        req: httpServerMock.createKibanaRequest({
+          path: '/foo',
           headers: {
             authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
           },
-        },
+        }),
         res: mockResponseFactory,
         logger: mockLogger,
       });
@@ -334,8 +332,10 @@ describe('Handle request to schedule', () => {
         } as ReportingUser,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',
-        // @ts-ignore
-        req: { ...mockRequest, headers: { authorization: 'ApiKey essu_c29tZS1zZWNyZXQ' } },
+        req: httpServerMock.createKibanaRequest({
+          path: '/foo',
+          headers: { authorization: 'ApiKey essu_c29tZS1zZWNyZXQ' },
+        }),
         res: mockResponseFactory,
         logger: mockLogger,
       });
@@ -361,8 +361,7 @@ describe('Handle request to schedule', () => {
         } as ReportingUser,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',
-        // @ts-ignore
-        req: mockRequest,
+        req: httpServerMock.createKibanaRequest({ path: '/foo' }),
         res: mockResponseFactory,
         logger: mockLogger,
       });

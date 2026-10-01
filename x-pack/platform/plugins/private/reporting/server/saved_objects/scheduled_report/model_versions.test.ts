@@ -52,6 +52,28 @@ describe('scheduledReportModelVersions v6', () => {
     ).not.toThrow();
   });
 
+  it.each(['create', 'forwardCompatibility'] as const)(
+    'allows up to three ownership IDs in the %s schema',
+    (schemaName) => {
+      const ownershipSchema = asObjectSchema(v6Schemas[schemaName]);
+      const createdById = [
+        'request-profile',
+        'owner-profile',
+        'realm:["native","default_native","rshared"]',
+      ];
+
+      expect(ownershipSchema.validate({ ...baseAttributes, createdById }).createdById).toEqual(
+        createdById
+      );
+      expect(() =>
+        ownershipSchema.validate({
+          ...baseAttributes,
+          createdById: [...createdById, 'unexpected-id'],
+        })
+      ).toThrow(/createdById/);
+    }
+  );
+
   it('accepts documents with neither ownership id (legacy)', () => {
     expect(() => asObjectSchema(v6Schemas.create).validate(baseAttributes)).not.toThrow();
   });
@@ -67,14 +89,12 @@ describe('scheduledReportModelVersions v6', () => {
 });
 
 describe('scheduledReportModelVersions v5 forwardCompatibility (ZDT rollback)', () => {
-  it('drops createdById as an unknown field, without erasing it from the stored document', () => {
+  it('omits createdById from the v5 view of a newer document', () => {
     const v5Schemas = scheduledReportModelVersions['5']!.schemas!;
     const result = asObjectSchema(v5Schemas.forwardCompatibility).validate({
       ...baseAttributes,
       createdById: ['realm:["file","default_file","rshared"]'],
     });
-    // A node running the older (v5) model version ignores `createdById` on read; it never
-    // writes back a full-attribute overwrite, so the field survives a rolling downgrade.
     expect(result).not.toHaveProperty('createdById');
   });
 });

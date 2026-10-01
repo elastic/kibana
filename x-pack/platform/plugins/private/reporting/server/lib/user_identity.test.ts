@@ -314,9 +314,7 @@ describe('getReportingUserIdentity', () => {
   it('uses the realm the username was resolved in, not the one that authenticated the request', async () => {
     const request = httpServerMock.createKibanaRequest();
 
-    // A proxy impersonating a user with `es-security-runas-user`: the request authenticates as the
-    // proxy account, while `username` is the impersonated user, resolved in its own realm. Such
-    // requests never carry a profile uid, so the realm-qualified id is all there is to match on.
+    // Run-as requests omit the impersonated user's profile UID.
     await expect(
       getReportingUserIdentity({
         user: {

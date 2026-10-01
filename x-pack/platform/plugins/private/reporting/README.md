@@ -14,6 +14,10 @@ This new endpoint is designed to have a more automation-friendly signature. It w
 
 Although historically related to reporting, the CsvGenerator class has now be moved into its own package `@kbn/generate-csv`.
 
+## Legacy scheduled report ownership
+
+Scheduled reports without `createdById` or `createdByApiKeyId` require the space's Manage Reporting privilege to list, update, delete, enable, or disable. Their stored username cannot establish ownership across authentication realms. Updates do not assign ownership to the caller. To restore access for the original creator, a reporting manager can disable or delete the old schedule and have that user create a replacement with verified ownership IDs.
+
 ## Serverless configuration
 
 Serverless defaults live in `@kbn/reporting-server` (`config_schema.ts`). CSV is enabled. PDF and PNG are disabled (`export_types.{pdf,png}.enabled: false`) and are not registered. `xpack.screenshotting.enabled` is `false` in `config/serverless.yml`. Users and Support cannot turn screenshot reporting on.

@@ -166,6 +166,41 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
+    it('returns a legacy report only to a reporting manager, even when its username matches', async () => {
+      const report = await reportingAPI.schedulePdf(
+        reportingAPI.REPORTING_USER_USERNAME,
+        reportingAPI.REPORTING_USER_PASSWORD,
+        pdfPayload
+      );
+      expect(report.status).to.eql(200);
+      const legacyReportId = report.body.job.id;
+      scheduledReportIds.push(legacyReportId);
+
+      await es.update({
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        id: `scheduled_report:${legacyReportId}`,
+        script: {
+          source:
+            "ctx._source.scheduled_report.remove('createdById'); ctx._source.scheduled_report.remove('createdByApiKeyId');",
+        },
+        refresh: true,
+      });
+
+      const userReports = await reportingAPI.listScheduledReports(
+        reportingAPI.REPORTING_USER_USERNAME,
+        reportingAPI.REPORTING_USER_PASSWORD
+      );
+      const userReportIds = userReports.data.map((item: { id: string }) => item.id);
+      expect(userReportIds).not.to.contain(legacyReportId);
+      expect(userReportIds).to.contain(report1Id);
+
+      const managerReports = await reportingAPI.listScheduledReports(
+        reportingAPI.MANAGE_REPORTING_USER_USERNAME,
+        reportingAPI.MANAGE_REPORTING_USER_PASSWORD
+      );
+      expect(managerReports.data.map((item: { id: string }) => item.id)).to.contain(legacyReportId);
+    });
+
     it('does not return a report owned by the same username in another realm', async () => {
       const report = await reportingAPI.schedulePdf(
         reportingAPI.REPORTING_USER_USERNAME,
@@ -176,10 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
       const foreignRealmReportId = report.body.job.id;
       scheduledReportIds.push(foreignRealmReportId);
 
-      // `reporting_user` authenticates in the native realm, so re-owning the report to the same
-      // username in a different realm must drop it from their list. Exercising the route rather
-      // than the filter in isolation is the point: `list` relies on the saved objects client to
-      // validate and rewrite the filter, which a unit test with a mocked client cannot cover.
+      // The requester uses the native realm; this exercises real saved-object filter rewriting.
       await es.update({
         index: ALERTING_CASES_SAVED_OBJECT_INDEX,
         id: `scheduled_report:${foreignRealmReportId}`,

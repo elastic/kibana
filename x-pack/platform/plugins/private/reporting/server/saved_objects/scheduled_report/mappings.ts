@@ -18,8 +18,7 @@ export const scheduledReportMappings: SavedObjectsTypeMappingDefinition = {
     },
     createdById: {
       type: 'keyword',
-      // Oversized realm-qualified IDs are hashed before storage so they remain indexed and cannot
-      // be mistaken for legacy documents by the ownership filter.
+      // Must match MAX_REALM_ID_LENGTH in user_identity.ts.
       ignore_above: 1024,
     },
     createdByApiKeyId: {

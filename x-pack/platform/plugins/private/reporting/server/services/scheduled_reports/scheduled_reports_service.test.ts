@@ -32,8 +32,6 @@ import { ScheduledReportsService } from './scheduled_reports_service';
 import type { UpdateScheduledReportParams } from './types/update';
 import { buildOwnedByFilter } from './lib/ownership';
 
-const legacyOwnedByFilterNode = (username: string) => buildOwnedByFilter({ ids: [], username });
-
 const fakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
@@ -425,7 +423,7 @@ describe('ScheduledReportsService', () => {
       });
     });
 
-    it('should filter by username when user does not have manage reporting permissions', async () => {
+    it('returns an empty list without querying when only a username is available', async () => {
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -433,45 +431,18 @@ describe('ScheduledReportsService', () => {
         responseFactory: mockResponseFactory,
         request: fakeRawRequest,
       });
-      await scheduledReportsService.list({
+      const result = await scheduledReportsService.list({
         user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
 
-      expect(soClient.find).toHaveBeenCalledTimes(1);
-      expect(soClient.find).toHaveBeenCalledWith({
-        type: 'scheduled_report',
-        page: 1,
-        perPage: 10,
-        filter: legacyOwnedByFilterNode('somebody'),
-        searchFields: ['title', 'created_by'],
-      });
-      expect(client.search).toHaveBeenCalledTimes(1);
-      expect(client.search).toHaveBeenCalledWith({
-        _source: ['created_at'],
-        collapse: { field: 'scheduled_report_id' },
-        index: '.reporting-*,.kibana-reporting*',
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  scheduled_report_id: [
-                    'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-                    '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        size: 10,
-        sort: [{ created_at: { order: 'desc' } }],
-      });
+      expect(result).toEqual({ page: 1, per_page: 10, total: 0, data: [] });
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(client.search).not.toHaveBeenCalled();
     });
 
-    it('filters by a realm-qualified id (plus legacy username fallback) for a realm-bearing user', async () => {
+    it('filters only by a realm-qualified ID for a realm-bearing user', async () => {
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -857,6 +828,13 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should not disable scheduled report when user does not have permissions', async () => {
+      const ownedReport = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdById: ['elastic-profile'] },
+      };
+      soClient.bulkGet = jest.fn().mockResolvedValue({
+        saved_objects: [ownedReport, savedObjects[1]],
+      });
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -878,7 +856,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' } as ReportingUser,
+        user: { username: 'elastic', profile_uid: 'elastic-profile' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -994,7 +972,7 @@ describe('ScheduledReportsService', () => {
       });
     });
 
-    it('leaves a legacy report unstamped on disable, so ownership is never claimed by a read-write path', async () => {
+    it('denies disabling a legacy report even when the username matches', async () => {
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -1009,11 +987,7 @@ describe('ScheduledReportsService', () => {
       soClient.bulkGet = jest
         .fn()
         .mockImplementationOnce(async () => ({ saved_objects: [legacyReport] }));
-      soClient.bulkUpdate = jest.fn().mockImplementationOnce(async () => ({
-        saved_objects: [{ id: legacyReport.id, type: 'scheduled_report', attributes: {} }],
-      }));
-
-      await scheduledReportsService.bulkDisable({
+      const result = await scheduledReportsService.bulkDisable({
         user: {
           username: 'rshared',
           lookup_realm: { type: 'native', name: 'default_native' },
@@ -1021,9 +995,13 @@ describe('ScheduledReportsService', () => {
         ids: [legacyReport.id],
       });
 
-      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
-        { id: legacyReport.id, type: 'scheduled_report', attributes: { enabled: false } },
-      ]);
+      expect(result).toEqual({
+        scheduled_report_ids: [],
+        errors: [{ id: legacyReport.id, message: 'Not found.', status: 404 }],
+        total: 1,
+      });
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(taskManager.bulkDisable).not.toHaveBeenCalled();
     });
 
     it('should handle errors in bulk get', async () => {
@@ -1437,6 +1415,38 @@ describe('ScheduledReportsService', () => {
         );
     });
 
+    it('denies enabling a legacy report even when the username matches', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const legacyReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdBy: 'rshared', enabled: false },
+      };
+      soClient.bulkGet = jest
+        .fn()
+        .mockImplementationOnce(async () => ({ saved_objects: [legacyReport] }));
+      const result = await scheduledReportsService.bulkEnable({
+        user: {
+          username: 'rshared',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        ids: [legacyReport.id],
+      });
+
+      expect(result).toEqual({
+        scheduled_report_ids: [],
+        errors: [{ id: legacyReport.id, message: 'Not found.', status: 404 }],
+        total: 1,
+      });
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+    });
+
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.bulkEnable({
         user: { username: 'elastic' } as ReportingUser,
@@ -1516,6 +1526,17 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should not enable scheduled report when user does not have permissions', async () => {
+      const ownedReport = {
+        ...savedObjects[0],
+        attributes: {
+          ...savedObjects[0].attributes,
+          createdById: ['elastic-profile'],
+          enabled: false,
+        },
+      };
+      soClient.bulkGet = jest.fn().mockResolvedValue({
+        saved_objects: [ownedReport, savedObjects[1]],
+      });
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -1537,7 +1558,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' } as ReportingUser,
+        user: { username: 'elastic', profile_uid: 'elastic-profile' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1997,6 +2018,38 @@ describe('ScheduledReportsService', () => {
   });
 
   describe('bulkDelete', () => {
+    it('denies deleting a legacy report even when the username matches', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const legacyReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdBy: 'rshared' },
+      };
+      soClient.bulkGet = jest
+        .fn()
+        .mockImplementationOnce(async () => ({ saved_objects: [legacyReport] }));
+      const result = await scheduledReportsService.bulkDelete({
+        user: {
+          username: 'rshared',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        ids: [legacyReport.id],
+      });
+
+      expect(result).toEqual({
+        scheduled_report_ids: [],
+        errors: [{ id: legacyReport.id, message: 'Not found.', status: 404 }],
+        total: 1,
+      });
+      expect(soClient.bulkDelete).not.toHaveBeenCalled();
+      expect(taskManager.bulkRemove).not.toHaveBeenCalled();
+    });
+
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.bulkDelete({
         user: { username: 'somebody' } as ReportingUser,
@@ -2073,6 +2126,13 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should not delete scheduled report when user does not have permissions', async () => {
+      const ownedReport = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdById: ['elastic-profile'] },
+      };
+      soClient.bulkGet = jest.fn().mockResolvedValue({
+        saved_objects: [ownedReport, savedObjects[1]],
+      });
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -2092,7 +2152,7 @@ describe('ScheduledReportsService', () => {
         statuses: [{ id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' } as ReportingUser,
+        user: { username: 'elastic', profile_uid: 'elastic-profile' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -2633,6 +2693,11 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should update scheduled report when user does not have permissions but is the creator', async () => {
+      const ownedReport = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdById: ['elastic-profile'] },
+      };
+      soClient.get = jest.fn().mockResolvedValue(ownedReport);
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -2643,7 +2708,7 @@ describe('ScheduledReportsService', () => {
 
       await scheduledReportsService.update({
         ...defaultUpdateParams,
-        user: { username: 'elastic' } as ReportingUser,
+        user: { username: 'elastic', profile_uid: 'elastic-profile' } as ReportingUser,
       });
 
       expect(soClient.update).toHaveBeenCalledTimes(1);
@@ -2759,7 +2824,7 @@ describe('ScheduledReportsService', () => {
       expect(soClient.update).not.toHaveBeenCalled();
     });
 
-    it('leaves a legacy report unstamped on update, so ownership is never claimed implicitly', async () => {
+    it('denies updating a legacy report even when the username matches', async () => {
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -2773,24 +2838,22 @@ describe('ScheduledReportsService', () => {
       };
       soClient.get = jest.fn().mockResolvedValue(legacyReport);
 
-      await scheduledReportsService.update({
-        ...defaultUpdateParams,
-        id: legacyReport.id,
-        user: {
-          username: 'rshared',
-          lookup_realm: { type: 'native', name: 'default_native' },
-        } as ReportingUser,
-      });
+      await expect(
+        scheduledReportsService.update({
+          ...defaultUpdateParams,
+          id: legacyReport.id,
+          user: {
+            username: 'rshared',
+            lookup_realm: { type: 'native', name: 'default_native' },
+          } as ReportingUser,
+        })
+      ).rejects.toMatchObject({ body: 'Not found.', statusCode: 404 });
 
-      expect(soClient.update).toHaveBeenCalledWith('scheduled_report', legacyReport.id, {
-        schedule: mockSchedule,
-        title: 'foobar',
-        notification: mockNotification,
-      });
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
     });
 
     it('does not stamp createdById when an admin updates another legacy report', async () => {
-      // canManageReportingForSpace resolves true by default (see beforeEach)
       const legacyReport: SavedObject<ScheduledReportType> = {
         ...savedObjects[0],
         attributes: { ...savedObjects[0].attributes, createdBy: 'someone-else' },
