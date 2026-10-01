@@ -4,9 +4,6 @@ echo '--- Setup environment vars'
 
 export CI=true
 
-# TEMP: dry run Post-Build failed test reporting
-export REPORT_FAILED_TESTS_TO_GITHUB=true
-
 KIBANA_DIR=$(pwd)
 export KIBANA_DIR
 export XPACK_DIR="$KIBANA_DIR/x-pack"
