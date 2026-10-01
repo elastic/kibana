@@ -72,10 +72,16 @@ This also returns older threads that were never answered, so nothing gets lost b
 
 Libra reads replies to its comments when it reviews a new commit, and may answer them. Those threads come back with `followUp: true`; Libra's answer is in `latestBody`, and `otherReplies` counts the replies already posted. Handle them in step 3 under "Follow-ups", not as new findings.
 
-If `threads` prints nothing:
+After `findings`, also read the body of Libra's review of that commit, because some findings appear only there:
 
-- After `clean`: stop and write the final report.
-- After `findings`: the findings may be in the review body rather than in threads. Find the latest Libra review with `gh api repos/elastic/kibana/pulls/<pr>/reviews --paginate --jq '.[] | select(.user.login == "infra-vault-gh-plugin-prod[bot]") | .id' | tail -n 1`, then read it with `gh api repos/elastic/kibana/pulls/<pr>/reviews/<id> --jq .body`. Triage and fix these body-only findings like any other; step 8 says how to answer them.
+```bash
+gh api repos/elastic/kibana/pulls/<pr>/reviews --paginate \
+  --jq '.[] | select(.user.login == "infra-vault-gh-plugin-prod[bot]" and .commit_id == "<sha>") | .body'
+```
+
+Triage and fix body-only findings like any other; step 8 says how to answer them.
+
+If `wait` reported `clean` and `threads` prints nothing, stop and write the final report.
 
 ### 3. Triage
 
@@ -131,7 +137,7 @@ Fix any failures before committing.
 
 ### 7. Commit
 
-If the round changed files, first pick up any kibanamachine commits (`git stash && git pull --rebase && git stash pop`), so the commit SHA you quote in the replies doesn't change when you push. Then make one commit. Write a message that says what the round fixed and why, not "Address comments". Don't push yet.
+If the round changed files, make one commit. Write a message that says what the round fixed and why, not "Address comments". Then run `git pull --rebase` to pick up any kibanamachine commits, so the SHA you quote in the replies (`git rev-parse HEAD`, taken after the rebase) doesn't change when you push. Don't push yet.
 
 If nothing changed, because every finding was a false positive, out of scope, or a follow-up that needs only a reply, skip to step 8. There will be no push in step 9.
 
