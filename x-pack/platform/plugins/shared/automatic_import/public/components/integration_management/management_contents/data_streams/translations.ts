@@ -214,6 +214,9 @@ export const TABLE_COLUMN_HEADERS = Object.freeze({
   field: i18n.translate('xpack.automaticImport.dataStreams.table.fieldColumnHeader', {
     defaultMessage: 'Field',
   }),
+  type: i18n.translate('xpack.automaticImport.dataStreams.table.typeColumnHeader', {
+    defaultMessage: 'Type',
+  }),
   value: i18n.translate('xpack.automaticImport.dataStreams.table.valueColumnHeader', {
     defaultMessage: 'Value',
   }),
@@ -306,7 +309,7 @@ export const EDIT_PIPELINE_FLYOUT = Object.freeze({
   filterPlaceholder: i18n.translate(
     'xpack.automaticImport.dataStreams.editPipelineFlyout.filterPlaceholder',
     {
-      defaultMessage: 'Filter by field, value',
+      defaultMessage: 'Filter by field, type, value',
     }
   ),
   errorTitle: i18n.translate('xpack.automaticImport.dataStreams.editPipelineFlyout.errorTitle', {
@@ -321,6 +324,34 @@ export const EDIT_PIPELINE_FLYOUT = Object.freeze({
   saveButton: i18n.translate('xpack.automaticImport.dataStreams.editPipelineFlyout.saveButton', {
     defaultMessage: 'Save',
   }),
+  resetButton: i18n.translate('xpack.automaticImport.dataStreams.editPipelineFlyout.resetButton', {
+    defaultMessage: 'Reset',
+  }),
+  unsavedPipelineChangesTitle: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.unsavedPipelineChangesTitle',
+    {
+      defaultMessage: 'Unsaved ingest pipeline changes',
+    }
+  ),
+  unsavedPipelineChangesDescription: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.unsavedPipelineChangesDescription',
+    {
+      defaultMessage:
+        'You have unsaved changes on the Ingest pipeline tab. Save or reset them first.',
+    }
+  ),
+  unsavedTableChangesTitle: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.unsavedTableChangesTitle',
+    {
+      defaultMessage: 'Unsaved field type changes',
+    }
+  ),
+  unsavedTableChangesDescription: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.unsavedTableChangesDescription',
+    {
+      defaultMessage: 'You have unsaved changes on the Table tab. Save or reset them first.',
+    }
+  ),
   saveErrorTitle: i18n.translate(
     'xpack.automaticImport.dataStreams.editPipelineFlyout.saveErrorTitle',
     {
@@ -342,7 +373,7 @@ export const EDIT_PIPELINE_FLYOUT = Object.freeze({
   closeConfirmBody: i18n.translate(
     'xpack.automaticImport.dataStreams.editPipelineFlyout.closeConfirmBody',
     {
-      defaultMessage: 'You have unsaved changes in the ingest pipeline editor.',
+      defaultMessage: 'You have unsaved changes in this editor.',
     }
   ),
   closeConfirmCancel: i18n.translate(

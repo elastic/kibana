@@ -7,16 +7,29 @@
 
 import type { EuiTokenProps } from '@elastic/eui';
 import ipaddr from 'ipaddr.js';
+import * as i18n from './translations';
 
 const TYPE_TO_ICON_MAP: Record<string, EuiTokenProps['iconType']> = {
   string: 'tokenString',
   keyword: 'tokenKeyword',
+  constant_keyword: 'tokenConstant',
+  wildcard: 'tokenString',
+  text: 'tokenString',
+  match_only_text: 'tokenString',
   number: 'tokenNumber',
+  byte: 'tokenNumber',
+  short: 'tokenNumber',
+  integer: 'tokenNumber',
   long: 'tokenNumber',
+  unsigned_long: 'tokenNumber',
+  half_float: 'tokenNumber',
   float: 'tokenNumber',
+  double: 'tokenNumber',
   date: 'tokenDate',
+  date_nanos: 'tokenDate',
   ip: 'tokenIP',
   geo_point: 'tokenGeo',
+  version: 'tokenTag',
   object: 'tokenQuestion',
   nested: 'tokenNested',
   boolean: 'tokenBoolean',
@@ -52,6 +65,28 @@ export const getFieldType = (value: unknown): string => {
     if (/^\d{4}-\d{2}-\d{2}/.test(value)) return 'date';
   }
   return 'string';
+};
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
+/**
+ * Normalize pipeline sample docs. Some code paths persist ingest `_source`
+ * objects; others persist the simulate wrapper `{ _source }` or `{ doc: { _source } }`.
+ */
+export const unwrapPipelineDocument = (
+  document: Record<string, unknown> | undefined
+): Record<string, unknown> | undefined => {
+  if (!document) {
+    return undefined;
+  }
+  if (isPlainObject(document._source)) {
+    return document._source;
+  }
+  if (isPlainObject(document.doc) && isPlainObject(document.doc._source)) {
+    return document.doc._source;
+  }
+  return document;
 };
 
 // Diff function based on longest common subsequence used in Git diff algorithm
@@ -103,4 +138,68 @@ export const flattenPipelineObject = (
   }
 
   return result;
+};
+
+export interface FlyoutFooterWarning {
+  title: string;
+  description: string;
+}
+
+export interface FlyoutFooterState {
+  isResetDisabled: boolean;
+  isSaveDisabled: boolean;
+  saveTestSubj: string;
+  warning?: FlyoutFooterWarning;
+}
+
+export const getFlyoutFooterState = ({
+  isTableTab,
+  mappingDirty,
+  mappingSaving,
+  pipelineDirty,
+  pipelineSaving,
+  pipelineText,
+  isSaving,
+  showPipelineWarning,
+  showTableWarning,
+}: {
+  isTableTab: boolean;
+  mappingDirty: boolean;
+  mappingSaving: boolean;
+  pipelineDirty: boolean;
+  pipelineSaving: boolean;
+  pipelineText: string;
+  isSaving: boolean;
+  showPipelineWarning: boolean;
+  showTableWarning: boolean;
+}): FlyoutFooterState => {
+  const isResetDisabled = isSaving || !(isTableTab ? mappingDirty : pipelineDirty);
+  const isSaveDisabled = isTableTab
+    ? !mappingDirty || mappingSaving || pipelineDirty
+    : !pipelineDirty || pipelineSaving || mappingDirty || !pipelineText.trim();
+  const saveTestSubj = isTableTab ? 'mappingEditorApplyButton' : 'editPipelineFlyoutSaveButton';
+
+  if (showPipelineWarning) {
+    return {
+      isResetDisabled,
+      isSaveDisabled,
+      saveTestSubj,
+      warning: {
+        title: i18n.EDIT_PIPELINE_FLYOUT.unsavedPipelineChangesTitle,
+        description: i18n.EDIT_PIPELINE_FLYOUT.unsavedPipelineChangesDescription,
+      },
+    };
+  }
+  if (showTableWarning) {
+    return {
+      isResetDisabled,
+      isSaveDisabled,
+      saveTestSubj,
+      warning: {
+        title: i18n.EDIT_PIPELINE_FLYOUT.unsavedTableChangesTitle,
+        description: i18n.EDIT_PIPELINE_FLYOUT.unsavedTableChangesDescription,
+      },
+    };
+  }
+  return { isResetDisabled, isSaveDisabled, saveTestSubj };
 };
