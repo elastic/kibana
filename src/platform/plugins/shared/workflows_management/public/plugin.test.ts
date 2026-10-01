@@ -10,19 +10,23 @@
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
   WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
+  WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
   WORKFLOWS_MANAGEMENT_FEATURE_ID,
   WORKFLOWS_UI_SETTING_ID,
 } from '@kbn/workflows/common/constants';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
-import { createStartServicesMock } from './mocks';
+import { renderApp } from './application';
+import { createStartServicesMock, workflowsManagementMocks } from './mocks';
 import { WorkflowsPlugin } from './plugin';
 import { triggerSchemas } from './trigger_schemas';
 import { PLUGIN_ID } from '../common';
 import { stepSchemas } from '../common/step_schemas';
+
+jest.mock('./application', () => ({ renderApp: jest.fn(() => jest.fn()) }));
 
 jest.mock('./common/lib/telemetry/telemetry_service', () => {
   return {
@@ -86,6 +90,33 @@ describe('WorkflowsPlugin', () => {
   });
 
   describe('setup()', () => {
+    it('keeps Core service accounts when the Security plugin also supplies a contract', async () => {
+      coreSetup.uiSettings.get.mockReturnValue(true);
+      const dependencies = { ...createStartServicesMock(), security: { authc: {} } };
+      coreSetup.getStartServices.mockResolvedValue([
+        coreStart,
+        dependencies,
+        workflowsManagementMocks.createStart(),
+      ]);
+      plugin.setup(coreSetup, {
+        actions: {
+          ...setupDeps.actions,
+          validateEmailAddresses: jest.fn(),
+          enabledEmailServices: ['*'],
+          isEarsEnabled: false,
+          isEarsExperimentalEnabled: false,
+        },
+        triggersActionsUi: dependencies.triggersActionsUi,
+        workflowsExtensions: setupDeps.workflowsExtensions,
+      });
+      const [application] = coreSetup.application.register.mock.calls[0];
+      await application.mount(applicationServiceMock.createAppMountParameters());
+      expect(renderApp).toHaveBeenCalledWith(
+        expect.objectContaining({ security: coreStart.security }),
+        expect.anything()
+      );
+    });
+
     it('should return an empty object when workflows UI is disabled', () => {
       coreSetup.uiSettings.get.mockReturnValue(false);
 
@@ -393,6 +424,22 @@ describe('WorkflowsPlugin', () => {
           expect.arrayContaining([
             expect.objectContaining({ id: 'executions', path: '/executions' }),
           ])
+        );
+      });
+
+      it('should include the library deep link by default after startup', () => {
+        setReadCapability(true);
+        setLicenseValid(true);
+        const updates = captureAppUpdates();
+
+        plugin.start(coreStart, startDeps as any);
+
+        expect(coreStart.settings.globalClient.get$).toHaveBeenCalledWith(
+          WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
+          true
+        );
+        expect(updates[updates.length - 1].deepLinks).toEqual(
+          expect.arrayContaining([expect.objectContaining({ id: 'library', path: '/library' })])
         );
       });
     });

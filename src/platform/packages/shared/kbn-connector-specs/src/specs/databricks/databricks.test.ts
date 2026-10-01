@@ -213,7 +213,7 @@ describe('Databricks', () => {
   });
 
   describe('listTools action', () => {
-    it('is not exposed as a tool (workflow-only)', () => {
+    it('is workflow-only (not exposed as agent tool)', () => {
       expect(Databricks.actions.listTools.isTool).toBe(false);
     });
 
@@ -229,7 +229,7 @@ describe('Databricks', () => {
   });
 
   describe('callTool action', () => {
-    it('is not exposed as a tool (workflow-only)', () => {
+    it('is workflow-only (not exposed as agent tool)', () => {
       expect(Databricks.actions.callTool.isTool).toBe(false);
     });
 

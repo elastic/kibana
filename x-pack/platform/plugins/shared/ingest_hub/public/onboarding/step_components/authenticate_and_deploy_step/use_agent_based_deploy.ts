@@ -20,7 +20,10 @@ import {
   buildAgentPolicyName,
 } from './agent_based_deploy';
 import type { AgentCredentialVars } from './package_inputs';
+import { toSOServiceVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
+import { toSOAuthMethod } from './agent_based_section/credential_method_selector';
+import { useOnboardingSO } from './use_onboarding_so';
 import { cleanupAgentBasedPolicies } from './policy_cleanup_agent_based';
 import {
   buildLiveStalePolicyIds,
@@ -57,6 +60,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
     agentBasedDeployment,
     setAgentBasedDeployment,
   } = useOnboardingFlow();
+
+  const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
 
   const { selectedServiceIds } = servicesStep;
 
@@ -144,16 +149,39 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
       const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
 
-      if (targetsToDeploy.length === 0 && !hasPendingCleanup) return { failed: false };
+      if (targetsToDeploy.length === 0 && !hasPendingCleanup) {
+        // No deploy targets and no cleanup to run, but the service selection may still have
+        // changed (e.g., a previously-failed service with no package policy was deselected).
+        // Reconcile the SO services list so resume reflects the current selection.
+        const existingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
+        if (existingDeploymentId) {
+          const remainingPolicyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
+          await updateDeployment(existingDeploymentId, {
+            services: selectedServiceIds,
+            serviceVars: toSOServiceVars(
+              serviceSettings?.serviceVars ?? {},
+              servicesMap ?? new Map()
+            ) as Record<string, Record<string, unknown>>,
+            packagePolicyIds: [...new Set(Object.values(remainingPolicyIdsByInstance))],
+          });
+        }
+        return { failed: false };
+      }
 
       setIsDeploying(true);
       updateDetectAndReviewStep({ isDeploying: true });
 
-      try {
-        const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds } = agentBasedDeployment;
-        const globalRegion = serviceSettings?.globalRegion ?? '';
-        const storedServiceVars = serviceSettings?.serviceVars ?? {};
+      // Hoisted so the catch block can best-effort update the SO on unexpected errors,
+      // including agent policy ids, services, serviceVars, and authMethod known at failure time.
+      let onboardingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
+      let resolvedAgentPolicyIds: string[] = [];
+      const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds, agentCredentialMethod } =
+        agentBasedDeployment;
+      const globalRegion = serviceSettings?.globalRegion ?? '';
+      const storedServiceVars = serviceSettings?.serviceVars ?? {};
+      const { dataFormat } = servicesStep;
 
+      try {
         const baseOpts = {
           namespace,
           globalRegion,
@@ -162,6 +190,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           pkgVersion: '', // overridden per-package inside deploy functions
           agentCredentials: agentCredentialsRef.current,
         };
+
+        // Track instance IDs successfully cleaned up so the SO update can exclude their
+        // stale policy IDs when building packagePolicyIds.
+        let cleanedLiveStale: string[] = [];
+        // Hoisted so the cleanup-only early return can decide whether to refresh the SO.
+        let remainingPending: Record<string, string> =
+          detectAndReviewStep.pendingCleanupPolicyIds ?? {};
 
         // Clean up package policies for removed services before creating new ones.
         if (hasPendingCleanup) {
@@ -186,9 +221,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           ]);
           // Agent-based deploy has no "update" semantics — a policy is either deleted or kept
           // entirely, so no survivingInstanceIds filter is needed here.
-          const cleanedLiveStale = buildCleanedLiveStale(liveStalePolicyIds, succeededIds);
+          cleanedLiveStale = buildCleanedLiveStale(liveStalePolicyIds, succeededIds);
           removeDeployInstances(cleanedLiveStale);
-          const remainingPending = buildRemainingPending(
+          remainingPending = buildRemainingPending(
             detectAndReviewStep.pendingCleanupPolicyIds,
             succeededIds
           );
@@ -198,9 +233,71 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         if (targetsToDeploy.length === 0) {
           setIsDeploying(false);
           updateDetectAndReviewStep({ isDeploying: false });
+          // Only refresh the SO services list when ALL cleanup succeeded — both explicit
+          // pendingCleanupPolicyIds (Step 4 deselections) AND live-stale entries (Step 1
+          // deselections). A failed live-stale cleanup is not tracked in remainingPending, so
+          // check that every live-stale instance was actually cleaned (i.e., all are in cleanedLiveStale).
+          const allLiveStaleSucceeded = Object.keys(liveStalePolicyIds).every((id) =>
+            cleanedLiveStale.includes(id)
+          );
+          if (
+            onboardingDeploymentId &&
+            Object.keys(remainingPending).length === 0 &&
+            allLiveStaleSucceeded
+          ) {
+            // Build the post-cleanup policy map: exclude instance IDs removed by cleanup so the
+            // persisted packagePolicyIds and policyIdsByInstance don't reference deleted policies.
+            const postCleanupPolicyIdsByInstance = Object.fromEntries(
+              Object.entries(detectAndReviewStep.policyIdsByInstance ?? {}).filter(
+                ([id]) => !cleanedLiveStale.includes(id)
+              )
+            );
+            await updateDeployment(onboardingDeploymentId, {
+              services: selectedServiceIds,
+              serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+                string,
+                Record<string, unknown>
+              >,
+              packagePolicyIds: [...new Set(Object.values(postCleanupPolicyIdsByInstance))],
+              policyIdsByInstance: postCleanupPolicyIdsByInstance,
+            });
+          }
           // Cleanup is best-effort — any entries that couldn't be cleared remain staged for
           // the next deploy attempt. Don't block navigation on a cleanup-only run.
           return { failed: false };
+        }
+
+        // ── SO create (best-effort, skipped when an ID already exists) ──────────
+        // !onboardingDeploymentId is the only guard needed: it prevents double-creation on
+        // Back→Next re-entry (id set from prior deploy) and on retry when the first deploy
+        // succeeded in creating the record. Intentionally NOT guarded on !isRetry: if the
+        // initial SO create failed (returned null) and the deploy then failed, a retry must
+        // still be able to create the record so the successful Fleet result has a durable home.
+        if (!onboardingDeploymentId) {
+          onboardingDeploymentId =
+            (await createDeployment({
+              provider: 'aws',
+              mechanisms: ['agent_based'],
+              services: selectedServiceIds,
+              serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+                string,
+                Record<string, unknown>
+              >,
+              globalRegion,
+              dataFormat,
+              authMethod: toSOAuthMethod(agentCredentialMethod),
+              // Persist agentPolicyIds on create so a mid-deploy tab-close leaves a record that
+              // hydrates back into existing mode rather than incorrectly creating a new agent policy.
+              // - existing mode: target ids are the user-selected set.
+              // - pre-created new-policy mode (agentPolicyId already set by flyout): wrap the
+              //   singular id so resume sees it and routes to existing mode, not new-policy mode.
+              ...(agentHostsMode === 'existing' && selectedAgentPolicyIds?.length
+                ? { agentPolicyIds: selectedAgentPolicyIds }
+                : agentPolicyId
+                ? { agentPolicyIds: [agentPolicyId] }
+                : {}),
+            })) ?? undefined;
+          if (onboardingDeploymentId) persistDeploymentId(onboardingDeploymentId);
         }
 
         let policyIdsByInstance: Record<string, string> = {};
@@ -214,6 +311,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         //   policy to avoid creating a second one (double-creation guard applies on retry too).
         if (agentHostsMode === 'existing' || agentPolicyId) {
           const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
+          resolvedAgentPolicyIds = targetPolicyIds;
 
           const result = await deployToExistingAgentPolicies(targetsToDeploy, {
             ...baseOpts,
@@ -233,6 +331,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               withSysMonitoring: agentBasedDeployment.withSysMonitoring ?? true,
             });
             policyIdsByInstance = result.packagePolicyIdsByInstance;
+            resolvedAgentPolicyIds = [result.agentPolicyId];
             // Persist the agent policy id so retries and step 4 can find it.
             setAgentBasedDeployment({
               agentPolicyId: result.agentPolicyId,
@@ -251,30 +350,136 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         const allTargetIds = targetsToDeploy.flatMap((g) => g.instanceIds);
         const statuses = buildAgentBasedInstanceStatuses(targetsToDeploy, failed);
 
-        setFailedInstances(failed);
+        // On retry, merge current failures with previously failed instances that were not retried,
+        // so the SO status reflects the full deployment state — not just the retried subset.
+        const mergedFailed = isRetry
+          ? [...getLatestFailedInstances().filter((id) => !allTargetIds.includes(id)), ...failed]
+          : failed;
+
+        // ── SO update (best-effort) ───────────────────────────────────────────
+        // The SO tracks current desired state, not a frozen deploy snapshot. Refreshing
+        // services/serviceVars here means a resume after a Back→add-service→Next sequence
+        // restores the complete service set, not just what was deployed first.
+        if (onboardingDeploymentId) {
+          // Build the persisted policy-ID list from the post-cleanup snapshot: filter out
+          // instance IDs removed by cleanup (cleanedLiveStale) before merging with current
+          // deploy results, so deleted package-policy IDs aren't persisted alongside new ones.
+          const priorIds = Object.fromEntries(
+            Object.entries(detectAndReviewStep.policyIdsByInstance ?? {}).filter(
+              ([id]) => !cleanedLiveStale.includes(id)
+            )
+          );
+          // Only persist the reduced services list when all cleanup succeeded — both explicit
+          // pendingCleanupPolicyIds and live-stale entries (Step 1 deselections). A failed
+          // live-stale cleanup is not tracked in remainingPending, so check both.
+          const allLiveStaleSucceededInDeploy = Object.keys(liveStalePolicyIds).every((id) =>
+            cleanedLiveStale.includes(id)
+          );
+          const cleanupFullySucceeded =
+            Object.keys(remainingPending).length === 0 && allLiveStaleSucceededInDeploy;
+          await updateDeployment(onboardingDeploymentId, {
+            ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
+            packagePolicyIds: [...new Set(Object.values({ ...priorIds, ...policyIdsByInstance }))],
+            // Always update mechanisms so that a record originally created for managed_integration
+            // (when the user switched deployment method after a failed MI attempt) is corrected.
+            // Without this, agent-based PUTs using assume_role are rejected by the handler, and
+            // static_keys PUTs succeed but hydrate back into managed_integration mode on resume.
+            mechanisms: ['agent_based'],
+            // Clear the connectorId when reusing an MI-created record. MI creates with a connector
+            // association; agent-based never uses one. If not cleared, the agent-based record remains
+            // returned for the unrelated cloud connector (getByConnectorId), matching MI→ECF behavior.
+            connectorId: null,
+            // Refresh authMethod so a credential-method change between deploys (Back→change→Next)
+            // is reflected on resume rather than presenting the original method's form.
+            authMethod: toSOAuthMethod(agentCredentialMethod),
+            status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
+            ...(cleanupFullySucceeded
+              ? {
+                  services: selectedServiceIds,
+                  serviceVars: toSOServiceVars(
+                    storedServiceVars,
+                    servicesMap ?? new Map()
+                  ) as Record<string, Record<string, unknown>>,
+                }
+              : {}),
+          });
+        }
+
+        // Use mergedFailed (not just the current-attempt `failed`) for local state too.
+        // On a partial retry, `failed` contains only the current attempt's failures, so using
+        // it directly would clear previously-failed instances from `failedInstances`, causing
+        // `isAgentDone` to evaluate as true and advancing Next even though B was never retried.
+        setFailedInstances(mergedFailed);
+        // Merge errors: keep previous diagnostics for instances not included in this retry so
+        // the error callout still shows why B failed even when only A was retried.
+        const mergedErrors = isRetry
+          ? {
+              ...Object.fromEntries(
+                Object.entries(detectAndReviewStep.deployErrors ?? {}).filter(
+                  ([id]) => !allTargetIds.includes(id)
+                )
+              ),
+              ...errorsByInstance,
+            }
+          : errorsByInstance;
         updateDetectAndReviewStep({
           isDeploying: false,
           serviceStatuses: statuses,
           policyIdsByInstance,
-          // On retry, merge with latest to preserve statuses for non-retried instances.
-          failedInstances: isRetry
-            ? [...getLatestFailedInstances().filter((id) => !allTargetIds.includes(id)), ...failed]
-            : failed,
-          deployErrors: errorsByInstance,
+          failedInstances: mergedFailed,
+          deployErrors: mergedErrors,
         });
-        return { failed: failed.length > 0 };
+        return { failed: mergedFailed.length > 0 };
       } catch (err) {
-        // Unexpected error — mark all as failed.
+        // Unexpected error — mark all retried instances as failed.
         const msg = extractErrorMessage(err);
         const allIds = targetsToDeploy.flatMap((g) => g.instanceIds);
+        // On a partial retry, merge with previously-failed instances that were not retried.
+        // Without this, B (failed previously, not retried) disappears from the failure set; a
+        // later successful retry of A can then compute an empty merged set and mark the SO
+        // succeeded even though B was never retried.
+        const mergedCatchFailed = isRetry
+          ? [...getLatestFailedInstances().filter((id) => !allIds.includes(id)), ...allIds]
+          : allIds;
         const statuses = buildAgentBasedInstanceStatuses(targetsToDeploy, allIds);
-        setFailedInstances(allIds);
+        setFailedInstances(mergedCatchFailed);
+        const catchErrors = isRetry
+          ? {
+              ...Object.fromEntries(
+                Object.entries(detectAndReviewStep.deployErrors ?? {}).filter(
+                  ([id]) => !allIds.includes(id)
+                )
+              ),
+              ...Object.fromEntries(allIds.map((id) => [id, msg])),
+            }
+          : Object.fromEntries(allIds.map((id) => [id, msg]));
         updateDetectAndReviewStep({
           isDeploying: false,
           serviceStatuses: statuses,
-          failedInstances: allIds,
-          deployErrors: Object.fromEntries(allIds.map((id) => [id, msg])),
+          failedInstances: mergedCatchFailed,
+          deployErrors: catchErrors,
         });
+        // Best-effort: mark the SO as failed so resume doesn't see a stale 'pending' record.
+        // Include agent policy ids, services, serviceVars and authMethod known at failure time
+        // so a resumed-after-unexpected-error deployment restores the correct service set and
+        // credential method, not a stale snapshot from a prior successful deploy.
+        if (onboardingDeploymentId) {
+          await updateDeployment(onboardingDeploymentId, {
+            ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
+            services: selectedServiceIds,
+            serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+              string,
+              Record<string, unknown>
+            >,
+            // Mirror the success-path update: keep mechanisms and connectorId consistent so an
+            // MI-created record that was switched to agent-based doesn't resume as MI after an
+            // unexpected throw (the handler rejects assume_role against stored MI mechanisms).
+            mechanisms: ['agent_based'],
+            connectorId: null,
+            authMethod: toSOAuthMethod(agentCredentialMethod),
+            status: 'failed',
+          });
+        }
         return { failed: true };
       } finally {
         setIsDeploying(false);
@@ -291,7 +496,12 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       updateDetectAndReviewStep,
       removeDeployInstances,
       getLatestFailedInstances,
+      selectedServiceIds,
+      servicesStep,
       servicesMap,
+      createDeployment,
+      updateDeployment,
+      persistDeploymentId,
     ]
   );
 

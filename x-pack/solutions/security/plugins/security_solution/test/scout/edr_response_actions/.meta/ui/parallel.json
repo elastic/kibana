@@ -1,5 +1,5 @@
 {
-  "sha1": "832d0806c097092fa5d8392a0b15e67f8e7a6cdb",
+  "sha1": "188e8f9ed30df7fba9f9fdf903b68c36ec876d20",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,21 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "0c8b03569042390-fb4eee45dcfb4b9",
+      "title": "Alert flyout automated response results shows the isolate action on the alert response details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/alert_flyout_results.spec.ts",
+        "line": 60,
+        "column": 7
       }
     },
     {

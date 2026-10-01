@@ -142,6 +142,21 @@ async function waitForTransformsToBeCreated(
   return { currentTransformId: undefined, unitedTransformId: undefined };
 }
 
+const isTransformAlreadyStartedError = (err: unknown): boolean => {
+  if (typeof err !== 'object' || err === null) {
+    return false;
+  }
+
+  const error = err as {
+    statusCode?: number;
+    body?: { error?: { type?: string } };
+    meta?: { body?: { error?: { type?: string } } };
+  };
+  const errorType = error.body?.error?.type ?? error.meta?.body?.error?.type;
+
+  return error.statusCode === 409 || errorType === 'resource_already_exists_exception';
+};
+
 async function startTransformWithRetry(
   esClient: Client,
   transformId: string,
@@ -154,11 +169,10 @@ async function startTransformWithRetry(
       await esClient.transform.startTransform({ transform_id: transformId });
       return;
     } catch (err) {
-      // 409: transform already started. A concurrent start can instead return
-      // resource_already_exists_exception for the persistent task. Either way the
-      // transform is running.
-      const errorType = err.body?.error?.type ?? err.meta?.body?.error?.type;
-      if (err.statusCode === 409 || errorType === 'resource_already_exists_exception') {
+      // 409: transform already started.
+      // resource_already_exists_exception: a parallel caller created this transform's
+      // task in the same moment. The task id is the transform id, so it is starting.
+      if (isTransformAlreadyStartedError(err)) {
         return;
       }
 

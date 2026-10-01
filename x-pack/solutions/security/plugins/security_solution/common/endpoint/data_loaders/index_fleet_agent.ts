@@ -20,7 +20,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { usageTracker } from './usage_tracker';
 import type { HostMetadata } from '../types';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
-import { createToolingLogger, wrapErrorAndRejectPromise } from './utils';
+import { createToolingLogger, EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
 
 const defaultFleetAgentGenerator = new FleetAgentGenerator();
 
@@ -205,31 +205,30 @@ export const deleteIndexedFleetAgents = async (
     const agentIds = indexedData.agents.map((agent) => agent.local_metadata.elastic.agent.id);
     // Documents are indexed into `.fleet-agents`. The legacy `-*` name only matches
     // older versioned indices, so a delete against that pattern can leave the agents
-    // in place. Fleet then rejects the agent policy delete while any active agent
-    // remains. A concurrent Fleet update can also skip a document (`conflicts:
-    // proceed`), so repeat the delete until the count is zero.
+    // in place. Fleet then rejects the agent policy delete while any active agent remains.
     const query: QueryDslQueryContainer = {
       bool: {
-        should: [
-          { terms: { 'local_metadata.elastic.agent.id': agentIds } },
-          { terms: { 'agent.id': agentIds } },
-        ],
-        minimum_should_match: 1,
+        filter: [{ terms: { 'local_metadata.elastic.agent.id': agentIds } }],
       },
     };
     const index = [indexedData.fleetAgentsIndex, `${indexedData.fleetAgentsIndex}-*`];
-    const countAgents = (agentQuery: QueryDslQueryContainer) =>
+    const countAgents = () =>
       esClient
         .count({
           index,
           ignore_unavailable: true,
           expand_wildcards: 'all',
-          query: agentQuery,
+          query,
         })
         .catch(wrapErrorAndRejectPromise);
 
+    // Fleet rewrites these docs while a test is cleaning up. With
+    // `conflicts: 'proceed'` that rewrite is skipped. When every hit conflicts,
+    // `refresh: true` does not refresh the index, so the next attempt can read
+    // the same version. Refresh the concrete index before retrying.
+    let deleted: DeleteByQueryResponse | undefined;
     for (let attempt = 0; attempt < 5; attempt++) {
-      response.agents = await esClient
+      deleted = await esClient
         .deleteByQuery({
           index,
           wait_for_completion: true,
@@ -241,57 +240,75 @@ export const deleteIndexedFleetAgents = async (
         })
         .catch(wrapErrorAndRejectPromise);
 
-      const remaining = await countAgents(query);
-
-      if (remaining.count === 0) {
+      const remaining = await countAgents();
+      if ((deleted.version_conflicts ?? 0) === 0 && remaining.count === 0) {
         break;
       }
 
-      if (attempt === 4) {
-        createToolingLogger().warning(
-          `Failed to delete ${remaining.count} seeded Fleet agents [${agentIds.join(
-            ', '
-          )}]. Marking them inactive so the agent policy can be removed.`
-        );
-        await esClient
-          .updateByQuery({
-            index,
-            refresh: true,
-            conflicts: 'proceed',
-            ignore_unavailable: true,
-            expand_wildcards: 'all',
-            query,
-            script: {
-              source: 'ctx._source.active = false',
-              lang: 'painless',
-            },
-          })
-          .catch(wrapErrorAndRejectPromise);
-
-        const stillActive = await countAgents({
-          bool: {
-            filter: [
-              query,
-              {
-                bool: {
-                  should: [{ term: { active: true } }, { term: { active: 'true' } }],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
-          },
-        });
-        if (stillActive.count > 0) {
-          const ids = agentIds.join(', ');
-          throw new Error(
-            `Failed to delete or deactivate ${stillActive.count} seeded Fleet agents [${ids}]`
-          );
-        }
-        break;
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+      // The refresh only lets the next delete see a new version. A failed
+      // refresh must not end the retry or replace the conflict error.
+      await esClient.indices
+        .refresh({
+          index,
+          ignore_unavailable: true,
+          expand_wildcards: 'all',
+        })
+        .catch(() => undefined);
+      await new Promise((resolve) => setTimeout(resolve, 250));
     }
+
+    const versionConflicts = deleted?.version_conflicts ?? 0;
+    const remaining = await countAgents();
+    if (versionConflicts > 0 || remaining.count > 0) {
+      const ids = agentIds.join(', ');
+      createToolingLogger().warning(
+        `Failed to delete seeded Fleet agents [${ids}] ` +
+          `(${versionConflicts} version conflict(s), ${remaining.count} document(s) left). ` +
+          'Marking them inactive so the agent policy can be removed.'
+      );
+      await esClient
+        .updateByQuery({
+          index,
+          refresh: true,
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+          expand_wildcards: 'all',
+          query,
+          script: {
+            source: 'ctx._source.active = false',
+            lang: 'painless',
+          },
+        })
+        .catch(wrapErrorAndRejectPromise);
+
+      const stillActive = await esClient
+        .count({
+          index,
+          ignore_unavailable: true,
+          expand_wildcards: 'all',
+          query: {
+            bool: {
+              filter: [
+                query,
+                {
+                  bool: {
+                    should: [{ term: { active: true } }, { term: { active: 'true' } }],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+        })
+        .catch(wrapErrorAndRejectPromise);
+      if (stillActive.count > 0) {
+        throw new EndpointDataLoadingError(
+          `Failed to delete or deactivate ${stillActive.count} seeded Fleet agents [${ids}]`
+        );
+      }
+    }
+
+    response.agents = deleted;
   }
 
   return response;

@@ -5,47 +5,51 @@
  * 2.0.
  */
 
-import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
-import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
-import type { IngestStreamEffectiveLifecycle, Streams } from '@kbn/streams-schema';
+import type { DestinationNameValidationError } from './destination_helpers';
 
 /**
- * Destination types targeted by V1. Only `elasticsearch` is backed by real
- * data today; `s3` and `remote_elasticsearch` land with the destinations
- * backend (see https://github.com/elastic/ingest-dev/issues/8131 and /8340).
+ * Destination storage choices shown in the create form.
+ * Only `local_elasticsearch` is persisted today. Add a kind here, a fields
+ * component, and a registry entry to introduce another type.
  */
-export type DestinationType = 'elasticsearch' | 's3' | 'remote_elasticsearch';
+export type DestinationStorageKind = 'local_elasticsearch' | 'external_storage';
 
-/**
- * View model for a row of the Destinations table, decoupled from
- * `ListStreamDetail` so the fetch actor and mapper are the only places to
- * update once the destinations CRUD API replaces the streams list endpoint.
- */
-export interface Destination {
+/** Unit destination types the UI can list and create. */
+export type DestinationType = 'elasticsearch';
+
+export interface DestinationViewModel {
+  id: string;
   name: string;
   type: DestinationType;
-  description: string;
-  tags: string[];
-  isManaged: boolean;
-  isInternal: boolean;
-  hasDataStream: boolean;
-  canReadFailureStore: boolean;
-  /** Undefined when the destination has no meaningful retention. */
-  retention: IngestStreamEffectiveLifecycle | undefined;
+  /** Elasticsearch `config` entry `index`. */
+  index: string;
   /**
-   * Numeric retention used for sorting; Infinity for indefinite retention and
-   * undefined when it cannot be determined (ILM, unparseable duration).
+   * Elasticsearch `config` entry `index_patterns`.
+   * Static indexes that omit the entry surface the spec default of `[index]`.
    */
-  retentionMs: number | undefined;
-  /** Backing stream definition, powering stream-based actions like Discover. */
-  streamDefinition: Streams.ClassicStream.Definition;
-  indexMode: IndicesIndexMode;
+  indexPatterns: string[];
 }
 
-/** Destination enriched with the metrics the sortable columns need. */
-export type DestinationRow = Destination & {
-  documentsCount: number;
-  ingestionRate: number;
-  storageBytes: number;
-  dataQuality?: QualityIndicators;
+/** Per-type form state. Each destination type owns its own slice. */
+export interface ElasticsearchDestinationFormData {
+  index: string;
+  /** Raw index patterns, one per line or comma-separated. */
+  indexPatterns: string;
+}
+
+export interface DestinationCreationFormData {
+  storageKind: DestinationStorageKind;
+  destinationName: string;
+  elasticsearch: ElasticsearchDestinationFormData;
+}
+
+export interface DestinationCreationFormErrors {
+  destinationName?: DestinationNameValidationError;
+  index?: 'required';
+  indexPatterns?: 'required' | 'invalid';
+}
+
+export const EMPTY_ELASTICSEARCH_DESTINATION_FORM: ElasticsearchDestinationFormData = {
+  index: '',
+  indexPatterns: '',
 };
