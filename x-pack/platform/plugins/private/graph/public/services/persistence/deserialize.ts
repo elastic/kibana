@@ -17,7 +17,7 @@ import type {
   SerializedWorkspaceState,
   AdvancedSettings,
   GraphData,
-  Workspace,
+  RuntimeWorkspace,
   SerializedField,
 } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
@@ -164,7 +164,7 @@ function getBlocklistedNodes(
   });
 }
 
-function resolveGroups(nodes: SerializedNode[], workspaceInstance: Workspace) {
+function resolveGroups(nodes: SerializedNode[], workspaceInstance: RuntimeWorkspace) {
   nodes.forEach(({ field, term, x, y, parent }) => {
     const nodeId = makeNodeId(field, term);
     const workspaceNode = workspaceInstance.nodesMap[nodeId];
@@ -206,8 +206,8 @@ export function makeNodeId(field: string, term: string) {
 export function savedWorkspaceToAppState(
   savedWorkspace: GraphWorkspaceSavedObject,
   indexPattern: DataView,
-  workspaceInstance: Workspace,
-  mergeRuntimeGraph: (workspace: Workspace, graph: GraphData) => void
+  workspaceInstance: RuntimeWorkspace,
+  mergeRuntimeGraph: (workspace: RuntimeWorkspace, graph: GraphData) => void
 ): {
   urlTemplates: UrlTemplate[];
   advancedSettings: AdvancedSettings;

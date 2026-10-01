@@ -6,10 +6,10 @@
  */
 
 import { getIcon } from '../../helpers/style_choices';
-import type { Workspace, WorkspaceEdge, WorkspaceNode } from '../../types/workspace_state';
+import type { RuntimeWorkspace, WorkspaceEdge, WorkspaceNode } from '../../types/workspace_state';
 import type { WorkspaceState } from '../../state_management/workspace';
 
-export const syncRuntimeTopology = (workspace: Workspace, state: WorkspaceState): void => {
+export const syncRuntimeTopology = (workspace: RuntimeWorkspace, state: WorkspaceState): void => {
   const nodesMap: Record<string, WorkspaceNode> = {};
   state.nodeIds.forEach((id) => {
     const node = state.nodesById[id];

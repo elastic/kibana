@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { GraphVisualization } from './graph_visualization';
-import type { Workspace, WorkspaceEdge, WorkspaceNode } from '../../types';
+import type { RuntimeWorkspace, WorkspaceEdge, WorkspaceNode } from '../../types';
 
 describe('graph_visualization', () => {
   const nodes: WorkspaceNode[] = [
@@ -102,7 +102,7 @@ describe('graph_visualization', () => {
   const workspace = {
     nodes,
     edges,
-  } as unknown as jest.Mocked<Workspace>;
+  } as unknown as jest.Mocked<RuntimeWorkspace>;
 
   const defaultSelectionProps = {
     selectedNodeIds: ['1'],
@@ -121,7 +121,7 @@ describe('graph_visualization', () => {
       shallow(
         <GraphVisualization
           {...defaultSelectionProps}
-          workspace={{} as unknown as Workspace}
+          workspace={{} as unknown as RuntimeWorkspace}
           selectSelected={() => {}}
           onSetControl={() => {}}
           onSetMergeCandidates={() => {}}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GraphWorkspaceSavedObject, Workspace } from '../../types';
+import type { GraphWorkspaceSavedObject, RuntimeWorkspace } from '../../types';
 import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
 import { createWorkspace } from '../workspace/runtime_workspace';
 import { GraphLayoutController } from '../workspace/graph_layout_controller';
@@ -15,7 +15,7 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
-  let workspace: Workspace;
+  let workspace: RuntimeWorkspace;
   let runtimeSequence: number;
 
   beforeEach(() => {

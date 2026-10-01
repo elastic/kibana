@@ -8,7 +8,7 @@
 import { appStateToSavedWorkspace, reduxStateToSavedWorkspace } from './serialize';
 import type {
   GraphWorkspaceSavedObject,
-  Workspace,
+  RuntimeWorkspace,
   WorkspaceEdge,
   WorkspaceNode,
   UrlTemplate,
@@ -20,7 +20,7 @@ import { createWorkspaceState, type IndexpatternDatasource } from '../../state_m
 
 describe('serialize', () => {
   let appState: {
-    workspace: Workspace;
+    workspace: RuntimeWorkspace;
     urlTemplates: UrlTemplate[];
     advancedSettings: AdvancedSettings;
     selectedIndex: IndexpatternDatasource;
@@ -133,7 +133,7 @@ describe('serialize', () => {
           },
         ],
         edges: [] as WorkspaceEdge[],
-      } as Workspace,
+      } as RuntimeWorkspace,
     };
 
     // C is parent of B and D

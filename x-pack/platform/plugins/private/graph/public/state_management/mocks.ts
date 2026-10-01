@@ -14,7 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { GraphStoreDependencies, GraphStore, GraphState, StartGraphListening } from './store';
 import { createRootReducer } from './store';
-import type { Workspace } from '../types';
+import type { RuntimeWorkspace } from '../types';
 
 export interface MockedGraphEnvironment {
   store: GraphStore;
@@ -54,7 +54,7 @@ export function createMockGraphStore({
     getEdgeSelection: jest.fn(() => []),
     options: {},
     blocklistedNodes: [],
-  } as unknown as Workspace;
+  } as unknown as RuntimeWorkspace;
 
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
     ...coreStart,
