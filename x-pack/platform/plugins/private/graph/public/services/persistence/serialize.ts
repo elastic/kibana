@@ -14,7 +14,7 @@ import type {
   WorkspaceField,
   GraphWorkspaceSavedObject,
   SerializedWorkspaceState,
-  RuntimeWorkspace,
+  RuntimeGraph,
   AdvancedSettings,
   SerializedNode,
   BlockListedNode,
@@ -109,7 +109,7 @@ export function appStateToSavedWorkspace(
     selectedIndex,
     selectedFields,
   }: {
-    workspace: RuntimeWorkspace;
+    workspace: RuntimeGraph;
     urlTemplates: UrlTemplate[];
     advancedSettings: AdvancedSettings;
     selectedIndex: IndexpatternDatasource;

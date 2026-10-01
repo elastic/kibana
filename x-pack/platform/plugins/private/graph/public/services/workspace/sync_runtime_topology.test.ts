@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { RuntimeWorkspace } from '../../types/workspace_state';
+import type { RuntimeGraph } from '../../types/workspace_state';
 import type { WorkspaceState } from '../../state_management/workspace';
 import { syncRuntimeTopology } from './sync_runtime_topology';
 
 it('rebuilds mutable runtime references from normalized Redux topology', () => {
-  const workspace = {} as RuntimeWorkspace;
+  const workspace = {} as RuntimeGraph;
   const layoutController = {
     start: jest.fn(),
     stop: jest.fn(),

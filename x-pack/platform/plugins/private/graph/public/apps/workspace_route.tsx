@@ -15,16 +15,16 @@ import type {
   SearchRequest,
   SearchResults,
   TermIntersect,
-  RuntimeWorkspace,
+  RuntimeGraph,
   WorkspaceNode,
 } from '../types';
 import {
   createGraphStore,
-  createWorkspaceState,
+  createRuntimeGraphState,
   workspaceRuntimeChanged,
   type GraphStore,
 } from '../state_management';
-import { createWorkspace } from '../services/workspace/runtime_workspace';
+import { createRuntimeGraph } from '../services/workspace/runtime_graph';
 import { GraphLayoutController } from '../services/workspace/graph_layout_controller';
 import { mergeRuntimeGraph as applyRuntimeGraphMerge } from '../services/workspace/runtime_graph_merge';
 import { ReduxLayoutTopology } from '../services/workspace/redux_layout_topology';
@@ -66,7 +66,7 @@ export const WorkspaceRoute = ({
   },
 }: WorkspaceRouteProps) => {
   // D3 continues to own a mutable runtime workspace while serializable graph state lives in Redux.
-  const workspaceRef = useRef<RuntimeWorkspace>();
+  const runtimeGraphRef = useRef<RuntimeGraph>();
   const layoutControllerRef = useRef<GraphLayoutController>();
   const storeRef = useRef<GraphStore>();
   const runtimeSequenceRef = useRef(0);
@@ -113,7 +113,7 @@ export const WorkspaceRoute = ({
   );
 
   const getMergeCandidates = async (nodes: WorkspaceNode[]): Promise<TermIntersect[]> => {
-    const workspace = workspaceRef.current;
+    const workspace = runtimeGraphRef.current;
     const datasource = storeRef.current?.getState().datasource.current;
     if (!workspace || !datasource || datasource.type === 'none') return [];
     const indexName = datasource.title;
@@ -126,7 +126,7 @@ export const WorkspaceRoute = ({
   };
 
   const mergeRuntimeGraph = (
-    workspace: RuntimeWorkspace,
+    workspace: RuntimeGraph,
     graph: Parameters<typeof applyRuntimeGraphMerge>[1]
   ) => {
     runtimeSequenceRef.current = applyRuntimeGraphMerge(
@@ -138,11 +138,11 @@ export const WorkspaceRoute = ({
   };
 
   const notifyWorkspaceChanged = () => {
-    const workspace = workspaceRef.current;
+    const workspace = runtimeGraphRef.current;
     if (workspace) {
       storeRef.current?.dispatch(
         workspaceRuntimeChanged(
-          createWorkspaceState(workspace, layoutControllerRef.current?.isRunning())
+          createRuntimeGraphState(workspace, layoutControllerRef.current?.isRunning())
         )
       );
     }
@@ -153,12 +153,12 @@ export const WorkspaceRoute = ({
       basePath: getBasePath(),
       addBasePath,
       indexPatternProvider,
-      createWorkspace: (indexPattern, exploreControls) => {
+      createRuntimeGraph: (indexPattern, exploreControls) => {
         layoutControllerRef.current?.stop();
         runtimeSequenceRef.current = 0;
         const layoutTopology = new ReduxLayoutTopology({
           getState: () => storeRef.current?.getState(),
-          getWorkspace: () => workspaceRef.current,
+          getWorkspace: () => runtimeGraphRef.current,
         });
         const layoutController = new GraphLayoutController({
           getNodes: () => layoutTopology.getNodes(),
@@ -166,10 +166,10 @@ export const WorkspaceRoute = ({
           onTick: notifyWorkspaceChanged,
         });
         layoutControllerRef.current = layoutController;
-        const createdWorkspace = (workspaceRef.current = createWorkspace());
+        const createdWorkspace = (runtimeGraphRef.current = createRuntimeGraph());
         return createdWorkspace;
       },
-      getWorkspace: () => workspaceRef.current,
+      getWorkspace: () => runtimeGraphRef.current,
       getLayoutController: () => layoutControllerRef.current,
       savePolicy: graphSavePolicy,
       contentClient,
@@ -185,7 +185,7 @@ export const WorkspaceRoute = ({
   storeRef.current = store;
 
   const loaded = useWorkspaceLoader({
-    workspaceRef,
+    runtimeGraphRef,
     store,
     contentClient,
     spaces,
@@ -205,7 +205,7 @@ export const WorkspaceRoute = ({
         <WorkspaceLayout
           spaces={spaces}
           sharingSavedObjectProps={sharingSavedObjectProps}
-          workspace={workspaceRef.current}
+          workspace={runtimeGraphRef.current}
           loading={loading}
           graphSavePolicy={graphSavePolicy}
           capabilities={capabilities}

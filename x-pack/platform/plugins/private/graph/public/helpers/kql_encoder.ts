@@ -7,7 +7,7 @@
 
 import rison from '@kbn/rison';
 
-import type { RuntimeWorkspace, WorkspaceNode } from '../types';
+import type { RuntimeGraph, WorkspaceNode } from '../types';
 import { unpackGroupedNodes } from '../services/workspace/runtime_grouping';
 
 function escapeQuotes(str: string) {
@@ -15,7 +15,7 @@ function escapeQuotes(str: string) {
 }
 
 export function getSelectedOrAllNodes(
-  workspace: RuntimeWorkspace,
+  workspace: RuntimeGraph,
   selectedNodeIds: readonly string[]
 ): WorkspaceNode[] {
   if (selectedNodeIds.length === 0) {
@@ -28,7 +28,7 @@ export function getSelectedOrAllNodes(
 }
 
 export function asKQL(
-  workspace: RuntimeWorkspace,
+  workspace: RuntimeGraph,
   selectedNodeIds: readonly string[],
   joinBy: 'and' | 'or'
 ) {

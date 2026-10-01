@@ -8,7 +8,7 @@
 import rison from '@kbn/rison';
 
 import { i18n } from '@kbn/i18n';
-import type { RuntimeWorkspace } from '../types';
+import type { RuntimeGraph } from '../types';
 import { asKQL, getSelectedOrAllNodes } from './kql_encoder';
 import { buildLikeThisButNotThisQuery, buildWorkspaceQuery } from './outlink_queries';
 
@@ -16,7 +16,7 @@ export interface OutlinkEncoder {
   id: string;
   title: string;
   description: string;
-  encode: (workspace: RuntimeWorkspace, selectedNodeIds: readonly string[]) => string;
+  encode: (workspace: RuntimeGraph, selectedNodeIds: readonly string[]) => string;
   type: 'kql' | 'lucene' | 'plain' | 'esq';
 }
 

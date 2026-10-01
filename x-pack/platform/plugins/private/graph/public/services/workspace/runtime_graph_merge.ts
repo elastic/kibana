@@ -7,7 +7,7 @@
 
 import type {
   GraphData,
-  RuntimeWorkspace,
+  RuntimeGraph,
   WorkspaceLayoutController,
 } from '../../types/workspace_state';
 import {
@@ -18,7 +18,7 @@ import {
 } from './graph_merge_planner';
 
 export const mergeRuntimeGraph = (
-  workspace: RuntimeWorkspace,
+  workspace: RuntimeGraph,
   graph: GraphData,
   initialSequence: number,
   layoutController: WorkspaceLayoutController

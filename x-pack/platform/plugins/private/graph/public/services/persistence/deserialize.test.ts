@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { GraphWorkspaceSavedObject, RuntimeWorkspace } from '../../types';
+import type { GraphWorkspaceSavedObject, RuntimeGraph } from '../../types';
 import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
-import { createWorkspace } from '../workspace/runtime_workspace';
+import { createRuntimeGraph } from '../workspace/runtime_graph';
 import { GraphLayoutController } from '../workspace/graph_layout_controller';
 import { mergeRuntimeGraph } from '../workspace/runtime_graph_merge';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
@@ -15,7 +15,7 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
-  let workspace: RuntimeWorkspace;
+  let workspace: RuntimeGraph;
   let layoutController: GraphLayoutController;
   let runtimeSequence: number;
 
@@ -121,7 +121,7 @@ describe('deserialize', () => {
       getNodes: () => workspace?.nodes ?? [],
       getEdges: () => workspace?.edges ?? [],
     });
-    workspace = createWorkspace();
+    workspace = createRuntimeGraph();
   });
 
   function callSavedWorkspaceToAppState() {
