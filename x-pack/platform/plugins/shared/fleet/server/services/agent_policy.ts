@@ -151,7 +151,6 @@ import {
 import { bulkInstallPackages, getPackageInfo } from './epm/packages';
 import { runWithCache } from './epm/packages/cache';
 import { ensureInstalledPackage } from './epm/packages/install';
-import { pkgToPkgKey } from './epm/registry';
 import { unenrollForAgentPolicyId } from './agents';
 import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
 import {
@@ -1328,14 +1327,12 @@ class AgentPolicyService {
     minAgentVersion: string | undefined;
     packageAgentVersionConditions: AgentPolicyAgentVersionCondition[] | undefined;
   }> {
-    // `getPackageInfo` only reuses results inside a `runWithCache` ALS session. Sync agent-policy
-    // updates (unlike deploy/bump tasks) historically did not open one, so every package policy
-    // paid a full EPM lookup. Wrap here so the shared LRU applies, and also dedupe by pkg key
-    // below so we never issue more than one lookup per distinct package:version in this pass.
+    // `getPackageInfo` only reuses results inside a `runWithCache` ALS session, including failed
+    // lookups. Sync agent-policy updates (unlike deploy/bump tasks) historically did not open one,
+    // so every package policy paid a full EPM lookup.
     return runWithCache(async () => {
       const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, policyId);
 
-      const versionConditionByPkgKey = new Map<string, string | undefined>();
       const conditions: AgentPolicyAgentVersionCondition[] = [];
       for (const pp of packagePolicies) {
         let versionCondition = pp.package_agent_version_condition;
@@ -1343,22 +1340,17 @@ class AgentPolicyService {
         // For package policies created before this field was introduced, fall back
         // to looking up the installed package info to get the version condition.
         if (!versionCondition && pp.package?.name && pp.package?.version) {
-          const pkgKey = pkgToPkgKey(pp.package);
-          if (!versionConditionByPkgKey.has(pkgKey)) {
-            try {
-              const pkgInfo = await getPackageInfo({
-                savedObjectsClient: soClient,
-                pkgName: pp.package.name,
-                pkgVersion: pp.package.version,
-                prerelease: true,
-              });
-              versionConditionByPkgKey.set(pkgKey, pkgInfo.conditions?.agent?.version);
-            } catch {
-              // ignore — package might not be installed or accessible
-              versionConditionByPkgKey.set(pkgKey, undefined);
-            }
+          try {
+            const pkgInfo = await getPackageInfo({
+              savedObjectsClient: soClient,
+              pkgName: pp.package.name,
+              pkgVersion: pp.package.version,
+              prerelease: true,
+            });
+            versionCondition = pkgInfo.conditions?.agent?.version;
+          } catch {
+            // ignore — package might not be installed or accessible
           }
-          versionCondition = versionConditionByPkgKey.get(pkgKey);
         }
 
         if (versionCondition) {

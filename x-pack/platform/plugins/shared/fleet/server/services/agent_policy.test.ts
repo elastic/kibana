@@ -1209,17 +1209,11 @@ describe('Agent policy', () => {
       );
     });
 
-    it('should look up package info once per unique package when version conditions are missing', async () => {
+    it('should fall back to package info when version conditions are missing', async () => {
       const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      // Simulate ~1000 same-package policies (Synthetics private location) missing the denormalized
-      // field. getPackageInfo is intentionally slow so the test doubles as a micro-benchmark:
-      // without dedupe this would be ~5s; with dedupe it stays near one lookup.
-      const LOOKUP_MS = 50;
-      const PACKAGE_POLICY_COUNT = 100;
       jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
-        await new Promise((resolve) => setTimeout(resolve, LOOKUP_MS));
         return {
           name: pkgName,
           version: pkgVersion,
@@ -1228,19 +1222,21 @@ describe('Agent policy', () => {
         } as any;
       });
 
-      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue(
-        Array.from({ length: PACKAGE_POLICY_COUNT }, (_, i) => ({
-          id: `pp-${i}`,
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        {
+          id: 'pp-1',
           package: { name: 'synthetics', title: 'Synthetics', version: '1.8.0' },
           package_agent_version_condition: undefined,
-        })) as any
-      );
+        },
+        {
+          id: 'pp-2',
+          package: { name: 'synthetics', title: 'Synthetics', version: '1.8.0' },
+          package_agent_version_condition: undefined,
+        },
+      ] as any);
 
-      const started = Date.now();
       await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
-      const elapsedMs = Date.now() - started;
 
-      expect(getPackageInfo).toHaveBeenCalledTimes(1);
       expect(getPackageInfo).toHaveBeenCalledWith(
         expect.objectContaining({
           pkgName: 'synthetics',
@@ -1263,12 +1259,9 @@ describe('Agent policy', () => {
           ]),
         })
       );
-      // Sequential N lookups would be PACKAGE_POLICY_COUNT * LOOKUP_MS (~5s). Allow headroom for
-      // SO work but fail loudly if the dedupe regresses.
-      expect(elapsedMs).toBeLessThan(PACKAGE_POLICY_COUNT * LOOKUP_MS * 0.25);
     });
 
-    it('should look up package info once per distinct package version in the fallback path', async () => {
+    it('should collect version conditions from each distinct package in the fallback path', async () => {
       const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -1300,7 +1293,25 @@ describe('Agent policy', () => {
 
       await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
 
-      expect(getPackageInfo).toHaveBeenCalledTimes(2);
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({
+          has_agent_version_conditions: true,
+          package_agent_version_conditions: expect.arrayContaining([
+            {
+              name: 'synthetics',
+              title: 'Synthetics',
+              version_condition: '>=8.12.0',
+            },
+            {
+              name: 'apache',
+              title: 'Apache',
+              version_condition: '>=9.0.0',
+            },
+          ]),
+        })
+      );
     });
 
     it('should not fetch full package policies when deploying asynchronously', async () => {
