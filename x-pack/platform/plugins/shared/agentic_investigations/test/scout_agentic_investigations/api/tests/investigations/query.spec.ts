@@ -320,6 +320,36 @@ apiTest.describe(
       expect(response.body).toStrictEqual({ low: 1, medium: 0, high: 1, critical: 1 });
     });
 
+    apiTest('reads the requested ids', async ({ apiClient }) => {
+      const response = await list(apiClient, `id=${highId}&id=${lowId}&per_page=100`);
+
+      expect(response).toHaveStatusCode(200);
+      expect((response.body as ListBody).results.map(({ id }) => id).sort()).toStrictEqual(
+        [highId, lowId].sort()
+      );
+    });
+
+    apiTest(
+      'matches investigations without a severity for severity=none',
+      async ({ apiClient }) => {
+        const unratedId = await seedInvestigation(apiClient, cookieHeader, {
+          title: `${RUN}-unrated question`,
+          metadata: { status: 'open', summary: `${RUN}-unrated summary` },
+          impactEntities: [{ id: `${RUN}-unrated-entity` }],
+        });
+        try {
+          const unrated = await list(apiClient, `query=${RUN}-unrated&severity=none`);
+          expect(unrated).toHaveStatusCode(200);
+          expect((unrated.body as ListBody).results.map(({ id }) => id)).toStrictEqual([unratedId]);
+
+          const rated = await list(apiClient, `query=${RUN}&severity=none&per_page=100`);
+          expect((rated.body as ListBody).results.map(({ id }) => id)).toStrictEqual([unratedId]);
+        } finally {
+          await deleteConversations(apiClient, [unratedId], cookieHeader);
+        }
+      }
+    );
+
     apiTest('returns 400 for an out-of-range page size', async ({ apiClient }) => {
       const response = await list(apiClient, 'per_page=101');
 
