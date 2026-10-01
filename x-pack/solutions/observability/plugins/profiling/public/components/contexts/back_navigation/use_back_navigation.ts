@@ -10,7 +10,7 @@ import type { AppHeaderBack } from '@kbn/app-header';
 import { useLocation } from 'react-router-dom';
 import type { PathsOf } from '@kbn/typed-react-router-config';
 import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
-import { hasProfilingData } from '../profiling_status/has_profiling_data';
+import { hasProfilingData } from '../../../utils/has_profiling_data';
 import { useProfilingStatus } from '../profiling_status/use_profiling_status';
 import type { ProfilingRoutes } from '../../../routing';
 

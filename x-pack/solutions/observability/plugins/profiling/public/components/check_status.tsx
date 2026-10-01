@@ -12,7 +12,7 @@ import { AsyncStatus } from '../hooks/use_async';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { AddDataTabs } from '../views/add_data_view/types';
 import { useLicenseContext } from './contexts/license/use_license_context';
-import { hasProfilingData } from './contexts/profiling_status/has_profiling_data';
+import { hasProfilingData } from '../utils/has_profiling_data';
 import { useProfilingStatus } from './contexts/profiling_status/use_profiling_status';
 import { LicensePrompt } from './license_prompt';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
