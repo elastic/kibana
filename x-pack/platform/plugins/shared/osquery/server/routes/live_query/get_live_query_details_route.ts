@@ -120,7 +120,11 @@ export const getLiveQueryDetailsRoute = (
             )
           );
 
-          const queries = actionDetails?._source?.queries;
+          if (!actionDetails?._source) {
+            return response.notFound({ body: { message: 'Action not found' } });
+          }
+
+          const queries = actionDetails._source.queries;
           const expirationDate = actionDetails?.fields?.expiration?.[0];
 
           const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
