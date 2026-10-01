@@ -47,7 +47,7 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
       const response = await apiClient.post(getAssignEpisodeActionUrl(episodeId), {
@@ -82,7 +82,7 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
       const response = await apiClient.post(getAssignEpisodeActionUrl(episodeId), {
@@ -124,13 +124,13 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           status: 'recovered',
-          episode: { id: olderEpisodeId, status: 'inactive' },
+          alert: { id: olderEpisodeId, status: 'inactive' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
 
