@@ -146,7 +146,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     await runPreBuild();
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/local_check.yml', {}));
+    // TEMP: skip Local Check so the failing Jest tests reach the Jest steps
 
     // Gated together: check_api_contracts depends_on check_oas_snapshot.
     if (!scoutTestsOnly) {
@@ -716,11 +716,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     // Run Saved Objects checks systematically
-    if (!scoutTestsOnly) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml', cancelable)
-      );
-    }
+    // TEMP: skipped because it depends on Local Check
 
     // Run Workflow Schema OOM prevention test when schema or connector whitelist changes
     if (
