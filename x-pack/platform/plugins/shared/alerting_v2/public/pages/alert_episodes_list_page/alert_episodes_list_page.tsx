@@ -400,6 +400,7 @@ const AlertEpisodesListPageContent = () => {
           spaces: services.spaces,
           queryClient,
           additionalDataSource,
+          isRuleAvailable: (ruleId) => Boolean(rulesCache[ruleId]),
           getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
             getDiscoverHrefForRuleAndEpisodeTimestamp({
               share: services.share,
