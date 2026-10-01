@@ -6,12 +6,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TAG_LENGTH } from '@kbn/alerting-v2-constants';
 import { MAX_KQL_LENGTH } from './constants';
 
 /** Maximum number of tags that can be set on a policy matcher. */
 export const POLICY_MATCHER_TAGS_MAX = 50;
-/** Maximum character length of each tag in a policy matcher. */
-export const POLICY_MATCHER_TAG_MAX_LENGTH = 256;
+/**
+ * Matcher tags are compared against rule tags, so a longer one could never
+ * match anything.
+ */
+export const POLICY_MATCHER_TAG_MAX_LENGTH = MAX_TAG_LENGTH;
 
 export const POLICY_MATCHER_TAGS_DESCRIPTION =
   'Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.';

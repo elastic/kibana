@@ -20,8 +20,8 @@ const mockAttrs: ActionPolicySavedObjectAttributes = {
   apiKey: 'test-api-key',
   apiKeyOwner: 'test-user',
   apiKeyCreatedByUser: false,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
+  updatedBy: { profile_uid: 'elastic' },
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
 };

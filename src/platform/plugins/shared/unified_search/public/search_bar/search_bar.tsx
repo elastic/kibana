@@ -514,13 +514,16 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       return;
     }
 
-    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER;
+    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER | QuerySource.QUICK_SEARCH;
     switch (trigger) {
       case QuerySubmitTrigger.QUERY_BAR_SUBMIT:
         source = QuerySource.SEARCH_BUTTON;
         break;
       case QuerySubmitTrigger.TIME_FILTER:
         source = QuerySource.TIME_FILTER;
+        break;
+      case QuerySubmitTrigger.QUICK_SEARCH:
+        source = QuerySource.QUICK_SEARCH;
         break;
       default:
         return;

@@ -153,6 +153,11 @@ input of the step:
 }
 ```
 
+In a conversation, the grant can widen when a delegating agent requests destructive APIs for a
+sub-agent through `run_subagent`, and the user is asked once to approve them before it starts. That
+approval covers only the delegated execution, so a sub-agent can hold access the parent run was not
+configured with, though never more than the delegating user could exercise themselves.
+
 ### Error handling
 
 All agentBuilder errors inherit from the `AgentBuilderError` error type. Various error utilities

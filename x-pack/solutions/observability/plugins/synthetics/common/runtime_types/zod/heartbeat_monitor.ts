@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-
-/** Twin of `../heartbeat_monitor.ts` `MonitorOriginCodec`. */
-export const MonitorOriginCodec = z.literal('heartbeat');
+export { MonitorOriginCodec } from '../heartbeat_monitor';

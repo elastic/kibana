@@ -124,11 +124,13 @@ export interface SemconvPodFixture {
   name: string;
   nodeName: string;
   withoutLimits?: boolean;
+  /** Pod has kubeletstats cpu and network docs, and no memory fields. */
+  omitMemory?: boolean;
   interfaces?: string[];
 }
 
 export const SEMCONV_PODS: SemconvPodFixture[] = [
-  { uid: 'semconv-pod-0', name: 'semconv-pod-0', nodeName: SEMCONV_HOST1_NAME },
+  { uid: 'semconv-pod-0-uid', name: 'semconv-pod-0', nodeName: SEMCONV_HOST1_NAME },
   {
     uid: 'semconv-pod-1-uid',
     name: 'semconv-pod-1',
