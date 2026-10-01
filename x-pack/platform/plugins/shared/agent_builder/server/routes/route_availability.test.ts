@@ -74,4 +74,14 @@ describe('Agent Builder public route availability', () => {
       ).toEqual({ stability: 'stable', since: '9.6.0' });
     });
   });
+
+  describe('conversation events', () => {
+    it('marks the add events route as tech preview', () => {
+      const availabilities = captureRouteAvailability(registerConversationRoutes);
+
+      expect(
+        availabilities.get(`POST ${publicApiPath}/conversations/{conversation_id}/_add_events`)
+      ).toEqual({ stability: 'tech_preview', since: '9.6.0' });
+    });
+  });
 });
