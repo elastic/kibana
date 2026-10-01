@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { sanitizeImageDataUrl } from '@kbn/content-sanitization';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
-import { sanitizeImageDataUrl } from '@kbn/fs';
 import { isValidUserProfileAvatarColor } from '@kbn/user-profile-components';
 import type { DotKeysOf } from '@kbn/utility-types';
 

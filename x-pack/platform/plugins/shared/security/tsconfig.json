@@ -26,7 +26,7 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/es-query",
     "@kbn/features-plugin",
-    "@kbn/fs",
+    "@kbn/content-sanitization",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",

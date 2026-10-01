@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-export {
-  writeFile,
-  writeFileSync,
-  appendFile,
-  appendFileSync,
-  createWriteStream,
-  readFile,
-  readFileSync,
-  createReadStream,
-  deleteFile,
-  deleteFileSync,
-} from './lib';
-
-export { getSafePath } from './utils';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-content-sanitization'],
+};

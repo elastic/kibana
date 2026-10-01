@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
+import { sanitizeImageDataUrl } from '@kbn/content-sanitization';
 import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
@@ -21,7 +22,6 @@ import type { INpreClient } from '@kbn/cps/server/npre';
 import { getSpaceDefaultNpreName, PROJECT_ROUTING } from '@kbn/cps-common';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { sanitizeImageDataUrl } from '@kbn/fs';
 
 import { isReservedSpace } from '../../common';
 import type { InitialSolutionSetupView, spaceV1 as v1 } from '../../common';

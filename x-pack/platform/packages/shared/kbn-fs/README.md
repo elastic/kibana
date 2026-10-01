@@ -16,7 +16,7 @@ This package provides a limited set of file system functions (no `openSync`, `mk
 - **Path Traversal Protection**: Prevents directory traversal attacks (e.g., `../` attempts)
 - **File Type Validation**: Only allows specific file extensions and MIME types
 - **File Size Limits**: Enforces maximum file size (1GB)
-- **Content Sanitization**: Automatically sanitizes SVG files
+- **Content Sanitization**: Automatically sanitizes SVG files (via `@kbn/content-sanitization`)
 - **Volume Support**: Organize files into subdirectories using volumes
 
 ## Usage
@@ -88,20 +88,6 @@ import { appendFile, appendFileSync } from '@kbn/fs';
 
 await appendFile('log.txt', 'new log entry\n');
 appendFileSync('log.txt', 'another entry\n');
-```
-
-### Sanitizing SVG content outside the file system
-
-The SVG sanitizer used by `writeFile` is also exported for SVG content that is persisted elsewhere,
-such as avatar images stored as `data:` URLs in saved objects or user profiles:
-
-```typescript
-import { sanitizeSvg, sanitizeImageDataUrl } from '@kbn/fs';
-
-const cleanSvg = sanitizeSvg(Buffer.from(svgString));
-
-// Returns non-SVG values unchanged; re-encodes SVG data URLs as sanitized base64.
-const cleanImageUrl = sanitizeImageDataUrl(space.imageUrl);
 ```
 
 ## When NOT to Use This Package
