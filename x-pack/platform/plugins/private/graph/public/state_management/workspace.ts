@@ -696,7 +696,9 @@ export const registerWorkspaceListeners = (
           fields
         );
         listenerApi.throwIfCancelled();
-        mergeRuntimeGraph(runtimeGraph, { nodes: topTermNodes, edges: [] });
+        const graph = { nodes: topTermNodes, edges: [] };
+        listenerApi.dispatch(workspaceGraphMerged(graph));
+        mergeRuntimeGraph(runtimeGraph, graph);
         listenerApi.dispatch(initializeWorkspace());
         notifyReact();
         listenerApi.dispatch(fillWorkspaceConnections(fields.length * 10));

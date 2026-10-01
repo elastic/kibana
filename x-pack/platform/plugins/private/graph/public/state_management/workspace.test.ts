@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import type { RuntimeGraph, WorkspaceField, WorkspaceNode } from '../types';
+import type {
+  GraphWorkspaceSavedObject,
+  RuntimeGraph,
+  WorkspaceField,
+  WorkspaceNode,
+} from '../types';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
 import { setDatasource } from './datasource';
-import { loadFields } from './fields';
+import { loadFields, selectedFieldsSelector } from './fields';
 import { fillWorkspace } from './persistence';
 import { createMockGraphStore } from './mocks';
+import { reduxStateToSavedWorkspace } from '../services/persistence/serialize';
 import {
   blocklistSelectedNodes,
   clearNodeSelection,
@@ -490,6 +496,47 @@ describe('workspace listeners', () => {
       expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
       expect(environment.mockedDeps.notifyReact).toHaveBeenCalled();
       expect(environment.mockedDeps.searchGraph).toHaveBeenCalled();
+    });
+
+    it('keeps fetched top-term nodes in Redux when connection filling fails', async () => {
+      const environment = createRuntimeGraphListenerEnvironment();
+      const nodes = [{ field: 'field-name', term: 'top-term' }];
+      (fetchTopNodes as jest.Mock).mockResolvedValue(nodes);
+      environment.mockedDeps.searchGraph.mockRejectedValue(new Error('connection failure'));
+
+      environment.store.dispatch(fillWorkspace());
+      await flushPromises();
+
+      const { workspace } = environment.store.getState();
+      expect(workspace.nodeIds).toEqual(['field-name..top-term']);
+      expect(workspace.nodesById['field-name..top-term']).toMatchObject({
+        data: { field: 'field-name', term: 'top-term' },
+      });
+      expect(environment.workspace.mergeGraph).toHaveBeenCalledWith({ nodes, edges: [] });
+      expect(environment.mockedDeps.handleSearchQueryError).toHaveBeenCalledWith(
+        new Error('connection failure')
+      );
+
+      const savedWorkspace = { wsState: '' } as GraphWorkspaceSavedObject;
+      const selectedIndex = environment.store.getState().datasource.current;
+      if (selectedIndex.type === 'none') {
+        throw new Error('Expected an index-pattern datasource');
+      }
+      reduxStateToSavedWorkspace(
+        savedWorkspace,
+        {
+          workspace,
+          urlTemplates: environment.store.getState().urlTemplates,
+          advancedSettings: environment.store.getState().advancedSettings,
+          selectedIndex,
+          selectedFields: selectedFieldsSelector(environment.store.getState()),
+        },
+        true
+      );
+      expect(savedWorkspace.numVertices).toBe(1);
+      expect(JSON.parse(savedWorkspace.wsState).vertices).toEqual([
+        expect.objectContaining({ field: 'field-name', term: 'top-term' }),
+      ]);
     });
 
     it('does not apply a stale response after a newer request', async () => {
