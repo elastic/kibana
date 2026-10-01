@@ -35,6 +35,7 @@ export const FLEET_AND_HOST_TIMEOUT_MS = 600_000;
 export interface EnrolledEndpoint {
   agentId: string;
   hostname: string;
+  packagePolicyId: string;
 }
 
 /**
@@ -153,6 +154,7 @@ export const withEnrolledEndpoint = async (
     await use({
       agentId: host.agentId,
       hostname: host.hostname,
+      packagePolicyId: policy.id,
     });
   } finally {
     if (created.host) {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import { getEndpointArtifactsApiService, PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -16,11 +18,16 @@ import { apiTest } from '../fixtures';
 
 const TRUSTED_APPS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
 /**
- * Packager interval is 60s, then the enrolled agent has to check in and
- * report the new applied revision.
+ * `edr_real_fleet` sets `packagerTaskInterval` to 5s. The host then has to
+ * check in and report the applied revision.
  */
+const PACKAGER_INTERVAL_MS = 5_000;
+/** Three packager ticks with no change, so a bump already queued by enrollment is not the write. */
+const STABLE_REVISION_MS = 15_000;
+const SETTLE_TIMEOUT_MS = 60_000;
+const PACKAGE_POLICY_REVISION_TIMEOUT_MS = 60_000;
 const APPLIED_REVISION_TIMEOUT_MS = 180_000;
-const TEST_TIMEOUT_MS = 10 * 60 * 1000;
+const TEST_TIMEOUT_MS = 12 * 60 * 1000;
 
 const TRUSTED_APP_ENTRIES = [
   {
@@ -43,7 +50,28 @@ const TRUSTED_APP_ENTRIES = [
   },
 ];
 
-const waitForAppliedRevisionAbove = async (
+const waitForStablePackagePolicyRevision = async (read: () => Promise<number>): Promise<number> => {
+  let current = await read();
+  let stableSince = Date.now();
+  const deadline = Date.now() + SETTLE_TIMEOUT_MS;
+
+  while (Date.now() < deadline) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, PACKAGER_INTERVAL_MS);
+    });
+    const next = await read();
+    if (next !== current) {
+      current = next;
+      stableSince = Date.now();
+    } else if (Date.now() - stableSince >= STABLE_REVISION_MS) {
+      return current;
+    }
+  }
+
+  throw new Error(`endpoint package policy revision did not settle at ${current}`);
+};
+
+const waitForPackagePolicyRevisionAbove = async (
   read: () => Promise<number>,
   current: number
 ): Promise<number> => {
@@ -55,12 +83,34 @@ const waitForAppliedRevisionAbove = async (
         return observed;
       },
       {
-        timeout: APPLIED_REVISION_TIMEOUT_MS,
-        intervals: [5_000],
-        message: `enrolled host applied revision did not increase past ${current}`,
+        timeout: PACKAGE_POLICY_REVISION_TIMEOUT_MS,
+        intervals: [PACKAGER_INTERVAL_MS],
+        message: `endpoint package policy revision did not increase past ${current}`,
       }
     )
     .toBeGreaterThan(current);
+
+  return observed;
+};
+
+const waitForAppliedRevisionAtLeast = async (
+  read: () => Promise<number>,
+  minimum: number
+): Promise<number> => {
+  let observed = 0;
+  await expect
+    .poll(
+      async () => {
+        observed = await read();
+        return observed;
+      },
+      {
+        timeout: APPLIED_REVISION_TIMEOUT_MS,
+        intervals: [PACKAGER_INTERVAL_MS],
+        message: `enrolled host applied revision did not reach ${minimum}`,
+      }
+    )
+    .toBeGreaterThanOrEqual(minimum);
 
   return observed;
 };
@@ -86,7 +136,15 @@ apiTest.describe(
           ...PUBLIC_API_HEADERS,
         };
 
-        const read = async () => {
+        const readPackagePolicyRevision = async () => {
+          const response = await apiClient.get(
+            packagePolicyRouteService.getInfoPath(enrolledEndpoint.packagePolicyId),
+            { headers, responseType: 'json' }
+          );
+          expect(response).toHaveStatusCode(200);
+          return (response.body as GetOnePackagePolicyResponse).item.revision;
+        };
+        const readAppliedRevision = async () => {
           const response = await apiClient.get(
             HOST_METADATA_GET_ROUTE.replace('{id}', enrolledEndpoint.agentId),
             { headers, responseType: 'json' }
@@ -95,7 +153,8 @@ apiTest.describe(
           const body = response.body as HostInfo;
           return Number(body.metadata.Endpoint.policy.applied.endpoint_policy_version);
         };
-        const baseline = await read();
+
+        const baseline = await waitForStablePackagePolicyRevision(readPackagePolicyRevision);
 
         const createListResponse = await apiClient.post('/api/exception_lists', {
           headers,
@@ -125,18 +184,36 @@ apiTest.describe(
           },
         });
         expect(createItemResponse).toHaveStatusCode(200);
+        const itemId = (createItemResponse.body as { item_id: string }).item_id;
+        expect(itemId).toStrictEqual(expect.any(String));
 
-        const afterCreate = await waitForAppliedRevisionAbove(read, baseline);
-        expect(afterCreate).toBeGreaterThan(baseline);
+        const revisionAfterCreate = await waitForPackagePolicyRevisionAbove(
+          readPackagePolicyRevision,
+          baseline
+        );
+        const appliedAfterCreate = await waitForAppliedRevisionAtLeast(
+          readAppliedRevision,
+          revisionAfterCreate
+        );
+        expect(appliedAfterCreate).toBeGreaterThanOrEqual(revisionAfterCreate);
 
         const deleteResponse = await apiClient.delete(
-          `/api/exception_lists?list_id=${TRUSTED_APPS_LIST_ID}&namespace_type=agnostic`,
+          `/api/exception_lists/items?item_id=${encodeURIComponent(
+            itemId
+          )}&namespace_type=agnostic`,
           { headers, responseType: 'json' }
         );
         expect(deleteResponse).toHaveStatusCode(200);
 
-        const afterDelete = await waitForAppliedRevisionAbove(read, afterCreate);
-        expect(afterDelete).toBeGreaterThan(afterCreate);
+        const revisionAfterDelete = await waitForPackagePolicyRevisionAbove(
+          readPackagePolicyRevision,
+          revisionAfterCreate
+        );
+        const appliedAfterDelete = await waitForAppliedRevisionAtLeast(
+          readAppliedRevision,
+          revisionAfterDelete
+        );
+        expect(appliedAfterDelete).toBeGreaterThanOrEqual(revisionAfterDelete);
       }
     );
   }
