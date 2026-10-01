@@ -781,7 +781,12 @@ export class NightshiftInvestigationsClient {
         ...toSubjectFields({ type: 'manual', id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID }),
         trigger_type: 'manual',
         created_at: new Date().toISOString(),
-        conversation_id: uuidv5(`conversation/${threadKey}`, SLACK_THREAD_ID_NAMESPACE),
+        // Conversations share one index across spaces, so a thread with an investigation in two
+        // spaces needs a conversation in each.
+        conversation_id: uuidv5(
+          `conversation/${this.getSpaceId()}/${threadKey}`,
+          SLACK_THREAD_ID_NAMESPACE
+        ),
         // The event is recorded below, like on an existing record, so that of two concurrent
         // creates for one event exactly one is told it is new.
         thread: {

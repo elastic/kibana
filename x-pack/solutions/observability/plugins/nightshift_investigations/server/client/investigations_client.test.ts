@@ -1805,6 +1805,22 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     expect(second.conversationId).not.toBe(first.conversationId);
   });
 
+  it('gives the thread a conversation per space, since conversations are shared across spaces', async () => {
+    await makeClient().findOrCreateSlackThread({ ...THREAD, create: true });
+    await makeClient({ spaceIdOverride: 'other-space' }).findOrCreateSlackThread({
+      ...THREAD,
+      create: true,
+    });
+
+    const [first, second] = repository.create.mock.calls.map(([{ id, attributes }]) => ({
+      id,
+      conversationId: attributes.conversation_id,
+    }));
+    // Saved object ids are scoped to their space.
+    expect(second.id).toBe(first.id);
+    expect(second.conversationId).not.toBe(first.conversationId);
+  });
+
   it('records the status message given on create', async () => {
     const result = await makeClient().findOrCreateSlackThread({
       ...THREAD,
