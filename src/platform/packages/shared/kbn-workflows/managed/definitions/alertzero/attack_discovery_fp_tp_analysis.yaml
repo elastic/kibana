@@ -133,11 +133,14 @@ steps:
   # `kibana.alert.uuid`, making `_id` the same value.
   #
   # A required source, so no `on-failure`: a failed search fails the run, which the
-  # review records as `failed`.
+  # review records as `failed`. `ignore_unavailable` is narrower: the alias does
+  # not exist until the first ad-hoc write, and a missing index is an empty hit
+  # set, which `require_attack_discovery` fails with the not-found message.
   - name: load_attack_discovery
     type: elasticsearch.search
     with:
       index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
+      ignore_unavailable: true
       size: 1
       query:
         ids:
@@ -170,11 +173,14 @@ steps:
 
   # Required source: every alert the discovery cites. `found` counts returned hits,
   # not `hits.total`, so a discovery citing more than `size` alerts fails instead of
-  # being judged on a subset.
+  # being judged on a subset. The space's alerts alias is created on first write;
+  # `ignore_unavailable` makes a missing index zero hits, which
+  # `require_cited_alerts` already rejects. A real search error still fails the run.
   - name: load_alerts
     type: elasticsearch.search
     with:
       index: .alerts-security.alerts-{{ workflow.spaceId }}
+      ignore_unavailable: true
       size: 100
       query:
         ids:

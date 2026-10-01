@@ -381,6 +381,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       );
     });
 
+    // The alias is created on the first ad-hoc write. A missing index is an
+    // empty hit set, which `require_attack_discovery` already fails.
+    it('ignores a missing ad-hoc index', () => {
+      expect(loadAttack?.with?.ignore_unavailable).toBe(true);
+    });
+
     // The persisted document is indexed UNDER `kibana.alert.uuid`, so `_id` is the
     // same value and needs no mapping to be queryable.
     it('reads it by the id it was given', () => {
@@ -511,6 +517,12 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
     it('fails the run when a cited alert is missing', () => {
       expect(stepIn('require_cited_alerts')?.type).toBe('workflow.fail');
+    });
+
+    // The alerts alias is created on first write. A missing index is zero hits,
+    // which `require_cited_alerts` already rejects.
+    it('ignores a missing alerts index', () => {
+      expect(stepIn('load_alerts')?.with?.ignore_unavailable).toBe(true);
     });
 
     it.each(['load_entities', 'load_events'] as const)(

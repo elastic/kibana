@@ -149,10 +149,16 @@ steps:
   # It also returns only genuinely new attacks: a re-discovered attack hashes to
   # an existing document, the bulk create 409s, and that document keeps the
   # execution uuid of the run that first found it.
+  #
+  # The alias is installed on the first ad-hoc write, not because the space is
+  # `default`. A run that persisted nothing searches an index that does not
+  # exist. `ignore_unavailable` turns that into an empty hit set; the runner
+  # already treats that as a quiet run.
   - name: fetch_discoveries
     type: elasticsearch.search
     with:
       index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
+      ignore_unavailable: true
       # Ceiling on attacks returned per run, above any realistic per-run volume.
       size: 1000
       query:

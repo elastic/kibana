@@ -307,6 +307,12 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       });
     });
 
+    // The alias is created on the first ad-hoc write. A run that persisted
+    // nothing must search an empty hit set, not fail with index_not_found.
+    it('ignores a missing ad-hoc index', () => {
+      expect(fetch().with?.ignore_unavailable).toBe(true);
+    });
+
     // The run step's `execution_uuid` is written to each persisted document as
     // `kibana.alert.rule.execution.uuid`, so this scopes the query to exactly
     // this run — no time window, so concurrent runs cannot bleed into it.
