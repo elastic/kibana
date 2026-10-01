@@ -52,8 +52,8 @@ const rulesRunSchema = schema.object({
     /**
      * Maximum ES response body size for non-streaming rule queries. Each
      * execution transiently holds roughly 4× this value in heap; size this as
-     * `heap budget / (capacity × 4)`. Defaults to 50mb; `config/serverless.yml`
-     * lowers it to 10mb for Serverless.
+     * `heap budget / (capacity × 4)`. Accepted range is 1kb–200mb; defaults to
+     * 50mb, and `config/serverless.yml` lowers it to 10mb for Serverless.
      *
      * Applies to all non-streaming queries: recovery and data-presence queries
      * always use JSON regardless of the feature flag; the breach query uses JSON
@@ -91,13 +91,13 @@ const rulesSchema = schema.object({
     },
   }),
   /**
-   * Combined rule runs per minute cap across all spaces. Creating enabled rules
-   * or enabling existing rules that would exceed the limit is rejected; creating
-   * disabled rules is always allowed.
+   * Combined rule runs per minute cap across all spaces. Creating enabled rules,
+   * enabling existing rules, or shortening an enabled rule's schedule is rejected
+   * when it would exceed the limit; creating disabled rules is always allowed.
    *
-   * `0` is a freeze mode: creating enabled rules and enabling existing rules are
-   * rejected while existing rules keep running. Defaults to 32000 (v1 hosted
-   * budget); `config/serverless.yml` overrides to 400 for Serverless.
+   * `0` is a freeze mode: those operations are all rejected while existing rules
+   * keep running. Defaults to 32000 (v1 hosted budget); `config/serverless.yml`
+   * overrides to 400 for Serverless.
    */
   maxScheduledPerMinute: schema.number({ defaultValue: 32000, min: 0, max: 32000 }),
   run: rulesRunSchema,
