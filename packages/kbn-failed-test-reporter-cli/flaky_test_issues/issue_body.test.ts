@@ -11,6 +11,8 @@ import {
   flakySuiteIssueTitle,
   readFlakySuiteIssueMetadata,
   renderFlakySuiteIssueBody,
+  renderFlakySuiteIssueComment,
+  type RecordedFlakySuiteIssueMetadata,
 } from './issue_body';
 import { groupIntoSuites } from './suites';
 import { flakyReport, flakyTest, pipelineStats, SUITE_PATH } from './test_fixtures';
@@ -521,5 +523,113 @@ describe('renderFlakySuiteIssueBody', () => {
       'appex-qa-serverless-kibana-scout-tests',
       'kibana-on-merge',
     ]);
+  });
+});
+
+describe('refreshing a suite issue', () => {
+  const previous: RecordedFlakySuiteIssueMetadata = {
+    'suite.filePath': SUITE_PATH,
+    'suite.title': 'Default status alert',
+    'suite.framework': 'playwright',
+    'suite.testIds': ['no-longer-flaky'],
+    'suite.branches': ['9.3'],
+    'suite.pipelines': ['kibana-on-merge', 'appex-qa-stateful-kibana-scout-tests'],
+    'report.generatedAt': '2026-09-08T09:04:41.000Z',
+    'report.count': 3,
+    'report.history': [
+      { generatedAt: '2026-09-07T09:04:41.000Z', builds: 400, failedBuilds: 20 },
+      { generatedAt: '2026-09-08T09:04:41.000Z', builds: 450, failedBuilds: 25 },
+    ],
+  };
+
+  it('keeps the test ids and branches it recorded and moves pipelines it no longer fails on first', () => {
+    const { suite, report } = singleTestReport();
+
+    const metadata = readFlakySuiteIssueMetadata(
+      renderFlakySuiteIssueBody(suite, { report, previous })
+    );
+
+    expect(metadata).toEqual({
+      ...previous,
+      'suite.testIds': [suite.tests[0].testId, 'no-longer-flaky'],
+      'suite.branches': ['main', '9.3'],
+      'suite.pipelines': ['appex-qa-stateful-kibana-scout-tests', 'kibana-on-merge'],
+      'report.generatedAt': '2026-09-09T09:04:41.000Z',
+      'report.count': 4,
+      'report.history': [
+        ...previous['report.history'],
+        { generatedAt: '2026-09-09T09:04:41.000Z', builds: 509, failedBuilds: 49 },
+      ],
+    });
+  });
+
+  it('counts the reports of an issue filed before the count was recorded and caps the history', () => {
+    const { suite, report } = singleTestReport();
+    const history = Array.from({ length: 30 }, (_, day) => ({
+      generatedAt: new Date(Date.UTC(2026, 7, day + 1)).toISOString(),
+      builds: 100,
+      failedBuilds: day,
+    }));
+
+    const metadata = readFlakySuiteIssueMetadata(
+      renderFlakySuiteIssueBody(suite, {
+        report,
+        previous: { ...previous, 'report.count': undefined, 'report.history': history },
+      })
+    );
+
+    expect(metadata?.['report.count']).toBe(31);
+    expect(metadata?.['report.history']).toHaveLength(30);
+    expect(metadata?.['report.history'][0]).toEqual(history[1]);
+    expect(metadata?.['report.history'][29].generatedAt).toBe('2026-09-09T09:04:41.000Z');
+  });
+
+  it("comments with the worst test's numbers, the newest failure and the tests newly flaky", () => {
+    const tests = [
+      flakyTest({ testId: 'no-longer-flaky' }),
+      flakyTest({ testId: 'new', title: 'another test', failedBuilds: 3 }),
+    ];
+    const report = flakyReport(tests);
+    const [suite] = groupIntoSuites(report.flaky);
+
+    expect(renderFlakySuiteIssueComment(suite, { report, previous, reopened: false }))
+      .toMatchInlineSnapshot(`
+      "**Still flaky**, with new failures since the last report. Its worst test failed in 49 / 509 (**10%**) builds over 2–9 Sep 2026.
+
+      - Newest failure: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC
+      - Newly flaky: *another test*
+
+      The issue description has the numbers of this report."
+    `);
+  });
+
+  it('says the issue is reopened and leaves pull request failures out of the newest one', () => {
+    const report = flakyReport([
+      flakyTest({
+        byBranch: [
+          {
+            branch: 'someone:fix-it',
+            builds: 3,
+            failedBuilds: 1,
+            buildFailRate: 1 / 3,
+            lastFailedAt: new Date('2026-09-09T08:00:00.000Z'),
+            lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-pull-request/builds/1',
+          },
+          ...flakyTest().byBranch,
+        ],
+      }),
+    ]);
+    const [suite] = groupIntoSuites(report.flaky);
+
+    const known = { ...previous, 'suite.testIds': [suite.tests[0].testId] };
+
+    expect(renderFlakySuiteIssueComment(suite, { report, previous: known, reopened: true }))
+      .toMatchInlineSnapshot(`
+      "**Failed again after this issue was closed**, reopening it. The test failed in 49 / 509 (**10%**) builds over 2–9 Sep 2026.
+
+      - Newest failure: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC
+
+      The issue description has the numbers of this report."
+    `);
   });
 });

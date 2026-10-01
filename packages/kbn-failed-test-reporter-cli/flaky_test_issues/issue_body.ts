@@ -12,12 +12,14 @@ import type { FlakyTestReport, TestFramework } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   BUILDKITE_ORG_URL,
+  buildkiteJobUrl,
   CATEGORY_LABELS,
   codeBlock,
   collapsed,
   formatBuildLink,
   formatFailedBranches,
   formatDateRange,
+  formatDateTime,
   formatFailedBuilds,
   formatFullFailureMessage,
   formatPercent,
@@ -40,11 +42,15 @@ const MAX_TEST_ROWS = 15;
 const MAX_ERRORS = 4;
 /** GitHub rejects longer issue titles with a 422. */
 const MAX_TITLE_LENGTH = 256;
+/** Report snapshots kept in the metadata, about a month of daily reports. */
+const MAX_REPORT_HISTORY = 30;
 
 export interface FlakySuiteIssueContext {
   report: FlakyTestReport;
   /** Numbers of issues that mention the suite's file without being about it. */
   relatedIssues?: number[];
+  /** Metadata of the issue being refreshed, merged into the new one; absent for a new issue. */
+  previous?: RecordedFlakySuiteIssueMetadata;
 }
 
 /** One report's numbers for the suite's worst test, kept in the body so the history survives. */
@@ -78,6 +84,13 @@ export interface FlakySuiteIssueMetadata {
   'report.history': FlakySuiteReportSnapshot[];
 }
 
+/** What an issue body records; older issues lack some of it. */
+export type RecordedFlakySuiteIssueMetadata = Pick<
+  FlakySuiteIssueMetadata,
+  'suite.filePath' | 'report.history'
+> &
+  Partial<FlakySuiteIssueMetadata>;
+
 const metadataValue = (body: string, key: keyof FlakySuiteIssueMetadata): unknown =>
   getIssueMetadata(body, key, undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);
 
@@ -96,10 +109,7 @@ const stringsOf = (value: unknown): string[] | undefined =>
 /** Suite metadata recorded in an issue body, if the body was written by this reporter. */
 export const readFlakySuiteIssueMetadata = (
   body: string
-):
-  | (Pick<FlakySuiteIssueMetadata, 'suite.filePath' | 'report.history'> &
-      Partial<FlakySuiteIssueMetadata>)
-  | undefined => {
+): RecordedFlakySuiteIssueMetadata | undefined => {
   const filePath = metadataValue(body, 'suite.filePath');
   if (typeof filePath !== 'string') {
     return undefined;
@@ -160,21 +170,64 @@ const failedPipelines = (suite: FlakySuite, { scope }: FlakyTestReport): string[
     )
     .map(({ pipeline }) => pipeline);
 
-/** Metadata of a freshly filed issue. */
+/** `current` followed by the values only `previous` has. */
+const union = (current: readonly string[], previous: readonly string[] = []): string[] => [
+  ...new Set([...current, ...previous]),
+];
+
+/**
+ * Metadata of a freshly filed issue, or of a refreshed one when `previous` is given: the test ids
+ * and branches it recorded are kept, so `/skip` still covers a branch the suite stopped failing on
+ * this week, and pipelines it no longer fails on move first, keeping the latest failure last.
+ */
 export const flakySuiteIssueMetadata = (
   suite: FlakySuite,
-  report: FlakyTestReport
-): FlakySuiteIssueMetadata => ({
-  'suite.filePath': suite.filePath,
-  ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
-  'suite.framework': suite.framework,
-  'suite.testIds': suite.tests.map((test) => test.testId),
-  'suite.branches': failedBranches(suite),
-  'suite.pipelines': failedPipelines(suite, report),
-  'report.generatedAt': report.generatedAt.toISOString(),
-  'report.count': 1,
-  'report.history': [snapshot(suite, report)],
-});
+  report: FlakyTestReport,
+  previous?: RecordedFlakySuiteIssueMetadata
+): FlakySuiteIssueMetadata => {
+  const pipelines = failedPipelines(suite, report);
+  const history = [...(previous?.['report.history'] ?? []), snapshot(suite, report)];
+  return {
+    'suite.filePath': suite.filePath,
+    ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
+    'suite.framework': suite.framework,
+    'suite.testIds': union(
+      suite.tests.map((test) => test.testId),
+      previous?.['suite.testIds']
+    ),
+    'suite.branches': union(failedBranches(suite), previous?.['suite.branches']),
+    'suite.pipelines': [
+      ...(previous?.['suite.pipelines'] ?? []).filter((pipeline) => !pipelines.includes(pipeline)),
+      ...pipelines,
+    ],
+    'report.generatedAt': report.generatedAt.toISOString(),
+    // Issues filed before the count was recorded had one report per snapshot
+    'report.count': previous
+      ? (previous['report.count'] ?? Math.max(previous['report.history'].length, 1)) + 1
+      : 1,
+    'report.history': history.slice(-MAX_REPORT_HISTORY),
+  };
+};
+
+/** The suite's newest failure on a branch of the report scope, pull requests left out. */
+export interface SuiteFailure {
+  at: Date;
+  branch: string;
+  buildUrl?: string;
+  jobId?: string;
+}
+
+export const newestFailure = (suite: FlakySuite): SuiteFailure | undefined => {
+  let newest: SuiteFailure | undefined;
+  for (const test of suite.tests) {
+    for (const { branch, lastFailedAt, lastFailedBuildUrl, lastFailedJobId } of test.byBranch) {
+      if (lastFailedAt && !isPullRequestRef(branch) && (!newest || lastFailedAt > newest.at)) {
+        newest = { at: lastFailedAt, branch, buildUrl: lastFailedBuildUrl, jobId: lastFailedJobId };
+      }
+    }
+  }
+  return newest;
+};
 
 /**
  * What the title says between the framework and "suite": `UI` or `API` for Scout and FTR,
@@ -606,7 +659,62 @@ export const renderFlakySuiteIssueBody = (
   ];
   return updateIssueMetadata(
     sections.filter((section) => section !== undefined).join('\n\n'),
-    flakySuiteIssueMetadata(suite, ctx.report),
+    flakySuiteIssueMetadata(suite, ctx.report, ctx.previous),
     FLAKY_TEST_SUITE_METADATA_PREFIX
   );
+};
+
+/** `kibana-on-merge` from `https://buildkite.com/elastic/kibana-on-merge/builds/12345`. */
+const pipelineOfBuild = (buildUrl: string | undefined): string | undefined =>
+  buildUrl?.match(/^https:\/\/buildkite\.com\/[^/]+\/([^/]+)\/builds\//)?.[1];
+
+/**
+ * `[kibana-on-merge - main](…#job) · 2026-09-09 06:12 UTC`, the link spelled like the ones
+ * `report_failed_tests` posts so people and `triage/` read both alike.
+ */
+const failureLink = ({ at, branch, buildUrl, jobId }: SuiteFailure): string => {
+  const label = `${pipelineOfBuild(buildUrl) ?? 'CI Build'} - ${branch}`;
+  const link = buildUrl ? `[${label}](${buildkiteJobUrl(buildUrl, jobId)})` : label;
+  return `${link} · ${formatDateTime(at)}`;
+};
+
+export interface FlakySuiteIssueCommentContext {
+  report: FlakyTestReport;
+  /** Metadata of the issue before the refresh, for the tests that are flaky for the first time. */
+  previous?: RecordedFlakySuiteIssueMetadata;
+  /** The issue is being reopened: the suite failed again after it was closed. */
+  reopened: boolean;
+}
+
+/**
+ * The comment of a refresh that found new failures: what the worst test did over the report
+ * window, its newest failure and the tests flaky for the first time. A `kibanamachine` comment
+ * is what turns into a Slack notification (elastic/kibana-operations `triage/`), so the body
+ * has to be updated first: the notification reads its metadata.
+ */
+export const renderFlakySuiteIssueComment = (
+  suite: FlakySuite,
+  { report, previous, reopened }: FlakySuiteIssueCommentContext
+): string => {
+  const [worst] = suite.tests;
+  const subject = suite.tests.length > 1 ? 'Its worst test' : 'The test';
+  const lead = reopened
+    ? '**Failed again after this issue was closed**, reopening it.'
+    : '**Still flaky**, with new failures since the last report.';
+  const known = new Set(previous?.['suite.testIds'] ?? []);
+  const newlyFlaky = previous ? suite.tests.filter(({ testId }) => !known.has(testId)) : [];
+  const failure = newestFailure(suite);
+  return [
+    `${lead} ${subject} failed in ${formatFailedBuilds(worst)} builds over ` +
+      `${formatDateRange(report.window.from, report.window.to)}.`,
+    [
+      ...(failure ? [`- Newest failure: ${failureLink(failure)}`] : []),
+      ...(newlyFlaky.length > 0
+        ? [`- Newly flaky: ${newlyFlaky.map(({ title }) => `*${title}*`).join(', ')}`]
+        : []),
+    ].join('\n'),
+    'The issue description has the numbers of this report.',
+  ]
+    .filter((section) => section !== '')
+    .join('\n\n');
 };

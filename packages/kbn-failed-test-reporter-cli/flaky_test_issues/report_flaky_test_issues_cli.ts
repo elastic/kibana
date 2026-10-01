@@ -41,6 +41,7 @@ export function runReportFlakyTestIssuesCli() {
       const inputPath = Path.resolve(REPO_ROOT, flagsReader.requiredString('input'));
       const summaryPath = Path.resolve(REPO_ROOT, flagsReader.requiredString('summary-path'));
       const dryRun = flagsReader.boolean('dry-run');
+      const updateIssues = flagsReader.boolean('update-issues');
       const token = process.env.GITHUB_TOKEN;
       if (!token) {
         throw createFlagError('GITHUB_TOKEN must be set to read and write GitHub issues');
@@ -82,7 +83,8 @@ export function runReportFlakyTestIssuesCli() {
           (tracking
             ? `, and a suite whose every test has one in ${tracking.repo} is skipped`
             : '') +
-          `; at most ${maxNewIssues} new issues`
+          `; at most ${maxNewIssues} new issues` +
+          (updateIssues ? ', suite issues of suites flaky again are refreshed' : '')
       );
 
       const summary = await reportFlakySuiteIssues({
@@ -93,21 +95,26 @@ export function runReportFlakyTestIssuesCli() {
         tracking,
         closedSince,
         maxNewIssues,
+        updateIssues,
         dryRun,
       });
 
       Fs.mkdirSync(Path.dirname(summaryPath), { recursive: true });
       Fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
 
-      const { created, skipped, failed } = summary.counts;
+      const { created, updated, skipped, failed } = summary.counts;
       log.info(
-        `${summary.suites} flaky suites: ${created} issues created, ${skipped} skipped, ` +
-          `${failed} failed${dryRun ? ' (dry run, nothing was written)' : ''} ` +
+        `${summary.suites} flaky suites: ${created} issues created, ${updated} updated, ` +
+          `${skipped} skipped, ${failed} failed${
+            dryRun ? ' (dry run, nothing was written)' : ''
+          } ` +
           `(summary in ${summaryPath})`
       );
       log.success(`Finished in ${((performance.now() - startedAt) / 1000).toFixed(2)}s`);
       if (failed > 0) {
-        throw createFailError(`${failed} GitHub issues could not be created, see the log above`);
+        throw createFailError(
+          `${failed} GitHub issues could not be created or updated, see the log above`
+        );
       }
     },
     {
@@ -118,7 +125,9 @@ export function runReportFlakyTestIssuesCli() {
         closed ones in --github-repo and in --tracking-repo, then matches locally. A suite gets no
         issue when every one of its tests has one in either repository, open or closed, a per-test
         issue about it or an issue about the suite or its file; a single test without one is
-        enough for the suite issue to be filed.
+        enough for the suite issue to be filed. A suite with an issue of its own in --github-repo
+        has it refreshed: the body gets this report's numbers, a comment is posted when the suite
+        failed since the last report, and an issue closed before such a failure is reopened.
 
         Examples:
           GITHUB_TOKEN=... node scripts/report_flaky_test_issues --input .scout/flaky_tests.json --dry-run
@@ -133,7 +142,7 @@ export function runReportFlakyTestIssuesCli() {
           'closed-since-days',
           'max-new-issues',
         ],
-        boolean: ['dry-run'],
+        boolean: ['dry-run', 'update-issues'],
         default: {
           input: DEFAULT_INPUT,
           'summary-path': DEFAULT_SUMMARY_PATH,
@@ -142,6 +151,7 @@ export function runReportFlakyTestIssuesCli() {
           'closed-since-days': String(DEFAULT_CLOSED_SINCE_DAYS),
           'max-new-issues': String(DEFAULT_MAX_NEW_ISSUES),
           'dry-run': false,
+          'update-issues': true,
         },
         help: `
           --input               Flaky test report to read [default: ${DEFAULT_INPUT}]
@@ -150,7 +160,8 @@ export function runReportFlakyTestIssuesCli() {
           --tracking-repo       owner/name whose failed-test issues cover a suite once every one of its tests has one; never written to, empty disables [default: ${DEFAULT_TRACKING_REPO}]
           --closed-since-days   Only closed issues updated within this many days count as tracking a suite [default: ${DEFAULT_CLOSED_SINCE_DAYS}]
           --max-new-issues      Issues created per run, worst suites first [default: ${DEFAULT_MAX_NEW_ISSUES}]
-          --dry-run             Read issues and log what would be filed without writing
+          --no-update-issues    Skip suites with an issue of their own instead of refreshing it
+          --dry-run             Read issues and log what would be filed or updated without writing
         `,
       },
     }
