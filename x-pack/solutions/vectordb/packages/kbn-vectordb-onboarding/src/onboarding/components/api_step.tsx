@@ -103,9 +103,9 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
   const commentWithExampleType =
     tabs.length > 1
       ? i18n.translate('vectordbOnboarding.apiStep.consoleCommentWithExampleType', {
-        defaultMessage: '{consoleComment} ({exampleType})',
-        values: { consoleComment, exampleType },
-      })
+          defaultMessage: '{consoleComment} ({exampleType})',
+          values: { consoleComment, exampleType },
+        })
       : consoleComment;
 
   const requestWithComment = `
