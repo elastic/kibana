@@ -15,12 +15,12 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { EMPTY_ENTITY_IDS } from '../data';
-import type { TimeRange } from '../../use_time_range_param';
 import {
-  getEntityFilterESQL,
+  buildEntityFilterClauses,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
-} from '../../use_entity_filters_param';
+  type TimeRange,
+} from '../../new_entities_table';
 
 const TIME_RANGE_TO_ESQL: Record<TimeRange, string> = {
   '24h': '24 hours',
@@ -54,7 +54,7 @@ export const useNewEntityCount = ({
         ? [
             `FROM ${index}`,
             `| WHERE entity.lifecycle.first_seen >= NOW() - ${TIME_RANGE_TO_ESQL[timeRange]} AND entity.risk.calculated_score > 0`,
-            ...getEntityFilterESQL(entityFilters),
+            ...buildEntityFilterClauses(entityFilters),
             `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
             `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`,
           ].join('\n')

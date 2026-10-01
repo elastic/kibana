@@ -6,7 +6,7 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
-import type { TimeRange } from '../../use_time_range_param';
+import type { TimeRange } from '../../new_entities_table';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 
 const alertsIndex = (spaceId: string) => `.alerts-security.alerts-${spaceId}`;

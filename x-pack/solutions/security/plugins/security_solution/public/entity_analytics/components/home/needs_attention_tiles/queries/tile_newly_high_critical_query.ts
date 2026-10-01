@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../use_time_range_param';
+import type { TimeRange } from '../../new_entities_table';
 
 /**
  * Builds an ES|QL query that counts entities that crossed into High or Critical

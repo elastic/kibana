@@ -16,13 +16,13 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
-import type { TimeRange } from '../../use_time_range_param';
 import { EMPTY_ENTITY_IDS } from '../data';
 import {
-  getEntityFilterESQL,
+  buildEntityFilterClauses,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
-} from '../../use_entity_filters_param';
+  type TimeRange,
+} from '../../new_entities_table';
 
 interface AlertBasedTilesResult {
   alertsCount: number;
@@ -93,7 +93,7 @@ export const useAlertBasedTiles = ({
       resolvedIndex.indexName,
       spaceId,
       timeRange,
-      getEntityFilterESQL(entityFilters)
+      buildEntityFilterClauses(entityFilters)
     );
   }, [euidApi, resolvedIndex?.indexName, spaceId, timeRange, entityFilters]);
 

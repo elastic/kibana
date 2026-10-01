@@ -6,7 +6,7 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
-import type { TimeRange } from '../../use_time_range_param';
+import type { TimeRange } from '../../new_entities_table';
 import { evalGuardedTypedEuids } from './guarded_typed_euid_eval';
 
 const ML_ANOMALIES_INDEX = '.ml-anomalies-shared*';
