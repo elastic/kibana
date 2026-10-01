@@ -30,7 +30,14 @@ export const createOpenInDiscoverAction = (deps: OpenInDiscoverActionDeps): Epis
   order: 50,
   displayName: i18n.OPEN_IN_DISCOVER,
   iconType: 'productDiscover',
-  isCompatible: ({ episodes }) => episodes.length === 1 && episodeSupportsActions(episodes[0]),
+  isCompatible: ({ episodes }) => {
+    if (episodes.length !== 1 || !episodeSupportsActions(episodes[0])) {
+      return false;
+    }
+
+    const ruleId = episodes[0]['rule.id'];
+    return Boolean(ruleId) && deps.isRuleAvailable(ruleId);
+  },
   execute: async ({ episodes }) => {
     const [ep] = episodes;
     const href = await deps.getDiscoverHref({
