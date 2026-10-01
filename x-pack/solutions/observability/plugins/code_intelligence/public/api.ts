@@ -22,8 +22,13 @@ export interface CatalogItem {
   signal_type?: string;
   title?: string;
   query?: string;
-  evidence?: Array<{ path?: string; line?: number }>;
-  validation?: { status?: string };
+  description?: string;
+  revision?: string;
+  severity_score?: number;
+  evidence?: Array<{ path?: string; line?: number; excerpt?: string }>;
+  validation?: { status?: string; diagnostics?: string[] };
+  created_at?: string;
+  updated_at?: string;
   [key: string]: unknown;
 }
 

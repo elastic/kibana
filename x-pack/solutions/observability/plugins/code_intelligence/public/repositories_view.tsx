@@ -7,16 +7,15 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiCallOut,
   EuiConfirmModal,
   EuiEmptyPrompt,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -29,7 +28,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ExtractionBatchStatus, Repository, RepositoryExtractionStatus } from './api';
 import { deleteRepository, getBatch, startBatch } from './api';
 import { describeStartError, type StartErrorDescription } from './describe_start_error';
-import { RepositoryForm } from './repository_form';
+import { RepositoryFlyout } from './repository_flyout';
 
 interface Props {
   http: HttpSetup;
@@ -85,13 +84,13 @@ const statusColor = (
     : 'primary';
 
 export const RepositoriesView = ({ http, repositories, loading, error, reload }: Props) => {
-  const [revisions, setRevisions] = useState<Record<string, string>>({});
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [batch, setBatch] = useState<ExtractionBatchStatus>();
   const [starting, setStarting] = useState(false);
   const [actionError, setActionError] = useState<StartErrorDescription>();
   const [following, setFollowing] = useState(false);
-  const [editing, setEditing] = useState<Repository>();
+  /** Open when set; `editing` is absent when adding a repository. */
+  const [flyout, setFlyout] = useState<{ editing?: Repository }>();
   const [pendingDelete, setPendingDelete] = useState<Repository>();
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string>();
@@ -121,12 +120,7 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
     try {
       const { id } = await startBatch(
         http,
-        selected.length === 0
-          ? undefined
-          : selected.map(({ repository, defaultRef }) => ({
-              repository,
-              revision: (revisions[repository] ?? defaultRef).trim() || defaultRef,
-            }))
+        selected.length === 0 ? undefined : selected.map(({ repository }) => ({ repository }))
       );
       setBatch(await getBatch(http, id));
     } catch (startError) {
@@ -134,7 +128,7 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
     } finally {
       setStarting(false);
     }
-  }, [http, revisions, selected]);
+  }, [http, selected]);
 
   const followBatch = useCallback(
     async (extractionId: string) => {
@@ -161,7 +155,7 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
     try {
       await deleteRepository(http, pendingDelete.repository);
       setSelectedIds((current) => current.filter((id) => id !== pendingDelete.repository));
-      if (editing?.repository === pendingDelete.repository) setEditing(undefined);
+      if (flyout?.editing?.repository === pendingDelete.repository) setFlyout(undefined);
       setPendingDelete(undefined);
       reload();
     } catch {
@@ -175,7 +169,7 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
     } finally {
       setDeleting(false);
     }
-  }, [editing, http, pendingDelete, reload]);
+  }, [flyout, http, pendingDelete, reload]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<Repository>>>(
     () => [
@@ -211,22 +205,9 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
           defaultMessage: 'Revision',
         }),
         render: ({ repository, defaultRef }: Repository) => (
-          <EuiFieldText
-            data-test-subj={`codeIntelligenceRevision-${repository}`}
-            compressed
-            value={revisions[repository] ?? defaultRef}
-            maxLength={255}
-            aria-label={i18n.translate('xpack.codeIntelligence.repositories.revisionLabel', {
-              defaultMessage: 'Revision for {repository}',
-              values: { repository },
-            })}
-            onChange={(event) =>
-              setRevisions((current) => ({
-                ...current,
-                [repository]: event.target.value.slice(0, 255),
-              }))
-            }
-          />
+          <EuiBadge color="hollow" data-test-subj={`codeIntelligenceRevision-${repository}`}>
+            {defaultRef}
+          </EuiBadge>
         ),
       },
       {
@@ -295,7 +276,7 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
             icon: 'pencil',
             type: 'icon',
             'data-test-subj': 'codeIntelligenceEditRepository',
-            onClick: (repository) => setEditing(repository),
+            onClick: (repository) => setFlyout({ editing: repository }),
           },
           {
             name: i18n.translate('xpack.codeIntelligence.repositories.deleteAction', {
@@ -314,7 +295,7 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
         ],
       },
     ],
-    [batch, revisions]
+    [batch]
   );
 
   if (loading) return <EuiLoadingSpinner size="xl" />;
@@ -346,18 +327,21 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
     );
   }
 
+  const addButton = (
+    <EuiButton
+      data-test-subj="codeIntelligenceAddRepositoryButton"
+      iconType="plusCircle"
+      fill
+      onClick={() => setFlyout({})}
+    >
+      {i18n.translate('xpack.codeIntelligence.repositories.addRepository', {
+        defaultMessage: 'Add repository',
+      })}
+    </EuiButton>
+  );
+
   return (
     <>
-      <RepositoryForm
-        http={http}
-        editing={editing}
-        onSaved={() => {
-          setEditing(undefined);
-          reload();
-        }}
-        onCancelEdit={() => setEditing(undefined)}
-      />
-      <EuiHorizontalRule />
       {actionError !== undefined && (
         <>
           <EuiCallOut
@@ -433,14 +417,16 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
           body={
             <p>
               {i18n.translate('xpack.codeIntelligence.repositories.emptyBody', {
-                defaultMessage: 'Add a repository with the form above to run extraction.',
+                defaultMessage: 'Add a repository to run extraction.',
               })}
             </p>
           }
+          actions={addButton}
         />
       ) : (
         <>
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>{addButton}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="codeIntelligenceRunBatchButton"
@@ -494,6 +480,17 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
             loading={starting}
           />
         </>
+      )}
+      {flyout !== undefined && (
+        <RepositoryFlyout
+          http={http}
+          editing={flyout.editing}
+          onSaved={() => {
+            setFlyout(undefined);
+            reload();
+          }}
+          onClose={() => setFlyout(undefined)}
+        />
       )}
       {pendingDelete !== undefined && (
         <EuiConfirmModal

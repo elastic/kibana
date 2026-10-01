@@ -5,32 +5,30 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBasicTable,
   EuiButton,
-  EuiCodeBlock,
+  EuiCode,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
   EuiPagination,
+  EuiPanel,
+  EuiProgress,
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import type { CatalogItem, CatalogResponse, Repository } from './api';
 import { getCatalog } from './api';
+import { CatalogEntryFlyout } from './catalog_entry_flyout';
+import { SignalTypeBadge, signalTypeLabels } from './signal_type_badge';
 
 interface Props {
   http: HttpSetup;
@@ -41,6 +39,44 @@ interface Props {
 }
 
 type Kind = '' | 'log' | 'trace' | 'metric';
+
+const CatalogRow = ({ item, onOpen }: { item: CatalogItem; onOpen: () => void }) => (
+  <EuiPanel
+    hasBorder
+    paddingSize="s"
+    onClick={onOpen}
+    data-test-subj="codeIntelligenceCatalogRow"
+    aria-label={i18n.translate('xpack.codeIntelligence.catalog.openEntry', {
+      defaultMessage: 'Open {title}',
+      values: { title: item.title ?? item.id },
+    })}
+  >
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <SignalTypeBadge signalType={item.signal_type} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued">
+          {item.repository}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer size="xs" />
+    <EuiText size="s">
+      <strong>{item.title ?? '—'}</strong>
+    </EuiText>
+    {item.query !== undefined && (
+      <>
+        <EuiSpacer size="xs" />
+        <div className="eui-textTruncate">
+          <EuiCode transparentBackground data-test-subj="codeIntelligenceCatalogRowQuery">
+            {item.query.replace(/\s+/g, ' ').trim()}
+          </EuiCode>
+        </div>
+      </>
+    )}
+  </EuiPanel>
+);
 
 export const CatalogView = ({
   http,
@@ -98,60 +134,6 @@ export const CatalogView = ({
     };
   }, [http, kind, page, query, repository, requestSequence]);
 
-  const columns = useMemo<Array<EuiBasicTableColumn<CatalogItem>>>(
-    () => [
-      {
-        field: 'repository',
-        name: i18n.translate('xpack.codeIntelligence.catalog.repositoryColumn', {
-          defaultMessage: 'Repository',
-        }),
-        render: (value?: string) => value ?? '—',
-      },
-      {
-        field: 'signal_type',
-        name: i18n.translate('xpack.codeIntelligence.catalog.signalTypeColumn', {
-          defaultMessage: 'Signal type',
-        }),
-        render: (value?: string) => value ?? '—',
-      },
-      {
-        name: i18n.translate('xpack.codeIntelligence.catalog.titleTemplateColumn', {
-          defaultMessage: 'Title / template',
-        }),
-        render: (item: CatalogItem) => (
-          <>
-            <EuiText size="s">
-              <strong>{item.title ?? '—'}</strong>
-            </EuiText>
-            {item.query !== undefined && (
-              <EuiText size="xs">
-                <p>{item.query}</p>
-              </EuiText>
-            )}
-          </>
-        ),
-      },
-      {
-        name: i18n.translate('xpack.codeIntelligence.catalog.evidenceColumn', {
-          defaultMessage: 'First evidence',
-        }),
-        render: ({ evidence }: CatalogItem) => {
-          const first = evidence?.[0];
-          return first?.path === undefined
-            ? '—'
-            : `${first.path}${first.line === undefined ? '' : `:${first.line}`}`;
-        },
-      },
-      {
-        name: i18n.translate('xpack.codeIntelligence.catalog.validationColumn', {
-          defaultMessage: 'Validation status',
-        }),
-        render: ({ validation }: CatalogItem) => validation?.status ?? '—',
-      },
-    ],
-    []
-  );
-
   if (!repositoriesLoading && repositoriesError !== undefined) {
     return (
       <EuiEmptyPrompt
@@ -195,6 +177,7 @@ export const CatalogView = ({
   }
 
   const pageCount = Math.min(100, Math.ceil((response?.total ?? 0) / 25));
+  const items = response?.items ?? [];
 
   return (
     <>
@@ -249,24 +232,9 @@ export const CatalogView = ({
                       defaultMessage: 'All kinds',
                     }),
                   },
-                  {
-                    value: 'log',
-                    text: i18n.translate('xpack.codeIntelligence.catalog.logKind', {
-                      defaultMessage: 'Log',
-                    }),
-                  },
-                  {
-                    value: 'trace',
-                    text: i18n.translate('xpack.codeIntelligence.catalog.traceKind', {
-                      defaultMessage: 'Trace',
-                    }),
-                  },
-                  {
-                    value: 'metric',
-                    text: i18n.translate('xpack.codeIntelligence.catalog.metricKind', {
-                      defaultMessage: 'Metric',
-                    }),
-                  },
+                  { value: 'log', text: signalTypeLabels.log },
+                  { value: 'trace', text: signalTypeLabels.trace },
+                  { value: 'metric', text: signalTypeLabels.metric },
                 ]}
                 onChange={(event) => {
                   setKind(event.target.value as Kind);
@@ -325,19 +293,39 @@ export const CatalogView = ({
         />
       ) : (
         <>
-          <EuiBasicTable
-            tableCaption={i18n.translate('xpack.codeIntelligence.catalog.tableCaption', {
-              defaultMessage: 'Code intelligence catalog',
-            })}
-            items={response?.items ?? []}
-            columns={columns}
-            loading={loading}
-            itemId="id"
-            noItemsMessage={i18n.translate('xpack.codeIntelligence.catalog.emptyMessage', {
-              defaultMessage: 'No catalog entries match these filters.',
-            })}
-            rowProps={(item) => ({ onClick: () => setSelected(item) })}
-          />
+          {loading && <EuiProgress size="xs" color="accent" />}
+          {items.length === 0 ? (
+            !loading && (
+              <EuiText
+                size="s"
+                color="subdued"
+                textAlign="center"
+                data-test-subj="codeIntelligenceCatalogEmpty"
+              >
+                <p>
+                  {i18n.translate('xpack.codeIntelligence.catalog.emptyMessage', {
+                    defaultMessage: 'No catalog entries match these filters.',
+                  })}
+                </p>
+              </EuiText>
+            )
+          ) : (
+            <EuiFlexGroup
+              component="ul"
+              direction="column"
+              gutterSize="s"
+              aria-label={i18n.translate('xpack.codeIntelligence.catalog.listLabel', {
+                defaultMessage: 'Code intelligence catalog',
+              })}
+              aria-busy={loading}
+            >
+              {items.map((item) => (
+                <EuiFlexItem component="li" key={item.id} grow={false}>
+                  <CatalogRow item={item} onOpen={() => setSelected(item)} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          )}
           {pageCount > 1 && (
             <>
               <EuiSpacer />
@@ -359,28 +347,7 @@ export const CatalogView = ({
       )}
 
       {selected !== undefined && (
-        <EuiFlyout
-          ownFocus
-          aria-label={i18n.translate('xpack.codeIntelligence.catalog.flyoutLabel', {
-            defaultMessage: 'Catalog entry details',
-          })}
-          onClose={() => setSelected(undefined)}
-        >
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2>
-                {i18n.translate('xpack.codeIntelligence.catalog.flyoutTitle', {
-                  defaultMessage: 'Catalog entry JSON',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiCodeBlock language="json" isCopyable overflowHeight={600}>
-              {JSON.stringify(selected, null, 2)}
-            </EuiCodeBlock>
-          </EuiFlyoutBody>
-        </EuiFlyout>
+        <CatalogEntryFlyout item={selected} onClose={() => setSelected(undefined)} />
       )}
     </>
   );
