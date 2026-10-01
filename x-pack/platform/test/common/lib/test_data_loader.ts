@@ -203,7 +203,7 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
       }
 
       // Ensure all sharing updates are visible to subsequent search operations.
-      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES, ignore_unavailable: true });
 
       // Create objects directly in ES that can't go through the import API.
       await Promise.all(

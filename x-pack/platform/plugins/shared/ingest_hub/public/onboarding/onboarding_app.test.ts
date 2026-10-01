@@ -87,6 +87,89 @@ describe('hydrateOnboardingSession', () => {
     expect(auth?.connectorId).toBeUndefined();
   });
 
+  // §0.1 — Guard: agent-based hydration must NOT seed agentPolicyId (singular).
+  // If it does, handleDeploy's "agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds" ternary
+  // narrows a multi-policy resume to the first policy only. It also makes isPolicyCreated truthy,
+  // re-opening the credential-gate bug that §A fixes via the isNextReady isPolicyCreated branch.
+  it('agent-based resume with policies: sets agentHostsMode:existing, selectedAgentPolicyIds, agentCredentialMethod — never agentPolicyId', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({
+        connectorId: undefined,
+        mechanisms: ['agent_based'],
+        agentPolicyIds: ['policy-a', 'policy-b'],
+        authMethod: 'assume_role',
+      }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const auth = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.authenticateAndDeployStep`) ?? 'null'
+    );
+    expect(auth).toMatchObject({
+      deploymentMethod: 'agent_based',
+      agentHostsMode: 'existing',
+      selectedAgentPolicyIds: ['policy-a', 'policy-b'],
+      agentCredentialMethod: 'assume_role',
+    });
+    // Regression guard: singular agentPolicyId must NOT be seeded.
+    expect(auth).not.toHaveProperty('agentPolicyId');
+  });
+
+  it('agent-based resume with no policies: sets agentHostsMode:new', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({
+        connectorId: undefined,
+        mechanisms: ['agent_based'],
+        agentPolicyIds: [],
+        authMethod: 'static_keys',
+      }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const auth = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.authenticateAndDeployStep`) ?? 'null'
+    );
+    expect(auth).toMatchObject({ deploymentMethod: 'agent_based', agentHostsMode: 'new' });
+    expect(auth).not.toHaveProperty('agentPolicyId');
+  });
+
+  // §0.2 — Guard: policyIdsByInstance must be empty for non-succeeded deploys.
+  // Fabricating completion for services that failed would prevent the retry path from running.
+  it('agent-based resume with status:succeeded populates policyIdsByInstance', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({
+        connectorId: undefined,
+        mechanisms: ['agent_based'],
+        status: 'succeeded',
+        services: ['aws.cloudtrail', 'aws.vpcflow'],
+        packagePolicyIds: ['pkg-1', 'pkg-2'],
+      }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const review = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.detectAndReviewStep`) ?? 'null'
+    );
+    expect(review?.policyIdsByInstance).toMatchObject({
+      'aws.cloudtrail': expect.any(String),
+      'aws.vpcflow': expect.any(String),
+    });
+  });
+
+  it('agent-based resume with status:failed leaves policyIdsByInstance empty', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({
+        connectorId: undefined,
+        mechanisms: ['agent_based'],
+        status: 'failed',
+        services: ['aws.cloudtrail'],
+        packagePolicyIds: ['pkg-1'],
+      }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const review = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.detectAndReviewStep`) ?? 'null'
+    );
+    expect(review?.policyIdsByInstance).toEqual({});
+  });
+
   it('restores ecfStacks into detectAndReviewStep so isMethodLocked stays true on ECF resume', async () => {
     const ecfStacks = [{ stackName: 'my-stack', region: 'us-east-1', status: 'CREATE_COMPLETE' }];
     mockSendGet.mockResolvedValue({ item: makeItem({ ecfStacks }) });

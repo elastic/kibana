@@ -16,7 +16,9 @@ const getIndexMappingsSchema = z.object({
   indices: z
     .array(z.string())
     .min(1)
-    .describe('List of indices, aliases or datastreams to retrieve mappings for.'),
+    .describe(
+      'List of indices, aliases, datastreams, or ES|QL views to retrieve fields for. Views return their output columns.'
+    ),
   raw: z
     .boolean()
     .default(false)
@@ -86,7 +88,8 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
   return {
     id: platformCoreTools.getIndexMapping,
     type: ToolType.builtin,
-    description: 'Retrieve mappings for indices, aliases or datastreams.',
+    description:
+      'Retrieve mappings for indices, aliases or datastreams, or the output columns of an ES|QL view. A view is not an index: if a name is missing from list_indices indices, check views before reporting it as not found.',
     annotations: {
       title: 'Get Index Mapping',
       readOnlyHint: true,
@@ -101,6 +104,7 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
       //  - CCS indices use batched _field_caps API (flat field list)
       const indexFields = await getIndexFields({
         indices,
+        includeViews: true,
         esClient: esClient.asCurrentUser,
       });
 
