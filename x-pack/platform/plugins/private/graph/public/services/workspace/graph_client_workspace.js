@@ -6,62 +6,23 @@
  */
 
 // Kibana wrapper
+import { unpackGroupedNodes } from './runtime_grouping';
+
 // The main constructor for our GraphWorkspace
 function GraphWorkspace(options) {
   this.blocklistedNodes = [];
   this.options = options;
-
-  if (!options) {
-    this.options = {};
-  }
   this.nodesMap = {};
   this.edgesMap = {};
-  this.searchTerm = '';
 
   this.nodes = [];
   this.edges = [];
   const layoutController = options.layoutController;
 
-  //======== Selection functions ========
+  //======== Grouping functions ========
 
-  this.returnUnpackedGroupeds = function (topLevelNodeArray) {
-    //Gather any grouped nodes that are part of this top-level selection
-    const result = topLevelNodeArray.slice();
-
-    // We iterate over edges not nodes because edges conveniently hold the top-most
-    // node information.
-
-    const edges = this.edges;
-    for (let i = 0; i < edges.length; i++) {
-      const edge = edges[i];
-
-      const topLevelSource = edge.topSrc;
-      const topLevelTarget = edge.topTarget;
-
-      if (result.indexOf(topLevelTarget) >= 0) {
-        //visible top-level node is selected - add all nesteds starting from bottom up
-        let target = edge.target;
-        while (target.parent !== undefined) {
-          if (result.indexOf(target) < 0) {
-            result.push(target);
-          }
-          target = target.parent;
-        }
-      }
-
-      if (result.indexOf(topLevelSource) >= 0) {
-        //visible top-level node is selected - add all nesteds starting from bottom up
-        let source = edge.source;
-        while (source.parent !== undefined) {
-          if (result.indexOf(source) < 0) {
-            result.push(source);
-          }
-          source = source.parent;
-        }
-      }
-    } //end of edges loop
-
-    return result;
+  this.returnUnpackedGroupeds = function (topLevelNodes) {
+    return unpackGroupedNodes(topLevelNodes, this.edges);
   };
 
   //====== Layout functions ========
