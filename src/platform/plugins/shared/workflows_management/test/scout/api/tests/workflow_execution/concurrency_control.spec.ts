@@ -44,11 +44,11 @@ steps:
     with:
       # Stay under the 5s engine threshold so waits sleep in-process instead of
       # parking on a workflow:resume Task Manager task (see handleExecutionDelay).
-      duration: 2s
+      duration: 4s
   - name: wait_step_2
     type: wait
     with:
-      duration: 2s
+      duration: 4s
   - name: hello_world_step_2
     type: console
     with:
@@ -67,7 +67,7 @@ spaceTest.describe(
       workflowsApi: WorkflowsApiService,
       workflowId: string,
       isolationKey: string,
-      { waitTimeout = 20_000 }: { waitTimeout?: number } = {}
+      { waitTimeout = 40_000 }: { waitTimeout?: number } = {}
     ) {
       const events = [
         { env: 'dev', problem: 'issue-1' },
@@ -77,16 +77,22 @@ spaceTest.describe(
         { env: 'dev', problem: 'issue-1' },
       ];
 
-      const scheduledExecutions: { workflowExecutionId: string; concurrencyKey: string }[] = [];
-
-      for (const event of events) {
+      const schedule = async (event: (typeof events)[number]) => {
         const response = await workflowsApi.run(workflowId, event);
 
-        scheduledExecutions.push({
+        return {
           workflowExecutionId: response.workflowExecutionId,
           concurrencyKey: `${event.env}-${event.problem}-${isolationKey}`,
-        });
-      }
+        };
+      };
+
+      const [firstEvent, ...remainingEvents] = events;
+
+      // Await the first run so it holds the slot, then submit the rest together to land inside it.
+      const scheduledExecutions = [
+        await schedule(firstEvent),
+        ...(await Promise.all(remainingEvents.map(schedule))),
+      ];
 
       const terminalExecutions = await Promise.all(
         scheduledExecutions.map((scheduledExecution) =>
@@ -188,24 +194,24 @@ spaceTest.describe(
     spaceTest(
       'queue strategy queues new executions and runs them sequentially until all complete',
       async ({ apiServices }) => {
-        // Scout's default test timeout is 60s. Queue serialises 3 ~4s runs for
-        // the same key (~12s), so 90s leaves CI headroom for Task Manager pickup.
-        spaceTest.setTimeout(90_000);
+        // Scout's default test timeout is 60s. Queue serialises 3 ~8s runs for
+        // the same key (~24s), so 150s leaves CI headroom for Task Manager pickup.
+        spaceTest.setTimeout(150_000);
 
         const isolationKey = randomUUID();
         const createdWorkflow = await apiServices.workflowsApi.create(
           getConcurrencyWorkflowYaml('queue', isolationKey)
         );
 
-        // The queue strategy serialises executions per concurrency key. Waits are 2s
+        // The queue strategy serialises executions per concurrency key. Waits are 4s
         // (under the 5s in-process vs workflow:resume threshold) so 3 queued runs
-        // finish in ~12s without parking on Task Manager. 60s is still enough
-        // headroom if the initial workflow:run claim is slow.
+        // finish in ~24s without parking on Task Manager. 90s is still enough
+        // headroom if the workflow:run claims between queued runs are slow.
         const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
           apiServices.workflowsApi,
           createdWorkflow.id,
           isolationKey,
-          { waitTimeout: 60_000 }
+          { waitTimeout: 90_000 }
         );
 
         Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
