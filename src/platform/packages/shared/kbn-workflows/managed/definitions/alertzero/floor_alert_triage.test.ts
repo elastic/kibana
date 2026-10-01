@@ -685,6 +685,51 @@ describe('floor_alert_triage — closure review hand-off', () => {
       expect(stepByName('abort_review_failed')?.type).toBe('workflow.fail');
     });
 
+    const renderReviewFailed = (autonomy: string, count: number): string => {
+      const template = (stepByName('post_comment_review_failed')?.with as { message: string })
+        .message;
+      return renderString(template, {
+        steps: { start_fp_review: { output: { status: 'failed' } } },
+        variables: { fp_candidate_count: count },
+        consts: { worker_settings: { autonomy } },
+      });
+    };
+
+    it.each([
+      [1, 'is tagged az:false_positive', 'it is still open'],
+      [3, 'are tagged az:false_positive', 'they are still open'],
+    ])(
+      'does not claim %i candidate alert(s) are still open when a supervised review failed',
+      (count, tagged, stillOpen) => {
+        // At supervised autonomy the review can approve and start closing before the Worker
+        // reads its status, and a failed close may leave some candidates already closed.
+        const rendered = renderReviewFailed('supervised', count);
+
+        expect(rendered).toContain('status: failed');
+        expect(rendered).toContain(tagged);
+        expect(rendered).toContain('some may already be closed');
+        expect(rendered).toContain(`rather than assuming ${stillOpen}`);
+        expect(rendered).not.toContain('remain open');
+      }
+    );
+
+    it.each([
+      [1, '1 alert remains open'],
+      [3, '3 alerts remain open'],
+    ])(
+      'says %i candidate alert(s) are still open when a manual review failed',
+      (count, expected) => {
+        // Manual autonomy closes nothing without a human decision, so a review that ended
+        // without one cannot have closed any candidate.
+        const rendered = renderReviewFailed('manual', count);
+
+        expect(rendered).toContain('status: failed');
+        expect(rendered).toContain(expected);
+        expect(rendered).toContain('tagged az:false_positive');
+        expect(rendered).not.toContain('may already be closed');
+      }
+    );
+
     it.each([
       [1, 'stays open', '1 alert classified'],
       [4, 'stay open', '4 alerts classified'],

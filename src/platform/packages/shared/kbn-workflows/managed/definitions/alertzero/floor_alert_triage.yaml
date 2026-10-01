@@ -569,7 +569,7 @@ steps:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
                 ⚠️ The closure review ended without a decision (status: {{ steps.start_fp_review.output.status }}).
-                {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive. This Investigation stays open for review.
+                {% if consts.worker_settings.autonomy == 'supervised' %}The {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. At supervised autonomy the review approves automatically and can start closing before this status is read, so some may already be closed: check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive, since nothing is closed without a human decision.{% endif %} This Investigation stays open for review.
 
           # Fails the run so a review that never ran shows up in execution history, like a
           # dispatch that could not be started does.
