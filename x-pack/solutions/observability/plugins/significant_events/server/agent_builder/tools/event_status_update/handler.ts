@@ -7,24 +7,22 @@
 
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { Logger } from '@kbn/core/server';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
-import type { EventClient } from '../../../lib/significant_events/events';
+import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 
 export async function updateEventStatusToolHandler({
-  eventClient,
+  eventSearchClient,
   eventId,
   status,
-  assessmentNote,
   alertEventsClient,
-  logger,
+  emitTrigger,
 }: {
-  eventClient: EventClient;
+  eventSearchClient: RuleEventsClient;
   eventId: string;
   status: SignificantEventStatus;
-  assessmentNote?: string;
-  alertEventsClient?: AlertEventsClientApi;
-  logger: Logger;
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
 }): Promise<{
   event_id: string;
   updated: number;
@@ -32,12 +30,11 @@ export async function updateEventStatusToolHandler({
   status: SignificantEventStatus;
 }> {
   const result = await updateSignificantEventStatus({
-    eventClient,
+    eventSearchClient,
     eventId,
     status,
-    assessmentNote,
     alertEventsClient,
-    logger,
+    emitTrigger,
   });
 
   return { event_id: eventId, ...result };

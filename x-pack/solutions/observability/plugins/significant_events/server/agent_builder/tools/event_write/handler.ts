@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import {
   type SignificantEvent,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
@@ -14,17 +13,13 @@ import {
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type {
-  EventClient,
-  SignificantEventsReadClient,
-} from '../../../lib/significant_events/events';
+import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import {
   assertValidBulkWriteSize,
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
-  extractCreateResults,
   type CompactBulkError,
-  toCompactBulkError,
 } from '../bulk_write';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 import {
@@ -39,7 +34,7 @@ import {
 import { getCalibratedSeverity, type EventsWriteSource } from './severity_calibration_guard';
 import { toRuleEvent } from '../../../lib/significant_events/events/to_rule_event';
 
-const DUAL_WRITE_CONCURRENCY = 10;
+const WRITE_CONCURRENCY = 10;
 
 export type EventsWriteInput = Pick<
   SignificantEvent,
@@ -236,7 +231,7 @@ const markDuplicateKeys = (
 
 /** Single scan for dedup candidates: fetch all currently-active events for the batch. */
 const fetchActiveEventsForDedup = async (
-  eventSearchClient: SignificantEventsReadClient,
+  eventSearchClient: RuleEventsClient,
   dedupCandidates: DedupCandidate[]
 ): Promise<SignificantEvent[]> => {
   if (dedupCandidates.length === 0) return [];
@@ -326,8 +321,7 @@ const resolveDedupSkips = (
 
 /** Full history for remaining continuation writes (lineage merge). */
 const fetchPriorDocsByEventId = async (
-  eventSearchClient: SignificantEventsReadClient,
-  eventClient: EventClient,
+  eventSearchClient: RuleEventsClient,
   candidates: WriteCandidate[]
 ): Promise<{
   latestByEventId: Map<string, SignificantEvent>;
@@ -339,31 +333,9 @@ const fetchPriorDocsByEventId = async (
     candidates
       .filter((c) => c.input.event_id !== undefined)
       .map(async (c) => {
-        // When flag is OFF, eventSearchClient === eventClient (same shared instance from
-        // getSharedEventClient()). The identity check avoids a redundant second ES round-trip
-        // by reusing the already-fetched hits as the canonical legacy lineage.
-        // Fall back to the canonical write client if the read store is unavailable, so a
-        // temporary read-store failure cannot abort a write that would otherwise succeed.
-        let readClientIsCanonical = eventSearchClient === eventClient;
-        let hits: SignificantEvent[];
-        try {
-          const result = await eventSearchClient.findByEventId(c.eventId);
-          hits = result.hits;
-        } catch (err) {
-          if (eventSearchClient === eventClient) throw err;
-          const result = await eventClient.findByEventId(c.eventId);
-          hits = result.hits;
-          readClientIsCanonical = true;
-        }
-        const legacyResult = readClientIsCanonical
-          ? null
-          : await eventClient.findByEventId(c.eventId);
-        const legacyHits = legacyResult ? legacyResult.hits : hits;
+        const { hits } = await eventSearchClient.findByEventId(c.eventId);
         priorDocsByEventId.set(c.eventId, hits);
-        // `.rule-events` is dual-written asynchronously and can lag the write store. Use the
-        // canonical predecessor for fields copied into the new version (especially
-        // investigations), while retaining the read-store history for episode-context merging.
-        const latest = legacyHits.at(-1);
+        const latest = hits.at(-1);
         if (latest !== undefined) {
           latestByEventId.set(c.eventId, latest);
         }
@@ -436,22 +408,22 @@ const buildPendingWrite = (
   };
 };
 
-/** Writes `detail.error ? bulk_error : written` into `results` for each pending write, by index. */
-const applyBulkResults = (
+/** Writes `error ? bulk_error : written` into `results` for each pending write, by index. */
+const applyWriteOutcomes = (
   pendingWrites: Array<ReturnType<typeof buildPendingWrite>>,
-  createResults: BulkResponseItem[],
+  errors: Array<CompactBulkError | undefined>,
   results: BulkResults
 ): void => {
   pendingWrites.forEach(({ candidate, status, narrativePreserved }, responseIndex) => {
-    const detail = createResults[responseIndex];
-    if (detail.error) {
+    const error = errors[responseIndex];
+    if (error) {
       results[candidate.index] = {
         index: candidate.index,
         event_id: candidate.eventId,
         status,
         written: false,
         reason: 'bulk_error',
-        error: toCompactBulkError(detail),
+        error,
       };
     } else {
       const result: EventsWriteResult = {
@@ -487,30 +459,23 @@ const applyBulkResults = (
  *    preserved (`narrative_preserved: true` on the result) to prevent identity hijack.
  */
 export async function eventsWriteBulkHandler({
-  eventClient,
   eventSearchClient,
+  alertEventsClient,
+  emitTrigger,
   inputs,
   source,
-  alertEventsClient,
   logger,
 }: {
-  /** Full-surface EventClient — writes and canonical lineage lookups always go here. */
-  eventClient: EventClient;
-  /**
-   * Flag-aware read surface (`getEventSearchClient()`). When `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ`
-   * is on, routes reads to `.rule-events`; otherwise returns the same shared `EventClient` instance
-   * as `eventClient` (no extra ES round-trip). Defaults to `eventClient` for legacy tests.
-   * Production callers must always supply this.
-   */
-  eventSearchClient?: SignificantEventsReadClient;
+  /** Reads prior versions and active events from `.rule-events`. */
+  eventSearchClient: RuleEventsClient;
+  /** Writes each new version to `.rule-events`. */
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
   inputs: EventsWriteInput[];
   source?: EventsWriteSource;
-  /** Optional — callers must attempt to pass in production; omitted only when client is unavailable or in legacy tests. */
-  alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
 }): Promise<EventsWriteBulkResult[]> {
   const timestamp = new Date().toISOString();
-  const client = eventSearchClient ?? eventClient;
 
   assertValidBulkWriteSize(inputs);
 
@@ -519,41 +484,11 @@ export async function eventsWriteBulkHandler({
   const validCandidates = markDuplicateKeys(candidates, results);
 
   const dedupCandidates = validCandidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
-  // Fall back to the canonical write client if the read store is unavailable, so a temporary
-  // .rule-events failure cannot block a canonical write.
-  let searchClientActiveEvents: SignificantEvent[];
-  let canonicalActiveEvents: SignificantEvent[];
-  try {
-    if (client !== eventClient) {
-      // Flag ON: canonical is the authoritative dedup source. Skip the rule-events scan entirely —
-      // its results would be discarded (see `activeEvents` below) and the extra scan adds latency
-      // plus failure risk without contributing to the dedup decision.
-      canonicalActiveEvents = await fetchActiveEventsForDedup(eventClient, dedupCandidates);
-      searchClientActiveEvents = []; // unused in this path
-    } else {
-      searchClientActiveEvents = await fetchActiveEventsForDedup(client, dedupCandidates);
-      // When the flag-aware read client differs from the canonical write client, also scan the
-      // canonical store. A write succeeds with `wait_for` refresh on the legacy store, but the
-      // dual-write to `.rule-events` is fire-and-forget with no matching refresh guarantee — a scan
-      // of `.rule-events` alone can miss a recently written event and produce a permanent duplicate.
-      canonicalActiveEvents = [];
-    }
-  } catch (err) {
-    if (client === eventClient) throw err;
-    // Canonical scan threw in flag-ON mode — no fallback is possible since canonical is the only
-    // dedup source of truth here. Surface the failure.
-    throw err;
-  }
-  // When flag ON, canonical writes first with `wait_for` and is the authoritative source for
-  // active state. Merging rule-events results risks including stale-active entries for recently-
-  // closed events (fire-and-forget lag), which would suppress valid new writes. Use canonical
-  // exclusively for dedup; rule-events is for user-facing reads only.
-  const activeEvents = client !== eventClient ? canonicalActiveEvents : searchClientActiveEvents;
+  const activeEvents = await fetchActiveEventsForDedup(eventSearchClient, dedupCandidates);
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
   const { latestByEventId, priorDocsByEventId } = await fetchPriorDocsByEventId(
-    client,
-    eventClient,
+    eventSearchClient,
     toWrite
   );
   const calibrated = toWrite.map((candidate) => ({
@@ -599,54 +534,37 @@ export async function eventsWriteBulkHandler({
     buildPendingWrite(candidate, timestamp, latestByEventId, priorDocsByEventId)
   );
 
-  let response;
-  try {
-    response = await eventClient.bulkCreate(
-      pendingToWrite.map(({ document }) => document),
-      // `wait_for` lets the immediate discovery `_count` see the newly written event version.
-      { throwOnFail: false, refresh: 'wait_for' }
-    );
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Unknown Elasticsearch transport error';
-    throw createBulkWriteOutcomeUnknownError(`Event bulk write outcome is unknown: ${message}`);
-  }
-
-  const createResults = extractCreateResults(response, pendingToWrite.length, 'Event');
-  applyBulkResults(pendingToWrite, createResults, results);
+  // `createAlertEvent` waits for a refresh, so the next discovery read sees the new version.
+  const writeLimit = pLimit(WRITE_CONCURRENCY);
+  const errors = await Promise.all(
+    pendingToWrite.map(({ document }) =>
+      writeLimit(async (): Promise<CompactBulkError | undefined> => {
+        try {
+          await alertEventsClient.createAlertEvent(toRuleEvent(document));
+          return undefined;
+        } catch (err) {
+          const reason = err instanceof Error ? err.message : String(err);
+          logger?.error(`Failed to write to .rule-events: ${reason}`);
+          return { type: 'rule_events_write_error', reason };
+        }
+      })
+    )
+  );
+  applyWriteOutcomes(pendingToWrite, errors, results);
 
   // Notify subscribed workflows (fire-and-forget) for successfully written docs only: no prior
   // version -> created; a prior version with a different status (e.g. triage re-open) -> status
   // changed. Emission is best-effort and guarded, so it never affects the returned results.
-  const dualWriteLimit = alertEventsClient ? pLimit(DUAL_WRITE_CONCURRENCY) : null;
-  const dualWritePromises = pendingToWrite.flatMap(({ candidate, document }, responseIndex) => {
-    if (createResults[responseIndex].error) {
-      return [];
+  pendingToWrite.forEach(({ candidate, document }, responseIndex) => {
+    if (errors[responseIndex]) {
+      return;
     }
     emitSignificantEventWriteTriggers({
-      eventClient,
+      emitTrigger,
       significantEvent: document,
-      // Use the canonical predecessor (legacy write store) rather than the read-store view:
-      // .rule-events is dual-written fire-and-forget (no refresh guarantee), so it may lag and
-      // yield undefined — emitting a spurious eventCreated for an existing event. The read-store
-      // client may decode statuses differently, corrupting the status comparison used to decide
-      // whether to emit eventStatusChanged.
       priorSignificantEvent: latestByEventId.get(candidate.eventId),
     });
-    if (alertEventsClient && dualWriteLimit) {
-      return [
-        dualWriteLimit(() => alertEventsClient.createAlertEvent(toRuleEvent(document))).catch(
-          (err) => {
-            logger?.error(
-              `Failed to write to .rule-events: ${err instanceof Error ? err.message : err}`
-            );
-          }
-        ),
-      ];
-    }
-    return [];
   });
-  await Promise.all(dualWritePromises);
 
   return alignResults(results, 'Event bulk results were not aligned with every input');
 }
@@ -657,21 +575,23 @@ export async function eventsWriteBulkHandler({
  * hit `existing_active_event`, which this adapter throws as `createBulkWriteOutcomeUnknownError`.
  */
 export async function eventsWriteHandler({
-  eventClient,
+  eventSearchClient,
   input,
   alertEventsClient,
+  emitTrigger,
   logger,
 }: {
-  eventClient: EventClient;
+  eventSearchClient: RuleEventsClient;
   input: EventsWriteInput;
-  /** Optional — callers must attempt to pass in production; omitted only when client is unavailable or in legacy tests. */
-  alertEventsClient?: AlertEventsClientApi;
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
   logger?: Logger;
 }): Promise<EventsWriteResult | EventsWriteNoOpResult> {
   const [result] = await eventsWriteBulkHandler({
-    eventClient,
-    inputs: [input],
+    eventSearchClient,
     alertEventsClient,
+    emitTrigger,
+    inputs: [input],
     logger,
   });
   if (result === undefined) {
