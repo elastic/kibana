@@ -41,7 +41,6 @@ const updateInvestigationBodySchema = z.object({
   recommendations: orAbsent(investigationStateSchema.shape.recommendations.unwrap()),
   blind_spots: orAbsent(investigationStateSchema.shape.blind_spots.unwrap()),
   conversation_id: orAbsent(z.string().max(MAX_KEYWORD_LENGTH)),
-  slack_message_ts: orAbsent(z.string().max(MAX_KEYWORD_LENGTH)),
   impact: orAbsent(investigationImpactSchema),
 });
 

@@ -131,8 +131,6 @@ export interface UpdateInvestigationRequest extends InvestigationStructuredOutpu
   title?: string;
   error?: string;
   conversation_id?: string;
-  /** Slack message this run posted or edited in the investigation's thread. */
-  slack_message_ts?: string;
 }
 
 export interface GetInvestigationResponse extends InvestigationStructuredOutput {
