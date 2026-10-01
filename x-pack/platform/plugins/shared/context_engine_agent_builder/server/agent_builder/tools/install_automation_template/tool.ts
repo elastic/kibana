@@ -139,7 +139,7 @@ const installAutomationTemplateSchema = z
       .max(MAX_UNITS_LIMIT)
       .optional()
       .describe(
-        'Upper bound on units profiled in one run. Each costs a model call. unit_profile only. Defaults to 25.'
+        'Upper bound on units profiled in one run. Each costs a model call. unit_profile only. Defaults to 100.'
       ),
     kis: z
       .string()

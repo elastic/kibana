@@ -277,7 +277,8 @@ Calling it again replaces the automation this template already attached.
 `template: document_orchestration`. Pass `sourceIndex`, `titleField` and `bodyField`. The AI index
 is the one attached to the conversation.
 Pass `corpusFilter`, `maxDocuments` and `bodyMaxChars` when the corpus needs a bound; they default
-to an empty filter, 50 documents and 12000 characters. `corpusFilter` is inserted after `FROM`.
+to an empty filter, 50 documents and 12000 characters. Keep `maxDocuments` within the KI budget
+(`strategy_catalog`, "The KI budget"). `corpusFilter` is inserted after `FROM`.
 A `WHERE` line may omit the leading `|`; the tool adds it. The tool attaches only the orchestration.
 Each parallel branch is one `workflow.execute` of the system workflow
 `system-context-engine-document-summary`, which is already installed and is not an automation on
@@ -300,8 +301,8 @@ Pass `catalogIndex` and `catalogKey` when a second index holds one record per un
 catalog row or a case header; they default to `sourceIndex` and `unitKey`, which means there is no
 separate record. Pass `discoveryFilter`, a complete ES|QL line beginning with `| WHERE`, to
 re-profile only some units; it defaults to taking every unit.
-`maxUnits` bounds the run and defaults to 25; each unit costs a model call, so raise it
-deliberately on a high-cardinality field.
+`maxUnits` bounds the run: one KI and one model call per unit. It defaults to 100, the KI budget;
+keep it within that budget (`strategy_catalog`, "The KI budget").
 The installed workflow pages through the units on a keyword cursor, so a corpus above the row cap
 is walked rather than truncated, and a re-run regenerates every unit and replaces its indicator.
 To accumulate across runs rather than replace, read the stored indicator and merge through
@@ -369,10 +370,11 @@ will invent it confidently. Put in the prompt:
 - the AI Index id, its destination index name, and whether that destination is an index or a
   data stream
 - the sources and the exact corpus filter the automation should apply
-- the KI budget: at most 100 KIs per run during onboarding, set in the template's own bound
-  (`max_units`, or `max_documents` — multiplied by the claims per document for a per-claim
-  variant). This is guidance for the automation, not a figure to put to the user, and it can be
-  raised once the output is trusted
+- the KI budget: at most 100 KIs per run during onboarding, set in the workflow's own bound
+  (`max_units` or `max_documents`; for a workflow that writes several KIs per document, the
+  `maxItems` and `max_documents` that `strategy_catalog`'s "The KI budget" describes). This is
+  guidance for the automation, not a limit to present to the user, and it can be raised once the
+  output is trusted
 - the strategy from `analyze-and-improve` **as its three answers** — the unit, what one KI
   carries, how units are found and refreshed — and what the indicators are meant to capture.
   Those three are what fill the `consts`, so a brief that names a strategy without them leaves
@@ -638,7 +640,7 @@ the verification retries that a full run pays for, so a straight-line projection
 Show the three numbers, not only the result, so the reader can see what was assumed.
 
 **When the projection exceeds one hour, put the estimate in bold between 🚨 markers** so it
-cannot be skimmed past: "🚨 **The full run over 300 units will take at least 80 minutes** 🚨".
+cannot be skimmed past: "🚨 **The full run over 100 units will take at least 80 minutes** 🚨".
 Under an hour, write it in plain text. A projection that comes out in hours is a finding of its
 own, and the answer is usually a narrower corpus filter or a cheaper unit rather than a shrug, so
 follow the warning with the option you would take. Report token usage only when the execution
