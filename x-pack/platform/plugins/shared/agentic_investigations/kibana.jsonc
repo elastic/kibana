@@ -4,7 +4,7 @@
   "owner": ["@elastic/security-solution"],
   "group": "platform",
   "visibility": "shared",
-  "description": "Solution-agnostic base layer for agentic investigations. Owns the entities an agent and a human collaborate on: impact and escalations today, investigations next. Proposals live in the `proposals` plugin.",
+  "description": "Solution-agnostic base layer for agentic investigations. Owns the entities an agent and a human collaborate on (impact and escalations today, investigations next) and the investigation and escalation conversation template UI. Proposals live in the `proposals` plugin.",
   "plugin": {
     "id": "agenticInvestigations",
     "configPath": ["xpack", "agenticInvestigations"],
