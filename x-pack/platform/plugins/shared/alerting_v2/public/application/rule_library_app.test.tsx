@@ -8,7 +8,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { MemoryRouter, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
 import { RuleLibraryApp } from './rule_library_app';
 

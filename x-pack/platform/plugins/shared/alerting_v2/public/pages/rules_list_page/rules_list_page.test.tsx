@@ -656,7 +656,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('composeDiscoverFlyout'));
 
     expect(mockCreateRuleMutate).toHaveBeenCalledWith(
-      { payload: {} },
+      { payload: {}, enabled: true },
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
     expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
