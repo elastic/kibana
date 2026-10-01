@@ -11,7 +11,7 @@ import type { ActionPolicyFormState } from './types';
 
 export const GROUPING_MODE_OPTIONS: Array<{ id: GroupingMode; label: string }> = [
   {
-    id: 'per_episode',
+    id: 'per_alert',
     label: i18n.translate(
       'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perEpisode',
       {
@@ -34,7 +34,7 @@ export const GROUPING_MODE_OPTIONS: Array<{ id: GroupingMode; label: string }> =
 ];
 
 export const GROUPING_MODE_HELP_TEXT: Record<GroupingMode, string> = {
-  per_episode: i18n.translate(
+  per_alert: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perEpisode.help',
     {
       defaultMessage:
@@ -104,7 +104,7 @@ export const AGGREGATE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: 
 ];
 
 export const DEFAULT_STRATEGY_FOR_MODE: Record<GroupingMode, ThrottleStrategy> = {
-  per_episode: 'on_status_change',
+  per_alert: 'on_status_change',
   per_field: 'time_interval',
   all: 'time_interval',
 };
@@ -228,7 +228,7 @@ export const DEFAULT_FORM_STATE: ActionPolicyFormState = {
   name: '',
   description: '',
   matcher: null,
-  groupingMode: 'per_episode',
+  groupingMode: 'per_alert',
   groupBy: [],
   throttleStrategy: 'on_status_change',
   throttleInterval: '',

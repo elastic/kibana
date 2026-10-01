@@ -53,7 +53,7 @@ export const NotificationControlsSection = () => {
   const showInterval = needsInterval(throttleStrategy);
 
   const strategyOptions =
-    groupingMode === 'per_episode' ? PER_EPISODE_STRATEGY_OPTIONS : AGGREGATE_STRATEGY_OPTIONS;
+    groupingMode === 'per_alert' ? PER_EPISODE_STRATEGY_OPTIONS : AGGREGATE_STRATEGY_OPTIONS;
 
   return (
     <>

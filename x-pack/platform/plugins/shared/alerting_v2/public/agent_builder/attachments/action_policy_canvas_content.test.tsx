@@ -81,7 +81,7 @@ const defaultData = {
   description: 'A test policy',
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: { tags: ['abc'] },
-  groupingMode: 'per_episode' as const,
+  groupingMode: 'per_alert' as const,
   throttle: { strategy: 'on_status_change' as const },
 };
 

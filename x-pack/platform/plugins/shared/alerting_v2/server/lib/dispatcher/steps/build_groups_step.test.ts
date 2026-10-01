@@ -358,10 +358,10 @@ describe('buildActionGroups', () => {
     expect(groups[0].rules).toEqual({});
   });
 
-  it('creates one group per episode for explicit per_episode mode', () => {
+  it('creates one group per episode for explicit per_alert mode', () => {
     const policy = createActionPolicy({
       id: 'p1',
-      groupingMode: 'per_episode',
+      groupingMode: 'per_alert',
       destinations: [{ type: 'workflow', id: 'w1' }],
     });
     const matched = [

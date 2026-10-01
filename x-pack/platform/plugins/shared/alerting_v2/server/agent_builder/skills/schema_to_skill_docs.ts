@@ -20,7 +20,7 @@ import {
   groupingModeSchema,
   throttleStrategySchema,
   MATCHER_CONTEXT_FIELDS,
-  PER_EPISODE_STRATEGIES,
+  PER_ALERT_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
   POLICY_MATCHER_TAGS_MAX,
@@ -613,7 +613,7 @@ const formatStrategySet = (strategies: Set<string>): string =>
 
 /**
  * Generates standalone markdown for throttle / grouping compatibility from
- * `groupingModeSchema`, `PER_EPISODE_STRATEGIES`, `AGGREGATE_STRATEGIES`, and
+ * `groupingModeSchema`, `PER_ALERT_STRATEGIES`, `AGGREGATE_STRATEGIES`, and
  * `STRATEGIES_REQUIRING_INTERVAL`.
  */
 export const generateThrottleGroupingCompatibilityDoc = (): string => {
@@ -621,23 +621,21 @@ export const generateThrottleGroupingCompatibilityDoc = (): string => {
     getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema')
   );
 
-  const perEpisodeOnlyStrategies = [...PER_EPISODE_STRATEGIES].filter(
+  const perAlertOnlyStrategies = [...PER_ALERT_STRATEGIES].filter(
     (strategy) => !AGGREGATE_STRATEGIES.has(strategy)
   );
-  const notPerEpisodeStrategies = [...AGGREGATE_STRATEGIES].filter(
-    (strategy) => !PER_EPISODE_STRATEGIES.has(strategy)
+  const notPerAlertStrategies = [...AGGREGATE_STRATEGIES].filter(
+    (strategy) => !PER_ALERT_STRATEGIES.has(strategy)
   );
 
   const caveats: string[] = [];
-  if (perEpisodeOnlyStrategies.length > 0) {
+  if (perAlertOnlyStrategies.length > 0) {
     caveats.push(
-      `- Only valid with \`per_episode\`: ${formatEnumValuesList(perEpisodeOnlyStrategies)}.`
+      `- Only valid with \`per_alert\`: ${formatEnumValuesList(perAlertOnlyStrategies)}.`
     );
   }
-  if (notPerEpisodeStrategies.length > 0) {
-    caveats.push(
-      `- Not valid with \`per_episode\`: ${formatEnumValuesList(notPerEpisodeStrategies)}.`
-    );
+  if (notPerAlertStrategies.length > 0) {
+    caveats.push(`- Not valid with \`per_alert\`: ${formatEnumValuesList(notPerAlertStrategies)}.`);
   }
   caveats.push(
     `- Require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`): ${formatStrategySet(
@@ -1047,7 +1045,7 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '   - Use the `workflowId` passed to `generate_workflow`, **not** the workflow `attachmentId`.',
     '3. `set_matcher`: `{ tags: ["notify-<rule-slug>"] }` — **do not omit**.',
     '   An omitted or empty matcher is a space-wide catch-all, not "this rule".',
-    '4. `set_grouping`: `per_episode`',
+    '4. `set_grouping`: `per_alert`',
     '5. `set_throttle`: `{ strategy: "on_status_change" }`',
     '6. `validate`',
     '',
@@ -1089,7 +1087,7 @@ export const generateMultiRuleActionPolicyDoc = (): string =>
     '  brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).',
     '- **Search first**: run `platform.core.sml_search` for existing policies before adding',
     '  another catch-all or overlapping tag matcher.',
-    '- **Grouping**: `per_episode` is still a safe default. `all` batches mixed-rule',
+    '- **Grouping**: `per_alert` is still a safe default. `all` batches mixed-rule',
     '  episodes into a single notification; only use it when the user wants one combined',
     '  message.',
     '',

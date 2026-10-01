@@ -502,9 +502,9 @@ describe('schema_to_skill_docs', () => {
     it('keeps the referencing field description when the definition also has one', () => {
       const doc = generateActionPolicySchemaDoc();
       expect(doc).toContain(
-        '| `grouping_mode` | "per_episode" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. |'
+        '| `grouping_mode` | "per_alert" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. |'
       );
-      expect(doc).not.toContain('per_episode groups by episode lifecycle');
+      expect(doc).not.toContain('per_alert groups by alert lifecycle');
     });
   });
 

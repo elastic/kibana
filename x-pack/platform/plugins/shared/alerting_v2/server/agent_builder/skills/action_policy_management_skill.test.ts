@@ -124,7 +124,7 @@ describe('createActionPolicyManagementSkill', () => {
     expect(byName['action-policy-matchers']).not.toContain('rule.id:');
     expect(byName['action-policy-matchers']).not.toContain('rule.tags:');
 
-    expect(byName['action-policy-grouping-modes']).toContain('`per_episode`');
+    expect(byName['action-policy-grouping-modes']).toContain('`per_alert`');
     expect(byName['action-policy-throttle-strategies']).toContain('`on_status_change`');
     expect(byName['action-policy-throttle-strategies']).toContain(
       'action-policy-throttle-grouping-compatibility.md'
@@ -132,7 +132,7 @@ describe('createActionPolicyManagementSkill', () => {
     expect(byName['action-policy-throttle-grouping-compatibility']).toContain(
       '# Throttle / Grouping Compatibility'
     );
-    expect(byName['action-policy-throttle-grouping-compatibility']).toContain('`per_episode`');
+    expect(byName['action-policy-throttle-grouping-compatibility']).toContain('`per_alert`');
 
     expect(byName['workflow-destinations']).toContain('# Workflows');
     expect(byName['dispatch-flow']).toContain('# Dispatch Flow');

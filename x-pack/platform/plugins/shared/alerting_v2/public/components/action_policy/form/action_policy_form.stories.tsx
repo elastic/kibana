@@ -73,7 +73,7 @@ export const PerEpisodeWithInterval: Story = {
       name: 'Status change with reminders',
       description: 'Notifies on status change and repeats every hour',
       matcher: null,
-      groupingMode: 'per_episode',
+      groupingMode: 'per_alert',
       groupBy: [],
       throttleStrategy: 'per_status_interval',
       throttleInterval: '1h',

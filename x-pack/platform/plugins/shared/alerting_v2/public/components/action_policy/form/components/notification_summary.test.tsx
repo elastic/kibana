@@ -22,13 +22,13 @@ describe('getDispatchSummary', () => {
     throttleInterval?: string;
   }) =>
     getDispatchSummary({
-      groupingMode: overrides.groupingMode ?? 'per_episode',
+      groupingMode: overrides.groupingMode ?? 'per_alert',
       groupBy: overrides.groupBy ?? [],
       throttleStrategy: overrides.throttleStrategy ?? 'on_status_change',
       throttleInterval: overrides.throttleInterval ?? '',
     });
 
-  describe('per_episode mode', () => {
+  describe('per_alert mode', () => {
     it('describes the status change strategy', () => {
       expect(summary({ throttleStrategy: 'on_status_change' })).toBe(
         'Sends one notification when an episode opens and one when it recovers.'
@@ -145,7 +145,7 @@ describe('NotificationSummary', () => {
   };
 
   it('shows the mode description and the outcome for the current configuration', () => {
-    renderSummary({ groupingMode: 'per_episode', throttleStrategy: 'on_status_change' });
+    renderSummary({ groupingMode: 'per_alert', throttleStrategy: 'on_status_change' });
 
     expect(screen.getByText('Notification summary')).toBeInTheDocument();
     expect(screen.getByTestId('notificationSummaryModeText')).toHaveTextContent(

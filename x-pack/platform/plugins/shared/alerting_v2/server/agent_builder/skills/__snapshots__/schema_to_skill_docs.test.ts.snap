@@ -38,7 +38,7 @@ Use \`set_grouping\` to batch matched episodes into notifications — one per ep
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`operation\` | \\"set_grouping\\" | required |  |
-| \`groupingMode\` | \\"per_episode\\" \\\\| \\"all\\" \\\\| \\"per_field\\" | optional | The grouping mode. |
+| \`groupingMode\` | \\"per_alert\\" \\\\| \\"all\\" \\\\| \\"per_field\\" | optional | The grouping mode. |
 | \`groupBy\` | string[] \\\\| null | optional | Fields used to group alerts (required when groupingMode is per_field). |
 
 #### \`operation: \\"set_throttle\\"\`
@@ -72,7 +72,7 @@ exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed
 | \`destinations\` | { type: \\"workflow\\", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |
 | \`matcher\` | object | optional | Selects the alerts this policy applies to. Set \`tags\` to match alerts from rules with those tags. Set \`expression\` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both \`tags\` and \`expression\`, an alert must match the tags and the expression for the policy to apply. When \`matcher\` is \`null\`, or when both \`tags\` and \`expression\` are empty, the policy applies to all alerts. |
 | \`group_by\` | string[] | optional | The fields used to group alerts. (max items: 16) |
-| \`grouping_mode\` | \\"per_episode\\" \\\\| \\"all\\" \\\\| \\"per_field\\" | optional | The grouping mode for alert notifications. |
+| \`grouping_mode\` | \\"per_alert\\" \\\\| \\"all\\" \\\\| \\"per_field\\" | optional | The grouping mode for alert notifications. |
 | \`throttle\` | object | optional | The throttle configuration for notifications. |"
 `;
 
@@ -181,8 +181,8 @@ Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw si
 exports[`schema_to_skill_docs generateGroupingModesDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Grouping Modes
 
-- \`per_episode\`: one notification per alert episode lifecycle (default).
-- \`all\`: a single notification for all matching episodes.
+- \`per_alert\`: one notification per alert lifecycle (default).
+- \`all\`: a single notification for all matching alerts.
 - \`per_field\`: group by specified \`groupBy\` fields.
 
 Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md)."
@@ -290,7 +290,7 @@ tags) and an optional KQL \`expression\` over
   brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).
 - **Search first**: run \`platform.core.sml_search\` for existing policies before adding
   another catch-all or overlapping tag matcher.
-- **Grouping**: \`per_episode\` is still a safe default. \`all\` batches mixed-rule
+- **Grouping**: \`per_alert\` is still a safe default. \`all\` batches mixed-rule
   episodes into a single notification; only use it when the user wants one combined
   message.
 
@@ -653,7 +653,7 @@ Call \`manage_action_policy\` with these operations in order:
    - Use the \`workflowId\` passed to \`generate_workflow\`, **not** the workflow \`attachmentId\`.
 3. \`set_matcher\`: \`{ tags: [\\"notify-<rule-slug>\\"] }\` — **do not omit**.
    An omitted or empty matcher is a space-wide catch-all, not \\"this rule\\".
-4. \`set_grouping\`: \`per_episode\`
+4. \`set_grouping\`: \`per_alert\`
 5. \`set_throttle\`: \`{ strategy: \\"on_status_change\\" }\`
 6. \`validate\`
 
@@ -684,13 +684,13 @@ State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-op
 exports[`schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Throttle / Grouping Compatibility
 
-- \`per_episode\`: one notification per alert episode lifecycle (default).
-- \`all\`: a single notification for all matching episodes.
+- \`per_alert\`: one notification per alert lifecycle (default).
+- \`all\`: a single notification for all matching alerts.
 - \`per_field\`: group by specified \`groupBy\` fields.
 
 Caveats:
-- Only valid with \`per_episode\`: \`on_status_change\`, \`per_status_interval\`.
-- Not valid with \`per_episode\`: \`time_interval\`.
+- Only valid with \`per_alert\`: \`on_status_change\`, \`per_status_interval\`.
+- Not valid with \`per_alert\`: \`time_interval\`.
 - Require an \`interval\` (e.g. \`\\"5m\\"\`, \`\\"1h\\"\`): \`per_status_interval\`, \`time_interval\`.
 
 If you set both in one request, put \`set_grouping\` before \`set_throttle\`. The tool
@@ -702,7 +702,7 @@ Related: [action-policy-grouping-modes](./action-policy-grouping-modes.md), [act
 exports[`schema_to_skill_docs generateThrottleStrategiesDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Throttle Strategies
 
-- \`on_status_change\`: notify only on episode status transitions (default for \`per_episode\`).
+- \`on_status_change\`: notify only on alert status transitions (default for \`per_alert\`).
 - \`per_status_interval\`: notify on transitions and at regular intervals.
 - \`time_interval\`: notify at regular intervals regardless of status (default for \`all\`/\`per_field\`).
 - \`every_time\`: notify on every evaluation cycle (high volume).

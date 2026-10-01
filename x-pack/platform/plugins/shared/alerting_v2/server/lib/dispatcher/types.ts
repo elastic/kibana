@@ -103,7 +103,7 @@ export interface ActionPolicy {
   /** data.* fields used to group episodes into a single action group */
   groupBy: string[];
   /** How episodes are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
-  groupingMode: 'per_episode' | 'all' | 'per_field';
+  groupingMode: 'per_alert' | 'all' | 'per_field';
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';

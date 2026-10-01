@@ -205,7 +205,7 @@ describe('ActionPolicyForm', () => {
     expect(screen.getByTestId(TEST_SUBJ.strategySelect)).toHaveValue('on_status_change');
   });
 
-  it('shows strategy select for per_episode mode', () => {
+  it('shows strategy select for per_alert mode', () => {
     renderForm();
 
     const strategySelect = screen.getByTestId(TEST_SUBJ.strategySelect);

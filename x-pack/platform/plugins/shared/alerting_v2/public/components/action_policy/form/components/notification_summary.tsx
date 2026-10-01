@@ -35,7 +35,7 @@ export const getDispatchSummary = ({
   const interval = formatInterval(throttleInterval);
   const fields = groupBy.join(', ');
 
-  if (groupingMode === 'per_episode') {
+  if (groupingMode === 'per_alert') {
     switch (throttleStrategy) {
       case 'on_status_change':
         return i18n.translate(
