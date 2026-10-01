@@ -36,10 +36,11 @@ export class PubSubExamplePlugin implements Plugin {
 
   public setup(core: CoreSetup) {
     core.pubsub.registerTopic(pingTopic);
-    core.pubsub.subscribe(pingTopic, 'echo', ['default'], (event) => {
-      this.logger.info(`echo ${event.id} ${event.payload.message}`);
+    core.pubsub.subscribe(pingTopic, 'echo', ['default'], (event, context) => {
+      const requestId = context.request?.id ?? 'none';
+      this.logger.info(`echo ${event.id} ${event.payload.message} request ${requestId}`);
     });
-    core.pubsub.subscribe(pingTopic, 'length', ['default'], (event) => {
+    core.pubsub.subscribe(pingTopic, 'length', ['*'], (event) => {
       this.logger.info(`length ${event.id} ${event.payload.message.length}`);
     });
 
@@ -70,10 +71,14 @@ export class PubSubExamplePlugin implements Plugin {
         },
         async (_context, request, response) => {
           const [start] = await core.getStartServices();
-          const event = await start.pubsub.publish(pingTopic, {
-            namespaces: ['default'],
-            payload: { source: 'http', message: request.body.message },
-          });
+          const event = await start.pubsub.publish(
+            pingTopic,
+            {
+              namespaces: ['default'],
+              payload: { source: 'http', message: request.body.message },
+            },
+            { request }
+          );
 
           return response.ok({ body: { id: event.id } });
         }
