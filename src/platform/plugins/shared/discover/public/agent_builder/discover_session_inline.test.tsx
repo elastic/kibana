@@ -295,6 +295,35 @@ describe('DiscoverSessionInline', () => {
     );
   });
 
+  it('keeps the last valid range when a legacy picker change is invalid', async () => {
+    renderInline();
+
+    await waitFor(() => {
+      expect(embeddableApi.setTimeRange).toHaveBeenCalledTimes(1);
+    });
+
+    act(() => {
+      capturedSearchBarProps.at(-1)?.onQueryChange?.({
+        dateRange: { from: '2024-01-02T00:00:00.000Z', to: '2024-01-01T00:00:00.000Z' },
+      });
+      capturedSearchBarProps.at(-1)?.onQueryChange?.({ dateRange: { from: 'now', to: 'now' } });
+    });
+
+    expect(embeddableApi.setTimeRange).toHaveBeenCalledTimes(1);
+
+    const validRange = {
+      from: '2024-01-01T00:00:00.000Z',
+      to: '2024-01-02T00:00:00.000Z',
+    };
+    act(() => {
+      capturedSearchBarProps.at(-1)?.onQueryChange?.({ dateRange: validRange });
+    });
+
+    await waitFor(() => {
+      expect(embeddableApi.setTimeRange).toHaveBeenCalledWith(validRange);
+    });
+  });
+
   it('opens Discover with the visible columns and live sort', async () => {
     const registerActionButtons = jest.fn();
     const { navigate } = renderInline({ registerActionButtons });

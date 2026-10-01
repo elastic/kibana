@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import dateMath from '@kbn/datemath';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -16,6 +17,16 @@ const EMPTY_KUERY_QUERY: Query = { query: '', language: 'kuery' };
 
 const areTimeRangesEqual = (current: TimeRange | undefined, next: TimeRange) =>
   current?.from === next.from && current?.to === next.to;
+
+const isCommittableTimeRange = (timeRange: TimeRange): boolean => {
+  if (timeRange.from === 'now' && timeRange.to === 'now') {
+    return false;
+  }
+
+  const from = dateMath.parse(timeRange.from);
+  const to = dateMath.parse(timeRange.to, { roundUp: true });
+  return Boolean(from?.isValid() && to?.isValid() && !from.isAfter(to));
+};
 
 export const useDiscoverSessionUnifiedSearch = ({
   timeRange,
@@ -42,6 +53,10 @@ export const useDiscoverSessionUnifiedSearch = ({
   }, [initialBounds]);
 
   const commitTimeRange = useCallback(({ dateRange }: { dateRange: TimeRange }) => {
+    if (!isCommittableTimeRange(dateRange)) {
+      return;
+    }
+
     setCommittedTimeRange((current) =>
       areTimeRangesEqual(current, dateRange) ? current : dateRange
     );
