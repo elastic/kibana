@@ -53,6 +53,9 @@ const getDocsPagePath = (spec: ConnectorSpec): string | undefined => {
   return path.join(CONNECTOR_DOCS_DIR, `${slug}-action-type.md`);
 };
 
+/** Normalizes an action name or a docs heading (`insertOne`, "Insert one", `` `insertOne` ``) to one key. */
+const toHeadingKey = (text: string): string => text.toLowerCase().replace(/[^a-z0-9]/g, '');
+
 const getAvailability = ({ metadata }: ConnectorSpec): Availability | undefined => {
   const agentBuilder = metadata.supportedFeatureIds.includes('agentBuilder');
   const workflows = metadata.supportedFeatureIds.includes('workflows');
@@ -197,19 +200,21 @@ describe('connector spec quality contracts', () => {
         ) {
           return;
         }
-        const nonToolActionCount = Object.values(spec.actions).filter(
-          (action) => !action.isTool
-        ).length;
-        const markedLineCount = fs
+        const headings = fs
           .readFileSync(docsPagePath, 'utf8')
           .split('\n')
-          .filter(
-            (line) =>
-              line.includes(NOT_YET_AVAILABLE_MARKER) &&
-              !AVAILABILITY_STATEMENTS.agentBuilderOnly.test(line)
-          ).length;
+          .map((line) => ({
+            name: toHeadingKey(line.split(NOT_YET_AVAILABLE_MARKER).join('')),
+            marked: line.includes(NOT_YET_AVAILABLE_MARKER),
+          }));
+        const unmarked = Object.entries(spec.actions)
+          .filter(([, action]) => !action.isTool)
+          .map(([actionName]) => actionName)
+          .filter((actionName) =>
+            headings.every(({ name, marked }) => name !== toHeadingKey(actionName) || !marked)
+          );
 
-        expect(markedLineCount).toBeGreaterThanOrEqual(nonToolActionCount);
+        expect(unmarked).toEqual([]);
       }
     );
 
