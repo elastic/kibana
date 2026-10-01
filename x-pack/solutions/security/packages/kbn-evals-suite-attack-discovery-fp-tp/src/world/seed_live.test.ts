@@ -237,8 +237,9 @@ describe('seedFixture', () => {
   });
 
   it('throws when createDataStream 400s and the stream still does not exist', async () => {
-    esClient.indices.getDataStream
-      .mockRejectedValue(Object.assign(new Error('not found'), { statusCode: 404 }));
+    esClient.indices.getDataStream.mockRejectedValue(
+      Object.assign(new Error('not found'), { statusCode: 404 })
+    );
     esClient.indices.createDataStream.mockRejectedValueOnce(
       Object.assign(new Error('invalid template'), { statusCode: 400 })
     );
@@ -250,10 +251,18 @@ describe('seedFixture', () => {
   });
 
   it('refuses when only a non-data-stream template matches the target name', async () => {
-    esClient.indices.getDataStream.mockRejectedValue(Object.assign(new Error('not found'), { statusCode: 404 }));
+    esClient.indices.getDataStream.mockRejectedValue(
+      Object.assign(new Error('not found'), { statusCode: 404 })
+    );
     esClient.indices.getIndexTemplate.mockResolvedValueOnce({
       index_templates: [
-        { name: '.alerts-security.alerts', index_template: { index_patterns: ['.alerts-security.alerts-*'], template: { mappings: {} } } },
+        {
+          name: '.alerts-security.alerts',
+          index_template: {
+            index_patterns: ['.alerts-security.alerts-*'],
+            template: { mappings: {} },
+          },
+        },
       ],
     });
 
