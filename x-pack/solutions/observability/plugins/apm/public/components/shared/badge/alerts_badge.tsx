@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MouseEventHandler } from 'react';
+import type { MouseEventHandler, ReactNode } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
@@ -82,26 +82,32 @@ export interface AlertsBadgeProps {
   'data-test-subj'?: string;
 }
 
-/**
- * Active-alerts count badge shared by the APM service detail header, the service flyout, and the
- * service map (nodes + popover title). Mirrors {@link SloStatusBadge}: it centralizes the markup,
- * tooltip, accessibility wiring, and the clickable/display-only split so the callers only decide
- * whether the badge navigates.
- *
- * `EuiBadgeProps` is a discriminated union, so `onClick` cannot be spread conditionally — the two
- * variants are rendered explicitly while sharing their static props. When non-interactive but
- * still tooltipped, the badge is wrapped in a focusable `<span>` so the tooltip is reachable by
- * keyboard (EUI requires the tooltip anchor to be focusable).
- */
-export function AlertsBadge({
+/** Presentation descriptor shared by {@link AlertsBadge} and the service flyout header badge. */
+export interface AlertsBadgeDescriptor {
+  color: 'danger';
+  iconType: 'warning';
+  /** Badge content (the active-alerts count). */
+  label: ReactNode;
+  ariaLabel: string;
+  toolTipContent: ReactNode;
+  /** Set when the badge navigates via a link (preferred — supports open-in-new-tab). */
+  href?: string;
+  /** Set when the badge navigates via a click handler instead of a link. */
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+  isInteractive: boolean;
+  ebtProps: ReturnType<typeof getEbtProps> | {};
+  'data-test-subj': string;
+}
+
+/** Resolves the alerts badge presentation so the standalone badge and the flyout header agree. */
+export function getAlertsBadgeDescriptor({
   count,
   serviceName,
   navigationProps,
   onClick,
-  hideTooltip = false,
   ebt,
   'data-test-subj': dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
-}: AlertsBadgeProps) {
+}: AlertsBadgeProps): AlertsBadgeDescriptor {
   const ariaLabel = getAriaLabel(count, serviceName);
 
   const href = navigationProps
@@ -118,26 +124,63 @@ export function AlertsBadge({
     : undefined;
 
   const isInteractive = !!(href || onClick);
-  const ebtProps = ebt && isInteractive ? getEbtProps(ebt) : {};
+
+  return {
+    color: 'danger',
+    iconType: 'warning',
+    label: count,
+    ariaLabel,
+    toolTipContent: isInteractive ? getClickableTooltip(count) : getDisplayTooltip(count),
+    href,
+    onClick,
+    isInteractive,
+    ebtProps: ebt && isInteractive ? getEbtProps(ebt) : {},
+    'data-test-subj': dataTestSubj,
+  };
+}
+
+/**
+ * Active-alerts count badge shared by the APM service detail header, the service flyout, and the
+ * service map (nodes + popover title). Mirrors {@link SloStatusBadge}: it centralizes the markup,
+ * tooltip, accessibility wiring, and the clickable/display-only split so the callers only decide
+ * whether the badge navigates.
+ *
+ * When non-interactive but still tooltipped, the badge is wrapped in a focusable `<span>` so the
+ * tooltip is reachable by keyboard.
+ */
+export function AlertsBadge(props: AlertsBadgeProps) {
+  const { hideTooltip = false } = props;
+  const {
+    color,
+    iconType,
+    label,
+    ariaLabel,
+    toolTipContent,
+    href,
+    onClick,
+    isInteractive,
+    ebtProps,
+    'data-test-subj': dataTestSubj,
+  } = getAlertsBadgeDescriptor(props);
 
   const badge = href ? (
     <EuiBadge
       data-test-subj={dataTestSubj}
-      color="danger"
-      iconType="warning"
+      color={color}
+      iconType={iconType}
       href={href}
       aria-label={ariaLabel}
       tabIndex={0}
       css={clickableBadgeStyles}
       {...ebtProps}
     >
-      {count}
+      {label}
     </EuiBadge>
   ) : onClick ? (
     <EuiBadge
       data-test-subj={dataTestSubj}
-      color="danger"
-      iconType="warning"
+      color={color}
+      iconType={iconType}
       onClick={onClick}
       onClickAriaLabel={ariaLabel}
       tabIndex={0}
@@ -145,16 +188,11 @@ export function AlertsBadge({
       css={clickableBadgeStyles}
       {...ebtProps}
     >
-      {count}
+      {label}
     </EuiBadge>
   ) : (
-    <EuiBadge
-      data-test-subj={dataTestSubj}
-      color="danger"
-      iconType="warning"
-      aria-label={ariaLabel}
-    >
-      {count}
+    <EuiBadge data-test-subj={dataTestSubj} color={color} iconType={iconType} aria-label={ariaLabel}>
+      {label}
     </EuiBadge>
   );
 
@@ -162,10 +200,8 @@ export function AlertsBadge({
     return badge;
   }
 
-  const tooltipContent = isInteractive ? getClickableTooltip(count) : getDisplayTooltip(count);
-
   return (
-    <EuiToolTip position="bottom" content={tooltipContent}>
+    <EuiToolTip position="bottom" content={toolTipContent}>
       {isInteractive ? badge : <span tabIndex={0}>{badge}</span>}
     </EuiToolTip>
   );

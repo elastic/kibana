@@ -5,26 +5,35 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+import { FlyoutTemplate } from '@kbn/flyout-template';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { AnomaliesBadge } from '../../../app/service_inventory/service_list/anomalies_badge';
+import { useAnomaliesBadgeDescriptor } from '../../../app/service_inventory/service_list/anomalies_badge';
 import { useServiceFlyoutContext } from '../service_flyout_context';
-import { AlertsBadge } from '../../badge/alerts_badge';
-import { SloStatusBadge } from '../../slo_status_badge';
+import { getAlertsBadgeDescriptor } from '../../badge/alerts_badge';
+import { getSloStatusBadgeDescriptor } from '../../slo_status_badge';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceBadgesData } from '../hooks/use_service_badges_data';
 import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 
+const { Badge } = FlyoutTemplate.Header;
+
+const SERVICE_BADGE_LABEL = i18n.translate('xpack.apm.serviceFlyout.serviceBadgeLabel', {
+  defaultMessage: 'Service',
+});
+
 /**
- * Resolves and renders the status badges (alerts, SLO, anomaly) for the service flyout header.
+ * Resolves the service flyout header badges (service, alerts, SLO, anomaly) as `Header.Badge`
+ * elements for the `FlyoutTemplate.Header` zone. A hook so it can run the badge data/link hooks and
+ * `useAnomaliesBadgeDescriptor`; the returned elements must be authored as direct children of the
+ * header zone (the template assembly only recognizes parts that are direct children).
  *
- * Alerts, SLO status, and anomaly score are all fetched on open and shown once their requests
- * resolve. SLO status uses its own endpoint since SLO summaries are evaluated over the SLO's own
- * window, not the flyout time range.
+ * Alerts, SLO status, and anomaly score are fetched on open and shown once resolved. SLO status uses
+ * its own endpoint since SLO summaries are evaluated over the SLO's own window, not the flyout range.
  */
-export function ServiceBadges() {
+export function useServiceBadges(): ReactElement[] {
   const {
     deps: { core, share },
     service,
@@ -43,90 +52,163 @@ export function ServiceBadges() {
     rangeTo,
   });
 
-  const showAlertsBadge = alertsCount !== undefined;
-  const showAnomalyBadge = anomalyData !== undefined;
-  const showSloBadge = sloData !== undefined;
+  const anomalyDescriptor = useAnomaliesBadgeDescriptor({
+    score: anomalyData?.anomalyScore,
+    detectorType: anomalyData?.detectorType,
+    navigationProps:
+      anomalyData && service.agentName && anomalyData.anomalyEnvironment && share?.url?.locators
+        ? {
+            serviceName: service.name,
+            anomalyEnvironment: anomalyData.anomalyEnvironment,
+            agentName: service.agentName,
+            rangeFrom,
+            rangeTo,
+            locators: share.url.locators,
+            transactionType,
+          }
+        : undefined,
+    ebt: {
+      action: EBT_CLICK_ACTIONS.VIEW_ANOMALIES,
+      element: SERVICE_FLYOUT_EBT_ELEMENTS.ANOMALIES_BADGE,
+    },
+  });
 
-  return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
-      <EuiFlexItem grow={false}>
-        <EuiBadge data-test-subj="serviceFlyoutServiceBadge" color="default" iconType="grid">
-          {i18n.translate('xpack.apm.serviceFlyout.serviceBadgeLabel', {
-            defaultMessage: 'Service',
+  const badges: ReactElement[] = [
+    <Badge key="service" id="service" color="default" iconType="grid" data-test-subj="serviceFlyoutServiceBadge">
+      {SERVICE_BADGE_LABEL}
+    </Badge>,
+  ];
+
+  if (showDynamicBadges && alertsCount !== undefined) {
+    const descriptor = getAlertsBadgeDescriptor({
+      count: alertsCount,
+      serviceName: service.name,
+      'data-test-subj': 'serviceFlyoutAlertsBadge',
+      ebt: {
+        action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
+        element: SERVICE_FLYOUT_EBT_ELEMENTS.ALERTS_BADGE,
+      },
+      navigationProps:
+        service.agentName && share?.url?.locators
+          ? {
+              serviceName: service.name,
+              agentName: service.agentName,
+              environment,
+              rangeFrom,
+              rangeTo,
+              locators: share.url.locators,
+            }
+          : undefined,
+    });
+
+    badges.push(
+      descriptor.href ? (
+        <Badge
+          key="alerts"
+          id="alerts"
+          color={descriptor.color}
+          iconType={descriptor.iconType}
+          data-test-subj={descriptor['data-test-subj']}
+          toolTipContent={descriptor.toolTipContent}
+          toolTipPosition="bottom"
+          href={descriptor.href}
+          aria-label={descriptor.ariaLabel}
+          {...descriptor.ebtProps}
+        >
+          {descriptor.label}
+        </Badge>
+      ) : (
+        <Badge
+          key="alerts"
+          id="alerts"
+          color={descriptor.color}
+          iconType={descriptor.iconType}
+          data-test-subj={descriptor['data-test-subj']}
+          toolTipContent={descriptor.toolTipContent}
+          toolTipPosition="bottom"
+          aria-label={descriptor.ariaLabel}
+        >
+          {descriptor.label}
+        </Badge>
+      )
+    );
+  }
+
+  if (showDynamicBadges && sloData !== undefined) {
+    const descriptor = getSloStatusBadgeDescriptor({
+      sloStatus: sloData.sloStatus,
+      sloCount: sloData.sloCount,
+      serviceName: service.name,
+    });
+
+    badges.push(
+      slosHref ? (
+        <Badge
+          key="slo"
+          id="slo"
+          color={descriptor.color}
+          data-test-subj="serviceFlyoutSloBadge"
+          toolTipContent={descriptor.toolTipContent}
+          toolTipPosition="bottom"
+          onClick={(event) => {
+            event.preventDefault();
+            navigateToUrl(slosHref);
+          }}
+          onClickAriaLabel={descriptor.ariaLabel}
+          {...getEbtProps({
+            action: EBT_CLICK_ACTIONS.VIEW_SLOS,
+            element: SERVICE_FLYOUT_EBT_ELEMENTS.SLO_BADGE,
           })}
-        </EuiBadge>
-      </EuiFlexItem>
-      {showDynamicBadges && showAlertsBadge && (
-        <EuiFlexItem grow={false}>
-          <AlertsBadge
-            count={alertsCount}
-            serviceName={service.name}
-            data-test-subj="serviceFlyoutAlertsBadge"
-            ebt={{
-              action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
-              element: SERVICE_FLYOUT_EBT_ELEMENTS.ALERTS_BADGE,
-            }}
-            navigationProps={
-              service.agentName && share?.url?.locators
-                ? {
-                    serviceName: service.name,
-                    agentName: service.agentName,
-                    environment,
-                    rangeFrom,
-                    rangeTo,
-                    locators: share.url.locators,
-                  }
-                : undefined
-            }
-          />
-        </EuiFlexItem>
-      )}
-      {showDynamicBadges && showSloBadge && (
-        <EuiFlexItem grow={false}>
-          <SloStatusBadge
-            sloStatus={sloData.sloStatus}
-            sloCount={sloData.sloCount}
-            serviceName={service.name}
-            {...(slosHref
-              ? {
-                  ebt: {
-                    action: EBT_CLICK_ACTIONS.VIEW_SLOS,
-                    element: SERVICE_FLYOUT_EBT_ELEMENTS.SLO_BADGE,
-                  },
-                  onClick: (event) => {
-                    event.preventDefault();
-                    navigateToUrl(slosHref);
-                  },
-                }
-              : {})}
-          />
-        </EuiFlexItem>
-      )}
-      {showDynamicBadges && showAnomalyBadge && (
-        <EuiFlexItem grow={false} data-test-subj="serviceFlyoutAnomaliesBadge">
-          <AnomaliesBadge
-            score={anomalyData.anomalyScore}
-            detectorType={anomalyData.detectorType}
-            ebt={{
-              action: EBT_CLICK_ACTIONS.VIEW_ANOMALIES,
-              element: SERVICE_FLYOUT_EBT_ELEMENTS.ANOMALIES_BADGE,
-            }}
-            navigationProps={
-              service.agentName && anomalyData.anomalyEnvironment && share?.url?.locators
-                ? {
-                    serviceName: service.name,
-                    anomalyEnvironment: anomalyData.anomalyEnvironment,
-                    agentName: service.agentName,
-                    rangeFrom,
-                    rangeTo,
-                    locators: share.url.locators,
-                    transactionType,
-                  }
-                : undefined
-            }
-          />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
+        >
+          {descriptor.label}
+        </Badge>
+      ) : (
+        <Badge
+          key="slo"
+          id="slo"
+          color={descriptor.color}
+          data-test-subj="serviceFlyoutSloBadge"
+          toolTipContent={descriptor.toolTipContent}
+          toolTipPosition="bottom"
+          aria-label={descriptor.ariaLabel}
+        >
+          {descriptor.label}
+        </Badge>
+      )
+    );
+  }
+
+  if (showDynamicBadges && anomalyData !== undefined) {
+    badges.push(
+      anomalyDescriptor.href ? (
+        <Badge
+          key="anomaly"
+          id="anomaly"
+          color={anomalyDescriptor.color}
+          data-test-subj="serviceFlyoutAnomaliesBadge"
+          toolTipContent={anomalyDescriptor.toolTipContent}
+          toolTipPosition="bottom"
+          href={anomalyDescriptor.href}
+          aria-label={anomalyDescriptor.ariaLabel}
+          {...anomalyDescriptor.ebtProps}
+        >
+          {anomalyDescriptor.label}
+        </Badge>
+      ) : (
+        <Badge
+          key="anomaly"
+          id="anomaly"
+          color={anomalyDescriptor.color}
+          data-test-subj="serviceFlyoutAnomaliesBadge"
+          toolTipContent={anomalyDescriptor.toolTipContent}
+          toolTipPosition="bottom"
+          aria-label={anomalyDescriptor.ariaLabel}
+        >
+          {anomalyDescriptor.label}
+        </Badge>
+      )
+    );
+  }
+
+  return badges;
 }

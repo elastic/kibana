@@ -18,6 +18,7 @@ import type {
   EuiIconProps,
   EuiTabProps,
   EuiTabsProps,
+  EuiToolTipProps,
 } from '@elastic/eui';
 // FIXME: change to import from `@elastic/eui` once https://github.com/elastic/eui/pull/10064 is merged.
 import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
@@ -94,29 +95,21 @@ export type FlyoutHeaderMetaBlockProps = Omit<MetaBlock, BlockPartOwnedProps> &
     children: ReactNode;
   };
 
-/** Props owned by the template. `children` is the badge label and `id` identifies the part instance. */
-type BadgePartOwnedProps = 'children' | 'id';
-
 /**
- * Props that would turn the badge into a control. Badges in a flyout header are meant to label the
- * subject, not act as controls.
+ * Props for the declarative `FlyoutTemplate.Header.Badge` part. Intersects the full `EuiBadgeProps`
+ * (rather than `Omit`-ing it) to keep the `ExclusiveUnion` intact, so `onClick`/`href` stay
+ * available and a badge can act as a label or a control.
  */
-type BadgeControlProps =
-  | 'onClick'
-  | 'onClickAriaLabel'
-  | 'iconOnClick'
-  | 'iconOnClickAriaLabel'
-  | 'href'
-  | 'target'
-  | 'rel';
-
-/** Props for the declarative `FlyoutTemplate.Header.Badge` part. */
-export type FlyoutHeaderBadgeProps = Omit<EuiBadgeProps, BadgePartOwnedProps | BadgeControlProps> &
+export type FlyoutHeaderBadgeProps = EuiBadgeProps &
   DataAttributeProps & {
     /** Optional explicit instance id; auto-generated when omitted. */
     id?: string;
     /** Badge label. */
     children: ReactNode;
+    /** When set, the badge is wrapped in an `EuiToolTip` showing this content on hover and focus. */
+    toolTipContent?: ReactNode;
+    /** Position of the badge tooltip; defaults to EUI's default. Only used with `toolTipContent`. */
+    toolTipPosition?: EuiToolTipProps['position'];
   };
 
 /** Props for the declarative `FlyoutTemplate.Header.InfoBlock` part. */

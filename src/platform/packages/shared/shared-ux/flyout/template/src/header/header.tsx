@@ -20,6 +20,7 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiMemoizedStyles,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -190,12 +191,25 @@ const BadgeOverflow = ({ badges, isHidden }: { badges: ReactNode[]; isHidden: bo
   );
 };
 
-/** Renders a resolved `Header.Badge` descriptor. */
-const renderBadge = ({ label, ...badgeProps }: HeaderBadgeDescriptor, key: string): ReactNode => (
-  <EuiBadge key={key} {...badgeProps}>
-    {label}
-  </EuiBadge>
-);
+/** Renders a resolved `Header.Badge` descriptor, wrapping in a tooltip when one is provided. */
+const renderBadge = (
+  { label, toolTipContent, toolTipPosition, ...badgeProps }: HeaderBadgeDescriptor,
+  key: string
+): ReactNode => {
+  const badge = (
+    <EuiBadge key={key} {...badgeProps}>
+      {label}
+    </EuiBadge>
+  );
+  if (!toolTipContent) {
+    return badge;
+  }
+  return (
+    <EuiToolTip key={key} content={toolTipContent} position={toolTipPosition}>
+      {badge}
+    </EuiToolTip>
+  );
+};
 
 type HeaderZoneProps = FlyoutHeaderProps & {
   flyoutTitleId?: string;

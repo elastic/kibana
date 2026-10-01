@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MouseEventHandler } from 'react';
+import type { MouseEventHandler, ReactNode } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import {
@@ -33,7 +33,7 @@ interface SloStatusConfig {
 
 export const SLO_COUNT_CAP = 50;
 
-const SLO_STATUS_CONFIG: Record<SloStatus | 'noSLOs', SloStatusConfig> = {
+export const SLO_STATUS_CONFIG: Record<SloStatus | 'noSLOs', SloStatusConfig> = {
   violated: {
     id: 'Violated',
     color: 'danger',
@@ -122,6 +122,51 @@ const SLO_STATUS_CONFIG: Record<SloStatus | 'noSLOs', SloStatusConfig> = {
       }),
   },
 };
+
+/** Presentation descriptor shared by {@link SloStatusBadge} and the service flyout header badge. */
+export interface SloStatusBadgeDescriptor {
+  color: SloStatusConfig['color'];
+  /** Badge content (status icon + label) for the non-compact layout. */
+  label: ReactNode;
+  toolTipContent: string;
+  ariaLabel: string;
+}
+
+export function getSloStatusBadgeDescriptor({
+  sloStatus,
+  sloCount,
+  serviceName,
+}: {
+  sloStatus: SloStatus | 'noSLOs';
+  sloCount?: number;
+  serviceName: string;
+}): SloStatusBadgeDescriptor {
+  const config = SLO_STATUS_CONFIG[sloStatus];
+  const cappedCount =
+    config.showCount && sloCount
+      ? sloCount >= SLO_COUNT_CAP
+        ? `${SLO_COUNT_CAP}+`
+        : sloCount
+      : undefined;
+
+  return {
+    color: config.color,
+    ariaLabel: config.ariaLabel(serviceName),
+    toolTipContent: config.tooltipContent,
+    label: (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+        {sloStatus !== 'noSLOs' && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="chartGauge" aria-hidden={true} />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">{config.badgeLabel(cappedCount)}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  };
+}
 
 export function SloStatusBadge({
   sloStatus,
