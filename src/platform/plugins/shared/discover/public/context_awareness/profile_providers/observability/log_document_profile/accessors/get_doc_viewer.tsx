@@ -12,6 +12,7 @@ import type {
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
+import { getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { PROJECT_ROUTING, type ICPSManager } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
@@ -61,6 +62,7 @@ export const createGetDocViewer =
             defaultMessage: 'Log overview',
           }),
           order: 0,
+          enabled: Boolean(getMessageFieldWithFallbacks(params.record.flattened).value),
           render: (props: DocViewRenderProps) => (
             <LogOverviewTab
               logOverviewContext$={context.logOverviewContext$}

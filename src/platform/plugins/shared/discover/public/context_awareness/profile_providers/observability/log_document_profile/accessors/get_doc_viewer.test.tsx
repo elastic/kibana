@@ -40,15 +40,13 @@ jest.mock('@kbn/unified-doc-viewer-plugin/public', () => {
 
 const LOGS_OVERVIEW_TAB_ID = 'doc_view_logs_overview';
 
-const buildRecord = (id: string) =>
-  buildDataTableRecord(
-    { _id: id, _index: 'logs-synth.docviewer-default', fields: { 'log.level': ['info'] } },
-    dataViewMock
-  );
+const buildRecord = (id: string, fields: Record<string, string[]> = { 'log.level': ['info'] }) =>
+  buildDataTableRecord({ _id: id, _index: 'logs-synth.docviewer-default', fields }, dataViewMock);
 
 const buildDocViewer = (
   logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>,
-  prevDocViews: DocView[] = []
+  prevDocViews: DocView[] = [],
+  record: ReturnType<typeof buildRecord> = buildRecord('doc-1')
 ) => {
   const registry = new DocViewsRegistry();
 
@@ -65,7 +63,7 @@ const buildDocViewer = (
       context: { logOverviewContext$ },
       toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     } as never
-  )({} as never);
+  )({ record } as never);
 
   docViewer.docViewsRegistry(registry);
 
@@ -74,8 +72,8 @@ const buildDocViewer = (
     throw new Error(`Expected the profile to register a '${LOGS_OVERVIEW_TAB_ID}' doc view`);
   }
 
-  const renderTab = (record: ReturnType<typeof buildRecord>) =>
-    logsOverviewTab.render!({ hit: record } as unknown as DocViewRenderProps);
+  const renderTab = (hit: ReturnType<typeof buildRecord>) =>
+    logsOverviewTab.render!({ hit } as unknown as DocViewRenderProps);
 
   return { registry, renderTab };
 };
@@ -100,6 +98,20 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
       'doc_view_table',
       'doc_view_source',
     ]);
+  });
+
+  it('enables the log overview tab only when the record has a message field', () => {
+    const getTabEnabled = (fields: Record<string, string[]>) =>
+      buildDocViewer(
+        new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+        [],
+        buildRecord('doc-1', fields)
+      )
+        .registry.getAll()
+        .find(({ id }) => id === LOGS_OVERVIEW_TAB_ID)?.enabled;
+
+    expect(getTabEnabled({ message: ['hello'] })).toBe(true);
+    expect(getTabEnabled({ 'service.name': ['payments'] })).toBe(false);
   });
 
   it('opens the section queued on the context when the tab mounts', async () => {
