@@ -72,10 +72,10 @@ describe('getTermsConversionFailure', () => {
     );
   });
 
-  it('returns terms_other_bucket_not_supported when other bucket is unset', () => {
+  it('allows conversion when other bucket is unset', () => {
     const column = createTermsColumn();
     delete column.params.otherBucket;
-    expect(getTermsConversionFailure(column, context())).toBe('terms_other_bucket_not_supported');
+    expect(getTermsConversionFailure(column, context())).toBeUndefined();
   });
 
   it.each([
