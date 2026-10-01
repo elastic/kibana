@@ -7,7 +7,7 @@
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
 import { ProfilingESField } from '@kbn/profiling-utils';
-import type { ProfilingESClient } from '../../utils/create_profiling_es_client';
+import type { ProfilingESClient } from '@kbn/profiling-data-access-plugin/server';
 
 interface HostDetails {
   hostId: string;

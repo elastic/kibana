@@ -420,13 +420,13 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
   it('posts batch progress counts reconciled to this batch alert ids, not raw agent verdicts', () => {
     const progress = findStepByName(workflow.steps, 'post_batch_progress_comment') as {
-      with: { body: { input: string } };
+      with: { message: string };
     };
     // Fabricated agent ids must not inflate the Investigation summary.
-    expect(progress.with.body.input).toContain('variables.batch_tp_count');
-    expect(progress.with.body.input).toContain('variables.batch_fp_count');
-    expect(progress.with.body.input).toContain('variables.batch_inc_count');
-    expect(progress.with.body.input).not.toContain(
+    expect(progress.with.message).toContain('variables.batch_tp_count');
+    expect(progress.with.message).toContain('variables.batch_fp_count');
+    expect(progress.with.message).toContain('variables.batch_inc_count');
+    expect(progress.with.message).not.toContain(
       "structured_output.verdicts | where: 'classification'"
     );
 
@@ -1804,31 +1804,57 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(evaluateExpression(engine, gate.condition, { inputs: {} })).toBe(false);
   });
 
-  it('links the Investigation from both alert notes, and omits it on the standalone path', () => {
-    const verdictNote = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
-      with: { body: { note: { note: string } } };
-    };
+  it('links the Investigation from the no-verdict note, and omits it on the standalone path', () => {
     const errorNote = findStepByName(workflow.steps, 'add_no_data_note_to_alert') as {
       with: { body: { note: { note: string } } };
     };
+    const note = errorNote.with.body.note.note;
 
-    for (const note of [verdictNote.with.body.note.note, errorNote.with.body.note.note]) {
-      const withInvestigation = engine.parseAndRenderSync(note, {
-        workflow: { spaceId: 'default' },
-        variables: { investigation_conversation_id: 'conv-1' },
-      });
-      expect(withInvestigation).toContain(
-        '- Investigation: [conv-1](/s/default/app/agent_builder/conversations/conv-1)'
-      );
+    const withInvestigation = engine.parseAndRenderSync(note, {
+      workflow: { spaceId: 'default' },
+      variables: { investigation_conversation_id: 'conv-1' },
+    });
+    expect(withInvestigation).toContain(
+      '- Investigation: [conv-1](/s/default/app/agent_builder/conversations/conv-1)'
+    );
 
-      // Standalone runs have no Investigation, so the line must not render as a dead link.
-      const standalone = engine.parseAndRenderSync(note, {
-        workflow: { spaceId: 'default' },
-        variables: { investigation_conversation_id: '' },
-      });
-      expect(standalone).not.toContain('Investigation:');
-      expect(standalone).not.toContain('agent_builder/conversations');
-    }
+    // Standalone runs have no Investigation, so the line must not render as a dead link.
+    const standalone = engine.parseAndRenderSync(note, {
+      workflow: { spaceId: 'default' },
+      variables: { investigation_conversation_id: '' },
+    });
+    expect(standalone).not.toContain('Investigation:');
+    expect(standalone).not.toContain('agent_builder/conversations');
+  });
+
+  // A Worker caller applies only its own static AlertZero tags.
+  it('writes the alert-analysis tags only on the standalone path', () => {
+    const gate = findStepByName(workflow.steps, 'write_standalone_tags') as {
+      condition: string;
+      steps: Array<{ name: string }>;
+    };
+    expect(gate.steps.map(({ name }) => name)).toEqual([
+      'set_tags',
+      'has_tags_to_remove',
+      'add_result_tags',
+    ]);
+    expect(evaluateExpression(engine, gate.condition, { inputs: { calledByWorker: true } })).toBe(
+      false
+    );
+    expect(evaluateExpression(engine, gate.condition, { inputs: {} })).toBe(true);
+  });
+
+  // The Worker writes its own verdict note; writing this one too would give each alert two.
+  it('writes the verdict note only on the standalone path', () => {
+    const gate = findStepByName(workflow.steps, 'write_standalone_verdict_note') as {
+      condition: string;
+      steps: Array<{ name: string }>;
+    };
+    expect(gate.steps.map(({ name }) => name)).toEqual(['add_verdict_note_to_alert']);
+    expect(evaluateExpression(engine, gate.condition, { inputs: { calledByWorker: true } })).toBe(
+      false
+    );
+    expect(evaluateExpression(engine, gate.condition, { inputs: {} })).toBe(true);
   });
 
   it('drops verdicts whose id belongs to another batch', () => {
@@ -2016,8 +2042,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       variables: { output_verdicts: verdicts },
     });
 
-    expect(summary).toContain('2 alert(s) with host ws-1 classified as true positive.');
-    expect(summary).toContain('1 alert(s) with host dc-1 classified as false positive.');
+    expect(summary).toContain('2 alerts with host ws-1 classified as true positive.');
+    expect(summary).toContain('1 alert with host dc-1 classified as false positive.');
   });
 
   it('describes alerts with no host field in plain language instead of the __missing__ sentinel', () => {
@@ -2036,7 +2062,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       variables: { output_verdicts: verdicts },
     });
 
-    expect(summary).toContain('1 alert(s) with no host field classified as false positive.');
+    expect(summary).toContain('1 alert with no host field classified as false positive.');
     expect(summary).not.toContain('__missing__');
   });
 
@@ -2336,7 +2362,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(summary).toContain('host-49');
     expect(summary).not.toContain('host-50');
     // 80 verdicts, 80 unique hosts → 30 omitted; overflow note must appear
-    expect(summary).toContain('30 additional host(s) omitted from summary');
+    expect(summary).toContain('30 additional hosts omitted from summary');
     expect(summary.length).toBeLessThanOrEqual(10000);
 
     const longHost = 'h'.repeat(200);

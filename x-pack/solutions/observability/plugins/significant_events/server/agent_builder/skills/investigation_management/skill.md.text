@@ -169,6 +169,6 @@ When the investigation completes, summarise the structured output for the user:
 | `hypotheses` | Every candidate cause investigated, each with a `confidence` score 0–1, a `status` (`confirmed`, `dismissed`, or `investigating`), and a `reason` |
 | `conclusion` | Prose narrative naming the confirmed root cause and its mechanism |
 | `recommendations` | Concrete, actionable next steps, each with a `title` and optional `description`/`code` |
-| `blind_spots` | Data or signal gaps that limited the investigation, each with a `title` and `description` |
+| `impact` | Business-facing `summary` of the impact with supporting `evidence`, plus affected `entities` when strongly indicated |
 
-Present the findings in plain language. Highlight the `confirmed` hypothesis and the `conclusion` first, then the `recommendations`, then surface the `dismissed` hypotheses (with their reasons) and `blind_spots` if they add useful context.
+Present the findings in plain language. Highlight the `confirmed` hypothesis and the `conclusion` first, then the `impact` and the `recommendations`, then surface the `dismissed` hypotheses (with their reasons) if they add useful context.
