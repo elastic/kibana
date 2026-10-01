@@ -253,7 +253,9 @@ export function createSearchEventsTool({
       const query = normalizeEventSearchQuery(toolParams.query);
 
       try {
-        const { getEventSearchClient, licensing, sourcesClient } = await getScopedClients({ request });
+        const { getEventSearchClient, licensing, sourcesClient } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
         const { slugs, ...searchParams } = toolParams;
         const catalog = await loadSourceCatalog(sourcesClient);

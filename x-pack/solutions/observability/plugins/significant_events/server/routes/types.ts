@@ -26,7 +26,7 @@ import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../lib/knowledge_indicators';
 
 import type { SignificantEventsClients } from '../lib/significant_events/significant_events_clients';
-import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
+import type { ContinuousOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
 import type { CleanupWorkflowService } from '../lib/workflows/cleanup_workflow';
 import type { SyncWorkflowService } from '../lib/workflows/sync_workflow';
 import type { SignificantEventsScheduledWorkflowsService } from '../lib/workflows/significant_events_scheduled_workflows';
@@ -71,7 +71,7 @@ export type SignificantEventsRouteHandlerResources = {
   server: SignificantEventsServer;
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
-  continuousKiOnboardingWorkflowService?: ContinuousKiOnboardingWorkflowService;
+  continuousOnboardingWorkflowService?: ContinuousOnboardingWorkflowService;
   cleanupWorkflowService?: CleanupWorkflowService;
   syncWorkflowService?: SyncWorkflowService;
   significantEventsScheduledWorkflowsService?: SignificantEventsScheduledWorkflowsService;

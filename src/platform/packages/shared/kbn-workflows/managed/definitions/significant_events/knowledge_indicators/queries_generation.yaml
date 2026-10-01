@@ -7,8 +7,9 @@
 # Flow:
 #   generate_queries (retry ×3) → persist_queries (retry ×3) → output
 #
-# Concurrency is keyed per stream so only one generation run can be active
-# for a given stream at any time; overlapping triggers are dropped.
+# Concurrency is keyed per source slug so only one generation run can be
+# active for a given source in a space at any time; overlapping triggers are
+# dropped. Every request targets the space that runs the workflow.
 
 version: "1"
 name: "KI Queries Generation"
@@ -22,16 +23,20 @@ tags:
 settings:
   timeout: "10m"
   concurrency:
-    key: "streams-ki-queries-generation-{{ inputs.streamName }}"
+    key: "nightshift-source-queries-generation-{{ inputs.sourceSlug }}"
     strategy: drop
     max: 1
 triggers:
   - type: manual
     inputs:
-      - name: streamName
+      - name: sourceId
         type: string
         required: true
-        description: "The name of the stream to generate queries for."
+        description: "The id of the source to generate queries for."
+      - name: sourceSlug
+        type: string
+        required: true
+        description: "Slug of the target source, used to key concurrency."
       - name: connectorId
         type: string
         description: "Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry."
@@ -46,7 +51,7 @@ steps:
     type: kibana.request
     with:
       method: POST
-      path: "/internal/streams/{{ inputs.streamName }}/queries/_generate"
+      path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/queries/_generate"
       headers:
         x-elastic-internal-origin: "kibana"
       body:
@@ -70,7 +75,7 @@ steps:
         strategy: exponential
     with:
       method: POST
-      path: "/internal/streams/{{ inputs.streamName }}/queries/_persist"
+      path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/queries/_persist"
       headers:
         x-elastic-internal-origin: "kibana"
       body:

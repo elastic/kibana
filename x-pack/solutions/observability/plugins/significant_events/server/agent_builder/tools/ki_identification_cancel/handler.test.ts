@@ -12,6 +12,10 @@ import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onb
 import { cancelKiIdentificationToolHandler } from './handler';
 
 describe('cancelKiIdentificationToolHandler', () => {
+  const getSourcesClient = jest.fn().mockResolvedValue({
+    get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
+  });
+
   it('cancels the latest workflow execution and returns cancel status', async () => {
     const managementApi = {
       getWorkflowExecutions: jest.fn().mockResolvedValue({
@@ -23,11 +27,13 @@ describe('cancelKiIdentificationToolHandler', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
+      getSourcesClient,
     });
     const request = httpServerMock.createKibanaRequest();
 
     const result = await cancelKiIdentificationToolHandler({
       streamName: 'logs.nginx',
+      sourceSlug: 'logs-nginx',
       streamsKIsOnboardingClient,
       request,
     });
@@ -52,11 +58,13 @@ describe('cancelKiIdentificationToolHandler', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
+      getSourcesClient,
     });
     const request = httpServerMock.createKibanaRequest();
 
     const result = await cancelKiIdentificationToolHandler({
       streamName: 'logs.nginx',
+      sourceSlug: 'logs-nginx',
       streamsKIsOnboardingClient,
       request,
     });

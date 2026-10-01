@@ -26,9 +26,11 @@ describe('createKiIdentificationStartTool', () => {
       }),
       runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
     };
+    const getSourcesClient = jest.fn();
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      getSourcesClient,
     });
     const maintenanceService = {
       getState: jest.fn().mockResolvedValue('enabled'),
@@ -44,11 +46,18 @@ describe('createKiIdentificationStartTool', () => {
     });
     const context = createMockToolContext();
 
-    return { tool, context, managementApi, maintenanceService, streamsKIsOnboardingClient };
+    return {
+      tool,
+      context,
+      managementApi,
+      maintenanceService,
+      streamsKIsOnboardingClient,
+      getSourcesClient,
+    };
   };
 
   it('triggers onboarding workflow and returns immediately by default', async () => {
-    const { tool, context, managementApi } = setup();
+    const { tool, context, managementApi, getSourcesClient } = setup();
 
     const result = await tool.handler(
       {
@@ -62,12 +71,15 @@ describe('createKiIdentificationStartTool', () => {
       expect.objectContaining({ id: 'system-streams-ki-onboarding' }),
       'default',
       expect.objectContaining({
-        streamName: 'logs.nginx',
+        sourceId: 'logs.nginx',
+        sourceSlug: 'logs.nginx',
         skipFeatures: false,
         skipQueries: false,
       }),
       context.request
     );
+    // The tool already resolved the source, so the client does not look it up again.
+    expect(getSourcesClient).not.toHaveBeenCalled();
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual({

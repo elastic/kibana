@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
 } from '@kbn/management-settings-ids';
 import {
   MAX_ID_LENGTH,
@@ -98,23 +98,23 @@ const eligibleStreamsRoute = createServerRoute({
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
 
-    const { sourcesClient, globalUiSettingsClient, licensing, getKnowledgeIndicatorClient } =
+    const { sourcesClient, uiSettingsClient, licensing, getKnowledgeIndicatorClient } =
       await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const query = params?.query ?? {};
 
-    const enabled = await globalUiSettingsClient.get<boolean>(
-      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
+    const enabled = await uiSettingsClient.get<boolean>(
+      OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
     );
 
     if (!enabled) {
       throw new StatusError('Continuous KI extraction is disabled', 400);
     }
 
-    const intervalHoursSetting = await globalUiSettingsClient.get<number>(
-      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS
+    const intervalHoursSetting = await uiSettingsClient.get<number>(
+      OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS
     );
 
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;

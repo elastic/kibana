@@ -1,6 +1,6 @@
 # KI Onboarding Workflow
 #
-# Orchestrates the full KI onboarding pipeline for a stream:
+# Orchestrates the full KI onboarding pipeline for a source:
 #   1. Features recency check (auto-skips identification if features are recent)
 #   2. Features identification (optional, skippable)
 #   3. Queries generation (conditional — skipped when no new features were found)
@@ -17,16 +17,20 @@ tags:
 settings:
   timeout: "30m"
   concurrency:
-    key: "streams-ki-onboarding-{{ inputs.streamName }}"
+    key: "nightshift-source-onboarding-{{ inputs.sourceSlug }}"
     strategy: drop
     max: 1
 triggers:
   - type: manual
     inputs:
-      - name: streamName
+      - name: sourceId
         type: string
         required: true
-        description: "Target stream name."
+        description: "Target source id."
+      - name: sourceSlug
+        type: string
+        required: true
+        description: "Slug of the target source, used to key concurrency."
       - name: skipFeatures
         type: boolean
         default: false
@@ -110,7 +114,7 @@ steps:
         type: workflow.output
         status: cancelled
         with:
-          streamName: '${{ inputs.streamName }}'
+          sourceId: '${{ inputs.sourceId }}'
           featuresSkipped: true
           featuresConnectorUsed: ''
           discoveredFeatures: []
@@ -151,7 +155,7 @@ steps:
         type: kibana.request
         with:
           method: GET
-          path: "/internal/streams/{{ inputs.streamName }}/features/_should_identify?thresholdHours={{ inputs.featuresRecencyThresholdHours }}"
+          path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_should_identify?thresholdHours={{ inputs.featuresRecencyThresholdHours }}"
           headers:
             x-elastic-internal-origin: "kibana"
       - name: skip_if_recent
@@ -175,7 +179,8 @@ steps:
         with:
           workflow-id: "system-streams-ki-features-identification"
           inputs:
-            streamName: "${{ inputs.streamName }}"
+            sourceId: "${{ inputs.sourceId }}"
+            sourceSlug: "${{ inputs.sourceSlug }}"
             connectorId: "${{ inputs.featuresConnectorId }}"
             start: "${{ inputs.featuresStart }}"
             end: "${{ inputs.featuresEnd }}"
@@ -220,7 +225,8 @@ steps:
         with:
           workflow-id: "system-streams-ki-queries-generation"
           inputs:
-            streamName: "${{ inputs.streamName }}"
+            sourceId: "${{ inputs.sourceId }}"
+            sourceSlug: "${{ inputs.sourceSlug }}"
             connectorId: "${{ inputs.queriesConnectorId }}"
             maxExistingQueriesForContext: "${{ inputs.queriesMaxExistingForContext }}"
       - name: save_queries_output
@@ -240,7 +246,7 @@ steps:
     type: kibana.request
     with:
       method: POST
-      path: "/internal/streams/{{ inputs.streamName }}/knowledge_indicators/_keep_alive"
+      path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/knowledge_indicators/_keep_alive"
       headers:
         x-elastic-internal-origin: "kibana"
       body:
@@ -252,7 +258,7 @@ steps:
   - name: output_result
     type: workflow.output
     with:
-      streamName: "${{ inputs.streamName }}"
+      sourceId: "${{ inputs.sourceId }}"
       featuresSkipped: "${{ variables.skipFeatures }}"
       featuresConnectorUsed: "${{ variables.featuresConnectorUsed }}"
       discoveredFeatures: "${{ variables.discoveredFeatures }}"

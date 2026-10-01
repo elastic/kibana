@@ -49,20 +49,20 @@ describe('streamsWithIndicatorsRoute', () => {
     (assertSignificantEventsAccess as jest.Mock).mockClear();
   });
 
-  it('maps stream names to the foreach item shape', async () => {
+  it('maps source ids to the foreach item shape', async () => {
     const result = await route.handler(
       makeHandlerParams({ streamNames: ['logs.nginx', 'logs.app'] })
     );
 
     expect(result).toEqual({
-      streams: [{ streamName: 'logs.nginx' }, { streamName: 'logs.app' }],
+      sources: [{ sourceId: 'logs.nginx' }, { sourceId: 'logs.app' }],
     });
   });
 
   it('returns an empty list when there is nothing to reconcile', async () => {
     const result = await route.handler(makeHandlerParams({ streamNames: [] }));
 
-    expect(result).toEqual({ streams: [] });
+    expect(result).toEqual({ sources: [] });
   });
 
   it('enforces significant events access', async () => {

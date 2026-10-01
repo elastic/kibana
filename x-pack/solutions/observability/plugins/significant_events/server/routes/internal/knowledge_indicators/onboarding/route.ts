@@ -121,6 +121,7 @@ const onboardingExecuteRoute = createServerRoute({
 
       const inputs: SignificantEventsKIsOnboardingInputs = {
         streamName: source.id,
+        sourceSlug: source.slug,
         features: {
           skip: skipFeatures,
           start: body.from,
@@ -141,9 +142,17 @@ const onboardingExecuteRoute = createServerRoute({
     // action === 'cancel'
     // Cancellation may be a no-op (nothing running, or already terminal), so we
     // return the real post-cancel status rather than assuming `canceled`.
-    await streamsKIsOnboardingClient.cancel({ streamName: source.id, request });
+    await streamsKIsOnboardingClient.cancel({
+      streamName: source.id,
+      sourceSlug: source.slug,
+      request,
+    });
 
-    return streamsKIsOnboardingClient.getStatus({ streamName: source.id, request });
+    return streamsKIsOnboardingClient.getStatus({
+      streamName: source.id,
+      sourceSlug: source.slug,
+      request,
+    });
   },
 });
 
@@ -183,7 +192,11 @@ const onboardingStatusRoute = createServerRoute({
 
     const { source } = await sourcesClient.get(streamName);
 
-    return streamsKIsOnboardingClient.getStatus({ streamName: source.id, request });
+    return streamsKIsOnboardingClient.getStatus({
+      streamName: source.id,
+      sourceSlug: source.slug,
+      request,
+    });
   },
 });
 
@@ -227,12 +240,13 @@ const onboardingBulkStatusRoute = createServerRoute({
       body: { streamNames },
     } = params;
 
-    // Executions are stored in the default space. Only ids in this space's catalog
-    // are looked up; anything else stays not_started.
-    const catalogIds = new Set((await listAllSources(sourcesClient)).map((source) => source.id));
-    const knownIds = streamNames.filter((sourceId) => catalogIds.has(sourceId));
+    // Executions are keyed by slug, so ids are resolved through this space's catalog.
+    // Anything outside the catalog stays not_started.
+    const catalog = await listAllSources(sourcesClient);
+    const requestedIds = new Set(streamNames);
+    const knownSources = catalog.filter((source) => requestedIds.has(source.id));
     const knownStatuses = await streamsKIsOnboardingClient.getStatuses({
-      streamNames: knownIds,
+      sources: knownSources,
       request,
     });
 

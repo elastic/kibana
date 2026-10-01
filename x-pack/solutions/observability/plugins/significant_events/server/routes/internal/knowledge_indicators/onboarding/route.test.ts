@@ -32,7 +32,7 @@ describe('onboardingBulkStatusRoute', () => {
         licensing: {},
         sourcesClient: {
           list: jest.fn().mockResolvedValue({
-            sources: [{ id: 'source-a' }],
+            sources: [{ id: 'source-a', slug: 'slug-a' }],
             total: 1,
             page: 1,
             per_page: 10_000,
@@ -48,7 +48,7 @@ describe('onboardingBulkStatusRoute', () => {
     const result = await route.handler(handlerParams);
 
     expect(getStatuses).toHaveBeenCalledWith({
-      streamNames: ['source-a'],
+      sources: [{ id: 'source-a', slug: 'slug-a' }],
       request: handlerParams.request,
     });
     expect(result).toEqual({

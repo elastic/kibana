@@ -12,8 +12,8 @@ import { DETECTIONS_DATA_STREAM } from '../../significant_events/detections/data
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
 // Significant events is gated solely by the availability flag now, so the installer always writes
-// the full set: 9 base workflows (via `installWorkflows`).
-const TOTAL_WORKFLOW_COUNT = 9;
+// the full set: 7 base workflows (via `installWorkflows`).
+const TOTAL_WORKFLOW_COUNT = 7;
 
 const createClientMock = () => {
   const client = {

@@ -8,6 +8,7 @@
 import { MAX_ID_LENGTH, type QueryLink } from '@kbn/significant-events-schema';
 import { DeepStrict } from '@kbn/zod-helpers';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
+import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../agent_builder/agents/ki_query_generation';
 import { internalKIQueriesRoutes } from './route';
 
 jest.mock('../../../utils/assert_significant_events_access', () => ({
@@ -511,6 +512,10 @@ describe('generateQueriesRoute', () => {
     });
   });
 
+  const makeAgentBuilder = () => ({
+    agents: { ensure: jest.fn().mockResolvedValue(undefined) },
+  });
+
   const makeHandlerParams = ({
     agentBuilder,
     body = { connectorId: 'test-connector' },
@@ -520,7 +525,7 @@ describe('generateQueriesRoute', () => {
   }) =>
     ({
       params: { path: { streamName: 'logs.test' }, body },
-      request: { events: { aborted$: { subscribe: jest.fn() } } },
+      request: { spaceId: 'space-a', events: { aborted$: { subscribe: jest.fn() } } },
       getScopedClients: jest.fn().mockResolvedValue({
         sourcesClient: {
           get: jest.fn().mockResolvedValue({
@@ -572,7 +577,7 @@ describe('generateQueriesRoute', () => {
   it('delegates to query generation and returns its result', async () => {
     const result = await generateRoute.handler(
       makeHandlerParams({
-        agentBuilder: {},
+        agentBuilder: makeAgentBuilder(),
         body: { connectorId: 'test-connector', runId: 'run-1' },
       })
     );
@@ -592,8 +597,24 @@ describe('generateQueriesRoute', () => {
     });
   });
 
+  it('installs the KI query generation agent in the request space before generating', async () => {
+    const agentBuilder = makeAgentBuilder();
+
+    await generateRoute.handler(makeHandlerParams({ agentBuilder }));
+
+    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'space-a',
+        agent: expect.objectContaining({ id: KI_QUERY_GENERATION_AGENT_ID }),
+      })
+    );
+    expect(agentBuilder.agents.ensure.mock.invocationCallOrder[0]).toBeLessThan(
+      mockGenerateKIQueries.mock.invocationCallOrder[0]
+    );
+  });
+
   it('generates a run id when one is not provided', async () => {
-    await generateRoute.handler(makeHandlerParams({ agentBuilder: {} }));
+    await generateRoute.handler(makeHandlerParams({ agentBuilder: makeAgentBuilder() }));
 
     const { runId } = mockGenerateKIQueries.mock.calls[0][0];
     expect(runId).toEqual(expect.any(String));

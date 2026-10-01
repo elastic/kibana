@@ -9,7 +9,7 @@ import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -34,6 +34,9 @@ const SYSTEM_REQUEST = expect.objectContaining({
   isFakeRequest: true,
   auth: { isAuthenticated: false },
 });
+
+const continuousDocumentId = (spaceId: string) =>
+  `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
 
 // A minimal, stateful saved-objects client: `get` throws NotFound until `create`
 // stores the doc, then returns it with a version that every write bumps. `create`
@@ -94,17 +97,27 @@ function makeManagementApi(options?: {
   failEnableFor?: string | { id?: string };
   /** Workflow ids for which cancelAllActiveWorkflowExecutions should throw. */
   failCancelAllFor?: string;
+  /**
+   * Document ids that are not installed. Per-space continuous onboarding documents
+   * only exist while the feature is on in their space.
+   */
+  missingWorkflows?: string[];
 }) {
   const enabled = new Map<string, boolean>();
   const stateKey = (id: string, spaceId: string) => `${id}@${spaceId}`;
   const failEnableId = (): string | undefined =>
     typeof options?.failEnableFor === 'object' ? options.failEnableFor.id : options?.failEnableFor;
+  const missing = new Set(options?.missingWorkflows ?? []);
 
-  const getWorkflow = jest.fn(async (id: string, spaceId: string) => ({
-    id,
-    enabled: enabled.get(stateKey(id, spaceId)) ?? true,
-    definition: { id },
-  }));
+  const getWorkflow = jest.fn(async (id: string, spaceId: string) =>
+    missing.has(id)
+      ? null
+      : {
+          id,
+          enabled: enabled.get(stateKey(id, spaceId)) ?? true,
+          definition: { id },
+        }
+  );
 
   const updateWorkflow = jest.fn(
     async (id: string, patch: { enabled?: boolean }, spaceId: string) => {
@@ -167,7 +180,7 @@ function makeV2RulesClient(options?: { disableErrors?: BulkError[]; enableErrors
 
 function makeUiSettingsClient(
   initial: Record<string, boolean | number | string> = {},
-  options?: { failSetFor?: string }
+  options?: { failSetFor?: string[] }
 ) {
   const store = new Map<string, boolean | number | string>(Object.entries(initial));
   return {
@@ -175,7 +188,7 @@ function makeUiSettingsClient(
       store.has(key) ? (store.get(key) as T) : defaultValue
     ),
     set: jest.fn(async (key: string, value: boolean | number | string) => {
-      if (options?.failSetFor === key) {
+      if (options?.failSetFor?.includes(key)) {
         throw new Error(`set failed for ${key}`);
       }
       store.set(key, value);
@@ -194,7 +207,7 @@ function makeService(params?: {
   spaceIds?: string[];
   /** Space ids the internal client finds (default: same as `spaceIds`). */
   internalSpaceIds?: string[];
-  /** Global continuous-onboarding toggle before pause (default: off). */
+  /** Per-space continuous-onboarding toggle before pause, in every space (default: off). */
   continuousOnboardingEnabled?: boolean;
   /** Per-space scheduled-discovery toggle before pause (default: off). */
   scheduledDiscoveryEnabled?: boolean;
@@ -211,24 +224,22 @@ function makeService(params?: {
     (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({ rule_id }))
   );
 
-  const globalUiSettingsClient = makeUiSettingsClient(
-    {
-      [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]:
-        params?.continuousOnboardingEnabled ?? false,
-    },
-    params?.failContinuousSet
-      ? { failSetFor: OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED }
-      : undefined
-  );
-  const spaceUiSettingsClient = makeUiSettingsClient(
-    {
-      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]:
-        params?.scheduledDiscoveryEnabled ?? false,
-    },
-    params?.failScheduledSet
-      ? { failSetFor: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED }
-      : undefined
-  );
+  const initialSettings = {
+    [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED]:
+      params?.continuousOnboardingEnabled ?? false,
+    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]:
+      params?.scheduledDiscoveryEnabled ?? false,
+  };
+  const userFailSetFor = [
+    ...(params?.failContinuousSet ? [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED] : []),
+    ...(params?.failScheduledSet
+      ? [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]
+      : []),
+  ];
+
+  const spaceUiSettingsClient = makeUiSettingsClient(initialSettings, {
+    failSetFor: userFailSetFor,
+  });
 
   // One space per page, so a sweep that stops after the first page misses `space-a`.
   const spacesRepository = {
@@ -249,10 +260,7 @@ function makeService(params?: {
     if (existing) {
       return existing;
     }
-    const client = makeUiSettingsClient({
-      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]:
-        params?.scheduledDiscoveryEnabled ?? false,
-    });
+    const client = makeUiSettingsClient(initialSettings);
     internalSpaceUiSettingsClients.set(spaceId, client);
     return client;
   };
@@ -266,6 +274,8 @@ function makeService(params?: {
     getUnsafeInternalClient: jest.fn(() => internalClient),
   };
 
+  // No `globalAsScopedToClient`: continuous onboarding is a space setting, so a
+  // leftover global read or write fails the test.
   const server = {
     core: {
       savedObjects,
@@ -273,7 +283,6 @@ function makeService(params?: {
         asScopedToClient: jest.fn((client?: { spaceId?: string }) =>
           client?.spaceId ? getInternalSpaceUiSettingsClient(client.spaceId) : spaceUiSettingsClient
         ),
-        globalAsScopedToClient: jest.fn(() => globalUiSettingsClient),
       },
     },
     workflowsManagement: params?.management ? { management: params.management } : undefined,
@@ -294,7 +303,6 @@ function makeService(params?: {
   const getScopedClients = jest.fn(async () => ({
     getKnowledgeIndicatorClient: async () => ({ getRuleBackedQueryLinks }),
     getSignificantEventsAlertingContext: async () => ({ alertingV2RulesClient: v2RulesClient }),
-    globalUiSettingsClient,
     uiSettingsClient: spaceUiSettingsClient,
   }));
 
@@ -311,7 +319,6 @@ function makeService(params?: {
     getScopedClients,
     v2RulesClient,
     getRuleBackedQueryLinks,
-    globalUiSettingsClient,
     spaceUiSettingsClient,
     getInternalSpaceUiSettingsClient,
   };
@@ -326,13 +333,13 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('returns the persisted state without reading feature settings', async () => {
       const { api } = makeManagementApi();
-      const { service, globalUiSettingsClient } = makeService({ management: api });
+      const { service, spaceUiSettingsClient } = makeService({ management: api });
 
       await service.pause({ request: REQUEST });
-      globalUiSettingsClient.get.mockClear();
+      spaceUiSettingsClient.get.mockClear();
 
       await expect(service.getState({ request: REQUEST })).resolves.toBe('paused');
-      expect(globalUiSettingsClient.get).not.toHaveBeenCalled();
+      expect(spaceUiSettingsClient.get).not.toHaveBeenCalled();
     });
   });
 
@@ -361,13 +368,12 @@ describe('SignificantEventsMaintenanceService', () => {
   describe('pause', () => {
     it('disables workflows and v2-backed rules, cancels executions, and persists the paused state', async () => {
       const { api, updateWorkflow, cancelAllActiveWorkflowExecutions } = makeManagementApi();
-      const { service, soClient, v2RulesClient, globalUiSettingsClient, spaceUiSettingsClient } =
-        makeService({
-          management: api,
-          ruleBackedRuleIds: ['rule-1', 'rule-2', 'rule-1'],
-          continuousOnboardingEnabled: true,
-          scheduledDiscoveryEnabled: true,
-        });
+      const { service, soClient, v2RulesClient, spaceUiSettingsClient } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1', 'rule-2', 'rule-1'],
+        continuousOnboardingEnabled: true,
+        scheduledDiscoveryEnabled: true,
+      });
 
       const summary = await service.pause({ request: REQUEST, updatedBy: 'marco' });
 
@@ -393,8 +399,8 @@ describe('SignificantEventsMaintenanceService', () => {
       );
 
       // Settings toggles turned off; prior-enabled flags stored for resume.
-      expect(globalUiSettingsClient.set).toHaveBeenCalledWith(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+      expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
         false
       );
       expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
@@ -409,7 +415,7 @@ describe('SignificantEventsMaintenanceService', () => {
           state: 'paused',
           updatedBy: 'marco',
           pausedSettings: {
-            continuousOnboardingWasEnabled: true,
+            continuousOnboardingWasEnabled: false,
             scheduledDiscoveryEnabledSpaceIds: ['default'],
           },
         }),
@@ -492,6 +498,65 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(second.rulesDisabled).toBe(first.rulesDisabled);
       expect(second.workflowsDisabled).toBeGreaterThan(0);
       expect(updateWorkflow.mock.calls.length).toBe(callsAfterFirst);
+    });
+
+    it('preserves the continuous onboarding restore record across a re-pause', async () => {
+      // First pause: continuous onboarding was on, gets disabled and recorded.
+      // Re-pause: the setting now reads false (it was written off in the first
+      // pause), but the document must stay in disabledWorkflows so Resume can
+      // restore it and the setting.
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, spaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+      });
+
+      await service.pause({ request: REQUEST });
+      const firstWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        disabledWorkflows: Array<{ id: string; spaceId: string }>;
+      };
+      expect(firstWrite.disabledWorkflows).toContainEqual({
+        id: continuousDocumentId('default'),
+        spaceId: 'default',
+      });
+
+      spaceUiSettingsClient.set.mockClear();
+      updateWorkflow.mockClear();
+
+      await service.pause({ request: REQUEST });
+      const secondWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        disabledWorkflows: Array<{ id: string; spaceId: string }>;
+      };
+      expect(secondWrite.disabledWorkflows).toContainEqual({
+        id: continuousDocumentId('default'),
+        spaceId: 'default',
+      });
+    });
+
+    it('records continuous onboarding as a restore target when the setting read fails', async () => {
+      // A transient error reading the setting must fall back to recording a
+      // restore intent, same as the scheduled-discovery read failure path.
+      const { api } = makeManagementApi();
+      const { service, soClient, spaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+      });
+      spaceUiSettingsClient.get.mockImplementation(async (key: string) => {
+        if (key === OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED) {
+          throw new Error('settings read failed');
+        }
+        return false;
+      });
+
+      await service.pause({ request: REQUEST });
+      const pauseWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        disabledWorkflows: Array<{ id: string; spaceId: string }>;
+        partialFailures?: unknown[];
+      };
+      expect(pauseWrite.disabledWorkflows).toContainEqual({
+        id: continuousDocumentId('default'),
+        spaceId: 'default',
+      });
     });
 
     it('records a partial failure but still pauses when one workflow cannot be disabled', async () => {
@@ -666,7 +731,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.partialFailures).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            target: 'settings:continuous-onboarding',
+            target: 'settings:continuous-onboarding@default',
             error: expect.stringContaining('Failed to pause'),
           }),
           expect.objectContaining({
@@ -683,7 +748,7 @@ describe('SignificantEventsMaintenanceService', () => {
         };
       };
       expect(pauseWrite.pausedSettings).toEqual({
-        continuousOnboardingWasEnabled: true,
+        continuousOnboardingWasEnabled: false,
         scheduledDiscoveryEnabledSpaceIds: ['default'],
       });
     });
@@ -728,7 +793,7 @@ describe('SignificantEventsMaintenanceService', () => {
           updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR,
           disabledRuleIds: [],
           pausedSettings: {
-            continuousOnboardingWasEnabled: true,
+            continuousOnboardingWasEnabled: false,
             scheduledDiscoveryEnabledSpaceIds: ['default', 'space-a'],
           },
           lastSummary: expect.objectContaining({ partialFailures: [] }),
@@ -806,21 +871,16 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('re-asserts across every space with a credential-less request', async () => {
       const { api, updateWorkflow, getWorkflow } = makeManagementApi();
-      const {
-        service,
-        soClient,
-        getScopedClients,
-        globalUiSettingsClient,
-        getInternalSpaceUiSettingsClient,
-      } = makeService({
-        management: api,
-        spaceIds: ['default'],
-        internalSpaceIds: ['default', 'space-a'],
-      });
+      const { service, soClient, getScopedClients, getInternalSpaceUiSettingsClient } = makeService(
+        {
+          management: api,
+          spaceIds: ['default'],
+          internalSpaceIds: ['default', 'space-a'],
+        }
+      );
 
       await service.pause({ request: REQUEST });
       updateWorkflow.mockClear();
-      globalUiSettingsClient.set.mockClear();
 
       // The system request has no credentials, so anything user-scoped fails.
       getScopedClients.mockRejectedValue(new Error('missing authentication credentials'));
@@ -829,6 +889,11 @@ describe('SignificantEventsMaintenanceService', () => {
         enabled: true,
         definition: { id },
       }));
+      // Something turned continuous onboarding back on in space-a while paused.
+      getInternalSpaceUiSettingsClient('space-a')._store.set(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+        true
+      );
 
       await service.reassertPause();
 
@@ -842,8 +907,8 @@ describe('SignificantEventsMaintenanceService', () => {
         'space-a',
         SYSTEM_REQUEST
       );
-      expect(globalUiSettingsClient.set).toHaveBeenCalledWith(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+      expect(getInternalSpaceUiSettingsClient('space-a').set).toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
         false
       );
       expect(getInternalSpaceUiSettingsClient('space-a').set).toHaveBeenCalledWith(
@@ -946,18 +1011,15 @@ describe('SignificantEventsMaintenanceService', () => {
   describe('resume', () => {
     it('re-enables exactly the workflows and rules that pause disabled', async () => {
       const { api, updateWorkflow } = makeManagementApi();
-      const { service, v2RulesClient, globalUiSettingsClient, spaceUiSettingsClient } = makeService(
-        {
-          management: api,
-          ruleBackedRuleIds: ['rule-1', 'rule-2'],
-          continuousOnboardingEnabled: true,
-          scheduledDiscoveryEnabled: true,
-        }
-      );
+      const { service, v2RulesClient, spaceUiSettingsClient } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1', 'rule-2'],
+        continuousOnboardingEnabled: true,
+        scheduledDiscoveryEnabled: true,
+      });
 
       await service.pause({ request: REQUEST });
       updateWorkflow.mockClear();
-      globalUiSettingsClient.set.mockClear();
       spaceUiSettingsClient.set.mockClear();
 
       const summary = await service.resume({ request: REQUEST });
@@ -970,8 +1032,8 @@ describe('SignificantEventsMaintenanceService', () => {
         REQUEST
       );
       expect(v2RulesClient?.bulkEnableRules).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
-      expect(globalUiSettingsClient.set).toHaveBeenCalledWith(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+      expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
         true
       );
       expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
@@ -991,8 +1053,11 @@ describe('SignificantEventsMaintenanceService', () => {
     });
 
     it('does not re-enable settings-backed workflows that were off before pause', async () => {
-      const { api, updateWorkflow } = makeManagementApi();
-      const { service, globalUiSettingsClient, spaceUiSettingsClient, soClient } = makeService({
+      // Continuous onboarding is off, so its space document is not installed.
+      const { api, updateWorkflow } = makeManagementApi({
+        missingWorkflows: [continuousDocumentId('default')],
+      });
+      const { service, spaceUiSettingsClient, soClient } = makeService({
         management: api,
         // Continuous + scheduled settings were already off — only workflows may be
         // enabled (drift). Resume must leave both settings and those workflows off.
@@ -1013,20 +1078,19 @@ describe('SignificantEventsMaintenanceService', () => {
         scheduledDiscoveryEnabledSpaceIds: [],
       });
       expect(
-        pauseWrite.disabledWorkflows.some(
-          (workflow) => workflow.id === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
+        pauseWrite.disabledWorkflows.some((workflow) =>
+          workflow.id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
         )
-      ).toBe(true);
+      ).toBe(false);
 
       updateWorkflow.mockClear();
-      globalUiSettingsClient.set.mockClear();
       spaceUiSettingsClient.set.mockClear();
 
       const summary = await service.resume({ request: REQUEST });
 
       expect(summary.state).toBe('enabled');
-      expect(globalUiSettingsClient.set).not.toHaveBeenCalledWith(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+      expect(spaceUiSettingsClient.set).not.toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
         true
       );
       expect(spaceUiSettingsClient.set).not.toHaveBeenCalledWith(
@@ -1036,7 +1100,6 @@ describe('SignificantEventsMaintenanceService', () => {
       const reEnabledIds = updateWorkflow.mock.calls
         .filter((call) => call[1]?.enabled === true)
         .map((call) => call[0] as string);
-      expect(reEnabledIds).not.toContain(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID);
       expect(
         reEnabledIds.some((id) => id.startsWith(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID))
       ).toBe(false);
@@ -1050,6 +1113,92 @@ describe('SignificantEventsMaintenanceService', () => {
             scheduledDiscoveryEnabled: false,
           },
         })
+      );
+    });
+
+    it('does not restore continuous onboarding when its document was enabled by drift', async () => {
+      // Document is enabled by drift (e.g. the toggle ON route enabled the
+      // document but its setting write failed), while the setting itself reads
+      // false. Pause sweeps and disables the document; Resume must not write the
+      // setting to true.
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, spaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: false,
+        scheduledDiscoveryEnabled: false,
+      });
+
+      await service.pause({ request: REQUEST });
+      spaceUiSettingsClient.set.mockClear();
+      updateWorkflow.mockClear();
+
+      const summary = await service.resume({ request: REQUEST });
+
+      expect(summary.state).toBe('enabled');
+      expect(spaceUiSettingsClient.set).not.toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+        true
+      );
+      // The document itself is not re-enabled.
+      const reEnabledIds = updateWorkflow.mock.calls
+        .filter((call) => call[1]?.enabled === true)
+        .map((call) => call[0] as string);
+      expect(
+        reEnabledIds.some((id) =>
+          id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+        )
+      ).toBe(false);
+    });
+
+    it('restores continuous onboarding when pause could not disable its document', async () => {
+      const { api } = makeManagementApi({ failUpdateFor: continuousDocumentId('default') });
+      const { service, soClient, spaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+      });
+
+      await service.pause({ request: REQUEST });
+
+      const pauseWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        disabledWorkflows: Array<{ id: string; spaceId: string }>;
+      };
+      expect(pauseWrite.disabledWorkflows).toContainEqual({
+        id: continuousDocumentId('default'),
+        spaceId: 'default',
+      });
+      spaceUiSettingsClient.set.mockClear();
+
+      await service.resume({ request: REQUEST });
+
+      expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+        true
+      );
+    });
+
+    it('restores continuous onboarding when its setting was on but its document was already off', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, spaceUiSettingsClient } = makeService({
+        management: api,
+        continuousOnboardingEnabled: true,
+      });
+      await api.updateWorkflow(continuousDocumentId('default'), { enabled: false }, 'default');
+
+      await service.pause({ request: REQUEST });
+      updateWorkflow.mockClear();
+      spaceUiSettingsClient.set.mockClear();
+
+      await service.resume({ request: REQUEST });
+
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        continuousDocumentId('default'),
+        { enabled: true },
+        'default',
+        REQUEST
+      );
+      expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+        true
       );
     });
 
@@ -1181,7 +1330,7 @@ describe('SignificantEventsMaintenanceService', () => {
 
     it('flips to enabled with warnings when settings restore fails (no workflow rollback)', async () => {
       const { api, updateWorkflow } = makeManagementApi();
-      const { service, soClient, globalUiSettingsClient } = makeService({
+      const { service, soClient, spaceUiSettingsClient } = makeService({
         management: api,
         continuousOnboardingEnabled: true,
         scheduledDiscoveryEnabled: false,
@@ -1190,8 +1339,8 @@ describe('SignificantEventsMaintenanceService', () => {
       await service.pause({ request: REQUEST });
       updateWorkflow.mockClear();
 
-      globalUiSettingsClient.set.mockImplementation(async (key: string) => {
-        if (key === OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED) {
+      spaceUiSettingsClient.set.mockImplementation(async (key: string) => {
+        if (key === OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED) {
           throw new Error('set failed for continuous');
         }
       });
@@ -1202,21 +1351,17 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.partialFailures).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            target: 'settings:continuous-onboarding',
+            target: 'settings:continuous-onboarding@default',
             error: expect.stringContaining('Failed to resume'),
           }),
         ])
       );
 
       const continuousEnableCalls = updateWorkflow.mock.calls.filter(
-        (call) =>
-          call[0] === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID &&
-          call[1]?.enabled === true
+        (call) => call[0] === continuousDocumentId('default') && call[1]?.enabled === true
       );
       const continuousDisableCalls = updateWorkflow.mock.calls.filter(
-        (call) =>
-          call[0] === SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID &&
-          call[1]?.enabled === false
+        (call) => call[0] === continuousDocumentId('default') && call[1]?.enabled === false
       );
       expect(continuousEnableCalls.length).toBeGreaterThan(0);
       // No compensating disable after settings failure.
@@ -1224,27 +1369,26 @@ describe('SignificantEventsMaintenanceService', () => {
 
       const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
         state: string;
-        disabledWorkflows: Array<{ id: string }>;
-        pausedSettings?: { continuousOnboardingWasEnabled: boolean };
+        disabledWorkflows: Array<{ id: string; spaceId: string }>;
+        pausedSettings?: unknown;
       };
       expect(lastWrite.state).toBe('enabled');
       // Kept so a later Resume (e.g. by someone who can write the setting) restores it.
-      expect(lastWrite.pausedSettings).toEqual({
-        continuousOnboardingWasEnabled: true,
-        scheduledDiscoveryEnabledSpaceIds: [],
-      });
-      expect(lastWrite.disabledWorkflows).toEqual([]);
+      expect(lastWrite.pausedSettings).toBeUndefined();
+      expect(lastWrite.disabledWorkflows).toEqual([
+        { id: continuousDocumentId('default'), spaceId: 'default' },
+      ]);
 
-      globalUiSettingsClient.set.mockClear();
-      globalUiSettingsClient.set.mockImplementation(async () => {});
+      spaceUiSettingsClient.set.mockClear();
+      spaceUiSettingsClient.set.mockImplementation(async () => {});
       await service.resume({ request: REQUEST });
 
-      expect(globalUiSettingsClient.set).toHaveBeenCalledWith(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+      expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
         true
       );
       expect(soClient.create.mock.calls.at(-1)?.[1]).toEqual(
-        expect.objectContaining({ state: 'enabled', pausedSettings: undefined })
+        expect.objectContaining({ state: 'enabled', disabledWorkflows: [] })
       );
     });
 

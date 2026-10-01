@@ -37,6 +37,8 @@ import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflo
 import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
+import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
+import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
 
 const getSerializedByteLength = (value: unknown) =>
   Buffer.byteLength(JSON.stringify(value), 'utf8');
@@ -62,8 +64,8 @@ const inferenceDocumentsSchema = z
     message: `Documents cannot exceed ${MAX_INFERENCE_DOCUMENTS_BYTES} serialized bytes in aggregate`,
   });
 
-// Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow,
-// which runs under a request whose API key can schedule the workflow trigger.
+// Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow of the
+// request space, which runs under a request whose API key can schedule the workflow trigger.
 // Only the inferred route bootstraps: it runs at least once per identification
 // pass and always precedes computed identification, so hooking it covers every
 // path. Idempotent and non-blocking — a failure here must never fail extraction.
@@ -86,7 +88,7 @@ const bootstrapSyncWorkflow = async ({
     if (stateBlocksNewActivity(state)) {
       return;
     }
-    await syncWorkflowService.ensureEnabled({ request });
+    await syncWorkflowService.ensureEnabled({ request, spaceId: request.spaceId });
   } catch (error) {
     logger.warn(
       `Failed to ensure KI sync workflow is enabled: ${
@@ -244,6 +246,16 @@ const identifyInferredFeaturesRoute = createServerRoute({
       sourcesClient.get(streamName),
       scopedClients.getKnowledgeIndicatorClient(),
     ]);
+
+    // Startup installs the agent in the default space only, and onboarding runs in the space of
+    // the request. Without this every iteration outside the default space fails on a missing agent.
+    if (server.agentBuilder) {
+      await installFeatureIdentificationAgent({
+        agentBuilder: server.agentBuilder,
+        spaceId: request.spaceId,
+        availability: createSignificantEventsAvailability({ server, logger: routeLogger }),
+      });
+    }
 
     try {
       const result = await identifyInferredFeatures({

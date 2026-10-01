@@ -28,6 +28,9 @@ describe('startKiIdentificationToolHandler', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
+      getSourcesClient: jest.fn().mockResolvedValue({
+        get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
+      }),
     });
     const maintenanceService = {
       getState: jest.fn().mockResolvedValue(maintenanceState),
@@ -46,6 +49,7 @@ describe('startKiIdentificationToolHandler', () => {
 
     const result = await startKiIdentificationToolHandler({
       streamName: 'logs.nginx',
+      sourceSlug: 'logs-nginx',
       steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
       streamsKIsOnboardingClient,
       maintenanceService,
@@ -61,7 +65,8 @@ describe('startKiIdentificationToolHandler', () => {
       expect.objectContaining({ id: 'system-streams-ki-onboarding' }),
       'default',
       expect.objectContaining({
-        streamName: 'logs.nginx',
+        sourceId: 'logs.nginx',
+        sourceSlug: 'logs-nginx',
         skipFeatures: false,
         skipQueries: false,
       }),
@@ -76,6 +81,7 @@ describe('startKiIdentificationToolHandler', () => {
     await expect(
       startKiIdentificationToolHandler({
         streamName: 'logs.nginx',
+        sourceSlug: 'logs-nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification],
         streamsKIsOnboardingClient,
         maintenanceService,
@@ -93,6 +99,7 @@ describe('startKiIdentificationToolHandler', () => {
     await expect(
       startKiIdentificationToolHandler({
         streamName: 'logs.nginx',
+        sourceSlug: 'logs-nginx',
         steps: [KIsOnboardingStep.FeaturesIdentification],
         streamsKIsOnboardingClient,
         maintenanceService,

@@ -10,8 +10,8 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
@@ -54,6 +54,7 @@ import {
   MAX_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
   MAX_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
   MAX_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
+  MIN_EXTRACTION_INTERVAL_HOURS,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
@@ -425,52 +426,49 @@ export function registerFeatureFlags(
             readonly: true,
             readonlyMode: 'ui',
           },
-        });
-
-        core.uiSettings.registerGlobal({
-          [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]: {
+          [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED]: {
             category: ['observability'],
-            name: i18n.translate('xpack.significantEvents.continuousKiExtractionEnabledName', {
-              defaultMessage: 'Continuous KI extraction enabled',
-            }),
+            name: i18n.translate('xpack.significantEvents.continuousOnboardingEnabledName', {
+              defaultMessage: 'Continuous KI onboarding enabled',
+            }) as string,
             value: false,
             description: i18n.translate(
-              'xpack.significantEvents.continuousKiExtractionEnabledDescription',
+              'xpack.significantEvents.continuousOnboardingEnabledDescription',
               {
                 defaultMessage:
-                  'When enabled, knowledge indicator extraction runs automatically on managed streams.',
+                  'When enabled, knowledge indicator onboarding runs automatically on the enabled sources of this Kibana space.',
               }
             ),
             type: 'boolean',
             schema: schema.boolean(),
-            scope: 'global',
             solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
             readonly: true,
             readonlyMode: 'ui',
           },
-          [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS]: {
+          [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS]: {
             category: ['observability'],
-            name: i18n.translate(
-              'xpack.significantEvents.continuousKiExtractionIntervalHoursName',
-              {
-                defaultMessage: 'Continuous KI extraction interval (hours)',
-              }
-            ),
+            name: i18n.translate('xpack.significantEvents.continuousOnboardingIntervalHoursName', {
+              defaultMessage: 'Continuous KI onboarding interval (hours)',
+            }) as string,
             value: DEFAULT_EXTRACTION_INTERVAL_HOURS,
             description: i18n.translate(
-              'xpack.significantEvents.continuousKiExtractionIntervalHoursDescription',
+              'xpack.significantEvents.continuousOnboardingIntervalHoursDescription',
               {
                 defaultMessage:
-                  'How often to run knowledge indicator extraction per stream, in hours.',
+                  'Minimum hours between continuous knowledge indicator onboarding runs for each source in this Kibana space.',
               }
             ),
             type: 'number',
-            schema: schema.number({ min: 0 }),
-            scope: 'global',
+            schema: schema.number({ min: MIN_EXTRACTION_INTERVAL_HOURS }),
             solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
             readonly: true,
             readonlyMode: 'ui',
           },
+        });
+
+        core.uiSettings.registerGlobal({
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG]: {
             category: ['observability'],
             name: i18n.translate('xpack.significantEvents.sigEventsTuningConfigName', {

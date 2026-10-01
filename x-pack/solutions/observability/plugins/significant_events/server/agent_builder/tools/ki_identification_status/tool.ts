@@ -60,6 +60,7 @@ export const createKiIdentificationStatusTool = ({
       const [source] = resolveSourcesBySlug(catalog, [slug]);
       const status = await getKiIdentificationStatusToolHandler({
         streamName: source.id,
+        sourceSlug: source.slug,
         request,
         streamsKIsOnboardingClient,
       });

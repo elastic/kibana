@@ -18,9 +18,9 @@ import {
   type BaseFeature,
   type GeneratedSignificantEventQuery,
 } from '@kbn/significant-events-schema';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { WorkflowExecutionService } from './workflow_execution_service';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
 
@@ -35,7 +35,9 @@ const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, 
  * handed to the workflow engine, whose manual trigger only accepts flat scalars.
  */
 export interface SignificantEventsKIsOnboardingInputs {
+  /** Source id. Callers that already hold the slug pass it as `sourceSlug` to skip the lookup. */
   streamName: string;
+  sourceSlug?: string;
   features: {
     skip: boolean;
     start: number;
@@ -63,7 +65,8 @@ export interface SignificantEventsKIsOnboardingInputs {
  * {@link SignificantEventsKIsOnboardingInputs} are flattened into this shape in `run()`.
  */
 interface OnboardingWorkflowInputPayload {
-  streamName: string;
+  sourceId: string;
+  sourceSlug: string;
   skipFeatures: boolean;
   skipQueries: boolean;
   featuresStart: number;
@@ -87,7 +90,7 @@ interface OnboardingWorkflowInputPayload {
  * Mapped into the nested {@link SignificantEventsKIsOnboardingOutput} shape on read.
  */
 interface OnboardingWorkflowOutputContext {
-  streamName: string;
+  sourceId: string;
   featuresSkipped: boolean;
   featuresConnectorUsed: string;
   discoveredFeatures: BaseFeature[];
@@ -104,16 +107,21 @@ interface OnboardingWorkflowOutputContext {
  * Used to extract summary counts for the status response.
  */
 export interface SignificantEventsKIsOnboardingOutput extends KIsOnboardingResult {
-  streamName: string;
+  sourceId: string;
 }
 
 /** Flattens nested onboarding inputs into the workflow engine's scalar payload. */
-const toWorkflowInputPayload = (
-  inputs: SignificantEventsKIsOnboardingInputs
-): OnboardingWorkflowInputPayload => {
+const toWorkflowInputPayload = ({
+  inputs,
+  sourceSlug,
+}: {
+  inputs: SignificantEventsKIsOnboardingInputs;
+  sourceSlug: string;
+}): OnboardingWorkflowInputPayload => {
   const { streamName, features, queries } = inputs;
   return {
-    streamName,
+    sourceId: streamName,
+    sourceSlug,
     skipFeatures: features.skip,
     skipQueries: queries.skip,
     featuresStart: features.start,
@@ -146,7 +154,7 @@ const toWorkflowInputPayload = (
 const parseWorkflowOutput = (
   output: Partial<OnboardingWorkflowOutputContext>
 ): SignificantEventsKIsOnboardingOutput => ({
-  streamName: output.streamName ?? '',
+  sourceId: output.sourceId ?? '',
   features: {
     skipped: output.featuresSkipped === true,
     discovered: Array.isArray(output.discoveredFeatures) ? output.discoveredFeatures : [],
@@ -164,19 +172,23 @@ const parseWorkflowOutput = (
   },
 });
 
-const ONBOARDING_EXECUTIONS_SPACE_ID = DEFAULT_SPACE_ID;
-
-const CONCURRENCY_KEY_PREFIX = 'streams-ki-onboarding-';
+const CONCURRENCY_KEY_PREFIX = 'nightshift-source-onboarding-';
 
 /**
  * Builds the concurrency group key used to correlate workflow executions with
- * a specific stream. Must stay in sync with the `settings.concurrency.key`
+ * a specific source. Must stay in sync with the `settings.concurrency.key`
  * template in the onboarding YAML definition.
+ *
+ * Keyed by slug rather than source id so execution lists stay readable. A slug
+ * is unique among the live sources of a space (the engine scopes concurrency
+ * groups by space), but deleting a source frees it: a new source created with
+ * the same title reuses the slug and shows the deleted source's last run until
+ * its own first run.
  */
-export const buildConcurrencyKey = (streamName: string) => `${CONCURRENCY_KEY_PREFIX}${streamName}`;
+export const buildConcurrencyKey = (sourceSlug: string) => `${CONCURRENCY_KEY_PREFIX}${sourceSlug}`;
 
-/** Extracts the stream name from a concurrency key, or returns null if the prefix doesn't match. */
-export const parseStreamNameFromConcurrencyKey = (key: string): string | null => {
+/** Extracts the source slug from a concurrency key, or returns null if the prefix doesn't match. */
+export const parseSourceSlugFromConcurrencyKey = (key: string): string | null => {
   if (!key.startsWith(CONCURRENCY_KEY_PREFIX)) {
     return null;
   }
@@ -188,19 +200,23 @@ export const MAX_STREAMS_PER_QUERY = 10000;
  * Client that wraps the workflows management API to provide a stream-centric
  * interface for running, querying, and canceling KI onboarding workflows.
  *
- * Each stream's onboarding execution is keyed by a concurrency group derived
- * from the stream name, so at most one onboarding run is active per stream.
+ * Executions live in the space of the request. Each source's onboarding
+ * execution is keyed by a concurrency group derived from its slug, so at most
+ * one onboarding run is active per source in a space.
  */
 export class SignificantEventsKIsOnboardingClient {
   private readonly workflowExecutionService: WorkflowExecutionService<OnboardingWorkflowInputPayload>;
   private readonly telemetry: EbtTelemetryClient;
+  private readonly getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>;
 
   constructor({
     managementApi,
     telemetry,
+    getSourcesClient,
   }: {
     managementApi: WorkflowsServerPluginSetup['management'];
     telemetry: EbtTelemetryClient;
+    getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>;
   }) {
     this.workflowExecutionService = new WorkflowExecutionService({
       managementApi,
@@ -208,12 +224,13 @@ export class SignificantEventsKIsOnboardingClient {
       workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
     this.telemetry = telemetry;
+    this.getSourcesClient = getSourcesClient;
   }
 
   /**
    * Triggers a new onboarding workflow execution for a stream.
    * Fetches the managed workflow definition from the global space and
-   * runs it in the default space with the provided inputs.
+   * runs it in the space of the request with the provided inputs.
    *
    * @throws If the managed onboarding workflow definition is not found.
    */
@@ -224,9 +241,14 @@ export class SignificantEventsKIsOnboardingClient {
     inputs: SignificantEventsKIsOnboardingInputs;
     request: KibanaRequest;
   }): Promise<{ executionId: string }> {
+    const sourceSlug = await this.resolveSourceSlug({
+      sourceId: inputs.streamName,
+      sourceSlug: inputs.sourceSlug,
+      request,
+    });
     const executionId = await this.workflowExecutionService.execute({
-      executionSpaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
-      inputs: toWorkflowInputPayload(inputs),
+      executionSpaceId: request.spaceId,
+      inputs: toWorkflowInputPayload({ inputs, sourceSlug }),
       request,
     });
 
@@ -234,7 +256,7 @@ export class SignificantEventsKIsOnboardingClient {
       source_id: inputs.streamName,
       execution_id: executionId,
       workflow_id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-      space_id: ONBOARDING_EXECUTIONS_SPACE_ID,
+      space_id: request.spaceId,
       skip_features: inputs.features.skip,
       skip_queries: inputs.queries.skip,
     });
@@ -251,15 +273,18 @@ export class SignificantEventsKIsOnboardingClient {
    */
   async getStatus({
     streamName,
+    sourceSlug,
     request,
   }: {
     streamName: string;
+    sourceSlug?: string;
     request: KibanaRequest;
   }): Promise<KIsOnboardingStatusResult> {
+    const slug = await this.resolveSourceSlug({ sourceId: streamName, sourceSlug, request });
     const result = await this.workflowExecutionService.getStatus({
       request,
-      spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
-      queryParams: { concurrencyGroupKey: buildConcurrencyKey(streamName) },
+      spaceId: request.spaceId,
+      queryParams: { concurrencyGroupKey: buildConcurrencyKey(slug) },
     });
 
     if (result.status !== SignificantEventsWorkflowStatus.Completed) {
@@ -269,7 +294,7 @@ export class SignificantEventsKIsOnboardingClient {
     const fullExecution = await this.workflowExecutionService.getExecution({
       request,
       id: result.executionId,
-      spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
+      spaceId: request.spaceId,
       options: { includeOutput: true },
     });
     const ctx = (fullExecution?.context ?? {}) as {
@@ -280,46 +305,49 @@ export class SignificantEventsKIsOnboardingClient {
   }
 
   /**
-   * Returns a lightweight status summary for many streams in one query.
+   * Returns a lightweight status summary for many sources in one query, keyed
+   * by source id.
    *
    * Collapses all onboarding executions via {@link getRecentExecutions} and
-   * filters to the requested names in memory (the management API can't filter
-   * by a set of concurrency keys). Streams with no execution map to
+   * filters to the requested slugs in memory (the management API can't filter
+   * by a set of concurrency keys). Sources with no execution map to
    * `NotStarted`. Unlike {@link getStatus}, the completed output is omitted so
-   * no extra per-stream fetch is needed.
+   * no extra per-source fetch is needed.
    */
   async getStatuses({
-    streamNames,
+    sources,
     request,
   }: {
-    streamNames: string[];
+    sources: Array<{ id: string; slug: string }>;
     request: KibanaRequest;
   }): Promise<Record<string, SignificantEventsWorkflowStatusResult>> {
-    if (streamNames.length === 0) {
+    if (sources.length === 0) {
       return {};
     }
 
     const statuses: Record<string, SignificantEventsWorkflowStatusResult> = {};
+    const idsBySlug = new Map<string, string>();
 
-    for (const streamName of streamNames) {
-      statuses[streamName] = {
+    for (const { id, slug } of sources) {
+      idsBySlug.set(slug, id);
+      statuses[id] = {
         status: SignificantEventsWorkflowStatus.NotStarted,
         executionId: null,
       };
     }
 
-    const requested = new Set(streamNames);
     const executions = await this.getRecentExecutions(request);
 
     for (const execution of executions) {
       if (execution.concurrencyGroupKey === undefined) {
         continue;
       }
-      const streamName = parseStreamNameFromConcurrencyKey(execution.concurrencyGroupKey);
-      if (streamName === null || !requested.has(streamName)) {
+      const slug = parseSourceSlugFromConcurrencyKey(execution.concurrencyGroupKey);
+      const sourceId = slug === null ? undefined : idsBySlug.get(slug);
+      if (sourceId === undefined) {
         continue;
       }
-      statuses[streamName] = WorkflowExecutionService.toStatusResult({
+      statuses[sourceId] = WorkflowExecutionService.toStatusResult({
         execution,
         workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       });
@@ -337,19 +365,37 @@ export class SignificantEventsKIsOnboardingClient {
    */
   async cancel({
     streamName,
+    sourceSlug,
     request,
   }: {
     streamName: string;
+    sourceSlug?: string;
+    request: KibanaRequest;
+  }): Promise<string | null> {
+    const slug = await this.resolveSourceSlug({ sourceId: streamName, sourceSlug, request });
+    return this.cancelBySourceSlug({ sourceSlug: slug, request });
+  }
+
+  /**
+   * Cancels the latest non-terminal onboarding execution for a slug. Unlike
+   * {@link cancel} it needs no catalog lookup, so it also works for sources that
+   * were already deleted.
+   */
+  async cancelBySourceSlug({
+    sourceSlug,
+    request,
+  }: {
+    sourceSlug: string;
     request: KibanaRequest;
   }): Promise<string | null> {
     return this.workflowExecutionService.cancelLatest({
-      spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
+      spaceId: request.spaceId,
       request,
-      concurrencyGroupKey: buildConcurrencyKey(streamName),
+      concurrencyGroupKey: buildConcurrencyKey(sourceSlug),
     });
   }
 
-  /** Returns non-terminal onboarding executions in one query. */
+  /** Returns non-terminal onboarding executions of the request space in one query. */
   async getNonTerminalExecutions({
     request,
   }: {
@@ -357,14 +403,14 @@ export class SignificantEventsKIsOnboardingClient {
   }): Promise<WorkflowExecutionListItemDto[]> {
     const { results } = await this.workflowExecutionService.getExecutions(
       { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
-      ONBOARDING_EXECUTIONS_SPACE_ID,
+      request.spaceId,
       request
     );
     return results;
   }
 
   /**
-   * Cancels every non-terminal onboarding execution across all streams.
+   * Cancels every non-terminal onboarding execution of the request space.
    * Used during teardown of the continuous KI onboarding workflow.
    *
    * @returns The number of executions that were canceled.
@@ -372,7 +418,7 @@ export class SignificantEventsKIsOnboardingClient {
   async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<number> {
     const { results } = await this.workflowExecutionService.getExecutions(
       { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
-      ONBOARDING_EXECUTIONS_SPACE_ID,
+      request.spaceId,
       request
     );
 
@@ -384,7 +430,7 @@ export class SignificantEventsKIsOnboardingClient {
       results.map((result) =>
         this.workflowExecutionService.cancelExecution({
           id: result.id,
-          spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
+          spaceId: request.spaceId,
           request,
         })
       )
@@ -411,10 +457,27 @@ export class SignificantEventsKIsOnboardingClient {
         sortOrder: 'desc',
         collapse: 'concurrencyGroupKey',
       },
-      ONBOARDING_EXECUTIONS_SPACE_ID,
+      request.spaceId,
       request
     );
 
     return results;
+  }
+
+  private async resolveSourceSlug({
+    sourceId,
+    sourceSlug,
+    request,
+  }: {
+    sourceId: string;
+    sourceSlug?: string;
+    request: KibanaRequest;
+  }): Promise<string> {
+    if (sourceSlug !== undefined) {
+      return sourceSlug;
+    }
+    const sourcesClient = await this.getSourcesClient(request);
+    const { source } = await sourcesClient.get(sourceId);
+    return source.slug;
   }
 }

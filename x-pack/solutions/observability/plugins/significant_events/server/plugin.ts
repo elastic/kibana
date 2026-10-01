@@ -89,8 +89,8 @@ import { registerSignificantEventsSkills } from './agent_builder/skills/register
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import {
-  createContinuousKiOnboardingWorkflowService,
-  type ContinuousKiOnboardingWorkflowService,
+  createContinuousOnboardingWorkflowService,
+  type ContinuousOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
 import {
   createCleanupWorkflowService,
@@ -102,6 +102,7 @@ import {
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
+import { removeLegacyDefaultSpaceWorkflows } from './lib/workflows/setup/remove_legacy_default_space_workflows';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
 import {
@@ -143,6 +144,7 @@ export class SignificantEventsPlugin
   private kibanaVersion: string;
   private streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
+  private removeLegacyWorkflows?: () => Promise<void>;
   private maintenanceService?: SignificantEventsMaintenanceService;
 
   constructor(context: PluginInitializerContext) {
@@ -344,7 +346,11 @@ export class SignificantEventsPlugin
 
     const workflowClients = createWorkflowClients(
       plugins.workflowsManagement?.management,
-      telemetryClient
+      telemetryClient,
+      async (request) => {
+        const [, pluginsStart] = await core.getStartServices();
+        return pluginsStart.nightshiftSources.getSourcesClient({ request });
+      }
     );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
     this.streamsKIsOnboardingClient = streamsKIsOnboardingClient;
@@ -403,27 +409,12 @@ export class SignificantEventsPlugin
         });
     }
 
-    let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
+    let continuousOnboardingWorkflowService: ContinuousOnboardingWorkflowService | undefined;
     let syncWorkflowService: SyncWorkflowService | undefined;
     let cleanupWorkflowService: CleanupWorkflowService | undefined;
     let significantEventsScheduledWorkflowsService:
       | SignificantEventsScheduledWorkflowsService
       | undefined;
-
-    if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
-      continuousKiOnboardingWorkflowService = createContinuousKiOnboardingWorkflowService({
-        logger: this.logger,
-        managementApi: plugins.workflowsManagement.management,
-        streamsKIsOnboardingClient,
-      });
-    }
-
-    if (plugins.workflowsManagement) {
-      syncWorkflowService = createSyncWorkflowService({
-        logger: this.logger,
-        managementApi: plugins.workflowsManagement.management,
-      });
-    }
 
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(
       SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
@@ -433,6 +424,7 @@ export class SignificantEventsPlugin
     registerSignificantEventsWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.workflowsManagement && plugins.workflowsExtensions) {
+      const { management: managementApi } = plugins.workflowsManagement;
       const getManagedWorkflowsClient = async () => {
         const [, pluginsStart] = await core.getStartServices();
         if (!pluginsStart.workflowsExtensions) {
@@ -443,11 +435,35 @@ export class SignificantEventsPlugin
         );
       };
 
+      if (streamsKIsOnboardingClient) {
+        continuousOnboardingWorkflowService = createContinuousOnboardingWorkflowService({
+          logger: this.logger,
+          managementApi,
+          streamsKIsOnboardingClient,
+          getManagedWorkflowsClient,
+        });
+      }
+
+      syncWorkflowService = createSyncWorkflowService({
+        logger: this.logger,
+        managementApi,
+        getManagedWorkflowsClient,
+      });
+
       cleanupWorkflowService = createCleanupWorkflowService({
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
         getManagedWorkflowsClient,
       });
+
+      // TODO: remove with the legacy default-space cleanup.
+      // https://github.com/elastic/kibana/issues/294271
+      this.removeLegacyWorkflows = () =>
+        removeLegacyDefaultSpaceWorkflows({
+          getManagedWorkflowsClient,
+          managementApi,
+          logger: this.logger,
+        });
 
       significantEventsScheduledWorkflowsService = createSignificantEventsScheduledWorkflowsService(
         {
@@ -484,7 +500,7 @@ export class SignificantEventsPlugin
         server: this.server,
         telemetry: telemetryClient,
         getScopedClients: this.getScopedClients,
-        continuousKiOnboardingWorkflowService,
+        continuousOnboardingWorkflowService,
         syncWorkflowService,
         cleanupWorkflowService,
         significantEventsScheduledWorkflowsService,
@@ -615,7 +631,8 @@ export class SignificantEventsPlugin
     // Editable discovery agents: installed via agents.ensure when significant events is
     // available. skip(1) on availabilityEnabled$ drops the initial emission, so catch up at
     // startup as well. Per-space installs also happen just-in-time from scheduled discovery
-    // enablement and manual discovery execute.
+    // enablement and manual discovery execute, and for the feature identification and KI query
+    // generation agents from the routes that run them.
     // Pause re-assert runs inside ensureSignificantEventsInstalled after every install.
     if (plugins.agentBuilder && this.server) {
       const agentBuilder = plugins.agentBuilder;
@@ -703,6 +720,10 @@ export class SignificantEventsPlugin
     try {
       await this.managedWorkflowsInstaller?.install();
     } finally {
+      // Independent of the install outcome: one failing static workflow would otherwise keep the
+      // legacy default-space documents around, next to their per-space replacements, on every
+      // restart. It never throws.
+      await this.removeLegacyWorkflows?.();
       await this.reassertPauseAfterWorkflowInstall();
     }
   }

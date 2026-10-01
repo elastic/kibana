@@ -861,6 +861,20 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
     },
   },
+  'observability:nightshiftContinuousOnboardingEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Non-default value of whether continuous knowledge indicator onboarding is enabled.',
+    },
+  },
+  'observability:nightshiftContinuousOnboardingIntervalHours': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the minimum hours between continuous knowledge indicator onboarding runs per source.',
+    },
+  },
   'observability:streamsSigEventsScheduledDiscoveryEnabled': {
     type: 'boolean',
     _meta: {
