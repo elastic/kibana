@@ -35,6 +35,7 @@ import { mockCases, mockCaseComments } from '../mocks';
 import { createAlertAttachment, createUserAttachment } from '../services/attachments/test_utils';
 import type {
   AttachmentAttributes,
+  AttachmentAttributesV2,
   Case,
   CaseConnector,
   EventAttachmentPayload,
@@ -833,18 +834,20 @@ describe('common utils', () => {
           "closed_by": null,
           "comments": Array [
             Object {
-              "comment": "Wow, good luck catching that bad meanie!",
               "created_at": "2019-11-25T21:55:00.177Z",
               "created_by": Object {
                 "email": "testemail@elastic.co",
                 "full_name": "elastic",
                 "username": "elastic",
               },
+              "data": Object {
+                "content": "Wow, good luck catching that bad meanie!",
+              },
               "id": "mock-comment-1",
               "owner": "securitySolution",
               "pushed_at": null,
               "pushed_by": null,
-              "type": "user",
+              "type": "comment",
               "updated_at": "2019-11-25T21:55:00.177Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -1064,13 +1067,25 @@ describe('common utils', () => {
   });
 
   describe('flattenCommentSavedObject', () => {
+    // mockCaseComments[0] is a legacy `user`-typed comment, a migrated attachment type, so the
+    // stored `comment` field is upgraded to unified `data.content` on read.
+    type LegacyCommentAttributes = Extract<
+      (typeof mockCaseComments)[0]['attributes'],
+      { comment: string }
+    >;
+
+    const unifiedAttributes = () => {
+      const { comment, type, ...rest } = mockCaseComments[0].attributes as LegacyCommentAttributes;
+      return { ...rest, type: 'comment', data: { content: comment } };
+    };
+
     it('flattens correctly', () => {
       const comment = { ...mockCaseComments[0] };
       const res = flattenAttachmentSavedObject(comment);
       expect(res).toEqual({
         id: comment.id,
         version: comment.version,
-        ...comment.attributes,
+        ...unifiedAttributes(),
       });
     });
 
@@ -1081,8 +1096,39 @@ describe('common utils', () => {
       expect(res).toEqual({
         id: comment.id,
         version: '0',
-        ...comment.attributes,
+        ...unifiedAttributes(),
       });
+    });
+
+    it('keeps a legacy shape for an unrecognized attachment type (no errors channel to reject it into)', () => {
+      // persistableState is self-contained (no SO-reference injection needed, unlike
+      // externalReference), so it decodes against the legacy Rt without extra setup.
+      const unrecognizedAttachment = {
+        id: 'unrecognized-1',
+        version: '1',
+        references: [],
+        attributes: {
+          type: AttachmentType.persistableState,
+          owner: 'cases',
+          persistableStateAttachmentTypeId: 'unknown-third-party-type',
+          persistableStateAttachmentState: {},
+          created_at: '2020-01-01T00:00:00.000Z',
+          created_by: { username: 'elastic', full_name: null, email: null },
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+        },
+      } as unknown as SavedObject<AttachmentAttributesV2>;
+
+      const res = flattenAttachmentSavedObject(unrecognizedAttachment);
+
+      expect(res).toEqual(
+        expect.objectContaining({
+          type: AttachmentType.persistableState,
+          persistableStateAttachmentTypeId: 'unknown-third-party-type',
+        })
+      );
     });
   });
 
