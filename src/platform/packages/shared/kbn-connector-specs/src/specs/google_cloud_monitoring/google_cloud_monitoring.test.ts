@@ -441,7 +441,6 @@ describe('GoogleCloudMonitoring', () => {
         { params: { pageSize: 1 } }
       );
       expect(result).toEqual({
-        ok: true,
         message: 'Successfully connected to the Cloud Monitoring API',
       });
     });

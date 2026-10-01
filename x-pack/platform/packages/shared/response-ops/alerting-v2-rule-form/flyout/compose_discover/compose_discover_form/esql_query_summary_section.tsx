@@ -9,17 +9,10 @@ import React from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RuleQuery } from '../../../form/types';
+import type { RuleKind, RuleQuery } from '../../../form/types';
+import { getBreachQuery } from '../../../form/utils/query_helpers';
 import { QueryBlock, QuerySummary } from '../query_summary';
-import { splitResultToRuleQuery } from '../use_heuristic_split';
 
-/**
- * Read-only summary of the applied ES|QL query on step 1. The heuristic split
- * is no longer shown in the editor (unified create flow) — it is surfaced here,
- * read-only, with copy + an edit CTA. A successful split is a `composed` query
- * (base + alert segment); a base-only query with no alert condition is persisted
- * as `standalone` (the whole query is the breach query, so every row is a breach).
- */
 export type EsqlSummaryState =
   | 'before_apply'
   | 'success'
@@ -30,21 +23,12 @@ export type EsqlSummaryState =
 /**
  * Derives the summary state from the committed query. Callout priority is
  * encoded by the branch order: empty → split failed → no alert condition.
- *
- * For standalone queries the outcome is derived by running the same heuristic
- * split on the breach query text. A standalone rule whose query already contains
- * a filtering condition returns 'success' so that no false "No alert condition"
- * callout appears (e.g. a rule like `FROM ... | WHERE c > 3` stored as standalone).
  */
 export const getEsqlSummaryState = (
   queryCommitted: boolean,
   query: RuleQuery
 ): EsqlSummaryState => {
   if (!queryCommitted) return 'before_apply';
-
-  if (query.format === 'standalone') {
-    return splitResultToRuleQuery(query.breach.query).outcome;
-  }
 
   const hasBase = query.base.trim().length > 0;
   const hasSegment = query.breach.segment.trim().length > 0;
@@ -121,23 +105,40 @@ const NoAlertConditionCallout: React.FC = () => (
   </EuiCallOut>
 );
 
-const getSummaryCallout = (state: EsqlSummaryState): React.ReactElement | null => {
+const getSummaryCallout = (state: EsqlSummaryState, kind: RuleKind): React.ReactElement | null => {
   if (state === 'empty') return <EmptyCallout />;
-  if (state === 'no_alert_condition') return <NoAlertConditionCallout />;
+  // Alert-condition guidance is meaningless for signal rules.
+  if (state === 'no_alert_condition' && kind === 'alert') return <NoAlertConditionCallout />;
   return null;
+};
+
+/**
+ * Signal rules omit alert-condition guidance. For committed signal queries the
+ * subtitle that talks about base/alert split is hidden entirely.
+ */
+const getDescription = (state: EsqlSummaryState, kind: RuleKind): string | null => {
+  if (kind === 'signal' && (state === 'no_alert_condition' || state === 'success')) {
+    return null;
+  }
+  return DESCRIPTIONS[state];
 };
 
 interface EsqlQuerySummarySectionProps {
   query: RuleQuery;
   queryCommitted: boolean;
+  /** Used to hide the alert-condition block, subtitle and callout for signal rules. */
+  kind: RuleKind;
   /** Disables the edit CTA while the sandbox is already open. */
   isEditorOpen: boolean;
   onOpenEditor: () => void;
 }
 
-const QUERY_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.queryLabel', {
-  defaultMessage: 'Query',
-});
+const QUERY_LABEL = (
+  <FormattedMessage
+    id="xpack.alertingV2.composeDiscover.esqlSummary.queryLabel"
+    defaultMessage="Query"
+  />
+);
 
 const BASE_QUERY_LABEL = (
   <FormattedMessage
@@ -156,34 +157,48 @@ const ALERT_CONDITION_LABEL = (
 export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = ({
   query,
   queryCommitted,
+  kind,
   isEditorOpen,
   onOpenEditor,
 }) => {
   const state = getEsqlSummaryState(queryCommitted, query);
   const showBlocks = state !== 'before_apply';
+  // A signal breaches on nothing, so a segment is part of the single query it
+  // runs rather than a condition to summarise on its own.
+  const showUnifiedBlock = kind === 'signal';
+  const callout = getSummaryCallout(state, kind);
+  const description = getDescription(state, kind);
 
   const isEditCta = state !== 'before_apply' && state !== 'empty';
   const ctaLabel = isEditCta
     ? i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.editQueryButtonLabel', {
         defaultMessage: 'Edit query',
       })
-    : i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.openEditorButtonLabel', {
-        defaultMessage: 'Open query editor',
+    : i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.addQueryButtonLabel', {
+        defaultMessage: 'Add query',
       });
 
   return (
     <div data-test-subj={`esqlQuerySummarySection-${state}`}>
-      <EuiText size="s" color="subdued">
-        {DESCRIPTIONS[state]}
-      </EuiText>
-      <EuiSpacer size="s" />
+      {description != null && (
+        <>
+          <EuiText size="s" color="subdued">
+            {description}
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      )}
 
-      {getSummaryCallout(state)}
-      {state !== 'success' && state !== 'before_apply' && <EuiSpacer size="m" />}
+      {callout}
+      {callout != null && <EuiSpacer size="m" />}
 
       {showBlocks ? (
-        query.format === 'standalone' ? (
-          <QueryBlock label={QUERY_LABEL} query={query.breach.query} emptyMessage={NOT_DEFINED} />
+        showUnifiedBlock ? (
+          <QueryBlock
+            label={QUERY_LABEL}
+            query={getBreachQuery(query)}
+            emptyMessage={NOT_DEFINED}
+          />
         ) : (
           <>
             <QueryBlock label={BASE_QUERY_LABEL} query={query.base} emptyMessage={NOT_DEFINED} />
@@ -202,8 +217,8 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
       <EuiSpacer size="s" />
       <EuiButton
         size="s"
-        color={isEditCta ? 'text' : undefined}
-        iconType={isEditCta ? 'chevronLimitLeft' : 'editorCodeBlock'}
+        color="text"
+        iconType={isEditCta ? 'pencil' : 'plusCircle'}
         isDisabled={isEditorOpen}
         onClick={onOpenEditor}
         data-test-subj="esqlSummaryOpenEditor"

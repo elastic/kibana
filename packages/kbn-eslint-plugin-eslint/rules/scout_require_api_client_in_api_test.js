@@ -187,13 +187,20 @@ module.exports = {
     ],
   },
 
-  create(context) {
-    const options = context.options[0] || {};
-    const alternativeFixtures = options.alternativeFixtures || [];
-    const acceptedFixtures = ['apiClient', ...alternativeFixtures];
-    const errorMsg = buildErrorMsg(acceptedFixtures);
+  createOnce(context) {
+    let acceptedFixtures;
+    let errorMsg;
+    let sourceCode;
 
     return {
+      before() {
+        const options = context.options[0] || {};
+        const alternativeFixtures = options.alternativeFixtures || [];
+        acceptedFixtures = ['apiClient', ...alternativeFixtures];
+        errorMsg = buildErrorMsg(acceptedFixtures);
+        sourceCode = context.sourceCode;
+      },
+
       CallExpression(node) {
         if (!isApiTestCall(node)) return;
 
@@ -207,7 +214,6 @@ module.exports = {
         }
 
         // Skip reporting if there is an eslint-disable comment for this rule
-        const sourceCode = context.getSourceCode();
         const comments = sourceCode.getCommentsBefore(node);
         if (
           comments.some((c) =>

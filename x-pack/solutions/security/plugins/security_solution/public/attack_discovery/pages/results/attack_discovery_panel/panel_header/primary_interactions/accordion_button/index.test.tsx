@@ -12,23 +12,24 @@ import { AccordionButton } from '.';
 
 describe('AccordionButton', () => {
   const title = 'Malware Delivery and Credentials Access on macOS';
+  const titleId = 'titleId';
 
   it('renders the assistant avatar', () => {
-    render(<AccordionButton isLoading={false} title={title} />);
+    render(<AccordionButton isLoading={false} title={title} titleId={titleId} />);
     const assistantAvatar = screen.getByTestId('assistantAvatar');
 
     expect(assistantAvatar).toBeInTheDocument();
   });
 
   it('renders the expected title', () => {
-    render(<AccordionButton isLoading={false} title={title} />);
+    render(<AccordionButton isLoading={false} title={title} titleId={titleId} />);
     const titleText = screen.getByTestId('titleText');
 
     expect(titleText).toHaveTextContent(title);
   });
 
   it('renders the skeleton title when isLoading is true', () => {
-    render(<AccordionButton isLoading={true} title={title} />);
+    render(<AccordionButton isLoading={true} title={title} titleId={titleId} />);
     const skeletonTitle = screen.getByTestId('skeletonTitle');
 
     expect(skeletonTitle).toBeInTheDocument();

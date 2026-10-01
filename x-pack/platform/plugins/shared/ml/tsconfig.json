@@ -99,6 +99,8 @@
     "@kbn/ml-ui-actions",
     "@kbn/ml-url-state",
     "@kbn/ml-validators",
+    "@kbn/ml-cps",
+    "@kbn/ml-cps-common",
     "@kbn/monaco",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/presentation-publishing",
@@ -125,6 +127,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/ui-actions-plugin",
+    "@kbn/ui-callout",
     "@kbn/unified-field-list",
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
@@ -153,12 +156,16 @@
     "@kbn/as-code-filters-transforms",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-visualizations",
     "@kbn/zod",
     "@kbn/cps",
     "@kbn/cps-utils",
     "@kbn/lens-common",
     "@kbn/scout",
     "@kbn/core-http-common",
-    "@kbn/app-header"
+    "@kbn/core-rendering-browser",
+    "@kbn/app-header",
+    "@kbn/ui-callout"
   ]
 }

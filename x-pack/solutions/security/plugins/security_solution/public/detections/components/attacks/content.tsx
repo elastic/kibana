@@ -52,6 +52,7 @@ import type { Status } from '../../../../common/api/detection_engine';
 import { FiltersSection } from './filters/filters_section';
 import { KPIsSection } from './kpis/kpis_section';
 import { AttacksTour, AttacksTourProvider, WelcomeTourCallout } from './tour';
+import { WorkflowsPromotionCallout } from './workflows_promotion_callout';
 import { GenerationsControlCenterFlyout } from './generations_control_center';
 import { GENERATIONS_BUTTON } from './generations_control_center/translations';
 
@@ -268,7 +269,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     data-test-subj={ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID}
-                    iconType="list"
+                    iconType="listBullet"
                     onClick={openControlCenter}
                     size="s"
                   >
@@ -287,6 +288,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
             </HeaderPage>
             <EuiHorizontalRule margin="none" />
             <EuiSpacer size="l" />
+            <WorkflowsPromotionCallout />
             <WelcomeTourCallout />
             <AttacksTour />
             <EuiFlexGroup direction="row" responsive={false} wrap={true}>

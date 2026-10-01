@@ -206,6 +206,29 @@ describe('openAIAdapter', () => {
       );
     });
 
+    it('forwards only connector-supported telemetry metadata', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          metadata: {
+            connectorTelemetry: {
+              pluginId: 'feature',
+              aggregateBy: 'parent',
+              productSolution: 'solution',
+              productFeature: 'product-feature',
+              interactionId: 'interaction-1',
+            },
+          },
+        })
+        .subscribe(noop);
+
+      expect(getSubActionParams().telemetryMetadata).toEqual({
+        pluginId: 'feature',
+        aggregateBy: 'parent',
+      });
+    });
+
     it('correctly formats messages with content parts', () => {
       openAIAdapter
         .chatComplete({
@@ -273,19 +296,72 @@ describe('openAIAdapter', () => {
             {
               type: 'image_url',
               image_url: {
-                url: 'aaaaaa',
+                url: 'data:image/png;base64,aaaaaa',
               },
             },
             {
               type: 'image_url',
               image_url: {
-                url: 'bbbbbb',
+                url: 'data:image/png;base64,bbbbbb',
               },
             },
           ],
           role: 'user',
         },
       ]);
+    });
+
+    it('injects a dummy tool when history has tool use and tools are omitted', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: 'answer',
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: {
+                      foo: 'bar',
+                    },
+                  },
+                  toolCallId: '0',
+                },
+              ],
+            },
+            {
+              name: 'my_function',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: {
+                bar: 'foo',
+              },
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(pick(getRequest().body, 'tools')).toEqual({
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'doNotCallThisTool',
+              description: 'Do not call this tool, it is strictly forbidden',
+              parameters: {
+                type: 'object',
+                properties: {},
+              },
+            },
+          },
+        ],
+      });
     });
 
     it('correctly formats tools and tool choice', () => {

@@ -83,18 +83,12 @@ export function NightshiftEmptyState({
     position: relative;
 
     &::before {
-      ${isProcessing
-        ? css`
-            animation: ${fillProgressAnimations[index]} 5s linear infinite;
-          `
-        : css`
-            animation: none;
-          `}
+      animation: ${fillProgressAnimations[index]} 5s linear infinite;
       background: ${progressGradient};
       content: '';
       inset: 0;
       position: absolute;
-      transform: scaleX(${isProcessing ? 0 : 0.45});
+      transform: scaleX(0);
       transform-origin: left;
     }
 

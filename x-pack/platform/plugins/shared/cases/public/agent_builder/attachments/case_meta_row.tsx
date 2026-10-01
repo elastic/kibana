@@ -53,7 +53,7 @@ export const CaseMetaRow: React.FC<Props> = ({ data, caseUrls }) => {
         <EuiFlexItem grow={false}>
           <EuiBadge
             color="hollow"
-            iconType="editorComment"
+            iconType="comment"
             href={caseUrls.activityTab}
             target="_blank"
             aria-label={VIEW_COMMENTS}

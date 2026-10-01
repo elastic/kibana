@@ -25,8 +25,18 @@ import {
   invalidateHitlExternalResumeTokenIfPresent,
   mintHitlExternalResumeToken,
 } from './hitl_external_resume_helpers';
-import { hasHitlWaitExpired } from './hitl_timeout_helpers';
-import { resumeHitlWaitStep, shouldSkipHitlWaitEntry, tryEnterHitlWait } from './hitl_wait_helpers';
+import {
+  getResolvedDynamicTimeout,
+  hasHitlWaitExpired,
+  persistResolvedDynamicTimeout,
+} from './hitl_timeout_helpers';
+import {
+  emitHitlWaitingAudit,
+  failHitlWaitOnTimeout,
+  resumeHitlWaitStep,
+  shouldSkipHitlWaitEntry,
+  tryEnterHitlWait,
+} from './hitl_wait_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 import { getKibanaUrl } from '../../utils/get_kibana_url';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -72,6 +82,11 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
   }
 
   private async enterWait(): Promise<void> {
+    const dynamicTimeout = persistResolvedDynamicTimeout(
+      this.stepExecutionRuntime,
+      this.node.configuration.timeout,
+      DEFAULT_WAIT_FOR_INPUT_TIMEOUT
+    );
     const withConfig = this.node.configuration?.with;
     const ctx = this.stepExecutionRuntime.contextManager;
     const message =
@@ -83,12 +98,19 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
       this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for human input`, {
         event: { action: 'hitl:waiting' },
       });
+      emitHitlWaitingAudit({
+        executionId: this.workflowRuntime.getWorkflowExecution().id,
+        stepExecutionId: this.stepExecutionRuntime.stepExecutionId,
+        stepType: this.node.stepType,
+      });
       return;
     }
 
     const stepInput: Record<string, unknown> = {
       ...(message.length > 0 && { message }),
-      ...(withConfig.schema !== undefined && { schema: withConfig.schema }),
+      ...(withConfig.schema !== undefined && {
+        schema: ctx.renderValueAccordingToContext(withConfig.schema),
+      }),
     };
 
     const channels = withConfig.channels;
@@ -102,11 +124,10 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
         throw new Error('External input notifications require a space');
       }
 
-      const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_INPUT_TIMEOUT;
       const resumeToken = mintHitlExternalResumeToken({
         stepExecutionRuntime: this.stepExecutionRuntime,
         execution,
-        timeout,
+        timeout: dynamicTimeout,
       });
 
       stepInput[HITL_TOKEN_HASH_INPUT_FIELD] = resumeToken.tokenHash;
@@ -154,23 +175,35 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
     this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for human input`, {
       event: { action: 'hitl:waiting' },
     });
+    emitHitlWaitingAudit({
+      executionId: this.workflowRuntime.getWorkflowExecution().id,
+      stepExecutionId: this.stepExecutionRuntime.stepExecutionId,
+      stepType: this.node.stepType,
+    });
   }
 
   private async resume(): Promise<void> {
     const execution = this.workflowRuntime.getWorkflowExecution();
     const resumeInput = execution.context?.resumeInput as Record<string, unknown> | undefined;
 
-    const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_INPUT_TIMEOUT;
+    const timeout = getResolvedDynamicTimeout(
+      this.stepExecutionRuntime,
+      this.node.configuration.timeout,
+      DEFAULT_WAIT_FOR_INPUT_TIMEOUT
+    );
     const startedAt = this.stepExecutionRuntime.stepExecution?.startedAt;
 
     if (resumeInput == null && hasHitlWaitExpired(startedAt, timeout)) {
       invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
-      this.stepExecutionRuntime.failStep(
-        new ExecutionError({
+      failHitlWaitOnTimeout({
+        stepExecutionRuntime: this.stepExecutionRuntime,
+        executionId: execution.id,
+        stepType: this.node.stepType,
+        error: new ExecutionError({
           type: 'TimeoutError',
           message: `Input wait exceeded the configured timeout of ${timeout}.`,
-        })
-      );
+        }),
+      });
       return;
     }
 

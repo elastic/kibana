@@ -53,7 +53,7 @@ export const EmbeddableMenuButton: React.FC = () => {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      anchorPosition="downRight"
+      anchorPosition="downLeft"
       aria-label={openMenuLabel}
     >
       {view === 'conversations' ? (

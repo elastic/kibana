@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -14,32 +14,51 @@ import {
   OBSERVABILITY_OVERVIEW_APP_ID,
   SIGNIFICANT_EVENTS_APP_ID,
 } from '@kbn/deeplinks-observability';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { getNightshiftCapabilities, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftApp } from './app/app';
 import { NightshiftAppHeader } from './app/app_header';
 import { useKibana } from './hooks/use_kibana';
+import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
+import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
 
 export function NightshiftPage(): React.ReactElement | null {
   const {
     application,
-    http: { basePath },
     featureFlags,
+    http: { basePath },
     serverless,
     observabilityShared,
+    nightshiftInvestigations,
   } = useKibana().services;
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
+  const { canConfigure, canManage } = getNightshiftCapabilities(
+    application.capabilities.nightshift
+  );
   const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
     path: '/settings',
+  });
+  const managementHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+    path: '/streams',
   });
   const navigateToSettings = useCallback(
     () => application.navigateToUrl(settingsHref),
     [application, settingsHref]
   );
+  const navigateToManagement = useCallback(
+    () => application.navigateToUrl(managementHref),
+    [application, managementHref]
+  );
 
-  // Availability is owned by this flag alone — the /available endpoint is the same
-  // gate on the server, so a second client probe would only duplicate it.
-  const isEnabled = featureFlags.getBooleanValue(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false);
+  // The secrets API is disabled (404) unless the nightshift.enabled flag is on.
+  const nightshiftEnabled = featureFlags.useBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
+  const canManageSandboxSecrets =
+    canManage && nightshiftInvestigations?.investigationsClient != null && nightshiftEnabled;
+  const [isSandboxSecretsFlyoutOpen, setIsSandboxSecretsFlyoutOpen] = useState(false);
+  const openSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(true), []);
+  const closeSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(false), []);
+
+  const { isAvailable, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
 
   useBreadcrumbs(
     [
@@ -55,12 +74,12 @@ export function NightshiftPage(): React.ReactElement | null {
   );
 
   useEffect(() => {
-    if (!isEnabled) {
+    if (!isAvailabilityLoading && !isAvailable) {
       application.navigateToApp(OBSERVABILITY_OVERVIEW_APP_ID);
     }
-  }, [application, isEnabled]);
+  }, [application, isAvailable, isAvailabilityLoading]);
 
-  if (!isEnabled) {
+  if (!isAvailable) {
     return null;
   }
 
@@ -73,10 +92,19 @@ export function NightshiftPage(): React.ReactElement | null {
         paddingSize: 'none',
       }}
     >
-      <NightshiftAppHeader onSettingsClick={navigateToSettings} settingsHref={settingsHref} />
+      <NightshiftAppHeader
+        onManagementClick={navigateToManagement}
+        managementHref={managementHref}
+        onSettingsClick={canConfigure ? navigateToSettings : undefined}
+        settingsHref={canConfigure ? settingsHref : undefined}
+        onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}
+      />
       <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
         <NightshiftApp />
       </EuiPageTemplate.Section>
+      {canManageSandboxSecrets && isSandboxSecretsFlyoutOpen && (
+        <SandboxSecretsFlyout onClose={closeSandboxSecretsFlyout} />
+      )}
     </ObservabilityPageTemplate>
   );
 }

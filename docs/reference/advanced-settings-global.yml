@@ -33,6 +33,29 @@ groups:
           self: ga
           serverless: unavailable
 
+  - group: Alerting V2
+    id: kibana-alerting-v2-global-settings
+    settings:
+
+      - setting: "alerting:v2:enabled"
+        id: alerting-v2-enabled
+        description: |
+          Makes the experimental {{esql}}-based alerting system available in {{product.kibana}}, including its rules, action policies, and APIs. When this setting is off, {{product.kibana}} hides the **Alerting V2** interface and rejects requests to its APIs, but rules and action policies that already exist keep running.
+
+          For the steps to turn the system on, confirm that it is available, and stop rules from running, refer to [Set up the experimental alerting system](docs-content://explore-analyze/alerting/experimental-alerting-system/get-started/setup.md).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview 9.5+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: preview
+        note: |
+          :applies_to: security: ga
+          This setting is unavailable on the [Elastic AI SOC Engine (EASE)](docs-content://solutions/security/ai/ease/ease-intro.md) Security project type.
+
   - group: Custom branding
     id: kibana-custom-branding-settings
     note: "Custom branding is a [subscription feature](https://www.elastic.co/subscriptions)."
@@ -49,20 +72,20 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          serverless: unavailable
+          serverless: ga
 
       - setting: "xpackCustomBranding:customizedLogo"
         id: organization-name
         description: |
           The custom image that replaces the text next to the logo in the header of all {{product.kibana}} pages. Images look best when they are no larger than 200 x 84 pixels and have a transparent background.
-        datatype: string
+        datatype: image
         applies_to:
           stack: ga
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          serverless: unavailable
+          serverless: ga
 
       - setting: "xpackCustomBranding:pageTitle"
         id: page-title
@@ -88,7 +111,7 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          serverless: unavailable
+          serverless: ga
 
       - setting: "xpackCustomBranding:faviconPNG"
         id: favicon-png
@@ -101,4 +124,4 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          serverless: unavailable
+          serverless: ga

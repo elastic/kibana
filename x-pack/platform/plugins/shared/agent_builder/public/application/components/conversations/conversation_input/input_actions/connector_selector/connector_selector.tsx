@@ -8,9 +8,10 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
@@ -34,6 +35,7 @@ import {
 import { InputPopoverButton } from '../input_popover_button';
 import { OptionText } from '../option_text';
 import { ConnectorIcon } from './connector_icon';
+import { isNearingEndOfLife, ModelRetirementIcon } from './model_badges';
 
 const selectableAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.selectableAriaLabel',
@@ -92,7 +94,8 @@ const ConnectorPopoverButton: React.FC<{
   onClick: () => void;
   disabled: boolean;
   selectedConnectorName?: string;
-}> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName }) => {
+  isRetiring?: boolean;
+}> = ({ isPopoverOpen, onClick, disabled, selectedConnectorName, isRetiring }) => {
   const connectorDisplayName = selectedConnectorName ?? defaultConnectorButtonLabel;
   return (
     <InputPopoverButton
@@ -108,7 +111,16 @@ const ConnectorPopoverButton: React.FC<{
         detail: 'connector',
       })}
     >
-      {connectorDisplayName}
+      {isRetiring ? (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="warning" size="s" color="warning" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{connectorDisplayName}</EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        connectorDisplayName
+      )}
     </InputPopoverButton>
   );
 };
@@ -142,28 +154,36 @@ const manageConnectorsAriaLabel = i18n.translate(
 const ConnectorListFooter: React.FC = () => {
   const { manageConnectorsUrl } = useNavigation();
   const { write: hasWritePrivilege } = useUiPrivileges();
+  const manageButtonProps = {
+    size: 's' as const,
+    iconType: 'gear',
+    color: 'text' as const,
+    'aria-label': manageConnectorsAriaLabel,
+    ...getEbtProps({
+      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      action: AGENT_BUILDER_UI_EBT.action.conversation.MANAGE_CONNECTORS,
+      detail: 'connector',
+    }),
+  };
   return (
     <EuiPopoverFooter paddingSize="s">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
-          <EuiButtonEmpty
-            size="s"
-            iconType="gear"
-            color="text"
-            aria-label={manageConnectorsAriaLabel}
-            href={manageConnectorsUrl}
-            disabled={!hasWritePrivilege}
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.MANAGE_CONNECTORS,
-              detail: 'connector',
-            })}
-          >
-            <FormattedMessage
-              id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
-              defaultMessage="Manage"
-            />
-          </EuiButtonEmpty>
+          {hasWritePrivilege ? (
+            <EuiButton {...manageButtonProps} href={manageConnectorsUrl}>
+              <FormattedMessage
+                id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
+                defaultMessage="Manage"
+              />
+            </EuiButton>
+          ) : (
+            <EuiButton {...manageButtonProps} disabled>
+              <FormattedMessage
+                id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
+                defaultMessage="Manage"
+              />
+            </EuiButton>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopoverFooter>
@@ -222,7 +242,12 @@ export const ConnectorSelector: React.FC<{}> = () => {
       label: connector.name,
       checked: connector.id === selectedConnectorId ? 'on' : undefined,
       prepend: <ConnectorIcon connectorName={connector.name} />,
-      append: connector.id === defaultConnectorId ? <DefaultConnectorBadge /> : undefined,
+      append: (
+        <>
+          <ModelRetirementIcon metadata={connector.metadata} />
+          {connector.id === defaultConnectorId && <DefaultConnectorBadge />}
+        </>
+      ),
     });
     const groupLabel = (label: string, dataTestSubj: string): ConnectorOptionData =>
       ({
@@ -269,6 +294,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
   });
 
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
+  const isRetiring = isNearingEndOfLife(selectedConnector?.metadata);
 
   // Track the previously-observed default so we can detect admin-initiated changes.
   // Seeded with the current value on first render and updated on every effect run
@@ -339,12 +365,13 @@ export const ConnectorSelector: React.FC<{}> = () => {
           onClick={togglePopover}
           disabled={isLoading || connectors.length === 0 || defaultConnectorOnly}
           selectedConnectorName={selectedConnector?.name}
+          isRetiring={isRetiring}
         />
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      anchorPosition="upCenter"
+      anchorPosition="upLeft"
     >
       <EuiSelectable
         id={connectorSelectId}

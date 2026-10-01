@@ -15,11 +15,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiLink,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -72,6 +71,8 @@ export const AgentlessStatusDetailsFlyout: React.FunctionComponent<
     return null;
   }, [agent, packagePolicy]);
 
+  const CalloutComponent = componentAlertLevel === 'failed' ? KbnDangerCallout : KbnWarningCallout;
+
   return (
     <EuiFlyout
       data-test-subj="agentlessStatusDetailsFlyout"
@@ -92,10 +93,8 @@ export const AgentlessStatusDetailsFlyout: React.FunctionComponent<
       <EuiFlyoutBody>
         {componentAlertLevel && (
           <>
-            <EuiCallOut
+            <CalloutComponent
               announceOnMount
-              color={componentAlertLevel === 'failed' ? 'danger' : 'warning'}
-              iconType="warning"
               title={
                 componentAlertLevel === 'failed'
                   ? i18n.translate(
@@ -108,29 +107,26 @@ export const AgentlessStatusDetailsFlyout: React.FunctionComponent<
                     )
               }
               data-test-subj="agentlessStatusDetailsFlyoutComponentsWarning"
-            >
-              {componentAlertLevel === 'failed' && (
-                <EuiText size="s">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.fleet.agentlessStatusDetailsFlyout.componentWarning.helperText"
-                      defaultMessage="{policyName} managed integration failed to establish. Check out the {troubleshootingGuideLink} for help."
-                      values={{
-                        policyName,
-                        troubleshootingGuideLink: (
-                          <EuiLink href={docLinks.links.fleet.troubleshooting} target="_blank">
-                            <FormattedMessage
-                              id="xpack.fleet.agentlessStatusDetailsFlyout.componentWarning.troubleshootingLinkLabel"
-                              defaultMessage="troubleshooting guide"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </p>
-                </EuiText>
-              )}
-            </EuiCallOut>
+              text={
+                componentAlertLevel === 'failed' ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentlessStatusDetailsFlyout.componentWarning.helperText"
+                    defaultMessage="{policyName} managed integration failed to establish. Check out the {troubleshootingGuideLink} for help."
+                    values={{
+                      policyName,
+                      troubleshootingGuideLink: (
+                        <EuiLink href={docLinks.links.fleet.troubleshooting} target="_blank">
+                          <FormattedMessage
+                            id="xpack.fleet.agentlessStatusDetailsFlyout.componentWarning.troubleshootingLinkLabel"
+                            defaultMessage="troubleshooting guide"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                ) : undefined
+              }
+            />
             <EuiSpacer size="m" />
           </>
         )}

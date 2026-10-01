@@ -9,7 +9,11 @@ import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { addPrivateLocationRoute, getAgentPolicySpaceIds } from './add_private_location';
+import {
+  addPrivateLocationRoute,
+  getAgentPolicySpaceIds,
+  PrivateLocationSchema,
+} from './add_private_location';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 
 jest.mock('./migrate_legacy_private_locations');
@@ -132,6 +136,20 @@ describe('addPrivateLocationRoute handler - space containment', () => {
     expect(create).toHaveBeenCalled();
   });
 
+  it('does not persist the deprecated isAgentSharding field', async () => {
+    const { routeContext } = makeRouteContext({
+      policySpaceIds: [ALL_SPACES_ID],
+      requestSpaces: ['naims'],
+    });
+    routeContext.request.body = { ...routeContext.request.body, isAgentSharding: true };
+    const create = stubDownstream();
+
+    await addPrivateLocationRoute().handler(routeContext);
+
+    expect(create).toHaveBeenCalled();
+    expect(create.mock.calls[0][0]).not.toHaveProperty('isAgentSharding');
+  });
+
   it('bypasses the containment check when the agent policy is all-spaces', async () => {
     const { routeContext, response } = makeRouteContext({
       policySpaceIds: [ALL_SPACES_ID],
@@ -165,5 +183,17 @@ describe('PrivateLocationRepository.getLocationSpaces', () => {
 
   it('falls back to agentPolicySpaces when locationSpaces is undefined', () => {
     expect(repo().getLocationSpaces({ agentPolicySpaces: ['default'] })).toEqual(['default']);
+  });
+});
+
+describe('PrivateLocationSchema', () => {
+  const base = { label: 'loc', agentPolicyId: 'ap' };
+
+  it('still accepts the deprecated isAgentSharding field', () => {
+    expect(() => PrivateLocationSchema.parse({ ...base, isAgentSharding: true })).not.toThrow();
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => PrivateLocationSchema.parse({ ...base, isAgentShardng: true })).toThrow();
   });
 });

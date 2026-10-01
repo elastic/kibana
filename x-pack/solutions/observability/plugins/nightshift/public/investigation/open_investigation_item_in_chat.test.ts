@@ -6,50 +6,24 @@
  */
 
 import {
-  buildBlindSpotChatOptions,
   buildHypothesisChatOptions,
   buildRecommendationChatOptions,
 } from './open_investigation_item_in_chat';
 
 describe('open_investigation_item_in_chat', () => {
-  it('buildBlindSpotChatOptions attaches the blind spot as text', () => {
-    expect(
-      buildBlindSpotChatOptions(
-        {
-          title: 'Missing trace coverage',
-          description: 'No spans for payment gateway calls.',
-        },
-        'blind-spot-1'
-      )
-    ).toEqual({
-      newConversation: true,
-      autoSendInitialMessage: true,
-      initialMessage: 'Tell me about this blind spot: Missing trace coverage',
-      attachments: [
-        {
-          id: 'blind-spot-1',
-          type: 'text',
-          description: '[Blind spot] Missing trace coverage',
-          data: {
-            content: 'Missing trace coverage · No spans for payment gateway calls.',
-          },
-        },
-      ],
-    });
-  });
-
   it('buildRecommendationChatOptions attaches the recommendation as text', () => {
     expect(
       buildRecommendationChatOptions(
         {
           title: 'Roll back checkout deployment',
+          confidence: 0.9,
           description: 'Revert commit abc123 and monitor error rate.',
         },
         'recommendation-1'
       )
     ).toEqual({
       newConversation: true,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage: false,
       initialMessage: 'Tell me about this recommendation: Roll back checkout deployment',
       attachments: [
         {
@@ -75,7 +49,7 @@ describe('open_investigation_item_in_chat', () => {
       )
     ).toEqual({
       newConversation: true,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage: false,
       initialMessage: 'Tell me about this hypothesis: Checkout deploy regression',
       attachments: [
         {

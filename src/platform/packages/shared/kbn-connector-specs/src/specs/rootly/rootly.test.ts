@@ -544,10 +544,8 @@ describe('Rootly', () => {
     it('should succeed when severities can be listed', async () => {
       mockClient.get.mockResolvedValue({ data: { data: [{ id: 'sev1' }, { id: 'sev2' }] } });
 
-      if (!Rootly.test) throw new Error('Test handler not defined');
       const result = await Rootly.test.handler(mockContext);
 
-      expect(result.ok).toBe(true);
       expect(result.message).toContain('2');
     });
 

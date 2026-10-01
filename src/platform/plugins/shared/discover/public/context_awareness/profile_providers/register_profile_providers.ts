@@ -122,12 +122,12 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDataSourceProfileProvider(),
   createPatternsDataSourceProfileProvider(providerServices),
-  createChangePointDataSourceProfileProvider(),
-  createDeprecationLogsDataSourceProfileProvider(),
+  createChangePointDataSourceProfileProvider(providerServices),
   createMetricsDataSourceProfileProvider(),
+  createDeprecationLogsDataSourceProfileProvider(),
   createSparklineDataSourceProfileProvider(providerServices),
-  ...createObservabilityLogsDataSourceProfileProviders(providerServices),
   ...createObservabilityTracesDataSourceProfileProviders(providerServices),
+  ...createObservabilityLogsDataSourceProfileProviders(providerServices),
 ];
 
 /**

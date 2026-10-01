@@ -10,8 +10,7 @@ import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
-// Failing: See https://github.com/elastic/kibana/issues/230804
-describe.skip(
+describe(
   'Response actions history page',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
@@ -65,14 +64,9 @@ describe.skip(
       cy.url().should('include', 'withOutputs');
 
       // collapse the row
-      cy.intercept('GET', '/api/endpoint/action*').as('getResponses');
       cy.get('@2nd-row').click();
-      // wait for the API response to come back
-      // and then see if the tray is actually closed
-      cy.wait('@getResponses', { timeout: 500 }).then(() => {
-        cy.getByTestSubj('response-actions-list-details-tray').should('not.exist');
-        cy.url().should('not.include', 'withOutputs');
-      });
+      cy.getByTestSubj('response-actions-list-details-tray').should('not.exist');
+      cy.url().should('not.include', 'withOutputs');
     });
   }
 );

@@ -24,6 +24,7 @@ spec:
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'false'
+        SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main
       default_branch: main

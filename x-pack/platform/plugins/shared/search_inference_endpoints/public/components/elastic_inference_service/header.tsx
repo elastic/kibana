@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-
-import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
-import { useKibana } from '../../hooks/use_kibana';
+import type { EisInferenceEndpoint } from '../../../common/types';
+import { useEisModels } from '../../hooks/use_eis_models';
 import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
+import { useKibana } from '../../hooks/use_kibana';
+import { useRegionPolicy } from '../../hooks/use_region_policy';
+import { RestrictedRegionsBadge } from './restricted_regions_badge';
+
+const EMPTY_ENDPOINTS: EisInferenceEndpoint[] = [];
 
 interface ElasticInferenceServiceModelsHeaderProps {
   onManageRegions: () => void;
@@ -24,8 +30,8 @@ export const ElasticInferenceServiceModelsHeader = ({
     services: { cloud },
   } = useKibana();
   const { canManage } = useInferenceCapabilities();
-
-  const showManageRegions = canManage;
+  const { data: regionPolicy } = useRegionPolicy();
+  const { data: eisEndpoints } = useEisModels();
 
   const [billingUrl, setBillingUrl] = useState<string>();
 
@@ -39,70 +45,83 @@ export const ElasticInferenceServiceModelsHeader = ({
     }
   }, [cloud]);
 
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        ...(cloud?.isCloudEnabled && billingUrl
+          ? [
+              {
+                id: 'viewCloudUsage',
+                label: i18n.translate(
+                  'xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button',
+                  { defaultMessage: 'View Cloud usage' }
+                ),
+                iconType: 'external' as const,
+                href: billingUrl,
+                target: '_blank',
+                testId:
+                  'searchInferenceEndpointsElasticInferenceServiceModelsHeaderViewCloudUsageButton',
+              },
+            ]
+          : []),
+        ...(canManage
+          ? [
+              {
+                id: 'manageRegions',
+                label: i18n.translate(
+                  'xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton',
+                  { defaultMessage: 'Region preferences' }
+                ),
+                iconType: 'gear' as const,
+                run: onManageRegions,
+                testId: 'eisManageRegionsButton',
+              },
+            ]
+          : []),
+      ],
+    }),
+    [billingUrl, canManage, cloud?.isCloudEnabled, onManageRegions]
+  );
+
+  const badges = useMemo(() => {
+    if (!regionPolicy) {
+      return undefined;
+    }
+    const hasAllowedGeos = (regionPolicy.region_policy.allowed_geos?.length ?? 0) > 0;
+    const hasAllowedRegions = (regionPolicy.region_policy.allowed_regions?.length ?? 0) > 0;
+    if (!hasAllowedGeos && !hasAllowedRegions) {
+      return undefined;
+    }
+
+    return [
+      {
+        label: i18n.translate(
+          'xpack.searchInferenceEndpoints.eisModelsPage.restrictedRegionsBadgeLabel',
+          { defaultMessage: 'Restricted regions' }
+        ),
+        renderCustomBadge: () => (
+          <RestrictedRegionsBadge
+            policy={regionPolicy}
+            endpoints={eisEndpoints ?? EMPTY_ENDPOINTS}
+            onManageRegions={canManage ? onManageRegions : undefined}
+          />
+        ),
+      },
+    ];
+  }, [canManage, eisEndpoints, onManageRegions, regionPolicy]);
+
   return (
-    <EuiPageTemplate.Header
-      data-test-subj="eisModelsPageHeader"
-      pageTitle={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.header', {
+    <AppHeader
+      title={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.header', {
         defaultMessage: 'Elastic Inference Service',
       })}
       description={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.description', {
         defaultMessage: 'Manage models and endpoints for Elastic Inference Service',
       })}
-      paddingSize="none"
-      bottomBorder={true}
-      rightSideItems={[
-        ...(cloud?.isCloudEnabled && billingUrl
-          ? [
-              <EuiButton
-                data-test-subj="searchInferenceEndpointsElasticInferenceServiceModelsHeaderViewCloudUsageButton"
-                href={billingUrl}
-                target="_blank"
-                iconType="external"
-                aria-label={i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.ariaLabel',
-                  {
-                    defaultMessage: 'Click to go Cloud usage details',
-                  }
-                )}
-              >
-                {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button', {
-                  defaultMessage: 'View Cloud usage',
-                })}
-              </EuiButton>,
-            ]
-          : []),
-        <EuiButtonEmpty
-          iconType="documentation"
-          aria-label={i18n.translate(
-            'xpack.searchInferenceEndpoints.eisModelsPage.header.documentation.ariaLabel',
-            {
-              defaultMessage: 'Click to go Elastic Inference Service documentation',
-            }
-          )}
-          href={docLinks.elasticInferenceService}
-          iconSide="left"
-          target="_blank"
-          data-test-subj="eis_documentation"
-        >
-          {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.documentationButton', {
-            defaultMessage: 'Documentation',
-          })}
-        </EuiButtonEmpty>,
-        ...(showManageRegions
-          ? [
-              <EuiButtonEmpty
-                iconType="gear"
-                onClick={onManageRegions}
-                data-test-subj="eisManageRegionsButton"
-              >
-                {i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton',
-                  { defaultMessage: 'Manage regions' }
-                )}
-              </EuiButtonEmpty>,
-            ]
-          : []),
-      ]}
+      badges={badges}
+      menu={menu}
+      docLink={docLinks.elasticInferenceService}
+      spacing="bleed"
     />
   );
 };

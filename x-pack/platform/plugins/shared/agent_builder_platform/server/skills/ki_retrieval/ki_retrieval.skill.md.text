@@ -3,26 +3,91 @@
 Load this skill when the user wants to **query a Context Engine AI Index** — i.e. to
 retrieve Knowledge Indicators (KIs) that have already been generated.
 
-This is the query-time complement to `ki-automation-generation`, which populates the index.
+This is the query-time complement to `analyze-and-improve`, which decides what the index should
+contain and produces the automations that populate it.
 This skill is not about generating these KIs, that is a separate skill.
 
 ## What a KI index looks like
 
-KIs are stored in indices matching `ai-index-*` (covers both regular indices and datastreams).
-Use `platform.core.list_indices` to discover which ones exist.
+Each AI index is queried through the ES|QL target listed for it: its backing index or data stream,
+matching `ai-index-*` for AI indices created in Kibana and `.ai-index-*` for the ones Elastic
+manages.
+
+The AI INDICES section of your instructions lists the targets available to this agent. When that
+section is absent, `platform.context_engine.list_ai_indices` returns the AI indices you can read
+in this space, each with its target as `esql_target`. Where a template below says `<targets>`,
+list the `esql_target` of every AI index in the AI INDICES section, comma-separated, for example
+`ai-index-idx-runbooks, .ai-index-idx-elastic-index`. `ai-index-*` alone misses the AI indices
+Elastic manages.
+
+Start every query with `FROM <targets> METADATA _id, _index, _score`: `SORT _score DESC`, the `:`
+match operators and `FUSE` need those fields.
 
 ### Field reference
 
-| Field | ES|QL type | Purpose |
+| Field | ES\|QL type | Purpose |
 |---|---|---|
 | `type` | keyword | Categorization — e.g. `"index_metadata"`, `"document"`, `"entity_profile"` |
 | `title` | text | Short name of the KI or its backing entity; semantic via `title.semantic` |
 | `content` | text | Full text: purpose, questions answered, access patterns; semantic via `content.semantic` |
 | `description` | text | Short description of this KI; semantic via `description.semantic` |
 | `tags` | keyword | Filter facets |
-| `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.) |
+| `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.). `attributes.esql` is the canonical location for a KI's runnable ES\|QL — see below. |
 
 Semantic sub-fields use **dot notation**: `content.semantic`, `title.semantic`, `description.semantic`.
+
+### `attributes.esql` — a KI's runnable ES|QL
+
+When a KI carries runnable ES|QL (e.g. a `detection` KI's materialized query, or an
+`index_metadata` KI's runnable example queries), those queries live in `attributes.esql`, as a
+string or an array of strings. This is the canonical location — do not hunt for runnable
+queries elsewhere in `attributes`. The prose access-pattern presentation (templates, params,
+returns) also appears inside `content`.
+
+The field is **optional**: only KI kinds that carry ES|QL set it, so queries must tolerate its
+absence rather than assume every KI has it. `attributes` is `flattened`, so extract the value
+with `FIELD_EXTRACT` before filtering or keeping it:
+
+```esql
+FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
+| WHERE type == "detection"
+| EVAL esql = FIELD_EXTRACT(attributes, "esql")
+| WHERE esql IS NOT NULL
+| KEEP title, description, esql
+| LIMIT <n>
+```
+
+When the KI stores an array of queries, the extracted value is multivalued: `IS NOT NULL`
+still filters correctly, but scalar comparisons like `==` skip multivalued rows. Add
+`| MV_EXPAND esql` after the `WHERE esql IS NOT NULL` to get one row per query when you
+need per-query filtering.
+
+### Space scoping
+
+A KI may be restricted to Kibana spaces through a nested privileges field that ES|QL cannot
+reference as a column. Run every AI-index query below through
+`platform.context_engine.query_ai_indices`, which applies the current space's scoping
+server-side, and never through `platform.core.execute_esql`, which applies none. Never write a
+space condition in ES|QL: it does not replace the server's scoping and can silently match nothing.
+
+### Lifecycle
+
+A KI is retired by a tombstone (`governance.lifecycle.status: deleted`) or by an `expires_at` in
+the past, and on a data stream one KI is several revisions under the same `id`. Every template
+below opens with the two lifecycle filters, so the query reads as what it returns:
+
+```esql
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
+```
+
+`platform.context_engine.query_ai_indices` adds these two filters and `DROP governance.*` to any
+query that omits them, and on a data stream keeps only the newest revision per `id`. Naming a
+field switches off its default only: `WHERE governance.lifecycle.status == "deleted"` returns
+tombstones, `WHERE expires_at < NOW()` returns expired KIs, and `KEEP governance.provenance.created_by.uri`
+shows the writing automation while both filters still apply.
 
 ---
 
@@ -33,15 +98,21 @@ a fixed vocabulary. Aggregate to discover what this index actually holds before 
 either one:
 
 ```esql
-FROM ai-index-*
+FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | STATS ki_count = COUNT(*) BY type
 | SORT ki_count DESC
+| LIMIT 10
 ```
 
 ```esql
-FROM ai-index-*
+FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | STATS ki_count = COUNT(*) BY tags
 | SORT ki_count DESC
+| LIMIT 10
 ```
 
 `tags` is usually higher cardinality than `type`, and a single KI can carry several, so tags
@@ -51,10 +122,13 @@ Aggregations also run over a result set, not just the whole index. Use this to s
 matches for a query distribute before narrowing:
 
 ```esql
-FROM ai-index-*
+FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
 | STATS ki_count = COUNT(*) BY tags
 | SORT ki_count DESC
+| LIMIT 10
 ```
 
 Then re-run the retrieval query with the most relevant tag added as a filter.
@@ -67,11 +141,10 @@ Use FORK+FUSE hybrid search. It runs keyword and semantic branches in parallel a
 them with reciprocal rank fusion, so documents matching both branches score higher than
 documents matching only one.
 
-Always include `METADATA _id, _index, _score` — required for `SORT _score DESC` and for FUSE
-to deduplicate across branches.
-
 ```esql
-FROM ai-index-* METADATA _id, _index, _score
+FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | FORK
     ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
     ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
@@ -82,11 +155,11 @@ FROM ai-index-* METADATA _id, _index, _score
 ```
 
 `KEEP` is not optional. Without it the query also returns `_score`, `_id`, `_index`, `_fork`,
-`@timestamp`, `attributes` and `references.uri` for every hit, which wastes the context the KIs
-are meant to save. `METADATA` still belongs at the top, since `FUSE` and the sort need those
-columns mid-pipeline; `KEEP` drops them once they have done their job. Add other fields to the
-`KEEP` list when you need them, for example a key from `attributes` you intend to filter on
-next.
+`@timestamp`, `expires_at`, `attributes` and `references` for every hit, which wastes the context
+the KIs are meant to save. `FUSE` and the sort use the `METADATA` fields
+`_score`, `_id` and `_index` mid-pipeline; `KEEP` drops them once they have done their job. Add
+other fields to the `KEEP` list when you need them, for example a key from `attributes` you
+intend to filter on next.
 
 Set a generous per-branch `LIMIT` (20) so FUSE has enough candidates to merge results from.
 The post-FUSE `LIMIT <n>` controls the final result count — start with 5 and adjust based on
@@ -98,7 +171,9 @@ Only deviate from this template if you have a hard constraint that FORK+FUSE can
 keyword-only is a valid alternative:
 
 ```esql
-FROM ai-index-* METADATA _id, _index, _score
+FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
 | SORT _score DESC, _id ASC
 | KEEP title, description, content, type, tags
@@ -110,7 +185,9 @@ In all other cases, prefer the FORK+FUSE template above.
 To scope results to a specific type or tag, add a `WHERE` before `FORK`:
 
 ```esql
-FROM ai-index-* METADATA _id, _index, _score
+FROM <targets> METADATA _id, _index, _score
+| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"
+| WHERE expires_at IS NULL OR expires_at > NOW()
 | WHERE type == "index_metadata"
 | FORK
     ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>"          | SORT _score DESC | LIMIT 20 )
@@ -127,8 +204,8 @@ Replace `type == "index_metadata"` with any combination of `type` or `tags` filt
 
 ## ES|QL syntax notes
 
-- **`METADATA _id, _index, _score`** — exposes the BM25/FUSE relevance score. Required for `SORT _score DESC`
-  whenever you use `:` match operators or `FUSE`. Omitting it causes a missing-field error.
+- **`_id`, `_index`, `_score`** — request them with `METADATA _id, _index, _score` on the `FROM`;
+  `SORT _score DESC`, the `:` match operators and `FUSE` need them.
 - **FORK branches** — each branch is an independent sub-query executed in parallel. A generous
   per-branch `LIMIT` (e.g. 20) ensures FUSE has enough candidates.
 - **FUSE** — merges branches into a single ranked result set (using reciprocal rank fusion - RRF - by default).
@@ -138,17 +215,15 @@ Replace `type == "index_metadata"` with any combination of `type` or `tags` filt
 
 ## Suggested retrieval flow
 
-1. **Discover** — call `platform.core.list_indices` and filter by `ai-index-*` to find which
-   KI indices exist in the environment.
-2. **Orient** — run a `STATS ki_count = COUNT(*) BY type` aggregation to see what categories
-   of KIs are available. You may want to sample a few KIs — potentially per type if type names
-   are ambiguous (`WHERE type == "..." | LIMIT 2`) — before running your full query. Remember
-   that this doesn't come for free, so only proceed with this if needed.
-3. **Query** — use FORK+FUSE hybrid search.
+1. **Discover** — read the AI INDICES section of your instructions for the targets available to
+   this agent, or call `platform.context_engine.list_ai_indices` when there is none.
+2. **Orient** — `platform.context_engine.describe_ai_index` returns an index's fields, type and
+   tag counts, and example queries. Across several targets, run `STATS ki_count = COUNT(*) BY type`
+   instead. Sample a few KIs (`WHERE type == "..." | LIMIT 2`) only when type names are ambiguous.
+   Remember that this doesn't come for free, so only proceed with this if needed.
+3. **Query** — use FORK+FUSE hybrid search through `platform.context_engine.query_ai_indices`.
 4. **Return** — the `KEEP` clause already limits results to `title`, `description`, `content`,
    `type` and `tags`. Seeing `tags` on the results is often enough to narrow a follow-up query
    without a separate aggregation.
 
 ---
-
-

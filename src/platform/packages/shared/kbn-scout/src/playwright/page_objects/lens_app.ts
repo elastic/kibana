@@ -7,13 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JSHandle } from 'playwright/test';
 import type { ScoutPage } from '..';
+import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
 /**
  * Default timeout for `page.waitForFunction` readiness waits.
  */
 const WAIT_FOR_FUNCTION_TIMEOUT_MS = 10_000;
+
+interface ChartSwitchPopoverOptions {
+  search?: string;
+  visType?: string;
+}
 
 export class LensApp {
   readonly lensApp;
@@ -22,6 +29,7 @@ export class LensApp {
   readonly saveModal;
   readonly savedObjectTitleInput;
   readonly confirmSaveButton;
+  readonly addToLibraryCheckbox;
   /**
    * Needed by the Lens plugin's `openDimensionEditor` / `secondaryFlyoutBackButton` alias
    * as well as `closeDimensionEditor` here.
@@ -29,6 +37,11 @@ export class LensApp {
   protected readonly closeDimensionEditorButton;
   readonly applyFlyoutButton;
   readonly cancelFlyoutButton;
+  /**
+   * Series colour input of the open dimension editor. Matched with `~=` because the
+   * input carries two space-separated test subjects (`euiColorPickerAnchor` and this one).
+   */
+  readonly dimensionColorPicker;
   protected readonly codeEditor: KibanaCodeEditorWrapper;
 
   private readonly chartSwitchPopover;
@@ -48,6 +61,7 @@ export class LensApp {
     this.saveModal = this.page.testSubj.locator('savedObjectSaveModal');
     this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
+    this.addToLibraryCheckbox = this.page.locator('#add-to-library-checkbox');
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
@@ -56,6 +70,9 @@ export class LensApp {
     );
     this.applyFlyoutButton = this.page.getByTestId('applyFlyoutButton');
     this.cancelFlyoutButton = this.page.getByTestId('cancelFlyoutButton');
+    this.dimensionColorPicker = this.page.locator(
+      '[data-test-subj~="indexPattern-dimension-colorPicker"]'
+    );
     this.codeEditor = new KibanaCodeEditorWrapper(this.page);
   }
 
@@ -70,28 +87,72 @@ export class LensApp {
    * @param options.search Optional filter text when the target chart is easier to find by label.
    */
   async switchToVisualization(visType: string, options?: { search?: string }) {
-    await this.openChartSwitchPopover();
-    if (options?.search) {
-      const searchInput = this.page.testSubj.locator('lnsChartSwitchSearch');
-      await searchInput.waitFor({ state: 'visible' });
-      await searchInput.fill(options.search);
-    }
-    const option = this.chartSwitchList.getByTestId(`lnsChartSwitchPopover_${visType}`);
-    await option.waitFor({ state: 'visible' });
-    await option.click();
-    // Popover should close after selection; waiting avoids racing with subsequent assertions.
-    await this.chartSwitchList.waitFor({ state: 'hidden' });
+    await this.openChartSwitchPopover({ ...options, visType });
+    await this.selectChartSwitchOption(visType);
   }
 
-  private async openChartSwitchPopover() {
-    await this.chartSwitchPopover.click();
-    await this.chartSwitchList.waitFor({ state: 'visible' });
+  /**
+   * Opens the chart switcher popover, optionally filtering its list.
+   * Prefer `switchToVisualization` to switch; open the popover directly only to assert on
+   * its contents (e.g. the warning badge of a chart type), then close it or pick an option.
+   *
+   * @param options.visType Chart switcher test-subj suffix to wait for after filtering.
+   * @param options.search Filter text, needed when the target chart is not rendered by the
+   * virtualized list until it is filtered.
+   */
+  async openChartSwitchPopover(options?: ChartSwitchPopoverOptions) {
+    await expect(async () => {
+      if (await this.chartSwitchList.isVisible()) {
+        return;
+      }
+
+      await this.chartSwitchPopover.click({ timeout: 5_000 });
+      await this.chartSwitchList.waitFor({ state: 'visible', timeout: 5_000 });
+    }).toPass({ timeout: 15_000 });
+
+    if (options?.visType) {
+      await this.filterChartSwitchOptions(options.visType, options.search);
+    }
+  }
+
+  /** Locator for a chart type's row in the open chart switcher popover. */
+  getChartSwitchOption(visType: string) {
+    return this.chartSwitchList.getByTestId(`lnsChartSwitchPopover_${visType}`);
+  }
+
+  /**
+   * Locator for the badge warning that switching to this chart type would change the current
+   * configuration. Resolves only while the popover is open and the option is rendered, so
+   * assert the option itself is visible before asserting the badge is absent.
+   */
+  getChartSwitchWarning(visType: string) {
+    return this.getChartSwitchOption(visType).getByTestId(`lnsChartSwitchPopoverAlert_${visType}`);
+  }
+
+  /** Picks a chart type from the open chart switcher popover. */
+  async selectChartSwitchOption(visType: string) {
+    const option = this.getChartSwitchOption(visType);
+    await option.waitFor({ state: 'visible', timeout: 15_000 });
+    // The virtualized list re-renders while filtered; dispatchEvent bypasses mouse actionability checks.
+    await option.dispatchEvent('click');
+    // Popover should close after selection; waiting avoids racing with subsequent assertions.
+    await this.chartSwitchList.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
   /** Returns the chart type label shown in the chart switcher popover. */
   async getChartSwitchType(): Promise<string> {
     await this.chartSwitchPopover.waitFor({ state: 'visible' });
     return (await this.chartSwitchPopover.innerText()).trim();
+  }
+
+  private async filterChartSwitchOptions(visType: string, search?: string) {
+    const query = search ?? visType.substring(visType.length - 3);
+    const searchInput = this.page.testSubj.locator('lnsChartSwitchSearch');
+
+    await searchInput.waitFor({ state: 'visible' });
+    await searchInput.fill(query);
+    await expect(searchInput).toHaveValue(query, { timeout: 10_000 });
+    await this.getChartSwitchOption(visType).waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   /**
@@ -105,9 +166,18 @@ export class LensApp {
     await this.page.testSubj.locator('dshDashboardViewport').waitFor({ state: 'visible' });
   }
 
+  /** Opens the Save and return split menu when Save as lives under it. */
+  async openSaveOptionsIfNeeded() {
+    const saveOptions = this.page.testSubj.locator('lnsApp_saveAndReturnButton-secondary-button');
+    if (await saveOptions.isVisible()) {
+      await saveOptions.click();
+    }
+  }
+
   /**
    * Opens the Lens save modal, fills in the title, optionally selects
-   * a dashboard target, and confirms. Waits for the modal to close.
+   * a dashboard target, and confirms. Waits for the modal to close and, when the save
+   * created a new library visualization, for the editor to finish reloading it.
    */
   async save(
     title: string,
@@ -118,29 +188,90 @@ export class LensApp {
         }
       | {
           addToDashboard: 'new';
+          saveAsNew?: boolean;
+          saveToLibrary?: boolean;
         }
       | {
           addToDashboard: 'none';
         }
   ) {
-    await this.saveButton.click();
-    await this.saveModal.waitFor({ state: 'visible' });
-    await this.savedObjectTitleInput.fill(title);
+    const savedObjectIdBeforeSave = await this.getSavedObjectIdFromUrl();
+    const workspaceBeforeSave = await this.page.evaluateHandle(() =>
+      document.querySelector('[data-test-subj="lnsWorkspace"]')
+    );
 
-    if (options?.addToDashboard === 'existing') {
-      await this.page.locator('label[for="existing-dashboard-option"]').click();
-      await this.page.testSubj.locator('open-dashboard-picker').click();
-      await this.page.testSubj
-        .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
-        .click();
-    } else if (options?.addToDashboard === 'new') {
-      await this.page.locator('label[for="new-dashboard-option"]').click();
-    } else if (options?.addToDashboard === 'none') {
-      await this.page.locator('label[for="add-to-library-option"]').click();
+    try {
+      await this.openSaveOptionsIfNeeded();
+      await this.saveButton.click();
+      await this.saveModal.waitFor({ state: 'visible' });
+      await this.savedObjectTitleInput.fill(title);
+
+      // Prefer checking the radio input — label clicks race save-modal remounts.
+      if (options?.addToDashboard === 'existing') {
+        await this.page.locator('#existing-dashboard-option').check();
+        await this.page.testSubj.locator('open-dashboard-picker').click();
+        await this.page.testSubj
+          .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
+          .click();
+      } else if (options?.addToDashboard === 'new') {
+        if (options.saveAsNew !== undefined) {
+          await this.setEuiSwitch('saveAsNewCheckbox', options.saveAsNew);
+        }
+        await this.page.locator('#new-dashboard-option').check();
+        if (options.saveToLibrary !== undefined) {
+          if (options.saveToLibrary) {
+            await this.addToLibraryCheckbox.check();
+          } else {
+            await this.addToLibraryCheckbox.uncheck();
+          }
+        }
+      } else if (options?.addToDashboard === 'none') {
+        await this.page.locator('#add-to-library-option').check();
+      }
+
+      await this.confirmSaveButton.click();
+      await this.saveModal.waitFor({ state: 'hidden' });
+      await this.waitForPostSaveReload(savedObjectIdBeforeSave, workspaceBeforeSave);
+    } finally {
+      // Release the handle so the detached pre-save workspace can be garbage collected.
+      await workspaceBeforeSave.dispose();
     }
+  }
 
-    await this.confirmSaveButton.click();
-    await this.saveModal.waitFor({ state: 'hidden' });
+  /** Reads the `#/edit/<id>` saved object id from the in-page URL, if the editor shows one. */
+  private async getSavedObjectIdFromUrl(): Promise<string | undefined> {
+    const url = await this.page.evaluate(() => window.location.href);
+    return /\/edit\/([^/?#]+)/.exec(url)?.[1];
+  }
+
+  /**
+   * Saving a *new* library visualization redirects the editor to `#/edit/<id>`, which makes
+   * Lens re-initialise its state from the saved object (`EditorRenderer` re-runs `loadInitial`).
+   * Until that reload lands the editor still looks interactive, but any edit made in the
+   * meantime is discarded when the reloaded state replaces it. The reload unmounts and
+   * remounts the editor frame, so wait for a *new* `lnsWorkspace` node before returning.
+   * Re-saving an existing visualization, or saving into a dashboard, does not reload.
+   */
+  private async waitForPostSaveReload(
+    savedObjectIdBeforeSave: string | undefined,
+    workspaceBeforeSave: JSHandle<Element | null>
+  ) {
+    const savedObjectIdAfterSave = await this.getSavedObjectIdFromUrl();
+    if (!savedObjectIdAfterSave || savedObjectIdAfterSave === savedObjectIdBeforeSave) {
+      return;
+    }
+    // Compare DOM nodes rather than waiting for `hidden` then `visible`: the unmounted
+    // window can be shorter than a poll interval locally, so a hidden-wait could miss it.
+    await this.page.waitForFunction(
+      (previousWorkspace) => {
+        const workspace = document.querySelector('[data-test-subj="lnsWorkspace"]');
+        return workspace !== null && workspace !== previousWorkspace;
+      },
+      workspaceBeforeSave,
+      // Two round trips (data view check + saved object load); slow on cloud.
+      { timeout: 20_000 }
+    );
+    await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'visible' });
   }
 
   async applyFlyoutChanges() {
@@ -218,9 +349,31 @@ export class LensApp {
     }
   }
 
+  async configureTextBasedDimension({
+    dimension,
+    field,
+  }: {
+    dimension: string;
+    field: string;
+  }): Promise<void> {
+    await this.page.testSubj.locator(dimension).click();
+
+    const fieldPicker = this.page.components.comboBox('text-based-dimension-field');
+    await fieldPicker.setSelectedOptions([field]);
+
+    await this.closeDimensionEditor();
+    await this.applyFlyoutButton.click();
+  }
+
   private async openDimensionSelector(dimension: string) {
     await this.page.testSubj.locator(dimension).click();
     await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
+  }
+
+  async removeDimension(dimensionTestSubj: string) {
+    await this.page.testSubj
+      .locator(`${dimensionTestSubj} > indexPattern-dimension-remove`)
+      .click();
   }
 
   async switchToFormula() {
@@ -231,10 +384,10 @@ export class LensApp {
     const operationSelector = isPreviousIncompatible
       ? `lns-indexPatternDimension-${operation} incompatible`
       : `lns-indexPatternDimension-${operation}`;
-    const operationButton = this.page.testSubj.locator(operationSelector);
-    await operationButton.waitFor({ state: 'visible' });
-    await operationButton.scrollIntoViewIfNeeded();
-    await operationButton.click();
+    const operationLabel = this.page.testSubj.locator(`${operationSelector}-label`);
+    await operationLabel.waitFor({ state: 'visible' });
+    await operationLabel.scrollIntoViewIfNeeded();
+    await operationLabel.click();
     await this.page.waitForFunction(
       (selector) =>
         document.querySelector(`[data-test-subj="${selector}"]`)?.getAttribute('aria-pressed') ===
@@ -245,7 +398,23 @@ export class LensApp {
   }
 
   private async selectField(field: string) {
-    await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
+    await this.page.components
+      .comboBox('indexPattern-dimension-field')
+      .setSelectedOptions([field], {
+        timeout: 10_000,
+      });
+    // ComboBox can show the typed option before Lens layer state commits.
+    // data-selected-field is the committed display name and updates only after
+    // insertOrReplaceColumn. Poll the attribute as data so labels with CSS
+    // metacharacters are not interpolated into a selector.
+    await this.page.waitForFunction(
+      (expected) =>
+        document
+          .querySelector('[data-test-subj="indexPattern-dimension-field"]')
+          ?.getAttribute('data-selected-field') === expected,
+      field,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
   }
 
   /**
@@ -311,6 +480,20 @@ export class LensApp {
       [testSubj, want] as const,
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
+  }
+
+  /**
+   * Opens the dimension editor for the XY chart's vertical axis, so callers can
+   * read or edit the series configuration.
+   *
+   * Deliberately does not wait: `lns-indexPattern-dimensionContainerClose` comes
+   * from the shared flyout container, so it can already be visible without the
+   * dimension editor being open, and waiting on it lets callers proceed too early.
+   * Assert on the control you actually need (e.g. {@link dimensionColorPicker});
+   * its own auto-waiting is the accurate readiness signal.
+   */
+  async openXYDimensionEditor() {
+    await this.page.testSubj.click('lnsXY_yDimensionPanel');
   }
 
   /**
@@ -590,5 +773,10 @@ export class LensApp {
       // Clear even on timeout so a leftover prev===count can't false-settle the next call.
       await clearPrevRenderCount();
     }
+  }
+
+  async assertLegacyMetric(title: string, count: string) {
+    await expect(this.page.locator('[data-test-subj="metric_label"]')).toHaveText(title);
+    await expect(this.page.locator('[data-test-subj="metric_value"]')).toHaveText(count);
   }
 }

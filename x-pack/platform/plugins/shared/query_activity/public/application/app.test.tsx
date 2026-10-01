@@ -7,11 +7,19 @@
 
 import React from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { cleanup, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { RunningQuery } from '../../common/types';
 import { QueryActivityApp } from './app';
 import { useQueryActivityAppContext, type QueryActivityAppContextValue } from './app_context';
+
+const renderApp = () =>
+  renderWithKibanaRenderContext(
+    <MockAppHeaderProvider>
+      <QueryActivityApp />
+    </MockAppHeaderProvider>
+  );
 
 jest.mock('./app_context', () => ({
   __esModule: true,
@@ -91,7 +99,7 @@ describe('QueryActivityApp', () => {
 
     mockUseQueryActivityAppContext.mockReturnValue(context);
 
-    renderWithKibanaRenderContext(<QueryActivityApp />);
+    renderApp();
 
     expect(await screen.findByText('Contact your administrator for access')).toBeInTheDocument();
     expect(screen.getByText(/Missing Elasticsearch cluster privilege/)).toBeInTheDocument();
@@ -115,9 +123,39 @@ describe('QueryActivityApp', () => {
 
     mockUseQueryActivityAppContext.mockReturnValue(context);
 
-    renderWithKibanaRenderContext(<QueryActivityApp />);
+    renderApp();
 
     expect(await screen.findByText(query.taskId)).toBeInTheDocument();
+    expect(screen.getByTestId('queryActivityRefreshButton')).toBeInTheDocument();
+    expect(screen.getByTestId('queryActivityLastUpdatedBadge')).toHaveTextContent(
+      'Updated <1m ago'
+    );
+  });
+
+  it('refreshes query activity from the AppHeader primary action', async () => {
+    const user = userEvent.setup();
+    const query = createQuery({ taskId: 'node1:refresh' });
+    const resendRequest = jest.fn();
+
+    const context = mockContext({
+      apiService: {
+        useLoadQueryActivity: jest.fn(() => ({
+          data: { queries: [query] },
+          isLoading: false,
+          error: null,
+          resendRequest,
+        })),
+        cancelTask: jest.fn(),
+      } as any,
+    });
+
+    mockUseQueryActivityAppContext.mockReturnValue(context);
+
+    renderApp();
+
+    await user.click(await screen.findByTestId('queryActivityRefreshButton'));
+
+    expect(resendRequest).toHaveBeenCalled();
   });
 
   it('shows a success toast and refreshes when stopping a query succeeds', async () => {
@@ -139,7 +177,7 @@ describe('QueryActivityApp', () => {
 
     mockUseQueryActivityAppContext.mockReturnValue(context);
 
-    renderWithKibanaRenderContext(<QueryActivityApp />);
+    renderApp();
 
     await user.click(await screen.findByLabelText('Cancel query'));
     await user.click(await screen.findByRole('button', { name: 'Cancel the query' }));

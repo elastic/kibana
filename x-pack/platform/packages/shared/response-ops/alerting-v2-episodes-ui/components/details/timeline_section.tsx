@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeActionsHistoryQuery } from '../../hooks/use_fetch_episode_actions_history_query';
@@ -18,6 +18,7 @@ import {
   mergeTimelineEntries,
 } from './timeline/entries';
 import { AlertEpisodeTimeline } from './timeline/timeline';
+import { AlertEpisodeTimelineSkeleton } from './section_skeletons';
 import * as i18n from './timeline/translations';
 
 export interface AlertEpisodeTimelineSectionProps {
@@ -55,7 +56,7 @@ export const AlertEpisodeTimelineSection = ({
       ...new Set(
         actionEntries.flatMap((e) => {
           const uids: string[] = [];
-          if (e.actor) uids.push(e.actor);
+          if (e.actor.profile_uid) uids.push(e.actor.profile_uid);
           if (e.assignee_uid) uids.push(e.assignee_uid);
           return uids;
         })
@@ -90,11 +91,7 @@ export const AlertEpisodeTimelineSection = ({
 
   if (isLoading) {
     return (
-      <EuiFlexGroup justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <AlertEpisodeTimelineSkeleton data-test-subj="alertingV2EpisodeTimelineSectionLoading" />
     );
   }
 

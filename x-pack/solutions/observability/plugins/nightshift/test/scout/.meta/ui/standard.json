@@ -1,13 +1,12 @@
 {
-  "sha1": "8a8972d2da188f1fbcb82aa43974b3b4226017e3",
+  "sha1": "31f0b51299eb62f33cbf55b6fdef7cf24a5cebca",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "ca3c97ed706025a-9c9263c28e45920",
-      "title": "Nightshift navigation from Significant Events Discovery navigates between Significant Events, Nightshift, and settings",
+      "id": "ca3c97ed706025a-f8f616c28542479",
+      "title": "Nightshift navigation links to Settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

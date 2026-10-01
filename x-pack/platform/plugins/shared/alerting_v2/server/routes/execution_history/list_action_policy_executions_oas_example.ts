@@ -13,19 +13,21 @@ export const LIST_ACTION_POLICY_EXECUTIONS_RESPONSE: ListPolicyExecutionHistoryR
   items: [
     {
       dispatched_at: '2026-01-15T12:05:00.000Z',
-      policy: { id: 'action-policy-1', name: 'Notify on host alerts' },
-      outcome: 'dispatched',
-      episode_count: 1,
+      policy: { id: 'action-policy-1', name: 'Notify on production alerts' },
+      outcome: 'success',
+      alert_count: 1,
+      alerts: [{ id: 'episode-1' }],
       action_group_count: 1,
       rules: [{ id: 'rule-1', name: 'Host CPU high' }],
-      totalRuleCount: 1,
+      total_rule_count: 1,
       workflows: [{ id: 'workflow-1', name: 'Notify oncall' }],
+      error: null,
     },
   ],
   page: 1,
-  perPage: 20,
-  totalEvents: 1,
-  searchMatches: null,
+  per_page: 20,
+  total: 1,
+  search_matches: null,
 };
 
 // Mirrors the page * per_page refinement message in listPolicyExecutionHistoryRequestSchema.

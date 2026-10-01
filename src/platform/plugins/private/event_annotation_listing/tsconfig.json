@@ -16,7 +16,6 @@
     "@kbn/data-views-plugin",
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-tagging-plugin",
-    "@kbn/presentation-util-plugin",
     "@kbn/visualizations-plugin",
     "@kbn/data-views-plugin",
     "@kbn/visualization-ui-components",

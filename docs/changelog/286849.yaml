@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/286849
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix stalled background streams blocking Kibana's event loop

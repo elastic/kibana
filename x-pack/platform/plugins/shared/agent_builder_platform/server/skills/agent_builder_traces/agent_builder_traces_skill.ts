@@ -51,7 +51,7 @@ messages** — for example:
 
 Do **not** use this skill when:
 - The user wants to query their *own* data indices (use the general data-exploration tools).
-- The user wants to build or modify a dashboard (use the dashboard-management skill).
+- The user wants to build or modify a dashboard (use the dashboards skill).
 
 ## Data Source
 
@@ -103,6 +103,7 @@ Span names follow the OTel \`{operation} {identifier}\` convention:
 - \`attributes.gen_ai.provider.name\` — provider name.
 - \`attributes.gen_ai.agent.id\` — agent id (hashed for custom agents in exported traces).
 - \`attributes.gen_ai.conversation.id\` — conversation id (hashed unless \`agentBuilder:tracing:includeRealIds\` is on).
+- \`attributes.user.id\` / \`attributes.user.hash\` / \`attributes.user.name\` — real user id and username when \`agentBuilder:tracing:includeUserData\` is on; otherwise a stable \`user.hash\` and no username.
 - \`attributes.elastic.conversation.title\` — conversation title on the conversation-turn (\`CHAIN\`) span only; omitted unless \`agentBuilder:tracing:includeRealNames\` is on.
 - \`duration\` — span duration in **nanoseconds**; divide by \`1000000000.0\` for seconds.
 - \`status.code\` — equals \`"Error"\` for failed spans.

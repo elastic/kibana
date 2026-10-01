@@ -71,15 +71,11 @@ export const getActionPoliciesApiService = ({
 
   const patch: ActionPoliciesApiService['patch'] = (id, data) =>
     measurePerformanceAsync(log, 'actionPolicies.patch', async () => {
-      const current = await get(id);
-      if (!current.version) {
-        throw new Error(`Action policy "${id}" has no version; cannot patch.`);
-      }
       const response = await kbnClient.request<ActionPolicyResponse>({
         method: 'PATCH',
         path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`,
         headers: COMMON_HEADERS,
-        body: { ...data, version: current.version },
+        body: data,
       });
       return response.data;
     });
@@ -135,7 +131,7 @@ export const getActionPoliciesApiService = ({
           method: 'POST',
           path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_snooze`,
           headers: COMMON_HEADERS,
-          body: { snoozedUntil },
+          body: { snoozed_until: snoozedUntil },
         });
         return response.data;
       }),

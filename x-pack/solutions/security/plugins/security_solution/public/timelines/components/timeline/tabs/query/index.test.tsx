@@ -11,7 +11,6 @@ import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { DataLoadingState } from '@kbn/unified-data-table';
@@ -53,6 +52,16 @@ import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.moc
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
+const mockPatterns = [
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'logs-*',
+  'packetbeat-*',
+  'winlogbeat-*',
+  'journalbeat-*',
+];
+
 jest.mock('../../../../../data_view_manager/hooks/use_browser_fields');
 jest.mock('../../../../../flyout_v2/use_flyout_api');
 jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
@@ -73,10 +82,6 @@ jest.mock('../../../../containers/details');
 
 jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
-}));
-
-jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
-  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
@@ -251,7 +256,7 @@ describe.skip('query tab with unified timeline', () => {
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
 
-    jest.mocked(useDataView).mockReturnValue(withIndices(mockSourcererScope.selectedPatterns));
+    jest.mocked(useDataView).mockReturnValue(withIndices(mockPatterns));
 
     jest.mocked(useBrowserFields).mockReturnValue(mockBrowserFields);
 
@@ -976,7 +981,7 @@ describe.skip('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
           'data-euiicon-type',
-          'expand'
+          'maximize'
         );
 
         // Open Flyout
@@ -1007,7 +1012,7 @@ describe.skip('query tab with unified timeline', () => {
           expect(mockCloseFlyout).toHaveBeenNthCalledWith(1);
           expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
             'data-euiicon-type',
-            'expand'
+            'maximize'
           );
         });
       },
@@ -1144,6 +1149,9 @@ describe.skip('query tab with unified timeline', () => {
             rawEvents: [{ _id: attackDiscoveryEvent._id, _index: attackDiscoveryEvent.ecs._index }],
             inspect: { dsl: [], response: [] },
             totalCount: 1,
+            isPartial: false,
+            shardFailures: [],
+            timedOut: false,
             loadNextBatch: jest.fn(),
             refreshedAt: 0,
             refetch: jest.fn(),

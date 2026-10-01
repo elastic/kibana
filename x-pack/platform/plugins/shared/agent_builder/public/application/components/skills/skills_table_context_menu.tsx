@@ -90,7 +90,7 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
       button={
         <EuiToolTip content={labels.skills.skillContextMenuButtonLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             aria-label={labels.skills.skillContextMenuButtonLabel}
             onClick={togglePopover}
             data-test-subj={`agentBuilderSkillContextMenuButton-${skill.id}`}

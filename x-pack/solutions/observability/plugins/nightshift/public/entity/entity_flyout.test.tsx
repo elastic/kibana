@@ -120,7 +120,7 @@ describe('EntityFlyout', () => {
 
     expect(mockOpenChat).toHaveBeenCalledWith({
       newConversation: true,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage: false,
       initialMessage: 'Tell me about synthetics-task-manager',
       attachments: [
         {

@@ -48,16 +48,17 @@ import { getSources } from '../alert_sources/get_sources';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import type { TimeRange } from '../../../common/typings';
 
+export type RuleLinkStatus = 'ok' | 'deleted' | 'disabled' | 'unknown';
+
+export interface AlertOverviewProps {
+  alert: TopAlert;
+  pageId?: string;
+  alertStatus?: AlertStatus;
+  ruleStatus?: RuleLinkStatus;
+}
+
 export const AlertOverview = memo(
-  ({
-    alert,
-    pageId,
-    alertStatus,
-  }: {
-    alert: TopAlert;
-    pageId?: string;
-    alertStatus?: AlertStatus;
-  }) => {
+  ({ alert, pageId, alertStatus, ruleStatus }: AlertOverviewProps) => {
     const {
       http: {
         basePath: { prepend },
@@ -81,7 +82,7 @@ export const AlertOverview = memo(
     );
 
     const linkToRule =
-      canReadAlertRule && pageId !== RULE_DETAILS_PAGE_ID && ruleId
+      canReadAlertRule && pageId !== RULE_DETAILS_PAGE_ID && ruleId && ruleStatus !== 'deleted'
         ? prepend(paths.observability.ruleDetails(ruleId))
         : null;
 

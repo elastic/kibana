@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
-import { ContentListWrapper } from '@kbn/scout';
+import {
+  AppMenu,
+  ContentListWrapper,
+  type KibanaUrl,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout';
+
+const LISTING_TIMEOUT = 20_000;
 
 export class GraphPage {
   /** Shared wrapper for the Content List listing UI (toolbar, table, selection bar). */
   readonly contentList: ContentListWrapper;
+  private readonly appMenu: AppMenu;
 
   // Public locators consumed directly by specs.
   readonly createGraphPromptButton: Locator;
+  readonly createGraphButton: Locator;
   readonly saveButton: Locator;
   readonly currentGraphBreadcrumb: Locator;
   readonly vennLargeTerm1: Locator;
@@ -24,7 +33,8 @@ export class GraphPage {
 
   // Internal locators — consumed only by methods on this class.
   private readonly newButton: Locator;
-  private readonly homeBreadcrumb: Locator;
+  private readonly settingsButton: Locator;
+  private readonly emptyState: Locator;
   private readonly datasourceButton: Locator;
   private readonly addFieldButton: Locator;
   private readonly fieldSearchInput: Locator;
@@ -46,15 +56,14 @@ export class GraphPage {
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.contentList = new ContentListWrapper(page);
+    this.appMenu = new AppMenu(page);
     this.createGraphPromptButton = this.page.testSubj.locator('graphCreateGraphPromptButton');
+    this.createGraphButton = this.page.testSubj.locator('graphCreateGraphButton');
 
     this.newButton = this.page.testSubj.locator('graphNewButton');
     this.saveButton = this.page.testSubj.locator('graphSaveButton');
-    // Two breadcrumbs register `graphHomeBreadcrumb` (chrome + shared-ux
-    // mirror); match `first` to pick the chrome one.
-    this.homeBreadcrumb = this.page.locator(
-      '[data-test-subj~="graphHomeBreadcrumb"][data-test-subj~="first"]'
-    );
+    this.settingsButton = this.page.testSubj.locator('graphSettingsButton');
+    this.emptyState = this.page.testSubj.locator('content-list-emptyState');
     this.currentGraphBreadcrumb = this.page.locator(
       '[data-test-subj~="graphCurrentGraphBreadcrumb"]'
     );
@@ -97,11 +106,19 @@ export class GraphPage {
   }
 
   async waitForListing() {
-    await this.contentList.waitForReady();
+    // Empty prompt button lives inside `content-list-emptyState`; do not `.or()`
+    // both or Playwright strict mode fails when the empty listing is ready.
+    await this.emptyState
+      .or(this.contentList.searchBox)
+      .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
   }
 
   async clickCreateGraph() {
-    await this.createGraphPromptButton.click();
+    if (await this.createGraphPromptButton.isVisible()) {
+      await this.createGraphPromptButton.click();
+      return;
+    }
+    await this.appMenu.clickItem(this.createGraphButton);
   }
 
   /**
@@ -148,14 +165,18 @@ export class GraphPage {
   }
 
   async saveWorkspaceAs(title: string) {
-    await this.saveButton.click();
+    await this.appMenu.clickItem(this.saveButton);
     await this.saveTitleInput.fill(title);
     await this.saveConfirmButton.click();
     await this.saveSuccessToast.waitFor({ state: 'visible' });
   }
 
+  async clickSettings() {
+    await this.appMenu.clickItem(this.settingsButton);
+  }
+
   async newWorkspace({ discardChanges = false }: { discardChanges?: boolean } = {}) {
-    await this.newButton.click();
+    await this.appMenu.clickItem(this.newButton);
     if (discardChanges) {
       await this.confirmModalTitle.waitFor({ state: 'visible' });
       await this.confirmModalConfirmButton.click();
@@ -163,7 +184,10 @@ export class GraphPage {
   }
 
   async goToListingViaBreadcrumb() {
-    await this.homeBreadcrumb.click();
+    this.page.once('dialog', async (dialog) => {
+      await dialog.accept();
+    });
+    await this.goto();
   }
 
   async openWorkspace(title: string) {

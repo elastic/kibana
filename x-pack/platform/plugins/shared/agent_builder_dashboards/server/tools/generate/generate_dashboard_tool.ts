@@ -17,10 +17,16 @@ import {
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 
-import { dashboardTools } from '../../../common';
+import {
+  dashboardTools,
+  DASHBOARD_UPDATED_UI_EVENT,
+  type DashboardUpdatedUiEventData,
+} from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
-  createVisPanelResolver,
+  createAttachmentPanelResolver,
+  createControlFieldCapabilitiesResolver,
+  createPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
   hasValidCreateMetadataOperations,
@@ -111,8 +117,8 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Use operations[] to:
 1. set metadata
-2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
-3. edit existing Lens, Vega, or markdown panel content
+2. add panels generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), by-value panels (\`source: "config"\`: markdown or ML anomaly panels), or existing visualization attachments by id (\`source: "attachment"\`)
+3. edit existing Lens, Vega, custom content, markdown, or ML anomaly panel content
 4. update panel layouts without changing content
 5. add / remove sections, including inline section panels during add_section
 6. remove panels
@@ -137,11 +143,15 @@ Use operations[] to:
           dashboardData: latestVersion?.data,
           operations,
           logger,
-          resolvePanelContent: createVisPanelResolver({
+          resolvePanelContent: createPanelResolver({
             logger,
             modelProvider,
             events,
             esClient,
+          }),
+          resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
+          resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({
+            esClient: esClient.asCurrentUser,
           }),
         });
 
@@ -170,6 +180,18 @@ Use operations[] to:
         }
 
         logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
+
+        events.sendUiEvent<typeof DASHBOARD_UPDATED_UI_EVENT, DashboardUpdatedUiEventData>(
+          DASHBOARD_UPDATED_UI_EVENT,
+          {
+            attachment: {
+              id: attachment.id,
+              type: DASHBOARD_ATTACHMENT_TYPE,
+              data: finalDashboardData,
+              origin: attachment.origin,
+            },
+          }
+        );
 
         return {
           results: [
@@ -202,7 +224,7 @@ Use operations[] to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId, operations },
+                metadata: { dashboardAttachmentId: previousAttachmentId },
               },
             },
           ],

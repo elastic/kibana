@@ -254,13 +254,23 @@ describe('AgentlessPoliciesService', () => {
   describe('updateAgentlessPolicy', () => {
     let packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
 
-    const createService = () =>
-      new AgentlessPoliciesServiceImpl(
+    const createService = () => {
+      const soClient = savedObjectsClientMock.create();
+      // Connector-reuse policy-group check queries package policies by cloud_connector_id;
+      // default to "no existing usages" (an unattached connector is adoptable by any group).
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 1,
+        page: 1,
+      } as any);
+      return new AgentlessPoliciesServiceImpl(
         packagePolicyService,
-        savedObjectsClientMock.create(),
+        soClient,
         elasticsearchServiceMock.createClusterClient().asInternalUser,
         loggingSystemMock.createLogger()
       );
+    };
 
     const buildUpdateRequest = (overrides: Record<string, any> = {}): any => ({
       name: 'Test Agentless Policy',
@@ -483,6 +493,82 @@ describe('AgentlessPoliciesService', () => {
       expect(jest.mocked(agentPolicyService.update)).not.toHaveBeenCalled();
     });
 
+    it('should update a legacy policy whose agent policy ID differs from its package policy ID', async () => {
+      // Simulates policies created before the same-ID invariant was introduced: the package
+      // policy's policy_ids[0] references a *different* agent policy ID.
+      const legacyPackagePolicyId = 'f5ff1997-package-policy-id';
+      const legacyAgentPolicyId = '0be3a541-agent-policy-id';
+
+      packagePolicyService.get.mockReset();
+      packagePolicyService.get.mockResolvedValue(
+        buildAgentlessPackagePolicy({
+          id: legacyPackagePolicyId,
+          policy_ids: [legacyAgentPolicyId],
+        })
+      );
+      jest.mocked(agentPolicyService.get).mockReset();
+      jest.mocked(agentPolicyService.get).mockResolvedValue({
+        id: legacyAgentPolicyId,
+        name: 'Agentless policy for Test Agentless Policy',
+        namespace: 'default',
+        supports_agentless: true,
+        agentless: { cluster_id: 'cluster-456' },
+      } as any);
+
+      await createService().updateAgentlessPolicy(legacyPackagePolicyId, buildUpdateRequest());
+
+      // Package policy is updated using the package policy ID.
+      expect(packagePolicyService.update).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        legacyPackagePolicyId,
+        expect.objectContaining({ policy_ids: [legacyAgentPolicyId] }),
+        expect.anything()
+      );
+
+      // Agent policy operations use the *agent* policy ID, not the package policy ID.
+      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        legacyAgentPolicyId,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(jest.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledWith(
+        expect.anything(),
+        legacyAgentPolicyId,
+        undefined,
+        expect.objectContaining({ throwOnAgentlessError: true })
+      );
+    });
+
+    it('should warn and fall back to the package policy ID when policy_ids is empty on update', async () => {
+      packagePolicyService.get.mockReset();
+      packagePolicyService.get.mockResolvedValue(
+        buildAgentlessPackagePolicy({ id: 'agentless-policy-id', policy_ids: [] })
+      );
+
+      const logger = loggingSystemMock.createLogger();
+      const service = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        savedObjectsClientMock.create(),
+        elasticsearchServiceMock.createClusterClient().asInternalUser,
+        logger
+      );
+
+      await service.updateAgentlessPolicy('agentless-policy-id', buildUpdateRequest());
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('has no policy_ids entry'));
+      // Falls back to policyId — agent policy operations still use that ID.
+      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'agentless-policy-id',
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
     it('should allow a package version change and re-derive package info from the requested version', async () => {
       await createService().updateAgentlessPolicy(
         'agentless-policy-id',
@@ -523,6 +609,45 @@ describe('AgentlessPoliciesService', () => {
         expect.objectContaining({
           name: 'Agentless policy for Test Agentless Policy',
           agentless: expect.objectContaining({ cluster_id: 'cluster-123' }),
+        }),
+        expect.objectContaining({ force: true })
+      );
+    });
+
+    it('should roll back using the agent policy ID (not package policy ID) for legacy policies', async () => {
+      const legacyPackagePolicyId = 'f5ff1997-package-policy-id';
+      const legacyAgentPolicyId = '0be3a541-agent-policy-id';
+
+      packagePolicyService.get.mockReset();
+      packagePolicyService.get.mockResolvedValue(
+        buildAgentlessPackagePolicy({
+          id: legacyPackagePolicyId,
+          policy_ids: [legacyAgentPolicyId],
+        })
+      );
+      jest.mocked(agentPolicyService.get).mockReset();
+      jest.mocked(agentPolicyService.get).mockResolvedValue({
+        id: legacyAgentPolicyId,
+        name: 'Agentless policy for Test Agentless Policy',
+        namespace: 'default',
+        supports_agentless: true,
+        agentless: { cluster_id: 'cluster-456' },
+      } as any);
+      jest
+        .mocked(agentPolicyService.deployPolicy)
+        .mockRejectedValueOnce(new Error('deploy failure'));
+
+      await expect(() =>
+        createService().updateAgentlessPolicy(legacyPackagePolicyId, buildUpdateRequest())
+      ).rejects.toThrow('deploy failure');
+
+      // Rollback must target the agent policy ID, not the package policy ID.
+      expect(jest.mocked(agentPolicyService.update)).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.anything(),
+        legacyAgentPolicyId,
+        expect.objectContaining({
+          agentless: expect.objectContaining({ cluster_id: 'cluster-456' }),
         }),
         expect.objectContaining({ force: true })
       );
@@ -767,16 +892,15 @@ describe('AgentlessPoliciesService', () => {
     });
 
     it('should delete an existing agentless policy', async () => {
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({
+          id: 'existing-agentless-policy-id',
+          policy_ids: ['existing-agentless-policy-id'],
+        })
+      );
       jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
         supports_agentless: true,
       } as any);
-
-      packagePolicyService.list.mockResolvedValueOnce({
-        items: [],
-        total: 0,
-        page: 1,
-        perPage: 1,
-      });
 
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -800,17 +924,82 @@ describe('AgentlessPoliciesService', () => {
       );
     });
 
-    it('should throw when deleting a non agentless policy', async () => {
-      jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
-        supports_agentless: false,
-      } as any);
+    it('should delete a legacy policy whose agent policy ID differs from its package policy ID', async () => {
+      const legacyPackagePolicyId = 'f5ff1997-package-policy-id';
+      const legacyAgentPolicyId = '0be3a541-agent-policy-id';
 
-      packagePolicyService.list.mockResolvedValueOnce({
-        items: [],
-        total: 0,
-        page: 1,
-        perPage: 1,
-      });
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({
+          id: legacyPackagePolicyId,
+          policy_ids: [legacyAgentPolicyId],
+        })
+      );
+      jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
+        id: legacyAgentPolicyId,
+        supports_agentless: true,
+      } as any);
+      jest.mocked(agentPolicyService.delete).mockResolvedValueOnce({} as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await agentlessPoliciesService.deleteAgentlessPolicy(legacyPackagePolicyId);
+
+      // Must delete the agent policy using the agent policy ID, not the package policy ID.
+      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        legacyAgentPolicyId,
+        expect.anything()
+      );
+    });
+
+    it('should warn and fall back to the package policy ID when policy_ids is empty', async () => {
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ id: 'corrupt-policy-id', policy_ids: [] })
+      );
+      jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
+        id: 'corrupt-policy-id',
+        supports_agentless: true,
+      } as any);
+      jest.mocked(agentPolicyService.delete).mockResolvedValueOnce({} as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await agentlessPoliciesService.deleteAgentlessPolicy('corrupt-policy-id');
+
+      // When policy_ids is empty the code falls back to policyId and warns.
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('has no policy_ids entry'));
+      // The fallback ID (package policy ID) is still used to delete the agent policy.
+      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'corrupt-policy-id',
+        expect.anything()
+      );
+    });
+
+    it('should throw a not found error when deleting a non-agentless package policy', async () => {
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ id: 'non-agentless-policy-id', supports_agentless: false })
+      );
 
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -825,23 +1014,76 @@ describe('AgentlessPoliciesService', () => {
 
       await expect(() =>
         agentlessPoliciesService.deleteAgentlessPolicy('non-agentless-policy-id')
-      ).rejects.toThrow(`Policy non-agentless-policy-id is not an agentless policy`);
+      ).rejects.toThrow('Agentless policy non-agentless-policy-id not found');
 
-      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(0);
+      expect(jest.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
+    });
+
+    it('should throw a not found error when the package policy does not exist', async () => {
+      packagePolicyService.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('test')
+      );
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await expect(() =>
+        agentlessPoliciesService.deleteAgentlessPolicy('missing-policy-id')
+      ).rejects.toThrow('Agentless policy missing-policy-id not found');
+
+      expect(jest.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
+    });
+
+    it('should rethrow non-404 errors from packagePolicyService.get', async () => {
+      const transientError = Object.assign(new Error('transient ES failure'), {
+        output: { statusCode: 503 },
+      });
+      packagePolicyService.get.mockRejectedValueOnce(transientError);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await expect(() =>
+        agentlessPoliciesService.deleteAgentlessPolicy('some-policy-id')
+      ).rejects.toThrow('transient ES failure');
+
+      expect(jest.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
     });
 
     it('should clean up orphaned resources when agent policy is not found (404)', async () => {
+      const packagePolicyId = 'orphaned-package-policy-id';
+      const agentPolicyId = 'orphaned-agent-policy-id';
+
       const deleteAgentlessAgentSpy = jest
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
         .mockResolvedValueOnce(undefined as any);
 
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
+      );
       jest
         .mocked(agentPolicyService.get)
         .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
 
       packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
-        { id: 'orphaned-pp-1' },
-        { id: 'orphaned-pp-2' },
+        { id: 'orphaned-pp-1', supports_agentless: true },
+        { id: 'orphaned-pp-2', supports_agentless: true },
       ] as any);
 
       packagePolicyService.delete.mockResolvedValueOnce([
@@ -860,25 +1102,294 @@ describe('AgentlessPoliciesService', () => {
         logger
       );
 
-      await agentlessPoliciesService.deleteAgentlessPolicy('orphaned-policy-id');
+      await agentlessPoliciesService.deleteAgentlessPolicy(packagePolicyId);
 
       expect(jest.mocked(agentPolicyService.delete)).not.toHaveBeenCalled();
+      // Orphan cleanup must use the agent policy ID (resolved from policy_ids[0]), not the
+      // package policy ID — findAllForAgentPolicy and deleteAgentlessAgent both treat their
+      // argument as an agent policy ID.
       expect(packagePolicyService.findAllForAgentPolicy).toHaveBeenCalledWith(
         soClient,
-        'orphaned-policy-id'
+        agentPolicyId
       );
       expect(packagePolicyService.delete).toHaveBeenCalledWith(
         soClient,
         esClient,
         ['orphaned-pp-1', 'orphaned-pp-2'],
+        expect.objectContaining({ force: undefined })
+      );
+      expect(packagePolicyService.delete).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        expect.any(Array),
+        expect.not.objectContaining({ skipUnassignFromAgentPolicies: true })
+      );
+      expect(deleteAgentlessAgentSpy).toHaveBeenCalledWith(agentPolicyId);
+
+      deleteAgentlessAgentSpy.mockRestore();
+    });
+
+    it('should skip non-agentless sibling package policies and warn', async () => {
+      const packagePolicyId = 'orphaned-package-policy-id';
+      const agentPolicyId = 'orphaned-agent-policy-id';
+
+      const deleteAgentlessAgentSpy = jest
+        .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
+        .mockResolvedValueOnce(undefined as any);
+
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
+      );
+      jest
+        .mocked(agentPolicyService.get)
+        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+
+      packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
+        { id: 'agentless-pp', supports_agentless: true },
+        { id: 'non-agentless-pp', supports_agentless: false },
+      ] as any);
+
+      packagePolicyService.delete.mockResolvedValueOnce([
+        { id: 'agentless-pp', success: true },
+      ] as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await agentlessPoliciesService.deleteAgentlessPolicy(packagePolicyId);
+
+      // Only the agentless package policy is deleted; the sibling is skipped.
+      expect(packagePolicyService.delete).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        ['agentless-pp'],
+        expect.anything()
+      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('non-agentless-pp'));
+      expect(deleteAgentlessAgentSpy).toHaveBeenCalledWith(agentPolicyId);
+
+      deleteAgentlessAgentSpy.mockRestore();
+    });
+
+    it('should honour force when deleting orphaned agentless package policies', async () => {
+      const packagePolicyId = 'orphaned-package-policy-id';
+      const agentPolicyId = 'orphaned-agent-policy-id';
+
+      const deleteAgentlessAgentSpy = jest
+        .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
+        .mockResolvedValueOnce(undefined as any);
+
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
+      );
+      jest
+        .mocked(agentPolicyService.get)
+        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+
+      packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
+        { id: 'managed-pp', supports_agentless: true, is_managed: true },
+      ] as any);
+
+      packagePolicyService.delete.mockResolvedValueOnce([
+        { id: 'managed-pp', success: true },
+      ] as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await agentlessPoliciesService.deleteAgentlessPolicy(packagePolicyId, { force: true });
+
+      expect(packagePolicyService.delete).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        ['managed-pp'],
         expect.objectContaining({ force: true })
       );
-      expect(deleteAgentlessAgentSpy).toHaveBeenCalledWith('orphaned-policy-id');
+
+      deleteAgentlessAgentSpy.mockRestore();
+    });
+
+    it('should throw PackagePolicyRestrictionRelatedError for managed agentless package policy without force', async () => {
+      const packagePolicyId = 'orphaned-package-policy-id';
+      const agentPolicyId = 'orphaned-agent-policy-id';
+
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
+      );
+      jest
+        .mocked(agentPolicyService.get)
+        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+
+      packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
+        { id: 'managed-pp', supports_agentless: true, is_managed: true },
+      ] as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await expect(() =>
+        agentlessPoliciesService.deleteAgentlessPolicy(packagePolicyId)
+      ).rejects.toThrow('Cannot delete managed agentless policies without force');
+
+      expect(packagePolicyService.delete).not.toHaveBeenCalled();
+    });
+
+    it('should throw FleetNotFoundError when no agentless package policies are found', async () => {
+      const packagePolicyId = 'orphaned-package-policy-id';
+      const agentPolicyId = 'orphaned-agent-policy-id';
+
+      const deleteAgentlessAgentSpy = jest
+        .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
+        .mockResolvedValueOnce(undefined as any);
+
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
+      );
+      jest
+        .mocked(agentPolicyService.get)
+        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+
+      packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([]);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      await expect(
+        new AgentlessPoliciesServiceImpl(
+          packagePolicyService,
+          soClient,
+          esClient,
+          logger
+        ).deleteAgentlessPolicy(packagePolicyId)
+      ).rejects.toThrow('No agentless package policies found');
+
+      expect(deleteAgentlessAgentSpy).toHaveBeenCalledWith(agentPolicyId);
+      expect(packagePolicyService.delete).not.toHaveBeenCalled();
+
+      deleteAgentlessAgentSpy.mockRestore();
+    });
+
+    it('should throw PackagePolicyRequestError and still call deleteAgentlessAgent when delete has per-item failures', async () => {
+      const packagePolicyId = 'orphaned-package-policy-id';
+      const agentPolicyId = 'orphaned-agent-policy-id';
+
+      const deleteAgentlessAgentSpy = jest
+        .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
+        .mockResolvedValueOnce(undefined as any);
+
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
+      );
+      jest
+        .mocked(agentPolicyService.get)
+        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+
+      packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
+        { id: 'agentless-pp-1', supports_agentless: true },
+        { id: 'agentless-pp-2', supports_agentless: true },
+      ] as any);
+
+      packagePolicyService.delete.mockResolvedValueOnce([
+        { id: 'agentless-pp-1', success: true },
+        { id: 'agentless-pp-2', success: false, body: { message: 'ES unavailable' } },
+      ] as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      await expect(
+        new AgentlessPoliciesServiceImpl(
+          packagePolicyService,
+          soClient,
+          esClient,
+          logger
+        ).deleteAgentlessPolicy(packagePolicyId)
+      ).rejects.toThrow('Failed to delete some package policies');
+
+      // deployment teardown must still run before the error is thrown
+      expect(deleteAgentlessAgentSpy).toHaveBeenCalledWith(agentPolicyId);
+
+      deleteAgentlessAgentSpy.mockRestore();
+    });
+
+    it('should use agentPolicyId (not policyId) for orphan cleanup in a legacy policy', async () => {
+      const legacyPackagePolicyId = 'f5ff1997-package-policy-id';
+      const legacyAgentPolicyId = '0be3a541-agent-policy-id';
+
+      const deleteAgentlessAgentSpy = jest
+        .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
+        .mockResolvedValueOnce(undefined as any);
+
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({
+          id: legacyPackagePolicyId,
+          policy_ids: [legacyAgentPolicyId],
+        })
+      );
+      jest
+        .mocked(agentPolicyService.get)
+        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+
+      packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
+        { id: 'legacy-agentless-pp', supports_agentless: true },
+      ] as any);
+
+      packagePolicyService.delete.mockResolvedValueOnce([
+        { id: 'legacy-agentless-pp', success: true },
+      ] as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      await new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      ).deleteAgentlessPolicy(legacyPackagePolicyId);
+
+      // Must use the agent policy ID from policy_ids[0], not the package policy ID passed by the
+      // caller — otherwise findAllForAgentPolicy finds nothing and the agentless deployment survives.
+      expect(packagePolicyService.findAllForAgentPolicy).toHaveBeenCalledWith(
+        soClient,
+        legacyAgentPolicyId
+      );
+      expect(deleteAgentlessAgentSpy).toHaveBeenCalledWith(legacyAgentPolicyId);
 
       deleteAgentlessAgentSpy.mockRestore();
     });
 
     it('should rethrow non-404 errors from agentPolicyService.get', async () => {
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ id: 'some-policy-id' })
+      );
       jest.mocked(agentPolicyService.get).mockRejectedValueOnce({
         output: { statusCode: 500 },
         message: 'Internal server error',

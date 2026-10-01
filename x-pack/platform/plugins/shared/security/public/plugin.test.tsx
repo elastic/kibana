@@ -95,6 +95,7 @@ describe('Security Plugin', () => {
         fatalErrors: coreSetupMock.fatalErrors,
         getStartServices: coreSetupMock.getStartServices,
         buildFlavor: expect.stringMatching(new RegExp('^serverless|traditional$')),
+        serviceAccountsAPIClient: expect.any(Object),
       });
     });
 
@@ -160,6 +161,7 @@ describe('Security Plugin', () => {
           "uiApi": Object {
             "components": Object {
               "getChangePassword": [Function],
+              "getCreateServiceAccount": [Function],
               "getPersonalInfo": [Function],
             },
           },
@@ -255,6 +257,30 @@ describe('Security Plugin', () => {
       });
 
       expect(startManagementServiceMock).toHaveBeenCalledTimes(1);
+    });
+
+    // Security also runs on anonymous pages, where the management plugin is absent but the
+    // security delegate registered during setup is still reachable.
+    it('captures capabilities for the security delegate even when the management plugin is absent', () => {
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+      const coreSetupMock = getCoreSetupMock();
+      plugin.setup(coreSetupMock, { licensing: licensingMock.createSetup() });
+
+      const [delegate] = coreSetupMock.security.registerSecurityDelegate.mock.calls[0];
+      expect(delegate.serviceAccounts.canCreate()).toBe(false);
+
+      const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        service_accounts: { save: true },
+      };
+
+      plugin.start(coreStart, {
+        dataViews: {} as DataViewsPublicPluginStart,
+        features: {} as FeaturesPluginStart,
+      });
+
+      expect(delegate.serviceAccounts.canCreate()).toBe(true);
     });
 
     it('calls UserProfileAPIClient start() to fetch the user profile', () => {

@@ -32,6 +32,13 @@ export const getCoverageTool = (
     'Retrieves SIEM data coverage health. Returns ingested data organized by the five main SIEM categories (Endpoint, Identity, Network, Cloud, Application/SaaS) with document counts per index. Also checks whether enabled detection rules are present. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for categories with missing data. Each actionable finding includes blast radius data. When presenting any finding, always show these as explicit labeled fields: Affected Platform, Affected Rules, Affected Tactics.',
   schema,
   tags: ['security', 'siem-readiness', 'coverage'],
+  annotations: {
+    title: 'Get SIEM Coverage',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   availability: {
     cacheMode: 'space',
     handler: async ({ request }) => {

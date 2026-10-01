@@ -54,7 +54,7 @@ describe('chatFunctionClient', () => {
           connectorId: 'foo',
           simulateFunctionCalling: false,
         });
-      }).rejects.toThrowError('Tool call arguments for myFunction were invalid');
+      }).rejects.toThrow('Tool call arguments for myFunction were invalid');
 
       expect(respondFn).not.toHaveBeenCalled();
     });
@@ -125,7 +125,7 @@ describe('chatFunctionClient', () => {
           connectorId: 'foo',
           simulateFunctionCalling: false,
         });
-      }).rejects.toThrowError('Tool call arguments for myFunction were invalid');
+      }).rejects.toThrow('Tool call arguments for myFunction were invalid');
 
       expect(respondFn).not.toHaveBeenCalled();
     });
@@ -161,7 +161,7 @@ describe('chatFunctionClient', () => {
           connectorId: 'foo',
           simulateFunctionCalling: false,
         });
-      }).rejects.toThrowError('Tool call arguments for noTypeFunction were invalid');
+      }).rejects.toThrow('Tool call arguments for noTypeFunction were invalid');
 
       const result = await client.executeFunction({
         chat: jest.fn(),
@@ -198,7 +198,7 @@ describe('chatFunctionClient', () => {
         },
       ]);
 
-      expect(() => client.validate('myAction', { count: 'not_a_number' })).toThrowError(
+      expect(() => client.validate('myAction', { count: 'not_a_number' })).toThrow(
         'Tool call arguments for myAction were invalid'
       );
 

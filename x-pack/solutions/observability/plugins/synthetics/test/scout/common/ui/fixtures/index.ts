@@ -44,4 +44,6 @@ const syntheticsPageObjectsFixture = baseTest.extend<SyntheticsTestFixtures>({
 
 export const test = mergeTests(syntheticsPageObjectsFixture, syntheticsServicesFixture);
 
+export { resetArchivedSyntheticsDataStreams } from './helpers/es_archives';
+
 export * as testData from './constants';

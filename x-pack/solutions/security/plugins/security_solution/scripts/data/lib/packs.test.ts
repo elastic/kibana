@@ -35,19 +35,22 @@ describe('parsePacksFlag', () => {
 });
 
 describe('Technology Watch packs', () => {
-  it('registers the four MVP packs', () => {
+  it('registers all expected packs', () => {
     expect(
       listPacks()
         .map((p) => p.id)
         .sort()
-    ).toEqual(['aws-iam', 'github-actions', 'kubernetes', 'okta']);
+    ).toEqual(['aws-iam', 'github-actions', 'ip-fields', 'kubernetes', 'okta']);
   });
 
   it('uses authored fidelity and pinned provenance', () => {
     for (const pack of listPacks()) {
       expect(() => assertPackProvenanceAuthored(pack)).not.toThrow();
       expect(pack.eventSources[0]?.fidelity).toEqual('authored');
-      expect(pack.eventSources[0]?.upstreamCommit).toMatch(/^[a-f0-9]{40}$/);
+      // Packs ported from an upstream repo pin the source commit; authored-from-scratch packs omit it.
+      if (pack.eventSources[0]?.upstreamCommit !== undefined) {
+        expect(pack.eventSources[0].upstreamCommit).toMatch(/^[a-f0-9]{40}$/);
+      }
     }
   });
 

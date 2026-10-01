@@ -106,7 +106,7 @@ export const LibraryTemplateImportPage = React.memo(() => {
     <EuiButtonEmpty
       size="xs"
       flush="left"
-      iconType="arrowLeft"
+      iconType="chevronSingleLeft"
       onClick={goToLibrary}
       data-test-subj="workflowLibraryTemplateImportBackButton"
     >

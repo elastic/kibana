@@ -27,7 +27,7 @@ const OUTCOME_OPTIONS: Array<{ value: PolicyOutcomeFilter; text: string }> = [
     }),
   },
   {
-    value: 'dispatched',
+    value: 'success',
     text: i18n.translate('xpack.alertingV2.executionHistory.searchBar.outcome.dispatched', {
       defaultMessage: 'Dispatched',
     }),
@@ -36,6 +36,12 @@ const OUTCOME_OPTIONS: Array<{ value: PolicyOutcomeFilter; text: string }> = [
     value: 'throttled',
     text: i18n.translate('xpack.alertingV2.executionHistory.searchBar.outcome.throttled', {
       defaultMessage: 'Throttled',
+    }),
+  },
+  {
+    value: 'failure',
+    text: i18n.translate('xpack.alertingV2.executionHistory.searchBar.outcome.dispatchFailed', {
+      defaultMessage: 'Failed',
     }),
   },
 ];
@@ -115,7 +121,7 @@ export const ExecutionHistorySearchBar = ({
           onChange={(e) => setSearchInput(e.target.value)}
           aria-label={i18n.translate(
             'xpack.alertingV2.executionHistory.searchBar.searchAriaLabel',
-            { defaultMessage: 'Search execution history by policy or rule' }
+            { defaultMessage: 'Search execution history by action policy or rule' }
           )}
         />
       </EuiFlexItem>

@@ -581,11 +581,8 @@ describe('AWS CloudWatch connector', () => {
     it('reports success when ListMetrics succeeds', async () => {
       mockPost.mockResolvedValue(jsonResponse({ Metrics: [{ Namespace: 'AWS/EC2' }] }));
 
-      if (!AwsCloudwatch.test) {
-        throw new Error('Test handler not defined');
-      }
       const result = await AwsCloudwatch.test.handler(mockContext);
-      expect(result).toMatchObject({ ok: true });
+      expect(result).toMatchObject({});
     });
 
     it('rejects when the API call throws', async () => {

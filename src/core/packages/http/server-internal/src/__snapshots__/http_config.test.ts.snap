@@ -87,7 +87,9 @@ Object {
   "protocol": "http1",
   "prototypeHardening": true,
   "rateLimiter": Object {
-    "enabled": false,
+    "elu": 0.8,
+    "enabled": true,
+    "term": "medium",
   },
   "requestId": Object {
     "allowFromAnyIp": false,
@@ -104,6 +106,10 @@ Object {
     "xContentTypeOptions": "nosniff",
   },
   "selfHttp": Object {
+    "maxRedirects": 0,
+    "ssl": Object {
+      "verificationMode": "full",
+    },
     "target": "auto",
   },
   "serverTiming": false,

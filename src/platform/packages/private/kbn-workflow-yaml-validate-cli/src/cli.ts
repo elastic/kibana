@@ -23,7 +23,7 @@ type FlagValue = string | boolean | string[] | undefined;
 const asOptionalString = (value: FlagValue): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
 
-const VARIANT_MODES: readonly VariantMode[] = ['auto', ...VARIANTS];
+const VARIANT_MODES: readonly VariantMode[] = ['auto', ...VARIANTS, 'managed'];
 
 const parseVariantMode = (value: FlagValue): VariantMode => {
   const variant = typeof value === 'string' && value.length > 0 ? value : 'auto';
@@ -121,6 +121,8 @@ const runCli = () =>
       description:
         'Validate workflow YAML (a file or a folder) against the generated workflow step JSON ' +
         'Schema artifact, then layer step-name uniqueness, DAG validity, and LiquidJS syntax checks. ' +
+        'Use --variant managed for kbn-workflows/managed definitions, which validates against the ' +
+        'strict schema while tolerating install-time __SOMETHING__ placeholder tokens as warnings. ' +
         'The schema source resolves from --schema, then the local target dir, then --schema-cdn-url.',
       usage: 'node scripts/validate_workflow_yaml.js <file-or-dir> [flags]',
       flags: {
@@ -131,7 +133,7 @@ const runCli = () =>
         <file-or-dir>                  Workflow YAML file or a folder of them (default: current directory)
         --recursive, -r                Descend into subdirectories (default: top-level only)
         --summary-only                 Suppress per-file streaming; print only failures and the summary
-        --variant <mode>               Schema variant: auto | strict | template (default: auto)
+        --variant <mode>               Schema variant: auto | strict | template | managed (default: auto). "managed" validates against strict and tolerates install-time __SOMETHING__ tokens
         --schema <path|url>            Explicit schema source: a bundle directory or an http(s):// base URL
         --schema-cdn-url <url>         CDN base URL fallback (or set KBN_WORKFLOW_SCHEMA_CDN_URL)
         --kibana-version <version>     Select a version under the local target dir (default: highest available)

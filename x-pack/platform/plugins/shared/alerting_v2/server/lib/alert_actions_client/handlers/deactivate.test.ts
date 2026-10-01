@@ -13,7 +13,7 @@ import {
   alertEventType,
   type AlertEpisodeStatus,
 } from '../../../resources/datastreams/alert_events';
-import { ALERTING_V2_ERROR_CODES } from '../../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { buildAlertEventRecord, buildHandlerItem } from '../test_utils';
 import type { AlertEventRecord } from '../types';
 import { deactivateHandler } from './deactivate';
@@ -60,7 +60,6 @@ describe('deactivateHandler', () => {
       const prepared = deactivateHandler.prepare(buildItem(alertEvent));
 
       expect(prepared.ruleEvent).toMatchObject({
-        '@timestamp': FIXED_NOW,
         rule: { id: alertEvent.rule_id, version: alertEvent.rule_version },
         group_hash: alertEvent.group_hash,
         data: alertEvent.data_json,
@@ -68,7 +67,7 @@ describe('deactivateHandler', () => {
         source: alertEvent.source,
         type: alertEventType.alert,
         space_id: alertEvent.space_id,
-        episode: { id: alertEvent.episode_id, status: alertEpisodeStatus.inactive },
+        alert: { id: alertEvent.episode_id, status: alertEpisodeStatus.inactive },
         severity: alertEvent.severity,
       });
     });
@@ -91,7 +90,7 @@ describe('deactivateHandler', () => {
   });
 
   describe('precondition: rejects only when the episode is already inactive', () => {
-    it('rejects deactivate with INVALID_EPISODE_STATE_TRANSITION (400) when episode_status is inactive', () => {
+    it('rejects deactivate with INVALID_ALERT_STATE_TRANSITION (409) when episode_status is inactive', () => {
       try {
         deactivateHandler.prepare(
           buildItem(buildAlertEventRecord({ episode_status: alertEpisodeStatus.inactive }))
@@ -99,13 +98,13 @@ describe('deactivateHandler', () => {
         throw new Error('expected handler to throw');
       } catch (error) {
         expect(Boom.isBoom(error)).toBe(true);
-        expect(error.output.statusCode).toBe(400);
+        expect(error.output.statusCode).toBe(409);
         expect(error.data).toMatchObject({
-          code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+          code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
           details: {
             group_hash: 'group-1',
-            episode_id: 'episode-1',
-            episode_status: alertEpisodeStatus.inactive,
+            alert_id: 'episode-1',
+            alert_status: alertEpisodeStatus.inactive,
             action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
           },
         });

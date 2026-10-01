@@ -10,7 +10,7 @@
 import { Children, Fragment, isValidElement, useMemo } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
-import type { ParsedPart } from '@kbn/content-list-assembly';
+import type { ParsedPart } from '@kbn/ui-react-assembly';
 import { useContentListSort, useContentListConfig } from '@kbn/content-list-provider';
 import { filter } from '../filters/part';
 import { Filters, type FiltersProps } from '../filters/filters';

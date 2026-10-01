@@ -56,6 +56,8 @@ export const createRuleTypeMocks = (
     registerSubActionConnectorType: jest.fn(),
 
     getAxiosInstanceWithAuth: jest.fn(),
+    getCredential: jest.fn(),
+    getClientLeasePool: jest.fn(),
 
     isPreconfiguredConnector: (connectorId: string) => false,
 
@@ -67,6 +69,7 @@ export const createRuleTypeMocks = (
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: () => true,
     registerConnectorLifecycleListener: jest.fn(),
+    registerConnectorEventEmitter: jest.fn(),
   } as ActionsPluginSetupContract;
 
   const scheduleActions = jest.fn();

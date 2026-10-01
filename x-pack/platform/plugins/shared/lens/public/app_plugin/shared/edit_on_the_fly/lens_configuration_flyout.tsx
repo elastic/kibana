@@ -21,9 +21,12 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { TypedLensSerializedState, LensDatasourceId } from '@kbn/lens-common';
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import type {
+  DatasourceStates,
+  TypedLensSerializedState,
+  LensDatasourceId,
+} from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, isTextBasedAttributes } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -43,6 +46,7 @@ import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { useHasMultipleVisibleLayers } from '../../../editor_frame_service/editor_frame/config_panel/use_has_multiple_visible_layers';
 import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/visualization_toolbar';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
@@ -107,40 +111,57 @@ export function LensEditConfigurationFlyout({
 
   const dispatch = useLensDispatch();
 
+  const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
+    useCurrentAttributes({
+      initialAttributes: attributes,
+    });
+
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
 
-    const datasource = datasourceMap[datasourceId];
-
-    const rawState = datasourceStates[datasourceId].state;
-    const currentPersistable = rawState ? datasource.getPersistableState(rawState) : null;
-
     const previousAttrs = previousAttributes.current;
-    const previousDsState = previousAttrs.state.datasourceStates[datasourceId];
-    // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison.
-    // formBased attributes are already persistable and getPersistableState expects private state.
-    let previousPersistable: typeof currentPersistable = null;
-    if (previousDsState) {
-      previousPersistable =
-        datasourceId === LENS_DATASOURCE_ID.TEXT_BASED
-          ? datasource.getPersistableState(previousDsState)
+    const previousReferences = [
+      ...previousAttrs.references,
+      ...(previousAttrs.state.internalReferences ?? []),
+    ];
+    // Persisted secondary datasources (for example, a form-based reference line on
+    // an ES|QL chart) must participate in dirty detection. Include the current active
+    // datasource as well so datasource conversions are still detected.
+    const datasourceIds = new Set<LensDatasourceId>([
+      ...(Object.keys(previousAttrs.state.datasourceStates) as LensDatasourceId[]),
+      datasourceId,
+    ]);
+
+    for (const id of datasourceIds) {
+      const currentDatasourceState = datasourceStates[id]?.state;
+      const previousDatasourceState = previousAttrs.state.datasourceStates[id];
+      if (!currentDatasourceState || !previousDatasourceState) {
+        return true;
+      }
+
+      const currentDatasource = datasourceMap[id as LensDatasourceId];
+      const currentPersistable = currentDatasource.getPersistableState(currentDatasourceState);
+      // Only textBased stores private state (e.g. indexPatternRefs) in attributes;
+      // formBased attributes are already persistable and getPersistableState expects private state.
+      const previousPersistable =
+        id === LENS_DATASOURCE_ID.TEXT_BASED
+          ? currentDatasource.getPersistableState(previousDatasourceState)
           : {
-              state: previousDsState,
-              references: previousAttrs.references,
+              state: previousDatasourceState,
+              references: previousReferences,
             };
+
+      if (
+        !currentDatasource.isEqual(
+          previousPersistable.state,
+          previousPersistable.references,
+          currentPersistable.state,
+          currentPersistable.references
+        )
+      ) {
+        return true;
+      }
     }
-
-    const datasourceStatesAreSame =
-      currentPersistable != null &&
-      previousPersistable != null &&
-      datasource.isEqual(
-        previousPersistable.state,
-        previousPersistable.references,
-        currentPersistable.state,
-        currentPersistable.references
-      );
-
-    if (!datasourceStatesAreSame) return true;
 
     const visualizationState = visualization.state;
     const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
@@ -173,6 +194,7 @@ export function LensEditConfigurationFlyout({
   ]);
 
   const onCancel = useCallback(() => {
+    setIsInlineFlyoutVisible(false);
     const previousAttrs = previousAttributes.current;
     if (attributesChanged) {
       // Use the datasourceId from the previous attributes, not the current one
@@ -185,11 +207,27 @@ export function LensEditConfigurationFlyout({
               previousAttrs.references
             )
           : previousAttrs.state.datasourceStates[previousDatasourceId];
+        // restore every datasource state from the previous attributes, not only the
+        // active one, so non-active loaded states are not dropped on cancel
+        const allPreviousDatasourceStates: DatasourceStates = Object.fromEntries(
+          Object.entries(previousAttrs.state.datasourceStates).map(([id, state]) => [
+            id,
+            {
+              isLoading: false,
+              state:
+                datasourceMap[id as LensDatasourceId]?.injectReferencesToLayers?.(
+                  state,
+                  previousAttrs.references
+                ) ?? state,
+            },
+          ])
+        );
         updatePanelState?.(
           currentDatasourceState,
           previousAttrs.state.visualization,
           undefined,
-          previousDatasourceId
+          previousDatasourceId,
+          allPreviousDatasourceStates
         );
       } else {
         updateSuggestion?.(previousAttrs);
@@ -214,13 +252,7 @@ export function LensEditConfigurationFlyout({
     onCancelCallback,
   ]);
 
-  const textBasedMode = isOfAggregateQueryType(attributes.state.query);
-
-  const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
-    useCurrentAttributes({
-      textBasedMode,
-      initialAttributes: attributes,
-    });
+  const textBasedMode = isTextBasedAttributes(attributes);
 
   const onTextBasedQueryStateChange = useCallback((state: TextBasedQueryState) => {
     setESQLQueryState(state);
@@ -364,10 +396,7 @@ export function LensEditConfigurationFlyout({
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
-      closeFlyout?.();
-      setIsInlineFlyoutVisible(false);
-      // Remove the user's preferred chart type from sessionStorage
-      deleteUserChartTypeFromSessionStorage();
+      onCancel();
     }
   };
 
@@ -376,6 +405,17 @@ export function LensEditConfigurationFlyout({
       ? activeVisualization.getLayerIds(visualization.state)
       : [];
   }, [activeVisualization, visualization.state]);
+
+  // Suggestions are single-layer: applying one would silently drop the other
+  // layers (e.g. annotations, reference lines), so show the panel only for
+  // single-layer ES|QL charts edited via layer tabs. Hidden layers (e.g. the
+  // metric trendline) do not render as tabs and must not count here.
+  const hasMultipleVisibleLayers = useHasMultipleVisibleLayers({
+    activeVisualization,
+    visualizationState: visualization.state,
+    framePublicAPI,
+  });
+  const showSuggestions = !textBasedMode || !hasMultipleVisibleLayers;
 
   const showConvertToEsqlButton = useMemo(() => {
     return getLensFeatureFlags().enableEsqlConversion && !textBasedMode;
@@ -639,38 +679,40 @@ export function LensEditConfigurationFlyout({
               </EuiAccordion>
             </EuiFlexItem>
 
-            <EuiFlexItem
-              grow={isSuggestionsAccordionOpen ? 1 : false}
-              data-test-subj="InlineEditingSuggestions"
-              css={css`
-                border-top: ${euiTheme.euiTheme.border.thin};
-                border-bottom: ${euiTheme.euiTheme.border.thin};
-                padding-left: ${euiTheme.euiTheme.size.base};
-                padding-right: ${euiTheme.euiTheme.size.base};
-                .euiAccordion__childWrapper {
-                  flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
-                }
-              `}
-            >
-              <SuggestionPanel
-                ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
-                frame={framePublicAPI}
-                core={coreStart}
-                nowProvider={startDependencies.data.nowProvider}
-                showOnlyIcons
-                wrapSuggestions
-                isAccordionOpen={isSuggestionsAccordionOpen}
-                toggleAccordionCb={(status) => {
-                  if (!status && isLayerAccordionOpen) {
-                    setIsLayerAccordionOpen(status);
+            {showSuggestions && (
+              <EuiFlexItem
+                grow={isSuggestionsAccordionOpen ? 1 : false}
+                data-test-subj="InlineEditingSuggestions"
+                css={css`
+                  border-top: ${euiTheme.euiTheme.border.thin};
+                  border-bottom: ${euiTheme.euiTheme.border.thin};
+                  padding-left: ${euiTheme.euiTheme.size.base};
+                  padding-right: ${euiTheme.euiTheme.size.base};
+                  .euiAccordion__childWrapper {
+                    flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
                   }
-                  if (status && isESQLResultsAccordionOpen) {
-                    setIsESQLResultsAccordionOpen(!status);
-                  }
-                  setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
-                }}
-              />
-            </EuiFlexItem>
+                `}
+              >
+                <SuggestionPanel
+                  ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
+                  frame={framePublicAPI}
+                  core={coreStart}
+                  nowProvider={startDependencies.data.nowProvider}
+                  showOnlyIcons
+                  wrapSuggestions
+                  isAccordionOpen={isSuggestionsAccordionOpen}
+                  toggleAccordionCb={(status) => {
+                    if (!status && isLayerAccordionOpen) {
+                      setIsLayerAccordionOpen(status);
+                    }
+                    if (status && isESQLResultsAccordionOpen) {
+                      setIsESQLResultsAccordionOpen(!status);
+                    }
+                    setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
+                  }}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           {isModalVisible && esqlConvertAttributes ? (
             <ConvertToEsqlModal

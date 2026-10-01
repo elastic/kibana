@@ -115,7 +115,7 @@ export const CsvExportButton: React.FC = () => {
       <EuiButtonIcon
         buttonRef={buttonRef}
         color="text"
-        iconType="exportAction"
+        iconType="upload"
         onClick={handleClick}
         isLoading={isExporting}
         aria-label={CSV_EXPORT_LABEL}

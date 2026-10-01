@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/home-plugin'
   - '@kbn/core-security-server'
   - '@kbn/core-http-server'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

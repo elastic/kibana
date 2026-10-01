@@ -82,6 +82,7 @@ export const SidebarHeader: FC<SidebarHeaderProps> = ({ title, children, onClose
                       onClick={onClose}
                       aria-label={closeSidebarLabel}
                       color="text"
+                      data-test-subj="sidebarHeaderCloseButton"
                     />
                   </EuiToolTip>
                 </EuiFlexItem>

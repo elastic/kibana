@@ -11,6 +11,7 @@ const detectorIndices = {
   [AnomalyDetectorType.txLatency]: 0,
   [AnomalyDetectorType.txThroughput]: 1,
   [AnomalyDetectorType.txFailureRate]: 2,
+  [AnomalyDetectorType.txLowCount]: 3,
 };
 
 export function getAnomalyDetectorIndex(type: AnomalyDetectorType) {

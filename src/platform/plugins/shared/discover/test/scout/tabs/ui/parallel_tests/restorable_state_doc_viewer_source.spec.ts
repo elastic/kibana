@@ -62,8 +62,7 @@ spaceTest.describe(
       const hideNullValuesSwitch = page.testSubj.locator('unifiedDocViewerHideNullValuesSwitch');
       await expect(hideNullValuesSwitch).toHaveAttribute('aria-checked', 'false');
 
-      await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
+      await discover.createNewTabAndSearch();
       await openTableDocViewer(pageObjects, 0);
       await expect(hideNullValuesSwitch).toHaveAttribute('aria-checked', 'false');
       await hideNullValuesSwitch.click();
@@ -83,14 +82,13 @@ spaceTest.describe(
         await openSourceDocViewer(pageObjects, 0);
         const originalJsonContent = await docViewer.getJsonCodeEditorValue();
 
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await discover.createNewTabAndSearch();
         await openSourceDocViewer(pageObjects, 1);
         const tab2JsonContent = await docViewer.getJsonCodeEditorValue();
         expect(tab2JsonContent).not.toStrictEqual(originalJsonContent);
 
         expect(
-          await network.countMatchingRequests(ESE_SEARCH_ENDPOINT, async () => {
+          await network.countMatchingRequests({ endpoint: ESE_SEARCH_ENDPOINT }, async () => {
             await unifiedTabs.selectTab(0);
             await discover.waitUntilTabIsLoaded();
           })
@@ -98,7 +96,7 @@ spaceTest.describe(
         expect(await docViewer.getJsonCodeEditorValue()).toBe(originalJsonContent);
 
         expect(
-          await network.countMatchingRequests(ESE_SEARCH_ENDPOINT, async () => {
+          await network.countMatchingRequests({ endpoint: ESE_SEARCH_ENDPOINT }, async () => {
             await unifiedTabs.selectTab(1);
             await discover.waitUntilTabIsLoaded();
           })
@@ -116,8 +114,7 @@ spaceTest.describe(
       const tab1ScrollTop = await discover.codeEditor.getScrollTop();
       expect(tab1ScrollTop).toBeGreaterThanOrEqual(scrollAmount);
 
-      await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
+      await discover.createNewTabAndSearch();
       await openSourceDocViewer(pageObjects, 0);
       expect(await discover.codeEditor.getScrollTop()).toBe(0);
 

@@ -156,7 +156,7 @@ describe('endpoint list middleware', () => {
           dispatchUserChangedUrlToEndpointList();
 
           await waitForAction('serverFinishedInitialization');
-          expect(mockSendBulkGetPackagePolicies).not.toBeCalled();
+          expect(mockSendBulkGetPackagePolicies).not.toHaveBeenCalled();
         });
 
         it('should fetch package policies with required privileges', async () => {
@@ -168,7 +168,7 @@ describe('endpoint list middleware', () => {
             waitForAction('serverFinishedInitialization'),
             waitForAction('serverReturnedEndpointNonExistingPolicies'),
           ]);
-          expect(mockSendBulkGetPackagePolicies).toBeCalled();
+          expect(mockSendBulkGetPackagePolicies).toHaveBeenCalled();
         });
       });
     });

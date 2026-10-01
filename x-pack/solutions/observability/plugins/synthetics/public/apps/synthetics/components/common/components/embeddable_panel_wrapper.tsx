@@ -16,6 +16,7 @@ interface Props {
   loading?: boolean;
   hideTitle?: boolean;
   titleAppend?: React.ReactNode;
+  panelCss?: React.ComponentProps<typeof EuiPanel>['css'];
 }
 
 export const EmbeddablePanelWrapper: FC<React.PropsWithChildren<Props>> = ({
@@ -24,13 +25,14 @@ export const EmbeddablePanelWrapper: FC<React.PropsWithChildren<Props>> = ({
   loading,
   titleAppend,
   hideTitle,
+  panelCss,
 }) => {
   const isSyntheticsApp = window.location.pathname.includes('/app/synthetics');
 
   const noTitle = !title && !titleAppend;
   return (
     <>
-      <EuiPanel hasShadow={false} hasBorder={isSyntheticsApp}>
+      <EuiPanel hasShadow={false} hasBorder={isSyntheticsApp} css={panelCss}>
         {!noTitle && (
           <>
             <EuiFlexGroup>

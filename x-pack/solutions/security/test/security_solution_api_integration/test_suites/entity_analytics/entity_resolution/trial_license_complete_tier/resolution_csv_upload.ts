@@ -12,7 +12,10 @@ import { ENTITY_STORE_ROUTES, API_VERSIONS } from '@kbn/entity-store/common';
 import { ENTITY_RESOLUTION_CSV_UPLOAD_URL } from '@kbn/security-solution-plugin/common/entity_analytics/entity_store/constants';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils } from '../../utils';
-import { entityMaintainerRouteHelpersFactory } from '../../utils/entity_maintainers';
+import {
+  entityMaintainerRouteHelpersFactory,
+  waitForMaintainerToSettle,
+} from '../../utils/entity_maintainers';
 
 /** Same value as `MAINTAINER_ID` in entity_store `server/maintainers/automated_resolution`. */
 const AUTOMATED_RESOLUTION_MAINTAINER_ID = 'automated-resolution';
@@ -122,8 +125,12 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @skipInServerlessMKI Entity Resolution CSV Upload', () => {
     before(async () => {
       await entityStoreUtils.enableEntityStoreV2();
-      // Stop before seeding — any TM auto-run between install and stop cannot touch
-      // test entities that haven't been seeded yet, so no wait-for-idle is needed.
+      // Drain the maintainer's in-flight auto-run before seeding; stop cannot abort a claimed run.
+      await waitForMaintainerToSettle({
+        retry,
+        routes: maintainerRoutes,
+        maintainerId: AUTOMATED_RESOLUTION_MAINTAINER_ID,
+      });
       await maintainerRoutes.stopMaintainer(AUTOMATED_RESOLUTION_MAINTAINER_ID);
       await cleanEntities();
       await seedEntities();

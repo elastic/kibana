@@ -440,10 +440,16 @@ describe('ApmServicesTable', () => {
     });
 
     describe('anomaly badge navigation', () => {
-      it('renders anomaly badge with href when locators is provided and service has anomaly score', () => {
-        const mockGetRedirectUrl = jest.fn().mockReturnValue('/services/opbeans-python/overview');
+      it('renders anomaly badge with href when locators is provided and service has anomaly score', async () => {
+        const mockGetUrl = jest.fn().mockResolvedValue('/app/apm/services/opbeans-python/overview');
+        const mockGetRedirectUrl = jest
+          .fn()
+          .mockReturnValue('/app/r?l=APM_LOCATOR&lz=compressed-payload');
         const mockLocators = {
-          get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }),
+          get: jest.fn().mockReturnValue({
+            getUrl: mockGetUrl,
+            getRedirectUrl: mockGetRedirectUrl,
+          }),
         } as any;
 
         const columns = getServiceColumns({
@@ -478,17 +484,25 @@ describe('ApmServicesTable', () => {
           </EuiThemeProvider>
         );
 
+        await waitFor(() => {
+          expect(screen.getByTestId('apmAnomaliesBadge')).toHaveAttribute('href');
+        });
         const badge = screen.getByTestId('apmAnomaliesBadge');
         expect(badge.closest('a')).not.toBeNull();
-        expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+        expect(badge.getAttribute('href')).toContain('/app/apm/services/opbeans-python/overview');
+        expect(badge.getAttribute('href')).not.toMatch(/\/app\/r(\?|$)/);
+        expect(mockGetUrl).toHaveBeenCalledWith(
           expect.objectContaining({
             serviceName: 'opbeans-python',
             query: expect.objectContaining({
               environment: 'production',
               comparisonEnabled: true,
+              offset: 'expected_bounds',
             }),
-          })
+          }),
+          undefined
         );
+        expect(mockGetRedirectUrl).not.toHaveBeenCalled();
       });
     });
 

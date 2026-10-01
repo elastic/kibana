@@ -297,6 +297,7 @@ export const fetchHistogramsForFields = async (params: FetchHistogramsForFieldsP
           ? buildSamplerAggregation(chartDataAggs, samplerShardSize)
           : wrap(chartDataAggs),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     },
     { signal: abortSignal, maxRetries: 0 }
   );

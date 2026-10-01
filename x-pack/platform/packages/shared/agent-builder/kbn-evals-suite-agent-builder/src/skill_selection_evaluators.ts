@@ -84,6 +84,7 @@ const skillIsPresent = (skillName: string, loadedNames: string[]): boolean => {
 export const createExpectedSkillEvaluator = (skillName: string): Evaluator => ({
   name: `Expected Skill (${skillName})`,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }): Promise<EvaluationResult> => {
     const loadedNames = getSkillsLoadedFromSteps(output);
     const loaded = skillIsPresent(skillName, loadedNames);
@@ -109,6 +110,7 @@ export const createExpectedSkillEvaluator = (skillName: string): Evaluator => ({
 export const createShouldNotActivateSkillEvaluator = (skillName: string): Evaluator => ({
   name: `Skill Not Activated (${skillName})`,
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }): Promise<EvaluationResult> => {
     const loadedNames = getSkillsLoadedFromSteps(output);
     const loaded = skillIsPresent(skillName, loadedNames);
@@ -139,6 +141,7 @@ export const createShouldNotActivateSkillEvaluator = (skillName: string): Evalua
 export const skillSelectionEvaluator: Evaluator = {
   name: 'Skill Selection',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }): Promise<EvaluationResult> => {
     const { expectedSkill, shouldNotActivateSkill } =
       (expected as BenchmarkExample['output']) ?? {};

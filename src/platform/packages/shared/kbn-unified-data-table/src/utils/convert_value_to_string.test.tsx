@@ -497,7 +497,7 @@ describe('convertValueToString', () => {
     expect(result.formattedString).toBe('hi there');
   });
 
-  it('should return an empty string and not fail', () => {
+  it('should convert a field the document does not have to the dash the grid renders', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
       dataView: dataTableContextComplexMock.dataView,
@@ -510,7 +510,10 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result.formattedString).toBe('');
+    // "-" starts a formula, but the dash is our own constant rather than document content,
+    // so it must not come back escaped as "'-" even when the value is CSV compatible.
+    expect(result.formattedString).toBe('-');
+    expect(result.withFormula).toBe(false);
   });
 
   it('should return an empty string when rowIndex is out of range', () => {
@@ -569,6 +572,33 @@ describe('convertValueToString', () => {
     expect(result.formattedString).toBe(
       '{"bytes":20,"date":"2020-20-01T12:12:12.123","message":"test1","_index":"i","_score":1}'
     );
+  });
+
+  it('should copy the _source column as the rendered nested document in JSON mode', () => {
+    const params = {
+      rows: dataTableContextComplexRowsMock,
+      dataView: dataTableContextComplexMock.dataView,
+      fieldFormats: servicesMock.fieldFormats,
+      columnId: '_source',
+      rowIndex: 0,
+      columnsMeta: undefined,
+      options: { compatibleWithCSV: true },
+    };
+
+    const flattened = convertValueToString(params).formattedString;
+    const nested = convertValueToString({
+      ...params,
+      documentsDisplayMode: 'json',
+      shouldShowFieldHandler: () => true,
+    }).formattedString;
+
+    // Summary/default copies the flattened source (dotted keys); JSON mode copies the nested
+    // document as the tree viewer renders it (dotted keys become nested objects).
+    expect(flattened).toContain('"object_user.first"');
+
+    const parsedNested = JSON.parse(nested);
+    expect(parsedNested).toHaveProperty('object_user.first'); // the dotted path resolves
+    expect(parsedNested).not.toHaveProperty(['object_user.first']); // no literal dotted key
   });
 
   it('should escape formula', () => {

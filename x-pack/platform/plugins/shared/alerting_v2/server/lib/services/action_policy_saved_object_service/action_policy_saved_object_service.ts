@@ -32,8 +32,6 @@ export type {
   ActionPolicySavedObjectServiceContract,
 };
 
-const escapeRegex = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
 @injectable()
 export class ActionPolicySavedObjectService implements ActionPolicySavedObjectServiceContract {
   constructor(
@@ -246,32 +244,5 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
       sortField,
       sortOrder,
     });
-  }
-
-  public async getDistinctTags(params?: { search?: string }): Promise<string[]> {
-    const search = params?.search;
-    const result = await this.client.find<
-      ActionPolicySavedObjectAttributes,
-      { tags: { buckets: Array<{ key: string }> } }
-    >({
-      type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-      perPage: 0,
-      aggs: {
-        tags: {
-          terms: {
-            field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
-            size: 100,
-            order: { _key: 'asc' },
-            ...(search ? { include: `${escapeRegex(search)}.*` } : {}),
-          },
-        },
-      },
-    });
-
-    return (
-      result.aggregations?.tags.buckets
-        .map((bucket) => bucket.key)
-        .filter((key) => key.length > 0) ?? []
-    );
   }
 }
