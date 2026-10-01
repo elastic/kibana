@@ -48,7 +48,7 @@ import {
   createLastNotifiedTimestampsResponse,
   createSeriesSuppressionsResponse,
 } from './fixtures/dispatcher';
-import { createAlertEpisode, createAlertEpisodeSuppression } from './fixtures/test_utils';
+import { createAlertEpisode, createEpisodeSuppressionRow } from './fixtures/test_utils';
 import { EpisodeScan } from './state';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {
@@ -463,11 +463,12 @@ describe('DispatcherService', () => {
           ])
         )
         .mockResolvedValueOnce(
-          createAlertEpisodeSuppressionsResponse([
-            createAlertEpisodeSuppression({ should_suppress: true }),
-            createAlertEpisodeSuppression(secondEpisode),
+          createEpisodeSuppressionsResponse([
+            createEpisodeSuppressionRow({ should_suppress: true }),
+            createEpisodeSuppressionRow(secondEpisode),
           ])
         )
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
           createEpisodeDataResponse([{ episode_id: 'episode-2', data_json: null }])
         )
