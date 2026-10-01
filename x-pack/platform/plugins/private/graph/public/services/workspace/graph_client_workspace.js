@@ -6,8 +6,6 @@
  */
 
 // Kibana wrapper
-import { mergeRuntimeGraph } from './runtime_graph_merge';
-
 // The main constructor for our GraphWorkspace
 function GraphWorkspace(options) {
   this.blocklistedNodes = [];
@@ -19,9 +17,6 @@ function GraphWorkspace(options) {
   this.nodesMap = {};
   this.edgesMap = {};
   this.searchTerm = '';
-
-  //A sequence number used to know when a node was added
-  this.seqNumber = 0;
 
   this.nodes = [];
   this.edges = [];
@@ -85,10 +80,6 @@ function GraphWorkspace(options) {
   };
   this.isLayoutRunning = function () {
     return layoutController.isRunning();
-  };
-
-  this.mergeGraph = function (newData) {
-    this.seqNumber = mergeRuntimeGraph(this, newData, this.seqNumber);
   };
 }
 //=====================

@@ -99,12 +99,6 @@ export interface Workspace {
    */
   returnUnpackedGroupeds(nodes: WorkspaceNode[]): WorkspaceNode[];
 
-  /**
-   * Adds new nodes retrieved from an elasticsearch search
-   * @param newData
-   */
-  mergeGraph(newData: GraphData): void;
-
   runLayout(): void;
   stopLayout(): void;
   isLayoutRunning(): boolean;

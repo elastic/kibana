@@ -69,7 +69,7 @@ const createWorkspaceMock = () =>
       },
     },
     blocklistedNodes: [],
-  } as unknown as jest.Mocked<Workspace>);
+  } as unknown as jest.Mocked<Workspace> & { mergeGraph: jest.Mock });
 
 const createWorkspaceListenerEnvironment = () => {
   const workspace = createWorkspaceMock();
