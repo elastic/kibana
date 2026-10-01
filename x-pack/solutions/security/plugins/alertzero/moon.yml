@@ -80,6 +80,7 @@ dependsOn:
   - '@kbn/proposals-ui'
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/core-chrome-browser-mocks'
+  - '@kbn/context-engine-plugin'
 tags:
   - plugin
   - prod
