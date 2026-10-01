@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
+import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
 import { isNotFoundError } from '@kbn/es-errors';
@@ -137,10 +138,10 @@ export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
   private async shouldWarnIgnoredKibanaFetcher(): Promise<boolean> {
-    return (
-      (await this.deps
+    return firstValueFrom(
+      this.deps
         .getCoreStart()
-        .featureFlags?.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)) ?? false
+        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
     );
   }
 
