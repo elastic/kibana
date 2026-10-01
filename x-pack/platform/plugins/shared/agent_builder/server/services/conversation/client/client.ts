@@ -560,9 +560,14 @@ class ConversationClientImpl implements ConversationClient {
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
+    const isOwner = hasConversationOwnerAccess({
+      conversation: fromEsWithoutRounds(document, this.getUser()),
+      user: this.getUser(),
+    });
+
     const [conversation, feedback] = await Promise.all([
       toResponseConversation({ document, user: this.getUser(), resolveTemplate: getTemplate }),
-      this.feedbackClient.getByConversation(conversationId),
+      isOwner ? this.feedbackClient.getByConversation(conversationId) : Promise.resolve(undefined),
     ]);
 
     return feedback ? { ...conversation, feedback } : conversation;
@@ -978,6 +983,8 @@ class ConversationClientImpl implements ConversationClient {
         })
       )
     );
+
+    await this.feedbackClient.deleteByConversation(conversationId);
 
     try {
       const { result } = await this.storage.getClient().delete({ id: conversationId });

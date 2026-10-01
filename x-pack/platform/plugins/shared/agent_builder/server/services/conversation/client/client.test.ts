@@ -70,6 +70,7 @@ interface MockRawEsClient {
   index: jest.Mock;
   delete: jest.Mock;
   search: jest.Mock;
+  deleteByQuery: jest.Mock;
 }
 
 const mockRawEsClient: MockRawEsClient = {
@@ -77,6 +78,7 @@ const mockRawEsClient: MockRawEsClient = {
   index: jest.fn(),
   delete: jest.fn(),
   search: jest.fn(),
+  deleteByQuery: jest.fn(),
 };
 
 const TEST_CONVERSATION_INDEX = '.kibana_agent_builder_conversations';
@@ -275,14 +277,16 @@ describe('ConversationClient', () => {
     mockRawEsClient.index.mockReset();
     mockRawEsClient.delete.mockReset();
     mockRawEsClient.search.mockReset();
+    mockRawEsClient.deleteByQuery.mockReset();
     mockEsClient.search.mockReset();
     mockEsClient.delete.mockReset();
     mockEsClient.index.mockReset();
     // Default OCC-style index response; describes that need something else override it.
     mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
-    // Default resolved value for feedback index/delete/search (raw ES client).
+    // Default resolved value for feedback index/delete/search/deleteByQuery (raw ES client).
     mockRawEsClient.index.mockResolvedValue({});
     mockRawEsClient.delete.mockResolvedValue({});
+    mockRawEsClient.deleteByQuery.mockResolvedValue({});
     mockRawEsClient.search.mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
     });

@@ -70,6 +70,21 @@ export class FeedbackClient {
     }
   }
 
+  async deleteByConversation(conversationId: string): Promise<void> {
+    try {
+      await this.esClient.deleteByQuery({
+        index: feedbackIndexName,
+        query: { term: { 'conversation_id.keyword': conversationId } },
+        refresh: true,
+      });
+    } catch (err) {
+      if (err?.meta?.statusCode === 404 || err?.statusCode === 404) {
+        return;
+      }
+      this.logger.error(`Failed to delete feedback for conversation ${conversationId}: ${err}`);
+    }
+  }
+
   async getByConversation(
     conversationId: string
   ): Promise<Record<string, ConversationRoundFeedback> | undefined> {
