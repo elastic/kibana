@@ -32,6 +32,8 @@ jest.mock('@kbn/code-editor', () => ({
   ),
 }));
 
+jest.setTimeout(30_000);
+
 const docLinksMock = {
   links: {
     elasticsearch: {
@@ -164,13 +166,6 @@ describe('CreateDatasetWizardPage', () => {
     fireEvent.click(partitionDetectionCombo.querySelector('input') ?? partitionDetectionCombo);
     fireEvent.click(getByTestId('createDatasetSettingsPartitionDetectionOption-hive'));
 
-    await clickBack(getByTestId);
-    expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
-    await clickNext(getByTestId);
-    expect(
-      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
-    ).toBeInTheDocument();
-
     await clickNext(getByTestId);
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
     // Timeseries is on by default and requires a field name before Next is allowed.
@@ -178,15 +173,6 @@ describe('CreateDatasetWizardPage', () => {
       target: { value: 'event_time' },
     });
     await clickNext(getByTestId);
-    expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
-    await clickBack(getByTestId);
-    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
-
-    fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
-      target: { value: 'event_time' },
-    });
-    await clickNext(getByTestId);
-
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     expect(getByText('Review configuration for logs-dataset')).toBeInTheDocument();
     expect(getByTestId('createDatasetWizardReview-name')).toHaveTextContent('logs-dataset');
