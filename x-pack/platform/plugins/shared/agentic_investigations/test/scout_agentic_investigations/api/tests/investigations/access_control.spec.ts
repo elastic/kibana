@@ -28,6 +28,7 @@ apiTest.describe(
   () => {
     let adminCookieHeader: Record<string, string>;
     let investigationId: string;
+    let privateInvestigationId: string;
 
     apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
       ({ cookieHeader: adminCookieHeader } = await samlAuth.asInteractiveUser('admin'));
@@ -36,10 +37,20 @@ apiTest.describe(
         metadata: { status: 'open', severity: 'medium', summary: `${RUN} summary` },
         impactEntities: [{ id: `${RUN}-entity` }],
       });
+      privateInvestigationId = await seedInvestigation(apiClient, adminCookieHeader, {
+        title: `${RUN} private investigation`,
+        metadata: { status: 'open', severity: 'high', summary: `${RUN} private summary` },
+        impactEntities: [{ id: `${RUN}-private-entity` }],
+        accessMode: 'private',
+      });
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
-      await deleteConversations(apiClient, [investigationId], adminCookieHeader);
+      await deleteConversations(
+        apiClient,
+        [investigationId, privateInvestigationId],
+        adminCookieHeader
+      );
     });
 
     apiTest(
@@ -90,6 +101,53 @@ apiTest.describe(
         });
         expect(counts).toHaveStatusCode(200);
         expect(counts.body).toStrictEqual({ low: 0, medium: 1, high: 0, critical: 0 });
+      }
+    );
+
+    apiTest(
+      "hides another user's private investigation from list, counts, and get",
+      async ({ samlAuth, apiClient }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
+        const headers = { ...INTERNAL_HEADERS, ...cookieHeader };
+
+        // The side index matches the entity; the access-checked conversation read drops it.
+        const byEntity = await apiClient.get(
+          `${INVESTIGATIONS_PATH}?entity=${RUN}-private-entity`,
+          { headers, responseType: 'json' }
+        );
+        expect(byEntity).toHaveStatusCode(200);
+        expect(byEntity.body.results).toStrictEqual([]);
+
+        // Conversation search path.
+        const byText = await apiClient.get(`${INVESTIGATIONS_PATH}?query=${RUN}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(byText).toHaveStatusCode(200);
+        expect(byText.body.results.map(({ id }: { id: string }) => id)).toStrictEqual([
+          investigationId,
+        ]);
+
+        const counts = await apiClient.get(`${INVESTIGATIONS_SEVERITY_COUNTS_PATH}?query=${RUN}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(counts.body).toStrictEqual({ low: 0, medium: 1, high: 0, critical: 0 });
+
+        const get = await apiClient.get(INVESTIGATION_BY_ID_PATH(privateInvestigationId), {
+          headers,
+          responseType: 'json',
+        });
+        expect([403, 404]).toContain(get.statusCode);
+
+        // The owner still sees it.
+        const owner = await apiClient.get(`${INVESTIGATIONS_PATH}?entity=${RUN}-private-entity`, {
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+          responseType: 'json',
+        });
+        expect(owner.body.results.map(({ id }: { id: string }) => id)).toStrictEqual([
+          privateInvestigationId,
+        ]);
       }
     );
 
