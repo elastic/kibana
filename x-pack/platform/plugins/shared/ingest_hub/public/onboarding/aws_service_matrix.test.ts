@@ -379,6 +379,42 @@ describe('AWS service matrix', () => {
     it('derives signalTypes from the PT type field', () => {
       expect(ec2Otel.signalTypes).toContain('metrics');
     });
+
+    it('uses a synthetic DS even when the package has data_streams (input package detection fix)', () => {
+      // Regression test: a PT with `input:` but no `data_streams` previously fell through to the
+      // all-package-DS fallback when packageInfo.data_streams was non-empty, causing the regular DS
+      // loop to run and the input-package branch to be skipped. This led to wrong stream keys like
+      // amazon_security_lake.application_activity instead of the Fleet-synthesized
+      // amazon_security_lake.amazon_security_lake.
+      const pkg = {
+        policy_templates: [
+          {
+            name: 'amazon_security_lake',
+            input: 'aws-sw',
+            type: 'logs',
+            title: 'Amazon Security Lake',
+          },
+        ],
+        data_streams: [
+          {
+            path: 'application_activity',
+            type: 'logs',
+            streams: [{ input: 'aws-sw', vars: [] }],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
+        {
+          id: 'amazon_security_lake',
+          category: 'security_identity_compliance',
+          packageName: 'amazon_security_lake',
+        },
+      ]);
+      // Must use the synthetic dsId (entry.id), not the package data_stream path
+      expect(result.dataStreams).toEqual(['amazon_security_lake']);
+      expect(result.inputs).toEqual(['aws-sw']);
+      expect(result.signalTypes).toContain('logs');
+    });
   });
 
   describe('agent_based fallback deployment method', () => {
@@ -574,6 +610,77 @@ describe('AWS service matrix', () => {
       ]);
       expect(result.varDefsByInput).toBeUndefined();
       expect(result.inputs).toContain('http_endpoint');
+    });
+
+    it('excludes data streams claimed by other PTs when the target PT has no data_streams list', () => {
+      // Regression: for multi-PT packages like amazon_security_lake, the all-package-DS fallback
+      // was including data streams owned by other policy templates, producing cross-PT stream keys
+      // that Fleet rejected as "stream not found".
+      const pkg = {
+        policy_templates: [
+          {
+            name: 'amazon_security_lake',
+            // no data_streams list — triggers fallback
+            inputs: [{ type: 'aws-s3', title: 'S3' }],
+          },
+          {
+            name: 'amazon_security_lake_application',
+            data_streams: ['application_activity'],
+          },
+        ],
+        data_streams: [
+          {
+            path: 'vpc_flow',
+            type: 'logs',
+            streams: [{ input: 'aws-s3', vars: [] }],
+          },
+          {
+            path: 'application_activity',
+            type: 'logs',
+            streams: [{ input: 'aws-s3', vars: [] }],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
+        {
+          id: 'amazon_security_lake',
+          category: 'security_identity_compliance',
+          packageName: 'amazon_security_lake',
+          deploymentMethods: [{ method: 'agent_based', preferred: true }],
+        },
+      ]);
+      // application_activity is owned by the other PT — must be excluded
+      expect(result.dataStreams).toEqual(['vpc_flow']);
+      expect(result.dataStreams).not.toContain('application_activity');
+    });
+
+    it('excludes data streams with no stream definitions (routing-rule-only streams)', () => {
+      // Regression: amazon_security_lake has 7 data streams but only `event` has an explicit
+      // `streams:` section. The rest use routing rules and have `streams: null`. Fleet's
+      // getStreamsForInputType skips them, so they are never in Fleet's streamsMap. Sending
+      // stream keys for them always produces "stream not found".
+      const pkg = {
+        policy_templates: [
+          { name: 'amazon_security_lake', inputs: [{ type: 'aws-s3', title: 'S3' }] },
+        ],
+        data_streams: [
+          // Only `event` has a stream definition; the rest use routing rules (streams: null).
+          { path: 'event', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] },
+          { path: 'application_activity', type: 'logs', streams: null },
+          { path: 'network_activity', type: 'logs', streams: null },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
+        {
+          id: 'amazon_security_lake',
+          category: 'security_identity_compliance',
+          packageName: 'amazon_security_lake',
+        },
+      ]);
+      // Only `event` has a stream definition — routing-rule streams must be excluded.
+      expect(result.dataStreams).toEqual(['event']);
+      expect(result.dataStreams).not.toContain('application_activity');
+      expect(result.dataStreams).not.toContain('network_activity');
     });
 
     it('does not consume aws-package data streams when the entry has a policyTemplate set', () => {

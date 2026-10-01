@@ -25,6 +25,8 @@ import { useBoolean } from '@kbn/react-hooks';
 import { internalTools } from '@kbn/agent-builder-common';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
 import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { useConversationContext } from '../../../../../context/conversation/conversation_context';
+import { useConversationFlyoutSessionProps } from '../../../../../hooks/use_conversation_flyout_session_props';
 import { JsonCodeBlock } from '../json_code_block';
 import { ToolResult } from '../results/tool_result';
 import { SubAgentExecutionFlyout } from './sub_agent_execution_flyout';
@@ -44,6 +46,11 @@ const toolLabel = i18n.translate('xpack.agentBuilder.conversation.toolResponseFl
   defaultMessage: 'tool',
 });
 
+const toolResponseTitle = i18n.translate(
+  'xpack.agentBuilder.conversation.toolResponseFlyout.title',
+  { defaultMessage: 'Tool response' }
+);
+
 interface ToolResponseFlyoutProps {
   step: ToolCallStepData;
   onClose: () => void;
@@ -59,6 +66,8 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
   const { backHeaderCss, stepsCss } = useSteppedFlyoutStyles();
   const titleId = useGeneratedHtmlId({ prefix: 'toolResponseFlyout' });
   const [isSubFlyoutOpen, { on: openSubFlyout, off: closeSubFlyout }] = useBoolean();
+  const { isEmbeddedContext } = useConversationContext();
+  const flyoutSessionProps = useConversationFlyoutSessionProps(toolResponseTitle);
 
   const isSubAgentCall = step.tool_id === internalTools.runSubagent;
   const subAgentExecutionId = isSubAgentCall ? getSubAgentExecutionId(step) : undefined;
@@ -162,6 +171,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
       size="m"
       ownFocus={!onBack}
       outsideClickCloses={onBack ? true : undefined}
+      {...flyoutSessionProps}
     >
       {onBack && (
         <EuiFlyoutHeader hasBorder css={backHeaderCss}>
@@ -187,8 +197,8 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
           executionId={subAgentExecutionId}
           params={step.params}
           isCompleted={!isSubAgentRunning}
-          onBack={closeSubFlyout}
-          onClose={onClose}
+          onBack={isEmbeddedContext ? closeSubFlyout : undefined}
+          onClose={isEmbeddedContext ? onClose : closeSubFlyout}
         />
       )}
     </EuiFlyout>
