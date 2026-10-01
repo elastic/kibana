@@ -214,12 +214,7 @@ const ScriptFieldComponent = ({ links, placeholder, disabled }: Props) => {
     } else if (error === null) {
       updateMonacoMarkers([]);
     }
-
-    if (fieldCurrentValue.current.trim() !== '') {
-      // The validation reads the preview response, so its verdict must never outlive it.
-      validateFields(['script.source']);
-    }
-  }, [error, displayPainlessScriptErrorInMonaco, updateMonacoMarkers, validateFields]);
+  }, [error, displayPainlessScriptErrorInMonaco, updateMonacoMarkers]);
 
   useEffect(() => {
     return () => {
