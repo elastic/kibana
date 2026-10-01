@@ -384,6 +384,14 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
   ],
   [
+    '.google_gke',
+    lazy(() => import(/* webpackChunkName: "connectorIconGoogleGke" */ './specs/google_gke/icon')),
+  ],
+  [
+    '.bitbucket',
+    lazy(() => import(/* webpackChunkName: "connectorIconBitbucket" */ './specs/bitbucket/icon')),
+  ],
+  [
     '.azure_aks',
     lazy(() => import(/* webpackChunkName: "connectorIconAzureAks" */ './specs/azure_aks/icon')),
   ],
@@ -405,7 +413,6 @@ export const ConnectorIconsMap: Map<
     '.threatq',
     lazy(() => import(/* webpackChunkName: "connectorIconThreatQ" */ './specs/threatq/icon')),
   ],
-
   [
     '.elasticsearch',
     lazy(
