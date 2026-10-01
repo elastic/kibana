@@ -67,10 +67,13 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
       await spaceTest.step(
         'verify unfiltered field list starts with expected alphabetical fields',
         async () => {
-          const fieldNames = await pageObjects.dataViewDetail.getFieldNames();
-          expect(fieldNames.slice(0, expectedUnfilteredStart.length)).toStrictEqual(
-            expectedUnfilteredStart
-          );
+          await expect
+            .poll(async () =>
+              (
+                await pageObjects.dataViewDetail.getFieldNames()
+              ).slice(0, expectedUnfilteredStart.length)
+            )
+            .toStrictEqual(expectedUnfilteredStart);
         }
       );
 
@@ -78,8 +81,9 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
         'filter by runtime schema and verify only the runtime field is shown',
         async () => {
           await pageObjects.dataViewDetail.setSchemaFieldTypeFilter('runtime');
-          const fieldNames = await pageObjects.dataViewDetail.getFieldNames();
-          expect(fieldNames).toStrictEqual(['_test']);
+          await expect
+            .poll(() => pageObjects.dataViewDetail.getFieldNames())
+            .toStrictEqual(['_test']);
         }
       );
 
@@ -87,10 +91,13 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
         'filter by indexed schema and verify the original field list is restored',
         async () => {
           await pageObjects.dataViewDetail.setSchemaFieldTypeFilter('indexed');
-          const fieldNames = await pageObjects.dataViewDetail.getFieldNames();
-          expect(fieldNames.slice(0, expectedUnfilteredStart.length)).toStrictEqual(
-            expectedUnfilteredStart
-          );
+          await expect
+            .poll(async () =>
+              (
+                await pageObjects.dataViewDetail.getFieldNames()
+              ).slice(0, expectedUnfilteredStart.length)
+            )
+            .toStrictEqual(expectedUnfilteredStart);
         }
       );
     }
@@ -133,8 +140,7 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
           await pageObjects.dataViewDetail.filterByText('unknown');
           await pageObjects.dataViewDetail.setFieldTypeFilter('text');
           await pageObjects.dataViewDetail.setSchemaFieldTypeFilter('runtime');
-          const types = await pageObjects.dataViewDetail.getFieldTypes();
-          expect(types).toStrictEqual([]);
+          await expect.poll(() => pageObjects.dataViewDetail.getFieldTypes()).toStrictEqual([]);
         }
       );
 
@@ -142,10 +148,12 @@ spaceTest.describe('Data view field list filters', { tag: tags.deploymentAgnosti
         'click View conflicts and verify all other filters were reset',
         async () => {
           await pageObjects.dataViewDetail.viewConflictsButton.click();
-          const fieldNames = await pageObjects.dataViewDetail.getFieldNames();
-          expect(fieldNames).toStrictEqual(['bytes']);
-          const fieldTypes = await pageObjects.dataViewDetail.getFieldTypes();
-          expect(fieldTypes).toStrictEqual(['keyword, long\nConflict']);
+          await expect
+            .poll(() => pageObjects.dataViewDetail.getFieldNames())
+            .toStrictEqual(['bytes']);
+          await expect
+            .poll(() => pageObjects.dataViewDetail.getFieldTypes())
+            .toStrictEqual(['keyword, long\nConflict']);
         }
       );
     }
