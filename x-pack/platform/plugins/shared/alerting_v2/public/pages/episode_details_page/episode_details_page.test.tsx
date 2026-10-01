@@ -295,7 +295,7 @@ describe('EpisodeDetailsPage', () => {
   it('renders the page structure once the episode loads', () => {
     renderPage();
 
-    expect(screen.getByTestId('alertingV2EpisodeDetailsPage')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2AlertDetailsPage')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsSidebar')).toBeInTheDocument();
     expect(screen.getByTestId('stubTimelineHeatmapsSection')).toBeInTheDocument();
   });

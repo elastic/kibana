@@ -9,9 +9,11 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createMemoryHistory } from 'history';
 import {
+  ALERTS_TABLE_APP_STATE_KEY,
   DEFAULT_EPISODES_TABLE_CONFIG,
   EPISODES_TABLE_APP_STATE_KEY,
   EPISODES_TABLE_CONFIG_STORAGE_KEY,
+  LEGACY_EPISODES_TABLE_CONFIG_STORAGE_KEY,
   mergeEpisodesTableConfig,
   readEpisodesTableConfigFromStorage,
   readEpisodesTableConfigFromUrl,
@@ -26,20 +28,32 @@ const createMockStorage = (initialValue: unknown = null) => ({
   clear: jest.fn(),
 });
 
+/** Mock storage with per-key get/set/remove so we can exercise the migration. */
+const createKeyedMockStorage = (seed: Record<string, unknown> = {}) => {
+  const store = new Map<string, unknown>(Object.entries(seed));
+  return {
+    get: jest.fn((key: string) => (store.has(key) ? store.get(key) : null)),
+    set: jest.fn((key: string, value: unknown) => {
+      store.set(key, value);
+    }),
+    remove: jest.fn((key: string) => {
+      store.delete(key);
+    }),
+    clear: jest.fn(() => store.clear()),
+  };
+};
+
 const createKbnTestUrlStorage = async (
-  episodesTablePayload?: unknown
+  alertsTablePayload?: unknown,
+  { key = ALERTS_TABLE_APP_STATE_KEY }: { key?: string } = {}
 ): Promise<IKbnUrlStateStorage> => {
   const storage = createKbnUrlStateStorage({
     history: createMemoryHistory({ initialEntries: ['/'] }),
     useHash: false,
     useHashQuery: false,
   });
-  if (episodesTablePayload !== undefined) {
-    await storage.set(
-      '_a',
-      { [EPISODES_TABLE_APP_STATE_KEY]: episodesTablePayload },
-      { replace: true }
-    );
+  if (alertsTablePayload !== undefined) {
+    await storage.set('_a', { [key]: alertsTablePayload }, { replace: true });
   }
   return storage;
 };
@@ -165,12 +179,75 @@ describe('episodes_table_config', () => {
         expect(readEpisodesTableConfigFromStorage(storage as any)).toEqual({ rowHeight });
       }
     });
+
+    describe('legacy localStorage migration', () => {
+      const stored = {
+        rowHeight: -1,
+        sort: { sortField: 'duration', sortDirection: 'desc' as const },
+      };
+
+      it('reads from the legacy key and copies it to the new key on first read', () => {
+        const storage = createKeyedMockStorage({
+          [LEGACY_EPISODES_TABLE_CONFIG_STORAGE_KEY]: stored,
+        });
+        expect(readEpisodesTableConfigFromStorage(storage as any)).toEqual(stored);
+        expect(storage.set).toHaveBeenCalledWith(EPISODES_TABLE_CONFIG_STORAGE_KEY, stored);
+        expect(storage.remove).toHaveBeenCalledWith(LEGACY_EPISODES_TABLE_CONFIG_STORAGE_KEY);
+      });
+
+      it('prefers the new key when both keys exist', () => {
+        const newer = {
+          rowHeight: 1,
+          sort: { sortField: 'tags', sortDirection: 'asc' as const },
+        };
+        const storage = createKeyedMockStorage({
+          [EPISODES_TABLE_CONFIG_STORAGE_KEY]: newer,
+          [LEGACY_EPISODES_TABLE_CONFIG_STORAGE_KEY]: stored,
+        });
+        expect(readEpisodesTableConfigFromStorage(storage as any)).toEqual(newer);
+        // No migration write/remove when the new key is already populated.
+        expect(storage.set).not.toHaveBeenCalled();
+        expect(storage.remove).not.toHaveBeenCalled();
+      });
+
+      it('returns undefined when neither key is present', () => {
+        const storage = createKeyedMockStorage({});
+        expect(readEpisodesTableConfigFromStorage(storage as any)).toBeUndefined();
+        expect(storage.set).not.toHaveBeenCalled();
+        expect(storage.remove).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('readEpisodesTableConfigFromUrl', () => {
-    it('returns undefined when _a has no episodesTable sub-key', async () => {
+    it('returns undefined when _a has no alertsTable sub-key', async () => {
       const urlStorage = await createKbnTestUrlStorage();
       expect(readEpisodesTableConfigFromUrl(urlStorage)).toBeUndefined();
+    });
+
+    it('reads filter state from the legacy episodesTable key when alertsTable is absent', async () => {
+      const urlStorage = await createKbnTestUrlStorage(
+        { rowHeight: -1 },
+        { key: EPISODES_TABLE_APP_STATE_KEY }
+      );
+      expect(readEpisodesTableConfigFromUrl(urlStorage)?.rowHeight).toBe(-1);
+    });
+
+    it('prefers alertsTable when both URL sub-keys are present', async () => {
+      const urlStorage = createKbnUrlStateStorage({
+        history: createMemoryHistory({ initialEntries: ['/'] }),
+        useHash: false,
+        useHashQuery: false,
+      });
+      await urlStorage.set(
+        '_a',
+        {
+          [ALERTS_TABLE_APP_STATE_KEY]: { rowHeight: 1 },
+          [EPISODES_TABLE_APP_STATE_KEY]: { rowHeight: -1 },
+        },
+        { replace: true }
+      );
+      expect(readEpisodesTableConfigFromUrl(urlStorage)?.rowHeight).toBe(1);
     });
 
     it('reads visibleColumns from URL', async () => {
@@ -220,30 +297,30 @@ describe('episodes_table_config', () => {
   });
 
   describe('writeEpisodesTableConfigToUrl', () => {
-    it('omits episodesTable sub-key when config equals defaults', async () => {
+    it('omits alertsTable sub-key when config equals defaults', async () => {
       const urlStorage = await createKbnTestUrlStorage({ rowHeight: 1 });
       await writeEpisodesTableConfigToUrl(urlStorage, DEFAULT_EPISODES_TABLE_CONFIG);
       expect(urlStorage.get('_a')).toEqual({});
     });
 
-    it('writes non-default fields to _a.episodesTable', async () => {
+    it('writes non-default fields to _a.alertsTable', async () => {
       const urlStorage = await createKbnTestUrlStorage();
       await writeEpisodesTableConfigToUrl(urlStorage, {
         ...DEFAULT_EPISODES_TABLE_CONFIG,
         rowHeight: -1,
       });
       expect(urlStorage.get('_a')).toEqual({
-        [EPISODES_TABLE_APP_STATE_KEY]: { rowHeight: -1 },
+        [ALERTS_TABLE_APP_STATE_KEY]: { rowHeight: -1 },
       });
     });
 
-    it('preserves other _a sub-keys (e.g. episodesList) when writing', async () => {
+    it('preserves other _a sub-keys (e.g. alertsList) when writing', async () => {
       const urlStorage = createKbnUrlStateStorage({
         history: createMemoryHistory({ initialEntries: ['/'] }),
         useHash: false,
         useHashQuery: false,
       });
-      await urlStorage.set('_a', { episodesList: { status: 'recovering' } }, { replace: true });
+      await urlStorage.set('_a', { alertsList: { status: 'recovering' } }, { replace: true });
 
       await writeEpisodesTableConfigToUrl(urlStorage, {
         ...DEFAULT_EPISODES_TABLE_CONFIG,
@@ -251,9 +328,25 @@ describe('episodes_table_config', () => {
       });
 
       expect(urlStorage.get('_a')).toEqual({
-        episodesList: { status: 'recovering' },
-        [EPISODES_TABLE_APP_STATE_KEY]: { rowHeight: -1 },
+        alertsList: { status: 'recovering' },
+        [ALERTS_TABLE_APP_STATE_KEY]: { rowHeight: -1 },
       });
+    });
+
+    it('purges a pre-existing legacy episodesTable key on write', async () => {
+      const urlStorage = await createKbnTestUrlStorage(
+        { rowHeight: 1 },
+        { key: EPISODES_TABLE_APP_STATE_KEY }
+      );
+
+      await writeEpisodesTableConfigToUrl(urlStorage, {
+        ...DEFAULT_EPISODES_TABLE_CONFIG,
+        rowHeight: -1,
+      });
+
+      const appState = urlStorage.get<Record<string, unknown>>('_a') ?? {};
+      expect(appState[EPISODES_TABLE_APP_STATE_KEY]).toBeUndefined();
+      expect(appState[ALERTS_TABLE_APP_STATE_KEY]).toEqual({ rowHeight: -1 });
     });
 
     it('round-trips config through URL', async () => {

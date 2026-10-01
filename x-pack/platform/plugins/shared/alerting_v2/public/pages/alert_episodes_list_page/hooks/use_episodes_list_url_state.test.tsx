@@ -61,7 +61,7 @@ describe('useEpisodesListUrlState', () => {
 
     expect(result.current.filterState).toEqual({ status: ['recovering'], ruleId: 'r9' });
     expect(history.location.search).toBe(
-      '?_a=(episodesList:(ruleId:r9,status:!(recovering),timeFrom:now-15m,timeTo:now))'
+      '?_a=(alertsList:(ruleId:r9,status:!(recovering),timeFrom:now-15m,timeTo:now))'
     );
   });
 });
