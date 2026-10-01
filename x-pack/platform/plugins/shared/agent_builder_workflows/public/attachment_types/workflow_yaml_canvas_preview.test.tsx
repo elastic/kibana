@@ -42,10 +42,11 @@ jest.mock('@kbn/workflows-ui', () => ({
     target,
     onOpenInYaml,
   }: {
-    target: { yamlSnippet?: string };
+    target: { yamlSnippet?: string; triggerLabel?: string };
     onOpenInYaml?: () => void;
   }) => (
     <div data-test-subj="mockStepFlyout">
+      <span data-test-subj="mockStepFlyoutTriggerLabel">{target.triggerLabel}</span>
       {target.yamlSnippet}
       <button type="button" data-test-subj="mockOpenInYaml" onClick={onOpenInYaml} />
     </div>
@@ -57,15 +58,23 @@ jest.mock('@kbn/workflows-ui', () => ({
     transformed: { nodeRefs: Record<string, { kind: string }> };
     onStepSelect: (stepId: string) => void;
   }) => {
-    const stepNodeId = Object.entries(transformed.nodeRefs).find(
-      ([, ref]) => ref.kind === 'step'
-    )?.[0];
+    const findNodeId = (kind: string) =>
+      Object.entries(transformed.nodeRefs).find(([, ref]) => ref.kind === kind)?.[0];
+    const stepNodeId = findNodeId('step');
+    const triggerNodeId = findNodeId('trigger');
     return (
-      <button
-        type="button"
-        data-test-subj="mockGraphCanvas"
-        onClick={() => stepNodeId && onStepSelect(stepNodeId)}
-      />
+      <>
+        <button
+          type="button"
+          data-test-subj="mockGraphCanvas"
+          onClick={() => stepNodeId && onStepSelect(stepNodeId)}
+        />
+        <button
+          type="button"
+          data-test-subj="mockGraphCanvasTrigger"
+          onClick={() => triggerNodeId && onStepSelect(triggerNodeId)}
+        />
+      </>
     );
   },
 }));
@@ -138,14 +147,6 @@ describe('WorkflowYamlCanvasPreview', () => {
     expect(screen.queryByTestId('mockBottomBar')).not.toBeInTheDocument();
   });
 
-  it('keeps the last graph when a later YAML version cannot be parsed', () => {
-    const { rerender } = render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} showGraph />);
-
-    rerender(<WorkflowYamlCanvasPreview yaml={`${VALID_YAML}  - name: [`} showGraph />);
-
-    expect(screen.getByTestId('mockGraphCanvas')).toBeInTheDocument();
-  });
-
   it('opens the step details when a graph node is selected', () => {
     render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} showGraph />);
 
@@ -153,6 +154,15 @@ describe('WorkflowYamlCanvasPreview', () => {
 
     expect(screen.getByTestId('workflowYamlCanvasPreview-stepFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('mockStepFlyout')).toHaveTextContent('name: say_hello');
+  });
+
+  it('titles the trigger details with the graph node label', () => {
+    render(<WorkflowYamlCanvasPreview yaml={VALID_YAML} showGraph />);
+
+    fireEvent.click(screen.getByTestId('mockGraphCanvasTrigger'));
+
+    expect(screen.getByTestId('mockStepFlyoutTriggerLabel')).toHaveTextContent('Manual');
+    expect(screen.getByTestId('mockStepFlyout')).toHaveTextContent('type: manual');
   });
 
   it('closes the step details with Escape', () => {

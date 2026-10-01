@@ -414,7 +414,9 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
 
     renderInlineContent: ({ attachment }) => (
       <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
-        <WorkflowInfoStripe yaml={attachment.data.yaml} showTitle />
+        <WorkflowsUiServicesProvider services={workflowsUiServices}>
+          <WorkflowInfoStripe yaml={attachment.data.yaml} showTitle />
+        </WorkflowsUiServicesProvider>
       </EuiPanel>
     ),
 

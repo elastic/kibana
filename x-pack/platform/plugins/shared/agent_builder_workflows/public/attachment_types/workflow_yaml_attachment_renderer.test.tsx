@@ -248,6 +248,29 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
     });
   });
 
+  describe('renderInlineContent', () => {
+    it('renders the step and trigger icons with the workflows-ui services', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = {
+        ...createAttachment(),
+        data: {
+          yaml: 'name: Test\ntriggers:\n  - type: manual\nsteps:\n  - name: log\n    type: console\n',
+        },
+      };
+
+      const { getByText } = render(
+        <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
+      );
+
+      expect(getByText('1 trigger and 1 step')).toBeInTheDocument();
+      // Step icons resolve through the registry, like the canvas graph.
+      expect(
+        services.workflowsUiServices.workflowsExtensions.getStepDefinition
+      ).toHaveBeenCalledWith('console');
+    });
+  });
+
   describe('renderCanvasContent', () => {
     it('renders the workflow preview with the attachment YAML', () => {
       const services = createMockServices();

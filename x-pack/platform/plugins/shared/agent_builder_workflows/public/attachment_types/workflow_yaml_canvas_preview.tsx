@@ -27,12 +27,6 @@ import {
   WorkflowYamlPreview,
 } from '@kbn/workflows-ui';
 
-const TRIGGER_LABEL: Record<string, string> = {
-  manual: 'Manual',
-  alert: 'Alert',
-  scheduled: 'Scheduled',
-};
-
 interface ParsedWorkflow {
   workflow: WorkflowYaml;
   transformed: TransformResult;
@@ -40,8 +34,8 @@ interface ParsedWorkflow {
 
 /**
  * Parses the YAML into a graph-ready workflow. Returns `undefined` for invalid
- * YAML, partial YAML (e.g. while the LLM streams), or a valid document with the
- * wrong shape (e.g. `steps:` as a mapping), which the graph cannot iterate.
+ * YAML, or for a valid document with the wrong shape (e.g. `steps:` as a
+ * mapping), which the graph cannot iterate.
  */
 export const parseWorkflowForGraph = (yaml: string): ParsedWorkflow | undefined => {
   try {
@@ -79,19 +73,10 @@ export const WorkflowYamlCanvasPreview: React.FC<{ yaml: string; showGraph: bool
   const [selectedStepId, setSelectedStepId] = useState<string | undefined>();
   const flyoutPanelRef = useRef<HTMLDivElement | null>(null);
 
-  // Keep the last graph-ready parse so the graph does not blank out while a
-  // new YAML version streams in or briefly fails to parse.
-  const lastParsedRef = useRef<ParsedWorkflow | undefined>(undefined);
-  const parsed = useMemo(() => {
-    if (!showGraph) {
-      return undefined;
-    }
-    const next = parseWorkflowForGraph(yaml);
-    if (next) {
-      lastParsedRef.current = next;
-    }
-    return next ?? lastParsedRef.current;
-  }, [yaml, showGraph]);
+  const parsed = useMemo(
+    () => (showGraph ? parseWorkflowForGraph(yaml) : undefined),
+    [yaml, showGraph]
+  );
 
   const activeView = parsed ? view : 'yaml';
 
@@ -110,10 +95,12 @@ export const WorkflowYamlCanvasPreview: React.FC<{ yaml: string; showGraph: bool
       if (!trigger) {
         return undefined;
       }
+      // Reuse the graph node's label so the flyout title matches the node.
+      const node = transformed.nodes.find(({ id }) => id === selectedStepId);
       return {
         kind: 'trigger',
         triggerType: ref.triggerType,
-        triggerLabel: TRIGGER_LABEL[ref.triggerType] ?? ref.triggerType,
+        triggerLabel: node?.type === 'trigger' ? node.data.label : ref.triggerType,
         yamlSnippet: stringifyYaml({ triggers: [trigger] }).trimEnd(),
       };
     }
