@@ -13,40 +13,49 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // Shared primitives
 // =============================================================================
 
-export const HOST_SCHEMA = z
-  .union([z.ipv4(), z.ipv6()])
-  .describe(
-    'Host identifier — an IPv4 or IPv6 address (e.g., "8.8.8.8" or "2001:4860:4860::8888")'
-  );
+export const HOST_SCHEMA = lazySchema(() =>
+  z
+    .union([z.ipv4(), z.ipv6()])
+    .describe(
+      'Host identifier — an IPv4 or IPv6 address (e.g., "8.8.8.8" or "2001:4860:4860::8888")'
+    )
+);
 
-const DOMAIN_HOSTNAME_SCHEMA = z.string().max(253).regex(z.regexes.domain, {
-  message: 'Must be a hostname or domain (e.g., "example.com")',
-});
+const DOMAIN_HOSTNAME_SCHEMA = lazySchema(() =>
+  z.string().max(253).regex(z.regexes.domain, {
+    message: 'Must be a hostname or domain (e.g., "example.com")',
+  })
+);
 
-export const HOSTNAME_SCHEMA = z
-  .union([z.ipv4(), z.ipv6(), DOMAIN_HOSTNAME_SCHEMA])
-  .describe('Hostname, domain, or IP address (IPv4 or IPv6), e.g. "example.com" or "8.8.8.8"');
+export const HOSTNAME_SCHEMA = lazySchema(() =>
+  z
+    .union([z.ipv4(), z.ipv6(), DOMAIN_HOSTNAME_SCHEMA])
+    .describe('Hostname, domain, or IP address (IPv4 or IPv6), e.g. "example.com" or "8.8.8.8"')
+);
 
-export const PORT_SCHEMA = z
-  .number()
-  .int()
-  .min(1)
-  .max(65535)
-  .describe('TCP/UDP port number (1–65535)');
+export const PORT_SCHEMA = lazySchema(() =>
+  z.number().int().min(1).max(65535).describe('TCP/UDP port number (1–65535)')
+);
 
-export const SHA256_SCHEMA = z
-  .string()
-  .regex(/^[a-fA-F0-9]{64}$/, { message: 'Must be a 64-character SHA-256 hex string' })
-  .describe('SHA-256 fingerprint as a 64-character lowercase hex string');
+export const SHA256_SCHEMA = lazySchema(() =>
+  z
+    .string()
+    .regex(/^[a-fA-F0-9]{64}$/, { message: 'Must be a 64-character SHA-256 hex string' })
+    .describe('SHA-256 fingerprint as a 64-character lowercase hex string')
+);
 
-export const TRANSPORT_PROTOCOL_SCHEMA = z
-  .enum(['unknown', 'tcp', 'udp', 'icmp', 'quic'])
-  .describe('Transport protocol: "unknown", "tcp", "udp", "icmp", or "quic"');
+export const TRANSPORT_PROTOCOL_SCHEMA = lazySchema(() =>
+  z
+    .enum(['unknown', 'tcp', 'udp', 'icmp', 'quic'])
+    .describe('Transport protocol: "unknown", "tcp", "udp", "icmp", or "quic"')
+);
 
-const RFC3339_TIMESTAMP_SCHEMA = z.string().datetime({
-  offset: true,
-  message: 'Must be an RFC 3339 timestamp (e.g., "2025-01-01T00:00:00Z")',
-});
+const RFC3339_TIMESTAMP_SCHEMA = lazySchema(() =>
+  z.string().datetime({
+    offset: true,
+    message: 'Must be an RFC 3339 timestamp (e.g., "2025-01-01T00:00:00Z")',
+  })
+);
 
 // =============================================================================
 // Helpers
@@ -103,28 +112,32 @@ export const GetHostHistoryInputSchema = lazySchema(() =>
 );
 export type GetHostHistoryInput = z.infer<typeof GetHostHistoryInputSchema>;
 
-const RescanServiceSchema = z
-  .object({
-    type: z.literal('service').describe('Discriminator: "service" to rescan a host service'),
-    ip: HOST_SCHEMA,
-    port: PORT_SCHEMA,
-    protocol: z
-      .string()
-      .min(1)
-      .describe('Application-layer protocol on the service (e.g., "HTTP", "SSH", "TLS")'),
-    transportProtocol: TRANSPORT_PROTOCOL_SCHEMA,
-  })
-  .describe('Submit a host service (IP + port + protocols) for fresh scanning');
+const RescanServiceSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('service').describe('Discriminator: "service" to rescan a host service'),
+      ip: HOST_SCHEMA,
+      port: PORT_SCHEMA,
+      protocol: z
+        .string()
+        .min(1)
+        .describe('Application-layer protocol on the service (e.g., "HTTP", "SSH", "TLS")'),
+      transportProtocol: TRANSPORT_PROTOCOL_SCHEMA,
+    })
+    .describe('Submit a host service (IP + port + protocols) for fresh scanning')
+);
 
-const RescanWebPropertySchema = z
-  .object({
-    type: z
-      .literal('webproperty')
-      .describe('Discriminator: "webproperty" to rescan a web property by host and port'),
-    hostname: HOSTNAME_SCHEMA,
-    port: PORT_SCHEMA,
-  })
-  .describe('Submit a web property (hostname or IP + port) for fresh scanning');
+const RescanWebPropertySchema = lazySchema(() =>
+  z
+    .object({
+      type: z
+        .literal('webproperty')
+        .describe('Discriminator: "webproperty" to rescan a web property by host and port'),
+      hostname: HOSTNAME_SCHEMA,
+      port: PORT_SCHEMA,
+    })
+    .describe('Submit a web property (hostname or IP + port) for fresh scanning')
+);
 
 export const RescanInputSchema = lazySchema(() =>
   z
@@ -150,21 +163,27 @@ export type ScanStatusInput = z.infer<typeof ScanStatusInputSchema>;
  * - This enables robust discriminated union validation and type-safe use within
  *   Censeye job APIs.
  */
-const CensEyeHostJobSchema = GetHostInputSchema.extend({
-  type: z.literal('host').describe('Discriminator: "host" to run Censeye against a host IP'),
-}).describe('Censeye job target: a host identified by its IP address');
+const CensEyeHostJobSchema = lazySchema(() =>
+  GetHostInputSchema.extend({
+    type: z.literal('host').describe('Discriminator: "host" to run Censeye against a host IP'),
+  }).describe('Censeye job target: a host identified by its IP address')
+);
 
-const CensEyeWebPropertyJobSchema = GetWebPropertyInputSchema.extend({
-  type: z
-    .literal('webproperty')
-    .describe('Discriminator: "webproperty" to run Censeye against a web property'),
-}).describe('Censeye job target: a web property (hostname or IP + port)');
+const CensEyeWebPropertyJobSchema = lazySchema(() =>
+  GetWebPropertyInputSchema.extend({
+    type: z
+      .literal('webproperty')
+      .describe('Discriminator: "webproperty" to run Censeye against a web property'),
+  }).describe('Censeye job target: a web property (hostname or IP + port)')
+);
 
-const CensEyeCertificateJobSchema = GetCertificateInputSchema.extend({
-  type: z
-    .literal('certificate')
-    .describe('Discriminator: "certificate" to run Censeye against a certificate'),
-}).describe('Censeye job target: a certificate SHA-256 fingerprint');
+const CensEyeCertificateJobSchema = lazySchema(() =>
+  GetCertificateInputSchema.extend({
+    type: z
+      .literal('certificate')
+      .describe('Discriminator: "certificate" to run Censeye against a certificate'),
+  }).describe('Censeye job target: a certificate SHA-256 fingerprint')
+);
 
 export const CensEyeCreateAnalysisJobInputSchema = lazySchema(() =>
   z

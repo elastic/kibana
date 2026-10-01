@@ -18,9 +18,9 @@ import type { ConnectorSpec } from '../../connector_spec';
 const ABUSEIPDB_API = 'https://api.abuseipdb.com/api/v2';
 
 /** AbuseIPDB accepts IPv4 and IPv6 on check/report endpoints. */
-const IpAddressSchema = z.union([z.ipv4(), z.ipv6()]);
+const IpAddressSchema = lazySchema(() => z.union([z.ipv4(), z.ipv6()]));
 
-const MaxAgeInDaysSchema = z.coerce.number().int().min(1).max(365);
+const MaxAgeInDaysSchema = lazySchema(() => z.coerce.number().int().min(1).max(365));
 
 const MAX_BLACKLIST_LIMIT = 10_000;
 const MAX_REPORT_CATEGORIES = 30;

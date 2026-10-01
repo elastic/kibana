@@ -43,33 +43,41 @@ const FILTER_DESCRIPTION = [
   'differs per endpoint — start without a filter to see the returned fields, then filter on those.',
 ].join(' ');
 
-const SiteIdSchema = z
-  .string()
-  .regex(UUID_REGEX, 'Must be a UUID.')
-  .describe(
-    'The site UUID, returned by the listSites action. Most Network actions are site-scoped.'
-  );
+const SiteIdSchema = lazySchema(() =>
+  z
+    .string()
+    .regex(UUID_REGEX, 'Must be a UUID.')
+    .describe(
+      'The site UUID, returned by the listSites action. Most Network actions are site-scoped.'
+    )
+);
 
-const OffsetSchema = z
-  .number()
-  .int()
-  .min(0)
-  .optional()
-  .describe(
-    'Zero-based index of the first result to return. Defaults to 0. Use with `limit` to page through results using `totalCount` from the response.'
-  );
+const OffsetSchema = lazySchema(() =>
+  z
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .describe(
+      'Zero-based index of the first result to return. Defaults to 0. Use with `limit` to page through results using `totalCount` from the response.'
+    )
+);
 
-const LimitSchema = z
-  .number()
-  .int()
-  .min(1)
-  .max(MAX_PAGE_LIMIT)
-  .optional()
-  .describe(
-    `Maximum number of results to return (1–${MAX_PAGE_LIMIT}). Defaults to 25 on the server.`
-  );
+const LimitSchema = lazySchema(() =>
+  z
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_PAGE_LIMIT)
+    .optional()
+    .describe(
+      `Maximum number of results to return (1–${MAX_PAGE_LIMIT}). Defaults to 25 on the server.`
+    )
+);
 
-const FilterSchema = z.string().max(MAX_FILTER_LENGTH).optional().describe(FILTER_DESCRIPTION);
+const FilterSchema = lazySchema(() =>
+  z.string().max(MAX_FILTER_LENGTH).optional().describe(FILTER_DESCRIPTION)
+);
 
 // ============================================================================
 // UniFi Network — reads
@@ -264,20 +272,24 @@ export const PROTECT_DEVICE_TYPES = [
   'alarm-hubs',
 ] as const;
 
-const ProtectDeviceTypeSchema = z
-  .enum(PROTECT_DEVICE_TYPES)
-  .describe(
-    `The Protect device family to query. One of: ${PROTECT_DEVICE_TYPES.join(
-      ', '
-    )}. Use "cameras" for video devices, "sensors" for UniFi Protect sensors (door/motion/leak), "alarm-hubs" for keypads/hubs, and "link-stations" for AI LiteStation-class devices.`
-  );
+const ProtectDeviceTypeSchema = lazySchema(() =>
+  z
+    .enum(PROTECT_DEVICE_TYPES)
+    .describe(
+      `The Protect device family to query. One of: ${PROTECT_DEVICE_TYPES.join(
+        ', '
+      )}. Use "cameras" for video devices, "sensors" for UniFi Protect sensors (door/motion/leak), "alarm-hubs" for keypads/hubs, and "link-stations" for AI LiteStation-class devices.`
+    )
+);
 
-const ProtectDeviceIdSchema = z
-  .string()
-  .regex(PROTECT_ID_REGEX, 'Must be an alphanumeric Protect device ID.')
-  .describe(
-    'The Protect device ID, returned in the `id` field by listProtectDevices, e.g. "66d025b301ebc903e80003ea".'
-  );
+const ProtectDeviceIdSchema = lazySchema(() =>
+  z
+    .string()
+    .regex(PROTECT_ID_REGEX, 'Must be an alphanumeric Protect device ID.')
+    .describe(
+      'The Protect device ID, returned in the `id` field by listProtectDevices, e.g. "66d025b301ebc903e80003ea".'
+    )
+);
 
 export const UnifiListProtectDevicesInputSchema = lazySchema(() =>
   z.object({

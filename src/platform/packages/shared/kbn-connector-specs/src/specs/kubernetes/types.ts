@@ -39,7 +39,7 @@ const DRY_RUN_DESCRIPTION =
 // Generic request
 // =============================================================================
 
-export const HttpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
+export const HttpMethodSchema = lazySchema(() => z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']));
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;
 
 export const RequestInputSchema = lazySchema(() =>

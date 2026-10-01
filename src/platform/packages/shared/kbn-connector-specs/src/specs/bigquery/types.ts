@@ -13,12 +13,14 @@ const DEFAULT_MAX_RESULTS = 1000;
 const MAX_RESULTS_LIMIT = 10000;
 const MAX_TIMEOUT_MS = 300000;
 
-const QuerySchema = z
-  .string()
-  .min(1)
-  .describe(
-    'GoogleSQL query text to execute in BigQuery. Use fully-qualified table names such as `project.dataset.table`. Prefer explicit date filters and LIMIT clauses for predictable cost and result size.'
-  );
+const QuerySchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .describe(
+      'GoogleSQL query text to execute in BigQuery. Use fully-qualified table names such as `project.dataset.table`. Prefer explicit date filters and LIMIT clauses for predictable cost and result size.'
+    )
+);
 
 const CommonQueryInputSchema = lazySchema(() =>
   z.object({

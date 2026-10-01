@@ -27,11 +27,13 @@ import type { ConnectorSpec } from '../../connector_spec';
 const VIRUSTOTAL_API_BASE_URL = 'https://www.virustotal.com/api/v3';
 const VIRUSTOTAL_RESOURCE_TYPES = ['analysis', 'url', 'domain', 'ip', 'file'] as const;
 const VIRUSTOTAL_DOMAIN_REGEX = z.regexes.domain;
-const VIRUSTOTAL_DOMAIN_SCHEMA = z.string().regex(VIRUSTOTAL_DOMAIN_REGEX);
-const VIRUSTOTAL_URL_SCHEMA = z.url({
-  protocol: /^https?$/,
-  hostname: VIRUSTOTAL_DOMAIN_REGEX,
-});
+const VIRUSTOTAL_DOMAIN_SCHEMA = lazySchema(() => z.string().regex(VIRUSTOTAL_DOMAIN_REGEX));
+const VIRUSTOTAL_URL_SCHEMA = lazySchema(() =>
+  z.url({
+    protocol: /^https?$/,
+    hostname: VIRUSTOTAL_DOMAIN_REGEX,
+  })
+);
 
 type VirusTotalResourceType = (typeof VIRUSTOTAL_RESOURCE_TYPES)[number];
 
@@ -69,7 +71,9 @@ const normalizeDomain = (value: string): string => value.trim().toLowerCase();
 const isValidDomain = (value: string): boolean =>
   VIRUSTOTAL_DOMAIN_SCHEMA.safeParse(normalizeDomain(value)).success;
 
-const urlOrDomainSchema = z.xor([VIRUSTOTAL_URL_SCHEMA, VIRUSTOTAL_DOMAIN_SCHEMA]);
+const urlOrDomainSchema = lazySchema(() =>
+  z.xor([VIRUSTOTAL_URL_SCHEMA, VIRUSTOTAL_DOMAIN_SCHEMA])
+);
 
 const getVirusTotalUrlIdentifier = (urlOrId: string): string => {
   const value = urlOrId.trim();
@@ -264,25 +268,27 @@ export const VirusTotalConnector: ConnectorSpec = {
     getAnalysisResults: {
       isTool: true,
       scope: 'read',
-      input: z.object({
-        id: z
-          .string()
-          .trim()
-          .min(1)
-          .describe('VirusTotal analysis ID, URL, domain, IP address, or file hash'),
-        resourceType: z
-          .enum(VIRUSTOTAL_RESOURCE_TYPES)
-          .optional()
-          .default('analysis')
-          .describe('Type of VirusTotal resource to retrieve'),
-        failOnError: z
-          .boolean()
-          .optional()
-          .default(false)
-          .describe(
-            'If true, throw error on API failures. If false (default), return error details'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          id: z
+            .string()
+            .trim()
+            .min(1)
+            .describe('VirusTotal analysis ID, URL, domain, IP address, or file hash'),
+          resourceType: z
+            .enum(VIRUSTOTAL_RESOURCE_TYPES)
+            .optional()
+            .default('analysis')
+            .describe('Type of VirusTotal resource to retrieve'),
+          failOnError: z
+            .boolean()
+            .optional()
+            .default(false)
+            .describe(
+              'If true, throw error on API failures. If false (default), return error details'
+            ),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           id: string;
