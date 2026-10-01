@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "scripts/**/*", "server/**/*", "test/scout/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/agent-builder-browser",
@@ -19,7 +19,6 @@
     "@kbn/data-views-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-observability",
-    "@kbn/dev-cli-runner",
     "@kbn/discover-plugin",
     "@kbn/ebt-click",
     "@kbn/ebt-tools",

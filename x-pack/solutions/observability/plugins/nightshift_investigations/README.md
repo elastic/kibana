@@ -36,7 +36,7 @@ An investigation is an Agent Builder conversation with the `investigation` templ
 - **Impact, hypotheses, and proposed actions.** The agent records these.
 - **The query API.** `GET /internal/investigations/investigations[/{id}]`, used for reads.
 
-The legacy `nightshift-investigation` saved object type is still registered, but nothing writes it anymore.
+Earlier versions stored investigations as Nightshift saved objects, settled by a reconciliation task and served by `GET`/`PATCH /internal/nightshift/investigations[/{id}]` and `/follow`. That saved object type, the task, and those routes are removed. The type name is reserved in core's `removed_types.json`, so an upgrade drops leftover documents, and the task type is listed in Task Manager's removed types, so a scheduled task is marked unrecognized instead of run.
 
 ### Starting an investigation
 
@@ -68,7 +68,7 @@ The workflow's concurrency key is `investigation:<id>` with a `queue` strategy, 
 
 Readers use the shared query API: the Nightshift landing page (list, severity counts, cards from `agenticInvestigations.InvestigationCard`, Agent Builder's conversation details flyout for one investigation), the significant-event flyout (`@kbn/investigation-output`), the alert "Investigate" action (list by `subject_id=<alert id>`), and significant events' investigation status route.
 
-`deleteAllInvestigations()` on the start contract deletes the legacy saved objects in every space and, through `agenticInvestigations.deleteSubjectInvestigationDataAcrossSpaces()`, the subjects, claims, impact, and hypotheses of every investigation with subjects. The Agent Builder conversations stay; Agent Builder has no cross-space delete.
+`deleteAllInvestigations()` on the start contract deletes, through `agenticInvestigations.deleteSubjectInvestigationDataAcrossSpaces()`, the subjects, claims, impact, and hypotheses of every investigation with subjects in every space. The Agent Builder conversations stay; Agent Builder has no cross-space delete.
 
 ### One identity per investigation
 
