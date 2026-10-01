@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
+import { v4 as uuidV4 } from 'uuid';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { DirectorService } from './director';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
@@ -669,6 +670,195 @@ describe('DirectorService', () => {
 
       expect(result.alertEvents).toHaveLength(3);
       expect(result.stats.newEpisodeIds).toHaveLength(2);
+    });
+
+    it('attaches every row of a group in one batch to a single new episode', async () => {
+      (uuidV4 as jest.Mock).mockReturnValueOnce('episode-1').mockReturnValueOnce('episode-2');
+
+      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
+
+      const result = await directorService.run({
+        spaceId: 'default',
+        rule,
+        executionContext: testExecutionContext,
+        alertEvents: [
+          createAlertEvent({ group_hash: 'hash-1', status: 'breached', alert: undefined }),
+          createAlertEvent({ group_hash: 'hash-1', status: 'breached', alert: undefined }),
+          createAlertEvent({ group_hash: 'hash-2', status: 'breached', alert: undefined }),
+        ],
+      });
+
+      expect(result.alertEvents.map((e) => e.alert)).toEqual([
+        { id: 'episode-1', status: alertEpisodeStatus.pending },
+        { id: 'episode-1', status: alertEpisodeStatus.pending },
+        { id: 'episode-2', status: alertEpisodeStatus.pending },
+      ]);
+      expect(result.stats.newEpisodeIds).toEqual(['episode-1', 'episode-2']);
+    });
+
+    describe('multiple rows for the same group in one batch', () => {
+      const rowsFor = (groupHash: string, count: number) =>
+        Array.from({ length: count }, () =>
+          createAlertEvent({ group_hash: groupHash, status: 'breached', alert: undefined })
+        );
+
+      it('reuses the open episode for every row and reports no new episodes', async () => {
+        mockEsClient.esql.query.mockResolvedValue(
+          createLatestAlertEventStateResponse([
+            {
+              last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+              last_status: 'breached',
+              last_episode_id: 'existing-episode',
+              last_episode_status: alertEpisodeStatus.active,
+              last_episode_status_count: null,
+              group_hash: 'hash-1',
+            },
+          ])
+        );
+
+        const result = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: rowsFor('hash-1', 3),
+        });
+
+        expect(result.alertEvents.map((e) => e.alert?.id)).toEqual([
+          'existing-episode',
+          'existing-episode',
+          'existing-episode',
+        ]);
+        expect(result.stats.newEpisodeIds).toEqual([]);
+      });
+
+      it('opens a single new episode when the previous one is inactive', async () => {
+        (uuidV4 as jest.Mock).mockReturnValueOnce('episode-1').mockReturnValueOnce('episode-2');
+
+        mockEsClient.esql.query.mockResolvedValue(
+          createLatestAlertEventStateResponse([
+            {
+              last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+              last_status: 'recovered',
+              last_episode_id: 'old-episode',
+              last_episode_status: alertEpisodeStatus.inactive,
+              last_episode_status_count: null,
+              group_hash: 'hash-1',
+            },
+          ])
+        );
+
+        const result = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: rowsFor('hash-1', 2),
+        });
+
+        expect(result.alertEvents.map((e) => e.alert?.id)).toEqual(['episode-1', 'episode-1']);
+        expect(result.stats.newEpisodeIds).toEqual(['episode-1']);
+      });
+
+      it('does not count extra rows as consecutive breaches toward the pending threshold', async () => {
+        const ruleWithTransition = createRuleResponse({
+          state_transition: { pending: { count: 3 } },
+        });
+
+        mockEsClient.esql.query.mockResolvedValue(
+          createLatestAlertEventStateResponse([
+            {
+              last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+              last_status: 'breached',
+              last_episode_id: 'episode-1',
+              last_episode_status: alertEpisodeStatus.pending,
+              last_episode_status_count: 1,
+              group_hash: 'hash-1',
+            },
+          ])
+        );
+
+        const result = await directorService.run({
+          spaceId: 'default',
+          rule: ruleWithTransition,
+          executionContext: testExecutionContext,
+          alertEvents: rowsFor('hash-1', 2),
+        });
+
+        const expectedAlert = {
+          id: 'episode-1',
+          status: alertEpisodeStatus.pending,
+          status_count: 2,
+        };
+        expect(result.alertEvents.map((e) => e.alert)).toEqual([expectedAlert, expectedAlert]);
+      });
+
+      it('gives each row its own copy of the shared episode', async () => {
+        mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
+
+        const result = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: rowsFor('hash-1', 2),
+        });
+
+        expect(result.alertEvents[0].alert).toEqual(result.alertEvents[1].alert);
+        expect(result.alertEvents[0].alert).not.toBe(result.alertEvents[1].alert);
+      });
+
+      it('keeps interleaved groups on their own episodes', async () => {
+        (uuidV4 as jest.Mock).mockReturnValueOnce('episode-a').mockReturnValueOnce('episode-b');
+
+        mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
+
+        const result = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: [
+            ...rowsFor('hash-a', 1),
+            ...rowsFor('hash-b', 1),
+            ...rowsFor('hash-a', 1),
+            ...rowsFor('hash-b', 1),
+          ],
+        });
+
+        expect(result.alertEvents.map((e) => e.alert?.id)).toEqual([
+          'episode-a',
+          'episode-b',
+          'episode-a',
+          'episode-b',
+        ]);
+        expect(result.stats.newEpisodeIds).toEqual(['episode-a', 'episode-b']);
+      });
+
+      it('keeps every row of a user-locked group on the locked episode, forced active', async () => {
+        mockEsClient.esql.query.mockResolvedValue(
+          createLatestAlertEventStateResponse([
+            {
+              last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+              last_status: 'breached',
+              last_episode_id: 'locked-episode',
+              last_episode_status: alertEpisodeStatus.recovering,
+              last_episode_status_count: null,
+              last_lifecycle_action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+              group_hash: 'hash-1',
+            },
+          ])
+        );
+
+        const result = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: rowsFor('hash-1', 2),
+        });
+
+        expect(result.alertEvents.map((e) => e.alert)).toEqual([
+          { id: 'locked-episode', status: alertEpisodeStatus.active },
+          { id: 'locked-episode', status: alertEpisodeStatus.active },
+        ]);
+        expect(result.stats.newEpisodeIds).toEqual([]);
+      });
     });
 
     // A group is "user-locked" when its most recent lifecycle action in

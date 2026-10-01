@@ -111,7 +111,16 @@ export class DirectorService {
 
       const newEpisodeIds: string[] = [];
       const evaluatedAt = new Date().toISOString();
+      // Episode decided for each group by the first row seen in this batch. Later rows for
+      // the same group attach to it, otherwise a group without an open episode would mint
+      // one episode per row (the prior-state snapshot is only loaded once per batch).
+      const decidedAlertByGroupHash = new Map<string, NonNullable<AlertEventDocument['alert']>>();
       const processed = alertEvents.map((currentAlertEvent) => {
+        const decidedAlert = decidedAlertByGroupHash.get(currentAlertEvent.group_hash);
+        if (decidedAlert) {
+          return { ...currentAlertEvent, alert: { ...decidedAlert } };
+        }
+
         const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
           rule,
           currentAlertEvent,
@@ -121,8 +130,11 @@ export class DirectorService {
           logger,
         });
 
-        if (isNewEpisode && alertEvent.alert) {
-          newEpisodeIds.push(alertEvent.alert.id);
+        if (alertEvent.alert) {
+          decidedAlertByGroupHash.set(currentAlertEvent.group_hash, alertEvent.alert);
+          if (isNewEpisode) {
+            newEpisodeIds.push(alertEvent.alert.id);
+          }
         }
 
         return alertEvent;
