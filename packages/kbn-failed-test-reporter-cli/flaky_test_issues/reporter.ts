@@ -28,6 +28,7 @@ import {
   type IssueMatch,
   type MatchedIssue,
 } from './match_issues';
+import { isSkippedTest, skippedBranches } from './skipped';
 import { groupIntoSuites, type FlakySuite } from './suites';
 
 /**
@@ -62,6 +63,11 @@ export interface ReportFlakySuiteIssuesOptions {
   closedSince: Date;
   /** Suite issues created per run, worst suites first; the rest is reported as skipped. */
   maxNewIssues: number;
+  /**
+   * Leave out the flaky tests skipped since on every branch they failed on (`isSkippedTest`), so
+   * that they neither get a suite its issue nor show in it; a suite left with none gets no issue.
+   */
+  omitSkippedTests: boolean;
   dryRun: boolean;
 }
 
@@ -83,7 +89,9 @@ export type SkipReason =
    */
   | 'tracked'
   /** Same, for the tracking repository. */
-  | 'tracked-upstream';
+  | 'tracked-upstream'
+  /** Every flaky test of the suite was skipped since, on the branches it failed on. */
+  | 'all-tests-skipped';
 
 /** The suite an action is about; several suites of one file are told apart by their title. */
 export interface SuiteRef {
@@ -108,6 +116,8 @@ export interface FlakySuiteIssuesSummary {
   dryRun: boolean;
   githubRepo: string;
   suites: number;
+  /** Flaky tests left out as skipped since, see `omitSkippedTests`. */
+  omittedTests: number;
   /** `failed-test` issues checked: every open one and the closed ones updated since `closedSince`. */
   issues: IssueCounts & {
     closedSince: Date;
@@ -145,6 +155,9 @@ const coveringIssue = (suite: FlakySuite, index: IssueIndex): MatchedIssue | und
   const distinct = [...new Map(covering.map((match) => [match.issue.number, match])).values()];
   return strongestTracking(distinct.sort(compareMatches));
 };
+
+const sameSuite = (a: FlakySuite, b: FlakySuite): boolean =>
+  a.framework === b.framework && a.filePath === b.filePath && a.suiteTitle === b.suiteTitle;
 
 const suiteRef = ({ filePath, suiteTitle }: FlakySuite): SuiteRef => ({
   filePath,
@@ -216,17 +229,35 @@ export const issueLabels = (suite: FlakySuite, githubRepo: string): string[] => 
  * worst suites first and at most `maxNewIssues` per run. A suite is tracked when every one of
  * its tests has an issue, in `githubRepo` or in the tracking repository, open or closed: an issue
  * about the suite or its file covers them all, a per-test issue only its own test. Issues about
- * some of the tests, or merely mentioning the file, are linked from the new issue instead. A
- * failed write is recorded and the run goes on with the next suite.
+ * some of the tests, or merely mentioning the file, are linked from the new issue instead. With
+ * `omitSkippedTests`, tests skipped since are left out first. A failed write is recorded and the
+ * run goes on with the next suite.
  */
 export const reportFlakySuiteIssues = async (
   options: ReportFlakySuiteIssuesOptions
 ): Promise<FlakySuiteIssuesSummary> => {
-  const { report, github, log, githubRepo, closedSince, maxNewIssues, dryRun } = options;
-  const suites = groupIntoSuites(report.flaky, report.files);
-  log.info(
-    `${report.flaky.length} flaky tests in ${suites.length} suites${dryRun ? ' (dry run)' : ''}`
+  const { report, github, log, githubRepo, closedSince, maxNewIssues, omitSkippedTests, dryRun } =
+    options;
+  const omitted = omitSkippedTests ? report.flaky.filter(isSkippedTest) : [];
+  const suites = groupIntoSuites(
+    report.flaky.filter((test) => !omitted.includes(test)),
+    report.files
   );
+  // Suites whose every flaky test was omitted; the others go on with the tests left
+  const skippedSuites = groupIntoSuites(omitted, report.files).filter(
+    (skipped) => !suites.some((suite) => sameSuite(suite, skipped))
+  );
+  log.info(
+    `${report.flaky.length} flaky tests in ${suites.length + skippedSuites.length} suites` +
+      (omitted.length > 0 ? `, ${omitted.length} of them skipped since and left out` : '') +
+      (dryRun ? ' (dry run)' : '')
+  );
+  for (const test of omitted) {
+    log.info(
+      `omit, skipped since on ${skippedBranches(test).join(', ')}: ${test.filePath}` +
+        `${test.suiteTitle ? ` (${test.suiteTitle})` : ''} › ${test.title}`
+    );
+  }
 
   const target = { github, repo: githubRepo };
   const { issues, open, closed } = await fetchFailedTestIssues(target, closedSince, log);
@@ -248,6 +279,11 @@ export const reportFlakySuiteIssues = async (
     actions.push(action);
     counts[action.action] += 1;
   };
+
+  for (const suite of skippedSuites) {
+    log.info(`skip, every flaky test was skipped since: ${describeSuite(suite)}`);
+    record({ action: 'skipped', ...suiteRef(suite), reason: 'all-tests-skipped' });
+  }
 
   const create = async (suite: FlakySuite, related: MatchedIssue[]) => {
     const ref = suiteRef(suite);
@@ -313,7 +349,8 @@ export const reportFlakySuiteIssues = async (
     generatedAt: report.generatedAt,
     dryRun,
     githubRepo,
-    suites: suites.length,
+    suites: suites.length + skippedSuites.length,
+    omittedTests: omitted.length,
     issues: { open, closed, closedSince, ...(tracking ? { tracking } : {}) },
     counts,
     actions,

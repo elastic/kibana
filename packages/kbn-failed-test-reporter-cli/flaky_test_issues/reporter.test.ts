@@ -71,6 +71,7 @@ const run = (
     githubRepo: TARGET_REPO,
     closedSince: CLOSED_SINCE,
     maxNewIssues: 10,
+    omitSkippedTests: true,
     dryRun: false,
     ...overrides,
   });
@@ -145,6 +146,7 @@ describe('reportFlakySuiteIssues', () => {
       dryRun: false,
       githubRepo: TARGET_REPO,
       suites: 0,
+      omittedTests: 0,
       issues: { open: 1, closed: 1, closedSince: CLOSED_SINCE },
       counts: { created: 0, skipped: 0, failed: 0 },
       actions: [],
@@ -364,6 +366,75 @@ describe('reportFlakySuiteIssues', () => {
         issue: { number: 43, state: 'open' },
         match: 'test',
       });
+    });
+  });
+
+  describe('flaky tests skipped since', () => {
+    /** Failed on `main`, where every run since 7 Sep was a skip. */
+    const skippedTest = (overrides: Parameters<typeof flakyTest>[0] = {}) =>
+      flakyTest({
+        ...overrides,
+        byBranch: [
+          {
+            ...flakyTest().byBranch[0],
+            latestExecutionAt: new Date('2026-09-07T10:00:00.000Z'),
+            latestRun: { status: 'skipped', timestamp: new Date('2026-09-09T06:00:00.000Z') },
+          },
+        ],
+      });
+
+    it('files no issue for a suite whose every flaky test was skipped, without spending a slot on it', async () => {
+      const github = createGithubApi();
+      const report = flakyReport([
+        skippedTest(),
+        flakyTest({ testId: 'n', filePath: 'new.spec.ts', failedBuilds: 9 }),
+      ]);
+
+      const summary = await run(github, { report, maxNewIssues: 1 });
+
+      expect(github.createIssue).toHaveBeenCalledTimes(1);
+      expect(summary.suites).toBe(2);
+      expect(summary.omittedTests).toBe(1);
+      expect(summary.actions).toEqual([
+        {
+          action: 'skipped',
+          filePath: SUITE_PATH,
+          suiteTitle: 'Default status alert',
+          reason: 'all-tests-skipped',
+        },
+        expect.objectContaining({ action: 'created', filePath: 'new.spec.ts' }),
+      ]);
+    });
+
+    it('leaves a skipped test out of its suite: it needs no issue and is not listed in one', async () => {
+      const tracked = createGithubApi([scoutTestIssue(43, 'pw-1')]);
+      const untracked = createGithubApi();
+      const report = flakyReport([
+        trackedTest(),
+        skippedTest({ testId: 'pw-2', title: 'a skipped test' }),
+      ]);
+
+      const trackedSummary = await run(tracked, { report });
+      await run(untracked, { report });
+
+      // the skipped test alone would have got the suite its issue
+      expect(tracked.createIssue).not.toHaveBeenCalled();
+      expect(trackedSummary.actions[0]).toMatchObject({ reason: 'tracked', issue: { number: 43 } });
+      const [, body] = untracked.createIssue.mock.calls[0];
+      expect(body).not.toContain('a skipped test');
+      expect(readFlakySuiteIssueMetadata(body)?.['suite.testIds']).toEqual(['pw-1']);
+    });
+
+    it('keeps them with --no-omit-skipped-tests', async () => {
+      const github = createGithubApi();
+
+      const summary = await run(github, {
+        report: flakyReport([skippedTest()]),
+        omitSkippedTests: false,
+      });
+
+      expect(summary.omittedTests).toBe(0);
+      expect(summary.actions[0]).toMatchObject({ action: 'created' });
     });
   });
 

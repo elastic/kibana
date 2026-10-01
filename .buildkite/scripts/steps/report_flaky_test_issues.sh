@@ -12,7 +12,9 @@ set -euo pipefail
 #   - elastic/kibana: live.
 # Every open failed-test issue is fetched, plus those closed in the last
 # FLAKY_TESTS_CLOSED_ISSUES_DAYS days; both count as tracking a suite. At most
-# FLAKY_TESTS_MAX_NEW_ISSUES issues are created per run.
+# FLAKY_TESTS_MAX_NEW_ISSUES issues are created per run. Unless FLAKY_TESTS_OMIT_SKIPPED_TESTS is
+# 'false', flaky tests skipped since on every branch they failed on are left out, so a suite
+# whose every flaky test is skipped gets no issue.
 # GITHUB_TOKEN (kibanamachine) comes from Vault via .buildkite/scripts/common/setup_job_env.sh.
 
 source .buildkite/scripts/common/util.sh
@@ -23,6 +25,7 @@ cd "${KIBANA_DIR:-$(pwd)}"
 FLAKY_TESTS_GITHUB_REPO="${FLAKY_TESTS_GITHUB_REPO:-}"
 FLAKY_TESTS_CLOSED_ISSUES_DAYS="${FLAKY_TESTS_CLOSED_ISSUES_DAYS:-365}"
 FLAKY_TESTS_MAX_NEW_ISSUES="${FLAKY_TESTS_MAX_NEW_ISSUES:-10}"
+FLAKY_TESTS_OMIT_SKIPPED_TESTS="${FLAKY_TESTS_OMIT_SKIPPED_TESTS:-true}"
 FLAKY_TESTS_TRACKING_REPO="${FLAKY_TESTS_TRACKING_REPO-elastic/kibana}"
 
 REPORT_DIR="target/flaky_tests"
@@ -56,6 +59,7 @@ echo "+++ Report flaky suites to GitHub ($MODE)"
 echo "    Repository          : $GITHUB_REPO"
 echo "    Closed issues since : $FLAKY_TESTS_CLOSED_ISSUES_DAYS days ago"
 echo "    Max new issues      : $FLAKY_TESTS_MAX_NEW_ISSUES"
+echo "    Omit skipped tests  : $FLAKY_TESTS_OMIT_SKIPPED_TESTS"
 if [[ -n "$FLAKY_TESTS_TRACKING_REPO" && "$FLAKY_TESTS_TRACKING_REPO" != "$GITHUB_REPO" ]]; then
   echo "    Also tracked in     : $FLAKY_TESTS_TRACKING_REPO (suites whose every test has an issue there get none)"
 fi
@@ -70,6 +74,9 @@ args=(
 )
 if [[ ${#DRY_RUN_ARGS[@]} -gt 0 ]]; then
   args+=("${DRY_RUN_ARGS[@]}")
+fi
+if [[ "$FLAKY_TESTS_OMIT_SKIPPED_TESTS" == "false" ]]; then
+  args+=(--no-omit-skipped-tests)
 fi
 
 # A failed GitHub write makes the CLI exit non-zero after handling every suite; annotate first,
