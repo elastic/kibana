@@ -390,7 +390,7 @@ describe('WorkersService', () => {
     expect(cleared.outcome).toBe('updated');
     const yaml = harness.documents.get(`${TRIAGE}-${SPACE}`)?.yaml ?? '';
     expect(yaml).not.toContain('run_as');
-    expect(parse(yaml).settings).toEqual({ timeout: '170h' });
+    expect(parse(yaml).settings).toBeUndefined();
     expect(harness.install).toHaveBeenLastCalledWith(
       TRIAGE,
       expect.objectContaining({

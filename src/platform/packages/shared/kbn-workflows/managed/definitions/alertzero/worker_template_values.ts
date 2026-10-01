@@ -18,6 +18,8 @@ export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValue
 
 const RUN_AS_LINE_PLACEHOLDER = '  __WORKER_RUN_AS_LINE__\n';
 const RUN_AS_BLOCK_PLACEHOLDER = '__WORKER_RUN_AS_BLOCK__\n';
+/** Parses as a null key so the template is valid YAML. Replaced before the bare placeholder. */
+const RUN_AS_BLOCK_KEY_PLACEHOLDER = '__WORKER_RUN_AS_BLOCK__:\n';
 
 /** `run_as` is optional. A missing id removes the line; an empty value is not valid YAML. */
 const renderRunAs = (serviceAccountId: string | undefined): { line: string; block: string } => {
@@ -37,6 +39,7 @@ export const renderCommonWorkerYaml = (
     .replaceAll('__WORKER_SETTINGS_VERSION__', String(settingsVersion))
     .replaceAll('__WORKER_AUTONOMY_LEVEL__', autonomyLevel)
     .replaceAll(RUN_AS_LINE_PLACEHOLDER, runAs.line)
+    .replaceAll(RUN_AS_BLOCK_KEY_PLACEHOLDER, runAs.block)
     .replaceAll(RUN_AS_BLOCK_PLACEHOLDER, runAs.block);
 };
 

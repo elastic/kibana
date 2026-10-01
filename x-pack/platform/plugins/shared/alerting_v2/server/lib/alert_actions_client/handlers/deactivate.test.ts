@@ -90,7 +90,7 @@ describe('deactivateHandler', () => {
   });
 
   describe('precondition: rejects only when the episode is already inactive', () => {
-    it('rejects deactivate with INVALID_EPISODE_STATE_TRANSITION (409) when episode_status is inactive', () => {
+    it('rejects deactivate with INVALID_ALERT_STATE_TRANSITION (409) when episode_status is inactive', () => {
       try {
         deactivateHandler.prepare(
           buildItem(buildAlertEventRecord({ episode_status: alertEpisodeStatus.inactive }))
@@ -103,8 +103,8 @@ describe('deactivateHandler', () => {
           code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
           details: {
             group_hash: 'group-1',
-            episode_id: 'episode-1',
-            episode_status: alertEpisodeStatus.inactive,
+            alert_id: 'episode-1',
+            alert_status: alertEpisodeStatus.inactive,
             action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
           },
         });

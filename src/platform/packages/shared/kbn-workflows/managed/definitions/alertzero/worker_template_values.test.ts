@@ -65,6 +65,16 @@ describe('renderCommonWorkerYaml run_as', () => {
     expect(parsed.settings).toEqual({ run_as: 'say "hi"' });
   });
 
+  it('replaces a null-key placeholder so the unrendered template stays valid YAML', () => {
+    const yaml = renderCommonWorkerYaml(
+      BLOCK_YAML.replace('__WORKER_RUN_AS_BLOCK__\n', '__WORKER_RUN_AS_BLOCK__:\n'),
+      { ...values, serviceAccountId: 'account-a' }
+    );
+    const parsed = parse(yaml) as { settings?: { run_as?: string } };
+
+    expect(parsed.settings).toEqual({ run_as: 'account-a' });
+  });
+
   it('omits the settings block when the worker runs as the current user', () => {
     const yaml = renderCommonWorkerYaml(BLOCK_YAML, values);
     const parsed = parse(yaml) as { settings?: unknown };

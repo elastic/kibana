@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { CoreStart, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
@@ -186,8 +187,12 @@ export const createSandboxSecretsClient = ({
     return promise;
   };
 
-  const isNightshiftEnabled = async (): Promise<boolean> =>
-    (await getDeps().featureFlags?.getBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false)) ?? false;
+  const isNightshiftEnabled = async (): Promise<boolean> => {
+    const featureFlags = getDeps().featureFlags;
+    return featureFlags
+      ? firstValueFrom(featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false))
+      : false;
+  };
 
   const assertNightshiftEnabled = async (): Promise<void> => {
     if (!(await isNightshiftEnabled())) {

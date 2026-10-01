@@ -1,9 +1,23 @@
 {
-  "sha1": "bf779799e7927839f67c60772438406fe0105019",
+  "sha1": "0a4b0dbff0d73a32baba45aa7ca400936457fc9f",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "0fa3765f2cebfcf-bd2a091d3e0b055",
+      "title": "ES|QL Data Federation — create CSV dataset wizard creates a CSV dataset, validates preview, and saves",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_create_csv_dataset_wizard.spec.ts",
+        "line": 104,
+        "column": 28
+      }
+    },
     {
       "id": "2995b8f4e0acc2e-1ad0ffd65e6e036",
       "title": "ES|QL Data Federation — data sources CRUD creates, edits, and deletes a data source",
@@ -19,8 +33,22 @@
       }
     },
     {
-      "id": "01aa1437955fee0-09fc07bbe770a41",
-      "title": "ES|QL Data Federation — datasets CRUD creates, edits, and deletes a dataset",
+      "id": "90e401eb6f7a37e-5a7ab2f3f26f5aa",
+      "title": "ES|QL Data Federation — dataset API-only settings passthrough preserves partition_sample_size and file_sort_by when the description is edited",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_dataset_passthrough_settings.spec.ts",
+        "line": 44,
+        "column": 17
+      }
+    },
+    {
+      "id": "01aa1437955fee0-289be30bafdb9c9",
+      "title": "ES|QL Data Federation — datasets CRUD creates, edits, and deletes a data set",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -44,6 +72,20 @@
         "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_management.spec.ts",
         "line": 12,
         "column": 14
+      }
+    },
+    {
+      "id": "81f07c22ead50dd-391074a60a29738",
+      "title": "ES|QL Data Federation — mapping fields preserves mapping fields across preview navigation and deletes only the chosen field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_mapping_fields.spec.ts",
+        "line": 27,
+        "column": 9
       }
     }
   ]
