@@ -64,8 +64,7 @@ WORKFLOW_ID="alertzero-seed-create-proposed-action"
 usage() {
   cat <<'USAGE'
 Seeds the AlertZero queue with the prototype's open proposals, each with the
-attachments its investigation flyout should list, plus four conversations that
-cover the attachment summary's edge cases.
+attachments its investigation flyout should list.
 
 Options:
   --url URL           Kibana base URL, base path included (default: http://localhost:5601/kbn)
@@ -759,64 +758,10 @@ fire configure \
 attach_rule "Unusual port for process"
 attach_alerts 20 "Unusual port for process" low
 
-# ---- 3. attachment summary edge cases ---------------------------------------
-
-# These go through `fire` too, so they land in the queue as ordinary cards and
-# their flyout is one click away. The category is arbitrary; they are grouped
-# under Configure only so they sit together.
-
-echo ""
-echo "Creating 4 attachment-summary edge cases…"
-
-fire configure \
-  "[seed] Attachment summary — 12 rows" \
-  "Twelve listable attachments across all four groups. The summary should collapse to the first five and offer \"Show more (7)\"." \
-  "Seeded to exercise the attachment summary's collapse behaviour. Not a real proposal."
-attach_attack "Credential theft chain on LAPTOP-SALES04"
-attach_alert_group \
-  "Suspicious PowerShell spawned by Word" high \
-  "LSASS handle opened by unsigned binary" critical \
-  "Scheduled task created in user context" medium \
-  "Outbound beacon to newly registered domain" high \
-  "Defender exclusion added for user temp path" medium \
-  "Clipboard capture module loaded" low
-attach_rule "Suspicious PowerShell spawned by Office"
-attach_entity host "LAPTOP-SALES04"
-attach_entity user "sales.rep@corp"
-attach_entity service "m365-exchange"
-attach_entity generic "corp-vpn-gw"
-
-fire configure \
-  "[seed] Attachment summary — exactly 5 rows" \
-  "Exactly five listable attachments — the boundary. All five rows should show with no \"Show more\" toggle at all." \
-  "Seeded to pin the five-row boundary of the attachment summary. Not a real proposal."
-attach_attack "Lateral movement from FIN-WS-02"
-attach_alert_group \
-  "SMB session to three hosts in 90 seconds" high \
-  "Admin share written by non-admin process" high
-attach_rule "Lateral movement via admin shares"
-attach_entity host "FIN-WS-02"
-
-fire configure \
-  "[seed] Attachment summary — excluded types only" \
-  "Two attachments, both of a type the summary deliberately does not list. The Attachment summary heading should not render at all." \
-  "Seeded to prove excluded attachment types do not reach the summary. Not a real proposal."
-attach_entity_graph host "EXCLUDED-HOST-01"
-attach_entity_graph user "excluded.user@corp"
-
-fire configure \
-  "[seed] Attachment summary — ordering" \
-  "One attachment per group, attached in reverse: entity first, then rule, then alert, with the attack last. Rows should still read attack, alert, rule, entity — group order beats attach time." \
-  "Seeded to prove the summary orders by group before creation time. Not a real proposal."
-attach_entity host "ordering-last-attached-first"
-attach_rule "Ordering probe — rule attached third from last"
-attach_alert "Ordering probe — alert attached second" medium
-attach_attack "Ordering probe — attack attached last, must render first"
-
 # ---- summary ----------------------------------------------------------------
 
 echo ""
-echo "Done. Open Security → AlertZero: Respond has 6, Investigate 2, Configure 8."
+echo "Done. Open Security → AlertZero: Respond has 6, Investigate 2, Configure 4."
 echo "Each proposal has its own conversation, titled after the proposal, and its"
 echo "own attachments."
 echo ""
@@ -825,18 +770,8 @@ echo "you are missing the patch described at the top of this script. The"
 echo "conversations still exist — open them in Agent Builder and use the"
 echo "conversation details button to reach the same flyout."
 echo ""
-echo "Alert rows in the attachment summary are backed by real Elasticsearch"
-echo "documents in ${ALERT_INDEX}. Clicking any alert row opens the Security"
-echo "alert flyout for that document. If rows stayed read-only, check that ES"
-echo "is reachable at ${ES_URL} and that no '! ES indexing failed' warnings"
-echo "appeared above."
-echo ""
-echo "To see the attachment summary, open a card's investigation flyout:"
-echo "  • \"[seed] Batch alert rows — 7 clickable\" — the focused drill-down"
-echo "    test: five rows visible, two behind Show more, every row clickable."
-echo "  • \"Kerberoasting against service accounts\" — 19 real alert rows."
-echo "  • \"Impossible travel — exec account (cfo@corp)\" — three single alerts."
-echo "  • \"[seed] Attachment summary — 12 rows\" — five rows, \"Show more (7)\"."
-echo "  • \"[seed] Attachment summary — exactly 5 rows\" — five rows, no toggle."
-echo "  • \"[seed] Attachment summary — excluded types only\" — no section."
-echo "  • \"[seed] Attachment summary — ordering\" — attack, alert, rule, entity."
+echo "To see the attachments overview, open a card's investigation flyout:"
+echo "  • \"Kerberoasting against service accounts\" — alerts + attack."
+echo "  • \"Impossible travel — exec account (cfo@corp)\" — alerts."
+echo "  • \"Credential access via Mimikatz\" — alerts + entity."
+echo "  • \"[seed] Batch alert rows — 7 clickable\" — alerts only."
