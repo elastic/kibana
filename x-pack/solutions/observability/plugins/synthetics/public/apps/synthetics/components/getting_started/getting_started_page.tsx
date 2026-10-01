@@ -84,18 +84,14 @@ export const GettingStartedPage = () => {
   }, [setScreenContext, hasNoLocations, locations]);
 
   return (
-    <MonitorsListingPage paddingSize="none">
+    <MonitorsListingPage>
       {!loading ? (
         hasNoLocations ? (
           <Wrapper>
             <GettingStartedOnPrem />
           </Wrapper>
         ) : (
-          <>
-            <GettingStartedWithLocations />
-            <EuiSpacer />
-            <GettingStartedLink />
-          </>
+          <GettingStartedWithLocations footer={<GettingStartedLink />} />
         )
       ) : (
         <LoadingState />

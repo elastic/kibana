@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import {
   EuiCard,
   EuiFlexGroup,
@@ -22,7 +22,7 @@ import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
 import { kibanaService } from '../../../../utils/kibana_service';
 import { SimpleMonitorForm } from './simple_monitor_form';
 
-export const GettingStartedWithLocations = () => {
+export const GettingStartedWithLocations = ({ footer }: { footer?: ReactNode }) => {
   const history = useHistory();
   const { search } = useLocation();
   const projectMonitorsDocs =
@@ -59,10 +59,11 @@ export const GettingStartedWithLocations = () => {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
-            <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexGroup direction="column" gutterSize="l">
               <EuiFlexItem>
                 <EuiCard
                   hasBorder
+                  paddingSize="l"
                   layout="horizontal"
                   titleSize="xs"
                   icon={<EuiIcon type="apps" size="l" aria-hidden={true} />}
@@ -76,9 +77,10 @@ export const GettingStartedWithLocations = () => {
                 <EuiFlexItem>
                   <EuiCard
                     hasBorder
+                    paddingSize="l"
                     layout="horizontal"
                     titleSize="xs"
-                    icon={<EuiIcon type="editorCodeBlock" size="l" aria-hidden={true} />}
+                    icon={<EuiIcon type="code" size="l" aria-hidden={true} />}
                     title={MONITORS_AS_CODE_TITLE}
                     description={MONITORS_AS_CODE_DESCRIPTION}
                     data-test-subj="syntheticsGettingStartedProjectMonitorsLink"
@@ -95,6 +97,12 @@ export const GettingStartedWithLocations = () => {
         <EuiText size="s" color="subdued">
           {ALERTS_HINT}
         </EuiText>
+        {footer ? (
+          <>
+            <EuiSpacer size="s" />
+            <div>{footer}</div>
+          </>
+        ) : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
