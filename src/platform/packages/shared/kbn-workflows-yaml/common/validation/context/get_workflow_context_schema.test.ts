@@ -454,6 +454,28 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     ).toBeDefined();
   });
 
+  it('should expose inputs declared on a page trigger', () => {
+    const workflow = {
+      ...baseWorkflow,
+      triggers: [
+        {
+          type: 'page',
+          'page-id': 'abc',
+          inputs: {
+            properties: { summary: { type: 'string' }, severity: { type: 'string' } },
+            required: ['summary'],
+          },
+        },
+      ],
+    } as WorkflowYaml;
+
+    const contextSchema = getWorkflowContextSchema(emptyRegistry, workflow);
+
+    expect(getSchemaAtPath(contextSchema, 'inputs.summary').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'inputs.severity').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'inputs.unknown').schema).toBeNull();
+  });
+
   it('should allow accessing event.rule and event.spaceId when alert trigger is present', () => {
     const workflow: WorkflowYaml = { ...baseWorkflow, triggers: [{ type: 'alert' }] };
     const contextSchema = getWorkflowContextSchema(emptyRegistry, workflow);

@@ -916,6 +916,33 @@ describe('getInputsFromDefinition', () => {
     expect(getInputsFromDefinition(definition)).toEqual(expectedSchema);
   });
 
+  it('should return the JSON Schema inputs from a page trigger', () => {
+    const definition = {
+      triggers: [{ type: 'page', 'page-id': 'abc', inputs: expectedSchema }],
+    } as unknown as WorkflowYaml;
+
+    expect(getInputsFromDefinition(definition)).toEqual(expectedSchema);
+  });
+
+  it('should prefer manual trigger inputs over page trigger inputs', () => {
+    const definition = {
+      triggers: [
+        { type: 'page', inputs: { properties: { other: { type: 'string' } } } },
+        { type: 'manual', inputs: expectedSchema },
+      ],
+    } as unknown as WorkflowYaml;
+
+    expect(getInputsFromDefinition(definition)).toEqual(expectedSchema);
+  });
+
+  it('should fall back to page trigger inputs when the manual trigger has none', () => {
+    const definition = {
+      triggers: [{ type: 'manual' }, { type: 'page', inputs: expectedSchema }],
+    } as unknown as WorkflowYaml;
+
+    expect(getInputsFromDefinition(definition)).toEqual(expectedSchema);
+  });
+
   it('should normalize legacy array inputs declared on the manual trigger', () => {
     const definition = {
       triggers: [

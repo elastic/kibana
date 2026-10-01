@@ -22,6 +22,7 @@ import {
   type LegacyWorkflowInput,
   type WorkflowInput,
 } from '../schema/triggers/manual_trigger_schema';
+import { isPageTrigger } from '../schema/triggers/page_trigger_schema';
 
 export type NormalizableFieldSchema =
   | JsonModelSchemaType
@@ -158,16 +159,17 @@ export function normalizeFieldsToJsonSchema(
  * Supports the legacy inputs format (array of field definitions) by converting it via
  * {@link normalizeFieldsToJsonSchema}.
  *
- * Falls back to root-level `inputs` on the definition for backward compatibility when the manual
- * trigger block has no inputs.
+ * Reads inputs from the manual trigger, else from the page trigger. Falls back to root-level
+ * `inputs` on the definition for backward compatibility when neither trigger has inputs.
  */
 export const getInputsFromDefinition = (
   definition: WorkflowYaml | Partial<WorkflowYaml> | undefined | null
 ): JsonModelSchemaType | undefined => {
-  const manualTriggerInDefinition = definition?.triggers?.find((trigger) =>
-    isManualTrigger(trigger)
-  );
-  let inputsInDefinition = manualTriggerInDefinition?.inputs;
+  // Both triggers declare the `inputs.*` contract; manual wins when both define inputs.
+  const triggers = definition?.triggers ?? [];
+  let inputsInDefinition =
+    triggers.filter(isManualTrigger).find((trigger) => trigger.inputs)?.inputs ??
+    triggers.filter(isPageTrigger).find((trigger) => trigger.inputs)?.inputs;
 
   if (!inputsInDefinition) {
     // Backward compatibility with workflows that still use root-level inputs
