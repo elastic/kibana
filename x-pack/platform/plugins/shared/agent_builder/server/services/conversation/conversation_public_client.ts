@@ -60,6 +60,14 @@ export const createConversationPublicClient = ({
         rounds: [],
       });
     },
+    addAccessControlEntries: async (conversationId, entries, options) =>
+      client.addAccessControlEntries(conversationId, entries, {
+        access: options?.access ?? 'converse',
+      }),
+    removeAccessControlEntries: async (conversationId, principals, options) =>
+      client.removeAccessControlEntries(conversationId, principals, {
+        access: options?.access ?? 'converse',
+      }),
     patchMetadata: async (conversationId, updates, options) => {
       const { conversation, changedFields } = options
         ? await client.patchMetadata(conversationId, updates, { access: options.access ?? 'owner' })

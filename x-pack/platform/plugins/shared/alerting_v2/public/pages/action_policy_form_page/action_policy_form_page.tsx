@@ -206,9 +206,9 @@ const ActionPolicyFormPageContent = ({
   );
 
   const onSubmitUpdate = useCallback(
-    (id: string, values: ActionPolicyFormState, version: string) =>
+    (id: string, values: ActionPolicyFormState) =>
       submitWithInlineWorkflows(values, (destinations) =>
-        updatePolicy({ id, data: toUpdatePayload({ ...values, destinations }, version) })
+        updatePolicy({ id, data: toUpdatePayload({ ...values, destinations }) })
       ),
     [submitWithInlineWorkflows, updatePolicy]
   );

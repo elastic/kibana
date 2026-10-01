@@ -805,7 +805,9 @@ steps:
       - name: propose_action
         type: workflow.executeAsync
         with:
-          workflow-id: system-create-proposal
+          # The bridge rather than the gate: it owns `origin`, so a Worker
+          # cannot stamp someone else's queue and lose the proposal.
+          workflow-id: system-create-alertzero-proposal
           inputs:
             conversationId: "{{ steps.resolve_request.output.investigation_id }}"
             comment: "{{ foreach.item.comment | default: steps.forensic_analysis.output.structured_output.rationale }}"

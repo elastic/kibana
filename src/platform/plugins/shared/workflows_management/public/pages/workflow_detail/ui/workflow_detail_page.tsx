@@ -101,6 +101,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     setSelectedExecution,
     setActiveTab: setUrlTab,
     replayExecutionId,
+    replayIsTestRun,
     clearReplayExecutionId,
   } = useWorkflowUrlState();
 
@@ -180,7 +181,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
       return;
     }
 
-    dispatch(setReplayExecutionId(replayExecutionId));
+    dispatch(setReplayExecutionId({ executionId: replayExecutionId, isTestRun: replayIsTestRun }));
     dispatch(setIsTestModalOpen(true));
     clearReplayExecutionId();
   }, [
@@ -190,6 +191,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     id,
     isReady,
     replayExecutionId,
+    replayIsTestRun,
     workflowDefinition,
     workflowId,
   ]);

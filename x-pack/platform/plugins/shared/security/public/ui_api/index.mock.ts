@@ -10,6 +10,7 @@ import type { UiApi } from '.';
 export const getUiApiMock = {
   createStart: (): jest.Mocked<UiApi> => ({
     components: {
+      getCreateServiceAccount: jest.fn(),
       getPersonalInfo: jest.fn(),
       getChangePassword: jest.fn(),
     },
