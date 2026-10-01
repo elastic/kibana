@@ -106,9 +106,9 @@ describe('escalation routes', () => {
 
     it('gates link on ESCALATIONS_API_PRIVILEGE_MANAGE', () => {
       const { byPath, posts } = registerAndCollect({});
-      expect(
-        byPath(posts, ESCALATION_LINK_URL).config.security?.authz?.requiredPrivileges
-      ).toEqual([ESCALATIONS_API_PRIVILEGE_MANAGE]);
+      expect(byPath(posts, ESCALATION_LINK_URL).config.security?.authz?.requiredPrivileges).toEqual(
+        [ESCALATIONS_API_PRIVILEGE_MANAGE]
+      );
     });
 
     it('gates assign on ESCALATIONS_API_PRIVILEGE_MANAGE', () => {

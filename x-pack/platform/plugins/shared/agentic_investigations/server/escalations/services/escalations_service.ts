@@ -12,7 +12,6 @@ import {
   ConversationAccessControlRole,
   createConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type {
   AttachmentPublicClient,
   ConversationPublicClient,
@@ -222,7 +221,10 @@ export class EscalationsService {
     const union = [...new Set([...prev, ...toAdd])];
 
     if (union.length > MAX_ESCALATION_LINKED_INVESTIGATIONS) {
-      throw new TooManyLinkedInvestigationsError(union.length, MAX_ESCALATION_LINKED_INVESTIGATIONS);
+      throw new TooManyLinkedInvestigationsError(
+        union.length,
+        MAX_ESCALATION_LINKED_INVESTIGATIONS
+      );
     }
 
     const { conversation } = await client.patchMetadata(

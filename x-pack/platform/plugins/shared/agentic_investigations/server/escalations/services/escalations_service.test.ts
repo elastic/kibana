@@ -1080,7 +1080,7 @@ describe('EscalationsService.addAttachments', () => {
   };
 
   it('copies attachments from a linked investigation into the escalation', async () => {
-    const { service, client, attachmentsClient } = makeService({
+    const { service, attachmentsClient } = makeService({
       get: jest
         .fn()
         .mockResolvedValueOnce(MOCK_ESCALATION)
@@ -1110,7 +1110,7 @@ describe('EscalationsService.addAttachments', () => {
   });
 
   it('skips non-investigation conversations and warns', async () => {
-    const { service, client, attachmentsClient } = makeService({
+    const { service, attachmentsClient } = makeService({
       get: jest
         .fn()
         .mockResolvedValueOnce(MOCK_ESCALATION)
@@ -1122,6 +1122,5 @@ describe('EscalationsService.addAttachments', () => {
     expect(result).toEqual({ copied: 0, failed: 0 });
     expect(attachmentsClient.bulkCreate).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('non-investigation'));
-    client; // suppress unused warning
   });
 });
