@@ -51,7 +51,9 @@ steps:
 ${steps}`;
 
 /** Builds isolated account and workflow fixtures for one execution-flow suite. */
-export const createServiceAccountSuite = (options: { testWritePermissions?: boolean } = {}) => {
+export const createServiceAccountSuite = (
+  options: { testWritePermissions?: boolean; testConnectorPermissions?: boolean } = {}
+) => {
   let headers: Record<string, string>;
 
   let accountId: string;
@@ -66,6 +68,8 @@ export const createServiceAccountSuite = (options: { testWritePermissions?: bool
 
   const writerRole = `${dataIndex}-writer`;
   let writerRoleCreated = false;
+  const readerRole = `${dataIndex}-reader`;
+  let readerRoleCreated = false;
 
   const workflowIds = new Set<string>();
 
@@ -188,6 +192,25 @@ export const createServiceAccountSuite = (options: { testWritePermissions?: bool
     initiatingUser = user.body;
     expect(typeof initiatingUser.username).toBe('string');
     expect(initiatingUser.username).not.toBe('');
+    if (options.testWritePermissions) {
+      await esClient.security.putRole({
+        name: readerRole,
+        indices: [{ names: [dataIndex], privileges: ['read', 'view_index_metadata'] }],
+      });
+      readerRoleCreated = true;
+      if (options.testConnectorPermissions) {
+        const role = await apiClient.put(`api/security/role/${readerRole}`, {
+          headers,
+          body: {
+            elasticsearch: {
+              indices: [{ names: [dataIndex], privileges: ['read', 'view_index_metadata'] }],
+            },
+            kibana: [{ base: [], feature: { actions: ['read'] }, spaces: ['default'] }],
+          },
+        });
+        expect(role).toHaveStatusCode(204);
+      }
+    }
     if (options.testWritePermissions && !config.serverless) {
       await esClient.security.putRole({
         name: writerRole,
@@ -209,7 +232,7 @@ export const createServiceAccountSuite = (options: { testWritePermissions?: bool
           name: `cp2-${name}-${Date.now()}`,
           roles:
             name === 'read-only'
-              ? ['viewer']
+              ? [options.testWritePermissions ? readerRole : 'viewer']
               : config.serverless
               ? ['admin']
               : options.testWritePermissions
@@ -347,6 +370,13 @@ export const createServiceAccountSuite = (options: { testWritePermissions?: bool
         await esClient.security.deleteRole({ name: writerRole });
       } catch (error) {
         failures.push(new Error('Permission role cleanup failed', { cause: error }));
+      }
+    }
+    if (readerRoleCreated) {
+      try {
+        await esClient.security.deleteRole({ name: readerRole });
+      } catch (error) {
+        failures.push(new Error('Read-only permission role cleanup failed', { cause: error }));
       }
     }
     if (failures.length) throw new AggregateError(failures, 'Service-account suite cleanup failed');

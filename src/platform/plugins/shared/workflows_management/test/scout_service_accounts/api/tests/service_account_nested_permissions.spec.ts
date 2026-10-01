@@ -36,6 +36,67 @@ apiTest.describe(
     apiTest.afterAll(teardown);
 
     apiTest(
+      'an unbound child retains the limited caller instead of the parent account',
+      async ({ apiClient, requestAuth, esClient }) => {
+        apiTest.setTimeout(120_000);
+        const { headers, accountId, dataIndex, create, run, wait } = getContext();
+        const executor = await requestAuth.getApiKeyForCustomRole({
+          elasticsearch: { cluster: [], indices: [] },
+          kibana: [{ base: [], feature: { workflowsManagement: ['all'] }, spaces: ['default'] }],
+        });
+        const executorHeaders = { ...headers, ...executor.apiKeyHeader };
+        // Do not send the administrator's cookie alongside the executor's API key.
+        delete executorHeaders.Cookie;
+        const childId = await create(
+          apiClient,
+          workflowYaml(
+            accountId,
+            `${
+              authenticationStep + writeStep(dataIndex, 'forbidden-unbound-child')
+            }    on-failure:\n      continue: true\n`
+          ).replace(`settings:\n  run_as: ${accountId}\n`, '')
+        );
+        const parentId = await create(
+          apiClient,
+          workflowYaml(
+            accountId,
+            `${writeStep(dataIndex, 'allowed-bound-parent')}  - name: child
+    type: workflow.execute
+    with:
+      workflow-id: ${childId}
+      inputs: {}
+${authenticationStep}`
+          )
+        );
+        const parent = await wait(apiClient, await run(apiClient, parentId, executorHeaders));
+        expect(parent.effectiveIdentity).toStrictEqual({ type: 'service_account', id: accountId });
+        expect(parent.stepExecutions?.find((step) => step.stepId === 'write')?.status).toBe(
+          'completed'
+        );
+        expect(
+          JSON.stringify(
+            parent.stepExecutions?.find((step) => step.stepId === 'authenticate')?.output
+          )
+        ).toContain(accountId);
+        const childExecutionId = parent.stepExecutions?.find((step) => step.stepId === 'child')
+          ?.state?.executionId;
+        expect(typeof childExecutionId).toBe('string');
+        const child = await wait(apiClient, String(childExecutionId));
+        expect(child.effectiveIdentity).toBeUndefined();
+        const authentication = child.stepExecutions?.find((step) => step.stepId === 'authenticate');
+        expect(authentication?.status).toBe('completed');
+        expect(JSON.stringify(authentication?.output)).not.toContain(accountId);
+        const write = child.stepExecutions?.find((step) => step.stepId === 'write');
+        expect(write?.status).toBe('failed');
+        expect(JSON.stringify(write?.error)).toContain('security_exception');
+        expect(await esClient.exists({ index: dataIndex, id: 'allowed-bound-parent' })).toBe(true);
+        expect(await esClient.exists({ index: dataIndex, id: 'forbidden-unbound-child' })).toBe(
+          false
+        );
+      }
+    );
+
+    apiTest(
       'a read-only child cannot inherit its parent write permissions',
       async ({ apiClient, requestAuth, esClient }) => {
         apiTest.setTimeout(150_000);
