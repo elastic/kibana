@@ -128,10 +128,11 @@ export class MbMap extends Component<Props> {
     }
   }, 256);
 
-  _getMapExtentState(): MapExtentState {
-    const zoom = this.props.mapApi!.getZoom();
-    const mbCenter = this.props.mapApi!.getCenter();
-    const mbBounds = this.props.mapApi!.getBounds();
+  _getMapExtentState(mapApi?: MapApi): MapExtentState {
+    const map = mapApi ?? this.props.mapApi!;
+    const zoom = map.getZoom();
+    const mbCenter = map.getCenter();
+    const mbBounds = map.getBounds();
     return {
       zoom: _.round(zoom, ZOOM_PRECISION),
       center: {
@@ -142,9 +143,10 @@ export class MbMap extends Component<Props> {
     };
   }
 
-  _updateViewDataAttributes() {
-    if (!this._containerRef || !this.props.mapApi) return;
-    const { zoom, center } = this._getMapExtentState();
+  _updateViewDataAttributes(mapApi?: MapApi) {
+    const map = mapApi ?? this.props.mapApi;
+    if (!this._containerRef || !map) return;
+    const { zoom, center } = this._getMapExtentState(map);
     this._containerRef.dataset.mapLat = String(center.lat);
     this._containerRef.dataset.mapLon = String(center.lon);
     this._containerRef.dataset.mapZoom = String(zoom);
@@ -249,8 +251,9 @@ export class MbMap extends Component<Props> {
     }
 
     this.props.setMapApi(mbMap);
-    this._updateViewDataAttributes();
-    this.props.onMapReady(this._getMapExtentState());
+    // props.mapApi is not yet updated (Redux is async), so pass mbMap directly
+    this._updateViewDataAttributes(mbMap);
+    this.props.onMapReady(this._getMapExtentState(mbMap));
     this._loadMakiSprites(mbMap);
     this._registerMapEventListeners(mbMap);
   }
@@ -440,6 +443,7 @@ export class MbMap extends Component<Props> {
     if (zoomRangeChanged) {
       setTimeout(() => {
         if (this._isMounted) {
+          this._updateViewDataAttributes();
           this.props.extentChanged(this._getMapExtentState());
         }
       }, 300);
