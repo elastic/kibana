@@ -19,7 +19,6 @@ export interface ProfilingStatusParams {
   soClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   spaceId?: string;
-  /** When provided, ES calls are cancelled once the signal aborts. */
   abortSignal?: AbortSignal;
 }
 
@@ -43,12 +42,10 @@ const createUnavailableUniversalProfilingSchemaStatus = (
   hasLegacyData: false,
 });
 
-/** Creates a service that reports the profiling status for both the OTel and Universal Profiling schemas. */
 export function createGetProfilingStatusService(params: RegisterServicesParams) {
   const { buildFlavor, createProfilingEsClient, logger } = params;
   const getOtelStatus = createGetOtelStatusService(params);
   const getUniversalProfilingStatus = createGetUniversalProfilingStatusService(params);
-  // Universal Profiling needs a setup that is not supported on serverless, which can only use the OTel schema.
   const isUniversalProfilingAvailable = buildFlavor !== 'serverless';
 
   return async ({
