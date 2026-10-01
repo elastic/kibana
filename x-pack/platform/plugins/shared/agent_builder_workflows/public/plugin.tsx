@@ -34,6 +34,9 @@ export class AgentBuilderWorkflowsPlugin
       const [telemetry, queryClient] = await Promise.all([
         depsStart.workflowsManagement.getTelemetry(),
         depsStart.workflowsManagement.getQueryClient(),
+        // Loads the lazily registered step/trigger definitions (e.g. `ai.agent`),
+        // which the attachment icons read. The Workflows app does the same on mount.
+        depsStart.workflowsExtensions.isReady(),
       ]);
       registerWorkflowAttachmentRenderers(depsStart.agentBuilder.attachments, {
         core: coreStart,

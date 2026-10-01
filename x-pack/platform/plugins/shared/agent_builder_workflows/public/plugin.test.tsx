@@ -33,7 +33,10 @@ describe('AgentBuilderWorkflowsPlugin', () => {
     const attachments = { addAttachmentType: jest.fn() };
     const telemetry = { reportWorkflowCreated: jest.fn() };
     const queryClient = { getQueryData: jest.fn() };
-    const workflowsExtensions = { getStepDefinition: jest.fn() };
+    const workflowsExtensions = {
+      getStepDefinition: jest.fn(),
+      isReady: jest.fn().mockResolvedValue(undefined),
+    };
     const triggersActionsUi = { actionTypeRegistry: {} };
 
     const depsStart = {
@@ -74,6 +77,7 @@ describe('AgentBuilderWorkflowsPlugin', () => {
 
     await flushPromises();
 
+    expect(workflowsExtensions.isReady).toHaveBeenCalledTimes(1);
     expect(registerWorkflowAttachmentRenderersMock).toHaveBeenCalledTimes(1);
     expect(registerWorkflowAttachmentRenderersMock).toHaveBeenCalledWith(attachments, {
       core: coreStart,
