@@ -30,6 +30,14 @@ describe('StatusActionButton', () => {
       </TestProviders>
     );
 
+  it('names the default status of the next category', () => {
+    const wrapper = mountComponent();
+
+    expect(wrapper.find(`button[data-test-subj="case-view-status-action-button"]`).text()).toBe(
+      'Mark as In progress'
+    );
+  });
+
   it('it renders', async () => {
     const wrapper = mountComponent();
 

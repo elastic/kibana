@@ -34,6 +34,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       for (const key of ['open', 'in-progress', 'closed']) {
         await testSubjects.existOrFail(`case-statuses-group-${key}`);
+        await testSubjects.existOrFail(`case-statuses-help-${key}`);
         await testSubjects.existOrFail(`case-status-row-${key}`);
         await testSubjects.existOrFail(`case-status-${key}-default-badge`);
       }

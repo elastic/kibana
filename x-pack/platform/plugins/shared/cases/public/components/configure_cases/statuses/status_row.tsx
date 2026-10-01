@@ -32,6 +32,7 @@ export interface StatusRowProps {
   disabled: boolean;
   isFirstInCategory: boolean;
   isLastInCategory: boolean;
+  categoryLabel: string;
   onEdit: (key: string) => void;
   onMove: (key: string, direction: 'up' | 'down') => void;
   onSetDefault: (key: string) => void;
@@ -44,6 +45,7 @@ const StatusRowComponent: React.FC<StatusRowProps> = ({
   disabled,
   isFirstInCategory,
   isLastInCategory,
+  categoryLabel,
   onEdit,
   onMove,
   onSetDefault,
@@ -158,9 +160,15 @@ const StatusRowComponent: React.FC<StatusRowProps> = ({
         </EuiFlexItem>
         {status.isDefault && (
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" data-test-subj={`case-status-${status.key}-default-badge`}>
-              {i18n.DEFAULT_BADGE}
-            </EuiBadge>
+            <EuiToolTip content={i18n.DEFAULT_BADGE_TOOLTIP(categoryLabel)}>
+              <EuiBadge
+                color="hollow"
+                tabIndex={0}
+                data-test-subj={`case-status-${status.key}-default-badge`}
+              >
+                {i18n.DEFAULT_BADGE}
+              </EuiBadge>
+            </EuiToolTip>
           </EuiFlexItem>
         )}
         {status.disabled && (
@@ -177,7 +185,7 @@ const StatusRowComponent: React.FC<StatusRowProps> = ({
             button={
               <EuiToolTip content={i18n.ACTIONS_FOR(status.label)} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  iconType="boxesHorizontal"
+                  iconType="boxesVertical"
                   aria-label={i18n.ACTIONS_FOR(status.label)}
                   disabled={disabled}
                   onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}

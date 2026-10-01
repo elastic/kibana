@@ -22,6 +22,12 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 import { StatusRow } from './status_row';
 import * as i18n from './translations';
 
+const CATEGORY_HELP: Record<CaseStatuses, string> = {
+  open: i18n.OPEN_CATEGORY_HELP,
+  'in-progress': i18n.IN_PROGRESS_CATEGORY_HELP,
+  closed: i18n.CLOSED_CATEGORY_HELP,
+};
+
 export interface CaseStatusesSectionProps {
   statuses: CaseStatusesConfiguration;
   disabled: boolean;
@@ -75,6 +81,11 @@ const CaseStatusesSectionComponent: React.FC<CaseStatusesSectionProps> = ({
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued" data-test-subj={`case-statuses-help-${category}`}>
+              {CATEGORY_HELP[category]}
+            </EuiText>
+            <EuiSpacer size="s" />
             {inCategory.map((status, index) => (
               <StatusRow
                 key={status.key}
@@ -83,6 +94,7 @@ const CaseStatusesSectionComponent: React.FC<CaseStatusesSectionProps> = ({
                 disabled={!canModify}
                 isFirstInCategory={index === 0}
                 isLastInCategory={index === inCategory.length - 1}
+                categoryLabel={categoryLabel}
                 onEdit={onEditStatus}
                 onMove={onMoveStatus}
                 onSetDefault={onSetDefaultStatus}

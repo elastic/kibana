@@ -12,6 +12,8 @@ import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
 import { useCloseCaseModal } from '../all_cases/hooks/use_close_case_modal';
 import { useCanSyncCloseReasonToAlerts } from '../all_cases/hooks/use_can_sync_close_reason_to_alerts';
 import { statuses } from './config';
+import { useCaseStatuses } from './use_case_statuses';
+import * as i18n from './translations';
 
 interface Props {
   status: CaseStatuses;
@@ -52,6 +54,9 @@ const StatusActionButtonComponent: React.FC<Props> = ({
   );
   const nextStatusIndex = useMemo(() => getNextItem(indexOfCurrentStatus), [indexOfCurrentStatus]);
   const nextStatus = caseStatuses[nextStatusIndex];
+  // The button is a category transition; the server lands the case on that category's default.
+  const { getStatus } = useCaseStatuses();
+  const nextLabel = getStatus(undefined, nextStatus).label;
 
   const onClick = useCallback(() => {
     if (nextStatus === CaseStatuses.closed) {
@@ -69,7 +74,7 @@ const StatusActionButtonComponent: React.FC<Props> = ({
         isLoading={isLoading}
         onClick={onClick}
       >
-        {statuses[caseStatuses[nextStatusIndex]].button.label}
+        {i18n.MARK_AS(nextLabel)}
       </EuiButton>
       {closeCaseModal}
     </>

@@ -13,8 +13,38 @@ export const TITLE = i18n.translate('xpack.cases.configureCases.statuses.title',
 
 export const DESCRIPTION = i18n.translate('xpack.cases.configureCases.statuses.description', {
   defaultMessage:
-    'Define the statuses your team uses. Each status belongs to Open, In progress, or Closed, so alerts, automations, and reports keep working the way they do today.',
+    'Define the statuses your team uses. Each status belongs to one of three categories: Open, In progress, or Closed. Alerts, automations, and reports work from the category, so they keep working the way they do today. Each category has a default status, used whenever a case moves to that category without a more specific status.',
 });
+
+export const OPEN_CATEGORY_HELP = i18n.translate(
+  'xpack.cases.configureCases.statuses.openCategoryHelp',
+  {
+    defaultMessage: 'Where new cases start. Every new case gets the default status.',
+  }
+);
+
+export const IN_PROGRESS_CATEGORY_HELP = i18n.translate(
+  'xpack.cases.configureCases.statuses.inProgressCategoryHelp',
+  {
+    defaultMessage:
+      'Cases someone is actively working on. The default status is applied when a case is marked in progress.',
+  }
+);
+
+export const CLOSED_CATEGORY_HELP = i18n.translate(
+  'xpack.cases.configureCases.statuses.closedCategoryHelp',
+  {
+    defaultMessage:
+      'Finished cases. The default status is applied when a case is closed, including by alert sync and automations.',
+  }
+);
+
+export const DEFAULT_BADGE_TOOLTIP = (category: string) =>
+  i18n.translate('xpack.cases.configureCases.statuses.defaultBadgeTooltip', {
+    values: { category },
+    defaultMessage:
+      'Applied when a case moves to {category} without a more specific status, for example from the API, alert sync, or the "Mark as" button.',
+  });
 
 export const ENABLED_COUNT = (count: number) =>
   i18n.translate('xpack.cases.configureCases.statuses.enabledCount', {

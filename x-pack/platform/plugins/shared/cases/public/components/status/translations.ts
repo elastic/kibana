@@ -27,3 +27,9 @@ export const CASE_IN_PROGRESS = i18n.translate('xpack.cases.caseView.caseInProgr
 export const CASE_CLOSED = i18n.translate('xpack.cases.caseView.caseClosed', {
   defaultMessage: 'Case closed',
 });
+
+export const MARK_AS = (label: string) =>
+  i18n.translate('xpack.cases.caseView.markAs', {
+    values: { label },
+    defaultMessage: 'Mark as {label}',
+  });
