@@ -49,6 +49,10 @@ export class LensEditorApp extends LensApp {
     this.dimensions = createLazyPageObject(LensDimensions, page, {
       closeDimensionEditorButton: this.closeDimensionEditorButton,
       closeDimensionEditor: () => this.closeDimensionEditor(),
+      getVisualizationRenderCount: (chartTestSubj: string) =>
+        this.workspace.getVisualizationRenderCount(chartTestSubj),
+      waitForVisualization: (chartTestSubj: string, options?: { afterCount?: number }) =>
+        this.waitForVisualization(chartTestSubj, options),
     });
     this.style = createLazyPageObject(LensStyle, page);
     this.metric = createLazyPageObject(LensMetric, page);

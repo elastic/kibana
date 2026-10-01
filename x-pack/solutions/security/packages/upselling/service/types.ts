@@ -33,4 +33,5 @@ export type UpsellingMessageId =
   | 'alert_suppression_rule_details'
   | 'note_management_user_filter'
   | 'prebuilt_rule_customization'
-  | 'prebuilt_rule_customization_description';
+  | 'prebuilt_rule_customization_description'
+  | 'endpoint_custom_yara_signatures';

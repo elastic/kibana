@@ -131,6 +131,9 @@ describe('MaintenanceWindowClient - update', () => {
         updatedAt: updatedMetadata.updatedAt,
         updatedBy: updatedMetadata.updatedBy,
         categoryIds: ['observability', 'securitySolution'],
+        // sibling-flag encoding: alertingEnabled = true (pre-MV5 docs default to v1-in-scope),
+        // alerting: null (no filter set), alertingV2 absent.
+        scope: { alertingEnabled: true, alerting: null },
       },
       {
         id: 'test-id',
@@ -235,6 +238,7 @@ describe('MaintenanceWindowClient - update', () => {
         updatedAt: updatedMetadata.updatedAt,
         updatedBy: updatedMetadata.updatedBy,
         categoryIds: ['observability', 'securitySolution'],
+        scope: { alertingEnabled: true, alerting: null },
       },
       {
         id: 'test-id',
@@ -375,6 +379,7 @@ describe('MaintenanceWindowClient - update', () => {
       data: {
         scope: {
           alerting: {
+            enabled: true,
             kql: "_id: '1234'",
             filters: [
               {
@@ -409,7 +414,7 @@ describe('MaintenanceWindowClient - update', () => {
     ).toEqual(`_id: '1234'`);
 
     expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.filters[0]
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.filters![0]
     ).toEqual({
       $state: { store: 'appState' },
       meta: {
@@ -475,6 +480,7 @@ describe('MaintenanceWindowClient - update', () => {
         data: {
           scope: {
             alerting: {
+              enabled: true,
               kql: `kibana.alert.rule.name: ${kqlPattern}`,
               filters: [],
             },
@@ -545,18 +551,79 @@ describe('MaintenanceWindowClient - update', () => {
     await updateMaintenanceWindow(mockContext, {
       id: 'test-id',
       data: {
-        scope: { alerting: null },
+        scope: { alerting: { enabled: true } },
       },
     });
 
-    expect((savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope?.alerting)
-      .toMatchInlineSnapshot(`
-      Object {
-        "dsl": "",
-        "filters": Array [],
-        "kql": "",
-      }
-    `);
+    // Sibling-flag encoding: alertingEnabled=true means "v1 selected, no filter".
+    // alerting is null (no filter kql/filters), so alerting.kql is absent (alerting is null).
+    const storedAttrs = savedObjectsClient.create.mock.calls[0][1] as Record<string, unknown>;
+    const storedScope = storedAttrs.scope as {
+      alertingEnabled?: boolean;
+      alerting: null | { kql: string; filters: unknown[]; dsl?: string };
+    };
+    expect(storedScope?.alertingEnabled).toBe(true);
+    expect(storedScope?.alerting).toBeNull();
+  });
+
+  it('should mirror a filters-only alerting scope into scopedQuery', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      schedule: {
+        custom: {
+          start: '2023-03-26T00:00:00.000Z',
+          duration: '1h',
+          timezone: 'CET',
+          recurring: {
+            every: '1w',
+            occurrences: 5,
+          },
+        },
+      },
+      events: [{ gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T00:12:34.000Z' }],
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValue({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    savedObjectsClient.create.mockResolvedValue({
+      attributes: {
+        ...mockMaintenanceWindow,
+        ...updatedAttributes,
+        ...updatedMetadata,
+      },
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    const filters = [
+      {
+        meta: { disabled: false, negate: false, alias: null },
+        $state: { store: FilterStateStore.APP_STATE },
+        query: { match_phrase: { 'kibana.alert.action_group': 'test' } },
+      },
+    ];
+
+    await updateMaintenanceWindow(mockContext, {
+      id: 'test-id',
+      data: {
+        scope: { alerting: { enabled: true, kql: '', filters } },
+      },
+    });
+
+    const { scopedQuery } = savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow;
+    expect(scopedQuery).toEqual({
+      kql: '',
+      filters,
+      dsl: expect.any(String),
+    });
+    expect(JSON.parse(scopedQuery!.dsl!).bool.filter).toEqual([
+      { match_phrase: { 'kibana.alert.action_group': 'test' } },
+    ]);
   });
 
   it('should throw if updating a maintenance window with invalid scope', async () => {
@@ -577,6 +644,7 @@ describe('MaintenanceWindowClient - update', () => {
         data: {
           scope: {
             alerting: {
+              enabled: true,
               kql: 'invalid: ',
               filters: [],
             },
@@ -588,6 +656,70 @@ describe('MaintenanceWindowClient - update', () => {
       invalid: 
       ---------^"
     `);
+  });
+
+  it('should include attributes.scopeErrors with scope "alerting" when alerting kql is invalid', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    let thrown: unknown;
+    try {
+      await updateMaintenanceWindow(mockContext, {
+        id: 'test-id',
+        data: { scope: { alerting: { enabled: true, kql: 'invalid: ', filters: [] } } },
+      });
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toMatchObject({
+      isBoom: true,
+      output: {
+        statusCode: 400,
+        payload: {
+          attributes: { scopeErrors: [expect.objectContaining({ scope: 'alerting' })] },
+        },
+      },
+    });
+  });
+
+  it('should include attributes.scopeErrors with scope "alertingV2" when alertingV2 kql is invalid', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    let thrown: unknown;
+    try {
+      await updateMaintenanceWindow(mockContext, {
+        id: 'test-id',
+        data: { scope: { alertingV2: { enabled: true, kql: 'invalid: ' } } },
+      });
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toMatchObject({
+      isBoom: true,
+      output: {
+        statusCode: 400,
+        payload: {
+          attributes: { scopeErrors: [expect.objectContaining({ scope: 'alertingV2' })] },
+        },
+      },
+    });
   });
 
   it('should throw if updating a maintenance window that has expired', async () => {

@@ -9,18 +9,19 @@ import { useMemo } from 'react';
 import { of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { ProjectRouting } from '@kbn/es-query';
-import { getApmInternalServices } from '../../../../plugin';
+import { apmCpsManager$, getApmCpsManager } from '../../../../plugin';
 
 /**
  * Current CPS (cross-project search) project routing, kept in sync with picker changes.
  *
- * Reads the `cpsManager` from the APM internal services singleton (only set when the APM
+ * Follows the `cpsManager` published to the APM internal services (only set when the APM
  * CPS feature flag is enabled), so it works regardless of which host renders the flyout
- * (APM service map, contextual map, or the discoverShared feature). Returns `undefined`
- * when CPS is disabled or the routing is unresolved.
+ * (APM service map, contextual map, or the discoverShared feature) and picks up a manager
+ * that arrives after mount when the flag flips. Returns `undefined` when CPS is disabled
+ * or the routing is unresolved.
  */
 export function useProjectRouting(): ProjectRouting | undefined {
-  const cpsManager = getApmInternalServices()?.cpsManager;
+  const cpsManager = useObservable(apmCpsManager$, getApmCpsManager());
   return useObservable(
     useMemo(() => cpsManager?.getProjectRouting$() ?? of(undefined), [cpsManager]),
     cpsManager?.getProjectRouting()

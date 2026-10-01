@@ -11,6 +11,7 @@ export const FETCHER_OPERATION_IDS = {
   FETCH_SPAN_LINKS: 'fetch-span-links',
   FETCH_TRACE_ROOT_SPAN: 'fetch-trace-root-span',
   FETCH_TRACE_ERRORS: 'fetch-trace-errors',
+  FETCH_SERVICE_ERRORS_FROM_LOGS: 'fetch-service-errors-from-logs',
 } as const;
 
 export type FetcherOperationId = (typeof FETCHER_OPERATION_IDS)[keyof typeof FETCHER_OPERATION_IDS];
