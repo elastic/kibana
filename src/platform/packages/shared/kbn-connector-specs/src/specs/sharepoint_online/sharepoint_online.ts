@@ -650,7 +650,7 @@ export const SharepointOnline: ConnectorSpec = {
             .url()
             .max(SHAREPOINT_MAX_DOWNLOAD_URL_LENGTH)
             .describe(
-              'The pre-authenticated download URL for the file. This is the @microsoft.graph.downloadUrl property returned by getDriveItems. Note: these URLs are time-limited and should be used promptly.'
+              'The pre-authenticated download URL for the file. This is the @microsoft.graph.downloadUrl property returned by getDriveItems, and must be an https URL on a *.sharepoint.com host. Note: these URLs are time-limited and should be used promptly.'
             ),
         })
       ),
@@ -671,9 +671,18 @@ export const SharepointOnline: ConnectorSpec = {
             'downloadItemFromURL requires a downloadUrl. Use getDriveItems to find items with @microsoft.graph.downloadUrl.'
           );
         }
-        ctx.log.debug(`SharePoint downloading item from URL ${typedInput.downloadUrl}`);
+        const { protocol, hostname } = new URL(typedInput.downloadUrl);
+        if (protocol !== 'https:' || !hostname.endsWith('.sharepoint.com')) {
+          throw new Error(
+            `downloadItemFromURL only downloads from https://*.sharepoint.com, not ${protocol}//${hostname}. Use the @microsoft.graph.downloadUrl returned by getDriveItems.`
+          );
+        }
+        ctx.log.debug(`SharePoint downloading item from ${hostname}`);
+        // The download URL carries its own short-lived token; ctx.client's Graph
+        // bearer token must not travel with it.
         const response = await ctx.client.get(typedInput.downloadUrl, {
           responseType: 'arraybuffer',
+          headers: { Authorization: undefined },
         });
         const buffer = Buffer.from(response.data);
         return {

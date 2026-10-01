@@ -190,7 +190,7 @@ export const ZoomDownloadRecordingFileInputSchema = lazySchema(() =>
       .url()
       .max(2048)
       .describe(
-        'The download_url from a recording file object (obtained via getMeetingRecordings or listUserRecordings)'
+        'The download_url from a recording file object (obtained via getMeetingRecordings or listUserRecordings). Must be an https URL on zoom.us or a zoom.us subdomain.'
       ),
     maxChars: z
       .number()

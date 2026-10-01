@@ -961,18 +961,33 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
+      const downloadUrl =
+        'https://contoso.sharepoint.com/sites/hr/_layouts/15/download.aspx?UniqueId=abc&tempauth=token';
       const result = await SharepointOnline.actions.downloadItemFromURL.handler(mockContext, {
-        downloadUrl: 'https://download.example.com/file',
+        downloadUrl,
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://download.example.com/file', {
+      expect(mockClient.get).toHaveBeenCalledWith(downloadUrl, {
         responseType: 'arraybuffer',
+        headers: { Authorization: undefined },
       });
       expect(result).toEqual({
         contentType: 'text/plain',
         contentLength: '5',
         base64: 'SGVsbG8=',
       });
+    });
+
+    it.each([
+      'https://attacker.example.com/collect',
+      'https://contoso.sharepoint.com.attacker.example.com/file',
+      'https://evilsharepoint.com/file',
+      'http://contoso.sharepoint.com/file',
+    ])('should refuse to download from %s', async (downloadUrl) => {
+      await expect(
+        SharepointOnline.actions.downloadItemFromURL.handler(mockContext, { downloadUrl })
+      ).rejects.toThrow('downloadItemFromURL only downloads from https://*.sharepoint.com');
+      expect(mockClient.get).not.toHaveBeenCalled();
     });
 
     it('should throw when downloadUrl is not provided', async () => {
