@@ -47,9 +47,24 @@ export interface EngineComponentStatus {
   errors?: Array<{ title?: string; message?: string }>;
 }
 
+export interface EntityStoreHistorySnapshotStatus {
+  status: 'started' | 'stopped';
+  frequency: string;
+  retentionDays: number;
+  lastExecutionTimestamp?: string;
+  lastError?: {
+    message: string;
+    timestamp?: string;
+  };
+  /** Present when the status request sets `include_components=true`. */
+  components?: EngineComponentStatus[];
+}
+
 export interface GetEntityStoreStatusResponse {
   status: EntityStoreStatus;
   engines: Array<EngineDescriptor & { components?: EngineComponentStatus[] }>;
+  /** Omitted when the Entity Store is not installed. */
+  historySnapshot?: EntityStoreHistorySnapshotStatus;
 }
 
 export interface InitEntityStoreResponse {

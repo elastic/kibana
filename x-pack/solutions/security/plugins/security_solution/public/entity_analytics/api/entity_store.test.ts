@@ -63,6 +63,31 @@ describe('useEntityStoreRoutes — executionContext propagation to prebuilt watc
     );
   });
 
+  it('enables the history snapshot task', async () => {
+    const { result } = renderHook(() => useEntityStoreRoutes());
+
+    await result.current.enableHistorySnapshot();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      ENTITY_STORE_ROUTES.public.ENABLE_HISTORY_SNAPSHOT,
+      expect.objectContaining({ method: 'PUT' })
+    );
+  });
+
+  it('disables the history snapshot task without deleting existing snapshots', async () => {
+    const { result } = renderHook(() => useEntityStoreRoutes());
+
+    await result.current.disableHistorySnapshot();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      ENTITY_STORE_ROUTES.public.DISABLE_HISTORY_SNAPSHOT,
+      expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({ clearHistorySnapshots: false }),
+      })
+    );
+  });
+
   it('does not fail when installEntityStore is called without context', async () => {
     const { result } = renderHook(() => useEntityStoreRoutes());
 

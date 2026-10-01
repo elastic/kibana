@@ -185,6 +185,7 @@ export type {
   EngineDescriptor,
   EngineComponentResource,
   EngineComponentStatus,
+  EntityStoreHistorySnapshotStatus,
   GetEntityStoreStatusResponse,
   InitEntityStoreResponse,
   InspectQuery,

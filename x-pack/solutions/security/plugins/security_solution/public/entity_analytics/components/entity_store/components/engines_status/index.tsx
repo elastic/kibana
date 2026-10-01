@@ -22,6 +22,7 @@ import { useEntityStoreTypes } from '../../../../hooks/use_enabled_entity_types'
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { downloadBlob } from '../../../../../common/utils/download_blob';
 import { EngineComponentsStatusTable } from './components/engine_components_status';
+import { HistorySnapshotStatus } from './components/history_snapshot_status';
 import { useEntityStoreStatus } from '../../hooks/use_entity_store';
 import { isEngineLoading } from './helpers';
 import { EngineStatusHeader } from './components/engine_status_header';
@@ -109,6 +110,7 @@ export const EngineStatus = () => {
             </Fragment>
           );
         })}
+        {data.historySnapshot && <HistorySnapshotStatus historySnapshot={data.historySnapshot} />}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

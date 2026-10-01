@@ -37,6 +37,14 @@ const ENTITY_STORE_DELETE_CONTEXT = buildExecutionContext(
   EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_MANAGEMENT,
   'entity_store_delete'
 );
+const ENTITY_STORE_ENABLE_HISTORY_SNAPSHOT_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_MANAGEMENT,
+  'history_snapshot_enable'
+);
+const ENTITY_STORE_DISABLE_HISTORY_SNAPSHOT_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_MANAGEMENT,
+  'history_snapshot_disable'
+);
 
 const ENTITY_STORE_STATUS = ['GET', 'ENTITY_STORE_STATUS'];
 
@@ -131,6 +139,34 @@ export const useStopEntityStoreMutation = () => {
     },
     {
       mutationKey: STOP_ENTITY_STORE_KEY,
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
+    }
+  );
+};
+
+export const ENABLE_HISTORY_SNAPSHOT_KEY = ['PUT', 'ENABLE_HISTORY_SNAPSHOT'];
+export const useEnableHistorySnapshotMutation = () => {
+  const queryClient = useQueryClient();
+  const { enableHistorySnapshot } = useEntityStoreRoutes();
+
+  return useMutation<unknown, ResponseError, void>(
+    () => enableHistorySnapshot(ENTITY_STORE_ENABLE_HISTORY_SNAPSHOT_CONTEXT),
+    {
+      mutationKey: ENABLE_HISTORY_SNAPSHOT_KEY,
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
+    }
+  );
+};
+
+export const DISABLE_HISTORY_SNAPSHOT_KEY = ['PUT', 'DISABLE_HISTORY_SNAPSHOT'];
+export const useDisableHistorySnapshotMutation = () => {
+  const queryClient = useQueryClient();
+  const { disableHistorySnapshot } = useEntityStoreRoutes();
+
+  return useMutation<unknown, ResponseError, void>(
+    () => disableHistorySnapshot(ENTITY_STORE_DISABLE_HISTORY_SNAPSHOT_CONTEXT),
+    {
+      mutationKey: DISABLE_HISTORY_SNAPSHOT_KEY,
       onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
     }
   );
