@@ -37,8 +37,7 @@ interface CreateAlertAttachmentTypeOptions {
   }) => PrivilegeChecker;
 }
 
-const parseAlertAttachmentData = (input: unknown) =>
-  alertAttachmentDataSchema.safeParse(input);
+const parseAlertAttachmentData = (input: unknown) => alertAttachmentDataSchema.safeParse(input);
 
 const formatAlertDescription = ({
   attachmentId,
