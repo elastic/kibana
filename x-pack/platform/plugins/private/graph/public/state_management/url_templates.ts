@@ -11,14 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { modifyUrl } from '@kbn/std';
 import rison from '@kbn/rison';
 import { format, parse } from 'url';
-import type { GraphState, GraphStoreDependencies, StartGraphListening } from './store';
+import type { GraphState } from './store';
 import type { UrlTemplate } from '../types';
 import { reset } from './global';
 import type { IndexpatternDatasource } from './datasource';
 import { setDatasource, requestDatasource } from './datasource';
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { urlTemplatePlaceholder } from '../helpers/url_template';
-import { matchesOne } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 
@@ -108,24 +107,3 @@ export const urlTemplatesReducer = (addBasePath: (url: string) => string) =>
     .build();
 
 export const templatesSelector = (state: GraphState) => state.urlTemplates;
-
-/**
- * Listener making sure the templates are always synced up to the scope.
- *
- * Won't be necessary once the side bar is moved to redux
- */
-export const registerUrlTemplatesListeners = (
-  startListening: StartGraphListening,
-  { notifyReact }: GraphStoreDependencies
-) => {
-  startListening({
-    predicate: matchesOne(
-      loadTemplates,
-      saveTemplate,
-      removeTemplate,
-      requestDatasource,
-      setDatasource
-    ),
-    effect: () => notifyReact(),
-  });
-};

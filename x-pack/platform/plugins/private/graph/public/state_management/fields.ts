@@ -13,7 +13,7 @@ import type { GraphState, GraphStoreDependencies, StartGraphListening } from './
 import { reset } from './global';
 import { setDatasource } from './datasource';
 import type { InferActionType, MatchedAction } from './helpers';
-import { matchesAction, matchesOne } from './helpers';
+import { matchesAction } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/fields');
 
@@ -64,25 +64,12 @@ export const hasFieldsSelector = createSelector(
   (fields) => fields.length > 0
 );
 
-/**
- * Listener making notifying react when fields are selected to re-calculate the state of the save button.
- *
- * Won't be necessary once the workspace is moved to redux
- */
 export const registerFieldsListeners = (
   startListening: StartGraphListening,
   { getRuntimeGraph, notifyReact }: GraphStoreDependencies
 ) => {
-  startListening({
-    predicate: matchesOne(selectField, deselectField),
-    effect: () => notifyReact(),
-  });
-
   /**
-   * Listener making sure the field styles (icons and colors) are applied to nodes currently active
-   * in the workspace.
-   *
-   * Won't be necessary once the workspace is moved to redux
+   * Keep mutable D3 nodes visually aligned with field styles stored in Redux.
    */
   startListening({
     matcher: matchesAction(updateFieldProperties),

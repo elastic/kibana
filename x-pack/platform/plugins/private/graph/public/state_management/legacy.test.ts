@@ -9,7 +9,6 @@ import type { MockedGraphEnvironment } from './mocks';
 import { createMockGraphStore } from './mocks';
 import { registerFieldsListeners, updateFieldProperties } from './fields';
 import type { WorkspaceField, WorkspaceNode } from '../types';
-import { loadTemplates, registerUrlTemplatesListeners } from './url_templates';
 
 /**
  * This suite tests listeners that only exist to sync the legacy world
@@ -21,7 +20,7 @@ describe('legacy sync listeners', () => {
 
   beforeEach(() => {
     env = createMockGraphStore({
-      listeners: [registerFieldsListeners, registerUrlTemplatesListeners],
+      listeners: [registerFieldsListeners],
       initialStateOverwrites: {
         fields: {
           field1: {
@@ -57,11 +56,6 @@ describe('legacy sync listeners', () => {
         prevName: 'b',
       },
     } as WorkspaceNode);
-  });
-
-  it('syncs templates with workspace', () => {
-    env.store.dispatch(loadTemplates([]));
-    expect(env.mockedDeps.notifyReact).toHaveBeenCalled();
   });
 
   it('syncs styles with nodes', () => {

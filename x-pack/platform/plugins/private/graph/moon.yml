@@ -38,7 +38,6 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/rison'
   - '@kbn/std'
-  - '@kbn/utility-types'
   - '@kbn/react-field'
   - '@kbn/shared-ux-router'
   - '@kbn/saved-objects-management-plugin'

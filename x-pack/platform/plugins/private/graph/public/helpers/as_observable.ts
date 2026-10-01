@@ -16,9 +16,7 @@ interface Props {
  * It is roughly comparable to `reactDirective`, but does not have to be used from within a
  * template.
  *
- * This is a temporary solution until the state of RuntimeGraph internals is moved outside
- * of mutable object to the redux state (at least blocklistedNodes, canEditDrillDownUrls and
- * unblocklist action in this case).
+ * This adapts Redux-backed settings props to the observable contract expected by the flyout.
  *
  * @param collectProps Function that collects properties from the scope that should be passed
  * into the observable. All functions passed along will be wrapped to cause a react render
