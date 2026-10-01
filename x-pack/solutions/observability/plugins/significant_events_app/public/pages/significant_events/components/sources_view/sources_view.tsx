@@ -7,7 +7,6 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import { KIS_ONBOARDING_IN_PROGRESS_STATUSES } from '@kbn/significant-events-schema';
 import React, { useCallback, useState } from 'react';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
@@ -24,6 +23,7 @@ import { getGenerateDisabledTooltip } from '../shared/translations';
 import { ConfirmSourceActionModal, type SourceAction } from './confirm_source_action_modal';
 import { SourceFlyout } from './source_flyout/source_flyout';
 import { SourcesTable } from './sources_table';
+import { isOnboardingInProgress } from './utils';
 import {
   CREATE_SOURCE_BUTTON_LABEL,
   EMPTY_STATE_BODY,
@@ -36,6 +36,7 @@ import {
   SOURCES_TABLE_SEARCH_PLACEHOLDER,
 } from './translations';
 
+/** Sources tab: the catalog table, its bulk onboarding controls and the create/edit flyout. */
 export function SourcesView() {
   const {
     core: {
@@ -89,8 +90,8 @@ export function SourcesView() {
       if (!source.enabled || generatingStreamNames.includes(source.id)) {
         return false;
       }
-      const result = streamStatusMap[source.id];
-      return !!result && !KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(result.status);
+      // No status yet means nothing has run for the source, e.g. it was just created.
+      return !isOnboardingInProgress(streamStatusMap[source.id]?.status);
     },
     [generatingStreamNames, streamStatusMap]
   );
@@ -100,10 +101,11 @@ export function SourcesView() {
   const selectedSources = sources.filter(({ id }) => selectedSourceIds.includes(id));
 
   const onboardSelectedSources =
-    (onboard: (sourceIds: string[]) => Promise<unknown>) => async () => {
+    (onboard: (sourceIds: string[]) => Promise<string[]>) => async () => {
       const sourceIds = selectedSources.filter(isSourceActionable).map(({ id }) => id);
-      setSelectedSourceIds([]);
-      await onboard(sourceIds);
+      const scheduledIds = await onboard(sourceIds);
+      // Only scheduled rows leave the selection, so failed ones can be retried without re-picking.
+      setSelectedSourceIds((current) => current.filter((id) => !scheduledIds.includes(id)));
     };
 
   const onConfirmPendingAction = () => {

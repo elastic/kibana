@@ -93,6 +93,28 @@ describe('reconcileSourceCatalog', () => {
     expect(kiClient.deleteOwnedRules).not.toHaveBeenCalled();
   });
 
+  it('aligns the remaining sources and sweeps orphans before reporting a failing source', async () => {
+    const kiClient = makeKiClient(['first', 'second']);
+    cancelBySourceSlug.mockRejectedValueOnce(new Error('cancel rejected'));
+
+    await expect(
+      reconcileSourceCatalog({
+        sourcesClient: makeSourcesClient([
+          makeSource({ id: 'first', enabled: false }),
+          makeSource({ id: 'second', enabled: false }),
+        ]),
+        kiClient,
+        onboardingClient: onboardingWithRuns(['first-slug', 'orphan-slug']),
+        maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+        request,
+      })
+    ).rejects.toThrow('cancel rejected');
+
+    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('first', false);
+    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('second', false);
+    expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'orphan-slug', request });
+  });
+
   it('enables rules for an enabled source and leaves onboarding running', async () => {
     const kiClient = makeKiClient(['enabled-source']);
     await reconcileSourceCatalog({

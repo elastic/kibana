@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourceChangeListener, SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
@@ -109,35 +109,35 @@ async function applySourceEnabled({
   onboardingClient,
   maintenanceState,
   request,
-  mayHaveRunningOnboarding = true,
-  mayOwnRules = true,
+  skipCancel = false,
+  skipRuleToggle = false,
 }: {
   source: Pick<NightshiftSource, 'id' | 'slug' | 'enabled'>;
   kiClient: Pick<CatalogKiClient, 'setSourceRulesEnabled'>;
   onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
   maintenanceState: SignificantEventsMaintenanceState;
   request: KibanaRequest;
-  /** `false` skips the cancel. The reconcile knows which runs are going; the listener does not. */
-  mayHaveRunningOnboarding?: boolean;
-  /** `false` skips the rule toggle. The reconcile knows which sources own rules; the listener does not. */
-  mayOwnRules?: boolean;
+  /** The reconcile knows which runs are going and skips the cancel; the listener does not, so it cancels. */
+  skipCancel?: boolean;
+  /** The reconcile knows which sources own rules and skips the toggle; the listener does not, so it toggles. */
+  skipRuleToggle?: boolean;
 }): Promise<void> {
   if (!source.enabled) {
     await cancelOnboardingThen({
-      onboardingClient: mayHaveRunningOnboarding ? onboardingClient : undefined,
+      onboardingClient: skipCancel ? undefined : onboardingClient,
       sourceSlug: source.slug,
       request,
       cleanup: async () => {
-        if (mayOwnRules) {
+        if (!skipRuleToggle) {
           await kiClient.setSourceRulesEnabled(source.id, false);
         }
       },
     });
     return;
   }
-  // A pause keeps rules off. Resume only restores the rules the pause disabled, so a source
-  // enabled meanwhile gets its rules back from the next catalog reconcile.
-  if (maintenanceState !== 'paused' && mayOwnRules) {
+  // While paused, rules stay off. After a resume, only the rules the pause disabled come back,
+  // so a source enabled in between gets its rules from the next catalog reconcile.
+  if (maintenanceState !== 'paused' && !skipRuleToggle) {
     await kiClient.setSourceRulesEnabled(source.id, true);
   }
 }
@@ -153,10 +153,12 @@ export const createSourceChangeListener =
     getScopedClients,
     onboardingClient,
     maintenanceService,
+    logger,
   }: {
     getScopedClients: GetScopedClients;
     onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
     maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
+    logger?: Pick<Logger, 'warn'>;
   }): SourceChangeListener =>
   async (event) => {
     const isDeleted = event.type === 'deleted';
@@ -173,6 +175,12 @@ export const createSourceChangeListener =
     const { getKnowledgeIndicatorClient } = await getScopedClients({ request: event.request });
     const kiClient = await getKnowledgeIndicatorClient();
     if (isDeleted || isQueryChanged) {
+      if (isQueryChanged) {
+        // Nothing re-onboards the source, so detection coverage stays empty until the next run.
+        logger?.warn(
+          `Query of source "${event.source.id}" changed: its rules, queries and knowledge indicators were removed until it is onboarded again`
+        );
+      }
       await resetSourceKnowledge({
         source: event.source,
         kiClient,
@@ -224,16 +232,23 @@ export async function reconcileSourceCatalog({
   const catalogSlugs = new Set(sources.map((source) => source.slug));
   const ownedRuleSourceIds = new Set(ownedRuleIds);
 
+  // One failing source must not leave the others' rules firing or skip the orphan sweep below,
+  // so failures are collected and thrown once everything else ran.
+  const failures: unknown[] = [];
   for (const source of sources) {
-    await applySourceEnabled({
-      source,
-      kiClient,
-      onboardingClient,
-      maintenanceState,
-      request,
-      mayHaveRunningOnboarding: runningSourceSlugs.has(source.slug),
-      mayOwnRules: ownedRuleSourceIds.has(source.id),
-    });
+    try {
+      await applySourceEnabled({
+        source,
+        kiClient,
+        onboardingClient,
+        maintenanceState,
+        request,
+        skipCancel: !runningSourceSlugs.has(source.slug),
+        skipRuleToggle: !ownedRuleSourceIds.has(source.id),
+      });
+    } catch (error) {
+      failures.push(error);
+    }
   }
 
   // Cancel before retiring: a run left going could write indicators or rules back for a
@@ -255,6 +270,12 @@ export async function reconcileSourceCatalog({
       continue;
     }
     await retireSourceKnowledge({ sourceId, kiClient });
+  }
+
+  if (failures.length > 0) {
+    throw failures.length === 1
+      ? failures[0]
+      : new AggregateError(failures, 'Failed to align several sources with the catalog');
   }
 
   return { sources, reconcileIds: survivingReconcileIds };

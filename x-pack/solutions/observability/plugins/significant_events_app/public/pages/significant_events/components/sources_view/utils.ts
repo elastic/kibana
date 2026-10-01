@@ -7,9 +7,20 @@
 
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
+  KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+  type SignificantEventsWorkflowStatusResult,
+} from '@kbn/significant-events-schema';
+import {
   RUN_SOURCE_ONBOARDING_BUTTON_LABEL,
   RUN_SOURCE_ONBOARDING_CROSS_PROJECT_TOOLTIP,
 } from './translations';
+
+/** True while an onboarding run for the source is going or being canceled. */
+export function isOnboardingInProgress(
+  status: SignificantEventsWorkflowStatusResult['status'] | undefined
+): boolean {
+  return status !== undefined && KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(status);
+}
 
 /** Keeps the sources whose title, tags or query contain the text, ignoring case. */
 export function filterSourcesByQuery(

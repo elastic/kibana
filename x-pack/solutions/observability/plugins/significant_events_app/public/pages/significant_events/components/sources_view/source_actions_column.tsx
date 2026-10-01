@@ -8,7 +8,6 @@
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
-  KIS_ONBOARDING_IN_PROGRESS_STATUSES,
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
@@ -16,9 +15,11 @@ import React from 'react';
 import {
   DELETE_SOURCE_ACTION_DESCRIPTION,
   DELETE_SOURCE_ACTION_LABEL,
+  ENABLE_SOURCE_TO_ONBOARD_TOOLTIP,
   RUN_SOURCE_ONBOARDING_BUTTON_LABEL,
   STOP_SOURCE_ONBOARDING_BUTTON_LABEL,
 } from './translations';
+import { isOnboardingInProgress } from './utils';
 
 interface SourceActionsColumnProps {
   source: NightshiftSource;
@@ -44,9 +45,6 @@ export function SourceActionsColumn({
   onStopOnboarding,
   onDelete,
 }: SourceActionsColumnProps) {
-  const isOnboardingInProgress =
-    onboardingStatus !== undefined && KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingStatus);
-
   return (
     <EuiFlexGroup
       data-test-subj={`significantEventsAppSourceActions-${source.id}`}
@@ -55,7 +53,7 @@ export function SourceActionsColumn({
       wrap={false}
     >
       <EuiFlexItem grow={false}>
-        {isOnboardingInProgress ? (
+        {isOnboardingInProgress(onboardingStatus) ? (
           <EuiToolTip content={STOP_SOURCE_ONBOARDING_BUTTON_LABEL} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="significantEventsAppSourcesTableStopButton"
@@ -66,7 +64,7 @@ export function SourceActionsColumn({
             />
           </EuiToolTip>
         ) : (
-          <EuiToolTip content={onboardTooltip}>
+          <EuiToolTip content={source.enabled ? onboardTooltip : ENABLE_SOURCE_TO_ONBOARD_TOOLTIP}>
             <EuiButtonIcon
               data-test-subj="significantEventsAppSourcesTableOnboardButton"
               iconType="radar"

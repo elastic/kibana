@@ -81,6 +81,11 @@ export const RUN_SOURCE_ONBOARDING_CROSS_PROJECT_TOOLTIP = i18n.translate(
   }
 );
 
+export const ENABLE_SOURCE_TO_ONBOARD_TOOLTIP = i18n.translate(
+  'xpack.significantEventsApp.sourcesView.enableSourceToOnboardTooltip',
+  { defaultMessage: 'Enable the source to onboard it' }
+);
+
 export const STOP_SOURCE_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.significantEventsApp.sources.stopOnboardingButtonLabel',
   { defaultMessage: 'Stop source onboarding' }

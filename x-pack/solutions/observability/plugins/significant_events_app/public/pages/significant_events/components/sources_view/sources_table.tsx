@@ -47,22 +47,7 @@ import { filterSourcesByQuery, getOnboardSourceTooltip } from './utils';
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100];
 
-export function SourcesTable({
-  loading,
-  sources,
-  onboardingResultMap,
-  searchText,
-  selection,
-  blocksActivity = false,
-  activityBlockTooltip,
-  canManage,
-  pendingEnabledSourceId,
-  onOpenSource,
-  onToggleSourceEnabled,
-  onOnboardSource,
-  onStopOnboarding,
-  onDeleteSource,
-}: {
+interface ISourcesTableProps {
   sources: NightshiftSource[];
   onboardingResultMap: Record<string, SignificantEventsWorkflowStatusResult>;
   loading?: boolean;
@@ -81,7 +66,25 @@ export function SourcesTable({
   onOnboardSource: (sourceId: string) => void;
   onStopOnboarding: (sourceId: string) => void;
   onDeleteSource: (source: NightshiftSource) => void;
-}) {
+}
+
+/** Catalog table with selection, inline enable switch, onboarding status and row actions. */
+export function SourcesTable({
+  loading,
+  sources,
+  onboardingResultMap,
+  searchText,
+  selection,
+  blocksActivity = false,
+  activityBlockTooltip,
+  canManage,
+  pendingEnabledSourceId,
+  onOpenSource,
+  onToggleSourceEnabled,
+  onOnboardSource,
+  onStopOnboarding,
+  onDeleteSource,
+}: ISourcesTableProps) {
   const {
     dependencies: {
       start: { cps },
@@ -202,7 +205,7 @@ export function SourcesTable({
       align: 'left',
       render: (source: NightshiftSource) => (
         <QueriesColumn
-          streamName={source.id}
+          sourceId={source.id}
           streamOnboardingResult={onboardingResultMap[source.id]}
         />
       ),
@@ -223,7 +226,7 @@ export function SourcesTable({
       ),
       width: '210px',
       align: 'left',
-      render: (source: NightshiftSource) => <SignificantEventsColumn streamName={source.id} />,
+      render: (source: NightshiftSource) => <SignificantEventsColumn sourceId={source.id} />,
     },
     ...(canManage ? [actionsColumn] : []),
   ];
