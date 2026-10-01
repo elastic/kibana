@@ -36,9 +36,7 @@ describe('SyncAlertsToggle', () => {
     const syncAlerts = await screen.findByTestId('caseSyncAlerts');
     expect(syncAlerts).toBeInTheDocument();
     expect(within(syncAlerts).getByRole('switch')).toHaveAttribute('aria-checked', 'true');
-    expect(
-      within(syncAlerts).getByText('Sync detection status with case status')
-    ).toBeInTheDocument();
+    expect(within(syncAlerts).getByText('Sync alert status with case status')).toBeInTheDocument();
   });
 
   it('it toggles the switch', async () => {
@@ -53,7 +51,7 @@ describe('SyncAlertsToggle', () => {
     await userEvent.click(within(syncAlerts).getByRole('switch'));
 
     expect(await screen.findByRole('switch')).toHaveAttribute('aria-checked', 'false');
-    expect(await screen.findByText('Sync detection status with case status')).toBeInTheDocument();
+    expect(await screen.findByText('Sync alert status with case status')).toBeInTheDocument();
   });
 
   it('it renders with default value', async () => {

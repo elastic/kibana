@@ -3179,7 +3179,7 @@ describe('update', () => {
     });
   });
 
-  describe('Detection status sync', () => {
+  describe('Attack status sync', () => {
     const clientArgs = createCasesClientMockArgs();
 
     type FoundAttachment = SavedObjectsFindResult<AttachmentAttributes>;
@@ -3269,7 +3269,7 @@ describe('update', () => {
         casesClientMock
       );
 
-    it('closes the attack document alongside its attached alerts', async () => {
+    it('closes the attack document and its attached alerts in separate calls', async () => {
       const alertAttachment = {
         ...mockCaseComments[3],
         score: 0,
@@ -3280,6 +3280,10 @@ describe('update', () => {
 
       await patchStatus(CaseStatuses.closed, 'false_positive');
 
+      // Attacks are synced on their own so their updated document count never lands in
+      // `syncedAlertCount`.
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledTimes(2);
+
       expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
         {
           id: 'attack-doc-1',
@@ -3287,6 +3291,9 @@ describe('update', () => {
           status: CaseStatuses.closed,
           closingReason: 'false_positive',
         },
+      ]);
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
         {
           id: 'test-id',
           index: 'test-index',
@@ -3294,6 +3301,14 @@ describe('update', () => {
           closingReason: 'false_positive',
         },
       ]);
+    });
+
+    it('does not count synced attacks towards the synced alert count', async () => {
+      mockAttachments([attackAttachment]);
+
+      const updatedCases = await patchStatus(CaseStatuses['in-progress']);
+
+      expect(updatedCases[0]).not.toHaveProperty('updateSummary');
     });
 
     it('syncs an attack attached from the adhoc index', async () => {

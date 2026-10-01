@@ -1352,12 +1352,52 @@ describe('AttachmentService', () => {
           ],
         });
 
-        await expect(
-          svc.bulkDelete({ savedObjectIds: ['id-1'], refresh: false })
-        ).resolves.toBeUndefined();
+        await expect(svc.bulkDelete({ savedObjectIds: ['id-1'], refresh: false })).resolves.toEqual(
+          []
+        );
         expect(mockLogger.warn).toHaveBeenCalledWith(
           expect.stringContaining('attachments mirror dispatch threw')
         );
+      });
+    });
+
+    describe('reporting failed deletes', () => {
+      it('returns the ids whose delete failed with a non-404', async () => {
+        const svc = makeService(makeMirrorWriter());
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            { id: 'id-1', type: CASE_ATTACHMENT_SAVED_OBJECT, success: true },
+            {
+              id: 'id-1',
+              type: CASE_COMMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            {
+              id: 'id-2',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 500, error: 'Internal Error', message: 'boom' },
+            },
+            {
+              id: 'id-2',
+              type: CASE_COMMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+          ],
+        });
+
+        await expect(
+          svc.bulkDelete({ savedObjectIds: ['id-1', 'id-2'], refresh: false })
+        ).resolves.toEqual(['id-2']);
+      });
+
+      it('returns an empty array when there is nothing to delete', async () => {
+        const svc = makeService(makeMirrorWriter());
+
+        await expect(svc.bulkDelete({ savedObjectIds: [], refresh: false })).resolves.toEqual([]);
+        expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
       });
     });
   });

@@ -19,7 +19,7 @@ import {
   ConfigurationsRt,
   UserActionsRt,
 } from '../../common/types/domain';
-import { isAlertAttachmentType } from '../../common/utils/attachments';
+import { isAlertAttachmentType, isAttackAttachmentType } from '../../common/utils/attachments';
 import type {
   CasePatchRequest,
   CaseResolveResponse,
@@ -134,8 +134,10 @@ export const createUpdateSuccessToaster = (
   key: UpdateByKey['updateKey'],
   value: UpdateByKey['updateValue']
 ): ToastInputFields => {
-  const caseHasAlerts = caseBeforeUpdate.comments.some((comment) =>
-    isAlertAttachmentType(comment.type)
+  // Attacks sync with the case status too, so turning the toggle on is worth confirming even
+  // when the case has no alerts attached.
+  const caseHasAlerts = caseBeforeUpdate.comments.some(
+    (comment) => isAlertAttachmentType(comment.type) || isAttackAttachmentType(comment.type)
   );
 
   const toast: ToastInputFields = {

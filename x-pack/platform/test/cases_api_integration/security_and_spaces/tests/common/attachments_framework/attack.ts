@@ -65,12 +65,15 @@ const alertAttachments = ALERT_IDS.map((alertId) => ({
   },
 }));
 
-/** `security.alert` attachment ids read back as an array even when posted as a single id. */
-const toIds = (attachmentId: string | string[] | undefined): string[] => {
-  if (attachmentId == null) {
+/**
+ * `security.alert` attachments are batched, so a single id or index posted as a scalar reads
+ * back inside an array. Normalise both before asserting.
+ */
+const toArray = (value: string | string[] | undefined): string[] => {
+  if (value == null) {
     return [];
   }
-  return Array.isArray(attachmentId) ? attachmentId : [attachmentId];
+  return Array.isArray(value) ? value : [value];
 };
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -114,14 +117,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const alerts = updatedCase.comments!.filter(
           (comment) => comment.type === SECURITY_ALERT_ATTACHMENT_TYPE
-        ) as unknown as Array<{ attachmentId: string | string[]; metadata: { index: string } }>;
+        ) as unknown as Array<{
+          attachmentId: string | string[];
+          metadata: { index: string | string[] };
+        }>;
         // `security.alert` batches its ids, so an attachment reads back with an array id even
         // when it was posted with a single one.
-        expect(alerts.flatMap(({ attachmentId }) => toIds(attachmentId)).sort()).to.eql(
+        expect(alerts.flatMap(({ attachmentId }) => toArray(attachmentId)).sort()).to.eql(
           [...ALERT_IDS].sort()
         );
         for (const alert of alerts) {
-          expect(alert.metadata.index).to.eql(ALERT_INDEX);
+          // `metadata.index` is batched alongside the ids, so it reads back as an array too.
+          expect(toArray(alert.metadata.index)).to.eql([ALERT_INDEX]);
         }
 
         // Both attachment kinds land in the unified `cases-attachments` saved object.
@@ -163,7 +170,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(
           comments
             .filter((comment) => comment.type !== SECURITY_ATTACK_ATTACHMENT_TYPE)
-            .flatMap((comment) => toIds(comment.alertId ?? comment.attachmentId))
+            .flatMap((comment) => toArray(comment.alertId ?? comment.attachmentId))
             .sort()
         ).to.eql([...ALERT_IDS].sort());
       });
@@ -234,7 +241,7 @@ export default ({ getService }: FtrProviderContext): void => {
         return attachments
           .filter(isAlertAttachment)
           .filter(({ attachmentId, alertId }) => {
-            const ids = toIds(alertId ?? attachmentId);
+            const ids = toArray(alertId ?? attachmentId);
             return (
               ids.length > 0 && ids.every((id) => attackSet.has(id) && !claimedByOthers.has(id))
             );
@@ -274,7 +281,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const alertIdsOf = (attachments: Attachment[]): string[] =>
         attachments
           .filter(({ type }) => type !== SECURITY_ATTACK_ATTACHMENT_TYPE)
-          .flatMap(({ alertId, attachmentId }) => toIds(alertId ?? attachmentId))
+          .flatMap(({ alertId, attachmentId }) => toArray(alertId ?? attachmentId))
           .sort();
 
       it('removes only the attack attachment when no alerts were opted in', async () => {

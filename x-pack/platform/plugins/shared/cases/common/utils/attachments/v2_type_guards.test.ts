@@ -13,12 +13,12 @@ import {
   STACK_ALERT_ATTACHMENT_TYPE,
 } from '../../constants/attachments';
 import { AttachmentType } from '../../types/domain';
+import type { AttachmentRequestV2 } from '../../types/api';
 import {
   isAlertAttachmentType,
-  isDetectionAttachmentType,
+  isAttackAttachmentType,
+  isUnifiedAttackAttachment,
   UNIFIED_ALERT_TYPES,
-  UNIFIED_DETECTION_TYPES,
-  UNIFIED_DETECTION_TYPES_ARRAY,
 } from './v2_type_guards';
 
 describe('v2 type guards', () => {
@@ -38,35 +38,54 @@ describe('v2 type guards', () => {
     });
   });
 
-  describe('UNIFIED_DETECTION_TYPES', () => {
-    it('is the union of the unified alert types and security.attack', () => {
-      expect(UNIFIED_DETECTION_TYPES_ARRAY).toEqual([
-        SECURITY_ALERT_ATTACHMENT_TYPE,
-        OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
-        STACK_ALERT_ATTACHMENT_TYPE,
-        SECURITY_ATTACK_ATTACHMENT_TYPE,
-      ]);
+  describe('isAttackAttachmentType', () => {
+    it('is true only for security.attack', () => {
+      expect(isAttackAttachmentType(SECURITY_ATTACK_ATTACHMENT_TYPE)).toBe(true);
+    });
+
+    it('is false for alert types and the legacy alert type', () => {
+      expect(isAttackAttachmentType(AttachmentType.alert)).toBe(false);
+      expect(isAttackAttachmentType(SECURITY_ALERT_ATTACHMENT_TYPE)).toBe(false);
+      expect(isAttackAttachmentType(OBSERVABILITY_ALERT_ATTACHMENT_TYPE)).toBe(false);
+      expect(isAttackAttachmentType(STACK_ALERT_ATTACHMENT_TYPE)).toBe(false);
+      expect(isAttackAttachmentType(SECURITY_ENTITY_ATTACHMENT_TYPE)).toBe(false);
+      expect(isAttackAttachmentType('something-custom')).toBe(false);
     });
 
     it('leaves UNIFIED_ALERT_TYPES untouched', () => {
       expect(UNIFIED_ALERT_TYPES.has(SECURITY_ATTACK_ATTACHMENT_TYPE)).toBe(false);
       expect(UNIFIED_ALERT_TYPES.size).toBe(3);
-      expect(UNIFIED_DETECTION_TYPES.size).toBe(4);
     });
   });
 
-  describe('isDetectionAttachmentType', () => {
-    it('is true for the legacy alert type, every unified alert type and security.attack', () => {
-      expect(isDetectionAttachmentType(AttachmentType.alert)).toBe(true);
-      expect(isDetectionAttachmentType(SECURITY_ALERT_ATTACHMENT_TYPE)).toBe(true);
-      expect(isDetectionAttachmentType(OBSERVABILITY_ALERT_ATTACHMENT_TYPE)).toBe(true);
-      expect(isDetectionAttachmentType(STACK_ALERT_ATTACHMENT_TYPE)).toBe(true);
-      expect(isDetectionAttachmentType(SECURITY_ATTACK_ATTACHMENT_TYPE)).toBe(true);
+  describe('isUnifiedAttackAttachment', () => {
+    it('is true for a reference attachment of type security.attack', () => {
+      expect(
+        isUnifiedAttackAttachment({
+          type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+          owner: 'securitySolution',
+          attachmentId: 'attack-1',
+          metadata: { index: '.alerts-security.attack.discovery.alerts-default' },
+        } as AttachmentRequestV2)
+      ).toBe(true);
     });
 
-    it('is false for attachment types that carry no workflow status', () => {
-      expect(isDetectionAttachmentType(SECURITY_ENTITY_ATTACHMENT_TYPE)).toBe(false);
-      expect(isDetectionAttachmentType('something-custom')).toBe(false);
+    it('is false for a value attachment and for other reference types', () => {
+      expect(
+        isUnifiedAttackAttachment({
+          type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+          owner: 'securitySolution',
+          data: { content: 'not a reference' },
+        } as unknown as AttachmentRequestV2)
+      ).toBe(false);
+
+      expect(
+        isUnifiedAttackAttachment({
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          owner: 'securitySolution',
+          attachmentId: 'alert-1',
+        } as AttachmentRequestV2)
+      ).toBe(false);
     });
   });
 });

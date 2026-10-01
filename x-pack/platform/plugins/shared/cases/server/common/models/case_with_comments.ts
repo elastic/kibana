@@ -14,7 +14,11 @@ import type {
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
-import { isAlertAttachmentType, isEventAttachmentType } from '../../../common/utils/attachments';
+import {
+  isAlertAttachmentType,
+  isAttackAttachmentType,
+  isEventAttachmentType,
+} from '../../../common/utils/attachments';
 import type { AttachmentAttributes, Case } from '../../../common/types/domain';
 import {
   CaseRt,
@@ -38,6 +42,7 @@ import {
   transformNewComment,
   getOrUpdateLensReferences,
   getAlertInfoFromComments,
+  getAttackInfoFromComments,
   getEventInfoFromComments,
   getIDsAndIndicesAsArrays,
   countEventsForID,
@@ -445,6 +450,12 @@ export class CaseCommentModel {
       if (hasEventsInRequest) {
         throw Boom.badRequest('Event cannot be attached to a closed case');
       }
+
+      const hasAttacksInRequest = req.some((a) => isAttackAttachmentType(a.type));
+
+      if (hasAttacksInRequest) {
+        throw Boom.badRequest('Attack cannot be attached to a closed case');
+      }
     }
 
     if (req.some((attachment) => attachment.owner !== this.caseInfo.attributes.owner)) {
@@ -485,8 +496,8 @@ export class CaseCommentModel {
   }
 
   /**
-   * Validates alert/event attachments before the saved object is persisted, so a failure here
-   * never leaves an already-created attachment on the case.
+   * Validates alert/event/attack attachments before the saved object is persisted, so a failure
+   * here never leaves an already-created attachment on the case.
    */
   private async ensureIndexedAttachmentsValid(attachments: UnifiedAttachmentPayload[]) {
     const alertAttachments = attachments.filter((a) => isAlertAttachmentType(a.type));
@@ -502,6 +513,16 @@ export class CaseCommentModel {
     if (events.length > 0) {
       await this.params.services.alertsService.ensureDocumentsExist({ alerts: events });
     }
+
+    // An attack discovery is an AAD alert (rule type `attack-discovery`), so the same read
+    // authorization applies: without this a caller could persist an arbitrary id/index pair and
+    // have the status sync write to any index it can reach.
+    const attackAttachments = attachments.filter((a) => isAttackAttachmentType(a.type));
+    const attacks = getAttackInfoFromComments(attackAttachments, true);
+
+    if (attacks.length > 0) {
+      await this.params.services.alertsService.ensureAlertsAuthorized({ alerts: attacks });
+    }
   }
 
   private async handleAlertComments(attachments: UnifiedAttachmentPayload[]) {
@@ -515,6 +536,28 @@ export class CaseCommentModel {
       if (this.caseInfo.attributes.settings.syncAlerts) {
         await this.updateAlertsStatus(alerts);
       }
+    }
+
+    await this.handleAttackComments(attachments);
+  }
+
+  /**
+   * Syncs an attack to the case status when it is attached, mirroring what alerts get in
+   * `handleAlertComments`. Without this an attack attached to an already in-progress or closed
+   * case would stay open until the next case status change.
+   *
+   * Unlike alerts, the case id is not written onto the attack document.
+   */
+  private async handleAttackComments(attachments: UnifiedAttachmentPayload[]) {
+    if (!this.caseInfo.attributes.settings.syncAlerts) {
+      return;
+    }
+
+    const attackAttachments = attachments.filter((a) => isAttackAttachmentType(a.type));
+    const attacks = getAttackInfoFromComments(attackAttachments);
+
+    if (attacks.length > 0) {
+      await this.updateAlertsStatus(attacks);
     }
   }
 

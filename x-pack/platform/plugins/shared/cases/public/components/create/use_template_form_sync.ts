@@ -27,8 +27,8 @@ import { getSpaceExtractObservables } from './utils';
 import { isObservablesExtractionBlocked } from '../../../common/utils/case_settings';
 
 /**
- * Values a template applies by default and reverts to when it stops applying them. Sync
- * detections defaults to off for templates; extract observables reverts to the space configuration default.
+ * Values a template applies by default and reverts to when it stops applying them. Sync alerts
+ * defaults to off for templates; extract observables reverts to the space configuration default.
  */
 const DEFAULT_SYNC_ALERTS = false;
 

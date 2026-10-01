@@ -111,9 +111,28 @@ describe('Attachments', () => {
       expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
     });
 
+    it('zod: removes foo:bar attributes from request', () => {
+      const result = BulkDeleteAttachmentsRequestSchema.safeParse({
+        ids: ['abc', 'xyz'],
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
+    });
+
     it(`zod: fails with more than ${MAX_BULK_DELETE_ATTACHMENTS} ids`, () => {
       const ids = new Array(MAX_BULK_DELETE_ATTACHMENTS + 1).fill('id');
       const result = BulkDeleteAttachmentsRequestSchema.safeParse({ ids });
+      expect(result.success).toBe(false);
+    });
+
+    it('zod: fails with an empty array of ids', () => {
+      const result = BulkDeleteAttachmentsRequestSchema.safeParse({ ids: [] });
+      expect(result.success).toBe(false);
+    });
+
+    it('zod: fails with an empty string id', () => {
+      const result = BulkDeleteAttachmentsRequestSchema.safeParse({ ids: [''] });
       expect(result.success).toBe(false);
     });
   });

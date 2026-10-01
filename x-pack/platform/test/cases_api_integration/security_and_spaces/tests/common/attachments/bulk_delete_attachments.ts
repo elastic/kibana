@@ -14,17 +14,20 @@ import {
   postCaseReq,
   postCommentAlertReq,
   postCommentUserReq,
+  postFileReq,
 } from '../../../../common/lib/mock';
 import {
   bulkDeleteAttachments,
   createCase,
   createComment,
+  createFileAttachment,
   deleteAllCaseItems,
   findCaseUserActions,
   getAllComments,
   getCase,
   superUserSpace1Auth,
 } from '../../../../common/lib/api';
+import { deleteAllFiles } from '../../../../common/lib/api/files';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -40,6 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('bulk_delete_attachments', () => {
     afterEach(async () => {
+      await deleteAllFiles({ supertest });
       await deleteAllCaseItems(es);
     });
 
@@ -165,6 +169,35 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect((await getAllComments({ supertest, caseId: firstCase.id })).length).to.eql(1);
         expect((await getAllComments({ supertest, caseId: secondCase.id })).length).to.eql(1);
+      });
+
+      it('returns a 400 and deletes nothing when one of the ids is a file attachment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const theCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
+        const caseWithFile = await createFileAttachment({
+          supertest,
+          caseId: postedCase.id,
+          params: postFileReq,
+        });
+
+        const fileAttachment = caseWithFile.comments!.find(
+          (comment) => comment.id !== theCase.comments![0].id
+        )!;
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId: postedCase.id,
+          attachmentIds: [theCase.comments![0].id, fileAttachment.id],
+          expectedHttpCode: 400,
+        });
+
+        const comments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(comments.length).to.eql(2);
       });
 
       it('returns a 400 when the ids are empty', async () => {

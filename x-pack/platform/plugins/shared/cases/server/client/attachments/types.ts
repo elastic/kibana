@@ -74,9 +74,12 @@ export interface BulkDeleteArgs {
    */
   caseId: string;
   /**
-   * The saved object ids of the attachments to delete
+   * The saved object ids of the attachments to delete.
+   *
+   * Deliberately not named `attachmentIds`: that name is reserved for the ids of the documents an
+   * attachment points at (alert ids, event ids, ...), which this endpoint may accept later on.
    */
-  attachmentIds: string[];
+  savedObjectIds: string[];
 }
 
 /**

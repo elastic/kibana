@@ -253,5 +253,99 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect((await getWorkflowFields(ATTACK_INDEX, attackId)).status).to.eql('open');
     });
+
+    it('syncs an attack attached to an already in-progress case', async () => {
+      const postedCase = await createCase(
+        supertest,
+        getPostCaseRequest({
+          owner: OWNER,
+          settings: { syncAlerts: true, extractObservables: false },
+        })
+      );
+
+      const inProgressCases = await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: CaseStatuses['in-progress'],
+            },
+          ],
+        },
+      });
+
+      await bulkCreateAttachments({
+        supertest,
+        caseId: inProgressCases[0].id,
+        params: [attackAttachment],
+      });
+
+      expect((await getWorkflowFields(ATTACK_INDEX, attackId)).status).to.eql('acknowledged');
+    });
+
+    it('does not sync an attack attached to an in-progress case when syncAlerts is off', async () => {
+      const postedCase = await createCase(
+        supertest,
+        getPostCaseRequest({
+          owner: OWNER,
+          settings: { syncAlerts: false, extractObservables: false },
+        })
+      );
+
+      const inProgressCases = await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: CaseStatuses['in-progress'],
+            },
+          ],
+        },
+      });
+
+      await bulkCreateAttachments({
+        supertest,
+        caseId: inProgressCases[0].id,
+        params: [attackAttachment],
+      });
+
+      expect((await getWorkflowFields(ATTACK_INDEX, attackId)).status).to.eql('open');
+    });
+
+    it('rejects an attack attached to a closed case', async () => {
+      const postedCase = await createCase(
+        supertest,
+        getPostCaseRequest({
+          owner: OWNER,
+          settings: { syncAlerts: true, extractObservables: false },
+        })
+      );
+
+      const closedCases = await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: CaseStatuses.closed,
+            },
+          ],
+        },
+      });
+
+      await bulkCreateAttachments({
+        supertest,
+        caseId: closedCases[0].id,
+        params: [attackAttachment],
+        expectedHttpCode: 400,
+      });
+
+      expect((await getWorkflowFields(ATTACK_INDEX, attackId)).status).to.eql('open');
+    });
   });
 };

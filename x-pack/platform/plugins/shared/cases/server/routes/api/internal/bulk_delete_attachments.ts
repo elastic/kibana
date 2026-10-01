@@ -42,7 +42,7 @@ export const bulkDeleteAttachmentsRoute = createCasesRoute({
 
       await client.attachments.bulkDelete({
         caseId: request.params.case_id,
-        attachmentIds: request.body.ids,
+        savedObjectIds: request.body.ids,
       });
 
       return response.noContent();

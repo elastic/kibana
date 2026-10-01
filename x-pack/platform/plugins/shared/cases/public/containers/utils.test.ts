@@ -67,7 +67,7 @@ describe('utils', () => {
       );
 
       expect(toast).toEqual({
-        title: 'Detections in "My case" have been synced',
+        title: 'Alerts in "My case" have been synced',
         className: 'eui-textBreakWord',
       });
     });
@@ -85,6 +85,27 @@ describe('utils', () => {
 
       expect(toast).toEqual({
         title: 'Auto-extract observables setting in "My case" have been updated',
+        className: 'eui-textBreakWord',
+      });
+    });
+
+    it('creates the correct toast when sync alerts is turned on and case only has an attack attached', () => {
+      const toast = createUpdateSuccessToaster(
+        {
+          ...caseBeforeUpdate,
+          comments: [{ type: 'security.attack' }] as CaseUI['comments'],
+          settings: { syncAlerts: false, extractObservables: false },
+        },
+        caseAfterUpdate,
+        'settings',
+        {
+          syncAlerts: true,
+          extractObservables: false,
+        }
+      );
+
+      expect(toast).toEqual({
+        title: 'Alerts in "My case" have been synced',
         className: 'eui-textBreakWord',
       });
     });

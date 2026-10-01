@@ -21,6 +21,7 @@ import {
 } from '../../../common/types/api';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
@@ -29,19 +30,34 @@ import { CaseFileMetadataForDeletionRt } from '../../../common/files';
 import type { CasesClient } from '../client';
 import { createFileEntities, deleteFiles } from '../files';
 import { handleAlerts, updateCaseAttachmentStats } from './delete';
-import { partitionByCaseAssociation } from '../../common/partitioning';
+import { isAssociatedToCase } from '../../common/partitioning';
 import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
+
+interface BulkDeleteClassification {
+  missingIds: string[];
+  attachmentsNotInCase: Array<SavedObject<AttachmentAttributesV2>>;
+  fileAttachments: Array<SavedObject<AttachmentAttributesV2>>;
+  attachmentsInCase: Array<SavedObject<AttachmentAttributesV2>>;
+}
+
+const doNotExistOnCaseMessage = (ids: string[], caseId: string): string =>
+  ids.length === 1
+    ? `Attachment ${ids[0]} does not exist on case ${caseId}.`
+    : `Attachments ${ids.join(', ')} do not exist on case ${caseId}.`;
 
 /**
  * Deletes multiple attachments of a case in a single call.
  *
- * Unlike {@link bulkDeleteFileAttachments} this is type agnostic: any attachment saved object
- * attached to the case can be deleted. The request is rejected as a whole if any of the ids
- * cannot be found on the case, so callers never end up with a partially applied deletion they
- * did not ask for.
+ * Unlike {@link bulkDeleteFileAttachments} this is type agnostic, with one exception: file
+ * attachments must go through {@link bulkDeleteFileAttachments}. A file lives in two places — the
+ * attachment saved object and the file object owned by the files plugin — and deleting only the
+ * former would orphan the blob, so they are rejected here instead of being silently half-deleted.
+ *
+ * The request is rejected as a whole if any of the ids cannot be found on the case, so callers
+ * never end up with a partially applied deletion they did not ask for.
  */
 export const bulkDeleteAttachments = async (
-  { caseId, attachmentIds }: BulkDeleteArgs,
+  { caseId, savedObjectIds }: BulkDeleteArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -52,26 +68,59 @@ export const bulkDeleteAttachments = async (
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(BulkDeleteAttachmentsRequestRt)({ ids: attachmentIds });
+    const request = decodeWithExcessOrThrow(BulkDeleteAttachmentsRequestRt)({
+      ids: savedObjectIds,
+    });
     const uniqueIds = [...new Set(request.ids)];
 
     const { saved_objects: soAttachments } = await attachmentService.getter.bulkGet(uniqueIds);
 
-    const missingIds = soAttachments
-      .filter((attachment) => attachment.error != null || attachment.attributes == null)
-      .map((attachment) => attachment.id);
+    const { missingIds, attachmentsNotInCase, fileAttachments, attachmentsInCase } =
+      soAttachments.reduce<BulkDeleteClassification>(
+        (acc, attachment) => {
+          if (attachment.error != null || attachment.attributes == null) {
+            acc.missingIds.push(attachment.id);
+            return acc;
+          }
 
-    const [attachmentsInCase, attachmentsNotInCase] = partitionByCaseAssociation(
-      caseId,
-      soAttachments.filter(
-        (attachment) => attachment.error == null && attachment.attributes != null
-      ) as Array<SavedObject<AttachmentAttributesV2>>
-    );
+          const found = attachment as SavedObject<AttachmentAttributesV2>;
 
-    const invalidIds = [...missingIds, ...attachmentsNotInCase.map((attachment) => attachment.id)];
+          if (!isAssociatedToCase(caseId, found)) {
+            acc.attachmentsNotInCase.push(found);
+            return acc;
+          }
 
-    if (invalidIds.length > 0) {
-      throw Boom.notFound(`These attachments ${invalidIds.join(', ')} do not exist in ${caseId}.`);
+          if (found.attributes.type === FILE_ATTACHMENT_TYPE) {
+            acc.fileAttachments.push(found);
+            return acc;
+          }
+
+          acc.attachmentsInCase.push(found);
+          return acc;
+        },
+        { missingIds: [], attachmentsNotInCase: [], fileAttachments: [], attachmentsInCase: [] }
+      );
+
+    if (missingIds.length > 0) {
+      throw Boom.notFound(doNotExistOnCaseMessage(missingIds, caseId));
+    }
+
+    if (attachmentsNotInCase.length > 0) {
+      throw Boom.notFound(
+        doNotExistOnCaseMessage(
+          attachmentsNotInCase.map((attachment) => attachment.id),
+          caseId
+        )
+      );
+    }
+
+    if (fileAttachments.length > 0) {
+      const ids = fileAttachments.map((attachment) => attachment.id);
+      throw Boom.badRequest(
+        `${ids.length === 1 ? 'Attachment' : 'Attachments'} ${ids.join(
+          ', '
+        )} of type ${FILE_ATTACHMENT_TYPE} cannot be deleted through this endpoint. Use the file attachments deletion endpoint instead.`
+      );
     }
 
     await authorization.ensureAuthorized({
@@ -82,7 +131,21 @@ export const bulkDeleteAttachments = async (
       operation: Operations.deleteComment,
     });
 
-    await attachmentService.bulkDelete({ savedObjectIds: uniqueIds, refresh: true });
+    const failedIds = await attachmentService.bulkDelete({
+      savedObjectIds: uniqueIds,
+      refresh: true,
+    });
+
+    // Core's bulk delete reports per-object failures instead of throwing. Surface them before any
+    // stats or user actions are written, so the case is never recorded as having lost attachments
+    // that are in fact still there.
+    if (failedIds.length > 0) {
+      throw Boom.internal(
+        `Failed to delete ${failedIds.length === 1 ? 'attachment' : 'attachments'} ${failedIds.join(
+          ', '
+        )} on case ${caseId}.`
+      );
+    }
 
     await updateCaseAttachmentStats({ caseService, attachmentService, caseId, user });
 

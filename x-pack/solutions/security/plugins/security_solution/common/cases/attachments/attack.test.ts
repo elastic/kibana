@@ -8,10 +8,13 @@
 import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import {
   AttackAttachmentPayloadSchema,
+  MAX_ATTACK_ATTACHMENT_ID_LENGTH,
   MAX_ATTACK_DETAILS_MARKDOWN_LENGTH,
   MAX_ATTACK_ENTITY_SUMMARY_MARKDOWN_LENGTH,
   MAX_ATTACK_MITRE_ATTACK_TACTIC_LENGTH,
   MAX_ATTACK_MITRE_ATTACK_TACTICS,
+  MAX_ATTACK_OWNER_LENGTH,
+  MAX_ATTACK_RISK_SCORE,
   MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH,
   MAX_ATTACK_TIMESTAMP_LENGTH,
 } from './attack';
@@ -94,6 +97,53 @@ describe('AttackAttachmentPayloadSchema', () => {
     expect(
       AttackAttachmentPayloadSchema.safeParse({ ...minimalPayload, extra: 'nope' }).success
     ).toBe(false);
+  });
+
+  describe('bounded fields', () => {
+    it(`accepts a riskScore of ${MAX_ATTACK_RISK_SCORE}`, () => {
+      expect(
+        AttackAttachmentPayloadSchema.safeParse({
+          ...minimalPayload,
+          metadata: { ...minimalPayload.metadata, riskScore: MAX_ATTACK_RISK_SCORE },
+        }).success
+      ).toBe(true);
+    });
+
+    it(`rejects a riskScore above ${MAX_ATTACK_RISK_SCORE}`, () => {
+      expect(
+        AttackAttachmentPayloadSchema.safeParse({
+          ...minimalPayload,
+          metadata: { ...minimalPayload.metadata, riskScore: MAX_ATTACK_RISK_SCORE + 1 },
+        }).success
+      ).toBe(false);
+    });
+
+    it('rejects a negative riskScore', () => {
+      expect(
+        AttackAttachmentPayloadSchema.safeParse({
+          ...minimalPayload,
+          metadata: { ...minimalPayload.metadata, riskScore: -1 },
+        }).success
+      ).toBe(false);
+    });
+
+    it(`rejects an attachmentId longer than ${MAX_ATTACK_ATTACHMENT_ID_LENGTH}`, () => {
+      expect(
+        AttackAttachmentPayloadSchema.safeParse({
+          ...minimalPayload,
+          attachmentId: 'a'.repeat(MAX_ATTACK_ATTACHMENT_ID_LENGTH + 1),
+        }).success
+      ).toBe(false);
+    });
+
+    it(`rejects an owner longer than ${MAX_ATTACK_OWNER_LENGTH}`, () => {
+      expect(
+        AttackAttachmentPayloadSchema.safeParse({
+          ...minimalPayload,
+          owner: 'o'.repeat(MAX_ATTACK_OWNER_LENGTH + 1),
+        }).success
+      ).toBe(false);
+    });
   });
 
   it('rejects a missing index', () => {
