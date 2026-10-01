@@ -18,6 +18,7 @@ import type { DeleteAllArgs, DeleteArgs } from './types';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
 import { AttachmentRequestRtV2 } from '../../../common/types/api';
 import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
+import { getRelatedAttachmentsToDelete } from './related_deletions';
 
 /**
  * Delete all comments for a case.
@@ -121,8 +122,24 @@ export async function deleteComment(
       throw Boom.notFound(`This comment ${savedObjectId} does not exist in ${id}.`);
     }
 
+    const relatedAttachments = await getRelatedAttachmentsToDelete({
+      caseId: id,
+      attachments: [attachment],
+      clientArgs,
+    });
+
+    if (relatedAttachments.length > 0) {
+      await authorization.ensureAuthorized({
+        entities: relatedAttachments.map((related) => ({
+          owner: related.attributes.owner,
+          id: related.id,
+        })),
+        operation: Operations.deleteComment,
+      });
+    }
+
     await attachmentService.bulkDelete({
-      savedObjectIds: [savedObjectId],
+      savedObjectIds: [savedObjectId, ...relatedAttachments.map((related) => related.id)],
       refresh: true,
     });
 
@@ -151,7 +168,27 @@ export async function deleteComment(
       },
     });
 
-    await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
+    if (relatedAttachments.length > 0) {
+      await userActionService.creator.bulkCreateAttachmentDeletion({
+        caseId: id,
+        attachments: relatedAttachments.map((related) => ({
+          id: related.id,
+          owner: related.attributes.owner,
+          attachment: decodeOrThrow(AttachmentRequestRtV2)(related.attributes),
+          savedObjectType: related.type as AttachmentSavedObjectType,
+        })),
+        user,
+      });
+    }
+
+    await handleAlerts({
+      alertsService,
+      attachments: [
+        attachment.attributes,
+        ...relatedAttachments.map((related) => related.attributes),
+      ],
+      caseId: id,
+    });
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete comment: ${caseID} comment id: ${savedObjectId}: ${error}`,
@@ -167,7 +204,7 @@ interface HandleAlertsArgs {
   caseId: string;
 }
 
-const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
+export const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
   const alerts = getAlertInfoFromComments(attachments);
 
   if (alerts.length === 0) {
@@ -184,7 +221,7 @@ interface UpdateCaseAttachmentStats {
   user: CasesClientArgs['user'];
 }
 
-const updateCaseAttachmentStats = async ({
+export const updateCaseAttachmentStats = async ({
   caseService,
   attachmentService,
   caseId,

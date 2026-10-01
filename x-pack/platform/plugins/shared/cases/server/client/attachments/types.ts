@@ -66,6 +66,25 @@ export interface BulkDeleteFileArgs {
 }
 
 /**
+ * Parameters for deleting multiple attachments of a case.
+ */
+export interface BulkDeleteArgs {
+  /**
+   * The id of the case
+   */
+  caseId: string;
+  /**
+   * The saved object ids of the attachments to delete
+   */
+  attachmentIds: string[];
+  /**
+   * Whether to also delete the attachments the deleted types' `onDelete` hooks return.
+   * Defaults to true.
+   */
+  includeRelated?: boolean;
+}
+
+/**
  * Parameters for deleting a single attachment of a case.
  */
 export interface DeleteArgs {
