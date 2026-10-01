@@ -89,8 +89,6 @@
       "@kbn/ai-security-labs-content/*": ["./x-pack/solutions/security/packages/ai-security-labs-content/*"],
       "@kbn/ai-tools": ["./x-pack/platform/packages/shared/kbn-ai-tools"],
       "@kbn/ai-tools/*": ["./x-pack/platform/packages/shared/kbn-ai-tools/*"],
-      "@kbn/ai-tools-cli": ["./x-pack/platform/packages/shared/kbn-ai-tools-cli"],
-      "@kbn/ai-tools-cli/*": ["./x-pack/platform/packages/shared/kbn-ai-tools-cli/*"],
       "@kbn/aiops-change-point-detection": ["./x-pack/platform/packages/shared/ml/aiops_change_point_detection"],
       "@kbn/aiops-change-point-detection/*": ["./x-pack/platform/packages/shared/ml/aiops_change_point_detection/*"],
       "@kbn/aiops-common": ["./x-pack/platform/packages/shared/ml/aiops_common"],
