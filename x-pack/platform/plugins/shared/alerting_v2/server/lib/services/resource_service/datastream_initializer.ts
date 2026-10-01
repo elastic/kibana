@@ -139,12 +139,20 @@ export class DatastreamInitializer implements IResourceInitializer {
       `Deleting data stream ${dataStreamName} created from index template v${createdFrom}: data streams created from v${forceReset.version} or below are recreated from v${version}. Their documents are lost.`
     );
 
+    let acknowledged: boolean;
     try {
-      await this.esClient.indices.deleteDataStream({ name: dataStreamName });
+      ({ acknowledged } = await this.esClient.indices.deleteDataStream({ name: dataStreamName }));
     } catch (error) {
       if (!isResponseError(error) || error.statusCode !== 404) {
         throw error;
       }
+      return;
+    }
+
+    // An unacknowledged delete may still complete later; fail here so the retry re-reads the
+    // data stream instead of initializing against one that may still carry the old mapping.
+    if (!acknowledged) {
+      throw new EsUnacknowledgedError(`delete data stream ${dataStreamName}`);
     }
   }
 

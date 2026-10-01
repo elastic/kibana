@@ -454,6 +454,16 @@ describe('DatastreamInitializer', () => {
       });
     });
 
+    it('fails initialization with a retryable error when the data stream delete is not acknowledged', async () => {
+      mockExistingDataStream({ version: 7, managed: true });
+      esClient.indices.deleteDataStream.mockResolvedValueOnce({ acknowledged: false });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+
+      await expect(initializer.initialize()).rejects.toBeInstanceOf(EsUnacknowledgedError);
+      expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
+    });
+
     it.each([400, 500])(
       'deletes the data stream and warns when applying the current template to its write index fails with a %i, since the installed template is current',
       async (statusCode) => {
