@@ -23,7 +23,7 @@ import type { Services } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
 import { RouterErrorBoundary } from './routing/router_error_boundary';
 import { LicenseProvider } from './components/contexts/license/license_context';
-import { ProfilingSetupStatusContextProvider } from './components/contexts/profiling_setup_status/profiling_setup_status_context';
+import { ProfilingStatusContextProvider } from './components/contexts/profiling_status/profiling_status_context';
 
 interface Props {
   profilingFetchServices: Services;
@@ -69,7 +69,7 @@ function App({
               <RouterErrorBoundary>
                 <TimeRangeContextProvider>
                   <ProfilingDependenciesContextProvider value={profilingDependencies}>
-                    <ProfilingSetupStatusContextProvider>
+                    <ProfilingStatusContextProvider>
                       <LicenseProvider>
                         <CheckSetup>
                           <RedirectWithDefaultDateRange>
@@ -79,7 +79,7 @@ function App({
                           </RedirectWithDefaultDateRange>
                         </CheckSetup>
                       </LicenseProvider>
-                    </ProfilingSetupStatusContextProvider>
+                    </ProfilingStatusContextProvider>
                   </ProfilingDependenciesContextProvider>
                 </TimeRangeContextProvider>
               </RouterErrorBoundary>

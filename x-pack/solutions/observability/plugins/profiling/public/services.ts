@@ -7,7 +7,7 @@
 
 import type { HttpFetchQuery } from '@kbn/core/public';
 import { buildPath } from '@kbn/core-http-browser';
-import type { TopNFunctions, UniversalProfilingStatus } from '@kbn/profiling-utils';
+import type { ProfilingStatus, TopNFunctions } from '@kbn/profiling-utils';
 import {
   createFlameGraph,
   type BaseFlameGraph,
@@ -29,10 +29,6 @@ export interface APMTransactionsPerService {
     serviceName: string;
     transactions: Array<{ name: string | null; samples: number | null }>;
   };
-}
-
-export interface UniversalProfilingSetupStatus extends UniversalProfilingStatus {
-  has_required_role: boolean;
 }
 
 export interface Services {
@@ -58,9 +54,7 @@ export interface Services {
     kuery: string;
     showErrorFrames: boolean;
   }) => Promise<ElasticFlameGraph>;
-  fetchHasSetup: (params: {
-    http: AutoAbortedHttpService;
-  }) => Promise<UniversalProfilingSetupStatus>;
+  fetchProfilingStatus: (params: { http: AutoAbortedHttpService }) => Promise<ProfilingStatus>;
   postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
   setupDataCollectionInstructions: (params: {
     http: AutoAbortedHttpService;
@@ -128,12 +122,8 @@ export function getServices(): Services {
       const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
       return createFlameGraph(baseFlamegraph, showErrorFrames);
     },
-    fetchHasSetup: async ({ http }) => {
-      const hasSetup = (await http.get(
-        paths.HasSetupESResources,
-        {}
-      )) as UniversalProfilingSetupStatus;
-      return hasSetup;
+    fetchProfilingStatus: async ({ http }) => {
+      return (await http.get(paths.Status, {})) as ProfilingStatus;
     },
     postSetupResources: async ({ http }) => {
       await http.post(paths.HasSetupESResources, { body: JSON.stringify({}) });

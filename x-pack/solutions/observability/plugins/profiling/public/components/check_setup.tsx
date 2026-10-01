@@ -6,46 +6,31 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { AsyncStatus, useAsync } from '../hooks/use_async';
-import { useAutoAbortedHttpClient } from '../hooks/use_auto_aborted_http_client';
+import { AsyncStatus } from '../hooks/use_async';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { AddDataTabs } from '../views/add_data_view/types';
 import { useLicenseContext } from './contexts/license/use_license_context';
-import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
+import { hasProfilingData } from './contexts/profiling_status/has_profiling_data';
+import { useProfilingStatus } from './contexts/profiling_status/use_profiling_status';
 import { LicensePrompt } from './license_prompt';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
-import { useProfilingSetupStatus } from './contexts/profiling_setup_status/use_profiling_setup_status';
+import { ProfilingStatusErrorPrompt } from './profiling_status_error_prompt';
+
+// Pages that can be opened without any profiling data. The profiling router is not used to match
+// them because, at this point, the current route might not have all of its required params.
+const UTILITY_PATHNAMES = [
+  '/add-data-instructions',
+  '/delete_data_instructions',
+  '/profiling-not-enabled',
+];
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
-  const {
-    start: { core },
-    services: { fetchHasSetup, postSetupResources },
-  } = useProfilingDependencies();
-  const { setProfilingSetupStatus } = useProfilingSetupStatus();
+  const { status, data, error, refresh } = useProfilingStatus();
   const license = useLicenseContext();
   const router = useProfilingRouter();
   const { pathname } = useLocation();
-
-  const { docLinks, notifications } = core;
-
-  const [postSetupLoading, setPostSetupLoading] = useState(false);
-
-  const { status, data, error, refresh } = useAsync(
-    ({ http }) => {
-      return fetchHasSetup({ http });
-    },
-    [fetchHasSetup]
-  );
-
-  useEffect(() => {
-    if (status === AsyncStatus.Settled) {
-      setProfilingSetupStatus(data);
-    }
-  }, [data, status, setProfilingSetupStatus]);
-
-  const http = useAutoAbortedHttpClient([]);
 
   if (!license?.hasAtLeast('enterprise')) {
     return (
@@ -55,9 +40,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     );
   }
 
-  const displayLoadingScreen = status !== AsyncStatus.Settled;
-
-  if (displayLoadingScreen) {
+  if (status !== AsyncStatus.Settled) {
     return (
       <ProfilingAppPageTemplate hideSearchBar>
         <EuiFlexGroup alignItems="center" justifyContent="center">
@@ -76,119 +59,40 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     );
   }
 
-  const displaySetupScreen =
-    (status === AsyncStatus.Settled &&
-      data?.profiling_enabled !== false &&
-      data?.has_setup !== true &&
-      data?.pre_8_9_1_data === false) ||
-    !!error;
-
-  if (displaySetupScreen) {
+  if (error || !data) {
     return (
-      <ProfilingAppPageTemplate
-        noDataConfig={{
-          action: {
-            elasticAgent: {
-              title: i18n.translate('xpack.profiling.noDataConfig.pageTitle', {
-                defaultMessage: 'Universal Profiling',
-              }),
-              description: i18n.translate('xpack.profiling.noDataConfig.action.description', {
-                defaultMessage:
-                  'Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Understand what lines of code are consuming compute resources, at all times, and across your entire infrastructure.',
-              }),
-              buttonText: postSetupLoading
-                ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
-                    defaultMessage: 'Setting up Universal Profiling...',
-                  })
-                : i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
-                    defaultMessage: 'Set up Universal Profiling',
-                  }),
-              buttonIsDisabled: postSetupLoading || data?.has_required_role === false,
-              disabledButtonTooltipText:
-                data?.has_required_role === false
-                  ? i18n.translate('xpack.profiling.noDataConfig.action.permissionsTooltip', {
-                      defaultMessage:
-                        'You need superuser permissions to set up Universal Profiling.',
-                    })
-                  : undefined,
-              onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                event.preventDefault();
-
-                setPostSetupLoading(true);
-
-                postSetupResources({ http })
-                  .then(() => refresh())
-                  .catch((err) => {
-                    const message = err?.body?.message ?? err.message ?? String(err);
-
-                    notifications.toasts.addError(err, {
-                      title: i18n.translate('xpack.profiling.checkSetup.setupFailureToastTitle', {
-                        defaultMessage: 'Failed to complete setup',
-                      }),
-                      toastMessage: message,
-                    });
-                  })
-                  .finally(() => {
-                    setPostSetupLoading(false);
-                  });
-              },
-              docsLink: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-get-started.html`,
-              'data-test-subj': 'profilingCheckSetupCard',
-            },
-          },
-        }}
-        hideSearchBar
+      <ProfilingStatusErrorPrompt
+        error={error ?? new Error('The profiling status is not available')}
+        onRetry={refresh}
       />
     );
   }
 
-  if (
-    status === AsyncStatus.Settled &&
-    data?.profiling_enabled === false &&
-    pathname !== '/profiling-not-enabled'
-  ) {
-    router.push('/profiling-not-enabled', {
-      path: {},
-      query: {},
-    });
-    return null;
-  }
-
-  if (data?.pre_8_9_1_data === true && pathname !== '/delete_data_instructions') {
-    // If the cluster still has data pre 8.9.1 version, redirect to deleting instructions
-    router.push('/delete_data_instructions', {
-      path: {},
-      query: {},
-    });
-    return null;
-  }
-
-  if (
-    status === AsyncStatus.Settled &&
-    data?.has_setup === true &&
-    data?.has_data === false &&
-    data?.pre_8_9_1_data === false &&
-    pathname !== '/add-data-instructions'
-  ) {
-    // when there's no data redirect the user to the add data instructions page
-    router.push('/add-data-instructions', {
-      path: {},
-      query: { selectedTab: AddDataTabs.Kubernetes },
-    });
-    return null;
-  }
-
-  const displayUi =
-    // Display UI if there's data or if the user is opening one of the setup/disabled pages.
-    // does not use profiling router because that breaks as at this point the route might not have all required params
-    (data?.has_data === true && data?.pre_8_9_1_data === false) ||
-    pathname === '/add-data-instructions' ||
-    pathname === '/delete_data_instructions' ||
-    pathname === '/profiling-not-enabled';
-
-  if (displayUi) {
+  if (!data.isEnabled) {
+    if (pathname !== '/profiling-not-enabled') {
+      router.push('/profiling-not-enabled', { path: {}, query: {} });
+      return null;
+    }
     return children;
   }
+
+  if (data.universalProfiling.hasLegacyData) {
+    if (pathname !== '/delete_data_instructions') {
+      // If the cluster still has data from before 8.9.1, redirect to the deletion instructions
+      router.push('/delete_data_instructions', { path: {}, query: {} });
+      return null;
+    }
+    return children;
+  }
+
+  if (hasProfilingData(data) || UTILITY_PATHNAMES.includes(pathname)) {
+    return children;
+  }
+
+  router.push('/add-data-instructions', {
+    path: {},
+    query: { selectedTab: AddDataTabs.Kubernetes },
+  });
 
   throw new Error('Invalid state');
 }

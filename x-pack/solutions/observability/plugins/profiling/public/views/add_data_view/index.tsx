@@ -30,7 +30,8 @@ import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
-import { useProfilingSetupStatus } from '../../components/contexts/profiling_setup_status/use_profiling_setup_status';
+import { hasProfilingData } from '../../components/contexts/profiling_status/has_profiling_data';
+import { useProfilingStatus } from '../../components/contexts/profiling_status/use_profiling_status';
 import type { AddDataTab } from './types';
 import { AddDataTabs } from './types';
 
@@ -41,7 +42,7 @@ export function AddDataView() {
   const { selectedTab } = query;
   const profilingRouter = useProfilingRouter();
   const routePath = useProfilingRoutePath();
-  const profilingSetupStatus = useProfilingSetupStatus();
+  const { data: profilingStatus } = useProfilingStatus();
   const [selectedSubTabKey, setSelectedSubTabKey] = useState<string | undefined>();
 
   const {
@@ -496,7 +497,7 @@ EOF`}
       pageTitle={i18n.translate('xpack.profiling.noDataPage.pageTitle', {
         defaultMessage: 'Add profiling data',
       })}
-      suppressMenu={!profilingSetupStatus.profilingSetupStatus?.has_data}
+      suppressMenu={!hasProfilingData(profilingStatus)}
     >
       {isLoading ? (
         <EuiFlexItem>
