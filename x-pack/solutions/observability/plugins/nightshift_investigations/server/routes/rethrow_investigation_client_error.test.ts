@@ -39,6 +39,12 @@ describe('rethrowInvestigationClientError', () => {
     [new InvestigationQuotaDeniedError(), 429],
     [new NightshiftModelNotFoundError('missing-model'), 400],
     [new NightshiftModelBlockedError('blocked-model', 'default-model'), 400],
+    [
+      Object.assign(new Error('Missing manage_investigations'), {
+        name: 'InvestigationsForbiddenError',
+      }),
+      403,
+    ],
   ])('maps %s to HTTP %i', (error, statusCode) => {
     expect(mapStatusCode(error)).toBe(statusCode);
   });
