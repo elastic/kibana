@@ -71,21 +71,34 @@ export const resolvePage = async (
   throw new ExternalResumeError('Page not found', 404);
 };
 
-export const buildPageUrl = ({ basePath, pageId }: { basePath: string; pageId: string }): string =>
-  `${basePath}${PAGE_FORM_API_PATH.replace('{pageId}', encodeURIComponent(pageId))}`;
+export const buildPageUrl = ({
+  basePath,
+  pageId,
+  secret,
+}: {
+  basePath: string;
+  pageId: string;
+  secret: string;
+}): string =>
+  `${basePath}${PAGE_FORM_API_PATH.replace('{pageId}', encodeURIComponent(pageId)).replace(
+    '{secret}',
+    encodeURIComponent(secret)
+  )}`;
 
 export const renderPageForm = ({
   page,
   basePath,
   pageId,
+  secret,
 }: {
   page: ResolvedPage;
   basePath: string;
   pageId: string;
+  secret: string;
 }): string =>
   renderExternalResumeFormPage({
     message: page.trigger.description ?? page.trigger.title,
-    formActionUrl: buildPageUrl({ basePath, pageId }),
+    formActionUrl: buildPageUrl({ basePath, pageId, secret }),
     fieldsHtml: buildExternalResumeFormFieldsHtml(page.inputsSchema),
   });
 

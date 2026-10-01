@@ -80,6 +80,11 @@ const configSchema = schema.object({
   pages: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     /**
+     * Key that derives the secret part of every page URL. Rotating it retires every
+     * page URL in the deployment at once; rotate a single page through its own route.
+     */
+    signingKey: schema.maybe(schema.string({ minLength: 32, maxLength: 256 })),
+    /**
      * Encoded Elasticsearch API key every page submission runs as. A page
      * visitor has no Kibana identity and the execution engine requires one.
      * Deployment-wide in this POC; the real feature stores a key per page.
