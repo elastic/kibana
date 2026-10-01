@@ -32,7 +32,7 @@ import type {
   SearchRequest,
   SearchResults,
   IndexPatternProvider,
-  RuntimeWorkspace,
+  RuntimeGraph,
   WorkspaceLayoutController,
 } from '../types';
 import { registerPersistenceListeners } from './persistence';
@@ -54,8 +54,8 @@ export interface GraphStoreDependencies
   extends Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'> {
   addBasePath: (url: string) => string;
   indexPatternProvider: IndexPatternProvider;
-  createWorkspace: (index: string, advancedSettings: AdvancedSettings) => RuntimeWorkspace;
-  getWorkspace: () => RuntimeWorkspace | undefined;
+  createRuntimeGraph: (index: string, advancedSettings: AdvancedSettings) => RuntimeGraph;
+  getWorkspace: () => RuntimeGraph | undefined;
   getLayoutController: () => WorkspaceLayoutController | undefined;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
@@ -68,7 +68,7 @@ export interface GraphStoreDependencies
   handleSearchQueryError: (err: Error | string) => void;
   exploreGraph: (index: string, request: ExploreRequest) => Promise<ExploreResults>;
   searchGraph: (index: string, request: SearchRequest) => Promise<SearchResults>;
-  mergeRuntimeGraph: (workspace: RuntimeWorkspace, graph: GraphData) => void;
+  mergeRuntimeGraph: (workspace: RuntimeGraph, graph: GraphData) => void;
 }
 
 export type StartGraphListening = TypedStartListening<GraphState, GraphDispatch>;
@@ -107,7 +107,7 @@ export const createGraphStore = (deps: GraphStoreDependencies): Store => {
       getDefaultMiddleware({
         // graph uses listeners instead of thunks
         thunk: false,
-        // graph state and actions carry non-serializable values (e.g. RuntimeWorkspace instances)
+        // graph state and actions carry non-serializable values (e.g. RuntimeGraph instances)
         serializableCheck: false,
         immutableCheck: false,
       }).prepend(listenerMiddleware.middleware),

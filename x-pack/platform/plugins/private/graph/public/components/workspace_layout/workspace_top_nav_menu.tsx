@@ -28,7 +28,7 @@ import type {
   BlockListedNode,
   GraphSavePolicy,
   GraphWorkspaceSavedObject,
-  RuntimeWorkspace,
+  RuntimeGraph,
   WorkspaceNode,
 } from '../../types';
 import type { AsObservable, SettingsWorkspaceProps } from '../settings';
@@ -38,7 +38,7 @@ import { useInspector } from '../../helpers/use_inspector';
 import { getHomePath } from '../../services/url';
 
 interface WorkspaceTopNavMenuProps {
-  workspace: RuntimeWorkspace | undefined;
+  workspace: RuntimeGraph | undefined;
   confirmWipeWorkspace: (
     onConfirm: () => void,
     text?: string,
@@ -140,7 +140,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
         }),
         iconType: 'gear',
         run: () => {
-          const currentWorkspace = workspace as RuntimeWorkspace;
+          const currentWorkspace = workspace as RuntimeGraph;
 
           const settingsObservable = asSyncedObservable(() => ({
             blocklistedNodes: currentWorkspace.blocklistedNodes,

@@ -7,7 +7,7 @@
 
 import { getIcon } from '../../helpers/style_choices';
 import type {
-  RuntimeWorkspace,
+  RuntimeGraph,
   WorkspaceEdge,
   WorkspaceLayoutController,
   WorkspaceNode,
@@ -15,7 +15,7 @@ import type {
 import type { WorkspaceState } from '../../state_management/workspace';
 
 export const syncRuntimeTopology = (
-  workspace: RuntimeWorkspace,
+  workspace: RuntimeGraph,
   state: WorkspaceState,
   layoutController: WorkspaceLayoutController
 ): void => {

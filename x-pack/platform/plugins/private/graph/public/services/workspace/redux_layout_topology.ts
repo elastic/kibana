@@ -6,11 +6,11 @@
  */
 
 import type { GraphState } from '../../state_management';
-import type { RuntimeWorkspace, WorkspaceEdge, WorkspaceNode } from '../../types';
+import type { RuntimeGraph, WorkspaceEdge, WorkspaceNode } from '../../types';
 
 interface ReduxLayoutTopologyOptions {
   getState: () => GraphState | undefined;
-  getWorkspace: () => RuntimeWorkspace | undefined;
+  getWorkspace: () => RuntimeGraph | undefined;
 }
 
 /** Supplies mutable D3 objects in the normalized topology order owned by Redux. */
@@ -35,14 +35,14 @@ export class ReduxLayoutTopology {
     return state.workspace.edgeIds.map((edgeId) => workspace.edgesMap[edgeId]);
   }
 
-  private hasSynchronizedNodes(workspace: RuntimeWorkspace, state: GraphState): boolean {
+  private hasSynchronizedNodes(workspace: RuntimeGraph, state: GraphState): boolean {
     return (
       workspace.nodes.length === state.workspace.nodeIds.length &&
       state.workspace.nodeIds.every((nodeId) => workspace.nodesMap[nodeId] !== undefined)
     );
   }
 
-  private hasSynchronizedEdges(workspace: RuntimeWorkspace, state: GraphState): boolean {
+  private hasSynchronizedEdges(workspace: RuntimeGraph, state: GraphState): boolean {
     return (
       workspace.edges.length === state.workspace.edgeIds.length &&
       state.workspace.edgeIds.every((edgeId) => workspace.edgesMap[edgeId] !== undefined)

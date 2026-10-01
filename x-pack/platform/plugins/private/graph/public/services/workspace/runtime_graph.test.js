@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { createWorkspaceState } from '../../state_management/workspace';
-import { createWorkspace } from './runtime_workspace';
+import { createRuntimeGraphState } from '../../state_management/workspace';
+import { createRuntimeGraph } from './runtime_graph';
 import { GraphLayoutController } from './graph_layout_controller';
 import { makeNodeId } from './graph_merge_planner';
 import { mergeRuntimeGraph } from './runtime_graph_merge';
 import { transformExpandResponse, transformSearchResponse } from './graph_response_transformers';
 
 describe('graphui-workspace', function () {
-  describe('createWorkspace()', function () {
+  describe('createRuntimeGraph()', function () {
     // var fooResource=null;
     let mockedResult = null;
     let init = null;
@@ -42,7 +42,7 @@ describe('graphui-workspace', function () {
           getNodes: () => runtime.workspace?.nodes ?? [],
           getEdges: () => runtime.workspace?.edges ?? [],
         });
-        const workspace = createWorkspace({ topologyChangeHandler });
+        const workspace = createRuntimeGraph({ topologyChangeHandler });
         runtime.workspace = workspace;
         return {
           workspace,
@@ -58,7 +58,7 @@ describe('graphui-workspace', function () {
         start: jest.fn(),
         isRunning: jest.fn(() => false),
       };
-      const workspace = createWorkspace();
+      const workspace = createRuntimeGraph();
 
       mergeGraph(workspace, { nodes: [], edges: [] });
 
@@ -85,7 +85,7 @@ describe('graphui-workspace', function () {
 
     it('snapshots new edges safely before and after layout initializes references', function () {
       const { workspace, topologyChangeHandler } = init();
-      topologyChangeHandler.mockImplementation(() => createWorkspaceState(workspace));
+      topologyChangeHandler.mockImplementation(() => createRuntimeGraphState(workspace));
 
       try {
         workspace.mergeGraph({

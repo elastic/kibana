@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuntimeWorkspace, WorkspaceField } from '../types';
+import type { RuntimeGraph, WorkspaceField } from '../types';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
 import { setDatasource } from './datasource';
 import { loadFields } from './fields';
@@ -15,7 +15,7 @@ import {
   blocklistSelectedNodes,
   clearNodeSelection,
   colorSelectedNodes,
-  createWorkspaceState,
+  createRuntimeGraphState,
   deleteSelectedNodes,
   expandSelectedNodes,
   fillWorkspaceConnections,
@@ -50,7 +50,7 @@ jest.mock('../services/fetch_top_nodes', () => ({
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve));
 
-const createWorkspaceMock = () =>
+const createRuntimeGraphMock = () =>
   ({
     mergeGraph: jest.fn(),
     layoutController: {
@@ -74,10 +74,10 @@ const createWorkspaceMock = () =>
       },
     },
     blocklistedNodes: [],
-  } as unknown as jest.Mocked<RuntimeWorkspace> & { mergeGraph: jest.Mock });
+  } as unknown as jest.Mocked<RuntimeGraph> & { mergeGraph: jest.Mock });
 
-const createWorkspaceListenerEnvironment = () => {
-  const workspace = createWorkspaceMock();
+const createRuntimeGraphListenerEnvironment = () => {
+  const workspace = createRuntimeGraphMock();
   const environment = createMockGraphStore({
     listeners: [registerWorkspaceListeners],
     mockedDepsOverwrites: {
@@ -141,9 +141,9 @@ describe('workspace state', () => {
       layoutController: { isRunning: () => false },
       selectedNodes: [parent],
       getEdgeSelection: () => [edge],
-    } as unknown as RuntimeWorkspace;
+    } as unknown as RuntimeGraph;
 
-    const snapshot = createWorkspaceState(workspace);
+    const snapshot = createRuntimeGraphState(workspace);
 
     expect(snapshot).toEqual({
       isLayoutRunning: false,
@@ -207,7 +207,7 @@ describe('workspace state', () => {
       blocklistedNodes: [node, duplicate],
     });
 
-    const snapshot = createWorkspaceState(workspace);
+    const snapshot = createRuntimeGraphState(workspace);
 
     expect(snapshot.nodeIds).toEqual([node.id]);
     expect(snapshot.nodeIds).toEqual(Object.keys(snapshot.nodesById));
@@ -219,14 +219,14 @@ describe('workspace state', () => {
 
   it('stores normalized workspace snapshots', () => {
     const environment = createMockGraphStore({});
-    const workspace = createWorkspaceMock();
+    const workspace = createRuntimeGraphMock();
     Object.assign(workspace, {
       nodes: [],
       edges: [],
       selectedNodes: [],
       getEdgeSelection: () => [],
     });
-    const snapshot = createWorkspaceState(workspace);
+    const snapshot = createRuntimeGraphState(workspace);
 
     environment.store.dispatch(workspaceChanged(snapshot));
 
@@ -240,7 +240,7 @@ describe('workspace state', () => {
 
   it('preserves explicit initialization when storing workspace snapshots', () => {
     const environment = createMockGraphStore({});
-    const snapshot = createWorkspaceState({
+    const snapshot = createRuntimeGraphState({
       nodes: [],
       edges: [],
       blocklistedNodes: [],
@@ -284,7 +284,7 @@ describe('workspace state', () => {
 
   it('handles node selection operations using normalized IDs', () => {
     const environment = createMockGraphStore({});
-    const workspace = createWorkspaceMock();
+    const workspace = createRuntimeGraphMock();
     Object.assign(workspace, {
       nodes: [
         { id: 'one', parent: undefined, data: {} },
@@ -303,7 +303,7 @@ describe('workspace state', () => {
       selectedNodes: [],
       getEdgeSelection: () => [],
     });
-    environment.store.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+    environment.store.dispatch(workspaceChanged(createRuntimeGraphState(workspace)));
 
     environment.store.dispatch(selectAllNodes());
     expect(environment.store.getState().workspace.selectedNodeIds).toEqual(['one', 'two']);
@@ -374,7 +374,7 @@ describe('workspace state', () => {
       blocklistedNodes: [existing],
       selectedNodes: [selected],
     });
-    environment.store.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+    environment.store.dispatch(workspaceChanged(createRuntimeGraphState(workspace)));
     environment.store.dispatch(toggleNodeSelection({ nodeId: selected.id, replace: true }));
 
     environment.store.dispatch(blocklistSelectedNodes());
@@ -476,7 +476,7 @@ describe('workspace state', () => {
       nodes: [{ id: 'selected', data: { field: 'field', term: 'selected' } }],
       edges: [],
     });
-    const initialState = createWorkspaceState(workspace);
+    const initialState = createRuntimeGraphState(workspace);
     environment.store.dispatch(workspaceChanged(initialState));
     environment.store.dispatch(deleteSelectedNodes());
     const { undoHistory } = environment.store.getState().workspace;
@@ -587,7 +587,7 @@ describe('workspace listeners', () => {
 
   describe('fill workspace', () => {
     it('merges fetched nodes and initializes the workspace', async () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
       const nodes = [{ id: 'node-id' }];
       (fetchTopNodes as jest.Mock).mockResolvedValue(nodes);
 
@@ -606,7 +606,7 @@ describe('workspace listeners', () => {
     });
 
     it('does not apply a stale response after a newer request', async () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
       let resolveFirstRequest: (nodes: Array<{ id: string }>) => void = () => {};
       const firstRequest = new Promise<Array<{ id: string }>>((resolve) => {
         resolveFirstRequest = resolve;
@@ -630,7 +630,7 @@ describe('workspace listeners', () => {
     });
 
     it('shows the server-provided message when fetching fails', async () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
       (fetchTopNodes as jest.Mock).mockRejectedValue({
         body: { message: 'server failure' },
       });
@@ -646,7 +646,7 @@ describe('workspace listeners', () => {
 
   describe('topology commands', () => {
     it('synchronizes Redux topology into the runtime adapter', () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
       environment.store.dispatch(toggleNodeSelection({ nodeId: 'selected', replace: false }));
 
       environment.store.dispatch(deleteSelectedNodes());
@@ -657,7 +657,7 @@ describe('workspace listeners', () => {
 
   describe('workspace requests', () => {
     it('expands selected nodes through the listener transport', async () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
       const fields = [{ name: 'field' }] as WorkspaceField[];
 
       environment.store.dispatch(toggleNodeSelection({ nodeId: 'selected', replace: false }));
@@ -672,7 +672,7 @@ describe('workspace listeners', () => {
     });
 
     it('fills existing connections through the listener transport', async () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
       environment.mockedDeps.searchGraph.mockResolvedValue({
         hits: { total: { value: 0 } },
         aggregations: { matrix: { buckets: [] } },
@@ -690,7 +690,7 @@ describe('workspace listeners', () => {
     });
 
     it('ignores stale fill-connection responses', async () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
       const resolvers: Array<
         (response: {
           hits: { total: { value: number } };
@@ -716,7 +716,7 @@ describe('workspace listeners', () => {
     });
 
     it('ignores stale expand responses', async () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
       const fields = [{ name: 'field' }] as WorkspaceField[];
       const resolvers: Array<(response: { vertices: []; connections: [] }) => void> = [];
       environment.mockedDeps.exploreGraph.mockImplementation(
@@ -736,7 +736,7 @@ describe('workspace listeners', () => {
 
   describe('layout lifecycle', () => {
     it('starts and stops the legacy layout runtime', () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
 
       environment.store.dispatch(startWorkspaceLayout());
       environment.store.dispatch(stopWorkspaceLayout());
@@ -749,7 +749,7 @@ describe('workspace listeners', () => {
 
   describe('submit search', () => {
     it('merges plain text search results into Redux before the runtime', async () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
       environment.mockedDeps.exploreGraph.mockResolvedValue({
         vertices: [{ field: 'field-name', term: 'result', weight: 1 }],
         connections: [],
@@ -774,7 +774,7 @@ describe('workspace listeners', () => {
     });
 
     it('submits a query DSL search through the listener transport', async () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
       const query = { query: { match_all: {} } };
 
       environment.store.dispatch(submitSearch(JSON.stringify(query)));
@@ -787,7 +787,7 @@ describe('workspace listeners', () => {
     });
 
     it('submits a Graph explore request unchanged', async () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
       const query = { vertices: [{ field: 'field-name' }] };
 
       environment.store.dispatch(submitSearch(JSON.stringify(query)));
@@ -797,7 +797,7 @@ describe('workspace listeners', () => {
     });
 
     it('ignores stale search responses', async () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
       const resolvers: Array<(response: { vertices: []; connections: [] }) => void> = [];
       environment.mockedDeps.exploreGraph.mockImplementation(
         () => new Promise((resolve) => resolvers.push(resolve))
@@ -814,7 +814,7 @@ describe('workspace listeners', () => {
     });
 
     it('reports malformed JSON', () => {
-      const environment = createWorkspaceListenerEnvironment();
+      const environment = createRuntimeGraphListenerEnvironment();
 
       environment.store.dispatch(submitSearch('{invalid'));
 

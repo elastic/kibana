@@ -84,7 +84,7 @@ export interface TermIntersect {
   overlap: number;
 }
 
-export interface RuntimeWorkspace {
+export interface RuntimeGraph {
   topologyChangeHandler?: () => void;
   nodesMap: Record<string, WorkspaceNode>;
   edgesMap: Record<string, WorkspaceEdge>;

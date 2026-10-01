@@ -12,7 +12,7 @@ import d3 from 'd3';
 import { css } from '@emotion/react';
 import { type UseEuiTheme, euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import type {
-  RuntimeWorkspace,
+  RuntimeGraph,
   WorkspaceNode,
   TermIntersect,
   ControlType,
@@ -29,7 +29,7 @@ import {
 } from '../../state_management';
 
 export interface GraphVisualizationProps {
-  workspace: RuntimeWorkspace;
+  workspace: RuntimeGraph;
   onSetControl: (control: ControlType) => void;
   selectSelected: (node: WorkspaceNode) => void;
   onSetMergeCandidates: (terms: TermIntersect[]) => void;

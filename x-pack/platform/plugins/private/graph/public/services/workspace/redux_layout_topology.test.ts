@@ -6,7 +6,7 @@
  */
 
 import type { GraphState } from '../../state_management';
-import type { RuntimeWorkspace, WorkspaceEdge, WorkspaceNode } from '../../types';
+import type { RuntimeGraph, WorkspaceEdge, WorkspaceNode } from '../../types';
 import { ReduxLayoutTopology } from './redux_layout_topology';
 
 const createNode = (id: string) => ({ id } as WorkspaceNode);
@@ -23,7 +23,7 @@ describe('ReduxLayoutTopology', () => {
       nodesMap: { first: firstNode, second: secondNode },
       edges: [firstEdge, secondEdge],
       edgesMap: { 'first-edge': firstEdge, 'second-edge': secondEdge },
-    } as unknown as RuntimeWorkspace;
+    } as unknown as RuntimeGraph;
     const state = {
       workspace: {
         nodeIds: ['second', 'first'],
@@ -47,7 +47,7 @@ describe('ReduxLayoutTopology', () => {
       nodesMap: { 'new-node': node },
       edges: [edge],
       edgesMap: { 'new-edge': edge },
-    } as unknown as RuntimeWorkspace;
+    } as unknown as RuntimeGraph;
     const state = {
       workspace: { nodeIds: [], edgeIds: [] },
     } as unknown as GraphState;

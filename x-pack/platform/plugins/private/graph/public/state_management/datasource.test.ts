@@ -69,7 +69,7 @@ describe('datasource listener', () => {
     env.store.dispatch(updateSettings(newSettings));
     dispatchRequest();
     await waitForPromise();
-    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledWith('test-pattern', newSettings);
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith('test-pattern', newSettings);
   });
 
   it('should not carry over diversity field into new workspace', async () => {
@@ -80,7 +80,7 @@ describe('datasource listener', () => {
     env.store.dispatch(updateSettings(newSettings));
     dispatchRequest();
     await waitForPromise();
-    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledWith('test-pattern', {
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith('test-pattern', {
       timeoutMillis: 123,
     });
   });
@@ -113,8 +113,8 @@ describe('datasource listener', () => {
     await waitForPromise();
 
     expect(fieldsSelector(env.store.getState()).map(({ name }) => name)).toEqual(['second-field']);
-    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledTimes(1);
-    expect(env.mockedDeps.createWorkspace).toHaveBeenCalledWith(
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledTimes(1);
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith(
       'second-pattern',
       expect.anything()
     );

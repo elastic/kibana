@@ -33,7 +33,7 @@ import {
 } from '../services/workspace/graph_response_transformers';
 import { syncRuntimeTopology } from '../services/workspace/sync_runtime_topology';
 import { unpackGroupedNodes } from '../services/workspace/runtime_grouping';
-import type { GraphData, RuntimeWorkspace, WorkspaceField, WorkspaceNode } from '../types';
+import type { GraphData, RuntimeGraph, WorkspaceField, WorkspaceNode } from '../types';
 import type { ServerResultNode } from '../types';
 import type { MatchedAction } from './helpers';
 import { matchesAction } from './helpers';
@@ -443,8 +443,8 @@ const selectNodesAndNeighbors = (state: WorkspaceState): string[] => {
   return state.nodeIds.filter((id) => selectedNodeIds.has(id));
 };
 
-export const createWorkspaceState = (
-  workspace: RuntimeWorkspace,
+export const createRuntimeGraphState = (
+  workspace: RuntimeGraph,
   isLayoutRunning = false
 ): WorkspaceSnapshot => {
   const blocklistedNodes = (workspace.blocklistedNodes ?? []) as WorkspaceNode[];
@@ -503,7 +503,7 @@ const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
   icon: node.icon,
 });
 
-const getEdgeId = ({ id, source, target }: RuntimeWorkspace['edges'][number]): string =>
+const getEdgeId = ({ id, source, target }: RuntimeGraph['edges'][number]): string =>
   id ?? `${source.id}-${target.id}`;
 
 const requestActionTypes = new Set([expandSelectedNodes.type, fillWorkspaceConnections.type]);
@@ -742,7 +742,7 @@ export const registerWorkspaceListeners = (
       listenerApi.dispatch(initializeWorkspace());
 
       // type casting is safe, at this point workspace should be loaded
-      const workspace = getWorkspace() as RuntimeWorkspace;
+      const workspace = getWorkspace() as RuntimeGraph;
       const liveResponseFields = liveResponseFieldsSelector(listenerApi.getState());
       const numHops = 2;
       const state = listenerApi.getState();

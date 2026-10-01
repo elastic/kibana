@@ -8,10 +8,10 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { GraphWorkspaceSavedObject, RuntimeWorkspace } from '../types';
+import type { GraphWorkspaceSavedObject, RuntimeGraph } from '../types';
 import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.';
 import {
-  createWorkspaceState,
+  createRuntimeGraphState,
   initializeWorkspace,
   submitSearch,
   workspaceChanged,
@@ -93,7 +93,7 @@ export const registerPersistenceListeners = (
         return;
       }
 
-      const createdWorkspace = deps.createWorkspace(
+      const createdWorkspace = deps.createRuntimeGraph(
         indexPattern.title,
         settingsSelector(listenerApi.getState())
       );
@@ -121,7 +121,7 @@ export const registerPersistenceListeners = (
       listenerApi.dispatch(initializeWorkspace());
       listenerApi.dispatch(
         workspaceChanged(
-          createWorkspaceState(createdWorkspace, deps.getLayoutController()?.isRunning())
+          createRuntimeGraphState(createdWorkspace, deps.getLayoutController()?.isRunning())
         )
       );
       if (urlQuery) {
@@ -156,7 +156,7 @@ export const registerPersistenceListeners = (
             const currentWorkspace = deps.getWorkspace();
             if (currentWorkspace) {
               listenerApi.dispatch(workspaceRuntimeChanged(
-                  createWorkspaceState(currentWorkspace, deps.getLayoutController()?.isRunning())
+                  createRuntimeGraphState(currentWorkspace, deps.getLayoutController()?.isRunning())
                 ));
             }
             return listenerApi.getState();
@@ -182,7 +182,7 @@ function showModal({
   selectedDatasource,
 }: {
   deps: GraphStoreDependencies;
-  workspace: RuntimeWorkspace;
+  workspace: RuntimeGraph;
   savedWorkspace: GraphWorkspaceSavedObject;
   getState: () => GraphState;
   selectedDatasource: IndexpatternDatasource;

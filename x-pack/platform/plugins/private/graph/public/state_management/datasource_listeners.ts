@@ -24,7 +24,7 @@ import { matchesAction } from './helpers';
  */
 export const registerDatasourceListeners = (
   startListening: StartGraphListening,
-  { indexPatternProvider, notifications, createWorkspace, notifyReact }: GraphStoreDependencies
+  { indexPatternProvider, notifications, createRuntimeGraph, notifyReact }: GraphStoreDependencies
 ) => {
   startListening({
     matcher: matchesAction(requestDatasource),
@@ -52,7 +52,7 @@ export const registerDatasourceListeners = (
 
       listenerApi.dispatch(loadFields(mapFields(indexPattern)));
       listenerApi.dispatch(datasourceLoaded());
-      createWorkspace(indexPattern.title, settingsSelector(listenerApi.getState()));
+      createRuntimeGraph(indexPattern.title, settingsSelector(listenerApi.getState()));
       notifyReact();
     },
   });

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { RuntimeWorkspace } from '../../types/workspace_state';
+import type { RuntimeGraph } from '../../types/workspace_state';
 
-export const createWorkspace = (
-  { topologyChangeHandler }: Pick<RuntimeWorkspace, 'topologyChangeHandler'> = {}
-): RuntimeWorkspace => ({
+export const createRuntimeGraph = (
+  { topologyChangeHandler }: Pick<RuntimeGraph, 'topologyChangeHandler'> = {}
+): RuntimeGraph => ({
   blocklistedNodes: [],
   topologyChangeHandler,
   nodesMap: {},
