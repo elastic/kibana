@@ -10,14 +10,10 @@ import { css, type SerializedStyles } from '@emotion/react';
 import { euiFontSize, useEuiTheme } from '@elastic/eui';
 
 // EUI's default heading sizes are too large for chat messages.
-const HEADING_FONT_SCALES = [
-  ['h1', 'l'],
-  ['h2', 'm'],
-  ['h3', 's'],
-  ['h4', 's'],
-  ['h5', 's'],
-  ['h6', 's'],
-] as const;
+// TODO(#294638): fill in once design settles the heading scale.
+const HEADING_FONT_SCALES: ReadonlyArray<
+  readonly [heading: string, scale: Parameters<typeof euiFontSize>[1]]
+> = [];
 
 export const useMarkdownContainerStyles = (): SerializedStyles => {
   const euiThemeContext = useEuiTheme();
