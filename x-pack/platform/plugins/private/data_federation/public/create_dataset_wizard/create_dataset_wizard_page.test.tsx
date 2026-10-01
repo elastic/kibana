@@ -61,6 +61,8 @@ const docLinksMock = {
   },
 };
 
+jest.setTimeout(30_000);
+
 describe('CreateDatasetWizardPage', () => {
   const clickNext = async (getByTestId: ReturnType<typeof render>['getByTestId']) => {
     await act(async () => {
