@@ -7,12 +7,10 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import type { GraphState, GraphStoreDependencies, StartGraphListening } from './store';
+import type { GraphState } from './store';
 import type { AdvancedSettings } from '../types';
 import { reset } from './global';
 import { setDatasource, requestDatasource } from './datasource';
-import type { MatchedAction } from './helpers';
-import { matchesAction } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/advancedSettings');
 
@@ -38,26 +36,3 @@ export const advancedSettingsReducer = reducerWithInitialState(initialSettings)
   .build();
 
 export const settingsSelector = (state: GraphState) => state.advancedSettings;
-
-/**
- * Listener making sure the advanced settings are always synced up to the workspace instance.
- *
- * Won't be necessary once the workspace is moved to redux
- */
-export const registerAdvancedSettingsListeners = (
-  startListening: StartGraphListening,
-  { getWorkspace, notifyReact }: GraphStoreDependencies
-) => {
-  startListening({
-    matcher: matchesAction(updateSettings),
-    effect: (action: MatchedAction<AdvancedSettingsState>, listenerApi) => {
-      listenerApi.cancelActiveListeners();
-      const workspace = getWorkspace();
-      if (!workspace) {
-        return;
-      }
-      workspace.options.exploreControls = action.payload;
-      notifyReact();
-    },
-  });
-};

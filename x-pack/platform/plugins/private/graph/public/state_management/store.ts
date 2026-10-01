@@ -19,7 +19,7 @@ import { fieldsReducer, registerFieldsListeners } from './fields';
 import type { UrlTemplatesState } from './url_templates';
 import { registerUrlTemplatesListeners, urlTemplatesReducer } from './url_templates';
 import type { AdvancedSettingsState } from './advanced_settings';
-import { advancedSettingsReducer, registerAdvancedSettingsListeners } from './advanced_settings';
+import { advancedSettingsReducer } from './advanced_settings';
 import type { DatasourceState } from './datasource';
 import { datasourceReducer } from './datasource';
 import { registerDatasourceListeners } from './datasource_listeners';
@@ -90,7 +90,6 @@ export const registerGraphListeners = (
   registerDatasourceListeners(startListening, deps);
   registerPersistenceListeners(startListening, deps);
   registerFieldsListeners(startListening, deps);
-  registerAdvancedSettingsListeners(startListening, deps);
   registerMetaDataListeners(startListening, deps, state);
   registerUrlTemplatesListeners(startListening, deps);
   registerWorkspaceListeners(startListening, deps);

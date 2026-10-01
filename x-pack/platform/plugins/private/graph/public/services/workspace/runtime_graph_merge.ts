@@ -24,7 +24,6 @@ export const mergeRuntimeGraph = (
     new Set(Object.keys(workspace.nodesMap))
   );
   graph.nodes = normalizedNodes;
-  workspace.options.nodeLabeller?.(newNodes);
 
   let sequence = initialSequence;
   newNodes.forEach((incomingNode) => {

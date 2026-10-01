@@ -6,7 +6,6 @@
  */
 
 import type { GenericIcon } from '../helpers/style_choices';
-import type { WorkspaceField, AdvancedSettings } from './app_state';
 
 export interface WorkspaceNode {
   id: string;
@@ -86,7 +85,6 @@ export interface TermIntersect {
 }
 
 export interface RuntimeWorkspace {
-  options: WorkspaceOptions;
   layoutController: WorkspaceLayoutController;
   nodesMap: Record<string, WorkspaceNode>;
   edgesMap: Record<string, WorkspaceEdge>;
@@ -108,16 +106,9 @@ export interface WorkspaceLayoutController {
 export type GraphExploreCallback = (data: ExploreResults) => void;
 export type GraphSearchCallback = (data: SearchResults) => void;
 
-export type WorkspaceOptions = Partial<{
-  indexName: string;
-  vertex_fields: WorkspaceField[];
-  nodeLabeller: (newNodes: IncomingGraphNode[]) => void;
-  exploreControls: AdvancedSettings;
-}>;
-
-export type RuntimeWorkspaceOptions = WorkspaceOptions & {
+export interface RuntimeWorkspaceOptions {
   layoutController: WorkspaceLayoutController;
-};
+}
 
 export type ControlType =
   | 'style'

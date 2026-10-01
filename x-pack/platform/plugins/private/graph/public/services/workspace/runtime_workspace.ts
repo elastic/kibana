@@ -9,11 +9,9 @@ import type { RuntimeWorkspace, RuntimeWorkspaceOptions } from '../../types/work
 
 export const createWorkspace = ({
   layoutController,
-  ...options
 }: RuntimeWorkspaceOptions): RuntimeWorkspace => {
   return {
     blocklistedNodes: [],
-    options,
     layoutController,
     nodesMap: {},
     edgesMap: {},
