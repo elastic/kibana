@@ -23,6 +23,12 @@ import { openServiceFlyoutFromAboutSection } from '../fixtures/helpers';
 
 const CHART_IDS = ['latency', 'throughput', 'failedTransactionRate'] as const;
 
+// TEMP — delete before merge. Captures the ES|QL (document-based) service flyout for the
+// PR before/after gallery. Set FLYOUT_SHOT_RUN=after for the post-migration run.
+const FLYOUT_SHOT_RUN = process.env.FLYOUT_SHOT_RUN ?? 'before';
+const flyoutShotPath = (name: string) =>
+  `.playwright-mcp/flyout-migration/${FLYOUT_SHOT_RUN}/${name}.png`;
+
 async function openServiceFlyoutAndVerifyCharts({
   tracesExperience,
   discover,
@@ -77,7 +83,7 @@ spaceTest.describe(
 
     spaceTest(
       'opens service flyout for an ECS service and renders its content',
-      async ({ pageObjects }) => {
+      async ({ page, pageObjects }) => {
         const { tracesExperience, discover } = pageObjects;
 
         await openServiceFlyoutAndVerifyCharts({
@@ -93,12 +99,22 @@ spaceTest.describe(
             await expect(tracesExperience.flyout.serviceFlyout.transactionsSection).toBeVisible();
           }
         );
+
+        // TEMP — delete before merge (PR before/after gallery).
+        await page.screenshot({ path: flyoutShotPath('overview-esql-ecs'), animations: 'disabled' });
+
+        // TEMP — capture the footer Actions menu popover open.
+        await page.testSubj.locator('serviceFlyoutActionsButton').click();
+        await expect(page.locator('[data-test-subj^="serviceFlyoutActionsMenuItem-"]')).not.toHaveCount(
+          0
+        );
+        await page.screenshot({ path: flyoutShotPath('footer-menu-esql-ecs'), animations: 'disabled' });
       }
     );
 
     spaceTest(
       'opens service flyout for an unprocessed OTel service and renders its content',
-      async ({ pageObjects }) => {
+      async ({ page, pageObjects }) => {
         const { tracesExperience, discover } = pageObjects;
 
         await openServiceFlyoutAndVerifyCharts({
@@ -114,6 +130,16 @@ spaceTest.describe(
             await expect(tracesExperience.flyout.serviceFlyout.transactionsSection).toBeHidden();
           }
         );
+
+        // TEMP — delete before merge (PR before/after gallery).
+        await page.screenshot({ path: flyoutShotPath('overview-esql-otel'), animations: 'disabled' });
+
+        // TEMP — capture the footer Actions menu popover open.
+        await page.testSubj.locator('serviceFlyoutActionsButton').click();
+        await expect(page.locator('[data-test-subj^="serviceFlyoutActionsMenuItem-"]')).not.toHaveCount(
+          0
+        );
+        await page.screenshot({ path: flyoutShotPath('footer-menu-esql-otel'), animations: 'disabled' });
       }
     );
   }
