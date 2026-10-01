@@ -155,7 +155,6 @@ export const MonitorStatusCol = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       ) : null}
-      a
       <EuiFlexItem grow={false}>
         {timestamp ? (
           <EuiToolTip
