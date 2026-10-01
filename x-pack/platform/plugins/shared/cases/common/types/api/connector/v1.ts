@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_TITLE_LENGTH } from '../../../constants';
 import { ExternalServiceSchema } from '../../domain/external_service/v1';
 import { CaseConnectorSchema, ConnectorMappingsSchema } from '../../domain/connector/v1';
 
@@ -30,7 +29,7 @@ export const GetCaseConnectorsResponseSchema = z.record(
 const ActionConnectorResultSchema = z.object({
   id: z.string().max(512),
   actionTypeId: z.string().max(256),
-  name: z.string().max(MAX_TITLE_LENGTH),
+  name: z.string(),
   isDeprecated: z.boolean(),
   isPreconfigured: z.boolean(),
   isSystemAction: z.boolean(),
