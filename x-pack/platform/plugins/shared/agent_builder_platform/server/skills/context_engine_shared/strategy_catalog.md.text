@@ -28,17 +28,33 @@ are these same three choices, so an analysis stated this way is already the temp
 
 | Strategy | Unit | `type` | What one KI carries | Refresh | When to use |
 |---|---|---|---|---|---|
-| **Index/Table Metadata** | One index | `index_metadata` | Purpose, what it does not contain, key fields, joins, when to use, parameterized access patterns with runnable examples | Every run, replacing | Always start here. Tells the agent which index to query, when, and how to reach it. |
+| **Index/Table Metadata** | One index | `index_metadata` | Purpose, what it does not contain, key fields, joins, when to use, parameterized access patterns with runnable examples | Every run, replacing | Several sources the agent must route between or join: tells it which index to query, when, and how to reach it. |
 | **Bottom-Up** | One document | `document` | Summary, the questions the document answers, a query that reaches it by id | Every run over the filtered slice; new documents added | Dense, bounded corpora: knowledge bases, case records, articles, product docs. |
 | **Selective / Outlier** | One significant document in a stream | `event` | What happened, why it is notable, how to find the neighbours | Every run; only documents the significance verdict accepts | Log and event streams where most records are noise but outliers matter. |
 | **Atomic Facts** | One claim inside a document | `fact` | The claim, its source span, the query to the document | Immutable; no `expires_at` | Information-dense documents (contracts, papers) where one KI per document loses precision. |
 | **Cumulative / Wiki-style** | One recurring entity | `entity` | A profile grounded in aggregations over every document referencing it, with the numbers that separate it from siblings: one index for the `unit_profile` template; a unit drawn from several indices is a custom workflow | Every run, replacing each unit | Entities recurring across many documents: customers, products, hosts, cases. |
 | **Detection / Feature** | One named condition / one inventory entry | `detection`, `feature` | A complete runnable query with a severity, thresholds quoting the observed baseline / a subtype and a stable slug | Every run | Observability data needing runnable detection conditions and structured inventory. |
 
-Quick guide: logs and metrics → Index Metadata plus Selective/Outlier plus Detection/Feature;
-article corpus → Bottom-Up; dense documents → Atomic Facts; recurring entities → Cumulative;
-several indices → Metadata for all, then one deeper strategy for the most important; unsure →
-Index/Table Metadata, which is cheap, fast and always useful.
+## Choosing between strategies
+
+Choose from the shape of the data, read off the row sample, the row count and the unit count
+`analyze-and-improve` runs, not from a default:
+
+- **Long text bodies in a bounded corpus** — articles, cases, product docs → Bottom-Up.
+- **A keyword key with many rows per value in one index** — customers, products, hosts →
+  Cumulative, through the `unit_profile` template. When the unit needs a second index, it is a
+  custom workflow built through a subagent.
+- **Several sources the agent must route between or join** → Index/Table Metadata over all of
+  them, in one install; then one deeper strategy for the source that matters most.
+- **A noisy event stream** where most records are routine → Selective / Outlier, with Detection /
+  Feature for conditions worth a runnable query.
+- **Dense, immutable documents** where one summary loses precision — contracts, papers → Atomic
+  Facts.
+
+A single index gains little from Index/Table Metadata: its one KI orients the agent to an index it
+would query anyway, while the questions people ask of it are about its documents or its entities.
+When two strategies fit about equally, say so and name what would separate them, rather than
+picking one by habit.
 
 ## Targeted KIs
 

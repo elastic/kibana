@@ -181,7 +181,43 @@ describe('analyzeAndImproveSkill', () => {
       expect(content).toMatch(/\*\*What one KI carries\*\*/);
       expect(content).toMatch(/\*\*How units are found and refreshed\*\*/);
       expect(content).toMatch(/as worked examples of those three answers/);
-      expect(content).toMatch(/unsure means Index\/Table Metadata/);
+    });
+
+    it('chooses a strategy from the signals in the data rather than defaulting to Index/Table Metadata', () => {
+      const catalog = strategyCatalogReference.content;
+      const prose = content.replace(/\s+/g, ' ');
+
+      for (const text of [content, catalog]) {
+        expect(text).not.toMatch(/unsure (means|→)/);
+        expect(text).not.toMatch(/Always start here/);
+        expect(text).not.toMatch(/cheap, fast and always useful/);
+        expect(text).not.toMatch(/Start at Index\/Table Metadata/);
+      }
+      expect(prose).toMatch(/Choose from those signals, not from a default/);
+      expect(prose).toMatch(/Choose the strategy from the signals in `strategy_catalog`/);
+    });
+
+    it('lists the fit signals for each strategy in the catalog', () => {
+      const catalog = strategyCatalogReference.content.replace(/\s+/g, ' ');
+
+      expect(catalog).toMatch(/## Choosing between strategies/);
+      expect(catalog).toMatch(/\*\*Long text bodies in a bounded corpus\*\*[^*]*→ Bottom-Up/);
+      expect(catalog).toMatch(
+        /\*\*A keyword key with many rows per value in one index\*\*[^*]*→ Cumulative/
+      );
+      expect(catalog).toMatch(/a second index, it is a custom workflow built through a subagent/);
+      expect(catalog).toMatch(
+        /\*\*Several sources the agent must route between or join\*\*[^*]*→ Index\/Table Metadata over all of them, in one install/
+      );
+      expect(catalog).toMatch(/\*\*A noisy event stream\*\*[^*]*→ Selective \/ Outlier/);
+      expect(catalog).toMatch(/\*\*Dense, immutable documents\*\*[^*]*→ Atomic Facts/);
+      expect(catalog).toMatch(/A single index gains little from Index\/Table Metadata/);
+    });
+
+    it('names the runner-up strategy and the evidence against it in the proposal', () => {
+      expect(content.replace(/\s+/g, ' ')).toMatch(
+        /the runner-up: the next-best strategy and the evidence line that decided against it/
+      );
     });
 
     it('offers only the refresh cadences the templates implement', () => {

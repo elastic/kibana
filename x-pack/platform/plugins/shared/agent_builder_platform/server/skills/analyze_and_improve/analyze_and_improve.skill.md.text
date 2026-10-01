@@ -206,9 +206,10 @@ Choosing the strategy is this skill's job, and a strategy is three answers, stat
 
 The `strategy_catalog` reference attached to this skill has the six named strategies (Index/Table
 Metadata, Bottom-Up, Selective / Outlier, Atomic Facts, Cumulative / Wiki-style, Detection /
-Feature) as worked examples of those three answers, with their `type` values, the quick guide and
-the default: unsure means Index/Table Metadata, which is cheap, fast and always useful. When the
-findings fit an example, name it. When they do not — a case corpus with a root-cause structure, a
+Feature) as worked examples of those three answers, with their `type` values and the signals in the
+data that call for each. Choose from those signals, not from a default: a strategy the data does not
+call for spends the KI budget on indicators nobody retrieves. When the findings fit an example,
+name it. When they do not — a case corpus with a root-cause structure, a
 unit grounded from three indices — write the three answers from the findings rather than picking
 the nearest name and inheriting a shape that does not fit. State the strategy in the proposal as
 the three answers even when it has a name, because the person reading it has not read the catalog.
@@ -298,7 +299,8 @@ proposals for the same index read the same way:
 
 - **Suggested automation** — the strategy by name where a catalog strategy fits (or "custom" with
   the unit named), the template it starts from, and whether it is new or replaces an automation,
-  naming which.
+  naming which. Then the runner-up: the next-best strategy and the evidence line that decided
+  against it, so the reader can see the choice was made rather than defaulted.
 - **Unit** — what one KI is about, and how many units the filtered corpus holds (a count you ran
   with the corpus filter applied).
 - **Carries** — what one KI carries: the orientation and the access patterns, and the grounded
@@ -555,8 +557,8 @@ against data you cannot see.
 index nobody has built cannot have been queried, and a probe that comes back empty only costs a
 turn. The analysis is of the data itself: what it contains (`platform.core.get_index_mapping`,
 then the sampling queries, join probes and unit count from "Ground the proposal in the data"), what questions
-it could answer, and which strategy fits, stated as the three answers. Start at Index/Table
-Metadata, and say that the proposal rests on the shape of the data rather than on observed
+it could answer, and which strategy fits, stated as the three answers. Choose the strategy from the
+signals in `strategy_catalog`, and say that the proposal rests on the shape of the data rather than on observed
 retrieval — with the Evidence section carrying the counts that shape was read from.
 Load `ai-index-sources` after the strategy, to write the source query and the filter the strategy
 calls for — not before, because the filter depends on the unit.

@@ -85,8 +85,24 @@ describe('Context Engine agent instructions', () => {
       expect(instructions).toMatch(/or when the index already has automations/);
     });
 
-    it('settles the first automation and asks for intent where it cannot be inferred', () => {
-      expect(instructions).toMatch(/An index with no automations starts at Index\/Table Metadata/);
+    it('chooses the first strategy from the data, proceeding on a clear fit and asking on a tie', () => {
+      expect(instructions).not.toMatch(/starts at Index\/Table Metadata/);
+      expect(instructions).not.toMatch(/that is settled/);
+      expect(instructions).toMatch(
+        /choose it by the signals in the strategy catalog rather than from a default/
+      );
+      expect(instructions).toMatch(
+        /When one strategy clearly fits, state it with the evidence that chose it and proceed, without asking which strategy/
+      );
+      expect(instructions).toMatch(
+        /When two fit about equally, or the data does not show what the index is for, ask with `ask_user_question`, offering the recommended strategy first/
+      );
+      expect(instructions).toMatch(
+        /Index\/Table Metadata is not that default: it is the strategy for routing between or joining several sources/
+      );
+    });
+
+    it('asks for intent where it cannot be inferred', () => {
       expect(instructions).toMatch(/where the answer is new coverage, ask which strategy/);
       expect(instructions).toContain(`\`${internalTools.askUserQuestion}\``);
       expect(instructions).toMatch(/name the unit and what one KI should carry/);
