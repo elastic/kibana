@@ -1452,6 +1452,51 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     ).resolves.toEqual({ investigation_id: 'inv-mine' });
   });
 
+  it('opens a new investigation rather than continue one without room for the new subjects', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-full' }]);
+    withConversations(makeConversation({ id: 'inv-full' }));
+    subjectsClient.listByConversationIds.mockResolvedValue(
+      Array.from({ length: 100 }, (_, n) =>
+        makeStoredSubject({ conversationId: 'inv-full', subjectId: `alert-${n}` })
+      )
+    );
+
+    // alert-1 is held already; alert-100 does not fit.
+    await expect(startAlerts('alert-1', 'alert-100')).resolves.toEqual({
+      investigation_id: 'inv-new',
+    });
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('no room'));
+    expect(subjectsClient.claimSubjects).toHaveBeenCalled();
+    expect(runInputs().subjects.map(({ id }: { id: string }) => id)).toEqual([
+      'alert-1',
+      'alert-100',
+    ]);
+  });
+
+  it('continues a full investigation when every subject of the start is already in it', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-full' }]);
+    withConversations(makeConversation({ id: 'inv-full' }));
+    subjectsClient.listByConversationIds.mockResolvedValue(
+      Array.from({ length: 100 }, (_, n) =>
+        makeStoredSubject({ conversationId: 'inv-full', subjectId: `alert-${n}` })
+      )
+    );
+
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-full' });
+  });
+
+  it('does not continue a claim holder without room for the new subjects', async () => {
+    subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
+    withConversations(makeConversation({ id: 'inv-holder' }));
+    subjectsClient.listByConversationIds.mockResolvedValue(
+      Array.from({ length: 100 }, (_, n) =>
+        makeStoredSubject({ conversationId: 'inv-holder', subjectId: `other-${n}` })
+      )
+    );
+
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
+  });
+
   it('continues the investigation holding a claimed subject', async () => {
     subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
     withConversations(makeConversation({ id: 'inv-holder' }));
@@ -1563,6 +1608,19 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [subjects[1]]);
   });
 
+  it('records only the subjects that fit an investigation near its subject ceiling', async () => {
+    withExecution();
+    withConversations(makeConversation({ id: 'inv-1' }));
+    subjectsClient.listByConversationIds.mockResolvedValue(
+      Array.from({ length: 99 }, (_, n) => makeStoredSubject({ subjectId: `other-${n}` }))
+    );
+
+    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).resolves.toBe('inv-1');
+
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [subjects[0]]);
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('room for 1 of 2'));
+  });
+
   it('reopens a closed investigation it continues', async () => {
     withExecution();
     withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
@@ -1657,6 +1715,13 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
       InvestigationNotFoundError
     );
+    expect(conversations.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects a run named by its own id when it works on another investigation', async () => {
+    withExecution({ inputs: { title: 't', investigation_id: 'inv-2' } });
+
+    await expect(makeClient().ensureOrCreate('exec-1')).rejects.toThrow(InvestigationNotFoundError);
     expect(conversations.create).not.toHaveBeenCalled();
   });
 

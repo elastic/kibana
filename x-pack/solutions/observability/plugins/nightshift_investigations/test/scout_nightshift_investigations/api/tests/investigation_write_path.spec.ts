@@ -7,6 +7,8 @@
 
 import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
+import type { KibanaRole } from '@kbn/scout-oblt';
+import { NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
 import {
   apiTest,
   cancelRunsOf,
@@ -29,6 +31,27 @@ import {
 import type { SharedInvestigation } from '../fixtures';
 
 /**
+ * A Nightshift operator: the investigations and proposals API privileges come from the Nightshift
+ * feature alone. Agent Builder `all` is what the start route requires, and starts run the
+ * investigation workflow, which needs workflow execute access.
+ */
+const NIGHTSHIFT_OPERATOR_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        [NIGHTSHIFT_FEATURE_ID]: ['all'],
+        agentBuilder: ['all'],
+        workflowsManagement: ['all'],
+        actions: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/**
  * The investigation write path on Agent Builder conversations: starts land on an investigation
  * whose subjects the shared agentic investigations API reads. The agent runs against an LLM
  * endpoint that never answers, so investigations stay in progress and no real model is needed;
@@ -44,7 +67,7 @@ apiTest.describe(
     let alertWorkflowId: string;
 
     apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
-      ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
+      ({ cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_OPERATOR_ROLE));
       llm = await startUnresponsiveLlm();
       connectorId = await createLlmConnector(kbnClient, llm.url);
       alertWorkflowId = await createAlertStartWorkflow(kbnClient, uniqueId('scout-alert-start'));
@@ -162,8 +185,8 @@ apiTest.describe(
       const { investigation_id: newId } = second.body as { investigation_id: string };
       expect(newId).not.toBe(closedId);
 
-      const reopened = await waitForInvestigation(apiClient, cookieHeader, newId);
-      expect(reopened.metadata.status).toBe('open');
+      const replacement = await waitForInvestigation(apiClient, cookieHeader, newId);
+      expect(replacement.metadata.status).toBe('open');
       const listed = await listSharedInvestigations(
         apiClient,
         cookieHeader,
