@@ -12,6 +12,7 @@ import { datasourceSelector, requestDatasource } from './datasource';
 import { registerDatasourceListeners } from './datasource_listeners';
 import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
+import { workspaceChanged, workspaceSelector, type WorkspaceSnapshot } from './workspace';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
@@ -47,6 +48,77 @@ describe('datasource listener', () => {
     const resultingState = env.store.getState();
     expect(env.mockedDeps.indexPatternProvider.get).toHaveBeenCalledWith('123');
     expect(fieldsSelector(resultingState)[0].name).toEqual('field1');
+  });
+
+  it('should clear Redux workspace state when switching datasource', async () => {
+    const previousSnapshot: WorkspaceSnapshot = {
+      isInitialized: true,
+      isLayoutRunning: true,
+      nodesById: {
+        node: {
+          id: 'node',
+          x: 1,
+          y: 1,
+          label: 'node',
+          color: 'black',
+          scaledSize: 10,
+          data: { field: 'field', term: 'term' },
+        },
+      },
+      nodeIds: ['node'],
+      edgesById: {
+        edge: {
+          id: 'edge',
+          sourceId: 'node',
+          targetId: 'node',
+          topSourceId: 'node',
+          topTargetId: 'node',
+          label: 'edge',
+          weight: 1,
+          width: 1,
+        },
+      },
+      edgeIds: ['edge'],
+      selectedNodeIds: ['node'],
+      selectedEdgeIds: ['edge'],
+      blocklistedNodesById: {
+        node: {
+          id: 'node',
+          x: 1,
+          y: 1,
+          label: 'node',
+          color: 'black',
+          scaledSize: 10,
+          data: { field: 'field', term: 'term' },
+        },
+      },
+      blocklistedNodeIds: ['node'],
+    };
+    env.store.dispatch(
+      workspaceChanged({
+        ...previousSnapshot,
+        undoHistory: [previousSnapshot],
+        redoHistory: [previousSnapshot],
+      })
+    );
+
+    dispatchRequest();
+    await waitForPromise();
+
+    expect(workspaceSelector(env.store.getState())).toEqual({
+      isInitialized: true,
+      isLayoutRunning: false,
+      nodesById: {},
+      nodeIds: [],
+      edgesById: {},
+      edgeIds: [],
+      selectedNodeIds: [],
+      selectedEdgeIds: [],
+      blocklistedNodesById: {},
+      blocklistedNodeIds: [],
+      undoHistory: [],
+      redoHistory: [],
+    });
   });
 
   it('should initialize workspace with the current advanced settings', async () => {
