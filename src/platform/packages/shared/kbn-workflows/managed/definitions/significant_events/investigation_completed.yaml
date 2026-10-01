@@ -22,6 +22,9 @@ steps:
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
+        # The investigation id is its Agent Builder conversation id. The field keeps its name so
+        # stored significant events stay valid; readers resolve it through the shared
+        # investigations API.
         workflow_execution_id: '{{ event.investigation_id }}'
         started_at: '{{ event.started_at }}'
         completed_at: '{{ event.completed_at }}'

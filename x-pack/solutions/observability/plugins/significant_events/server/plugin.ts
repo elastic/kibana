@@ -507,6 +507,7 @@ export class SignificantEventsPlugin
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
       this.server.nightshiftInvestigations = plugins.nightshiftInvestigations;
+      this.server.agenticInvestigations = plugins.agenticInvestigations;
 
       this.server.relayClient = plugins.actions.getRelayClient();
 
