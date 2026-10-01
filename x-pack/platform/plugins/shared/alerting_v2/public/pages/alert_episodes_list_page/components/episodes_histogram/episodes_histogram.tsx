@@ -174,6 +174,7 @@ export const EpisodesHistogram = ({
     isChartLoading: isDataLoading || !dataView,
     onBrushEnd,
     onTimeIntervalChange,
+    withLensActions: false,
   });
 
   const esqlQuery = useMemo<AggregateQuery>(
@@ -289,13 +290,6 @@ export const EpisodesHistogram = ({
             gutterSize="none"
             css={css`
               height: 192px;
-              /*
-               * TODO: Replace these selectors with a proper prop on UnifiedHistogramChart (e.g. withLensActions={false})
-               */
-              [data-test-subj='unifiedHistogramEditFlyoutVisualization'],
-              [data-test-subj='unifiedHistogramSaveVisualization'] {
-                display: none;
-              }
             `}
           >
             <EuiFlexItem>

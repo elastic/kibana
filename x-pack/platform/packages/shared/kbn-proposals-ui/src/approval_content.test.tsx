@@ -6,20 +6,21 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <EuiProvider>{children}</EuiProvider>
+  <I18nProvider>
+    <EuiProvider>{children}</EuiProvider>
+  </I18nProvider>
 );
 
 const baseProps: ApprovalContentProps = {
   title: 'Block IP 10.0.0.4',
   tone: 'danger',
-  iconType: 'lock',
   comment: 'Isolate the compromised host.',
-  actionImpact: { variant: 'description', description: 'One host, reversible.' },
   primaryAction: {
     label: 'Approve',
     onClick: jest.fn(),
@@ -48,14 +49,19 @@ describe('ApprovalContent', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the header when showHeader is true (default)', () => {
+  it('renders the header', () => {
     renderContent();
-    expect(screen.getByText(/approval required/i)).toBeInTheDocument();
+    expect(screen.getByText('Needs review')).toBeInTheDocument();
   });
 
-  it('hides the header when showHeader is false', () => {
-    renderContent({ showHeader: false });
-    expect(screen.queryByText(/approval required/i)).not.toBeInTheDocument();
+  it('renders a caption under the badge when supplied', () => {
+    renderContent({ caption: 'Rule tuning · Reversible' });
+    expect(screen.getByText('Rule tuning · Reversible')).toBeInTheDocument();
+  });
+
+  it('omits the caption line when none is supplied', () => {
+    renderContent({ caption: undefined });
+    expect(screen.queryByText('Rule tuning · Reversible')).not.toBeInTheDocument();
   });
 
   it('renders the comment', () => {
@@ -82,42 +88,6 @@ describe('ApprovalContent', () => {
     expect(screen.queryByTestId('approvalContent-comment')).not.toBeInTheDocument();
   });
 
-  it('renders the impact section label', () => {
-    renderContent();
-    expect(screen.getByText('Impact')).toBeInTheDocument();
-  });
-
-  it('renders the impact description variant prose', () => {
-    renderContent();
-    expect(screen.getByText('One host, reversible.')).toBeInTheDocument();
-  });
-
-  it('renders impact list variant items', () => {
-    renderContent({
-      actionImpact: {
-        variant: 'list',
-        items: [
-          { id: 'item-1', iconType: 'globe', text: 'host: 10.0.0.4' },
-          { id: 'item-2', iconType: 'tag', text: 'network' },
-        ],
-      },
-    });
-    expect(screen.getByText('host: 10.0.0.4')).toBeInTheDocument();
-    expect(screen.getByText('network')).toBeInTheDocument();
-  });
-
-  it('omits the impact section when no actionImpact is supplied', () => {
-    renderContent({ actionImpact: undefined });
-    expect(screen.queryByText('Impact')).not.toBeInTheDocument();
-  });
-
-  it("renders the comment above the impact section, so the proposal's own explanation leads", () => {
-    renderContent();
-    expect(
-      isBefore(screen.getByText('Isolate the compromised host.'), screen.getByText('Impact'))
-    ).toBe(true);
-  });
-
   it('renders the secondary action before the primary, so the committing decision sits last', () => {
     renderContent();
     expect(
@@ -132,17 +102,6 @@ describe('ApprovalContent', () => {
       ],
     });
     expect(screen.getByTestId('content-x').querySelector('[data-euiicon-type]')).toBeTruthy();
-  });
-
-  it('renders the actor row by default', () => {
-    renderContent();
-    expect(screen.getByText('You')).toBeInTheDocument();
-    expect(screen.getByText(/Senior Analyst/)).toBeInTheDocument();
-  });
-
-  it('hides the actor row when showActorRow is false', () => {
-    renderContent({ showActorRow: false });
-    expect(screen.queryByText('You')).not.toBeInTheDocument();
   });
 
   it('renders the primary action button', () => {
@@ -215,5 +174,85 @@ describe('ApprovalContent', () => {
     });
     fireEvent.click(screen.getByRole('checkbox'));
     expect(onChange).toHaveBeenCalledWith(true);
+  });
+
+  describe('built-in decline flow (onDismiss)', () => {
+    it('renders a Decline trigger next to the primary action when onDismiss is supplied', () => {
+      renderContent({ onDismiss: jest.fn(), 'data-test-subj': 'card' });
+      expect(screen.getByTestId('card-dismiss')).toBeInTheDocument();
+    });
+
+    it('omits the Decline trigger when onDismiss is not supplied', () => {
+      renderContent({ onDismiss: undefined, 'data-test-subj': 'card' });
+      expect(screen.queryByTestId('card-dismiss')).not.toBeInTheDocument();
+    });
+
+    it('disables the Decline trigger whenever the primary action is disabled', () => {
+      renderContent({
+        onDismiss: jest.fn(),
+        primaryAction: { label: 'Approve', onClick: jest.fn(), isDisabled: true },
+        'data-test-subj': 'card',
+      });
+      expect(screen.getByTestId('card-dismiss')).toBeDisabled();
+    });
+
+    it('swaps the comment for the reason form, and the footer for Cancel/Decline, once the trigger is clicked', () => {
+      renderContent({ onDismiss: jest.fn(), 'data-test-subj': 'card' });
+      fireEvent.click(screen.getByTestId('card-dismiss'));
+
+      expect(screen.queryByText('Isolate the compromised host.')).not.toBeInTheDocument();
+      expect(screen.getByTestId('card-decline-form')).toBeInTheDocument();
+      expect(screen.getByTestId('card-cancel-decline')).toBeInTheDocument();
+      expect(screen.getByTestId('card-confirm-decline')).toBeInTheDocument();
+      expect(screen.queryByTestId('content-confirm')).not.toBeInTheDocument();
+    });
+
+    it('returns to view without declining when Cancel is clicked', () => {
+      const onDismiss = jest.fn();
+      renderContent({ onDismiss, 'data-test-subj': 'card' });
+      fireEvent.click(screen.getByTestId('card-dismiss'));
+      fireEvent.click(screen.getByTestId('card-cancel-decline'));
+
+      expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
+      expect(onDismiss).not.toHaveBeenCalled();
+    });
+
+    it('calls onDismiss with the selected reason and rationale on confirm', async () => {
+      const onDismiss = jest.fn().mockResolvedValue(undefined);
+      renderContent({ onDismiss, 'data-test-subj': 'card' });
+      fireEvent.click(screen.getByTestId('card-dismiss'));
+      fireEvent.click(screen.getByTestId('card-confirm-decline'));
+
+      await waitFor(() =>
+        expect(onDismiss).toHaveBeenCalledWith({ dismissReason: 'no_reason', rationale: undefined })
+      );
+    });
+
+    it('shows an error and keeps the form open when onDismiss rejects', async () => {
+      const onDismiss = jest.fn().mockRejectedValue(new Error('Could not decline.'));
+      renderContent({ onDismiss, 'data-test-subj': 'card' });
+      fireEvent.click(screen.getByTestId('card-dismiss'));
+      fireEvent.click(screen.getByTestId('card-confirm-decline'));
+
+      await waitFor(() => expect(screen.getByText('Could not decline.')).toBeInTheDocument());
+      expect(screen.getByTestId('card-decline-form')).toBeInTheDocument();
+    });
+
+    it('hides the reason form once isSubmitting is "declining", since the banner already says so', () => {
+      const onDismiss = jest.fn();
+      const { rerender } = renderContent({ onDismiss, 'data-test-subj': 'card' });
+      fireEvent.click(screen.getByTestId('card-dismiss'));
+      expect(screen.getByTestId('card-decline-form')).toBeInTheDocument();
+
+      rerender(
+        <ApprovalContent
+          {...baseProps}
+          onDismiss={onDismiss}
+          isSubmitting="declining"
+          data-test-subj="card"
+        />
+      );
+      expect(screen.queryByTestId('card-decline-form')).not.toBeInTheDocument();
+    });
   });
 });

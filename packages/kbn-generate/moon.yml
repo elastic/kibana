@@ -24,14 +24,18 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/repo-packages'
   - '@kbn/projects-solutions-groups'
+  - '@kbn/licensing-types'
 tags:
   - shared-common
   - package
   - dev
   - group-platform
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

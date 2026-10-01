@@ -50,6 +50,45 @@ describe('KibanaEvalsClient', () => {
     (getCurrentTraceId as jest.Mock).mockReturnValue('default-trace-id');
   });
 
+  it('runs trusted upstream examples and retains dataset and example IDs', async () => {
+    const upsertDataset = jest.fn().mockResolvedValue('stored-dataset-id');
+    const onEvaluationComplete = jest.fn();
+    const dataset = {
+      id: 'stored-dataset-id',
+      name: 'curated-dataset',
+      description: 'Managed in the evaluations UI',
+      examples: [{ id: 'stored-example-id', input: { question: 'Investigate' } }],
+    };
+    const client = createClient({
+      upsertDataset,
+      onEvaluationComplete,
+      getDatasetByName: jest.fn().mockResolvedValue(dataset),
+    });
+    const [result] = await client.runExperiment(
+      {
+        datasets: [{ name: dataset.name, description: '', examples: [] }],
+        trustUpstreamDataset: true,
+        task: async () => ({ answer: 'Done' }),
+      },
+      [
+        {
+          name: 'placeholder',
+          kind: 'CODE',
+          direction: 'neutral',
+          evaluate: async () => ({ score: 1 }),
+        },
+      ]
+    );
+
+    expect(upsertDataset).toHaveBeenCalledWith(
+      expect.objectContaining({ name: dataset.name, examples: dataset.examples })
+    );
+    expect(result.datasetId).toBe('stored-dataset-id');
+    expect(onEvaluationComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ datasetId: 'stored-dataset-id', exampleId: 'stored-example-id' })
+    );
+  });
+
   it('computes a stable datasetId for datasets with the same name', async () => {
     const client = createClient();
 

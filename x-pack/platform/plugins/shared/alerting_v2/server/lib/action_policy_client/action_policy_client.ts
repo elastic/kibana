@@ -10,12 +10,13 @@ import pMap from 'p-map';
 import type {
   ActionPolicyResponse,
   BulkResponse,
-  CreateActionPolicyDataInput,
   MatchActionPoliciesResponse,
   MatchedActionPolicy,
+  PutActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import {
   createActionPolicyDataSchema,
+  putActionPolicyDataSchema,
   updateActionPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -43,6 +44,8 @@ import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_po
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
+import type { LicenseServiceContract } from '../services/license_service/license_service';
+import { LicenseServiceToken } from '../services/license_service/tokens';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -144,6 +147,7 @@ export class ActionPolicyClient {
     private readonly esoClient: EncryptedSavedObjectsClient,
     @inject(ActionPolicyNamespaceToken)
     private readonly namespace: string | undefined,
+    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.logger = loggerService.forSubsystem('actionPolicyClient');
@@ -224,6 +228,7 @@ export class ActionPolicyClient {
   }
 
   public async createActionPolicy(params: CreateActionPolicyParams): Promise<ActionPolicyResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, params.data, 'create');
 
     const actor = await this.userService.getCurrentActor();
@@ -233,6 +238,7 @@ export class ActionPolicyClient {
 
     const attributes = buildCreateActionPolicyAttributes({
       data: parsed,
+      enabled: params.options?.enabled ?? true,
       auth: apiKeyAttrs,
       createdBy: actor,
       createdAt: now,
@@ -241,14 +247,13 @@ export class ActionPolicyClient {
     });
 
     try {
-      const { id, version } = await this.actionPolicySavedObjectService.create({
+      const { id } = await this.actionPolicySavedObjectService.create({
         attrs: attributes,
         id: params.options?.id,
       });
 
       return transformActionPolicySoAttributesToApiResponse({
         id,
-        version,
         attributes,
       });
     } catch (e) {
@@ -265,10 +270,9 @@ export class ActionPolicyClient {
   }
 
   public async getActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
-    const { attrs, version } = await this.getExistingActionPolicy(id);
+    const { attrs } = await this.getExistingActionPolicy(id);
     return transformActionPolicySoAttributesToApiResponse({
       id,
-      version,
       attributes: attrs,
     });
   }
@@ -300,7 +304,6 @@ export class ActionPolicyClient {
       return [
         transformActionPolicySoAttributesToApiResponse({
           id: doc.id,
-          version: doc.version,
           attributes: doc.attributes,
         }),
       ];
@@ -308,12 +311,15 @@ export class ActionPolicyClient {
   }
 
   public async updateActionPolicy(params: UpdateActionPolicyParams): Promise<ActionPolicyResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     const parsed = this.parseActionPolicyData(updateActionPolicyDataSchema, params.data, 'update');
 
     const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
-    const { attrs: existingPolicy } = await this.getExistingActionPolicy(params.options.id);
+    const { attrs: existingPolicy, version: existingVersion } = await this.getExistingActionPolicy(
+      params.options.id
+    );
 
     const oldAuth = await this.getDecryptedAuth(params.options.id);
 
@@ -328,12 +334,11 @@ export class ActionPolicyClient {
       updatedAt: now,
     });
 
-    let updated: { id: string; version?: string };
     try {
-      updated = await this.writeActionPolicyAttrs({
+      await this.writeActionPolicyAttrs({
         id: params.options.id,
         attrs: nextAttrs,
-        version: params.options.version,
+        version: existingVersion,
       });
     } catch (e) {
       this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, params.options.id);
@@ -344,7 +349,6 @@ export class ActionPolicyClient {
 
     return transformActionPolicySoAttributesToApiResponse({
       id: params.options.id,
-      version: updated.version,
       attributes: nextAttrs,
     });
   }
@@ -373,7 +377,6 @@ export class ActionPolicyClient {
       items: res.saved_objects.map((so) =>
         transformActionPolicySoAttributesToApiResponse({
           id: so.id,
-          version: so.version,
           attributes: so.attributes,
         })
       ),
@@ -408,13 +411,13 @@ export class ActionPolicyClient {
     const evaluatedCount = allPolicies.items.length;
     return {
       items,
-      total: allPolicies.total,
       evaluated_count: evaluatedCount,
       is_truncated: allPolicies.total > evaluatedCount,
     };
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     return this.updatePolicyState(id, { enabled: true });
   }
 
@@ -433,7 +436,15 @@ export class ActionPolicyClient {
     return this.updatePolicyState(id, { snoozedUntil: null });
   }
 
-  public async updateActionPolicyApiKey({ id }: UpdateActionPolicyApiKeyParams): Promise<void> {
+  public async updateActionPolicyApiKey({
+    id,
+  }: UpdateActionPolicyApiKeyParams): Promise<ActionPolicyResponse> {
+    await this.rotateApiKey(id);
+
+    return this.getActionPolicy({ id });
+  }
+
+  private async rotateApiKey(id: string): Promise<void> {
     const { attrs: existingPolicy } = await this.getExistingActionPolicy(id);
 
     const oldAuth = await this.getDecryptedAuth(id);
@@ -463,6 +474,7 @@ export class ActionPolicyClient {
   public async bulkEnableActionPolicies({
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     return this.executeBulkUpdate(ids, { enabled: true });
   }
 
@@ -542,15 +554,17 @@ export class ActionPolicyClient {
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
     // Each id rotates its own API key (SO get + decrypt + key create + write),
-    // so the work is per-item rather than a single SO round-trip. Fan out with a
-    // bounded concurrency; failures are isolated per id inside the mapper so one
-    // bad policy never aborts the rest of the batch. `pMap` preserves input
-    // order, keeping the `errors` ordering deterministic.
+    // so the work is per-item rather than a single SO round-trip. Rotate
+    // directly rather than through `updateActionPolicyApiKey`, whose trailing
+    // read only exists to build a body this response does not carry. Fan out
+    // with a bounded concurrency; failures are isolated per id inside the mapper
+    // so one bad policy never aborts the rest of the batch. `pMap` preserves
+    // input order, keeping the `errors` ordering deterministic.
     const results = await pMap(
       ids,
       async (id): Promise<ActionPolicyBulkError | null> => {
         try {
-          await this.updateActionPolicyApiKey({ id });
+          await this.rotateApiKey(id);
           return null;
         } catch (e) {
           return bulkErrorFromThrown(id, e);
@@ -862,16 +876,18 @@ export class ActionPolicyClient {
     data,
   }: {
     id: string;
-    data: CreateActionPolicyDataInput;
+    data: PutActionPolicyData;
   }): Promise<{ policy: ActionPolicyResponse; created: boolean }> {
+    await this.licenseService.assertActionPoliciesLicense();
     // Validate up front so a bad body never spends an API key allocation or
     // even consults the SO store.
-    const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, data, 'upsert');
+    const parsed = this.parseActionPolicyData(putActionPolicyDataSchema, data, 'upsert');
 
     const exists = await this.actionPolicyExists({ id });
 
     if (!exists) {
-      const policy = await this.createActionPolicy({ data, options: { id } });
+      const { enabled, ...createData } = parsed;
+      const policy = await this.createActionPolicy({ data: createData, options: { id, enabled } });
       return { policy, created: true };
     }
 
@@ -888,28 +904,31 @@ export class ActionPolicyClient {
     const oldAuth = await this.getDecryptedAuth(id);
     const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(parsed.name));
 
-    // PUT replaces every field accepted by createActionPolicyDataSchema. Audit
-    // metadata (createdBy/createdAt) and operational state (enabled,
-    // snoozedUntil) are not part of the create schema and are preserved here.
-    // Tags are also preserved: they are no longer part of the API contract but
-    // remain in the saved object so they can be re-exposed later.
+    // PUT replaces every field accepted by createActionPolicyDataSchema, plus
+    // the optional `enabled`: omitted preserves the existing stored value,
+    // otherwise it becomes the new value. Audit metadata (createdBy/createdAt)
+    // and other operational state (snoozedUntil) are not part of the create
+    // schema and are preserved here. Tags are also preserved: they are no
+    // longer part of the API contract but remain in the saved object so they
+    // can be re-exposed later.
+    const nextEnabled = parsed.enabled ?? existingAttrs.enabled;
     const replacementAttrs: ActionPolicySavedObjectAttributes = {
       ...buildCreateActionPolicyAttributes({
         data: parsed,
+        enabled: nextEnabled,
         auth: apiKeyAttrs,
         createdBy: existingAttrs.createdBy,
         createdAt: existingAttrs.createdAt,
         updatedBy: actor,
         updatedAt: now,
       }),
-      enabled: existingAttrs.enabled,
+      enabled: nextEnabled,
       snoozedUntil: existingAttrs.snoozedUntil,
       tags: existingAttrs.tags,
     };
 
-    let updated: { id: string; version?: string };
     try {
-      updated = await this.writeActionPolicyAttrs({
+      await this.writeActionPolicyAttrs({
         id,
         attrs: replacementAttrs,
         version: existingVersion,
@@ -924,7 +943,6 @@ export class ActionPolicyClient {
     return {
       policy: transformActionPolicySoAttributesToApiResponse({
         id,
-        version: updated.version,
         attributes: replacementAttrs,
       }),
       created: false,

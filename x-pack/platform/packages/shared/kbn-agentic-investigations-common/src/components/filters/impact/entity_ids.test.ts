@@ -17,6 +17,7 @@ const investigation = (overrides: Partial<Investigation> = {}): Investigation =>
   watch_id: '',
   watch_execution_id: '',
   pendingProposalCount: 1,
+  assignees: [],
   events: [],
   ...overrides,
 });

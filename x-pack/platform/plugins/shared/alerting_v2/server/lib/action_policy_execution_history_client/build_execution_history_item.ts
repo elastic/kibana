@@ -11,11 +11,10 @@ import {
   MAX_EMBEDDED_EPISODES_PER_ITEM,
   type DispatchFailureReason,
   type PolicyExecutionHistoryItem,
-  type PolicyExecutionOutcome,
   type SearchMatchCounts,
 } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
+import { isSurfacedEventAction, toPolicyExecutionOutcome } from './outcome';
 
 export type { PolicyExecutionHistoryItem };
 
@@ -33,11 +32,6 @@ export interface ResolvedSearchIds {
 }
 
 export const isString = (v: unknown): v is string => typeof v === 'string';
-
-export const isPolicyOutcome = (action: unknown): action is PolicyExecutionOutcome =>
-  action === ACTION_POLICY_EVENT_ACTIONS.DISPATCHED ||
-  action === ACTION_POLICY_EVENT_ACTIONS.THROTTLED ||
-  action === ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED;
 
 export function collectIdsFromEvents(events: IValidatedEvent[]): {
   policyIds: string[];
@@ -130,7 +124,7 @@ export function buildExecutionHistoryItem(
 
   const timestamp = event['@timestamp'];
   const action = event.event?.action;
-  if (!timestamp || !isPolicyOutcome(action)) return null;
+  if (!timestamp || !isSurfacedEventAction(action)) return null;
 
   const savedObjects = event.kibana?.saved_objects ?? [];
   const policyId = savedObjects.find((so) => so.type === ACTION_POLICY_SAVED_OBJECT_TYPE)?.id;
@@ -168,7 +162,7 @@ export function buildExecutionHistoryItem(
   return {
     dispatched_at: timestamp,
     policy: { id: policyId, name: policyNames.get(policyId) ?? null },
-    outcome: action,
+    outcome: toPolicyExecutionOutcome(action),
     episode_count: Number(dispatcher.episode_count ?? 0),
     episodes,
     action_group_count: Number(dispatcher.action_group_count ?? 0),
