@@ -466,34 +466,6 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationUnavailableError('Investigations are not configured in this space');
     }
 
-    switch (trigger_type) {
-      case 'manual':
-        break;
-      case 'automatic': {
-        const { allowed } = await evaluateInvestigationQuota({
-          callback: this.investigationQuotaCallback,
-          logger: this.logger,
-        });
-        if (!allowed) {
-          throw new InvestigationQuotaDeniedError();
-        }
-        break;
-      }
-      default:
-        assertNever(trigger_type);
-    }
-
-    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
-    // agent exists wherever an investigation runs. This narrower install stays because the run
-    // below executes the *stored* workflow definition, which predates that step until the managed
-    // install has upgraded it — and that install is fire-and-forget. Deliberately without the
-    // step's visibility retry: the workflow owns that, and this request path should not pay for it.
-    await installInvestigationAgent({
-      agentBuilder,
-      spaceId,
-      availability: this.agentAvailability,
-    });
-
     const { alerts } = prepared;
     const newInvestigationId = uuidv4();
     const subjects = toStartSubjects({
@@ -511,8 +483,22 @@ export class NightshiftInvestigationsClient {
       agenticInvestigations,
       subjects,
       newInvestigationId,
+      // Only a start that opens a new investigation counts against the daily automatic quota:
+      // a follow-up adds a round to an investigation that was already paid for.
+      assertCanOpenNew: () => this.assertQuotaForNewInvestigation(trigger_type),
     });
     const isFollowUp = investigationId !== newInvestigationId;
+
+    // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
+    // agent exists wherever an investigation runs. This narrower install stays because the run
+    // below executes the *stored* workflow definition, which predates that step until the managed
+    // install has upgraded it — and that install is fire-and-forget. Deliberately without the
+    // step's visibility retry: the workflow owns that, and this request path should not pay for it.
+    await installInvestigationAgent({
+      agentBuilder,
+      spaceId,
+      availability: this.agentAvailability,
+    });
 
     const newSubjects = withoutRecordedSubjects(subjects, recorded);
     const newAlertIds = new Set(newSubjects.map(({ id }) => id));
@@ -571,20 +557,45 @@ export class NightshiftInvestigationsClient {
    * such an investigation does not block it. Deployments run starts under one service identity
    * so this does not happen there.
    */
+  private async assertQuotaForNewInvestigation(
+    triggerType: StartInvestigationRequest['trigger_type']
+  ): Promise<void> {
+    switch (triggerType) {
+      case 'manual':
+        return;
+      case 'automatic': {
+        const { allowed } = await evaluateInvestigationQuota({
+          callback: this.investigationQuotaCallback,
+          logger: this.logger,
+        });
+        if (!allowed) {
+          throw new InvestigationQuotaDeniedError();
+        }
+        return;
+      }
+      default:
+        assertNever(triggerType);
+    }
+  }
+
   private async resolveInvestigation({
     conversations,
     agenticInvestigations,
     subjects,
     newInvestigationId,
+    assertCanOpenNew,
   }: {
     conversations: ConversationPublicClient;
     agenticInvestigations: AgenticInvestigationsPluginStart;
     subjects: WorkflowSubjectInput[];
     newInvestigationId: string;
+    /** Throws when this start may not open a new investigation. Runs before any claim. */
+    assertCanOpenNew: () => Promise<void>;
   }): Promise<{ id: string; recorded: StoredInvestigationSubject[] }> {
     const newInvestigation = { id: newInvestigationId, recorded: [] };
     const keys = toSubjectKeys(subjects, newInvestigationId);
     if (keys.length === 0) {
+      await assertCanOpenNew();
       return newInvestigation;
     }
 
@@ -633,6 +644,7 @@ export class NightshiftInvestigationsClient {
       );
     }
 
+    await assertCanOpenNew();
     const claim = await subjectsClient.claimSubjects({
       conversationId: newInvestigationId,
       subjects: keys,
