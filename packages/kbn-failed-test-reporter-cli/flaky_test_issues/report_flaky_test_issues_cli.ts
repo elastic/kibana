@@ -121,8 +121,7 @@ export function runReportFlakyTestIssuesCli() {
         closed ones in --github-repo and in --tracking-repo, then matches locally. A suite gets no
         issue when every one of its tests has one in either repository, open or closed, a per-test
         issue about it or an issue about the suite or its file; a single test without one is
-        enough for the suite issue to be filed. Flaky tests skipped since, on every branch they
-        failed on, are left out first, so a suite whose every flaky test is skipped gets no issue.
+        enough for the suite issue to be filed. Flaky tests skipped since are left out.
 
         Examples:
           GITHUB_TOKEN=... node scripts/report_flaky_test_issues --input .scout/flaky_tests.json --dry-run
@@ -155,7 +154,7 @@ export function runReportFlakyTestIssuesCli() {
           --tracking-repo       owner/name whose failed-test issues cover a suite once every one of its tests has one; never written to, empty disables [default: ${DEFAULT_TRACKING_REPO}]
           --closed-since-days   Only closed issues updated within this many days count as tracking a suite [default: ${DEFAULT_CLOSED_SINCE_DAYS}]
           --max-new-issues      Issues created per run, worst suites first [default: ${DEFAULT_MAX_NEW_ISSUES}]
-          --no-omit-skipped-tests  Keep flaky tests that were skipped since: their latest run on every branch they failed on was a skip, at least 12 hours after they last ran there
+          --no-omit-skipped-tests  Keep flaky tests that were skipped since
           --dry-run             Read issues and log what would be filed without writing
         `,
       },

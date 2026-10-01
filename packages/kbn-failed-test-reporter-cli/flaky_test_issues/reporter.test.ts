@@ -370,7 +370,6 @@ describe('reportFlakySuiteIssues', () => {
   });
 
   describe('flaky tests skipped since', () => {
-    /** Failed on `main`, where every run since 7 Sep was a skip. */
     const skippedTest = (overrides: Parameters<typeof flakyTest>[0] = {}) =>
       flakyTest({
         ...overrides,
@@ -417,7 +416,6 @@ describe('reportFlakySuiteIssues', () => {
       const trackedSummary = await run(tracked, { report });
       await run(untracked, { report });
 
-      // the skipped test alone would have got the suite its issue
       expect(tracked.createIssue).not.toHaveBeenCalled();
       expect(trackedSummary.actions[0]).toMatchObject({ reason: 'tracked', issue: { number: 43 } });
       const [, body] = untracked.createIssue.mock.calls[0];

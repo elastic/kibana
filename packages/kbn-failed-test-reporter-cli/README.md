@@ -30,16 +30,9 @@ per-test one or one about the suite or its file; commenting on and reopening
 those issues is left to a later iteration, so is the stale `failed-test` sweep closing the issues
 of suites that drop out of the report.
 
-Flaky tests that were skipped since are left out before any of this (`--no-omit-skipped-tests`
-keeps them): a test whose latest run, on every branch it failed on in the window, was a skip at
-least 12 hours after it last ran there. A suite is about the tests that still run, and one whose
-every flaky test was skipped gets no issue, recorded as skipped (`all-tests-skipped`). The check
-is per branch, since a test skipped on `main` but still failing on a release branch needs a skip
-there too, and the 12 hours tell a skip in the code from a config or Scout target that skips the
-test while others still run it, interleaving skipped and executed runs within a build. Every
-framework reports skipped runs, whatever skipped them (`.skip`, a skipped parent suite, a
-runtime skip). A skip merged just before the report has not run long enough to count yet, and a
-pipeline running older commits (the Cloud ones) keeps executing the test until it catches up.
+Flaky tests that were skipped since are left out first (`--no-omit-skipped-tests` keeps them):
+on every branch the test failed on, its latest run was a skip, at least 12 hours after it last ran.
+A suite left with no test gets no issue (`all-tests-skipped`).
 
 The body ends with hidden `flaky-test-suite` metadata (`<!-- kibanaCiData = … -->`): the suite's
 file, title, framework and test ids, the branches a test of the suite failed on (`suite.branches`,

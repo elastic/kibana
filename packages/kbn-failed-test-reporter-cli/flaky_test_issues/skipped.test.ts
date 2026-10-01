@@ -8,12 +8,11 @@
  */
 
 import type { FlakyTestBranchStats } from '@kbn/scout-reporting';
-import { isSkippedTest, MIN_SKIPPED_FOR_MS, skippedBranches } from './skipped';
+import { isSkippedTest, MIN_TIME_SINCE_EXECUTION_MS, skippedBranches } from './skipped';
 import { flakyTest } from './test_fixtures';
 
 const LAST_EXECUTED_AT = new Date('2026-09-07T10:00:00.000Z');
 
-/** A branch the test failed on, whose latest run was `status` at `at`. */
 const branch = (
   name: string,
   status: string,
@@ -52,7 +51,7 @@ describe('isSkippedTest', () => {
 
   it('is not skipped when the skip came minutes after an execution, as when a target skips it conditionally', () => {
     const minutesLater = new Date(LAST_EXECUTED_AT.getTime() + 10 * 60 * 1000);
-    const atThreshold = new Date(LAST_EXECUTED_AT.getTime() + MIN_SKIPPED_FOR_MS);
+    const atThreshold = new Date(LAST_EXECUTED_AT.getTime() + MIN_TIME_SINCE_EXECUTION_MS);
 
     expect(isSkippedTest(flakyTest({ byBranch: [branch('main', 'skipped', minutesLater)] }))).toBe(
       false
@@ -67,7 +66,6 @@ describe('isSkippedTest', () => {
       byBranch: [
         branch('main', 'skipped', SKIPPED_DAYS_LATER),
         branch('someone:fix-it', 'failed', SKIPPED_DAYS_LATER),
-        // skipped too, but it never failed there
         branch('9.4', 'passed', SKIPPED_DAYS_LATER, { failedBuilds: 0 }),
       ],
     });

@@ -12,9 +12,8 @@ set -euo pipefail
 #   - elastic/kibana: live.
 # Every open failed-test issue is fetched, plus those closed in the last
 # FLAKY_TESTS_CLOSED_ISSUES_DAYS days; both count as tracking a suite. At most
-# FLAKY_TESTS_MAX_NEW_ISSUES issues are created per run. Unless FLAKY_TESTS_OMIT_SKIPPED_TESTS is
-# 'false', flaky tests skipped since on every branch they failed on are left out, so a suite
-# whose every flaky test is skipped gets no issue.
+# FLAKY_TESTS_MAX_NEW_ISSUES issues are created per run. FLAKY_TESTS_OMIT_SKIPPED_TESTS leaves
+# out flaky tests that were skipped since.
 # GITHUB_TOKEN (kibanamachine) comes from Vault via .buildkite/scripts/common/setup_job_env.sh.
 
 source .buildkite/scripts/common/util.sh

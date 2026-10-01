@@ -63,10 +63,7 @@ export interface ReportFlakySuiteIssuesOptions {
   closedSince: Date;
   /** Suite issues created per run, worst suites first; the rest is reported as skipped. */
   maxNewIssues: number;
-  /**
-   * Leave out the flaky tests skipped since on every branch they failed on (`isSkippedTest`), so
-   * that they neither get a suite its issue nor show in it; a suite left with none gets no issue.
-   */
+  /** Leave out flaky tests that were skipped since (`isSkippedTest`). */
   omitSkippedTests: boolean;
   dryRun: boolean;
 }
@@ -90,7 +87,7 @@ export type SkipReason =
   | 'tracked'
   /** Same, for the tracking repository. */
   | 'tracked-upstream'
-  /** Every flaky test of the suite was skipped since, on the branches it failed on. */
+  /** Every flaky test of the suite was skipped since. */
   | 'all-tests-skipped';
 
 /** The suite an action is about; several suites of one file are told apart by their title. */
@@ -116,7 +113,7 @@ export interface FlakySuiteIssuesSummary {
   dryRun: boolean;
   githubRepo: string;
   suites: number;
-  /** Flaky tests left out as skipped since, see `omitSkippedTests`. */
+  /** Flaky tests left out as skipped. */
   omittedTests: number;
   /** `failed-test` issues checked: every open one and the closed ones updated since `closedSince`. */
   issues: IssueCounts & {
@@ -229,9 +226,8 @@ export const issueLabels = (suite: FlakySuite, githubRepo: string): string[] => 
  * worst suites first and at most `maxNewIssues` per run. A suite is tracked when every one of
  * its tests has an issue, in `githubRepo` or in the tracking repository, open or closed: an issue
  * about the suite or its file covers them all, a per-test issue only its own test. Issues about
- * some of the tests, or merely mentioning the file, are linked from the new issue instead. With
- * `omitSkippedTests`, tests skipped since are left out first. A failed write is recorded and the
- * run goes on with the next suite.
+ * some of the tests, or merely mentioning the file, are linked from the new issue instead. A
+ * failed write is recorded and the run goes on with the next suite.
  */
 export const reportFlakySuiteIssues = async (
   options: ReportFlakySuiteIssuesOptions
@@ -243,7 +239,7 @@ export const reportFlakySuiteIssues = async (
     report.flaky.filter((test) => !omitted.includes(test)),
     report.files
   );
-  // Suites whose every flaky test was omitted; the others go on with the tests left
+  // Suites with no test left
   const skippedSuites = groupIntoSuites(omitted, report.files).filter(
     (skipped) => !suites.some((suite) => sameSuite(suite, skipped))
   );
