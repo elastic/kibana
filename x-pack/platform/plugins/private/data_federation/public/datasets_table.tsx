@@ -15,9 +15,11 @@ import {
   EuiSpacer,
   EuiTextBlockTruncate,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useHistory } from 'react-router-dom';
+import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSetWithName, DataSource } from '../common';
+import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
@@ -29,10 +31,7 @@ export interface DatasetsTableProps {
   items: DataSetListRow[];
   selectedItems: DataSetListRow[];
   dataSourceNames: string[];
-  isCreateDisabled: boolean;
   onSelectionChange: (next: DataSetListRow[]) => void;
-  onCreate: () => void;
-  onEdit: (item: DataSetListRow) => void;
   onDelete: (item: DataSetListRow) => void;
   onDeleteSelected: (items: DataSetListRow[]) => void;
 }
@@ -41,16 +40,15 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   items,
   selectedItems,
   dataSourceNames,
-  isCreateDisabled,
   onSelectionChange,
-  onCreate,
-  onEdit,
   onDelete,
   onDeleteSelected,
 }) => {
   const {
     services: { docLinks },
   } = useKibana<DataFederationKibanaServices>();
+  const history = useHistory();
+  const createDatasetNav = reactRouterNavigate(history, CREATE_DATASET_PATH);
 
   const emptyMessage = useMemo(
     () => (
@@ -119,7 +117,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
             icon: 'pencil',
             type: 'icon',
             onClick: (item) => {
-              onEdit(item);
+              history.push(getEditDatasetPath(item.name));
             },
             'data-test-subj': 'dataSetsSetsEditButton',
           },
@@ -137,7 +135,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         ],
       },
     ],
-    [onDelete, onEdit]
+    [history, onDelete]
   );
 
   return (
@@ -194,8 +192,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
               fill
               color="primary"
               data-test-subj="dataSetsSetsCreateButton"
-              onClick={onCreate}
-              disabled={isCreateDisabled}
+              {...createDatasetNav}
             >
               {mainTranslations.columns.dataSets.addButtonLabel}
             </EuiButton>

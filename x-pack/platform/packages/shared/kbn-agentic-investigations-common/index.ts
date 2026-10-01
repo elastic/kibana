@@ -60,21 +60,6 @@ export {
 } from './src/components/details/proposed_action_button';
 
 export {
-  AttachmentSummarySection,
-  type AttachmentSummarySectionProps,
-  AttachmentSummaryList,
-  type AttachmentSummaryListProps,
-  AttachmentSummaryGroup,
-  type AttachmentSummaryGroupProps,
-  DEFAULT_COLLAPSED_COUNT,
-  AttachmentSummaryRow,
-  type AttachmentSummaryRowProps,
-  selectSummaryAttachments,
-  SUMMARY_ATTACHMENT_TYPES,
-  type SummaryAttachmentType,
-} from './src/components/attachment_summary';
-
-export {
   registerAgenticInvestigationTemplateUI,
   type RegisterAgenticInvestigationTemplateUIOptions,
   registerEscalationTemplateUI,

@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/user-profile-components'
   - '@kbn/proposals-ui'
   - '@kbn/ui-ai-components'
+  - '@kbn/rison'
 tags:
   - shared-browser
   - package

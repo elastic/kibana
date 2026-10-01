@@ -565,6 +565,7 @@ export function AgentBasedSection({
             onClose={() => setIsFlyoutOpen(false)}
             isIntegrationFlow
             hideIncomingDataStep
+            hideViewAgentsButton
             onAgentPolicyCreated={!isPolicyCreated ? handleAgentPolicyCreated : undefined}
             defaultAgentPolicyName={!isPolicyCreated ? newAgentPolicy.name : undefined}
             forceCreatePolicy={!isPolicyCreated}
