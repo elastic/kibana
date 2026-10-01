@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
+import { isSchemaValuedAdditionalProperties } from './schema/common/json_model_shape_schema';
 import { TriggerSchema } from './schema/triggers';
 import { AlertEventSchema } from './schema/triggers/alert_trigger_schema';
 import {
@@ -1106,6 +1107,16 @@ const WorkflowSchemaBase = z.object({
 function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSchema> | undefined {
   if (!value) return undefined;
   if (typeof value === 'object' && !Array.isArray(value) && 'properties' in value) {
+    return value as z.infer<typeof JsonModelSchema>;
+  }
+  if (
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    'additionalProperties' in value &&
+    isSchemaValuedAdditionalProperties(
+      (value as { additionalProperties?: unknown }).additionalProperties
+    )
+  ) {
     return value as z.infer<typeof JsonModelSchema>;
   }
   if (Array.isArray(value)) {
