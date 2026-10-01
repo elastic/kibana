@@ -145,9 +145,17 @@ export const createProposalTool = ({
     availability: {
       // Per principal, so it cannot be cached per space.
       cacheMode: 'none',
-      handler: async ({ request }) => {
+      handler: async ({ request, spaceId }) => {
         try {
           await assertAvailable(request);
+          // Starting the gate also needs execute access to the managed workflow; without it
+          // every call would fail. The handler does not repeat this: `executeWorkflow` checks it.
+          await getWorkflowsApi().assertWorkflowAccess(
+            CREATE_PROPOSAL_WORKFLOW_ID,
+            spaceId,
+            'execute',
+            request
+          );
           return { status: 'available' };
         } catch (error) {
           return { status: 'unavailable', reason: errorMessage(error) };

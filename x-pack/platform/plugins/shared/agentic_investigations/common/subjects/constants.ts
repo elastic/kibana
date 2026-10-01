@@ -15,8 +15,12 @@ export const SUBJECT_INDEX_NAME = '.kibana-investigation-subject' as const;
  * One claim per space and subject, so concurrent starts for the same subject agree on one
  * investigation. A sibling index rather than a second document kind in the subject index, so
  * every subject index document is an attachment document.
+ *
+ * Not `.kibana-investigation-subject-claim`: the storage adapter's index template matches
+ * `<name>-*`, so the subject template would match the claim index and Elasticsearch refuses
+ * two same-priority templates with overlapping patterns.
  */
-export const SUBJECT_CLAIM_INDEX_NAME = '.kibana-investigation-subject-claim' as const;
+export const SUBJECT_CLAIM_INDEX_NAME = '.kibana-investigation-claim' as const;
 
 /** What an investigation is about. `slack_thread` is a Slack thread asking a question. */
 export const INVESTIGATION_SUBJECT_TYPES = [

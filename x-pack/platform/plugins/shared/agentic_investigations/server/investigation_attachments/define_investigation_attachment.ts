@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import type {
   AgentBuilderPluginSetup,
@@ -64,6 +64,14 @@ export interface InvestigationAttachmentConfig<
   maxContentLength?: number;
 }
 
+/** What the Agent Builder type needs at runtime; resolved lazily, after `start`. */
+export interface InvestigationAttachmentTypeDeps<TStored extends StoredInvestigationAttachment> {
+  getService: () => InvestigationAttachmentDocService<TStored>;
+  /** Checked before `resolve` and `isStale` read the index by a caller-supplied origin. */
+  assertCanRead: (request: KibanaRequest) => Promise<void>;
+  logger: Logger;
+}
+
 /** How a write reads and changes the document, shared by the route and tool paths. */
 export interface InvestigationAttachmentWrite<TStored extends StoredInvestigationAttachment> {
   service: InvestigationAttachmentDocService<TStored>;
@@ -92,14 +100,13 @@ export interface InvestigationAttachmentDefinition<
   createServiceFromStorage: (
     storage: InvestigationAttachmentStorage<TStored>
   ) => InvestigationAttachmentDocService<TStored>;
-  createAttachmentType: (deps: {
-    getService: () => InvestigationAttachmentDocService<TStored>;
-    logger: Logger;
-  }) => AttachmentTypeDefinition<TType, InvestigationAttachmentDocument<TStored>>;
+  createAttachmentType: (
+    deps: InvestigationAttachmentTypeDeps<TStored>
+  ) => AttachmentTypeDefinition<TType, InvestigationAttachmentDocument<TStored>>;
   /** Setup-time registration with Agent Builder. */
   registerAttachmentType: (
     agentBuilder: AgentBuilderPluginSetup,
-    deps: { getService: () => InvestigationAttachmentDocService<TStored>; logger: Logger }
+    deps: InvestigationAttachmentTypeDeps<TStored>
   ) => void;
   /** Route / step path: owner check, index write, public-client attach, revert on failure. */
   writeAndAttach: (
@@ -139,15 +146,13 @@ export const defineInvestigationAttachment = <
 
   const buildAttachmentType = <TId extends string>(
     type: TId,
-    {
-      getService,
-      logger,
-    }: Parameters<InvestigationAttachmentDefinition<TType, TStored>['createAttachmentType']>[0]
+    { getService, assertCanRead, logger }: InvestigationAttachmentTypeDeps<TStored>
   ) =>
     createInvestigationAttachmentType<TId, TStored>({
       type,
       schema: config.schema,
       getService,
+      assertCanRead,
       logger,
       format: config.format,
       agentDescription: config.agentDescription,

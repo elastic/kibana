@@ -120,12 +120,16 @@ describe('SubjectClaimsService', () => {
     expect(holderOf(ALERT)).toBe('conv-2');
   });
 
-  it('claims all subjects or none, releasing what it took', async () => {
+  it('claims all subjects or none, handing what it took to the holder', async () => {
     const { service, holderOf } = setup();
+    // Claims are taken in claim id order: hold the later one so the call takes the earlier first.
+    const [first, second] = [ALERT, EVENT].sort((left, right) =>
+      subjectClaimId(SPACE_ID, left).localeCompare(subjectClaimId(SPACE_ID, right))
+    );
     await service.claim({
       spaceId: SPACE_ID,
       conversationId: 'conv-1',
-      subjects: [ALERT],
+      subjects: [second],
       isHolderOpen: isOpen(true),
     });
 
@@ -133,12 +137,22 @@ describe('SubjectClaimsService', () => {
       service.claim({
         spaceId: SPACE_ID,
         conversationId: 'conv-2',
-        subjects: [EVENT, ALERT],
+        subjects: [second, first],
         isHolderOpen: isOpen(true),
       })
     ).resolves.toEqual({ claimed: false, heldBy: 'conv-1' });
-    expect(holderOf(EVENT)).toBeUndefined();
-    expect(holderOf(ALERT)).toBe('conv-1');
+    // The caller follows up on conv-1 with both subjects, so a concurrent start for the first
+    // subject must be pointed there too, not at the abandoned conv-2.
+    expect(holderOf(first)).toBe('conv-1');
+    expect(holderOf(second)).toBe('conv-1');
+    await expect(
+      service.claim({
+        spaceId: SPACE_ID,
+        conversationId: 'conv-3',
+        subjects: [first],
+        isHolderOpen: isOpen(true),
+      })
+    ).resolves.toEqual({ claimed: false, heldBy: 'conv-1' });
   });
 
   it('keeps claims apart per space', async () => {

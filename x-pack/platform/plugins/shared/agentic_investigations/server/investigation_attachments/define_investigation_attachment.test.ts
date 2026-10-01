@@ -101,11 +101,14 @@ const setup = () => {
   return { storage, service };
 };
 
-const registeredType = (service: ReturnType<typeof setup>['service']) => {
+const registeredType = (
+  service: ReturnType<typeof setup>['service'],
+  assertCanRead: jest.Mock = jest.fn().mockResolvedValue(undefined)
+) => {
   const registerType = jest.fn();
   note.registerAttachmentType(
     { attachments: { registerType } } as unknown as AgentBuilderPluginSetup,
-    { getService: () => service, logger: loggerMock.create() }
+    { getService: () => service, assertCanRead, logger: loggerMock.create() }
   );
   return registerType.mock.calls[0][0] as AttachmentTypeDefinition;
 };
@@ -346,6 +349,38 @@ describe('investigation attachment type', () => {
     await expect(
       definition.resolve?.(noteId(), { ...resolveContext, spaceId: 'other' })
     ).resolves.toBeUndefined();
+  });
+
+  it('resolves and checks staleness only for a caller who may read the entity', async () => {
+    const { storage, service } = setup();
+    storage.put(noteId(), body());
+    const assertCanRead = jest.fn().mockRejectedValue(new Error('Missing privilege'));
+    const definition = registeredType(service, assertCanRead);
+
+    await expect(definition.resolve?.(noteId(), resolveContext)).resolves.toBeUndefined();
+    await expect(
+      definition.isStale?.(
+        {
+          id: noteId(),
+          type: TYPE,
+          origin: noteId(),
+          current_version: 1,
+          active: true,
+          versions: [
+            {
+              version: 1,
+              data: { id: noteId(), ...body({ count: 9 }) },
+              created_at: '',
+              content_hash: '',
+              estimated_tokens: 1,
+            },
+          ],
+        },
+        resolveContext
+      )
+    ).resolves.toBe(false);
+    expect(assertCanRead).toHaveBeenCalledWith(resolveContext.request);
+    expect(storage.search).not.toHaveBeenCalled();
   });
 
   it('is stale when the index changed beyond a timestamp', async () => {

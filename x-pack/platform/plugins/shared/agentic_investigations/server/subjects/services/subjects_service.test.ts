@@ -87,7 +87,11 @@ const setup = () => {
   const registerType = jest.fn();
   registerSubjectAttachment(
     { attachments: { registerType } } as unknown as AgentBuilderPluginSetup,
-    { getSubjectsService: () => service, logger: loggerMock.create() }
+    {
+      getSubjectsService: () => service,
+      privileges: { assertCanManage: jest.fn(), assertCanRead: jest.fn() },
+      logger: loggerMock.create(),
+    }
   );
   const definition = registerType.mock.calls[0][0] as AttachmentTypeDefinition;
   const { manager, client } = createAttachmentClient(definition);
@@ -240,6 +244,19 @@ describe('SubjectsService', () => {
         .then((ids) => ids.sort())
     ).resolves.toEqual(['conv-1', 'conv-3']);
     await expect(service.findConversationIdsBySubjects([], SPACE_ID)).resolves.toEqual([]);
+  });
+
+  it('bounds the claiming conversation id', async () => {
+    const { service } = setup();
+
+    await expect(
+      service.claimSubjects({
+        spaceId: SPACE_ID,
+        conversationId: 'c'.repeat(257),
+        subjects: [{ type: 'alert', id: 'alert-1' }],
+        isHolderOpen: jest.fn(),
+      })
+    ).rejects.toBeInstanceOf(InvestigationAttachmentInvalidRequestError);
   });
 
   it('lists the subjects of investigations', async () => {

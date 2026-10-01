@@ -82,24 +82,27 @@ export class AgenticInvestigationsPlugin
   ): AgenticInvestigationsPluginSetup {
     registerFeatures({ features, escalationsEnabled: this.escalationsEnabled });
 
-    registerImpactAttachment(agentBuilder, {
-      getImpactService: () => this.requireImpactService(),
-      logger: this.logger,
-    });
-    registerSubjectAttachment(agentBuilder, {
-      getSubjectsService: () => this.requireSubjectsService(),
-      logger: this.logger,
-    });
-    registerHypothesesAttachment(agentBuilder, {
-      getHypothesesService: () => this.requireHypothesesService(),
-      logger: this.logger,
-    });
-
-    // Steps and tools register during setup but only run once Kibana has
+    // Attachment types, steps and tools register during setup but only run once Kibana has
     // started, so the authorization service is resolved per call rather than
     // captured here — `security.authz` does not exist yet.
     const impactPrivileges = createImpactPrivilegesChecker({
       getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+      logger: this.logger,
+    });
+
+    registerImpactAttachment(agentBuilder, {
+      getImpactService: () => this.requireImpactService(),
+      privileges: impactPrivileges,
+      logger: this.logger,
+    });
+    registerSubjectAttachment(agentBuilder, {
+      getSubjectsService: () => this.requireSubjectsService(),
+      privileges: impactPrivileges,
+      logger: this.logger,
+    });
+    registerHypothesesAttachment(agentBuilder, {
+      getHypothesesService: () => this.requireHypothesesService(),
+      privileges: impactPrivileges,
       logger: this.logger,
     });
 
