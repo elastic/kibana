@@ -112,6 +112,31 @@ export const removeLegacyContinuousOnboardingWorkflow = ({
   });
 
 /**
+ * Stops and uninstalls the unsuffixed KI sync document of the default space, once its active
+ * executions have finished cancelling. A missing document is a no-op.
+ *
+ * Resolves to whether the document was enabled. Throws when it could not be removed.
+ *
+ * TODO: delete with {@link removeLegacyDefaultSpaceWorkflows}.
+ * https://github.com/elastic/kibana/issues/294271
+ */
+export const removeLegacySyncWorkflow = ({
+  getManagedWorkflowsClient,
+  managementApi,
+  request,
+}: {
+  getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
+  managementApi: ManagementApi;
+  request: KibanaRequest;
+}): Promise<boolean> =>
+  uninstallLegacyManagedWorkflow({
+    getManagedWorkflowsClient,
+    managementApi,
+    id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+    request,
+  });
+
+/**
  * Cancels the executions of, and deletes, the workflows that were installed in the default space
  * before continuous onboarding and sync became per-space.
  *
