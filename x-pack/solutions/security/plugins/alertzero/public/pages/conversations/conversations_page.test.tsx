@@ -238,9 +238,22 @@ const proposal: ProposalItem = {
 
 const renderPage = (
   initialEntry: string,
-  { capabilities = {} }: { capabilities?: Record<string, unknown> } = {}
+  {
+    capabilities = {},
+    proposalsCapabilities = { showProposals: true, decideProposals: true },
+    alertZeroWrite = true,
+  }: {
+    capabilities?: Record<string, unknown>;
+    proposalsCapabilities?: Record<string, boolean>;
+    alertZeroWrite?: boolean;
+  } = {}
 ) => {
   const core = coreMock.createStart();
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    alertzero: { show: true, write: alertZeroWrite },
+    proposals: proposalsCapabilities,
+  };
   // The real service returns a URL; the mock returns undefined, which would silently drop the
   // chat control's href and make the link assertions vacuous.
   core.application.getUrlForApp.mockImplementation(
@@ -298,6 +311,36 @@ beforeEach(() => {
     refetch: jest.fn(),
   });
   mockOpenCount(0);
+});
+
+describe('ConversationsPage proposals access', () => {
+  afterEach(() => jest.clearAllMocks());
+
+  it.each<Record<string, boolean>>([{}, { showProposals: false }])(
+    'names the missing privilege and prevents queue requests with capabilities %s',
+    (proposalsCapabilities) => {
+      renderPage('/', { proposalsCapabilities });
+
+      expect(
+        screen.getByText(
+          'To view the AlertZero queue in this space, you need the Proposed Actions Read privilege.'
+        )
+      ).toBeInTheDocument();
+      expect(mockUseProposalsByCategory).not.toHaveBeenCalled();
+      expect(mockUseProposalsByCategoryCount).not.toHaveBeenCalled();
+      expect(mockUseClosedProposals).not.toHaveBeenCalled();
+      expect(mockUseClosedProposalsCount).not.toHaveBeenCalled();
+      expect(mockUseProposalChartsSummary).not.toHaveBeenCalled();
+    }
+  );
+
+  it('allows the queue with Proposals read access alone', () => {
+    mockProposals({ investigate: [proposal] });
+    renderPage('/', { proposalsCapabilities: { showProposals: true, decideProposals: false } });
+
+    expect(screen.queryByTestId('alertzeroProposalsPrivilegesGate')).not.toBeInTheDocument();
+    expect(mockUseProposalsByCategory).toHaveBeenCalled();
+  });
 });
 
 describe('ConversationsPage scan failures', () => {
@@ -484,8 +527,8 @@ describe('ConversationsPage decisions', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Revoke sessions' }));
   };
 
-  it('submits the action input the analyst was shown, so the API can refuse a stale approval', () => {
-    renderPage('/');
+  it('allows Proposals Manage to approve without AlertZero Write and submits the displayed input', () => {
+    renderPage('/', { alertZeroWrite: false });
     openApproval();
 
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
@@ -494,6 +537,14 @@ describe('ConversationsPage decisions', () => {
       id: 'prop-1',
       body: { actionInput: { user: 'cfo@corp' } },
     });
+  });
+
+  it('does not offer proposal decisions without Proposals Manage even with AlertZero All', () => {
+    renderPage('/', { proposalsCapabilities: { showProposals: true, decideProposals: false } });
+    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+    expect(approveMutateAsync).not.toHaveBeenCalled();
+    expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 
   it('stays open and shows Applying while useIsApprovingProposal reports this proposal in flight', () => {

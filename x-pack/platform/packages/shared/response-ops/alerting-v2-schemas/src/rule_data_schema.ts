@@ -440,7 +440,7 @@ export const stateTransitionSchema = z
   .object({
     pending: stateTransitionPhaseSchema({
       countDescription:
-        'Consecutive matches required before the alert episode becomes `active`. Set to `0` to open it on the first match.',
+        'Consecutive matches the alert episode spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.',
       timeframeDescription:
         'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
       metaId: 'alerting_rule_state_transition_pending',
@@ -449,7 +449,7 @@ export const stateTransitionSchema = z
       .describe('Delay before a match opens an alert episode.'),
     recovering: stateTransitionPhaseSchema({
       countDescription:
-        'Consecutive recoveries required before the alert episode becomes `inactive`. Set to `0` to close it on the first recovery.',
+        'Consecutive recoveries the alert episode spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.',
       timeframeDescription:
         'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
       metaId: 'alerting_rule_state_transition_recovering',
