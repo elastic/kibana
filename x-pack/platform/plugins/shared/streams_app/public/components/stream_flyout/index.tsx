@@ -331,7 +331,7 @@ function StreamFlyoutContent({
         data-test-subj="canvasFlyoutStreamMenu-processingToggle"
         key="processing-toggle"
         icon={isProcessingEnabled ? 'minus' : 'plus'}
-        disabled={hasProcessingEnabled}
+        disabled={loading || hasProcessingEnabled}
         toolTipContent={
           hasProcessingEnabled
             ? i18n.translate('xpack.streams.flyout.tab.removeProcessingNotice', {
