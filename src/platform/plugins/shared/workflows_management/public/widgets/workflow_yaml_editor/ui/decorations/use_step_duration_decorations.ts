@@ -130,6 +130,10 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
   const maxWidthRef = useRef(MONACO_DEFAULT_LINE_DECORATIONS_WIDTH);
   const lastExecutionIdRef = useRef<string | undefined>(undefined);
 
+  // Refs used by Effect 3 (tooltip). Declared here so cleanup across re-runs can clear them.
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tooltipLineRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!editor) return;
 
@@ -202,47 +206,70 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
     });
     document.body.appendChild(tipEl);
 
+    const scheduleHide = () => {
+      if (hideTimerRef.current === null) {
+        hideTimerRef.current = setTimeout(() => {
+          tipEl.style.display = 'none';
+          tooltipLineRef.current = null;
+          hideTimerRef.current = null;
+        }, 120);
+      }
+    };
+
+    const cancelHide = () => {
+      if (hideTimerRef.current !== null) {
+        clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
+      }
+    };
+
+    const immediateHide = () => {
+      cancelHide();
+      tipEl.style.display = 'none';
+      tooltipLineRef.current = null;
+    };
+
     const moveDisposable = editor.onMouseMove((e) => {
       const isGutter = e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_DECORATIONS;
       const line = e.target.position?.lineNumber;
       const duration = isGutter && line != null ? lineTooltip.get(line) : undefined;
 
       if (duration) {
-        const avg = formatDuration(Math.round(duration.totalMs / duration.runCount)).trim();
-        const minStr = formatDuration(duration.minMs).trim();
-        const maxStr = formatDuration(duration.maxMs).trim();
+        cancelHide();
 
-        const runsLabel = i18n.translate(
-          'workflows.workflowYamlEditor.stepDurationGutter.tooltip.runs',
-          {
-            defaultMessage: '{count} completed {count, plural, one {run} other {runs}}',
-            values: { count: duration.runCount },
-          }
-        );
-        const avgLabel = i18n.translate(
-          'workflows.workflowYamlEditor.stepDurationGutter.tooltip.avg',
-          {
-            defaultMessage: 'Average duration per run: {duration}',
-            values: { duration: avg },
-          }
-        );
-        const minMaxLabel = i18n.translate(
-          'workflows.workflowYamlEditor.stepDurationGutter.tooltip.minMax',
-          {
-            defaultMessage: 'Min {min} · Max {max}',
-            values: { min: minStr, max: maxStr },
-          }
-        );
+        // Rebuild content only when the hovered line changes, not on every pixel of movement.
+        if (tooltipLineRef.current !== line) {
+          tooltipLineRef.current = line;
+          const total = formatDuration(duration.totalMs).trim();
+          const avg = formatDuration(Math.round(duration.totalMs / duration.runCount)).trim();
+          const minStr = formatDuration(duration.minMs).trim();
+          const maxStr = formatDuration(duration.maxMs).trim();
 
-        const bold = document.createElement('strong');
-        bold.textContent = runsLabel;
-        tipEl.replaceChildren(
-          bold,
-          document.createElement('br'),
-          document.createTextNode(avgLabel),
-          document.createElement('br'),
-          document.createTextNode(minMaxLabel)
-        );
+          const runsLabel = i18n.translate(
+            'workflows.workflowYamlEditor.stepDurationGutter.tooltip.runs',
+            {
+              defaultMessage:
+                '{count} completed {count, plural, one {run} other {runs}} · Total {total}',
+              values: { count: duration.runCount, total },
+            }
+          );
+          const breakdownLabel = i18n.translate(
+            'workflows.workflowYamlEditor.stepDurationGutter.tooltip.breakdown',
+            {
+              defaultMessage: 'Avg {avg} · Min {min} · Max {max}',
+              values: { avg, min: minStr, max: maxStr },
+            }
+          );
+
+          const bold = document.createElement('strong');
+          bold.textContent = runsLabel;
+          tipEl.replaceChildren(
+            bold,
+            document.createElement('br'),
+            document.createTextNode(breakdownLabel)
+          );
+        }
+
         tipEl.style.display = 'block';
         // Clamp position so the tooltip never escapes the viewport.
         const { width: tipW, height: tipH } = tipEl.getBoundingClientRect();
@@ -257,24 +284,26 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
         tipEl.style.left = `${Math.max(margin, clampedLeft)}px`;
         tipEl.style.top = `${Math.max(margin, clampedTop)}px`;
       } else {
-        tipEl.style.display = 'none';
+        scheduleHide();
       }
     });
 
     const leaveDisposable = editor.onMouseLeave(() => {
-      tipEl.style.display = 'none';
+      immediateHide();
     });
 
     // Hide when the editor scrolls with a stationary pointer — `onMouseMove` does not fire in
     // that case, so the fixed tooltip would otherwise stay pinned next to the wrong step.
     const scrollDisposable = editor.onDidScrollChange(() => {
-      tipEl.style.display = 'none';
+      immediateHide();
     });
 
     return () => {
       moveDisposable.dispose();
       leaveDisposable.dispose();
       scrollDisposable.dispose();
+      cancelHide();
+      tooltipLineRef.current = null;
       if (document.body.contains(tipEl)) document.body.removeChild(tipEl);
     };
   }, [editor, isActive, stepDurations, workflowLookup, colors, border]);
@@ -296,7 +325,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
     }
 
     return css({
-      // Lane container — layout only, no visible style of its own.
+      // Lane container — layout; tone modifier selectors below add a flat background colour.
       [`.${BASE_CLASS}`]: {
         display: 'flex',
         justifyContent: 'flex-end',
@@ -320,14 +349,18 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
         color: colors.textSubdued,
       },
 
-      // Tone modifiers — opaque chip so the colour stands out from the status band behind it.
-      [`.${BASE_CLASS}-warning::before`]: {
+      // Tone modifiers — flat colour spanning the full gutter width; chip inherits it.
+      [`.${BASE_CLASS}-warning`]: {
         backgroundColor: colors.backgroundLightWarning,
+      },
+      [`.${BASE_CLASS}-warning::before`]: {
         color: colors.textWarning,
       },
+      [`.${BASE_CLASS}-danger`]: {
+        backgroundColor: colors.backgroundLightRisk,
+      },
       [`.${BASE_CLASS}-danger::before`]: {
-        backgroundColor: colors.backgroundLightDanger,
-        color: colors.textDanger,
+        color: colors.textRisk,
       },
 
       // Per-label content injection. Built inline so Emotion owns insertion/cleanup.

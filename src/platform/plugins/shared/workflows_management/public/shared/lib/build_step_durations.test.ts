@@ -186,7 +186,7 @@ describe('buildStepDurations', () => {
     expect(loop?.totalMs).toBe(867);
     expect(loop?.runCount).toBe(1);
 
-    // Child: 3 completed docs → runCount = 3 (non-loop step, shows ~avg in chip + tooltip).
+    // Child: 3 completed docs → runCount = 3 (chip shows total; tooltip shows avg/min/max breakdown).
     const child = result.get('child_step');
     expect(child?.totalMs).toBe(867); // 289 × 3
     expect(child?.runCount).toBe(3);
@@ -376,7 +376,7 @@ describe('formatStepDurationLabel', () => {
     expect(label).toBe('1s');
   });
 
-  it('formats repeated runs as ~avg (tilde prefix, no run count in the chip)', () => {
+  it('formats repeated runs as total (no tilde prefix, no run count in the chip)', () => {
     const label = formatStepDurationLabel({
       totalMs: 867,
       runCount: 3,
@@ -384,15 +384,15 @@ describe('formatStepDurationLabel', () => {
       minMs: 289,
       maxMs: 289,
     });
-    // avg = Math.round(867/3) = 289ms; chip shows ~289ms, run count is in the hover tooltip only.
-    expect(label).toContain('~');
-    expect(label).toContain('289ms');
+    // chip shows total 867ms; run count and avg are in the hover tooltip only.
+    expect(label).not.toContain('~');
+    expect(label).toContain('867ms');
     expect(label).not.toContain('3'); // run count is NOT in the chip label
     expect(label).not.toContain('×');
   });
 
-  it('rounds the average to the nearest millisecond', () => {
-    // 100ms total, 3 runs → avg = Math.round(100/3) = 33ms
+  it('shows total for repeated runs, not the rounded average', () => {
+    // 100ms total, 3 runs → chip shows 100ms (total), not 33ms (avg)
     const label = formatStepDurationLabel({
       totalMs: 100,
       runCount: 3,
@@ -400,7 +400,8 @@ describe('formatStepDurationLabel', () => {
       minMs: 33,
       maxMs: 34,
     });
-    expect(label).toContain('33ms');
+    expect(label).toContain('100ms');
+    expect(label).not.toContain('33ms');
   });
 });
 

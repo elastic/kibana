@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import type { StepInfo } from '@kbn/workflows-yaml';
 import { formatDuration } from './format_duration';
@@ -102,22 +101,10 @@ export const buildStepDurations = (
   return result;
 };
 
-/** Formats a StepDuration for display in the gutter chip. */
+/** Formats a StepDuration for display in the gutter chip. Always shows the total wall-clock time. */
 export const formatStepDurationLabel = (duration: StepDuration): string => {
-  const { totalMs, runCount, hasDuration } = duration;
-  if (!hasDuration) return '';
-
-  if (runCount > 1) {
-    const avg = formatDuration(Math.round(totalMs / runCount)).trim();
-    return i18n.translate('workflows.workflowYamlEditor.stepDurationGutter.repeatedLabel', {
-      defaultMessage: '~{duration}',
-      description:
-        'Step duration gutter chip label for a step that ran multiple times. {duration} is the average duration per run, prefixed with ~ to indicate it is an approximation.',
-      values: { duration: avg },
-    });
-  }
-
-  return formatDuration(totalMs).trim();
+  if (!duration.hasDuration) return '';
+  return formatDuration(duration.totalMs).trim();
 };
 
 /** Hotspot tone for a duration chip: the step's share of the whole execution. */
