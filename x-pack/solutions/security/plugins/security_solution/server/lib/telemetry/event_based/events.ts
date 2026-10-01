@@ -525,12 +525,11 @@ type RiskScoreDistributionFieldSchema = RootSchema<{
 const riskScoreDistributionSchema = (
   scoreKind: 'base' | 'resolution'
 ): RiskScoreDistributionFieldSchema => {
-  const label = scoreKind === 'base' ? 'base' : 'resolution';
   const scoreKindLabel = scoreKind === 'base' ? 'Base' : 'Resolution';
   return {
     _meta: {
       optional: true,
-      description: `Distribution of ${label} scores written in this run by risk band and percentile`,
+      description: `Distribution of ${scoreKind} scores written in this run by risk band and percentile`,
     },
     properties: {
       critical: {
@@ -572,14 +571,14 @@ const riskScoreDistributionSchema = (
         type: 'float',
         _meta: {
           optional: true,
-          description: `Median calculated_score_norm of ${label} scores written in this run`,
+          description: `Median calculated_score_norm of ${scoreKind} scores written in this run`,
         },
       },
       normP90: {
         type: 'float',
         _meta: {
           optional: true,
-          description: `90th percentile calculated_score_norm of ${label} scores written in this run`,
+          description: `90th percentile calculated_score_norm of ${scoreKind} scores written in this run`,
         },
       },
     },

@@ -270,7 +270,6 @@ export const ENTITY_STORE_DELETION_EVENT = {
 } as const satisfies EventTypeOpts<DeletionEvent>;
 
 const riskScoreDistributionSchema = (scoreKind: 'base' | 'resolution') => {
-  const label = scoreKind === 'base' ? 'base' : 'resolution';
   const scoreField =
     scoreKind === 'base'
       ? 'entity.risk.calculated_score_norm'
@@ -278,56 +277,56 @@ const riskScoreDistributionSchema = (scoreKind: 'base' | 'resolution') => {
   return {
     _meta: {
       optional: true,
-      description: `Distribution of ${label} risk scores for all entities of this type currently in the store`,
+      description: `Distribution of ${scoreKind} risk scores for all entities of this type currently in the store`,
     },
     properties: {
       critical: {
         type: 'long' as const,
         _meta: {
           optional: true,
-          description: `Entities of this type whose ${label} risk band is Critical`,
+          description: `Entities of this type whose ${scoreKind} risk band is Critical`,
         },
       },
       high: {
         type: 'long' as const,
         _meta: {
           optional: true,
-          description: `Entities of this type whose ${label} risk band is High`,
+          description: `Entities of this type whose ${scoreKind} risk band is High`,
         },
       },
       moderate: {
         type: 'long' as const,
         _meta: {
           optional: true,
-          description: `Entities of this type whose ${label} risk band is Moderate`,
+          description: `Entities of this type whose ${scoreKind} risk band is Moderate`,
         },
       },
       low: {
         type: 'long' as const,
         _meta: {
           optional: true,
-          description: `Entities of this type whose ${label} risk band is Low`,
+          description: `Entities of this type whose ${scoreKind} risk band is Low`,
         },
       },
       unknown: {
         type: 'long' as const,
         _meta: {
           optional: true,
-          description: `Entities of this type whose ${label} risk band is Unknown or missing`,
+          description: `Entities of this type whose ${scoreKind} risk band is Unknown or missing`,
         },
       },
       normP50: {
         type: 'float' as const,
         _meta: {
           optional: true,
-          description: `Median ${scoreField} for entities of this type that have a ${label} score`,
+          description: `Median ${scoreField} for entities of this type that have a ${scoreKind} score`,
         },
       },
       normP90: {
         type: 'float' as const,
         _meta: {
           optional: true,
-          description: `90th percentile ${scoreField} for entities of this type that have a ${label} score`,
+          description: `90th percentile ${scoreField} for entities of this type that have a ${scoreKind} score`,
         },
       },
     },
