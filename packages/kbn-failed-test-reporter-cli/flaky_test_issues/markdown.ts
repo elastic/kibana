@@ -49,6 +49,27 @@ export const testDashboardUrl = (testId: string): string =>
       `query:(bool:(must:!((match_phrase:(test.id:${risonString(testId)}))))))))`
   );
 
+/**
+ * The Scout dashboard filtered on the tests of one suite: its file, and its `describe` block when
+ * the suite has a title. Both exact, so a sibling block whose title starts the same is left out.
+ */
+export const suiteDashboardUrl = ({
+  filePath,
+  suiteTitle,
+}: {
+  filePath: string;
+  suiteTitle?: string;
+}): string => {
+  const clauses = [
+    `(match_phrase:(test.file.path:${risonString(filePath)}))`,
+    ...(suiteTitle ? [`(match_phrase:(suite.title.keyword:${risonString(suiteTitle)}))`] : []),
+  ];
+  return encodeURI(
+    `${SCOUT_TEST_DASHBOARD_URL}?_g=(filters:!((meta:(alias:'Test suite',disabled:!f,negate:!f),` +
+      `query:(bool:(must:!(${clauses.join(',')}))))))`
+  );
+};
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /** Markdown table cells cannot contain pipes or line breaks. */
