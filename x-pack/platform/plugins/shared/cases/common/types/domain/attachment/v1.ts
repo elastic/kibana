@@ -167,7 +167,7 @@ export const ActionsAttachmentPayloadSchema = z.object({
     targets: z.array(
       z.object({
         hostname: z.string().max(256),
-        endpointId: z.string().max(MAX_TITLE_LENGTH),
+        endpointId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
       })
     ),
     type: z.string().max(MAX_TITLE_LENGTH),
@@ -209,13 +209,13 @@ const ExternalReferenceBaseAttachmentPayloadSchema = z.object({
 
 export const ExternalReferenceNoSOAttachmentPayloadSchema =
   ExternalReferenceBaseAttachmentPayloadSchema.extend({
-    externalReferenceId: z.string().max(MAX_TITLE_LENGTH),
+    externalReferenceId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
     externalReferenceStorage: ExternalReferenceStorageNoSOSchema,
   });
 
 export const ExternalReferenceSOAttachmentPayloadSchema =
   ExternalReferenceBaseAttachmentPayloadSchema.extend({
-    externalReferenceId: z.string().max(MAX_TITLE_LENGTH),
+    externalReferenceId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
     externalReferenceStorage: ExternalReferenceStorageSOSchema,
   });
 
