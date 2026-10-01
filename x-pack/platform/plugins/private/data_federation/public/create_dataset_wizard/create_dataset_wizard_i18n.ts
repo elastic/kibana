@@ -26,23 +26,24 @@ export const createDatasetWizardStrings = {
   datasetStepSubheader: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.datasetStepSubheader',
     {
-      defaultMessage: 'Select the source and define which dataset you want added',
+      defaultMessage: 'Select the specific data you want to query within a connected data source.',
     }
   ),
   additionalStepLabel: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.advancedStepLabel',
     {
-      defaultMessage: 'Additional settings',
+      defaultMessage: 'Optional settings',
     }
   ),
   additionalStepSubheader: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalStepSubheader',
     {
-      defaultMessage: 'Settings you leave unchanged use the default for your file format.',
+      defaultMessage:
+        'Customize how your files are read. Unchanged settings use the defaults for that file format.',
     }
   ),
   mappingStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappingStepLabel', {
-    defaultMessage: 'Mapping',
+    defaultMessage: 'Schema mappings',
   }),
   mappingStepErrorsTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.mappingStepErrorsTitle',
@@ -53,7 +54,7 @@ export const createDatasetWizardStrings = {
   defineSchemaRequiresFieldError: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.defineSchemaRequiresField',
     {
-      defaultMessage: 'When Define schema is selected, you must map at least one field.',
+      defaultMessage: 'When Use mapped fields only is selected, you must map at least one field.',
     }
   ),
   configureSchemaResolutionOptional: i18n.translate(
@@ -65,7 +66,7 @@ export const createDatasetWizardStrings = {
   commonSettingsSectionTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.commonSettingsSectionTitle',
     {
-      defaultMessage: 'Common settings (optional)',
+      defaultMessage: 'Commonly adjusted settings',
     }
   ),
 
@@ -78,7 +79,7 @@ export const createDatasetWizardStrings = {
   advancedSettingsSectionTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.advancedSettingsSectionTitle',
     {
-      defaultMessage: 'Advanced settings (optional)',
+      defaultMessage: 'Advanced settings',
     }
   ),
   trueLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.trueLabel', {

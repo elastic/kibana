@@ -144,8 +144,6 @@ function makeDeployReturn(
     failedInstances: overrides.failedInstances ?? [],
     isAlreadyDeployed: overrides.isAlreadyDeployed ?? false,
     deployGroups: overrides.deployGroups ?? [],
-    namespace: 'default',
-    setNamespace: jest.fn(),
   };
 }
 
@@ -210,8 +208,6 @@ describe('AuthenticateAndDeployStep', () => {
       failedInstances: [],
       isAlreadyDeployed: false,
       handleDeploy: jest.fn().mockResolvedValue({ failed: false }),
-      namespace: 'default',
-      setNamespace: jest.fn(),
     });
     // clearAllMocks wipes the factory's default implementation, so restore it here.
     MockAgentBasedSection.mockImplementation(() => null);
@@ -464,8 +460,6 @@ describe('AuthenticateAndDeployStep', () => {
         failedInstances: ['vpcflow'],
         isAlreadyDeployed: false,
         handleDeploy: jest.fn().mockResolvedValue({ failed: true }),
-        namespace: 'default',
-        setNamespace: jest.fn(),
       });
       renderStep();
       expect(screen.queryByTestId('mock-agent-failed')).not.toBeInTheDocument();
@@ -486,8 +480,6 @@ describe('AuthenticateAndDeployStep', () => {
         failedInstances: ['vpcflow'],
         isAlreadyDeployed: false,
         handleDeploy,
-        namespace: 'default',
-        setNamespace: jest.fn(),
       });
       MockAgentBasedSection.mockImplementation(
         ({
@@ -557,8 +549,6 @@ describe('AuthenticateAndDeployStep', () => {
           failedInstances: [],
           isAlreadyDeployed: false,
           handleDeploy,
-          namespace: 'default',
-          setNamespace: jest.fn(),
         });
         const onContinue = jest.fn();
         renderStep(onContinue);
@@ -576,8 +566,6 @@ describe('AuthenticateAndDeployStep', () => {
           failedInstances: [],
           isAlreadyDeployed: false,
           handleDeploy,
-          namespace: 'default',
-          setNamespace: jest.fn(),
         });
         const onContinue = jest.fn();
         renderStep(onContinue);
@@ -600,8 +588,6 @@ describe('AuthenticateAndDeployStep', () => {
           failedInstances: [],
           isAlreadyDeployed: true, // already deployed → isAgentDone = true
           handleDeploy,
-          namespace: 'default',
-          setNamespace: jest.fn(),
         });
         const onContinue = jest.fn();
         renderStep(onContinue);
@@ -625,8 +611,6 @@ describe('AuthenticateAndDeployStep', () => {
           failedInstances: [],
           isAlreadyDeployed: false,
           handleDeploy,
-          namespace: 'default',
-          setNamespace: jest.fn(),
         });
         mockUseOnboardingFlow.mockReturnValue({
           servicesStep: { selectedServiceIds: ['vpcflow'], dataFormat: 'json' },
