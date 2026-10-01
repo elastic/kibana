@@ -26,6 +26,7 @@ import type { WorkflowExecutionForInputRendering } from '../workflow_context_man
 export interface BuildWorkflowExecutionDocumentParams {
   workflow: WorkflowExecutionEngineModel;
   inheritedIdentity?: EsWorkflowExecution['effectiveIdentity'];
+  childWorkflowApprovals?: EsWorkflowExecution['childWorkflowApprovals'];
   spaceId: string;
   context: Record<string, unknown>;
   defaultTriggeredBy: string;
@@ -51,6 +52,7 @@ export const buildWorkflowExecutionDocument = (
   const {
     workflow,
     inheritedIdentity,
+    childWorkflowApprovals,
     spaceId,
     context,
     defaultTriggeredBy,
@@ -87,6 +89,7 @@ export const buildWorkflowExecutionDocument = (
     id: generateUuid(),
     spaceId,
     workflowId: workflow.id,
+    ...(childWorkflowApprovals ? { childWorkflowApprovals } : {}),
     ...pickManagedWorkflowFields(workflow),
     isTestRun: workflow.isTestRun,
     isEphemeral: workflow.isEphemeral,
@@ -97,7 +100,7 @@ export const buildWorkflowExecutionDocument = (
     createdAt: now.toISOString(),
     executedBy: authenticatedUser ?? UNKNOWN_EXECUTION_IDENTITY,
     ...(inheritedIdentity ? { effectiveIdentity: inheritedIdentity } : {}),
-    ...(workflow.definition?.settings?.run_as
+    ...(!inheritedIdentity && workflow.definition?.settings?.run_as
       ? {
           effectiveIdentity: {
             type: 'service_account' as const,

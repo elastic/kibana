@@ -589,7 +589,7 @@ describe('WorkflowRepository.isWorkflowEnabledRealtime', () => {
   });
 });
 
-describe('WorkflowRepository.isWorkflowRevisionCurrent', () => {
+describe('WorkflowRepository.isWorkflowIncarnationCurrent', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const repository = new WorkflowRepository({ esClient, logger: loggingSystemMock.create().get() });
   const workflow = {
@@ -599,6 +599,7 @@ describe('WorkflowRepository.isWorkflowRevisionCurrent', () => {
   };
   const source = {
     spaceId: 'default',
+    created_at: '2026-09-30T00:00:00.000Z',
     yaml: workflow.yaml,
     definition: workflow.definition,
     enabled: true,
@@ -607,19 +608,22 @@ describe('WorkflowRepository.isWorkflowRevisionCurrent', () => {
 
   it.each([
     [{}, true],
-    [{ yaml: 'changed' }, false],
+    [{ yaml: 'changed' }, true],
     [
       { definition: { ...workflow.definition, steps: [{ name: 'injected', type: 'console' }] } },
-      false,
+      true,
     ],
     [{ enabled: false }, false],
-    [{ valid: false }, false],
+    [{ valid: false }, true],
+    [{ created_at: '2026-10-01T00:00:00.000Z' }, false],
     [{ spaceId: 'other' }, false],
     [{ spaceId: '*' }, false],
     [{ deleted_at: '2026-09-30' }, false],
-  ])('checks the exact live snapshot: %j', async (override, expected) => {
+  ])('checks the live child incarnation without adopting edits: %j', async (override, expected) => {
     esClient.get.mockResolvedValue({ _source: { ...source, ...override } } as never);
-    await expect(repository.isWorkflowRevisionCurrent(workflow, 'default')).resolves.toBe(expected);
+    await expect(
+      repository.isWorkflowIncarnationCurrent(workflow.id, 'default', source.created_at)
+    ).resolves.toBe(expected);
     expect(esClient.get).toHaveBeenLastCalledWith(
       expect.objectContaining({ id: 'child', realtime: true })
     );
@@ -628,10 +632,12 @@ describe('WorkflowRepository.isWorkflowRevisionCurrent', () => {
 
   it('rejects missing children and propagates storage failures', async () => {
     esClient.get.mockRejectedValueOnce({ statusCode: 404 });
-    await expect(repository.isWorkflowRevisionCurrent(workflow, 'default')).resolves.toBe(false);
+    await expect(
+      repository.isWorkflowIncarnationCurrent(workflow.id, 'default', source.created_at)
+    ).resolves.toBe(false);
     esClient.get.mockRejectedValueOnce(new Error('Unavailable'));
-    await expect(repository.isWorkflowRevisionCurrent(workflow, 'default')).rejects.toThrow(
-      'Unavailable'
-    );
+    await expect(
+      repository.isWorkflowIncarnationCurrent(workflow.id, 'default', source.created_at)
+    ).rejects.toThrow('Unavailable');
   });
 });

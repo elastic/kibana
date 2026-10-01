@@ -975,15 +975,13 @@ export const WorkflowExecuteStepInputSchema = z.object({
     .boolean()
     .optional()
     .describe(
-      'Execute as the parent service account. Requires a literal workflow-id and approved expectedRevision; the child must not have its own run_as.'
+      'Execute as the parent service account using the approved child snapshot. Requires approval in the workflow editor.'
     ),
-  expectedRevision: z
-    .string()
-    .length(64)
-    .regex(/^[a-f0-9]{64}$/)
+  runAsMode: z
+    .enum(['default', 'inherit', 'override'])
     .optional()
     .describe(
-      'Approved SHA-256 of the exact saved child YAML. Required when inheritRunAs is true; a changed child fails before scheduling.'
+      'default: use the child identity. inherit: use the parent SA if the child has none. override: use the parent SA even if the child has its own. Inheritance requires explicit child approval.'
     ),
 });
 

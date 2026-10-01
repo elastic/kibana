@@ -16,14 +16,19 @@ import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/wor
 export const WORKFLOW_SERVICE_ACCOUNT_TYPE = 'workflow';
 type IdentityExecution = Pick<
   EsWorkflowExecution,
-  'id' | 'workflowId' | 'spaceId' | 'workflowDefinition' | 'effectiveIdentity'
+  | 'id'
+  | 'workflowId'
+  | 'spaceId'
+  | 'workflowDefinition'
+  | 'effectiveIdentity'
+  | 'childWorkflowApprovals'
 >;
 const originalRequests = new WeakMap<KibanaRequest, KibanaRequest>();
 const executingWorkflows = new WeakMap<KibanaRequest, IdentityExecution>();
 const inheritedApprovalSchema = WorkflowExecuteStepInputSchema.pick({
   'workflow-id': true,
   inheritRunAs: true,
-  expectedRevision: true,
+  runAsMode: true,
 });
 
 export const getExecutionServiceAccountId = (execution: IdentityExecution): string | undefined =>
@@ -42,7 +47,14 @@ export const resolveInheritedWorkflowIdentity = (
     parentStepId?: string;
     spaceId?: string;
   }
-): EsWorkflowExecution['effectiveIdentity'] => {
+):
+  | {
+      effectiveIdentity: NonNullable<EsWorkflowExecution['effectiveIdentity']>;
+      workflow: WorkflowExecutionEngineModel;
+      createdAt: string;
+      childWorkflowApprovals: NonNullable<EsWorkflowExecution['childWorkflowApprovals']>;
+    }
+  | undefined => {
   if (!context.inheritRunAs) return undefined;
   const parent = executingWorkflows.get(request);
   const accountId = parent && getExecutionServiceAccountId(parent);
@@ -66,31 +78,57 @@ export const resolveInheritedWorkflowIdentity = (
       approved = inheritedApprovalSchema.safeParse(step.with);
     }
   });
+  const mode = approved?.success
+    ? approved.data.runAsMode ?? (approved.data.inheritRunAs ? 'inherit' : 'default')
+    : 'default';
+  const approvals = parent.childWorkflowApprovals;
+  const snapshot = approvals?.snapshots.find(
+    (entry) =>
+      entry.path.length === 1 &&
+      entry.path[0] === context.parentStepId &&
+      entry.workflowId === workflow.id &&
+      entry.runAsMode === mode
+  );
   if (
     !approved?.success ||
-    approved.data.inheritRunAs !== true ||
-    !approved.data.expectedRevision ||
-    approved.data['workflow-id'] !== workflow.id
+    mode === 'default' ||
+    (approved.data.runAsMode !== undefined && approved.data.inheritRunAs !== undefined) ||
+    approved.data['workflow-id'] !== workflow.id ||
+    !snapshot ||
+    approvals?.serviceAccountId !== accountId
   ) {
     throw Boom.forbidden(
-      'inheritRunAs requires a literal workflow-id and an approved expectedRevision in the parent workflow.'
+      'Review and approve this child workflow before inheriting the service account.'
     );
   }
-  if (workflow.definition?.settings?.run_as)
-    throw Boom.badRequest('Cannot inherit a service account when the child has its own run_as.');
-  const revision = createHash('sha256').update(workflow.yaml).digest('hex');
-  if (revision !== approved.data.expectedRevision)
-    throw Boom.conflict(
-      'The child workflow changed after approval. Review it and update expectedRevision in the parent workflow.'
-    );
+  if (mode === 'inherit' && snapshot.definition.settings?.run_as) {
+    throw Boom.badRequest('Use runAsMode: override to replace the child service account.');
+  }
+  const revision = createHash('sha256').update(snapshot.yaml).digest('hex');
   return {
-    type: 'service_account',
-    id: accountId,
-    inheritedFrom: {
-      workloadId: parent.effectiveIdentity?.inheritedFrom?.workloadId ?? parent.workflowId,
-      workflowId: parent.workflowId,
-      executionId: parent.id,
-      revision,
+    createdAt: snapshot.createdAt,
+    workflow: {
+      ...workflow,
+      yaml: snapshot.yaml,
+      definition: snapshot.definition,
+      name: snapshot.definition.name,
+      version: snapshot.version,
+    },
+    childWorkflowApprovals: {
+      ...approvals,
+      snapshots: approvals.snapshots
+        .filter((entry) => entry.path.length > 1 && entry.path[0] === context.parentStepId)
+        .map((entry) => ({ ...entry, path: entry.path.slice(1) })),
+    },
+    effectiveIdentity: {
+      type: 'service_account',
+      id: accountId,
+      inheritedFrom: {
+        workloadId: parent.effectiveIdentity?.inheritedFrom?.workloadId ?? parent.workflowId,
+        workflowId: parent.workflowId,
+        executionId: parent.id,
+        revision,
+      },
     },
   };
 };

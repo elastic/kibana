@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { ChildWorkflowApprovals } from '@kbn/workflows';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 export interface WorkflowDocumentGetOptions {
@@ -28,6 +29,7 @@ export interface ManagedWorkflowUpgrade {
 }
 
 export interface IndexWorkflowDocumentOptions {
+  childApproval?: ChildWorkflowApprovals;
   managedWorkflowUpgrade?: ManagedWorkflowUpgrade;
   previousDocument?: WorkflowProperties;
   request?: KibanaRequest;

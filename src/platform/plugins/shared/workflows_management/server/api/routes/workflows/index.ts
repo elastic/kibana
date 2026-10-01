@@ -10,6 +10,7 @@
 import { registerWorkflowAccessControlRoutes } from './access_control';
 import { registerBulkCreateWorkflowsRoute } from './bulk_create_workflows';
 import { registerBulkDeleteWorkflowsRoute } from './bulk_delete_workflows';
+import { registerChildWorkflowApprovalRoutes } from './child_workflow_approvals';
 import { registerCloneWorkflowRoute } from './clone_workflow';
 import { registerCreateWorkflowRoute } from './create_workflow';
 import { registerDeleteWorkflowRoute } from './delete_workflow';
@@ -26,6 +27,7 @@ import { registerValidateWorkflowRoute } from './validate_workflow';
 import type { RouteDependencies } from '../types';
 
 export function registerWorkflowRoutes(deps: RouteDependencies) {
+  registerChildWorkflowApprovalRoutes(deps);
   registerWorkflowAccessControlRoutes(deps);
   registerGetWorkflowsRoute(deps);
   registerBulkCreateWorkflowsRoute(deps);

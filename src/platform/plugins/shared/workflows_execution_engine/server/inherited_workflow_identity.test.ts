@@ -38,15 +38,35 @@ const revision = createHash('sha256').update(child.yaml).digest('hex');
 const approval: WorkflowExecuteStep['with'] = {
   'workflow-id': child.id,
   inheritRunAs: true,
-  expectedRevision: revision,
 };
 const parent = (
   withInput = approval,
   accountId: string | undefined = 'account-a'
 ): Pick<
   EsWorkflowExecution,
-  'id' | 'workflowId' | 'spaceId' | 'workflowDefinition' | 'effectiveIdentity'
+  | 'id'
+  | 'workflowId'
+  | 'spaceId'
+  | 'workflowDefinition'
+  | 'effectiveIdentity'
+  | 'childWorkflowApprovals'
 > => ({
+  childWorkflowApprovals: {
+    serviceAccountId: 'account-a',
+    approvedAt: '2026-09-30',
+    approvedBy: 'admin',
+    snapshots: [
+      {
+        path: ['child'],
+        workflowId: child.id,
+        runAsMode: 'inherit',
+        yaml: child.yaml,
+        definition: child.definition,
+        version: 1,
+        createdAt: '2026-09-30T00:00:00.000Z',
+      },
+    ],
+  },
   id: 'parent-execution',
   workflowId: 'parent',
   spaceId: 'default',
@@ -103,7 +123,9 @@ describe('inherited workflow execution identity', () => {
       const execution = parent();
       execution.workflowDefinition.steps = [{ name: 'child', type, with: approval }];
       await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
-        expect(resolveInheritedWorkflowIdentity(request, child, context)).toEqual(identity);
+        expect(
+          resolveInheritedWorkflowIdentity(request, child, context)?.effectiveIdentity
+        ).toEqual(identity);
       });
     }
   );
@@ -140,34 +162,87 @@ describe('inherited workflow execution identity', () => {
 
   it.each([
     { ...approval, inheritRunAs: false },
-    { ...approval, expectedRevision: undefined },
     { ...approval, 'workflow-id': '{{ inputs.child }}' },
-    { ...approval, expectedRevision: '{{ inputs.revision }}' },
+    { ...approval, runAsMode: 'override' as const },
   ])('rejects missing or dynamic approval: %j', async (withInput) => {
     await withWorkflowExecutionIdentity(core, parent(withInput), caller, async (request) => {
       expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
-        'literal workflow-id and an approved expectedRevision'
+        'Review and approve'
       );
     });
   });
 
-  it('rejects a child edited before admission, including whitespace-only changes', async () => {
+  it('executes the approved snapshot even when the latest child was edited', async () => {
     await withWorkflowExecutionIdentity(core, parent(), caller, async (request) => {
-      expect(() =>
-        resolveInheritedWorkflowIdentity(request, { ...child, yaml: `${child.yaml}\n` }, context)
-      ).toThrow('changed after approval');
+      const result = resolveInheritedWorkflowIdentity(
+        request,
+        {
+          ...child,
+          yaml: 'unapproved code',
+          definition: { ...child.definition, name: 'Unapproved' },
+        },
+        context
+      );
+      expect(result?.workflow.yaml).toBe(child.yaml);
+      expect(result?.workflow.definition).toEqual(child.definition);
+      expect(result?.workflow.version).toBe(1);
     });
   });
 
-  it('rejects overriding a child service account', async () => {
-    await withWorkflowExecutionIdentity(core, parent(), caller, async (request) => {
-      const boundChild = {
-        ...child,
-        definition: { ...child.definition, settings: { run_as: 'child-account' } },
-      };
+  it('rejects a missing approval and an approval for a different SA', async () => {
+    for (const execution of [
+      { ...parent(), childWorkflowApprovals: undefined },
+      parent(approval, 'other-sa'),
+    ]) {
+      await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
+        expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
+          'Review and approve'
+        );
+      });
+    }
+  });
+
+  it('requires an explicit approved override for a child with its own SA', async () => {
+    const boundChild = {
+      ...child,
+      definition: { ...child.definition, settings: { run_as: 'child-sa' } },
+    };
+    const execution = parent({ 'workflow-id': child.id, runAsMode: 'override' });
+    if (!execution.childWorkflowApprovals) throw new Error('Missing fixture approval');
+    execution.childWorkflowApprovals.snapshots[0] = {
+      ...execution.childWorkflowApprovals.snapshots[0],
+      runAsMode: 'override',
+      definition: boundChild.definition,
+    };
+    await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
+      const result = resolveInheritedWorkflowIdentity(request, boundChild, context);
+      expect(result?.effectiveIdentity.id).toBe('account-a');
+      expect(result?.workflow.definition?.settings?.run_as).toBe('child-sa');
+    });
+    execution.workflowDefinition.steps = [
+      { name: 'child', type: 'workflow.execute', with: approval },
+    ];
+    execution.childWorkflowApprovals.snapshots[0].runAsMode = 'inherit';
+    await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
       expect(() => resolveInheritedWorkflowIdentity(request, boundChild, context)).toThrow(
-        'child has its own run_as'
+        'override'
       );
+    });
+  });
+
+  it('passes only the approved descendants for the invoking step to the child', async () => {
+    const execution = parent();
+    if (!execution.childWorkflowApprovals) throw new Error('Missing fixture approval');
+    const snapshot = execution.childWorkflowApprovals.snapshots[0];
+    execution.childWorkflowApprovals.snapshots.push(
+      { ...snapshot, path: ['child', 'grandchild'], workflowId: 'grandchild' },
+      { ...snapshot, path: ['unrelated', 'grandchild'], workflowId: 'other' }
+    );
+    await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
+      const result = resolveInheritedWorkflowIdentity(request, child, context);
+      expect(result?.childWorkflowApprovals.snapshots).toEqual([
+        expect.objectContaining({ path: ['grandchild'], workflowId: 'grandchild' }),
+      ]);
     });
   });
 
@@ -179,7 +254,7 @@ describe('inherited workflow execution identity', () => {
       ...parent(),
       workflowId: child.id,
       workflowDefinition: child.definition,
-      effectiveIdentity: inherited,
+      effectiveIdentity: inherited?.effectiveIdentity,
     };
     for (let resume = 0; resume < 2; resume++) {
       await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
@@ -212,7 +287,9 @@ describe('inherited workflow execution identity', () => {
       },
     };
     await withWorkflowExecutionIdentity(core, inheritedParent, caller, async (request) => {
-      expect(resolveInheritedWorkflowIdentity(request, child, context)?.inheritedFrom).toEqual({
+      expect(
+        resolveInheritedWorkflowIdentity(request, child, context)?.effectiveIdentity.inheritedFrom
+      ).toEqual({
         ...identity.inheritedFrom,
         workloadId: 'root',
       });

@@ -1221,7 +1221,7 @@ export class WorkflowsExecutionEnginePlugin
     const ensureServiceAccountBinding = async (
       workflow: WorkflowExecutionEngineModel,
       spaceId: string
-    ): Promise<void> => {
+    ): Promise<EsWorkflowExecution['childWorkflowApprovals']> => {
       const serviceAccountId = workflow.definition?.settings?.run_as;
       if (serviceAccountId) {
         if (!coreStart.security.serviceAccounts.isEnabled())
@@ -1239,21 +1239,28 @@ export class WorkflowsExecutionEnginePlugin
         });
         if (binding?.serviceAccountId !== serviceAccountId)
           throw Boom.forbidden('Workflow service account binding does not match.');
+        return saved.childWorkflowApprovals?.serviceAccountId === serviceAccountId
+          ? saved.childWorkflowApprovals
+          : undefined;
       }
     };
 
     const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
       inheritedIdentity?: EsWorkflowExecution['effectiveIdentity'];
+      childWorkflowApprovals?: EsWorkflowExecution['childWorkflowApprovals'];
       spaceId: string;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
       authenticatedUser: string | undefined;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
-      await ensureServiceAccountBinding(args.workflow, args.spaceId);
+      const approvals = args.inheritedIdentity
+        ? args.childWorkflowApprovals
+        : await ensureServiceAccountBinding(args.workflow, args.spaceId);
       return buildWorkflowExecutionDocument({
         ...args,
+        childWorkflowApprovals: approvals,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
         getConcurrencyGroupKey: (execution) =>
           this.getConcurrencyGroupKey(
@@ -1294,7 +1301,7 @@ export class WorkflowsExecutionEnginePlugin
       const spaceId = (context.spaceId as string | undefined) || 'default';
       await ensureExecutionAccess(workflow, spaceId, request);
       await ensureWorkflowEnabled(workflow, spaceId);
-      const inheritedIdentity = resolveInheritedWorkflowIdentity(originalRequest, workflow, {
+      const inherited = resolveInheritedWorkflowIdentity(originalRequest, workflow, {
         inheritRunAs: context.inheritRunAs === true,
         parentWorkflowId:
           typeof context.parentWorkflowId === 'string' ? context.parentWorkflowId : undefined,
@@ -1305,14 +1312,22 @@ export class WorkflowsExecutionEnginePlugin
         parentStepId: typeof context.parentStepId === 'string' ? context.parentStepId : undefined,
         spaceId,
       });
+      const inheritedIdentity = inherited?.effectiveIdentity;
       if (inheritedIdentity?.inheritedFrom) {
-        if (!coreStart.security.serviceAccounts.isEnabled())
-          throw Boom.forbidden('Service account execution is disabled.');
-        if (!(await workflowRepository.isWorkflowRevisionCurrent(workflow, spaceId))) {
+        if (
+          !inherited ||
+          !(await workflowRepository.isWorkflowIncarnationCurrent(
+            workflow.id,
+            spaceId,
+            inherited.createdAt
+          ))
+        ) {
           throw Boom.conflict(
-            'The child workflow changed during admission. Review its current revision before retrying.'
+            'The approved child was deleted or recreated. Review and approve it again.'
           );
         }
+        if (!coreStart.security.serviceAccounts.isEnabled())
+          throw Boom.forbidden('Service account execution is disabled.');
         const binding = await coreStart.security.serviceAccounts.getWorkloadBinding({
           workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
           workloadId: inheritedIdentity.inheritedFrom.workloadId,
@@ -1329,8 +1344,9 @@ export class WorkflowsExecutionEnginePlugin
       );
 
       const workflowExecution = await buildExecutionDocument({
-        workflow,
+        workflow: inherited?.workflow ?? workflow,
         inheritedIdentity,
+        childWorkflowApprovals: inherited?.childWorkflowApprovals,
         spaceId,
         context,
         defaultTriggeredBy,

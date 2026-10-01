@@ -28,17 +28,11 @@ triggers:
   - type: manual
 steps:
 ${steps}`;
-const callStep = (
-  id: string,
-  yaml: string,
-  type = 'workflow.execute',
-  inherit = true
-): string => `  - name: child
+const callStep = (id: string, type = 'workflow.execute', inherit = true): string => `  - name: child
     type: ${type}
     with:
       workflow-id: ${id}
       inheritRunAs: ${inherit}
-      expectedRevision: ${revision(yaml)}
 `;
 const authenticatedAs = (execution: WorkflowExecutionDto): string =>
   JSON.stringify(execution.stepExecutions?.find((step) => step.stepId === 'authenticate')?.output);
@@ -50,6 +44,7 @@ apiTest.describe(
     const { setup, teardown, getContext, cleanupWorkflows } = createServiceAccountSuite();
     let headers: Record<string, string>;
     let editorHeaders: Record<string, string>;
+    let editorApprovalHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ requestAuth, apiClient, samlAuth, config, esClient }) => {
       await setup({ apiClient, samlAuth, config, esClient });
@@ -65,11 +60,31 @@ apiTest.describe(
       };
       headers = { ...common, ...admin.apiKeyHeader };
       editorHeaders = { ...common, ...editor.apiKeyHeader };
+      const editorSession = await samlAuth.asInteractiveUser({
+        elasticsearch: { cluster: [], indices: [] },
+        kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+      });
+      editorApprovalHeaders = { ...common, ...editorSession.cookieHeader };
     });
 
     apiTest.afterEach(async ({ apiClient }) => cleanupWorkflows(apiClient));
 
     apiTest.afterAll(teardown);
+
+    const approve = async (apiClient: ApiClientFixture, id: string) => {
+      const approvalHeaders = getContext().headers;
+      const review = await apiClient.get(`internal/workflows/${id}/child_approvals`, {
+        headers: approvalHeaders,
+        responseType: 'json',
+      });
+      expect(review, JSON.stringify(review.body)).toHaveStatusCode(200);
+      const result = await apiClient.post(`internal/workflows/${id}/child_approvals`, {
+        headers: approvalHeaders,
+        body: { reviewToken: review.body.reviewToken },
+        responseType: 'json',
+      });
+      expect(result, JSON.stringify(result.body)).toHaveStatusCode(200);
+    };
 
     const children = async (
       apiClient: ApiClientFixture,
@@ -96,9 +111,10 @@ apiTest.describe(
           const childId = await create(apiClient, yaml, headers);
           const parentId = await create(
             apiClient,
-            workflowYaml(readOnlyAccountId, callStep(childId, yaml, type)),
+            workflowYaml(readOnlyAccountId, callStep(childId, type)),
             headers
           );
+          await approve(apiClient, parentId);
           const parentExecutionId = await run(apiClient, parentId, editorHeaders);
           const parent = await wait(apiClient, parentExecutionId, parentStatus, headers);
           const step = parent.stepExecutions?.find((item) => item.stepId === 'child');
@@ -151,47 +167,80 @@ apiTest.describe(
     }
 
     apiTest(
-      'rejects an edited child before scheduling and requires privileged reapproval',
+      'keeps approved code after edits and requires explicit privileged reapproval',
       async ({ apiClient }) => {
         apiTest.setTimeout(executionTimeout);
-        const { readOnlyAccountId, create, run, wait } = getContext();
+        const { readOnlyAccountId, create, run, wait, headers: approvalHeaders } = getContext();
         const yaml = unboundYaml();
         const childId = await create(apiClient, yaml, headers);
-        const parentId = await create(
+        const parentYaml = workflowYaml(readOnlyAccountId, callStep(childId));
+        const parentId = await create(apiClient, parentYaml, headers);
+        const pending = await wait(
           apiClient,
-          workflowYaml(readOnlyAccountId, callStep(childId, yaml)),
+          await run(apiClient, parentId, headers),
+          'failed',
           headers
         );
-        const changed = yaml.replace('Approved child', 'Edited child');
+        expect(JSON.stringify(pending.stepExecutions)).toContain('Review and approve');
+        expect(await children(apiClient, childId)).toHaveLength(0);
+        await approve(apiClient, parentId);
+        const review = await apiClient.get(`internal/workflows/${parentId}/child_approvals`, {
+          headers: approvalHeaders,
+          responseType: 'json',
+        });
+        expect(review).toHaveStatusCode(200);
+        const changed = `${yaml}  - name: injected\n    type: console\n    with:\n      message: Unapproved\n`;
         const edit = await apiClient.put(`api/workflows/workflow/${childId}`, {
           headers: editorHeaders,
           body: { yaml: changed },
           responseType: 'json',
         });
         expect(edit).toHaveStatusCode(200);
-        const parent = await wait(
-          apiClient,
-          await run(apiClient, parentId, headers),
-          'failed',
-          headers
-        );
-        expect(JSON.stringify(parent.stepExecutions)).toContain('changed after approval');
-        expect(await children(apiClient, childId)).toHaveLength(0);
-        const approved = workflowYaml(readOnlyAccountId, callStep(childId, changed));
-        const forbidden = await apiClient.put(`api/workflows/workflow/${parentId}`, {
-          headers: editorHeaders,
-          body: { yaml: approved },
+        const stale = await apiClient.post(`internal/workflows/${parentId}/child_approvals`, {
+          headers: approvalHeaders,
+          body: { reviewToken: review.body.reviewToken },
+          responseType: 'json',
+        });
+        expect(stale).toHaveStatusCode(409);
+        const current = await apiClient.get(`internal/workflows/${parentId}/child_approvals`, {
+          headers: approvalHeaders,
+          responseType: 'json',
+        });
+        expect(current).toHaveStatusCode(200);
+        expect(current.body.children[0]).toMatchObject({
+          status: 'changed',
+          approvedVersion: 1,
+          currentVersion: 2,
+        });
+        const forbidden = await apiClient.post(`internal/workflows/${parentId}/child_approvals`, {
+          headers: editorApprovalHeaders,
+          body: { reviewToken: current.body.reviewToken },
           responseType: 'json',
         });
         expect(forbidden).toHaveStatusCode(403);
         expect(JSON.stringify(forbidden.body)).toContain('manage_security');
-        const reapprove = await apiClient.put(`api/workflows/workflow/${parentId}`, {
+        const save = await apiClient.put(`api/workflows/workflow/${parentId}`, {
           headers,
-          body: { yaml: approved },
+          body: { yaml: `${parentYaml}\n` },
           responseType: 'json',
         });
-        expect(reapprove).toHaveStatusCode(200);
+        expect(save).toHaveStatusCode(200);
         await wait(apiClient, await run(apiClient, parentId, headers), 'completed', headers);
+        const first = await children(apiClient, childId);
+        expect(first).toHaveLength(1);
+        const approvedChild = await wait(apiClient, first[0].id, 'completed', headers);
+        expect(approvedChild.stepExecutions?.some((step) => step.stepId === 'injected')).toBe(
+          false
+        );
+        expect(authenticatedAs(approvedChild)).toContain(readOnlyAccountId);
+        await approve(apiClient, parentId);
+        await wait(apiClient, await run(apiClient, parentId, headers), 'completed', headers);
+        const runs = await children(apiClient, childId);
+        expect(runs).toHaveLength(2);
+        const updatedRun = runs.find((execution) => execution.id !== first[0].id);
+        expect(updatedRun).toBeDefined();
+        const updated = await wait(apiClient, String(updatedRun?.id), 'completed', headers);
+        expect(updated.stepExecutions?.some((step) => step.stepId === 'injected')).toBe(true);
       }
     );
 
@@ -200,7 +249,7 @@ apiTest.describe(
         reason: 'child identity conflict',
         childYaml: workflowYaml,
         parentYaml: workflowYaml,
-        message: 'child has its own run_as',
+        message: 'Review and approve',
       },
       {
         reason: 'parent without service account',
@@ -213,7 +262,7 @@ apiTest.describe(
         const { accountId, readOnlyAccountId, create, run, wait } = getContext();
         const yaml = childYaml(readOnlyAccountId);
         const childId = await create(apiClient, yaml, headers);
-        const steps = callStep(childId, yaml);
+        const steps = callStep(childId);
         const parentId = await create(apiClient, parentYaml(accountId, steps), headers);
         const parent = await wait(
           apiClient,
@@ -227,6 +276,44 @@ apiTest.describe(
     }
 
     apiTest(
+      'executes approved nested children and explicit identity overrides',
+      async ({ apiClient }) => {
+        apiTest.setTimeout(executionTimeout);
+        const { accountId, readOnlyAccountId, create, run, wait } = getContext();
+        const grandchild = await create(apiClient, workflowYaml(accountId), headers);
+        const child = await create(
+          apiClient,
+          unboundYaml(callStep(grandchild).replace('inheritRunAs: true', 'runAsMode: override')),
+          headers
+        );
+        const parent = await create(
+          apiClient,
+          workflowYaml(readOnlyAccountId, callStep(child)),
+          headers
+        );
+        await approve(apiClient, parent);
+        const edited = await apiClient.put(`api/workflows/workflow/${child}`, {
+          headers: editorHeaders,
+          body: { yaml: unboundYaml() },
+          responseType: 'json',
+        });
+        expect(edited).toHaveStatusCode(200);
+        await wait(apiClient, await run(apiClient, parent, editorHeaders), 'completed', headers);
+        const grandchildRuns = await children(apiClient, grandchild);
+        expect(grandchildRuns).toHaveLength(1);
+        const result = await wait(apiClient, grandchildRuns[0].id, 'completed', headers);
+        expect(authenticatedAs(result)).toContain(readOnlyAccountId);
+        expect(result.effectiveIdentity?.inheritedFrom?.workloadId).toBe(parent);
+        const saved = await apiClient.get(`api/workflows/workflow/${grandchild}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(saved).toHaveStatusCode(200);
+        expect(saved.body.definition.settings.run_as).toBe(accountId);
+      }
+    );
+
+    apiTest(
       'default-off retains the original caller for an unbound child',
       async ({ apiClient }) => {
         const { accountId, create, run, wait } = getContext();
@@ -234,7 +321,7 @@ apiTest.describe(
         const childId = await create(apiClient, yaml, headers);
         const parentId = await create(
           apiClient,
-          workflowYaml(accountId, callStep(childId, yaml, 'workflow.execute', false)),
+          workflowYaml(accountId, callStep(childId, 'workflow.execute', false)),
           headers
         );
         const parent = await wait(
@@ -259,12 +346,13 @@ apiTest.describe(
         const { readOnlyAccountId, create, run, wait, resume } = getContext();
         const yaml = unboundYaml(waitStep + authenticationStep);
         const childId = await create(apiClient, yaml, headers);
-        const parentSteps = callStep(childId, yaml, 'workflow.executeAsync');
+        const parentSteps = callStep(childId, 'workflow.executeAsync');
         const parentId = await create(
           apiClient,
           workflowYaml(readOnlyAccountId, parentSteps),
           headers
         );
+        await approve(apiClient, parentId);
         const parent = await wait(
           apiClient,
           await run(apiClient, parentId, headers),

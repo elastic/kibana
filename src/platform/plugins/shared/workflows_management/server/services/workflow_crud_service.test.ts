@@ -3905,3 +3905,71 @@ describe('service account mutation race regressions', () => {
     );
   });
 });
+
+describe('server-managed child approvals', () => {
+  it.each(['same', 'changed', 'unbound', 'new'] as const)(
+    'preserves only approvals for the persisted delegation (%s), ignoring caller metadata',
+    async (scenario) => {
+      const core = {
+        ...coreMock.createStart(),
+        security: securityServiceMock.createStart(),
+        elasticsearch: elasticsearchServiceMock.createStart(),
+      };
+      const bindings = core.security.serviceAccounts;
+      bindings.isEnabled.mockReturnValue(true);
+      bindings.getWorkloadBinding.mockResolvedValue(null);
+      core.elasticsearch.client.asScoped().asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+        username: 'owner',
+        cluster: { manage_security: true },
+        index: {},
+        application: {},
+      });
+      const { deps, client } = makeDeps(undefined, {
+        getCoreStart: () => core,
+        getServiceAccountBindings: () => bindings,
+      });
+      const approved = {
+        serviceAccountId: 'sa',
+        approvedBy: 'admin',
+        approvedAt: '2026-09-30',
+        snapshots: [],
+      };
+      const previous = makeSource({
+        definition: {
+          name: 'Parent',
+          version: '1',
+          enabled: true,
+          triggers: [],
+          steps: [],
+          settings: { run_as: 'sa' },
+        },
+        childWorkflowApprovals: approved,
+      });
+      const document = makeSource({
+        definition: {
+          name: 'Changed parent',
+          version: '1',
+          enabled: true,
+          triggers: [],
+          steps: [],
+          settings:
+            scenario === 'unbound'
+              ? undefined
+              : { run_as: scenario === 'changed' ? 'other' : 'sa' },
+        },
+        childWorkflowApprovals: { ...approved, approvedBy: 'forged' },
+      });
+      await new WorkflowCrudService(deps).indexWorkflowDocument('parent', document, {
+        request: httpServerMock.createKibanaRequest(),
+        previousDocument: scenario === 'new' ? undefined : previous,
+        create: scenario === 'new',
+        ifSeqNo: 1,
+        ifPrimaryTerm: 1,
+      });
+      expect(client.index.mock.calls[0][0].document.childWorkflowApprovals).toEqual(
+        scenario === 'same' ? approved : undefined
+      );
+    }
+  );
+});

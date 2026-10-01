@@ -137,7 +137,25 @@ export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
 
 export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
 
+export interface ChildWorkflowApproval {
+  path: string[];
+  workflowId: string;
+  runAsMode: 'inherit' | 'override';
+  yaml: string;
+  definition: WorkflowYaml;
+  version?: number;
+  createdAt: string;
+}
+
+export interface ChildWorkflowApprovals {
+  serviceAccountId: string;
+  approvedAt: string;
+  approvedBy: string;
+  snapshots: ChildWorkflowApproval[];
+}
+
 export interface EsWorkflowExecution {
+  childWorkflowApprovals?: ChildWorkflowApprovals;
   spaceId: string;
   id: string;
   workflowId: string;
@@ -383,7 +401,10 @@ export const EsWorkflowSchema = z.object({
   version: z.number().optional(),
 });
 
-export type EsWorkflow = z.infer<typeof EsWorkflowSchema> & WorkflowAccessSubject;
+export type EsWorkflow = z.infer<typeof EsWorkflowSchema> &
+  WorkflowAccessSubject & {
+    childWorkflowApprovals?: ChildWorkflowApprovals;
+  };
 
 export type EsWorkflowCreate = Omit<
   EsWorkflow,
