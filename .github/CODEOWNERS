@@ -1402,7 +1402,6 @@ x-pack/solutions/search/plugins/search_assistant @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_getting_started @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_homepage @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_navigation @elastic/search-ml-ux
-x-pack/solutions/search/plugins/search_notebooks @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_query_rules @elastic/search-ml-ux
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-ml-ux
 x-pack/solutions/search/plugins/serverless_search @elastic/search-ml-ux
