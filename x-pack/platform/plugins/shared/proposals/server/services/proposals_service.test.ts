@@ -126,6 +126,7 @@ const createService = (
     update: jest.fn(),
     delete: jest.fn(),
     list: jest.fn(),
+    bulkCreate: jest.fn(),
   };
   return {
     service: new ProposalsService({
