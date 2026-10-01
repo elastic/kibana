@@ -1,0 +1,176 @@
+{
+  "sha1": "dbff18a7d5e5ba5fb45b5aa546f908fc115770bd",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "b67022d9b012554-4203fe57e2fa72b",
+      "title": "Load logstash data for data view management tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "7edef7d72fc00c1-b17d27399c45991",
+      "title": "Data view field formatters applies text, link and color formats from the field flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/field_formatter.spec.ts",
+        "line": 51,
+        "column": 39
+      }
+    },
+    {
+      "id": "7edef7d72fc00c1-f624b3ea51a27c8",
+      "title": "Data view field formatters applies the default formatter from a field meta unit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/field_formatter.spec.ts",
+        "line": 98,
+        "column": 15
+      }
+    },
+    {
+      "id": "067a6c5515fae5e-bbbfefa7c304dc5",
+      "title": "Data view runtime fields creates, modifies and deletes a runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/runtime_fields.spec.ts",
+        "line": 23,
+        "column": 25
+      }
+    },
+    {
+      "id": "067a6c5515fae5e-bdbd60aec2a817c",
+      "title": "Data view runtime fields creates, modifies and deletes a composite runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/runtime_fields.spec.ts",
+        "line": 56,
+        "column": 13
+      }
+    },
+    {
+      "id": "a2eb84246fd699e-410e96cc9eb8bac",
+      "title": "Using scripted fields in Discover numeric field: value, sort, filter and Lens hand-off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/scripted_fields_discover.spec.ts",
+        "line": 86,
+        "column": 90
+      }
+    },
+    {
+      "id": "a2eb84246fd699e-bb52826822140e7",
+      "title": "Using scripted fields in Discover string field: value, sort and filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/scripted_fields_discover.spec.ts",
+        "line": 124,
+        "column": 24
+      }
+    },
+    {
+      "id": "a2eb84246fd699e-32c2689be36a794",
+      "title": "Using scripted fields in Discover boolean field: value and filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/scripted_fields_discover.spec.ts",
+        "line": 156,
+        "column": 11
+      }
+    },
+    {
+      "id": "a2eb84246fd699e-44e69b77e0921c5",
+      "title": "Using scripted fields in Discover date field: formatted value and filter from a cell",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/scripted_fields_discover.spec.ts",
+        "line": 178,
+        "column": 10
+      }
+    },
+    {
+      "id": "ff6a7a65c384d6d-df65a126bce8e3a",
+      "title": "Data view scripted fields does not allow saving of invalid scripts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/scripted_fields.spec.ts",
+        "line": 25,
+        "column": 13
+      }
+    },
+    {
+      "id": "ff6a7a65c384d6d-95f2d5843ac0a0d",
+      "title": "Data view scripted fields creates a scripted field and re-saves it repeatedly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/scripted_fields.spec.ts",
+        "line": 35,
+        "column": 84
+      }
+    },
+    {
+      "id": "a72c16b37cef00a-3aca376e38444dc",
+      "title": "Data Views: Try ES|QL navigates to Discover and presents an ES|QL query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_management/test/scout/ui/parallel_tests/try_esql.spec.ts",
+        "line": 16,
+        "column": 5
+      }
+    }
+  ]
+}
