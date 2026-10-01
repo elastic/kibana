@@ -38,13 +38,38 @@ export const getEluRetryDelayMs = (res: supertest.Response): number | undefined 
   return retryAfterMs <= MAX_RETRY_AFTER_MS ? retryAfterMs : undefined;
 };
 
+// Resolves early when the caller aborts, so `signal` still cancels a request promptly instead of
+// waiting out `Retry-After` first.
+const waitBeforeRetry = (delayMs: number, signal?: AbortSignal): Promise<void> =>
+  new Promise<void>((resolve) => {
+    if (signal?.aborted) {
+      resolve();
+      return;
+    }
+
+    const timer = setTimeout(() => resolve(), delayMs);
+
+    signal?.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer);
+        resolve();
+      },
+      { once: true }
+    );
+  });
+
 /**
  * Issues a request, re-issuing it once if Kibana's ELU rate limiter rejected it with a 429; the
  * limiter rejects at `onPreAuth`, so the handler never ran and there is no side effect to repeat.
  */
 export const withEluRetry = async (
   issueRequest: () => PromiseLike<supertest.Response>,
-  { log, requestDescription }: { log: ScoutLogger; requestDescription: string }
+  {
+    log,
+    requestDescription,
+    signal,
+  }: { log: ScoutLogger; requestDescription: string; signal?: AbortSignal }
 ): Promise<supertest.Response> => {
   for (let attempt = 1; ; attempt++) {
     const res = await issueRequest();
@@ -68,6 +93,6 @@ export const withEluRetry = async (
       return res;
     }
 
-    await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+    await waitBeforeRetry(retryDelayMs, signal);
   }
 };

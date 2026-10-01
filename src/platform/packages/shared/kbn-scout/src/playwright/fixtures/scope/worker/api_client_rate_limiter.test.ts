@@ -94,6 +94,27 @@ describe('api_client_rate_limiter', () => {
       );
     });
 
+    it('stops waiting out Retry-After as soon as the caller aborts', async () => {
+      const controller = new AbortController();
+      const issueRequest = jest.fn().mockResolvedValue(eluLimited('30'));
+
+      const promise = withEluRetry(issueRequest, {
+        log,
+        requestDescription: 'GET /api/test',
+        signal: controller.signal,
+      });
+
+      await jest.advanceTimersByTimeAsync(1_000);
+      expect(issueRequest).toHaveBeenCalledTimes(1);
+
+      controller.abort();
+      await jest.advanceTimersByTimeAsync(0);
+
+      // Re-issued without burning the remaining 29s, so an aborted request rejects promptly.
+      await promise;
+      expect(issueRequest).toHaveBeenCalledTimes(2);
+    });
+
     it('does not retry a response the limiter did not reject', async () => {
       const issueRequest = jest.fn().mockResolvedValue(ok());
 

@@ -146,6 +146,7 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
           const res = await withEluRetry(buildRequest, {
             log,
             requestDescription: `${method.toUpperCase()} ${url}`,
+            signal: options.signal,
           });
 
           return {
