@@ -377,6 +377,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
       { ignore: [400] }
     );
   });
+
   apiTest.afterAll(async ({ apiClient, esClient }) => {
     try {
       await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
