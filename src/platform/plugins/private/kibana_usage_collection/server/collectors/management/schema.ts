@@ -727,6 +727,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmMaxNumberOfServices': {
+    type: 'long',
+    _meta: { description: 'Maximum number of services shown in the APM Services Inventory.' },
+  },
   'observability:apmEnableTransactionProfiling': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

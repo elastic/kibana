@@ -257,6 +257,46 @@ describe('huntBehavior', () => {
     );
   });
 
+  it('does not double the wildcard on matched indices that already carry one', async () => {
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      {
+        text: REPORT_TEXT,
+        required_indices: ['logs-*'],
+        article_context: {
+          // A discovered scope hands over wildcard patterns, not concrete backing indices.
+          matched_indices: ['logs-cisco_asa.log-*', 'logs-aws.*'],
+        },
+      },
+      esClient
+    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'logs-cisco_asa.log-*,logs-aws.*' })
+    );
+  });
+
+  it('keeps an exact matched index when wildcarding it would cross a broad-scope exclusion', async () => {
+    // `logs-elastic` is searchable under `logs-*` with `-logs-elastic_agent*`, but
+    // `logs-elastic*` would expand into the excluded agent streams and the gate
+    // would refuse both that wildcard and the `logs-*` fallback.
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      {
+        text: REPORT_TEXT,
+        required_indices: ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'],
+        article_context: {
+          matched_indices: ['logs-elastic'],
+        },
+      },
+      esClient
+    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'logs-elastic' })
+    );
+  });
+
   it('returns generateEsql targeting the required indices when Tier 1 had no hits', async () => {
     await huntBehavior(
       buildMockModel([t1078Candidate]),
