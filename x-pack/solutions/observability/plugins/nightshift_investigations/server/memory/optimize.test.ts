@@ -23,6 +23,7 @@ import {
   unwrapUserTask,
 } from './optimize';
 import type { MemoryPageStore } from './page_store';
+import type { TranscriptStep } from './transcript';
 import type { MemoryPage } from '../../common/memory';
 
 const page = (id: string, title = id, content = 'body'): MemoryPage => ({
@@ -132,7 +133,9 @@ describe('formatMemoryMergeSources', () => {
 
     expect(formatted).toContain('Topic: Long extract');
     expect(formatted).toContain('Keywords: checkout, redis');
-    expect(formatted).toContain('Memories this entry replaces:\n- id=memory_long-source');
+    expect(formatted).toContain(
+      'Memories this entry replaces. Integrate their facts that still hold with what this run learned:\n- id=memory_long-source'
+    );
     expect(formatted).toContain('SOURCE_FACT');
   });
 
@@ -182,12 +185,16 @@ describe('createLlmSynthesizeMemoryGroup', () => {
       recalledIds: [],
       labels: { useful: [], harmful: [] },
       extractions: [{ slug: 'checkout-redis', title: 'Checkout Redis', tags: [], replaces: [] }],
-      synthesizeMemoryGroup: createLlmSynthesizeMemoryGroup({ inferenceClient: { output } as never }),
+      synthesizeMemoryGroup: createLlmSynthesizeMemoryGroup({
+        inferenceClient: { output } as never,
+      }),
       logger: loggerMock.create(),
     });
 
     const { input } = output.mock.calls[0][0];
-    expect(input).toContain('Memories this entry replaces:\n- id=memory_checkout-redis');
+    expect(input).toContain(
+      'Memories this entry replaces. Integrate their facts that still hold with what this run learned:\n- id=memory_checkout-redis'
+    );
     expect(input).toContain('COLLIDING_FACT');
   });
 
@@ -1637,6 +1644,16 @@ describe('applyMemoryEdits entries: new, update, merge', () => {
   });
 });
 
+const REDIS_INVESTIGATION: TranscriptStep[] = [
+  {
+    kind: 'tool',
+    toolId: 'nightshift_sandbox_bash',
+    params: { command: 'esql "FROM metrics-redis*"' },
+    resultText: 'evicted_keys=4210',
+    isError: false,
+  },
+];
+
 describe('optimizeMemory', () => {
   it('passes the abort signal to every LLM call', async () => {
     const signal = new AbortController().signal;
@@ -1698,7 +1715,7 @@ describe('optimizeMemory', () => {
     expect(store.upsert).not.toHaveBeenCalled();
   });
 
-  it('gives both LLM calls the round tool calls, not just the user and assistant text', async () => {
+  it('critiques from tool-call parameters but does not extract without tool results', async () => {
     const store = createStore({
       get: jest.fn().mockImplementation(async (id: string) => page(id)),
     });
@@ -1718,16 +1735,13 @@ describe('optimizeMemory', () => {
       logger: loggerMock.create(),
     });
 
-    for (const propose of [proposeLabels, proposeExtractions]) {
-      const { transcript } = propose.mock.calls[0][0];
-      expect(transcript).toContain('## Tool calls (parameters only; results unavailable)');
-      expect(transcript).toContain('nightshift_sandbox_bash');
-      expect(transcript).toContain('FROM metrics-redis*');
-      expect(transcript.indexOf('## User task')).toBeLessThan(transcript.indexOf('## Tool calls'));
-      expect(transcript.indexOf('## Tool calls')).toBeLessThan(
-        transcript.indexOf('## Final answer')
-      );
-    }
+    const { transcript } = proposeLabels.mock.calls[0][0];
+    expect(transcript).toContain('## Tool calls (parameters only; results unavailable)');
+    expect(transcript).toContain('nightshift_sandbox_bash');
+    expect(transcript).toContain('FROM metrics-redis*');
+    expect(transcript.indexOf('## User task')).toBeLessThan(transcript.indexOf('## Tool calls'));
+    expect(transcript.indexOf('## Tool calls')).toBeLessThan(transcript.indexOf('## Final answer'));
+    expect(proposeExtractions).not.toHaveBeenCalled();
   });
 
   it('gives both LLM calls the tool results when the round could be read', async () => {
@@ -1763,6 +1777,10 @@ describe('optimizeMemory', () => {
       expect(transcript).toContain('Result: evicted_keys=4210');
       expect(transcript).not.toContain('results unavailable');
     }
+    expect(proposeLabels.mock.calls[0][0].transcript).toContain(
+      '## Final answer\nRedis evictions on checkout.'
+    );
+    expect(proposeExtractions.mock.calls[0][0].transcript).not.toContain('## Final answer');
   });
 
   it('writes every entry with the extraction transcript and the other entries topics', async () => {
@@ -1824,21 +1842,23 @@ describe('optimizeMemory', () => {
   });
 
   it('marks an empty tool-call list explicitly', async () => {
-    const store = createStore();
-    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [] });
+    const store = createStore({
+      get: jest.fn().mockImplementation(async (id: string) => page(id)),
+    });
+    const proposeLabels = jest.fn().mockResolvedValue({ useful: [], harmful: [] });
 
     await optimizeMemory({
       store,
-      recalledIds: [],
-      proposeLabels: jest.fn(),
-      proposeExtractions,
+      recalledIds: ['memory_a'],
+      proposeLabels,
+      proposeExtractions: jest.fn(),
       userMessage: 'hi',
       assistantMessage: 'hello',
       toolCalls: [],
       logger: loggerMock.create(),
     });
 
-    expect(proposeExtractions.mock.calls[0][0].transcript).toContain(
+    expect(proposeLabels.mock.calls[0][0].transcript).toContain(
       '## Tool calls (parameters only; results unavailable)\n(no tool calls)'
     );
   });
@@ -1894,6 +1914,7 @@ describe('optimizeMemory', () => {
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions on checkout.',
       toolCalls: [],
+      investigation: REDIS_INVESTIGATION,
       logger: loggerMock.create(),
     });
 
@@ -1932,6 +1953,7 @@ describe('optimizeMemory', () => {
         'why is checkout slow?\n\n<system_update>\nSemantic memories materialized this turn:\n- `/workspace/memories/memory_a.md` — Alpha\n</system_update>',
       assistantMessage: 'Redis evictions on checkout.',
       toolCalls: [],
+      investigation: REDIS_INVESTIGATION,
       logger: loggerMock.create(),
     });
 
@@ -1970,11 +1992,11 @@ describe('optimizeMemory', () => {
 });
 
 describe('extraction prompts', () => {
-  it('forbids generic tool-resolution writeups', () => {
+  it('forbids generic knowledge writeups', () => {
     expect(MEMORY_CRITIQUE_SYSTEM_PROMPT).toContain('conservative');
     expect(MEMORY_EXTRACT_SYSTEM_PROMPT).toContain('customer');
     expect(MEMORY_EXTRACT_GUIDELINES).toContain('NEVER EXTRACT');
-    expect(MEMORY_EXTRACT_GUIDELINES).toContain('Generic "how to use X"');
+    expect(MEMORY_EXTRACT_GUIDELINES).toContain('Common-sense or generic knowledge');
     expect(MEMORY_EXTRACT_GUIDELINES).toContain('**EXTRACT**');
     expect(MEMORY_EXTRACT_GUIDELINES).not.toContain('tool resolutions');
   });

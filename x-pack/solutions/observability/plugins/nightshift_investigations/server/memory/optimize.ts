@@ -43,17 +43,13 @@ Be conservative with labeling useful memories: only identify as useful if defini
 
 Return only recalled memory ids (the id= value, e.g. memory_checkout-redis-evictions). Never titles, content, or the full recalled line.`;
 
-export const MEMORY_EXTRACT_SYSTEM_PROMPT = `You are a knowledge distillation engine for an AI SRE assistant. After each conversation you propose **up to 3** memory entries. Each entry is one topic: reusable facts that would help the same assistant on a *similar but not exactly the same* task in this same customer environment in the future. An entry is either new, or replaces recalled memories that this conversation corrects, extends, or shows to be duplicates.
+export const MEMORY_EXTRACT_SYSTEM_PROMPT = `You are a knowledge distillation engine for an AI SRE assistant. After each conversation you propose **up to 3** memory entries. Each entry is one topic: durable facts about this customer's systems that are not public knowledge or in your training data, and that the same assistant would want to know ahead of time on a *similar but not exactly the same* future task in this environment. An entry is either new, or replaces recalled memories that this conversation corrects, extends, or shows to be duplicates.
 
-Focus strictly on durable, tool-output-verifiable knowledge about the customer's environment — how this organization's systems are structured and how its components behave. Do **not** extract generic tool, connector, or API usage — that belongs to the tool/connector's own documentation, not to per-customer memory.`;
+Focus strictly on durable, tool-output-verifiable knowledge about the customer's environment — how this organization's systems are structured and how its components behave. Do **not** extract what the run read from pre-existing knowledge files that the agent didn't generate (memories, Cortex pages, decision trees, and environment docs under /workspace/).`;
 
-export const MEMORY_EXTRACT_GUIDELINES = `Review the conversation. Extract only facts that are directly substantiated by the transcript.
+export const MEMORY_EXTRACT_GUIDELINES = `Review the conversation. Extract only facts that a tool result in the investigation shows.
 
-The transcript has the user task; the investigation, in order (the agent's notes and every tool call with an excerpt of its result, where "ERROR" marks a failed call); and the final answer. Some calls only read the agent's own stored knowledge: other memories (/workspace/memories/), Cortex wiki pages (/workspace/cortex/), decision trees (/workspace/decision-trees/), and environment docs (/workspace/elastic.md, /workspace/connectors.md). Whatever they return is already stored, so it is not new evidence. Never restate information from Cortex, other memories, or decision trees, even when the final answer repeats it. The one exception is a recalled memory this run corrects, extends, or duplicates: replace it (see NEW OR REPLACE).
-
-Extract a fact only if a tool result in the investigation shows it. The final answer is a synthesis that can include the agent's inferences, so it is not evidence by itself. A failed call shows nothing about the environment. If results are unavailable (the section says so), you cannot see what any call returned, and the final answer is the only source. The answer often restates what the agent read from its own stored knowledge: anything it attributes to memories (/workspace/memories/), Cortex pages (/workspace/cortex/), decision trees (/workspace/decision-trees/), postmortems, runbooks, or earlier incidents is already stored, so do not restate it. Extract only what the answer says it observed in this environment during this run, through queries the tool calls show were actually run. Skip its inferences, hypotheses, and recommendations. When unsure, return an empty list.
-
-**EXTRACT** — durable customer-environment knowledge:
+**EXTRACT** — durable customer-environment knowledge the assistant would want before starting a similar task:
 - Organizational context: team ownership, on-call structure, service → team mapping, escalation paths, naming conventions.
 - System component behavior: what a service/job does, its upstream/downstream dependencies, typical traffic/latency/error profile, known failure modes.
 - Environment topology: how services are named in traces/logs/metrics, how environments (prod/stage/etc.) are labeled, which hosts/clusters/regions serve what role.
@@ -61,15 +57,11 @@ Extract a fact only if a tool result in the investigation shows it. The final an
 **NEVER EXTRACT:**
 - Knowledge already present in the memories recalled for this session — repeating it just bloats the store. To correct, extend, or combine recalled memories, replace them instead.
 - Common-sense or generic knowledge that isn't specific to this customer's environment (e.g. "Prometheus exposes /api/v1/query", "K8s pods restart on OOM").
-- Connector/tool mechanics: hosts, auth methods, base paths, tenant IDs, API endpoint patterns, query syntax, request/response shapes.
-- Generic "how to use X" tips that would apply to any customer running the same tool.
 - "How we investigated this" narratives — capture the *facts* the investigation uncovered, not the procedure.
-- Tool errors, broken environments, or workarounds for failures.
 - Negation / absence ("X doesn't exist", "no doc found").
 - Credentials, tokens, or secrets.
 - Container internals (/proc, hex ports, Docker layers).
 - Information only relevant to this specific request (e.g. the single alert fingerprint being investigated).
-- Ids from this run (trace, span, request, alert, or document ids).
 
 **NEW OR REPLACE** — you choose the topics; you do not write the memories. Every entry has a title (its topic), keywords, and replaces. A writer then writes each entry's content from the transcript and the memories it replaces, and every memory in replaces is archived once it is written.
 - New topic: replaces is empty.
@@ -182,7 +174,6 @@ export const OPTIMIZER_EVIDENCE_TOKEN_BUDGET = 128_000;
 export const OPTIMIZER_OUTPUT_TOKEN_LIMIT = 8_000;
 export const OPTIMIZER_EVIDENCE_CHARACTER_HARD_LIMIT = 2_000_000;
 export const MAX_RECALLED_TITLE_CHARS = 256;
-export const MAX_RECALLED_CONTEXT_CHARS = 1_024;
 
 interface EvidenceEntry {
   prefix: string;
@@ -409,32 +400,27 @@ Investigation transcript:\n${transcript}`,
   };
 };
 
-export const MEMORY_WRITER_SYSTEM_PROMPT = `You write one semantic memory for an AI SRE assistant: durable facts about one topic in the customer's environment.
+export const MEMORY_WRITER_SYSTEM_PROMPT = `You maintain the semantic memory of an AI SRE assistant that works in one customer's environment. Write the memory for one topic.
 
-You get the run time, the topic and its keywords, the stored memories the entry replaces (often none), the other entries written this round, and this round's investigation transcript. The replaced memories are archived once your entry is written, so anything worth keeping from them must be in your content.
+A memory is recalled on future, similar tasks, so its value is its signal to noise: keep only durable facts about this customer's systems that are not public knowledge or in your training data and that the assistant would want to know before starting such a task. Leave out what only describes this run.
 
-The transcript is the evidence. It has the user task; the investigation, in order (the agent's notes and every tool call with an excerpt of its result, where "ERROR" marks a failed call); and the final answer. Write what this run's tool results show about the topic, and check the replaced memories against them. A claim is observed only if a tool result shows it. The final answer can include the agent's inferences, hypotheses, and recommendations, so it is not evidence by itself. A failed call shows nothing about the environment. Calls that read memories (/workspace/memories/), Cortex pages (/workspace/cortex/), decision trees (/workspace/decision-trees/), or environment docs (/workspace/elastic.md, /workspace/connectors.md) return stored knowledge, not new evidence: never restate it, even when the final answer repeats it. If results are unavailable (the transcript says so), the final answer is the only source for what this run observed: keep only what it says was observed in this environment through queries the tool calls show were run.
+Base the memory on what this run's tool results showed. Do not copy or cite what the run read from stored knowledge pre-existing on the file system that the agent didn't create through tool calling, except the memories this entry replaces.
 
-Write durable knowledge about the customer's environment: ownership, naming, topology, what a component does, its dependencies, its typical behavior, and its known failure modes. Never write connector or tool mechanics (hosts, auth, endpoints, query syntax), generic knowledge that applies to any customer, how the investigation was done, tool errors or workarounds, absence ("no doc found"), container internals, or credentials.
-- Rewrite, do not patch. Check every sentence you keep from a replaced memory against the rules below: a fact can be right and still need a date, or the past tense because the problem has stopped.
-- Keep the facts from the replaced memories that are still correct and useful.
-- Where this run's evidence contradicts a replaced memory, drop the contradicted claim. A claim written as ongoing is outdated when this run shows the problem has stopped; a value is outdated when this run measured it differently. Keep a replaced memory's inference or explanation only if the evidence supports it.
-- Stay on the entry's topic as its title names it. The transcript covers other topics too; add a fact from it only if it is about this topic. Facts about the other entries written this round (listed in the input) belong to those entries, never to this one.
-- Drop what is not useful and ids from one run (trace, span, request, alert, or document ids).
-- Every claim that can change over time (counts, rates, latencies, percentiles, error levels, versions, config values, which component is slowest) states when it was observed, as an absolute UTC time or window with dates. Keep the times given in the inputs. A replaced memory's claim with no time was observed by that memory's updated date: say "as of <date>".
-- Never write relative times such as "current", "prior window", "now", or "recently".
-- Structural facts that do not change from run to run (names, fields, index or data stream names, ownership, dependencies, topology) get no time, even when the transcript shows when they were seen: no "observed" or "as of" on them.
-- Earlier observations may stay when they are still useful, labeled with their times. When a newer observation conflicts with an older one, the newer one is the current state; keep the older one only as a dated earlier observation.
-- History stays short: give the newest observation in full, and each earlier one as a single dated line with only the numbers that show the change (e.g. "2026-09-29T19:06Z–2026-09-30T19:06Z: reinforce avg 78.6 s, p95 332.5 s"). Delete the tables of earlier observations; the content has at most one table.
-- A problem the evidence shows has stopped is written in the past tense throughout, cause included, with when it was observed and when it stopped. Write "From 2026-09-30T06:57Z to 07:30Z the host clock was 1 s behind the CA", not "The host clock runs 1 s behind the CA". Keep its signature (error text, affected component) so a recurrence is recognized, but never describe the problem or its cause as ongoing.
-- State facts only; never address the reader or give instructions (no "should be used to", "watch for").
-- Before returning, reread the content: rewrite any present-tense sentence about a problem that has stopped, and replace every table except the newest observation's with one dated line per earlier observation. This applies however much room is left.
-- Compare observations from different times only when they measure the same thing the same way; otherwise state each on its own.
-- Lead with the lasting conclusion, then the dated observations that support it.
-- State each fact once. Add nothing that is not in the replaced memories or this run's tool results: no fixes or recommendations.
-- Be concise: at most 4,000 characters. Cut earlier observations and detail before cutting the conclusion or the newest observation.
+Worth keeping:
+- Organizational context: team ownership, on-call structure, service → team mapping, escalation paths, naming conventions.
+- System component behavior: what a service or job does, its upstream and downstream dependencies, its typical traffic, latency, and error profile, its known failure modes.
+- Environment topology: how services are named in traces, logs, and metrics, how environments are labeled, which hosts, clusters, or regions serve what role.
 
-Return the markdown content. If neither this run's evidence nor the replaced memories hold a durable fact about the topic, return empty content.`;
+Never write:
+- Generic knowledge that applies to any customer.
+- How the investigation was done.
+- Advice or recommendations.
+- Credentials, tokens, secrets, or container internals.
+- Facts that belong to the other entries written this round, or mentions of other memories.
+
+Say when a fact that can change was observed, and describe a problem that has stopped in the past tense.
+
+Return concise markdown, or empty content if nothing durable about the topic is established.`;
 
 export const formatMemoryMergeSources = ({
   sources,
@@ -453,7 +439,9 @@ export const formatMemoryMergeSources = ({
               prefix: `Topic: ${extract.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` + `Keywords: `,
               content:
                 `${extract.tags.join(', ') || '(none)'}\n\n` +
-                `Memories this entry replaces:${sources.length > 0 ? '' : ' (none)'}`,
+                (sources.length > 0
+                  ? 'Memories this entry replaces. Integrate their facts that still hold with what this run learned:'
+                  : 'Memories this entry replaces: (none)'),
             },
           ]
         : []),
@@ -462,7 +450,6 @@ export const formatMemoryMergeSources = ({
           `${index === 0 && !extract ? '' : '\n'}` +
           `- id=${page.id}\n` +
           `  updated: ${page.updated_at}\n` +
-          `  context: ${(page.context ?? '').slice(0, MAX_RECALLED_CONTEXT_CHARS)}\n` +
           `  content: `,
         content: page.content,
       })),
@@ -1049,6 +1036,7 @@ export const optimizeMemory = async ({
     investigation,
     toolCalls,
   });
+  const evidenceTranscript = renderMemoryTranscript({ task, investigation, toolCalls });
 
   let labels: MemoryLabelProposal;
   if (recalledMemories.length === 0) {
@@ -1070,17 +1058,21 @@ export const optimizeMemory = async ({
 
   // Cold-start rounds have an empty recalled set; still extract or the store never fills.
   signal?.throwIfAborted();
-  const shouldExtract = assistantMessage.trim().length > 0;
   let extractions: MemoryExtractProposal[] = [];
-  if (!shouldExtract) {
+  if (assistantMessage.trim().length === 0) {
     logger.debug('Memory extract skipped — empty assistant message');
+  } else if (investigation === undefined) {
+    logger.debug('Memory extract skipped — no tool results to extract from');
   } else {
     const extractStarted = Date.now();
     logger.debug(
       `Memory extract LLM start nightshift_memory_extract recalled=${recalledMemories.length} ` +
-        `transcriptChars=${transcript.length}`
+        `transcriptChars=${evidenceTranscript.length}`
     );
-    const extracted = await proposeExtractions({ transcript, recalledMemories });
+    const extracted = await proposeExtractions({
+      transcript: evidenceTranscript,
+      recalledMemories,
+    });
     extractions = extracted.extractions;
     logger.debug(
       `Memory extract LLM done ${Date.now() - extractStarted}ms ` +
@@ -1120,7 +1112,7 @@ export const optimizeMemory = async ({
     labels,
     extractions,
     context: task,
-    transcript,
+    transcript: evidenceTranscript,
     synthesizeMemoryGroup,
     logger,
   });

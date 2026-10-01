@@ -8,7 +8,7 @@
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 
 /**
- * The text the Semantic Memory critique and extraction calls read.
+ * The text the Semantic Memory critique, extraction, and writer calls read.
  *
  * Layout, in the order the model should weigh it:
  *  1. the user's task;
@@ -16,8 +16,8 @@ import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
  *     its result. Nothing is filtered by tool or path: the calls that read recalled memories or
  *     other stored knowledge show whether that knowledge was used, and the rest are the evidence
  *     for what is new, what to merge, and what was wrong;
- *  3. the final answer last, next to the instructions. It is a synthesis and can contain the
- *     agent's inferences, so facts should be backed by a result above.
+ *  3. the final answer last, only when `answer` is given. It is a synthesis and can contain the
+ *     agent's inferences, so the calls that write memories omit it.
  *
  * When the persisted round cannot be read, the investigation is built from the hook's tool calls
  * and results, or falls back to tool-call parameters when no results were passed.
@@ -121,7 +121,7 @@ export const renderMemoryTranscript = ({
   toolCalls,
 }: {
   task: string;
-  answer: string;
+  answer?: string;
   /** The round's steps, in order, when the persisted round could be read. */
   investigation?: TranscriptStep[];
   /** Parameters-only fallback, used when `investigation` is unavailable. */
@@ -149,9 +149,7 @@ export const renderMemoryTranscript = ({
     task.slice(0, MAX_TASK_CHARS),
     '',
     ...middle,
-    '',
-    '## Final answer',
-    answer.slice(0, MAX_ANSWER_CHARS),
+    ...(answer !== undefined ? ['', '## Final answer', answer.slice(0, MAX_ANSWER_CHARS)] : []),
   ].join('\n');
 };
 
