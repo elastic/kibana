@@ -251,7 +251,7 @@ describe(`#runUiamContainer()`, () => {
             "timeout 1 bash -c \\"</dev/tcp/localhost/8080\\"",
             "--name",
             "uiam",
-            "docker.elastic.co/kibana-ci/uiam:latest-verified@sha256:3b2d0890339815fd947a2e31f560befa3081119197275eb32e7d8d9cebc99885",
+            "docker.elastic.co/kibana-ci/uiam:latest-verified",
           ],
         ],
         Array [
