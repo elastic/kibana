@@ -189,6 +189,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     // Failed instances always need a retry deploy — credentials are required. Treat them as
     // new untracked targets so the credential gate stays on even when pending cleanup exists.
     if (failedInstances.length > 0) return false;
+    // TODO(ingest-dev#9730): once secret-ref hydration and buildPackageVars refsToPreserve land,
+    // a dirty+cleanup run can safely proceed without re-entering credentials because the policy
+    // PUT will preserve existing secret refs. Until then, require credentials whenever isDirty
+    // is true so the dirty-update PUT does not emit an empty vars block and clear AWS keys.
+    if (detectAndReviewStep.isDirty) return false;
     const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
     const liveStalePolicyIds = buildLiveStalePolicyIds(
       detectAndReviewStep.policyIdsByInstance ?? {},
@@ -210,6 +215,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   }, [
     failedInstances,
     deployGroups,
+    detectAndReviewStep.isDirty,
     detectAndReviewStep.policyIdsByInstance,
     detectAndReviewStep.serviceStatuses,
     detectAndReviewStep.pendingCleanupPolicyIds,
