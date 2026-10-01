@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@kbn/react-query';
 import type {
   NightshiftInvestigationsAPIClientRequestParamsOf,
   NightshiftInvestigationsAPIReturnType,
@@ -16,7 +16,9 @@ import { useKibana } from './use_kibana';
 
 type AutomationsResponse =
   NightshiftInvestigationsAPIReturnType<'GET /internal/nightshift/automations'>;
-type Automation = AutomationsResponse['automations'][number];
+type Automation = AutomationsResponse['automations'][number] & {
+  author: { username: string };
+};
 type CreateAutomationBody =
   NightshiftInvestigationsAPIClientRequestParamsOf<'POST /internal/nightshift/automations'>['params']['body'];
 
@@ -65,20 +67,83 @@ export const useFetchAutomations = () => {
 };
 
 export const useAutomationLastRun = (id: string) => {
+  return useAutomationRunsInRange(id, '', '');
+};
+
+type InvestigationsClient = NonNullable<
+  ReturnType<typeof useKibana>['services']['nightshiftInvestigations']
+>['investigationsClient'];
+
+const getAutomationRunsQuery = (
+  investigationsClient: InvestigationsClient | undefined,
+  id: string,
+  startedAfter: string,
+  startedBefore: string
+) => ({
+  queryKey: [...AUTOMATIONS_QUERY_KEY, id, 'runs', startedAfter, startedBefore],
+  enabled: investigationsClient != null,
+  queryFn: async () => {
+    if (!investigationsClient) {
+      throw new Error('Nightshift investigations plugin is unavailable');
+    }
+    return investigationsClient.fetch('GET /internal/nightshift/automations/{id}/runs', {
+      params: { path: { id }, query: { page: 1, size: 100, startedAfter, startedBefore } },
+      signal: null,
+    });
+  },
+  retry: false,
+});
+
+export const useAutomationRunsInRange = (
+  id: string,
+  startedAfter: string,
+  startedBefore: string
+) => {
+  const { nightshiftInvestigations } = useKibana().services;
+  return useQuery(
+    getAutomationRunsQuery(
+      nightshiftInvestigations?.investigationsClient,
+      id,
+      startedAfter,
+      startedBefore
+    )
+  );
+};
+
+export const useAutomationsRunsInRange = (
+  ids: string[],
+  startedAfter: string,
+  startedBefore: string
+) => {
+  const { nightshiftInvestigations } = useKibana().services;
+  return useQueries({
+    queries: ids.map((id) =>
+      getAutomationRunsQuery(
+        nightshiftInvestigations?.investigationsClient,
+        id,
+        startedAfter,
+        startedBefore
+      )
+    ),
+  });
+};
+
+export const useAutomationAuthor = (id: string) => {
   const { nightshiftInvestigations } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;
 
   return useQuery({
-    queryKey: [...AUTOMATIONS_QUERY_KEY, id, 'runs'],
+    queryKey: [...AUTOMATIONS_QUERY_KEY, id, 'author'],
     enabled: investigationsClient != null,
     queryFn: async () => {
       if (!investigationsClient) {
         throw new Error('Nightshift investigations plugin is unavailable');
       }
-      return investigationsClient.fetch('GET /internal/nightshift/automations/{id}/runs', {
-        params: { path: { id }, query: { page: 1, size: 1 } },
-        signal: null,
-      });
+      const automation = await investigationsClient.fetch(
+        'GET /internal/nightshift/automations/{id}',
+        { params: { path: { id } }, signal: null }
+      );
+      return automation.author;
     },
     retry: false,
   });

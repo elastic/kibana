@@ -40,11 +40,12 @@ const navigateToUrl = jest.fn();
 const navigateToApp = jest.fn();
 const featureFlags = { getBooleanValue: jest.fn() };
 
-function renderPage() {
+function renderPage(initialPath = '/') {
+  const history = createMemoryHistory({ initialEntries: [initialPath] });
   return render(
     <I18nProvider>
       <MockAppHeaderProvider>
-        <Router history={createMemoryHistory()}>
+        <Router history={history}>
           <NightshiftPage />
         </Router>
       </MockAppHeaderProvider>
@@ -101,7 +102,7 @@ describe('NightshiftPage', () => {
     renderPage();
     expect(navigateToApp).not.toHaveBeenCalled();
     await waitFor(() =>
-      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Nightshift')
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Investigations')
     );
     expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
@@ -145,7 +146,7 @@ describe('NightshiftPage', () => {
 
     expect(screen.queryByTestId('nightshiftSettingsLink')).not.toBeInTheDocument();
     expect(screen.getByTestId('nightshiftManagementLink')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftAutomationsLink')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationsLink')).not.toBeInTheDocument();
   });
 
   it('links to Significant Events settings with EBT tracking', async () => {
@@ -213,17 +214,41 @@ describe('NightshiftPage', () => {
       expect(screen.getByTestId('sandboxSecretsFlyoutStub')).toBeInTheDocument();
     });
 
-    it('shows the automations menu when the API and feature flag are available', async () => {
+    it('shows the Investigations action when the API and feature flag are available', async () => {
       withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
       renderPage();
       await openAppMenuOverflow();
 
-      const automationsLink = await screen.findByTestId('nightshiftAutomationsLink');
-      const managementLink = screen.getByTestId('nightshiftManagementLink');
-      expect(automationsLink).toHaveAttribute('href', '/app/nightshift/automations');
-      expect(automationsLink.compareDocumentPosition(managementLink)).toBe(
-        Node.DOCUMENT_POSITION_FOLLOWING
+      expect(await screen.findByTestId('nightshiftInvestigationsPrimaryAction')).toHaveAttribute(
+        'href',
+        '/app/nightshift/investigations'
       );
+    });
+
+    it('shows the all-investigations tab and WIP content at /investigations', async () => {
+      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
+      renderPage('/investigations');
+
+      expect(await screen.findByTestId('nightshiftTabAllInvestigations')).toHaveAttribute(
+        'href',
+        '/app/nightshift/investigations'
+      );
+      expect(screen.getByTestId('nightshiftTabAutomations')).toHaveAttribute(
+        'href',
+        '/app/nightshift/automations'
+      );
+      expect(screen.getByText('WIP')).toBeInTheDocument();
+    });
+
+    it('shows the automations tab and list at /automations', async () => {
+      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
+      renderPage('/automations');
+
+      expect(await screen.findByTestId('nightshiftTabAutomations')).toHaveAttribute(
+        'href',
+        '/app/nightshift/automations'
+      );
+      expect(screen.getByTestId('automationsSearch')).toBeInTheDocument();
     });
 
     it('hides the sandbox secrets link when Nightshift is not enabled', async () => {

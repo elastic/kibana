@@ -23,7 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useCreateAutomation } from '../hooks/use_automations';
+import { useCreateAutomation, type Automation } from '../hooks/use_automations';
 
 interface TriggerRow {
   ruleNamePattern: string;
@@ -88,13 +88,30 @@ const labels = {
 
 export const CreateAutomationFlyout = ({
   onClose,
+  automation,
 }: {
   onClose: () => void;
+  automation?: Automation;
 }): React.ReactElement => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [triggers, setTriggers] = useState<TriggerRow[]>([initialTrigger()]);
-  const [dailyDispatchLimit, setDailyDispatchLimit] = useState('20');
+  const [name, setName] = useState(automation?.name ?? '');
+  const [description, setDescription] = useState(automation?.description ?? '');
+  const [triggers, setTriggers] = useState<TriggerRow[]>(() => {
+    const alertRows = (automation?.trigger.rows ?? []).flatMap((row) =>
+      row.kind === 'alert'
+        ? [
+            {
+              ruleNamePattern: row.ruleNamePattern ?? '',
+              alertStatus: row.alertStatus ?? 'any',
+              tags: row.tags ?? [],
+            },
+          ]
+        : []
+    );
+    return alertRows.length ? alertRows : [initialTrigger()];
+  });
+  const [dailyDispatchLimit, setDailyDispatchLimit] = useState(
+    String(automation?.runtime.dailyDispatchLimit ?? 20)
+  );
   const createAutomation = useCreateAutomation();
   const numericDailyDispatchLimit = Number(dailyDispatchLimit);
   const isDailyDispatchLimitValid =

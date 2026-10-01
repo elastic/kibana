@@ -11,6 +11,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationsPage } from './automations_page';
 import {
   useAutomationLastRun,
+  useAutomationRunsInRange,
+  useAutomationsRunsInRange,
   useDeleteAutomation,
   useFetchAutomations,
   useToggleAutomation,
@@ -20,6 +22,8 @@ import { useKibana } from '../hooks/use_kibana';
 jest.mock('../hooks/use_automations', () => ({
   AUTOMATIONS_LOAD_ERROR_TITLE: 'Failed to load automations',
   useAutomationLastRun: jest.fn(),
+  useAutomationRunsInRange: jest.fn(),
+  useAutomationsRunsInRange: jest.fn(),
   useDeleteAutomation: jest.fn(),
   useFetchAutomations: jest.fn(),
   useToggleAutomation: jest.fn(),
@@ -27,6 +31,8 @@ jest.mock('../hooks/use_automations', () => ({
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
 const mockUseAutomationLastRun = useAutomationLastRun as jest.Mock;
+const mockUseAutomationRunsInRange = useAutomationRunsInRange as jest.Mock;
+const mockUseAutomationsRunsInRange = useAutomationsRunsInRange as jest.Mock;
 const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
 const mockUseFetchAutomations = useFetchAutomations as jest.Mock;
 const mockUseToggleAutomation = useToggleAutomation as jest.Mock;
@@ -39,6 +45,11 @@ describe('AutomationsPage', () => {
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationLastRun.mockReturnValue({ data: undefined, isInitialLoading: false });
+    mockUseAutomationsRunsInRange.mockReturnValue([]);
+    mockUseAutomationRunsInRange.mockReturnValue({
+      data: { runs: [], total: 0 },
+      isInitialLoading: false,
+    });
     mockUseDeleteAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
     mockUseToggleAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
   });
@@ -52,6 +63,46 @@ describe('AutomationsPage', () => {
 
     expect(screen.getByText('Automations run on triggers you define')).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Create automation' })).toHaveLength(2);
+  });
+
+  it('filters automations by name and clears filters', () => {
+    mockUseFetchAutomations.mockReturnValue({
+      data: {
+        automations: [
+          {
+            id: 'automation-1',
+            name: 'Alert triage',
+            isEnabled: true,
+            trigger: { rows: [{ kind: 'alert' }] },
+            runtime: { dailyDispatchLimit: 20 },
+            author: { username: 'alice' },
+          },
+          {
+            id: 'automation-2',
+            name: 'Weekly schedule',
+            isEnabled: false,
+            trigger: { rows: [{ kind: 'schedule' }] },
+            runtime: { dailyDispatchLimit: 20 },
+            author: { username: 'bob' },
+          },
+        ],
+      },
+      isInitialLoading: false,
+    });
+
+    render(
+      <I18nProvider>
+        <AutomationsPage />
+      </I18nProvider>
+    );
+
+    fireEvent.change(screen.getByTestId('automationsSearch'), { target: { value: 'weekly' } });
+    expect(screen.getByText('Weekly schedule')).toBeInTheDocument();
+    expect(screen.queryByText('Alert triage')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
+    expect(screen.getByText('Alert triage')).toBeInTheDocument();
+    expect(screen.getByText('Weekly schedule')).toBeInTheDocument();
   });
 
   it('shows an error state and lets the user retry after loading fails', () => {

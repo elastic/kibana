@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderTab } from '@kbn/app-header';
 import type { AppMenuConfig, AppMenuRunActionParams } from '@kbn/core-chrome-app-menu-components';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
@@ -14,6 +15,10 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_c
 
 const nightshiftPageTitle = i18n.translate('xpack.nightshift.pageTitle', {
   defaultMessage: 'Nightshift',
+});
+
+const investigationsPageTitle = i18n.translate('xpack.nightshift.investigationsPageTitle', {
+  defaultMessage: 'Investigations',
 });
 
 const settingsLabel = i18n.translate('xpack.nightshift.settingsLinkLabel', {
@@ -28,9 +33,26 @@ const sandboxSecretsLabel = i18n.translate('xpack.nightshift.sandboxSecretsLinkL
   defaultMessage: 'Sandbox secrets',
 });
 
-const automationsLabel = i18n.translate('xpack.nightshift.automations.menuLabel', {
-  defaultMessage: 'Automations',
+const investigationsLabel = i18n.translate('xpack.nightshift.investigationsButtonLabel', {
+  defaultMessage: 'Investigations',
 });
+
+export const nightshiftTabs: AppHeaderTab[] = [
+  {
+    id: 'allInvestigations',
+    'data-test-subj': 'nightshiftTabAllInvestigations',
+    label: i18n.translate('xpack.nightshift.allInvestigationsTab', {
+      defaultMessage: 'All investigations',
+    }),
+  },
+  {
+    id: 'automations',
+    'data-test-subj': 'nightshiftTabAutomations',
+    label: i18n.translate('xpack.nightshift.automations.tabLabel', {
+      defaultMessage: 'Automations',
+    }),
+  },
+];
 
 const settingsEbtProps = getEbtProps({
   action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SETTINGS,
@@ -64,7 +86,9 @@ export function NightshiftAppHeader({
   settingsHref,
   onSandboxSecretsClick,
   onAutomationsClick,
-  automationsHref,
+  investigationsHref,
+  tabs,
+  back,
 }: {
   onManagementClick: () => void | Promise<void>;
   managementHref: string;
@@ -73,20 +97,23 @@ export function NightshiftAppHeader({
   /** Shows the sandbox secrets menu item when set. */
   onSandboxSecretsClick?: () => void;
   onAutomationsClick?: () => void | Promise<void>;
-  automationsHref?: string;
+  investigationsHref?: string;
+  tabs?: AppHeaderTab[];
+  back?: AppHeaderBack;
 }): React.ReactElement {
+  const isInvestigationsPage = Boolean(tabs?.length);
   const menu = useMemo<AppMenuConfig>(
     () => ({
       items: [
-        ...(onAutomationsClick && automationsHref
+        ...(onAutomationsClick && investigationsHref && !isInvestigationsPage
           ? [
               {
-                id: 'nightshiftAutomations',
-                label: automationsLabel,
-                iconType: 'workflowsApp',
-                href: automationsHref,
+                id: 'nightshiftInvestigations',
+                label: investigationsLabel,
+                iconType: 'magnifyExclamation',
+                href: investigationsHref,
                 run: () => void onAutomationsClick(),
-                testId: 'nightshiftAutomationsLink',
+                testId: 'nightshiftInvestigationsPrimaryAction',
               },
             ]
           : []),
@@ -112,6 +139,7 @@ export function NightshiftAppHeader({
             void onManagementClick();
           },
           testId: 'nightshiftManagementLink',
+          overflow: true,
         },
         ...(onSettingsClick && settingsHref
           ? [
@@ -125,14 +153,15 @@ export function NightshiftAppHeader({
                   void onSettingsClick();
                 },
                 testId: 'nightshiftSettingsLink',
-                overflow: true,
+                overflow: !isInvestigationsPage,
               },
             ]
           : []),
       ],
     }),
     [
-      automationsHref,
+      investigationsHref,
+      isInvestigationsPage,
       managementHref,
       onAutomationsClick,
       onManagementClick,
@@ -142,5 +171,13 @@ export function NightshiftAppHeader({
     ]
   );
 
-  return <AppHeader title={nightshiftPageTitle} menu={menu} spacing="compact" />;
+  return (
+    <AppHeader
+      title={isInvestigationsPage ? investigationsPageTitle : nightshiftPageTitle}
+      back={back}
+      tabs={tabs}
+      menu={menu}
+      spacing="standard"
+    />
+  );
 }
