@@ -395,6 +395,7 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
 
 export const clickAlertsHistogramLegend = () => {
   cy.get(ALERTS_HISTOGRAM_LEGEND).click();
+};
 
 export const clickAlertsHistogramLegendAddToTimeline = (ruleName: string) => {
   cy.get(LEGEND_ACTIONS.ADD_TO_TIMELINE(ruleName)).click();
