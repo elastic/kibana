@@ -505,6 +505,8 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
   valid: boolean;
   tags?: string[];
   version?: number;
+  /** Rotation counter for the workflow page URL. Kept outside the YAML on purpose. */
+  pageGeneration?: number;
 }
 
 export type WorkflowAccessControlUpdateResponseDto = Pick<

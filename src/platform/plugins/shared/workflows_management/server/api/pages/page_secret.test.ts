@@ -10,37 +10,36 @@
 import { computePageSecret, PAGE_SECRET_LENGTH, verifyPageSecret } from './page_secret';
 
 const KEY = 'k'.repeat(32);
+const BASE = { spaceId: 'default', workflowId: 'workflow-1', generation: 0 };
 
 describe('page secret', () => {
   it('is a fixed-length hex string', () => {
-    const secret = computePageSecret(KEY, 'default', 'page-1');
+    const secret = computePageSecret(KEY, BASE);
     expect(secret).toMatch(/^[0-9a-f]+$/);
     expect(secret).toHaveLength(PAGE_SECRET_LENGTH);
   });
 
-  it('is stable for the same key, space, and page', () => {
-    expect(computePageSecret(KEY, 'default', 'page-1')).toBe(
-      computePageSecret(KEY, 'default', 'page-1')
-    );
+  it('is stable for the same inputs, so the author can fetch the URL again', () => {
+    expect(computePageSecret(KEY, BASE)).toBe(computePageSecret(KEY, BASE));
   });
 
   it('verifies a secret it derived', () => {
-    const secret = computePageSecret(KEY, 'default', 'page-1');
-    expect(verifyPageSecret(KEY, 'default', 'page-1', secret)).toBe(true);
+    expect(verifyPageSecret(KEY, BASE, computePageSecret(KEY, BASE))).toBe(true);
   });
 
-  it('changes when the page-id changes, which is how rotation retires a URL', () => {
-    const secret = computePageSecret(KEY, 'default', 'page-1');
-    expect(verifyPageSecret(KEY, 'default', 'page-2', secret)).toBe(false);
+  it('changes with the generation, which is how rotation retires a URL', () => {
+    const secret = computePageSecret(KEY, BASE);
+    expect(verifyPageSecret(KEY, { ...BASE, generation: 1 }, secret)).toBe(false);
   });
 
-  it('rejects a secret from another space or signing key', () => {
-    const secret = computePageSecret(KEY, 'default', 'page-1');
-    expect(verifyPageSecret(KEY, 'other', 'page-1', secret)).toBe(false);
-    expect(verifyPageSecret('x'.repeat(32), 'default', 'page-1', secret)).toBe(false);
+  it('rejects a secret from another space, workflow, or signing key', () => {
+    const secret = computePageSecret(KEY, BASE);
+    expect(verifyPageSecret(KEY, { ...BASE, spaceId: 'other' }, secret)).toBe(false);
+    expect(verifyPageSecret(KEY, { ...BASE, workflowId: 'workflow-2' }, secret)).toBe(false);
+    expect(verifyPageSecret('x'.repeat(32), BASE, secret)).toBe(false);
   });
 
   it('rejects a secret of the wrong length without throwing', () => {
-    expect(verifyPageSecret(KEY, 'default', 'page-1', 'short')).toBe(false);
+    expect(verifyPageSecret(KEY, BASE, 'short')).toBe(false);
   });
 });
