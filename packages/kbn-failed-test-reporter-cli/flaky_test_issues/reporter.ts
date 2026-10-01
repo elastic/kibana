@@ -16,7 +16,14 @@ import {
   type GithubIssue,
   type GithubIssueState,
 } from '../failed_tests_reporter/github_api';
-import { flakySuiteIssueTitle, renderFlakySuiteIssueBody } from './issue_body';
+import {
+  flakySuiteIssueTitle,
+  newestFailure,
+  readFlakySuiteIssueMetadata,
+  renderFlakySuiteIssueBody,
+  renderFlakySuiteIssueComment,
+  type RecordedFlakySuiteIssueMetadata,
+} from './issue_body';
 import {
   addIssueToIndex,
   candidateIssues,
@@ -65,6 +72,12 @@ export interface ReportFlakySuiteIssuesOptions {
   maxNewIssues: number;
   /** Leave out flaky tests that were skipped since (`isSkippedTest`). */
   omitSkippedTests: boolean;
+  /**
+   * Refresh the suite issues of `githubRepo` that the report finds flaky again: the body is
+   * rewritten with this report's numbers, a comment posted when the suite failed since the last
+   * report, and an issue closed before such a failure reopened. Off, they are skipped as tracked.
+   */
+  updateIssues: boolean;
   dryRun: boolean;
 }
 
@@ -83,6 +96,8 @@ export type SkipReason =
   /**
    * Every test of the suite has an issue in `githubRepo`, open or closed: a per-test issue about
    * it, or an issue about the suite or its file. A single test without one gets the suite its issue.
+   * A suite issue of its own is refreshed instead, unless it already has this report, or is
+   * closed and the suite has not failed since.
    */
   | 'tracked'
   /** Same, for the tracking repository. */
@@ -99,8 +114,10 @@ export interface SuiteRef {
 export type FlakySuiteAction = SuiteRef &
   (
     | { action: 'created'; issue: IssueRef }
+    /** The suite's own issue got this report's numbers; `commented` on new failures. */
+    | { action: 'updated'; issue: IssueRef; commented: boolean; reopened: boolean }
     | { action: 'skipped'; reason: SkipReason; issue?: IssueRef; match?: IssueMatch }
-    | { action: 'failed'; attempted: 'create'; error: string }
+    | { action: 'failed'; attempted: 'create' | 'update'; error: string; issue?: IssueRef }
   );
 
 export interface IssueCounts {
@@ -155,6 +172,48 @@ const coveringIssue = (suite: FlakySuite, index: IssueIndex): MatchedIssue | und
 
 const sameSuite = (a: FlakySuite, b: FlakySuite): boolean =>
   a.framework === b.framework && a.filePath === b.filePath && a.suiteTitle === b.suiteTitle;
+
+/** An issue this reporter filed for the suite itself, rather than for its whole file. */
+const isOwnSuiteIssue = ({ issue, match }: MatchedIssue, suite: FlakySuite): boolean =>
+  match === 'suite' &&
+  readFlakySuiteIssueMetadata(issue.body)?.['suite.title'] === suite.suiteTitle;
+
+interface Refresh {
+  previous: RecordedFlakySuiteIssueMetadata;
+  /** The suite failed since the last report, or since the issue was closed. */
+  comment: boolean;
+  reopen: boolean;
+}
+
+/**
+ * What refreshing the suite's own issue takes, or undefined when it already has this report (a
+ * rebuild) or is closed and the suite has not failed since: the report window can still hold
+ * the failures a fix was merged for. An issue closed as a duplicate stays closed.
+ */
+const planRefresh = (
+  suite: FlakySuite,
+  issue: GithubIssue,
+  report: FlakyTestReport
+): Refresh | undefined => {
+  const previous = readFlakySuiteIssueMetadata(issue.body);
+  const recordedAt = previous?.['report.generatedAt'];
+  if (!previous || (recordedAt && new Date(recordedAt) >= report.generatedAt)) {
+    return undefined;
+  }
+  const failedAt = newestFailure(suite)?.at;
+  if (issue.state === 'closed') {
+    const closedAt = issue.closed_at ? new Date(issue.closed_at) : undefined;
+    const failedSinceClosed = failedAt && closedAt && failedAt > closedAt;
+    return failedSinceClosed && issue.state_reason !== 'duplicate'
+      ? { previous, comment: true, reopen: true }
+      : undefined;
+  }
+  return {
+    previous,
+    comment: failedAt !== undefined && (!recordedAt || failedAt > new Date(recordedAt)),
+    reopen: false,
+  };
+};
 
 const suiteRef = ({ filePath, suiteTitle }: FlakySuite): SuiteRef => ({
   filePath,
@@ -226,14 +285,24 @@ export const issueLabels = (suite: FlakySuite, githubRepo: string): string[] => 
  * worst suites first and at most `maxNewIssues` per run. A suite is tracked when every one of
  * its tests has an issue, in `githubRepo` or in the tracking repository, open or closed: an issue
  * about the suite or its file covers them all, a per-test issue only its own test. Issues about
- * some of the tests, or merely mentioning the file, are linked from the new issue instead. A
+ * some of the tests, or merely mentioning the file, are linked from the new issue instead. With
+ * `updateIssues`, a suite tracked by its own issue in `githubRepo` has that issue refreshed. A
  * failed write is recorded and the run goes on with the next suite.
  */
 export const reportFlakySuiteIssues = async (
   options: ReportFlakySuiteIssuesOptions
 ): Promise<FlakySuiteIssuesSummary> => {
-  const { report, github, log, githubRepo, closedSince, maxNewIssues, omitSkippedTests, dryRun } =
-    options;
+  const {
+    report,
+    github,
+    log,
+    githubRepo,
+    closedSince,
+    maxNewIssues,
+    omitSkippedTests,
+    updateIssues,
+    dryRun,
+  } = options;
   const omitted = omitSkippedTests ? report.flaky.filter(isSkippedTest) : [];
   const suites = groupIntoSuites(
     report.flaky.filter((test) => !omitted.includes(test)),
@@ -270,7 +339,12 @@ export const reportFlakySuiteIssues = async (
   }
 
   const actions: FlakySuiteAction[] = [];
-  const counts: FlakySuiteIssuesSummary['counts'] = { created: 0, skipped: 0, failed: 0 };
+  const counts: FlakySuiteIssuesSummary['counts'] = {
+    created: 0,
+    updated: 0,
+    skipped: 0,
+    failed: 0,
+  };
   const record = (action: FlakySuiteAction) => {
     actions.push(action);
     counts[action.action] += 1;
@@ -309,10 +383,66 @@ export const reportFlakySuiteIssues = async (
     }
   };
 
+  /** Body first: the Slack notification the comment triggers reads the updated metadata. */
+  const update = async (
+    suite: FlakySuite,
+    issue: GithubIssue,
+    related: MatchedIssue[],
+    { previous, comment, reopen }: Refresh
+  ) => {
+    const ref = suiteRef(suite);
+    const body = renderFlakySuiteIssueBody(suite, {
+      report,
+      relatedIssues: related
+        .filter((matched) => matched.issue.number !== issue.number)
+        .map((matched) => matched.issue.number),
+      previous,
+    });
+    try {
+      await github.editIssue(issue.number, { body, ...(reopen ? { state: 'open' } : {}) });
+      if (comment) {
+        await github.addIssueComment(
+          issue.number,
+          renderFlakySuiteIssueComment(suite, { report, previous, reopened: reopen })
+        );
+      }
+      log.info(
+        `${reopen ? 'reopened' : 'updated'} #${issue.number}${comment ? ' with a comment' : ''}: ` +
+          describeSuite(suite)
+      );
+      record({
+        action: 'updated',
+        ...ref,
+        issue: { ...issueRef(issue), state: 'open' },
+        commented: comment,
+        reopened: reopen,
+      });
+    } catch (error) {
+      log.error(
+        `failed to update #${issue.number} for ${describeSuite(suite)}: ${errorMessage(error)}`
+      );
+      record({
+        action: 'failed',
+        ...ref,
+        attempted: 'update',
+        error: errorMessage(error),
+        issue: issueRef(issue),
+      });
+    }
+  };
+
   for (const suite of suites) {
     const ref = suiteRef(suite);
     const matches = findMatchingIssues(suite, candidateIssues(suite, index));
     const tracked = coveringIssue(suite, index);
+    const refresh =
+      updateIssues && tracked && isOwnSuiteIssue(tracked, suite)
+        ? planRefresh(suite, tracked.issue, report)
+        : undefined;
+    if (tracked && refresh) {
+      await update(suite, tracked.issue, matches, refresh);
+      continue;
+    }
     if (tracked) {
       const { issue, match } = tracked;
       log.info(
