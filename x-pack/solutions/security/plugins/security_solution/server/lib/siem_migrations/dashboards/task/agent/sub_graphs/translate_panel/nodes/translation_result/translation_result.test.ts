@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
+import { getESQLAdHocDataviewId } from '@kbn/esql-utils';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { getTranslationResultNode } from './translation_result';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
@@ -74,5 +77,65 @@ describe('getTranslationResultNode', () => {
       expect(comment.message).toContain('logs-test-*');
       expect(comment.message).not.toContain(MISSING_INDEX_PATTERN_PLACEHOLDER);
     }
+  });
+
+  it('uses the @timestamp data view id when field caps finds the field', async () => {
+    const fieldCaps = jest.fn().mockResolvedValue({
+      fields: { '@timestamp': { date: {} } },
+    });
+    const node = getTranslationResultNode({
+      logger,
+      esScopedClient: { asCurrentUser: { fieldCaps } as unknown as ElasticsearchClient },
+    });
+    const esqlQuery = 'FROM logs-test-* | STATS count = COUNT(*) BY process.name';
+    const state = { ...baseState, esql_query: esqlQuery, index_pattern: 'logs-test-*' };
+
+    const result = await node(state, {});
+
+    expect(fieldCaps).toHaveBeenCalledWith({
+      index: 'logs-test-*',
+      fields: '@timestamp',
+      include_unmapped: false,
+    });
+    const expectedId = await getESQLAdHocDataviewId({
+      indexPattern: 'logs-test-*',
+      timeFieldName: '@timestamp',
+      projectRouting: undefined,
+    });
+    const adHocDataViews = get(
+      result.elastic_panel,
+      'embeddableConfig.attributes.state.adHocDataViews'
+    ) as Record<string, { timeFieldName?: string }>;
+    expect(Object.keys(adHocDataViews)).toEqual([expectedId]);
+    expect(adHocDataViews[expectedId].timeFieldName).toBe('@timestamp');
+  });
+
+  it('does not call field caps for a placeholder index and omits the time field', async () => {
+    const fieldCaps = jest.fn();
+    const node = getTranslationResultNode({
+      logger,
+      esScopedClient: { asCurrentUser: { fieldCaps } as unknown as ElasticsearchClient },
+    });
+    const esqlQuery = `FROM ${TRANSLATION_INDEX_PATTERN}\n| STATS count = COUNT(*) BY process.name`;
+    const state = {
+      ...baseState,
+      esql_query: esqlQuery,
+      index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER,
+    };
+
+    const result = await node(state, {});
+
+    expect(fieldCaps).not.toHaveBeenCalled();
+    const expectedId = await getESQLAdHocDataviewId({
+      indexPattern: 'indexPattern',
+      timeFieldName: undefined,
+      projectRouting: undefined,
+    });
+    const adHocDataViews = get(
+      result.elastic_panel,
+      'embeddableConfig.attributes.state.adHocDataViews'
+    ) as Record<string, { timeFieldName?: string }>;
+    expect(Object.keys(adHocDataViews)).toEqual([expectedId]);
+    expect(adHocDataViews[expectedId].timeFieldName).toBeUndefined();
   });
 });

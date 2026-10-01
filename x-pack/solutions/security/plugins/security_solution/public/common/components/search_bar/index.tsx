@@ -43,6 +43,11 @@ import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timera
 interface SiemSearchBarProps {
   dataTestSubj?: string;
   dataView: DataView;
+  /**
+   * Data views from the current page, such as dashboard panels, used to resolve
+   * filters that target a data view other than `dataView`.
+   */
+  additionalDataViews?: DataView[];
   hideFilterBar?: boolean;
   hideQueryInput?: boolean;
   id: InputsModelId.global | InputsModelId.timeline;
@@ -62,6 +67,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
     dataTestSubj,
     dataView,
+    additionalDataViews,
     end,
     filterQuery,
     fromStr,
@@ -296,11 +302,22 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     }, []);
 
     const dataViews: DataView[] | null = useMemo(() => {
-      if (dataView != null) {
-        return [dataView];
+      if (dataView == null) {
+        return null;
       }
-      return null;
-    }, [dataView]);
+      const seen = new Set<string>();
+      if (dataView.id) {
+        seen.add(dataView.id);
+      }
+      const extras = (additionalDataViews ?? []).filter((view) => {
+        if (!view.id || seen.has(view.id)) {
+          return false;
+        }
+        seen.add(view.id);
+        return true;
+      });
+      return [dataView, ...extras];
+    }, [additionalDataViews, dataView]);
 
     const onTimeRangeChange = useCallback(
       ({ dateRange }: { dateRange: TimeRange }) => {
@@ -356,7 +373,8 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.updateSearch === nextProps.updateSearch &&
     prevProps.dataTestSubj === nextProps.dataTestSubj &&
     deepEqual(prevProps.queries, nextProps.queries) &&
-    deepEqual(prevProps.dataView, nextProps.dataView)
+    deepEqual(prevProps.dataView, nextProps.dataView) &&
+    deepEqual(prevProps.additionalDataViews, nextProps.additionalDataViews)
 );
 
 const makeMapStateToProps = () => {
