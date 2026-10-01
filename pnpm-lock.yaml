@@ -410,8 +410,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.27.0
-        version: 4.27.0(monaco-editor@0.44.0)
+        specifier: 4.28.0
+        version: 4.28.0(monaco-editor@0.44.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -479,8 +479,8 @@ importers:
         specifier: 0.24.1
         version: 0.24.1
       '@grpc/grpc-js':
-        specifier: 1.14.4
-        version: 1.14.4
+        specifier: 1.14.5
+        version: 1.14.5
       '@hapi/accept':
         specifier: 6.0.3
         version: 6.0.3
@@ -3292,9 +3292,6 @@ importers:
       '@kbn/search-navigation':
         specifier: workspace:*
         version: link:x-pack/solutions/search/plugins/search_navigation
-      '@kbn/search-notebooks':
-        specifier: workspace:*
-        version: link:x-pack/solutions/search/plugins/search_notebooks
       '@kbn/search-queries':
         specifier: workspace:*
         version: link:x-pack/solutions/search/packages/kbn-search-queries
@@ -4111,6 +4108,9 @@ importers:
       '@langchain/openai':
         specifier: 1.5.5
         version: 1.5.5(@aws-sdk/credential-provider-node@3.972.70)(@langchain/core@1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.3)(zod@4.4.3))(ws@8.21.3))(@smithy/signature-v4@5.7.3)(ws@8.21.3)
+      '@launchdarkly/js-client-sdk':
+        specifier: 4.10.4
+        version: 4.10.4
       '@launchdarkly/node-server-sdk':
         specifier: 9.13.3
         version: 9.13.3(supports-color@10.2.2)
@@ -4151,8 +4151,8 @@ importers:
         specifier: 1.12.0
         version: 1.12.0
       '@openfeature/launchdarkly-client-provider':
-        specifier: 0.3.3
-        version: 0.3.3(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))(launchdarkly-js-client-sdk@3.9.5)
+        specifier: 0.4.0
+        version: 0.4.0(@launchdarkly/js-client-sdk@4.10.4)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk':
         specifier: 1.23.0
         version: 1.23.0(@openfeature/core@1.12.0)
@@ -4561,9 +4561,6 @@ importers:
       langsmith:
         specifier: 0.7.1
         version: 0.7.1(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.3)(zod@4.4.3))(ws@8.21.3)
-      launchdarkly-js-client-sdk:
-        specifier: 3.9.5
-        version: 3.9.5
       liquidjs:
         specifier: 10.28.0
         version: 10.28.0
@@ -6744,8 +6741,8 @@ importers:
         specifier: 0.35.4
         version: 0.35.4(@types/node@24.10.13)
       simple-git:
-        specifier: 3.36.0
-        version: 3.36.0(supports-color@10.2.2)
+        specifier: 4.0.2
+        version: 4.0.2(supports-color@10.2.2)
       sinon:
         specifier: 22.1.0
         version: 22.1.0
@@ -9641,8 +9638,6 @@ importers:
 
   x-pack/solutions/search/plugins/search_navigation: {}
 
-  x-pack/solutions/search/plugins/search_notebooks: {}
-
   x-pack/solutions/search/plugins/search_query_rules: {}
 
   x-pack/solutions/search/plugins/search_synonyms: {}
@@ -11033,8 +11028,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.27.0':
-    resolution: {integrity: sha512-fmWGdA3QITxq1L+N2uzlsO3OrU9ALnRYrGspwZUbFkevwjCuEhid0J2hF1cHhUGogRc0QbGmR6JkUBD6S0ULaQ==}
+  '@elastic/monaco-esql@4.28.0':
+    resolution: {integrity: sha512-qbX1FQndoCw765QjWi2nkcbR4L+cVTYC2Fe5vM2KmNYf+nLTG9q5NKnrj4pKoZcC3zX7qFPVfZFteDE4xUm1ag==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -11514,8 +11509,8 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@grpc/grpc-js@1.14.4':
-    resolution: {integrity: sha512-k9Dj3DV/itK9D06Y8f190Qgop7/Ui+D0njFV3LHMPwPT75DpXLQohE9Wmz0QElrJnzsjB7KPWiKJbOl7IPDArQ==}
+  '@grpc/grpc-js@1.14.5':
+    resolution: {integrity: sha512-7VZM+SVdEcUUqSQeNI3zM8Qs/BhQKZndPo2h5VkYkAM8Iz0wJIa8mKV5ekQGqG8UUsnkQ0NMxIxwkIHYvj0qOw==}
     engines: {node: '>=12.10.0'}
 
   '@grpc/proto-loader@0.8.1':
@@ -12385,8 +12380,17 @@ packages:
     peerDependencies:
       '@langchain/core': 1.2.3
 
+  '@launchdarkly/js-client-sdk-common@1.32.2':
+    resolution: {integrity: sha512-1m5cI3lVbuXmrP74Nz+1+ZUV8qEPGZzvUYpvoynowdweWX5EEuUK3vHtqC9umhSe2Z/Ujxy/vcmPgH3Q+5BHQA==}
+
+  '@launchdarkly/js-client-sdk@4.10.4':
+    resolution: {integrity: sha512-n1gvH/Or8/M2bR2HNqyLKrZ7x7lJOQx7WOaWnSibqf9hmtauE169HgtbtdMoUA9s22Z5MvSmNF6eBCJbetHlKA==}
+
   '@launchdarkly/js-sdk-common@2.25.2':
     resolution: {integrity: sha512-l/OJiIGnLS6Qt6J/Lc3KgUXL4vAES5wsxIgNZcw3yCUbDEuTyVR9Qya9Aqy1klg2kF1VsHiY2wvaKimlIZK7+g==}
+
+  '@launchdarkly/js-sdk-common@2.27.0':
+    resolution: {integrity: sha512-Av+eVK5QXQ41leDGi1JS+rzOGvz4ViRgVw8P8vg9h6Q+IwP4UkW/swA7ZU6+05k4cUs9LuGUg8oW+mR7weCVFg==}
 
   '@launchdarkly/js-server-sdk-common@2.21.1':
     resolution: {integrity: sha512-JJ4sCTCxJddiD7eLOSORNxR6HI/AEgz0H1KpPhcix1DAErfCwlYuM0OxeotF7Y8P1tZ5XGXPXT7WP8GaVNjWDA==}
@@ -12884,11 +12888,11 @@ packages:
   '@openfeature/core@1.12.0':
     resolution: {integrity: sha512-7PCPzyd1OC19begz30+CRknFB0ChtyaZUhk7YWrk+Bov1fpVw0HYkTXtoxxsvPfDZB9P9WsT7uixN+Z8f9+bcA==}
 
-  '@openfeature/launchdarkly-client-provider@0.3.3':
-    resolution: {integrity: sha512-pAhUMC+rxd6SZMfCgqv9VtYnHpF0LOzDftEFz6FQCk/ZrYuK/8ycNCstxt2yA/xnDyb0Ki7Rwe56IXEfQwBuew==}
+  '@openfeature/launchdarkly-client-provider@0.4.0':
+    resolution: {integrity: sha512-Mhn0rCS5t1DbcQEP+/Ub25RkuYBTD91vXowzm9isynU4GRZ6WQze1xblmhAYKIMzi+GAnbwfhgVibjkq5LGibw==}
     peerDependencies:
+      '@launchdarkly/js-client-sdk': ^4.7.0
       '@openfeature/web-sdk': ^1.0.0
-      launchdarkly-js-client-sdk: '>=3.1.3'
 
   '@openfeature/server-sdk@1.23.0':
     resolution: {integrity: sha512-JWeLvltJIV0AFgOfbw7hK9b9Rw/5wWq+RMhCIU9sJtAqarxr8hSPglG+JAGGhYdElAz3Qwe9W3ApWyPNkQEyqg==}
@@ -14309,11 +14313,11 @@ packages:
   '@sideway/pinpoint@2.0.0':
     resolution: {integrity: sha512-RNiOoTPkptFtSVzQevY/yWtZwf/RxyVnPy/OcA9HBM3MlGDnBEYL5B41H0MTn0Uec8Hi+2qUtTfG2WWZBmMejQ==}
 
-  '@simple-git/args-pathspec@1.0.3':
-    resolution: {integrity: sha512-ngJMaHlsWDTfjyq9F3VIQ8b7NXbBLq5j9i5bJ6XLYtD6qlDXT7fdKY2KscWWUF8t18xx052Y/PUO1K1TRc9yKA==}
+  '@simple-git/args-pathspec@1.0.4':
+    resolution: {integrity: sha512-EtMX6XjRWSastG2SdkmSQByPtJ9dx/NIjnHbpQPCYt62j4RmSx5rgLTGpw0YCjF5h191gZOmBfheOT23cRSFdw==}
 
-  '@simple-git/argv-parser@1.1.1':
-    resolution: {integrity: sha512-Q9lBcfQ+VQCpQqGJFHe5yooOS5hGdLFFbJ5R+R5aDsnkPCahtn1hSkMcORX65J2Z5lxSkD0lQorMsncuBQxYUw==}
+  '@simple-git/argv-parser@2.0.1':
+    resolution: {integrity: sha512-M++IaVWrN+vYalilOHfwvT2IL3wYZtVEBQpmX6DLSOJLtxbZ+SUeIDE3IiPogzhPACLajwtxfa5rp+ZX1FczzQ==}
 
   '@sinclair/typebox@0.27.12':
     resolution: {integrity: sha512-hhyNJ+nbR6ZR7pToHvllEFun9TL0sbL+tk/ON75lo+Xas054uez98qRbsuNt7MBCyZKK4+8Yli/OAGZhmfBZ/g==}
@@ -18818,9 +18822,6 @@ packages:
     resolution: {integrity: sha512-hhqQL+IJllZi3aM4TKvmCj3bywLEcycNTTLZeLhA9ttMxBrCqM07q7Di4kl+j9EWSTXvJH1+EpIgsDbF/+8H5Q==}
     engines: {node: '>=12.17.0'}
 
-  fast-deep-equal@2.0.1:
-    resolution: {integrity: sha512-bCK/2Z4zLidyB4ReuIsvALH6w31YfAQDmXMqMx6FyfHqvBxtjC0eRumeSu4Bs3XtXwpyIywtSTrVT99BxY1f9w==}
-
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
@@ -20802,12 +20803,6 @@ packages:
   launchdarkly-eventsource@2.2.0:
     resolution: {integrity: sha512-u38fYlLSq/m6oFz0MS1/76Sj2xzlYhTKZ+sf/vju6PA86PMc6fPlY5k8CdU79edLXjNwsvIQTDvDNy3llDqB8A==}
     engines: {node: '>=0.12.0'}
-
-  launchdarkly-js-client-sdk@3.9.5:
-    resolution: {integrity: sha512-VYIqarCd1tOt8C701Eu2TQNCfsd/mMw4Eu+yi/C4yT3nuQLd614hbPOGbJrpB3WFVWmePEgcPeLxYenj4nCs+A==}
-
-  launchdarkly-js-sdk-common@5.8.3:
-    resolution: {integrity: sha512-IYf022xU3x3UMESumqbkkbPi2F4qEkZt+MEW2lwNKDuekWE6s/rm2PHF0el6gZKtDP5qn84w2UtvPydsnIttTA==}
 
   lazy-ass@2.0.3:
     resolution: {integrity: sha512-/O3/DoQmI1XAhklDvF1dAjFf/epE8u3lzOZegQfLZ8G7Ud5bTRSZiFOpukHCu6jODrCA4gtIdwUCC7htxcDACA==}
@@ -24258,8 +24253,8 @@ packages:
   simple-get@4.0.1:
     resolution: {integrity: sha512-brv7p5WgH0jmQJr1ZDDfKDOSeWWg+OVypG99A/5vYGPqJ6pxiaHLy8nxtFjBA7oMa01ebA9gfh1uMCFqOuXxvA==}
 
-  simple-git@3.36.0:
-    resolution: {integrity: sha512-cGQjLjK8bxJw4QuYT7gxHw3/IouVESbhahSsHrX97MzCL1gu2u7oy38W6L2ZIGECEfIBG4BabsWDPjBxJENv9Q==}
+  simple-git@4.0.2:
+    resolution: {integrity: sha512-l0sIsv9VrPwovKELFDBOj/lhmIcbMvxBk2B+hRhsMM4/VL3gKtuZvYnBNixVo+N/0HnqQx2cBdLvxnAbygHpqA==}
 
   simple-sha256@1.1.0:
     resolution: {integrity: sha512-jMdj+5MR1dRiFbrQ8idmkPv+HCoJEmJVBBwc0vQQz4Gtg3PEkjdpVxUM4BSwK898zhNP/ub3vcP9edw47EHuLQ==}
@@ -27941,7 +27936,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.27.0(monaco-editor@0.44.0)':
+  '@elastic/monaco-esql@4.28.0(monaco-editor@0.44.0)':
     dependencies:
       '@elastic/esql-definitions': 4.28.0
       monaco-editor: 0.44.0
@@ -28567,7 +28562,7 @@ snapshots:
     dependencies:
       graphql: 16.14.2
 
-  '@grpc/grpc-js@1.14.4':
+  '@grpc/grpc-js@1.14.5':
     dependencies:
       '@grpc/proto-loader': 0.8.1
       '@js-sdsl/ordered-map': 4.4.2
@@ -29626,7 +29621,17 @@ snapshots:
       '@langchain/core': 1.2.3(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.11.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.21.3)(zod@4.4.3))(ws@8.21.3)
       js-tiktoken: 1.0.21
 
+  '@launchdarkly/js-client-sdk-common@1.32.2':
+    dependencies:
+      '@launchdarkly/js-sdk-common': 2.27.0
+
+  '@launchdarkly/js-client-sdk@4.10.4':
+    dependencies:
+      '@launchdarkly/js-client-sdk-common': 1.32.2
+
   '@launchdarkly/js-sdk-common@2.25.2': {}
+
+  '@launchdarkly/js-sdk-common@2.27.0': {}
 
   '@launchdarkly/js-server-sdk-common@2.21.1':
     dependencies:
@@ -30139,10 +30144,10 @@ snapshots:
 
   '@openfeature/core@1.12.0': {}
 
-  '@openfeature/launchdarkly-client-provider@0.3.3(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))(launchdarkly-js-client-sdk@3.9.5)':
+  '@openfeature/launchdarkly-client-provider@0.4.0(@launchdarkly/js-client-sdk@4.10.4)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))':
     dependencies:
+      '@launchdarkly/js-client-sdk': 4.10.4
       '@openfeature/web-sdk': 1.10.0(@openfeature/core@1.12.0)
-      launchdarkly-js-client-sdk: 3.9.5
       lodash.isempty: 4.4.0
 
   '@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0)':
@@ -30627,7 +30632,7 @@ snapshots:
 
   '@opentelemetry/otlp-grpc-exporter-base@0.222.0(@opentelemetry/api@1.9.1)':
     dependencies:
-      '@grpc/grpc-js': 1.14.4
+      '@grpc/grpc-js': 1.14.5
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.11.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/otlp-exporter-base': 0.222.0(@opentelemetry/api@1.9.1)
@@ -31583,11 +31588,11 @@ snapshots:
 
   '@sideway/pinpoint@2.0.0': {}
 
-  '@simple-git/args-pathspec@1.0.3': {}
+  '@simple-git/args-pathspec@1.0.4': {}
 
-  '@simple-git/argv-parser@1.1.1':
+  '@simple-git/argv-parser@2.0.1':
     dependencies:
-      '@simple-git/args-pathspec': 1.0.3
+      '@simple-git/args-pathspec': 1.0.4
 
   '@sinclair/typebox@0.27.12': {}
 
@@ -36878,8 +36883,6 @@ snapshots:
     dependencies:
       pure-rand: 8.4.2
 
-  fast-deep-equal@2.0.1: {}
-
   fast-deep-equal@3.1.3: {}
 
   fast-diff@1.3.0: {}
@@ -39349,16 +39352,6 @@ snapshots:
       shell-quote: 1.11.0
 
   launchdarkly-eventsource@2.2.0: {}
-
-  launchdarkly-js-client-sdk@3.9.5:
-    dependencies:
-      escape-string-regexp: 4.0.0
-      launchdarkly-js-sdk-common: 5.8.3
-
-  launchdarkly-js-sdk-common@5.8.3:
-    dependencies:
-      base64-js: 1.5.1
-      fast-deep-equal: 2.0.1
 
   lazy-ass@2.0.3: {}
 
@@ -43468,12 +43461,12 @@ snapshots:
       simple-concat: 1.0.1
     optional: true
 
-  simple-git@3.36.0(supports-color@10.2.2):
+  simple-git@4.0.2(supports-color@10.2.2):
     dependencies:
       '@kwsites/file-exists': 1.1.1(supports-color@10.2.2)
       '@kwsites/promise-deferred': 1.1.1
-      '@simple-git/args-pathspec': 1.0.3
-      '@simple-git/argv-parser': 1.1.1
+      '@simple-git/args-pathspec': 1.0.4
+      '@simple-git/argv-parser': 2.0.1
       debug: 4.4.3(supports-color@10.2.2)
     transitivePeerDependencies:
       - supports-color
