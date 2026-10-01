@@ -10,7 +10,8 @@ import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { KbnClient } from '@kbn/kbn-client';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
-import { createLlmProxy, createToolCallMessage } from '@kbn/ftr-llm-proxy';
+import { createLlmProxy } from '@kbn/ftr-llm-proxy';
+import { mockFinalAnswer, mockTitleGeneration, mockToolCall } from '../../common/llm_mocks';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'kibana',
@@ -39,36 +40,6 @@ const createGenAiConnectorForProxy = async (
     },
   });
   return res.data.id;
-};
-
-const mockTitleGeneration = (proxy: LlmProxy, title: string) => {
-  void proxy
-    .intercept({
-      name: 'set_title',
-      when: ({ messages }) =>
-        String(messages.find((m) => m.role === 'system')?.content ?? '').includes(
-          'You are a title-generation utility'
-        ),
-      responseMock: createToolCallMessage('set_title', { title }),
-    })
-    .completeAfterIntercept();
-};
-
-const mockToolCall = (proxy: LlmProxy, toolName: string, toolArg: Record<string, unknown>) => {
-  void proxy.interceptors.userMessage({
-    name: 'agent:tool_call',
-    when: ({ messages }) =>
-      !String(messages.find((m) => m.role === 'system')?.content ?? '').includes(
-        'You are a title-generation utility'
-      ),
-    response: createToolCallMessage(toolName, toolArg),
-  });
-};
-
-const mockFinalAnswer = (proxy: LlmProxy, answer: string) => {
-  void proxy
-    .intercept({ name: 'final-assistant-response', when: () => true, responseMock: answer })
-    .completeAfterIntercept();
 };
 
 const CHAT_CONVERSE_ASYNC = '/api/chat/converse/async';

@@ -55,15 +55,15 @@ interface CustomContentChatTestFixtures extends ScoutTestFixtures {
 
 /**
  * Non-parallel test with an LLM proxy standing in for the model. The connector is global to the
- * cluster, so do not call `cleanStandardList`: it would delete it.
+ * cluster, so do not call `cleanStandardList`: it would delete it. The fixture deletes only the
+ * connector it created.
  */
 export const test = baseTest.extend<CustomContentChatTestFixtures, CustomContentChatWorkerFixtures>(
   {
     llmProxy: [
       async ({ apiServices, log }, use) => {
         const proxy = await createLlmProxy(log);
-        await apiServices.alerting.cleanup.deleteAllConnectors();
-        await apiServices.alerting.connectors.create({
+        const { id: connectorId } = await apiServices.alerting.connectors.create({
           name: 'llm-proxy',
           connectorTypeId: '.gen-ai',
           config: {
@@ -75,7 +75,7 @@ export const test = baseTest.extend<CustomContentChatTestFixtures, CustomContent
         });
         await use(proxy);
         proxy.close();
-        await apiServices.alerting.cleanup.deleteAllConnectors();
+        await apiServices.alerting.connectors.delete(connectorId);
       },
       { scope: 'worker', auto: true },
     ],

@@ -8,11 +8,8 @@
 import { tags, type KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import {
-  mockFinalAnswer,
-  mockTitleGeneration,
-  mockUpdatePanelToolCall,
-} from '../fixtures/llm_mocks';
+import { mockFinalAnswer, mockTitleGeneration } from '../../common/llm_mocks';
+import { mockUpdatePanelToolCall } from '../fixtures/llm_mocks';
 
 const DASHBOARD_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
