@@ -105,7 +105,7 @@ export const CancelActionModal = memo<CancelActionModalProps>(
         pageSize: Math.min(Math.max(pendingAgentIds.length, 1), 10000),
         kuery: pendingAgentIds.map((id) => `united.endpoint.agent.id:"${id}"`).join(' or '),
       },
-      { enabled: shouldCheckCapabilities }
+      { enabled: shouldCheckCapabilities, keepPreviousData: false, refetchInterval: false }
     );
 
     // Build a map of `agent.id` to the capabilities reported by that endpoint's metadata document
