@@ -85,6 +85,7 @@ export {
   MAX_SOURCE_TAG_LENGTH,
   MAX_SOURCE_TAGS,
   MAX_SOURCE_TITLE_LENGTH,
+  MAX_SOURCES_PER_PAGE,
   createSourceRequestSchema,
   nightshiftSourceSlugField,
   nightshiftSourceSlugSchema,

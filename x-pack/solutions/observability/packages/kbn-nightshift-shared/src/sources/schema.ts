@@ -13,7 +13,7 @@ export const MAX_SOURCE_DESCRIPTION_LENGTH = 2000;
 export const MAX_SOURCE_ESQL_LENGTH = 10_000;
 export const MAX_SOURCE_TAGS = 20;
 export const MAX_SOURCE_TAG_LENGTH = 64;
-const MAX_SOURCES_PER_PAGE = 100;
+export const MAX_SOURCES_PER_PAGE = 100;
 const DEFAULT_SOURCES_PER_PAGE = 25;
 
 export type SourceHealth = 'ok' | 'view_missing' | 'view_drift' | 'unresolvable' | 'unknown';
