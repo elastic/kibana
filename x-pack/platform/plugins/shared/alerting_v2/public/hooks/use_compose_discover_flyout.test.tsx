@@ -8,6 +8,7 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
+import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../services/rules_api';
 
 const mockCreateMutate = jest.fn();
@@ -140,6 +141,39 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
     expect(capturedFlyoutProps.mode).toBe('create');
     expect(capturedFlyoutProps.ruleId).toBeUndefined();
     expect(capturedFlyoutProps.onCreateRule).toBeDefined();
+  });
+
+  it('creates an enabled rule from the blank create flyout', async () => {
+    await renderAndOpenCreate();
+    callOnCreateRule();
+
+    expect(mockCreateMutate).toHaveBeenCalledWith(
+      { payload: { metadata: { name: 'My rule' } }, enabled: true },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+  });
+
+  it('creates a disabled rule when a template flyout is saved', async () => {
+    render(<Harness />);
+    act(() => {
+      hookApi!.openCreateFromTemplateFlyout({
+        id: 'cpu-template',
+        rule: { metadata: { name: 'CPU usage' } },
+      } as RuleTemplateResponse);
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    callOnCreateRule();
+
+    expect(mockCreateMutate).toHaveBeenCalledWith(
+      { payload: { metadata: { name: 'My rule' } }, enabled: false },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+    await waitFor(() => {
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
   });
 
   it('redirects and closes flyout after rule creation', async () => {

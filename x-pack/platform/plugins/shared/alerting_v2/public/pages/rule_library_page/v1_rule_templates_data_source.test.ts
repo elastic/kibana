@@ -120,6 +120,74 @@ describe('useV1RuleTemplatesDataSource', () => {
     });
   });
 
+  it('drops templates that carry an excluded tag and pages the remainder', async () => {
+    const included = {
+      id: 'template-prod',
+      name: 'CPU usage',
+      ruleTypeId: 'metrics.alert.threshold',
+      tags: ['prod'],
+    };
+    const excluded = {
+      id: 'template-legacy',
+      name: 'Legacy CPU',
+      ruleTypeId: 'metrics.alert.threshold',
+      tags: ['prod', 'legacy'],
+    };
+    const secondPage = {
+      id: 'template-zeta',
+      name: 'Zeta',
+      ruleTypeId: 'metrics.alert.threshold',
+      tags: ['prod'],
+    };
+    mockFindRuleTemplates
+      .mockResolvedValueOnce({
+        data: Array.from({ length: 99 }, (_, index) => ({
+          ...included,
+          id: `template-${index}`,
+          name: `CPU ${index}`,
+        })).concat([excluded]),
+        total: 101,
+        page: 1,
+        perPage: 100,
+      })
+      .mockResolvedValueOnce({
+        data: [secondPage],
+        total: 101,
+        page: 2,
+        perPage: 100,
+      });
+
+    const { result } = renderHook(() => useV1RuleTemplatesDataSource());
+    const response = await result.current.findItems(
+      findParams({
+        filters: { [TAG_FILTER_ID]: { include: ['prod'], exclude: ['legacy'] } },
+        page: { index: 0, size: 100 },
+      })
+    );
+
+    expect(mockFindRuleTemplates).toHaveBeenNthCalledWith(1, {
+      http: mockHttp,
+      page: 1,
+      perPage: 100,
+      search: undefined,
+      tags: ['prod'],
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
+    expect(mockFindRuleTemplates).toHaveBeenNthCalledWith(2, {
+      http: mockHttp,
+      page: 2,
+      perPage: 100,
+      search: undefined,
+      tags: ['prod'],
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
+    expect(response.total).toBe(100);
+    expect(response.items.map((item) => item.id)).not.toContain('template-legacy');
+    expect(response.items.map((item) => item.id)).toContain('template-zeta');
+  });
+
   it('omits tags on the list item when the template has none', async () => {
     mockFindRuleTemplates.mockResolvedValue({
       data: [

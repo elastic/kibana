@@ -22,7 +22,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
 import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
@@ -72,6 +72,8 @@ export const useComposeDiscoverFlyout = ({
   const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
+  // Template install creates the rule disabled. Other create paths leave it enabled.
+  const createEnabledRef = useRef(true);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
 
   const openInEsql = useCallback((rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
@@ -145,6 +147,7 @@ export const useComposeDiscoverFlyout = ({
   }, [application, createSuccessRedirectPath, http]);
 
   const openCreateFlyout = useCallback(() => {
+    createEnabledRef.current = true;
     setTargetRule(null);
     setFlyoutMode('create');
     setBuilderType(null);
@@ -153,6 +156,7 @@ export const useComposeDiscoverFlyout = ({
 
   const openCreateBuilderFlyout = useCallback(
     (type: string) => {
+      createEnabledRef.current = true;
       if (!RULE_BUILDER_REGISTRY[type]) {
         notifications.toasts.addWarning({
           title: i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.unknownBuilderTitle', {
@@ -180,6 +184,7 @@ export const useComposeDiscoverFlyout = ({
 
   const openRuleFlyout = useCallback(
     (rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
+      createEnabledRef.current = true;
       const result = resolveBuilderMode(rule);
       if (result === 'esql') {
         openInEsql(rule, mode);
@@ -208,6 +213,7 @@ export const useComposeDiscoverFlyout = ({
 
   const openCreateFromTemplateFlyout = useCallback(
     (template: RuleTemplateResponse) => {
+      createEnabledRef.current = false;
       const syntheticRule = templateToSyntheticRule(template);
       const result = resolveBuilderMode(syntheticRule);
       if (result !== 'esql' && result !== 'esql-fallback') {
@@ -235,7 +241,10 @@ export const useComposeDiscoverFlyout = ({
       initialBuilderState={initialBuilderState}
       onSwitchToEsql={builderType ? requestSwitchToEsql : undefined}
       onCreateRule={(payload) =>
-        createRuleMutation.mutate({ payload }, { onSuccess: closeAndRedirect })
+        createRuleMutation.mutate(
+          { payload, enabled: createEnabledRef.current },
+          { onSuccess: closeAndRedirect }
+        )
       }
       onUpdateRule={(id, payload) =>
         updateRuleMutation.mutate({ id, payload }, { onSuccess: closeFlyout })

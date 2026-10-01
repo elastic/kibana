@@ -18,6 +18,7 @@ import { V1RuleLibraryList } from './v1_rule_library_list';
 const mockFindItems = jest.fn();
 const mockNavigateToApp = jest.fn();
 const mockUseFetchV1RuleTemplateTags = jest.fn();
+const mockGetRuleTypes = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -39,6 +40,10 @@ jest.mock('./v1_rule_templates_data_source', () => ({
 jest.mock('../../hooks/use_fetch_v1_rule_template_tags', () => ({
   useFetchV1RuleTemplateTags: (params: { search?: string }) =>
     mockUseFetchV1RuleTemplateTags(params),
+}));
+
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
+  getRuleTypes: (...args: unknown[]) => mockGetRuleTypes(...args),
 }));
 
 const template = {
@@ -65,6 +70,12 @@ describe('V1RuleLibraryList', () => {
       isLoading: false,
       isError: false,
     });
+    mockGetRuleTypes.mockResolvedValue([
+      {
+        id: template.ruleTypeId,
+        authorizedConsumers: { stackAlerts: { all: true, read: true } },
+      },
+    ]);
   });
 
   it('ignores URL search and sort when urlSync is off', async () => {
@@ -152,7 +163,11 @@ describe('V1RuleLibraryList', () => {
 
     renderList();
 
-    await user.click(await screen.findByTestId('ruleLibraryCreateAction'));
+    const createAction = await screen.findByTestId('ruleLibraryCreateAction');
+    await waitFor(() => {
+      expect(createAction).not.toHaveAttribute('aria-disabled', 'true');
+    });
+    await user.click(createAction);
 
     await waitFor(() => {
       expect(mockNavigateToApp).toHaveBeenCalledWith('management', {
@@ -161,5 +176,34 @@ describe('V1RuleLibraryList', () => {
         ),
       });
     });
+  });
+
+  it('disables Create when the user has only classic read access to the rule type', async () => {
+    mockGetRuleTypes.mockResolvedValue([
+      {
+        id: template.ruleTypeId,
+        authorizedConsumers: { stackAlerts: { all: false, read: true } },
+      },
+    ]);
+    mockFindItems.mockResolvedValue({
+      items: [
+        {
+          id: template.id,
+          title: template.name,
+          description: template.description,
+          tags: template.tags,
+          template,
+        },
+      ],
+      total: 1,
+    });
+
+    renderList();
+
+    const createAction = await screen.findByTestId('ruleLibraryCreateAction');
+    await waitFor(() => {
+      expect(createAction).toHaveAttribute('aria-disabled', 'true');
+    });
+    expect(mockNavigateToApp).not.toHaveBeenCalled();
   });
 });

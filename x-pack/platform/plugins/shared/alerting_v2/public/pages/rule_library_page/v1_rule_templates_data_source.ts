@@ -19,6 +19,9 @@ import {
 const API_SORT_FIELDS = ['name', 'tags'] as const;
 type ApiSortField = (typeof API_SORT_FIELDS)[number];
 
+/** Classic find rejects `per_page` above 100. */
+const CLASSIC_FIND_PAGE_SIZE = 100;
+
 const isApiSortField = (field: string): field is ApiSortField =>
   (API_SORT_FIELDS as readonly string[]).includes(field);
 
@@ -53,6 +56,9 @@ export const toV1RuleTemplateContentListItem = (
   template,
 });
 
+const hasExcludedTag = (template: RuleTemplate, excludedTags: ReadonlySet<string>): boolean =>
+  template.tags.some((tag) => excludedTags.has(tag));
+
 export const useV1RuleTemplatesDataSource = (): DataSourceConfig => {
   const http = useService(CoreStart('http'));
   const { toasts } = useService(CoreStart('notifications'));
@@ -61,21 +67,58 @@ export const useV1RuleTemplatesDataSource = (): DataSourceConfig => {
     async ({ searchQuery, filters, sort, page }) => {
       const tagFilter = filters[TAG_FILTER_ID] as IncludeExcludeFilter | undefined;
       const tags = tagFilter?.include?.length ? tagFilter.include : undefined;
+      const excludedTags = tagFilter?.exclude ?? [];
+      const search = searchQuery || undefined;
+      const sortField = toApiSortField(sort?.field);
+      const sortOrder = sort?.direction;
 
       try {
-        const response = await findRuleTemplates({
-          http,
-          page: page.index + 1,
-          perPage: page.size,
-          search: searchQuery || undefined,
-          tags,
-          sortField: toApiSortField(sort?.field),
-          sortOrder: sort?.direction,
-        });
+        if (excludedTags.length === 0) {
+          const response = await findRuleTemplates({
+            http,
+            page: page.index + 1,
+            perPage: page.size,
+            search,
+            tags,
+            sortField,
+            sortOrder,
+          });
 
+          return {
+            items: response.data.map(toV1RuleTemplateContentListItem),
+            total: response.total,
+          };
+        }
+
+        // Classic find accepts included tags only, so exclusions are applied after every page is loaded.
+        const excluded = new Set(excludedTags);
+        const matches: RuleTemplate[] = [];
+        let apiPage = 1;
+        let pageCount = 1;
+        while (apiPage <= pageCount) {
+          const response = await findRuleTemplates({
+            http,
+            page: apiPage,
+            perPage: CLASSIC_FIND_PAGE_SIZE,
+            search,
+            tags,
+            sortField,
+            sortOrder,
+          });
+          if (apiPage === 1) {
+            pageCount = Math.max(1, Math.ceil(response.total / CLASSIC_FIND_PAGE_SIZE));
+          }
+          matches.push(...response.data.filter((template) => !hasExcludedTag(template, excluded)));
+          if (response.data.length === 0) {
+            break;
+          }
+          apiPage += 1;
+        }
+
+        const start = page.index * page.size;
         return {
-          items: response.data.map(toV1RuleTemplateContentListItem),
-          total: response.total,
+          items: matches.slice(start, start + page.size).map(toV1RuleTemplateContentListItem),
+          total: matches.length,
         };
       } catch (error) {
         const normalizedError = error instanceof Error ? error : new Error(String(error));

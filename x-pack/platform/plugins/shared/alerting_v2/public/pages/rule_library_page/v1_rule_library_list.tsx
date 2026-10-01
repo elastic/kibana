@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { useQuery } from '@kbn/react-query';
 import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   ContentList,
@@ -22,6 +23,7 @@ import {
   getCreateRuleFromTemplateRoute,
   getTriggersActionsManagementPath,
 } from '@kbn/rule-data-utils';
+import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 import { MANAGEMENT_APP_ID, V1_RULE_TEMPLATES_CONTENT_LIST_ID } from '../../constants';
 import { RULE_LIBRARY_FEATURES_FIELDS, V1RuleTemplateTagsFilter } from './rule_library_filters';
 import {
@@ -39,11 +41,42 @@ const CREATE_ACTION_NAME = i18n.translate('xpack.alertingV2.ruleLibrary.createBu
   defaultMessage: 'Create',
 });
 
+const CREATE_RESTRICTED_REASON = i18n.translate(
+  'xpack.alertingV2.ruleLibrary.v1.createRestrictedTooltip',
+  {
+    defaultMessage: 'You do not have permission to create rules',
+  }
+);
+
+const CLASSIC_RULE_TYPES_QUERY_KEY = ['alertingV2', 'classicRuleTypes'] as const;
+
+type ClassicRuleTypes = Awaited<ReturnType<typeof getRuleTypes>>;
+
+/** True when the user has the classic `all` privilege for at least one consumer of this rule type. */
+export const canCreateClassicRule = (
+  ruleTypes: ClassicRuleTypes | undefined,
+  ruleTypeId: string
+): boolean => {
+  const ruleType = ruleTypes?.find((candidate) => candidate.id === ruleTypeId);
+  if (!ruleType) {
+    return false;
+  }
+  return Object.values(ruleType.authorizedConsumers).some((consumer) => consumer.all);
+};
+
 const toTemplate = (item: ContentListItem) => (item as V1RuleTemplateContentListItem).template;
 
 export const V1RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => {
   const application = useService(CoreStart('application'));
+  const http = useService(CoreStart('http'));
   const dataSource = useV1RuleTemplatesDataSource();
+  const { data: ruleTypes } = useQuery({
+    queryKey: CLASSIC_RULE_TYPES_QUERY_KEY,
+    queryFn: () => getRuleTypes({ http }),
+    staleTime: 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
   const onCreate = useCallback(
     (templateId: string) => {
@@ -63,10 +96,14 @@ export const V1RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => 
           onItemAction: (item) => {
             onCreate(item.id);
           },
+          restriction: (item) =>
+            canCreateClassicRule(ruleTypes, toTemplate(item).ruleTypeId)
+              ? undefined
+              : CREATE_RESTRICTED_REASON,
         },
       },
     }),
-    [onCreate]
+    [onCreate, ruleTypes]
   );
 
   const emptyState = (

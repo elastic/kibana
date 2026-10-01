@@ -95,6 +95,10 @@ jest.mock('./v1_rule_templates_data_source', () => ({
   }),
 }));
 
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
+  getRuleTypes: () => Promise.resolve([]),
+}));
+
 jest.mock('../../hooks/use_fetch_v1_rule_template_tags', () => ({
   useFetchV1RuleTemplateTags: () => ({
     data: [],
