@@ -151,7 +151,10 @@ function VarField({
                 !Array.isArray(next)
                   ? (next as { dataset?: unknown }).dataset ?? ''
                   : next;
-              onFieldChange(activeInput, fieldName, toDraft(raw));
+              const nextDraft = toDraft(raw);
+              if (nextDraft !== toDraft(draft[activeInput]?.[fieldName])) {
+                onFieldChange(activeInput, fieldName, nextDraft);
+              }
             }}
             errors={errors}
             forceShowErrors={forceShowErrors}
