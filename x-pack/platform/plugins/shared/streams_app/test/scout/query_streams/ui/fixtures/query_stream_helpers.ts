@@ -35,23 +35,21 @@ export const deleteRootStreamViews = async (esClient: EsClient) => {
   }
 };
 
-export const enableQueryStreams = async (kbnClient: KbnClient) => {
+const setQueryStreamsEnabled = async (kbnClient: KbnClient, enabled: boolean) => {
   await kbnClient.uiSettings.update({
-    [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
+    [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: enabled,
+    [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: enabled,
   });
-  await kbnClient.uiSettings.update({
-    [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
-  });
+  // The streams APIs read these settings server-side, and a Kibana node that did not handle the
+  // write keeps serving the previous value until its shared cache expires (elastic/kibana#265720).
+  await kbnClient.uiSettings.waitForEventualCacheRefresh();
 };
 
-export const disableQueryStreams = async (kbnClient: KbnClient) => {
-  await kbnClient.uiSettings.update({
-    [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
-  });
-  await kbnClient.uiSettings.update({
-    [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
-  });
-};
+export const enableQueryStreams = async (kbnClient: KbnClient) =>
+  setQueryStreamsEnabled(kbnClient, true);
+
+export const disableQueryStreams = async (kbnClient: KbnClient) =>
+  setQueryStreamsEnabled(kbnClient, false);
 
 export const createQueryStream = async (
   esClient: EsClient,
