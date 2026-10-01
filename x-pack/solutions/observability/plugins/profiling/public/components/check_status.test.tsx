@@ -185,18 +185,29 @@ describe('CheckStatus', () => {
     expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
   });
 
-  it('redirects to the deletion instructions when data from before 8.9.1 exists', () => {
-    mockStatus({
-      data: makeStatus({ universalProfiling: { hasData: true, hasLegacyData: true } }),
+  describe('when data from before 8.9.1 exists', () => {
+    const legacyData = makeStatus({ universalProfiling: { hasData: true, hasLegacyData: true } });
+
+    it('redirects to the add data page, which shows the deletion instructions', () => {
+      mockStatus({ data: legacyData });
+
+      renderCheckStatus();
+
+      expect(routerPush).toHaveBeenCalledWith('/add-data-instructions', {
+        path: {},
+        query: { selectedTab: AddDataTabs.Kubernetes },
+      });
+      expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
     });
 
-    renderCheckStatus();
+    it('displays the add data page without redirecting', () => {
+      mockStatus({ data: legacyData });
 
-    expect(routerPush).toHaveBeenCalledWith('/delete_data_instructions', {
-      path: {},
-      query: {},
+      renderCheckStatus('/add-data-instructions');
+
+      expect(screen.getByTestId('profilingApp')).toBeInTheDocument();
+      expect(routerPush).not.toHaveBeenCalled();
     });
-    expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
   });
 
   it.each([
@@ -239,7 +250,7 @@ describe('CheckStatus', () => {
     expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
   });
 
-  it.each(['/add-data-instructions', '/delete_data_instructions', '/profiling-not-enabled'])(
+  it.each(['/add-data-instructions', '/profiling-not-enabled'])(
     'displays %s without redirecting when there is no data',
     (pathname) => {
       mockStatus({ data: makeStatus({ universalProfiling: { hasSetup: false } }) });

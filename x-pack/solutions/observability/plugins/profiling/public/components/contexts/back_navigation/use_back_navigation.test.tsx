@@ -44,15 +44,17 @@ const pluginRootTarget: AppHeaderBack = {
 const CONTENT_ROUTES = ['/stacktraces/threads', '/flamegraphs/flamegraph', '/functions/topn', '/'];
 
 // Utility routes that deliberately stay out of ROUTES_WITH_BACK_NAVIGATION.
-const UTILITY_ROUTES = ['/delete_data_instructions', '/profiling-not-enabled'];
+const UTILITY_ROUTES = ['/profiling-not-enabled'];
 
 // Build a valid ProfilingStatus, reporting data in the given schemas.
 const makeStatus = ({
   otelData = false,
   universalProfilingData = false,
+  legacyData = false,
 }: {
   otelData?: boolean;
   universalProfilingData?: boolean;
+  legacyData?: boolean;
 }): ProfilingStatus => ({
   isEnabled: true,
   otel: { isAvailable: true, hasData: otelData },
@@ -60,7 +62,7 @@ const makeStatus = ({
     isAvailable: true,
     hasSetup: true,
     hasData: universalProfilingData,
-    hasLegacyData: false,
+    hasLegacyData: legacyData,
     canSetup: true,
   },
 });
@@ -231,6 +233,15 @@ describe('useBackNavigation', () => {
         initialStatus: makeStatus({ otelData: true }),
       });
       expect(result.current.back).toEqual(pluginRootTarget);
+    });
+
+    it('returns undefined when there is data from before 8.9.1', () => {
+      // Going back would only be redirected to the deletion instructions on this page again.
+      const { result } = renderBackNavigation({
+        initialEntry: '/add-data-instructions',
+        initialStatus: makeStatus({ universalProfilingData: true, legacyData: true }),
+      });
+      expect(result.current.back).toBeUndefined();
     });
 
     it('transitions from undefined to the plugin root when the status resolves with data', () => {
