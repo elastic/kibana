@@ -74,8 +74,8 @@ const relativeTime = (secondsAgo: number, base: number = Date.now()): string =>
 interface BuildAlertEventInput {
   ruleId: NonNullable<AlertEvent['rule']>['id'];
   groupHash: AlertEvent['group_hash'];
-  episodeId: NonNullable<AlertEvent['episode']>['id'];
-  episodeStatus: NonNullable<AlertEvent['episode']>['status'];
+  episodeId: NonNullable<AlertEvent['alert']>['id'];
+  episodeStatus: NonNullable<AlertEvent['alert']>['status'];
   status: AlertEvent['status'];
   data?: AlertEvent['data'];
   timestamp: AlertEvent['@timestamp'];
@@ -94,7 +94,7 @@ const buildAlertEvent = ({
   type: 'alert',
   rule: { id: ruleId, version: 1 },
   group_hash: groupHash,
-  episode: { id: episodeId, status: episodeStatus },
+  alert: { id: episodeId, status: episodeStatus },
   data,
   status,
   source: 'internal',
@@ -121,7 +121,7 @@ const buildAlertAction = ({
   expiry,
 }: BuildAlertActionInput): AlertAction => ({
   '@timestamp': timestamp,
-  actor: 'elastic',
+  actor: { type: 'user', profile_uid: 'elastic' },
   action_type: actionType,
   last_series_event_timestamp: lastSeriesEventTimestamp,
   rule_id: ruleId,
@@ -171,11 +171,8 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           // existing index is the cheapest no-op: it parses, runs
           // successfully, and returns zero rows even if the executor task
           // fires before the bulkDisable below lands.
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
-          },
-          state_transition: { pending_count: 0, recovering_count: 0 },
+          query: { base: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
+          state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
         })
       );
     }
@@ -188,11 +185,8 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       buildCreateRuleData({
         metadata: { name: 'Dispatcher test rule-001', tags: ['notify-rule-001'] },
         schedule: { every: '1d' },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
-        },
-        state_transition: { pending_count: 0, recovering_count: 0 },
+        query: { base: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
+        state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
       })
     );
 
@@ -365,7 +359,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         expect(event).toMatchObject({
           group_hash: 'rule-1-series-1',
           rule_id: 'rule-1',
-          actor: 'system',
+          actor: { type: 'internal' },
           action_type: 'fire',
           source: 'internal',
           reason: `dispatched by policy ${ACTION_POLICY_ID}`,
@@ -400,7 +394,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         expect(action).toMatchObject({
           rule_id: 'rule-1',
           action_type: 'notified',
-          actor: 'system',
+          actor: { type: 'internal' },
           source: 'internal',
         });
 
@@ -473,7 +467,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
       for (const action of notifiedActions) {
         expect(action).toMatchObject({
-          actor: 'system',
+          actor: { type: 'internal' },
           action_type: 'notified',
           rule_id: 'rule-1',
           source: 'internal',
@@ -761,7 +755,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
             rule_id: 'rule-001',
             group_hash: 'rule-001-series-1',
             action_type: 'fire',
-            actor: 'system',
+            actor: { type: 'internal' },
             source: 'internal',
           }),
         ])
@@ -978,10 +972,57 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         expect(fires[0]).toMatchObject({
           rule_id: ruleId,
           action_type: 'fire',
-          actor: 'system',
+          actor: { type: 'internal' },
           source: 'internal',
         });
       }
+    }
+  );
+
+  apiTest(
+    'does not carry an ack from a previous episode of the series over to the current episode',
+    async ({ apiServices }) => {
+      const baseTime = Date.now();
+      const eventTs = (sec: number) => relativeTime(sec, baseTime);
+      const actionTs = (sec: number) => relativeTime(sec, baseTime);
+
+      // Seed the ack first: the dispatcher only picks up episodes from `.rule-events`, so it can
+      // never evaluate episode-2 without the ack already in place.
+      await apiServices.alertingV2.alertActionsEvents.seed([
+        buildAlertAction({
+          ruleId: 'rule-006',
+          groupHash: 'rule-006-series-1',
+          episodeId: 'rule-006-series-1-episode-1',
+          actionType: 'ack',
+          lastSeriesEventTimestamp: eventTs(180),
+          timestamp: actionTs(120),
+        }),
+      ]);
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-006',
+          groupHash: 'rule-006-series-1',
+          episodeId: 'rule-006-series-1-episode-2',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: eventTs(60),
+        }),
+      ]);
+
+      const [fire] = await expectStableCount(apiServices, 1, {
+        ruleId: 'rule-006',
+        actionTypes: ['fire', 'suppress'],
+      });
+
+      expect(fire).toMatchObject({
+        rule_id: 'rule-006',
+        group_hash: 'rule-006-series-1',
+        last_series_event_timestamp: eventTs(60),
+        action_type: 'fire',
+        actor: 'system',
+        source: 'internal',
+      });
     }
   );
 
@@ -1043,7 +1084,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         expect(action).toMatchObject({
           rule_id: 'rule-matcher',
           action_type: 'fire',
-          actor: 'system',
+          actor: { type: 'internal' },
           source: 'internal',
         });
       }
@@ -1119,7 +1160,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         expect(action).toMatchObject({
           rule_id: 'rule-groupby',
           action_type: 'fire',
-          actor: 'system',
+          actor: { type: 'internal' },
           source: 'internal',
         });
       }
@@ -1136,7 +1177,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         expect(action).toMatchObject({
           action_type: 'notified',
           rule_id: 'rule-groupby',
-          actor: 'system',
+          actor: { type: 'internal' },
           source: 'internal',
         });
 
@@ -1514,7 +1555,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           rule_id: 'rule-mw',
           group_hash: 'rule-mw-series-1',
           action_type: 'suppress',
-          actor: 'system',
+          actor: { type: 'internal' },
           source: 'internal',
           reason: `maintenance_window:${mw.id}`,
         });
@@ -1816,7 +1857,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         rule_id: 'rule-1',
         group_hash: 'rule-1-throttle-series',
         action_type: 'suppress',
-        actor: 'system',
+        actor: { type: 'internal' },
         source: 'internal',
         reason: `suppressed by throttled policy ${ACTION_POLICY_ID}`,
       });
@@ -1869,7 +1910,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         '@timestamp': new Date().toISOString(),
         source: 'pagerduty',
         group_hash: 'pd-group-1',
-        episode: { id: 'pd-ep-1', status: 'active' },
+        alert: { id: 'pd-ep-1', status: 'active' },
         space_id: 'default',
         status: 'breached',
         type: 'alert',
@@ -1888,7 +1929,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         source: 'pagerduty',
         group_hash: 'pd-group-1',
         space_id: 'default',
-        actor: 'system',
+        actor: { type: 'internal' },
         action_type: 'fire',
       });
 
@@ -1900,7 +1941,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       expect(notifiedActions[0]).toMatchObject({
         source: 'pagerduty',
         space_id: 'default',
-        actor: 'system',
+        actor: { type: 'internal' },
         action_type: 'notified',
       });
     }

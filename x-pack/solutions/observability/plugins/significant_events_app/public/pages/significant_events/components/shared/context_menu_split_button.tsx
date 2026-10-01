@@ -16,8 +16,6 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
-import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
-import { MODEL_SETTINGS_LABEL } from './translations';
 
 export interface MenuHelpers {
   resetMenu: () => void;
@@ -46,7 +44,6 @@ export interface ContextMenuSplitButtonProps {
   color?: ComponentProps<typeof EuiSplitButton>['color'];
   size?: ComponentProps<typeof EuiSplitButton>['size'];
   isLoading?: boolean;
-  hideModelSettings?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -67,14 +64,12 @@ export const ContextMenuSplitButton = ({
   color,
   size,
   isLoading,
-  hideModelSettings,
   'data-test-subj': dataTestSubj,
 }: ContextMenuSplitButtonProps) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, { off: close, toggle }] = useBoolean(false);
   const [menuResetKey, setMenuResetKey] = useState(0);
   const popoverId = useGeneratedHtmlId({ prefix: 'contextMenuSplitButton' });
-  const managementUrl = useModelSettingsUrl();
 
   const resetMenu = useCallback(() => setMenuResetKey((k) => k + 1), []);
 
@@ -86,28 +81,11 @@ export const ContextMenuSplitButton = ({
   const panels = useMemo(() => {
     const builtPanels = buildPanels({ resetMenu, closeMenu });
 
-    const settingsItems =
-      !hideModelSettings && managementUrl
-        ? [
-            { isSeparator: true as const },
-            {
-              name: MODEL_SETTINGS_LABEL,
-              icon: 'gear' as const,
-              href: managementUrl,
-              target: '_blank',
-              onClick: closeMenu,
-            },
-          ]
-        : [];
-
     return builtPanels.map((panel, index) => ({
       ...panel,
       id: index,
-      ...(index === 0 && panel.items && settingsItems.length > 0
-        ? { items: [...panel.items, ...settingsItems] }
-        : {}),
     }));
-  }, [buildPanels, resetMenu, closeMenu, managementUrl, hideModelSettings]);
+  }, [buildPanels, resetMenu, closeMenu]);
 
   const popoverContent = error ? (
     <EuiCallOut

@@ -11,6 +11,7 @@ import type { CSSProperties, MouseEventHandler, ReactNode } from 'react';
 import type {
   DataAttributeProps,
   EuiBadgeProps,
+  EuiButtonPropsForButton,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuProps,
@@ -18,8 +19,6 @@ import type {
   EuiIconProps,
   EuiTabProps,
 } from '@elastic/eui';
-// FIXME: change to import from `@elastic/eui` once https://github.com/elastic/eui/pull/10064 is merged.
-import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 import type { MetaBlock } from '@kbn/flyout-meta-blocks';
 import type {
@@ -28,6 +27,7 @@ import type {
   FlyoutSubsectionProps,
   FlyoutAccordionProps,
 } from '@kbn/flyout-sections';
+import type { KbnCalloutProps } from '@kbn/ui-callout';
 
 type TabBarOwnedProps = 'aria-controls' | 'children' | 'id' | 'isSelected' | 'onClick';
 
@@ -135,12 +135,31 @@ export type FlyoutBodySubsectionProps = Omit<FlyoutSubsectionProps, 'hasBorder'>
 /** Props for the declarative `FlyoutTemplate.Body.Accordion` part. */
 export type FlyoutBodyAccordionProps = Omit<FlyoutAccordionProps, 'hasBorder'>;
 
+/** Severity of a `Body.Callout`; each maps to exactly one `@kbn/ui-callout` component. */
+export type FlyoutBodyCalloutLevel = 'info' | 'success' | 'warning' | 'danger';
+
+/**
+ * The template owns every banner callout's size and styling so they look the same. `heading` is
+ * owned too: callout titles stay `<p>` and out of the flyout's heading outline.
+ */
+type CalloutOwnedProps = 'size' | 'heading' | 'className' | 'css' | 'style';
+
+/** Props for the declarative `FlyoutTemplate.Body.Callout` part. */
+export type FlyoutBodyCalloutProps = Omit<KbnCalloutProps, CalloutOwnedProps | 'id'> &
+  DataAttributeProps & {
+    /** Selects `KbnInfoCallout`, `KbnSuccessCallout`, `KbnWarningCallout`, or `KbnDangerCallout`. */
+    level: FlyoutBodyCalloutLevel;
+    /** Optional explicit instance id; auto-generated when omitted. */
+    id?: string;
+  };
+
 /** Props for the declarative `FlyoutTemplate.Body` zone. */
 export interface FlyoutBodyProps {
   'data-test-subj'?: string;
   /**
-   * `Body.Section`, `Body.Accordion`, or `Body.TabPanel` parts, and/or arbitrary
-   * content (callouts, search bars, data grids) rendered as-is in source order.
+   * `Body.Callout`, `Body.Section`, `Body.Accordion`, or `Body.TabPanel` parts, and/or arbitrary
+   * content (search bars, data grids) rendered as-is in source order. `Body.Callout` parts render
+   * in the body's banner, above everything else.
    */
   children?: ReactNode;
 }

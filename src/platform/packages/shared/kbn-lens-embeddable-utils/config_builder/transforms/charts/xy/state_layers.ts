@@ -24,7 +24,7 @@ import type {
   DataLayerType,
   ReferenceLineLayerType,
   AnnotationLayerByValueType,
-  AnnotationLayerManualOnlyType,
+  AnnotationLayerESQLType,
   XYConfig,
 } from '../../../schema/charts/xy';
 import { addLayerColumn, generateLayer } from '../../utils';
@@ -116,7 +116,7 @@ function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDa
 }
 
 function buildByValueAnnotationLayer(
-  layer: AnnotationLayerByValueType | AnnotationLayerManualOnlyType,
+  layer: AnnotationLayerByValueType | AnnotationLayerESQLType,
   i: number,
   dataViewId: string | undefined
 ): XYPersistedByValueAnnotationLayerConfig {

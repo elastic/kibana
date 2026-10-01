@@ -22,6 +22,7 @@ import type { AgentsServiceStart } from '../../agents';
 import type { ConversationService } from '../../conversation';
 import type { AttachmentServiceStart } from '../../attachments';
 import type { RendererServiceStart } from '../../renderers';
+import type { ConversationEventsServiceStart } from '../../conversation_events';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
@@ -45,6 +46,7 @@ export interface RunnerFactoryDeps {
   conversationService: ConversationService;
   attachmentsService: AttachmentServiceStart;
   renderersService: RendererServiceStart;
+  conversationEventsService: ConversationEventsServiceStart;
   skillServiceStart: SkillServiceStart;
   pluginsServiceStart: PluginsServiceStart;
   trackingService?: TrackingService;

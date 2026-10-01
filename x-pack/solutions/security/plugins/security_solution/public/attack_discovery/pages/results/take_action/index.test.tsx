@@ -203,13 +203,33 @@ describe('TakeAction', () => {
 
     render(
       <TestProviders>
-        <TakeAction {...defaultProps} />
+        <TakeAction {...defaultProps} attackDiscoveries={[getMockAttackDiscoveryAlerts()[0]]} />
       </TestProviders>
     );
 
     openPopover();
 
     expect(screen.getByTestId('viewInAgentBuilder')).toBeDisabled();
+  });
+
+  // Only a persisted discovery can be attached, so a no-op action is not offered.
+  it('does not render the Add to chat action for a discovery that is not persisted', () => {
+    mockUseAgentBuilderAvailability.mockReturnValue({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
+    });
+
+    render(
+      <TestProviders>
+        <TakeAction {...defaultProps} />
+      </TestProviders>
+    );
+
+    openPopover();
+
+    expect(screen.queryByTestId('viewInAgentBuilder')).not.toBeInTheDocument();
   });
 
   it('does NOT render View in AI Assistant when multiple discoveries are selected', () => {

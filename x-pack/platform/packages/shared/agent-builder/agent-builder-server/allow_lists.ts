@@ -10,6 +10,7 @@ import {
   platformCoreCasesTools,
   platformSignificantEventsTools,
   contextEngineAiIndexTools,
+  contextEngineAutomationTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
@@ -116,7 +117,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'custom_content_update_panel',
 
   // Platform – Context Engine
-  `${internalNamespaces.platformContextEngine}.save_automation`,
+  contextEngineAutomationTools.installAutomationTemplate,
+  contextEngineAutomationTools.saveAutomation,
+  contextEngineAutomationTools.runAutomation,
   ...Object.values(contextEngineAiIndexTools),
 
   // Nightshift – Sandbox
@@ -207,7 +210,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'action-policy-management',
 
   // Platform – Dashboard
-  'dashboard-management',
+  'dashboards',
 
   // Platform – Discover
   'discover-data-analysis',
@@ -363,6 +366,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Security Solution
   'security.alert',
+  'security.impact',
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
@@ -385,6 +389,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Security Solution – AlertZero (Hunt Watch)
   // gated behind xpack.alertzero.enabled
   'security.threat',
+  'security.significant_security_event',
 
   // Observability
   'observability.ai_insight',

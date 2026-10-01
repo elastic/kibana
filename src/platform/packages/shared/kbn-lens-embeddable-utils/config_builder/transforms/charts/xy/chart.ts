@@ -16,8 +16,8 @@ import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
 import {
   getIdForLayer,
+  isAPIDataLayer,
   isAPIesqlXYLayer,
-  isAPIAnnotationLayer,
   isLensStateDataLayer,
 } from './helpers';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
@@ -190,15 +190,17 @@ export function buildVisualizationState(
   };
 }
 
-function areAllLayersEsql(apiLayers: XYLayer[]): apiLayers is XYConfigESQL['layers'] {
-  // Annotation layers without a data source are neutral — classify based on data layers only.
-  const dataLayers = apiLayers.filter((l) => !isAPIAnnotationLayer(l));
+// The ES|QL/DSL homogeneity check only applies to data layers. Annotation layers
+// never participate in that split (query annotations carry their own data-view
+// data source, manual annotations none), and reference line layers may be ES|QL
+// or data-view based alongside ES|QL data layers.
+function areAllDataLayersEsql(apiLayers: XYLayer[]): apiLayers is XYConfigESQL['layers'] {
+  const dataLayers = apiLayers.filter(isAPIDataLayer);
   return dataLayers.length > 0 && dataLayers.every(isAPIesqlXYLayer);
 }
 
-function areAllLayersNoEsql(apiLayers: XYLayer[]): apiLayers is XYConfigNoESQL['layers'] {
-  // Annotation layers without a data source are neutral — classify based on data layers only.
-  const dataLayers = apiLayers.filter((l) => !isAPIAnnotationLayer(l));
+function areAllDataLayersNoEsql(apiLayers: XYLayer[]): apiLayers is XYConfigNoESQL['layers'] {
+  const dataLayers = apiLayers.filter(isAPIDataLayer);
   return dataLayers.length > 0 && dataLayers.every((l) => !isAPIesqlXYLayer(l));
 }
 
@@ -239,7 +241,7 @@ export function buildVisualizationAPI(
   const styling = convertStylingToAPIFormat(config, seriesTypes);
   const legend = convertLegendToAPIFormat(config.legend);
 
-  if (areAllLayersEsql(apiLayers)) {
+  if (areAllDataLayersEsql(apiLayers)) {
     return {
       type: 'xy',
       layers: apiLayers,
@@ -248,7 +250,7 @@ export function buildVisualizationAPI(
       ...legend,
     };
   }
-  if (areAllLayersNoEsql(apiLayers)) {
+  if (areAllDataLayersNoEsql(apiLayers)) {
     return {
       type: 'xy',
       layers: apiLayers,
@@ -257,7 +259,7 @@ export function buildVisualizationAPI(
       ...legend,
     };
   }
-  throw new Error('Mixed ESQL and non-ESQL layers are not supported');
+  throw new Error('Mixed ESQL and non-ESQL data layers are not supported');
 }
 
 function convertDomainStateToAPIFormat(
