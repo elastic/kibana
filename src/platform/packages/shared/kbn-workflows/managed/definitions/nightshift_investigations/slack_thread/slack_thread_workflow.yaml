@@ -20,16 +20,19 @@ tags:
   - nightshift
 
 triggers:
-  # Only human replies in a thread. The app's own posts and edits come back as message events:
-  # posts carry botId, and edits carry a message_changed subtype that may lack botId. A reply also
-  # sent to the channel carries the thread_broadcast subtype.
+  # Only human replies with text in a thread. The Relay drops the app's own posts and edits, but a
+  # connector that receives events straight from Slack does not: its posts carry botId, and its
+  # edits carry a message_changed subtype that may lack botId. A reply also sent to the channel
+  # carries the thread_broadcast subtype, and a reply with attached files the file_share subtype;
+  # only its text is investigated.
   - type: slack2.message
     connector-id: elastic-apps-slack
     on:
-      condition: 'event.threadId:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast)'
+      condition: 'event.threadId:* and event.text:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast or event.subtype:file_share)'
 
 steps:
-  # A reply only continues an existing investigation; this workflow never creates one.
+  # A reply only continues an existing investigation; this workflow never creates one. Delivery
+  # is at least once, so the thread records each event and a redelivered one is skipped.
   - name: find_investigation
     type: kibana.request
     with:
@@ -43,10 +46,11 @@ steps:
         thread_ts: '{{ event.threadId | default: event.messageId }}'
         text: '${{ event.text }}'
         create: false
+        event_id: '${{ event.correlationKey }}'
 
   - name: in_investigation_thread
     type: if
-    condition: '${{ steps.find_investigation.output.investigation_id != null }}'
+    condition: '${{ steps.find_investigation.output.investigation_id != null and steps.find_investigation.output.duplicate != true }}'
     steps:
       - name: set_investigation_url
         type: data.set
@@ -57,7 +61,7 @@ steps:
       # showing the previous findings rather than blanking it for as long as the run takes.
       - name: post_started
         type: slack2.sendMessage
-        if: '${{ steps.find_investigation.output.slack_message_ts == null }}'
+        if: '${{ steps.find_investigation.output.status_message_ts == null }}'
         connector-id: '{{ event.connectorId }}'
         with:
           channel: '{{ event.channel }}'
@@ -81,7 +85,7 @@ steps:
             channel: '{{ event.channel }}'
             thread_ts: '{{ event.threadId | default: event.messageId }}'
             create: false
-            slack_message_ts: '{{ steps.post_started.output.ts }}'
+            status_message_ts: '{{ steps.post_started.output.ts }}'
         on-failure:
           retry:
             max-attempts: 3
@@ -119,7 +123,7 @@ steps:
         type: data.set
         with:
           # This run's own message on the first run, the recorded one on every later run.
-          status_message_ts: '${{ steps.post_started.output.ts | default: steps.find_investigation.output.slack_message_ts }}'
+          status_message_ts: '${{ steps.post_started.output.ts | default: steps.find_investigation.output.status_message_ts }}'
           result_text: |
             {% if steps.investigate.error == null and steps.get_investigation.output.status == 'completed' %}{% if steps.get_investigation.output.title %}*{{ steps.get_investigation.output.title }}*
 
@@ -135,7 +139,12 @@ steps:
           channel: '{{ event.channel }}'
           messageTs: '{{ variables.status_message_ts }}'
           text: '{{ variables.result_text }}'
+        # Retried so that a transient failure does not leave the thread a second status message.
         on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+            strategy: exponential
           continue: true
 
       # The thread has no status message, or it could not be edited, for example because someone
@@ -171,7 +180,7 @@ steps:
             channel: '{{ event.channel }}'
             thread_ts: '{{ event.threadId | default: event.messageId }}'
             create: false
-            slack_message_ts: '{{ variables.result_message_ts }}'
+            status_message_ts: '{{ variables.result_message_ts }}'
         on-failure:
           retry:
             max-attempts: 3

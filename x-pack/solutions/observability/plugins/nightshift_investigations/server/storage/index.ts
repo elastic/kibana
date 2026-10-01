@@ -16,8 +16,10 @@ export type {
   InvestigationRecord,
   InvestigationRepository,
   InvestigationSweepRepository,
+  InvestigationThread,
   ProjectedInvestigationRecord,
 } from './types';
+export { MAX_THREAD_SEEN_EVENT_IDS } from './types';
 export { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from './errors';
 export { SavedObjectInvestigationRepository } from './saved_object_investigation_repository';
 export {

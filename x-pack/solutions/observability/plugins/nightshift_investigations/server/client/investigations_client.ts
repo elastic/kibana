@@ -49,9 +49,14 @@ import type {
   InvestigationPatch,
   InvestigationRecord,
   InvestigationRepository,
+  InvestigationThread,
   ProjectedInvestigationRecord,
 } from '../storage';
-import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from '../storage';
+import {
+  InvestigationAlreadyExistsError,
+  InvestigationStaleWriteError,
+  MAX_THREAD_SEEN_EVENT_IDS,
+} from '../storage';
 import { buildInvestigationMessage } from './build_investigation_message';
 import {
   InvestigationConflictError,
@@ -125,18 +130,48 @@ const SLACK_THREAD_ID_NAMESPACE = '6f1c3a52-8d4e-4b7a-9e21-3c5d7f0a9b64';
 const MAX_SLACK_THREAD_TITLE_LENGTH = 80;
 const DEFAULT_SLACK_THREAD_TITLE = 'Slack investigation';
 
+/** A thread write that lost a race is retried this many times against the fresh record. */
+const MAX_THREAD_WRITE_ATTEMPTS = 3;
+
 /** Response of POST /internal/nightshift/investigations/_slack_thread. */
 export interface SlackThreadInvestigation {
   investigation_id: string;
   title: string;
-  slack_message_ts?: string;
+  status_message_ts?: string;
+  /** The thread already handled this event, so the caller should not act on it again. */
+  duplicate?: true;
 }
 
-const toSlackThreadInvestigation = (record: InvestigationRecord): SlackThreadInvestigation => ({
+const toSlackThreadInvestigation = (
+  record: InvestigationRecord,
+  duplicate: boolean
+): SlackThreadInvestigation => ({
   investigation_id: record.id,
   title: record.title,
-  slack_message_ts: record.slack_message_ts,
+  status_message_ts: record.thread?.status_message_ts,
+  ...(duplicate && { duplicate: true }),
 });
+
+/** The thread after it records `eventId` and `statusMessageTs`, or undefined when nothing changes. */
+const nextThreadState = (
+  thread: InvestigationThread,
+  { statusMessageTs, eventId }: { statusMessageTs?: string; eventId?: string }
+): InvestigationThread | undefined => {
+  const seen = thread.seen_event_ids ?? [];
+  const recordEvent = eventId !== undefined && !seen.includes(eventId);
+  const recordStatusMessage =
+    statusMessageTs !== undefined && statusMessageTs !== thread.status_message_ts;
+  if (!recordEvent && !recordStatusMessage) {
+    return undefined;
+  }
+  return {
+    ...thread,
+    ...(recordStatusMessage && { status_message_ts: statusMessageTs }),
+    ...(recordEvent && {
+      seen_event_ids: [...seen, eventId].slice(-MAX_THREAD_SEEN_EVENT_IDS),
+    }),
+  };
+};
 
 /** A headline from the opening message, with Slack mentions and markup collapsed away. */
 const toSlackThreadTitle = (text: string | undefined): string => {
@@ -703,8 +738,9 @@ export class NightshiftInvestigationsClient {
   /**
    * The investigation for a Slack thread. Its ids derive from the thread, so concurrent calls for
    * one thread agree on a single record and conversation. Without `create`, a thread that has no
-   * investigation yet returns undefined. `slackMessageTs` records the thread's status message on an
-   * existing investigation whatever its status.
+   * investigation yet returns undefined. `statusMessageTs` records the thread's status message
+   * whatever the investigation's status. `eventId` records a delivered event; an event the thread
+   * already recorded comes back marked `duplicate`.
    */
   async findOrCreateSlackThread({
     workspace,
@@ -712,53 +748,95 @@ export class NightshiftInvestigationsClient {
     threadTs,
     text,
     create,
-    slackMessageTs,
+    statusMessageTs,
+    eventId,
   }: {
-    workspace?: string;
+    workspace: string;
     channel: string;
     threadTs: string;
     text?: string;
     create: boolean;
-    slackMessageTs?: string;
+    statusMessageTs?: string;
+    eventId?: string;
   }): Promise<SlackThreadInvestigation | undefined> {
-    const threadKey = [workspace, channel, threadTs].filter(Boolean).join('/');
+    // Channel ids are only unique within a workspace.
+    const threadKey = `${workspace}/${channel}/${threadTs}`;
     const investigationId = uuidv5(`investigation/${threadKey}`, SLACK_THREAD_ID_NAMESPACE);
 
-    const existing = await this.investigationRepository.get(investigationId);
-    if (existing) {
-      if (slackMessageTs && slackMessageTs !== existing.slack_message_ts) {
-        await this.investigationRepository.update({
-          id: existing.id,
-          patch: { slack_message_ts: slackMessageTs },
-        });
-        return toSlackThreadInvestigation({ ...existing, slack_message_ts: slackMessageTs });
+    let record = await this.investigationRepository.get(investigationId);
+    if (!record) {
+      if (!create) {
+        return undefined;
       }
-      return toSlackThreadInvestigation(existing);
-    }
-    if (!create) {
-      return undefined;
-    }
-    if (!(await this.isAvailable())) {
-      throw new InvestigationUnavailableError('Investigations are not available');
+      if (!(await this.isAvailable())) {
+        throw new InvestigationUnavailableError('Investigations are not available');
+      }
+
+      const attributes: InvestigationAttributes = {
+        title: toSlackThreadTitle(text),
+        status: 'pending',
+        // Like any manual run, a thread is defined by its prompt rather than an entity, so the
+        // subject stays the placeholder the UI hides. The thread itself is identified by `thread`
+        // and by the ids derived from it.
+        ...toSubjectFields({ type: 'manual', id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID }),
+        trigger_type: 'manual',
+        created_at: new Date().toISOString(),
+        conversation_id: uuidv5(`conversation/${threadKey}`, SLACK_THREAD_ID_NAMESPACE),
+        // The event is recorded below, like on an existing record, so that of two concurrent
+        // creates for one event exactly one is told it is new.
+        thread: {
+          surface: 'slack',
+          workspace,
+          channel,
+          thread_ts: threadTs,
+          ...(statusMessageTs && { status_message_ts: statusMessageTs }),
+        },
+      };
+      await this.createIgnoringConflict({ id: investigationId, attributes });
+      record = (await this.investigationRepository.get(investigationId)) ?? {
+        id: investigationId,
+        ...attributes,
+      };
     }
 
-    const attributes: InvestigationAttributes = {
-      title: toSlackThreadTitle(text),
-      status: 'pending',
-      // Like any manual run, a thread is defined by its prompt rather than an entity, so the
-      // subject stays the placeholder the UI hides. The thread itself is identified by
-      // slack_channel/slack_thread_ts and by the ids derived from it.
-      ...toSubjectFields({ type: 'manual', id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID }),
-      trigger_type: 'manual',
-      created_at: new Date().toISOString(),
-      conversation_id: uuidv5(`conversation/${threadKey}`, SLACK_THREAD_ID_NAMESPACE),
-      slack_channel: channel,
-      slack_thread_ts: threadTs,
-    };
-    await this.createIgnoringConflict({ id: investigationId, attributes });
+    return this.recordSlackThreadActivity(record, { statusMessageTs, eventId });
+  }
 
-    const created = await this.investigationRepository.get(investigationId);
-    return toSlackThreadInvestigation(created ?? { id: investigationId, ...attributes });
+  private async recordSlackThreadActivity(
+    record: InvestigationRecord,
+    activity: { statusMessageTs?: string; eventId?: string }
+  ): Promise<SlackThreadInvestigation> {
+    let current = record;
+    for (let attempt = 1; ; attempt++) {
+      const duplicate =
+        activity.eventId !== undefined &&
+        (current.thread?.seen_event_ids ?? []).includes(activity.eventId);
+      const thread = current.thread && nextThreadState(current.thread, activity);
+      if (!thread) {
+        return toSlackThreadInvestigation(current, duplicate);
+      }
+
+      try {
+        await this.investigationRepository.update({
+          id: current.id,
+          patch: { thread },
+          version: current.version,
+        });
+        return toSlackThreadInvestigation({ ...current, thread }, duplicate);
+      } catch (error) {
+        if (
+          !(error instanceof InvestigationStaleWriteError) ||
+          attempt >= MAX_THREAD_WRITE_ATTEMPTS
+        ) {
+          throw error;
+        }
+        const fresh = await this.investigationRepository.get(current.id);
+        if (!fresh) {
+          throw new InvestigationNotFoundError(current.id);
+        }
+        current = fresh;
+      }
+    }
   }
 
   /**

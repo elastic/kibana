@@ -14,6 +14,21 @@ import type {
   Severity,
 } from '../../common';
 
+/** How many handled event ids a thread keeps; the oldest are dropped first. */
+export const MAX_THREAD_SEEN_EVENT_IDS = 50;
+
+/** The chat thread an investigation belongs to, when it was started from one. */
+export interface InvestigationThread {
+  surface: 'slack';
+  workspace: string;
+  channel: string;
+  thread_ts: string;
+  /** The thread's status message; every run edits it in place. */
+  status_message_ts?: string;
+  /** Delivery ids of the events already handled, oldest first, so a redelivery runs once. */
+  seen_event_ids?: string[];
+}
+
 export interface InvestigationAttributes extends InvestigationStructuredOutput {
   title: string;
   status: InvestigationStatus;
@@ -31,11 +46,7 @@ export interface InvestigationAttributes extends InvestigationStructuredOutput {
   conversation_id?: string;
   /** The workflow execution of the latest run, when it is not the one the investigation is named after. */
   execution_id?: string;
-  /** Slack thread this investigation belongs to, when it was started from Slack. */
-  slack_channel?: string;
-  slack_thread_ts?: string;
-  /** The findings message posted into that thread; later runs edit it in place. */
-  slack_message_ts?: string;
+  thread?: InvestigationThread;
 }
 
 export interface InvestigationRecord extends InvestigationAttributes {
@@ -62,7 +73,7 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
   error?: string | null;
   conversation_id?: string;
   execution_id?: string;
-  slack_message_ts?: string;
+  thread?: InvestigationThread;
 }
 
 export interface FindInvestigationsQuery<

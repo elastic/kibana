@@ -36,20 +36,33 @@ const requireStep = (name: string): WorkflowStep => {
 };
 
 describe('Nightshift Slack thread workflow', () => {
-  it('continues an existing investigation on human thread replies only', () => {
+  it('continues an existing investigation on human thread replies with text only', () => {
     expect(workflow.triggers).toEqual([
       {
         type: 'slack2.message',
         'connector-id': 'elastic-apps-slack',
         on: {
           condition:
-            'event.threadId:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast)',
+            'event.threadId:* and event.text:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast or event.subtype:file_share)',
         },
       },
     ]);
     expect(requireStep('find_investigation').with?.body).toMatchObject({
+      workspace: '${{ event.workspace }}',
       create: false,
     });
+  });
+
+  it('records each delivered event and skips one the thread already handled', () => {
+    expect(requireStep('find_investigation').with?.body).toMatchObject({
+      event_id: '${{ event.correlationKey }}',
+    });
+    expect(requireStep('in_investigation_thread').condition).toContain(
+      'steps.find_investigation.output.duplicate != true'
+    );
+    for (const name of ['record_status_message', 'record_result_message']) {
+      expect(requireStep(name).with?.body).not.toHaveProperty('event_id');
+    }
   });
 
   it('runs replies in the same thread one at a time, in order', () => {
@@ -62,7 +75,8 @@ describe('Nightshift Slack thread workflow', () => {
   it('acts only on a thread that has an investigation', () => {
     expect(requireStep('in_investigation_thread')).toMatchObject({
       type: 'if',
-      condition: '${{ steps.find_investigation.output.investigation_id != null }}',
+      condition:
+        '${{ steps.find_investigation.output.investigation_id != null and steps.find_investigation.output.duplicate != true }}',
     });
     expect(requireStep('in_investigation_thread').steps?.map(({ name }) => name)).toEqual([
       'set_investigation_url',
@@ -82,12 +96,12 @@ describe('Nightshift Slack thread workflow', () => {
     const postStarted = requireStep('post_started');
     expect(postStarted).toMatchObject({
       type: 'slack2.sendMessage',
-      if: '${{ steps.find_investigation.output.slack_message_ts == null }}',
+      if: '${{ steps.find_investigation.output.status_message_ts == null }}',
     });
     // A later run must not blank the previous findings for as long as its own run takes.
     expect(postStarted.with).not.toHaveProperty('messageTs');
     expect(requireStep('record_status_message')).toMatchObject({
-      with: { body: { create: false, slack_message_ts: '{{ steps.post_started.output.ts }}' } },
+      with: { body: { create: false, status_message_ts: '{{ steps.post_started.output.ts }}' } },
       'on-failure': { retry: { 'max-attempts': 3 }, continue: true },
     });
   });
@@ -110,7 +124,7 @@ describe('Nightshift Slack thread workflow', () => {
   it("reports this run's result, not a previous run's record", () => {
     const setResult = requireStep('set_result').with;
     expect(setResult?.status_message_ts).toBe(
-      '${{ steps.post_started.output.ts | default: steps.find_investigation.output.slack_message_ts }}'
+      '${{ steps.post_started.output.ts | default: steps.find_investigation.output.status_message_ts }}'
     );
     expect(setResult?.result_text).toContain(
       "steps.investigate.error == null and steps.get_investigation.output.status == 'completed'"
@@ -122,6 +136,8 @@ describe('Nightshift Slack thread workflow', () => {
       type: 'slack2.updateMessage',
       if: '${{ variables.status_message_ts != null }}',
       with: { messageTs: '{{ variables.status_message_ts }}', text: '{{ variables.result_text }}' },
+      // A transient failure must not leave the thread a second status message.
+      'on-failure': { retry: { 'max-attempts': 3 }, continue: true },
     });
     const postResult = requireStep('post_result');
     expect(postResult).toMatchObject({
@@ -138,7 +154,7 @@ describe('Nightshift Slack thread workflow', () => {
     );
     expect(requireStep('record_result_message')).toMatchObject({
       if: '${{ variables.result_message_ts != null and (variables.result_message_ts != variables.status_message_ts or steps.record_status_message.error != null) }}',
-      with: { body: { create: false, slack_message_ts: '{{ variables.result_message_ts }}' } },
+      with: { body: { create: false, status_message_ts: '{{ variables.result_message_ts }}' } },
     });
   });
 });

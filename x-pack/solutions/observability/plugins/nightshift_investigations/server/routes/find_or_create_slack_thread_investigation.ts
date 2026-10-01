@@ -20,8 +20,9 @@ export const findOrCreateSlackThreadInvestigationRoute = createNightshiftInvesti
     description:
       'Returns the investigation and status message for a Slack thread. With ' +
       '`create`, a thread without one gets a pending investigation; otherwise the response is ' +
-      'empty. With `slack_message_ts`, records that message as the thread status message. ' +
-      'Called by the Slack thread workflow.',
+      'empty. With `status_message_ts`, records that message as the thread status message. ' +
+      'With `event_id`, records the delivered event and marks the response `duplicate` when the ' +
+      'thread already recorded it. Called by the Slack thread workflow.',
   },
   security: {
     authz: {
@@ -30,12 +31,13 @@ export const findOrCreateSlackThreadInvestigationRoute = createNightshiftInvesti
   },
   params: z.object({
     body: z.object({
-      workspace: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+      workspace: z.string().min(1).max(MAX_KEYWORD_LENGTH),
       channel: z.string().min(1).max(MAX_KEYWORD_LENGTH),
       thread_ts: z.string().min(1).max(MAX_KEYWORD_LENGTH),
       text: z.string().max(MAX_SLACK_TEXT_LENGTH).optional(),
       create: z.boolean(),
-      slack_message_ts: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+      status_message_ts: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+      event_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
     }),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
@@ -46,7 +48,8 @@ export const findOrCreateSlackThreadInvestigationRoute = createNightshiftInvesti
       thread_ts: threadTs,
       text,
       create,
-      slack_message_ts: slackMessageTs,
+      status_message_ts: statusMessageTs,
+      event_id: eventId,
     } = params.body;
     try {
       return (
@@ -56,7 +59,8 @@ export const findOrCreateSlackThreadInvestigationRoute = createNightshiftInvesti
           threadTs,
           text,
           create,
-          slackMessageTs,
+          statusMessageTs,
+          eventId,
         })) ?? {}
       );
     } catch (error) {

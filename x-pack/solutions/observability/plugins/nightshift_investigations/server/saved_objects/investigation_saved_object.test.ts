@@ -99,19 +99,39 @@ describe('nightshift investigation saved object model version 5', () => {
     ).not.toThrow();
   });
 
-  it('accepts the Slack thread fields', () => {
+  const threadInvestigation = (thread: Record<string, unknown>) => ({
+    title: 'Checkout errors',
+    status: 'pending',
+    subject_type: 'manual',
+    subject_id: 'manual',
+    trigger_type: 'manual',
+    created_at: '2026-09-28T00:00:00.000Z',
+    thread,
+  });
+
+  it('accepts the thread the investigation belongs to', () => {
     expect(() =>
-      modelVersion4?.schemas?.create?.validate({
-        title: 'Checkout errors',
-        status: 'pending',
-        subject_type: 'manual',
-        subject_id: 'T1/C1/1700.0001',
-        trigger_type: 'manual',
-        created_at: '2026-09-28T00:00:00.000Z',
-        slack_channel: 'C1',
-        slack_thread_ts: '1700.0001',
-        slack_message_ts: '1700.0002',
-      })
+      modelVersion5?.schemas?.create?.validate(
+        threadInvestigation({
+          surface: 'slack',
+          workspace: 'T1',
+          channel: 'C1',
+          thread_ts: '1700.0001',
+          status_message_ts: '1700.0002',
+          seen_event_ids: ['Ev1', 'Ev2'],
+        })
+      )
     ).not.toThrow();
+  });
+
+  it('rejects a thread without its workspace or from another surface', () => {
+    const thread = { surface: 'slack', channel: 'C1', thread_ts: '1700.0001' };
+
+    expect(() => modelVersion5?.schemas?.create?.validate(threadInvestigation(thread))).toThrow();
+    expect(() =>
+      modelVersion5?.schemas?.create?.validate(
+        threadInvestigation({ ...thread, workspace: 'T1', surface: 'teams' })
+      )
+    ).toThrow();
   });
 });
