@@ -75,7 +75,10 @@ describe('InvestigationTimelineFlyoutOpener', () => {
         size: 's',
         paddingSize: 'l',
         title: 'Investigation timeline',
-        session: 'start',
+        session: 'never',
+        maxWidth: false,
+        resizable: false,
+        type: 'overlay',
         historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
       }),
       expect.objectContaining({
@@ -83,7 +86,9 @@ describe('InvestigationTimelineFlyoutOpener', () => {
         flyoutType: FLYOUT_TYPE.INVESTIGATION_TIMELINE,
         session: 'start',
         origin: FLYOUT_ORIGIN.ATTACHMENTS_OVERVIEW,
-      })
+      }),
+      undefined,
+      { persistWidth: false }
     );
   });
 });

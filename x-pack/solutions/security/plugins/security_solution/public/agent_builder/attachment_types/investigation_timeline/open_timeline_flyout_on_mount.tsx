@@ -34,13 +34,20 @@ const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] 
     }
     hasOpened.current = true;
     // The timeline is carried by value, so it is not written into the flyout URL the way an
-    // alert document id is. It still opens through the same system flyout as an alert row.
+    // alert document id is. Stay outside the flyout session: a child sits beside the
+    // conversation flyout when both fit, and a new main session clears that flyout's push
+    // inset. An unmanaged overlay covers the conversation flyout and leaves the page inset.
+    // Size stays the uncapped conversation-details width; the persisted Security width is narrower.
     openFlyout(
       <InvestigationTimelineFlyout events={events} />,
       {
         ...defaultProperties,
         historyKey,
-        session,
+        session: 'never',
+        size: 's',
+        maxWidth: false,
+        resizable: false,
+        type: 'overlay',
         paddingSize: 'l',
         title: INVESTIGATION_TIMELINE_FLYOUT_TITLE,
       },
@@ -49,7 +56,9 @@ const OpenTimelineOnMount = ({ events }: { events: InvestigationTimelineEvent[] 
         flyoutType: FLYOUT_TYPE.INVESTIGATION_TIMELINE,
         session,
         origin: FLYOUT_ORIGIN.ATTACHMENTS_OVERVIEW,
-      }
+      },
+      undefined,
+      { persistWidth: false }
     );
   }, [defaultProperties, events, historyKey, openFlyout, session]);
 

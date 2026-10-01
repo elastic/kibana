@@ -76,7 +76,10 @@ describe('InvestigationIocsFlyoutOpener', () => {
         size: 's',
         paddingSize: 'l',
         title: 'IOCs',
-        session: 'start',
+        session: 'never',
+        maxWidth: false,
+        resizable: false,
+        type: 'overlay',
         historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
       }),
       expect.objectContaining({
@@ -84,7 +87,9 @@ describe('InvestigationIocsFlyoutOpener', () => {
         flyoutType: FLYOUT_TYPE.INVESTIGATION_IOCS,
         session: 'start',
         origin: FLYOUT_ORIGIN.ATTACHMENTS_OVERVIEW,
-      })
+      }),
+      undefined,
+      { persistWidth: false }
     );
   });
 });

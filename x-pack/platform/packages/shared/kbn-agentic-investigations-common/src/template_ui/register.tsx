@@ -113,36 +113,37 @@ export const registerAgenticInvestigationTemplateUI = ({
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
-  // Build the renderAttachmentsOverview callback once, captured in the tab closure.
-  // LazyAttachmentsOverviewSection is module-level lazy so its chunk only loads when the first
-  // flyout opens, not on every plugin start. The attachments service is captured here so the
-  // section can render types through their conversation details renderer.
-  const renderAttachmentsOverview = getSecurityAppUrl
-    ? (attachments: VersionedAttachment[]) => (
-        <Suspense fallback={null}>
-          <LazyAttachmentsOverviewSection
-            attachments={attachments}
-            getSecurityAppUrl={getSecurityAppUrl}
-            getAttachmentUiDefinition={attachmentsService.getAttachmentUiDefinition}
-          />
-        </Suspense>
-      )
-    : undefined;
+  conversationTemplates.registerTab(overviewTabId, ({ attachmentsService }) => {
+    // LazyAttachmentsOverviewSection is module-level lazy so its chunk only loads when the first
+    // flyout opens, not on every plugin start. The attachments service comes from this tab
+    // context, so the section can render types through their conversation details renderer.
+    const renderAttachmentsOverview = getSecurityAppUrl
+      ? (attachments: VersionedAttachment[]) => (
+          <Suspense fallback={null}>
+            <LazyAttachmentsOverviewSection
+              attachments={attachments}
+              getSecurityAppUrl={getSecurityAppUrl}
+              getAttachmentUiDefinition={attachmentsService.getAttachmentUiDefinition}
+            />
+          </Suspense>
+        )
+      : undefined;
 
-  conversationTemplates.registerTab(overviewTabId, ({ attachmentsService }) => ({
-    label: DETAILS_FLYOUT_LABELS.tabs.overview,
-    content: function OverviewTabContent({ conversation }) {
-      return (
-        <Suspense fallback={<EuiSkeletonText lines={3} />}>
-          <LazyOverviewSlot
-            conversation={conversation}
-            renderProposedActions={renderProposedActions}
-            renderAttachmentsOverview={renderAttachmentsOverview}
-          />
-        </Suspense>
-      );
-    },
-  }));
+    return {
+      label: DETAILS_FLYOUT_LABELS.tabs.overview,
+      content: function OverviewTabContent({ conversation }) {
+        return (
+          <Suspense fallback={<EuiSkeletonText lines={3} />}>
+            <LazyOverviewSlot
+              conversation={conversation}
+              renderProposedActions={renderProposedActions}
+              renderAttachmentsOverview={renderAttachmentsOverview}
+            />
+          </Suspense>
+        );
+      },
+    };
+  });
 
   conversationTemplates.registerTemplateUIDefinition(
     templateId,

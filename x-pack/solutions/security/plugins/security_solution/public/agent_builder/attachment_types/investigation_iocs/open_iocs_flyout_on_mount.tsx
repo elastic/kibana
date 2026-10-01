@@ -31,12 +31,20 @@ const OpenIocsOnMount = ({ categories }: { categories: IocCategoryRow[] }) => {
     }
     hasOpened.current = true;
     // Indicators are carried by value, so they are not written into the flyout URL.
+    // Stay outside the flyout session: a child sits beside the conversation flyout when both
+    // fit, and a new main session clears that flyout's push inset. An unmanaged overlay covers
+    // the conversation flyout and leaves the page inset. Size stays the uncapped
+    // conversation-details width; the persisted Security width is narrower.
     openFlyout(
       <InvestigationIocsFlyout categories={categories} />,
       {
         ...defaultProperties,
         historyKey,
-        session,
+        session: 'never',
+        size: 's',
+        maxWidth: false,
+        resizable: false,
+        type: 'overlay',
         paddingSize: 'l',
         title: INVESTIGATION_IOCS_FLYOUT_TITLE,
       },
@@ -45,7 +53,9 @@ const OpenIocsOnMount = ({ categories }: { categories: IocCategoryRow[] }) => {
         flyoutType: FLYOUT_TYPE.INVESTIGATION_IOCS,
         session,
         origin: FLYOUT_ORIGIN.ATTACHMENTS_OVERVIEW,
-      }
+      },
+      undefined,
+      { persistWidth: false }
     );
   }, [categories, defaultProperties, historyKey, openFlyout, session]);
 
