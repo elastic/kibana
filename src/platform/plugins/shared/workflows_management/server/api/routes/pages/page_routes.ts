@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import { isMap, isSeq, parseDocument } from 'yaml';
 import { schema } from '@kbn/config-schema';
 import { isPageTrigger, toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import {
   PAGE_FORM_API_PATH,
   PAGE_ID_PARAM_MAX_LENGTH,
   PAGE_LINK_API_PATH,
+  PAGE_ROTATE_API_PATH,
   PAGE_WORKFLOW_ID_MAX_LENGTH,
 } from '../../pages/constants';
 import { PAGE_ID_KEY } from '../../pages/page_ids';
 import { buildPageRunRequest } from '../../pages/page_run_identity';
+import { computePageSecret, PAGE_SECRET_LENGTH, verifyPageSecret } from '../../pages/page_secret';
 import {
   buildPageUrl,
   getPageSubmitter,
@@ -34,7 +39,7 @@ import {
 } from '../executions/external_resume_route_helpers';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, INTERNAL_API_VERSION } from '../utils/route_constants';
-import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
+import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const pageParamsSchema = schema.object({
@@ -42,7 +47,29 @@ const pageParamsSchema = schema.object({
     maxLength: PAGE_ID_PARAM_MAX_LENGTH,
     meta: { description: 'The `page-id` of the workflow page trigger.' },
   }),
+  secret: schema.string({
+    maxLength: PAGE_SECRET_LENGTH,
+    meta: { description: 'Secret derived from the page-id. Opens the page.' },
+  }),
 });
+
+const rotateParamsSchema = schema.object({
+  workflowId: schema.string({ maxLength: PAGE_WORKFLOW_ID_MAX_LENGTH }),
+  pageId: schema.string({ maxLength: PAGE_ID_PARAM_MAX_LENGTH }),
+});
+
+/**
+ * Checks the URL secret before touching any workflow, so a wrong secret costs one
+ * HMAC and no index lookup. A miss gets the same generic error page as an unknown page.
+ */
+const assertPageSecret = (
+  signingKey: string,
+  { spaceId, pageId, secret }: { spaceId: string; pageId: string; secret: string }
+): void => {
+  if (!verifyPageSecret(signingKey, spaceId, pageId, secret)) {
+    throw new ExternalResumeError('Page not found', 404);
+  }
+};
 
 const workflowParamsSchema = schema.object({
   workflowId: schema.string({
@@ -51,8 +78,8 @@ const workflowParamsSchema = schema.object({
   }),
 });
 
-/** GET the hosted form for a workflow page. The unguessable `page-id` is the credential. */
-export function registerPageFormRoute(deps: RouteDependencies) {
+/** GET the hosted form for a workflow page. The derived URL secret is the credential. */
+export function registerPageFormRoute(deps: RouteDependencies, signingKey: string) {
   const { router, api, spaces, logger } = deps;
 
   router.versioned
@@ -69,12 +96,17 @@ export function registerPageFormRoute(deps: RouteDependencies) {
       { version: API_VERSION, validate: { request: { params: pageParamsSchema } } },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const { pageId } = request.params;
+          const { pageId, secret } = request.params;
+          const spaceId = spaces.getSpaceId(request);
+          assertPageSecret(signingKey, { spaceId, pageId, secret });
           const page = await resolvePage(api.getWorkflowsSubscribedToTrigger.bind(api), {
             pageId,
-            spaceId: spaces.getSpaceId(request),
+            spaceId,
           });
-          return htmlOk(response, renderPageForm({ page, basePath: request.basePath, pageId }));
+          return htmlOk(
+            response,
+            renderPageForm({ page, basePath: request.basePath, pageId, secret })
+          );
         } catch (error) {
           return handleExternalResumeError(response, error, logger);
         }
@@ -83,7 +115,11 @@ export function registerPageFormRoute(deps: RouteDependencies) {
 }
 
 /** POST a page submission, which validates the input and runs the workflow. */
-export function registerPageSubmitRoute(deps: RouteDependencies, runAsApiKey: string) {
+export function registerPageSubmitRoute(
+  deps: RouteDependencies,
+  signingKey: string,
+  runAsApiKey: string
+) {
   const { router, api, spaces, logger, audit } = deps;
 
   router.versioned
@@ -107,10 +143,11 @@ export function registerPageSubmitRoute(deps: RouteDependencies, runAsApiKey: st
         },
       },
       withAvailabilityCheck(async (context, request, response) => {
-        const { pageId } = request.params;
+        const { pageId, secret } = request.params;
         let workflowId: string | undefined;
         try {
           const spaceId = spaces.getSpaceId(request);
+          assertPageSecret(signingKey, { spaceId, pageId, secret });
           const page = await resolvePage(api.getWorkflowsSubscribedToTrigger.bind(api), {
             pageId,
             spaceId,
@@ -143,24 +180,22 @@ export function registerPageSubmitRoute(deps: RouteDependencies, runAsApiKey: st
 }
 
 /** Authenticated helper that lists the public URLs of a workflow's pages. */
-export function registerPageLinkRoute(deps: RouteDependencies) {
+export function registerPageLinkRoute(deps: RouteDependencies, signingKey: string) {
   const { router, api, spaces } = deps;
 
   router.versioned
     .get({
       path: PAGE_LINK_API_PATH,
       access: 'internal',
-      security: WORKFLOW_EXECUTE_SECURITY,
+      // Revealing a URL hands out the page, so it needs edit rights, not read.
+      security: WORKFLOW_UPDATE_SECURITY,
       summary: 'Get the shareable links for a workflow page',
     })
     .addVersion(
       { version: INTERNAL_API_VERSION, validate: { request: { params: workflowParamsSchema } } },
       withAvailabilityCheck(async (context, request, response) => {
-        const workflow = await api.getWorkflow(
-          request.params.workflowId,
-          spaces.getSpaceId(request),
-          request
-        );
+        const spaceId = spaces.getSpaceId(request);
+        const workflow = await api.getWorkflow(request.params.workflowId, spaceId, request);
         const pageIds = (workflow?.definition?.triggers ?? [])
           .filter(isPageTrigger)
           .map((trigger) => trigger[PAGE_ID_KEY])
@@ -174,10 +209,61 @@ export function registerPageLinkRoute(deps: RouteDependencies) {
             enabled: workflow.enabled,
             pages: pageIds.map((pageId) => ({
               pageId,
-              url: buildPageUrl({ basePath: request.basePath, pageId }),
+              url: buildPageUrl({
+                basePath: request.basePath,
+                pageId,
+                secret: computePageSecret(signingKey, spaceId, pageId),
+              }),
             })),
           },
         });
+      })
+    );
+}
+
+/**
+ * Retires a page URL by assigning the page a new `page-id`. The secret is derived
+ * from the page-id, so the old URL stops working as soon as the workflow saves.
+ * The change goes through the normal update path, so it is versioned and audited.
+ */
+export function registerPageRotateRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
+
+  router.versioned
+    .post({
+      path: PAGE_ROTATE_API_PATH,
+      access: 'internal',
+      security: WORKFLOW_UPDATE_SECURITY,
+      summary: 'Rotate the URL of a workflow page',
+    })
+    .addVersion(
+      { version: INTERNAL_API_VERSION, validate: { request: { params: rotateParamsSchema } } },
+      withAvailabilityCheck(async (context, request, response) => {
+        const { workflowId, pageId } = request.params;
+        const spaceId = spaces.getSpaceId(request);
+        const workflow = await api.getWorkflow(workflowId, spaceId, request);
+        if (!workflow) {
+          return response.notFound({ body: { message: 'Workflow not found.' } });
+        }
+
+        const document = parseDocument(workflow.yaml);
+        const triggers = document.get('triggers', true);
+        const target = isSeq(triggers)
+          ? triggers.items.find(
+              (item) =>
+                isMap(item) && item.get('type') === 'page' && item.get(PAGE_ID_KEY) === pageId
+            )
+          : undefined;
+        if (!isMap(target)) {
+          return response.notFound({ body: { message: 'Workflow does not define this page.' } });
+        }
+
+        const nextPageId = uuidv4();
+        target.set(PAGE_ID_KEY, nextPageId);
+        await api.updateWorkflow(workflowId, { yaml: document.toString() }, spaceId, request);
+        audit.logWorkflowUpdated(request, { id: workflowId });
+
+        return response.ok({ body: { previousPageId: pageId, pageId: nextPageId } });
       })
     );
 }
