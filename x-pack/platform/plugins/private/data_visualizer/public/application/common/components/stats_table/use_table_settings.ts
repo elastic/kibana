@@ -35,13 +35,14 @@ export function useTableSettings<TypeOfItem extends object>(
 
   const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = useCallback(
     ({ page, sort }: CriteriaWithPagination<TypeOfItem>) => {
-      if (!isInteractive) return;
       const result = {
         ...pageState,
         pageIndex: page?.index ?? pageState.pageIndex,
         pageSize: page?.size ?? pageState.pageSize,
-        sortField: (sort?.field as string) ?? pageState.sortField,
-        sortDirection: sort?.direction ?? pageState.sortDirection,
+        ...(isInteractive && {
+          sortField: (sort?.field as string) ?? pageState.sortField,
+          sortDirection: sort?.direction ?? pageState.sortDirection,
+        }),
       };
       updatePageState(result);
     },

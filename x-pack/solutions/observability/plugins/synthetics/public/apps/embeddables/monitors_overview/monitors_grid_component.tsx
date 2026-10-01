@@ -68,7 +68,7 @@ export const StatusGridComponent = ({
   );
 };
 
-const SingleMonitorView = () => {
+const SingleMonitorView = ({ isInteractive = true }: { isInteractive?: boolean }) => {
   const trendData = useSelector(selectOverviewTrends);
   const dispatch = useDispatch();
 
@@ -119,7 +119,12 @@ const SingleMonitorView = () => {
 
   return (
     <>
-      <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} style={style} />
+      <MetricItem
+        monitor={monitor}
+        onClick={setFlyoutConfigCallback}
+        style={style}
+        isInteractive={isInteractive}
+      />
       <MaybeMonitorDetailsFlyout setFlyoutConfigCallback={setFlyoutConfigCallback} />
     </>
   );
@@ -154,7 +159,7 @@ const MonitorsOverviewList = ({
   }, [dispatch, filters]);
 
   if (singleMonitor && view === 'cardView') {
-    return <SingleMonitorView />;
+    return <SingleMonitorView isInteractive={isInteractive} />;
   }
 
   return <OverviewGrid view={view} isEmbeddable isInteractive={isInteractive} />;
