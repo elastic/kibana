@@ -20,11 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  useMenuHeaderStyle,
-  type SecondaryHeaderSpacing,
-} from '../../hooks/use_menu_header_style';
-import { useSecondaryHeaderSpacing } from '../../hooks/use_secondary_header_spacing';
+import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 import { useNestedMenu } from './use_nested_menu';
 
 export interface HeaderProps {
@@ -34,21 +30,15 @@ export interface HeaderProps {
    * Primary-nav icon shown beside the header title.
    */
   iconType?: IconType;
-  /**
-   * Header spacing. Defaults to Navigation's `secondaryHeaderSpacing`, or `standard`.
-   */
-  spacing?: SecondaryHeaderSpacing;
 }
 
 export const Header: FC<HeaderProps> = ({
   title,
   'aria-describedby': ariaDescribedBy,
   iconType,
-  spacing: spacingProp,
 }) => {
   const { goBack } = useNestedMenu();
-  const spacing = useSecondaryHeaderSpacing(spacingProp);
-  const headerStyle = useMenuHeaderStyle(spacing);
+  const headerStyle = useMenuHeaderStyle();
 
   return (
     <EuiFlexGroup css={headerStyle} alignItems="center" gutterSize="s" responsive={false}>

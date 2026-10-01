@@ -11,19 +11,12 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 /**
- * Secondary menu header spacing.
- * Matches the App Header shell outer height: `standard` is 64px + thin border,
- * `compact` is 48px + thin border. Content is flex-centered for baseline alignment.
- */
-export type SecondaryHeaderSpacing = 'standard' | 'compact';
-
-/**
  * Menu header rendered above the scrolling menu body, so it stays in view.
+ * Matches the App Header standard shell outer height (64px + thin border).
+ * Content is flex-centered for baseline alignment.
  */
-export function useMenuHeaderStyle(spacing: SecondaryHeaderSpacing = 'standard') {
+export function useMenuHeaderStyle() {
   const { euiTheme } = useEuiTheme();
-
-  const isCompact = spacing === 'compact';
 
   return css`
     --border-width: ${euiTheme.border.width.thin};
@@ -33,9 +26,9 @@ export function useMenuHeaderStyle(spacing: SecondaryHeaderSpacing = 'standard')
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    padding: ${isCompact ? euiTheme.size.s : euiTheme.size.base} var(--horizontal-padding);
-    // Match App Header shell outer height (49/65): content floor + thin border width, no hairline.
-    min-height: calc(${isCompact ? '48px' : '64px'} + ${euiTheme.border.width.thin});
+    padding: ${euiTheme.size.base} var(--horizontal-padding);
+    // Match App Header standard shell outer height (65): content floor + thin border, no hairline.
+    min-height: calc(64px + ${euiTheme.border.width.thin});
 
     & h4 {
       margin-block: 0;

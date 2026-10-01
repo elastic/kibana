@@ -37,7 +37,6 @@ interface WorkflowsNavNode {
   link: typeof WORKFLOWS_APP_ID;
   id?: typeof WORKFLOWS_APP_ID;
   renderAs?: 'panelOpener';
-  secondaryHeaderSpacing?: 'standard' | 'compact';
   children?: Array<{ link: DeepLinkId; breadcrumbStatus?: 'hidden' }>;
 }
 
@@ -83,7 +82,6 @@ export const getWorkflowsNavPanel = (core: WorkflowsNavPanelCore): WorkflowsNavN
       id: WORKFLOWS_APP_ID,
       link: WORKFLOWS_APP_ID,
       renderAs: 'panelOpener',
-      secondaryHeaderSpacing: 'compact',
       children: [
         { link: workflowsDeepLink(WorkflowsPageName.list), breadcrumbStatus: 'hidden' },
         ...links,

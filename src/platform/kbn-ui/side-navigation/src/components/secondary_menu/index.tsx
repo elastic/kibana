@@ -16,11 +16,7 @@ import type { BadgeType } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { SecondaryMenuItemComponent } from './item';
 import { SecondaryMenuSectionComponent } from './section';
-import {
-  useMenuHeaderStyle,
-  type SecondaryHeaderSpacing,
-} from '../../hooks/use_menu_header_style';
-import { useSecondaryHeaderSpacing } from '../../hooks/use_secondary_header_spacing';
+import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 import { scrollLayoutStyles, useScroll } from '../../hooks/use_scroll';
 
 export interface SecondaryMenuProps {
@@ -33,10 +29,6 @@ export interface SecondaryMenuProps {
   iconType?: IconType;
   isNew?: boolean;
   isPanel?: boolean;
-  /**
-   * Header spacing. Defaults to Navigation's `secondaryHeaderSpacing`, or `standard`.
-   */
-  spacing?: SecondaryHeaderSpacing;
   title: string;
 }
 
@@ -47,23 +39,14 @@ interface SecondaryMenuComponent
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  (
-    { badgeType, children, footer, iconType, title, isNew = false, spacing: spacingProp },
-    ref
-  ) => {
-    const spacing = useSecondaryHeaderSpacing(spacingProp);
-    const headerStyle = useMenuHeaderStyle(spacing);
+  ({ badgeType, children, footer, iconType, title, isNew = false }, ref) => {
+    const headerStyle = useMenuHeaderStyle();
     const scrollStyles = useScroll(true);
     const showBadge = Boolean(badgeType && (badgeType !== 'new' || isNew));
 
     return (
       <div ref={ref} css={scrollLayoutStyles}>
-        <EuiFlexGroup
-          css={headerStyle}
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-        >
+        <EuiFlexGroup css={headerStyle} alignItems="center" gutterSize="s" responsive={false}>
           {iconType && (
             <EuiFlexItem grow={false}>
               <EuiIcon type={iconType} size="m" color="subdued" />

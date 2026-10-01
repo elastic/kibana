@@ -32,8 +32,6 @@ export type {
   SecondaryMenuSection,
 };
 
-export type { SecondaryHeaderSpacing } from '../../src/hooks/use_menu_header_style';
-
 /** Alias for the external package. */
 export type SideNavigationProps = NavigationProps;
 
