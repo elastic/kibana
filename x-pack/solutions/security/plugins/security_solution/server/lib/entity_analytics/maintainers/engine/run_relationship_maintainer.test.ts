@@ -1601,7 +1601,7 @@ describe('runRelationshipMaintainer', () => {
 
     it('logs a prefixed error identifying the entity write as the failing stage', async () => {
       const { esClient, search, esql } = makeEsClient();
-      const { crudClient, entityMetadataClient, bulkUpdate } = makeClients();
+      const { crudClient, entityMetadataClient, relationshipsClient, bulkUpdate } = makeClients();
       const logger = loggerMock.create();
 
       search.mockResolvedValueOnce(
@@ -1623,6 +1623,7 @@ describe('runRelationshipMaintainer', () => {
         namespace: 'default',
         crudClient,
         entityMetadataClient,
+        relationshipsClient,
         integrations: [baseConfig],
         maintainerName: 'communicates_with',
       });
@@ -1635,7 +1636,7 @@ describe('runRelationshipMaintainer', () => {
 
     it('logs a prefixed error identifying the metadata write as the failing stage', async () => {
       const { esClient, search, esql } = makeEsClient();
-      const { crudClient, entityMetadataClient, bulkAppend } = makeClients();
+      const { crudClient, entityMetadataClient, relationshipsClient, bulkAppend } = makeClients();
       const logger = loggerMock.create();
 
       search.mockResolvedValueOnce(
@@ -1657,6 +1658,7 @@ describe('runRelationshipMaintainer', () => {
         namespace: 'default',
         crudClient,
         entityMetadataClient,
+        relationshipsClient,
         integrations: [baseConfig],
         maintainerName: 'communicates_with',
       });
@@ -1671,7 +1673,7 @@ describe('runRelationshipMaintainer', () => {
 
     it('logs a prefixed error identifying the actor fetch as the failing stage', async () => {
       const { esClient, search } = makeEsClient();
-      const { crudClient, entityMetadataClient } = makeClients();
+      const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
       const logger = loggerMock.create();
 
       search.mockRejectedValueOnce(new Error('search boom'));
@@ -1682,6 +1684,7 @@ describe('runRelationshipMaintainer', () => {
         namespace: 'default',
         crudClient,
         entityMetadataClient,
+        relationshipsClient,
         integrations: [baseConfig],
         maintainerName: 'communicates_with',
       });
@@ -1694,7 +1697,7 @@ describe('runRelationshipMaintainer', () => {
 
     it('logs a prefixed error identifying the target fetch as the failing stage', async () => {
       const { esClient, search, esql } = makeEsClient();
-      const { crudClient, entityMetadataClient } = makeClients();
+      const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
       const logger = loggerMock.create();
 
       search.mockResolvedValueOnce(
@@ -1708,6 +1711,7 @@ describe('runRelationshipMaintainer', () => {
         namespace: 'default',
         crudClient,
         entityMetadataClient,
+        relationshipsClient,
         integrations: [baseConfig],
         maintainerName: 'communicates_with',
       });
@@ -1751,7 +1755,7 @@ describe('runRelationshipMaintainer', () => {
 
     it('reports applied for a source that writes entities', async () => {
       const { esClient, search, esql } = makeEsClient();
-      const { crudClient, entityMetadataClient } = makeClients();
+      const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
 
       search.mockResolvedValueOnce(
         successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }])
@@ -1776,6 +1780,7 @@ describe('runRelationshipMaintainer', () => {
         namespace: 'default',
         crudClient,
         entityMetadataClient,
+        relationshipsClient,
         integrations: [baseConfig],
         maintainerName: 'communicates_with',
         telemetryCollector: collector,
@@ -1790,7 +1795,7 @@ describe('runRelationshipMaintainer', () => {
 
     it('keeps applied non-zero when the metadata write throws after entities landed', async () => {
       const { esClient, search, esql } = makeEsClient();
-      const { crudClient, entityMetadataClient, bulkAppend } = makeClients();
+      const { crudClient, entityMetadataClient, relationshipsClient, bulkAppend } = makeClients();
 
       search.mockResolvedValueOnce(
         successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }])
@@ -1816,6 +1821,7 @@ describe('runRelationshipMaintainer', () => {
         namespace: 'default',
         crudClient,
         entityMetadataClient,
+        relationshipsClient,
         integrations: [baseConfig],
         maintainerName: 'communicates_with',
         telemetryCollector: collector,
