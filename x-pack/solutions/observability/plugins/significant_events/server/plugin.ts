@@ -32,10 +32,7 @@ import {
 } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import {
-  NIGHTSHIFT_ENABLED_FLAG,
-  SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
-} from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
   getRelayAppConnectionSavedObjectType,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -232,10 +229,6 @@ export class SignificantEventsPlugin
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
         space,
-        useRuleEventsRead$: coreStart.featureFlags.getBooleanValue$(
-          SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
-          false
-        ),
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
