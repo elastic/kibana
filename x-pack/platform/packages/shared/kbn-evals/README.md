@@ -44,17 +44,26 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 
 #### Key flags
 
-| Flag                | Description                                                            |
-| ------------------- | ---------------------------------------------------------------------- |
-| `--suite <id>`      | Suite to run (interactive prompt if omitted)                           |
-| `--model <id>`      | Connector/model to evaluate (comma-separated OK)                       |
-| `--judge <id>`      | Connector for LLM-as-a-judge evaluators                                |
-| `--grep <pattern>`  | Filter tests by name                                                   |
-| `--repetitions <n>` | Repeat each example N times                                            |
-| `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
-| `--skip-server`     | Skip EDOT/Scout startup (use existing services)                        |
-| `--skip-init`       | Skip config and connector setup                                        |
-| `--dry-run`         | Print configuration and exit                                           |
+| Flag                     | Description                                                            |
+| ------------------------ | ---------------------------------------------------------------------- |
+| `--suite <id>`           | Suite to run (interactive prompt if omitted)                           |
+| `--model <id>`           | Connector/model to evaluate (comma-separated OK)                       |
+| `--judge <id>`           | Connector for LLM-as-a-judge evaluators                                |
+| `--grep <pattern>`       | Filter tests by name                                                   |
+| `--repetitions <n>`      | Repeat each example N times                                            |
+| `--space-ids <ids>`      | Spaces to assign datasets and scores to (the run works from the first) |
+| `--skip-server`          | Skip EDOT/Scout startup (use existing services)                        |
+| `--skip-init`            | Skip config and connector setup                                        |
+| `--allow-missing-traces` | Warn instead of failing when the trace export check fails              |
+| `--dry-run`              | Print configuration and exit                                           |
+
+#### Trace export check
+
+Before the suite runs, `start` and `run` send a test span through every OTLP exporter in `TRACING_EXPORTERS` (`http`, `grpc`, `proto`; Phoenix and Langfuse are not checked) and wait up to 60s for it to appear in `traces-*` on `TRACING_ES_URL`. If an exporter rejects the span, or the span never arrives (for example, the EDOT collector is dropping data because its credentials expired), the run fails before any examples execute.
+
+- The check is skipped when `TRACING_EXPORTERS` is not set or contains no OTLP exporter.
+- Without `TRACING_ES_URL`, only the exporter's acceptance is checked; delivery is not verified.
+- An auto-selected `local` export profile only warns. Pass `--allow-missing-traces` to warn instead of failing in any other case.
 
 #### EIS connector setup
 

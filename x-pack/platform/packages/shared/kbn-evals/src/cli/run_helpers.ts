@@ -485,6 +485,10 @@ export const buildEvalRunArgs = ({
     runArgs.push('--skip-server');
   }
 
+  if (flagsReader.boolean('allow-missing-traces')) {
+    runArgs.push('--allow-missing-traces');
+  }
+
   return runArgs;
 };
 
@@ -503,7 +507,23 @@ export const evalRunFlags: FlagOptions = {
     'evaluations-kbn-url',
     'evaluations-kbn-api-key',
   ],
-  boolean: ['skip-server', 'dry-run', 'skip-init'],
+  boolean: ['skip-server', 'dry-run', 'skip-init', 'allow-missing-traces'],
   alias: { model: 'project', judge: 'evaluation-connector-id' },
-  default: { 'skip-server': false, 'dry-run': false, 'skip-init': false },
+  default: {
+    'skip-server': false,
+    'dry-run': false,
+    'skip-init': false,
+    'allow-missing-traces': false,
+  },
 };
+
+/**
+ * Whether a failed trace export check stops the run. An auto-selected `local` export profile only
+ * warns, matching how an unreachable TRACING_ES_URL is handled for it.
+ */
+export const shouldEnforceTraceExport = (
+  flagsReader: FlagsReader,
+  exportProfile: string | undefined
+): boolean =>
+  !flagsReader.boolean('allow-missing-traces') &&
+  !isExportProfileImplicitLocal(flagsReader, exportProfile);

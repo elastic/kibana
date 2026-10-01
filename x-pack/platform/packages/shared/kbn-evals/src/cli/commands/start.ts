@@ -16,7 +16,9 @@ import {
   buildEvalRunEnv,
   formatEvalCliCommand,
   evalRunFlags,
+  shouldEnforceTraceExport,
 } from '../run_helpers';
+import { runTraceExportPreflight } from '../trace_export_preflight';
 
 export const startCmd: Command<void> = {
   name: 'start',
@@ -115,6 +117,12 @@ export const startCmd: Command<void> = {
       profileEnvOverrides,
       suiteScoutEnv,
       flagsReader,
+      log,
+    });
+
+    await runTraceExportPreflight({
+      env: { ...process.env, ...envOverrides },
+      enforce: shouldEnforceTraceExport(flagsReader, exportProfile),
       log,
     });
 
