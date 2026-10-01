@@ -51,6 +51,17 @@ it('passes the status message and the delivered event to the client', async () =
   });
 });
 
+it.each([
+  ['workspace', 129],
+  ['channel', 257],
+  ['thread_ts', 65],
+  ['status_message_ts', 65],
+  ['event_id', 257],
+])('bounds %s so the thread key and the recorded event fit the thread subject', (field, length) => {
+  expect(params?.safeParse({ body: BODY }).success).toBe(true);
+  expect(params?.safeParse({ body: { ...BODY, [field]: 'x'.repeat(length) } }).success).toBe(false);
+});
+
 it('returns an empty body for a thread without an investigation', async () => {
   findOrCreateSlackThread.mockResolvedValue(undefined);
 

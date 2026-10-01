@@ -45,6 +45,18 @@ describe('rethrowInvestigationClientError', () => {
       }),
       403,
     ],
+    [
+      Object.assign(new Error('Too many subjects'), {
+        name: 'InvestigationAttachmentInvalidRequestError',
+      }),
+      400,
+    ],
+    [
+      Object.assign(new Error('Concurrent update'), {
+        name: 'InvestigationAttachmentConflictError',
+      }),
+      409,
+    ],
   ])('maps %s to HTTP %i', (error, statusCode) => {
     expect(mapStatusCode(error)).toBe(statusCode);
   });
