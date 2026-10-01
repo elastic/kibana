@@ -11,7 +11,7 @@ import type { UiSettingsParams } from '@kbn/core/types';
 import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
-  ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID,
+  ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID,
   ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
   type AlertingAdvancedSettingId,
   type AlertingAdvancedSettingValueMap,
@@ -45,18 +45,18 @@ export const alertingGlobalAdvancedSettings = {
 } satisfies AlertingV2AdvancedSettingsRegistration<typeof ALERTING_V2_ENABLED_SETTING_ID>;
 
 export const alertingSpaceAdvancedSettings = {
-  [ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID]: {
+  [ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID]: {
     category: [ALERTING_CATEGORY],
-    name: i18n.translate('xpack.alertingVTwo.showStandardObservabilityAlertsPageSettingName', {
-      defaultMessage: 'Show standard Observability alerts page',
+    name: i18n.translate('xpack.alertingVTwo.showV1ObservabilityAlertsTableSettingName', {
+      defaultMessage: 'Show V1 Observability alerts table',
     }),
     type: 'boolean',
     value: false,
     description: i18n.translate(
-      'xpack.alertingVTwo.showStandardObservabilityAlertsPageSettingDescription',
+      'xpack.alertingVTwo.showV1ObservabilityAlertsTableSettingDescription',
       {
         defaultMessage:
-          'Show the standard Observability alerts page in navigation. Only shows alerts from standard alerting rules.',
+          'Show the V1 Observability alerts table in navigation. Only shows alerts from V1 alerting rules.',
       }
     ),
     schema: schema.boolean(),
@@ -78,7 +78,7 @@ export const alertingSpaceAdvancedSettings = {
     experimental: true,
   },
 } satisfies AlertingV2AdvancedSettingsRegistration<
-  | typeof ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID
+  | typeof ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID
   | typeof ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID
 >;
 

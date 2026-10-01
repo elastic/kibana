@@ -8,7 +8,7 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
-  ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID,
+  ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
 
 /**
@@ -71,20 +71,22 @@ export const shouldShowAlertingV2CreateRuleFlyout = (core: CoreStart): boolean =
 };
 
 /**
- * Returns whether the standard Observability alerts page should appear in
+ * Returns whether the V1 Observability alerts table should appear in
  * solution navigation.
  *
  * Always shown while Alerting v2 is disabled. When v2 is enabled, shown only
- * if the space-scoped `alerting:v1:showStandardObservabilityAlertsPage` setting is true.
+ * if the space-scoped `alerting:v1:showV1ObservabilityAlertsTable` setting is true.
  */
-export const shouldShowStandardObservabilityAlertsPage = (core: CoreStart): boolean => {
+export const shouldShowV1ObservabilityAlertsTable = (core: CoreStart): boolean => {
   if (!isAlertingV2Enabled(core)) {
     return true;
   }
 
   return (
-    core.settings.client.get<boolean>(ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID, false) ===
-    true
+    core.settings.client.get<boolean>(
+      ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID,
+      false
+    ) === true
   );
 };
 

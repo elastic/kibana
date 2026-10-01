@@ -19,7 +19,7 @@
  * login as custom roles and assert which panel children render.
  */
 
-import { ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID } from '@kbn/alerting-v2-constants';
+import { ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { KibanaRole } from '@kbn/scout-oblt';
 import {
   OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
@@ -101,7 +101,7 @@ const enableV2AndOpenNav = async ({
 }) => {
   await setAlertingV2NavSettings(kbnClient, scoutSpace, {
     v2Enabled: true,
-    showStandardAlertsPage: false,
+    showV1AlertsTable: false,
   });
   await browserAuth.loginAsAdmin();
   await pageObjects.observabilityNavigation.goto();
@@ -153,11 +153,11 @@ const expectPanelForRole = async (
   },
   role: KibanaRole,
   visible: readonly string[],
-  { showStandardAlertsPage = false }: { showStandardAlertsPage?: boolean } = {}
+  { showV1AlertsTable = false }: { showV1AlertsTable?: boolean } = {}
 ) => {
   await setAlertingV2NavSettings(kbnClient, scoutSpace, {
     v2Enabled: true,
-    showStandardAlertsPage,
+    showV1AlertsTable,
   });
   const nav = pageObjects.observabilityNavigation;
   await loadNavAsRole(browserAuth, nav, role);
@@ -176,13 +176,13 @@ test.describe(
       }
       await setAlertingV2NavSettings(kbnClient, scoutSpace, {
         v2Enabled: false,
-        showStandardAlertsPage: false,
+        showV1AlertsTable: false,
       });
     });
 
     test.afterAll(async ({ scoutSpace, kbnClient }) => {
       await unsetAlertingV2EnabledSetting(kbnClient);
-      await scoutSpace.uiSettings.unset(ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID);
+      await scoutSpace.uiSettings.unset(ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID);
     });
 
     test('shows a plain Alerts link that loads the classic alerts page when v2 is disabled', async ({
@@ -230,7 +230,7 @@ test.describe(
       ).toHaveCount(0);
     });
 
-    test('opens an Alerts panel without Alerts V1 when v2 is on and the standard alerts page is off', async ({
+    test('opens an Alerts panel without Alerts V1 when v2 is on and the V1 alerts table is off', async ({
       browserAuth,
       pageObjects,
       kbnClient,
@@ -238,7 +238,7 @@ test.describe(
     }) => {
       await setAlertingV2NavSettings(kbnClient, scoutSpace, {
         v2Enabled: true,
-        showStandardAlertsPage: false,
+        showV1AlertsTable: false,
       });
 
       await browserAuth.loginAsAdmin();
@@ -359,7 +359,7 @@ test.describe(
       await expectPageTitle(pageObjects.chrome.pageTitle, 'Execution history');
     });
 
-    test('clicking Alerts V1 loads the classic alerts page when the standard alerts page setting is on', async ({
+    test('clicking Alerts V1 loads the classic alerts page when the V1 alerts table setting is on', async ({
       browserAuth,
       pageObjects,
       kbnClient,
@@ -367,7 +367,7 @@ test.describe(
     }) => {
       await setAlertingV2NavSettings(kbnClient, scoutSpace, {
         v2Enabled: true,
-        showStandardAlertsPage: true,
+        showV1AlertsTable: true,
       });
 
       await browserAuth.loginAsAdmin();
@@ -398,7 +398,7 @@ test.describe(
     }) => {
       await setAlertingV2NavSettings(kbnClient, scoutSpace, {
         v2Enabled: false,
-        showStandardAlertsPage: false,
+        showV1AlertsTable: false,
       });
 
       await browserAuth.loginAsAdmin();
@@ -528,7 +528,7 @@ test.describe(
       );
     });
 
-    test('shows Alerts and Alerts V1 when the user has v1 observability alerts read and the standard alerts page is on', async ({
+    test('shows Alerts and Alerts V1 when the user has v1 observability alerts read and the V1 alerts table is on', async ({
       browserAuth,
       pageObjects,
       kbnClient,
@@ -539,10 +539,10 @@ test.describe(
           { browserAuth, pageObjects, kbnClient, scoutSpace },
           observabilityAlertingNavRole({ observabilityAlerts: ['read'] }),
           [PANEL_LINKS.alerts, ALERTS_DEEP_LINK],
-          { showStandardAlertsPage: true }
+          { showV1AlertsTable: true }
         );
       } finally {
-        await scoutSpace.uiSettings.unset(ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID);
+        await scoutSpace.uiSettings.unset(ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID);
         await kbnClient.uiSettings.waitForEventualCacheRefresh();
       }
     });

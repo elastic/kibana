@@ -10,7 +10,7 @@ export {
   hasAlertingV2Capability,
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
-  shouldShowStandardObservabilityAlertsPage,
+  shouldShowV1ObservabilityAlertsTable,
   canAccessAlertingV2Rules,
   type AlertingV2CapabilityFeature,
   type AlertingV2CapabilityLevel,

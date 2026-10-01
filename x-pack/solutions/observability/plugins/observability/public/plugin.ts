@@ -84,7 +84,7 @@ import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observabil
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
-import { shouldShowStandardObservabilityAlertsPage } from '@kbn/alerting-v2-utils';
+import { shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
@@ -216,7 +216,7 @@ export class Plugin
     {
       id: 'alerts',
       title: i18n.translate('xpack.observability.alertsLinkTitle', {
-        defaultMessage: 'Alerts (Standard)',
+        defaultMessage: 'Alerts (V1)',
       }),
       order: 8001,
       path: ALERTS_PATH,
@@ -544,7 +544,7 @@ export class Plugin
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
       pricing: coreStart.pricing,
-      showStandardAlertsInGlobalSearch: shouldShowStandardObservabilityAlertsPage(coreStart),
+      showV1AlertsInGlobalSearch: shouldShowV1ObservabilityAlertsTable(coreStart),
     });
 
     import('./navigation_tree').then(({ createDefinition }) => {

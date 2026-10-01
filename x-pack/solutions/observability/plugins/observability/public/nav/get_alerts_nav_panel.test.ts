@@ -209,7 +209,7 @@ describe('getAlertsNavPanel', () => {
       expect(getAlertsNavPanel(core)).toEqual([]);
     });
 
-    it('shows Alerts and Alerts V1 when the user has v1 alerts read and the standard alerts page setting is on', () => {
+    it('shows Alerts and Alerts V1 when the user has v1 alerts read and the V1 alerts table setting is on', () => {
       core.settings.client.get = <T>(_key: string) => true as T;
       setCapabilities(core, { observabilityAlerts: { show: true } });
 
@@ -217,12 +217,12 @@ describe('getAlertsNavPanel', () => {
         expect.objectContaining({ link: 'observabilityAlerting:alerts' }),
         expect.objectContaining({
           link: 'observability-overview:alerts',
-          title: 'Alerts (Standard)',
+          title: 'Alerts (V1)',
         }),
       ]);
     });
 
-    it('does not show Alerts V1 when the standard alerts page setting is off', () => {
+    it('does not show Alerts V1 when the V1 alerts table setting is off', () => {
       setCapabilities(core, { observabilityAlerts: { show: true } });
 
       expect(getSectionByTitle(core)?.children).toEqual([

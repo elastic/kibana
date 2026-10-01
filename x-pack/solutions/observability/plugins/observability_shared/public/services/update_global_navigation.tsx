@@ -46,13 +46,13 @@ export function updateGlobalNavigation({
   deepLinks,
   updater$,
   pricing,
-  showStandardAlertsInGlobalSearch = true,
+  showV1AlertsInGlobalSearch = true,
 }: {
   capabilities: ApplicationStart['capabilities'];
   deepLinks: AppDeepLink[];
   updater$: Subject<AppUpdater>;
   pricing: PricingServiceStart;
-  showStandardAlertsInGlobalSearch?: boolean;
+  showV1AlertsInGlobalSearch?: boolean;
 }) {
   const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
   const hasObsCapabilities = hasObservabilityCapabilities(capabilities);
@@ -77,7 +77,7 @@ export function updateGlobalNavigation({
           // Observability feature access only — cases-only users do not get alerts/rules nav.
           if (hasObsCapabilities) {
             const alertsVisibleIn: AppDeepLinkLocations[] = ['classicSideNav', 'projectSideNav'];
-            if (showStandardAlertsInGlobalSearch) {
+            if (showV1AlertsInGlobalSearch) {
               alertsVisibleIn.push('globalSearch');
             }
             return { ...link, visibleIn: alertsVisibleIn };

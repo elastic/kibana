@@ -12,7 +12,7 @@ import {
   hasAlertingV2Capability,
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
-  shouldShowStandardObservabilityAlertsPage,
+  shouldShowV1ObservabilityAlertsTable,
 } from './is_alerting_v2_enabled';
 
 describe('isAlertingV2Enabled', () => {
@@ -157,7 +157,7 @@ describe('hasAlertingV2Capability', () => {
   });
 });
 
-describe('shouldShowStandardObservabilityAlertsPage', () => {
+describe('shouldShowV1ObservabilityAlertsTable', () => {
   let core: CoreStart;
 
   beforeEach(() => {
@@ -167,27 +167,27 @@ describe('shouldShowStandardObservabilityAlertsPage', () => {
   });
 
   it('returns true when alerting v2 is disabled', () => {
-    expect(shouldShowStandardObservabilityAlertsPage(core)).toBe(true);
+    expect(shouldShowV1ObservabilityAlertsTable(core)).toBe(true);
   });
 
   it('returns false when alerting v2 is enabled and the space setting is off', () => {
     core.settings.globalClient.get = <T>(_key: string) => true as T;
 
-    expect(shouldShowStandardObservabilityAlertsPage(core)).toBe(false);
+    expect(shouldShowV1ObservabilityAlertsTable(core)).toBe(false);
   });
 
   it('returns true when alerting v2 is enabled and the space setting is on', () => {
     core.settings.globalClient.get = <T>(_key: string) => true as T;
     core.settings.client.get = <T>(_key: string) => true as T;
 
-    expect(shouldShowStandardObservabilityAlertsPage(core)).toBe(true);
+    expect(shouldShowV1ObservabilityAlertsTable(core)).toBe(true);
   });
 
   it('returns false when alerting v2 is enabled and the space setting is unset', () => {
     core.settings.globalClient.get = <T>(_key: string) => true as T;
     core.settings.client.get = <T>(_key: string) => undefined as T;
 
-    expect(shouldShowStandardObservabilityAlertsPage(core)).toBe(false);
+    expect(shouldShowV1ObservabilityAlertsTable(core)).toBe(false);
   });
 });
 
