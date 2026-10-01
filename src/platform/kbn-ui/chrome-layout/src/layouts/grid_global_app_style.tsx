@@ -82,10 +82,13 @@ const globalTempHackStyles = (
     }
 
     .euiFlyout[class*='right'] {
-      // match the application area border-radius on the right edge,
-      // but not for side-by-side child flyouts since they aren't positioned at the rightmost edge
+      // match the application area border-radius on the right edge for overlay flyouts,
+      // but not for side-by-side child flyouts (not at the rightmost edge) or push flyouts
+      // (they sit flush in the layout; EUI already uses clip-path: none for push)
       ${appearance === 'framed' &&
-      `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]) {
+      `&:not([class*='push']):not(
+          [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
+        ) {
           border-top-right-radius: ${_euiTheme.border.radius.frame};
           border-bottom-right-radius: ${_euiTheme.border.radius.frame};
           // EUI clips overlay-right flyout shadows with a sharp polygon; round it to match
@@ -96,6 +99,13 @@ const globalTempHackStyles = (
           ) !important;
           .euiFlyoutFooter {
             border-bottom-right-radius: ${_euiTheme.border.radius.frame};
+          }
+        }
+        &[class*='push'] {
+          border-radius: 0;
+          clip-path: none !important;
+          .euiFlyoutFooter {
+            border-radius: 0;
           }
         }
         // Preserve EUI's unclipped shadow when a child flyout is stacked on top.

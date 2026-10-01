@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiToolTip,
+  useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
 import type { CSSObject } from '@emotion/react';
@@ -27,6 +28,7 @@ import React, {
   useState,
 } from 'react';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_CANVAS_CHROME_INSET, WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
 
 export type WorkflowDetailBottomBarView = 'yaml' | 'graph';
 
@@ -57,8 +59,7 @@ export interface WorkflowDetailBottomBarProps {
   editorView: WorkflowDetailBottomBarView;
   onEditorViewChange: (next: WorkflowDetailBottomBarView) => void;
   /**
-   * Leftmost slot shown only in YAML view (e.g. "add step" + documentation).
-   * Mirrors ZoomControls in graph view.
+   * Leftmost slot shown in both YAML and graph views (Actions menu + documentation).
    */
   yamlActionsSlot?: ReactNode;
   toolsSlot?: ReactNode;
@@ -87,17 +88,8 @@ export interface WorkflowDetailBottomBarProps {
   showViewToggle?: boolean;
 }
 
-// Figma Shadow/Medium composite.
-const BAR_SHADOW =
-  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 4px 8px 0 rgba(43, 57, 79, 0.12), 0 8px 16px 0 rgba(43, 57, 79, 0.06)';
-
-// Subtle shadow for the active view-toggle button (Figma Shadow/X-small).
-const TOGGLE_ACTIVE_SHADOW =
-  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)';
-
-// Width (px) of the bar's position: relative container below which we switch
 // to the compact "…" pill. Chosen to give the full bar enough room before it
-// starts overlapping the zoom controls (bottom-left of the canvas).
+// starts overlapping the zoom stack (bottom-left) or minimap (bottom-right).
 const COMPACT_THRESHOLD_PX = 800;
 
 function ViewToggle({
@@ -108,11 +100,14 @@ function ViewToggle({
   onEditorViewChange: (next: WorkflowDetailBottomBarView) => void;
 }) {
   const { euiTheme } = useEuiTheme();
+  const activeToggleShadow = useEuiShadow('xs');
   const items: Array<{ id: WorkflowDetailBottomBarView; iconType: string; label: string }> = [
     {
       id: 'graph',
       iconType: 'workflow',
-      label: i18n.translate('workflowsUi.bottomBar.editorViewGraph', { defaultMessage: 'Graph' }),
+      label: i18n.translate('workflowsUi.bottomBar.editorViewGraph', {
+        defaultMessage: 'Visual builder',
+      }),
     },
     {
       id: 'yaml',
@@ -130,7 +125,7 @@ function ViewToggle({
       css={{
         background: euiTheme.colors.backgroundBaseSubdued,
         border: euiTheme.border.thin,
-        borderRadius: euiTheme.border.radius.control,
+        borderRadius: WORKFLOWS_SURFACE_RADIUS,
         padding: euiTheme.size.xs,
         display: 'flex',
         alignItems: 'center',
@@ -158,7 +153,7 @@ function ViewToggle({
                 borderRadius: euiTheme.border.radius.control,
                 padding: 0,
                 background: active ? euiTheme.colors.backgroundBasePlain : 'transparent',
-                boxShadow: active ? TOGGLE_ACTIVE_SHADOW : 'none',
+                boxShadow: active ? activeToggleShadow : 'none',
                 color: euiTheme.colors.text,
                 transition: 'background 120ms ease, box-shadow 120ms ease',
                 '&:hover': {
@@ -306,6 +301,7 @@ export function WorkflowDetailBottomBar({
   showViewToggle = true,
 }: WorkflowDetailBottomBarProps) {
   const { euiTheme } = useEuiTheme();
+  const floatingShadow = useEuiShadow('m');
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [compact, setCompact] = useState(false);
   const hasTools = Boolean(toolsSlot) || Boolean(toolsMenuItems?.length);
@@ -368,7 +364,7 @@ export function WorkflowDetailBottomBar({
     position: 'absolute',
     left: -2,
     right: -2,
-    bottom: 12 + bottomOffset,
+    bottom: WORKFLOWS_CANVAS_CHROME_INSET + bottomOffset,
     zIndex: euiTheme.levels.header,
     display: 'flex',
     justifyContent: 'center',
@@ -383,27 +379,29 @@ export function WorkflowDetailBottomBar({
     <WorkflowBottomBarContext.Provider value={{ isExpanded }}>
       <div ref={containerRef} css={barCss} data-test-subj="workflowDetailBottomBar">
         <div
-          css={{
-            pointerEvents: isExpanded ? 'auto' : 'none',
-            opacity: isExpanded ? 1 : 0,
-            transition: 'opacity 200ms ease',
-            background: euiTheme.colors.backgroundBasePlain,
-            borderRadius: 12,
-            paddingBlock: euiTheme.size.s,
-            paddingLeft: 12,
-            paddingRight: euiTheme.size.s,
-            boxShadow: BAR_SHADOW,
-            display: 'inline-flex',
-            maxWidth: 'min(980px, 100%)',
-            position: 'relative',
-            zIndex: 1,
-          }}
+          css={[
+            {
+              pointerEvents: isExpanded ? 'auto' : 'none',
+              opacity: isExpanded ? 1 : 0,
+              transition: 'opacity 200ms ease',
+              background: euiTheme.colors.backgroundBasePlain,
+              borderRadius: WORKFLOWS_SURFACE_RADIUS,
+              paddingBlock: euiTheme.size.s,
+              paddingLeft: 12,
+              paddingRight: euiTheme.size.s,
+              display: 'inline-flex',
+              maxWidth: 'min(980px, 100%)',
+              position: 'relative',
+              zIndex: 1,
+            },
+            floatingShadow,
+          ]}
           onMouseEnter={handleExpandedMouseEnter}
           onMouseLeave={handleExpandedMouseLeave}
         >
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap={false}>
-            {/* Left section — yaml actions slot, only shown in yaml view. */}
-            {yamlActionsSlot && editorView === 'yaml' ? (
+            {/* Left section — Actions menu + documentation in both editor views. */}
+            {yamlActionsSlot ? (
               <>
                 <EuiFlexItem grow={false}>{yamlActionsSlot}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -455,24 +453,26 @@ export function WorkflowDetailBottomBar({
           role="button"
           tabIndex={0}
           aria-label={pillLabel}
-          css={{
-            position: 'absolute',
-            left: '50%',
-            bottom: 0,
-            transform: 'translateX(-50%)',
-            pointerEvents: isExpanded ? 'none' : 'auto',
-            opacity: isExpanded ? 0 : 1,
-            transition: 'opacity 200ms ease',
-            width: 64,
-            height: 24,
-            background: euiTheme.colors.primary,
-            borderRadius: 30,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: BAR_SHADOW,
-            cursor: 'pointer',
-          }}
+          css={[
+            {
+              position: 'absolute',
+              left: '50%',
+              bottom: 0,
+              transform: 'translateX(-50%)',
+              pointerEvents: isExpanded ? 'none' : 'auto',
+              opacity: isExpanded ? 0 : 1,
+              transition: 'opacity 200ms ease',
+              width: 64,
+              height: 24,
+              background: euiTheme.colors.primary,
+              borderRadius: 30,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            },
+            floatingShadow,
+          ]}
           onMouseEnter={handlePillMouseEnter}
           onFocus={handlePillMouseEnter}
           onBlur={handleExpandedMouseLeave}

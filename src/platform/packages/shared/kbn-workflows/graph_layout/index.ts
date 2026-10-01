@@ -9,6 +9,7 @@
 
 export {
   TRIGGER_STEP_TYPES,
+  getStepFallbackSteps,
   type EdgeBranchType,
   type HandleSide,
   type LayoutDirection,

@@ -10,7 +10,7 @@
 import { debounce } from 'lodash';
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux-toolkit-v1';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { _clearComputedData, _setComputedDataInternal, setYamlString } from './slice';
+import { _clearComputedData, _setComputedDataInternal, seedCreateYaml, setYamlString } from './slice';
 import { performComputation } from './utils/computation';
 import type { RootState } from '../types';
 
@@ -44,13 +44,22 @@ const debouncedCompute = debounce(
   COMPUTATION_DEBOUNCE_MS
 );
 
+/**
+ * Flush a pending graph recompute immediately. Visual-editor mutations call
+ * this after `setYamlString` so the canvas does not sit on the empty/stale
+ * graph for the typing debounce window.
+ */
+export const flushWorkflowComputation = (): void => {
+  debouncedCompute.flush();
+};
+
 // Side effects middleware - computes derived data when yamlString changes (debounced)
 const workflowComputationMiddleware: Middleware =
   (store: MiddlewareAPI<Dispatch<AnyAction>, RootState>) => (next) => (action) => {
     const result = next(action);
 
-    // Only react to yamlString changes
-    if (setYamlString.match(action)) {
+    // React to yaml edits and create-session seeds (both update yamlString).
+    if (setYamlString.match(action) || seedCreateYaml.match(action)) {
       debouncedCompute.cancel();
 
       const yamlString = action.payload;

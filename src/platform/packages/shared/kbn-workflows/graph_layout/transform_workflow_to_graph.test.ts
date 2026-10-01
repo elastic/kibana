@@ -465,6 +465,36 @@ describe('transformWorkflowToGraph', () => {
     );
   });
 
+  it('synthesizes labeled bypass lanes for empty switch cases', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'sw',
+            type: 'switch',
+            expression: '{{ steps.x.output.v }}',
+            cases: [
+              { match: 'draft', steps: [] },
+              { match: 'ready', steps: [{ name: 'on_ready', type: 'http' }] },
+            ],
+          },
+          { name: 'after', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+
+    const fromGate = r.edges.filter((e) => e.source === 'sw');
+    expect(fromGate.map((e) => e.label).sort()).toEqual(['default', 'draft', 'ready']);
+    expect(r.bypassLaneNodes.length).toBeGreaterThanOrEqual(2);
+    expect(r.edges).toContainEqual(
+      expect.objectContaining({
+        source: 'sw',
+        branchType: 'switch',
+        label: 'draft',
+      })
+    );
+  });
+
   it('chains multiple steps inside a switch case sequentially', () => {
     const r = transformWorkflowToGraph(
       minimal({
@@ -932,5 +962,52 @@ describe('transformWorkflowToGraph — nodeRefs', () => {
       ];
       expect(allBypassIds).toHaveLength(new Set(allBypassIds).size);
     });
+  });
+});
+
+// ─── on-failure fallback (error routes) ──────────────────────────────────────
+describe('transformWorkflowToGraph — on-failure.fallback', () => {
+  const wfWithFallback = () =>
+    minimal({
+      steps: [
+        {
+          name: 'fetch',
+          type: 'http',
+          'on-failure': { fallback: [{ name: 'notify', type: 'console' }] },
+        },
+        { name: 'after', type: 'console' },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+
+  it('renders fallback steps as nodes tagged with fallbackOf and a dashed failure edge', () => {
+    const r = transformWorkflowToGraph(wfWithFallback());
+    const fallbackNode = r.nodes.find((n) => n.id === 'notify');
+    expect(fallbackNode).toBeDefined();
+    expect(fallbackNode!.data.fallbackOf).toBe('fetch');
+    expect(r.nodeRefs.notify).toEqual({ kind: 'step', stepName: 'notify', fallbackOf: 'fetch' });
+
+    const failureEdge = r.edges.find((e) => e.source === 'fetch' && e.target === 'notify');
+    expect(failureEdge).toMatchObject({ isFailure: true, label: 'on failure' });
+  });
+
+  it('keeps the main flow going from the step itself, not from the fallback leaf', () => {
+    const r = transformWorkflowToGraph(wfWithFallback());
+    expect(r.edges.some((e) => e.source === 'fetch' && e.target === 'after')).toBe(true);
+    expect(r.edges.some((e) => e.source === 'notify' && e.target === 'after')).toBe(false);
+  });
+
+  it('does not tag regular steps with fallbackOf', () => {
+    const r = transformWorkflowToGraph(wfWithFallback());
+    expect(r.nodeRefs.fetch).toEqual({ kind: 'step', stepName: 'fetch' });
+    expect(r.nodes.find((n) => n.id === 'after')!.data.fallbackOf).toBeUndefined();
+  });
+
+  it('changes the topology fingerprint when an error route is added', () => {
+    const base = minimal({
+      steps: [{ name: 'fetch', type: 'http' }] as unknown as WorkflowYaml['steps'],
+    });
+    expect(computeTopologyFingerprint(base)).not.toEqual(
+      computeTopologyFingerprint(wfWithFallback())
+    );
   });
 });

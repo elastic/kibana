@@ -9,6 +9,7 @@
 
 import type { EsWorkflow } from '@kbn/workflows';
 import { updateYamlField } from '@kbn/workflows-yaml';
+import { parseDocument } from 'yaml';
 
 /**
  * Checks if a workflow update affects YAML metadata fields
@@ -23,9 +24,26 @@ export function affectsYamlMetadata(workflow: Partial<EsWorkflow>): boolean {
   );
 }
 
+const deleteYamlField = (yamlString: string, fieldPath: string): string => {
+  try {
+    const doc = parseDocument(yamlString);
+    const pathArray = fieldPath.split('.');
+    if (!doc.hasIn(pathArray)) {
+      return yamlString;
+    }
+    doc.deleteIn(pathArray);
+    return doc.toString();
+  } catch {
+    return yamlString;
+  }
+};
+
 /**
  * Updates multiple YAML fields in a workflow YAML string while preserving formatting.
  * This is a convenience function that applies multiple field updates in sequence.
+ *
+ * Empty optional metadata (`description: ''`, `tags: []`) removes the key from the
+ * document — empty optional keys must not linger in YAML.
  *
  * @param yamlString - The original YAML string
  * @param workflow - The workflow update object containing fields to update
@@ -46,10 +64,16 @@ export function updateWorkflowYamlFields(
     updatedYaml = updateYamlField(updatedYaml, 'enabled', enabledValue);
   }
   if (workflow.description !== undefined) {
-    updatedYaml = updateYamlField(updatedYaml, 'description', workflow.description);
+    updatedYaml =
+      workflow.description === ''
+        ? deleteYamlField(updatedYaml, 'description')
+        : updateYamlField(updatedYaml, 'description', workflow.description);
   }
   if (workflow.tags !== undefined) {
-    updatedYaml = updateYamlField(updatedYaml, 'tags', workflow.tags);
+    updatedYaml =
+      workflow.tags.length === 0
+        ? deleteYamlField(updatedYaml, 'tags')
+        : updateYamlField(updatedYaml, 'tags', workflow.tags);
   }
 
   return updatedYaml;

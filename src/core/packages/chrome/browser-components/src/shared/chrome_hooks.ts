@@ -280,3 +280,13 @@ export function useUserMenu(): ReactNode {
   const content$ = useMemo(() => chrome.controls.userMenu.get$(), [chrome]);
   return useObservable(content$, null);
 }
+
+/**
+ * Returns trailing header content set via
+ * `chrome.controls.appendRight.set()`, or null if not set.
+ */
+export function useAppendRight(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.controls.appendRight.get$(), [chrome]);
+  return useObservable(content$, null);
+}

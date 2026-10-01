@@ -61,6 +61,16 @@ describe('buildDisplayOptions', () => {
     expect(dataKinds(result)).toEqual(['command', 'command']);
   });
 
+  it('labels the root section Add trigger when only triggers are offered', () => {
+    const result = buildDisplayOptions({ ...base, addGroupContent: 'triggers' });
+    expect(groupLabels(result)[0]).toBe('Add trigger');
+  });
+
+  it('labels the root section Add step when only steps are offered', () => {
+    const result = buildDisplayOptions({ ...base, addGroupContent: 'steps' });
+    expect(groupLabels(result)[0]).toBe('Add step');
+  });
+
   it('returns action items alphabetically when inside a sub-group', () => {
     const options = [makeAction('z', 'Zulu'), makeAction('a', 'Alpha'), makeAction('m', 'Mike')];
     const result = buildDisplayOptions({ ...base, options, currentPath: ['group1'] });

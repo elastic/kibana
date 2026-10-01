@@ -11,7 +11,8 @@ import type { WorkflowYaml } from '../spec/schema';
 
 export type Step = WorkflowYaml['steps'][number];
 
-export const DEFAULT_NODE_STYLE = { width: 300, height: 52 } as const;
+/** Step card: 32px icon chip + 12px padding top/bottom. */
+export const DEFAULT_NODE_STYLE = { width: 300, height: 56 } as const;
 
 export const FLOW_CONTROL_STEP_TYPES: ReadonlySet<string> = new Set([
   'if',
@@ -59,6 +60,11 @@ export interface StepNodeData extends Record<string, unknown> {
   label: string;
   stepType: string;
   step?: Step;
+  /**
+   * Set on steps rendered from a parent step's `on-failure.fallback` list —
+   * the name of the step whose error route this node belongs to.
+   */
+  fallbackOf?: string;
 }
 
 export interface TriggerNodeData extends Record<string, unknown> {
@@ -111,6 +117,11 @@ export interface GraphEdge {
   branchIndex?: number;
   /** Display label rendered on the edge (e.g. 'true' / 'false' / case value). */
   label?: string;
+  /**
+   * True for the error route from a step into its first `on-failure.fallback`
+   * step. Rendered as a dashed danger connector with an "on failure" pill.
+   */
+  isFailure?: boolean;
 }
 
 /**
@@ -138,8 +149,24 @@ export interface ForeachGroup {
  * lookup rather than guessing by type).
  */
 export type NodeRef =
-  | { readonly kind: 'step'; readonly stepName: string }
+  | {
+      readonly kind: 'step';
+      readonly stepName: string;
+      /** Name of the parent step when this step lives in its `on-failure.fallback` list. */
+      readonly fallbackOf?: string;
+    }
   | { readonly kind: 'trigger'; readonly triggerIndex: number; readonly triggerType: string };
+
+/**
+ * Returns the `on-failure.fallback` step list of a step, or an empty array when
+ * the step has no error route (or the value is malformed).
+ */
+export function getStepFallbackSteps(step: Step): Step[] {
+  const onFailure = (step as Record<string, unknown>)['on-failure'];
+  if (typeof onFailure !== 'object' || onFailure === null) return [];
+  const fallback = (onFailure as Record<string, unknown>).fallback;
+  return Array.isArray(fallback) ? fallback.filter(isStep) : [];
+}
 
 /** Side a node anchors its source/target handle on. Maps to `@xyflow/react`'s `Position`. */
 export type HandleSide = 'top' | 'right' | 'bottom' | 'left';

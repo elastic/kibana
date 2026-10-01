@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiButtonIcon, EuiPageTemplate, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { selectUnit } from '@formatjs/intl-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -24,10 +24,17 @@ import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
+import { WorkflowSettingsFlyout } from './workflow_settings_flyout';
+import {
+  getWorkflowSettingsSurfaceVariant,
+  subscribeWorkflowSettingsSurfaceVariant,
+  type WorkflowSettingsSurfaceVariant,
+} from '../../../features/workflow_visual_editor/ui/workflow_settings_surface_variant';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
+  selectEditorWorkflowDefinition,
   selectHasChanges,
   selectHasYamlSchemaValidationErrors,
   selectIsSavingYaml,
@@ -37,6 +44,7 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
@@ -143,12 +151,26 @@ export const WorkflowDetailHeader = React.memo(
     const isExecutionsTab = activeTab === 'executions';
 
     const workflow = useSelector(selectWorkflow);
+    const editorDefinition = useSelector(selectEditorWorkflowDefinition);
     const canUpdateWorkflow = hasUpdatePrivilege && workflow?.permissions?.edit !== false;
     const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
     const canManageAccess = hasUpdatePrivilege && workflow?.permissions?.manage === true;
     const isManagedWorkflow = workflow?.managed === true;
+    const isEditorReadOnly = useWorkflowEditorReadOnly();
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [settingsSurfaceVariant, setSettingsSurfaceVariant] =
+      useState<WorkflowSettingsSurfaceVariant>(() => getWorkflowSettingsSurfaceVariant());
+    const showHeaderSettingsGear = settingsSurfaceVariant === 'a';
     const canReadVisibleWorkflowExecution =
       canReadWorkflowExecution && (!isManagedWorkflow || canReadManagedWorkflowExecution);
+
+    useEffect(
+      () =>
+        subscribeWorkflowSettingsSurfaceVariant(() => {
+          setSettingsSurfaceVariant(getWorkflowSettingsSurfaceVariant());
+        }),
+      []
+    );
     const executionsTabDisabledTooltip = isManagedWorkflow
       ? executionsTabReadManagedExecutionDisabledTooltip
       : executionsTabReadExecutionDisabledTooltip;
@@ -159,12 +181,23 @@ export const WorkflowDetailHeader = React.memo(
 
     const { name, isEnabled, lastUpdatedAt } = useMemo(
       () => ({
-        name: workflow?.name ?? 'New workflow',
+        name: editorDefinition?.name ?? workflow?.name ?? 'New workflow',
         isEnabled: workflow?.enabled ?? false,
         lastUpdatedAt: workflow ? new Date(workflow.lastUpdatedAt) : null,
       }),
-      [workflow]
+      [editorDefinition?.name, workflow]
     );
+
+    const openSettings = useCallback(() => {
+      setIsSettingsOpen(true);
+    }, []);
+    const closeSettings = useCallback(() => {
+      setIsSettingsOpen(false);
+    }, []);
+
+    const settingsAriaLabel = i18n.translate('workflows.workflowDetailHeader.settingsAriaLabel', {
+      defaultMessage: 'Workflow settings',
+    });
 
     const saveYaml = useSaveYaml();
     const isSaving = useSelector(selectIsSavingYaml);
@@ -276,7 +309,7 @@ export const WorkflowDetailHeader = React.memo(
     const executionsToggleItem = useMemo<AppMenuItemType>(
       () => ({
         id: 'toggleExecutions',
-        order: 0,
+        order: 1,
         label: i18n.translate('workflows.workflowDetailHeader.executionsButton', {
           defaultMessage: 'Executions',
         }),
@@ -312,7 +345,8 @@ export const WorkflowDetailHeader = React.memo(
 
       return {
         id: 'workflowHistory',
-        order: 2,
+        // Left of Executions (order 1) — primary chrome, not overflow.
+        order: 0,
         label: i18n.translate('workflows.workflowDetailHeader.historyButton', {
           defaultMessage: 'History',
         }),
@@ -361,6 +395,25 @@ export const WorkflowDetailHeader = React.memo(
     const badges = useMemo<AppHeaderBadge[]>(() => {
       const result: AppHeaderBadge[] = [];
 
+      // Variant A keeps the header flyout. B/C open settings from the canvas.
+      if (showHeaderSettingsGear) {
+        result.push({
+          label: settingsAriaLabel,
+          // Custom gear control sits beside the title; AppHeader has no public titleAppend.
+          renderCustomBadge: () => (
+            <EuiToolTip content={settingsAriaLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="gear"
+                color="text"
+                aria-label={settingsAriaLabel}
+                onClick={openSettings}
+                data-test-subj="workflowSettingsButton"
+              />
+            </EuiToolTip>
+          ),
+        });
+      }
+
       if (isManagedWorkflow) {
         result.push({
           label: i18n.translate('workflows.managedWorkflowBadge.label', {
@@ -379,7 +432,7 @@ export const WorkflowDetailHeader = React.memo(
           label: i18n.translate('workflows.unsavedChangesBadge', {
             defaultMessage: 'Unsaved changes',
           }),
-          color: 'primary',
+          color: 'warning',
           onClick: () => setHighlightDiff((state) => !state),
           onClickAriaLabel: highlightDiff
             ? i18n.translate('workflows.unsavedChangesBadge.hideDiff', {
@@ -400,6 +453,9 @@ export const WorkflowDetailHeader = React.memo(
 
       return result;
     }, [
+      showHeaderSettingsGear,
+      settingsAriaLabel,
+      openSettings,
       isManagedWorkflow,
       hasUnsavedChanges,
       workflowId,
@@ -430,9 +486,14 @@ export const WorkflowDetailHeader = React.memo(
             : undefined,
         });
       }
+      // History first (order 0), then Executions (order 1) — matches header chrome.
+      if (historyItem) {
+        items.push(historyItem);
+      }
       if (workflowId) {
         items.push(executionsToggleItem);
       }
+      // Run lives on the visual-builder bottom bar when the graph editor is on.
       if (!isVisualEditorEnabled) {
         items.push({
           id: 'runWorkflow',
@@ -445,9 +506,6 @@ export const WorkflowDetailHeader = React.memo(
           tooltipContent: runWorkflowTooltipContent ?? undefined,
           testId: 'runWorkflowHeaderButton',
         });
-      }
-      if (historyItem) {
-        items.push(historyItem);
       }
       if (addConnectorsMenuItem) {
         items.push(addConnectorsMenuItem);
@@ -481,11 +539,11 @@ export const WorkflowDetailHeader = React.memo(
       workflow?.permissions?.manage,
       isExecutionsTab,
       workflowId,
-      executionsToggleItem,
       historyItem,
+      executionsToggleItem,
+      isVisualEditorEnabled,
       addConnectorsMenuItem,
       enabledSwitchConfig,
-      isVisualEditorEnabled,
       handleSaveWorkflow,
       canSaveWorkflow,
       isLoading,
@@ -512,6 +570,13 @@ export const WorkflowDetailHeader = React.memo(
             spacing="compact"
           />
         </EuiPageTemplate>
+        {showHeaderSettingsGear ? (
+          <WorkflowSettingsFlyout
+            isOpen={isSettingsOpen}
+            onClose={closeSettings}
+            readOnly={isEditorReadOnly}
+          />
+        ) : null}
         {isAccessOpen && workflow && (
           <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
         )}

@@ -18,7 +18,7 @@ export const useWorkflowUrlState = () => {
   }, []);
   return {
     activeTab,
-    editorView: 'yaml' as const,
+    editorView: 'graph' as const,
     graphDirection: 'TB' as const,
     selectedExecutionId: undefined,
     selectedStepExecutionId: undefined,

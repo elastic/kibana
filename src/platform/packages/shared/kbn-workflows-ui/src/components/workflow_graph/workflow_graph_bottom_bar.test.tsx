@@ -168,4 +168,17 @@ describe('WorkflowDetailBottomBar', () => {
     );
     expect(screen.getByTestId('run-btn')).toBeInTheDocument();
   });
+
+  it('shows the actions slot in both yaml and graph views', () => {
+    const slot = <button type="button" data-test-subj="actions-slot">{'Actions'}</button>;
+    const { rerender } = render(
+      <WorkflowDetailBottomBar {...defaultProps} editorView="yaml" yamlActionsSlot={slot} />
+    );
+    expect(screen.getByTestId('actions-slot')).toBeInTheDocument();
+
+    rerender(
+      <WorkflowDetailBottomBar {...defaultProps} editorView="graph" yamlActionsSlot={slot} />
+    );
+    expect(screen.getByTestId('actions-slot')).toBeInTheDocument();
+  });
 });
