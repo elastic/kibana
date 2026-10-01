@@ -983,11 +983,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "364bd131bc78f85db0f341fddf77e4ad7839ce0a026267bcb8fbec34b7ded4e8"
+      "sha256": "4ccb677e9708046c7144e21c408aebb486c94982380f98cd4707c8a274cbdb05"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "0962c6e10447888334c0f1d667d49f308e0033bb8390c2e0baf178f45c5cdca6"
+      "sha256": "4fc180515fa7a0c48f2210f29b8c9dca41bfc87eeb3541ebe0935999479bdd79"
     }
   }
 }
