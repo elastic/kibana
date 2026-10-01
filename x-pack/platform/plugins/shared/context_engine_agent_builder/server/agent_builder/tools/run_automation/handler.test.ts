@@ -266,6 +266,38 @@ describe('runAutomationHandler', () => {
 
       expect(result.status).toBe('failed');
       expect(result.errorMessage).toBe('ES|QL syntax error');
+      expect(result.durationMs).toBeUndefined();
+    });
+
+    it('reports a cancelled pilot as ended without a duration to project from', async () => {
+      getWorkflowMock.mockResolvedValue(pilotWorkflow);
+      executeWorkflow.mockResolvedValue({
+        success: true,
+        execution: {
+          execution_id: 'exec-pilot',
+          status: 'cancelled',
+          started_at: '2026-10-01T10:00:00.000Z',
+          finished_at: '2026-10-01T10:00:20.000Z',
+        },
+      });
+
+      const result = await runAutomationHandler(buildPilotDeps());
+
+      expect(result.status).toBe('cancelled');
+      expect(result.durationMs).toBeUndefined();
+      expect(result.errorMessage).toMatch(/cancelled/);
+      expect(result.statusCheckHint).toBeUndefined();
+    });
+
+    it('says the workflow was not found rather than asking for a reinstall', async () => {
+      getWorkflowMock.mockResolvedValue(null);
+
+      const result = await runAutomationHandler(buildPilotDeps());
+
+      expect(executeWorkflow).not.toHaveBeenCalled();
+      expect(result.started).toBe(false);
+      expect(result.reason).toMatch(/not found/);
+      expect(result.reason).not.toMatch(/reinstall/i);
     });
 
     it('returns the execution id to poll when the pilot outlasts the wait', async () => {
@@ -298,7 +330,8 @@ describe('runAutomationHandler', () => {
       expect(executeWorkflow).not.toHaveBeenCalled();
       expect(result.started).toBe(false);
       expect(result.reason).toMatch(/pilot_size/);
-      expect(result.reason).toMatch(/reinstall/i);
+      expect(result.reason).toMatch(/document_orchestration or unit_profile/);
+      expect(result.reason).toMatch(/reinstalled with the same name/);
     });
   });
 });

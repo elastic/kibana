@@ -45,7 +45,7 @@ describe('Context Engine agent instructions', () => {
 
     it('keeps the facts the user needs to decide', () => {
       expect(instructions).toMatch(
-        /how many one run writes, how long a run takes and what it costs, once a pilot has measured them/
+        /how many one run writes and the model calls that costs, how long a run takes once a pilot has measured it/
       );
     });
   });
@@ -100,6 +100,9 @@ describe('Context Engine agent instructions', () => {
       expect(instructions).toMatch(
         /Index\/Table Metadata is not that default: it is the strategy for routing between or joining several sources/
       );
+      expect(instructions).toMatch(
+        /A strategy built through a subagent still stops at the checkpoint before a subagent/
+      );
     });
 
     it('asks for intent where it cannot be inferred', () => {
@@ -113,7 +116,10 @@ describe('Context Engine agent instructions', () => {
     });
 
     it('asks before the build and not before the save or the run', () => {
-      expect(instructions).toMatch(/Ask before you build; do not ask before you save or run/);
+      expect(instructions).toMatch(
+        /Settle what to build before you build, asking only where it is not clear; do not ask before you save or run/
+      );
+      expect(instructions).not.toMatch(/Ask before you build;/);
       expect(instructions).toMatch(/The question you owed was the one before the build/);
     });
 

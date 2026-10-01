@@ -631,6 +631,15 @@ describe('aiIndexAutomationsSkill', () => {
       );
       expect(prose).toMatch(/Then call `run_automation` again without `pilotSize`/);
       expect(prose).toMatch(/The full run replaces the pilot's indicators/);
+      expect(prose).toMatch(
+        /If the user declines it, the pilot's indicators stay in the index: say so/
+      );
+    });
+
+    it('puts the over-an-hour warning and the cheaper option before the full-run dialog', () => {
+      expect(prose).toMatch(
+        /When it exceeds an hour, give the 🚨 warning and the cheaper option you would take in the same message\. Then call `run_automation` again/
+      );
     });
 
     it('skips the pilot where it measures nothing worth measuring', () => {
@@ -641,11 +650,11 @@ describe('aiIndexAutomationsSkill', () => {
       expect(prose).toMatch(/when the run writes no more units than the pilot would/);
     });
 
-    it('handles a failed or slow pilot without starting the full run', () => {
+    it('handles a pilot that did not complete without starting the full run', () => {
       expect(prose).toMatch(
-        /When the pilot's `status` is `failed`, report `errorMessage` and stop/
+        /When the pilot ended with any `status` other than `completed`, report `errorMessage` and stop/
       );
-      expect(prose).toMatch(/When it returns without `durationMs`, the pilot is still running/);
+      expect(prose).toMatch(/When it is still `running`, say the time is not yet measured/);
     });
 
     it('says a full run returns at once while a pilot waits', () => {

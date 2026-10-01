@@ -9,7 +9,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { WorkflowDetailDto } from '@kbn/workflows';
+import { isTerminalStatus, type WorkflowDetailDto } from '@kbn/workflows';
 import { runSavedAutomation, type RunAutomationResult } from '../save_automation/handler';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 
@@ -70,13 +70,19 @@ export const runAutomationHandler = async ({
   // A workflow without the input would ignore it and run over the full corpus.
   if (pilotSize !== undefined) {
     const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
+    if (!workflow) {
+      return {
+        started: false,
+        reason: `Workflow '${workflowId}' was not found in this space.`,
+      };
+    }
     if (!declaresPilotInput(workflow)) {
       return {
         started: false,
         reason:
           `Workflow '${workflowId}' does not declare the ${PILOT_SIZE_INPUT} input, so it cannot ` +
-          `run as a pilot. Reinstall it from the document_orchestration or unit_profile template ` +
-          `with the same name to add it.`,
+          `run as a pilot. Only document_orchestration or unit_profile automations can; one ` +
+          `installed before pilot mode existed gains it when reinstalled with the same name.`,
       };
     }
   }
@@ -107,7 +113,7 @@ export const runAutomationHandler = async ({
   const workflowUrl = `${workflowBaseUrl}?tab=executions&executionId=${encodeURIComponent(
     runResult.executionId ?? ''
   )}`;
-  const finished = runResult.durationMs !== undefined;
+  const finished = runResult.status !== undefined && isTerminalStatus(runResult.status);
 
   return {
     ...runResult,

@@ -18,6 +18,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import {
@@ -42,7 +43,7 @@ export interface RunAutomationResult {
   /** Why the run did not start. */
   reason?: string;
   /** Execution status, present when the call waited for the run. */
-  status?: string;
+  status?: ExecutionStatus;
   /** Wall-clock run time, present when the call waited and the run finished. */
   durationMs?: number;
   /** Why the run failed, present when the call waited and the run failed. */
@@ -615,16 +616,22 @@ export const runSavedAutomation = async ({
       };
     }
 
-    const durationMs = execution.finished_at
-      ? Date.parse(execution.finished_at) - Date.parse(execution.started_at)
-      : undefined;
+    const { status, started_at: startedAt, finished_at: finishedAt } = execution;
+    // Only a completed run measured anything; a cancelled or timed-out one stopped part-way.
+    const durationMs =
+      status === ExecutionStatus.COMPLETED && finishedAt
+        ? Date.parse(finishedAt) - Date.parse(startedAt)
+        : undefined;
+    const endedEarly = status !== ExecutionStatus.COMPLETED && isTerminalStatus(status);
 
     return {
       started: true,
       executionId: execution.execution_id,
-      status: execution.status,
+      status,
       ...(durationMs !== undefined && { durationMs }),
-      ...(execution.error_message && { errorMessage: execution.error_message }),
+      ...(endedEarly && {
+        errorMessage: execution.error_message ?? `The run ended with status '${status}'.`,
+      }),
       ...(enabledForRun && { enabledForRun }),
     };
   } catch (error) {
