@@ -31,7 +31,7 @@ export const formatRepairMessages = ({
   validated.flatMap(({ attempt, success, error }): BaseMessageLike[] => {
     const response = authored.find((outcome) => outcome.attempt === attempt)?.response;
     // Without a response (e.g. the model call itself failed) there is nothing to repair.
-    if (success || !response || !error) {
+    if (success || response === undefined || !error) {
       return [];
     }
     return [
