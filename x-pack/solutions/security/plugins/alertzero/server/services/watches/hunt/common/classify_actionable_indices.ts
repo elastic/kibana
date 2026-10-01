@@ -147,6 +147,16 @@ export const classifyActionableIndices = async ({
   const bounded = boundTargetPatterns(patterns);
   if (!bounded.collapsed) return { patterns: bounded.patterns, degraded: false };
 
+  if (!bounded.fits) {
+    // Returning the over-long list anyway would hand packaging a set the SSE then silently
+    // truncates to its own 64-entry cap, so a genuinely actionable index could read as
+    // non-actionable with nothing recording the cut. `resolveTier2Targets` already drops a list
+    // that does not fit for the same reason; this one was keeping it.
+    logger?.warn(
+      `Actionable indices named ${patterns.length} pattern(s), more than a request may carry even as vendor wildcards; naming none this run`
+    );
+    return { patterns: [], degraded: true };
+  }
   logger?.warn(
     `Actionable indices named ${patterns.length} pattern(s), more than a request may carry; collapsed to ${bounded.patterns.length}`
   );

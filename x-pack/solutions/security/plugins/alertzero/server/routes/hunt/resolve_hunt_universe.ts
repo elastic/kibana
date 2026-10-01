@@ -26,8 +26,8 @@ const isPatternList = (value: string[] | undefined): value is string[] =>
  * The patterns a hunt searches: the space's Security Solution default data view
  * (`securitySolution:defaultIndex`, exclusions included), which is what the analyst's own
  * Security app searches. Falls back to `['logs-*']` with one warning when the setting is
- * missing, not an array of patterns, or empty, so a misconfigured space still hunts the
- * streams Fleet integrations write rather than nothing.
+ * missing, not an array of patterns, empty, or unreadable, so a misconfigured space still
+ * hunts the streams Fleet integrations write rather than nothing.
  *
  * The read lives in the routes, not the service: the service takes the list as a parameter
  * and tests inject it directly.
@@ -37,9 +37,22 @@ export const resolveHuntUniverse = async (
   logger: Logger
 ): Promise<string[]> => {
   const { uiSettings } = await context.core;
-  const configured = await uiSettings.client.get<string[] | undefined>(
-    SECURITY_SOLUTION_DEFAULT_INDEX_ID
-  );
+  let configured: string[] | undefined;
+  try {
+    configured = await uiSettings.client.get<string[] | undefined>(
+      SECURITY_SOLUTION_DEFAULT_INDEX_ID
+    );
+  } catch (err) {
+    // The fallback exists so a space whose setting cannot be used still hunts. A read that
+    // throws (settings saved object unavailable, the setting unregistered in this context) is
+    // that same case, not a reason to fail the whole hunt.
+    logger.warn(
+      `Reading ${SECURITY_SOLUTION_DEFAULT_INDEX_ID} failed; hunting ${FALLBACK_HUNT_UNIVERSE.join(
+        ', '
+      )} instead: ${err instanceof Error ? err.message : String(err)}`
+    );
+    return [...FALLBACK_HUNT_UNIVERSE];
+  }
   if (isPatternList(configured)) return configured.map((pattern) => pattern.trim());
 
   logger.warn(

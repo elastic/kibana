@@ -60,6 +60,16 @@ describe('resolveHuntUniverse', () => {
     );
   });
 
+  it('falls back to logs-* when the settings read throws rather than failing the hunt', async () => {
+    const get = jest.fn().mockRejectedValue(new Error('uiSettings unavailable'));
+    const context = { core: Promise.resolve({ uiSettings: { client: { get } } }) };
+    const logger = loggingSystemMock.createLogger();
+
+    await expect(resolveHuntUniverse(context, logger)).resolves.toEqual(['logs-*']);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('uiSettings unavailable'));
+  });
+
   it('passes exclusions through unchanged', async () => {
     const { context } = makeContext(['logs-*', '-*elastic-cloud-logs-*']);
     const logger = loggingSystemMock.createLogger();

@@ -308,6 +308,24 @@ describe('classifyActionableIndices', () => {
     expect(result).toEqual({ patterns: ['filebeat-*'], degraded: true });
   });
 
+  it('names none rather than a list the SSE would silently truncate when nothing fits', async () => {
+    const logger = loggerMock.create();
+    const vendors = Array.from({ length: MAX_SCOPE_TARGETS }, (_, i) => `vendor${i}`);
+    fieldCapsMock.mockResolvedValue({
+      indices: vendors.flatMap((vendor) => [
+        `.ds-logs-${vendor}.stream-default-2026.09.30-000001`,
+        `.ds-metrics-${vendor}.stream-default-2026.09.30-000001`,
+      ]),
+      fields: { 'process.pid': { long: capability() } },
+    });
+
+    const result = await classifyActionableIndices({ esClient, indexPatterns: UNIVERSE, logger });
+
+    expect(result).toEqual({ patterns: [], degraded: true });
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('naming none this run'));
+  });
+
   it('logs once and returns [] degraded when _field_caps fails', async () => {
     const logger = loggerMock.create();
     fieldCapsMock.mockRejectedValue(new Error('field caps unavailable'));
