@@ -46,6 +46,7 @@ export const testSubjectIds = {
   GRAPH_IPS_POPOVER_ID: 'cloudSecurityGraphGraphInvestigationIpsPopover',
   GRAPH_IPS_POPOVER_CONTENT_ID: 'cloudSecurityGraphGraphInvestigationIpsPopoverContent',
   GRAPH_IPS_POPOVER_IP_ID: 'cloudSecurityGraphGraphInvestigationIpsPopoverId',
+  GRAPH_IPS_POPOVER_IP_LINK_ID: 'cloudSecurityGraphGraphInvestigationIpsPopoverIpLink',
   PREVIEW_SECTION_BANNER_PANEL: 'previewSectionBannerPanel',
   GENERIC_ENTITY_PANEL_HEADER_TEST_ID: 'generic-panel-header',
   HOST_PANEL_HEADER_TEST_ID: 'host-panel-header',

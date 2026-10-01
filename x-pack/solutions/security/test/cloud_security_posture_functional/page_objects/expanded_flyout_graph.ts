@@ -31,6 +31,7 @@ const {
   GRAPH_IPS_POPOVER_ID,
   GRAPH_IPS_POPOVER_CONTENT_ID,
   GRAPH_IPS_POPOVER_IP_ID,
+  GRAPH_IPS_POPOVER_IP_LINK_ID,
   PREVIEW_SECTION_BANNER_PANEL,
   GRAPH_GROUPED_NODE_TEST_ID,
   GRAPH_NODE_ENTITY_DETAILS_ID,
@@ -322,7 +323,14 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   async clickOnFirstIpInPopover(): Promise<void> {
     await this.testSubjects.existOrFail(GRAPH_IPS_POPOVER_CONTENT_ID);
     const popoverContent = await this.testSubjects.find(GRAPH_IPS_POPOVER_CONTENT_ID);
-    const firstIpElement = await popoverContent.findByTestSubject(GRAPH_IPS_POPOVER_IP_ID);
+    // Prefer the clickable link element (onNetworkPreview path); fall back to the list item
+    // for the scopeId / plain-label paths where no inner link is rendered.
+    let firstIpElement: WebElementWrapper;
+    try {
+      firstIpElement = await popoverContent.findByTestSubject(GRAPH_IPS_POPOVER_IP_LINK_ID);
+    } catch {
+      firstIpElement = await popoverContent.findByTestSubject(GRAPH_IPS_POPOVER_IP_ID);
+    }
     await firstIpElement.click();
   }
 

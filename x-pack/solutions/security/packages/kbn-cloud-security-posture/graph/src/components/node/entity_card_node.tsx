@@ -45,6 +45,7 @@ import {
   GRAPH_TAG_COUNT_ID,
 } from '../test_ids';
 import { getSpanIcon } from './get_span_icon';
+import { getCountryFlag } from './country_flags/country_codes';
 import { showStackedShape } from '../utils';
 import type { EntityNodeViewModel, NodeProps, NodeToolbarItem } from '../types';
 
@@ -52,9 +53,32 @@ import type { EntityNodeViewModel, NodeProps, NodeToolbarItem } from '../types';
 const countryCodeToFlag = (code: string): string =>
   [...code.toUpperCase()].map((c) => String.fromCodePoint(c.charCodeAt(0) + 127397)).join('');
 
-/** Formats a raw snake_case criticality level (e.g. "extreme_impact") to sentence case:
- * underscores become spaces and only the first letter is capitalised. */
+/** Maps known criticality level enum values to their translated display strings. */
+const CRITICALITY_LEVEL_LABELS: Record<string, string> = {
+  extreme_impact: i18n.translate(
+    'securitySolutionPackages.csp.graph.entityNode.criticalityLevel.extremeImpact',
+    { defaultMessage: 'Extreme impact' }
+  ),
+  high_impact: i18n.translate(
+    'securitySolutionPackages.csp.graph.entityNode.criticalityLevel.highImpact',
+    { defaultMessage: 'High impact' }
+  ),
+  medium_impact: i18n.translate(
+    'securitySolutionPackages.csp.graph.entityNode.criticalityLevel.mediumImpact',
+    { defaultMessage: 'Medium impact' }
+  ),
+  low_impact: i18n.translate(
+    'securitySolutionPackages.csp.graph.entityNode.criticalityLevel.lowImpact',
+    { defaultMessage: 'Low impact' }
+  ),
+};
+
+/** Returns the translated display label for a criticality level enum value.
+ * Falls back to sentence-casing the raw value for any unknown future levels. */
 const formatCriticalityLevel = (value: string): string => {
+  if (CRITICALITY_LEVEL_LABELS[value] !== undefined) {
+    return CRITICALITY_LEVEL_LABELS[value];
+  }
   const readable = value.replace(/_/g, ' ');
   return readable.charAt(0).toUpperCase() + readable.slice(1);
 };
@@ -459,7 +483,9 @@ IpsCell.displayName = 'IpsCell';
 
 /** Shows the first flag emoji with a hollow "+N" overflow badge for the rest. */
 const GeoCell = memo<{ countryCodes: string[] }>(({ countryCodes }) => {
-  const formatted = countryCodes.map(countryCodeToFlag);
+  const formatted = countryCodes
+    .filter((code) => getCountryFlag(code) !== null)
+    .map(countryCodeToFlag);
   const [first, ...rest] = formatted;
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={{ width: '100%' }}>
@@ -817,7 +843,12 @@ const ToolbarButtonRow: React.FC<ToolbarButtonRowProps> = ({
     ]}
   >
     {items.map((item, idx) => (
-      <EuiToolTip key={idx} content={item.label} disableScreenReaderOutput>
+      <EuiToolTip
+        key={idx}
+        content={item.toolTipText ?? item.label}
+        data-test-subj={item.toolTipTestSubj}
+        disableScreenReaderOutput={!item.toolTipText}
+      >
         <EuiButtonIcon
           data-test-subj={item.testSubject}
           iconType={item.iconType}

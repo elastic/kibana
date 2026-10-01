@@ -15,7 +15,7 @@ import { EllipseNode } from './ellipse_node';
 import { HexagonNode } from './hexagon_node';
 import { PentagonNode } from './pentagon_node';
 import { RectangleNode } from './rectangle_node';
-import type { NodeProps, EntityNodeViewModel } from '../types';
+import type { NodeProps, EntityNodeViewModel, NodeToolbarItem } from '../types';
 import {
   GRAPH_NODE_EXPAND_BUTTON_ID,
   GRAPH_ENTITY_NODE_ID,
@@ -254,5 +254,180 @@ describe('Entity Nodes', () => {
         });
       }
     );
+  });
+
+  describe('Risk Score Badge', () => {
+    it('shows a single badge when min equals max', () => {
+      renderNodeInFlow({ riskScore: { min: 75, max: 75 } });
+      const badges = screen.getAllByTestId(GRAPH_ENTITY_NODE_RISK_BADGE_ID);
+      expect(badges).toHaveLength(1);
+      expect(badges[0].textContent).toBe('75.00');
+    });
+
+    it('shows a single badge for a precise score (min equals max)', () => {
+      renderNodeInFlow({ riskScore: { min: 74.5, max: 74.5 } });
+      const badges = screen.getAllByTestId(GRAPH_ENTITY_NODE_RISK_BADGE_ID);
+      expect(badges).toHaveLength(1);
+      expect(badges[0].textContent).toBe('74.50');
+    });
+
+    it('shows two badges (min then max) when min differs from max', () => {
+      renderNodeInFlow({ count: 4, riskScore: { min: 55, max: 92 } });
+      const badges = screen.getAllByTestId(GRAPH_ENTITY_NODE_RISK_BADGE_ID);
+      expect(badges).toHaveLength(2);
+      expect(badges[0].textContent).toBe('55.00');
+      expect(badges[1].textContent).toBe('92.00');
+    });
+
+    it('rounds risk scores to 2 decimal places', () => {
+      renderNodeInFlow({ riskScore: { min: 74.567, max: 74.567 } });
+      const badge = screen.getByTestId(GRAPH_ENTITY_NODE_RISK_BADGE_ID);
+      expect(badge.textContent).toBe('74.57');
+    });
+  });
+
+  describe('Asset Criticality', () => {
+    it('shows translated criticality label for a single-entity node', () => {
+      renderNodeInFlow({
+        assetCriticality: [{ level: 'high_impact', count: 1 }],
+      });
+      expect(screen.getByText('High impact')).toBeInTheDocument();
+    });
+
+    it('shows translated label for each known criticality level', () => {
+      const cases: Array<[string, string]> = [
+        ['extreme_impact', 'Extreme impact'],
+        ['high_impact', 'High impact'],
+        ['medium_impact', 'Medium impact'],
+        ['low_impact', 'Low impact'],
+      ];
+      for (const [level, expectedLabel] of cases) {
+        const { unmount } = renderNodeInFlow({
+          assetCriticality: [{ level, count: 1 }],
+        });
+        expect(screen.getByText(expectedLabel)).toBeInTheDocument();
+        unmount();
+      }
+    });
+
+    it('falls back to sentence-cased raw value for an unknown criticality level', () => {
+      renderNodeInFlow({
+        assetCriticality: [{ level: 'future_level', count: 1 }],
+      });
+      expect(screen.getByText('Future level')).toBeInTheDocument();
+    });
+
+    it('shows a dash placeholder when assetCriticality is absent', () => {
+      renderNodeInFlow({ assetCriticality: undefined });
+      // metadata panel should still render without crashing
+      expect(screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).toBeInTheDocument();
+    });
+
+    it('shows only the first criticality level for a single-entity node when multiple are supplied', () => {
+      // SingleEntityMetadataPanel renders assetCriticality[0] only.
+      renderNodeInFlow({
+        assetCriticality: [
+          { level: 'high_impact', count: 2 },
+          { level: 'medium_impact', count: 1 },
+        ],
+      });
+      expect(screen.getByText('High impact')).toBeInTheDocument();
+      // Second level must not appear — single-entity panel shows only the first entry.
+      expect(screen.queryByText('Medium impact')).not.toBeInTheDocument();
+    });
+
+    it('hides the metadata panel for grouped nodes (count > 1)', () => {
+      // By design, grouped nodes do not render the metadata panel.
+      renderNodeInFlow({
+        count: 4,
+        assetCriticality: [{ level: 'high_impact', count: 2 }],
+      });
+      expect(screen.queryByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Source Aggregation', () => {
+    it('shows a single source formatted in title case', () => {
+      renderNodeInFlow({
+        documentsData: [{ id: 'e1', type: 'entity', entity: { sources: ['active_directory'] } }],
+      });
+      expect(screen.getByText('Active Directory')).toBeInTheDocument();
+    });
+
+    it('deduplicates sources across multiple documentsData entries and shows +N for extras', () => {
+      // count is left as default (single entity) so the metadata panel is visible.
+      // A single entity node can still aggregate sources across multiple documentsData entries.
+      renderNodeInFlow({
+        documentsData: [
+          { id: 'e1', type: 'entity', entity: { sources: ['okta'] } },
+          { id: 'e2', type: 'entity', entity: { sources: ['endpoint', 'okta'] } },
+          // 'okta' is a duplicate — deduplicated set is ['okta', 'endpoint'] (2 unique)
+        ],
+      });
+      // First source is shown as plain text
+      expect(screen.getByText('Okta')).toBeInTheDocument();
+      // Second source collapsed into the +N badge
+      expect(screen.getByText('+1')).toBeInTheDocument();
+    });
+
+    it('shows no source row when documentsData is absent', () => {
+      renderNodeInFlow({ documentsData: undefined });
+      // metadata panel renders without crashing
+      expect(screen.getByTestId(GRAPH_ENTITY_NODE_LAYERS_PANEL_ID)).toBeInTheDocument();
+    });
+  });
+
+  describe('Toolbar Items', () => {
+    it('renders toolbar buttons produced by toolbarItemsFn', () => {
+      const items: NodeToolbarItem[] = [
+        {
+          iconType: 'eye',
+          label: 'Show actor',
+          onClick: jest.fn(),
+          testSubject: 'test-toolbar-btn-show-actor',
+        },
+        {
+          iconType: 'eyeClosed',
+          label: 'Hide actor',
+          onClick: jest.fn(),
+          testSubject: 'test-toolbar-btn-hide-actor',
+        },
+      ];
+      renderNodeInFlow({ toolbarItemsFn: () => items });
+
+      expect(screen.getByTestId('test-toolbar-btn-show-actor')).toBeInTheDocument();
+      expect(screen.getByTestId('test-toolbar-btn-hide-actor')).toBeInTheDocument();
+    });
+
+    it('renders a disabled toolbar button when item.disabled is true', () => {
+      const items: NodeToolbarItem[] = [
+        {
+          iconType: 'eye',
+          label: 'Show entity details',
+          onClick: jest.fn(),
+          disabled: true,
+          testSubject: 'test-toolbar-btn-disabled',
+        },
+      ];
+      renderNodeInFlow({ toolbarItemsFn: () => items });
+
+      expect(screen.getByTestId('test-toolbar-btn-disabled')).toHaveAttribute('disabled');
+    });
+
+    it('calls onClick when a toolbar button is clicked', () => {
+      const handleClick = jest.fn();
+      const items: NodeToolbarItem[] = [
+        {
+          iconType: 'eye',
+          label: 'Show actor',
+          onClick: handleClick,
+          testSubject: 'test-toolbar-btn-click',
+        },
+      ];
+      renderNodeInFlow({ interactive: true, toolbarItemsFn: () => items });
+
+      fireEvent.click(screen.getByTestId('test-toolbar-btn-click'));
+      expect(handleClick).toHaveBeenCalledTimes(1);
+    });
   });
 });

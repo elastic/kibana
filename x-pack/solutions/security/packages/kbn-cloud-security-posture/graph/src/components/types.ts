@@ -49,6 +49,10 @@ export interface NodeToolbarItem {
   disabled?: boolean;
   /** data-test-subj for FTR targeting. Mirrors the popover item's testSubject. */
   testSubject?: string;
+  /** Explanatory tooltip text shown instead of the label when the item is disabled. */
+  toolTipText?: string;
+  /** data-test-subj applied to the EuiToolTip panel — mirrors the popover item's toolTipProps['data-test-subj']. */
+  toolTipTestSubj?: string;
 }
 
 export interface EntityNodeViewModel

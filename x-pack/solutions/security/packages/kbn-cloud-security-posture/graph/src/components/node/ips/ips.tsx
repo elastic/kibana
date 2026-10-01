@@ -26,6 +26,7 @@ import {
   GRAPH_IPS_PLUS_COUNT_ID,
   GRAPH_IPS_POPOVER_CONTENT_ID,
   GRAPH_IPS_POPOVER_IP_ID,
+  GRAPH_IPS_POPOVER_IP_LINK_ID,
   GRAPH_IPS_POPOVER_ID,
   GRAPH_IPS_PLUS_COUNT_BUTTON_ID,
   GRAPH_IPS_BUTTON_ID,
@@ -41,6 +42,10 @@ const popoverTipAriaLabel = i18n.translate(
     defaultMessage: 'Show IP address details',
   }
 );
+
+const ipAddressLabel = i18n.translate('securitySolutionPackages.csp.graph.ips.ipAddressLabel', {
+  defaultMessage: 'IP address: ',
+});
 
 export type UseIpPopoverReturn = UseNodeDetailsPopoverReturn & {
   onIpClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -61,7 +66,7 @@ export const useIpPopover = (
         label: (
           <EuiLink
             key={`${index}-${ip}`}
-            data-test-subj={GRAPH_IPS_POPOVER_IP_ID}
+            data-test-subj={GRAPH_IPS_POPOVER_IP_LINK_ID}
             onClick={() => onNetworkPreview(ip)}
           >
             {ip}
@@ -185,7 +190,7 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
             ${xxsFontSize};
           `}
         >
-          {'IP address: '}
+          {ipAddressLabel}
         </EuiText>
       </EuiFlexItem>
       {ipValue && <EuiFlexItem grow={false}>{ipValue}</EuiFlexItem>}

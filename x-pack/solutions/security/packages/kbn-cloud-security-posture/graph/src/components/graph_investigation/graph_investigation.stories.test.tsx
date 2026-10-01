@@ -22,8 +22,10 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
   GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../test_ids';
 import * as previewAnnotations from '../../../.storybook/preview';
 import { NOTIFICATIONS_ADD_ERROR_ACTION } from '../../../.storybook/constants';
@@ -338,9 +340,16 @@ describe('GraphInvestigation Component', () => {
       );
       expect(showDetailsItem).not.toBeNull();
       expect(showDetailsItem).toHaveAttribute('aria-label', 'Show entity details');
-      // In the NodeToolbar design the button is rendered disabled; the tooltip test-subj is not
-      // forwarded by toToolbarItemsFn, so we verify only the disabled attribute here.
       expect(showDetailsItem).toHaveAttribute('disabled');
+      // The tooltip should explain why the button is disabled.
+      fireEvent.mouseEnter(showDetailsItem!.parentElement!);
+      await waitFor(() => {
+        expect(
+          document.querySelector(
+            `[data-test-subj="${GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID}"]`
+          )
+        ).not.toBeNull();
+      });
     });
 
     it('shows the option `Show entity relationships` as enabled when entity node is enriched', async () => {
@@ -369,9 +378,16 @@ describe('GraphInvestigation Component', () => {
       );
       expect(showRelationshipsItem).not.toBeNull();
       expect(showRelationshipsItem).toHaveAttribute('aria-label', 'Show entity relationships');
-      // In the NodeToolbar design the button is rendered disabled; the tooltip test-subj is not
-      // forwarded by toToolbarItemsFn, so we verify only the disabled attribute here.
       expect(showRelationshipsItem).toHaveAttribute('disabled');
+      // The tooltip should explain why the button is disabled.
+      fireEvent.mouseEnter(showRelationshipsItem!.parentElement!);
+      await waitFor(() => {
+        expect(
+          document.querySelector(
+            `[data-test-subj="${GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID}"]`
+          )
+        ).not.toBeNull();
+      });
     });
 
     it('does not show `Show entity relationships` option for grouped entities', async () => {
