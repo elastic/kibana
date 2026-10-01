@@ -20,6 +20,8 @@ import type { ActionPolicySavedObjectServiceContract } from '../services/action_
 import { createActionPolicySavedObjectService } from '../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
 import { createEventLogService } from '../services/event_log_service/event_log_service.mock';
+import type { LicenseServiceContract } from '../services/license_service/license_service';
+import { createMockLicenseService } from '../services/license_service/license_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { MaintenanceWindowServiceContract } from '../services/maintenance_window_service/maintenance_window_service';
 import { createMaintenanceWindowServiceMock } from '../services/maintenance_window_service/maintenance_window_service.mock';
@@ -40,12 +42,13 @@ import {
 import { DispatcherService } from './dispatcher';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import {
-  createAlertEpisodeSuppressionsResponse,
   createDispatchableAlertEventsResponse,
   createEpisodeDataResponse,
+  createEpisodeSuppressionsResponse,
   createLastNotifiedTimestampsResponse,
+  createSeriesSuppressionsResponse,
 } from './fixtures/dispatcher';
-import { createAlertEpisode } from './fixtures/test_utils';
+import { createAlertEpisode, createEpisodeSuppressionRow } from './fixtures/test_utils';
 import { EpisodeScan } from './state';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {
@@ -63,7 +66,12 @@ import {
   StoreActionsStep,
   StoreExecutionHistoryStep,
 } from './steps';
-import type { AlertEpisode, AlertEpisodeSuppression, DispatcherHaltReason } from './types';
+import type {
+  AlertEpisode,
+  DispatcherHaltReason,
+  EpisodeSuppressionRow,
+  SeriesSuppressionRow,
+} from './types';
 
 function mockRulesFindByIds(
   spy: jest.SpyInstance,
@@ -131,6 +139,7 @@ function buildDispatcherService(deps: {
   workflowsManagement: WorkflowsServerPluginSetup['management'];
   maintenanceWindowService: MaintenanceWindowServiceContract;
   eventLogService: EventLogServiceContract;
+  licenseService?: LicenseServiceContract;
 }): DispatcherService {
   const pipeline = new DispatcherPipeline([
     new FetchEpisodesStep(deps.queryService),
@@ -143,7 +152,7 @@ function buildDispatcherService(deps: {
     new EvaluateMatchersStep(),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService),
-    new DispatchStep(deps.workflowsManagement),
+    new DispatchStep(deps.workflowsManagement, deps.licenseService ?? createMockLicenseService()),
     new StoreActionsStep(deps.storageService),
     new StoreExecutionHistoryStep(deps.eventLogService),
   ]);
@@ -163,6 +172,7 @@ describe('DispatcherService', () => {
   let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
   let mockMwService: jest.Mocked<MaintenanceWindowServiceContract>;
   let mockEventLogService: EventLogServiceContract;
+  let mockLicenseService: ReturnType<typeof createMockLicenseService>;
 
   beforeEach(() => {
     ({ queryService, mockEsClient: queryEsClient } = createQueryService());
@@ -181,6 +191,7 @@ describe('DispatcherService', () => {
     mockWfm = createMockWorkflowsManagement();
     mockMwService = createMaintenanceWindowServiceMock();
     ({ eventLogService: mockEventLogService } = createEventLogService());
+    mockLicenseService = createMockLicenseService();
 
     dispatcherService = buildDispatcherService({
       queryService,
@@ -190,6 +201,7 @@ describe('DispatcherService', () => {
       workflowsManagement: mockWfm,
       maintenanceWindowService: mockMwService,
       eventLogService: mockEventLogService,
+      licenseService: mockLicenseService,
     });
   });
 
@@ -220,7 +232,7 @@ describe('DispatcherService', () => {
         },
       ];
 
-      const suppressions: AlertEpisodeSuppression[] = [
+      const suppressions: EpisodeSuppressionRow[] = [
         {
           rule_id: 'rule-1',
           source: 'internal',
@@ -241,7 +253,8 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
           createEpisodeDataResponse([
             { episode_id: 'episode-1', data_json: null },
@@ -273,7 +286,7 @@ describe('DispatcherService', () => {
         .add(MAX_WINDOW_MINUTES, 'minutes')
         .toISOString();
 
-      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(4);
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(5);
       expect(queryEsClient.esql.query).toHaveBeenCalledWith(
         {
           query: getDispatchableAlertEventsQuery({
@@ -316,7 +329,7 @@ describe('DispatcherService', () => {
           expect.objectContaining({
             group_hash: 'hash-1',
             last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
-            actor: 'system',
+            actor: { type: 'internal' },
             action_type: 'fire',
             rule_id: 'rule-1',
             source: 'internal',
@@ -324,7 +337,7 @@ describe('DispatcherService', () => {
           expect.objectContaining({
             group_hash: 'hash-2',
             last_series_event_timestamp: '2026-01-22T07:15:00.000Z',
-            actor: 'system',
+            actor: { type: 'internal' },
             action_type: 'fire',
             rule_id: 'rule-2',
             source: 'internal',
@@ -355,7 +368,7 @@ describe('DispatcherService', () => {
         },
       ];
 
-      const suppressions: AlertEpisodeSuppression[] = [
+      const suppressions: EpisodeSuppressionRow[] = [
         {
           rule_id: 'rule-1',
           source: 'internal',
@@ -376,7 +389,8 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
           createEpisodeDataResponse([{ episode_id: 'episode-2', data_json: null }])
         )
@@ -408,7 +422,7 @@ describe('DispatcherService', () => {
           expect.objectContaining({
             group_hash: 'hash-1',
             last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
-            actor: 'system',
+            actor: { type: 'internal' },
             action_type: 'suppress',
             rule_id: 'rule-1',
             source: 'internal',
@@ -416,13 +430,91 @@ describe('DispatcherService', () => {
           expect.objectContaining({
             group_hash: 'hash-2',
             last_series_event_timestamp: '2026-01-22T07:15:00.000Z',
-            actor: 'system',
+            actor: { type: 'internal' },
             action_type: 'fire',
             rule_id: 'rule-2',
             source: 'internal',
           }),
         ])
       );
+    });
+
+    it('records alert actions but schedules no workflow when the license does not support action policies', async () => {
+      mockLicenseService.getActionPoliciesLicenseState.mockResolvedValue({
+        isValid: false,
+        type: 'basic',
+        status: 'active',
+      });
+      const logEventSpy = jest.spyOn(mockEventLogService, 'logEvent');
+
+      const secondEpisode = {
+        rule_id: 'rule-2',
+        group_hash: 'hash-2',
+        episode_id: 'episode-2',
+      };
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(
+          createDispatchableAlertEventsResponse([
+            createAlertEpisode(),
+            createAlertEpisode({
+              ...secondEpisode,
+              last_event_timestamp: '2026-01-22T07:15:00.000Z',
+            }),
+          ])
+        )
+        .mockResolvedValueOnce(
+          createEpisodeSuppressionsResponse([
+            createEpisodeSuppressionRow({ should_suppress: true }),
+            createEpisodeSuppressionRow(secondEpisode),
+          ])
+        )
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
+        .mockResolvedValueOnce(
+          createEpisodeDataResponse([{ episode_id: 'episode-2', data_json: null }])
+        )
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [
+          { create: { _id: '1', status: 201 } },
+          { create: { _id: '2', status: 201 } },
+          { create: { _id: '3', status: 201 } },
+        ],
+        errors: false,
+      } as BulkResponse);
+
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+      const result = await dispatcherService.run({ eventWatermark, taskId: 'task-1' });
+
+      expect(mockWfm.getWorkflowsByIdsForRequests).not.toHaveBeenCalled();
+      expect(mockWfm.getClient).not.toHaveBeenCalled();
+
+      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
+      const docs = (operations ?? []).filter((_, index) => index % 2 === 1);
+      expect(docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ group_hash: 'hash-1', action_type: 'suppress' }),
+          expect.objectContaining({ group_hash: 'hash-2', action_type: 'fire' }),
+          expect.objectContaining({ group_hash: 'hash-2', action_type: 'notified' }),
+        ])
+      );
+      expect(docs).toHaveLength(3);
+
+      expect(logEventSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'dispatch_failed', outcome: 'failure' },
+          kibana: expect.objectContaining({
+            alerting_v2: {
+              dispatcher: expect.objectContaining({
+                failure_reason: 'license_not_supported',
+                workflow_ids: ['workflow-test-id'],
+                episode_ids: ['episode-2'],
+              }),
+            },
+          }),
+        })
+      );
+      expect(result.nextWatermark.getTime()).toBeGreaterThan(eventWatermark.getTime());
     });
 
     it('handles empty alert episode responses', async () => {
@@ -570,14 +662,13 @@ describe('DispatcherService', () => {
         },
       ];
 
-      // Suppression query results:
+      // Episode suppression query results:
       // - rule-001: ack at 16:03, then unack at 16:08 → should_suppress: false
       // - rule-002: ack at 16:03, no unack → should_suppress: true
       // - rule-003: no actions → no suppression records
-      // - rule-004: snoozed at 16:03 (null episode_id, applies to all) → should_suppress: true
       // - rule-005 series-1: deactivated at 16:08 → should_suppress: true
       // - rule-005 series-2: no actions → no suppression record
-      const suppressions: AlertEpisodeSuppression[] = [
+      const episodeSuppressions: EpisodeSuppressionRow[] = [
         {
           rule_id: 'rule-001',
           source: 'internal',
@@ -585,6 +676,7 @@ describe('DispatcherService', () => {
           group_hash: 'rule-001-series-1',
           episode_id: 'rule-001-series-1-episode-1',
           should_suppress: false,
+          last_ack_action: 'unack',
         },
         {
           rule_id: 'rule-002',
@@ -593,22 +685,7 @@ describe('DispatcherService', () => {
           group_hash: 'rule-002-series-1',
           episode_id: 'rule-002-series-1-episode-1',
           should_suppress: true,
-        },
-        {
-          rule_id: 'rule-004',
-          source: 'internal',
-          space_id: 'default',
-          group_hash: 'rule-004-series-1',
-          episode_id: null,
-          should_suppress: true,
-        },
-        {
-          rule_id: 'rule-004',
-          source: 'internal',
-          space_id: 'default',
-          group_hash: 'rule-004-series-2',
-          episode_id: null,
-          should_suppress: true,
+          last_ack_action: 'ack',
         },
         {
           rule_id: 'rule-005',
@@ -617,12 +694,35 @@ describe('DispatcherService', () => {
           group_hash: 'rule-005-series-1',
           episode_id: 'rule-005-series-1-episode-1',
           should_suppress: true,
+          last_deactivate_action: 'deactivate',
+        },
+      ];
+
+      // Series suppression query results:
+      // - rule-004: both series snoozed at 16:03 (series-level, applies to every episode)
+      const seriesSuppressions: SeriesSuppressionRow[] = [
+        {
+          rule_id: 'rule-004',
+          source: 'internal',
+          space_id: 'default',
+          group_hash: 'rule-004-series-1',
+          should_suppress: true,
+          last_snooze_action: 'snooze',
+        },
+        {
+          rule_id: 'rule-004',
+          source: 'internal',
+          space_id: 'default',
+          group_hash: 'rule-004-series-2',
+          should_suppress: true,
+          last_snooze_action: 'snooze',
         },
       ];
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(episodeSuppressions))
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse(seriesSuppressions))
         .mockResolvedValueOnce(createEpisodeDataResponse([]))
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
@@ -639,7 +739,7 @@ describe('DispatcherService', () => {
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
-      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(4);
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(5);
 
       const [{ operations }] = storageEsClient.bulk.mock.calls[0];
 
@@ -660,7 +760,7 @@ describe('DispatcherService', () => {
             group_hash: 'rule-001-series-1',
             last_series_event_timestamp: '2026-01-27T16:15:00.000Z',
             action_type: 'fire',
-            actor: 'system',
+            actor: { type: 'internal' },
             source: 'internal',
           }),
         ])
@@ -758,7 +858,7 @@ describe('DispatcherService', () => {
         episode_status: 'active',
       });
 
-      const suppressions: AlertEpisodeSuppression[] = [
+      const suppressions: EpisodeSuppressionRow[] = [
         {
           rule_id: null,
           source: 'pagerduty',
@@ -782,7 +882,8 @@ describe('DispatcherService', () => {
             externalEpisode('space-b'),
           ])
         )
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
           createEpisodeDataResponse([{ episode_id: 'pd-ep-1', data_json: null }])
         )
@@ -846,7 +947,7 @@ describe('DispatcherService', () => {
         },
       ];
 
-      const suppressions: AlertEpisodeSuppression[] = [
+      const suppressions: EpisodeSuppressionRow[] = [
         {
           rule_id: 'rule-1',
           source: 'internal',
@@ -867,7 +968,8 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
           createEpisodeDataResponse([
             { episode_id: 'episode-critical', data_json: JSON.stringify({ severity: 'critical' }) },
@@ -1351,7 +1453,7 @@ describe('DispatcherService', () => {
             expect.objectContaining({
               group_hash: blockingEpisode.group_hash,
               action_type: 'unmatched',
-              actor: 'system',
+              actor: { type: 'internal' },
               rule_id: blockingEpisode.rule_id,
               reason: expect.stringContaining('escape hatch'),
             }),

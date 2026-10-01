@@ -7,6 +7,7 @@
 
 export type {
   ExtractIocsResponse,
+  EnrichReportCoreResponse,
   ExtractDiamondResponse,
   AssessRelevanceResponse,
   EnrichTaxonomyResponse,
@@ -17,7 +18,11 @@ export {
   enumLiterals,
   extractIocsBodySchema,
   EXTRACT_IOCS_MAX_BODY_BYTES,
+  extractedIocSchema,
   extractIocsResponseSchema,
+  enrichReportCoreBodySchema,
+  ENRICH_REPORT_CORE_MAX_BODY_BYTES,
+  enrichReportCoreResponseSchema,
   extractDiamondBodySchema,
   EXTRACT_DIAMOND_MAX_BODY_BYTES,
   extractDiamondResponseSchema,
