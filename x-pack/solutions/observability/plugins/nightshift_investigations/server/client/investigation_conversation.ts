@@ -37,17 +37,13 @@ export interface InvestigationConversation {
   created: boolean;
 }
 
-type ConversationWithAccess = Pick<
-  Conversation,
-  'id' | 'title' | 'metadata' | 'template_id' | 'user'
-> & {
+type ConversationWithAccess = Pick<Conversation, 'id' | 'title' | 'metadata' | 'template_id'> & {
   permissions: ConversationPermissions;
 };
 
 const toInvestigationConversation = (
   conversation: ConversationWithAccess,
-  created: boolean,
-  callerUsername?: string
+  created: boolean
 ): InvestigationConversation => {
   if (conversation.template_id !== INVESTIGATION_TEMPLATE_ID) {
     // An id that names some other conversation is not an investigation, whatever the caller says.
@@ -57,9 +53,7 @@ const toInvestigationConversation = (
     id: conversation.id,
     title: conversation.title,
     status: conversation.metadata?.status === 'closed' ? 'closed' : 'open',
-    isOwner:
-      conversation.permissions.update_access_control === true ||
-      (callerUsername !== undefined && conversation.user.username === callerUsername),
+    isOwner: conversation.permissions.update_access_control === true,
     created,
   };
 };
@@ -67,18 +61,10 @@ const toInvestigationConversation = (
 /**
  * Reads investigation conversations in the given order, skipping ids that do not exist, are not
  * readable, or are not investigations.
- *
- * `callerUsername` also counts a conversation owned by that username as the caller's. Agent
- * Builder matches owners by user profile id when both sides have one, and a workflow run resolves
- * its identity with a profile id in some contexts (an HTTP call from a step) and without one in
- * others (a step handler), so the same identity can fail the profile comparison. Only the start
- * path uses it, to decide which investigation to continue; the writes themselves stay with Agent
- * Builder's own check.
  */
 export const findInvestigationConversations = async (
   conversations: ConversationPublicClient,
-  ids: string[],
-  callerUsername?: string
+  ids: string[]
 ): Promise<InvestigationConversation[]> => {
   if (ids.length === 0) {
     return [];
@@ -87,7 +73,7 @@ export const findInvestigationConversations = async (
   return ids.flatMap((id) => {
     const conversation = found.get(id);
     return conversation?.template_id === INVESTIGATION_TEMPLATE_ID
-      ? [toInvestigationConversation(conversation, false, callerUsername)]
+      ? [toInvestigationConversation(conversation, false)]
       : [];
   });
 };
