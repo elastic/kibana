@@ -17,6 +17,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
+  // Migration recommendation: MIGRATE TO SCOUT
+  // Single test: navigates to a non-existent data view URL (id: 111111111111) and asserts that
+  // the app redirects to the "no data views" empty state and shows an error toast with the
+  // expected message. No existing Scout coverage found. Pure navigation + assertion with no ES
+  // archive required — an ideal Scout candidate. The `esArchiver.emptyKibanaIndex()` call can be
+  // replaced with kibanaServer.savedObjects.cleanStandardList() in Scout.
   describe('index pattern not found', function () {
     before(async () => {
       await esArchiver.emptyKibanaIndex();

@@ -15,9 +15,6 @@ import { SettingsTab } from './tab';
 
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_developer_mode');
-jest.mock('../../../../hooks/use_model_settings_url', () => ({
-  useModelSettingsUrl: () => undefined,
-}));
 jest.mock('../../../../hooks/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({
     blocksActivity: false,
@@ -177,15 +174,17 @@ describe('SettingsTab developer mode', () => {
     expect(screen.queryByTestId('streams-settings-tuning-editor')).not.toBeInTheDocument();
   });
 
-  it('hides the cost estimate when developer mode is off', () => {
+  it('hides stale event cleanup and the cost estimate when developer mode is off', () => {
     setup({ isDeveloperMode: false });
 
+    expect(screen.queryByTestId('stale-event-cleanup-section')).not.toBeInTheDocument();
     expect(screen.queryByTestId('cost-estimate')).not.toBeInTheDocument();
   });
 
-  it('shows the cost estimate when developer mode is on', () => {
+  it('shows stale event cleanup and the cost estimate when developer mode is on', () => {
     setup({ isDeveloperMode: true });
 
+    expect(screen.getByTestId('stale-event-cleanup-section')).toBeInTheDocument();
     expect(screen.getByTestId('cost-estimate')).toBeInTheDocument();
   });
 

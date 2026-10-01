@@ -54,7 +54,12 @@ import type { UserProfileServiceStartInternal } from '../user_profile';
 interface AuthenticationServiceSetupParams {
   http: Pick<
     HttpServiceSetup,
-    'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse' | 'staticAssets'
+    | 'basePath'
+    | 'csp'
+    | 'registerAuth'
+    | 'registerOnPreResponse'
+    | 'setSelfClientUnauthorizedErrorHandler'
+    | 'staticAssets'
   >;
   customBranding: CustomBrandingSetup;
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
@@ -389,6 +394,31 @@ export class AuthenticationService {
       }
 
       return toolkit.notHandled();
+    });
+
+    http.setSelfClientUnauthorizedErrorHandler(async ({ request }, toolkit) => {
+      if (!license.isLicenseAvailable() || !license.isEnabled()) {
+        return toolkit.notHandled();
+      }
+
+      // Core only consults this handler for a 401 raised by the authentication lifecycle, so the
+      // target route handler did not run and replaying the call cannot duplicate a side
+      // effect. Unlike the Elasticsearch path there is no expiry marker to test. Kibana boomifies
+      // the upstream error — so the trigger is ownership instead: only a fake request bound to a
+      // service account, whose credential Kibana minted and can mint again, is recoverable.
+      // A real request's credential would have to be refreshed through the session machinery,
+      // which would mutate the ambient authentication state of a request this call merely borrows.
+      if (!request.isFakeRequest) {
+        return toolkit.notHandled();
+      }
+
+      // It is possible that the request is not bound to a service account.
+      // We do not yet have a great mechanism to detect within the authentication service,
+      // so we rely on the service accounts backend to return null for requests that are not bound to a service account.
+      const authHeaders = await getServiceAccounts()
+        ?.backend.reauthenticateFakeRequest(request)
+        .catch(() => null);
+      return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
     });
   }
 

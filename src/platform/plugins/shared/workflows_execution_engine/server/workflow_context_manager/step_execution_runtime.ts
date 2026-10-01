@@ -26,7 +26,7 @@ import { toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
 import { extractConnectorId, extractTokenUsage, parseDuration } from '../utils';
 
-import type { IWorkflowEventLogger, WorkflowEventFlushOptions } from '../workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
@@ -379,10 +379,6 @@ export class StepExecutionRuntime {
       });
     }
     return usage;
-  }
-
-  public async flushEventLogs(options?: WorkflowEventFlushOptions): Promise<void> {
-    await this.stepLogger?.flushEvents(options);
   }
 
   /**
