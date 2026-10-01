@@ -243,8 +243,7 @@ describe('Trusted apps form', () => {
     });
 
     it('should default OS to Windows', () => {
-      // Note: the trailing `, ` comes from screen-reader-only text
-      expect(getOsField().textContent).toEqual('Windows, ');
+      expect(getOsField().textContent).toEqual('Windows');
     });
 
     it('should allow user to select between 3 OSs', () => {
