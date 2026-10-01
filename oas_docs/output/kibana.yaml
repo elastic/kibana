@@ -49166,7 +49166,7 @@ paths:
         Check whether one or more data stream index patterns contain any documents indexed at or after the given start time.<br/><br/>[Required authorization] Route required privileges: fleet-read.
       operationId: get-fleet-data-streams-data
       parameters:
-        - description: A comma-separated list of data stream index patterns to check. Each pattern must be of the form `logs-<dataset>-*` or `metrics-<dataset>-*`.
+        - description: A comma-separated list of data stream index patterns to check. Each pattern must be of the form `logs-<dataset>-<namespace>` or `metrics-<dataset>-<namespace>`, where `<namespace>` is `*` or a concrete namespace.
           in: query
           name: dataStreams
           required: true
