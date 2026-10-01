@@ -92,6 +92,30 @@ describe('install_automation_template schema', () => {
     ).toBe(false);
   });
 
+  it('rejects a whitespace-only name', () => {
+    expect(
+      schema.safeParse({
+        template: 'document_orchestration',
+        name: '   ',
+        sourceIndex: 'loyalty-docs',
+        titleField: 'title',
+        bodyField: 'body',
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects a name containing a forward slash', () => {
+    expect(
+      schema.safeParse({
+        template: 'document_orchestration',
+        name: 'flight/activity',
+        sourceIndex: 'loyalty-docs',
+        titleField: 'title',
+        bodyField: 'body',
+      }).success
+    ).toBe(false);
+  });
+
   it('rejects a call without name on any template', () => {
     expect(
       schema.safeParse({

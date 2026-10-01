@@ -107,7 +107,7 @@ steps:
               # units would overwrite each other. `ki_id` takes any string up to 512 characters.
               # Prefixed with automation_name so two installations on the same source index
               # produce distinct, non-colliding KIs.
-              ki_id: "{{ consts.automation_name }}-{{ foreach.item[0] }}"
+              ki_id: "{{ consts.automation_name }}/{{ foreach.item[0] }}"
 
           # Grounding 1: totals over every row referencing the unit. Column names are derived from
           # field names so a new metric is one STATS edit — add a column here and it propagates

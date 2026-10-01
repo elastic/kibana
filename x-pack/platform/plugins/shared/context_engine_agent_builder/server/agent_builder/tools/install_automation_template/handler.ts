@@ -190,6 +190,9 @@ export const installAutomationTemplateHandler = async ({
   const aiIndexId = aiIndexIdFromAttachments(attachments);
   // Inject the caller-provided name into the rendered YAML so the server derives a stable
   // workflow ID from it, keeping workflow IDs scoped to names rather than AI index ids.
+  // NOTE: changing `name` on an existing automation changes its ki_ids (they are prefixed with
+  // automation_name). KIs produced under the old name are not cleaned up automatically; callers
+  // that need to migrate must delete stale KIs out of band before or after re-running.
   const workflowYaml = renderTemplate(params, aiIndexId).replace(
     /^name: .*/m,
     `name: ${JSON.stringify(params.name)}`

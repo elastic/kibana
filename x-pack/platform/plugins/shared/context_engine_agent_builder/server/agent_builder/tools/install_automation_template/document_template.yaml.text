@@ -252,7 +252,7 @@ steps:
             type: context-engine.createKi
             with:
               ai_index_id: "{{ consts.ai_index_id }}"
-              ki_id: "{{ consts.automation_name }}-{{ steps.document_context.output.doc_id }}"
+              ki_id: "{{ consts.automation_name }}/{{ steps.document_context.output.doc_id }}"
               ki: "${{ steps.assemble_ki.output.ki }}"
               verifiers:
                 - esql-valid-syntax
