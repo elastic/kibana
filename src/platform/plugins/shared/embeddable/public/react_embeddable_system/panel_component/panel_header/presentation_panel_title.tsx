@@ -82,12 +82,13 @@ const InlineEditablePanelTitle = ({
         [data-test-subj='embeddablePanelTitle'] .euiText {
           font-weight: ${euiTheme.font.weight.medium};
         }
-        // only show the pencil when hovering the panel header or focusing the title. Keep its
-        // space so the title doesn't shift when it appears
+        // only show the pencil when hovering the panel (or its hover actions) or focusing the
+        // title. Keep its space so the title doesn't shift when it appears
         [data-test-subj='embeddablePanelTitle'] .euiIcon {
           opacity: 0;
         }
-        .embPanel__title:hover & [data-test-subj='embeddablePanelTitle'] .euiIcon,
+        .embPanel__hoverActionsAnchor:hover & [data-test-subj='embeddablePanelTitle'] .euiIcon,
+        .embPanel:hover & [data-test-subj='embeddablePanelTitle'] .euiIcon,
         [data-test-subj='embeddablePanelTitle']:focus-visible .euiIcon {
           opacity: 1;
         }
