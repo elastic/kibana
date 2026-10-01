@@ -26,6 +26,7 @@ export class AlertEpisodesListPage {
   public readonly histogramChart: Locator;
   public readonly tagsFilterButton: Locator;
   public readonly tagsFilterSearch: Locator;
+  public readonly searchInput: Locator;
   /** Inline "Open in Discover" leading control. */
   public readonly openInDiscoverRowControl: Locator;
   /**
@@ -46,6 +47,7 @@ export class AlertEpisodesListPage {
     this.histogramChart = this.page.testSubj.locator('unifiedHistogramChart');
     this.tagsFilterButton = this.page.testSubj.locator('episodesFilterBar-tags-button');
     this.tagsFilterSearch = this.page.getByPlaceholder('Search alert tags…');
+    this.searchInput = this.page.testSubj.locator('episodesFilterBar-search');
     this.openInDiscoverRowControl = this.page.testSubj.locator(
       `unifiedDataTable_rowControl_${OPEN_IN_DISCOVER_EPISODE_ACTION_ID}`
     );
@@ -67,6 +69,10 @@ export class AlertEpisodesListPage {
 
   async searchTagsFilter(query: string): Promise<void> {
     await this.tagsFilterSearch.fill(query);
+  }
+
+  async searchEpisodes(query: string): Promise<void> {
+    await this.searchInput.fill(query);
   }
 
   tagFilterOption(tag: string): Locator {
