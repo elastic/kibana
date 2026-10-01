@@ -458,9 +458,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         ],
       });
 
-      // pending.count=3 — director needs status_count to climb 1 → 2 → 3 to
-      // promote the episode to active. Also lets us assert that active events
-      // do not carry status_count.
+      // pending.count=3 — the episode spends three evaluations in pending,
+      // with status_count climbing 1 → 2 → 3, and becomes active on the
+      // fourth. Also lets us assert that active events do not carry
+      // status_count.
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-count-increment' },
@@ -472,7 +473,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       );
 
       // Wait for the active transition — by then the executor will have run
-      // at least three times for this group, walking status_count 1 → 2.
+      // at least four times for this group, walking status_count 1 → 2 → 3.
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
         episodeStatus: 'active',
       });
@@ -483,9 +484,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         .map((event) => event.alert!.status_count)
         .filter((count): count is number => typeof count === 'number');
 
-      expect(pendingCounts).toHaveLength(2);
+      expect(pendingCounts).toHaveLength(3);
       expect(Math.min(...pendingCounts)).toBe(1);
-      expect(Math.max(...pendingCounts)).toBe(2);
+      expect(Math.max(...pendingCounts)).toBe(3);
 
       const activeEvents = events.filter((event) => event.alert?.status === 'active');
       expect(activeEvents.length).toBeGreaterThanOrEqual(1);
@@ -678,12 +679,12 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         .map((event) => event.alert!.status_count)
         .filter((count): count is number => typeof count === 'number');
 
-      // Every recovering event must carry a status_count, and we must have
-      // observed at least two distinct values (i.e. the count climbed before
-      // the threshold was met).
-      expect(recoveringCounts).toHaveLength(2);
+      // Every recovering event must carry a status_count. recovering.count=3
+      // spends three evaluations in recovering (1 → 2 → 3) before the episode
+      // becomes inactive on the fourth.
+      expect(recoveringCounts).toHaveLength(3);
       expect(Math.min(...recoveringCounts)).toBe(1);
-      expect(Math.max(...recoveringCounts)).toBe(2);
+      expect(Math.max(...recoveringCounts)).toBe(3);
     }
   );
 

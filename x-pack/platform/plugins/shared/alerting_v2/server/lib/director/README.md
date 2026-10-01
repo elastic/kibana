@@ -147,6 +147,23 @@ It supports:
 
 For timeframe evaluation, it compares the director run time (`evaluatedAt`) with the last stored episode timestamp; the current event has no `@timestamp` yet, since ES sets it at ingest.
 
+#### Count semantics
+
+A count of `N` is the number of evaluations the episode spends in the phase. The phase resolves on the evaluation after that, so with consecutive breaches:
+
+| `pending.count` | eval 1 | eval 2 | eval 3 | Becomes `active` on |
+| --- | --- | --- | --- | --- |
+| `0` | `active` | `active` | `active` | evaluation 1 |
+| `1` | `pending` | `active` | `active` | evaluation 2 |
+| `2` | `pending` | `pending` | `active` | evaluation 3 |
+| `3` | `pending` | `pending` | `pending` | evaluation 4 |
+
+`recovering.count` behaves the same way for `recovering -> inactive`.
+
+A count of `0` skips the phase, unless a `timeframe` is combined with it using `and`: then the timeframe still has to elapse, so `{ count: 0, timeframe: '5m', operator: 'and' }` holds the phase until the timeframe is met. With `or`, the count alone is enough and the phase is skipped.
+
+**Caveat:** elapsed time for an `and`-combined `timeframe` is measured against the previous evaluation's stored timestamp, not against when the phase was entered (see above), so it never accumulates past roughly one schedule interval. An `and`-combined `timeframe` therefore only resolves reliably when the rule's schedule interval is >= the timeframe; on a shorter schedule it holds the phase indefinitely. This applies to any count, not just `0`.
+
 ## When to add a new strategy
 
 Add a strategy when the lifecycle rules depend on rule configuration and the variation can be isolated behind `canHandle(rule)` + `getNextState(...)`.
