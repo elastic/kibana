@@ -84,15 +84,28 @@ describe('ReviewActionsWidget', () => {
       widget.dispose();
     });
 
-    it('hands focus back to the editor when tabbing out of either end of the toolbar', () => {
+    it('lets the browser move focus out of the toolbar when tabbing past either end', () => {
       const editorFocus = jest.fn();
       const { widget, dom, undoButton, replaceButton } = setup(editorFocus);
 
-      tab(replaceButton);
-      expect(editorFocus).toHaveBeenCalledTimes(1);
+      const forward = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+      const backward = new KeyboardEvent('keydown', {
+        key: 'Tab',
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+      const stopForward = jest.spyOn(forward, 'stopPropagation');
+      const stopBackward = jest.spyOn(backward, 'stopPropagation');
 
-      tab(undoButton, true);
-      expect(editorFocus).toHaveBeenCalledTimes(2);
+      replaceButton.dispatchEvent(forward);
+      undoButton.dispatchEvent(backward);
+
+      expect(forward.defaultPrevented).toBe(false);
+      expect(backward.defaultPrevented).toBe(false);
+      expect(stopForward).toHaveBeenCalled();
+      expect(stopBackward).toHaveBeenCalled();
+      expect(editorFocus).not.toHaveBeenCalled();
 
       dom.remove();
       widget.dispose();

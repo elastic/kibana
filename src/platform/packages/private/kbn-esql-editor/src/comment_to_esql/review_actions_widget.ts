@@ -133,15 +133,12 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
       if (event.key !== 'Tab') return;
       const index = this.buttons.findIndex((button) => button === event.target);
       if (index === -1) return;
-      // The editor's Tab command would otherwise send focus back to Undo.
-      event.preventDefault();
+      // Keep Monaco's Tab command from sending focus back to Undo.
       event.stopPropagation();
       const next = this.buttons[index + (event.shiftKey ? -1 : 1)];
-      if (next) {
-        next.focus({ preventScroll: true });
-      } else {
-        this.editor.focus();
-      }
+      if (!next) return;
+      event.preventDefault();
+      next.focus({ preventScroll: true });
     });
 
     const acceptLabel = this.isReplaceMode
