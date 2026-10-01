@@ -39,6 +39,8 @@ export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
  * for a missed notifyChange / leftover cleanup — not the MW trigger.
  */
 export const DEFAULT_TASK_SCHEDULE = '24h';
+// Must exceed DEFAULT_TASK_SCHEDULE, or the safety-net run always resets its lookback.
+const MAX_LOOKBACK_HOURS = 48;
 
 // A failed sync must not wait for the 24h safety net, but retries are bounded.
 export const FAILED_RUN_RETRY_DELAY_MS = 5 * 60 * 1000;
@@ -112,8 +114,11 @@ export class SyncPrivateLocationMonitorsTask {
     } = this.serverSetup;
 
     let lastStartedAt = taskInstance.state.lastStartedAt;
-    // if it's too old, set it to 10 minutes ago to avoid syncing everything the first time
-    if (!lastStartedAt || moment(lastStartedAt).isBefore(moment().subtract(6, 'hour'))) {
+    // On first run or after a long outage, avoid syncing everything: look back 10 minutes only.
+    if (
+      !lastStartedAt ||
+      moment(lastStartedAt).isBefore(moment().subtract(MAX_LOOKBACK_HOURS, 'hour'))
+    ) {
       lastStartedAt = moment().subtract(10, 'minute').toISOString();
     }
     const taskState = this.getNewTaskState({ taskInstance });
