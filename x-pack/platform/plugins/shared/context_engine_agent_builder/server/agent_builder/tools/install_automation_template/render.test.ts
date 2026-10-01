@@ -20,6 +20,7 @@ import {
 
 const unitValues = {
   aiIndexId: 'airline-loyalty',
+  automationName: 'loyalty-province-profile',
   unitIndex: 'airline_loyalty_customer_loyalty_history',
   unitKey: 'Province',
   activityField: 'Enrollment Date',
@@ -32,6 +33,7 @@ describe('automation template rendering', () => {
   it('quotes string consts and leaves numbers bare', () => {
     const yaml = renderDocumentOrchestrationTemplate({
       aiIndexId: 'airline-loyalty',
+      automationName: 'flight-activity-docs',
       sourceIndex: 'loyalty-docs',
       titleField: 'title',
       bodyField: 'body',
@@ -51,6 +53,7 @@ describe('automation template rendering', () => {
   it('keeps a corpus filter that itself contains underscores', () => {
     const yaml = renderDocumentOrchestrationTemplate({
       aiIndexId: 'airline-loyalty',
+      automationName: 'flight-activity-docs',
       sourceIndex: 'loyalty-docs',
       titleField: 'title',
       bodyField: 'body',
@@ -65,6 +68,7 @@ describe('automation template rendering', () => {
   it('fills the index metadata consts', () => {
     const yaml = renderIndexMetadataTemplate({
       aiIndexId: 'airline-loyalty',
+      automationName: 'loyalty-index-metadata',
       sourceIndex: 'loyalty-docs',
       categoryField: 'tier',
     });
@@ -109,6 +113,7 @@ describe('automation template rendering', () => {
       () =>
         renderDocumentOrchestrationTemplate({
           aiIndexId: 'airline-loyalty',
+          automationName: 'flight-activity-docs',
           sourceIndex: 'loyalty-docs',
           titleField: 'title',
           bodyField: 'body',
@@ -123,6 +128,7 @@ describe('automation template rendering', () => {
       () =>
         renderIndexMetadataTemplate({
           aiIndexId: 'airline-loyalty',
+          automationName: 'loyalty-index-metadata',
           sourceIndex: 'loyalty-docs',
           categoryField: 'tier',
         }),
@@ -150,6 +156,7 @@ describe('automation template rendering', () => {
     expect(() =>
       renderIndexMetadataTemplate({
         aiIndexId: 'airline-loyalty',
+        automationName: 'loyalty-index-metadata',
         sourceIndex: 'loyalty-docs',
         categoryField: 'tier`',
       })

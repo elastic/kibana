@@ -79,15 +79,15 @@ const aiIndexIdFromAttachments = (attachments: AttachmentStateManager): string =
 
 const renderTemplate = (params: InstallAutomationTemplateParams, aiIndexId: string): string => {
   if (params.template === 'document_orchestration') {
-    return renderDocumentOrchestrationTemplate({ ...params, aiIndexId });
+    return renderDocumentOrchestrationTemplate({ ...params, aiIndexId, automationName: params.name });
   }
   if (params.template === 'unit_profile') {
-    return renderUnitProfileTemplate({ ...params, aiIndexId });
+    return renderUnitProfileTemplate({ ...params, aiIndexId, automationName: params.name });
   }
   if (params.template === 'targeted_ki_writer') {
     return renderTargetedKiWriterTemplate({ aiIndexId, kis: params.kis });
   }
-  return renderIndexMetadataTemplate({ ...params, aiIndexId });
+  return renderIndexMetadataTemplate({ ...params, aiIndexId, automationName: params.name });
 };
 
 /**
@@ -146,8 +146,15 @@ export const findInstalledTemplateWorkflowId = async ({
     // automation of the same template type, which is the opposite of the multi-instance intent.
     // The tag path is retained only for callers that supply no name (pre-name backwards compat).
     if (templateName) {
-      if (workflow.name === templateName && nameMatch === undefined) {
-        nameMatch = workflow.id ?? automation.value;
+      if (workflow.name === templateName) {
+        // Guard against cross-template name collisions: a workflow carrying a different
+        // template's tag cannot be a valid replacement target for this template type.
+        const hasOtherTemplateTag = Object.values(AUTOMATION_TEMPLATE_TAGS).some(
+          (tag) => tag !== templateTag && workflow.tags?.includes(tag)
+        );
+        if (!hasOtherTemplateTag && nameMatch === undefined) {
+          nameMatch = workflow.id ?? automation.value;
+        }
       }
     } else if (workflow.tags?.includes(templateTag) && nameMatch === undefined) {
       nameMatch = workflow.id ?? automation.value;

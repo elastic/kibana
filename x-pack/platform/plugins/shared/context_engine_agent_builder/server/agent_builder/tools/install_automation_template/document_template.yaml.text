@@ -25,6 +25,9 @@ enabled: true
 consts:
   # The Context Engine AI index the indicators are written into.
   ai_index_id: __AI_INDEX_ID__
+  # The human-readable name of this automation instance, used as a KI ID prefix so that
+  # multiple installations reading from the same index produce distinct, non-colliding KIs.
+  automation_name: __AUTOMATION_NAME__
   # The index the documents are read from.
   source_index: __SOURCE_INDEX__
   # The field used as the document's title.
@@ -242,15 +245,14 @@ steps:
                   esql: "${{ steps.summarize_document.output.content.access_patterns | map: 'esql_example' | default: nil }}"
                   topics: "${{ steps.summarize_document.output.content.topics }}"
 
-          # `ki_id` pairs the index with the source document id, so a re-run replaces that
-          # document's KI rather than appending a second copy, and two indices holding the same
-          # document id do not collide. On a data-stream destination a re-run appends a new revision
-          # instead.
+          # `ki_id` scopes the document to this automation instance so that two installations
+          # reading from the same index produce distinct, non-colliding KIs. A re-run with the
+          # same automation_name replaces the KI in-place rather than appending a second copy.
           - name: create_ki
             type: context-engine.createKi
             with:
               ai_index_id: "{{ consts.ai_index_id }}"
-              ki_id: "{{ consts.source_index }}-{{ steps.document_context.output.doc_id }}"
+              ki_id: "{{ consts.automation_name }}-{{ steps.document_context.output.doc_id }}"
               ki: "${{ steps.assemble_ki.output.ki }}"
               verifiers:
                 - esql-valid-syntax

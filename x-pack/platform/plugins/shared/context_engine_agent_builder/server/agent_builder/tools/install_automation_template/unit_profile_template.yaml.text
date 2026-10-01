@@ -28,6 +28,9 @@ enabled: true
 consts:
   # The Context Engine AI index the indicators are written into.
   ai_index_id: __AI_INDEX_ID__
+  # The human-readable name of this automation instance, used as a KI ID prefix so that
+  # multiple installations on the same source index produce distinct, non-colliding KIs.
+  automation_name: __AUTOMATION_NAME__
   # The index the units are discovered in and their activity is aggregated from.
   unit_index: __UNIT_INDEX__
   # The keyword field holding the unit identity — one KI is produced per distinct value.
@@ -102,7 +105,9 @@ steps:
                 {{ foreach.item[0] | replace: '\\', '\\\\' | replace: '"', '\\"' }}
               # The raw key, never a slug: `slugify` folds `ABC` and `abc` into one id, and those
               # units would overwrite each other. `ki_id` takes any string up to 512 characters.
-              ki_id: "unit-{{ foreach.item[0] }}"
+              # Prefixed with automation_name so two installations on the same source index
+              # produce distinct, non-colliding KIs.
+              ki_id: "{{ consts.automation_name }}-{{ foreach.item[0] }}"
 
           # Grounding 1: totals over every row referencing the unit. Column names are derived from
           # field names so a new metric is one STATS edit — add a column here and it propagates
