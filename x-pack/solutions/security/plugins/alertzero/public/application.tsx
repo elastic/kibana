@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
+import type { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, AppUnmount, CoreStart } from '@kbn/core/public';
 import { Router } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
 import { ALERTZERO_PLUGIN_NAME } from '@kbn/alertzero-common';
+import { AccessBoundary } from './components/access_boundary';
+import type { SubscriptionAvailability } from '../common/availability';
 import { AppChromeLayout } from './components/app_chrome';
 import type { AlertZeroStartDependencies } from './types';
 import { mergeKibanaServices } from './kibana_services';
@@ -22,6 +25,7 @@ interface RenderAppParams {
   coreStart: CoreStart;
   startDeps: AlertZeroStartDependencies;
   params: AppMountParameters;
+  availability$: Observable<SubscriptionAvailability>;
 }
 
 const rootStyle: React.CSSProperties = {
@@ -35,6 +39,7 @@ export const renderApp = async ({
   coreStart,
   startDeps,
   params,
+  availability$,
 }: RenderAppParams): Promise<AppUnmount> => {
   coreStart.chrome.docTitle.change(ALERTZERO_PLUGIN_NAME);
 
@@ -52,9 +57,11 @@ export const renderApp = async ({
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <div style={rootStyle}>
-            <AppChromeLayout>
-              <AlertZeroRoutes />
-            </AppChromeLayout>
+            <AccessBoundary availability$={availability$}>
+              <AppChromeLayout>
+                <AlertZeroRoutes />
+              </AppChromeLayout>
+            </AccessBoundary>
           </div>
         </Router>
       </QueryClientProvider>

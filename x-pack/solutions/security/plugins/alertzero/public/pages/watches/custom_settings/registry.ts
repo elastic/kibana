@@ -6,10 +6,12 @@
  */
 
 import {
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
 } from '@kbn/alertzero-common';
 import { AlertTriageSettings } from './alert_triage_settings';
+import { RuleCoverageSettings } from './rule_coverage/rule_coverage_settings';
 import { RuleTuningSettings } from './rule_tuning/rule_tuning_settings';
 import type { WorkerCustomSettingsComponent } from './types';
 
@@ -21,6 +23,7 @@ import type { WorkerCustomSettingsComponent } from './types';
 const WORKER_CUSTOM_SETTINGS_COMPONENTS: Partial<Record<string, WorkerCustomSettingsComponent>> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: AlertTriageSettings,
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: RuleTuningSettings,
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: RuleCoverageSettings,
 };
 
 export const getWorkerCustomSettingsComponent = (

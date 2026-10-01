@@ -21,7 +21,7 @@ import {
   ALERTZERO_FORENSICS_WORKFLOW_IDS,
   ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
   ALERTZERO_RULE_WORKFLOW_IDS,
-  ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
@@ -37,7 +37,7 @@ import {
 import ACTION_ISOLATE_HOST_YAML from './definitions/alertzero/actions/defend/action_isolate_host.yaml';
 import ACTION_KILL_PROCESS_YAML from './definitions/alertzero/actions/defend/action_kill_process.yaml';
 import ACTION_SUSPEND_PROCESS_YAML from './definitions/alertzero/actions/defend/action_suspend_process.yaml';
-import DETECTION_RULE_CREATION_YAML from './definitions/alertzero/detection_rule_creation.yaml';
+import DETECTION_RULE_COVERAGE_YAML from './definitions/alertzero/detection_rule_coverage.yaml';
 import DETECTION_RULE_TUNING_YAML from './definitions/alertzero/detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './definitions/alertzero/floor_alert_triage.yaml';
 import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/alertzero/floor_attack_discovery.yaml';
@@ -96,9 +96,11 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     scheduleInterval: '2h',
     extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
   },
-  [ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
+  [ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
+    scheduleInterval: '1h',
+    extras: { lookbackDays: 14, maxGapsPerRun: 5 },
   },
   [SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
     detectionIntervalMinutes: 30,
@@ -205,9 +207,9 @@ it.each([
   ],
   [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '8:237c81e3'],
   [
-    ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
-    DETECTION_RULE_CREATION_YAML,
-    '2:0be65f46',
+    ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
+    DETECTION_RULE_COVERAGE_YAML,
+    '2:9e586a9d',
   ],
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '3:20440aaf'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '3:39ab48da'],
