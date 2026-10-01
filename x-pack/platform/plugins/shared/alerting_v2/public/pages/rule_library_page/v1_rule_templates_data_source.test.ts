@@ -119,4 +119,36 @@ describe('useV1RuleTemplatesDataSource', () => {
       sortOrder: 'asc',
     });
   });
+
+  it('omits tags on the list item when the template has none', async () => {
+    mockFindRuleTemplates.mockResolvedValue({
+      data: [
+        {
+          id: 'template-1',
+          name: 'CPU usage',
+          ruleTypeId: 'metrics.alert.threshold',
+          tags: [],
+        },
+      ],
+      total: 1,
+      page: 1,
+      perPage: 20,
+    });
+    const { result } = renderHook(() => useV1RuleTemplatesDataSource());
+
+    const response = await result.current.findItems(findParams());
+
+    expect(response.items[0]?.tags).toBeUndefined();
+  });
+
+  it('toasts an Error and rethrows when the classic find API fails', async () => {
+    mockFindRuleTemplates.mockRejectedValue('network down');
+    const { result } = renderHook(() => useV1RuleTemplatesDataSource());
+
+    await expect(result.current.findItems(findParams())).rejects.toThrow('network down');
+    expect(mockAddError).toHaveBeenCalledWith(expect.any(Error), {
+      title: 'Failed to load rule templates',
+    });
+    expect(mockAddError.mock.calls[0][0].message).toBe('network down');
+  });
 });

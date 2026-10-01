@@ -30,7 +30,7 @@ import {
 
 const { Column, Action } = ContentListTable;
 
-const RULE_LIBRARY_LIST_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.pageTitle', {
+const RULE_LIBRARY_LIST_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.v1.pageTitle', {
   defaultMessage: 'Rule library',
 });
 
@@ -75,7 +75,7 @@ export const V1RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => 
       title={
         <h2>
           <FormattedMessage
-            id="xpack.alertingV2.ruleLibrary.emptyTitle"
+            id="xpack.alertingV2.ruleLibrary.v1.emptyTitle"
             defaultMessage="No rule templates"
           />
         </h2>
@@ -83,7 +83,7 @@ export const V1RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => 
       body={
         <p>
           <FormattedMessage
-            id="xpack.alertingV2.ruleLibrary.emptyBody"
+            id="xpack.alertingV2.ruleLibrary.v1.emptyBody"
             defaultMessage="Rule templates are provided by Fleet integrations. Update or install integrations to view available rule templates."
           />
         </p>
@@ -96,13 +96,13 @@ export const V1RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => 
       id={V1_RULE_TEMPLATES_CONTENT_LIST_ID}
       queryKeyScope={V1_RULE_TEMPLATES_CONTENT_LIST_ID}
       labels={{
-        entity: i18n.translate('xpack.alertingV2.ruleLibrary.entity', {
+        entity: i18n.translate('xpack.alertingV2.ruleLibrary.v1.entity', {
           defaultMessage: 'rule template',
         }),
-        entityPlural: i18n.translate('xpack.alertingV2.ruleLibrary.entityPlural', {
+        entityPlural: i18n.translate('xpack.alertingV2.ruleLibrary.v1.entityPlural', {
           defaultMessage: 'rule templates',
         }),
-        searchPlaceholder: i18n.translate('xpack.alertingV2.ruleLibrary.searchPlaceholder', {
+        searchPlaceholder: i18n.translate('xpack.alertingV2.ruleLibrary.v1.searchPlaceholder', {
           defaultMessage: 'Search rule templates',
         }),
       }}
@@ -115,13 +115,13 @@ export const V1RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => 
           fields: [
             {
               field: 'name',
-              name: i18n.translate('xpack.alertingV2.ruleLibrary.sort.name', {
+              name: i18n.translate('xpack.alertingV2.ruleLibrary.v1.sort.name', {
                 defaultMessage: 'Name',
               }),
             },
             {
               field: 'tags',
-              name: i18n.translate('xpack.alertingV2.ruleLibrary.sort.tags', {
+              name: i18n.translate('xpack.alertingV2.ruleLibrary.v1.sort.tags', {
                 defaultMessage: 'Tags',
               }),
             },
@@ -142,7 +142,7 @@ export const V1RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => 
           <Column.Name showDescription width="40em" />
           <Column
             id="tags"
-            name={i18n.translate('xpack.alertingV2.ruleLibrary.column.tags', {
+            name={i18n.translate('xpack.alertingV2.ruleLibrary.v1.column.tags', {
               defaultMessage: 'Tags',
             })}
             width="10em"

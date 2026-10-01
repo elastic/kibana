@@ -30,8 +30,19 @@ export const useRuleLibraryAccess = (): RuleLibraryAccess => {
   };
 };
 
-/** V2 when the user can read it. V1 only when that is their only library. */
+/**
+ * V2 when the user can read it, otherwise V1.
+ * Returns null when the user can read neither library. Callers check access before rendering a list.
+ */
 export const getDefaultRuleLibraryEngine = ({
   canAccessV1,
   canAccessV2,
-}: RuleLibraryAccess): RuleLibraryEngine => (canAccessV2 || !canAccessV1 ? 'v2' : 'v1');
+}: RuleLibraryAccess): RuleLibraryEngine | null => {
+  if (canAccessV2) {
+    return 'v2';
+  }
+  if (canAccessV1) {
+    return 'v1';
+  }
+  return null;
+};

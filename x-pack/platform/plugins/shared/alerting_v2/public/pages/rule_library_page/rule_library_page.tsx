@@ -37,11 +37,11 @@ const V1_TAB_LABEL = i18n.translate('xpack.alertingV2.ruleLibrary.v1TabTitle', {
 export const RuleLibraryPage = () => {
   useBreadcrumbs('rule_library_list');
   const { canAccessV1, canAccessV2 } = useRuleLibraryAccess();
-  const [selectedEngine, setSelectedEngine] = useState<RuleLibraryEngine>(() =>
+  const [selectedEngine, setSelectedEngine] = useState<RuleLibraryEngine | null>(() =>
     getDefaultRuleLibraryEngine({ canAccessV1, canAccessV2 })
   );
   const showV2Library = selectedEngine === 'v2';
-  const shareListUrlState = !(canAccessV1 && canAccessV2);
+  const singleEngineMode = !(canAccessV1 && canAccessV2);
   const { flyout, confirmationModal, openCreateFromTemplateFlyout } = useComposeDiscoverFlyout();
   useCreateFromTemplateQuery(openCreateFromTemplateFlyout, { enabled: showV2Library });
 
@@ -78,11 +78,11 @@ export const RuleLibraryPage = () => {
         spacing="bleed"
       />
       <EuiSpacer size="m" />
-      {showV2Library ? (
-        <RuleLibraryList urlSync={shareListUrlState} onInstall={openCreateFromTemplateFlyout} />
-      ) : (
-        <V1RuleLibraryList urlSync={shareListUrlState} />
-      )}
+      {selectedEngine === 'v2' ? (
+        <RuleLibraryList urlSync={singleEngineMode} onInstall={openCreateFromTemplateFlyout} />
+      ) : selectedEngine === 'v1' ? (
+        <V1RuleLibraryList urlSync={singleEngineMode} />
+      ) : null}
       {flyout}
       {confirmationModal}
     </div>

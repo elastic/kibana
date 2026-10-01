@@ -138,6 +138,27 @@ describe('useCreateFromTemplateQuery', () => {
     expect(history.location.search).toBe('');
   });
 
+  it('opens the flyout once when the effect runs again before templateId is stripped', async () => {
+    mockGetRuleTemplate.mockResolvedValue(mockTemplate);
+    const history = createMemoryHistory({
+      initialEntries: ['/?templateId=template-1'],
+    });
+    jest.spyOn(history, 'replace').mockImplementation(() => {});
+
+    const { rerender } = renderHook(
+      () => useCreateFromTemplateQuery(mockOpenCreateFromTemplateFlyout),
+      { wrapper: createWrapper(history) }
+    );
+
+    await waitFor(() => {
+      expect(mockOpenCreateFromTemplateFlyout).toHaveBeenCalledTimes(1);
+    });
+
+    rerender();
+
+    expect(mockOpenCreateFromTemplateFlyout).toHaveBeenCalledTimes(1);
+  });
+
   it('keeps other query params when it strips templateId', async () => {
     mockGetRuleTemplate.mockResolvedValue(mockTemplate);
     const history = createMemoryHistory({

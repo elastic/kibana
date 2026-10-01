@@ -106,6 +106,7 @@ jest.mock('../../hooks/use_fetch_rule_template_tags', () => ({
 jest.mock('../../hooks/use_compose_discover_flyout', () => ({
   useComposeDiscoverFlyout: () => ({
     flyout: null,
+    confirmationModal: null,
     openCreateFromTemplateFlyout: jest.fn(),
   }),
 }));

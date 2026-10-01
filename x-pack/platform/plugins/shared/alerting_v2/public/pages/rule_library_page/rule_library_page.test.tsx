@@ -94,6 +94,9 @@ jest.mock('../../hooks/use_compose_discover_flyout', () => {
             ReactActual.createElement('div', { 'data-test-subj': 'composeDiscoverFlyout' })
           );
         },
+        confirmationModal: ReactActual.createElement('div', {
+          'data-test-subj': 'ruleLibraryConfirmationModal',
+        }),
       };
     },
   };
@@ -145,6 +148,7 @@ describe('RuleLibraryPage', () => {
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rule library');
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleLibraryConfirmationModal')).toBeInTheDocument();
   });
 
   it('renders the rule library list', () => {

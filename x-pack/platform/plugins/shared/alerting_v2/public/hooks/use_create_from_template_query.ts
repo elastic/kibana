@@ -43,6 +43,7 @@ export const useCreateFromTemplateQuery = (
   const { toasts } = useService(CoreStart('notifications'));
   const openFlyoutRef = useRef(openCreateFromTemplateFlyout);
   openFlyoutRef.current = openCreateFromTemplateFlyout;
+  const handledTemplateIdRef = useRef<string | null>(null);
 
   const templateId = new URLSearchParams(search).get('templateId');
 
@@ -55,17 +56,24 @@ export const useCreateFromTemplateQuery = (
   });
 
   useEffect(() => {
-    if (!enabled || !templateId) {
+    if (!templateId) {
+      handledTemplateIdRef.current = null;
+      return;
+    }
+
+    if (!enabled || handledTemplateIdRef.current === templateId) {
       return;
     }
 
     if (query.isSuccess && query.data) {
+      handledTemplateIdRef.current = templateId;
       openFlyoutRef.current(query.data);
       stripTemplateId(history, pathname, search);
       return;
     }
 
     if (query.isError) {
+      handledTemplateIdRef.current = templateId;
       const error = query.error instanceof Error ? query.error : new Error(String(query.error));
       toasts.addError(error, { title: TEMPLATE_LOAD_ERROR_TITLE });
       stripTemplateId(history, pathname, search);

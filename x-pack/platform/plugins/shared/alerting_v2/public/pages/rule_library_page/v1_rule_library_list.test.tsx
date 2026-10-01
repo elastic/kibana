@@ -43,10 +43,10 @@ const template = {
   tags: ['prod'],
 };
 
-const renderList = () =>
+const renderList = (urlSync?: boolean, initialEntries?: string[]) =>
   render(
-    <ListPageTestProviders>
-      <V1RuleLibraryList />
+    <ListPageTestProviders initialEntries={initialEntries}>
+      <V1RuleLibraryList urlSync={urlSync} />
     </ListPageTestProviders>
   );
 
@@ -54,6 +54,25 @@ describe('V1RuleLibraryList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFindItems.mockResolvedValue({ items: [], total: 0 });
+  });
+
+  it('ignores URL search and sort when urlSync is off', async () => {
+    renderList(false, ['/?q=cpu&sort=tags:desc']);
+
+    await waitFor(() => {
+      expect(mockFindItems).toHaveBeenCalled();
+    });
+
+    const params = mockFindItems.mock.calls.at(-1)[0];
+    expect(params.searchQuery).toBe('');
+    expect(params.sort).toEqual({ field: 'name', direction: 'asc' });
+  });
+
+  it('renders the empty state when there are no templates', async () => {
+    renderList();
+
+    expect(await screen.findByTestId('v1RuleLibraryEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByText('No rule templates')).toBeInTheDocument();
   });
 
   it('renders classic templates with a Create action', async () => {

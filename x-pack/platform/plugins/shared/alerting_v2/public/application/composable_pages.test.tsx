@@ -37,6 +37,9 @@ jest.mock('@kbn/core-di-browser', () => {
       if (token === 'uiSettings') {
         return { get: () => mockAlertingV2ExperimentalFeaturesEnabled };
       }
+      if (token === 'application') {
+        return { capabilities: { management: {} } };
+      }
       return {};
     },
     CoreStart: (key: string) => key,

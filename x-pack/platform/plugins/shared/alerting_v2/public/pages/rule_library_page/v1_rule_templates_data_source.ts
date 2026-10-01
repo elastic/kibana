@@ -16,21 +16,25 @@ import {
   type RuleTemplate,
 } from '@kbn/response-ops-rules-apis/apis/find_rule_templates';
 
-const SORT_FIELDS = new Set(['name', 'tags']);
+const API_SORT_FIELDS = ['name', 'tags'] as const;
+type ApiSortField = (typeof API_SORT_FIELDS)[number];
+
+const isApiSortField = (field: string): field is ApiSortField =>
+  (API_SORT_FIELDS as readonly string[]).includes(field);
 
 /**
  * Maps Content List sort fields onto the classic find API.
  * `Column.Name` sorts by `title`; the templates API expects `name`.
  */
-const toApiSortField = (field: string | undefined): 'name' | 'tags' | undefined => {
+const toApiSortField = (field: string | undefined): ApiSortField | undefined => {
   if (!field) {
     return undefined;
   }
   if (field === 'title') {
     return 'name';
   }
-  if (SORT_FIELDS.has(field)) {
-    return field as 'name' | 'tags';
+  if (isApiSortField(field)) {
+    return field;
   }
   return undefined;
 };
@@ -74,12 +78,13 @@ export const useV1RuleTemplatesDataSource = (): DataSourceConfig => {
           total: response.total,
         };
       } catch (error) {
-        toasts.addError(error, {
-          title: i18n.translate('xpack.alertingV2.ruleLibrary.fetchError', {
+        const normalizedError = error instanceof Error ? error : new Error(String(error));
+        toasts.addError(normalizedError, {
+          title: i18n.translate('xpack.alertingV2.ruleLibrary.v1.fetchError', {
             defaultMessage: 'Failed to load rule templates',
           }),
         });
-        return { items: [], total: 0 };
+        throw normalizedError;
       }
     },
     [http, toasts]
