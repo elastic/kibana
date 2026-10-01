@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -100,6 +100,7 @@ export const DiscoverSessionInline = ({
 }: DiscoverSessionInlineProps) => {
   const SearchBar = unifiedSearch.ui.SearchBar;
   const [embeddableApi, setEmbeddableApi] = useState<SearchEmbeddableApi | undefined>();
+  const [blockingError, setBlockingError] = useState<Error | undefined>();
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const visibleColumnsRef = useRef<string[] | undefined>(undefined);
   const canWriteDashboards = application?.capabilities.dashboard_v2?.showWriteControls === true;
@@ -146,6 +147,16 @@ export const DiscoverSessionInline = ({
     embeddableApi?.setTimeRange(effectiveTimeRange);
   }, [embeddableApi, effectiveTimeRange]);
 
+  useEffect(() => {
+    if (!embeddableApi) {
+      setBlockingError(undefined);
+      return;
+    }
+
+    const subscription = embeddableApi.blockingError$.subscribe(setBlockingError);
+    return () => subscription.unsubscribe();
+  }, [embeddableApi]);
+
   const openSaveModal = useCallback(() => {
     if (canWriteDashboards) {
       setIsSaveModalOpen(true);
@@ -185,13 +196,15 @@ export const DiscoverSessionInline = ({
     );
   }, [application, canWriteDashboards, embeddable, embeddableApi, openSaveModal]);
 
+  // A blocking error replaces the grid, and with it the toolbar hosting the time picker,
+  // so the picker moves next to the error message instead.
   const toolbarSlot = useMemo(
     () => ({
-      leftSide: toolbarLeftSide,
+      leftSide: blockingError ? undefined : toolbarLeftSide,
       saveToDashboardButton,
       onVisibleColumnsChange,
     }),
-    [onVisibleColumnsChange, saveToDashboardButton, toolbarLeftSide]
+    [blockingError, onVisibleColumnsChange, saveToDashboardButton, toolbarLeftSide]
   );
 
   const closeSaveModal = useCallback(() => setIsSaveModalOpen(false), []);
@@ -271,6 +284,12 @@ export const DiscoverSessionInline = ({
 
   return (
     <SearchEmbeddableToolbarProvider value={toolbarSlot}>
+      {blockingError && (
+        <>
+          {toolbarLeftSide}
+          <EuiSpacer size="s" />
+        </>
+      )}
       <div
         css={css`
           height: ${INLINE_TABLE_HEIGHT}px;

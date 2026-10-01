@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
@@ -46,6 +47,7 @@ const liveSerializedState: DiscoverSessionEmbeddableByValueState & {
 const embeddableApi = {
   setTimeRange: jest.fn(),
   getSerializedStateByValue: jest.fn(() => liveSerializedState),
+  blockingError$: new BehaviorSubject<Error | undefined>(undefined),
 };
 
 const navigateToWithEmbeddablePackages = jest.fn();
@@ -192,6 +194,14 @@ const MockEmbeddableRenderer = ({
   };
 }) => {
   const { leftSide, saveToDashboardButton, onVisibleColumnsChange } = useSearchEmbeddableToolbar();
+  const [blockingError, setBlockingError] = useState<Error | undefined>(
+    embeddableApi.blockingError$.getValue()
+  );
+
+  useEffect(() => {
+    const subscription = embeddableApi.blockingError$.subscribe(setBlockingError);
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     embeddableMounts += 1;
@@ -206,6 +216,11 @@ const MockEmbeddableRenderer = ({
   useEffect(() => {
     onVisibleColumnsChange?.(['event.action', '@timestamp']);
   }, [onVisibleColumnsChange]);
+
+  // The real factory replaces the whole grid, toolbar included, with the error panel.
+  if (blockingError) {
+    return <span data-test-subj="mockedSearchEmbeddableError">{blockingError.message}</span>;
+  }
 
   return (
     <div data-test-subj="mockedSearchEmbeddable" data-query={readEmbeddableQuery(getParentApi)}>
@@ -223,6 +238,7 @@ describe('DiscoverSessionInline', () => {
     capturedOnSave = undefined;
     capturedSaveModalDocumentInfo = undefined;
     capturedSearchBarProps.length = 0;
+    embeddableApi.blockingError$.next(undefined);
     jest
       .mocked(EmbeddableRenderer)
       .mockImplementation(({ onApiAvailable, getParentApi }) => (
@@ -322,6 +338,39 @@ describe('DiscoverSessionInline', () => {
     await waitFor(() => {
       expect(embeddableApi.setTimeRange).toHaveBeenCalledWith(validRange);
     });
+  });
+
+  it('keeps a single usable time picker when the search fails', async () => {
+    renderInline();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('discoverAgentBuilderSessionTimePicker')).toBeInTheDocument();
+    });
+
+    act(() => {
+      embeddableApi.blockingError$.next(new Error('verification_exception'));
+    });
+
+    expect(screen.getByTestId('mockedSearchEmbeddableError')).toBeInTheDocument();
+    expect(screen.getAllByTestId('discoverAgentBuilderSessionTimePicker')).toHaveLength(1);
+
+    const absoluteRange = {
+      from: '2024-01-01T00:00:00.000Z',
+      to: '2024-01-02T00:00:00.000Z',
+    };
+    act(() => {
+      capturedSearchBarProps.at(-1)?.onQueryChange?.({ dateRange: absoluteRange });
+    });
+
+    await waitFor(() => {
+      expect(embeddableApi.setTimeRange).toHaveBeenCalledWith(absoluteRange);
+    });
+
+    act(() => {
+      embeddableApi.blockingError$.next(undefined);
+    });
+
+    expect(screen.getAllByTestId('discoverAgentBuilderSessionTimePicker')).toHaveLength(1);
   });
 
   it('opens Discover with the visible columns and live sort', async () => {
