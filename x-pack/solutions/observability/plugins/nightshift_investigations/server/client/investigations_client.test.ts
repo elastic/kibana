@@ -1707,7 +1707,7 @@ describe('NightshiftInvestigationsClient notifications', () => {
     );
   });
 
-  it('ensureOrCreate() ignores malformed destinations rather than failing the run', async () => {
+  it('ensureOrCreate() rejects malformed destinations', async () => {
     mockManagement.getWorkflowExecution.mockResolvedValue({
       id: 'exec-notify',
       workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
@@ -1724,10 +1724,8 @@ describe('NightshiftInvestigationsClient notifications', () => {
       },
     });
 
-    await makeClient().ensureOrCreate('exec-notify');
-
-    const [{ attributes }] = repository.create.mock.calls[0];
-    expect(attributes).not.toHaveProperty('notifications');
+    await expect(makeClient().ensureOrCreate('exec-notify')).rejects.toThrow();
+    expect(repository.create).not.toHaveBeenCalled();
   });
 
   it('get() returns the stored destinations and delivery results', async () => {
@@ -1739,23 +1737,161 @@ describe('NightshiftInvestigationsClient notifications', () => {
     );
   });
 
-  it('setNotifications() writes delivery results onto a settled record', async () => {
-    const delivered = [{ ...notifications[0], status: 'failed' as const, error: 'not connected' }];
-    repository.get.mockResolvedValue(makeRecord({ status: 'completed' }, { version: 'v7' }));
+  it('rejects malformed destinations before starting a workflow', async () => {
+    await expect(
+      makeClient().start({
+        title: 'Test',
+        subject: { type: 'manual', id: 'manual' },
+        trigger_type: 'manual',
+        message: 'Investigate',
+        notifications: [{ ...notifications[0], channel: '' }],
+      })
+    ).rejects.toThrow();
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+});
 
-    await makeClient().setNotifications('inv-1', delivered);
-
-    expect(repository.update).toHaveBeenCalledWith({
-      id: 'inv-1',
-      patch: { notifications: delivered },
-      version: 'v7',
+describe('Nightshift notification delivery claims', () => {
+  const destination = { type: 'slack' as const, connector_id: 'c', channel: '#alerts' };
+  let stored: InvestigationRecord;
+  let nextVersion: number;
+  beforeEach(() => {
+    nextVersion = 1;
+    stored = makeRecord({ notifications: [destination, { ...destination, channel: '#oncall' }] });
+    repository.get.mockImplementation(async () => structuredClone(stored));
+    repository.update.mockImplementation(async ({ patch, version }) => {
+      if (version !== stored.version) throw new InvestigationStaleWriteError(stored.id);
+      stored = { ...stored, ...patch, version: String(++nextVersion) };
     });
   });
 
-  it('setNotifications() throws InvestigationNotFoundError for an unknown record', async () => {
-    await expect(makeClient().setNotifications('inv-missing', notifications)).rejects.toThrow(
-      InvestigationNotFoundError
+  it('allows exactly one concurrent caller to claim the same destination', async () => {
+    const client = makeClient();
+    const claims = await Promise.all([
+      client.claimNotification('inv-1', 0, 'attempt-1'),
+      client.claimNotification('inv-1', 0, 'attempt-2'),
+    ]);
+    expect(claims.filter(Boolean)).toHaveLength(1);
+    expect(stored.notifications?.[0]).toMatchObject({
+      status: 'unconfirmed',
+      attempt_id: 'attempt-1',
+    });
+    expect(stored.notifications?.[1]).toEqual({ ...destination, channel: '#oncall' });
+  });
+
+  it('preserves concurrent claims and results on different destinations', async () => {
+    const client = makeClient();
+    await Promise.all([
+      client.claimNotification('inv-1', 0, 'a'),
+      client.claimNotification('inv-1', 1, 'b'),
+    ]);
+    await Promise.all([
+      client.recordNotificationOutcome('inv-1', 0, 'a', { status: 'sent', message_ts: '1.2' }),
+      client.recordNotificationOutcome('inv-1', 1, 'b', {
+        status: 'failed',
+        error: 'not in channel',
+      }),
+    ]);
+    expect(stored.notifications).toEqual([
+      expect.objectContaining({ status: 'sent', message_ts: '1.2', attempt_id: 'a' }),
+      expect.objectContaining({ status: 'failed', error: 'not in channel', attempt_id: 'b' }),
+    ]);
+  });
+
+  it.each(['sent', 'failed', 'unconfirmed'] as const)(
+    'does not reclaim a %s destination',
+    async (status) => {
+      stored.notifications = [{ ...destination, status }];
+      await expect(makeClient().claimNotification('inv-1', 0, 'new')).resolves.toBeUndefined();
+      expect(repository.update).not.toHaveBeenCalled();
+    }
+  );
+
+  it('does not claim a nonterminal record', async () => {
+    stored.status = 'running';
+    await expect(makeClient().claimNotification('inv-1', 0, 'a')).resolves.toBeUndefined();
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects an outcome belonging to another attempt', async () => {
+    await makeClient().claimNotification('inv-1', 0, 'owner');
+    repository.update.mockClear();
+    await expect(
+      makeClient().recordNotificationOutcome('inv-1', 0, 'other', { status: 'sent' })
+    ).rejects.toThrow(InvestigationConflictError);
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('clears obsolete outcome fields when finalizing its own attempt', async () => {
+    stored.notifications = [
+      {
+        ...destination,
+        status: 'unconfirmed',
+        attempt_id: 'a',
+        error: 'old error',
+        message_ts: 'old',
+        sent_at: 'old',
+      },
+    ];
+    await makeClient().recordNotificationOutcome('inv-1', 0, 'a', {
+      status: 'sent',
+      message_ts: 'new',
+      sent_at: 'now',
+    });
+    expect(stored.notifications?.[0]).toMatchObject({
+      status: 'sent',
+      message_ts: 'new',
+      sent_at: 'now',
+    });
+    expect(stored.notifications?.[0]?.error).toBeUndefined();
+  });
+
+  it.each(['claim', 'outcome'] as const)(
+    'bounds %s conflict retries to three writes',
+    async (operation) => {
+      stored.notifications = [
+        {
+          ...destination,
+          status: operation === 'outcome' ? 'unconfirmed' : undefined,
+          attempt_id: 'a',
+        },
+      ];
+      repository.update.mockRejectedValue(new InvestigationStaleWriteError('inv-1'));
+      const client = makeClient();
+      await expect(
+        operation === 'claim'
+          ? client.claimNotification('inv-1', 0, 'a')
+          : client.recordNotificationOutcome('inv-1', 0, 'a', { status: 'sent' })
+      ).rejects.toThrow(InvestigationConflictError);
+      expect(repository.update).toHaveBeenCalledTimes(3);
+    }
+  );
+
+  it('does not retry a storage error', async () => {
+    repository.update.mockRejectedValue(new Error('storage unavailable'));
+    await expect(makeClient().claimNotification('inv-1', 0, 'a')).rejects.toThrow(
+      'storage unavailable'
+    );
+    expect(repository.update).toHaveBeenCalledTimes(1);
+  });
+
+  it('requires a version before claiming', async () => {
+    stored.version = undefined;
+    await expect(makeClient().claimNotification('inv-1', 0, 'a')).rejects.toThrow(
+      InvestigationConflictError
     );
     expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects missing investigations', async () => {
+    repository.get.mockResolvedValue(undefined);
+    const client = makeClient();
+    await expect(client.claimNotification('missing', 0, 'a')).rejects.toThrow(
+      InvestigationNotFoundError
+    );
+    await expect(
+      client.recordNotificationOutcome('missing', 0, 'a', { status: 'sent' })
+    ).rejects.toThrow(InvestigationNotFoundError);
   });
 });

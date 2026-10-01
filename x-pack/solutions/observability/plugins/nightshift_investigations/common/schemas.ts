@@ -37,21 +37,25 @@ export const investigationSubjectSchema = z.object({
 /** Bound on Slack destinations one investigation fans out to; one per automation is the norm. */
 export const MAX_INVESTIGATION_NOTIFICATIONS = 20;
 
-/**
- * One Slack destination an investigation posts its outcome to, plus the delivery result the notify
- * step writes back. Destinations are copied onto the investigation at start so delivery needs no
- * automation lookup, thread replies can carry a per-event `thread_ts`, and several automations can
- * later fan out to one investigation.
- */
-export const investigationNotificationSchema = z.object({
+/** Slack destination supplied by a caller, without server-owned delivery state. */
+export const investigationNotificationDestinationSchema = z.strictObject({
   type: z.literal('slack'),
   connector_id: z.string().min(1).max(500),
-  /** Slack channel id, or a `#name` when the connector resolves names (the Elastic Slack app does). */
   channel: z.string().min(1).max(500),
   thread_ts: z.string().max(100).optional(),
   automation_id: z.string().max(500).optional(),
   automation_name: z.string().max(500).optional(),
-  status: z.enum(['sent', 'failed']).optional(),
+});
+
+export const investigationNotificationDestinationsSchema = z
+  .array(investigationNotificationDestinationSchema)
+  .max(MAX_INVESTIGATION_NOTIFICATIONS);
+
+/** A destination and its durable delivery attempt; unconfirmed attempts must never auto-resend. */
+export const investigationNotificationSchema = investigationNotificationDestinationSchema.extend({
+  status: z.enum(['sent', 'failed', 'unconfirmed']).optional(),
+  attempt_id: z.string().min(1).max(100).optional(),
+  attempted_at: z.string().max(64).optional(),
   message_ts: z.string().max(100).optional(),
   error: z.string().max(MAX_TEXT_LENGTH).optional(),
   sent_at: z.string().max(64).optional(),
@@ -182,6 +186,13 @@ export const freeFormContextSchema = z
   });
 
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;
+export type InvestigationNotificationDestination = z.infer<
+  typeof investigationNotificationDestinationSchema
+>;
+export type InvestigationNotificationOutcome = Pick<
+  InvestigationNotification,
+  'message_ts' | 'error' | 'sent_at'
+> & { status: 'sent' | 'failed' | 'unconfirmed' };
 export type InvestigationNotification = z.infer<typeof investigationNotificationSchema>;
 export type AlertSnapshotGroup = z.infer<typeof alertSnapshotGroupSchema>;
 export type AlertSnapshotEvaluation = z.infer<typeof alertSnapshotEvaluationSchema>;

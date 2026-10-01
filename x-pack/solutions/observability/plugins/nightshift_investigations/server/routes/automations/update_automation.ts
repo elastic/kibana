@@ -10,6 +10,10 @@ import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
+import {
+  automationCompletionInputSchema,
+  automationCompletionSchema,
+} from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 
@@ -55,14 +59,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
           connectorId: z.string().max(512).optional(),
         })
         .optional(),
-      completion: z
-        .object({
-          action: z.enum(['create_investigation', 'post_to_slack', 'silent']).optional(),
-          targetMode: z.enum(['thread', 'channel', 'self']).optional(),
-          destination: z.string().max(500).optional(),
-          connectorId: z.string().max(512).optional(),
-        })
-        .optional(),
+      completion: automationCompletionInputSchema.optional(),
       runtime: z
         .object({
           dailyDispatchLimit: z.number().int().min(0).optional(),
@@ -107,6 +104,10 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       }),
       updatedAt: new Date().toISOString(),
     };
+
+    const completion = automationCompletionSchema.safeParse(merged.completion);
+    if (!completion.success) throw badRequest(completion.error.message);
+    merged.completion = completion.data;
 
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {

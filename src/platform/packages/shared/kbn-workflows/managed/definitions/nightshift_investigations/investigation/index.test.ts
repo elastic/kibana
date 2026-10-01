@@ -168,6 +168,34 @@ describe('Nightshift investigation workflow', () => {
     ).toBe(false);
   });
 
+  it('enforces notification bounds and rejects delivery fields in workflow input', () => {
+    const validator = buildFieldsZodValidator(
+      getInputsFromDefinition(parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml))
+    );
+    const base = { message: 'Investigate', title: 'Test' };
+    const destination = { type: 'slack', connector_id: 'slack', channel: '#alerts' };
+    const valid = (notifications: object[]) =>
+      validator.safeParse({ ...base, notifications }).success;
+    for (const field of ['connector_id', 'channel']) {
+      for (const value of [undefined, '', 'x'.repeat(501)])
+        expect(valid([{ ...destination, [field]: value }])).toBe(false);
+      expect(valid([{ ...destination, [field]: 'x'.repeat(500) }])).toBe(true);
+    }
+    for (const [field, limit] of [
+      ['thread_ts', 100],
+      ['automation_id', 500],
+      ['automation_name', 500],
+    ] as const) {
+      expect(valid([{ ...destination, [field]: '' }])).toBe(true);
+      expect(valid([{ ...destination, [field]: 'x'.repeat(limit) }])).toBe(true);
+      expect(valid([{ ...destination, [field]: 'x'.repeat(limit + 1) }])).toBe(false);
+    }
+    for (const field of ['status', 'attempt_id', 'attempted_at', 'message_ts', 'error', 'sent_at'])
+      expect(valid([{ ...destination, [field]: 'sent' }])).toBe(false);
+    expect(valid(Array(20).fill(destination))).toBe(true);
+    expect(valid(Array(21).fill(destination))).toBe(false);
+  });
+
   it('space-scopes the path of every kibana.request step', () => {
     const requestSteps = collectStepsByType(investigation.steps, 'kibana.request');
     const unscoped = requestSteps.filter(

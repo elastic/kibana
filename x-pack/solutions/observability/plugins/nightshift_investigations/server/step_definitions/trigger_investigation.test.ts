@@ -101,7 +101,12 @@ describe('triggerInvestigationStepDefinition', () => {
     const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
     const { definition } = createDefinition(start);
     const notifications = [
-      { type: 'slack', connector_id: 'elastic-apps-slack', channel: '#alerts', automation_id: 'a1' },
+      {
+        type: 'slack',
+        connector_id: 'elastic-apps-slack',
+        channel: '#alerts',
+        automation_id: 'a1',
+      },
     ];
 
     await definition.handler(

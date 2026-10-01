@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { InvestigationNotification } from '../../../common';
+import type { InvestigationNotification, InvestigationNotificationOutcome } from '../../../common';
 import {
   buildInvestigationUrl,
   deliverInvestigationNotifications,
@@ -57,134 +57,236 @@ describe('buildInvestigationUrl', () => {
 
 describe('deliverInvestigationNotifications', () => {
   const logger = loggerMock.create();
-  const deliver = (
-    notifications: InvestigationNotification[],
-    execute: jest.Mock,
-    status: 'completed' | 'failed' | 'cancelled' | 'running' = 'completed'
-  ) =>
-    deliverInvestigationNotifications({
-      investigation: investigation(notifications, status as 'completed'),
-      kibanaUrl: 'https://kibana.example.com',
-      spaceId: 'default',
-      execute,
-      logger,
-    });
+  const setup = (notifications: InvestigationNotification[] = [destination()]) => {
+    const record = investigation(structuredClone(notifications));
+    const client = {
+      get: jest.fn().mockImplementation(async () => record),
+      claimNotification: jest
+        .fn()
+        .mockImplementation(async (_id: string, index: number, attemptId: string) => {
+          const notification = record.notifications[index];
+          if (notification.status !== undefined) return undefined;
+          const claim = {
+            ...notification,
+            status: 'unconfirmed' as const,
+            attempt_id: attemptId,
+            attempted_at: new Date().toISOString(),
+          };
+          record.notifications[index] = claim;
+          return claim;
+        }),
+      recordNotificationOutcome: jest
+        .fn()
+        .mockImplementation(
+          async (
+            _id: string,
+            index: number,
+            _attemptId: string,
+            outcome: InvestigationNotificationOutcome
+          ) => {
+            record.notifications[index] = { ...record.notifications[index], ...outcome };
+          }
+        ),
+    };
+    const execute = jest.fn().mockResolvedValue(ok);
+    const controller = new AbortController();
+    const deliver = () =>
+      deliverInvestigationNotifications({
+        investigation: record,
+        kibanaUrl: 'https://kibana.example.com',
+        spaceId: 'ops',
+        execute,
+        client: client as never,
+        signal: controller.signal,
+        logger,
+      });
+    return { record, client, execute, controller, deliver };
+  };
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('posts to each pending destination and records the Slack message timestamp', async () => {
-    const execute = jest.fn().mockResolvedValue(ok);
-
-    const result = await deliver(
-      [destination(), destination({ channel: '#oncall', thread_ts: '1759190000.000001' })],
-      execute
-    );
-
-    expect(execute).toHaveBeenCalledTimes(2);
-    expect(execute).toHaveBeenNthCalledWith(1, {
-      actionId: 'elastic-apps-slack',
-      params: {
-        subAction: 'sendMessage',
-        subActionParams: {
-          channel: '#alerts',
-          text: expect.stringContaining(
-            '<https://kibana.example.com/app/nightshift?investigationId=inv-1|Open the investigation in Kibana>'
-          ),
-        },
-      },
+  it('claims before posting, passes cancellation, and persists each result immediately', async () => {
+    const { record, client, execute, controller, deliver } = setup([
+      destination(),
+      destination({ channel: '#oncall', thread_ts: '1.1' }),
+    ]);
+    execute.mockImplementation(async () => {
+      const index = execute.mock.calls.length - 1;
+      expect(record.notifications[index]).toEqual(
+        expect.objectContaining({
+          status: 'unconfirmed',
+          attempt_id: expect.any(String),
+          attempted_at: expect.any(String),
+        })
+      );
+      if (index === 1) expect(record.notifications[0].status).toBe('sent');
+      return ok;
     });
-    expect(execute.mock.calls[1][0].params.subActionParams).toEqual(
-      expect.objectContaining({ channel: '#oncall', threadTs: '1759190000.000001' })
-    );
-    expect(result.sent).toBe(2);
-    expect(result.failed).toBe(0);
-    expect(result.notifications[0]).toEqual(
-      expect.objectContaining({ status: 'sent', message_ts: '1759190400.000100' })
-    );
-    expect(result.notifications[0].sent_at).toEqual(expect.any(String));
-  });
-
-  it('records a connector error result without throwing', async () => {
-    const execute = jest.fn().mockResolvedValue({
-      status: 'error',
-      actionId: 'elastic-apps-slack',
-      message: 'error posting slack message',
-      serviceMessage: 'Channel #alerts is not connected to this deployment',
-    });
-
-    const result = await deliver([destination()], execute);
-
-    expect(result).toEqual(
+    await expect(deliver()).resolves.toEqual({ sent: 2, failed: 0, unconfirmed: 0 });
+    expect(execute).toHaveBeenCalledWith(
       expect.objectContaining({
-        sent: 0,
-        failed: 1,
-        notifications: [
-          expect.objectContaining({
-            status: 'failed',
-            error: 'Channel #alerts is not connected to this deployment',
-          }),
-        ],
+        signal: controller.signal,
+        params: expect.objectContaining({ subAction: 'sendMessage' }),
       })
     );
-    expect(result.notifications[0]).not.toHaveProperty('sent_at');
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('not connected'));
-  });
-
-  it('records a thrown error (missing connector, no privilege) as a failed delivery', async () => {
-    const execute = jest.fn().mockRejectedValue(new Error('Saved object [action/x] not found'));
-
-    const result = await deliver([destination({ connector_id: 'x' })], execute);
-
-    expect(result.failed).toBe(1);
-    expect(result.notifications[0]).toEqual(
-      expect.objectContaining({ status: 'failed', error: 'Saved object [action/x] not found' })
+    expect(execute.mock.calls[1][0].params.subActionParams).toEqual(
+      expect.objectContaining({
+        channel: '#oncall',
+        threadTs: '1.1',
+        text: expect.stringContaining('/s/ops/app/nightshift'),
+      })
+    );
+    expect(client.recordNotificationOutcome).toHaveBeenCalledWith(
+      'inv-1',
+      0,
+      record.notifications[0].attempt_id,
+      expect.objectContaining({
+        status: 'sent',
+        message_ts: ok.data.ts,
+        sent_at: expect.any(String),
+      })
     );
   });
 
-  it('leaves already-sent destinations untouched so a re-run posts nothing twice', async () => {
-    const execute = jest.fn().mockResolvedValue(ok);
-    const sent = destination({
-      status: 'sent',
-      message_ts: '1.1',
-      sent_at: '2026-09-30T00:00:00Z',
+  it('persists connector error responses as failed', async () => {
+    const { record, execute, deliver } = setup();
+    execute.mockResolvedValue({
+      status: 'error',
+      actionId: 'x',
+      serviceMessage: 'channel unavailable',
     });
-
-    const result = await deliver([sent, destination({ channel: '#oncall' })], execute);
-
-    expect(execute).toHaveBeenCalledTimes(1);
-    expect(execute.mock.calls[0][0].params.subActionParams.channel).toBe('#oncall');
-    expect(result.notifications[0]).toEqual(sent);
-    expect(result.sent).toBe(1);
-  });
-
-  it('retries a previously failed destination', async () => {
-    const execute = jest.fn().mockResolvedValue(ok);
-
-    const result = await deliver(
-      [destination({ status: 'failed', error: 'rate limited' })],
-      execute
-    );
-
-    expect(execute).toHaveBeenCalledTimes(1);
-    expect(result.notifications[0]).toEqual(
-      expect.objectContaining({ status: 'sent', message_ts: '1759190400.000100' })
+    await expect(deliver()).resolves.toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+    expect(record.notifications[0]).toEqual(
+      expect.objectContaining({ status: 'failed', error: 'channel unavailable' })
     );
   });
 
-  it('does nothing for an investigation that has not settled', async () => {
-    const execute = jest.fn();
+  it.each([undefined, '', ' ', 'x'.repeat(101)])(
+    'keeps success without a valid timestamp unconfirmed (%s)',
+    async (ts) => {
+      const { record, execute, deliver } = setup();
+      execute.mockResolvedValue({ ...ok, data: { ts } });
+      await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
+      expect(record.notifications[0].error).toContain('timestamp');
+    }
+  );
 
-    const result = await deliver([destination()], execute, 'running');
+  it('keeps exceptions unconfirmed with bounded diagnostics', async () => {
+    const { record, execute, deliver } = setup();
+    execute.mockRejectedValue(new Error('x'.repeat(20000)));
+    await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
+    expect(record.notifications[0].error).toHaveLength(10000);
+  });
 
+  it('never replays sent, failed, or unconfirmed destinations', async () => {
+    const notifications = ['sent', 'failed', 'unconfirmed'].map((status) =>
+      destination({ status: status as InvestigationNotification['status'] })
+    );
+    const { record, client, execute, deliver } = setup(notifications);
+    await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
+    expect(client.claimNotification).not.toHaveBeenCalled();
     expect(execute).not.toHaveBeenCalled();
-    expect(result).toEqual({ notifications: [destination()], sent: 0, failed: 0 });
+    expect(record.notifications).toEqual(notifications);
   });
 
-  it('posts the failure wording for a failed investigation', async () => {
-    const execute = jest.fn().mockResolvedValue(ok);
+  it('retains a crash-after-claim marker and skips it on replay', async () => {
+    const { client, execute, deliver } = setup();
+    await client.claimNotification('inv-1', 0, 'crashed-attempt');
+    await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
+    expect(execute).not.toHaveBeenCalled();
+  });
 
-    await deliver([destination()], execute, 'failed');
+  it('stops after successful post/result-write failure and skips that attempt on replay', async () => {
+    const { record, client, execute, deliver } = setup([
+      destination(),
+      destination({ channel: '#oncall' }),
+    ]);
+    client.recordNotificationOutcome.mockRejectedValueOnce(new Error('storage unavailable'));
+    await expect(deliver()).rejects.toThrow('storage unavailable');
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(record.notifications[0].status).toBe('unconfirmed');
+    expect(record.notifications[1].status).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(record.notifications[0].attempt_id ?? '')
+    );
+    await expect(deliver()).resolves.toEqual({ sent: 1, failed: 0, unconfirmed: 1 });
+    expect(execute).toHaveBeenCalledTimes(2);
+    expect(execute.mock.calls[1][0].params.subActionParams.channel).toBe('#oncall');
+  });
 
-    expect(execute.mock.calls[0][0].params.subActionParams.text).toContain('Investigation failed');
+  it('stops before posting when claim persistence fails', async () => {
+    const { client, execute, deliver } = setup([destination(), destination()]);
+    client.claimNotification.mockRejectedValueOnce(new Error('storage unavailable'));
+    await expect(deliver()).rejects.toThrow('storage unavailable');
+    expect(execute).not.toHaveBeenCalled();
+    expect(client.claimNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it('concurrent deliveries post once and count unresolved claims', async () => {
+    const { execute, deliver } = setup();
+    let finish: (value: typeof ok) => void = () => {};
+    execute.mockImplementation(
+      () =>
+        new Promise<typeof ok>((resolve) => {
+          finish = resolve;
+        })
+    );
+    const first = deliver();
+    await Promise.resolve();
+    await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
+    finish(ok);
+    await expect(first).resolves.toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not claim when already cancelled', async () => {
+    const { controller, client, execute, deliver } = setup();
+    controller.abort();
+    await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+    expect(client.claimNotification).not.toHaveBeenCalled();
+    expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('records cancellation after a claim without invoking the connector', async () => {
+    const { controller, client, record, execute, deliver } = setup();
+    const claim =
+      client.claimNotification.getMockImplementation() ?? (() => Promise.resolve(undefined));
+    client.claimNotification.mockImplementation(async (...args) => {
+      const result = await claim(...args);
+      controller.abort();
+      return result;
+    });
+    await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
+    expect(record.notifications[0].error).toContain('Cancelled before');
+    expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('keeps cancellation during execution unconfirmed and stops later destinations', async () => {
+    const { controller, record, execute, deliver } = setup([destination(), destination()]);
+    execute.mockImplementation(async () => {
+      controller.abort();
+      return ok;
+    });
+    await expect(deliver()).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 1 });
+    expect(record.notifications[0].error).toContain('Cancelled during');
+    expect(record.notifications[1].status).toBeUndefined();
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns early for a running investigation', async () => {
+    const { record, client, execute, controller } = setup();
+    await expect(
+      deliverInvestigationNotifications({
+        investigation: { ...record, status: 'running' },
+        kibanaUrl: '',
+        spaceId: 'ops',
+        execute,
+        client: client as never,
+        signal: controller.signal,
+        logger,
+      })
+    ).resolves.toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+    expect(client.get).not.toHaveBeenCalled();
+    expect(execute).not.toHaveBeenCalled();
   });
 });

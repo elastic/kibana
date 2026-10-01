@@ -6,6 +6,7 @@
  */
 
 import { stringify } from 'yaml';
+import type { InvestigationNotificationDestination } from '../../../common';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolicy } from './types';
 
 // alerting.alertStatusChanged uses 'active'/'recovered'; our AlertStatus uses 'active'/'inactive'.
@@ -97,7 +98,7 @@ export function generateWorkflowYaml(
 function buildNotifications(
   automationId: string,
   automation: NightshiftAutomationAttributes
-): Array<Record<string, string>> | undefined {
+): InvestigationNotificationDestination[] | undefined {
   const { completion } = automation;
   if (
     completion.action !== 'post_to_slack' ||

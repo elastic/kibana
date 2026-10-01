@@ -17,8 +17,12 @@ import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
-import { investigationNotificationSchema } from '../../common/schemas';
-import type { InvestigationNotification } from '../../common/schemas';
+import { investigationNotificationDestinationsSchema } from '../../common/schemas';
+import type {
+  InvestigationNotification,
+  InvestigationNotificationDestination,
+  InvestigationNotificationOutcome,
+} from '../../common/schemas';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
 import type { InvestigationQuotaCallback } from '../types';
 import type {
@@ -123,7 +127,7 @@ interface ExecutionInvestigationMetadata {
   title?: string;
   triggerType: InvestigationTriggerType;
   concurrencyKey?: string;
-  notifications?: InvestigationNotification[];
+  notifications?: InvestigationNotificationDestination[];
 }
 /**
  * Context fields each subject type's id arrives under. The `satisfies` clause is what makes a
@@ -227,8 +231,9 @@ const parseExecutionInvestigationMetadata = (
       : undefined;
   const rawConcurrencyKey = inputs?.concurrency_key;
   const concurrencyKey = typeof rawConcurrencyKey === 'string' ? rawConcurrencyKey : undefined;
-  // The engine validated the input against the workflow schema; this only guards a hand-run.
-  const notifications = investigationNotificationSchema.array().safeParse(inputs?.notifications);
+  const notifications = investigationNotificationDestinationsSchema
+    .optional()
+    .parse(inputs?.notifications);
 
   return {
     subject: recoverSubjectFromInput(inputs),
@@ -236,9 +241,7 @@ const parseExecutionInvestigationMetadata = (
     title: asString(inputs?.title),
     triggerType: recoverTriggerTypeFromInput(inputs) ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
     concurrencyKey,
-    ...(notifications.success && notifications.data.length > 0
-      ? { notifications: notifications.data }
-      : {}),
+    ...(notifications?.length ? { notifications } : {}),
   };
 };
 
@@ -405,6 +408,10 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
 
+    const validatedNotifications = investigationNotificationDestinationsSchema
+      .optional()
+      .parse(notifications);
+
     const resolvedConnectorId = await resolveNightshiftModelForRequest({
       request: this.request,
       inference: this.inference,
@@ -467,7 +474,7 @@ export class NightshiftInvestigationsClient {
       stream_names: stream_names ?? [],
       ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       ...(concurrency_key ? { concurrency_key } : {}),
-      ...(notifications?.length ? { notifications } : {}),
+      ...(validatedNotifications?.length ? { notifications: validatedNotifications } : {}),
       context: {
         ...prepared.context,
         source: resolvedSubject.type,
@@ -495,7 +502,7 @@ export class NightshiftInvestigationsClient {
       title,
       triggerType: trigger_type,
       concurrencyKey: concurrency_key,
-      notifications,
+      notifications: validatedNotifications,
     }).catch((error) => {
       this.logger.warn(
         `Failed to eagerly persist investigation "${executionId}", deferring to the workflow's ensure step: ${error.message}`
@@ -523,7 +530,7 @@ export class NightshiftInvestigationsClient {
     title: string;
     triggerType: InvestigationTriggerType;
     concurrencyKey?: string;
-    notifications?: InvestigationNotification[];
+    notifications?: InvestigationNotificationDestination[];
   }): Promise<void> {
     if (concurrencyKey) {
       await this.cancelSupersededInvestigation({ concurrencyKey, investigationId });
@@ -580,6 +587,9 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationNotFoundError(investigationId);
     }
 
+    const { subject, title, triggerType, concurrencyKey, notifications } =
+      parseExecutionInvestigationMetadata(execution.context);
+
     const startedAt = execution.startedAt ?? new Date().toISOString();
 
     if (existing) {
@@ -591,9 +601,6 @@ export class NightshiftInvestigationsClient {
       });
       return;
     }
-
-    const { subject, title, triggerType, concurrencyKey, notifications } =
-      parseExecutionInvestigationMetadata(execution.context);
 
     if (!subject || !title) {
       throw new InvestigationMetadataMissingError(investigationId);
@@ -749,30 +756,80 @@ export class NightshiftInvestigationsClient {
     }
   }
 
-  /**
-   * Records Slack delivery results. Separate from `update()` because that method refuses to touch
-   * a settled record, and delivery happens precisely after the record has settled.
-   */
-  async setNotifications(
+  /** Claims one destination before posting, using the stored version to exclude concurrent senders. */
+  async claimNotification(
     investigationId: string,
-    notifications: InvestigationNotification[]
-  ): Promise<void> {
-    const existing = await this.investigationRepository.get(investigationId);
-    if (!existing) {
-      throw new InvestigationNotFoundError(investigationId);
+    index: number,
+    attemptId: string
+  ): Promise<InvestigationNotification | undefined> {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const existing = await this.investigationRepository.get(investigationId);
+      if (!existing) throw new InvestigationNotFoundError(investigationId);
+      const notification = existing.notifications?.[index];
+      if (
+        !isTerminalStatus(existing.status) ||
+        !notification ||
+        notification.status !== undefined
+      ) {
+        return undefined;
+      }
+      if (!existing.version) throw InvestigationConflictError.concurrentlyModified(investigationId);
+      const claimed: InvestigationNotification = {
+        ...notification,
+        status: 'unconfirmed',
+        attempt_id: attemptId,
+        attempted_at: new Date().toISOString(),
+      };
+      const notifications = [...(existing.notifications ?? [])];
+      notifications[index] = claimed;
+      try {
+        await this.investigationRepository.update({
+          id: investigationId,
+          patch: { notifications },
+          version: existing.version,
+        });
+        return claimed;
+      } catch (error) {
+        if (!(error instanceof InvestigationStaleWriteError)) throw error;
+      }
     }
-    try {
-      await this.investigationRepository.update({
-        id: investigationId,
-        patch: { notifications },
-        version: existing.version,
-      });
-    } catch (err) {
-      if (err instanceof InvestigationStaleWriteError) {
+    throw InvestigationConflictError.concurrentlyModified(investigationId);
+  }
+
+  /** Saves one attempt's outcome without replacing results written by other senders. */
+  async recordNotificationOutcome(
+    investigationId: string,
+    index: number,
+    attemptId: string,
+    outcome: InvestigationNotificationOutcome
+  ): Promise<void> {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const existing = await this.investigationRepository.get(investigationId);
+      if (!existing) throw new InvestigationNotFoundError(investigationId);
+      const notification = existing.notifications?.[index];
+      if (!existing.version || !notification || notification.attempt_id !== attemptId) {
         throw InvestigationConflictError.concurrentlyModified(investigationId);
       }
-      throw err;
+      const notifications = [...(existing.notifications ?? [])];
+      notifications[index] = {
+        ...notification,
+        error: undefined,
+        message_ts: undefined,
+        sent_at: undefined,
+        ...outcome,
+      };
+      try {
+        await this.investigationRepository.update({
+          id: investigationId,
+          patch: { notifications },
+          version: existing.version,
+        });
+        return;
+      } catch (error) {
+        if (!(error instanceof InvestigationStaleWriteError)) throw error;
+      }
     }
+    throw InvestigationConflictError.concurrentlyModified(investigationId);
   }
 
   /**

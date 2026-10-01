@@ -6,11 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { GetInvestigationsClient } from '../routes/types';
+import type { ExecuteConnector } from '../lib/notifications/deliver_investigation_notifications';
 import { deliverInvestigationNotifications } from '../lib/notifications/deliver_investigation_notifications';
 
 const inputSchema = z.object({
@@ -38,6 +40,7 @@ export const notifyInvestigationStepDefinition = ({
     outputSchema: z.object({
       sent: z.number().describe('Destinations that received the message in this run'),
       failed: z.number().describe('Destinations whose delivery failed in this run'),
+      unconfirmed: z.number().describe('Attempts without a confirmed delivery result'),
     }),
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
@@ -50,26 +53,45 @@ export const notifyInvestigationStepDefinition = ({
       // Reads the settled record rather than the agent output so the message matches Kibana.
       const client = getInvestigationsClient(request, spaceId);
       const investigation = await client.get(investigationId);
-      const pending = (investigation.notifications ?? []).filter(({ status }) => status !== 'sent');
-      if (pending.length === 0) {
-        return { output: { sent: 0, failed: 0 } };
+      const terminal = ['completed', 'failed', 'cancelled'].includes(investigation.status);
+      const notifications = investigation.notifications ?? [];
+      if (!terminal || !notifications.some(({ status }) => status === undefined)) {
+        return {
+          output: {
+            sent: 0,
+            failed: 0,
+            unconfirmed: terminal
+              ? notifications.filter(({ status }) => status === 'unconfirmed').length
+              : 0,
+          },
+        };
       }
-
-      const actions = getActions();
-      if (!actions) {
-        throw new Error('actions plugin is not available, cannot deliver Slack notifications');
+      let execute: ExecuteConnector | undefined;
+      let setupError: string | undefined;
+      if (!context.abortSignal.aborted) {
+        try {
+          const actions = getActions();
+          if (!actions) throw new Error('actions plugin is not available');
+          const actionsClient = await actions.getActionsClientWithRequestInSpace(
+            request,
+            brandSpaceId(spaceId)
+          );
+          execute = (execution) => actionsClient.execute(execution);
+        } catch (error) {
+          setupError =
+            error instanceof Error ? error.message : 'Could not initialize Slack delivery';
+        }
       }
-      const actionsClient = await actions.getActionsClientWithRequest(request);
-
-      const result = await deliverInvestigationNotifications({
+      const output = await deliverInvestigationNotifications({
         investigation,
         kibanaUrl,
         spaceId,
         logger: context.logger,
-        execute: (execution) => actionsClient.execute(execution),
+        execute,
+        setupError,
+        client,
+        signal: context.abortSignal,
       });
-      await client.setNotifications(investigationId, result.notifications);
-
-      return { output: { sent: result.sent, failed: result.failed } };
+      return { output };
     },
   });

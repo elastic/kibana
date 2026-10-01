@@ -47,13 +47,36 @@ triggers:
         notifications:
           type: array
           maxItems: 20
-          description: >
-            Slack destinations the concluded investigation is posted to, one per automation.
-            Delivery results are recorded on the investigation.
+          description: Slack destinations notified once the investigation settles.
           items:
             type: object
             additionalProperties: false
             required:
+              - type
+              - connector_id
+              - channel
+            properties:
+              type:
+                type: string
+                enum: [slack]
+              connector_id:
+                type: string
+                minLength: 1
+                maxLength: 500
+              channel:
+                type: string
+                minLength: 1
+                maxLength: 500
+              thread_ts:
+                type: string
+                maxLength: 100
+              automation_id:
+                type: string
+                maxLength: 500
+              automation_name:
+                type: string
+                maxLength: 500
+      required:
         - message
         - title
       additionalProperties: false

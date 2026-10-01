@@ -7,6 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { InvestigationNotification } from '../../common';
 import type { GetInvestigationsClient } from '../routes/types';
 import { notifyInvestigationStepDefinition } from './notify_investigation';
 
@@ -21,15 +22,7 @@ const pending = {
   channel: '#alerts',
   automation_name: 'Prod alerts',
 };
-const investigation = (notifications: unknown[] | undefined) => ({
-  investigation_id: 'inv-1',
-  title: 'Checkout latency spike',
-  status: 'completed',
-  summary: 'Latency rose after a deploy.',
-  notifications,
-});
-
-const createContext = () =>
+const createContext = (signal = new AbortController().signal) =>
   ({
     input: { investigation_id: 'inv-1' },
     rawInput: { investigation_id: 'inv-1' },
@@ -43,126 +36,156 @@ const createContext = () =>
       callKibanaApi: jest.fn(),
     },
     logger: loggerMock.create(),
-    abortSignal: new AbortController().signal,
+    abortSignal: signal,
     stepId: 'notify_destinations',
     stepType: 'nightshift.notifyInvestigation',
   } as never);
 
-const setup = ({
-  record,
-  execute = jest
+const setup = () => {
+  const record = {
+    investigation_id: 'inv-1',
+    title: 'Latency spike',
+    status: 'completed',
+    notifications: [{ ...pending }] as InvestigationNotification[],
+  };
+  const get = jest.fn().mockImplementation(async () => record);
+  const claimNotification = jest
     .fn()
-    .mockResolvedValue({ status: 'ok', actionId: 'elastic-apps-slack', data: { ts: '1.2' } }),
-  actionsAvailable = true,
-}: {
-  record: ReturnType<typeof investigation>;
-  execute?: jest.Mock;
-  actionsAvailable?: boolean;
-}) => {
-  const get = jest.fn().mockResolvedValue(record);
-  const setNotifications = jest.fn().mockResolvedValue(undefined);
-  const getInvestigationsClient = jest
+    .mockImplementation(async (_id, index: number, attemptId: string) => {
+      const claim = {
+        ...record.notifications[index],
+        status: 'unconfirmed' as const,
+        attempt_id: attemptId,
+      };
+      record.notifications[index] = claim;
+      return claim;
+    });
+  const recordNotificationOutcome = jest
     .fn()
-    .mockReturnValue({ get, setNotifications }) as unknown as GetInvestigationsClient;
-  const getActionsClientWithRequest = jest.fn().mockResolvedValue({ execute });
-  const definition = notifyInvestigationStepDefinition({
-    getInvestigationsClient,
-    getActions: () => (actionsAvailable ? ({ getActionsClientWithRequest } as never) : undefined),
-  });
+    .mockImplementation(async (_id, index: number, _attemptId, outcome) => {
+      record.notifications[index] = { ...record.notifications[index], ...outcome };
+    });
+  const getInvestigationsClient = jest.fn().mockReturnValue({
+    get,
+    claimNotification,
+    recordNotificationOutcome,
+  }) as unknown as GetInvestigationsClient;
+  const execute = jest
+    .fn()
+    .mockResolvedValue({ status: 'ok', actionId: pending.connector_id, data: { ts: '1.2' } });
+  const getActionsClientWithRequestInSpace = jest.fn().mockResolvedValue({ execute });
+  const getActions = jest.fn().mockReturnValue({ getActionsClientWithRequestInSpace });
+  const definition = notifyInvestigationStepDefinition({ getInvestigationsClient, getActions });
   return {
     definition,
+    record,
     get,
-    setNotifications,
-    execute,
+    claimNotification,
+    recordNotificationOutcome,
     getInvestigationsClient,
-    getActionsClientWithRequest,
+    getActions,
+    getActionsClientWithRequestInSpace,
+    execute,
   };
 };
 
 describe('notifyInvestigationStepDefinition', () => {
-  it('delivers pending destinations in the workflow space and records the results', async () => {
+  it('uses the workflow authentication and non-default space for saved connectors', async () => {
     const {
       definition,
-      setNotifications,
       execute,
       getInvestigationsClient,
-      getActionsClientWithRequest,
-    } = setup({ record: investigation([pending]) });
-
-    const result = await definition.handler(createContext());
-
+      getActionsClientWithRequestInSpace,
+      recordNotificationOutcome,
+    } = setup();
+    const signal = new AbortController().signal;
+    await expect(definition.handler(createContext(signal))).resolves.toEqual({
+      output: { sent: 1, failed: 0, unconfirmed: 0 },
+    });
     expect(getInvestigationsClient).toHaveBeenCalledWith(request, 'ops');
-    expect(getActionsClientWithRequest).toHaveBeenCalledWith(request);
+    expect(getActionsClientWithRequestInSpace).toHaveBeenCalledWith(request, 'ops');
     expect(execute).toHaveBeenCalledWith(
       expect.objectContaining({
-        actionId: 'elastic-apps-slack',
+        actionId: pending.connector_id,
+        signal,
         params: expect.objectContaining({
-          subAction: 'sendMessage',
           subActionParams: expect.objectContaining({
             channel: '#alerts',
-            text: expect.stringContaining(
-              'https://kibana.example.com/s/ops/app/nightshift?investigationId=inv-1'
-            ),
+            text: expect.stringContaining('/s/ops/app/nightshift'),
           }),
         }),
       })
     );
-    expect(setNotifications).toHaveBeenCalledWith('inv-1', [
-      expect.objectContaining({ ...pending, status: 'sent', message_ts: '1.2' }),
-    ]);
-    expect(result).toEqual({ output: { sent: 1, failed: 0 } });
-  });
-
-  it('records a failed delivery instead of throwing', async () => {
-    const execute = jest.fn().mockResolvedValue({
-      status: 'error',
-      actionId: 'elastic-apps-slack',
-      serviceMessage: 'Channel #alerts is not connected to this deployment',
-    });
-    const { definition, setNotifications } = setup({ record: investigation([pending]), execute });
-
-    const result = await definition.handler(createContext());
-
-    expect(setNotifications).toHaveBeenCalledWith('inv-1', [
-      expect.objectContaining({
-        status: 'failed',
-        error: 'Channel #alerts is not connected to this deployment',
-      }),
-    ]);
-    expect(result).toEqual({ output: { sent: 0, failed: 1 } });
-  });
-
-  it('is a no-op when the investigation has no pending destinations', async () => {
-    const { definition, setNotifications, execute, getActionsClientWithRequest } = setup({
-      record: investigation([{ ...pending, status: 'sent', message_ts: '1.1' }]),
-    });
-
-    const result = await definition.handler(createContext());
-
-    expect(getActionsClientWithRequest).not.toHaveBeenCalled();
-    expect(execute).not.toHaveBeenCalled();
-    expect(setNotifications).not.toHaveBeenCalled();
-    expect(result).toEqual({ output: { sent: 0, failed: 0 } });
-  });
-
-  it('is a no-op when the investigation was started without destinations', async () => {
-    const { definition, setNotifications } = setup({ record: investigation(undefined) });
-
-    await expect(definition.handler(createContext())).resolves.toEqual({
-      output: { sent: 0, failed: 0 },
-    });
-    expect(setNotifications).not.toHaveBeenCalled();
-  });
-
-  it('throws when the actions plugin is unavailable so the failure shows in the run', async () => {
-    const { definition, setNotifications } = setup({
-      record: investigation([pending]),
-      actionsAvailable: false,
-    });
-
-    await expect(definition.handler(createContext())).rejects.toThrow(
-      'actions plugin is not available'
+    expect(recordNotificationOutcome).toHaveBeenCalledWith(
+      'inv-1',
+      0,
+      expect.any(String),
+      expect.objectContaining({ status: 'sent', message_ts: '1.2' })
     );
-    expect(setNotifications).not.toHaveBeenCalled();
+  });
+
+  it.each(['unavailable', 'throws'])(
+    'persists failed results when Actions setup %s',
+    async (failure) => {
+      const {
+        definition,
+        getActions,
+        getActionsClientWithRequestInSpace,
+        claimNotification,
+        recordNotificationOutcome,
+        execute,
+      } = setup();
+      if (failure === 'unavailable') getActions.mockReturnValue(undefined);
+      else getActionsClientWithRequestInSpace.mockRejectedValue(new Error('setup unavailable'));
+      await expect(definition.handler(createContext())).resolves.toEqual({
+        output: { sent: 0, failed: 1, unconfirmed: 0 },
+      });
+      expect(execute).not.toHaveBeenCalled();
+      expect(claimNotification).toHaveBeenCalledTimes(1);
+      expect(recordNotificationOutcome).toHaveBeenCalledWith(
+        'inv-1',
+        0,
+        expect.any(String),
+        expect.objectContaining({ status: 'failed', error: expect.stringContaining('available') })
+      );
+      expect(getActions.mock.invocationCallOrder[0]).toBeLessThan(
+        claimNotification.mock.invocationCallOrder[0]
+      );
+    }
+  );
+
+  it.each(['sent', 'failed', 'unconfirmed'])(
+    'skips %s destinations without resolving Actions',
+    async (status) => {
+      const { definition, record, getActions, claimNotification } = setup();
+      record.notifications[0].status = status as InvestigationNotification['status'];
+      await expect(definition.handler(createContext())).resolves.toEqual({
+        output: { sent: 0, failed: 0, unconfirmed: status === 'unconfirmed' ? 1 : 0 },
+      });
+      expect(getActions).not.toHaveBeenCalled();
+      expect(claimNotification).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(['running', 'no destinations'])('returns early for %s', async (state) => {
+    const { definition, record, getActions, claimNotification } = setup();
+    if (state === 'running') record.status = 'running';
+    else record.notifications = [];
+    await expect(definition.handler(createContext())).resolves.toEqual({
+      output: { sent: 0, failed: 0, unconfirmed: 0 },
+    });
+    expect(getActions).not.toHaveBeenCalled();
+    expect(claimNotification).not.toHaveBeenCalled();
+  });
+
+  it('does not resolve Actions or claim when cancelled', async () => {
+    const { definition, getActions, claimNotification } = setup();
+    const controller = new AbortController();
+    controller.abort();
+    await expect(definition.handler(createContext(controller.signal))).resolves.toEqual({
+      output: { sent: 0, failed: 0, unconfirmed: 0 },
+    });
+    expect(getActions).not.toHaveBeenCalled();
+    expect(claimNotification).not.toHaveBeenCalled();
   });
 });

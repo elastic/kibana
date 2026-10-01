@@ -100,6 +100,7 @@ describe('nightshift investigation saved object model version 5', () => {
         subject_id: 'alert-1',
         trigger_type: 'automatic',
         created_at: '2026-09-30T00:00:00.000Z',
+        impact: { summary: 'Checkout latency rose.', evidence: { description: 'Latency chart' } },
         notifications: [
           {
             type: 'slack',
@@ -107,7 +108,9 @@ describe('nightshift investigation saved object model version 5', () => {
             channel: '#alerts',
             automation_id: 'auto-1',
             automation_name: 'Prod alerts',
-            status: 'sent',
+            status: 'unconfirmed',
+            attempt_id: 'attempt-1',
+            attempted_at: '2026-09-30T00:04:00.000Z',
             message_ts: '1759190400.000100',
             sent_at: '2026-09-30T00:05:00.000Z',
           },

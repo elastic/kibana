@@ -39,6 +39,8 @@ export type {
   AlertSnapshotGroup,
   InvestigationContext,
   InvestigationNotification,
+  InvestigationNotificationDestination,
+  InvestigationNotificationOutcome,
   InvestigationSubject,
 } from './schemas';
 
@@ -47,6 +49,8 @@ export {
   alertSnapshotSchema,
   freeFormContextSchema,
   investigationNotificationSchema,
+  investigationNotificationDestinationSchema,
+  investigationNotificationDestinationsSchema,
   investigationSubjectSchema,
   MAX_ALERTS_PER_INVESTIGATION,
   MAX_INVESTIGATION_NOTIFICATIONS,
@@ -56,6 +60,7 @@ import type {
   AlertInvestigationContext,
   InvestigationContext,
   InvestigationNotification,
+  InvestigationNotificationDestination,
   InvestigationSubject,
 } from './schemas';
 
@@ -89,7 +94,7 @@ export interface StartInvestigationRequest {
   concurrency_key?: string;
   context?: InvestigationContext | AlertInvestigationContext;
   /** Slack destinations to post the outcome to once the investigation settles. */
-  notifications?: InvestigationNotification[];
+  notifications?: InvestigationNotificationDestination[];
 }
 
 export interface StartInvestigationResponse {

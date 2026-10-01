@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { GetInvestigationResponse, InvestigationNotification } from '../../../common';
+import type { NightshiftInvestigationsClient } from '../../client/investigations_client';
+import type { GetInvestigationResponse, InvestigationNotificationOutcome } from '../../../common';
 import { NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM } from '../../../common/locators/investigation_locator';
 import { formatInvestigationSlackMessage } from './format_investigation_slack_message';
 import type { NotifiableInvestigation } from './format_investigation_slack_message';
@@ -16,6 +19,7 @@ import type { NotifiableInvestigation } from './format_investigation_slack_messa
 /** The `slack2.sendMessage` sub-action, in the shape `actionsClient.execute` takes. */
 export interface SlackSendMessageExecution {
   actionId: string;
+  signal?: AbortSignal;
   params: {
     subAction: 'sendMessage';
     subActionParams: { channel: string; text: string; threadTs?: string };
@@ -31,9 +35,9 @@ export type ExecuteConnector = (
 ) => Promise<ActionTypeExecutorResult<unknown>>;
 
 export interface DeliverInvestigationNotificationsResult {
-  notifications: InvestigationNotification[];
   sent: number;
   failed: number;
+  unconfirmed: number;
 }
 
 const TERMINAL_STATUSES: ReadonlyArray<GetInvestigationResponse['status']> = [
@@ -63,85 +67,117 @@ const messageTsOf = (result: ActionTypeExecutorResult<unknown>): string | undefi
   return typeof ts === 'string' ? ts : undefined;
 };
 
-/**
- * Posts a settled investigation to every destination that has not been delivered yet and returns
- * the destinations with their results filled in. Never throws for a Slack failure: the failure is
- * the result, recorded on the investigation so the automation's history can show it. Entries
- * already `sent` are left alone, which is what makes a re-run post nothing twice.
- */
+/** Claims and records each destination separately so replay never resends an uncertain attempt. */
 export const deliverInvestigationNotifications = async ({
   investigation,
   kibanaUrl,
   spaceId,
   execute,
+  setupError,
+  client,
+  signal,
   logger,
 }: {
   investigation: NotifiableInvestigation &
     Pick<GetInvestigationResponse, 'investigation_id' | 'notifications'>;
   kibanaUrl: string;
   spaceId: string;
-  execute: ExecuteConnector;
-  /** Only `warn` is used, so the narrower workflow step logger fits too. */
+  execute?: ExecuteConnector;
+  setupError?: string;
+  client: Pick<
+    NightshiftInvestigationsClient,
+    'claimNotification' | 'recordNotificationOutcome' | 'get'
+  >;
+  signal: AbortSignal;
   logger: Pick<Logger, 'warn'>;
 }): Promise<DeliverInvestigationNotificationsResult> => {
   const notifications = investigation.notifications ?? [];
-  if (!TERMINAL_STATUSES.includes(investigation.status)) {
-    return { notifications, sent: 0, failed: 0 };
-  }
+  const result = { sent: 0, failed: 0, unconfirmed: 0 };
+  if (!TERMINAL_STATUSES.includes(investigation.status)) return result;
 
   const url = buildInvestigationUrl(kibanaUrl, spaceId, investigation.investigation_id);
-  let sent = 0;
-  let failed = 0;
-  const delivered: InvestigationNotification[] = [];
+  for (const [index, notification] of notifications.entries()) {
+    if (notification.status !== undefined) continue;
+    if (signal.aborted) break;
 
-  for (const notification of notifications) {
-    if (notification.status === 'sent') {
-      delivered.push(notification);
-      continue;
-    }
+    const attemptId = randomUUID();
+    const claimed = await client.claimNotification(
+      investigation.investigation_id,
+      index,
+      attemptId
+    );
+    if (!claimed) continue;
 
-    const text = formatInvestigationSlackMessage({
-      investigation,
-      url,
-      automationName: notification.automation_name,
-    });
-
-    let outcome: Pick<InvestigationNotification, 'status' | 'message_ts' | 'error'>;
-    try {
-      const result = await execute({
-        actionId: notification.connector_id,
-        params: {
-          subAction: 'sendMessage',
-          subActionParams: {
-            channel: notification.channel,
-            text,
-            ...(notification.thread_ts ? { threadTs: notification.thread_ts } : {}),
-          },
-        },
-      });
-      outcome =
-        result.status === 'ok'
-          ? { status: 'sent', message_ts: messageTsOf(result) }
-          : { status: 'failed', error: toErrorMessage(result) };
-    } catch (error) {
-      outcome = { status: 'failed', error: error?.message || FALLBACK_DELIVERY_ERROR };
-    }
-
-    if (outcome.status === 'sent') {
-      sent += 1;
+    let outcome: InvestigationNotificationOutcome;
+    if (signal.aborted) {
+      outcome = { status: 'unconfirmed', error: 'Cancelled before Slack delivery' };
+    } else if (!execute) {
+      outcome = { status: 'failed', error: setupError || FALLBACK_DELIVERY_ERROR };
     } else {
-      failed += 1;
+      try {
+        const response = await execute({
+          actionId: claimed.connector_id,
+          signal,
+          params: {
+            subAction: 'sendMessage',
+            subActionParams: {
+              channel: claimed.channel,
+              text: formatInvestigationSlackMessage({
+                investigation,
+                url,
+                automationName: claimed.automation_name,
+              }),
+              ...(claimed.thread_ts ? { threadTs: claimed.thread_ts } : {}),
+            },
+          },
+        });
+        const messageTs = messageTsOf(response);
+        if (signal.aborted) {
+          outcome = { status: 'unconfirmed', error: 'Cancelled during Slack delivery' };
+        } else if (response.status !== 'ok') {
+          outcome = { status: 'failed', error: toErrorMessage(response) };
+        } else if (!messageTs?.trim() || messageTs.length > 100) {
+          outcome = { status: 'unconfirmed', error: 'Slack returned no valid message timestamp' };
+        } else {
+          outcome = { status: 'sent', message_ts: messageTs, sent_at: new Date().toISOString() };
+        }
+      } catch (error) {
+        outcome = {
+          status: 'unconfirmed',
+          error: error instanceof Error ? error.message : FALLBACK_DELIVERY_ERROR,
+        };
+      }
+    }
+    if (outcome.error !== undefined) outcome.error = outcome.error.slice(0, MAX_TEXT_LENGTH);
+    if (outcome.status !== 'sent') {
       logger.warn(
-        `Slack delivery for investigation "${investigation.investigation_id}" to ${notification.channel} via connector "${notification.connector_id}" failed: ${outcome.error}`
+        `Slack delivery for investigation "${investigation.investigation_id}" to ${claimed.channel} (attempt "${attemptId}") is ${outcome.status}: ${outcome.error}`
       );
     }
-
-    delivered.push({
-      ...notification,
-      ...outcome,
-      ...(outcome.status === 'sent' ? { sent_at: new Date().toISOString() } : {}),
-    });
+    try {
+      await client.recordNotificationOutcome(
+        investigation.investigation_id,
+        index,
+        attemptId,
+        outcome
+      );
+    } catch (error) {
+      logger.warn(
+        `Could not persist Slack delivery for investigation "${
+          investigation.investigation_id
+        }" to ${claimed.channel} (attempt "${attemptId}"); do not resend: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      throw error;
+    }
+    if (outcome.status === 'sent') result.sent++;
+    else if (outcome.status === 'failed') result.failed++;
+    if (signal.aborted) break;
   }
-
-  return { notifications: delivered, sent, failed };
+  const latest = await client.get(investigation.investigation_id);
+  result.unconfirmed = (latest.notifications ?? []).filter(
+    ({ status }) => status === 'unconfirmed'
+  ).length;
+  return result;
 };

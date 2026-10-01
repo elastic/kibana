@@ -168,3 +168,29 @@ it('returns service unavailable when alert lookup is not wired', async () => {
     } as never)
   ).rejects.toMatchObject({ output: { statusCode: 503 } });
 });
+
+it.each(['alert', 'manual'])(
+  'validates and forwards destination-only notifications for %s starts',
+  async (type) => {
+    const destination = { type: 'slack', connector_id: 'slack', channel: '#alerts' };
+    const input = {
+      subject: { type, id: 'alert-1' },
+      message: 'Investigate',
+      notifications: [destination],
+    };
+    const body = schema.parse(input);
+    await handler({
+      request: {},
+      getInvestigationsClient,
+      getAlertsClient,
+      params: { body },
+    } as never);
+    expect(start).toHaveBeenCalledWith(expect.objectContaining({ notifications: [destination] }));
+    expect(
+      schema.safeParse({ ...input, notifications: [{ ...destination, status: 'sent' }] }).success
+    ).toBe(false);
+    expect(schema.safeParse({ ...input, notifications: Array(21).fill(destination) }).success).toBe(
+      false
+    );
+  }
+);
