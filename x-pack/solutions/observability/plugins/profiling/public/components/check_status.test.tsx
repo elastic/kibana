@@ -28,7 +28,7 @@ import { AddDataTabs } from '../views/add_data_view/types';
 import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { useProfilingStatus } from './contexts/profiling_status/use_profiling_status';
-import { CheckSetup } from './check_setup';
+import { CheckStatus } from './check_status';
 
 // Minimal error shape recognized by `isHttpFetchError`.
 const createHttpFetchError = (status: number, body?: object) =>
@@ -60,7 +60,7 @@ const makeStatus = ({
   },
 });
 
-describe('CheckSetup', () => {
+describe('CheckStatus', () => {
   const routerPush = jest.fn();
   const refresh = jest.fn();
   const showErrorDialog = jest.fn();
@@ -73,12 +73,12 @@ describe('CheckSetup', () => {
     });
   };
 
-  const renderCheckSetup = (pathname = '/stacktraces/threads') => {
+  const renderCheckStatus = (pathname = '/stacktraces/threads') => {
     (useLocation as jest.Mock).mockReturnValue({ pathname });
     render(
-      <CheckSetup>
+      <CheckStatus>
         <div data-test-subj="profilingApp" />
-      </CheckSetup>
+      </CheckStatus>
     );
   };
 
@@ -95,7 +95,7 @@ describe('CheckSetup', () => {
     (useLicenseContext as jest.Mock).mockReturnValue({ hasAtLeast: () => false });
     mockStatus({ data: makeStatus({ otel: { hasData: true } }) });
 
-    renderCheckSetup();
+    renderCheckStatus();
 
     expect(screen.getByTestId('profilingLicensePrompt')).toBeInTheDocument();
     expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
@@ -106,7 +106,7 @@ describe('CheckSetup', () => {
     (status) => {
       mockStatus({ status });
 
-      renderCheckSetup();
+      renderCheckStatus();
 
       expect(screen.getByText('Loading data sources')).toBeInTheDocument();
       expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
@@ -123,7 +123,7 @@ describe('CheckSetup', () => {
     it('displays a generic error prompt without the server cause', () => {
       mockStatus({ error: serverError });
 
-      renderCheckSetup();
+      renderCheckStatus();
 
       expect(screen.getByTestId('profilingStatusErrorPrompt')).toBeInTheDocument();
       expect(screen.queryByText(/search_phase_execution_exception/)).not.toBeInTheDocument();
@@ -134,7 +134,7 @@ describe('CheckSetup', () => {
     it('fetches the status again when retrying', () => {
       mockStatus({ error: serverError });
 
-      renderCheckSetup();
+      renderCheckStatus();
       fireEvent.click(screen.getByTestId('profilingStatusErrorRetryButton'));
 
       expect(refresh).toHaveBeenCalledTimes(1);
@@ -143,7 +143,7 @@ describe('CheckSetup', () => {
     it('shows the server cause in the error details dialog', () => {
       mockStatus({ error: serverError });
 
-      renderCheckSetup();
+      renderCheckStatus();
       fireEvent.click(screen.getByTestId('profilingStatusErrorDetailsButton'));
 
       expect(showErrorDialog).toHaveBeenCalledWith({
@@ -155,7 +155,7 @@ describe('CheckSetup', () => {
     it('falls back to the response message when there is no cause', () => {
       mockStatus({ error: createHttpFetchError(500, { message: 'Request timed out' }) });
 
-      renderCheckSetup();
+      renderCheckStatus();
       fireEvent.click(screen.getByTestId('profilingStatusErrorDetailsButton'));
 
       expect(showErrorDialog).toHaveBeenCalledWith(
@@ -169,7 +169,7 @@ describe('CheckSetup', () => {
       const error = new Error('unexpected');
       mockStatus({ error });
 
-      renderCheckSetup();
+      renderCheckStatus();
       fireEvent.click(screen.getByTestId('profilingStatusErrorDetailsButton'));
 
       expect(showErrorDialog).toHaveBeenCalledWith(expect.objectContaining({ error }));
@@ -179,7 +179,7 @@ describe('CheckSetup', () => {
   it('redirects to the not enabled page when profiling is disabled in Elasticsearch', () => {
     mockStatus({ data: makeStatus({ isEnabled: false }) });
 
-    renderCheckSetup();
+    renderCheckStatus();
 
     expect(routerPush).toHaveBeenCalledWith('/profiling-not-enabled', { path: {}, query: {} });
     expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
@@ -190,7 +190,7 @@ describe('CheckSetup', () => {
       data: makeStatus({ universalProfiling: { hasData: true, hasLegacyData: true } }),
     });
 
-    renderCheckSetup();
+    renderCheckStatus();
 
     expect(routerPush).toHaveBeenCalledWith('/delete_data_instructions', {
       path: {},
@@ -209,7 +209,7 @@ describe('CheckSetup', () => {
   ])('displays the app when there is %s', (_name, data) => {
     mockStatus({ data });
 
-    renderCheckSetup();
+    renderCheckStatus();
 
     expect(screen.getByTestId('profilingApp')).toBeInTheDocument();
     expect(routerPush).not.toHaveBeenCalled();
@@ -230,7 +230,7 @@ describe('CheckSetup', () => {
   ])('redirects to the add data page when %s and there is no data', (_name, data) => {
     mockStatus({ data });
 
-    renderCheckSetup();
+    renderCheckStatus();
 
     expect(routerPush).toHaveBeenCalledWith('/add-data-instructions', {
       path: {},
@@ -244,7 +244,7 @@ describe('CheckSetup', () => {
     (pathname) => {
       mockStatus({ data: makeStatus({ universalProfiling: { hasSetup: false } }) });
 
-      renderCheckSetup(pathname);
+      renderCheckStatus(pathname);
 
       expect(screen.getByTestId('profilingApp')).toBeInTheDocument();
       expect(routerPush).not.toHaveBeenCalled();
