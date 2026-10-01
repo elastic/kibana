@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import {
-  getActiveAttachments,
-  getLatestVersion,
-  type VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { encode as risonEncode } from '@kbn/rison';
 import { ATTACHMENTS_OVERVIEW_LABELS } from '../translations';
-import { ESQL_QUERY_KEY, escapeKqlPhrase } from './url_utils';
+import { ESQL_QUERY_KEY, escapeKqlPhrase, getVisibleAttachments } from './url_utils';
 
 const TYPE_ENTITY = 'security.entity';
 
@@ -53,7 +49,7 @@ export const getEntityRow = (
   attachments: readonly VersionedAttachment[],
   getSecurityAppUrl: (path: string) => string
 ): { label: string; href: string } | undefined => {
-  const active = getActiveAttachments(attachments as VersionedAttachment[]);
+  const active = getVisibleAttachments(attachments);
   const entityKeySet = new Set<string>();
   const entityTerms: string[] = [];
 

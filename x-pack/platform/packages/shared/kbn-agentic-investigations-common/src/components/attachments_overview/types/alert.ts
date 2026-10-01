@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import {
-  getActiveAttachments,
-  getLatestVersion,
-  type VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENTS_OVERVIEW_LABELS } from '../translations';
-import { buildAlertOrAttackParams, firstCreatedAt, minDate, maxDate } from './url_utils';
+import {
+  buildAlertOrAttackParams,
+  firstCreatedAt,
+  lastUpdatedAt,
+  getVisibleAttachments,
+  minDate,
+  maxDate,
+} from './url_utils';
 
 const TYPE_ALERT = 'security.alert';
 const TYPE_ALERTS = 'security.alerts';
@@ -59,22 +62,21 @@ export const getAlertRow = (
   attachments: readonly VersionedAttachment[],
   getSecurityAppUrl: (path: string) => string
 ): { label: string; href: string } | undefined => {
-  const active = getActiveAttachments(attachments as VersionedAttachment[]);
+  const visible = getVisibleAttachments(attachments);
   const alertIdSet = new Set<string>();
   let createdAt: string | undefined;
   let updatedAt: string | undefined;
 
-  for (const attachment of active) {
+  for (const attachment of visible) {
     const { type } = attachment;
     const data = getLatestVersion(attachment)?.data as Record<string, unknown> | undefined;
-    const ts = firstCreatedAt(attachment);
 
     if (type === TYPE_ALERT) {
       const id = parseAlertId(data);
       if (id && !alertIdSet.has(id)) {
         alertIdSet.add(id);
-        createdAt = minDate(createdAt, ts);
-        updatedAt = maxDate(updatedAt, ts);
+        createdAt = minDate(createdAt, firstCreatedAt(attachment));
+        updatedAt = maxDate(updatedAt, lastUpdatedAt(attachment));
       }
     } else if (type === TYPE_ALERTS) {
       const ids = data?.alertIds;
@@ -82,8 +84,8 @@ export const getAlertRow = (
         for (const id of ids) {
           if (typeof id === 'string' && !alertIdSet.has(id)) {
             alertIdSet.add(id);
-            createdAt = minDate(createdAt, ts);
-            updatedAt = maxDate(updatedAt, ts);
+            createdAt = minDate(createdAt, firstCreatedAt(attachment));
+            updatedAt = maxDate(updatedAt, lastUpdatedAt(attachment));
           }
         }
       }

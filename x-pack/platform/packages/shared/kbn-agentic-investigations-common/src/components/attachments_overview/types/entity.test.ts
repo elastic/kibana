@@ -85,6 +85,13 @@ describe('getEntityRow', () => {
     ).toBeUndefined();
   });
 
+  it('ignores hidden attachments', () => {
+    const data = { identifierType: 'host', identifier: 'web-01' };
+    expect(
+      getEntityRow([makeAttachment('security.entity', data, { hidden: true })], getUrl)
+    ).toBeUndefined();
+  });
+
   it('puts entity terms into cspq query language kuery', () => {
     const data = { identifierType: 'user', identifier: 'alice@corp' };
     const row = getEntityRow([makeAttachment('security.entity', data)], getUrl)!;

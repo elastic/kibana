@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import {
-  getActiveAttachments,
-  getLatestVersion,
-  type VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENTS_OVERVIEW_LABELS } from '../translations';
-import { buildAlertOrAttackParams, firstCreatedAt, minDate, maxDate } from './url_utils';
+import {
+  buildAlertOrAttackParams,
+  firstCreatedAt,
+  lastUpdatedAt,
+  getVisibleAttachments,
+  minDate,
+  maxDate,
+} from './url_utils';
 
 const TYPE_ATTACK = 'security.attack_discovery';
 
@@ -24,21 +27,20 @@ export const getAttackRow = (
   attachments: readonly VersionedAttachment[],
   getSecurityAppUrl: (path: string) => string
 ): { label: string; href: string } | undefined => {
-  const active = getActiveAttachments(attachments as VersionedAttachment[]);
+  const visible = getVisibleAttachments(attachments);
   const attackIdSet = new Set<string>();
   let createdAt: string | undefined;
   let updatedAt: string | undefined;
 
-  for (const attachment of active) {
+  for (const attachment of visible) {
     if (attachment.type !== TYPE_ATTACK) continue;
     const data = getLatestVersion(attachment)?.data as Record<string, unknown> | undefined;
     // data.id is the persisted document _id; fall back to origin (also the doc _id).
     const id = (data?.id as string | undefined) ?? (attachment.origin as string | undefined);
     if (id && !attackIdSet.has(id)) {
       attackIdSet.add(id);
-      const ts = firstCreatedAt(attachment);
-      createdAt = minDate(createdAt, ts);
-      updatedAt = maxDate(updatedAt, ts);
+      createdAt = minDate(createdAt, firstCreatedAt(attachment));
+      updatedAt = maxDate(updatedAt, lastUpdatedAt(attachment));
     }
   }
 

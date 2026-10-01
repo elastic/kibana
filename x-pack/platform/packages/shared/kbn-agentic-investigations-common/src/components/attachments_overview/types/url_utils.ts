@@ -6,7 +6,10 @@
  */
 
 import { encode as risonEncode } from '@kbn/rison';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import {
+  getActiveAttachments,
+  type VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
 
 // URL param keys — copied from security_solution/public/common/hooks/constants.ts
 // to avoid a cross-plugin dependency.
@@ -15,9 +18,21 @@ export const TIMERANGE_KEY = 'timerange';
 export const PAGE_FILTERS_KEY = 'pageFilters';
 export const ESQL_QUERY_KEY = 'cspq';
 
+/** Returns active, non-hidden attachments. */
+export const getVisibleAttachments = (
+  attachments: readonly VersionedAttachment[]
+): VersionedAttachment[] =>
+  getActiveAttachments(attachments as VersionedAttachment[]).filter((a) => !a.hidden);
+
 /** Returns the ISO string of the first (oldest) version's `created_at`. */
 export const firstCreatedAt = (attachment: VersionedAttachment): string | undefined =>
   attachment.versions.length > 0 ? attachment.versions[0].created_at : undefined;
+
+/** Returns the ISO string of the latest version's `created_at` (upper bound for timerange). */
+export const lastUpdatedAt = (attachment: VersionedAttachment): string | undefined =>
+  attachment.versions.length > 0
+    ? attachment.versions[attachment.versions.length - 1].created_at
+    : undefined;
 
 export const minDate = (a: string | undefined, b: string | undefined): string | undefined => {
   if (!a) return b;

@@ -96,6 +96,15 @@ describe('getRuleRow', () => {
     expect(getRuleRow([a], getUrl)).toBeUndefined();
   });
 
+  it('ignores hidden attachments', () => {
+    const a = makeAttachment(
+      'security.rule',
+      { attachmentLabel: 'Rule' },
+      { origin: 'sig-1', hidden: true }
+    );
+    expect(getRuleRow([a], getUrl)).toBeUndefined();
+  });
+
   it('counts only attachments with an origin', () => {
     const withOrigin = makeAttachment(
       'security.rule',
