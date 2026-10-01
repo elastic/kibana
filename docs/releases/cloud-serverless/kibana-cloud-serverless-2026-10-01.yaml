@@ -10,9 +10,9 @@ hide-features:
 entries:
 - file:
     name: 290915.yaml
-    checksum: 4305a8bbaff81b6d29ae9ed70eab70d99eeacb5e
+    checksum: f52552be08cb438dcab78bcab7c198ec9196fd7e
   type: bug-fix
-  title: Keep the selected step after refresh and copy field paths in the flyout
+  title: Keep the selected step on refresh and copy field paths in the workflow flyout
   products:
   - product: cloud-serverless
   - product: kibana
@@ -73,9 +73,9 @@ entries:
   - https://github.com/elastic/kibana/issues/294054
 - file:
     name: 293924.yaml
-    checksum: f24c9ff2ec4db467684de2305f682040893a3a86
+    checksum: 577e381eac8143282be8610ba215e4be8b1ac9bb
   type: bug-fix
-  title: Wrap markdown table cells instead of truncating them
+  title: Wrap markdown table cells in Security AI Assistant instead of truncating them
   products:
   - product: cloud-serverless
   - product: kibana
@@ -274,9 +274,9 @@ entries:
   - https://github.com/elastic/kibana/issues/291774
 - file:
     name: 290782.yaml
-    checksum: 45726b1ebb770b70397702400618894265eaf90f
+    checksum: 76ea87ae54fe30c96e17a8b6e84bda0f603a02c2
   type: bug-fix
-  title: Show nested steps when you select an iteration in the execution flyout
+  title: Show nested steps when you select an iteration in the workflow execution flyout
   products:
   - product: cloud-serverless
   - product: kibana
@@ -326,13 +326,13 @@ entries:
   - https://github.com/elastic/security-team/issues/19676
 - file:
     name: 293855.yaml
-    checksum: 98bf1ab57a50563a985f15e48f778e12ac268218
+    checksum: b9325537ec31412440e459580e66d6f5cd5cd428
   type: bug-fix
-  title: Fix Agent Builder failing with legacy AI connector default LLM settings
+  title: Fix default LLM check failing legacy AI connector configurations
   products:
   - product: cloud-serverless
   - product: kibana
-  description: Fixes an issue where a restrictive default LLM selection check failed legacy AI connector configurations, even when the underlying inference endpoint matched the LLM call.
+  description: Fixes an issue where the default LLM selection check rejected legacy AI connector configurations, even when the underlying inference endpoint matched the LLM call. Agent Builder now also gives administrator-configured, feature-specific LLM settings precedence over the default connector.
   prs:
   - https://github.com/elastic/kibana/pull/293855
   issues:

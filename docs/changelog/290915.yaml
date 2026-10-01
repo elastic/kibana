@@ -6,4 +6,4 @@ type: bug-fix
 products:
 - product: cloud-serverless
 - product: kibana
-title: "Keep the selected step after refresh and copy field paths in the flyout"
+title: "Keep the selected step on refresh and copy field paths in the workflow flyout"
