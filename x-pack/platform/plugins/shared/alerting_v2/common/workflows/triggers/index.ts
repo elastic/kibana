@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { episodeActionEnvelopeSchema } from './episode_action_envelope';
-export type { EpisodeActionEnvelopePayload } from './episode_action_envelope';
+export { alertActionEnvelopeSchema } from './alert_action_envelope';
+export type { AlertActionEnvelopePayload } from './alert_action_envelope';
 
 export {
   ALERT_ASSIGNED_TRIGGER_ID,

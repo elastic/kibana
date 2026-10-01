@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import type { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { episodeActionEnvelopeSchema } from './episode_action_envelope';
+import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_ACKED_TRIGGER_ID = 'alerting.userActions.alertAcked' as const;
 
-export const alertAckedPayloadSchema = episodeActionEnvelopeSchema.extend({});
+export const alertAckedPayloadSchema = alertActionEnvelopeSchema.extend({});
 
 export type AlertAckedPayload = z.infer<typeof alertAckedPayloadSchema>;
 
@@ -33,7 +33,7 @@ export const alertAckedTriggerCommonDefinition: CommonTriggerDefinition<
       'xpack.alertingVTwo.workflowTriggers.alertAcked.documentation.details',
       {
         defaultMessage:
-          'Emitted after an alert ack action is persisted. The payload includes event.episodeId, event.ruleId, and event.spaceId for trigger conditions.',
+          'Emitted after an alert ack action is persisted. The payload includes event.alertId, event.ruleId, and event.spaceId for trigger conditions.',
       }
     ),
   },

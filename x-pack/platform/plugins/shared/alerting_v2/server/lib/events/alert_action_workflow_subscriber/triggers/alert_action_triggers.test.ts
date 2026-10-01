@@ -35,6 +35,9 @@ const envelope = {
   actorUid: 'actor-uid-1',
 } as const;
 
+const { episodeId: alertId, ...sharedEnvelopeFields } = envelope;
+const expectedEnvelopePayload = { ...sharedEnvelopeFields, alertId };
+
 interface Case {
   name: string;
   trigger: AlertActionWorkflowTriggerBinding;
@@ -110,7 +113,7 @@ const cases: Case[] = [
 describe('alert-action workflow trigger bindings', () => {
   describe.each(cases)('$name', ({ trigger, event, expectedExtra }) => {
     it('flattens the envelope (and any action-specific fields) into the payload', () => {
-      expect(trigger.toPayload(event)).toEqual({ ...envelope, ...expectedExtra });
+      expect(trigger.toPayload(event)).toEqual({ ...expectedEnvelopePayload, ...expectedExtra });
     });
 
     it('preserves a null actorUid (system-initiated action)', () => {

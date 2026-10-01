@@ -30,7 +30,7 @@ describe('alertAssignedTrigger', () => {
       expect(result).toEqual({
         occurredAt: baseEvent.occurredAt,
         groupHash: baseEvent.groupHash,
-        episodeId: baseEvent.episodeId,
+        alertId: baseEvent.episodeId,
         ruleId: baseEvent.ruleId,
         spaceId: baseEvent.spaceId,
         actorUid: baseEvent.actorUid,

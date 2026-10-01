@@ -75,7 +75,7 @@ describe('AlertActionWorkflowSubscriber', () => {
       expect(mockEmitEvent).toHaveBeenCalledWith(ALERT_ASSIGNED_TRIGGER_ID, {
         occurredAt: episodeAssignedEvent.occurredAt,
         groupHash: episodeAssignedEvent.groupHash,
-        episodeId: episodeAssignedEvent.episodeId,
+        alertId: episodeAssignedEvent.episodeId,
         ruleId: episodeAssignedEvent.ruleId,
         spaceId: episodeAssignedEvent.spaceId,
         actorUid: episodeAssignedEvent.actorUid,

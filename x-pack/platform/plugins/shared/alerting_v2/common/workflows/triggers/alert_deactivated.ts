@@ -8,18 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { episodeActionEnvelopeSchema } from './episode_action_envelope';
+import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_DEACTIVATED_TRIGGER_ID = 'alerting.userActions.alertDeactivated' as const;
 
-export const alertDeactivatedPayloadSchema = episodeActionEnvelopeSchema.extend({
+export const alertDeactivatedPayloadSchema = alertActionEnvelopeSchema.extend({
   reason: z
     .string()
     .min(1)
     .max(1024)
     .describe(
-      i18n.translate('xpack.alertingVTwo.triggers.episodeDeactivated.schema.reason', {
-        defaultMessage: 'Reason the alerting episode was deactivated.',
+      i18n.translate('xpack.alertingVTwo.triggers.alertDeactivated.schema.reason', {
+        defaultMessage: 'Reason the alert was deactivated.',
       })
     ),
 });
@@ -43,7 +43,7 @@ export const alertDeactivatedTriggerCommonDefinition: CommonTriggerDefinition<
       'xpack.alertingVTwo.workflowTriggers.alertDeactivated.documentation.details',
       {
         defaultMessage:
-          'Emitted after an alert deactivate action is persisted. The payload includes event.reason alongside event.episodeId, event.ruleId, and event.spaceId for trigger conditions.',
+          'Emitted after an alert deactivate action is persisted. The payload includes event.reason alongside event.alertId, event.ruleId, and event.spaceId for trigger conditions.',
       }
     ),
   },

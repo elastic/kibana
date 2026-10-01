@@ -8,17 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { episodeActionEnvelopeSchema } from './episode_action_envelope';
+import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_TAGGED_TRIGGER_ID = 'alerting.userActions.alertTagged' as const;
 
-export const alertTaggedPayloadSchema = episodeActionEnvelopeSchema.extend({
+export const alertTaggedPayloadSchema = alertActionEnvelopeSchema.extend({
   tags: z
     .array(z.string().min(1).max(128))
     .max(20)
     .describe(
-      i18n.translate('xpack.alertingVTwo.triggers.episodeTagged.schema.tags', {
-        defaultMessage: 'Tags added to the alerting episode.',
+      i18n.translate('xpack.alertingVTwo.triggers.alertTagged.schema.tags', {
+        defaultMessage: 'Tags added to the alert.',
       })
     ),
 });
@@ -42,7 +42,7 @@ export const alertTaggedTriggerCommonDefinition: CommonTriggerDefinition<
       'xpack.alertingVTwo.workflowTriggers.alertTagged.documentation.details',
       {
         defaultMessage:
-          'Emitted after an alert tag action is persisted. The payload includes event.tags alongside event.episodeId, event.ruleId, and event.spaceId for trigger conditions.',
+          'Emitted after an alert tag action is persisted. The payload includes event.tags alongside event.alertId, event.ruleId, and event.spaceId for trigger conditions.',
       }
     ),
   },

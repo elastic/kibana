@@ -8,18 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { episodeActionEnvelopeSchema } from './episode_action_envelope';
+import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_ACTIVATED_TRIGGER_ID = 'alerting.userActions.alertActivated' as const;
 
-export const alertActivatedPayloadSchema = episodeActionEnvelopeSchema.extend({
+export const alertActivatedPayloadSchema = alertActionEnvelopeSchema.extend({
   reason: z
     .string()
     .min(1)
     .max(1024)
     .describe(
-      i18n.translate('xpack.alertingVTwo.triggers.episodeActivated.schema.reason', {
-        defaultMessage: 'Reason the alerting episode was activated.',
+      i18n.translate('xpack.alertingVTwo.triggers.alertActivated.schema.reason', {
+        defaultMessage: 'Reason the alert was activated.',
       })
     ),
 });
@@ -43,7 +43,7 @@ export const alertActivatedTriggerCommonDefinition: CommonTriggerDefinition<
       'xpack.alertingVTwo.workflowTriggers.alertActivated.documentation.details',
       {
         defaultMessage:
-          'Emitted after an alert activate action is persisted. The payload includes event.reason alongside event.episodeId, event.ruleId, and event.spaceId for trigger conditions.',
+          'Emitted after an alert activate action is persisted. The payload includes event.reason alongside event.alertId, event.ruleId, and event.spaceId for trigger conditions.',
       }
     ),
   },

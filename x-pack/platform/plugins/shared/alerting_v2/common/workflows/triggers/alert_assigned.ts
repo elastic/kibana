@@ -8,17 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { episodeActionEnvelopeSchema } from './episode_action_envelope';
+import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_ASSIGNED_TRIGGER_ID = 'alerting.userActions.alertAssigned' as const;
 
-export const alertAssignedPayloadSchema = episodeActionEnvelopeSchema.extend({
+export const alertAssignedPayloadSchema = alertActionEnvelopeSchema.extend({
   assigneeUid: z
     .string()
     .min(1)
     .max(256)
     .describe(
-      i18n.translate('xpack.alertingVTwo.triggers.episodeAssigned.schema.assigneeUid', {
+      i18n.translate('xpack.alertingVTwo.triggers.alertAssigned.schema.assigneeUid', {
         defaultMessage: 'User-profile uid of the new assignee.',
       })
     ),
@@ -43,7 +43,7 @@ export const alertAssignedTriggerCommonDefinition: CommonTriggerDefinition<
       'xpack.alertingVTwo.workflowTriggers.alertAssigned.documentation.details',
       {
         defaultMessage:
-          'Emitted after an alert assign action is persisted with a non-null assignee. The payload includes event.episodeId, event.ruleId, event.spaceId, and event.assigneeUid for trigger conditions.',
+          'Emitted after an alert assign action is persisted with a non-null assignee. The payload includes event.alertId, event.ruleId, event.spaceId, and event.assigneeUid for trigger conditions.',
       }
     ),
     examples: [

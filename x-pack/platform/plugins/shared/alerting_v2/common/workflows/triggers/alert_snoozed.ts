@@ -8,16 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { episodeActionEnvelopeSchema } from './episode_action_envelope';
+import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_SNOOZED_TRIGGER_ID = 'alerting.userActions.alertSnoozed' as const;
 
-export const alertSnoozedPayloadSchema = episodeActionEnvelopeSchema.extend({
+export const alertSnoozedPayloadSchema = alertActionEnvelopeSchema.extend({
   expiry: z.iso
     .datetime()
     .nullable()
     .describe(
-      i18n.translate('xpack.alertingVTwo.triggers.episodeSnoozed.schema.expiry', {
+      i18n.translate('xpack.alertingVTwo.triggers.alertSnoozed.schema.expiry', {
         defaultMessage:
           'ISO datetime when the snooze expires, or null when the snooze has no expiry.',
       })
@@ -43,7 +43,7 @@ export const alertSnoozedTriggerCommonDefinition: CommonTriggerDefinition<
       'xpack.alertingVTwo.workflowTriggers.alertSnoozed.documentation.details',
       {
         defaultMessage:
-          'Emitted after an alert snooze action is persisted. The payload includes event.expiry alongside event.episodeId, event.ruleId, and event.spaceId for trigger conditions.',
+          'Emitted after an alert snooze action is persisted. The payload includes event.expiry alongside event.alertId, event.ruleId, and event.spaceId for trigger conditions.',
       }
     ),
   },

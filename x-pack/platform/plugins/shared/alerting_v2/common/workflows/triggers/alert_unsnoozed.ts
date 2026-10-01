@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import type { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { episodeActionEnvelopeSchema } from './episode_action_envelope';
+import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_UNSNOOZED_TRIGGER_ID = 'alerting.userActions.alertUnsnoozed' as const;
 
-export const alertUnsnoozedPayloadSchema = episodeActionEnvelopeSchema.extend({});
+export const alertUnsnoozedPayloadSchema = alertActionEnvelopeSchema.extend({});
 
 export type AlertUnsnoozedPayload = z.infer<typeof alertUnsnoozedPayloadSchema>;
 
@@ -33,7 +33,7 @@ export const alertUnsnoozedTriggerCommonDefinition: CommonTriggerDefinition<
       'xpack.alertingVTwo.workflowTriggers.alertUnsnoozed.documentation.details',
       {
         defaultMessage:
-          'Emitted after an alert unsnooze action is persisted. The payload includes event.episodeId, event.ruleId, and event.spaceId for trigger conditions.',
+          'Emitted after an alert unsnooze action is persisted. The payload includes event.alertId, event.ruleId, and event.spaceId for trigger conditions.',
       }
     ),
   },

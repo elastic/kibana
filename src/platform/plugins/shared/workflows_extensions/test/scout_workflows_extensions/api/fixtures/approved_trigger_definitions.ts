@@ -84,39 +84,39 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.userActions.alertAcked',
-    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
+    schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
   },
   {
     id: 'alerting.userActions.alertActivated',
-    schemaHash: 'c5a55a218565c7d084269021a9d6252d9ea972a8a9ce496082da5c6e76d09a01',
+    schemaHash: '07ee0fd838d1d21ae735b5060d4529e1242bb156f83c85b86ed336053780bdfc',
   },
   {
     id: 'alerting.userActions.alertAssigned',
-    schemaHash: 'b99211de1fdabb5e2a2942031495b8c34d317a3feccd7efaa81bf997c0412439',
+    schemaHash: '91e8aea06c5d64a463a4d785a813cf010b08781d4e1fd6dca56bd1f71da62e81',
   },
   {
     id: 'alerting.userActions.alertDeactivated',
-    schemaHash: '623ec35bd18482cc9a3bc7a9ecaf3b3de4f203c8cacc207e102b8a5b14fa554a',
+    schemaHash: '44071e937ad35416cc28959c12df5dbbc5edff8a2950f1218bfc11c7803834f5',
   },
   {
     id: 'alerting.userActions.alertSnoozed',
-    schemaHash: 'f0517884b4e0560f86a62515c0d84420fed367ef2cfdda501cfedad010f22914',
+    schemaHash: '1bc74f115b351daa1f6c04ccc4d50949112b974b5a1d0aea2e043d73472fd143',
   },
   {
     id: 'alerting.userActions.alertTagged',
-    schemaHash: 'd6ad1872b85995d8088dfacbad85f775236ceb61a3982b077c7a00902c84bf95',
+    schemaHash: 'd75b12a1fa3e7770bb15a3d63c1985b8c17006a652b8b2f32ab1569600d6a97c',
   },
   {
     id: 'alerting.userActions.alertUnacked',
-    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
+    schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
   },
   {
     id: 'alerting.userActions.alertUnassigned',
-    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
+    schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
   },
   {
     id: 'alerting.userActions.alertUnsnoozed',
-    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
+    schemaHash: 'efcf6a9900c7c4019ef80cd061cda7e3ddad910bede8180240f4750da6b09373',
   },
   {
     id: 'cases.attachmentsAdded',

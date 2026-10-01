@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 
-export const episodeActionEnvelopeSchema = z
+export const alertActionEnvelopeSchema = z
   .object({
     occurredAt: z.iso.datetime().describe(
-      i18n.translate('xpack.alertingVTwo.triggers.episodeAction.schema.occurredAt', {
+      i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.occurredAt', {
         defaultMessage: 'ISO timestamp of when the action occurred.',
       })
     ),
@@ -20,19 +20,19 @@ export const episodeActionEnvelopeSchema = z
       .min(1)
       .max(128)
       .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.episodeAction.schema.groupHash', {
-          defaultMessage: 'Stable hash of the alert grouping the episode belongs to.',
+        i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.groupHash', {
+          defaultMessage: 'Stable hash of the alert series the alert belongs to.',
         })
       ),
-    episodeId: z
+    alertId: z
       .string()
       .min(1)
       .max(256)
       .nullable()
       .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.episodeAction.schema.episodeId', {
+        i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.alertId', {
           defaultMessage:
-            'Identifier of the alerting episode the action was applied to, or null for series-level actions that target the series as a whole.',
+            'Identifier of the alert the action was applied to, or null for series-level actions that target the series as a whole.',
         })
       ),
     ruleId: z
@@ -41,9 +41,9 @@ export const episodeActionEnvelopeSchema = z
       .max(256)
       .nullable()
       .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.episodeAction.schema.ruleId', {
+        i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.ruleId', {
           defaultMessage:
-            'Identifier of the alerting rule the episode belongs to, or null for external-source episodes not tied to a Kibana rule.',
+            'Identifier of the alerting rule the alert belongs to, or null for external-source alerts not tied to a Kibana rule.',
         })
       ),
     spaceId: z
@@ -51,8 +51,8 @@ export const episodeActionEnvelopeSchema = z
       .min(1)
       .max(256)
       .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.episodeAction.schema.spaceId', {
-          defaultMessage: 'Kibana space the episode lives in.',
+        i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.spaceId', {
+          defaultMessage: 'Kibana space the alert lives in.',
         })
       ),
     actorUid: z
@@ -61,7 +61,7 @@ export const episodeActionEnvelopeSchema = z
       .max(256)
       .nullable()
       .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.episodeAction.schema.actorUid', {
+        i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.actorUid', {
           defaultMessage:
             'User-profile uid of the actor who performed the action, or null when performed by an internal/system context.',
         })
@@ -69,4 +69,4 @@ export const episodeActionEnvelopeSchema = z
   })
   .strict();
 
-export type EpisodeActionEnvelopePayload = z.infer<typeof episodeActionEnvelopeSchema>;
+export type AlertActionEnvelopePayload = z.infer<typeof alertActionEnvelopeSchema>;

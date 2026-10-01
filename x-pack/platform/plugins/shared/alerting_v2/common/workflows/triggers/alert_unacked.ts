@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import type { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { episodeActionEnvelopeSchema } from './episode_action_envelope';
+import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_UNACKED_TRIGGER_ID = 'alerting.userActions.alertUnacked' as const;
 
-export const alertUnackedPayloadSchema = episodeActionEnvelopeSchema.extend({});
+export const alertUnackedPayloadSchema = alertActionEnvelopeSchema.extend({});
 
 export type AlertUnackedPayload = z.infer<typeof alertUnackedPayloadSchema>;
 
@@ -33,7 +33,7 @@ export const alertUnackedTriggerCommonDefinition: CommonTriggerDefinition<
       'xpack.alertingVTwo.workflowTriggers.alertUnacked.documentation.details',
       {
         defaultMessage:
-          'Emitted after an alert unack action is persisted. The payload includes event.episodeId, event.ruleId, and event.spaceId for trigger conditions.',
+          'Emitted after an alert unack action is persisted. The payload includes event.alertId, event.ruleId, and event.spaceId for trigger conditions.',
       }
     ),
   },
