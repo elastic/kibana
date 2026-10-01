@@ -23,7 +23,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Environment } from '../../../../common/environment_rt';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { ENVIRONMENT_ALL_VALUE } from '../../../../common/environment_filter_values';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ResponsiveFlyout } from '../responsive_flyout';
@@ -91,7 +91,7 @@ export function RequestFlyout({
   );
 
   const envLabel =
-    environment === ENVIRONMENT_ALL
+    environment === ENVIRONMENT_ALL_VALUE
       ? i18n.translate('xpack.apm.requestFlyout.environmentAny', { defaultMessage: 'Any' })
       : environment;
 
@@ -162,8 +162,7 @@ export function RequestFlyout({
                     data-test-subj="requestFlyoutTabOperations"
                   >
                     {i18n.translate('xpack.apm.requestFlyout.tabs.operations', {
-                      defaultMessage: 'Operations ({target} methods)',
-                      values: { target: connection.targetLabel },
+                      defaultMessage: 'Operations',
                     })}
                   </EuiTab>
                   {connection.targetServiceName && (
@@ -173,12 +172,30 @@ export function RequestFlyout({
                       data-test-subj="requestFlyoutTabAffectedEndpoints"
                     >
                       {i18n.translate('xpack.apm.requestFlyout.tabs.affectedEndpoints', {
-                        defaultMessage: '{source} transactions',
-                        values: { source: connection.sourceLabel },
+                        defaultMessage: 'Transactions',
                       })}
                     </EuiTab>
                   )}
                 </EuiTabs>
+
+                {/* Tab caption — one line below the tabs to name the two services */}
+                <EuiText size="xs" color="subdued" style={{ marginTop: 4 }}>
+                  {activeTab === 'operations'
+                    ? i18n.translate('xpack.apm.requestFlyout.tabs.operations.caption', {
+                        defaultMessage: 'What {source} calls on {target}',
+                        values: {
+                          source: connection.sourceLabel,
+                          target: connection.targetLabel,
+                        },
+                      })
+                    : i18n.translate('xpack.apm.requestFlyout.tabs.affectedEndpoints.caption', {
+                        defaultMessage: '{source} transactions that call {target}',
+                        values: {
+                          source: connection.sourceLabel,
+                          target: connection.targetLabel,
+                        },
+                      })}
+                </EuiText>
                 <EuiSpacer size="s" />
 
                 {activeTab === 'operations' && <RequestFlyoutOperations />}

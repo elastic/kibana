@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { TransactionGroup } from '@kbn/apm-ui-shared';
 import { RequestFlyoutContextProvider } from '../request_flyout_context';
 import type { RequestFlyoutContextValue } from '../request_flyout_context';
-import { RequestFlyoutTransactions } from '.';
+import { RequestFlyoutAffectedEndpoints } from '.';
 
 // ---------------------------------------------------------------------------
 // Module mocks
@@ -19,45 +18,6 @@ import { RequestFlyoutTransactions } from '.';
 const mockUseRequestFlyoutTransactions = jest.fn();
 jest.mock('./use_request_flyout_transactions', () => ({
   useRequestFlyoutTransactions: (...args: unknown[]) => mockUseRequestFlyoutTransactions(...args),
-}));
-
-// Mock TransactionsTable so we can control what it renders and intercept
-// columnInteractions without pulling in the full @kbn/apm-ui-shared bundle.
-const mockTransactionsTable = jest.fn();
-jest.mock('@kbn/apm-ui-shared', () => ({
-  TransactionsTable: (props: {
-    items: TransactionGroup[];
-    isLoading: boolean;
-    maxCountExceeded: boolean;
-    columnInteractions?: {
-      name?: {
-        onClick?: (item: TransactionGroup) => void;
-        isExpanded?: (item: TransactionGroup) => boolean;
-      };
-    };
-  }) => {
-    mockTransactionsTable(props);
-    if (props.isLoading) {
-      return <div data-test-subj="transactionsTableLoading">Loading…</div>;
-    }
-    return (
-      <div data-test-subj="transactionsTable">
-        {props.maxCountExceeded && (
-          <div data-test-subj="maxTransactionsBanner">Max transactions reached</div>
-        )}
-        {props.items.map((item) => (
-          <button
-            key={`${item.name}-${item.transactionType}`}
-            data-test-subj={`transactionRow-${item.name}`}
-            data-expanded={String(props.columnInteractions?.name?.isExpanded?.(item) ?? false)}
-            onClick={() => props.columnInteractions?.name?.onClick?.(item)}
-          >
-            {item.name}
-          </button>
-        ))}
-      </div>
-    );
-  },
 }));
 
 // TransactionDetailFlyout — lightweight stub.
@@ -92,32 +52,34 @@ const BASE_CONTEXT: RequestFlyoutContextValue = {
     targetServiceName: 'backend',
   },
   filters: {
-    environment: 'ENVIRONMENT_ALL',
-    setEnvironment: jest.fn(),
+    environment: 'production',
     start: '2024-01-01T00:00:00.000Z',
     end: '2024-01-01T01:00:00.000Z',
     rangeFrom: 'now-1h',
     rangeTo: 'now',
-    setRange: jest.fn(),
   },
-  refreshToken: 0,
-  onRefresh: jest.fn(),
 };
 
-const SAMPLE_TRANSACTIONS: TransactionGroup[] = [
+const SAMPLE_ITEMS = [
   {
     name: 'GET /api/products',
     transactionType: 'request',
-    latency: { value: 120 },
-    throughput: { value: 5 },
-    errorRate: { value: 0.01 },
+    avgCallLatency: 120_000,
+    callCount: 50,
+    callRate: 5,
+    failedCallRate: 0.01,
+    timeConsumedPct: 0.6,
+    isSampled: false,
   },
   {
     name: 'POST /api/orders',
     transactionType: 'request',
-    latency: { value: 200 },
-    throughput: { value: 2 },
-    errorRate: { value: 0.05 },
+    avgCallLatency: 200_000,
+    callCount: 20,
+    callRate: 2,
+    failedCallRate: 0.05,
+    timeConsumedPct: 0.4,
+    isSampled: false,
   },
 ];
 
@@ -125,7 +87,7 @@ function renderComponent(contextOverrides: Partial<RequestFlyoutContextValue> = 
   const ctx = { ...BASE_CONTEXT, ...contextOverrides };
   return render(
     <RequestFlyoutContextProvider value={ctx}>
-      <RequestFlyoutTransactions latencyAggregationType="avg" />
+      <RequestFlyoutAffectedEndpoints />
     </RequestFlyoutContextProvider>
   );
 }
@@ -134,17 +96,29 @@ function renderComponent(contextOverrides: Partial<RequestFlyoutContextValue> = 
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('RequestFlyoutTransactions', () => {
+describe('RequestFlyoutAffectedEndpoints', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseRequestFlyoutTransactions.mockReturnValue({
-      items: SAMPLE_TRANSACTIONS,
+      items: SAMPLE_ITEMS,
       isLoading: false,
       isMaxTransactionsReached: false,
     });
   });
 
-  it('shows loading state while data is being fetched', () => {
+  it('renders transaction rows when data has loaded', () => {
+    renderComponent();
+
+    expect(screen.getByTestId('requestFlyoutSection-affectedEndpoints')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('requestFlyoutTransactionNameLink-POST /api/orders')
+    ).toBeInTheDocument();
+  });
+
+  it('shows a loading state while data is being fetched', () => {
     mockUseRequestFlyoutTransactions.mockReturnValue({
       items: [],
       isLoading: true,
@@ -152,22 +126,13 @@ describe('RequestFlyoutTransactions', () => {
     });
 
     renderComponent();
-
-    expect(screen.getByTestId('transactionsTableLoading')).toBeInTheDocument();
+    expect(screen.getByText('Loading transactions…')).toBeInTheDocument();
   });
 
-  it('renders transaction rows when data has loaded', () => {
+  it('opens TransactionDetailFlyout when a transaction name link is clicked', () => {
     renderComponent();
 
-    expect(screen.getByTestId('requestFlyoutSection-transactions')).toBeInTheDocument();
-    expect(screen.getByTestId('transactionRow-GET /api/products')).toBeInTheDocument();
-    expect(screen.getByTestId('transactionRow-POST /api/orders')).toBeInTheDocument();
-  });
-
-  it('opens TransactionDetailFlyout when a transaction row is clicked', () => {
-    renderComponent();
-
-    fireEvent.click(screen.getByTestId('transactionRow-GET /api/products'));
+    fireEvent.click(screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products'));
 
     const flyout = screen.getByTestId('transactionDetailFlyout');
     expect(flyout).toBeInTheDocument();
@@ -179,60 +144,56 @@ describe('RequestFlyoutTransactions', () => {
   it('closes TransactionDetailFlyout when the same row is clicked again (toggle)', () => {
     renderComponent();
 
-    const row = screen.getByTestId('transactionRow-GET /api/products');
+    const link = screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products');
 
-    // First click — opens
-    fireEvent.click(row);
+    fireEvent.click(link);
     expect(screen.getByTestId('transactionDetailFlyout')).toBeInTheDocument();
 
-    // Second click on the same row — closes
-    fireEvent.click(row);
+    fireEvent.click(link);
     expect(screen.queryByTestId('transactionDetailFlyout')).not.toBeInTheDocument();
   });
 
-  it('switches selected transaction when a different row is clicked', () => {
+  it('switches selected transaction when a different name link is clicked', () => {
     renderComponent();
 
-    fireEvent.click(screen.getByTestId('transactionRow-GET /api/products'));
+    fireEvent.click(screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products'));
     expect(screen.getByTestId('transactionDetailFlyoutName')).toHaveTextContent(
       'GET /api/products'
     );
 
-    fireEvent.click(screen.getByTestId('transactionRow-POST /api/orders'));
+    fireEvent.click(screen.getByTestId('requestFlyoutTransactionNameLink-POST /api/orders'));
     expect(screen.getByTestId('transactionDetailFlyoutName')).toHaveTextContent('POST /api/orders');
   });
 
-  it('closes the flyout when the flyout close button is clicked', () => {
+  it('closes the detail flyout when the flyout close button is clicked', () => {
     renderComponent();
 
-    fireEvent.click(screen.getByTestId('transactionRow-GET /api/products'));
+    fireEvent.click(screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products'));
     expect(screen.getByTestId('transactionDetailFlyout')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('transactionDetailFlyoutClose'));
     expect(screen.queryByTestId('transactionDetailFlyout')).not.toBeInTheDocument();
   });
 
-  it('shows the max transactions banner when isMaxTransactionsReached is true', () => {
+  it('shows the max-transactions warning when isMaxTransactionsReached is true', () => {
     mockUseRequestFlyoutTransactions.mockReturnValue({
-      items: SAMPLE_TRANSACTIONS,
+      items: SAMPLE_ITEMS,
       isLoading: false,
       isMaxTransactionsReached: true,
     });
 
     renderComponent();
 
-    expect(screen.getByTestId('maxTransactionsBanner')).toBeInTheDocument();
+    expect(screen.getByText(/Not all transactions are shown/i)).toBeInTheDocument();
   });
 
-  it('does not show the max transactions banner when isMaxTransactionsReached is false', () => {
+  it('does not show the max-transactions warning by default', () => {
     renderComponent();
-
-    expect(screen.queryByTestId('maxTransactionsBanner')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Not all transactions are shown/i)).not.toBeInTheDocument();
   });
 
   it('does not render TransactionDetailFlyout when no transaction is selected', () => {
     renderComponent();
-
     expect(screen.queryByTestId('transactionDetailFlyout')).not.toBeInTheDocument();
   });
 });

@@ -8,8 +8,8 @@
 import {
   EuiBasicTable,
   EuiCallOut,
+  EuiLink,
   EuiSpacer,
-  EuiText,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,17 +22,19 @@ import { useRequestFlyoutTransactions } from './use_request_flyout_transactions'
 import type { ConnectionTransactionGroup } from './use_request_flyout_transactions';
 
 /**
- * "Affected endpoints" tab in the edge flyout.
+ * "Transactions" tab in the edge flyout.
  *
  * Shows source-service transaction groups that directly call the target.
  * All metrics (call latency, calls, failed) are measured from the exit spans,
- * NOT from the full transaction duration — so latency here means "time spent
- * calling the target", not "transaction response time".
+ * NOT from the full transaction duration.
+ *
+ * Column names are unified with the Operations tab:
+ *   Name · Avg time · Calls · Failed · Time consumed
  */
 export function RequestFlyoutAffectedEndpoints() {
   const {
     deps,
-    connection: { sourceServiceName, targetLabel },
+    connection: { sourceServiceName },
     filters: { environment, rangeFrom, rangeTo, start, end },
   } = useRequestFlyoutContext();
 
@@ -43,7 +45,7 @@ export function RequestFlyoutAffectedEndpoints() {
     transactionType: string;
   } | null>(null);
 
-  const onRowClick = useCallback((item: ConnectionTransactionGroup) => {
+  const onTransactionClick = useCallback((item: ConnectionTransactionGroup) => {
     if (!item.transactionType) return;
     setSelectedTransaction((prev) =>
       prev?.name === item.name && prev.transactionType === item.transactionType
@@ -56,32 +58,31 @@ export function RequestFlyoutAffectedEndpoints() {
     {
       field: 'name',
       name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.transaction', {
-        defaultMessage: 'Transaction',
+        defaultMessage: 'Name',
       }),
       truncateText: true,
-      render: (name: string) => (
-        <EuiText size="s" style={{ cursor: 'pointer' }}>
+      render: (name: string, item: ConnectionTransactionGroup) => (
+        <EuiLink
+          data-test-subj={`requestFlyoutTransactionNameLink-${name}`}
+          onClick={() => onTransactionClick(item)}
+        >
           {name}
-        </EuiText>
+        </EuiLink>
       ),
     },
     {
       field: 'avgCallLatency',
-      name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.avgCallLatency', {
-        defaultMessage: 'Avg time in {target} calls',
-        values: { target: targetLabel },
+      name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.avgTime', {
+        defaultMessage: 'Avg time',
       }),
       align: 'right' as const,
       render: (value: number | null) =>
-        value == null
-          ? '—'
-          : asMillisecondDuration(value),
+        value == null ? '—' : asMillisecondDuration(value),
     },
     {
       field: 'callCount',
       name: i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.column.calls', {
-        defaultMessage: 'Calls to {target}',
-        values: { target: targetLabel },
+        defaultMessage: 'Calls',
       }),
       align: 'right' as const,
       render: (value: number) => value.toLocaleString(),
@@ -133,14 +134,13 @@ export function RequestFlyoutAffectedEndpoints() {
           noItemsMessage={
             isLoading
               ? i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.loadingLabel', {
-                  defaultMessage: 'Loading endpoints…',
+                  defaultMessage: 'Loading transactions…',
                 })
               : i18n.translate('xpack.apm.requestFlyout.affectedEndpoints.noDataLabel', {
                   defaultMessage: 'No transactions found between these services.',
                 })
           }
           rowProps={(item) => ({
-            onClick: () => onRowClick(item),
             'data-test-subj': `affectedEndpointRow-${item.name}`,
           })}
           data-test-subj="requestFlyoutAffectedEndpointsTable"

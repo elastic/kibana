@@ -49,5 +49,6 @@ export function useRequestFlyoutOperations() {
   return {
     items: data?.operations ?? [],
     isLoading: isPending(status),
+    resolvedDependencyName,
   };
 }

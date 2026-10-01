@@ -12,6 +12,11 @@ import { rangeSchema, kuerySchema, offsetSchema } from '../../default_api_types'
 
 export interface DependencyOperation {
   spanName: string;
+  /**
+   * Span subtype (e.g. 'redis', 'http', 'grpc', 'postgresql') or service target type
+   * from service_destination metrics. Optional — absent when neither field is indexed.
+   */
+  spanType?: string;
   latency: number | null;
   throughput: number;
   failureRate: number | null;

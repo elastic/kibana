@@ -13,10 +13,12 @@ import type { Environment } from '../../../common/environment_rt';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
+  SERVICE_TARGET_TYPE,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
   SPAN_NAME,
+  SPAN_SUBTYPE,
 } from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -136,6 +138,10 @@ export async function getTopDependencyOperations({
           total_time: {
             sum: { field },
           },
+          // Span subtype (e.g. 'redis', 'http', 'grpc') — from raw spans.
+          span_subtype: { terms: { field: SPAN_SUBTYPE, size: 1 } },
+          // Service target type — from service_destination metrics.
+          target_type: { terms: { field: SERVICE_TARGET_TYPE, size: 1 } },
         },
       },
     },
@@ -186,8 +192,16 @@ export async function getTopDependencyOperations({
       const latencyValue = isFiniteNumber(bucket.latency.value) ? bucket.latency.value : 0;
       const count = isFiniteNumber(bucket.count.value) ? bucket.count.value : 1;
 
+      const spanSubtype = String(
+        (bucket as any).span_subtype?.buckets?.[0]?.key ?? ''
+      ) || undefined;
+      const targetType = String(
+        (bucket as any).target_type?.buckets?.[0]?.key ?? ''
+      ) || undefined;
+
       return {
         spanName: bucket.key as string,
+        spanType: spanSubtype ?? targetType,
         latency: searchServiceDestinationMetrics ? latencyValue / count : bucket.latency.value,
         throughput: calculateThroughputWithRange({
           start: startWithOffset,

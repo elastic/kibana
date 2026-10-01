@@ -83,15 +83,11 @@ const BASE_CONTEXT: RequestFlyoutContextValue = {
   },
   filters: {
     environment: 'ENVIRONMENT_ALL',
-    setEnvironment: jest.fn(),
     start: '2024-01-01T00:00:00.000Z',
     end: '2024-01-01T01:00:00.000Z',
     rangeFrom: 'now-1h',
     rangeTo: 'now',
-    setRange: jest.fn(),
   },
-  refreshToken: 0,
-  onRefresh: jest.fn(),
 };
 
 function renderComponent(contextOverrides: Partial<RequestFlyoutContextValue> = {}) {
