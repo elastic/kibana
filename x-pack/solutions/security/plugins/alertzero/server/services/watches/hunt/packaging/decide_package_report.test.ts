@@ -235,10 +235,24 @@ describe('decidePackageReport', () => {
     expect(recommendation?.comment).toContain('could not be resolved to a live process');
   });
 
-  it('mints executable plus a recommendation when evidence is not host-scoped (trigger: not host-scoped)', () => {
+  it('mints executable plus a recommendation when evidence fell outside the actionable indices', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({ allEventsActionable: false }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals).toHaveLength(2);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    // Names what was observed; an empty actionable set is also what a degraded mapping
+    // classifier leaves behind, so the line must not conclude the finding is not host-scoped.
+    expect(recommendation?.comment).toContain('not known to carry a process identity');
+    expect(recommendation?.comment).not.toContain('is not host-scoped');
+  });
+
+  it('mints executable plus a recommendation when evidence really is not host-scoped', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({ hasNonHostEntity: true }),
       catalog: { ok: true, actions: [isolateHost] },
     });
     expect(result.proposals).toHaveLength(2);

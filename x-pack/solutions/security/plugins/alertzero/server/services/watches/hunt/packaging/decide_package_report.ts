@@ -158,12 +158,14 @@ const buildClosureSummary = (state: CurrentRunState): string => {
 const buildRecommendationReasonLines = ({
   hasExecutable,
   unenrolledHosts,
-  notHostScoped,
+  nonHostEvidence,
+  evidenceOutsideActionable,
   processUncovered,
 }: {
   hasExecutable: boolean;
   unenrolledHosts: CurrentRunHost[];
-  notHostScoped: boolean;
+  nonHostEvidence: boolean;
+  evidenceOutsideActionable: boolean;
   processUncovered: boolean;
 }): string[] => {
   const lines: string[] = [];
@@ -179,9 +181,18 @@ const buildRecommendationReasonLines = ({
       } not enrolled, so no Defend action reaches ${unenrolledHosts.length === 1 ? 'it' : 'them'}.`
     );
   }
-  if (notHostScoped) {
+  if (nonHostEvidence) {
     lines.push(
       'Part of the evidence for this finding is not host-scoped, so a host action would not close it.'
+    );
+  }
+  // Says what was observed -- an event whose index is not among the run's `actionable_indices` --
+  // rather than concluding the finding is not host-scoped. An empty actionable set also means
+  // the mapping classifier was degraded, and the run cannot tell that apart from a customer
+  // with no process telemetry; neither reading would justify the stronger claim.
+  if (evidenceOutsideActionable) {
+    lines.push(
+      'Some evidence came from indices not known to carry a process identity to act on, so a host action would not close it on its own.'
     );
   }
   if (processUncovered) {
@@ -330,7 +341,8 @@ export const decidePackageReport = ({
     const reasonLines = buildRecommendationReasonLines({
       hasExecutable,
       unenrolledHosts: unenrolled,
-      notHostScoped,
+      nonHostEvidence: state.hasNonHostEntity || state.hasIocIndicator,
+      evidenceOutsideActionable: !state.allEventsActionable,
       processUncovered,
     });
     proposals.push(buildRecommendationProposal({ conversationId, state, reasonLines }));
