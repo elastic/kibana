@@ -100,15 +100,16 @@ export const createAttachmentPublicClient = ({
         : [];
     // Route the write through `appendEvents` in both cases (with or without events): it's the only
     // path that runs `reconcileAttachments` against the caller's snapshot, so a concurrent
-    // add/delete between `loadState` and this write can't be silently clobbered. `appendEvents`
-    // defaults to `converse` access; `owner` keeps the original permission check.
+    // add/delete between `loadState` and this write can't be silently clobbered. Uses the same
+    // `converse` access as the `loadState` read, so anyone who can converse in a public or shared
+    // conversation can also manage its attachments.
     await conversationClient.appendEvents(
       {
         id: conversation.id,
         events,
         attachments: { snapshot: conversation.attachments ?? [], produced: stateManager.getAll() },
       },
-      { access: 'owner' }
+      { access: 'converse' }
     );
   };
 

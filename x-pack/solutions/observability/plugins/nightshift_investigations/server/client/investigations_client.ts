@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -14,6 +15,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { investigationStateSchema, type Severity } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
 import type { InvestigationQuotaCallback } from '../types';
@@ -212,7 +214,6 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
   const recommendations = investigationStateSchema.shape.recommendations.safeParse(
     record.recommendations
   );
-  const blindSpots = investigationStateSchema.shape.blind_spots.safeParse(record.blind_spots);
 
   return {
     ...toListInvestigationItem(record),
@@ -222,7 +223,6 @@ const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationR
     conclusion: record.conclusion,
     hypotheses: record.hypotheses,
     recommendations: recommendations.success ? recommendations.data : undefined,
-    blind_spots: blindSpots.success ? blindSpots.data : undefined,
     conversation_id: record.conversation_id,
     impact: record.impact,
   };
@@ -302,7 +302,11 @@ export interface NightshiftInvestigationsClientDeps {
   agentAvailability: AgentAvailabilityConfig;
   investigationQuotaCallback?: InvestigationQuotaCallback;
   investigationRepository: InvestigationRepository;
-  isAvailable: () => Promise<boolean>;
+  inference?: InferenceServerStart;
+  savedObjects?: CoreStart['savedObjects'];
+  uiSettings?: CoreStart['uiSettings'];
+  isAvailable: (connectorId?: string) => Promise<boolean>;
+  isInfrastructureAvailable: () => Promise<boolean>;
 }
 
 export class NightshiftInvestigationsClient {
@@ -315,7 +319,11 @@ export class NightshiftInvestigationsClient {
   private readonly agentAvailability: AgentAvailabilityConfig;
   private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly investigationRepository: InvestigationRepository;
-  private readonly checkAvailability: () => Promise<boolean>;
+  private readonly inference?: InferenceServerStart;
+  private readonly savedObjects?: CoreStart['savedObjects'];
+  private readonly uiSettings?: CoreStart['uiSettings'];
+  private readonly checkAvailability: (connectorId?: string) => Promise<boolean>;
+  private readonly checkInfrastructureAvailability: () => Promise<boolean>;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -327,10 +335,15 @@ export class NightshiftInvestigationsClient {
     this.agentAvailability = deps.agentAvailability;
     this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.investigationRepository = deps.investigationRepository;
+    this.inference = deps.inference;
+    this.savedObjects = deps.savedObjects;
+    this.uiSettings = deps.uiSettings;
     this.checkAvailability = deps.isAvailable;
+    this.checkInfrastructureAvailability = deps.isInfrastructureAvailable;
   }
 
-  public isAvailable = (): Promise<boolean> => this.checkAvailability();
+  public isAvailable = (connectorId?: string): Promise<boolean> =>
+    this.checkAvailability(connectorId);
 
   private getSpaceId(): string {
     return (
@@ -378,19 +391,32 @@ export class NightshiftInvestigationsClient {
     trigger_type,
     message,
     stream_names,
+    connector_id,
     concurrency_key,
     context = {},
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
-    if (!this.workflowsManagement) {
-      throw new InvestigationUnavailableError('workflowsManagement is not available');
-    }
-
-    if (!this.agentBuilder) {
-      throw new InvestigationUnavailableError('agentBuilder is not available');
-    }
-    if (!(await this.isAvailable())) {
+    if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
+
+    if (
+      !this.workflowsManagement ||
+      !this.agentBuilder ||
+      !this.inference ||
+      !this.savedObjects ||
+      !this.uiSettings
+    ) {
+      throw new InvestigationUnavailableError('Investigations are not available');
+    }
+
+    const resolvedConnectorId = await resolveNightshiftModelForRequest({
+      request: this.request,
+      inference: this.inference,
+      savedObjects: this.savedObjects,
+      uiSettings: this.uiSettings,
+      step: 'investigation',
+      requestedId: connector_id,
+    });
 
     const prepared = this.prepareAgentInput(subject, message, context);
     const resolvedSubject = withDerivedSubjectSummary(subject, prepared.message);
@@ -443,6 +469,7 @@ export class NightshiftInvestigationsClient {
       message: prepared.message,
       title,
       stream_names: stream_names ?? [],
+      ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
         ...prepared.context,

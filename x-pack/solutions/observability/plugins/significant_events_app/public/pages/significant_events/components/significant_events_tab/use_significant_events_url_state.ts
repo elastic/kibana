@@ -20,6 +20,8 @@ export interface SignificantEventsFilters {
   status: SignificantEventStatus[];
   severity: Severity[];
   stream: string[];
+  /** Service Knowledge Indicator feature ids. */
+  service: string[];
 }
 
 type TabQuery = ReturnType<typeof useSignificantEventsAppParams<'/{tab}'>>['query'];
@@ -46,7 +48,7 @@ const parseListParam = <T extends string>(
   return options.filter((option) => values.includes(option));
 };
 
-const parseStreamParam = (raw: ListParam): string[] =>
+const parseValuesParam = (raw: ListParam): string[] =>
   raw === undefined ? [] : castArray(raw).filter(Boolean);
 
 // `query-string` drops empty arrays, so an empty selection is written as '' (serialised as `key=`).
@@ -55,9 +57,9 @@ const encodeListParam = (values: string[]): string | string[] => (values.length 
 /**
  * URL state for the significant events tab.
  *
- * - `status` / `severity` / `stream`: the list filters. The URL is the single source of truth so
- *   they survive a reload and follow browser history. Absent `status`/`severity` means the default
- *   selection; `stream` is omitted when empty.
+ * - `status` / `severity` / `stream` / `service`: the list filters. The URL is the single source of
+ *   truth so they survive a reload and follow browser history. Absent `status`/`severity` means the
+ *   default selection; `stream` and `service` are omitted when empty.
  * - `selectedEvent`: deep-link context (e.g. from a notification). Filters the list to just
  *   that event and adapts the filter controls to its properties.
  * - `openEvent`: the single source of truth for flyout visibility — the flyout is open iff
@@ -88,7 +90,8 @@ export const useSignificantEventsUrlState = () => {
       parseListParam(query?.severity, SEVERITY_OPTIONS, DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER),
     [query?.severity]
   );
-  const streamFilter = useMemo(() => parseStreamParam(query?.stream), [query?.stream]);
+  const streamFilter = useMemo(() => parseValuesParam(query?.stream), [query?.stream]);
+  const serviceFilter = useMemo(() => parseValuesParam(query?.service), [query?.service]);
 
   /**
    * Every URL write goes through here so that writes issued in the same tick compose: the ref is
@@ -115,18 +118,22 @@ export const useSignificantEventsUrlState = () => {
    */
   const setFilters = useCallback(
     (
-      { status, severity, stream }: Partial<SignificantEventsFilters>,
+      { status, severity, stream, service }: Partial<SignificantEventsFilters>,
       { keepSelectedEvent = false } = {}
     ) => {
-      const { stream: currentStream, ...rest } = keepSelectedEvent
-        ? queryRef.current ?? {}
-        : omitSelectedEvent(queryRef.current);
-      const nextStream = stream ?? parseStreamParam(currentStream);
+      const {
+        stream: currentStream,
+        service: currentService,
+        ...rest
+      } = keepSelectedEvent ? queryRef.current ?? {} : omitSelectedEvent(queryRef.current);
+      const nextStream = stream ?? parseValuesParam(currentStream);
+      const nextService = service ?? parseValuesParam(currentService);
       write('replace', {
         ...rest,
         ...(status ? { status: encodeListParam(status) } : {}),
         ...(severity ? { severity: encodeListParam(severity) } : {}),
         ...(nextStream.length ? { stream: nextStream } : {}),
+        ...(nextService.length ? { service: nextService } : {}),
       });
     },
     [write]
@@ -138,6 +145,7 @@ export const useSignificantEventsUrlState = () => {
       status: _status,
       severity: _severity,
       stream: _stream,
+      service: _service,
       ...rest
     } = omitSelectedEvent(queryRef.current);
     write('replace', rest);
@@ -192,6 +200,7 @@ export const useSignificantEventsUrlState = () => {
     statusFilter,
     severityFilter,
     streamFilter,
+    serviceFilter,
     setFilters,
     resetFilters,
     openEvent,

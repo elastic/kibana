@@ -90,11 +90,12 @@ export {
   type InvestigationImpact,
   type InvestigationImpactEntity,
   type InvestigationRecommendation,
-  type InvestigationBlindSpot,
   type InvestigationRunStatus,
   type InvestigationState,
   type InvestigationEvidence,
-  type InvestigationEvidenceCode,
+  type EvidenceChart,
+  type EvidenceChartSeries,
+  type EvidenceChartAnnotation,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
@@ -104,12 +105,18 @@ export {
   MAX_HYPOTHESES,
   MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
-  MAX_BLIND_SPOTS,
+  MAX_EVIDENCE_CHART_SERIES,
+  MAX_EVIDENCE_CHART_POINTS,
+  MAX_EVIDENCE_CHART_ANNOTATIONS,
+  EVIDENCE_CHART_TYPES,
+  EVIDENCE_CHART_X_AXIS_TYPES,
+  EVIDENCE_CHART_Y_AXIS_UNITS,
+  evidenceChartSchema,
+  investigationEvidenceSchema,
   investigationImpactEntitySchema,
   investigationImpactSchema,
   investigationHypothesisSchema,
   investigationRecommendationSchema,
-  investigationBlindSpotSchema,
   type BlastRadiusEntry,
   type CausalFeature,
   type SignalEntry,
@@ -171,5 +178,10 @@ export {
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
 } from './src/inference_feature_ids';
+
+export { NightshiftModelBlockedError } from './src/nightshift_model_blocked_error';
+export { NightshiftModelNotFoundError } from './src/nightshift_model_not_found_error';
+
+export { NIGHTSHIFT_DEFAULT_MODELS, type NightshiftModelStep } from './src/nightshift_models';
 
 export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';

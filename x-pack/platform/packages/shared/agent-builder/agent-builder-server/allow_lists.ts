@@ -209,7 +209,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'action-policy-management',
 
   // Platform – Dashboard
-  'dashboard-management',
+  'dashboards',
 
   // Platform – Discover
   'discover-data-analysis',

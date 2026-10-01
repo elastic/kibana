@@ -6,10 +6,16 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { createInferenceRequestError } from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import {
+  NIGHTSHIFT_DEFAULT_MODELS,
+  NightshiftModelNotFoundError,
+} from '@kbn/significant-events-schema';
 import type { InvestigationStatus } from '../../common';
 import { freeFormContextSchema } from '../../common/schemas';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -62,6 +68,16 @@ const mockLogger = {
 const mockRequest = {} as KibanaRequest;
 const mockAgentAvailability = { cacheMode: 'space' as const, handler: jest.fn() };
 const investigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
+const getConnectorById = jest.fn(async (connectorId: string) => ({ connectorId }));
+const mockInference = {
+  getConnectorById,
+  getDefaultConnector: jest.fn(),
+} as unknown as InferenceServerStart;
+const getSetting = jest.fn().mockResolvedValue(false);
+const mockSavedObjects = { getScopedClient: jest.fn().mockReturnValue({}) } as never;
+const mockUiSettings = {
+  asScopedToClient: jest.fn().mockReturnValue({ get: getSetting }),
+} as never;
 
 let repository: jest.Mocked<InvestigationRepository>;
 
@@ -77,7 +93,11 @@ const makeClient = (
     agentAvailability: mockAgentAvailability,
     investigationQuotaCallback,
     investigationRepository: repository,
+    inference: mockInference,
+    savedObjects: mockSavedObjects,
+    uiSettings: mockUiSettings,
     isAvailable: jest.fn().mockResolvedValue(true),
+    isInfrastructureAvailable: jest.fn().mockResolvedValue(true),
     ...overrides,
   });
 
@@ -96,7 +116,6 @@ const makeAttrs = (overrides: Partial<InvestigationAttributes> = {}): Investigat
   conclusion: 'No issues found.',
   hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
   recommendations: [{ title: 'Keep monitoring', confidence: 0.7 }],
-  blind_spots: [{ title: 'Blind spot', confidence: 0.6, description: 'desc' }],
   ...overrides,
 });
 
@@ -127,6 +146,8 @@ beforeEach(() => {
   jest.clearAllMocks();
   installInvestigationAgentMock.mockResolvedValue(undefined);
   investigationQuotaCallback.mockResolvedValue({ allowed: true });
+  getSetting.mockResolvedValue(false);
+  getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
   repository = createMockRepository();
 });
 
@@ -161,24 +182,23 @@ describe('NightshiftInvestigationsClient.get()', () => {
       severity: undefined,
       hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
       recommendations: [{ title: 'Keep monitoring', confidence: 0.7 }],
-      blind_spots: [{ title: 'Blind spot', confidence: 0.6, description: 'desc' }],
       conversation_id: 'conv-1',
       impact: { entities: [{ name: 'checkout-service' }] },
     });
   });
 
-  it('omits historical recommendation and blind-spot arrays without confidence', async () => {
+  it('omits historical recommendations without confidence and legacy blind spots', async () => {
     repository.get.mockResolvedValue({
       ...makeRecord(),
       recommendations: [{ title: 'Keep monitoring' }],
-      blind_spots: [{ title: 'Blind spot', description: 'desc' }],
+      blind_spots: [{ title: 'Blind spot', confidence: 0.6, description: 'desc' }],
     } as unknown as InvestigationRecord);
 
     const result = await makeClient().get('inv-1');
 
     expect(result.summary).toBe('All clear.');
     expect(result.recommendations).toBeUndefined();
-    expect(result.blind_spots).toBeUndefined();
+    expect(result).not.toHaveProperty('blind_spots');
   });
 
   it('returns subject.summary from the stored subject_summary attribute', async () => {
@@ -354,7 +374,6 @@ describe('NightshiftInvestigationsClient.list()', () => {
     expect(result.results[0]).not.toHaveProperty('conclusion');
     expect(result.results[0]).not.toHaveProperty('hypotheses');
     expect(result.results[0]).not.toHaveProperty('recommendations');
-    expect(result.results[0]).not.toHaveProperty('blind_spots');
     expect(result.results[0]).not.toHaveProperty('conversation_id');
   });
 
@@ -445,7 +464,62 @@ describe('NightshiftInvestigationsClient.start()', () => {
       'nightshift-investigations'
     );
     expect(result).toEqual({ investigation_id: 'exec-123' });
+    expect(getConnectorById).toHaveBeenCalledWith(
+      NIGHTSHIFT_DEFAULT_MODELS.investigation,
+      mockRequest
+    );
     expect(investigationQuotaCallback).not.toHaveBeenCalled();
+  });
+
+  it('validates and forwards a custom connector using its canonical id', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+    getConnectorById.mockResolvedValue({ connectorId: 'canonical-model' });
+
+    await makeClient().start({
+      title: 'Latency is too high',
+      subject: { type: 'significant_event', id: 'event-1' },
+      trigger_type: 'manual',
+      connector_id: 'legacy-alias',
+    });
+
+    expect(getConnectorById).toHaveBeenCalledWith('legacy-alias', mockRequest);
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      expect.objectContaining({ connector_id: 'canonical-model' }),
+      expect.anything(),
+      'nightshift-investigations'
+    );
+  });
+
+  it('rejects an unknown custom connector before launching or persisting', async () => {
+    getConnectorById.mockRejectedValue(createInferenceRequestError('not found', 404));
+
+    await expect(
+      makeClient().start({
+        title: 'Latency is too high',
+        subject: { type: 'significant_event', id: 'event-1' },
+        trigger_type: 'manual',
+        connector_id: 'missing-model',
+      })
+    ).rejects.toEqual(new NightshiftModelNotFoundError('missing-model'));
+
+    expect(mockManagement.getWorkflow).not.toHaveBeenCalled();
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('reports a missing default model instead of generic unavailability', async () => {
+    getConnectorById.mockRejectedValue(createInferenceRequestError('not found', 404));
+
+    await expect(
+      makeClient().start({
+        title: 'Latency is too high',
+        subject: { type: 'significant_event', id: 'event-1' },
+        trigger_type: 'manual',
+      })
+    ).rejects.toEqual(new NightshiftModelNotFoundError(NIGHTSHIFT_DEFAULT_MODELS.investigation));
   });
 
   it('starts manual runs on the Nightshift investigation workflow', async () => {
@@ -856,7 +930,11 @@ describe('NightshiftInvestigationsClient.start()', () => {
       spaceIdOverride: SPACE_ID,
       agentAvailability: mockAgentAvailability,
       investigationRepository: repository,
+      inference: mockInference,
+      savedObjects: mockSavedObjects,
+      uiSettings: mockUiSettings,
       isAvailable: jest.fn().mockResolvedValue(true),
+      isInfrastructureAvailable: jest.fn().mockResolvedValue(true),
     });
 
     await expect(
@@ -871,7 +949,9 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('throws InvestigationUnavailableError when a start requirement is unavailable', async () => {
     await expect(
-      makeClient({ isAvailable: jest.fn().mockResolvedValue(false) }).start({
+      makeClient({
+        isInfrastructureAvailable: jest.fn().mockResolvedValue(false),
+      }).start({
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
         trigger_type: 'automatic',
