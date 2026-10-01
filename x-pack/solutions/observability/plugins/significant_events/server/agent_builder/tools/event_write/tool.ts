@@ -312,10 +312,10 @@ export function createEventsWriteTool({
       const { request } = context;
       try {
         const {
-          getEventClient,
           getEventSearchClient,
           getKnowledgeIndicatorClient,
           getAlertEventsClient,
+          emitTrigger,
           licensing,
         } = await getScopedClients({
           request,
@@ -329,11 +329,11 @@ export function createEventsWriteTool({
         );
 
         const data = await eventsWriteBulkHandler({
-          eventClient: await getEventClient(),
           eventSearchClient: await getEventSearchClient(),
           inputs: items,
           source: toolParams.source,
           alertEventsClient: await getAlertEventsClient(),
+          emitTrigger,
           logger,
         });
 

@@ -239,18 +239,10 @@ export class SignificantEventsPlugin
       const getAlertingV2RulesClient = async () =>
         pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
 
-      let alertEventsClientPromise: Promise<AlertEventsClientApi | undefined> | undefined;
-      const getAlertEventsClient = (): Promise<AlertEventsClientApi | undefined> => {
-        alertEventsClientPromise ??= pluginsStart.alertingVTwo
-          .getAlertEventsClientWithRequest(request)
-          .catch((err) => {
-            this.logger.warn(
-              `Failed to acquire AlertEventsClient; .rule-events dual-write skipped: ${
-                err instanceof Error ? err.message : err
-              }`
-            );
-            return undefined;
-          });
+      let alertEventsClientPromise: Promise<AlertEventsClientApi> | undefined;
+      const getAlertEventsClient = (): Promise<AlertEventsClientApi> => {
+        alertEventsClientPromise ??=
+          pluginsStart.alertingVTwo.getAlertEventsClientWithRequest(request);
         return alertEventsClientPromise;
       };
 
