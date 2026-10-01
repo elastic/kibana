@@ -185,7 +185,7 @@ export class ProposalsService {
     await this.attachToConversation(id, params.conversationId, document.title, request);
 
     const proposal = toProposal(id, document);
-    return { ...proposal, action: metadata, expired: isExpired(proposal) };
+    return { ...proposal, action: metadata, expired: isExpired(proposal) && !proposal.decision };
   }
 
   /**
@@ -1124,7 +1124,7 @@ export class ProposalsService {
       ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId, request)
       : undefined;
 
-    return { ...proposal, action, expired: isExpired(proposal) };
+    return { ...proposal, action, expired: isExpired(proposal) && !proposal.decision };
   }
 
   /**
@@ -1158,7 +1158,7 @@ export class ProposalsService {
         proposal.actionWorkflowId !== undefined
           ? metaMap.get(proposal.actionWorkflowId)
           : undefined,
-      expired: isExpired(proposal),
+      expired: isExpired(proposal) && !proposal.decision,
     }));
   }
 }

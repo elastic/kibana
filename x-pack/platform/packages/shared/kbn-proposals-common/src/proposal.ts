@@ -224,7 +224,14 @@ export const proposalSchema = z.object({
 });
 export type Proposal = z.infer<typeof proposalSchema>;
 
-/** Catalog metadata resolved on read, plus the expiry evaluated at request time. */
+/**
+ * Catalog metadata resolved on read, plus the expiry evaluated at request time.
+ *
+ * `expired` is false once `decision` is set, even past `expiresAt`: a decided
+ * proposal was settled by a person, and it should not say it expired. The only
+ * time a proposal should be considered as expired is when it was left undecided
+ * past the expiry deadline.
+ */
 export interface ProposalWithMetadata extends Proposal {
   action?: ActionMetadata;
   expired: boolean;

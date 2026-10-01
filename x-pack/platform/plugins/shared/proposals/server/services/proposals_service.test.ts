@@ -2065,6 +2065,25 @@ describe('ProposalsService', () => {
       );
     });
 
+    it('should not report a decided proposal as expired once its deadline has passed', async () => {
+      const storage = createStorage(
+        baseDocument({
+          status: 'succeeded',
+          decision: 'approved',
+          decidedBy: analyst('analyst-1'),
+          decidedAt: '2026-09-01T00:05:00.000Z',
+          expiresAt: '2026-09-01T00:10:00.000Z',
+        })
+      );
+      const { service } = createService(storage);
+
+      const { proposals } = await service.list(listQuery(), SPACE_ID, request);
+
+      // `decision` means a person settled it before the deadline ran out, so it
+      // should not be considered expired even if the current time is past its `expiresAt`.
+      expect(proposals[0].expired).toBe(false);
+    });
+
     it('should drop superseded proposals so a retried chain shows only its head', async () => {
       const storage = createStorage(baseDocument());
       const { service } = createService(storage);
