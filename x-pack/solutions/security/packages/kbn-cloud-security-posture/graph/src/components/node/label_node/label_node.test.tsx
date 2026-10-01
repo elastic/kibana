@@ -13,12 +13,7 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import type { NodeProps } from '../../types';
 import { getLabelColors } from '../styles';
 import { GRAPH_FLAGS_BADGE_ID, GRAPH_IPS_TEXT_ID, GRAPH_LABEL_NODE_ID } from '../../test_ids';
-import {
-  LabelNode,
-  TEST_SUBJ_EXPAND_BTN,
-  TEST_SUBJ_HANDLE,
-  TEST_SUBJ_HOVER_OUTLINE,
-} from './label_node';
+import { LabelNode, TEST_SUBJ_EXPAND_BTN, TEST_SUBJ_HANDLE } from './label_node';
 
 describe('LabelNode', () => {
   const baseProps: NodeProps = {
@@ -58,7 +53,7 @@ describe('LabelNode', () => {
     expect(screen.getAllByTestId(TEST_SUBJ_HANDLE)).toHaveLength(2);
   });
 
-  test('renders expand button and outline on hover if interactive', async () => {
+  test('renders expand button on hover if interactive', async () => {
     render(
       <ReactFlow>
         <LabelNode {...baseProps} />
@@ -69,11 +64,10 @@ describe('LabelNode', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_EXPAND_BTN)).toBeInTheDocument();
-      expect(screen.queryByTestId(TEST_SUBJ_HOVER_OUTLINE)).toBeInTheDocument();
     });
   });
 
-  test('does not render expand button and outline on hover if no interactive', async () => {
+  test('does not render expand button on hover if not interactive', async () => {
     const props = {
       ...baseProps,
       data: {
@@ -92,7 +86,6 @@ describe('LabelNode', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_EXPAND_BTN)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(TEST_SUBJ_HOVER_OUTLINE)).not.toBeInTheDocument();
     });
   });
 

@@ -195,7 +195,7 @@ export const Minimap = ({
         zoomable={zoomable}
         pannable={pannable}
         zoomStep={zoomStep}
-        position="bottom-left"
+        position="bottom-right"
       />
     </div>
   );

@@ -6,17 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import { ReactFlow, Position } from '@xyflow/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { NodeProps } from '../../types';
 import { getRelationshipColors, getLabelColors } from '../styles';
 import {
-  GRAPH_RELATIONSHIP_NODE_ID,
   GRAPH_RELATIONSHIP_NODE_SHAPE_ID,
   GRAPH_RELATIONSHIP_NODE_HANDLE_ID,
-  GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID,
 } from '../../test_ids';
 import { RelationshipNode } from './relationship_node';
 
@@ -74,44 +71,6 @@ describe('RelationshipNode', () => {
     );
 
     expect(screen.getByText('test-relationship-node')).toBeInTheDocument();
-  });
-
-  test('renders hover outline if interactive', async () => {
-    render(
-      <ReactFlow>
-        <RelationshipNode {...baseProps} />
-      </ReactFlow>
-    );
-
-    await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_ID));
-
-    await waitFor(() => {
-      expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID)).toBeInTheDocument();
-    });
-  });
-
-  test('does not render hover outline if not interactive', async () => {
-    const props = {
-      ...baseProps,
-      data: {
-        ...baseProps.data,
-        interactive: false,
-      },
-    };
-
-    render(
-      <ReactFlow>
-        <RelationshipNode {...props} />
-      </ReactFlow>
-    );
-
-    await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_ID));
-
-    await waitFor(() => {
-      expect(
-        screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID)
-      ).not.toBeInTheDocument();
-    });
   });
 
   describe('Shape colors', () => {

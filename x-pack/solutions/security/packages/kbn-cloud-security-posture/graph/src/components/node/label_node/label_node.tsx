@@ -22,7 +22,6 @@ import {
   LabelShape,
   LabelStackedShape,
   HandleStyleOverride,
-  LabelShapeOnHover,
   NodeButton,
   ACTUAL_LABEL_HEIGHT,
   NODE_LABEL_WIDTH,
@@ -40,7 +39,6 @@ export const TEST_SUBJ_SHAPE = 'label-node-shape';
 export const TEST_SUBJ_STACKED_SHAPE = 'label-node-stacked-shape';
 export const TEST_SUBJ_HANDLE = 'label-node-handle';
 export const TEST_SUBJ_EXPAND_BTN = 'label-node-expand-btn';
-export const TEST_SUBJ_HOVER_OUTLINE = 'label-node-hover-outline';
 export const TEST_SUBJ_LABEL_TEXT = 'label-node-text';
 
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
@@ -144,9 +142,6 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               ))}
             </div>
           </NodeToolbar>
-        )}
-        {interactive && (
-          <LabelShapeOnHover data-test-subj={TEST_SUBJ_HOVER_OUTLINE} color={color} />
         )}
         <LabelShape
           data-test-subj={TEST_SUBJ_SHAPE}

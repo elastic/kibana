@@ -20,7 +20,6 @@ import {
   useEuiTheme,
   transparentize,
 } from '@elastic/eui';
-import { rgba } from 'polished';
 import { css } from '@emotion/react';
 import { getSpanIcon } from './get_span_icon';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
@@ -119,6 +118,8 @@ interface LabelShapeProps extends EuiTextProps {
   shadow?: string;
 }
 
+const HOVER_BORDER_COLOR = '#1750BA';
+
 export const LabelShape = styled(EuiText, {
   shouldForwardProp(propName) {
     return !['backgroundColor', 'borderColor', 'isConnectable', 'shadow'].includes(propName);
@@ -138,6 +139,21 @@ export const LabelShape = styled(EuiText, {
   border-radius: ${LABEL_BORDER_RADIUS}px;
   min-height: 100%;
   min-width: 100%;
+  transition: border-color 0.2s ease;
+
+  /* Change border colour on hover/focus for interactive nodes */
+  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
+    border-color: ${HOVER_BORDER_COLOR};
+  }
+
+  .react-flow__node:not(.non-interactive):focus:focus-visible & {
+    border-color: ${HOVER_BORDER_COLOR};
+  }
+
+  /* Retain blue border when node is selected (click-to-select, one at a time) */
+  .react-flow__node:not(.non-interactive).selected & {
+    border-color: ${HOVER_BORDER_COLOR};
+  }
 
   ${({ shadow }) => `
     /* Apply shadow when node is selected (only for interactive nodes) */
@@ -162,36 +178,6 @@ export const LabelStackedShape = styled.div<{ borderColor: string }>`
   z-index: -1;
   border: ${(props) => `${LABEL_BORDER_WIDTH}px solid ${props.borderColor}`};
   border-radius: ${LABEL_BORDER_RADIUS}px;
-`;
-
-export const LabelShapeOnHover = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  opacity: 0; /* Hidden by default */
-  transition: opacity 0.2s ease; /* Smooth transition */
-  border: ${(props) => {
-    const { euiTheme } = useEuiTheme();
-    return `dashed ${rgba(
-      euiTheme.colors[props.color as keyof typeof euiTheme.colors] as string,
-      0.5
-    )} 1px`;
-  }};
-  border-radius: ${LABEL_BORDER_RADIUS}px;
-  background: transparent;
-  width: calc(100% + 12px);
-  height: calc(100% + 12px);
-
-  /* Only show hover effects for interactive nodes */
-  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
-    opacity: 1; /* Show on hover */
-  }
-
-  .react-flow__node:not(.non-interactive):focus:focus-visible & {
-    opacity: 1; /* Show on focus */
-  }
 `;
 
 export const NodeContainer = styled.div`

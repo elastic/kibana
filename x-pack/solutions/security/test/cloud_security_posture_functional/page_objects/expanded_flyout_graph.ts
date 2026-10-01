@@ -126,21 +126,30 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   /**
-   * Finds a button inside the NodeToolbar portal that belongs to a specific node.
+   * Finds a button inside the toolbar that belongs to a specific node.
    *
-   * NodeToolbar portals are rendered with `isVisible={true}` so they always exist in the DOM
-   * (opacity:0 / pointer-events:none when not hovered). We locate the portal by the ReactFlow
-   * `data-id` attribute that is placed on the `.react-flow__node-toolbar` div, then find the
-   * button within that scoped element. This prevents cross-node mis-clicks when multiple
-   * toolbars are present.
+   * Label nodes render their toolbar via a ReactFlow NodeToolbar portal
+   * (`.react-flow__node-toolbar[data-id="..."]`).
+   * Entity nodes render their toolbar as an absolutely-positioned div inside the node element
+   * (`.react-flow__node[data-id="..."]`) — no portal is used.
+   *
+   * We try the portal first; if it doesn't exist we fall back to the node element so that
+   * both node types are handled without needing to know which type is being targeted.
    */
   private async findNodeToolbarButton(
     nodeId: string,
     itemTestSubject: string
   ): Promise<WebElementWrapper> {
     const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
-    const toolbar = await graph.findByCssSelector(`.react-flow__node-toolbar[data-id="${nodeId}"]`);
-    return toolbar.findByCssSelector(`[data-test-subj="${itemTestSubject}"]`);
+    let container: WebElementWrapper;
+    try {
+      // Label nodes: toolbar lives in the ReactFlow NodeToolbar portal
+      container = await graph.findByCssSelector(`.react-flow__node-toolbar[data-id="${nodeId}"]`);
+    } catch {
+      // Entity nodes: toolbar lives inside the node element itself
+      container = await graph.findByCssSelector(`.react-flow__node[data-id="${nodeId}"]`);
+    }
+    return container.findByCssSelector(`[data-test-subj="${itemTestSubject}"]`);
   }
 
   /**
@@ -172,11 +181,15 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     await this.retry.try(async () => {
       await this.waitGraphIsLoaded();
       const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
-      const toolbar = await graph.findByCssSelector(
-        `.react-flow__node-toolbar[data-id="${nodeId}"]`
-      );
+      // Label nodes use the NodeToolbar portal; entity nodes use the in-node toolbar div.
+      let container: WebElementWrapper;
+      try {
+        container = await graph.findByCssSelector(`.react-flow__node-toolbar[data-id="${nodeId}"]`);
+      } catch {
+        container = await graph.findByCssSelector(`.react-flow__node[data-id="${nodeId}"]`);
+      }
       // Some nodes show individual entity details; grouped nodes show a grouped-entities variant
-      const buttons = await toolbar.findAllByCssSelector(
+      const buttons = await container.findAllByCssSelector(
         `[data-test-subj="${GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID}"], [data-test-subj="${GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID}"]`
       );
       expect(buttons.length).to.be(1);

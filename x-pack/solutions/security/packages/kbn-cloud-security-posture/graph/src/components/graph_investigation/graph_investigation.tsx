@@ -81,7 +81,13 @@ const useGraphPopovers = ({
   const euidApi = useEntityStoreEuidApi()?.euid;
   const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview, euidApi);
   const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
-  const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
+  // Pass onOpenNetworkPreview so popover items call it directly instead of relying on PreviewLink.
+  const onNetworkPreviewForPopover = useMemo(
+    () =>
+      onOpenNetworkPreview ? (ip: string) => onOpenNetworkPreview(ip, GRAPH_SCOPE_ID) : undefined,
+    [onOpenNetworkPreview]
+  );
+  const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID, onNetworkPreviewForPopover);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
   const eventPopover = useEventDetailsPopover(currentEventAnalysis, currentEventText);
 

@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { Handle, Position } from '@xyflow/react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -393,31 +394,62 @@ const GEO_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
 );
 
 /** Shows the first IP with a hollow "+N" overflow badge for the rest. */
-const IpsCell = memo<{ ips: string[] }>(({ ips }) => {
+const IpsCell = memo<{
+  ips: string[];
+  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}>(({ ips, onIpClick }) => {
   const [first, ...rest] = ips;
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={{ width: '100%' }}>
       <EuiFlexItem css={{ flex: '0 1 auto', minWidth: 0 }}>
-        <EuiToolTip position="top" content={first}>
-          <EuiText size="xs" tabIndex={0}>
-            <p
-              css={{
-                margin: 0,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {first}
-            </p>
-          </EuiText>
-        </EuiToolTip>
+        {onIpClick ? (
+          <EuiButtonEmpty
+            size="xs"
+            color="text"
+            flush="both"
+            onClick={onIpClick}
+            css={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: '100%',
+            }}
+          >
+            {first}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiToolTip position="top" content={first}>
+            <EuiText size="xs" tabIndex={0}>
+              <p
+                css={{
+                  margin: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {first}
+              </p>
+            </EuiText>
+          </EuiToolTip>
+        )}
       </EuiFlexItem>
       {rest.length > 0 && (
         <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
-          <EuiToolTip position="top" title={IPS_OVERFLOW_TOOLTIP_TITLE} content={rest.join(', ')}>
-            <EuiBadge color="hollow" tabIndex={0}>{`+${rest.length}`}</EuiBadge>
-          </EuiToolTip>
+          {onIpClick ? (
+            <EuiBadge
+              color="hollow"
+              tabIndex={0}
+              onClick={onIpClick}
+              onClickAriaLabel={IPS_OVERFLOW_TOOLTIP_TITLE}
+            >
+              {`+${rest.length}`}
+            </EuiBadge>
+          ) : (
+            <EuiToolTip position="top" title={IPS_OVERFLOW_TOOLTIP_TITLE} content={rest.join(', ')}>
+              <EuiBadge color="hollow" tabIndex={0}>{`+${rest.length}`}</EuiBadge>
+            </EuiToolTip>
+          )}
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
@@ -501,7 +533,8 @@ const GroupedMetadataPanel = memo<{
   sources?: string[];
   assetCriticality?: Array<{ level: string; count: number }>;
   euiTheme: EuiThemeComputed;
-}>(({ ips, countryCodes, sources, assetCriticality, euiTheme }) => (
+  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}>(({ ips, countryCodes, sources, assetCriticality, euiTheme, onIpClick }) => (
   <>
     {/* Row 1: Asset Criticality | Source */}
     <MetadataItem euiTheme={euiTheme}>
@@ -520,7 +553,11 @@ const GroupedMetadataPanel = memo<{
     {/* Row 2: IP Address | Geolocation */}
     <MetadataItem euiTheme={euiTheme}>
       <MetadataLabel>{IP_ADDRESS_LABEL}</MetadataLabel>
-      {ips?.length ? <IpsCell ips={ips} /> : <DashValue euiTheme={euiTheme} />}
+      {ips?.length ? (
+        <IpsCell ips={ips} onIpClick={onIpClick} />
+      ) : (
+        <DashValue euiTheme={euiTheme} />
+      )}
     </MetadataItem>
     <MetadataItem euiTheme={euiTheme}>
       <MetadataLabel>{GEOLOCATION_LABEL}</MetadataLabel>
@@ -541,7 +578,8 @@ const SingleEntityMetadataPanel = memo<{
   sources?: string[];
   assetCriticality?: Array<{ level: string; count: number }>;
   euiTheme: EuiThemeComputed;
-}>(({ ips, countryCodes, sources, assetCriticality, euiTheme }) => (
+  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}>(({ ips, countryCodes, sources, assetCriticality, euiTheme, onIpClick }) => (
   <>
     {/* Row 1: Asset Criticality | Source */}
     <MetadataItem euiTheme={euiTheme}>
@@ -562,7 +600,11 @@ const SingleEntityMetadataPanel = memo<{
     {/* Row 2: IP Address | Geolocation */}
     <MetadataItem euiTheme={euiTheme}>
       <MetadataLabel>{IP_ADDRESS_LABEL}</MetadataLabel>
-      {ips?.length ? <IpsCell ips={ips} /> : <DashValue euiTheme={euiTheme} />}
+      {ips?.length ? (
+        <IpsCell ips={ips} onIpClick={onIpClick} />
+      ) : (
+        <DashValue euiTheme={euiTheme} />
+      )}
     </MetadataItem>
     <MetadataItem euiTheme={euiTheme}>
       <MetadataLabel>{GEOLOCATION_LABEL}</MetadataLabel>
@@ -650,9 +692,7 @@ const EntityCardHeaderContent: React.FC<EntityCardHeaderContentProps> = ({
       )}
     </IconBox>
 
-    {isGrouped && (
-      <CountBadge data-test-subj={GRAPH_TAG_COUNT_ID}>{countDisplay}</CountBadge>
-    )}
+    {isGrouped && <CountBadge data-test-subj={GRAPH_TAG_COUNT_ID}>{countDisplay}</CountBadge>}
 
     <EntityInfo data-test-subj={GRAPH_ENTITY_NODE_DETAILS_ID}>
       {isGrouped ? (
@@ -800,6 +840,7 @@ interface EntityMetadataContentProps {
   sources?: string[];
   assetCriticality?: Array<{ level: string; count: number }>;
   euiTheme: EuiThemeComputed;
+  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 /** Renders the appropriate metadata panel based on whether the node is grouped or single. */
@@ -810,6 +851,7 @@ const EntityMetadataContent: React.FC<EntityMetadataContentProps> = ({
   sources,
   assetCriticality,
   euiTheme,
+  onIpClick,
 }) =>
   isGrouped ? (
     <GroupedMetadataPanel
@@ -818,6 +860,7 @@ const EntityMetadataContent: React.FC<EntityMetadataContentProps> = ({
       sources={sources}
       assetCriticality={assetCriticality}
       euiTheme={euiTheme}
+      onIpClick={onIpClick}
     />
   ) : (
     <SingleEntityMetadataPanel
@@ -826,6 +869,7 @@ const EntityMetadataContent: React.FC<EntityMetadataContentProps> = ({
       sources={sources}
       assetCriticality={assetCriticality}
       euiTheme={euiTheme}
+      onIpClick={onIpClick}
     />
   );
 
@@ -850,6 +894,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
     expandButtonClick,
     toolbarItemsFn,
     nodeClick,
+    ipClickHandler,
   } = props.data as EntityNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
@@ -918,7 +963,6 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
       onMouseEnter={showToolbar}
       onMouseLeave={hideToolbar}
     >
-
       {/* The entity card is shorter than the full NODE_HEIGHT reservation.
           justify-content: center vertically centres the card in the container
           so top: 50% on the handles lands at the card's true visual centre —
@@ -985,6 +1029,9 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                   sources={entitySources}
                   assetCriticality={assetCriticality}
                   euiTheme={euiTheme}
+                  onIpClick={
+                    ipClickHandler as ((e: React.MouseEvent<HTMLButtonElement>) => void) | undefined
+                  }
                 />
               </EntityCardMetadata>
             )}

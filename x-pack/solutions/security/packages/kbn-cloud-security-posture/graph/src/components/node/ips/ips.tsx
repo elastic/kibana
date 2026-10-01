@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiText, EuiButtonEmpty, useEuiFontSize, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiText,
+  EuiButtonEmpty,
+  useEuiFontSize,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { RoundedBadge } from '../styles';
@@ -39,13 +46,36 @@ export type UseIpPopoverReturn = UseNodeDetailsPopoverReturn & {
   onIpClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
-export const useIpPopover = (ips: string[], scopeId?: string): UseIpPopoverReturn => {
-  const items = scopeId
-    ? createPreviewItems('network-preview', ips, scopeId)
-    : ips.map((ip, index) => ({
+export const useIpPopover = (
+  ips: string[],
+  scopeId?: string,
+  onNetworkPreview?: (ip: string) => void
+): UseIpPopoverReturn => {
+  // When a direct network-preview callback is provided, create clickable button items
+  // that invoke it — bypassing PreviewLink and its ExpandableFlyoutApi dependency.
+  // Fall back to PreviewLink items (scopeId path) or plain label items.
+  const items = useMemo(() => {
+    if (onNetworkPreview) {
+      return ips.map((ip, index) => ({
         key: `${index}-${ip}`,
-        label: ip,
+        label: (
+          <EuiLink
+            key={`${index}-${ip}`}
+            data-test-subj={GRAPH_IPS_POPOVER_IP_ID}
+            onClick={() => onNetworkPreview(ip)}
+          >
+            {ip}
+          </EuiLink>
+        ),
       }));
+    }
+    return scopeId
+      ? createPreviewItems('network-preview', ips, scopeId)
+      : ips.map((ip, index) => ({
+          key: `${index}-${ip}`,
+          label: ip,
+        }));
+  }, [ips, scopeId, onNetworkPreview]);
 
   const { id, onClick, PopoverComponent, actions, state } = useNodeDetailsPopover({
     popoverId: 'ips-popover',
@@ -55,9 +85,11 @@ export const useIpPopover = (ips: string[], scopeId?: string): UseIpPopoverRetur
     popoverTestSubj: GRAPH_IPS_POPOVER_ID,
   });
 
+  const onIpClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => onClick(e), [onClick]);
+
   return {
     id,
-    onIpClick: onClick,
+    onIpClick,
     PopoverComponent,
     actions,
     state,

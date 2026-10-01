@@ -13,7 +13,6 @@ import {
   LabelNodeContainer,
   LabelShape,
   HandleStyleOverride,
-  LabelShapeOnHover,
   RoundedBadge,
   getRelationshipColors,
 } from '../styles';
@@ -42,12 +41,6 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
 
   return (
     <LabelNodeContainer data-test-subj={GRAPH_RELATIONSHIP_NODE_ID}>
-      {interactive && (
-        <LabelShapeOnHover
-          data-test-subj={GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID}
-          color="primary"
-        />
-      )}
       <LabelShape
         data-test-subj={GRAPH_RELATIONSHIP_NODE_SHAPE_ID}
         backgroundColor={backgroundColor}
