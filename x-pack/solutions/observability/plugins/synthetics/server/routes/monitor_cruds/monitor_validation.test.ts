@@ -962,7 +962,7 @@ describe('normalizeAPIConfig', () => {
     }
   );
 
-  it.each([[['secret']], [new Date()], [new Set()], [new String('secret')], [/regex/]])(
+  it.each([[['secret']], [new Date()], [new Set()], ['secret'], [/regex/]])(
     'rejects non-string params that are not a plain record of strings: %p',
     (params) => {
       expect(normalizeAPIConfig({ type: 'browser', params } as any).errorMessage).toMatch(
