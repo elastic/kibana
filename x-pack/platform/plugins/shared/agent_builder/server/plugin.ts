@@ -262,8 +262,6 @@ export class AgentBuilderPlugin
 
     const modelProviderFactory = createModelProviderFactory({
       inference,
-      uiSettings,
-      savedObjects,
       trackingService: this.trackingService,
       searchInferenceEndpoints,
       logger: this.logger.get('model-provider'),
