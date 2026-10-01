@@ -10,6 +10,7 @@ import pMap from 'p-map';
 import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { SyntheticsServerSetup } from '../../../types';
@@ -33,11 +34,13 @@ export const syncNewMonitorBulk = async ({
   routeContext,
   normalizedMonitors,
   privateLocations,
+  maintenanceWindows,
   spaceId,
 }: {
   routeContext: RouteContext;
   normalizedMonitors: SyntheticsMonitor[];
   privateLocations: SyntheticsPrivateLocations;
+  maintenanceWindows?: MaintenanceWindow[];
   spaceId: string;
 }) => {
   const { server, syntheticsMonitorClient, monitorConfigRepository, request } = routeContext;
@@ -73,7 +76,12 @@ export const syncNewMonitorBulk = async ({
         monitors: monitorsToCreate,
         savedObjectType: query.savedObjectType,
       }),
-      syntheticsMonitorClient.addMonitors(monitorsToCreate, privateLocations, spaceId),
+      syntheticsMonitorClient.addMonitors(
+        monitorsToCreate,
+        privateLocations,
+        spaceId,
+        maintenanceWindows
+      ),
     ]);
 
     let failedMonitors: FailedMonitorConfig[] = [];
