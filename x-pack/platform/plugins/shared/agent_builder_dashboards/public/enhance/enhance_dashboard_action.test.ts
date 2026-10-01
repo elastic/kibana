@@ -94,6 +94,12 @@ const createAction = ({
 };
 
 describe('createEnhanceDashboardAction', () => {
+  it('prefixes the prompt with the dashboard skill badge', () => {
+    expect(ENHANCE_DASHBOARD_PROMPT).toBe(
+      '[/dashboards](skill://dashboard-management) Enhance this dashboard'
+    );
+  });
+
   it('is compatible when a child uses ES|QL', async () => {
     const { action } = createAction();
 

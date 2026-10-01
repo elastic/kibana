@@ -43,7 +43,7 @@ import {
   type HasUniqueId,
 } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { DASHBOARD_MANAGEMENT_SKILL_ID } from '../../common';
+import { getDashboardSkillBadge } from '../../common';
 import type { IdGenerator } from '../attachment_types';
 import { reportRefineWithChatClicked, type RefineWithChatChatState } from '../telemetry';
 
@@ -56,7 +56,7 @@ import { reportRefineWithChatClicked, type RefineWithChatChatState } from '../te
  * space collapses and the caret lands against the badge. This is the same character the editor
  * inserts after a badge picked from the command menu.
  */
-export const REFINE_WITH_CHAT_INITIAL_MESSAGE = `[/${DASHBOARD_MANAGEMENT_SKILL_ID}](skill://${DASHBOARD_MANAGEMENT_SKILL_ID})\u00A0`;
+export const REFINE_WITH_CHAT_INITIAL_MESSAGE = `${getDashboardSkillBadge()} `;
 
 export interface RefineWithChatActionDeps {
   agentBuilder: Pick<

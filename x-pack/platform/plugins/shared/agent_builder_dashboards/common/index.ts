@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { dashboardTools, DASHBOARD_MANAGEMENT_SKILL_ID } from './constants';
+export {
+  dashboardTools,
+  DASHBOARD_MANAGEMENT_SKILL_ID,
+  DASHBOARD_SKILL_DISPLAY_NAME,
+  getDashboardSkillBadge,
+} from './constants';

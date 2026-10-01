@@ -132,9 +132,7 @@ describe('createRefineWithChatAction', () => {
   });
 
   it('prefills the input with the dashboard management skill badge and a caret-able separator', () => {
-    expect(REFINE_WITH_CHAT_INITIAL_MESSAGE).toBe(
-      '[/dashboard-management](skill://dashboard-management)\u00A0'
-    );
+    expect(REFINE_WITH_CHAT_INITIAL_MESSAGE).toBe('[/dashboards](skill://dashboard-management) ');
   });
 
   describe('isCompatible', () => {
