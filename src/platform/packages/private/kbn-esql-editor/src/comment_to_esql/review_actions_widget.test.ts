@@ -98,57 +98,45 @@ describe('ReviewActionsWidget', () => {
       widget.dispose();
     });
 
-    it('focuses the Undo button', () => {
+    it('focuses Undo only once Monaco has rendered the widget', () => {
       const { widget, dom, undoButton } = setup();
 
       widget.focus();
+      expect(document.activeElement).not.toBe(undoButton);
 
+      widget.afterRender(null);
+      expect(document.activeElement).not.toBe(undoButton);
+
+      widget.afterRender(0);
       expect(document.activeElement).toBe(undoButton);
 
       dom.remove();
       widget.dispose();
     });
 
-    it('retries focusing until the widget is rendered', () => {
-      jest.useFakeTimers();
-      const frames: FrameRequestCallback[] = [];
-      jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
-        frames.push(cb);
-        return frames.length;
-      });
-      const { widget, dom, undoButton } = setup();
-      const focus = jest
-        .spyOn(undoButton, 'focus')
-        .mockImplementationOnce(() => {})
-        .mockImplementationOnce(() => {})
-        .mockImplementation(HTMLElement.prototype.focus);
+    it('does not steal focus on later renders', () => {
+      const { widget, dom, undoButton, replaceButton } = setup();
 
       widget.focus();
-      expect(document.activeElement).not.toBe(undoButton);
+      widget.afterRender(0);
+      replaceButton.focus();
+      widget.afterRender(0);
 
-      frames.shift()?.(0);
+      expect(document.activeElement).toBe(replaceButton);
       expect(document.activeElement).not.toBe(undoButton);
-
-      frames.shift()?.(0);
-      expect(document.activeElement).toBe(undoButton);
-      expect(focus).toHaveBeenCalledTimes(3);
-      expect(frames).toHaveLength(0);
 
       dom.remove();
       widget.dispose();
-      jest.useRealTimers();
     });
 
-    it('stops retrying once disposed', () => {
-      const cancel = jest.spyOn(window, 'cancelAnimationFrame');
-      jest.spyOn(window, 'requestAnimationFrame').mockReturnValue(42);
+    it('does not focus after being disposed', () => {
       const { widget, dom, undoButton } = setup();
-      jest.spyOn(undoButton, 'focus').mockImplementation(() => {});
 
       widget.focus();
       widget.dispose();
+      widget.afterRender(0);
 
-      expect(cancel).toHaveBeenCalledWith(42);
+      expect(document.activeElement).not.toBe(undoButton);
       dom.remove();
     });
   });

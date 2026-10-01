@@ -11,6 +11,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { monaco } from '@kbn/code-editor';
 import { useReplaceReview } from './use_replace_review';
+import { ReviewActionsWidget } from './review_actions_widget';
 
 jest.mock('@kbn/code-editor', () => ({
   monaco: {
@@ -122,9 +123,7 @@ describe('useReplaceReview', () => {
       const { editor, focus, revealLineInCenter } = buildEditor();
       params.editorRef.current = editor;
       params.editorModel.current = buildModel();
-      const buttonFocus = jest
-        .spyOn(HTMLButtonElement.prototype, 'focus')
-        .mockImplementation(() => {});
+      const widgetFocus = jest.spyOn(ReviewActionsWidget.prototype, 'focus');
 
       const { result } = renderHook(() => useReplaceReview(params));
 
@@ -132,7 +131,7 @@ describe('useReplaceReview', () => {
 
       expect(focus).not.toHaveBeenCalled();
       expect(revealLineInCenter).toHaveBeenCalledWith(REVIEW_STATE.generatedLineEnd);
-      expect(buttonFocus).toHaveBeenCalled();
+      expect(widgetFocus).toHaveBeenCalled();
     });
 
     it('does not steal focus when the user moved it outside the editor', () => {
@@ -140,9 +139,7 @@ describe('useReplaceReview', () => {
       const { editor, revealLineInCenter } = buildEditor();
       params.editorRef.current = editor;
       params.editorModel.current = buildModel();
-      const buttonFocus = jest
-        .spyOn(HTMLButtonElement.prototype, 'focus')
-        .mockImplementation(() => {});
+      const widgetFocus = jest.spyOn(ReviewActionsWidget.prototype, 'focus');
       const outside = document.createElement('input');
       document.body.appendChild(outside);
       outside.focus();
@@ -151,7 +148,7 @@ describe('useReplaceReview', () => {
 
       act(() => result.current.showReview(REVIEW_STATE));
 
-      expect(buttonFocus).not.toHaveBeenCalled();
+      expect(widgetFocus).not.toHaveBeenCalled();
       expect(revealLineInCenter).not.toHaveBeenCalled();
       outside.remove();
     });

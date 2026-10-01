@@ -17,7 +17,6 @@ const WIDGET_ID = 'ESQL_COMMENT_REVIEW_ACTIONS_WIDGET';
 // Buttons (~30px) plus 8px breathing room above so they don't sit flush against the inserted code.
 const ZONE_HEIGHT_PX = 38;
 const ZONE_PADDING_TOP_PX = 8;
-const MAX_FOCUS_ATTEMPTS = 8;
 
 interface ReviewActionsCallbacks {
   onAccept: () => void;
@@ -33,7 +32,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
   private domNode: HTMLElement | undefined;
   private zoneId: string | undefined;
   private buttons: HTMLButtonElement[] = [];
-  private focusFrame: number | undefined;
+  private isFocusPending = false;
   private readonly afterLineNumber: number;
 
   constructor(
@@ -81,11 +80,18 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
   /** Puts keyboard focus on Undo so Replace is the next tab stop. */
   public focus(): void {
     this.getDomNode();
-    this.focusWhenRendered(this.buttons[0]);
+    this.isFocusPending = true;
+  }
+
+  /** Monaco keeps the widget hidden until it renders, so focus can only land from here. */
+  public afterRender(position: monaco.editor.ContentWidgetPositionPreference | null): void {
+    if (!this.isFocusPending || position === null) return;
+    this.isFocusPending = false;
+    this.buttons[0]?.focus({ preventScroll: true });
   }
 
   public dispose(): void {
-    this.cancelScheduledFocus();
+    this.isFocusPending = false;
     this.editor.removeContentWidget(this);
 
     if (this.zoneId) {
@@ -98,30 +104,6 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
 
     this.domNode = undefined;
     this.buttons = [];
-  }
-
-  /**
-   * Monaco keeps a content widget hidden until its next render frame and exposes no
-   * event for it, so focus() is ignored until then. Retry per frame until it sticks.
-   */
-  private focusWhenRendered(button: HTMLButtonElement | undefined): void {
-    if (!button) return;
-    this.cancelScheduledFocus();
-
-    const attempt = (remaining: number) => {
-      this.focusFrame = undefined;
-      button.focus({ preventScroll: true });
-      if (document.activeElement === button || remaining <= 1) return;
-      this.focusFrame = requestAnimationFrame(() => attempt(remaining - 1));
-    };
-    attempt(MAX_FOCUS_ATTEMPTS);
-  }
-
-  private cancelScheduledFocus(): void {
-    if (this.focusFrame !== undefined) {
-      cancelAnimationFrame(this.focusFrame);
-      this.focusFrame = undefined;
-    }
   }
 
   private buildDom(): HTMLElement {
@@ -154,7 +136,6 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
       // The editor's Tab command would otherwise send focus back to Undo.
       event.preventDefault();
       event.stopPropagation();
-      this.cancelScheduledFocus();
       const next = this.buttons[index + (event.shiftKey ? -1 : 1)];
       if (next) {
         next.focus({ preventScroll: true });
