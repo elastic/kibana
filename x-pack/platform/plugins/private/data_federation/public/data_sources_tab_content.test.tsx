@@ -121,6 +121,7 @@ const createServicesMock = ({
           dataSources: '',
           datasets: '',
           datasetSettings: '',
+          datasetMappings: '',
           authentication: '',
           staticCredentials: '',
           federatedIdentity: '',
