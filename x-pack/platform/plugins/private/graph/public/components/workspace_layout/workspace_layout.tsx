@@ -21,7 +21,7 @@ import { FieldManager } from '../field_manager';
 import type { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
 import { GuidancePanel } from '../guidance_panel';
-import type { GraphWorkspaceSavedObject, Workspace } from '../../types';
+import type { GraphWorkspaceSavedObject, RuntimeWorkspace } from '../../types';
 import type { GraphServices } from '../../application';
 import { ControlPanel } from '../control_panel';
 import { ReduxGraphVisualization } from '../graph_visualization';
@@ -47,7 +47,7 @@ type WorkspaceLayoutProps = Pick<
   | 'spaces'
   | 'inspect'
 > & {
-  workspace?: Workspace;
+  workspace?: RuntimeWorkspace;
   loading: boolean;
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;

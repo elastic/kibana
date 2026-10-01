@@ -16,13 +16,13 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { GraphStore } from '../state_management';
-import type { GraphWorkspaceSavedObject, Workspace } from '../types';
+import type { GraphWorkspaceSavedObject, RuntimeWorkspace } from '../types';
 import { getEmptyWorkspace, getSavedWorkspace } from './saved_workspace_utils';
 import { getEditUrl } from '../services/url';
 
 export interface UseWorkspaceLoaderProps {
   store: GraphStore;
-  workspaceRef: React.MutableRefObject<Workspace | undefined>;
+  workspaceRef: React.MutableRefObject<RuntimeWorkspace | undefined>;
   contentClient: ContentClient;
   coreStart: CoreStart;
   spaces?: SpacesApi;

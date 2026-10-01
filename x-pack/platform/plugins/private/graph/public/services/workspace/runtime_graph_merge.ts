@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GraphData, Workspace } from '../../types/workspace_state';
+import type { GraphData, RuntimeWorkspace } from '../../types/workspace_state';
 import {
   materializeRuntimeEdge,
   materializeRuntimeNode,
@@ -14,7 +14,7 @@ import {
 } from './graph_merge_planner';
 
 export const mergeRuntimeGraph = (
-  workspace: Workspace,
+  workspace: RuntimeWorkspace,
   graph: GraphData,
   initialSequence: number
 ): number => {

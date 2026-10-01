@@ -9,7 +9,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import type { ControlType, Workspace, WorkspaceField } from '../../types';
+import type { ControlType, RuntimeWorkspace, WorkspaceField } from '../../types';
 import {
   blocklistSelectedNodes,
   deleteSelectedNodes,
@@ -24,7 +24,7 @@ import {
 } from '../../state_management';
 
 interface ControlPanelToolBarProps {
-  workspace: Workspace;
+  workspace: RuntimeWorkspace;
   liveResponseFields: WorkspaceField[];
   onSetControl: (action: ControlType) => void;
 }

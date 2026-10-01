@@ -6,13 +6,13 @@
  */
 
 import { asKQL } from './kql_encoder';
-import type { Workspace, WorkspaceNode } from '../types';
+import type { RuntimeWorkspace, WorkspaceNode } from '../types';
 
 const createNode = (id: string, field: string, term: string) =>
   ({ id, data: { field, term } } as WorkspaceNode);
 
 describe('kql_encoder', () => {
-  let workspaceMock: Workspace;
+  let workspaceMock: RuntimeWorkspace;
 
   beforeEach(() => {
     const nodes = [
@@ -24,7 +24,7 @@ describe('kql_encoder', () => {
       nodes,
       edges: [],
       nodesMap: Object.fromEntries(nodes.map((node) => [node.id, node])),
-    } as unknown as Workspace;
+    } as unknown as RuntimeWorkspace;
   });
 
   it('should encode query as URI component', () => {

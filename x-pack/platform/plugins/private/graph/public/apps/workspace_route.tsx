@@ -15,7 +15,7 @@ import type {
   SearchRequest,
   SearchResults,
   TermIntersect,
-  Workspace,
+  RuntimeWorkspace,
   WorkspaceNode,
 } from '../types';
 import {
@@ -67,7 +67,7 @@ export const WorkspaceRoute = ({
   },
 }: WorkspaceRouteProps) => {
   // D3 continues to own a mutable runtime workspace while serializable graph state lives in Redux.
-  const workspaceRef = useRef<Workspace>();
+  const workspaceRef = useRef<RuntimeWorkspace>();
   // Callbacks retained during store initialization need access to the completed store.
   // This ref is a temporary bridge until further workspace state optimizations remove that dependency.
   const storeRef = useRef<GraphStore>();
@@ -127,7 +127,7 @@ export const WorkspaceRoute = ({
   };
 
   const mergeRuntimeGraph = (
-    workspace: Workspace,
+    workspace: RuntimeWorkspace,
     graph: Parameters<typeof applyRuntimeGraphMerge>[1]
   ) => {
     runtimeSequenceRef.current = applyRuntimeGraphMerge(

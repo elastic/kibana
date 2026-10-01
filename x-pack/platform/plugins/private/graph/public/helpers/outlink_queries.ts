@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Workspace, WorkspaceNode } from '../types';
+import type { RuntimeWorkspace, WorkspaceNode } from '../types';
 import { buildNodeQuery } from '../services/workspace/graph_request_builders';
 import { unpackGroupedNodes } from '../services/workspace/runtime_grouping';
 
 export const buildWorkspaceQuery = (
-  workspace: Workspace,
+  workspace: RuntimeWorkspace,
   nodes: WorkspaceNode[],
   loose = false
 ) => {
@@ -25,7 +25,10 @@ export const buildWorkspaceQuery = (
   };
 };
 
-export const buildLikeThisButNotThisQuery = (workspace: Workspace, nodes: WorkspaceNode[]) => {
+export const buildLikeThisButNotThisQuery = (
+  workspace: RuntimeWorkspace,
+  nodes: WorkspaceNode[]
+) => {
   const textByField: Record<string, string> = {};
   nodes.forEach((node) => {
     const existingText = textByField[node.data.field];

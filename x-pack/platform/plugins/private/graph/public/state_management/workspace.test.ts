@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Workspace, WorkspaceField } from '../types';
+import type { RuntimeWorkspace, WorkspaceField } from '../types';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
 import { setDatasource } from './datasource';
 import { loadFields } from './fields';
@@ -71,7 +71,7 @@ const createWorkspaceMock = () =>
       },
     },
     blocklistedNodes: [],
-  } as unknown as jest.Mocked<Workspace> & { mergeGraph: jest.Mock });
+  } as unknown as jest.Mocked<RuntimeWorkspace> & { mergeGraph: jest.Mock });
 
 const createWorkspaceListenerEnvironment = () => {
   const workspace = createWorkspaceMock();
@@ -137,7 +137,7 @@ describe('workspace state', () => {
       edges: [edge],
       selectedNodes: [parent],
       getEdgeSelection: () => [edge],
-    } as unknown as Workspace;
+    } as unknown as RuntimeWorkspace;
 
     const snapshot = createWorkspaceState(workspace);
 

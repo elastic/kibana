@@ -10,7 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createMockGraphStore } from '../state_management/mocks';
-import type { Workspace } from '../types';
+import type { RuntimeWorkspace } from '../types';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 
@@ -43,7 +43,7 @@ const mockContentClient = {
 
 describe('use_workspace_loader', () => {
   const defaultProps: UseWorkspaceLoaderProps = {
-    workspaceRef: { current: {} as Workspace },
+    workspaceRef: { current: {} as RuntimeWorkspace },
     store: createMockGraphStore({}).store,
     contentClient: mockContentClient as unknown as ContentClient,
     coreStart: coreMock.createStart(),

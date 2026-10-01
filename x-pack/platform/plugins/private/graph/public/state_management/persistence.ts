@@ -8,7 +8,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { GraphWorkspaceSavedObject, Workspace } from '../types';
+import type { GraphWorkspaceSavedObject, RuntimeWorkspace } from '../types';
 import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.';
 import {
   createWorkspaceState,
@@ -176,7 +176,7 @@ function showModal({
   selectedDatasource,
 }: {
   deps: GraphStoreDependencies;
-  workspace: Workspace;
+  workspace: RuntimeWorkspace;
   savedWorkspace: GraphWorkspaceSavedObject;
   getState: () => GraphState;
   selectedDatasource: IndexpatternDatasource;
