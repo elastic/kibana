@@ -7,10 +7,11 @@
 
 import Path from 'path';
 import { internalTools } from '@kbn/agent-builder-common';
+import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
+import { INVESTIGATION_TOOL_IDS } from '../agents/investigation';
 import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID } from '../tools/investigation_progress_report/tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
 
@@ -28,7 +29,8 @@ import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_too
  *
  * With `evidenceOnly`, calls that are not evidence are dropped with their results: reads of the
  * knowledge Nightshift seeded into the sandbox (Cortex, decision trees, environment docs), and
- * calls that only record the agent's own process (progress reports, todos, skills, file edits).
+ * calls that only record the agent's own process or findings (recorded findings, todos, skills,
+ * file edits).
  * Any other tool is kept, so a new query tool is not silently hidden.
  *
  * When the persisted round cannot be read, the investigation is built from the hook's tool calls
@@ -64,7 +66,9 @@ const SEEDED_PATH_IN_COMMAND = new RegExp(
 );
 
 const NON_EVIDENCE_TOOL_IDS = new Set<string>([
-  SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
+  // The agent records its findings with these; they are conclusions, not evidence.
+  ...INVESTIGATION_TOOL_IDS,
+  PROPOSALS_CREATE_TOOL_ID,
   internalTools.writeTodos,
   internalTools.listFiles,
   internalTools.loadSkill,
@@ -185,7 +189,7 @@ export const renderMemoryTranscript = ({
 }: {
   task: string;
   answer?: string;
-  /** Drop seeded Cortex and decision-tree reads and progress reports, with their results. */
+  /** Drop seeded Cortex and decision-tree reads and recorded findings, with their results. */
   evidenceOnly?: boolean;
   /** The round's steps, in order, when the persisted round could be read. */
   investigation?: TranscriptStep[];
