@@ -54,6 +54,10 @@ const createInvestigationConfig = (sandboxKibanaConfig: string): ScoutServerConf
         '--xpack.task_manager.capacity=21',
         '--xpack.nightshift_investigations.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
+        '--feature_flags.overrides.lens.enable_esql=true',
+        // Outermost gate for Significant Events (Tech Preview).
+        '--feature_flags.overrides.streams.significantEventsAvailable=true',
+        '--feature_flags.overrides.xpack.nightshift_investigations.enabled=true',
         '--xpack.nightshift_investigations.cortex.enabled=false',
         `--config=${sandboxKibanaConfig}`,
         ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),
