@@ -136,6 +136,11 @@ export function usePrebuiltRulesUpgrade({
           fields: constructRuleFieldsToUpgrade(rulesUpgradeState[ruleId]),
         }));
 
+      // All selected rules may have gone stale; the API rejects an empty rules list
+      if (ruleUpgradeSpecifiers.length === 0) {
+        return;
+      }
+
       setLoadingRules((prev) => [...prev, ...ruleIds]);
 
       try {
@@ -173,6 +178,11 @@ export function usePrebuiltRulesUpgrade({
           version: rulesUpgradeState[ruleId].target_rule.version,
           revision: rulesUpgradeState[ruleId].revision,
         }));
+
+      // All selected rules may have gone stale; the API rejects an empty rules list
+      if (ruleUpgradeSpecifiers.length === 0) {
+        return;
+      }
 
       setLoadingRules((prev) => [...prev, ...ruleIds]);
 
