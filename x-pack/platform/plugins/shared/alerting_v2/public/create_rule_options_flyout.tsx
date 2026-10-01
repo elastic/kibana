@@ -27,6 +27,7 @@ import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
+import { useCreateActionPolicyDisabledReason } from './hooks/use_create_action_policy_disabled_reason';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
@@ -63,6 +64,23 @@ interface LoadedModules {
   services: AlertingV2KibanaServices;
   ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
 }
+
+const ActionPolicyAwareComposeDiscoverFlyout = ({
+  services,
+  ComposeDiscoverFlyout,
+  ...props
+}: Omit<ComposeDiscoverFlyoutProps, 'services'> & {
+  services: AlertingV2KibanaServices;
+  ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
+}) => {
+  const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
+  const actionPolicyAwareServices = useMemo(
+    () => ({ ...services, createActionPolicyDisabledReason }),
+    [services, createActionPolicyDisabledReason]
+  );
+
+  return <ComposeDiscoverFlyout {...props} services={actionPolicyAwareServices} />;
+};
 
 const noopSubscribe = () => () => {};
 
@@ -114,13 +132,17 @@ const CreateRuleOptionsFlyoutInner = ({
   const { query, esqlVariables } = useSyncExternalStore(wrappedSubscribe, getDiscoverQuerySnapshot);
 
   const { loading, value } = useAsync(async (): Promise<LoadedModules> => {
-    const [services, mod] = await Promise.all([
+    const [services, ruleFormModule, actionPolicyFormModule] = await Promise.all([
       untilPluginStartServicesReady(),
       import('@kbn/alerting-v2-rule-form'),
+      import('./components/action_policy/form_flyout/create_action_policy_form_flyout'),
     ]);
     return {
-      services,
-      ComposeDiscoverFlyout: mod.ComposeDiscoverFlyout,
+      services: {
+        ...services,
+        createActionPolicyFormFlyout: actionPolicyFormModule.CreateActionPolicyFormFlyout,
+      },
+      ComposeDiscoverFlyout: ruleFormModule.ComposeDiscoverFlyout,
     };
   }, []);
 
@@ -243,7 +265,8 @@ const CreateRuleOptionsFlyoutInner = ({
   if (step.type === 'esql') {
     return (
       <Context.Provider value={services.container}>
-        <ComposeDiscoverFlyout
+        <ActionPolicyAwareComposeDiscoverFlyout
+          ComposeDiscoverFlyout={ComposeDiscoverFlyout}
           historyKey={historyKey}
           mode="create"
           onClose={onClose}
@@ -260,7 +283,8 @@ const CreateRuleOptionsFlyoutInner = ({
   if (step.type === 'threshold') {
     return (
       <Context.Provider value={services.container}>
-        <ComposeDiscoverFlyout
+        <ActionPolicyAwareComposeDiscoverFlyout
+          ComposeDiscoverFlyout={ComposeDiscoverFlyout}
           historyKey={historyKey}
           mode="create"
           onClose={onClose}

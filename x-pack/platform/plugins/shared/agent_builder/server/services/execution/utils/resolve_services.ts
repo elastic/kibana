@@ -7,14 +7,12 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import { createAgentNotFoundError } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
 import type { AgentsServiceStart } from '../../agents';
-import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
 import { createModelProvider } from '../runner/model_provider';
 
 export const resolveServices = async ({
@@ -25,8 +23,6 @@ export const resolveServices = async ({
   logger,
   inference,
   agentService,
-  uiSettings,
-  savedObjects,
   searchInferenceEndpoints,
 }: {
   agentId: string;
@@ -36,18 +32,16 @@ export const resolveServices = async ({
   logger: Logger;
   inference: InferenceServerStart;
   agentService: AgentsServiceStart;
-  uiSettings: UiSettingsServiceStart;
-  savedObjects: SavedObjectsServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }) => {
-  const selectedConnectorId = await resolveSelectedConnectorId({
-    request,
-    connectorId,
-    uiSettings,
-    savedObjects,
-    inference,
-    searchInferenceEndpoints,
-  });
+  const selectedConnectorId =
+    connectorId ??
+    (
+      await searchInferenceEndpoints.endpoints.getForFeature(
+        AGENT_BUILDER_INFERENCE_FEATURE_ID,
+        request
+      )
+    ).endpoints[0]?.connectorId;
 
   if (!selectedConnectorId) {
     throw new Error('No connector available for chat execution');
@@ -70,8 +64,6 @@ export const resolveServices = async ({
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
     logger,
-    uiSettings,
-    savedObjects,
     searchInferenceEndpoints,
   });
 
