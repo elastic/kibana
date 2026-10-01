@@ -527,6 +527,33 @@ describe('promoteUnbackedQueriesRoute', () => {
   });
 });
 
+describe('persistQueriesRoute', () => {
+  const persistRoute =
+    internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_persist'];
+
+  it('rejects a disabled source, which would get a live rule', async () => {
+    const handlerParams = {
+      params: { path: { streamName: 'logs.test' }, body: { queries: [] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({
+            source: { id: 'logs.test', view_name: 'logs.test', enabled: false },
+          }),
+        },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof persistRoute.handler>[0];
+
+    await expect(persistRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+  });
+});
+
 describe('generateQueriesRoute', () => {
   const generateRoute =
     internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_generate'];
@@ -659,7 +686,8 @@ describe('generateQueriesRoute', () => {
 });
 
 describe('upsertQueryRoute', () => {
-  const source = { id: 'logs.test', view_name: 'logs.test, logs.test.*' };
+  const source = { id: 'logs.test', view_name: 'logs.test, logs.test.*', enabled: true };
+  const disabledSource = { ...source, enabled: false };
   const upsertBody = {
     title: 'Error count',
     description: '',
@@ -736,6 +764,50 @@ describe('upsertQueryRoute', () => {
       output: { statusCode: 404 },
     });
     expect(upsertQuery).not.toHaveBeenCalled();
+  });
+
+  it('rejects a new query for a disabled source, which would get a live rule', async () => {
+    const upsertQuery = jest.fn();
+    const handlerParams = {
+      params: { path: { queryId: 'q1' }, body: { ...upsertBody, target_name: 'logs.test' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: { get: jest.fn().mockResolvedValue({ source: disabledSource }) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          upsertQuery,
+          getQueryLinks: jest.fn().mockResolvedValue([]),
+        }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+    expect(upsertQuery).not.toHaveBeenCalled();
+  });
+
+  it('still edits a stored query of a disabled source', async () => {
+    const upsertQuery = jest.fn().mockResolvedValue(undefined);
+    const handlerParams = {
+      params: { path: { queryId: 'q1' }, body: upsertBody },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: { get: jest.fn().mockResolvedValue({ source: disabledSource }) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          upsertQuery,
+          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+        }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
+    expect(upsertQuery).toHaveBeenCalledWith('logs.test', expect.objectContaining({ id: 'q1' }));
   });
 
   it('does not persist when ES|QL is invalid', async () => {

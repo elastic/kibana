@@ -42,6 +42,7 @@ import {
 } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
+import { assertSourceEnabled } from '../../../utils/assert_source_enabled';
 import { resolveSourceIds } from '../../../utils/resolve_source_ids';
 import { listAllSources } from '../../../utils/list_all_sources';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
@@ -732,6 +733,8 @@ const persistQueriesRoute = createServerRoute({
       scopedClients.getKnowledgeIndicatorClient(),
     ]);
 
+    assertSourceEnabled(source);
+
     return persistQueries(source.id, queries, {
       kiClient,
       viewName: source.view_name,
@@ -792,6 +795,10 @@ const upsertQueryRoute = createServerRoute({
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const streamName = targetName ?? (await resolveExistingQueryStreamName(kiClient, queryId));
     const { source } = await sourcesClient.get(streamName);
+    if (!source.enabled && !(await findExistingQueryLink(kiClient, queryId))) {
+      // Editing a stored query of a disabled source stays possible; a new one would get a live rule.
+      assertSourceEnabled(source);
+    }
 
     validateEsqlQueryForSourceOrThrow({
       esqlQuery: queryBody.esql.query,
@@ -809,10 +816,7 @@ const upsertQueryRoute = createServerRoute({
   },
 });
 
-async function resolveExistingQueryStreamName(
-  kiClient: KnowledgeIndicatorClient,
-  queryId: string
-): Promise<string> {
+async function findExistingQueryLink(kiClient: KnowledgeIndicatorClient, queryId: string) {
   // Empty stream list means "no stream filter"; include expired and unbacked so
   // an omitted target_name can still resolve an existing query for update.
   const [existing] = await kiClient.getQueryLinks([], {
@@ -820,6 +824,14 @@ async function resolveExistingQueryStreamName(
     ruleUnbacked: 'include',
     includeExpired: true,
   });
+  return existing;
+}
+
+async function resolveExistingQueryStreamName(
+  kiClient: KnowledgeIndicatorClient,
+  queryId: string
+): Promise<string> {
+  const existing = await findExistingQueryLink(kiClient, queryId);
   if (!existing) {
     throw new QueryNotFoundError(`Query [${queryId}] not found`);
   }

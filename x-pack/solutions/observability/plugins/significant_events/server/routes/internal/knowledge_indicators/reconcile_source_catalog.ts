@@ -113,7 +113,7 @@ async function applySourceEnabled({
   source,
   kiClient,
   onboardingClient,
-  maintenanceState,
+  getMaintenanceState,
   request,
   skipCancel = false,
   skipRuleToggle = false,
@@ -121,7 +121,8 @@ async function applySourceEnabled({
   source: Pick<NightshiftSource, 'id' | 'slug' | 'enabled'>;
   kiClient: Pick<CatalogKiClient, 'setSourceRulesEnabled'>;
   onboardingClient?: Pick<OnboardingClient, 'cancelBySourceSlug'>;
-  maintenanceState: SignificantEventsMaintenanceState;
+  /** Read only when the source is enabled: a failed read must not stop a disable. */
+  getMaintenanceState: () => Promise<SignificantEventsMaintenanceState>;
   request: KibanaRequest;
   /** The reconcile knows which runs are going and skips the cancel; the listener does not, so it cancels. */
   skipCancel?: boolean;
@@ -143,7 +144,7 @@ async function applySourceEnabled({
   }
   // While paused, rules stay off. After a resume, only the rules the pause disabled come back,
   // so a source enabled in between gets its rules from the next catalog reconcile.
-  if (maintenanceState !== 'paused' && !skipRuleToggle) {
+  if (!skipRuleToggle && (await getMaintenanceState()) !== 'paused') {
     await kiClient.setSourceRulesEnabled(source.id, true);
   }
 }
@@ -199,7 +200,7 @@ export const createSourceChangeListener =
       source: event.source,
       kiClient,
       onboardingClient,
-      maintenanceState: await maintenanceService.getState({ request: event.request }),
+      getMaintenanceState: () => maintenanceService.getState({ request: event.request }),
       request: event.request,
     });
   };
@@ -247,7 +248,7 @@ export async function reconcileSourceCatalog({
         source,
         kiClient,
         onboardingClient,
-        maintenanceState,
+        getMaintenanceState: () => Promise.resolve(maintenanceState),
         request,
         skipCancel: !runningSourceSlugs.has(source.slug),
         skipRuleToggle: !ownedRuleSourceIds.has(source.id),

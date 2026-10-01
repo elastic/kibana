@@ -327,7 +327,7 @@ describe('createSourceChangeListener', () => {
       onboardingClient: { cancelBySourceSlug },
       maintenanceService,
     });
-    return { listener, kiClient, getScopedClients, cancelBySourceSlug };
+    return { listener, kiClient, getScopedClients, cancelBySourceSlug, maintenanceService };
   };
 
   const source = makeSource({ id: 'gone-source' });
@@ -377,6 +377,16 @@ describe('createSourceChangeListener', () => {
       listener({ type: 'updated', source: disabledSource, previous: enabledSource, request })
     ).rejects.toThrow('no workflows privilege');
 
+    expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('toggled-source', false);
+  });
+
+  it('disables the rules of a disabled source without reading the maintenance state', async () => {
+    const { listener, kiClient, maintenanceService } = setup();
+    maintenanceService.getState.mockRejectedValue(new Error('saved objects unavailable'));
+
+    await listener({ type: 'updated', source: disabledSource, previous: enabledSource, request });
+
+    expect(maintenanceService.getState).not.toHaveBeenCalled();
     expect(kiClient.setSourceRulesEnabled).toHaveBeenCalledWith('toggled-source', false);
   });
 
