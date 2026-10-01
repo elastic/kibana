@@ -1769,6 +1769,54 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('countPendingByConversationIds', () => {
+    it('counts live pending proposals per conversation in one aggregation', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: {
+          by_conversation: {
+            buckets: [
+              { key: 'conv-1', doc_count: 2 },
+              { key: 'conv-2', doc_count: 1 },
+            ],
+          },
+        },
+      });
+      const { service } = createService(storage);
+
+      const counts = await service.countPendingByConversationIds(
+        ['conv-1', 'conv-2', 'conv-1', ''],
+        SPACE_ID
+      );
+
+      expect([...counts.entries()]).toEqual([
+        ['conv-1', 2],
+        ['conv-2', 1],
+      ]);
+      const [searchRequest] = storage.search.mock.calls[0];
+      expect(searchRequest).toMatchObject({
+        size: 0,
+        aggs: { by_conversation: { terms: { field: 'conversationId', size: 2 } } },
+      });
+      expect(searchRequest.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { spaceId: SPACE_ID } },
+          { term: { status: 'pending' } },
+          { terms: { conversationId: ['conv-1', 'conv-2'] } },
+        ])
+      );
+    });
+
+    it('does not search without conversation ids', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await expect(service.countPendingByConversationIds([], SPACE_ID)).resolves.toEqual(new Map());
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getLatestRevision', () => {
     it('returns the proposal itself when it is the live revision', async () => {
       const storage = createStorage(baseDocument({ rootProposalId: 'proposal-1', revision: 1 }));

@@ -797,6 +797,44 @@ export class ProposalsService {
       : undefined;
   }
 
+  /**
+   * Pending, non-superseded proposals per conversation, in one aggregation. Conversations without
+   * any are absent from the map.
+   */
+  async countPendingByConversationIds(
+    conversationIds: string[],
+    spaceId: string
+  ): Promise<Map<string, number>> {
+    const ids = [...new Set(conversationIds.filter((id) => blankToUndefined(id) !== undefined))];
+    if (ids.length === 0) {
+      return new Map();
+    }
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...toFilterClauses(
+              {
+                status: 'pending',
+                excludeSuperseded: true,
+                excludeExpired: false,
+              },
+              spaceId
+            ),
+            { terms: { conversationId: ids } },
+          ],
+        },
+      },
+      aggs: {
+        by_conversation: { terms: { field: 'conversationId', size: ids.length } },
+      },
+    });
+    const buckets = response.aggregations?.by_conversation.buckets ?? [];
+    return new Map(buckets.map(({ key, doc_count: count }) => [String(key), count]));
+  }
+
   async getLatestRevision(
     id: string,
     spaceId: string
