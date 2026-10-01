@@ -144,9 +144,21 @@ describe('Nightshift Slack thread workflow', () => {
     expect(setResult?.status_message_ts).toBe(
       '${{ steps.post_started.output.ts | default: steps.find_investigation.output.status_message_ts }}'
     );
-    expect(setResult?.result_text).toContain(
-      "steps.investigate.error == null and steps.get_investigation.output.status == 'completed'"
-    );
+    expect(setResult?.result_text).toContain('{% if steps.investigate.error == null %}');
+    expect(setResult?.result_text).not.toContain('get_investigation.output.status');
+    expect(setResult?.result_text).toContain('steps.get_investigation.output.title');
+    expect(setResult?.result_text).toContain('steps.get_investigation.output.metadata.summary');
+  });
+
+  it('reads the investigation from the shared investigations API', () => {
+    expect(requireStep('get_investigation')).toMatchObject({
+      type: 'kibana.request',
+      with: {
+        method: 'GET',
+        path: '/s/{{ workflow.spaceId }}/internal/investigations/investigations/{{ steps.find_investigation.output.investigation_id }}',
+        headers: { 'elastic-api-version': '1' },
+      },
+    });
   });
 
   it('reports a failure only when the record failed or no run ever started it', () => {

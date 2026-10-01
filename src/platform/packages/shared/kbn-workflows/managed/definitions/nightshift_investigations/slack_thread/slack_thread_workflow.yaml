@@ -100,7 +100,7 @@ steps:
             strategy: exponential
           continue: true
 
-      # A failed investigation is reported from its record below rather than failing this run.
+      # A failed investigation is reported in the thread below rather than failing this run.
       - name: investigate
         type: workflow.execute
         with:
@@ -116,44 +116,19 @@ steps:
         on-failure:
           continue: true
 
+      # The shared investigations API: the title and what the agent recorded as what happened.
       - name: get_investigation
         type: kibana.request
         with:
           method: GET
-          path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ steps.find_investigation.output.investigation_id }}'
+          path: '/s/{{ workflow.spaceId }}/internal/investigations/investigations/{{ steps.find_investigation.output.investigation_id }}'
           headers:
             x-elastic-internal-origin: 'kibana'
-
-      # A run rejected before it reopened the investigation, for example because another run owns
-      # it, did not act on the event. It gives the event back so that a redelivery is handled.
-      - name: release_event
-        type: kibana.request
-        if: "${{ steps.investigate.error != null and steps.get_investigation.output.status != 'failed' }}"
-        with:
-          method: POST
-          path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_slack_thread'
-          headers:
-            x-elastic-internal-origin: 'kibana'
-          body:
-            workspace: '${{ event.workspace }}'
-            channel: '{{ event.channel }}'
-            thread_ts: '{{ event.threadId | default: event.messageId }}'
-            create: false
-            event_id: '${{ event.correlationKey }}'
-            execution_id: '{{ execution.id }}'
-            release_event: true
+            elastic-api-version: '1'
         on-failure:
-          retry:
-            max-attempts: 3
-            delay: 5s
-            strategy: exponential
           continue: true
 
-      # The record alone cannot tell this run's result: a run rejected before it reopened the
-      # investigation leaves the record as another run left it, completed with the previous findings
-      # or running. Such a run reports nothing, so the status message keeps what it showed. It says
-      # the investigation failed only when the record did, or when the record is still pending,
-      # which means no run ever started it.
+      # The investigation keeps no run status, so this run's own investigate step decides success.
       - name: set_result
         type: data.set
         with:
@@ -162,9 +137,9 @@ steps:
           report: "{% if steps.investigate.error == null and steps.get_investigation.output.status == 'completed' %}findings{% elsif steps.get_investigation.output.status == 'failed' %}failure{% elsif steps.investigate.error != null and steps.get_investigation.output.status == 'pending' %}failure{% else %}none{% endif %}"
           # Slack edits take at most 4,000 characters of text.
           result_text: |
-            {% if steps.investigate.error == null and steps.get_investigation.output.status == 'completed' %}{% if steps.get_investigation.output.title %}*{{ steps.get_investigation.output.title }}*
+            {% if steps.investigate.error == null %}{% if steps.get_investigation.output.title %}*{{ steps.get_investigation.output.title }}*
 
-            {% endif %}{{ steps.get_investigation.output.summary | truncate: 3000 }}{% else %}Investigation failed.{% endif %}
+            {% endif %}{{ steps.get_investigation.output.metadata.summary | truncate: 3000 | default: 'The investigation finished without a summary.' }}{% else %}Investigation failed.{% endif %}
 
             <{{ variables.investigation_url }}|View the investigation>
 
