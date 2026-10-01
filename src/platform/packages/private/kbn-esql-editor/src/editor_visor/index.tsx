@@ -55,8 +55,12 @@ export interface QuickSearchVisorProps {
   onNlResult?: (generatedQuery: string) => void;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
-  // When true, visor submit is a no-op (matches the query bar Search button)
+  // When true, every visor submit is a no-op (e.g. invalid date range or a disabled caller)
   isDisabled?: boolean;
+  // When true, KQL submit is a no-op. Natural language is still allowed while the editor query is empty
+  disableSubmitAction?: boolean;
+  // Called after a KQL filter is submitted so the parent can move focus back to the editor
+  onKqlSubmitted?: () => void;
 }
 
 export function QuickSearchVisor({
@@ -66,6 +70,8 @@ export function QuickSearchVisor({
   onNlResult,
   onUpdateAndSubmitQuery,
   isDisabled = false,
+  disableSubmitAction = false,
+  onKqlSubmitted,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, data, core } = kibana.services;
@@ -99,21 +105,24 @@ export function QuickSearchVisor({
 
   const onKqlSubmit = useCallback(
     (kqlQuery: string) => {
-      if (isDisabled) return;
+      if (isDisabled || disableSubmitAction) return;
       if (sourcesKey && kqlQuery.trim()) {
         const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
         const newQuery = `${sourceCommand} ${sourcesKey} | WHERE KQL("""${kqlQuery.trim()}""")`;
         onUpdateAndSubmitQuery(newQuery);
         setSearchValue('');
+        onKqlSubmitted?.();
       }
     },
-    [isDisabled, sourcesKey, query, onUpdateAndSubmitQuery]
+    [isDisabled, disableSubmitAction, sourcesKey, query, onUpdateAndSubmitQuery, onKqlSubmitted]
   );
 
   const onNlSubmit = useCallback(() => {
     if (isDisabled) return;
+    // NL does not need an existing query, unlike KQL, so an empty editor can still submit it.
+    if (disableSubmitAction && query.trim()) return;
     submitNl();
-  }, [isDisabled, submitNl]);
+  }, [isDisabled, disableSubmitAction, query, submitNl]);
 
   const onVisorModeChange = useCallback(
     (id: string) => {
