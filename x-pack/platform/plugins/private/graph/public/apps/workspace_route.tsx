@@ -113,13 +113,13 @@ export const WorkspaceRoute = ({
   );
 
   const getMergeCandidates = async (nodes: WorkspaceNode[]): Promise<TermIntersect[]> => {
-    const workspace = runtimeGraphRef.current;
+    const runtimeGraph = runtimeGraphRef.current;
     const datasource = storeRef.current?.getState().datasource.current;
-    if (!workspace || !datasource || datasource.type === 'none') return [];
+    if (!runtimeGraph || !datasource || datasource.type === 'none') return [];
     const indexName = datasource.title;
     const topLevelNodes = nodes.filter((node) => node.parent === undefined);
     const request = buildIntersectionRequest(
-      topLevelNodes.map((node) => buildNodeQuery(unpackGroupedNodes([node], workspace.edges)))
+      topLevelNodes.map((node) => buildNodeQuery(unpackGroupedNodes([node], runtimeGraph.edges)))
     );
     const response = await searchGraph(indexName, request);
     return transformIntersectionResponse(response, topLevelNodes);
@@ -138,11 +138,11 @@ export const WorkspaceRoute = ({
   };
 
   const notifyWorkspaceChanged = () => {
-    const workspace = runtimeGraphRef.current;
-    if (workspace) {
+    const runtimeGraph = runtimeGraphRef.current;
+    if (runtimeGraph) {
       storeRef.current?.dispatch(
         workspaceRuntimeChanged(
-          createRuntimeGraphState(workspace, layoutControllerRef.current?.isRunning())
+          createRuntimeGraphState(runtimeGraph, layoutControllerRef.current?.isRunning())
         )
       );
     }
@@ -205,7 +205,7 @@ export const WorkspaceRoute = ({
         <WorkspaceLayout
           spaces={spaces}
           sharingSavedObjectProps={sharingSavedObjectProps}
-          workspace={runtimeGraphRef.current}
+          runtimeGraph={runtimeGraphRef.current}
           loading={loading}
           graphSavePolicy={graphSavePolicy}
           capabilities={capabilities}

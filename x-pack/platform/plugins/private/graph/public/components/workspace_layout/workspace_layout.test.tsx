@@ -57,7 +57,7 @@ describe('workspace_layout', () => {
       reset: jest.fn(),
       getRequests: jest.fn(() => []),
     } as unknown as RequestAdapter,
-    workspace: {} as unknown as RuntimeGraph,
+    runtimeGraph: {} as unknown as RuntimeGraph,
   };
   it('should display conflict notification if outcome is conflict', () => {
     shallow(
