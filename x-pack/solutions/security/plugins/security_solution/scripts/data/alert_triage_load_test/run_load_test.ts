@@ -16,7 +16,7 @@ import { formatError, getStatusCode } from '../lib/type_guards';
 import { LOAD_TEST_TAG, loadTestRunTag } from './lib/alert_clone';
 import { startCollector } from './lib/collector';
 import type { LoadTestConfig } from './lib/config';
-import { ALERT_TRIAGE_WORKER_ID, alertsIndexFor, buildConfig } from './lib/config';
+import { ALERT_TRIAGE_WORKER_ID, alertsIndexFor, buildConfig, withRunTarget } from './lib/config';
 import { executePlan } from './lib/dispatcher';
 import {
   cancelExecution,
@@ -394,20 +394,37 @@ const runCommand = async (config: LoadTestConfig, log: ToolingLog): Promise<void
 
 const reportCommand = async (config: LoadTestConfig, log: ToolingLog): Promise<void> => {
   if (!config.runId) throw new Error('report needs --run-id');
-  const clients = connect(config, log);
   const paths = buildRunPaths(config.outDir, config.runId);
   const manifest = readJson<RunManifest>(paths.manifest);
+  log.info(
+    `Using ${manifest.kibanaUrl} (space ${manifest.spaceId}), where run ${config.runId} ran`
+  );
+  const clients = connect(withRunTarget(config, manifest), log);
   await finalizeReport({ clients, manifest, paths, log });
 };
 
 const cleanCommand = async (config: LoadTestConfig, log: ToolingLog): Promise<void> => {
-  const { esClient, kbnClient } = connect(config, log);
-  const alertsIndex = alertsIndexFor(config.spaceId);
+  if (config.cancelExecutions && !config.runId) {
+    throw new Error('--cancel-executions needs --run-id');
+  }
 
-  if (config.cancelExecutions) {
-    if (!config.runId) throw new Error('--cancel-executions needs --run-id');
-    const paths = buildRunPaths(config.outDir, config.runId);
-    const manifest = readJson<RunManifest>(paths.manifest);
+  // A run remembers where it ran. Without one, the target comes from the command line.
+  const paths = config.runId ? buildRunPaths(config.outDir, config.runId) : undefined;
+  const manifest =
+    paths && fs.existsSync(paths.manifest) ? readJson<RunManifest>(paths.manifest) : undefined;
+  if (paths && !manifest) {
+    if (config.cancelExecutions) {
+      throw new Error(`Missing ${paths.manifest}; --cancel-executions needs the run's manifest.`);
+    }
+    log.warning(
+      `No manifest for run ${config.runId} in ${paths.dir}; using the target given on the command line.`
+    );
+  }
+  const target = manifest ? withRunTarget(config, manifest) : config;
+  const { esClient, kbnClient } = connect(target, log);
+  const alertsIndex = manifest?.alertsIndex ?? alertsIndexFor(target.spaceId);
+
+  if (config.cancelExecutions && paths && manifest) {
     const dispatches = readDispatches(paths);
     const snapshot = await fetchProgress({
       kbnClient,

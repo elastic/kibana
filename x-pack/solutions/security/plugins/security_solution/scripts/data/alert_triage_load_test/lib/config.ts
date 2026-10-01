@@ -146,4 +146,18 @@ export const buildConfig = (flags: Flags, positional: string[]): LoadTestConfig 
   };
 };
 
+/**
+ * Points a config at the stack and space a run recorded in its manifest, so `report` and `clean`
+ * reach the run's data without repeating the connection flags. Credentials are never stored with a
+ * run, so they stay those of the invocation.
+ */
+export const withRunTarget = (
+  config: LoadTestConfig,
+  {
+    kibanaUrl,
+    elasticsearchUrl,
+    spaceId,
+  }: Pick<LoadTestConfig, 'kibanaUrl' | 'elasticsearchUrl' | 'spaceId'>
+): LoadTestConfig => ({ ...config, kibanaUrl, elasticsearchUrl, spaceId });
+
 export const alertsIndexFor = (spaceId: string): string => `.alerts-security.alerts-${spaceId}`;

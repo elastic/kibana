@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertsIndexFor, buildConfig, parseDuration } from './config';
+import { alertsIndexFor, buildConfig, parseDuration, withRunTarget } from './config';
 
 describe('parseDuration', () => {
   it.each([
@@ -108,5 +108,38 @@ describe('buildConfig', () => {
 describe('alertsIndexFor', () => {
   it('names the alerts index of the space', () => {
     expect(alertsIndexFor('default')).toBe('.alerts-security.alerts-default');
+  });
+});
+
+describe('withRunTarget', () => {
+  it('replaces the stack and space with the ones the run recorded', () => {
+    const config = buildConfig({ kibanaUrl: 'http://localhost:5601', space: 'default' }, [
+      'report',
+    ]);
+
+    const target = withRunTarget(config, {
+      kibanaUrl: 'https://kb.example.com',
+      elasticsearchUrl: 'https://es.example.com',
+      spaceId: 'load-test',
+    });
+
+    expect(target).toMatchObject({
+      kibanaUrl: 'https://kb.example.com',
+      elasticsearchUrl: 'https://es.example.com',
+      spaceId: 'load-test',
+    });
+  });
+
+  it('keeps the credentials and options of the invocation', () => {
+    const config = buildConfig({ apiKey: 'abc123', 'run-id': 'run-1' }, ['clean']);
+
+    const target = withRunTarget(config, {
+      kibanaUrl: 'https://kb.example.com',
+      elasticsearchUrl: 'https://es.example.com',
+      spaceId: 'load-test',
+    });
+
+    expect(target.auth).toEqual({ type: 'apiKey', apiKey: 'abc123' });
+    expect(target).toMatchObject({ command: 'clean', runId: 'run-1' });
   });
 });

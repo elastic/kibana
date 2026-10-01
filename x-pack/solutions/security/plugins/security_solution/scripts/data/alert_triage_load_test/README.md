@@ -103,6 +103,8 @@ Re-run the analysis later, for example after parked runs have expired:
 pnpm data:triage-load-test report --run-id <runId>
 ```
 
+`report` and `clean --run-id` use the Kibana and Elasticsearch URLs and the space recorded in the run's `manifest.json`, so you do not repeat those flags. Credentials are never stored; pass them again (`--apiKey`, `--username`/`--password` or the environment variables) when the target needs them.
+
 ### The report
 
 - **Dispatch**: batches and alerts, failures, run API and indexing latency.
@@ -121,7 +123,7 @@ pnpm data:triage-load-test clean                        # alerts of every run
 pnpm data:triage-load-test clean --run-id <runId> --cancel-executions
 ```
 
-`clean` deletes the alerts tagged `triage-load-test` (and `triage-load-test:<runId>`). `--cancel-executions` also cancels the run's open Worker executions, for example the ones parked for 72 h. The Investigations and proposals the Worker already created are **not** deleted; decide or remove them in AlertZero. On a shared deployment, run against a dedicated space so they are easy to find.
+`clean` deletes the alerts tagged `triage-load-test` (and `triage-load-test:<runId>`). With `--run-id` it targets the stack, space and alerts index recorded in that run's manifest; without it, it uses the target given on the command line. `--cancel-executions` also cancels the run's open Worker executions, for example the ones parked for 72 h. The Investigations and proposals the Worker already created are **not** deleted; decide or remove them in AlertZero. On a shared deployment, run against a dedicated space so they are easy to find.
 
 ## Known limits
 
