@@ -117,6 +117,11 @@ consts:
   # consts in rule_tuning_worker.yaml.
   analysis_window_days: 7
   preview_invocation_count: 2
+  # How long an AI-created exception lasts before it needs re-approval, so a wrong
+  # diagnosis self-heals instead of permanently muting the rule.
+  # 30 days, in seconds (Liquid filters chain left-to-right, so the offset has to be
+  # a single addable value).
+  exception_expire_seconds: 2592000
   # Written onto every alert that reached a decision, alongside the tag naming the
   # outcome. Filtered out by the sweep's harvest, so a later sweep cannot rediagnose
   # the same alerts into the same review; consts.reviewed_tag in rule_tuning_worker.yaml
@@ -543,43 +548,31 @@ steps:
                 enum: [low, medium, high]
             required: [change_type, summary, title, fp_pattern, reasoning, confidence]
 
-  # Builds the proposed exception into a filter instead of creating it, so the
-  # exception arm can reuse the query backtest below. The item is never saved;
-  # name/description/list_id are placeholders the endpoint schema requires.
+  # Turns a proposed exception into a filters array (the rule's own filters plus one
+  # excluding matching alerts) instead of creating the exception itself, so the change
+  # can be backtested the same way a query change is below. Only the entries matter here;
+  # eligibility to actually run the backtest is decided by can_preview_query_change, same
+  # gate the query arm uses, since both reuse the same preview mechanism.
   - name: build_exception_filter
-    type: kibana.request
+    type: security.buildExceptionEntriesFilter
     if: >-
       ${{ steps.fetch_rule.error == null
         and steps.fetch_rule.output.enabled == true
         and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/internal/lists/_create_filter"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "1"
-        x-elastic-internal-origin: kibana
-        Content-Type: application/json
-      body:
-        type: exception_items
-        exceptions:
-          - type: simple
-            name: tuning-backtest-scratch
-            description: Ephemeral item for backtest preview, never saved.
-            list_id: tuning-backtest-scratch
-            entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+      existing_filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+      entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
     on-failure:
       continue: true
 
-  # The endpoint returns one filter; append it to the rule's own filters.
-  - name: compute_proposed_filters
+  # Adds the expiry offset to the current epoch and formats the result as the ISO 8601
+  # string the exceptions API's expire_time expects.
+  - name: compute_exception_expire_time
     type: data.set
-    if: "${{ steps.build_exception_filter.error == null and steps.build_exception_filter.output.filter != null }}"
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'exception' }}"
     with:
-      filters: >-
-        ${{ steps.fetch_rule.output.filters
-          | default: consts.no_items
-          | push: steps.build_exception_filter.output.filter }}
+      expire_time: >-
+        {{ "now" | date: "%s" | plus: consts.exception_expire_seconds | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}
 
   # Rules using a data view, timestamp override, or alert suppression need fields
   # the preview API cannot conditionally omit, and a saved-query rule has no inline
@@ -598,7 +591,7 @@ steps:
         ${{ (steps.diagnose_rule.output.structured_output.change_type == 'query'
             or (steps.diagnose_rule.output.structured_output.change_type == 'exception'
               and steps.build_exception_filter.error == null
-              and steps.build_exception_filter.output.filter != null))
+              and steps.build_exception_filter.output.filters != null))
           and steps.fetch_rule.output.type == 'query'
           and steps.fetch_rule.output.saved_id == null
           and steps.fetch_rule.output.data_view_id == null
@@ -651,11 +644,11 @@ steps:
             {% if steps.diagnose_rule.output.structured_output.change_type == 'exception' %}{{ steps.fetch_rule.output.query }}{% else %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% endif %}
           language: "{{ steps.fetch_rule.output.language }}"
           index: "${{ steps.fetch_rule.output.index }}"
-          # compute_proposed_filters' output (the rule's filters plus the negated exception
+          # build_exception_filter's output (the rule's filters plus the negated exception
           # clause) takes precedence when it ran; otherwise this previews unchanged, same
           # as the query arm.
           filters: >-
-            ${{ steps.compute_proposed_filters.output.filters
+            ${{ steps.build_exception_filter.output.filters
               | default: steps.fetch_rule.output.filters
               | default: consts.no_items }}
           exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
@@ -745,7 +738,7 @@ steps:
         {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
-        Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
+        Approving adds the exception to the rule's own exception list, expiring automatically on {{ steps.compute_exception_expire_time.output.expire_time }}. It can be removed or extended in the Detection Rules UI.
         {% when "risk_score" %}
         Current risk score: {{ steps.fetch_rule.output.risk_score }}
         Current severity: {{ steps.fetch_rule.output.severity }}
@@ -868,6 +861,7 @@ steps:
                   description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
                   # `${{ }}` keeps the entries as objects.
                   entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+                  expire_time: "{{ steps.compute_exception_expire_time.output.expire_time }}"
                 # Same as a query edit: an exception changes how many alerts the
                 # rule produces, so it can lose a detection. Re-ranking cannot,
                 # which is why the risk score arm is lower.

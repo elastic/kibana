@@ -17,6 +17,7 @@ import { setAttackStatusStepDefinition } from './set_attack_status_step/set_atta
 import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
 import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
 import { createRuleExceptionStepDefinition } from './create_rule_exception_step/create_rule_exception_step';
+import { buildExceptionEntriesFilterStepDefinition } from './build_exception_entries_filter_step/build_exception_entries_filter_step';
 import { createExceptionListItemStepDefinition } from './create_exception_list_item_step/create_exception_list_item_step';
 import { createNoteStepDefinition } from './create_note_step/create_note_step';
 import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
@@ -42,6 +43,7 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(enableRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(disableRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(createRuleExceptionStepDefinition);
+  workflowsExtensions.registerStepDefinition(buildExceptionEntriesFilterStepDefinition);
   workflowsExtensions.registerStepDefinition(createExceptionListItemStepDefinition);
   workflowsExtensions.registerStepDefinition(createNoteStepDefinition);
   workflowsExtensions.registerStepDefinition(deleteNoteStepDefinition);
