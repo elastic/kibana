@@ -9,6 +9,8 @@ import type { InferenceConnector } from './connectors';
 import { getModelDefinition } from './known_models';
 import { getConnectorDefaultModel } from './connector_config';
 import { elasticModelDictionary } from '../const';
+import { createInferenceRequestError } from '../errors';
+import type { ChatCompletionReasoningEffort } from '../chat_complete/reasoning';
 
 /**
  * Retrieve the context window size for the default model of the given connector, if available.
@@ -45,6 +47,30 @@ export const getSupportedReasoningEffortLevels = (
     return undefined;
   }
   return supportedLevels;
+};
+
+/**
+ * Checks that the connector's model supports the reasoning effort level, as advertised by EIS.
+ * Every level is accepted when support is unknown.
+ *
+ * @throws {InferenceTaskRequestError} with status 400 when the model does not support
+ * `reasoningEffort`.
+ */
+export const validateReasoningEffort = (
+  connector: InferenceConnector,
+  reasoningEffort: ChatCompletionReasoningEffort
+): void => {
+  const supportedLevels = getSupportedReasoningEffortLevels(connector);
+  if (supportedLevels === undefined || supportedLevels.includes(reasoningEffort)) {
+    return;
+  }
+
+  throw createInferenceRequestError(
+    `Reasoning level "${reasoningEffort}" is not supported by model "${connector.name}" (${
+      connector.connectorId
+    }). Supported levels: ${supportedLevels.join(', ')}.`,
+    400
+  );
 };
 
 export const contextWindowFromModelName = (modelName: string): number | undefined => {

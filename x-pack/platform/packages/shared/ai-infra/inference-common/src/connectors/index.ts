@@ -26,4 +26,5 @@ export {
   getContextWindowSize,
   contextWindowFromModelName,
   getSupportedReasoningEffortLevels,
+  validateReasoningEffort,
 } from './connector_capabilities';

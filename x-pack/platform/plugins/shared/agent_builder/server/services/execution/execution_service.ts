@@ -13,6 +13,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { validateReasoningEffort, type InferenceConnector } from '@kbn/inference-common';
 import type {
   ChatEvent,
   ConverseInput,
@@ -56,7 +57,7 @@ import {
   collectAndWriteEvents,
   type AgentExecutionDeps,
 } from './execution_runner';
-import { serializeExecutionError, validateReasoningLevel } from './utils';
+import { resolveExecutionConnectorId, serializeExecutionError } from './utils';
 import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
@@ -124,16 +125,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       params.reasoningLevel !== undefined &&
       !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
     ) {
-      const { inference, uiSettings, savedObjects, searchInferenceEndpoints } = this.deps;
-      await validateReasoningLevel({
-        reasoningLevel: params.reasoningLevel,
+      const connector = await this.resolveExecutionConnector({
         connectorId: params.connectorId,
         request,
-        inference,
-        uiSettings,
-        savedObjects,
-        searchInferenceEndpoints,
       });
+      if (connector) {
+        validateReasoningEffort(connector, params.reasoningLevel);
+      }
     }
 
     const conversationClient = await this.getConversationClient({
@@ -705,6 +703,24 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       return false;
     }
     return (await executionClient.peek(executionId)) !== undefined;
+  }
+
+  private async resolveExecutionConnector({
+    connectorId,
+    request,
+  }: {
+    connectorId?: string;
+    request: KibanaRequest;
+  }): Promise<InferenceConnector | undefined> {
+    const { inference, searchInferenceEndpoints } = this.deps;
+    return (
+      resolveExecutionConnectorId({ connectorId, request, searchInferenceEndpoints })
+        .then((resolvedConnectorId) =>
+          resolvedConnectorId ? inference.getConnectorById(resolvedConnectorId, request) : undefined
+        )
+        // Leaves resolution failures to the runner, which records them against the execution
+        .catch(() => undefined)
+    );
   }
 
   private async resolveConversationRequest({

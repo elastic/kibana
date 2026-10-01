@@ -7,28 +7,11 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { InferenceConnector } from '@kbn/inference-common';
-import { getSupportedReasoningEffortLevels } from '@kbn/inference-common';
+import { validateReasoningEffort } from '@kbn/inference-common';
 import { AiPromptStepCommonDefinition } from '../../../../common/steps/ai';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { AI_PROMPT_FEATURE_ID } from '../ai_feature_ids';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
-
-const assertReasoningLevelSupported = (
-  connector: InferenceConnector,
-  reasoningLevel: string
-): void => {
-  const supportedLevels = getSupportedReasoningEffortLevels(connector);
-  if (supportedLevels === undefined || supportedLevels.includes(reasoningLevel)) {
-    return;
-  }
-
-  throw new Error(
-    `reasoning-level "${reasoningLevel}" is not supported by model "${connector.name}" (${
-      connector.connectorId
-    }). Supported levels: ${supportedLevels.join(', ')}.`
-  );
-};
 
 export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsStartDeps>) =>
   createServerStepDefinition({
@@ -81,7 +64,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
       });
 
       if (reasoningLevel !== undefined) {
-        assertReasoningLevelSupported(chatModel.getConnector(), reasoningLevel);
+        validateReasoningEffort(chatModel.getConnector(), reasoningLevel);
       }
 
       const modelInput = [

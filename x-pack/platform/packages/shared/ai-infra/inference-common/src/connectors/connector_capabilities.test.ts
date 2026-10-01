@@ -8,7 +8,12 @@
 import { type InferenceConnector, InferenceConnectorType } from './connectors';
 import { elasticModelIds } from '../inference_endpoints';
 import { elasticModelDictionary } from '../const';
-import { getContextWindowSize, getSupportedReasoningEffortLevels } from './connector_capabilities';
+import { InferenceTaskErrorCode } from '../errors';
+import {
+  validateReasoningEffort,
+  getContextWindowSize,
+  getSupportedReasoningEffortLevels,
+} from './connector_capabilities';
 import { getModelDefinition } from './known_models';
 
 const createConnector = (parts: Partial<InferenceConnector>): InferenceConnector => {
@@ -125,5 +130,38 @@ describe('getSupportedReasoningEffortLevels', () => {
     });
 
     expect(getSupportedReasoningEffortLevels(connector)).toEqual(['high', 'low']);
+  });
+});
+
+describe('validateReasoningEffort', () => {
+  const createEisConnector = (supportedEffortLevels?: string[]): InferenceConnector =>
+    createConnector({
+      type: InferenceConnectorType.Inference,
+      name: 'Claude Haiku',
+      connectorId: '.anthropic-claude-haiku-chat_completion',
+      isInferenceEndpoint: true,
+      isEis: true,
+      metadata: supportedEffortLevels
+        ? { capabilities: { reasoning: { supported_effort_levels: supportedEffortLevels } } }
+        : {},
+    });
+
+  it.each<{ description: string; connector: InferenceConnector }>([
+    { description: 'a non-EIS connector', connector: createConnector({ isEis: false }) },
+    { description: 'an EIS connector that advertises no levels', connector: createEisConnector() },
+    { description: 'a level the model supports', connector: createEisConnector(['xhigh', 'low']) },
+  ])('accepts $description', ({ connector }) => {
+    expect(() => validateReasoningEffort(connector, 'xhigh')).not.toThrow();
+  });
+
+  it('rejects a level the model does not support with a 400 request error', () => {
+    expect(() => validateReasoningEffort(createEisConnector(['high', 'low']), 'xhigh')).toThrow(
+      expect.objectContaining({
+        code: InferenceTaskErrorCode.requestError,
+        message:
+          'Reasoning level "xhigh" is not supported by model "Claude Haiku" (.anthropic-claude-haiku-chat_completion). Supported levels: high, low.',
+        meta: { status: 400 },
+      })
+    );
   });
 });

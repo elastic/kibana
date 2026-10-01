@@ -478,7 +478,7 @@ describe('aiPromptStepDefinition', () => {
         );
 
         await expect(handler(withReasoningLevel('xhigh'))).rejects.toThrow(
-          'reasoning-level "xhigh" is not supported by model "Claude Haiku" (.anthropic-claude-haiku-chat_completion). Supported levels: high, low.'
+          'Reasoning level "xhigh" is not supported by model "Claude Haiku" (.anthropic-claude-haiku-chat_completion). Supported levels: high, low.'
         );
         expect(mockChatModel.invoke).not.toHaveBeenCalled();
       });
