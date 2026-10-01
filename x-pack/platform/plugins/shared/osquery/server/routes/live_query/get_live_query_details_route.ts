@@ -129,19 +129,24 @@ export const getLiveQueryDetailsRoute = (
 
           const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
 
-          const responseData = await lastValueFrom(
-            zip(
-              ...map(queries, (query) =>
-                getActionResponses(
-                  search,
-                  query.action_id,
-                  query.agents?.length ?? 0,
-                  namespacesOrUndefined,
-                  spaceId
+          // `zip()` with no sources completes empty and `lastValueFrom` rejects, so an
+          // action without queries (a `.fleet-actions` document, or a pack with every
+          // query disabled) must skip the read.
+          const responseData = queries?.length
+            ? await lastValueFrom(
+                zip(
+                  ...map(queries, (query) =>
+                    getActionResponses(
+                      search,
+                      query.action_id,
+                      query.agents?.length ?? 0,
+                      namespacesOrUndefined,
+                      spaceId
+                    )
+                  )
                 )
               )
-            )
-          );
+            : [];
 
           const isCompleted = expired || (responseData && every(responseData, ['pending', 0]));
           const agentByActionIdStatusMap = mapKeys(responseData, 'action_id');
