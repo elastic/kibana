@@ -26,6 +26,9 @@ jest.mock('./app/app', () => ({
 jest.mock('./sandbox_secrets/sandbox_secrets_flyout', () => ({
   SandboxSecretsFlyout: () => <div data-test-subj="sandboxSecretsFlyoutStub" />,
 }));
+jest.mock('./automations/automations_page', () => ({
+  AutomationsPage: () => <div data-test-subj="automationsPageStub" />,
+}));
 jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('./hooks/use_significant_events_availability');
 
@@ -102,7 +105,7 @@ describe('NightshiftPage', () => {
     renderPage();
     expect(navigateToApp).not.toHaveBeenCalled();
     await waitFor(() =>
-      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Investigations')
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Nightshift')
     );
     expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
@@ -248,7 +251,34 @@ describe('NightshiftPage', () => {
         'href',
         '/app/nightshift/automations'
       );
-      expect(screen.getByTestId('automationsSearch')).toBeInTheDocument();
+      expect(screen.getByTestId('automationsPageStub')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Investigations'
+      );
+    });
+
+    it('shows Settings instead of Investigations inside the investigations pages', async () => {
+      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
+      mockUseKibana.mockReturnValue({
+        services: {
+          ...mockUseKibana().services,
+          application: {
+            ...mockUseKibana().services.application,
+            capabilities: {
+              nightshift: {
+                [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+                [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
+                manage: true,
+              },
+            },
+          },
+        },
+      });
+      renderPage('/automations');
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('nightshiftSettingsLink')).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigationsPrimaryAction')).not.toBeInTheDocument();
     });
 
     it('hides the sandbox secrets link when Nightshift is not enabled', async () => {

@@ -66,10 +66,6 @@ export const useFetchAutomations = () => {
   });
 };
 
-export const useAutomationLastRun = (id: string) => {
-  return useAutomationRunsInRange(id, '', '');
-};
-
 type InvestigationsClient = NonNullable<
   ReturnType<typeof useKibana>['services']['nightshiftInvestigations']
 >['investigationsClient'];
@@ -125,27 +121,6 @@ export const useAutomationsRunsInRange = (
         startedBefore
       )
     ),
-  });
-};
-
-export const useAutomationAuthor = (id: string) => {
-  const { nightshiftInvestigations } = useKibana().services;
-  const investigationsClient = nightshiftInvestigations?.investigationsClient;
-
-  return useQuery({
-    queryKey: [...AUTOMATIONS_QUERY_KEY, id, 'author'],
-    enabled: investigationsClient != null,
-    queryFn: async () => {
-      if (!investigationsClient) {
-        throw new Error('Nightshift investigations plugin is unavailable');
-      }
-      const automation = await investigationsClient.fetch(
-        'GET /internal/nightshift/automations/{id}',
-        { params: { path: { id } }, signal: null }
-      );
-      return automation.author;
-    },
-    retry: false,
   });
 };
 

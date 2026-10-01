@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationsPage } from './automations_page';
 import {
-  useAutomationLastRun,
   useAutomationRunsInRange,
   useAutomationsRunsInRange,
   useDeleteAutomation,
@@ -18,10 +17,10 @@ import {
   useToggleAutomation,
 } from '../hooks/use_automations';
 import { useKibana } from '../hooks/use_kibana';
+import type { Automation } from '../hooks/use_automations';
 
 jest.mock('../hooks/use_automations', () => ({
   AUTOMATIONS_LOAD_ERROR_TITLE: 'Failed to load automations',
-  useAutomationLastRun: jest.fn(),
   useAutomationRunsInRange: jest.fn(),
   useAutomationsRunsInRange: jest.fn(),
   useDeleteAutomation: jest.fn(),
@@ -29,8 +28,12 @@ jest.mock('../hooks/use_automations', () => ({
   useToggleAutomation: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('./create_automation_flyout', () => ({
+  CreateAutomationFlyout: ({ automation }: { automation?: { name: string } }) => (
+    <div data-test-subj="createAutomationFlyoutStub">{automation?.name ?? 'new'}</div>
+  ),
+}));
 
-const mockUseAutomationLastRun = useAutomationLastRun as jest.Mock;
 const mockUseAutomationRunsInRange = useAutomationRunsInRange as jest.Mock;
 const mockUseAutomationsRunsInRange = useAutomationsRunsInRange as jest.Mock;
 const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
@@ -44,7 +47,6 @@ describe('AutomationsPage', () => {
       services: { application: { capabilities: { nightshift: { manage: true } } } },
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
-    mockUseAutomationLastRun.mockReturnValue({ data: undefined, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
     mockUseAutomationRunsInRange.mockReturnValue({
       data: { runs: [], total: 0 },
@@ -122,5 +124,167 @@ describe('AutomationsPage', () => {
     expect(screen.getByText('Failed to load automations')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     expect(refetch).toHaveBeenCalled();
+  });
+
+  describe('with automations', () => {
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+    const buildAutomation = (overrides: Partial<Automation>): Automation => ({
+      id: 'automation',
+      name: 'Automation',
+      automationType: 'custom',
+      isEnabled: true,
+      trigger: { rows: [{ kind: 'alert' }] },
+      execution: {},
+      completion: {},
+      runtime: { dailyDispatchLimit: 20 },
+      createdAt: '2026-10-01T00:00:00.000Z',
+      updatedAt: '2026-10-01T00:00:00.000Z',
+      author: { username: 'elastic' },
+      ...overrides,
+    });
+    const automations = [
+      buildAutomation({
+        id: 'triage',
+        name: 'Triage incoming alerts',
+        tags: ['triage', 'alerts'],
+        runtime: { dailyDispatchLimit: 20 },
+        author: { username: 'Rakesh Kumar' },
+      }),
+      buildAutomation({
+        id: 'report',
+        name: 'Daily report',
+        isEnabled: false,
+        trigger: { rows: [{ kind: 'schedule' }] },
+        runtime: { dailyDispatchLimit: 5 },
+        author: { username: 'Artemis Chen' },
+      }),
+    ];
+    const totals: Record<string, { range: number; today: number }> = {
+      triage: { range: 28, today: 27 },
+      report: { range: 2, today: 1 },
+    };
+    const deleteMutate = jest.fn();
+    const toggleMutate = jest.fn();
+
+    const renderPage = () =>
+      render(
+        <I18nProvider>
+          <AutomationsPage />
+        </I18nProvider>
+      );
+    const rowOf = (name: string) => screen.getByText(name).closest('tr') as HTMLElement;
+
+    beforeEach(() => {
+      deleteMutate.mockClear();
+      toggleMutate.mockClear();
+      mockUseFetchAutomations.mockReturnValue({ data: { automations }, isInitialLoading: false });
+      mockUseAutomationsRunsInRange.mockImplementation((ids: string[], startedAfter: string) =>
+        ids.map((id) => ({
+          data: {
+            total: startedAfter === todayStart.toISOString() ? totals[id].today : totals[id].range,
+          },
+        }))
+      );
+      mockUseAutomationRunsInRange.mockImplementation((id: string) => ({
+        data: {
+          total: totals[id].range,
+          runs: [{ status: 'completed', startedAt: new Date().toISOString() }],
+        },
+        isInitialLoading: false,
+      }));
+      mockUseDeleteAutomation.mockReturnValue({ mutate: deleteMutate, isLoading: false });
+      mockUseToggleAutomation.mockReturnValue({ mutate: toggleMutate, isLoading: false });
+    });
+
+    it('sorts rows by automation name by default', () => {
+      renderPage();
+
+      const names = screen.getAllByTestId('nightshiftAutomationName').map((el) => el.textContent);
+      expect(names).toEqual(['Daily report', 'Triage incoming alerts']);
+      expect(screen.getByText('Showing 2 automations')).toBeInTheDocument();
+    });
+
+    it('shows tags, run counts, usage, and the daily limit warning', () => {
+      renderPage();
+
+      const triageRow = rowOf('Triage incoming alerts');
+      expect(within(triageRow).getByTestId('automationTags')).toHaveTextContent('2');
+      expect(within(triageRow).getByTestId('automationRuns')).toHaveTextContent('28');
+      expect(within(triageRow).getByTestId('automationUsage')).toHaveTextContent('27 / 20');
+      expect(within(triageRow).getByTestId('automationLimitReached')).toBeInTheDocument();
+      expect(within(triageRow).getByText('Rakesh Kumar')).toBeInTheDocument();
+
+      const reportRow = rowOf('Daily report');
+      expect(within(reportRow).queryByTestId('automationTags')).not.toBeInTheDocument();
+      expect(within(reportRow).getByTestId('automationUsage')).toHaveTextContent('1 / 5');
+      expect(within(reportRow).queryByTestId('automationLimitReached')).not.toBeInTheDocument();
+    });
+
+    it('toggles an automation', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByTestId('automationToggle-report'));
+
+      expect(toggleMutate).toHaveBeenCalledWith({ id: 'report', isEnabled: true });
+    });
+
+    it('clones an automation from the row actions', async () => {
+      renderPage();
+
+      fireEvent.click(screen.getByTestId('automationActions-triage'));
+      fireEvent.click(await screen.findByTestId('cloneAutomation'));
+
+      expect(screen.getByTestId('createAutomationFlyoutStub')).toHaveTextContent(
+        'Triage incoming alerts'
+      );
+    });
+
+    it('deletes an automation after confirmation', async () => {
+      renderPage();
+
+      fireEvent.click(screen.getByTestId('automationActions-report'));
+      fireEvent.click(await screen.findByTestId('deleteAutomation'));
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+
+      expect(deleteMutate).toHaveBeenCalledWith('report', expect.anything());
+    });
+
+    it('opens the create flyout', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Create automation' }));
+
+      expect(screen.getByTestId('createAutomationFlyoutStub')).toHaveTextContent('new');
+    });
+
+    it('filters by status with counts and clears the selection', async () => {
+      renderPage();
+
+      fireEvent.click(screen.getByTestId('automationStatusFilter'));
+      const activeOption = await screen.findByRole('option', { name: /Active/ });
+      expect(activeOption).toHaveTextContent('1');
+      expect(
+        screen.queryByTestId('nightshiftAutomationFilterClearSelection')
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(activeOption);
+      expect(screen.queryByText('Daily report')).not.toBeInTheDocument();
+      expect(screen.getByText('Showing 1 automations')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('nightshiftAutomationFilterClearSelection'));
+      expect(screen.getByText('Daily report')).toBeInTheDocument();
+    });
+
+    it('hides management actions for read-only users', () => {
+      mockUseKibana.mockReturnValue({
+        services: { application: { capabilities: { nightshift: {} } } },
+      });
+      renderPage();
+
+      expect(screen.queryByRole('button', { name: 'Create automation' })).not.toBeInTheDocument();
+      expect(screen.queryByTestId('automationActions-triage')).not.toBeInTheDocument();
+      expect(screen.getByTestId('automationToggle-triage')).toBeDisabled();
+    });
   });
 });

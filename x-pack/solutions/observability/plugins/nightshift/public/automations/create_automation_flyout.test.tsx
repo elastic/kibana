@@ -15,12 +15,21 @@ jest.mock('../hooks/use_automations', () => ({ useCreateAutomation: jest.fn() })
 
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 
-const renderFlyout = () =>
+const onClose = jest.fn();
+
+const renderFlyout = (props: Partial<React.ComponentProps<typeof CreateAutomationFlyout>> = {}) =>
   render(
     <I18nProvider>
-      <CreateAutomationFlyout onClose={jest.fn()} />
+      <CreateAutomationFlyout onClose={onClose} {...props} />
     </I18nProvider>
   );
+
+const addTag = async (tag: string) => {
+  fireEvent.click(screen.getByTestId('automationAddTags'));
+  const tagInput = within(await screen.findByTestId('automationTagInput')).getByRole('combobox');
+  fireEvent.change(tagInput, { target: { value: tag } });
+  fireEvent.keyDown(tagInput, { key: 'Enter' });
+};
 
 const addTrigger = async (label: string) => {
   fireEvent.click(screen.getByTestId('automationAddTrigger'));
@@ -38,6 +47,7 @@ describe('CreateAutomationFlyout', () => {
 
   beforeEach(() => {
     mutate.mockClear();
+    onClose.mockClear();
     mockUseCreateAutomation.mockReturnValue({ mutate, isLoading: false });
   });
 
@@ -62,10 +72,7 @@ describe('CreateAutomationFlyout', () => {
   it('creates a paused alert automation with tags, instructions, and daily limit', async () => {
     renderFlyout();
     rename('  Alert triage  ');
-    fireEvent.click(screen.getByTestId('automationAddTags'));
-    const tagInput = within(await screen.findByTestId('automationTagInput')).getByRole('combobox');
-    fireEvent.change(tagInput, { target: { value: 'oncall' } });
-    fireEvent.keyDown(tagInput, { key: 'Enter' });
+    await addTag('oncall');
     await addTrigger('Alert triggered');
     fireEvent.change(screen.getByTestId('automationInstructions'), {
       target: { value: 'Find the root cause' },
@@ -126,5 +133,112 @@ describe('CreateAutomationFlyout', () => {
       target: { value: '#oncall' },
     });
     expect(screen.getByTestId('submitAutomation')).toBeEnabled();
+  });
+
+  it('ignores duplicate tags and removes tags', async () => {
+    renderFlyout();
+    await addTag('oncall');
+    await addTag('OnCall');
+
+    expect(screen.getAllByText('oncall')).toHaveLength(1);
+    expect(screen.getByTestId('automationAddTags')).toHaveTextContent('Add tag');
+    fireEvent.click(screen.getByLabelText('Remove tag oncall'));
+    expect(screen.queryByText('oncall')).not.toBeInTheDocument();
+    expect(screen.getByTestId('automationAddTags')).toHaveTextContent('Add tags');
+  });
+
+  it('renames the automation in place and reverts on Escape', () => {
+    renderFlyout();
+
+    expect(screen.getByTestId('automationNameReadMode')).toHaveTextContent('Untitled automation');
+    rename('Alert triage');
+    expect(screen.getByTestId('automationNameReadMode')).toHaveTextContent('Alert triage');
+
+    fireEvent.click(screen.getByTestId('automationNameReadMode'));
+    fireEvent.change(screen.getByTestId('automationName'), { target: { value: 'Other' } });
+    fireEvent.keyDown(screen.getByTestId('automationName'), { key: 'Escape' });
+    expect(screen.getByTestId('automationNameReadMode')).toHaveTextContent('Alert triage');
+  });
+
+  it('opens the title editor from the footer Rename action', async () => {
+    renderFlyout();
+
+    fireEvent.click(screen.getByTestId('automationFlyoutActions'));
+    fireEvent.click(await screen.findByText('Rename'));
+
+    expect(screen.getByTestId('automationName')).toBeInTheDocument();
+  });
+
+  it('closes a pristine draft without confirmation', () => {
+    renderFlyout();
+
+    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('confirms before discarding unsaved changes', async () => {
+    renderFlyout();
+    rename('Alert triage');
+
+    fireEvent.click(screen.getByTestId('automationFlyoutActions'));
+    fireEvent.click(await screen.findByText('Discard draft'));
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(
+        'Alert triage has not been saved. If you leave now, this draft will be discarded.'
+      )
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Keep editing'));
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    fireEvent.click(screen.getByText('Discard'));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('activates the automation on save when the switch is on', async () => {
+    renderFlyout();
+    rename('Alert triage');
+    await addTrigger('Alert triggered');
+
+    expect(screen.getByText('Saves as paused')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('automationEnabledSwitch'));
+    expect(screen.getByText('Activates when saved')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('submitAutomation'));
+
+    expect(mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ isEnabled: true }),
+      expect.anything()
+    );
+  });
+
+  it('prefills the form from a cloned automation', () => {
+    renderFlyout({
+      automation: {
+        id: 'automation-1',
+        name: 'Triage',
+        tags: ['oncall'],
+        description: 'Triage alerts',
+        automationType: 'custom',
+        isEnabled: true,
+        trigger: { rows: [{ kind: 'alert', alertStatus: 'active' }] },
+        execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
+        completion: {},
+        runtime: { dailyDispatchLimit: 5 },
+        createdAt: '2026-10-01T00:00:00.000Z',
+        updatedAt: '2026-10-01T00:00:00.000Z',
+        author: { username: 'elastic' },
+      },
+    });
+
+    expect(screen.getByTestId('automationNameReadMode')).toHaveTextContent('Triage');
+    expect(screen.getByText('oncall')).toBeInTheDocument();
+    expect(screen.getByTestId('automationDescription')).toHaveValue('Triage alerts');
+    expect(screen.getByTestId('automationStatusPicker')).toHaveTextContent('Active');
+    expect(screen.getByTestId('automationDailyLimit')).toHaveValue(5);
+    expect(screen.getByTestId('automationInstructions')).toHaveValue('Find the cause');
+    expect(screen.getByTestId('automationInstructionMode')).toHaveTextContent('Investigate');
   });
 });
