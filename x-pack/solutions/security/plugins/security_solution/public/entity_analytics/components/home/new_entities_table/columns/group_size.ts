@@ -49,14 +49,28 @@ const buildGroupSizeSortDataQuery = ({
   ].join('\n');
 };
 
-const buildGroupSizeSortCountQuery = ({ namespace }: QueryArgs): string =>
-  [
-    `FROM ${entityAliasOf(namespace)}`,
+const buildGroupSizeSortCountQuery = ({
+  namespace,
+  concreteEntityIndexName,
+  filterExpression,
+}: QueryArgs): string => {
+  const entityAlias = entityAliasOf(namespace);
+  const inner = [
+    `FROM ${entityAlias}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     `| EVAL group_key = COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`,
     `| STATS _c = COUNT(*) BY group_key`,
+    `| RENAME group_key AS \`entity.id\``,
+  ].join('\n');
+
+  return [
+    `FROM (\n${inner}\n)`,
+    `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``,
+    `| WHERE ${ENTITY_TYPE_FILTER}`,
+    ...buildFilterClause(filterExpression),
     `| STATS total = COUNT(*)`,
   ].join('\n');
+};
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 

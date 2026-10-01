@@ -56,6 +56,6 @@ export const buildRiskMoversCountQuery = (
     `| WHERE entity.name IS NOT NULL`,
     ...entityFilterClauses,
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
-    `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`,
+    `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`,
   ].join('\n');
 };

@@ -13,6 +13,18 @@ export type SignalCardId =
   | 'watchlisted'
   | 'newEntity';
 
+export const SIGNAL_CARD_IDS = [
+  'entitiesWithAlerts',
+  'entitiesWithAnomalies',
+  'riskMovers',
+  'newlyHighCritical',
+  'watchlisted',
+  'newEntity',
+] as const satisfies readonly SignalCardId[];
+
+export const isTileCard = (v: string | null): v is SignalCardId =>
+  v != null && (SIGNAL_CARD_IDS as readonly string[]).includes(v);
+
 /** Shared empty list so hooks do not allocate a new `[]` on every render. */
 export const EMPTY_ENTITY_IDS: string[] = [];
 

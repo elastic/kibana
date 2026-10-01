@@ -56,7 +56,7 @@ export const useNewEntityCount = ({
             `| WHERE entity.lifecycle.first_seen >= NOW() - ${TIME_RANGE_TO_ESQL[timeRange]} AND entity.risk.calculated_score > 0`,
             ...buildEntityFilterClauses(entityFilters),
             `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
-            `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`,
+            `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`,
           ].join('\n')
         : null,
     [index, timeRange, entityFilters]

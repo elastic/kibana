@@ -99,7 +99,6 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   const { childMap, isChildFetching, prefetchChildren, resetChildren } = useEntityChildren({
     expandedIds,
     timeRange,
-    whereExpression,
   });
 
   // ── column visibility ─────────────────────────────────────────────────────

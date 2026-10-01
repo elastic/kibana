@@ -94,6 +94,8 @@ export const useEntityGridData = ({
   const cursorStr = cursors[pageIndex] ?? null;
   const cursor: PageCursor | null = cursorStr ? decodeCursor(cursorStr) : null;
 
+  // whereExpression (URL filters, global query, NAT card IN-list, …) is part of every
+  // key so shell + count + enrich all invalidate together when tiles/filters change.
   const shellQueryKey = [
     'entity-grid-fe',
     sortField,
@@ -189,7 +191,8 @@ export const useEntityGridData = ({
     },
     {
       enabled: !!concreteEntityIndexName,
-      keepPreviousData: true,
+      // Do not keepPreviousData: a stale unfiltered total leaves phantom pages when
+      // whereExpression gains a NAT card IN-list (shell updates, count would look wrong).
     }
   );
 
@@ -244,7 +247,11 @@ export const useEntityGridData = ({
     rows: enrichQuery.data ?? shellRows ?? [],
     total: countQuery.data ?? 0,
     updatedAt,
-    isFetching: shellQuery.isFetching || enrichQuery.isFetching || !concreteEntityIndexName,
+    isFetching:
+      shellQuery.isFetching ||
+      enrichQuery.isFetching ||
+      countQuery.isFetching ||
+      !concreteEntityIndexName,
     isLastPage: shellQuery.data != null && shellQuery.data.next_cursor == null,
   };
 };

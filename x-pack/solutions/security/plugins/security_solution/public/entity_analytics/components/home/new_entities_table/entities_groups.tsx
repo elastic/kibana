@@ -35,6 +35,8 @@ export interface GroupedViewProps {
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
   view: 'resolved' | 'raw';
+  /** Tile ES|QL clause (same as flat table); AND'd into leaf grids. */
+  cardWhereExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
 }
@@ -46,6 +48,7 @@ export const EntitiesGroups: React.FC<GroupedViewProps> = ({
   timeRange,
   watchlistNames,
   view,
+  cardWhereExpression,
   cellHandlers,
   rowActions,
 }) => (
@@ -57,6 +60,7 @@ export const EntitiesGroups: React.FC<GroupedViewProps> = ({
     timeRange={timeRange}
     watchlistNames={watchlistNames}
     view={view}
+    cardWhereExpression={cardWhereExpression}
     cellHandlers={cellHandlers}
     rowActions={rowActions}
   />
@@ -72,6 +76,7 @@ interface GroupWithPaginationProps {
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
   view: 'resolved' | 'raw';
+  cardWhereExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
 }
@@ -84,6 +89,7 @@ const GroupWithPagination: React.FC<GroupWithPaginationProps> = ({
   timeRange,
   watchlistNames,
   view,
+  cardWhereExpression,
   cellHandlers,
   rowActions,
 }) => {
@@ -109,6 +115,7 @@ const GroupWithPagination: React.FC<GroupWithPaginationProps> = ({
           timeRange={timeRange}
           watchlistNames={watchlistNames}
           view={view}
+          cardWhereExpression={cardWhereExpression}
           cellHandlers={cellHandlers}
           rowActions={rowActions}
         />
@@ -138,6 +145,7 @@ interface GroupContentProps {
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
   view: 'resolved' | 'raw';
+  cardWhereExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
 }
@@ -157,6 +165,7 @@ const GroupContent: React.FC<GroupContentProps> = ({
   timeRange,
   watchlistNames,
   view,
+  cardWhereExpression,
   cellHandlers,
   rowActions,
 }) => {
@@ -172,6 +181,7 @@ const GroupContent: React.FC<GroupContentProps> = ({
         timeRange={timeRange}
         watchlistNames={watchlistNames}
         view={view}
+        cardWhereExpression={cardWhereExpression}
         cellHandlers={cellHandlers}
         rowActions={rowActions}
       />
@@ -185,6 +195,7 @@ const GroupContent: React.FC<GroupContentProps> = ({
       timeRange={timeRange}
       watchlistNames={watchlistNames}
       view={view}
+      cardWhereExpression={cardWhereExpression}
       cellHandlers={cellHandlers}
       rowActions={rowActions}
     />
@@ -202,6 +213,7 @@ interface GroupWithLocalPaginationProps {
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
   view: 'resolved' | 'raw';
+  cardWhereExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
 }
@@ -215,6 +227,7 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
   timeRange,
   watchlistNames,
   view,
+  cardWhereExpression,
   cellHandlers,
   rowActions,
 }) => {
@@ -253,6 +266,7 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
           timeRange={timeRange}
           watchlistNames={watchlistNames}
           view={view}
+          cardWhereExpression={cardWhereExpression}
           cellHandlers={cellHandlers}
           rowActions={rowActions}
         />
@@ -277,6 +291,7 @@ interface LeafGridProps {
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
   view: 'resolved' | 'raw';
+  cardWhereExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
 }
@@ -287,6 +302,7 @@ const LeafGrid: React.FC<LeafGridProps> = ({
   timeRange,
   watchlistNames,
   view,
+  cardWhereExpression,
   cellHandlers,
   rowActions,
 }) => {
@@ -310,9 +326,9 @@ const LeafGrid: React.FC<LeafGridProps> = ({
   const whereExpression = useMemo(() => {
     const groupFilters = processGroupFilters(mergeFilters(currentGroupFilters, parentGroupFilters));
     const { esqlExpression: groupExpr } = convertFiltersToESQLExpression(groupFilters);
-    const parts = [baseWhereExpression, groupExpr].filter(Boolean);
+    const parts = [baseWhereExpression, cardWhereExpression, groupExpr].filter(Boolean);
     return parts.length ? parts.join(' AND ') : undefined;
-  }, [baseWhereExpression, currentGroupFilters, parentGroupFilters]);
+  }, [baseWhereExpression, cardWhereExpression, currentGroupFilters, parentGroupFilters]);
 
   return (
     <EntitiesGrid

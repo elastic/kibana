@@ -33,26 +33,18 @@ const ENTITY_CHILDREN_ENRICH_QUERY_KEY = 'entity-children-enrich';
 const CHILDREN_STALE_TIME_MS = 60_000;
 const CHILDREN_GC_TIME_MS = 5 * 60_000;
 
+/** Expand is structural: always the full resolution group, never re-applying table filters. */
 const getEntityChildrenQueryKey = (
   entityId: string,
   timeRange: TimeRange,
-  whereExpression: string | undefined,
   concreteEntityIndexName: string
-) =>
-  [
-    ENTITY_CHILDREN_QUERY_KEY,
-    entityId,
-    timeRange,
-    whereExpression,
-    concreteEntityIndexName,
-  ] as const;
+) => [ENTITY_CHILDREN_QUERY_KEY, entityId, timeRange, concreteEntityIndexName] as const;
 
-const buildChildQuery = (namespace: string, entityId: string, whereExpression?: string): string =>
+const buildChildQuery = (namespace: string, entityId: string): string =>
   [
     `FROM ${entityAliasOf(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     `| WHERE ${ENTITY_ID_FIELD} == ${esc(entityId)} OR ${RESOLVED_TO_FIELD} == ${esc(entityId)}`,
-    ...(whereExpression ? [`| WHERE ${whereExpression}`] : []),
     buildKeepClause(),
     `| SORT ${RISK_SCORE_NORM_FIELD} DESC NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
     `| LIMIT 100`,
@@ -61,7 +53,6 @@ const buildChildQuery = (namespace: string, entityId: string, whereExpression?: 
 interface FetchEntityChildrenParams {
   entityId: string;
   timeRange: TimeRange;
-  whereExpression: string | undefined;
   spaceId: string;
   concreteEntityIndexName: string;
   searchService: DataPublicPluginStart['search'];
@@ -72,7 +63,6 @@ const fetchEntityChildrenShell = async ({
   entityId,
   spaceId,
   concreteEntityIndexName,
-  whereExpression,
   searchService,
 }: FetchEntityChildrenParams): Promise<Row[]> => {
   const runQuery: EsqlRunner = async (query) =>
@@ -80,7 +70,7 @@ const fetchEntityChildrenShell = async ({
       await lastValueFrom(searchService.search({ params: { query } }, { strategy: 'esql_async' }))
     );
 
-  const rows = await runQuery(buildChildQuery(spaceId, entityId, whereExpression));
+  const rows = await runQuery(buildChildQuery(spaceId, entityId));
   for (const row of rows) row[GROUP_SIZE_FIELD] = 1;
   return rows;
 };
@@ -110,14 +100,9 @@ const enrichEntityChildren = async (
 export interface UseEntityChildrenOptions {
   expandedIds: ReadonlySet<string>;
   timeRange: TimeRange;
-  whereExpression?: string;
 }
 
-export const useEntityChildren = ({
-  expandedIds,
-  timeRange,
-  whereExpression,
-}: UseEntityChildrenOptions) => {
+export const useEntityChildren = ({ expandedIds, timeRange }: UseEntityChildrenOptions) => {
   const queryClient = useQueryClient();
   const {
     data: { search: searchService },
@@ -135,24 +120,18 @@ export const useEntityChildren = ({
       concreteEntityIndexName
         ? {
             timeRange,
-            whereExpression,
             spaceId,
             concreteEntityIndexName,
             searchService,
             http,
           }
         : null,
-    [concreteEntityIndexName, timeRange, whereExpression, spaceId, searchService, http]
+    [concreteEntityIndexName, timeRange, spaceId, searchService, http]
   );
 
   const shellQueries = useQueries({
     queries: expandedIdList.map((entityId) => ({
-      queryKey: getEntityChildrenQueryKey(
-        entityId,
-        timeRange,
-        whereExpression,
-        concreteEntityIndexName ?? ''
-      ),
+      queryKey: getEntityChildrenQueryKey(entityId, timeRange, concreteEntityIndexName ?? ''),
       queryFn: () => {
         if (!fetchParams) throw new Error('entity store index not resolved');
         return fetchEntityChildrenShell({ ...fetchParams, entityId });
@@ -170,7 +149,6 @@ export const useEntityChildren = ({
       const shellKey = getEntityChildrenQueryKey(
         entityId,
         timeRange,
-        whereExpression,
         concreteEntityIndexName ?? ''
       );
       return {
@@ -178,7 +156,6 @@ export const useEntityChildren = ({
           ENTITY_CHILDREN_ENRICH_QUERY_KEY,
           entityId,
           timeRange,
-          whereExpression,
           concreteEntityIndexName ?? '',
           shell?.dataUpdatedAt ?? 0,
         ],
@@ -225,14 +202,13 @@ export const useEntityChildren = ({
         queryKey: getEntityChildrenQueryKey(
           entityId,
           timeRange,
-          whereExpression,
           fetchParams.concreteEntityIndexName
         ),
         queryFn: () => fetchEntityChildrenShell({ ...fetchParams, entityId }),
         staleTime: CHILDREN_STALE_TIME_MS,
       });
     },
-    [fetchParams, queryClient, timeRange, whereExpression]
+    [fetchParams, queryClient, timeRange]
   );
 
   const resetChildren = useCallback(() => {
