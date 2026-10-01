@@ -264,11 +264,12 @@ export function AgentBasedSection({
   //   (add service after first success) must re-enter credentials.
   // - agentHostsMode === 'existing': user selected an existing policy; credentials always in-memory.
   // - new-policy: credentials must be entered before the flyout runs.
-  const isNextReady = isPolicyCreated
-    ? isCredentialReady
-    : agentHostsMode === 'existing'
-    ? selectedAgentPolicyIds.length > 0 && isCredentialReady
-    : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
+  const isNextReady =
+    agentHostsMode === 'existing'
+      ? selectedAgentPolicyIds.length > 0 && isCredentialReady
+      : isPolicyCreated
+      ? isCredentialReady
+      : !isPolicyNameLoading && isPolicyFormValid && isCredentialReady;
 
   const onNextReadyChangeRef = useRef(onNextReadyChange);
   onNextReadyChangeRef.current = onNextReadyChange;
