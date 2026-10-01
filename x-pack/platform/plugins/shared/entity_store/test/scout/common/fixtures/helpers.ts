@@ -10,6 +10,7 @@ import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   API_VERSIONS,
+  FF_ENABLE_ENTITY_STORE_V2,
   RESOLUTION_RULE_IDS,
   type EntityType,
   type GetEntityMaintainersResponse,
@@ -47,6 +48,7 @@ const DEFAULT_LOG_EXTRACTION_CONFIG = {
   maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
   maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
   additionalIndexPatterns: [] as string[],
+  excludedIndexPatterns: [] as string[],
 };
 /**
  * Normalizes values that may be stored as a single keyword or as keyword[] after
@@ -291,6 +293,65 @@ export const installEntityStoreSuite = async ({
   expect(startAutomatedResolutionMaintainerResponse.statusCode).toBe(200);
 };
 
+export const installEntityStoreSuiteWithKbnClient = async ({
+  kbnClient,
+}: {
+  kbnClient: KbnClientFixture;
+}) => {
+  const publicHeaders = { 'elastic-api-version': API_VERSIONS.public.v1 };
+  const internalHeaders = { 'elastic-api-version': API_VERSIONS.internal.v2 };
+
+  await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
+  await clearResolutionRuleOverrides(kbnClient);
+
+  const installResponse = await kbnClient.request({
+    method: 'POST',
+    path: ENTITY_STORE_ROUTES.public.INSTALL,
+    headers: publicHeaders,
+    body: {},
+  });
+  expect([200, 201]).toContain(installResponse.status);
+
+  const updateResponse = await kbnClient.request({
+    method: 'PUT',
+    path: ENTITY_STORE_ROUTES.public.UPDATE,
+    headers: publicHeaders,
+    body: { logExtraction: DEFAULT_LOG_EXTRACTION_CONFIG },
+  });
+  expect(updateResponse.status).toBe(200);
+
+  const enableEmailRuleResponse = await kbnClient.request({
+    method: 'PUT',
+    path: ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
+    headers: publicHeaders,
+  });
+  expect(enableEmailRuleResponse.status).toBe(200);
+
+  const stopResponse = await kbnClient.request({
+    method: 'PUT',
+    path: ENTITY_STORE_ROUTES.public.STOP,
+    headers: publicHeaders,
+    body: {},
+  });
+  expect(stopResponse.status).toBe(200);
+
+  const initMaintainersResponse = await kbnClient.request({
+    method: 'POST',
+    path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
+    headers: internalHeaders,
+    body: {},
+  });
+  expect(initMaintainersResponse.status).toBe(200);
+
+  const startAutomatedResolutionMaintainerResponse = await kbnClient.request({
+    method: 'PUT',
+    path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START('automated-resolution'),
+    headers: internalHeaders,
+    body: {},
+  });
+  expect(startAutomatedResolutionMaintainerResponse.status).toBe(200);
+};
+
 export const uninstallEntityStoreSuite = async ({
   apiClient,
   esClient,
@@ -357,7 +418,15 @@ export const uninstallEntityStoreSuiteWithKbnClient = async ({
       ignoreErrors: [404],
     });
   } finally {
-    await clearEntityStoreIndices(esClient);
+    try {
+      await clearResolutionRuleOverrides(kbnClient);
+    } finally {
+      try {
+        await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
+      } finally {
+        await clearEntityStoreIndices(esClient);
+      }
+    }
   }
 };
 
