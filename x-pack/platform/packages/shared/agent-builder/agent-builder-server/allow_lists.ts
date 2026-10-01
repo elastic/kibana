@@ -139,6 +139,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Platform – Agentic Investigations
   'investigations.set_impact',
   'investigations.set_hypotheses',
+  'investigations.get',
 
   // Platform – Proposals
   'proposals.create',
