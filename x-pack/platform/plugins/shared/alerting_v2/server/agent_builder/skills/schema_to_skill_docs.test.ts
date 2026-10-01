@@ -450,7 +450,7 @@ describe('schema_to_skill_docs', () => {
         `| \`recovery\` | ${recoveryVariants} | optional |`
       );
       expect(generateRuleOperationsDoc()).toContain(
-        `| \`recovery\` | ${recoveryVariants} | optional |`
+        `| \`recovery\` | ${recoveryVariants} | required |`
       );
     });
 

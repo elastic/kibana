@@ -11,7 +11,7 @@ applies_to:
 
 The Amazon EKS connector gives an agent the AWS control-plane side of managed Kubernetes: it discovers clusters, reads cluster and node group state, scales node groups to add or drain capacity, and audits who can reach a cluster through EKS access entries and access policies. Through the connector execute API, it also manages access entries and mints the short-lived Kubernetes bearer token that EKS requires, without an interactive `aws eks get-token`.
 
-This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 
 It does not touch workloads. Pods, deployments, logs, and `kubectl`-style apply, scale, and rollout belong to the [Kubernetes connector](/reference/connectors-kibana/kubernetes-action-type.md), which accepts the same AWS access key through its **Amazon EKS** authentication type. The `getCluster` action returns the endpoint and CA certificate that connector needs.
 
@@ -60,7 +60,7 @@ Every action accepts an optional `region` that overrides the connector setting.
 `getCluster`
 :   Describes a cluster: status, Kubernetes and platform version, API server endpoint, CA certificate, authentication mode, enabled control-plane log types, VPC and endpoint access settings, health issues, and tags. Also returns `kubernetesConnector` with the API URL and PEM CA certificate for wiring the Kubernetes connector to the cluster. Clusters registered through the EKS Connector have no endpoint, so `kubernetesConnector` is absent for them. When `vpc.endpointPublicAccess` is `false`, the endpoint is reachable only from inside the cluster's VPC. Parameters: `clusterName`.
 
-`getToken`
+`getToken` _(not yet available)_
 :   Mints a short-lived Kubernetes bearer token for the cluster and, by default, returns the endpoint and CA certificate with it, ready for a call to the Kubernetes API. Tokens are reported as valid for 14 minutes, one minute less than EKS accepts them. The connector's IAM identity must already have an access entry on the cluster. Fails for a cluster without an API server endpoint. Parameters: `clusterName`, `includeClusterDetails`. Execute API only.
 
 ### Node groups
@@ -87,7 +87,7 @@ Every action accepts an optional `region` that overrides the connector setting.
 `updateClusterConfig`
 :   Changes one category of control-plane settings per call: control-plane logging (`enableLogTypes`, `disableLogTypes`), the upgrade policy (`supportType`), or `deletionProtection`. EKS rejects an update that mixes categories, so the connector does too. Returns an update, with the cluster name and Region to poll it with.
 
-`updateClusterAccessConfig`
+`updateClusterAccessConfig` _(not yet available)_
 :   Changes how clients reach the cluster, one category per call: the authentication mode (`authenticationMode`, forward only: `CONFIG_MAP` to `API_AND_CONFIG_MAP` to `API`; switching to `API` disables the `aws-auth` ConfigMap and can't be undone), or API endpoint access (`endpointPublicAccess`, `endpointPrivateAccess`, `publicAccessCidrs`). Endpoint settings you omit keep their current values. Returns an update, with the cluster name and Region to poll it with. Execute API only.
 
 `listTagsForResource`
@@ -107,19 +107,19 @@ Every action accepts an optional `region` that overrides the connector setting.
 `listAssociatedAccessPolicies`
 :   Lists the access policies bound to a principal's access entry with their scope. Parameters: `clusterName`, `principalArn`.
 
-`createAccessEntry`
+`createAccessEntry` _(not yet available)_
 :   Creates an access entry so an IAM user or role can authenticate to the cluster. Parameters: `clusterName`, `principalArn`, and optional `kubernetesGroups`, `username`, `type`, `tags`. Execute API only.
 
-`updateAccessEntry`
+`updateAccessEntry` _(not yet available)_
 :   Replaces the Kubernetes groups or username of an access entry. The one you omit keeps its current value. Parameters: `clusterName`, `principalArn`, and `kubernetesGroups` or `username`. Execute API only.
 
-`deleteAccessEntry`
+`deleteAccessEntry` _(not yet available)_
 :   Deletes an access entry, revoking the principal's cluster access. Parameters: `clusterName`, `principalArn`. Execute API only.
 
-`associateAccessPolicy`
+`associateAccessPolicy` _(not yet available)_
 :   Binds an access policy to an access entry, cluster-wide or scoped to namespaces. Parameters: `clusterName`, `principalArn`, `policyArn`, `accessScopeType`, `namespaces`. Execute API only.
 
-`disassociateAccessPolicy`
+`disassociateAccessPolicy` _(not yet available)_
 :   Removes an access policy from an access entry. Parameters: `clusterName`, `principalArn`, `policyArn`. Execute API only.
 
 ## Usage notes [aws-eks-usage-notes]
