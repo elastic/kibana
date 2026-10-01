@@ -467,11 +467,31 @@ describe('floor_alert_triage — if-conditions', () => {
 });
 
 // ---------------------------------------------------------------------------
-// set_az_tags — the verdict tags are written in bulk, not one call per alert
+// az: tags — written in bulk and in chunks, never one call per alert
 // ---------------------------------------------------------------------------
-describe('floor_alert_triage — set_az_tags', () => {
+const AZ_TAG_WRITES = [
+  { step: 'remove_stale_az_tags', idsVariable: 'az_all_ids', tagToAdd: undefined },
+  {
+    step: 'add_az_true_positive_tags',
+    idsVariable: 'az_true_positive_ids',
+    tagToAdd: 'az:true_positive',
+  },
+  {
+    step: 'add_az_false_positive_tags',
+    idsVariable: 'az_false_positive_ids',
+    tagToAdd: 'az:false_positive',
+  },
+  {
+    step: 'add_az_inconclusive_tags',
+    idsVariable: 'az_inconclusive_ids',
+    tagToAdd: 'az:inconclusive',
+  },
+] as const;
+
+const AZ_TAG_STEPS = AZ_TAG_WRITES.map(({ step }) => step);
+
+describe('floor_alert_triage — az: tags', () => {
   const idsStep = stepByName('compute_az_tag_ids');
-  const countsStep = stepByName('count_az_tag_ids');
 
   const verdicts = [
     { alert_id: 'tp-1', classification: 'true_positive' },
@@ -490,24 +510,35 @@ describe('floor_alert_triage — set_az_tags', () => {
     );
   };
 
-  const computeCounts = (ids: Record<string, unknown>): Record<string, unknown> =>
-    Object.fromEntries(
-      Object.entries(countsStep?.with ?? {}).map(([key, expr]) => [
-        key,
-        evalExpr(expr as string, { variables: ids }),
-      ])
+  const loopOf = (name: string) => stepByName(name) as YamlStep;
+  const callOf = (name: string) => loopOf(name).steps?.[0];
+
+  const makeIds = (count: number): string[] =>
+    Array.from({ length: count }, (_, i) => `alert-${i + 1}`);
+
+  const renderChunks = (name: string, idsVariable: string, ids: string[]): string[][] =>
+    JSON.parse(
+      renderString((loopOf(name).foreach ?? '').replace(/^\$\{\{/, '{{').trim(), {
+        variables: { [idsVariable]: ids },
+      })
     );
 
-  it('never loops over alerts: no step in the tag writes is a foreach', () => {
-    const tagSteps = flatten(stepByName('set_az_tags')?.steps ?? []);
-    expect(stepByName('set_az_tags')?.type).toBe('if');
-    expect(tagSteps.some((step) => step.type === 'foreach')).toBe(false);
-    expect(tagSteps.filter((step) => step.type === 'kibana.SetAlertTags')).toHaveLength(4);
+  const chunkSizeOf = (name: string): number =>
+    Number(/chunk: (\d+)/.exec(loopOf(name).foreach ?? '')?.[1]);
+
+  it('walks each id list in chunks, with one SetAlertTags call per chunk', () => {
+    AZ_TAG_WRITES.forEach(({ step }) => {
+      expect(loopOf(step).type).toBe('foreach');
+      expect(loopOf(step).foreach).toContain('| chunk:');
+      expect(loopOf(step).steps).toHaveLength(1);
+      expect(callOf(step)?.type).toBe('kibana.SetAlertTags');
+      expect(callOf(step)?.name).toBe(`${step}_call`);
+      expect(callOf(step)?.with?.ids).toBe('${{ foreach.item }}');
+    });
   });
 
   it('partitions the alert ids by classification, every id landing in exactly one class', () => {
-    const ids = computeIds(verdicts);
-    expect(ids).toEqual({
+    expect(computeIds(verdicts)).toEqual({
       az_all_ids: ['tp-1', 'fp-1', 'fp-2', 'inc-1'],
       az_true_positive_ids: ['tp-1'],
       az_false_positive_ids: ['fp-1', 'fp-2'],
@@ -515,48 +546,70 @@ describe('floor_alert_triage — set_az_tags', () => {
     });
   });
 
-  it('counts each list so the guards compare numbers rather than filter a list', () => {
-    expect(computeCounts(computeIds(verdicts))).toEqual({
-      az_all_count: 4,
-      az_true_positive_count: 1,
-      az_false_positive_count: 2,
-      az_inconclusive_count: 1,
+  it('chunks each list at the size the closure review re-tags with', () => {
+    const reviewChunkSize = Number(/chunk: (\d+)/.exec(FLOOR_ALERT_TRIAGE_REVIEW_YAML)?.[1]);
+    expect(reviewChunkSize).toBeGreaterThan(0);
+    AZ_TAG_STEPS.forEach((step) => expect(chunkSizeOf(step)).toBe(reviewChunkSize));
+  });
+
+  it.each(AZ_TAG_WRITES)(
+    '"$step" splits a large list into bounded chunks that keep every id exactly once',
+    ({ step, idsVariable }) => {
+      const size = chunkSizeOf(step);
+      const ids = makeIds(size * 2 + 200);
+      const chunks = renderChunks(step, idsVariable, ids);
+      expect(chunks.map((chunk) => chunk.length)).toEqual([size, size, 200]);
+      expect(chunks.flat()).toEqual(ids);
+    }
+  );
+
+  it('sends a single call when the list fits in one chunk', () => {
+    AZ_TAG_WRITES.forEach(({ step, idsVariable }) => {
+      expect(renderChunks(step, idsVariable, makeIds(3))).toEqual([makeIds(3)]);
     });
   });
 
-  it('keeps every guard free of filters', () => {
-    const guards = [
-      stepByName('set_az_tags'),
-      ...flatten(stepByName('set_az_tags')?.steps ?? []),
-    ].filter((step) => step?.type === 'if');
-    expect(guards).toHaveLength(4);
-    guards.forEach((guard) => expect(guard?.condition).not.toContain('|'));
+  it('makes a bounded number of calls for a large batch, not one per alert', () => {
+    const alertCount = 1200;
+    const ids = makeIds(alertCount);
+    // Every alert is a false positive: the remove and the false-positive add each see them all.
+    const calls = AZ_TAG_WRITES.map(({ step, idsVariable }) => {
+      const list = step === 'add_az_false_positive_tags' || idsVariable === 'az_all_ids' ? ids : [];
+      return renderChunks(step, idsVariable, list).length;
+    });
+    expect(calls).toEqual([3, 0, 3, 0]);
+    expect(calls.reduce((sum, count) => sum + count, 0)).toBeLessThan(alertCount);
   });
 
-  it('skips the writes for a batch with no verdicts, since `ids` needs at least one entry', () => {
-    const counts = computeCounts(computeIds([]));
-    const outer = stepByName('set_az_tags')?.condition ?? '';
-    expect(evalExpr(outer, { variables: counts })).toBe(false);
+  it('never sends an empty `ids`, since a list with no ids chunks to no calls', () => {
+    AZ_TAG_WRITES.forEach(({ step, idsVariable }) => {
+      expect(renderChunks(step, idsVariable, [])).toEqual([]);
+    });
+    const ids = computeIds([]);
+    expect(Object.values(ids)).toEqual([[], [], [], []]);
   });
 
-  it('only writes a class tag when that class has alerts', () => {
-    const counts = computeCounts(
-      computeIds([{ alert_id: 'fp-1', classification: 'false_positive' }])
-    );
-    const guardOf = (name: string) => stepByName(name)?.condition ?? '';
-    expect(evalExpr(guardOf('set_az_tags'), { variables: counts })).toBe(true);
-    expect(evalExpr(guardOf('add_az_false_positive_tag'), { variables: counts })).toBe(true);
-    expect(evalExpr(guardOf('add_az_true_positive_tag'), { variables: counts })).toBe(false);
-    expect(evalExpr(guardOf('add_az_inconclusive_tag'), { variables: counts })).toBe(false);
+  it('only writes a class tag for the alerts of that class', () => {
+    const ids = computeIds([{ alert_id: 'fp-1', classification: 'false_positive' }]);
+    const chunksFor = (variable: string, step: string) =>
+      renderChunks(step, variable, ids[variable] as string[]);
+    expect(chunksFor('az_false_positive_ids', 'add_az_false_positive_tags')).toEqual([['fp-1']]);
+    expect(chunksFor('az_true_positive_ids', 'add_az_true_positive_tags')).toEqual([]);
+    expect(chunksFor('az_inconclusive_ids', 'add_az_inconclusive_tags')).toEqual([]);
+  });
+
+  it('reads each loop from the list its tag belongs to', () => {
+    AZ_TAG_WRITES.forEach(({ step, idsVariable }) => {
+      expect(loopOf(step).foreach).toContain(`variables.${idsVariable} `);
+    });
   });
 
   it('clears the three classification tags before any tag is added, and never in the same call', () => {
-    const names = flatten(stepByName('set_az_tags')?.steps ?? [])
-      .filter((step) => step.type === 'kibana.SetAlertTags')
-      .map((step) => step.name);
-    expect(names[0]).toBe('remove_stale_az_tags');
+    const order = parsed.steps.map((step) => step.name);
+    const [removeStep, ...addSteps] = AZ_TAG_STEPS;
+    addSteps.forEach((add) => expect(order.indexOf(removeStep)).toBeLessThan(order.indexOf(add)));
 
-    const remove = stepByName('remove_stale_az_tags')?.with as {
+    const remove = callOf(removeStep)?.with as {
       tags: { tags_to_remove: string[]; tags_to_add: string[] };
     };
     expect(remove.tags.tags_to_remove).toEqual([
@@ -566,34 +619,28 @@ describe('floor_alert_triage — set_az_tags', () => {
     ]);
     expect(remove.tags.tags_to_add).toEqual([]);
 
-    const adds = [
-      ['add_az_true_positive_tag_call', 'az:true_positive'],
-      ['add_az_false_positive_tag_call', 'az:false_positive'],
-      ['add_az_inconclusive_tag_call', 'az:inconclusive'],
-    ];
-    adds.forEach(([name, tag]) => {
-      const add = stepByName(name)?.with as {
+    AZ_TAG_WRITES.filter(({ tagToAdd }) => tagToAdd !== undefined).forEach(({ step, tagToAdd }) => {
+      const add = callOf(step)?.with as {
         tags: { tags_to_remove: string[]; tags_to_add: string[] };
       };
-      expect(add.tags.tags_to_add).toEqual([tag]);
+      expect(add.tags.tags_to_add).toEqual([tagToAdd]);
       expect(add.tags.tags_to_remove).toEqual([]);
     });
   });
 
   it('retries each write and fails the run when one still fails', () => {
-    flatten(stepByName('set_az_tags')?.steps ?? [])
-      .filter((step) => step.type === 'kibana.SetAlertTags')
-      .forEach((step) => {
-        expect(step['on-failure']?.retry?.['max-attempts']).toBe(3);
-        expect(step['on-failure']?.continue).toBeUndefined();
-      });
+    AZ_TAG_STEPS.forEach((step) => {
+      expect(callOf(step)?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+      expect(callOf(step)?.['on-failure']?.continue).toBeUndefined();
+    });
   });
 
   it('runs before the verdict notes and the review dispatch', () => {
     const names = parsed.steps.map((step) => step.name);
-    expect(names.indexOf('compute_az_tag_ids')).toBeLessThan(names.indexOf('set_az_tags'));
-    expect(names.indexOf('count_az_tag_ids')).toBeLessThan(names.indexOf('set_az_tags'));
-    expect(names.indexOf('set_az_tags')).toBeLessThan(names.indexOf('add_verdict_notes'));
+    expect(names.indexOf('compute_az_tag_ids')).toBeLessThan(names.indexOf(AZ_TAG_STEPS[0]));
+    AZ_TAG_STEPS.forEach((step) => {
+      expect(names.indexOf(step)).toBeLessThan(names.indexOf('add_verdict_notes'));
+    });
   });
 });
 
@@ -746,18 +793,37 @@ describe('floor_alert_triage — add_verdict_notes', () => {
         ).toEqual([]);
       });
 
+      const accumulate = (
+        accumulated: unknown[],
+        chunkFailed: unknown[],
+        staleVariable: unknown[] = []
+      ): unknown =>
+        evalExpr(recordExpr, {
+          variables: { failed_note_verdicts: accumulated, chunk_failed_verdicts: staleVariable },
+          steps: { collect_chunk_failed_notes: { output: { chunk_failed_verdicts: chunkFailed } } },
+        });
+
       it('accumulates the failures across chunks', () => {
         const [a, b, c] = verdicts(3);
-        expect(
-          evalExpr(recordExpr, {
-            variables: { failed_note_verdicts: [a], chunk_failed_verdicts: [b, c] },
-          })
-        ).toEqual([a, b, c]);
-        expect(
-          evalExpr(recordExpr, {
-            variables: { failed_note_verdicts: [a], chunk_failed_verdicts: [] },
-          })
-        ).toEqual([a]);
+        expect(accumulate([a], [b, c])).toEqual([a, b, c]);
+        expect(accumulate([a], [])).toEqual([a]);
+      });
+
+      // `variables` is a merge of every data.set output in run order, and an empty value does not
+      // reliably shadow the previous chunk's, so a clean chunk after a failed one must not
+      // re-add the failed one: the step output is what the accumulator has to read.
+      it('does not re-add the failures of an earlier chunk when a later chunk is clean', () => {
+        const [a, b] = verdicts(2);
+        const afterFailedChunk = accumulate([a], [b]);
+        expect(afterFailedChunk).toEqual([a, b]);
+        expect(accumulate(afterFailedChunk as unknown[], [], [b])).toEqual([a, b]);
+      });
+
+      it('reads the failures from the collecting step, not from a variable', () => {
+        expect(recordExpr).toContain(
+          'steps.collect_chunk_failed_notes.output.chunk_failed_verdicts'
+        );
+        expect(recordExpr).not.toContain('variables.chunk_failed_verdicts');
       });
 
       it('starts the accumulator empty before the first chunk', () => {
@@ -851,7 +917,7 @@ describe('floor_alert_triage — closure review hand-off', () => {
 
   it('starts the review after every alert has its az: tag and its note', () => {
     const gate = stepIndex('gate_fp_close');
-    expect(gate).toBeGreaterThan(stepIndex('set_az_tags'));
+    AZ_TAG_STEPS.forEach((name) => expect(gate).toBeGreaterThan(stepIndex(name)));
     expect(gate).toBeGreaterThan(stepIndex('add_verdict_notes'));
   });
 

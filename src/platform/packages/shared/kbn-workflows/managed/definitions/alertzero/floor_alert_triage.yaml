@@ -52,7 +52,8 @@ consts:
 #   4. classify_alerts           — run the classification sub-workflow
 #   5. compute_fp_candidates     — filter verdicts to false_positive at or above the floor
 #   6. attach_impact             — entity × verdict summary
-#   7. set_az_tags               — static AZ classification tags (R5, always), in bulk
+#   7. remove_stale_az_tags,     — static AZ classification tags (R5, always), in bulk
+#      add_az_*_tags
 #   8. add_verdict_notes         — verdict + Investigation reference per alert (R4/R13, always),
 #                                  written 20 at a time
 #   9. gate_fp_close             — start the closure review and record its dispatch (if any FP candidates)
@@ -366,11 +367,10 @@ steps:
   # Same remove-then-add split alert_analysis_workflow.yaml uses for its own tags.
   #
   # Written in bulk, not per alert: kibana.SetAlertTags takes a list of ids, so the batch costs
-  # one remove call plus one add call per verdict class (four calls at most) instead of two
-  # calls per alert. Every step of a loop is recorded in the execution, so a per-alert loop
-  # over a thousand alerts is thousands of step records on the same event loop as the UI.
-  # The ids are partitioned by classification here, and the counts are materialised because an
-  # if-condition takes no filters (see compute_classification_guard_counts).
+  # one remove call plus one add call per verdict class (per chunk of 500) instead of two calls
+  # per alert. Every step of a loop is recorded in the execution, so a per-alert loop over a
+  # thousand alerts is thousands of step records on the same event loop as the UI.
+  # The ids are partitioned by classification here.
   - name: compute_az_tag_ids
     type: data.set
     with:
@@ -388,28 +388,25 @@ steps:
             | where: 'classification', 'inconclusive'
             | map: 'alert_id' }}
 
-  - name: count_az_tag_ids
-    type: data.set
-    with:
-      az_all_count: "${{ variables.az_all_ids | size }}"
-      az_true_positive_count: "${{ variables.az_true_positive_ids | size }}"
-      az_false_positive_count: "${{ variables.az_false_positive_ids | size }}"
-      az_inconclusive_count: "${{ variables.az_inconclusive_ids | size }}"
-
-  # `ids` needs at least one entry, so a batch with no verdicts (missing connector, skipped
-  # sub-workflow) writes nothing rather than failing here. The same holds for each class below.
-  - name: set_az_tags
-    type: if
-    condition: "${{ variables.az_all_count > 0 }}"
+  # Each list is walked in chunks of 500 ids, as floor_alert_triage_review.yaml does for its
+  # re-tag. One call carries the whole chunk, so a batch costs a call per chunk and class rather
+  # than per alert, yet no call grows with the batch: the route turns `ids` into a `terms` query
+  # (capped by index.max_terms_count) and emits one alert-tags-changed trigger event per call,
+  # which is truncated beyond 10000 ids. A batch with no verdicts (missing connector, skipped
+  # sub-workflow) chunks to an empty list, so each loop below runs zero times and `ids` is never
+  # sent empty. The remove loop runs to the end before any add loop starts.
+  - name: remove_stale_az_tags
+    type: foreach
+    foreach: "${{ variables.az_all_ids | chunk: 500 | json }}"
     steps:
-      - name: remove_stale_az_tags
+      - name: remove_stale_az_tags_call
         type: kibana.SetAlertTags
         on-failure:
           retry:
             max-attempts: 3
             delay: 5s
         with:
-          ids: "${{ variables.az_all_ids }}"
+          ids: "${{ foreach.item }}"
           tags:
             tags_to_remove:
               - "az:true_positive"
@@ -417,56 +414,56 @@ steps:
               - "az:inconclusive"
             tags_to_add: []
 
-      - name: add_az_true_positive_tag
-        type: if
-        condition: "${{ variables.az_true_positive_count > 0 }}"
-        steps:
-          - name: add_az_true_positive_tag_call
-            type: kibana.SetAlertTags
-            on-failure:
-              retry:
-                max-attempts: 3
-                delay: 5s
-            with:
-              ids: "${{ variables.az_true_positive_ids }}"
-              tags:
-                tags_to_remove: []
-                tags_to_add:
-                  - "az:true_positive"
+  - name: add_az_true_positive_tags
+    type: foreach
+    foreach: "${{ variables.az_true_positive_ids | chunk: 500 | json }}"
+    steps:
+      - name: add_az_true_positive_tags_call
+        type: kibana.SetAlertTags
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          ids: "${{ foreach.item }}"
+          tags:
+            tags_to_remove: []
+            tags_to_add:
+              - "az:true_positive"
 
-      - name: add_az_false_positive_tag
-        type: if
-        condition: "${{ variables.az_false_positive_count > 0 }}"
-        steps:
-          - name: add_az_false_positive_tag_call
-            type: kibana.SetAlertTags
-            on-failure:
-              retry:
-                max-attempts: 3
-                delay: 5s
-            with:
-              ids: "${{ variables.az_false_positive_ids }}"
-              tags:
-                tags_to_remove: []
-                tags_to_add:
-                  - "az:false_positive"
+  - name: add_az_false_positive_tags
+    type: foreach
+    foreach: "${{ variables.az_false_positive_ids | chunk: 500 | json }}"
+    steps:
+      - name: add_az_false_positive_tags_call
+        type: kibana.SetAlertTags
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          ids: "${{ foreach.item }}"
+          tags:
+            tags_to_remove: []
+            tags_to_add:
+              - "az:false_positive"
 
-      - name: add_az_inconclusive_tag
-        type: if
-        condition: "${{ variables.az_inconclusive_count > 0 }}"
-        steps:
-          - name: add_az_inconclusive_tag_call
-            type: kibana.SetAlertTags
-            on-failure:
-              retry:
-                max-attempts: 3
-                delay: 5s
-            with:
-              ids: "${{ variables.az_inconclusive_ids }}"
-              tags:
-                tags_to_remove: []
-                tags_to_add:
-                  - "az:inconclusive"
+  - name: add_az_inconclusive_tags
+    type: foreach
+    foreach: "${{ variables.az_inconclusive_ids | chunk: 500 | json }}"
+    steps:
+      - name: add_az_inconclusive_tags_call
+        type: kibana.SetAlertTags
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          ids: "${{ foreach.item }}"
+          tags:
+            tags_to_remove: []
+            tags_to_add:
+              - "az:inconclusive"
 
   # ---------------------------------------------------------------------------
   # 8. Write a verdict note to each alert referencing the Investigation (R4, R13).
@@ -536,7 +533,19 @@ steps:
 
       # A branch's `key` is the verdict it was given, so the verdicts of the notes that did not
       # complete can be read straight off the results. Anything but `completed` counts, so a
-      # timed-out branch is retried as well.
+      # timed-out branch is retried as well. The cost is that each verdict is stored twice in the
+      # branch state and in `results[].key`; attack_discovery_batched_generation.yaml avoids that
+      # by fanning out over integer offsets. Here a branch needs the whole verdict to render its
+      # note and the retry needs it back, and a branch cannot look it up by index without
+      # reading shared variables other branches are writing, so the key stays the verdict.
+      # A verdict is at most about 1.5 KB under the classify schema (512-character id, 500-character
+      # rationale, three 100-character factors), so a 1000-alert batch (the input maximum) holds
+      # at most about 3 MB of duplicated state, and a 100-alert batch about 0.3 MB. That is an
+      # upper bound from the schema, not a measurement of a run.
+      #
+      # The failed verdicts are read from this step's own output, not from `variables`: the
+      # variables are a merge of every `data.set` output in run order, and an empty list does
+      # not reliably shadow the previous chunk's, which would retry a failed note twice.
       - name: collect_chunk_failed_notes
         type: data.set
         with:
@@ -548,7 +557,7 @@ steps:
       - name: record_failed_verdict_notes
         type: data.set
         with:
-          failed_note_verdicts: "${{ variables.failed_note_verdicts | concat: variables.chunk_failed_verdicts }}"
+          failed_note_verdicts: "${{ variables.failed_note_verdicts | concat: steps.collect_chunk_failed_notes.output.chunk_failed_verdicts }}"
 
   # Empty on a clean run, so this loop does nothing. The note is the same one as above: keep the
   # two in step.

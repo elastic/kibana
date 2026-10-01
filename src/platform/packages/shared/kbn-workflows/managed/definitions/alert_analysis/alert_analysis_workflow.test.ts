@@ -1845,6 +1845,38 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       );
     });
 
+    it('drops the pending alerts too, so it still matches missing_alert_ids with a pending filter', () => {
+      const missingStep = findStepByName(workflow.steps, 'set_missing_alert_ids') as {
+        with: { missing_alert_ids: string };
+      };
+      const context = {
+        inputs: { calledByWorker: true, alerts },
+        variables: {
+          pending_filter_expr: 'a._id == "a3"',
+          auto_close_enabled: false,
+          all_verdict_ids: ['a1'],
+        },
+      };
+
+      expect(renderIds(context)).toEqual(['a2']);
+      expect(evaluateExpression(engine, missingStep.with.missing_alert_ids, context)).toEqual(
+        renderIds(context)
+      );
+    });
+
+    it('drops the pending alerts on a Worker run with auto-close on as well', () => {
+      expect(
+        renderIds({
+          inputs: { calledByWorker: true, alerts },
+          variables: {
+            pending_filter_expr: 'a._id == "a3"',
+            auto_close_enabled: true,
+            all_verdict_ids: ['a1'],
+          },
+        })
+      ).toEqual(['a1', 'a2']);
+    });
+
     it('keeps every alert when a Worker turns auto-close on, since auto_close_ids is built here', () => {
       expect(
         renderIds({

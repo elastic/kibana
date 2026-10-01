@@ -1799,14 +1799,15 @@ steps:
       # visits decide how big the execution is. A Worker caller (calledByWorker) writes its own
       # tags and notes, and runs with auto-close off, so for an alert that has a verdict every
       # branch below is a no-op; only an alert without one is acted on (log line and error
-      # note). The Worker path therefore iterates the alerts missing a verdict, not all of them.
+      # note). The Worker path therefore iterates the alerts missing a verdict, not all of them,
+      # and drops the same pending alerts set_missing_alert_ids does, so the two lists agree.
       # A Worker that turns auto-close on keeps the full list, because auto_close_ids is
       # accumulated per alert inside this loop. The standalone path always visits every
       # pending alert.
       - name: apply_verdicts
         type: foreach
         foreach: >-
-          {% if inputs.calledByWorker == true and variables.auto_close_enabled != true %}{{ inputs.alerts | reject_exp: 'a', 'variables.all_verdict_ids contains a._id' | json }}{% elsif inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% endif %}
+          {% if inputs.calledByWorker == true and variables.auto_close_enabled != true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | reject_exp: 'a', 'variables.all_verdict_ids contains a._id' | json }}{% elsif inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% endif %}
         steps:
           - name: select_alert_verdict
             type: data.set
