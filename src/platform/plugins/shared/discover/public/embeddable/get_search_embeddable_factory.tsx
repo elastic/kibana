@@ -305,12 +305,9 @@ export const getSearchEmbeddableFactory = ({
         });
       };
 
-      const enableFilters =
-        runtimeState.nonPersistedDisplayOptions?.enableFilters !== false &&
-        !disableTriggers$.getValue();
+      const enableFilters = runtimeState.nonPersistedDisplayOptions?.enableFilters !== false;
       const enableDocumentViewer =
-        runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !== false &&
-        !disableTriggers$.getValue();
+        runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !== false;
 
       const expandedDoc$ = new BehaviorSubject<DataTableRecord | undefined>(undefined);
       const initialDocViewerTabId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -376,6 +373,7 @@ export const getSearchEmbeddableFactory = ({
             selectedTabId,
             isInlineEditDirty,
             searchError,
+            disableTriggers,
           ] = useBatchedPublishingSubjects(
             api.savedSearch$,
             api.dataViews$,
@@ -383,7 +381,8 @@ export const getSearchEmbeddableFactory = ({
             inlineEditingApi.draftSelectedTabId$,
             selectedTabId$,
             inlineEditingApi.inlineEditDirty$,
-            searchError$
+            searchError$,
+            disableTriggers$
           );
 
           const expandedDoc = useObservable(expandedDoc$, expandedDoc$.getValue());
@@ -493,7 +492,9 @@ export const getSearchEmbeddableFactory = ({
                       }}
                       dataView={dataView!}
                       onAddFilter={
-                        isEsqlMode(savedSearch) || !enableFilters ? undefined : addFilter
+                        isEsqlMode(savedSearch) || !enableFilters || disableTriggers
+                          ? undefined
+                          : addFilter
                       }
                       stateManager={searchEmbeddable.stateManager}
                     />
@@ -506,14 +507,20 @@ export const getSearchEmbeddableFactory = ({
                       <SearchEmbeddableGridComponent
                         api={{ ...api, fetchWarnings$, fetchContext$, abortSignal$, viewMode$ }}
                         dataView={dataView!}
-                        onAddFilter={enableFilters ? addFilter : undefined}
-                        enableDocumentViewer={enableDocumentViewer}
-                        expandedDoc={enableDocumentViewer ? expandedDoc : undefined}
+                        onAddFilter={enableFilters && !disableTriggers ? addFilter : undefined}
+                        enableDocumentViewer={enableDocumentViewer && !disableTriggers}
+                        expandedDoc={
+                          enableDocumentViewer && !disableTriggers ? expandedDoc : undefined
+                        }
                         initialDocViewerTabId={
-                          enableDocumentViewer ? initialDocViewerTabId : undefined
+                          enableDocumentViewer && !disableTriggers
+                            ? initialDocViewerTabId
+                            : undefined
                         }
                         docViewerRef={docViewerRef}
-                        setExpandedDoc={enableDocumentViewer ? setExpandedDoc : undefined}
+                        setExpandedDoc={
+                          enableDocumentViewer && !disableTriggers ? setExpandedDoc : undefined
+                        }
                         inlineEditing={{
                           isActive: isInlineEditing,
                           hasPendingChanges: hasPendingInlineTabChanges,

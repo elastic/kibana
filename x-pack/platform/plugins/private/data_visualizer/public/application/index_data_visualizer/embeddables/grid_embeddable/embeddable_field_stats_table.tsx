@@ -75,7 +75,7 @@ const EmbeddableFieldStatsTableWrapper = (
               item={item}
               dataView={props.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
-              onAddFilter={onAddFilter}
+              onAddFilter={props.previewMode ? undefined : onAddFilter}
               totalDocuments={props.totalDocuments}
             />
           );
@@ -83,7 +83,14 @@ const EmbeddableFieldStatsTableWrapper = (
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [props.dataView, searchQueryLanguage, searchString, props.totalDocuments, onAddFilter]
+    [
+      props.dataView,
+      searchQueryLanguage,
+      searchString,
+      props.totalDocuments,
+      onAddFilter,
+      props.previewMode,
+    ]
   );
 
   useEffect(() => {

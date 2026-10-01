@@ -654,7 +654,7 @@ export const useESQLDataVisualizerData = (
               totalDocuments={totalCount}
               typeAccessor="secondaryType"
               timeFieldName={timeFieldName}
-              onAddFilter={input.onAddFilter}
+              onAddFilter={input.previewMode ? undefined : input.onAddFilter}
               onVisibilityChange={onVisibilityChange}
             />
           );
@@ -663,7 +663,7 @@ export const useESQLDataVisualizerData = (
       }, {} as ItemIdToExpandedRowMap);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentDataView, totalCount, query.esql, timeFieldName, onVisibilityChange]
+    [currentDataView, totalCount, query.esql, timeFieldName, onVisibilityChange, input.previewMode]
   );
 
   const combinedProgress = useMemo(
