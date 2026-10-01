@@ -175,7 +175,7 @@ function convertDataLayerToAPI(
     return {
       ...getValueApiColumn(accessor, layer),
       ...(breakdown_by ? {} : { color: fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR }),
-      ...(axis !== 'y' ? { axis } : {}),
+      axis,
     };
   });
 

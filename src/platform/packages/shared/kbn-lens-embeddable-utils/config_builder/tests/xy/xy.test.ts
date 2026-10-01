@@ -8,7 +8,7 @@
  */
 
 import type { XYVisualizationState } from '@kbn/lens-common';
-import type { XYConfig, XYConfigNoESQL } from '../../schema/charts/xy';
+import { xyConfigSchema, type XYConfig, type XYConfigNoESQL } from '../../schema/charts/xy';
 import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import type { LensAttributes } from '../../types';
@@ -1218,5 +1218,35 @@ describe('XY', () => {
         }
       }
     });
+  });
+
+  describe('dashboard GET parse vs serialize', () => {
+    const builder = new LensConfigBuilder(undefined, true);
+
+    it('keeps a default bar panel equal after schema parse', () => {
+      const api = builder.toAPIFormat(setSeriesType(minimalAttributesXY, 'bar'));
+      expect(xyConfigSchema.parse(api)).toEqual(api);
+    });
+
+    it('keeps an ES|QL primary-axis panel equal after schema parse', () => {
+      const api = builder.toAPIFormat(esqlChart);
+      expect(xyConfigSchema.parse(api)).toEqual(api);
+      const dataLayer = (api as XYConfig).layers[0];
+      expect('y' in dataLayer && dataLayer.y[0].axis).toBe('y');
+    });
+
+    it.each(['line', 'area'] as const)(
+      'fills omitted interpolation and points on a %s panel so serialize matches',
+      (type) => {
+        const api = builder.toAPIFormat(setSeriesType(minimalAttributesXY, type)) as XYConfig;
+        const {
+          interpolation: _interpolation,
+          points: _points,
+          ...stylingRest
+        } = api.styling ?? {};
+        const omitted = { ...api, styling: stylingRest };
+        expect(builder.toAPIFormat(builder.fromAPIFormat(omitted))).toEqual(api);
+      }
+    );
   });
 });
