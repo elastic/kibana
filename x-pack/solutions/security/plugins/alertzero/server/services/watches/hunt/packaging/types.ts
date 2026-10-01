@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionCatalogEntry } from '@kbn/alertzero-common';
+import type { ActionCatalogEntry, ActionSubjectKind } from '@kbn/alertzero-common';
 import type { SeverityLevel } from '../../../../../common/attachment_enums';
 import type {
   PackageReportBehavior,
@@ -43,6 +43,25 @@ export interface ProcessSelector {
    */
   techniqueId?: string;
 }
+
+export type SubjectKind = ActionSubjectKind;
+
+/**
+ * One thing packaging could act on. Hosts and processes are reachable when the host is
+ * enrolled with an agent id; users and services are always reachable (the identity action
+ * is a Kibana API). `value` is the human-readable name the proposal is about.
+ */
+export type Subject =
+  | { kind: 'host'; value: string; reachable: boolean; host: CurrentRunHost }
+  | {
+      kind: 'process';
+      value: string;
+      reachable: boolean;
+      host: CurrentRunHost;
+      processSelector: ProcessSelector;
+    }
+  | { kind: 'user'; value: string; reachable: true }
+  | { kind: 'service'; value: string; reachable: true };
 
 /** One confirmed Tier 2 behavior, deduped by `technique_id` across current-run SSEs. */
 export interface HuntEvidenceTechnique {
