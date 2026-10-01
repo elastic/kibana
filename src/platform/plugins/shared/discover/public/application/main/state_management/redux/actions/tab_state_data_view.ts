@@ -68,6 +68,11 @@ export const setDataView: InternalStateThunkActionCreator<
 
     if (nextSource) {
       currentDataSource$.next(nextSource);
+      return;
+    }
+
+    if (!existingSource) {
+      currentDataSource$.next(new DataViewSource(dataView));
     }
   };
 

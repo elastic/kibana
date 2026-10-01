@@ -154,6 +154,34 @@ describe('tab_state_data_view actions', () => {
       expect(next).toBe(previous);
       expect(next?.id).not.toBe('esql-unregistered');
     });
+
+    it('publishes a DataViewSource for an unregistered ES|QL shim when the tab has no source', async () => {
+      const { internalState, tabId, runtimeStateManager } = await setup();
+      const currentDataSource$ = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).currentDataSource$;
+      currentDataSource$.next(undefined);
+
+      const shim = buildDataViewMock({
+        id: 'esql-unregistered',
+        title: 'logs-*',
+        type: ESQL_TYPE,
+        timeFieldName: '@timestamp',
+        isPersisted: false,
+      });
+
+      internalState.dispatch(
+        internalStateActions.setDataView({
+          tabId,
+          dataView: shim,
+        })
+      );
+
+      const next = currentDataSource$.getValue();
+      expect(next?.kind).toBe('index-pattern');
+      expect(next?.id).toBe('esql-unregistered');
+    });
   });
 
   describe('assignNextDataView', () => {
