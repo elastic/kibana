@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 import { loadRawServerConfig } from '../servers/configs/loader/read_config_file';
-import { auditConfigSets } from './audit_config_sets';
+import { auditConfigSets, KEEP_SEPARATE } from './audit_config_sets';
 
 jest.mock('@kbn/repo-packages', () => ({ getPackages: () => [] }));
 jest.mock('../servers/configs/loader/read_config_file', () => ({
@@ -21,17 +21,19 @@ jest.mock('../servers/configs/loader/read_config_file', () => ({
 const CONNECTORS_ENV = 'KIBANA_TESTING_AI_CONNECTORS';
 const SETS_DIR = 'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets';
 
+const writeSet = (repoRoot: string, name: string) => {
+  const dir = Path.join(repoRoot, SETS_DIR, name, 'stateful');
+  Fs.mkdirSync(dir, { recursive: true });
+  Fs.writeFileSync(Path.join(dir, 'classic.stateful.config.ts'), '');
+};
+
 describe('auditConfigSets', () => {
   const originalEnv = process.env[CONNECTORS_ENV];
   let repoRoot: string;
 
   beforeEach(() => {
     repoRoot = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'scout-audit-'));
-    ['default', 'needs_env'].forEach((name) => {
-      const dir = Path.join(repoRoot, SETS_DIR, name, 'stateful');
-      Fs.mkdirSync(dir, { recursive: true });
-      Fs.writeFileSync(Path.join(dir, 'classic.stateful.config.ts'), '');
-    });
+    ['default', 'needs_env'].forEach((name) => writeSet(repoRoot, name));
     delete process.env[CONNECTORS_ENV];
   });
 
@@ -61,5 +63,23 @@ describe('auditConfigSets', () => {
     await auditConfigSets(repoRoot);
 
     expect(process.env[CONNECTORS_ENV]).toBe('real');
+  });
+
+  it('skips sets that are kept separate on purpose', async () => {
+    const [kept] = Object.keys(KEEP_SEPARATE);
+    writeSet(repoRoot, kept);
+    (loadRawServerConfig as jest.Mock).mockResolvedValue({});
+
+    const { sameAsDefault } = await auditConfigSets(repoRoot);
+
+    expect(loadRawServerConfig).not.toHaveBeenCalledWith(expect.stringContaining(`/${kept}/`));
+    expect(sameAsDefault).toEqual(['`needs_env` (stateful)']);
+  });
+
+  it('only keeps separate the config sets that exist', () => {
+    const setsDir = Path.resolve(__dirname, '../servers/configs/config_sets');
+    Object.keys(KEEP_SEPARATE).forEach((name) => {
+      expect(Fs.existsSync(Path.join(setsDir, name))).toBe(true);
+    });
   });
 });
