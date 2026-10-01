@@ -61,6 +61,7 @@ test.describe('Alerts page - read/write privileges', { tag: '@local-stateful-cla
     const { alertEpisodesList } = pageObjects;
     await alertEpisodesList.goto();
     await expect(alertEpisodesList.pageContainer).toBeVisible();
+    await expect(alertEpisodesList.itemCount).toHaveText('Showing 1 episode');
 
     await test.step('the rule-dependent open-in-discover control is not rendered', async () => {
       await expect(alertEpisodesList.openInDiscoverRowControl).toHaveCount(0);

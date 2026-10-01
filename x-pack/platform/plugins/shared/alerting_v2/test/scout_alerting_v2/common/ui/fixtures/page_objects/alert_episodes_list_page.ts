@@ -13,9 +13,8 @@ import { OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from '@kbn/alerting-v2-episodes-ui
 
 /**
  * Drives the Alerts (episodes) list page. Episode row actions are rendered as
- * UnifiedDataTable leading controls: read-only users only get the read-safe
- * "Open in Discover" inline control, while editors get enough write actions
- * that they collapse into the overflow actions menu.
+ * UnifiedDataTable leading controls. Editors get enough write actions that
+ * they collapse into the overflow actions menu.
  */
 export class AlertEpisodesListPage {
   public readonly pageContainer: Locator;
@@ -27,7 +26,7 @@ export class AlertEpisodesListPage {
   public readonly histogramChart: Locator;
   public readonly tagsFilterButton: Locator;
   public readonly tagsFilterSearch: Locator;
-  /** Inline "Open in Discover" leading control (the only read-safe episode action). */
+  /** Inline "Open in Discover" leading control. */
   public readonly openInDiscoverRowControl: Locator;
   /**
    * Overflow row actions ("Additional actions") menu. Episode actions are
