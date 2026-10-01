@@ -2353,61 +2353,6 @@ describe('conversation model converters', () => {
 
   describe('metadata, template_id, and template_version round-trips', () => {
     describe('fromEs', () => {
-      it('exposes conversation.feedback map on the returned conversation', () => {
-        const doc: ConversationDocument = {
-          _id: 'conv-feedback-map',
-          _seq_no: 1,
-          _primary_term: 1,
-          _source: {
-            agent_id: 'agent_id',
-            title: 'Feedback map test',
-            user_id: 'user_id',
-            user_name: 'user_name',
-            space: 'space',
-            schema_version: CONVERSATION_SCHEMA_VERSION,
-            conversation_rounds: [
-              {
-                id: 'round-1',
-                status: ConversationRoundStatus.completed,
-                input: { message: 'q' },
-                response: { message: 'a' },
-                steps: [],
-                started_at: roundCreationDate,
-                time_to_first_token: 10,
-                time_to_last_token: 50,
-                model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 5, output_tokens: 5 },
-              },
-            ],
-            feedback: {
-              'round-1': {
-                vote: 'up',
-                chips: [],
-                comment: '',
-                submitted_at: '2025-01-01T00:00:00.000Z',
-              },
-            },
-            events: [
-              {
-                id: 'round-1::user_message',
-                type: TimelineEventType.userMessage,
-                created_at: roundCreationDate,
-                actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
-                data: { message: 'q' },
-              },
-            ],
-            created_at: creationDate,
-            updated_at: updateDate,
-          },
-        };
-
-        const result = fromEs(doc, requestingUser);
-
-        expect(result.feedback).toEqual({
-          'round-1': { vote: 'up', chips: [], comment: '', submitted_at: '2025-01-01T00:00:00.000Z' },
-        });
-      });
-
-
       it('deserializes metadata, template_id, and template_version when present in the document', () => {
         const doc: ConversationDocument = {
           _id: 'conv-tmpl',

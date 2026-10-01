@@ -88,6 +88,7 @@ import { buildConversationIdsFilter } from './build_ids_filter';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationProperties, ConversationStorage } from './storage';
 import { conversationIndexName, createStorage } from './storage';
+import { FeedbackClient } from './feedback_storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
@@ -241,8 +242,10 @@ export const createClient = ({
   eventEmitter?: ScopedConversationEventEmitter;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
+  const feedbackClient = new FeedbackClient(esClient, logger);
   return new ConversationClientImpl({
     storage,
+    feedbackClient,
     esClient,
     user,
     space,
@@ -278,6 +281,7 @@ const hasTerminalEventFor = (current: NormalizedConversation, executionId: strin
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
+  private readonly feedbackClient: FeedbackClient;
   private readonly esClient: ElasticsearchClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
@@ -287,6 +291,7 @@ class ConversationClientImpl implements ConversationClient {
 
   constructor({
     storage,
+    feedbackClient,
     esClient,
     user,
     space,
@@ -296,6 +301,7 @@ class ConversationClientImpl implements ConversationClient {
     eventEmitter,
   }: {
     storage: ConversationStorage;
+    feedbackClient: FeedbackClient;
     esClient: ElasticsearchClient;
     user: CurrentUser;
     space: string;
@@ -305,6 +311,7 @@ class ConversationClientImpl implements ConversationClient {
     eventEmitter?: ScopedConversationEventEmitter;
   }) {
     this.storage = storage;
+    this.feedbackClient = feedbackClient;
     this.esClient = esClient;
     this.user = user;
     this.space = space;
@@ -528,11 +535,12 @@ class ConversationClientImpl implements ConversationClient {
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    return toResponseConversation({
-      document,
-      user: this.getUser(),
-      resolveTemplate: getTemplate,
-    });
+    const [conversation, feedback] = await Promise.all([
+      toResponseConversation({ document, user: this.getUser(), resolveTemplate: getTemplate }),
+      this.feedbackClient.getByConversation(conversationId),
+    ]);
+
+    return feedback ? { ...conversation, feedback } : conversation;
   }
 
   async exists(conversationId: string): Promise<boolean> {
@@ -882,46 +890,37 @@ class ConversationClientImpl implements ConversationClient {
     executionId: string,
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void> {
-    await this.writeConversation({
-      conversationId,
-      access: 'owner',
-      fields: (current) => {
-        const terminalEvent = (current.events ?? []).find(
-          (e): e is ExecutionTerminalEvent =>
-            isExecutionTerminalEvent(e) && e.execution_id === executionId
-        );
+    const document = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
+    const conversation = fromEs(document, this.getUser());
 
-        if (!terminalEvent) {
-          throw createConversationNotFoundError({ conversationId });
-        }
+    const terminalEvent = (conversation.events ?? []).find(
+      (e): e is ExecutionTerminalEvent =>
+        isExecutionTerminalEvent(e) && e.execution_id === executionId
+    );
 
-        const existing = current.feedback ?? {};
+    if (!terminalEvent) {
+      throw createConversationNotFoundError({ conversationId });
+    }
 
-        if (feedback.vote === null) {
-          const { [executionId]: _removed, ...rest } = existing;
-          return { feedback: Object.keys(rest).length ? rest : undefined };
-        }
+    if (feedback.vote === null) {
+      await this.feedbackClient.delete(conversationId, executionId);
+      return;
+    }
 
-        const modelUsage =
-          terminalEvent.type === TimelineEventType.executionTerminated
-            ? terminalEvent.data.model_usage
-            : undefined;
+    const modelUsage =
+      terminalEvent.type === TimelineEventType.executionTerminated
+        ? terminalEvent.data.model_usage
+        : undefined;
 
-        return {
-          feedback: {
-            ...existing,
-            [executionId]: {
-              vote: feedback.vote,
-              chips: feedback.chips ?? [],
-              comment: feedback.comment ?? '',
-              submitted_at: new Date().toISOString(),
-              connector_id: modelUsage?.connector_id,
-              model: modelUsage?.model,
-            } satisfies ConversationRoundFeedback,
-          },
-        };
-      },
-    });
+    await this.feedbackClient.write(conversationId, executionId, {
+      vote: feedback.vote,
+      chips: feedback.chips ?? [],
+      comment: feedback.comment ?? '',
+      submitted_at: new Date().toISOString(),
+      connector_id: modelUsage?.connector_id,
+      model: modelUsage?.model,
+      agent_id: conversation.agent_id,
+    } satisfies ConversationRoundFeedback & { agent_id: string });
   }
 
   async delete(conversationId: string): Promise<boolean> {

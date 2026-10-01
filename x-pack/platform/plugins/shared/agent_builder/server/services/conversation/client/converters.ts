@@ -268,8 +268,6 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
   const storedEvents = document._source!.events;
   const isEventsNative = isEventsNativeVersion(storedSchemaVersion);
 
-  const storedFeedback = document._source!.feedback;
-
   const conversation: NormalizedConversation = {
     ...base,
     ...perUserFlags,
@@ -277,7 +275,6 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
     ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
     ...(document._source!.state ? { state: document._source!.state } : {}),
     ...(isEventsNative ? { schema_version: storedSchemaVersion } : {}),
-    ...(storedFeedback ? { feedback: storedFeedback } : {}),
   };
 
   const events =
@@ -437,7 +434,6 @@ export const toEs = (
           schema_version: conversation.schema_version,
         }
       : {}),
-    ...(conversation.feedback ? { feedback: conversation.feedback } : {}),
     // Cast metadata to storage type — the flattened mapping requires string | string[].
     // Deserialized domain values (boolean, number) only exist on read; writes always
     // go through serializeMetadataValue before reaching this converter.

@@ -19,7 +19,6 @@ import type {
   ConversationOrigin,
   ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
-import type { ConversationRoundFeedback } from '@kbn/agent-builder-common/chat/conversation';
 import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import type {
   ConversationPinnedByEntry,
@@ -66,7 +65,6 @@ const storageSettings = {
           data: types.object({ dynamic: false, properties: {} }),
         },
       }),
-      feedback: types.object({ dynamic: false, properties: {} }),
       active_execution: types.object({
         dynamic: false,
         properties: {
@@ -155,7 +153,6 @@ export interface ConversationProperties {
   updated_at: string;
   conversation_rounds: PersistentConversationRound[];
   events?: ConversationEvent[];
-  feedback?: Record<string, ConversationRoundFeedback>;
   active_execution?: ActiveExecution;
   schema_version?: number;
   attachments?: VersionedAttachment[];
