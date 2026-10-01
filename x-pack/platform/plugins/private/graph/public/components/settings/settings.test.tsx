@@ -67,6 +67,7 @@ describe('settings', () => {
           field: 'A',
           term: '1',
         },
+        id: 'blocklisted-node-1',
         label: 'blocklisted node 1',
         icon: {
           id: 'test',
@@ -85,6 +86,7 @@ describe('settings', () => {
           field: 'A',
           term: '1',
         },
+        id: 'blocklisted-node-2',
         label: 'blocklisted node 2',
         icon: {
           id: 'test',
@@ -240,6 +242,7 @@ describe('settings', () => {
                 field: 'A',
                 term: '1',
               },
+              id: 'blocklisted-node-3',
               label: 'blocklisted node 3',
               icon: {
                 id: 'test',

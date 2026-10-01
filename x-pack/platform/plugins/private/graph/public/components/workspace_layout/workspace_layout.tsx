@@ -180,7 +180,6 @@ export const WorkspaceLayoutComponent = ({
   return (
     <Fragment>
       <WorkspaceTopNavMenu
-        workspace={workspace}
         savedWorkspace={savedWorkspace}
         graphSavePolicy={graphSavePolicy}
         capabilities={capabilities}

@@ -23,22 +23,17 @@ import {
   metaDataSelector,
   unblockAllNodes,
   unblockNode,
+  workspaceSelector,
 } from '../../state_management';
-import type {
-  BlockListedNode,
-  GraphSavePolicy,
-  GraphWorkspaceSavedObject,
-  RuntimeGraph,
-  WorkspaceNode,
-} from '../../types';
-import type { AsObservable, SettingsWorkspaceProps } from '../settings';
+import type { GraphSavePolicy, GraphWorkspaceSavedObject } from '../../types';
+import { getIcon } from '../../helpers/style_choices';
+import type { AsObservable, BlocklistedNodeDisplay, SettingsWorkspaceProps } from '../settings';
 import { Settings } from '../settings';
 import { asSyncedObservable } from '../../helpers/as_observable';
 import { useInspector } from '../../helpers/use_inspector';
 import { getHomePath } from '../../services/url';
 
 interface WorkspaceTopNavMenuProps {
-  workspace: RuntimeGraph | undefined;
   confirmWipeWorkspace: (
     onConfirm: () => void,
     text?: string,
@@ -62,11 +57,12 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const title = useSelector(metaDataSelector).title;
   const hasFields = useSelector(hasFieldsSelector);
   const datasource = useSelector(datasourceSelector);
+  const { blocklistedNodeIds, blocklistedNodesById } = useSelector(workspaceSelector);
   const allSavingDisabled = props.graphSavePolicy === 'none';
   const isInspectDisabled = props.requestAdapter.getRequests().length === 0;
   const canSave = Boolean(props.capabilities.graph.save);
 
-  const { confirmWipeWorkspace, savedWorkspace, workspace } = props;
+  const { confirmWipeWorkspace, savedWorkspace } = props;
 
   const { onOpenInspector } = useInspector({
     inspect: props.inspect,
@@ -140,12 +136,16 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
         }),
         iconType: 'gear',
         run: () => {
-          const currentWorkspace = workspace as RuntimeGraph;
-
           const settingsObservable = asSyncedObservable(() => ({
-            blocklistedNodes: currentWorkspace.blocklistedNodes,
-            unblockNode: (node: BlockListedNode) =>
-              dispatch(unblockNode((node as WorkspaceNode).id)),
+            blocklistedNodes: blocklistedNodeIds.map((id) => {
+              const node = blocklistedNodesById[id];
+              return {
+                id,
+                label: node.label,
+                icon: getIcon(node.icon ?? ''),
+              };
+            }),
+            unblockNode: (node: BlocklistedNodeDisplay) => dispatch(unblockNode(node.id)),
             unblockAll: () => dispatch(unblockAllNodes()),
             canEditDrillDownUrls: props.canEditDrillDownUrls,
           })) as unknown as AsObservable<SettingsWorkspaceProps>['observable'];
@@ -210,6 +210,8 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
     };
   }, [
     allSavingDisabled,
+    blocklistedNodeIds,
+    blocklistedNodesById,
     canSave,
     confirmWipeWorkspace,
     datasource,
@@ -224,7 +226,6 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
     props.isInitialized,
     savedWorkspace,
     store,
-    workspace,
   ]);
 
   return <AppHeader title={title} back={back} menu={menu} />;
