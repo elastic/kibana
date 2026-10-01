@@ -13,6 +13,7 @@ import type { AlertingAuthorization } from '../../../../authorization';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { changeTrackingServiceMock } from '../../../../rules_client/lib/change_tracking/service.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   savedObjectsClientMock,
@@ -204,6 +205,7 @@ describe('findBackfill()', () => {
 
     rulesClient = new RulesClient({
       request: httpServerMock.createKibanaRequest(),
+      changeTrackingService: changeTrackingServiceMock.createScoped(),
       taskManager,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,

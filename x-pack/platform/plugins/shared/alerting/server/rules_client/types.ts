@@ -98,7 +98,7 @@ export interface RulesClientContext {
   readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   readonly auditLogger?: AuditLogger;
   readonly eventLogger?: IEventLogger;
-  readonly changeTrackingService?: IScopedChangeTrackingService;
+  readonly changeTrackingService: IScopedChangeTrackingService;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
   readonly cloneAPIKey: (name: string) => Promise<CreateAPIKeyResult>;

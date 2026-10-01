@@ -33,6 +33,23 @@ const applyConfigDeprecations = (settings = {}) => {
 };
 
 describe('config deprecations', () => {
+  it('removes xpack.alerting.ruleChangeTracking.enabled', async () => {
+    const config = {
+      ruleChangeTracking: {
+        enabled: false,
+        scope: ['security'],
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.ruleChangeTracking?.enabled).not.toBeDefined();
+    expect(migrated.ruleChangeTracking?.scope).toEqual(['security']);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Use the \\"securitySolution:enableRuleChangesHistory\\" advanced setting to turn the feature off per space.",
+      ]
+    `);
+  });
+
   it('renames xpack.alerting.maintenanceWindow.enabled to xpack.maintenanceWindows.enabled', async () => {
     const config = {
       xpack: {

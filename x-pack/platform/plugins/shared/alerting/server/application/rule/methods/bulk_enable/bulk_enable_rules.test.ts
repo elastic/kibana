@@ -7,6 +7,7 @@
 
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
+import { changeTrackingServiceMock } from '../../../../rules_client/lib/change_tracking/service.mock';
 import type { SavedObject } from '@kbn/core/server';
 import type { RawRule } from '../../../../types';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -1148,11 +1149,7 @@ describe('bulkEnableRules', () => {
   });
 
   describe('change tracking', () => {
-    const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-    });
+    const createChangeTrackingService = () => changeTrackingServiceMock.createScoped();
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
       ruleTypeRegistry.get.mockReturnValue({
@@ -1267,7 +1264,7 @@ describe('bulkEnableRules', () => {
 
       expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
       const [changes] = changeTrackingService.logBulk.mock.calls[0];
-      expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
+      expect(changes.map((c) => c.timestamp)).toEqual([
         '2023-03-05T10:30:00.000Z',
         '2023-03-05T11:00:00.000Z',
       ]);

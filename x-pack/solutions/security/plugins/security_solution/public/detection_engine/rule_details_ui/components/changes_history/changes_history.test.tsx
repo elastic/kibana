@@ -28,7 +28,10 @@ Object.defineProperty(window, 'IntersectionObserver', {
   value: MockIntersectionObserver,
 });
 
-jest.mock('../../../rule_management/api/hooks/use_infinite_change_history');
+jest.mock('../../../rule_management/api/hooks/use_infinite_change_history', () => ({
+  ...jest.requireActual('../../../rule_management/api/hooks/use_infinite_change_history'),
+  useInfiniteChangeHistory: jest.fn(),
+}));
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -309,6 +312,23 @@ describe('RuleChangesHistory', () => {
     });
   });
 
+  it('shows a disabled placeholder when the history API returns 403', async () => {
+    mockUseInfiniteChangeHistory.mockReturnValue(
+      mockUseInfiniteQueryResult([], { error: { response: { status: 403 } } })
+    );
+
+    render(
+      <TestProviders>
+        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ruleChangesHistoryDisabled')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('ruleChangesHistoryEmpty')).not.toBeInTheDocument();
+  });
+
   it('does not fire ChangesHistoryDiffOpened on auto-selection, but fires it on an explicit click', async () => {
     const firstItem = createHistoryItem({
       id: 'create-1',
@@ -399,6 +419,7 @@ interface MockUseInfiniteQueryResultOptions {
   hasNextPage?: boolean;
   fetchNextPage?: jest.Mock;
   isFetching?: boolean;
+  error?: unknown;
 }
 
 function mockUseInfiniteQueryResult(
@@ -407,6 +428,7 @@ function mockUseInfiniteQueryResult(
     hasNextPage = false,
     fetchNextPage = jest.fn(),
     isFetching = false,
+    error = undefined,
   }: MockUseInfiniteQueryResultOptions = {}
 ) {
   return {
@@ -421,6 +443,7 @@ function mockUseInfiniteQueryResult(
         },
       ],
     },
+    error,
     isLoading: false,
     isFetching,
     isFetchingNextPage: false,

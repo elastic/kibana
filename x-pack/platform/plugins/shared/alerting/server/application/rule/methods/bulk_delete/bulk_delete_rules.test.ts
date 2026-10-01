@@ -10,6 +10,7 @@ import { getRulesClientMockParams } from '../../../../test_utils';
 import { schema } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { changeTrackingServiceMock } from '../../../../rules_client/lib/change_tracking/service.mock';
 import { RecoveredActionGroup } from '../../../../../common';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -803,11 +804,7 @@ describe('bulkDelete', () => {
   });
 
   describe('change tracking', () => {
-    const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-    });
+    const createChangeTrackingService = () => changeTrackingServiceMock.createScoped();
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
       ruleTypeRegistry.get.mockReturnValue({
@@ -942,7 +939,7 @@ describe('bulkDelete', () => {
         expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
         const [changes] = changeTrackingService.logBulk.mock.calls[0];
         // All rules share the same operation timestamp.
-        expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
+        expect(changes.map((c) => c.timestamp)).toEqual([
           '2030-06-01T08:00:00.000Z',
           '2030-06-01T08:00:00.000Z',
         ]);

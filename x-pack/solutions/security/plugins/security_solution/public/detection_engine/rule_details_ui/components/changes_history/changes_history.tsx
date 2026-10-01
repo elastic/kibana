@@ -30,7 +30,10 @@ import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redi
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { useRule } from '../../../rule_management/logic';
 import { RuleChangesHistoryTimeline } from '../changes_history_timeline';
-import { useInfiniteChangeHistory } from '../../../rule_management/api/hooks/use_infinite_change_history';
+import {
+  isRuleChangeTrackingDisabledError,
+  useInfiniteChangeHistory,
+} from '../../../rule_management/api/hooks/use_infinite_change_history';
 import { RuleDetailTabs } from '../../pages/rule_details/use_rule_details_tabs';
 import { RuleChangesDiff } from '../changes_diff/changes_diff';
 import { useChangeHistoryAutoSelection } from './use_change_history_auto_selection';
@@ -67,8 +70,9 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
   });
 
   const [selectedItem, setSelectedItem] = useState<RuleHistoryItem | undefined>();
-  const { data, isLoading, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage } =
+  const { data, error, isLoading, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage } =
     useInfiniteChangeHistory({ ruleId });
+  const isDisabled = isRuleChangeTrackingDisabledError(error);
   const handleNextPageLoading = useCallback(() => {
     if (!hasNextPage || isFetchingNextPage) {
       return;
@@ -158,6 +162,21 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
     }),
     [euiTheme]
   );
+
+  if (isDisabled) {
+    return (
+      <div css={styles.mainCss}>
+        {header}
+        <EuiEmptyPrompt
+          iconType="warning"
+          color="subdued"
+          title={<h2>{i18n.CHANGE_HISTORY_DISABLED_TITLE}</h2>}
+          body={<p>{i18n.CHANGE_HISTORY_DISABLED_BODY}</p>}
+          data-test-subj="ruleChangesHistoryDisabled"
+        />
+      </div>
+    );
+  }
 
   if (hasNoHistory) {
     return (
