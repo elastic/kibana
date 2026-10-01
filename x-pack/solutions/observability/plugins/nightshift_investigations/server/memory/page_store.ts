@@ -94,7 +94,7 @@ export const canonicalizeSlug = (slug: string): string => {
   if (normalized.startsWith('memory-')) {
     normalized = normalized.slice('memory-'.length);
   }
-  return normalized.replace(/^-+|-+$/g, '').slice(0, 80);
+  return normalized.replace(/^-+/, '').slice(0, 80).replace(/-+$/, '');
 };
 
 export const toMemoryKiId = (slug: string): string => {

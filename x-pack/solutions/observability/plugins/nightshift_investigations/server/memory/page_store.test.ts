@@ -13,6 +13,7 @@ import {
   canonicalizeSlug,
   createMemoryPageStore,
   epochSecondsToIso,
+  isCanonicalMemoryId,
   toMemoryDisplayTelemetry,
   toMemoryKiId,
 } from './page_store';
@@ -47,6 +48,12 @@ describe('canonicalizeSlug / toMemoryKiId', () => {
   it('strips a memory- prefix copied from document ids', () => {
     expect(canonicalizeSlug('memory-kafka-lag')).toBe('kafka-lag');
     expect(toMemoryKiId('Kafka Lag')).toBe('memory_kafka-lag');
+  });
+
+  it('never ends a truncated slug with a hyphen, so the id stays canonical', () => {
+    const id = toMemoryKiId(`${'a'.repeat(79)} b`);
+    expect(id).toBe(`memory_${'a'.repeat(79)}`);
+    expect(isCanonicalMemoryId(id)).toBe(true);
   });
 });
 
