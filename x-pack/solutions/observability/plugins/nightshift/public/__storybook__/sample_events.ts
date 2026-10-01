@@ -8,7 +8,6 @@
 import type {
   EventLifecycleResponse,
   Feature,
-  InvestigationState,
   LifecycleDetection,
   QueryOccurrencesResponse,
   SignalEntry,
@@ -227,57 +226,6 @@ export const runningInvestigation = {
   workflow_execution_id: 'checkout-investigation-running',
   started_at: '2026-07-24T09:45:00.000Z',
 } satisfies NonNullable<SignificantEvent['investigations']>[number];
-
-export const completedInvestigationState: InvestigationState = {
-  summary: 'Investigate the latency spike affecting checkout requests.',
-  hypotheses: [
-    {
-      candidate: 'The latest checkout deployment introduced a database lookup regression',
-      confidence: 0.92,
-      status: 'confirmed',
-      reason:
-        'Database query time increased immediately after the deployment while upstream dependency latency remained stable.',
-    },
-    {
-      candidate: 'Payment gateway latency is slowing checkout requests',
-      confidence: 0.34,
-      status: 'dismissed',
-      reason: 'Payment gateway response times remained within their normal range.',
-    },
-  ],
-  conclusion:
-    'The latest checkout deployment introduced a synchronous inventory lookup that increased request latency.',
-  recommendations: [
-    {
-      title: 'Roll back the checkout deployment',
-      confidence: 0.95,
-      description: 'Revert version 2026.07.24-1 and monitor P95 latency.',
-    },
-    {
-      title: 'Add a deployment guardrail',
-      confidence: 0.75,
-      description: 'Block releases when checkout latency exceeds the service baseline.',
-    },
-  ],
-};
-
-export const runningInvestigationState: InvestigationState = {
-  summary: 'Determine what caused checkout latency to increase after the latest deployment.',
-  hypotheses: [
-    {
-      candidate: 'The latest checkout deployment introduced a database lookup regression',
-      confidence: 0.78,
-      status: 'investigating',
-      reason: 'Comparing database spans before and after the deployment.',
-    },
-    {
-      candidate: 'Payment gateway latency is slowing checkout requests',
-      confidence: 0.31,
-      status: 'investigating',
-      reason: 'Checking payment gateway response-time distributions.',
-    },
-  ],
-};
 
 export const entityWithoutEvidence: Feature = {
   ...checkoutFeature,
