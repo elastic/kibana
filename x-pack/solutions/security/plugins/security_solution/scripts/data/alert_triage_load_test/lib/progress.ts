@@ -27,6 +27,14 @@ export const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
  */
 export const WORK_DONE_STEP_ID = 'post_comment_alert_updates';
 
+/**
+ * Statuses of the work-done step that prove the alerts were triaged. The step only posts a chat
+ * message and is declared `on-failure: continue`, so a `failed` one still means the tagging and
+ * notes before it finished and the run goes on to the proposal gate. `cancelled`, `skipped` and
+ * `timed_out` say nothing about that work, so they must not count.
+ */
+const WORK_DONE_STATUSES: ReadonlySet<string> = new Set(['completed', 'failed']);
+
 /** Steps whose durations the report breaks out. `classify_alerts` is the LLM-bound one. */
 export const REPORTED_STEP_IDS = [
   'create_investigation',
@@ -79,7 +87,7 @@ export const classifyDispatches = ({
   );
   const workDoneByRun = new Map(
     snapshot.workDoneSteps
-      .filter(({ status }) => TERMINAL_STATUSES.has(status))
+      .filter(({ status }) => WORK_DONE_STATUSES.has(status))
       .map((step) => [step.workflowRunId, step])
   );
 

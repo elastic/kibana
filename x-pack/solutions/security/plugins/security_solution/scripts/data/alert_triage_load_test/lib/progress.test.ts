@@ -111,6 +111,22 @@ describe('classifyDispatches', () => {
     expect(phase).toBe('finished');
   });
 
+  it('still parks a batch whose work-done step failed, because the run continues past it', () => {
+    const { phase } = classify(buildSnapshot({ workDoneSteps: [buildStep({ status: 'failed' })] }));
+
+    expect(phase).toBe('parked');
+  });
+
+  it.each(['cancelled', 'skipped', 'timed_out'])(
+    'does not treat a %s work-done step as proof the alerts were triaged',
+    (status) => {
+      const progress = classify(buildSnapshot({ workDoneSteps: [buildStep({ status })] }));
+
+      expect(progress.phase).toBe('running');
+      expect(progress.workDoneStep).toBeUndefined();
+    }
+  );
+
   it('only counts the work-done step of the batch own run', () => {
     const { phase } = classify(
       buildSnapshot({ workDoneSteps: [buildStep({ workflowRunId: 'execution-2' })] })
