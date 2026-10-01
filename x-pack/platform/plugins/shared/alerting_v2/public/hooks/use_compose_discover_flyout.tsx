@@ -35,15 +35,12 @@ const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiRespons
   // `null` is the write-side way to say "no delays"; a rule read back never carries it.
   state_transition: template.rule.state_transition ?? undefined,
   id: '',
+  version: 1,
   enabled: false,
   created_by: null,
   created_at: new Date().toISOString(),
   updated_by: null,
   updated_at: new Date().toISOString(),
-  metadata: {
-    ...template.rule.metadata,
-    version: 1,
-  },
 });
 
 interface UseComposeDiscoverFlyoutOptions {

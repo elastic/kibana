@@ -8,7 +8,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  PROPOSALS_UI_CAPABILITY_SHOW,
+  PROPOSALS_UI_CAPABILITY_DECIDE,
+} from '@kbn/proposals-common';
 import {
   type ConversationsActionsGroupProps,
   type BaseActionsProps,
@@ -62,6 +67,39 @@ const LazyConnectedEscalationModal = React.lazy(() =>
 );
 
 export const ConversationsPage: React.FC = () => {
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+
+  if (application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_SHOW] !== true) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="alertzeroProposalsPrivilegesGate"
+        iconType="lock"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.alertzero.queue.missingProposalsPrivilegesTitle"
+              defaultMessage="Contact your administrator for access"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.alertzero.queue.missingProposalsPrivilegesDescription"
+              defaultMessage="To view the AlertZero queue in this space, you need the Proposed Actions Read privilege."
+            />
+          </p>
+        }
+      />
+    );
+  }
+
+  return <ConversationsPageContent />;
+};
+
+const ConversationsPageContent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
   const { sections, proposalsById, investigations: conversations } = useQueueSections();
@@ -160,9 +198,10 @@ export const ConversationsPage: React.FC = () => {
   );
 
   const {
-    services: { notifications },
+    services: { application, notifications },
   } = useKibana<CoreStart>();
 
+  const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
   const { manageEscalations: canManageEscalations, manageInvestigations: canManageInvestigations } =
     useAgenticInvestigationsCapabilities();
 
@@ -338,6 +377,7 @@ export const ConversationsPage: React.FC = () => {
         initialAssignee={actionInvestigation?.assignee}
         investigation={actionInvestigation}
         approvalProposal={selectedProposal}
+        readOnly={!canDecide}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
@@ -383,7 +423,7 @@ export const ConversationsPage: React.FC = () => {
               section={section}
               entityFilter={effectiveEntityFilter}
               selectedConversationId={selectedConversationId}
-              onClickRecommendedAction={onClickRecommendedAction}
+              onClickRecommendedAction={canDecide ? onClickRecommendedAction : undefined}
               onClickAction={onClickAction}
               onClickCard={onClickCard}
               onOpenChat={openChatForProposal}
