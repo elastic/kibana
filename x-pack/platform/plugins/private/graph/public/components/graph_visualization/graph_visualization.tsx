@@ -29,7 +29,7 @@ import {
 } from '../../state_management';
 
 export interface GraphVisualizationProps {
-  workspace: RuntimeGraph;
+  runtimeGraph: RuntimeGraph;
   onSetControl: (control: ControlType) => void;
   selectSelected: (node: WorkspaceNode) => void;
   onSetMergeCandidates: (terms: TermIntersect[]) => void;
@@ -66,7 +66,7 @@ function makeEdgeId(edge: WorkspaceEdge) {
 }
 
 export function GraphVisualization({
-  workspace,
+  runtimeGraph,
   selectSelected,
   onSetControl,
   onSetMergeCandidates,
@@ -124,8 +124,8 @@ export function GraphVisualization({
     >
       <g>
         <g>
-          {workspace.edges &&
-            workspace.edges.map((edge) => (
+          {runtimeGraph.edges &&
+            runtimeGraph.edges.map((edge) => (
               <g key={makeEdgeId(edge)} css={styles.edgeWrapper}>
                 {/* Draw two edges: a thicker one for better click handling and the one to show the user */}
                 <line
@@ -166,8 +166,8 @@ export function GraphVisualization({
               </g>
             ))}
         </g>
-        {workspace.nodes &&
-          workspace.nodes
+        {runtimeGraph.nodes &&
+          runtimeGraph.nodes
             .filter((node) => !node.parent)
             .map((node) => {
               const iconOffset = getIconOffset(node.icon);
