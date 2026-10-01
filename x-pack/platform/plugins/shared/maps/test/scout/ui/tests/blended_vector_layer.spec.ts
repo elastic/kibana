@@ -19,7 +19,7 @@ const BLENDED_DOCUMENT_EXAMPLE_ID = '279e1f20-6883-11ea-952a-b102add99cf8';
 const LOAD_DOCUMENTS_REQUEST_NAME = 'load layer features (logstash-*)';
 const LOAD_CLUSTERS_REQUEST_NAME = 'load layer features (Clustered logstash-*)';
 
-test.describe(
+test.describe.only(
   'Maps - blended vector layer',
   {
     tag: '@local-stateful-classic',
@@ -45,7 +45,7 @@ test.describe(
     });
 
     test('blended vector layer', async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsPrivilegedUser();
+      await browserAuth.loginAsViewer();
       await pageObjects.maps.openMapWithId(BLENDED_DOCUMENT_EXAMPLE_ID);
 
       await test.step('should request documents when zoomed to smaller regions showing less data', async () => {
