@@ -90,6 +90,7 @@ const TableVisualizationComponent = ({
               visConfig={visConfig}
               uiStateProps={uiStateProps}
               enforceMinWidth={direction === 'column'}
+              isInteractive={handlers.isInteractive()}
             />
           )}
         </div>
