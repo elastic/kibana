@@ -95,14 +95,6 @@ jest.mock('./v1_rule_templates_data_source', () => ({
   }),
 }));
 
-jest.mock('../../hooks/use_install_rule_template', () => ({
-  useInstallRuleTemplate: () => ({
-    mutate: jest.fn(),
-    isLoading: false,
-    variables: undefined,
-  }),
-}));
-
 jest.mock('../../hooks/use_compose_discover_flyout', () => ({
   useComposeDiscoverFlyout: () => ({
     flyout: null,

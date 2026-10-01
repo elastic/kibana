@@ -42,7 +42,7 @@ export const RuleLibraryPage = () => {
   );
   const showV2Library = selectedEngine === 'v2';
   const shareListUrlState = !(canAccessV1 && canAccessV2);
-  const { flyout, openCreateFromTemplateFlyout } = useComposeDiscoverFlyout();
+  const { flyout, confirmationModal, openCreateFromTemplateFlyout } = useComposeDiscoverFlyout();
   useCreateFromTemplateQuery(openCreateFromTemplateFlyout, { enabled: showV2Library });
 
   const tabs = useMemo<AppHeaderTab[]>(() => {
@@ -79,11 +79,12 @@ export const RuleLibraryPage = () => {
       />
       <EuiSpacer size="m" />
       {showV2Library ? (
-        <RuleLibraryList urlSync={shareListUrlState} />
+        <RuleLibraryList urlSync={shareListUrlState} onInstall={openCreateFromTemplateFlyout} />
       ) : (
         <V1RuleLibraryList urlSync={shareListUrlState} />
       )}
       {flyout}
+      {confirmationModal}
     </div>
   );
 };

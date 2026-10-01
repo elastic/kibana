@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import type { History } from 'history';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { useQuery } from '@kbn/react-query';
@@ -20,19 +21,30 @@ const TEMPLATE_LOAD_ERROR_TITLE = i18n.translate(
   }
 );
 
+/** Removes `templateId` and leaves the rest of the query string in place. */
+const stripTemplateId = (history: History, pathname: string, search: string): void => {
+  const params = new URLSearchParams(search);
+  if (!params.has('templateId')) {
+    return;
+  }
+  params.delete('templateId');
+  const nextSearch = params.toString();
+  history.replace({ pathname, search: nextSearch ? `?${nextSearch}` : '' });
+};
+
 /** Opens the create-rule flyout when the URL contains `templateId`. */
 export const useCreateFromTemplateQuery = (
   openCreateFromTemplateFlyout: (template: RuleTemplateResponse) => void,
   { enabled = true }: { enabled?: boolean } = {}
 ): void => {
-  const location = useLocation();
+  const { pathname, search } = useLocation();
   const history = useHistory();
   const ruleTemplatesApi = useService(RuleTemplatesApi);
   const { toasts } = useService(CoreStart('notifications'));
   const openFlyoutRef = useRef(openCreateFromTemplateFlyout);
   openFlyoutRef.current = openCreateFromTemplateFlyout;
 
-  const templateId = new URLSearchParams(location.search).get('templateId');
+  const templateId = new URLSearchParams(search).get('templateId');
 
   const query = useQuery({
     queryKey: ['ruleTemplate', templateId],
@@ -49,14 +61,14 @@ export const useCreateFromTemplateQuery = (
 
     if (query.isSuccess && query.data) {
       openFlyoutRef.current(query.data);
-      history.replace({ pathname: location.pathname, search: '' });
+      stripTemplateId(history, pathname, search);
       return;
     }
 
     if (query.isError) {
       const error = query.error instanceof Error ? query.error : new Error(String(query.error));
       toasts.addError(error, { title: TEMPLATE_LOAD_ERROR_TITLE });
-      history.replace({ pathname: location.pathname, search: '' });
+      stripTemplateId(history, pathname, search);
     }
   }, [
     enabled,
@@ -66,7 +78,8 @@ export const useCreateFromTemplateQuery = (
     query.isError,
     query.error,
     history,
-    location.pathname,
+    pathname,
+    search,
     toasts,
   ]);
 };

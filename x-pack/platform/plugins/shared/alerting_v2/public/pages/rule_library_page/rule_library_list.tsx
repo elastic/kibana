@@ -6,13 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import {
   ContentList,
   ContentListFooter,
@@ -25,7 +20,6 @@ import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RULE_TEMPLATES_CONTENT_LIST_ID } from '../../constants';
-import { useInstallRuleTemplate } from '../../hooks/use_install_rule_template';
 import { UserCapabilities } from '../../services/user_capabilities';
 import {
   useRuleTemplatesDataSource,
@@ -51,27 +45,28 @@ const INSTALL_RESTRICTED_REASON = i18n.translate(
 
 const toTemplate = (item: ContentListItem) => (item as RuleTemplateContentListItem).template;
 
-export const RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => {
+export const RuleLibraryList = ({
+  urlSync = true,
+  onInstall,
+}: {
+  urlSync?: boolean;
+  onInstall: (template: RuleTemplateResponse) => void;
+}) => {
   const canWrite = useService(UserCapabilities).canWrite('rules');
   const dataSource = useRuleTemplatesDataSource();
-  const {
-    mutate: installTemplate,
-    isLoading: isInstalling,
-    variables: installingTemplate,
-  } = useInstallRuleTemplate();
 
   const itemConfig = useMemo(
     (): ContentListItemConfig => ({
       actions: {
         install: {
           onItemAction: (item) => {
-            installTemplate(toTemplate(item));
+            onInstall(toTemplate(item));
           },
           restriction: canWrite ? undefined : () => INSTALL_RESTRICTED_REASON,
         },
       },
     }),
-    [canWrite, installTemplate]
+    [canWrite, onInstall]
   );
 
   const emptyState = (
@@ -170,18 +165,9 @@ export const RuleLibraryList = ({ urlSync = true }: { urlSync?: boolean }) => {
           <Column.Actions width="14em" sticky={false}>
             <Action
               id="install"
-              name={(item: ContentListItem) =>
-                isInstalling && installingTemplate?.id === item.id ? (
-                  <EuiLoadingSpinner size="m" data-test-subj="ruleLibraryInstallLoading" />
-                ) : (
-                  INSTALL_ACTION_NAME
-                )
-              }
+              name={INSTALL_ACTION_NAME}
               description={INSTALL_ACTION_NAME}
               type="button"
-              enabled={(item: ContentListItem) =>
-                canWrite && !(isInstalling && installingTemplate?.id === item.id)
-              }
               data-test-subj="ruleLibraryInstallAction"
             />
           </Column.Actions>

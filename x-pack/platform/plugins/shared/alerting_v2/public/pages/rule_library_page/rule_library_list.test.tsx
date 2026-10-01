@@ -14,10 +14,8 @@ import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { RuleLibraryList } from './rule_library_list';
 
 const mockFindItems = jest.fn();
-const mockInstallMutate = jest.fn();
+const mockOnInstall = jest.fn();
 let mockCanWriteRules = true;
-let mockInstallIsLoading = false;
-let mockInstallVariables: { id: string } | undefined;
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -51,14 +49,6 @@ jest.mock('./rule_templates_data_source', () => ({
   }),
 }));
 
-jest.mock('../../hooks/use_install_rule_template', () => ({
-  useInstallRuleTemplate: () => ({
-    mutate: mockInstallMutate,
-    isLoading: mockInstallIsLoading,
-    variables: mockInstallVariables,
-  }),
-}));
-
 const createRulePayload = (overrides: Partial<CreateRuleData> = {}): CreateRuleData =>
   ({
     kind: 'signal',
@@ -79,7 +69,7 @@ const createTemplate = (overrides: Partial<RuleTemplateResponse> = {}): RuleTemp
 const renderList = () =>
   render(
     <ListPageTestProviders>
-      <RuleLibraryList />
+      <RuleLibraryList onInstall={mockOnInstall} />
     </ListPageTestProviders>
   );
 
@@ -87,8 +77,6 @@ describe('RuleLibraryList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCanWriteRules = true;
-    mockInstallIsLoading = false;
-    mockInstallVariables = undefined;
     mockFindItems.mockResolvedValue({ items: [], total: 0 });
   });
 
@@ -123,7 +111,7 @@ describe('RuleLibraryList', () => {
     expect(screen.getByTestId(CONTENT_LIST_TEST_SUBJECTS.table)).toBeInTheDocument();
   });
 
-  it('installs a template from the row action', async () => {
+  it('opens the create flyout from the install action', async () => {
     const user = userEvent.setup();
     const template = createTemplate();
     mockFindItems.mockResolvedValue({
@@ -145,7 +133,7 @@ describe('RuleLibraryList', () => {
     await user.click(installAction);
 
     await waitFor(() => {
-      expect(mockInstallMutate).toHaveBeenCalledWith(template);
+      expect(mockOnInstall).toHaveBeenCalledWith(template);
     });
   });
 
@@ -169,29 +157,5 @@ describe('RuleLibraryList', () => {
 
     const installAction = await screen.findByTestId('ruleLibraryInstallAction');
     expect(installAction).toHaveAttribute('aria-disabled', 'true');
-  });
-
-  it('shows a loading install action while a template is installing', async () => {
-    mockInstallIsLoading = true;
-    mockInstallVariables = { id: 'template-1' };
-    const template = createTemplate();
-    mockFindItems.mockResolvedValue({
-      items: [
-        {
-          id: template.id,
-          title: template.rule.metadata.name,
-          description: template.rule.metadata.description,
-          tags: template.rule.metadata.tags,
-          template,
-        },
-      ],
-      total: 1,
-    });
-
-    renderList();
-
-    const installAction = await screen.findByTestId('ruleLibraryInstallAction');
-    expect(installAction).toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByTestId('ruleLibraryInstallLoading')).toBeInTheDocument();
   });
 });

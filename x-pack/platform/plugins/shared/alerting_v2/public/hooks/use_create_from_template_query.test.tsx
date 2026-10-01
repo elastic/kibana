@@ -138,6 +138,25 @@ describe('useCreateFromTemplateQuery', () => {
     expect(history.location.search).toBe('');
   });
 
+  it('keeps other query params when it strips templateId', async () => {
+    mockGetRuleTemplate.mockResolvedValue(mockTemplate);
+    const history = createMemoryHistory({
+      initialEntries: ['/?q=cpu&templateId=template-1&sort=tags:desc'],
+    });
+
+    renderHook(() => useCreateFromTemplateQuery(mockOpenCreateFromTemplateFlyout), {
+      wrapper: createWrapper(history),
+    });
+
+    await waitFor(() => {
+      expect(mockOpenCreateFromTemplateFlyout).toHaveBeenCalledWith(mockTemplate);
+    });
+    const params = new URLSearchParams(history.location.search);
+    expect(params.get('templateId')).toBeNull();
+    expect(params.get('q')).toBe('cpu');
+    expect(params.get('sort')).toBe('tags:desc');
+  });
+
   it('does not fetch a template when templateId is absent', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
 
