@@ -402,12 +402,16 @@ const buildSelectableOptions = <T extends string>({
   values: readonly T[];
   selected: T[];
   getLabel?: (value: T) => string;
-}): EuiSelectableOption[] =>
-  values.map((v) => ({
+}): EuiSelectableOption[] => {
+  // Selected values missing from the options (stale URL id, options still loading) stay listed so
+  // the user can uncheck them instead of being stuck until "Reset filters".
+  const missing = selected.filter((v) => !values.includes(v));
+  return [...values, ...missing].map((v) => ({
     label: getLabel(v),
     key: v,
     checked: selected.includes(v) ? ('on' as const) : undefined,
   }));
+};
 
 export const SignificantEventsTab = () => {
   const { euiTheme } = useEuiTheme();
@@ -466,7 +470,12 @@ export const SignificantEventsTab = () => {
         .sort((a, b) => (a.title ?? a.id).localeCompare(b.title ?? b.id)),
     [featuresData]
   );
-  const serviceOptions = useMemo(() => serviceFeatures.map((f) => f.id), [serviceFeatures]);
+  // `id` is the stream-local slug stored in `causal_features` / `blast_radius`, so the same
+  // service seen in several streams collapses into one option.
+  const serviceOptions = useMemo(
+    () => [...new Set(serviceFeatures.map((f) => f.id))],
+    [serviceFeatures]
+  );
   const serviceLabels = useMemo(
     () => new Map(serviceFeatures.map((f) => [f.id, f.title ?? f.id])),
     [serviceFeatures]

@@ -108,6 +108,14 @@ jest.mock('../../../../hooks/use_fetch_features', () => ({
     data: {
       features: [
         { id: 'svc-checkout', type: 'entity', subtype: 'service', title: 'checkout' },
+        // Same slug seen in another stream: must collapse into one option.
+        {
+          id: 'svc-checkout',
+          type: 'entity',
+          subtype: 'service',
+          title: 'checkout',
+          stream_name: 'logs.other',
+        },
         { id: 'svc-excluded', type: 'entity', subtype: 'service', excluded: true },
         { id: 'dep-redis', type: 'dependency', subtype: 'cache', title: 'redis' },
       ],
@@ -485,6 +493,20 @@ describe('selectedEvent deep link', () => {
     fireEvent.click(screen.getByTestId('filterPopover-Service'));
 
     expect(defaultUrlState.setFilters).toHaveBeenCalledWith({ service: ['svc-checkout'] });
+  });
+
+  it('lists each service slug once and keeps a selected id that is not among the options', () => {
+    mockUseSignificantEventsUrlState.mockReturnValue({
+      ...defaultUrlState,
+      selectedEventId: undefined,
+      openEventId: undefined,
+      serviceFilter: ['svc-ghost'],
+    });
+
+    render(<SignificantEventsTab />);
+
+    const options = screen.getByTestId('filterPopoverOptions-Service').textContent ?? '';
+    expect(options.split(',')).toEqual(['checkout', 'svc-ghost']);
   });
 
   it('adapts the date range to the linked event lineage window', () => {

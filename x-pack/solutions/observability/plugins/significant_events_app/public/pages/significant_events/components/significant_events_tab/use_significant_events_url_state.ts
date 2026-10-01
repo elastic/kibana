@@ -48,7 +48,7 @@ const parseListParam = <T extends string>(
   return options.filter((option) => values.includes(option));
 };
 
-const parseStreamParam = (raw: ListParam): string[] =>
+const parseValuesParam = (raw: ListParam): string[] =>
   raw === undefined ? [] : castArray(raw).filter(Boolean);
 
 // `query-string` drops empty arrays, so an empty selection is written as '' (serialised as `key=`).
@@ -90,8 +90,8 @@ export const useSignificantEventsUrlState = () => {
       parseListParam(query?.severity, SEVERITY_OPTIONS, DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER),
     [query?.severity]
   );
-  const streamFilter = useMemo(() => parseStreamParam(query?.stream), [query?.stream]);
-  const serviceFilter = useMemo(() => parseStreamParam(query?.service), [query?.service]);
+  const streamFilter = useMemo(() => parseValuesParam(query?.stream), [query?.stream]);
+  const serviceFilter = useMemo(() => parseValuesParam(query?.service), [query?.service]);
 
   /**
    * Every URL write goes through here so that writes issued in the same tick compose: the ref is
@@ -126,8 +126,8 @@ export const useSignificantEventsUrlState = () => {
         service: currentService,
         ...rest
       } = keepSelectedEvent ? queryRef.current ?? {} : omitSelectedEvent(queryRef.current);
-      const nextStream = stream ?? parseStreamParam(currentStream);
-      const nextService = service ?? parseStreamParam(currentService);
+      const nextStream = stream ?? parseValuesParam(currentStream);
+      const nextService = service ?? parseValuesParam(currentService);
       write('replace', {
         ...rest,
         ...(status ? { status: encodeListParam(status) } : {}),

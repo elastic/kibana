@@ -111,8 +111,9 @@ const eventsSearchRoute = createServerRoute({
       search: z.string().max(500).optional(),
       event_id: z.string().max(255).optional(),
       severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
+      // Same cap as the agent `event_search` tool; the UI lets users select any number of services.
       topology_feature_id: z
-        .union([z.string().max(255), z.array(z.string().max(255)).max(50)])
+        .union([z.string().max(255), z.array(z.string().max(255)).max(100)])
         .optional(),
     }),
   }),
