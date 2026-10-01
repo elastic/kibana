@@ -45,7 +45,7 @@ describe('Context Engine agent instructions', () => {
 
     it('keeps the facts the user needs to decide', () => {
       expect(instructions).toMatch(
-        /how many one run writes, how long a run takes and what it costs/
+        /how many one run writes, how long a run takes and what it costs, once a pilot has measured them/
       );
     });
   });
@@ -137,6 +137,15 @@ describe('Context Engine agent instructions', () => {
       expect(instructions).toMatch(/Never end a turn asking for permission to save or to run/);
       expect(instructions).toMatch(
         /do not follow an install or a save with an `ask_user_question` offering to run/
+      );
+    });
+
+    it('pilots a document or unit-profile install through the run tool before its full run', () => {
+      expect(instructions).toMatch(
+        /a pilot of a document or unit-profile install first, then the full run/
+      );
+      expect(instructions).toMatch(
+        /A pilot returns when it finishes, with its duration: state the projected full-run time from it, then start the full run/
       );
     });
 

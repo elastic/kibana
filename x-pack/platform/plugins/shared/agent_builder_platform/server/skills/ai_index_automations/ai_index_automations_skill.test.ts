@@ -614,6 +614,45 @@ describe('aiIndexAutomationsSkill', () => {
     });
   });
 
+  describe('piloting a template install', () => {
+    const prose = aiIndexAutomationsSkill.content.replace(/\s+/g, ' ');
+
+    it('pilots a document or unit-profile install with pilotSize before the full run', () => {
+      expect(prose).toMatch(
+        /\*\*Pilot a document or unit-profile install before its full run\.\*\*/
+      );
+      expect(prose).toMatch(/`run_automation` with `pilotSize: 3`/);
+      expect(prose).toMatch(/returns `status` and `durationMs`/);
+    });
+
+    it('projects the full run from the pilot, states it, then starts the full run', () => {
+      expect(prose).toMatch(
+        /project the full run from `durationMs` and the pilot size as the time estimate above lays out/
+      );
+      expect(prose).toMatch(/Then call `run_automation` again without `pilotSize`/);
+      expect(prose).toMatch(/The full run replaces the pilot's indicators/);
+    });
+
+    it('skips the pilot where it measures nothing worth measuring', () => {
+      expect(prose).toMatch(
+        /Skip the pilot for Index\/Table Metadata, which makes one model call per source/
+      );
+      expect(prose).toMatch(/for a Targeted KI writer/);
+      expect(prose).toMatch(/when the run writes no more units than the pilot would/);
+    });
+
+    it('handles a failed or slow pilot without starting the full run', () => {
+      expect(prose).toMatch(
+        /When the pilot's `status` is `failed`, report `errorMessage` and stop/
+      );
+      expect(prose).toMatch(/When it returns without `durationMs`, the pilot is still running/);
+    });
+
+    it('says a full run returns at once while a pilot waits', () => {
+      expect(prose).toMatch(/A full run returns immediately with `executionId` and `workflowUrl`/);
+    });
+  });
+
   describe('the unit profile template', () => {
     const content = aiIndexAutomationsSkill.content;
     const prose = content.replace(/\s+/g, ' ');

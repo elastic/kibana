@@ -313,7 +313,7 @@ proposals for the same index read the same way:
   automation's own KI cap when that is lower), how many model calls that is (one per unit for the
   profile templates, one per document for the document template), and, once a pilot has run, the pilot's duration and the projected duration of a full run from it, as
   `ai-index-automations` lays out. Before the pilot, say the time is not yet measured rather than
-  guessing.
+  guessing. For a template install, the pilot is a `run_automation` call with `pilotSize`.
 - **Example questions** — optional. Include it only when you are sure: a question belongs here
   only if an access pattern the KI will carry answers it, and every field that pattern filters or
   aggregates on was non-null in the sampled rows or had a probe count above zero. Do not run extra

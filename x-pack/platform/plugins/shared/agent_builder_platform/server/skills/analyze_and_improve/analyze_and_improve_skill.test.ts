@@ -313,6 +313,9 @@ describe('analyzeAndImproveSkill', () => {
       expect(content).toMatch(
         /Before the pilot, say the time is not yet measured rather than\s+guessing/
       );
+      expect(content.replace(/\s+/g, ' ')).toMatch(
+        /For a template install, the pilot is a `run_automation` call with `pilotSize`/
+      );
     });
 
     it('sends the setup case through the grounding queries, with the evidence in the proposal', () => {
