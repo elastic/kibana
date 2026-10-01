@@ -28,8 +28,12 @@ export function StreamRemoveProcessingConfirmationModal({
         defaultMessage: 'Remove processing?',
       })}
       titleProps={{ id: modalTitleId }}
-      cancelButtonText="Cancel"
-      confirmButtonText="Confirm removal"
+      cancelButtonText={i18n.translate('xpack.streams.flyout.euiConfirmModal.cancelLabel', {
+        defaultMessage: 'Cancel',
+      })}
+      confirmButtonText={i18n.translate('xpack.streams.flyout.euiConfirmModal.confirmLabel', {
+        defaultMessage: 'Confirm removal',
+      })}
       confirmButtonDisabled={!confirmation}
       onCancel={onClose}
       onConfirm={onConfirm}
@@ -43,7 +47,7 @@ export function StreamRemoveProcessingConfirmationModal({
         </p>
         <EuiSwitch
           label={i18n.translate('xpack.streams.flyout.confirmation.label', {
-            defaultMessage: "I understand this deletes all changes and can't be undone",
+            defaultMessage: "I understand this removes any changes present and can't be undone",
           })}
           checked={confirmation}
           onChange={() => setConfirmation(!confirmation)}
