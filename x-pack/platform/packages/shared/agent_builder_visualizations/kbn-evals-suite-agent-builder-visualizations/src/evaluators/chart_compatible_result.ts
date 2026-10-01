@@ -17,7 +17,7 @@ const resolveChartType = (
   visualization: ExtractedVisualization,
   expectedChartType: string | undefined
 ): string | undefined => {
-  const candidate = expectedChartType ?? visualization.chartType;
+  const candidate = visualization.chartType ?? expectedChartType;
   return typeof candidate === 'string' && candidate.trim().length > 0
     ? candidate.trim().toLowerCase()
     : undefined;
