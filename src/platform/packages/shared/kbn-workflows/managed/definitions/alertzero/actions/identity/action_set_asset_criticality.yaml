@@ -1,0 +1,160 @@
+version: "1"
+name: Set asset criticality
+description: >
+  AlertZero action: assigns an asset criticality level to one user or service
+  so Entity Analytics lifts its risk score and flags it on the entity page.
+  Executed by the investigation proposal gate once an analyst approves, so
+  the write is attributed to the approver.
+enabled: true
+tags:
+  # Generic tag every action workflow carries, so the catalog can be
+  # discovered by tag rather than a hardcoded list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata, read back by the catalog when a
+  # proposal referencing this workflow is created or rendered. Metadata has
+  # to live under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Set asset criticality
+    description: Assigns an asset criticality level to a user or service so Entity Analytics raises its risk score and flags it on the entity page.
+    category: respond
+    impact: low
+    reversible: true
+    approvalPolicy: autonomy-dependent
+    subject:
+      - user
+      - service
+  actionLabel: Asset criticality
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            Asset criticality fields. Every action workflow takes a single
+            `actionInput` object so the generic gate workflow never needs to
+            know an action's parameter names.
+          properties:
+            id_field:
+              type: string
+              enum:
+                - user.name
+                - service.name
+              description: Which identity field `id_value` names.
+            id_value:
+              type: string
+              minLength: 1
+              maxLength: 1024
+              description: The user.name or service.name to mark.
+            criticality_level:
+              type: string
+              enum:
+                - low_impact
+                - medium_impact
+                - high_impact
+                - extreme_impact
+              default: high_impact
+              description: Criticality level to assign.
+            comment:
+              type: string
+              maxLength: 30000
+              description: Optional comment explaining why this identity is being marked.
+          required:
+            - id_field
+            - id_value
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: id_field
+    type: string
+  - name: id_value
+    type: string
+  - name: criticality_level
+    type: string
+  - name: previous_level
+    type: string
+  - name: message
+    type: string
+steps:
+  # Entity Analytics checks index privileges on the asset criticality index,
+  # not just the Kibana feature. Probe first so a missing privilege fails
+  # before anything is written. This GET also initialises the index on first use.
+  - name: probe_privileges
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/asset_criticality/privileges"
+      headers:
+        elastic-api-version: "1"
+
+  - name: fail_if_missing_privileges
+    type: if
+    condition: "${{ steps.probe_privileges.output.data.has_all_required != true }}"
+    steps:
+      - name: missing_asset_criticality_privilege
+        type: workflow.fail
+        with:
+          message: >
+            Cannot set asset criticality for {{ inputs.actionInput.id_field }}
+            {{ inputs.actionInput.id_value }}: the approver lacks the Entity
+            Analytics privileges or write access to the asset criticality
+            index{% if steps.probe_privileges.error != blank %} ({{ steps.probe_privileges.error.message }}){% endif %}.
+
+  # The API upserts, so read the current level first to report what changed
+  # and give the approver the value to put back. A 404 means none was set.
+  - name: read_previous
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/asset_criticality?id_field={{ inputs.actionInput.id_field }}&id_value={{ inputs.actionInput.id_value | url_encode }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+
+  - name: capture_previous
+    type: data.set
+    with:
+      previous_level: "{{ steps.read_previous.output.data.criticality_level | default: '' }}"
+      criticality_level: "{{ inputs.actionInput.criticality_level | default: 'high_impact' }}"
+
+  # Upsert the record. No retries: a repeated POST is harmless but would hide
+  # the real failure behind a later success. `refresh: wait_for` so the entity
+  # page and the next risk-score run see the new level immediately.
+  # `/api/asset_criticality` is deprecated in favour of the Entity Store API
+  # but is the only route that writes a single record today; revisit when the
+  # replacement ships.
+  - name: dispatch
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/asset_criticality"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        id_field: "{{ inputs.actionInput.id_field }}"
+        id_value: "{{ inputs.actionInput.id_value }}"
+        criticality_level: "{{ variables.criticality_level }}"
+        refresh: wait_for
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      id_field: "{{ inputs.actionInput.id_field }}"
+      id_value: "{{ inputs.actionInput.id_value }}"
+      criticality_level: "{{ steps.dispatch.output.data.criticality_level }}"
+      previous_level: "{{ variables.previous_level }}"
+      message: >-
+        {{ consts.actionLabel }} for {{ inputs.actionInput.id_field }} {{ inputs.actionInput.id_value }}
+        set to {{ steps.dispatch.output.data.criticality_level }}{% if variables.previous_level != "" %} (was {{ variables.previous_level }}){% endif %}.
+        To revert, DELETE /api/asset_criticality?id_field={{ inputs.actionInput.id_field }}&id_value={{ inputs.actionInput.id_value | url_encode }}{% if variables.previous_level != "" %} or POST the previous level back{% endif %}.
