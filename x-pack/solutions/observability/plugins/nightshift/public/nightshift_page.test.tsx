@@ -218,9 +218,11 @@ describe('NightshiftPage', () => {
       renderPage();
       await openAppMenuOverflow();
 
-      expect(await screen.findByTestId('nightshiftAutomationsLink')).toHaveAttribute(
-        'href',
-        '/app/nightshift/automations'
+      const automationsLink = await screen.findByTestId('nightshiftAutomationsLink');
+      const managementLink = screen.getByTestId('nightshiftManagementLink');
+      expect(automationsLink).toHaveAttribute('href', '/app/nightshift/automations');
+      expect(automationsLink.compareDocumentPosition(managementLink)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
       );
     });
 

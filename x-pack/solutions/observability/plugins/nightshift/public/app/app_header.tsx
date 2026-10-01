@@ -87,7 +87,6 @@ export function NightshiftAppHeader({
                 href: automationsHref,
                 run: () => void onAutomationsClick(),
                 testId: 'nightshiftAutomationsLink',
-                overflow: true,
               },
             ]
           : []),
