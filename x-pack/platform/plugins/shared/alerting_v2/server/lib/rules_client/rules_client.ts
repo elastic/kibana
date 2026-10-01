@@ -21,7 +21,6 @@ import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import {
   SavedObjectsUtils,
   type KibanaRequest as CoreKibanaRequest,
@@ -72,7 +71,7 @@ import type { UserServiceContract } from '../services/user_service/user_service'
 import { UserService } from '../services/user_service/user_service';
 import type { PluginConfig } from '../../config';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
-import { buildRuleSoFilter } from './build_rule_filter';
+import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import type {
   BulkByIdsParams,
@@ -84,10 +83,10 @@ import type {
   BulkResponse,
   CreateRuleData,
   CreateRuleParams,
+  FindMatchingRulesArgs,
   FindRulesArgs,
   FindRulesResponse,
   FindRulesSortField,
-  MatchRulesArgs,
   RotationCandidate,
   RuleResponse,
   UpdateRuleParams,
@@ -195,18 +194,6 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   };
 
   return sortFieldMap[sortField];
-};
-
-const buildMatchRulesFilter = (tags: string[]): string => {
-  const alertRules = nodeBuilder.is('kind', 'alert');
-  if (tags.length === 0) {
-    return toKqlExpression(alertRules);
-  }
-
-  const anyTag = nodeBuilder.or(
-    tags.map((tag) => nodeBuilder.is('metadata.tags', nodeTypes.literal.buildNode(tag, true)))
-  );
-  return toKqlExpression(nodeBuilder.and([alertRules, anyTag]));
 };
 
 @injectable()
@@ -1071,15 +1058,15 @@ export class RulesClient {
    * The matcher expression runs against alerts, so it can't narrow rules down.
    */
   @withApm
-  public async matchRules({
+  public async findMatchingRules({
     matcher,
     page,
     perPage,
-  }: MatchRulesArgs = {}): Promise<FindRulesResponse> {
+  }: FindMatchingRulesArgs = {}): Promise<FindRulesResponse> {
     return this.findRules({
       page,
       perPage,
-      filter: buildMatchRulesFilter(matcher?.tags ?? []),
+      filter: buildMatchingRulesFilter(matcher?.tags ?? []),
       sortField: 'name',
       sortOrder: 'asc',
     });

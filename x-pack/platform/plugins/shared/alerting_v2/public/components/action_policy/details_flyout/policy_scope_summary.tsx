@@ -15,18 +15,38 @@ export const POLICY_SCOPE_LABEL = i18n.translate(
   { defaultMessage: 'Policy scope' }
 );
 
-export type PolicyScopeKind = 'catchAll' | 'expressionOnly' | 'tags';
+export type PolicyScopeKind = 'catchAll' | 'expressionOnly' | 'tagsOnly' | 'tagsAndExpression';
+
+const POLICY_SCOPE_SUMMARIES: Record<PolicyScopeKind, string> = {
+  tagsAndExpression: i18n.translate(
+    'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tagsAndExpression',
+    {
+      defaultMessage:
+        'This policy matches all alerts from rules with one of the following tags AND the matching query.',
+    }
+  ),
+  tagsOnly: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tags', {
+    defaultMessage: 'This policy matches all alerts from rules with one of the following tags.',
+  }),
+  expressionOnly: i18n.translate(
+    'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.expression',
+    { defaultMessage: 'This policy matches all alerts matching this query.' }
+  ),
+  catchAll: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.matchesAll', {
+    defaultMessage: 'This policy matches all alerts.',
+  }),
+};
 
 const normalizeMatcher = (matcher?: PolicyMatcher | null) => ({
   tags: matcher?.tags?.length ? matcher.tags : null,
   expression: matcher?.expression?.trim() || null,
 });
 
-/** Classifies a policy matcher by what narrows down the rules it applies to. */
+/** Classifies a policy matcher by whether rule tags, the matching query, or both narrow down its alerts. */
 export const getPolicyScopeKind = (matcher?: PolicyMatcher | null): PolicyScopeKind => {
   const { tags, expression } = normalizeMatcher(matcher);
   if (tags) {
-    return 'tags';
+    return expression ? 'tagsAndExpression' : 'tagsOnly';
   }
   return expression ? 'expressionOnly' : 'catchAll';
 };
@@ -38,31 +58,9 @@ interface Props {
 export const PolicyScopeSummary = ({ matcher }: Props) => {
   const { tags: matcherTags, expression: matcherExpression } = normalizeMatcher(matcher);
 
-  const policyScopeSummary =
-    matcherTags && matcherExpression
-      ? i18n.translate(
-          'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tagsAndExpression',
-          {
-            defaultMessage:
-              'This policy matches all alerts from rules with one of the following tags AND the matching query.',
-          }
-        )
-      : matcherTags
-      ? i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tags', {
-          defaultMessage:
-            'This policy matches all alerts from rules with one of the following tags.',
-        })
-      : matcherExpression
-      ? i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.expression', {
-          defaultMessage: 'This policy matches all alerts matching this query.',
-        })
-      : i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.matchesAll', {
-          defaultMessage: 'This policy matches all alerts.',
-        });
-
   return (
     <>
-      <EuiText size="s">{policyScopeSummary}</EuiText>
+      <EuiText size="s">{POLICY_SCOPE_SUMMARIES[getPolicyScopeKind(matcher)]}</EuiText>
       {matcherTags && (
         <>
           <EuiSpacer size="s" />

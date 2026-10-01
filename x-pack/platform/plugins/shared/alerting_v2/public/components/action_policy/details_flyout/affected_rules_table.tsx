@@ -6,7 +6,7 @@
  */
 
 import { EuiBasicTable, EuiLink, type Criteria, type EuiBasicTableColumn } from '@elastic/eui';
-import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
+import { FIND_MAX_RESULT_WINDOW, type PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useAlertingLocators } from '../../../application/locator_context';
@@ -97,7 +97,7 @@ export const AffectedRulesTable = ({ matcher }: Props) => {
       pagination={{
         pageIndex: page - 1,
         pageSize: perPage,
-        totalItemCount: data?.total ?? 0,
+        totalItemCount: Math.min(data?.total ?? 0, FIND_MAX_RESULT_WINDOW),
         pageSizeOptions: PAGE_SIZE_OPTIONS,
       }}
       onChange={onTableChange}

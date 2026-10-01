@@ -2193,14 +2193,14 @@ describe('RulesClient', () => {
     });
   });
 
-  describe('matchRules', () => {
+  describe('findMatchingRules', () => {
     const kindFilter = `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`;
     const tagsField = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`;
 
     it('finds the alert rules with any of the matcher tags, sorted by name', async () => {
       const client = createClient();
 
-      await client.matchRules({ matcher: { tags: ['cpu', 'prod'] }, page: 2, perPage: 10 });
+      await client.findMatchingRules({ matcher: { tags: ['cpu', 'prod'] }, page: 2, perPage: 10 });
 
       expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2216,7 +2216,9 @@ describe('RulesClient', () => {
     it('ignores the matcher expression', async () => {
       const client = createClient();
 
-      await client.matchRules({ matcher: { tags: ['cpu'], expression: 'severity: critical' } });
+      await client.findMatchingRules({
+        matcher: { tags: ['cpu'], expression: 'severity: critical' },
+      });
 
       expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
         expect.objectContaining({ filter: `(${kindFilter} AND ${tagsField}: "cpu")` })
@@ -2226,7 +2228,7 @@ describe('RulesClient', () => {
     it('matches tags literally', async () => {
       const client = createClient();
 
-      await client.matchRules({ matcher: { tags: ['team "a" OR *'] } });
+      await client.findMatchingRules({ matcher: { tags: ['team "a" OR *'] } });
 
       expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2243,7 +2245,7 @@ describe('RulesClient', () => {
     ])('finds every alert rule for %s', async (_, matcher) => {
       const client = createClient();
 
-      await client.matchRules({ matcher });
+      await client.findMatchingRules({ matcher });
 
       expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2271,7 +2273,7 @@ describe('RulesClient', () => {
         per_page: 20,
       });
 
-      const res = await client.matchRules({ matcher: { tags: ['cpu'] }, page: 2 });
+      const res = await client.findMatchingRules({ matcher: { tags: ['cpu'] }, page: 2 });
 
       expect(res).toEqual({
         items: [

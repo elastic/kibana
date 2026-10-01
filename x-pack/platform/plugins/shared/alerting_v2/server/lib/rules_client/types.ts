@@ -64,7 +64,7 @@ export interface FindRulesArgs {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface MatchRulesArgs {
+export interface FindMatchingRulesArgs {
   matcher?: PolicyMatcher | null;
   page?: number;
   perPage?: number;

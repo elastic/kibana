@@ -16,7 +16,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
-import type { MatchRulesArgs } from '../../lib/rules_client';
+import type { FindMatchingRulesArgs } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
@@ -25,12 +25,12 @@ import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions'
 import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { matchRulesOasExamples } from './match_rules_oas_example';
 
-export const toMatchRulesArgs = ({
+export const toFindMatchingRulesArgs = ({
   matcher,
   page,
   per_page: perPage,
   ...rest
-}: MatchRulesBody): Complete<MatchRulesArgs> => {
+}: MatchRulesBody): Complete<FindMatchingRulesArgs> => {
   assertAllFieldsMapped(rest);
   return {
     matcher,
@@ -83,7 +83,9 @@ export class MatchRulesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const result = await this.rulesClient.matchRules(toMatchRulesArgs(this.request.body));
+    const result = await this.rulesClient.findMatchingRules(
+      toFindMatchingRulesArgs(this.request.body)
+    );
     return this.ctx.response.ok({ body: result });
   }
 }

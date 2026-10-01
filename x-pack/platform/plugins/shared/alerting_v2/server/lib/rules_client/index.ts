@@ -17,9 +17,9 @@ export type {
   CreateRuleData,
   CreateRuleParams,
   DryRunResponse,
+  FindMatchingRulesArgs,
   FindRulesArgs,
   FindRulesResponse,
-  MatchRulesArgs,
   RuleResponse,
   UpdateRuleData,
 } from './types';

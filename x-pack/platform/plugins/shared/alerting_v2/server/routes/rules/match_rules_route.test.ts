@@ -10,13 +10,13 @@ import type { MatchRulesBody } from '@kbn/alerting-v2-schemas';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { RulesClient } from '../../lib/rules_client';
 import { createRouteDependencies } from '../test_utils';
-import { MatchRulesRoute, toMatchRulesArgs } from './match_rules_route';
+import { MatchRulesRoute, toFindMatchingRulesArgs } from './match_rules_route';
 import { LIST_RULES_RESPONSE } from './list_rules_oas_example';
 
 const createRulesClientStub = () =>
   ({
-    matchRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, per_page: 20 }),
-  } as unknown as jest.Mocked<Pick<RulesClient, 'matchRules'>>);
+    findMatchingRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, per_page: 20 }),
+  } as unknown as jest.Mocked<Pick<RulesClient, 'findMatchingRules'>>);
 
 const buildRoute = (body: MatchRulesBody) => {
   const { ctx } = createRouteDependencies();
@@ -27,10 +27,10 @@ const buildRoute = (body: MatchRulesBody) => {
   return { ctx, rulesClient, route };
 };
 
-describe('toMatchRulesArgs', () => {
+describe('toFindMatchingRulesArgs', () => {
   it('maps the snake_case body to camelCase client args', () => {
     expect(
-      toMatchRulesArgs({
+      toFindMatchingRulesArgs({
         matcher: { tags: ['prod'], expression: 'severity: critical' },
         page: 2,
         per_page: 50,
@@ -53,7 +53,7 @@ describe('MatchRulesRoute', () => {
 
     await route.handle();
 
-    expect(rulesClient.matchRules).toHaveBeenCalledWith({
+    expect(rulesClient.findMatchingRules).toHaveBeenCalledWith({
       matcher: { tags: ['prod', 'infra'] },
       page: 3,
       perPage: 10,
@@ -65,7 +65,7 @@ describe('MatchRulesRoute', () => {
 
     await route.handle();
 
-    expect(rulesClient.matchRules).toHaveBeenCalledWith({
+    expect(rulesClient.findMatchingRules).toHaveBeenCalledWith({
       matcher: undefined,
       page: undefined,
       perPage: undefined,
@@ -74,7 +74,7 @@ describe('MatchRulesRoute', () => {
 
   it('returns the client result in the response body', async () => {
     const { ctx, rulesClient, route } = buildRoute({ matcher: { tags: ['production'] } });
-    rulesClient.matchRules.mockResolvedValueOnce(LIST_RULES_RESPONSE);
+    rulesClient.findMatchingRules.mockResolvedValueOnce(LIST_RULES_RESPONSE);
 
     await route.handle();
 
@@ -83,7 +83,7 @@ describe('MatchRulesRoute', () => {
 
   it('maps client errors onto the error response', async () => {
     const { ctx, rulesClient, route } = buildRoute({ matcher: { tags: ['production'] } });
-    rulesClient.matchRules.mockRejectedValueOnce(Boom.badRequest('Invalid filter.'));
+    rulesClient.findMatchingRules.mockRejectedValueOnce(Boom.badRequest('Invalid filter.'));
 
     await route.handle();
 

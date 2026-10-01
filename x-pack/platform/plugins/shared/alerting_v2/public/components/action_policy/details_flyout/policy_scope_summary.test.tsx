@@ -35,10 +35,16 @@ describe('getPolicyScopeKind', () => {
   });
 
   it.each([
-    ['tags only', { tags: ['prod'] }],
-    ['tags and an expression', { tags: ['prod'], expression: 'data.severity : "critical"' }],
-  ])('classifies %s as tags', (_, matcher) => {
-    expect(getPolicyScopeKind(matcher)).toBe('tags');
+    ['tags', { tags: ['prod'] }],
+    ['tags and a blank expression', { tags: ['prod'], expression: '  ' }],
+  ])('classifies %s as tagsOnly', (_, matcher) => {
+    expect(getPolicyScopeKind(matcher)).toBe('tagsOnly');
+  });
+
+  it('classifies tags and an expression as tagsAndExpression', () => {
+    expect(getPolicyScopeKind({ tags: ['prod'], expression: 'data.severity : "critical"' })).toBe(
+      'tagsAndExpression'
+    );
   });
 });
 

@@ -96,6 +96,20 @@ describe('AffectedRulesFlyout', () => {
     expect(within(table).getByText('CPU usage')).toBeInTheDocument();
     expect(within(table).getByText('Memory')).toBeInTheDocument();
     expect(within(table).getByText('prod')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('actionPolicyAffectedRulesMatchingQueryCallout')
+    ).not.toBeInTheDocument();
+  });
+
+  it('says the matching query decides which alerts of the listed rules are handled', () => {
+    const matcher = { tags: ['cpu'], expression: 'data.severity : "critical"' };
+    renderFlyout(matcher);
+
+    expect(screen.getByTestId('actionPolicyAffectedRulesMatchingQueryCallout')).toHaveTextContent(
+      'These rules have at least one of the policy tags. The matching query decides which of their alerts this policy handles.'
+    );
+    expect(mockUseFetchMatchingRules).toHaveBeenCalledWith({ matcher, page: 1, perPage: 10 });
+    expect(screen.getByTestId('actionPolicyAffectedRulesTable')).toBeInTheDocument();
   });
 
   it('links each rule name to its details page in a new tab', () => {
@@ -120,6 +134,19 @@ describe('AffectedRulesFlyout', () => {
       page: 2,
       perPage: 10,
     });
+  });
+
+  it('does not offer pages beyond the API result window', () => {
+    mockUseFetchMatchingRules.mockReturnValue({
+      data: { items: [createRule('rule-1', 'CPU usage')], total: 20000, page: 1, per_page: 10 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+    });
+    renderFlyout({ tags: ['cpu'] });
+
+    expect(screen.getByTestId('pagination-button-999')).toBeInTheDocument();
+    expect(screen.queryByTestId('pagination-button-1999')).not.toBeInTheDocument();
   });
 
   it('shows a loading message until the first page of rules arrives', () => {

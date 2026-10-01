@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiFlyoutProps } from '@elastic/eui';
+import { EuiSpacer, type EuiFlyoutProps } from '@elastic/eui';
 import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +19,10 @@ import {
   type PolicyScopeKind,
 } from './policy_scope_summary';
 
-const ALL_RULES_CALLOUT_TITLES: Record<Exclude<PolicyScopeKind, 'tags'>, string> = {
+const ALL_RULES_CALLOUT_TITLES: Record<
+  Extract<PolicyScopeKind, 'catchAll' | 'expressionOnly'>,
+  string
+> = {
   catchAll: i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.catchAll', {
     defaultMessage: 'All rules in this space that create alerts are handled by this policy.',
   }),
@@ -28,6 +31,14 @@ const ALL_RULES_CALLOUT_TITLES: Record<Exclude<PolicyScopeKind, 'tags'>, string>
       'All rules in this space that create alerts may be handled by this policy, depending on the matching query.',
   }),
 };
+
+const MATCHING_QUERY_CALLOUT_TITLE = i18n.translate(
+  'xpack.alertingV2.actionPolicy.affectedRules.tagsAndExpression',
+  {
+    defaultMessage:
+      'These rules have at least one of the policy tags. The matching query decides which of their alerts this policy handles.',
+  }
+);
 
 interface Props {
   matcher?: PolicyMatcher | null;
@@ -72,8 +83,20 @@ export const AffectedRulesFlyout = ({ matcher, historyKey, onClose, ownFocus = f
           })}
           data-test-subj="actionPolicyAffectedRulesRules"
         >
-          {scopeKind === 'tags' ? (
-            <AffectedRulesTable matcher={matcher} />
+          {scopeKind === 'tagsOnly' || scopeKind === 'tagsAndExpression' ? (
+            <>
+              {scopeKind === 'tagsAndExpression' && (
+                <>
+                  <KbnInfoCallout
+                    size="s"
+                    title={MATCHING_QUERY_CALLOUT_TITLE}
+                    data-test-subj="actionPolicyAffectedRulesMatchingQueryCallout"
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
+              <AffectedRulesTable matcher={matcher} />
+            </>
           ) : (
             <KbnInfoCallout
               size="s"
