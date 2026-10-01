@@ -33,7 +33,11 @@ export const StatsOverviewComponent = ({
   const statsOverviewStore = useRef(getStatsOverviewStore(requestCancellationManager));
 
   return (
-    <SyntheticsEmbeddableContext reload$={reload$} reduxStore={statsOverviewStore.current}>
+    <SyntheticsEmbeddableContext
+      reload$={reload$}
+      reduxStore={statsOverviewStore.current}
+      onAutoRefresh={() => requestCancellationManager.resumeAfterCancellation()}
+    >
       <EuiFlexGroup
         alignItems="center"
         css={{

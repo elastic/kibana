@@ -46,4 +46,17 @@ describe('RequestCancellationManager', () => {
     expect(priorLoadSignal.reason).toBe(AbortReason.REPLACED);
     expect(manager.signal.aborted).toBe(false);
   });
+
+  it('resumes future automatic refreshes after cancellation', () => {
+    const manager = new RequestCancellationManager();
+
+    manager.startLoad();
+    const canceledSignal = manager.signal;
+    manager.cancel();
+    manager.resumeAfterCancellation();
+
+    expect(canceledSignal.aborted).toBe(true);
+    expect(manager.signal).not.toBe(canceledSignal);
+    expect(manager.signal.aborted).toBe(false);
+  });
 });

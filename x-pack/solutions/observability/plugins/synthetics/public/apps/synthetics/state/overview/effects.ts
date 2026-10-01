@@ -34,10 +34,8 @@ export function* fetchTrendEffect(
         yield put(trendStatsBatch.success({ trendStats, batch: chunk }));
       }
     }
-  } catch (e: any) {
-    if (!requestSignal?.aborted) {
-      yield put(trendStatsBatch.fail(action.payload));
-    }
+  } catch {
+    yield put(trendStatsBatch.fail(action.payload));
   }
 }
 

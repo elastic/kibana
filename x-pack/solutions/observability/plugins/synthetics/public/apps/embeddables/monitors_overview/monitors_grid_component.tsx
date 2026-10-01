@@ -48,7 +48,11 @@ export const StatusGridComponent = ({
     filters && filters.locations?.length === 1 && filters.monitor_ids?.length === 1;
 
   const monitorOverviewListComponent = (
-    <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
+    <SyntheticsEmbeddableContext
+      reload$={reload$}
+      reduxStore={overviewStore.current}
+      onAutoRefresh={() => requestCancellationManager.resumeAfterCancellation()}
+    >
       <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} view={view} />
     </SyntheticsEmbeddableContext>
   );

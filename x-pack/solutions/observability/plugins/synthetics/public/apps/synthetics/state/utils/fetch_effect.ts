@@ -62,7 +62,8 @@ export function fetchEffectFactory<T, R, S, F>(
   fail: (error: IHttpSerializedFetchError<T>) => PayloadAction<F>,
   onSuccess?: ((response: R) => void) | string,
   onFailure?: ((error: Error) => void) | string,
-  shouldIgnoreError?: (error: unknown) => boolean
+  shouldIgnoreError?: (error: unknown) => boolean,
+  onIgnoredError?: (action: PayloadAction<T>) => PayloadAction<unknown>
 ) {
   const showErrorToast = (error: Error, action: PayloadAction<T>) => {
     const serializedError = serializeHttpFetchError(error as IHttpFetchError, action.payload);
@@ -85,6 +86,10 @@ export function fetchEffectFactory<T, R, S, F>(
       if (response instanceof Error) {
         const error = response as Error;
         if (shouldIgnoreError?.(error)) {
+          const ignoredErrorAction = onIgnoredError?.(action);
+          if (ignoredErrorAction) {
+            yield put(ignoredErrorAction);
+          }
           return;
         }
         // eslint-disable-next-line no-console
@@ -115,6 +120,10 @@ export function fetchEffectFactory<T, R, S, F>(
       }
     } catch (error) {
       if (shouldIgnoreError?.(error)) {
+        const ignoredErrorAction = onIgnoredError?.(action);
+        if (ignoredErrorAction) {
+          yield put(ignoredErrorAction);
+        }
         return;
       }
       // eslint-disable-next-line no-console

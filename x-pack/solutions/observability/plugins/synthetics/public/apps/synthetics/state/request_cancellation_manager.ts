@@ -24,6 +24,13 @@ export class RequestCancellationManager {
     this.hasStartedLoad = true;
   }
 
+  public resumeAfterCancellation(): void {
+    if (this.abortController.signal.aborted) {
+      this.abortController = new AbortController();
+      this.hasStartedLoad = true;
+    }
+  }
+
   public cancel(reason: AbortReason = AbortReason.CANCELED): void {
     this.abortController.abort(reason);
   }

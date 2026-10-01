@@ -14,6 +14,8 @@ import { selectOverviewPageState } from '../overview/selectors';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   appendOverviewStatusAction,
+  cancelAppendOverviewStatusAction,
+  cancelOverviewStatusAction,
   fetchOverviewStatusAction,
   fetchStaleStatusAction,
   quietFetchOverviewStatusAction,
@@ -41,7 +43,8 @@ export function* fetchOverviewStatusEffect(
       fetchOverviewStatusAction.fail,
       undefined,
       undefined,
-      () => Boolean(requestSignal?.aborted)
+      () => Boolean(requestSignal?.aborted),
+      () => cancelOverviewStatusAction()
     ) as ReturnType<typeof fetchEffectFactory>
   );
 }
@@ -70,7 +73,8 @@ export function* appendOverviewStatusEffect(
       appendOverviewStatusAction.fail,
       undefined,
       undefined,
-      () => Boolean(requestSignal?.aborted)
+      () => Boolean(requestSignal?.aborted),
+      () => cancelAppendOverviewStatusAction()
     ) as ReturnType<typeof fetchEffectFactory>
   );
 }

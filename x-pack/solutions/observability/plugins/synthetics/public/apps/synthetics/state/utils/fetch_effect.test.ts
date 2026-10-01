@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { call } from 'redux-saga/effects';
+import { call, put } from 'redux-saga/effects';
 import { fetchEffectFactory } from './fetch_effect';
 
 jest.mock('../../../../utils/kibana_service', () => ({ kibanaService: {} }));
@@ -21,6 +21,29 @@ describe('fetchEffectFactory', () => {
 
     expect(generator.next().value).toEqual(call(fetch, action.payload));
     expect(generator.throw(new Error('canceled')).done).toBe(true);
+    expect(fail).not.toHaveBeenCalled();
+  });
+
+  it('dispatches the supplied cancellation action without reporting an error', () => {
+    const fetch = jest.fn();
+    const success = jest.fn();
+    const fail = jest.fn();
+    const action = { type: 'fetch', payload: {} };
+    const cancel = { type: 'fetchCanceled', payload: undefined };
+    const fetchEffect = fetchEffectFactory(
+      fetch,
+      success,
+      fail,
+      undefined,
+      undefined,
+      () => true,
+      () => cancel
+    );
+    const generator = fetchEffect(action);
+
+    expect(generator.next().value).toEqual(call(fetch, action.payload));
+    expect(generator.throw(new Error('canceled')).value).toEqual(put(cancel));
+    expect(generator.next().done).toBe(true);
     expect(fail).not.toHaveBeenCalled();
   });
 });
