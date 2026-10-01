@@ -6,6 +6,7 @@
  */
 
 import {
+  ConversationActivityEventType,
   ConversationOriginType,
   ConversationRoundStepType,
   EventActorType,
@@ -791,6 +792,29 @@ describe('groupTimelineEvents with events outside the built-in set', () => {
 
     expect(items).toHaveLength(3);
     expect(items[2]).toEqual({ kind: 'customEvent', key: 'note-1', event: custom });
+  });
+
+  it('emits nothing for conversation activity events', () => {
+    const actor = { type: EventActorType.user, id: 'user-1' };
+    const created: ConversationEvent = {
+      id: 'act-created',
+      type: ConversationActivityEventType.conversationCreated,
+      created_at: '2026-09-03T11:00:00.000Z',
+      actor,
+      data: { agent_id: 'agent-1', access_mode: 'private' },
+    };
+    const renamed: ConversationEvent = {
+      id: 'act-renamed',
+      type: ConversationActivityEventType.titleUpdated,
+      created_at: '2026-09-03T11:20:00.000Z',
+      actor,
+      execution_id: 'exec-1',
+      data: { previous_title: 'New conversation', title: 'Renamed' },
+    };
+
+    const items = buildItems([created, user, started, terminated, renamed]);
+
+    expect(items.map((item) => item.kind)).toEqual(['userMessage', 'agentTurn']);
   });
 
   it('keeps array order, so a custom event between two turns sits between them', () => {

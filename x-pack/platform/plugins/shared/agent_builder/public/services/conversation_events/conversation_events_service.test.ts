@@ -75,11 +75,11 @@ describe('ConversationEventsService', () => {
     expect(() => service.register({ type: 'step', render: () => null })).toThrow('reserved');
   });
 
-  it('throws for every built-in timeline event type', () => {
+  it('throws for every built-in event type', () => {
     const service = new ConversationEventsService();
     for (const builtInType of BUILT_IN_CONVERSATION_EVENT_TYPES) {
       expect(() => service.register({ type: builtInType, render: () => null })).toThrow(
-        'built-in timeline event type'
+        'built-in event type'
       );
     }
   });

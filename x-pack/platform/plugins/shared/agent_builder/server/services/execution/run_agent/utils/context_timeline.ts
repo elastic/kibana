@@ -21,6 +21,7 @@ import type {
 import {
   TimelineEventType,
   interruptionOfTerminal,
+  isCustomConversationEvent,
   isEventsNativeVersion,
   isExecutionTerminalEvent,
   isTimelineEvent,
@@ -116,6 +117,10 @@ export type TimelineEntry<E extends AnyTimelineEvent = TimelineEvent> =
  *
  * Custom (registered) events are carried through untouched: they belong to no execution, so
  * they are ordered by timestamp and stored position like the other non-round events.
+ *
+ * Activity-only events (the `ConversationActivityEventType` lifecycle types) are dropped: they
+ * have no agent representation yet. One would be a third partition here, next to the custom
+ * events, rendered where `prepareConversation` resolves them.
  */
 export const eventsForContext = (conversation: Conversation): ContextTimelineEvent[] => {
   if (!isEventsNativeVersion(conversation.schema_version) || !conversation.events?.length) {
@@ -267,7 +272,7 @@ export const standaloneUserMessages = <E extends AnyTimelineEvent>(
 
 /** Selects the custom (registered) events of a timeline: everything that is not a built-in event. */
 export const customEvents = <E extends AnyTimelineEvent>(timeline: E[]): Array<CustomEventOf<E>> =>
-  timeline.filter((event): event is CustomEventOf<E> => !isTimelineEvent(event));
+  timeline.filter((event): event is CustomEventOf<E> => isCustomConversationEvent(event));
 
 /** The event an entry is ordered by: its triggering message, or the custom event itself. */
 const entryAnchor = <E extends AnyTimelineEvent>(

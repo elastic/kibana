@@ -22,6 +22,7 @@ import type {
 import {
   AgentExecutionMode,
   ChatTriggerMode,
+  EventActorType,
   agentBuilderDefaultAgentId,
   createBadRequestError,
   createInternalError,
@@ -74,6 +75,12 @@ import {
 } from './utils/events';
 import { userMessageActor } from '../conversation/client/rounds_to_events';
 
+/** The still-recorded parent execution that spawned a sub-agent execution. */
+interface ParentExecution {
+  agentId: string;
+  executionId: string;
+}
+
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   taskManager: TaskManagerStartContract;
@@ -121,7 +128,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
-    const conversationClient = await this.getConversationClient({
+    const { conversationClient, parentExecution } = await this.resolveConversationClient({
       request,
       executionClient,
       parentExecutionId: params.parentExecutionId,
@@ -220,6 +227,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           receivedAt,
           eventId: roundUserMessageEventId(roundId),
           mergeAttachments: false,
+          parentExecution,
         });
       } catch (err) {
         try {
@@ -646,9 +654,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * A sub-agent acts as its parent execution's owner: a Task Manager parent's request resolves to
    * the task's API key, which does not match the owner's id. Trusts `parentExecutionId` to name
-   * the running parent that spawned it.
+   * the running parent that spawned it. The same lookup identifies the parent execution, so the
+   * conversations this execution creates can be attributed to it.
    */
-  private async getConversationClient({
+  private async resolveConversationClient({
     request,
     executionClient,
     parentExecutionId,
@@ -656,25 +665,31 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     request: KibanaRequest;
     executionClient: AgentExecutionClient;
     parentExecutionId?: string;
-  }): Promise<ConversationClient> {
+  }): Promise<{ conversationClient: ConversationClient; parentExecution?: ParentExecution }> {
     const { conversationService } = this.deps;
 
     const requestClient = await conversationService.getScopedClient({ request });
 
     if (!parentExecutionId) {
-      return requestClient;
+      return { conversationClient: requestClient };
     }
 
-    const parentOwner = (await executionClient.peek(parentExecutionId))?.owner;
+    const parent = await executionClient.peek(parentExecutionId);
+    const parentExecution = parent?.agentId
+      ? { agentId: parent.agentId, executionId: parentExecutionId }
+      : undefined;
 
-    if (!parentOwner) {
-      return requestClient;
+    if (!parent?.owner) {
+      return { conversationClient: requestClient, parentExecution };
     }
 
-    return conversationService.getScopedClientAsUser({
-      request,
-      user: { ...requestClient.getUser(), ...parentOwner },
-    });
+    return {
+      conversationClient: await conversationService.getScopedClientAsUser({
+        request,
+        user: { ...requestClient.getUser(), ...parent.owner },
+      }),
+      parentExecution,
+    };
   }
 
   private async resolveConversationRequest({
@@ -717,6 +732,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt,
     eventId,
     mergeAttachments,
+    parentExecution,
   }: {
     conversation: ConversationWithOperation;
     conversationClient: ConversationClient;
@@ -725,6 +741,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt: Date;
     eventId: string;
     mergeAttachments: boolean;
+    parentExecution?: ParentExecution;
   }): Promise<string> {
     const { nextInput, origin: requestOrigin } = params;
     const author = conversationClient.getAuthor(requestOrigin?.author);
@@ -736,6 +753,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       eventId,
       author,
       ...(origin ? { origin } : {}),
+      ...(parentExecution
+        ? {
+            activity: {
+              actor: { type: EventActorType.agent, id: parentExecution.agentId },
+              execution_id: parentExecution.executionId,
+            },
+          }
+        : {}),
     };
 
     // The round rewrite falls back to the conversation owner, not the requester.

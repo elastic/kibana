@@ -24,6 +24,7 @@ import {
   ChatEventType,
   AgentExecutionMode,
   ConversationRoundStepType,
+  EventActorType,
   carriedOverTodos,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
@@ -293,7 +294,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const updateConversationMetadata =
     conversationId && conversation?.template_id
       ? (updates: Record<string, MetadataFieldValue>) =>
-          conversationClient.patchMetadata(conversationId, updates)
+          conversationClient.patchMetadata(conversationId, updates, {
+            // Attribute the change to the agent's run.
+            activity: {
+              actor: { type: EventActorType.agent, id: agentId ?? conversation.agent_id },
+              ...(executionId !== undefined ? { execution_id: executionId } : {}),
+            },
+          })
       : undefined;
 
   const conversationTemplate = conversation?.template_id

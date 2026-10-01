@@ -40,6 +40,7 @@ import {
   createPreExecutionSteps,
 } from './utils';
 import { createAgentGraph } from './graph';
+import { registerInternalTools } from './tools/register_internal_tools';
 import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
 import { RunTracker } from './run_tracker';
@@ -449,6 +450,84 @@ describe('runDefaultAgentMode', () => {
       expect(call.roundId).not.toBe('preminted-round-id');
       // UUID v4 format sanity: 36 chars with dashes at expected positions.
       expect(call.roundId).toMatch(/^[0-9a-f-]{36}$/);
+    });
+  });
+
+  describe('conversation metadata updates from tools', () => {
+    const registerInternalToolsMock = registerInternalTools as jest.MockedFn<
+      typeof registerInternalTools
+    >;
+
+    const setupBase = async (context: ReturnType<typeof createAgentHandlerContextMock>) => {
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      getPendingTurnMock.mockReturnValue(undefined);
+      selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    };
+
+    const updaterPassedToTools = () =>
+      registerInternalToolsMock.mock.calls[0][0].updateConversationMetadata;
+
+    it('attributes a templated conversation metadata patch to the agent and its execution', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          conversation: createEmptyConversation({ id: 'conv-1', template_id: 'tmpl-1' }),
+          agentId: 'agent-1',
+          executionId: 'round-1::execution',
+        },
+        context
+      );
+
+      const updateConversationMetadata = updaterPassedToTools();
+      expect(updateConversationMetadata).toBeDefined();
+      await updateConversationMetadata!({ status: 'open' });
+
+      expect(context.conversationClient.patchMetadata).toHaveBeenCalledWith(
+        'conv-1',
+        { status: 'open' },
+        {
+          activity: {
+            actor: { type: 'agent', id: 'agent-1' },
+            execution_id: 'round-1::execution',
+          },
+        }
+      );
+    });
+
+    it('offers no metadata updater when the conversation has no template', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          conversation: createEmptyConversation({ id: 'conv-1' }),
+          agentId: 'agent-1',
+        },
+        context
+      );
+
+      expect(updaterPassedToTools()).toBeUndefined();
+      expect(context.conversationClient.patchMetadata).not.toHaveBeenCalled();
     });
   });
 

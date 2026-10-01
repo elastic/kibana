@@ -17,6 +17,11 @@ import type {
 } from './conversation';
 import type { RoundState } from './round_state';
 import type { ExecutionInterruption } from './events';
+import type {
+  ConversationAccessControlMode,
+  ConversationAccessControlPrincipalType,
+  ConversationAccessControlRole,
+} from './access_control/types';
 
 /**
  * The projection format that new writes are stamped at.
@@ -335,6 +340,106 @@ const ATTACHMENT_EVENT_TYPES: ReadonlySet<string> = new Set([
 export const isAttachmentEvent = (event: { type: string }): event is AttachmentTimelineEvent =>
   ATTACHMENT_EVENT_TYPES.has(event.type);
 
+/**
+ * Lifecycle bookkeeping written only by the conversation client. Built in (custom types may not
+ * reuse the names, the add-events API rejects them) but not timeline events: the round fold, the
+ * agent context and the default timeline exclude them by class, whatever their `execution_id`.
+ */
+export enum ConversationActivityEventType {
+  conversationCreated = 'conversation_created',
+  titleUpdated = 'title_updated',
+  metadataUpdated = 'metadata_updated',
+  participantsAdded = 'participants_added',
+  participantsRemoved = 'participants_removed',
+  visibilityUpdated = 'visibility_updated',
+}
+
+export interface ConversationCreatedActivityEventData {
+  agent_id: string;
+  access_mode: ConversationAccessControlMode;
+  template_id?: string;
+  /** Set when created as a persistent sub-agent child. */
+  parent_conversation_id?: string;
+}
+export type ConversationCreatedActivityEvent = ConversationEvent<
+  ConversationActivityEventType.conversationCreated,
+  ConversationCreatedActivityEventData
+>;
+
+/** The `actor` says who: a user renaming, or the agent when the runtime generated the title. */
+export interface TitleUpdatedEventData {
+  previous_title: string;
+  title: string;
+}
+export type TitleUpdatedEvent = ConversationEvent<
+  ConversationActivityEventType.titleUpdated,
+  TitleUpdatedEventData
+>;
+
+/** Values are not recorded, only the keys that were added, changed or removed. */
+export interface MetadataUpdatedEventData {
+  changed_fields: string[];
+  template_id?: string;
+  template_version?: number;
+}
+export type MetadataUpdatedEvent = ConversationEvent<
+  ConversationActivityEventType.metadataUpdated,
+  MetadataUpdatedEventData
+>;
+
+export interface ConversationParticipant {
+  type: ConversationAccessControlPrincipalType;
+  id: string;
+  role: ConversationAccessControlRole;
+}
+
+export interface ParticipantsAddedEventData {
+  participants: ConversationParticipant[];
+}
+export type ParticipantsAddedEvent = ConversationEvent<
+  ConversationActivityEventType.participantsAdded,
+  ParticipantsAddedEventData
+>;
+
+export interface ParticipantsRemovedEventData {
+  participants: ConversationParticipant[];
+}
+export type ParticipantsRemovedEvent = ConversationEvent<
+  ConversationActivityEventType.participantsRemoved,
+  ParticipantsRemovedEventData
+>;
+
+export interface VisibilityUpdatedEventData {
+  previous_access_mode: ConversationAccessControlMode;
+  access_mode: ConversationAccessControlMode;
+}
+export type VisibilityUpdatedEvent = ConversationEvent<
+  ConversationActivityEventType.visibilityUpdated,
+  VisibilityUpdatedEventData
+>;
+
+/**
+ * What the activity log lists: the lifecycle events above plus the attachment events, which are
+ * also timeline events. Activity and timeline overlap on attachments, so consumers that want one
+ * without the other select by predicate (`isTimelineEvent`, `isCustomConversationEvent`) or
+ * combine them, rather than treating the two as a partition.
+ */
+export type ActivityEvent =
+  | ConversationCreatedActivityEvent
+  | TitleUpdatedEvent
+  | MetadataUpdatedEvent
+  | ParticipantsAddedEvent
+  | ParticipantsRemovedEvent
+  | VisibilityUpdatedEvent
+  | AttachmentTimelineEvent;
+
+const ACTIVITY_EVENT_TYPES: ReadonlySet<string> = new Set(
+  Object.values(ConversationActivityEventType)
+);
+
+export const isActivityEvent = (event: { type: string }): event is ActivityEvent =>
+  ACTIVITY_EVENT_TYPES.has(event.type) || isAttachmentEvent(event);
+
 const EXECUTION_TERMINAL_EVENT_TYPES: ReadonlySet<string> = new Set([
   TimelineEventType.executionTerminated,
   TimelineEventType.executionFailed,
@@ -516,33 +621,47 @@ export const executionStepEventId = (
 export const RESERVED_CONVERSATION_EVENT_TYPES = ['execution', 'step'] as const;
 export type ReservedConversationEventType = (typeof RESERVED_CONVERSATION_EVENT_TYPES)[number];
 
-/**
- * The built-in timeline event type names. Derived from `TimelineEventType` rather than written
- * out, so it cannot drift from the enum: adding a member to `TimelineEventType` adds it here.
- * A custom event type may not reuse one of these names — the round-derived events projection
- * owns them.
- */
-export const BUILT_IN_CONVERSATION_EVENT_TYPES: readonly TimelineEventType[] =
-  Object.values(TimelineEventType);
+export type BuiltInConversationEventType = TimelineEventType | ConversationActivityEventType;
 
-/** True when `type` is one of the built-in timeline event type names. */
-export const isBuiltInConversationEventType = (type: string): type is TimelineEventType =>
+/**
+ * The built-in event type names: the timeline events and the activity events. Derived from the
+ * enums rather than written out, so it cannot drift: adding a member to either enum adds it
+ * here. A custom event type may not reuse one of these names.
+ */
+export const BUILT_IN_CONVERSATION_EVENT_TYPES: readonly BuiltInConversationEventType[] = [
+  ...Object.values(TimelineEventType),
+  ...Object.values(ConversationActivityEventType),
+];
+
+/** True when `type` is one of the built-in event type names (timeline or activity). */
+export const isBuiltInConversationEventType = (
+  type: string
+): type is BuiltInConversationEventType =>
   (BUILT_IN_CONVERSATION_EVENT_TYPES as readonly string[]).includes(type);
 
+const TIMELINE_EVENT_TYPES: ReadonlySet<string> = new Set(Object.values(TimelineEventType));
+
+/** The class the round fold and the default timeline consume. */
 export const isTimelineEvent = (event: ConversationEvent): event is TimelineEvent =>
-  isBuiltInConversationEventType(event.type);
+  TIMELINE_EVENT_TYPES.has(event.type);
+
+/** A registered (non built-in) event. */
+export const isCustomConversationEvent = (event: { type: string }): boolean =>
+  !isBuiltInConversationEventType(event.type);
 
 /**
- * Union of the string values of all built-in timeline event types.
+ * Union of the string values of all built-in event types.
  * Uses template-literal distribution so that `'user_message' extends BuiltInConversationEventTypeValue`
  * evaluates to `true` — plain string literals do not extend string enum types in TypeScript's
  * type system even when the runtime values match.
  */
-type BuiltInConversationEventTypeValue = `${TimelineEventType}`;
+type BuiltInConversationEventTypeValue =
+  | `${TimelineEventType}`
+  | `${ConversationActivityEventType}`;
 
 /**
  * Compile-time guard that rejects a type string if it contains the id delimiter, is reserved, or
- * is a built-in timeline event type.
+ * is a built-in event type (timeline or activity).
  *
  * Only effective when `T` is inferred as a literal — a `string`-typed variable slips through.
  * Always pair with the runtime checks in the registry.
@@ -561,7 +680,7 @@ export type ValidConversationEventType<T extends string> =
  * Enforces the same three naming rules as the server-side registry:
  *   1. May not contain the id delimiter (`::`)
  *   2. May not be a reserved type (`execution`, `step`)
- *   3. May not shadow a built-in timeline event type
+ *   3. May not shadow a built-in event type (timeline or activity)
  *
  * Pair with the compile-time {@link ValidConversationEventType} guard for full coverage.
  */
@@ -576,7 +695,7 @@ export const assertValidConversationEventType = (type: string): void => {
   }
   if (isBuiltInConversationEventType(type)) {
     throw new Error(
-      `Conversation event type "${type}" is a built-in timeline event type and cannot be registered`
+      `Conversation event type "${type}" is a built-in event type and cannot be registered`
     );
   }
 };

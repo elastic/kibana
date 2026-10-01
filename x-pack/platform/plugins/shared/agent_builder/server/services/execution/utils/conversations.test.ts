@@ -398,6 +398,34 @@ describe('conversations utils', () => {
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
+    it('forwards the caller-supplied activity to create, and no attribution otherwise', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+      const receipt = {
+        conversation,
+        conversationClient,
+        eventId: 'round-1::user_message',
+        receivedAt: new Date(),
+        input: { message: 'hi' },
+      };
+      const activity = {
+        actor: { type: EventActorType.agent, id: 'parent-agent' },
+        execution_id: 'parent-round::execution',
+      };
+
+      await persistUserMessage({ ...receipt, activity });
+      expect(conversationClient.create).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'conv-1' }),
+        { activity }
+      );
+
+      await persistUserMessage(receipt);
+      expect(conversationClient.create).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'conv-1' }),
+        undefined
+      );
+    });
+
     it('defaults an undefined message to an empty string so the receipt-time snapshot is a valid RoundInput', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');

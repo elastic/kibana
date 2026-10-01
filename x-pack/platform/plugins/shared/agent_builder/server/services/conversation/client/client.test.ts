@@ -11,6 +11,7 @@ import { nodeBuilder } from '@kbn/es-query';
 import { z } from '@kbn/zod/v4';
 import {
   CONVERSATION_SCHEMA_VERSION,
+  ConversationActivityEventType,
   ConversationParentRelation,
   ConversationRoundStatus,
   EventActorType,
@@ -1227,7 +1228,9 @@ describe('ConversationClient', () => {
         agent_id: 'agent-1',
         user: { id: 'user-1', username: 'test-user' },
         rounds: [],
-        events: [],
+        events: [
+          expect.objectContaining({ type: ConversationActivityEventType.conversationCreated }),
+        ],
         schema_version: CONVERSATION_SCHEMA_VERSION,
         read: false,
         pinned: false,
@@ -3482,7 +3485,11 @@ describe('ConversationClient', () => {
         };
       };
       expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      expect(indexed.events?.map((event) => event.id)).toEqual([
+      // The creation activity leads, then the round-derived projection.
+      expect(indexed.events?.map((event) => event.type)[0]).toBe(
+        ConversationActivityEventType.conversationCreated
+      );
+      expect(indexed.events?.slice(1).map((event) => event.id)).toEqual([
         'round-1::user_message',
         'round-1::execution_started',
         'round-1::execution_terminated',
@@ -3551,11 +3558,17 @@ describe('ConversationClient', () => {
       });
 
       const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
-        document: { events?: Array<{ data: { attachment_refs?: unknown[] } }> };
+        document: { events?: Array<{ type: string; data: { attachment_refs?: unknown[] } }> };
       };
-      expect(indexed.events?.[0]?.data.attachment_refs).toEqual(attachmentRefs);
+      const indexedUserMessage = indexed.events?.find(
+        (event) => event.type === TimelineEventType.userMessage
+      );
+      expect(indexedUserMessage?.data.attachment_refs).toEqual(attachmentRefs);
 
-      expect(created.events?.[0]?.data).toMatchObject({ attachment_refs: attachmentRefs });
+      const createdUserMessage = created.events?.find(
+        (event) => event.type === TimelineEventType.userMessage
+      );
+      expect(createdUserMessage?.data).toMatchObject({ attachment_refs: attachmentRefs });
       expect(created.rounds[0].input.attachment_refs).toEqual(attachmentRefs);
     });
 
@@ -3973,28 +3986,26 @@ describe('ConversationClient', () => {
       expect(result.events).toEqual(indexed.events);
     });
 
-    it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {
+    it('leaves legacy conversations rounds-only on an update that records no activity (no events / no schema_version written)', async () => {
       mockGetDocumentResponse(
         createConversationDocument({
           rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
         })
       );
 
-      await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
+      await client.update({ id: 'conversation-1', attachments: [] }, { access: 'owner' });
 
       const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
         document: {
-          title: string;
           schema_version?: number;
           events?: unknown[];
         };
       };
-      expect(indexed.title).toBe('Renamed');
       expect(indexed.schema_version).toBeUndefined();
       expect(indexed.events).toBeUndefined();
     });
 
-    it('keeps events-native docs events-native on update (keeps schema_version, preserves stored events verbatim)', async () => {
+    it('keeps events-native docs events-native on update (keeps schema_version, preserves stored events and appends the activity)', async () => {
       const existingRound = createRound({
         id: 'round-1',
         status: ConversationRoundStatus.completed,
@@ -4025,7 +4036,10 @@ describe('ConversationClient', () => {
         };
       };
       expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      expect(indexed.events).toEqual(storedEvents);
+      expect(indexed.events).toEqual([
+        ...storedEvents,
+        expect.objectContaining({ type: ConversationActivityEventType.titleUpdated }),
+      ]);
     });
   });
 
@@ -4054,6 +4068,581 @@ describe('ConversationClient', () => {
       expect(result[0].type).toBe('text_note');
       expect(result[0].actor.type).toBe(EventActorType.user);
       expect(result[0].actor.id).toBe('user-1');
+      expect(result[0].actor.username).toBe('test-user');
+    });
+  });
+
+  describe('activity events', () => {
+    const userActor = { type: EventActorType.user, id: 'user-1', username: 'test-user' };
+    const agentActorFor = (agentId: string) => ({ type: EventActorType.agent, id: agentId });
+
+    const indexedDocument = (call = 0) =>
+      (mockEsClient.index.mock.calls[call][0] as { document: Document['_source'] }).document!;
+    const indexedEvents = (call = 0) => (indexedDocument(call).events ?? []) as ConversationEvent[];
+    const activityOf = (events: ConversationEvent[]) =>
+      events.filter((event) =>
+        (Object.values(ConversationActivityEventType) as string[]).includes(event.type)
+      );
+
+    const userMessage = (id: string, createdAt: string): TimelineEvent => ({
+      id,
+      type: TimelineEventType.userMessage,
+      created_at: createdAt,
+      actor: userActor,
+      data: { message: 'hello' },
+    });
+
+    const terminated = (roundId: string, createdAt: string): TimelineEvent => ({
+      id: `${roundId}::execution_terminated`,
+      type: TimelineEventType.executionTerminated,
+      created_at: createdAt,
+      actor: agentActorFor('agent-1'),
+      execution_id: `${roundId}::execution`,
+      trigger_event_id: `${roundId}::user_message`,
+      data: {
+        model_usage: { connector_id: 'c1', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+        time_to_first_token: 1,
+        time_to_last_token: 2,
+        outcome: { type: 'responded', response: { message: 'hi' } },
+      },
+    });
+
+    const eventsNativeDocument = (
+      overrides: Parameters<typeof createConversationDocument>[0] = {}
+    ) => createConversationDocument({ schemaVersion: 1, events: [], ...overrides });
+
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    describe('conversation_created', () => {
+      beforeEach(() => {
+        mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
+        mockGetReturnsIndexedDocument();
+      });
+
+      it('leads the stored timeline, attributed to the creating user', async () => {
+        await client.create({
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+        });
+
+        const [created, ...rest] = indexedEvents();
+        expect(rest).toEqual([]);
+        expect(created).toEqual({
+          id: expect.any(String),
+          type: ConversationActivityEventType.conversationCreated,
+          created_at: expect.any(String),
+          actor: userActor,
+          data: { agent_id: 'agent-1', access_mode: ConversationAccessControlMode.Private },
+        });
+        expect(created.created_at).toBe(indexedDocument().created_at);
+      });
+
+      it('precedes caller-supplied events and is never stamped after them', async () => {
+        const receivedAt = '2020-01-01T00:00:00.000Z';
+        await client.create({
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+          events: [userMessage('round-1::user_message', receivedAt)],
+        });
+
+        const events = indexedEvents();
+        expect(events.map((event) => event.type)).toEqual([
+          ConversationActivityEventType.conversationCreated,
+          TimelineEventType.userMessage,
+        ]);
+        expect(events[0].created_at).toBe(receivedAt);
+        // The document is created at the same instant, so the event never predates it.
+        expect(indexedDocument().created_at).toBe(receivedAt);
+      });
+
+      it('records the initial access mode, the template and the parent conversation', async () => {
+        getTemplateMock.mockReturnValue(makeTemplate('tmpl-a', {}, 3));
+
+        await client.create({
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+          template_id: 'tmpl-a',
+          access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
+          parent_conversation: { id: 'parent-1', relation: ConversationParentRelation.subagent },
+        });
+
+        expect(indexedEvents()[0].data).toEqual({
+          agent_id: 'agent-1',
+          access_mode: ConversationAccessControlMode.Public,
+          template_id: 'tmpl-a',
+          parent_conversation_id: 'parent-1',
+        });
+      });
+
+      it('defaults the actor to the overriding owner of a sub-agent child', async () => {
+        // The read-after-write runs as `user-1`, who does not own the child; only the indexed
+        // document matters here.
+        await client
+          .create({
+            id: 'conversation-1',
+            title: 'Conversation 1',
+            agent_id: 'agent-1',
+            rounds: [],
+            user: { id: 'owner-9', username: 'owner' },
+          })
+          .catch(() => undefined);
+
+        expect(indexedEvents()[0].actor).toEqual({
+          type: EventActorType.user,
+          id: 'owner-9',
+          username: 'owner',
+        });
+      });
+
+      it('attributes the creation to the parent execution when the caller says so', async () => {
+        await client
+          .create(
+            {
+              id: 'conversation-1',
+              title: 'Conversation 1',
+              agent_id: 'agent-1',
+              rounds: [],
+              user: { id: 'owner-9', username: 'owner' },
+              parent_conversation: {
+                id: 'parent-1',
+                relation: ConversationParentRelation.subagent,
+              },
+            },
+            {
+              activity: {
+                actor: agentActorFor('parent-agent'),
+                execution_id: 'parent-round::execution',
+              },
+            }
+          )
+          .catch(() => undefined);
+
+        expect(indexedEvents()[0]).toMatchObject({
+          type: ConversationActivityEventType.conversationCreated,
+          actor: agentActorFor('parent-agent'),
+          execution_id: 'parent-round::execution',
+          data: { agent_id: 'agent-1', parent_conversation_id: 'parent-1' },
+        });
+      });
+    });
+
+    describe('title_updated on update', () => {
+      it('appends the rename after the stored events without touching read state', async () => {
+        const stored = [userMessage('round-1::user_message', '2026-01-01T00:00:00.000Z')];
+        mockGetDocumentResponse(eventsNativeDocument({ events: stored }));
+
+        await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
+
+        const document = indexedDocument();
+        expect(document.events).toEqual([
+          ...stored,
+          {
+            id: expect.any(String),
+            type: ConversationActivityEventType.titleUpdated,
+            created_at: expect.any(String),
+            actor: userActor,
+            data: { previous_title: 'Conversation 1', title: 'Renamed' },
+          },
+        ]);
+        expect(document.read_by).toEqual([{ userId: 'unrelated-reader-id' }]);
+        expect(document.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      });
+
+      it('records nothing when the title is unchanged', async () => {
+        mockGetDocumentResponse(eventsNativeDocument());
+
+        await client.update(
+          { id: 'conversation-1', title: 'Conversation 1' },
+          { access: 'rename' }
+        );
+
+        expect(indexedEvents()).toEqual([]);
+      });
+
+      it('promotes a legacy document, deriving its timeline ahead of the activity', async () => {
+        mockGetDocumentResponse(
+          createConversationDocument({
+            rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+          })
+        );
+
+        await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
+
+        const document = indexedDocument();
+        expect(document.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+        expect(document.events?.map((event) => event.id.split('::')[0])).toEqual([
+          'round-1',
+          'round-1',
+          'round-1',
+          expect.any(String),
+        ]);
+        expect(document.events?.at(-1)?.type).toBe(ConversationActivityEventType.titleUpdated);
+      });
+
+      it('honours the caller-supplied actor and execution id', async () => {
+        mockGetDocumentResponse(eventsNativeDocument());
+
+        await client.update(
+          { id: 'conversation-1', title: 'Renamed' },
+          {
+            access: 'owner',
+            activity: { actor: agentActorFor('agent-7'), execution_id: 'round-1::execution' },
+          }
+        );
+
+        expect(indexedEvents()[0]).toMatchObject({
+          actor: agentActorFor('agent-7'),
+          execution_id: 'round-1::execution',
+        });
+      });
+
+      it('keeps the stored rounds, so round feedback survives the write', async () => {
+        const roundWithFeedback = {
+          ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+          feedback: {
+            vote: 'up' as const,
+            chips: [],
+            comment: '',
+            submitted_at: '2025-01-01T00:00:00.000Z',
+          },
+        };
+        mockGetDocumentResponse(
+          eventsNativeDocument({
+            rounds: [roundWithFeedback],
+            events: [
+              userMessage('round-1::user_message', '2026-01-01T00:00:00.000Z'),
+              terminated('round-1', '2026-01-01T00:00:05.000Z'),
+            ],
+          })
+        );
+
+        await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
+
+        const persistedRounds = indexedDocument().conversation_rounds;
+        expect(persistedRounds).toHaveLength(1);
+        expect(persistedRounds[0]).toMatchObject({
+          id: 'round-1',
+          feedback: roundWithFeedback.feedback,
+        });
+      });
+    });
+
+    describe('metadata_updated on update', () => {
+      it('lists added, changed and removed keys', async () => {
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({
+            templateId: 'tmpl-a',
+            templateVersion: 2,
+            metadata: { same: 'a', changed: 'b', removed: 'c' },
+          })
+        );
+
+        await client.update(
+          { id: 'conversation-1', metadata: { same: 'a', changed: 'B', added: 'd' } },
+          { access: 'owner' }
+        );
+
+        const [event] = activityOf(indexedEvents());
+        expect(event.type).toBe(ConversationActivityEventType.metadataUpdated);
+        expect(event.data).toEqual({
+          changed_fields: expect.arrayContaining(['changed', 'removed', 'added']),
+          template_id: 'tmpl-a',
+          template_version: 2,
+        });
+        expect((event.data as { changed_fields: string[] }).changed_fields).toHaveLength(3);
+      });
+
+      it('records nothing for an attachments-only update', async () => {
+        mockGetDocumentResponse(eventsNativeDocument());
+
+        await client.update({ id: 'conversation-1', attachments: [] }, { access: 'owner' });
+
+        expect(indexedEvents()).toEqual([]);
+      });
+    });
+
+    describe('access control activity', () => {
+      const member = (id: string) => ({
+        type: 'user' as const,
+        id,
+        role: ConversationAccessControlRole.Member,
+      });
+      const listed = (id: string) => ({ ...member(id), added_at: '2026-01-01T00:00:00.000Z' });
+
+      it('records participants_added for new members only', async () => {
+        mockGetDocumentResponse(eventsNativeDocument({ entries: [listed('user-2')] }));
+
+        await client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [member('user-2'), member('user-3')],
+        });
+
+        const events = indexedEvents();
+        expect(events.map((event) => event.type)).toEqual([
+          ConversationActivityEventType.participantsAdded,
+        ]);
+        expect(events[0].data).toEqual({ participants: [member('user-3')] });
+        expect(events[0].actor).toEqual(userActor);
+      });
+
+      it('records participants_removed', async () => {
+        mockGetDocumentResponse(
+          eventsNativeDocument({ entries: [listed('user-2'), listed('user-3')] })
+        );
+
+        await client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [member('user-3')],
+        });
+
+        const events = indexedEvents();
+        expect(events.map((event) => event.type)).toEqual([
+          ConversationActivityEventType.participantsRemoved,
+        ]);
+        expect(events[0].data).toEqual({ participants: [member('user-2')] });
+      });
+
+      it('records visibility_updated, then the members dropped by publishing', async () => {
+        mockGetDocumentResponse(eventsNativeDocument({ entries: [listed('user-2')] }));
+
+        await client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Public,
+          entries: [],
+        });
+
+        const events = indexedEvents();
+        expect(events.map((event) => event.type)).toEqual([
+          ConversationActivityEventType.visibilityUpdated,
+          ConversationActivityEventType.participantsRemoved,
+        ]);
+        expect(events[0].data).toEqual({
+          previous_access_mode: ConversationAccessControlMode.Private,
+          access_mode: ConversationAccessControlMode.Public,
+        });
+      });
+
+      it('records nothing for an identical request or an inert owner entry', async () => {
+        mockGetDocumentResponse(eventsNativeDocument({ entries: [listed('user-2')] }));
+
+        await client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [member('user-2'), member('user-1')],
+        });
+
+        expect(indexedEvents()).toEqual([]);
+      });
+
+      it('addAccessControlEntries records only the members it actually added', async () => {
+        mockGetDocumentResponse(eventsNativeDocument({ entries: [listed('user-2')] }));
+
+        await client.addAccessControlEntries(
+          'conversation-1',
+          [member('user-2'), member('user-3')],
+          { activity: { actor: agentActorFor('agent-1'), execution_id: 'round-1::execution' } }
+        );
+
+        const events = indexedEvents();
+        expect(events.map((event) => event.type)).toEqual([
+          ConversationActivityEventType.participantsAdded,
+        ]);
+        expect(events[0]).toMatchObject({
+          actor: agentActorFor('agent-1'),
+          execution_id: 'round-1::execution',
+          data: { participants: [member('user-3')] },
+        });
+      });
+
+      it('removeAccessControlEntries records the members it removed', async () => {
+        mockGetDocumentResponse(
+          eventsNativeDocument({ entries: [listed('user-2'), listed('user-3')] })
+        );
+
+        await client.removeAccessControlEntries('conversation-1', [{ type: 'user', id: 'user-2' }]);
+
+        const events = indexedEvents();
+        expect(events.map((event) => event.type)).toEqual([
+          ConversationActivityEventType.participantsRemoved,
+        ]);
+        expect(events[0]).toMatchObject({
+          actor: userActor,
+          data: { participants: [member('user-2')] },
+        });
+      });
+    });
+
+    describe('metadata_updated on patchMetadata and applyTemplate', () => {
+      const template = () =>
+        makeTemplate(
+          'tmpl-a',
+          {
+            severity: {
+              input_type: 'SELECT',
+              description: 'Sev',
+              options: ['low', 'high'],
+              default_value: 'low',
+            },
+            status: { input_type: 'SELECT', description: 'Status', options: ['open', 'closed'] },
+          },
+          2
+        );
+
+      beforeEach(() => {
+        getTemplateMock.mockReturnValue(template());
+      });
+
+      it('patchMetadata records the changed fields it returns, with the template reference', async () => {
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({
+            templateId: 'tmpl-a',
+            templateVersion: 2,
+            metadata: { severity: 'low' },
+          })
+        );
+
+        const { changedFields } = await client.patchMetadata('conversation-1', {
+          severity: 'high',
+          status: 'open',
+        });
+
+        const [event] = activityOf(indexedEvents());
+        expect(event.type).toBe(ConversationActivityEventType.metadataUpdated);
+        expect(event.actor).toEqual(userActor);
+        expect(event.data).toEqual({
+          changed_fields: changedFields,
+          template_id: 'tmpl-a',
+          template_version: 2,
+        });
+        expect(changedFields).toEqual(['severity', 'status']);
+      });
+
+      it('patchMetadata records nothing for a no-op patch', async () => {
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({
+            templateId: 'tmpl-a',
+            templateVersion: 2,
+            metadata: { severity: 'low' },
+          })
+        );
+
+        await client.patchMetadata('conversation-1', { severity: 'low' });
+
+        expect(activityOf(indexedEvents())).toEqual([]);
+      });
+
+      it('patchMetadata attributes the change to the agent run that made it', async () => {
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({ templateId: 'tmpl-a', templateVersion: 2 })
+        );
+
+        await client.patchMetadata(
+          'conversation-1',
+          { severity: 'high' },
+          { activity: { actor: agentActorFor('agent-1'), execution_id: 'round-1::execution' } }
+        );
+
+        expect(activityOf(indexedEvents())[0]).toMatchObject({
+          actor: agentActorFor('agent-1'),
+          execution_id: 'round-1::execution',
+        });
+      });
+
+      it('applyTemplate records the seeded defaults on first apply and nothing on a no-op re-apply', async () => {
+        mockGetDocumentResponse(createConversationDocumentWithTemplate());
+        await client.applyTemplate('conversation-1', 'tmpl-a');
+
+        const [first] = activityOf(indexedEvents(0));
+        expect(first.type).toBe(ConversationActivityEventType.metadataUpdated);
+        expect(first.data).toEqual({
+          changed_fields: ['severity'],
+          template_id: 'tmpl-a',
+          template_version: 2,
+        });
+
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({
+            templateId: 'tmpl-a',
+            templateVersion: 2,
+            metadata: { severity: 'low' },
+          })
+        );
+        await client.applyTemplate('conversation-1', 'tmpl-a');
+
+        expect(activityOf(indexedEvents(1))).toEqual([]);
+      });
+    });
+
+    describe('title_updated for generated titles', () => {
+      const roundEvents = [
+        userMessage('round-1::user_message', '2026-01-01T00:00:00.000Z'),
+        terminated('round-1', '2026-01-01T00:00:05.000Z'),
+      ];
+
+      it('replaceRoundEvents appends an agent-attributed title right after the round block', async () => {
+        // The round's receipt-time message is already stored, followed by a later additive event:
+        // the rewritten block, and the title with it, take the block's position.
+        const later = userMessage('later-uuid', '2026-01-01T00:01:00.000Z');
+        mockGetDocumentResponse(eventsNativeDocument({ events: [roundEvents[0], later] }));
+
+        await client.replaceRoundEvents({
+          id: 'conversation-1',
+          roundId: 'round-1',
+          events: roundEvents,
+          title: 'Generated title',
+        });
+
+        const events = indexedEvents();
+        expect(events.map((event) => event.id)).toEqual([
+          'round-1::user_message',
+          'round-1::execution_terminated',
+          expect.any(String),
+          'later-uuid',
+        ]);
+        expect(events[2].type).toBe(ConversationActivityEventType.titleUpdated);
+        expect(events[2]).toMatchObject({
+          actor: agentActorFor('agent-1'),
+          execution_id: 'round-1::execution',
+          data: { previous_title: 'Conversation 1', title: 'Generated title' },
+        });
+      });
+
+      it('appendEvents appends the generated title after the appended events', async () => {
+        mockGetDocumentResponse(eventsNativeDocument());
+
+        await client.appendEvents({
+          id: 'conversation-1',
+          events: roundEvents,
+          title: 'Generated title',
+        });
+
+        const events = indexedEvents();
+        expect(events.at(-1)).toMatchObject({
+          type: ConversationActivityEventType.titleUpdated,
+          actor: agentActorFor('agent-1'),
+          execution_id: 'round-1::execution',
+          data: { previous_title: 'Conversation 1', title: 'Generated title' },
+        });
+      });
+
+      it('records nothing when the generated title is the stored one', async () => {
+        mockGetDocumentResponse(eventsNativeDocument());
+
+        await client.replaceRoundEvents({
+          id: 'conversation-1',
+          roundId: 'round-1',
+          events: roundEvents,
+          title: 'Conversation 1',
+        });
+
+        expect(activityOf(indexedEvents())).toEqual([]);
+      });
     });
   });
 });
