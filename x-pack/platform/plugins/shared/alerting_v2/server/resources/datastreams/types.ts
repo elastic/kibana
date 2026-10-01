@@ -27,6 +27,7 @@ export interface ResourceDefinition {
   /**
    * Deletes the existing data stream on startup when it was created from an index template at or
    * below `version`, for mapping changes that cannot be applied in place. Its documents are lost.
+   * Must stay below the resource `version`; `DatastreamInitializer` rejects the definition otherwise.
    */
   forceReset?: { version: number };
 }

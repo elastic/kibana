@@ -336,6 +336,24 @@ describe('DatastreamInitializer', () => {
       });
     });
 
+    it.each([
+      ['equal to', 8],
+      ['above', 9],
+    ])(
+      'rejects a definition whose forceReset.version is %s its version, since it would reset on every startup',
+      (_description, forceResetVersion) => {
+        expect(
+          () =>
+            new DatastreamInitializer(mockLogger, esClient, {
+              ...forceResetDefinition,
+              forceReset: { version: forceResetVersion },
+            })
+        ).toThrow(
+          `Data stream ${forceResetDefinition.dataStreamName}: forceReset.version (${forceResetVersion}) must be below version (8)`
+        );
+      }
+    );
+
     it('does not read the data stream ahead of DataStreamClient when forceReset is not set', async () => {
       const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
 

@@ -31,7 +31,14 @@ export class DatastreamInitializer implements IResourceInitializer {
     private readonly logger: Logger,
     private readonly esClient: ElasticsearchClient,
     private readonly resourceDefinition: ResourceDefinition
-  ) {}
+  ) {
+    const { dataStreamName, forceReset, version } = resourceDefinition;
+    if (forceReset && forceReset.version >= version) {
+      throw new Error(
+        `Data stream ${dataStreamName}: forceReset.version (${forceReset.version}) must be below version (${version})`
+      );
+    }
+  }
 
   public async initialize(): Promise<void> {
     // The template references the pipeline, so it must exist first.
