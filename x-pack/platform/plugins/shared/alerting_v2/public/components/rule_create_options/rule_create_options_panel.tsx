@@ -203,7 +203,7 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
         <h2>
           <FormattedMessage
             id="xpack.alertingV2.ruleCreateOptionsPanel.emptyStateTitle"
-            defaultMessage="No rules yet. Let's get started!"
+            defaultMessage="No ES|QL rules yet. Let's get started!"
           />
         </h2>
       }

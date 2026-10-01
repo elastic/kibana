@@ -60,6 +60,13 @@ const getRuleDetailBadges = (rule: RuleApiResponse): AppHeaderBadge[] => {
       color: rule.enabled ? 'success' : 'default',
       'data-test-subj': rule.enabled ? 'enabledBadge' : 'disabledBadge',
     },
+    {
+      label: i18n.translate('xpack.alertingV2.ruleDetails.esqlRulesBadge', {
+        defaultMessage: 'ES|QL rules',
+      }),
+      color: 'hollow',
+      'data-test-subj': 'esqlRulesBadge',
+    },
   ];
 
   return badges;

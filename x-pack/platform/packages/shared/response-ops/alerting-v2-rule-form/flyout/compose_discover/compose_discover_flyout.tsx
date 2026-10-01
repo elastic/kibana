@@ -94,6 +94,10 @@ const YAML_VIEW_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.editMod
   defaultMessage: 'YAML view',
 });
 
+const ES_QL_RULES_BADGE_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.esqlRulesBadge', {
+  defaultMessage: 'ES|QL rules',
+});
+
 const YAML_MODE_BADGE_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.badge', {
   defaultMessage: 'YAML MODE',
 });
@@ -1216,6 +1220,10 @@ export function ComposeDiscoverFlyout({
                   {title}
                 </h2>
               </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiBadge color="hollow" data-test-subj="esqlRulesBadge">
+                {ES_QL_RULES_BADGE_LABEL}
+              </EuiBadge>
 
               <EuiFlexGroup
                 justifyContent="spaceBetween"
