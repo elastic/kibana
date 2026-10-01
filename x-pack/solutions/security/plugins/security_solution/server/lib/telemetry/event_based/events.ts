@@ -2649,15 +2649,13 @@ export const INDICATOR_MATCH_THREAT_INDEX_SIZE_EVENT: EventTypeOpts<{
     threatMappingGroupCount: {
       type: 'long',
       _meta: {
-        description:
-          'Number of groups in the rule threat mapping.',
+        description: 'Number of groups in the rule threat mapping.',
       },
     },
     maxFieldsPerThreatMappingGroup: {
       type: 'long',
       _meta: {
-        description:
-          'Largest number of field pairs in a single group of the rule threat mapping.',
+        description: 'Largest number of field pairs in a single group of the rule threat mapping.',
       },
     },
   },
