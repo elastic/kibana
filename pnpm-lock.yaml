@@ -5695,7 +5695,7 @@ importers:
         version: 0.35.4(@types/node@24.10.13)
       simple-git:
         specifier: 4.0.2
-        version: 4.0.2(supports-color@10.2.2)
+        version: 4.0.2(supports-color@8.1.1)
       sinon:
         specifier: 22.1.0
         version: 22.1.0
@@ -39682,13 +39682,13 @@ snapshots:
 
   simple-bin-help@1.8.0: {}
 
-  simple-git@4.0.2(supports-color@10.2.2):
+  simple-git@4.0.2(supports-color@8.1.1):
     dependencies:
-      '@kwsites/file-exists': 1.1.1(supports-color@10.2.2)
+      '@kwsites/file-exists': 1.1.1(supports-color@8.1.1)
       '@kwsites/promise-deferred': 1.1.1
       '@simple-git/args-pathspec': 1.0.4
       '@simple-git/argv-parser': 2.0.1
-      debug: 4.4.3(supports-color@10.2.2)
+      debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
 
