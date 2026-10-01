@@ -9,7 +9,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { getImpactStepCommonDefinition } from '../../../common/impact/step_types/get_impact_step';
 import { parseStepInput } from './parse_step_input';
 import type { ImpactService } from '../services/impact_service';
-import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import { toStepError } from './to_step_error';
 
 /** Reads impact for a conversation and fails the step when none has been attached. */
@@ -18,7 +18,7 @@ export const getGetImpactStepDefinition = ({
   privileges,
 }: {
   getImpactService: () => ImpactService;
-  privileges: ImpactPrivilegesChecker;
+  privileges: InvestigationsPrivilegesChecker;
 }) =>
   createServerStepDefinition({
     ...getImpactStepCommonDefinition,

@@ -7,13 +7,13 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Impact } from '../../../common/impact/impact';
-import type { ImpactPrivilegesChecker } from './check_impact_privileges';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import type { ImpactService } from './impact_service';
 
 /**
  * In-process impact reads. The space and the principal both come from the
  * request, so a caller cannot supply another space or skip the investigations
- * manage privilege.
+ * read privilege (read or manage).
  */
 export interface ImpactReadClient {
   listByConversationIds: (conversationIds: string[]) => Promise<Impact[]>;
@@ -22,7 +22,7 @@ export interface ImpactReadClient {
 export interface ImpactClientDeps {
   getImpactService: () => ImpactService;
   getSpaceId: (request: KibanaRequest) => string;
-  privileges: ImpactPrivilegesChecker;
+  privileges: InvestigationsPrivilegesChecker;
 }
 
 /** Builds a request-scoped reader. The privilege check runs before any search. */

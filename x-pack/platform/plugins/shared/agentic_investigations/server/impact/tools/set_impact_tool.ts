@@ -19,7 +19,7 @@ import type { Impact, ImpactEntity } from '../../../common/impact/impact';
 import { createInvestigationTool } from '../../investigation_attachments';
 import type { ResolveUser } from '../../services/resolve_user';
 import { attachImpactFromTool } from '../attachments/attach_impact_from_tool';
-import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import type { ImpactService } from '../services/impact_service';
 
 const setImpactEntitySchema = z.object({
@@ -127,7 +127,7 @@ export const createSetImpactTool = ({
 }: {
   getImpactService: () => ImpactService;
   resolveUser: ResolveUser;
-  privileges: ImpactPrivilegesChecker;
+  privileges: InvestigationsPrivilegesChecker;
   logger: Logger;
 }) =>
   createInvestigationTool({

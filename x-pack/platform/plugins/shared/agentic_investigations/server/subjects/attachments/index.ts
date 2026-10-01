@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { ImpactPrivilegesChecker } from '../../impact/services/check_impact_privileges';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import type { SubjectsService } from '../services/subjects_service';
 import { subjectAttachment } from './subject_attachment_type';
 
@@ -20,7 +20,7 @@ export const registerSubjectAttachment = (
     logger,
   }: {
     getSubjectsService: () => SubjectsService;
-    privileges: ImpactPrivilegesChecker;
+    privileges: InvestigationsPrivilegesChecker;
     logger: Logger;
   }
 ): void => {

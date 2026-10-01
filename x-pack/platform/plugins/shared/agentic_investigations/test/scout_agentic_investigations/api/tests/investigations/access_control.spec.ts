@@ -1,0 +1,110 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import {
+  apiTest,
+  IMPACT_PATH,
+  INTERNAL_HEADERS,
+  INVESTIGATION_BY_ID_PATH,
+  INVESTIGATIONS_PATH,
+  INVESTIGATIONS_READ_ROLE,
+  INVESTIGATIONS_SEVERITY_COUNTS_PATH,
+  NO_INVESTIGATIONS_ROLE,
+  deleteConversations,
+  seedInvestigation,
+} from '../../fixtures';
+
+const RUN = `scout-access-${Date.now()}`;
+
+apiTest.describe(
+  'Investigation query API access control',
+  { tag: [...tags.stateful.classic] },
+  () => {
+    let adminCookieHeader: Record<string, string>;
+    let investigationId: string;
+
+    apiTest.beforeAll(async ({ samlAuth, apiClient }) => {
+      ({ cookieHeader: adminCookieHeader } = await samlAuth.asInteractiveUser('admin'));
+      investigationId = await seedInvestigation(apiClient, adminCookieHeader, {
+        title: `${RUN} investigation`,
+        metadata: { status: 'open', severity: 'medium', summary: `${RUN} summary` },
+        impactEntities: [{ id: `${RUN}-entity` }],
+      });
+    });
+
+    apiTest.afterAll(async ({ apiClient }) => {
+      await deleteConversations(apiClient, [investigationId], adminCookieHeader);
+    });
+
+    apiTest(
+      'returns 403 on every read for a user without an investigations privilege',
+      async ({ samlAuth, apiClient }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(NO_INVESTIGATIONS_ROLE);
+        const headers = { ...INTERNAL_HEADERS, ...cookieHeader };
+
+        for (const path of [
+          INVESTIGATION_BY_ID_PATH(investigationId),
+          INVESTIGATIONS_PATH,
+          INVESTIGATIONS_SEVERITY_COUNTS_PATH,
+        ]) {
+          const response = await apiClient.get(path, { headers, responseType: 'json' });
+          expect(response).toHaveStatusCode(403);
+        }
+      }
+    );
+
+    apiTest(
+      'lets a user with only the read privilege get, list, and count investigations',
+      async ({ samlAuth, apiClient }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
+        const headers = { ...INTERNAL_HEADERS, ...cookieHeader };
+
+        const get = await apiClient.get(INVESTIGATION_BY_ID_PATH(investigationId), {
+          headers,
+          responseType: 'json',
+        });
+        expect(get).toHaveStatusCode(200);
+        expect(get.body).toMatchObject({
+          id: investigationId,
+          impact: { entities: [{ id: `${RUN}-entity` }] },
+        });
+
+        const list = await apiClient.get(`${INVESTIGATIONS_PATH}?entity=${RUN}-entity`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(list).toHaveStatusCode(200);
+        expect(list.body.results.map(({ id }: { id: string }) => id)).toStrictEqual([
+          investigationId,
+        ]);
+
+        const counts = await apiClient.get(`${INVESTIGATIONS_SEVERITY_COUNTS_PATH}?query=${RUN}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(counts).toHaveStatusCode(200);
+        expect(counts.body).toStrictEqual({ low: 0, medium: 1, high: 0, critical: 0 });
+      }
+    );
+
+    apiTest(
+      'does not let a user with only the read privilege write impact',
+      async ({ samlAuth, apiClient }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
+
+        const response = await apiClient.post(IMPACT_PATH, {
+          headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+          body: { conversationId: investigationId, entities: [{ id: `${RUN}-other` }] },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+  }
+);

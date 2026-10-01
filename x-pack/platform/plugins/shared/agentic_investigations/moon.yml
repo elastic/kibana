@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/visualization-utils'
+  - '@kbn/workflows-management-plugin'
 tags:
   - plugin
   - prod

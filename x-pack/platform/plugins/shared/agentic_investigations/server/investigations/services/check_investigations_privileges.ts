@@ -19,7 +19,7 @@ import {
   INVESTIGATIONS_API_PRIVILEGE_MANAGE,
   INVESTIGATIONS_API_PRIVILEGE_READ,
 } from '../constants';
-import { ImpactForbiddenError } from './errors/impact_forbidden_error';
+import { InvestigationsForbiddenError } from './investigations_forbidden_error';
 
 export interface InvestigationsPrivilegesDeps {
   getSecurity: () => Promise<SecurityPluginStart | undefined>;
@@ -80,60 +80,62 @@ export const createInvestigationsPrivilegesReader = ({
 });
 
 /**
- * The same privilege the Impact routes require, checked against a principal
- * that did not arrive through a route — a workflow execution or an in-process
- * caller. Impact has no privilege of its own yet, so reads and writes both use
- * investigations manage. The feature declares the bare operation name, so it
- * has to be turned into its `api:` action before `checkPrivileges` will
- * recognise it.
+ * The privileges the investigation routes require, checked against a principal that did not
+ * arrive through a route: a workflow execution, an agent tool, or an in-process caller. Reads
+ * accept the read or the manage privilege; writes need manage. The feature declares the bare
+ * operation names, so they are turned into `api:` actions before `checkPrivileges` sees them.
  */
-export interface ImpactPrivilegesDeps {
+export interface InvestigationsPrivilegesCheckerDeps {
   getSecurity: () => Promise<SecurityPluginStart | undefined>;
   logger: Logger;
 }
 
-export interface ImpactPrivilegesChecker {
-  /** Throws when the principal may not write impact. */
+export interface InvestigationsPrivilegesChecker {
+  /** Throws when the principal may not write investigation data. */
   assertCanManage: (request: KibanaRequest) => Promise<void>;
-  /** Throws when the principal may not read impact. */
+  /** Throws when the principal may not read investigation data. */
   assertCanRead: (request: KibanaRequest) => Promise<void>;
 }
 
-export const createImpactPrivilegesChecker = ({
+export const createInvestigationsPrivilegesChecker = ({
   getSecurity,
   logger,
-}: ImpactPrivilegesDeps): ImpactPrivilegesChecker => {
-  const assertPrivilege = async (
+}: InvestigationsPrivilegesCheckerDeps): InvestigationsPrivilegesChecker => {
+  const assertAnyPrivilege = async (
     request: KibanaRequest,
-    privilege: string,
+    privileges: string[],
     operation: string
   ): Promise<void> => {
+    const missing = `Missing privilege ${privileges.join(' or ')} required to ${operation}`;
     const security = await getSecurity();
     if (!security) {
       // Fail closed. Without the security plugin there is no principal to
       // evaluate, and a caller that cannot be attributed must not proceed.
-      logger.warn('Security is unavailable, so the impact privilege check fails closed');
-      throw new ImpactForbiddenError(
-        `Missing privilege ${privilege} required to ${operation} impact`
-      );
+      logger.warn('Security is unavailable, so the investigations privilege check fails closed');
+      throw new InvestigationsForbiddenError(missing);
     }
 
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
-    const { hasAllRequested } = await checkPrivileges({
-      kibana: [security.authz.actions.api.get(privilege)],
+    const response = await checkPrivileges({
+      kibana: privileges.map((privilege) => security.authz.actions.api.get(privilege)),
     });
 
-    if (!hasAllRequested) {
-      throw new ImpactForbiddenError(
-        `Missing privilege ${privilege} required to ${operation} impact`
-      );
+    const authorized =
+      response.hasAllRequested ||
+      (response.privileges?.kibana ?? []).some((privilege) => privilege.authorized);
+    if (!authorized) {
+      throw new InvestigationsForbiddenError(missing);
     }
   };
 
   return {
     assertCanManage: (request) =>
-      assertPrivilege(request, INVESTIGATIONS_API_PRIVILEGE_MANAGE, 'write'),
+      assertAnyPrivilege(request, [INVESTIGATIONS_API_PRIVILEGE_MANAGE], 'write investigations'),
     assertCanRead: (request) =>
-      assertPrivilege(request, INVESTIGATIONS_API_PRIVILEGE_MANAGE, 'read'),
+      assertAnyPrivilege(
+        request,
+        [INVESTIGATIONS_API_PRIVILEGE_READ, INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+        'read investigations'
+      ),
   };
 };

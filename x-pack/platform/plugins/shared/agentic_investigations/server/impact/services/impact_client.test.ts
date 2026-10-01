@@ -6,8 +6,8 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { ImpactPrivilegesChecker } from './check_impact_privileges';
-import { ImpactForbiddenError } from './errors';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
+import { InvestigationsForbiddenError } from '../../investigations/services/investigations_forbidden_error';
 import { createImpactClient } from './impact_client';
 import type { ImpactService } from './impact_service';
 
@@ -22,7 +22,7 @@ const createClient = ({
   assertCanRead?: jest.Mock;
   getSpaceId?: jest.Mock;
 } = {}) => {
-  const privileges: ImpactPrivilegesChecker = {
+  const privileges: InvestigationsPrivilegesChecker = {
     assertCanRead,
     assertCanManage: jest.fn(),
   };
@@ -48,10 +48,12 @@ describe('createImpactClient', () => {
 
   it('should refuse before searching when the principal cannot manage investigations', async () => {
     const { client, listByConversationIds, getSpaceId } = createClient({
-      assertCanRead: jest.fn().mockRejectedValue(new ImpactForbiddenError('nope')),
+      assertCanRead: jest.fn().mockRejectedValue(new InvestigationsForbiddenError('nope')),
     });
 
-    await expect(client.listByConversationIds(['c1'])).rejects.toBeInstanceOf(ImpactForbiddenError);
+    await expect(client.listByConversationIds(['c1'])).rejects.toBeInstanceOf(
+      InvestigationsForbiddenError
+    );
     expect(listByConversationIds).not.toHaveBeenCalled();
     expect(getSpaceId).not.toHaveBeenCalled();
   });

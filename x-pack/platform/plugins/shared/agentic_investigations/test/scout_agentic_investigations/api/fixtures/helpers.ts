@@ -6,7 +6,13 @@
  */
 
 import type { ApiClientFixture } from '@kbn/scout';
-import { AB_CONVERSATION_BY_ID_PATH, PUBLIC_HEADERS } from './constants';
+import {
+  AB_CONVERSATIONS_PATH,
+  AB_CONVERSATION_BY_ID_PATH,
+  IMPACT_PATH,
+  INTERNAL_HEADERS,
+  PUBLIC_HEADERS,
+} from './constants';
 
 interface CreatedResponse {
   statusCode: number;
@@ -64,4 +70,54 @@ export const deleteConversations = async (
     const messages = failures.map((f) => String(f.reason)).join('\n');
     throw new Error(`Teardown cleanup failed:\n${messages}`);
   }
+};
+
+/** Prefixes a path with `/s/<spaceId>` for a non-default Space. */
+export const spaceUrl = (path: string, spaceId?: string): string =>
+  spaceId && spaceId !== 'default' ? `/s/${spaceId}/${path}` : path;
+
+export interface SeedInvestigationOptions {
+  title: string;
+  metadata?: Record<string, string>;
+  impactEntities?: Array<{ id: string; name?: string }>;
+  spaceId?: string;
+}
+
+/**
+ * Creates a public investigation conversation and attaches its impact through the internal
+ * route, as the owner. Returns the conversation id.
+ */
+export const seedInvestigation = async (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  { title, metadata = { status: 'open' }, impactEntities, spaceId }: SeedInvestigationOptions
+): Promise<string> => {
+  const created = await apiClient.post(spaceUrl(AB_CONVERSATIONS_PATH, spaceId), {
+    headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+    body: {
+      title,
+      template_id: 'investigation',
+      access_control: { access_mode: 'public' },
+      metadata,
+    },
+    responseType: 'json',
+  });
+  const id = expectCreated(created, `investigation "${title}"`);
+
+  if (impactEntities) {
+    const response = await apiClient.post(spaceUrl(IMPACT_PATH, spaceId), {
+      headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+      body: { conversationId: id, entities: impactEntities },
+      responseType: 'json',
+    });
+    if (response.statusCode !== 200) {
+      throw new Error(
+        `Setup: failed to attach impact to ${id} (status ${response.statusCode}): ${JSON.stringify(
+          response.body
+        )}`
+      );
+    }
+  }
+
+  return id;
 };
