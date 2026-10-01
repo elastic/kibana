@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { aiAnonymizationSettings } from '@kbn/inference-common';
+import { aiAnonymizationSettings, type AnonymizationSettings } from '@kbn/inference-common';
 import { getUiSettings } from './ui_settings';
 
 describe('getUiSettings', () => {
@@ -16,10 +16,11 @@ describe('getUiSettings', () => {
     expect(setting.solutionViews).toBeUndefined();
   });
 
-  it('ships with every default anonymization rule disabled', () => {
-    const { rules } = JSON.parse(setting.value as string) as { rules: Array<{ enabled: boolean }> };
+  it('ships a valid default with every anonymization rule disabled', () => {
+    const { rules }: AnonymizationSettings = JSON.parse(String(setting.value));
 
-    expect(rules.length).toBeGreaterThan(0);
-    expect(rules.every((rule) => rule.enabled === false)).toBe(true);
+    expect(() => setting.schema.validate({ rules })).not.toThrow();
+    expect(rules).not.toHaveLength(0);
+    expect(rules.filter(({ enabled }) => enabled)).toEqual([]);
   });
 });
