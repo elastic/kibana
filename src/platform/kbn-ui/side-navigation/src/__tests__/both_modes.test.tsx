@@ -898,7 +898,9 @@ describe('Both modes', () => {
         const panelHeader = within(sidePanel).getByRole('heading', {
           name: 'Apps',
         });
-        const betaBadge = await within(panelHeader.parentElement!).findByTitle('Beta');
+        // Title and badge are sibling FlexItems under the header FlexGroup.
+        const headerRow = panelHeader.closest('[class*="euiFlexGroup"]') as HTMLElement;
+        const betaBadge = await within(headerRow).findByTitle('Beta');
 
         expect(betaBadge).toBeInTheDocument();
       });
@@ -941,9 +943,9 @@ describe('Both modes', () => {
         const panelHeader = within(sidePanel).getByRole('heading', {
           name: 'Machine learning',
         });
-        const techPreviewBadge = await within(panelHeader.parentElement!).findByTitle(
-          'Tech preview'
-        );
+        // Title and badge are sibling FlexItems under the header FlexGroup.
+        const headerRow = panelHeader.closest('[class*="euiFlexGroup"]') as HTMLElement;
+        const techPreviewBadge = await within(headerRow).findByTitle('Tech preview');
 
         expect(techPreviewBadge).toBeInTheDocument();
       });
@@ -984,7 +986,9 @@ describe('Both modes', () => {
         const panelHeader = within(sidePanel).getByRole('heading', {
           name: 'Rules',
         });
-        const newBadge = await within(panelHeader.parentElement!).findByTitle('New');
+        // Title and badge are sibling FlexItems under the header FlexGroup.
+        const headerRow = panelHeader.closest('[class*="euiFlexGroup"]') as HTMLElement;
+        const newBadge = await within(headerRow).findByTitle('New');
 
         expect(newBadge).toBeInTheDocument();
       });
