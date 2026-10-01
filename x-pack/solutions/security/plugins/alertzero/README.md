@@ -137,14 +137,9 @@ AlertZero is a **standalone Security-category app** (`/app/alertzero`) that **us
 | `/app/alertzero` | Brief — Investigation queue |
 | `/app/discover` | Real Discover (via Security / AlertZero nav Discover item) |
 | `/app/security/dashboards` | Real Security dashboards (via Throughline Dashboards item) |
-| `/app/alertzero/alerts` | Placeholder — coming soon |
-| `/app/alertzero/attacks` | Placeholder — coming soon |
-| `/app/alertzero/threat-hunt` | Placeholder — coming soon |
-| `/app/alertzero/streams` | Placeholder — coming soon |
 | `/app/alertzero/watches` | Watch catalog (`system-security-watch-*`) |
 | `/app/alertzero/watches/:watchId` | Watch detail |
 | `/app/alertzero/watches/workflows` … `/guardrails` | Watches section stubs |
-| `/app/alertzero/settings` | Settings stub (no dedicated nav item) |
 
 An investigation has no route of its own: it is a templated Agent Builder conversation, so its
 details open in Agent Builder's conversation flyout (`?selectedConversationId=` on the queue) and
@@ -152,7 +147,7 @@ its chat opens at `/app/agent_builder/agents/{agentId}/conversations/{id}`.
 
 ### Security left-rail order (when `securitySolution:enableAlertZero` is on)
 
-**AlertZero → Discover → Dashboards → Alerts → Attacks → Threat hunt → Streams → Watches**, then the rest of Security’s existing destinations (including the platform **More** overflow — not an AlertZero stub).
+**AlertZero → Discover → Dashboards → Escalations → Watches**, then the rest of Security’s existing destinations (including the platform **More** overflow — not an AlertZero stub).
 
 ### Internal API (`/internal/alertzero/*`)
 
@@ -313,7 +308,6 @@ AlertZero is not live. A new required extra or schedule key that has a default i
 ## Non-goals (this PR)
 
 - Nesting routes under `/app/security` or importing Security page wrappers
-- Wiring remaining operate destinations (Alerts, Attacks, …) to real apps
 - Pixel-perfect Throughline CSS port
 - Implementing Workflows / Activity / Performance / Guardrails data
 - No `.kibana-threat-intel-hunt-findings` index / Intelligence Hub findings queue
