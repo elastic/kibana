@@ -7,25 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import CORTEX_OPTIMIZE_WORKFLOW_YAML from './cortex_optimize_workflow.yaml';
+import AGENT_OPTIMIZE_WORKFLOW_YAML from './agent_optimize_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
-export const NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID = 'system-nightshift-cortex-optimize';
+export const NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID = 'system-nightshift-agent-optimize';
 
 /**
- * Post-round workflow that updates the Cortex wiki from a completed
- * investigation transcript.
+ * Post-round workflow that updates Cortex and Semantic Memory in parallel.
+ *
+ * Agent Builder's afterExecution hook still runs `post_execution_workflow_ids`
+ * in sequence. Optimize must not be two entries in that list. Obtain returns
+ * one `sandbox_id` (the same `<space>__<conversation>` hydrate and the bash
+ * tools derive); both writers take it as input.
+ *
+ * `mode: settled` — one optimizer failing must not skip the other (the old
+ * per-workflow `on-failure: continue`).
  *
  * `enablement: 'enforced'` — post-round workflows log failures rather than
  * aborting the agent, but enablement must stay on so every investigation
  * writes durable knowledge back.
  */
-export const NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW = {
-  id: NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID,
+export const NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW = {
+  id: NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
   version: 1,
   billable: false,
-  yaml: CORTEX_OPTIMIZE_WORKFLOW_YAML,
+  yaml: AGENT_OPTIMIZE_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
