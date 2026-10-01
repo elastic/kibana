@@ -418,4 +418,9 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconazurefunctions" */ './specs/azure_functions/icon')
     ),
   ],
+
+  [
+    '.aws_rds',
+    lazy(() => import(/* webpackChunkName: "connectorIconAwsRds" */ './specs/aws_rds/icon')),
+  ],
 ]);

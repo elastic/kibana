@@ -88,3 +88,4 @@ export * from './specs/gitlab/gitlab';
 export { ThreatQ } from './specs/threatq/threatq';
 export * from './specs/elasticsearch/elasticsearch';
 export * from './specs/azure_functions/azure_functions';
+export * from './specs/aws_rds/aws_rds';
