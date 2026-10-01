@@ -25,6 +25,7 @@ import { deriveQueryType, MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
 import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
 import { installKIQueryGenerationAgent } from '../../../../agent_builder/agents/ki_query_generation';
+import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
@@ -650,6 +651,7 @@ const generateQueriesRoute = createServerRoute({
     await installKIQueryGenerationAgent({
       agentBuilder: server.agentBuilder,
       spaceId: request.spaceId,
+      availability: createSignificantEventsAvailability({ server, logger }),
     });
 
     const [{ source }, kiClient] = await Promise.all([
