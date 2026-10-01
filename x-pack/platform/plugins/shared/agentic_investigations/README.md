@@ -2,7 +2,7 @@
 
 Solution-agnostic base layer for the entities an agent and a human collaborate on. It owns their storage and their API, so a Worker in any solution can create them and any solution's UI can act on them.
 
-Today it holds two entities: **impact** and **escalations**. **Investigations** are next, which is why the plugin is an umbrella rather than one plugin per entity. **Proposals** started here and now live in their own `proposals` plugin, which this one may depend on but which does not depend on this one.
+Today it holds the investigation attachments (**impact**, **subjects**, **hypotheses**) and **escalations**. **Investigations** are next, which is why the plugin is an umbrella rather than one plugin per entity. **Proposals** started here and now live in their own `proposals` plugin, which this one may depend on but which does not depend on this one.
 
 It also owns the browser UI of the `investigation` and `escalation` conversation templates: the Agent Builder conversation details flyout, its tabs, and the connected components behind them. See [Template UI and gating](#template-ui-and-gating).
 
@@ -24,6 +24,8 @@ common/
   evidence/              evidence schema (Markdown + static chart), shared by every entity
   investigation_attachments/  base types of by-reference investigation attachment documents
   impact/                constants, schemas, step definitions, attachment type id
+  subjects/              constants and schemas, including the alert snapshot and Slack thread fields
+  hypotheses/            constants and schemas
   escalations/           constants and schemas
 server/
   plugin.ts config.ts types.ts
@@ -31,10 +33,14 @@ server/
   services/              user resolution, shared by every entity
   investigation_attachments/  `defineInvestigationAttachment` factory and the agent tool helper
   impact/                routes, service, storage, step handlers, Agent Builder attachment, agent tool
+  subjects/              service, claims, request-scoped client, storage, Agent Builder attachment
+  hypotheses/            service, storage, Agent Builder attachment, agent tool
   escalations/           routes and service
 public/
   plugin.ts index.ts types.ts
   impact/                browser step definitions and flyout attachment UI
+  subjects/              subject attachment UI (one row per subject, by type)
+  hypotheses/            hypotheses attachment UI
   evidence/              evidence renderer (Markdown + line/bar chart), exported as `LazyEvidenceView`
   investigation_attachments/  attachment renderer registration helper
   escalations/           browser hooks
@@ -73,7 +79,7 @@ Proposals privileges are **not** here. They belong to the `proposals` feature, r
 
 ## By-reference investigation attachments
 
-Entities an agent records on an investigation (impact today; subjects and hypotheses next) are **by-reference Agent Builder attachments backed by a hidden index**. `server/investigation_attachments/defineInvestigationAttachment` gives each one:
+Entities recorded on an investigation (impact, subjects, hypotheses) are **by-reference Agent Builder attachments backed by a hidden index**. `server/investigation_attachments/defineInvestigationAttachment` gives each one:
 
 - **Storage**: a `StorageIndexAdapter` index (`.kibana-investigation-<entity>`, see [Index naming](#index-naming)) with keyword `spaceId` and `conversationId`, read and written as the internal user. Callers authorize first and pass the request's space. Mapping changes must stay additive.
 - **Service** (`InvestigationAttachmentDocService`): `get` (space-checked), `upsert` (read-modify-write under `if_seq_no`/`if_primary_term`, retried on a lost race, then a conflict error), `revert`, `listByConversationIds` (≤ 1000), `searchConversationIds(filter)` for list filters that start from the index, and `deleteByConversationIds` / `deleteAllInSpace` for maintenance. Document ids are a hash of their key parts (`hashInvestigationAttachmentId`). Every read goes through `withTransientSearchRetry`: on a fresh cluster the hidden index may not exist yet (reads as empty) or may have no allocated shard for a moment after the first write created it (`no_shard_available_action_exception`, or an all-shards-failed 503 `search_phase_execution_exception`), which is retried after 200, 400, and 800 ms before the error is rethrown.
@@ -100,6 +106,26 @@ An **Impact** record is what an investigation found was affected: a `summary`, i
 - Agent Builder attachment type `investigation_impact` (`isReadonly: true`, hidden in the chat) is registered for the investigation flyout (and allow-listed in `@kbn/agent-builder-server`). The attach HTTP route and `investigations.attachImpact` call `attachImpactToInvestigation`, the route path above; the attachment `origin` is the Impact document id. `resolve()` loads the current document, so a later merge does not leave the flyout on a stale snapshot. The renderer shows the summary (Markdown), the evidence chart, and the entities; the details flyout also shows each entity's evidence.
 - `scripts/seed_impact_attachment.sh` creates an investigation conversation, attaches entities through the internal API, and checks that the conversation has one `investigation_impact` attachment.
 
+## Subjects
+
+An **investigation subject** is what an investigation is about. It lives in `.kibana-investigation-subject`, **one document per space, conversation, and subject**, so an investigation that a follow-up extends holds several (at most 100). The document `_id` (also the attachment id and origin) is a hash of `(spaceId, conversationId, subjectType, subjectId)`.
+
+- **Types**: `alert`, `significant_event`, `manual` (a question a user asked), and `slack_thread` (a Slack thread asking a question; its id is `team:<T>/channel:<C>/thread:<thread_ts>`).
+- **Fields**: `subjectType`, `subjectId` (named so they do not collide with the document `id`), `summary?` (an event title, the question), `triggerType?` (`automatic` | `manual`), `snapshot?` (alerts only), `slack?` (Slack threads only: `channel`, `thread_ts`, `status_message_ts?`, `permalink?`), `createdAt`, `createdBy?`, `updatedAt?`.
+- **Alert snapshot** (`alertSubjectSnapshotSchema`): a loose object. The fields the renderer reads are declared with the bounds of Nightshift's `alertSnapshotSchema`, so every Nightshift snapshot validates; other fields are kept. At most 50 keys and 64 000 serialized characters. Stored but not indexed.
+- **Writes** come from the routes and steps that start or follow up on an investigation, outside agent turns. There is **no agent tool**. `SubjectsService.upsertSubjects` (and `getSubjectsClient(request).upsertSubjects(conversationId, subjects)` on the start contract) validates the input, then for each subject writes the index and attaches it through the public attachment client (owner check first; `writeAndAttach`). A later write for a recorded subject replaces the fields it sends and keeps the rest; `slack` merges field by field, so a writer can add `status_message_ts` alone. An unchanged subject is not re-stamped.
+- **Lookup**: `findConversationIdsBySubjects([{ type, id }])` returns the investigations (open or closed, unchecked for access) holding any of the subjects. Callers read the conversations to filter.
+- **Race-safe start** (`claimSubjects`): claims live in a sibling index, `.kibana-investigation-subject-claim`, one document per space and subject (`_id` = hash of `(spaceId, type, id)`), holding the claiming conversation id. A sibling index rather than a second document kind in the subject index keeps every subject index document an attachment document. A start claims every subject before creating the conversation, all or nothing, in a fixed order so overlapping starts contend for the same subject first. A subject held by another investigation returns `{ claimed: false, heldBy }`, and the claims this call made are released. A claim is held without a check for 2 minutes (the gap before its conversation exists); after that it is taken over when the caller's `isHolderOpen(conversationId)` says the holder is closed or gone. `heldBy` may name a conversation that does not exist yet, so a follow-up has to get or create it.
+- The renderer shows one row per subject: alert → rule name, status, reason, and a link to the alert when the snapshot has a safe `url`; significant event and question → the summary; Slack thread → the Slack icon, `#channel`, the question, and "Open thread" when `slack.permalink` is set (HTTPS only).
+- Privilege: `manage_investigations` for reads and writes, as for impact.
+
+## Hypotheses
+
+**Investigation hypotheses** are the candidate causes an investigation considered. They live in `.kibana-investigation-hypotheses`, one document per space and conversation (`_id` = hash of `(spaceId, conversationId)`), holding the full list (at most 50): `{ candidate, confidence (0..1), status: investigating | dismissed | confirmed, reason?, evidence?: Evidence[≤3] }`. Stored but not indexed.
+
+- **The agent tool `investigations.set_hypotheses`** takes the full list on every call and replaces the stored one, so a hypothesis it leaves out is gone. It warns, without failing, when more than one hypothesis is `confirmed` (the warning text of Nightshift's progress report), and notes when the user removed the attachment. It requires `manage_investigations`, writes the index immediately, and adds or updates the `investigation_hypotheses` attachment through the run's attachment state.
+- The renderer lists the hypotheses in the agent's order with a status badge, the confidence, and the reason (Markdown). The details flyout also shows each hypothesis's evidence with `EvidenceView`; the inline render leaves it out.
+
 ## Template UI and gating
 
 The public plugin registers the conversation template UI for `investigation` and `escalation` once in `start`, through `registerTemplate` in `public/conversation_templates/registry/register_template.ts`, with one `TemplateDefinition` per template in `public/conversation_templates/templates/<template>/register.ts`. Solutions do not register these templates themselves; Agent Builder throws on a second registration.
@@ -123,7 +149,7 @@ The status and assignee signals and the shared query client in `public/` are mod
 
 ## Index naming
 
-`.kibana-investigation-impact` is permanent. `.kibana*` is already granted to the `kibana_system` role, so the index needs no Elasticsearch-side system index registration — a dedicated prefix such as `.investigation-impact` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning. Each entity gets its own index rather than one index discriminated by a type field.
+`.kibana-investigation-impact`, `.kibana-investigation-subject`, `.kibana-investigation-subject-claim`, and `.kibana-investigation-hypotheses` are permanent. `.kibana*` is already granted to the `kibana_system` role, so these indexes need no Elasticsearch-side system index registration — a dedicated prefix such as `.investigation-impact` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning. Each entity gets its own index rather than one index discriminated by a type field.
 
 **Escalations are the documented exception:** they live in Agent Builder's `.chat-conversations` index (a conversation with `template_id: 'escalation'`), and this plugin owns no storage for them. The reasons are: (a) Agent Builder's conversation model already provides everything an escalation needs — metadata, access control, space scoping, OCC writes; (b) adding an escalations index would duplicate that infrastructure for no benefit; (c) the visibility and collaborator model that agents and investigations already use must apply to escalations for free. Any future entity that fits the conversation model should do the same rather than adding an index by default.
 

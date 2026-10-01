@@ -63,6 +63,45 @@ export {
 
 export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
 
+// Subjects and hypotheses export constants and types only: this directory is an extra public
+// dir, so every value exported here lands in the page load bundle. Their schemas stay in the
+// entity barrels until a consumer outside this plugin needs them.
+export {
+  INVESTIGATION_SUBJECT_TRIGGER_TYPES,
+  INVESTIGATION_SUBJECT_TYPES,
+  MAX_SUBJECT_ID_LENGTH,
+  MAX_SUBJECTS_PER_CONVERSATION,
+  MAX_SUBJECTS_PER_REQUEST,
+  SUBJECT_ATTACHMENT_TYPE,
+  SUBJECT_CLAIM_INDEX_NAME,
+  SUBJECT_INDEX_NAME,
+} from './subjects/constants';
+
+export type {
+  AlertSubjectSnapshot,
+  InvestigationSubject,
+  InvestigationSubjectInput,
+  InvestigationSubjectKey,
+  InvestigationSubjectTriggerType,
+  InvestigationSubjectType,
+  SlackThreadSubject,
+} from './subjects/subject';
+
+export {
+  HYPOTHESES_ATTACHMENT_TYPE,
+  HYPOTHESES_INDEX_NAME,
+  HYPOTHESIS_STATUSES,
+  MAX_HYPOTHESES,
+  MAX_HYPOTHESIS_EVIDENCE,
+  SET_HYPOTHESES_TOOL_ID,
+} from './hypotheses/constants';
+
+export type {
+  Hypothesis,
+  HypothesisStatus,
+  InvestigationHypotheses,
+} from './hypotheses/hypotheses';
+
 export {
   ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_ASSIGN_URL,
