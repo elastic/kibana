@@ -11,6 +11,7 @@ import supertest from 'supertest';
 import { format as formatUrl } from 'url';
 import { samlAuthFixture as coreWorkerFixtures } from './saml_auth';
 import { parseBufferResponse, parseTextResponse } from './api_client_parsers';
+import { withEluRetry } from './api_client_rate_limiter';
 
 /**
  * Strips leading slashes from a URL path so that supertest concatenates it
@@ -73,70 +74,80 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
           if (!fn) {
             throw new Error(`Unsupported HTTP method: ${method}`);
           }
-          let req = fn(normalizePathSlashes(url));
 
-          // Apply headers
-          if (options.headers) {
-            for (const [key, value] of Object.entries(options.headers)) {
-              req = req.set(key, value);
-            }
-          }
+          // A supertest request can only be sent once, so each attempt builds its own.
+          const buildRequest = () => {
+            let req = fn(normalizePathSlashes(url));
 
-          // Set Accept header for JSON if requested
-          if (options.responseType === 'json') {
-            req = req.set('Accept', 'application/json');
-          }
-
-          // Return the raw payload as a UTF-8 string for text responseType. Superagent has no
-          // parser for e.g. `application/ndjson`, so without this `res.body` would be a Buffer.
-          if (options.responseType === 'text') {
-            req = req.buffer(true).parse(parseTextResponse);
-          }
-
-          // Enable binary buffering for buffer responseType
-          if (options.responseType === 'buffer') {
-            req = req.buffer(true).parse(parseBufferResponse);
-          }
-
-          // Handle body and auto-set Content-Type if needed
-          if (options.body !== undefined) {
-            const isPlainObject =
-              typeof options.body === 'object' &&
-              options.body !== null &&
-              !Buffer.isBuffer(options.body) &&
-              !(options.body instanceof ArrayBuffer) &&
-              !(options.body instanceof Uint8Array);
-
-            const hasContentType =
-              options.headers &&
-              Object.keys(options.headers).some((k) => k.toLowerCase() === 'content-type');
-
-            if (isPlainObject && !hasContentType) {
-              req = req.set('Content-Type', 'application/json');
+            // Apply headers
+            if (options.headers) {
+              for (const [key, value] of Object.entries(options.headers)) {
+                req = req.set(key, value);
+              }
             }
 
-            req = req.send(options.body);
-          }
-
-          if (options.signal) {
-            if (options.signal.aborted) {
-              req.abort();
-            } else {
-              options.signal.addEventListener(
-                'abort',
-                () => {
-                  try {
-                    req.abort();
-                  } catch {
-                    // Swallow — the abort rejection propagates via the awaited request
-                  }
-                },
-                { once: true }
-              );
+            // Set Accept header for JSON if requested
+            if (options.responseType === 'json') {
+              req = req.set('Accept', 'application/json');
             }
-          }
 
-          const res = await req;
+            // Return the raw payload as a UTF-8 string for text responseType. Superagent has no
+            // parser for e.g. `application/ndjson`, so without this `res.body` would be a Buffer.
+            if (options.responseType === 'text') {
+              req = req.buffer(true).parse(parseTextResponse);
+            }
+
+            // Enable binary buffering for buffer responseType
+            if (options.responseType === 'buffer') {
+              req = req.buffer(true).parse(parseBufferResponse);
+            }
+
+            // Handle body and auto-set Content-Type if needed
+            if (options.body !== undefined) {
+              const isPlainObject =
+                typeof options.body === 'object' &&
+                options.body !== null &&
+                !Buffer.isBuffer(options.body) &&
+                !(options.body instanceof ArrayBuffer) &&
+                !(options.body instanceof Uint8Array);
+
+              const hasContentType =
+                options.headers &&
+                Object.keys(options.headers).some((k) => k.toLowerCase() === 'content-type');
+
+              if (isPlainObject && !hasContentType) {
+                req = req.set('Content-Type', 'application/json');
+              }
+
+              req = req.send(options.body);
+            }
+
+            if (options.signal) {
+              if (options.signal.aborted) {
+                req.abort();
+              } else {
+                options.signal.addEventListener(
+                  'abort',
+                  () => {
+                    try {
+                      req.abort();
+                    } catch {
+                      // Swallow — the abort rejection propagates via the awaited request
+                    }
+                  },
+                  { once: true }
+                );
+              }
+            }
+
+            return req;
+          };
+
+          const res = await withEluRetry(buildRequest, {
+            log,
+            requestDescription: `${method.toUpperCase()} ${url}`,
+          });
+
           return {
             statusCode: res.status,
             statusMessage: res.text,
