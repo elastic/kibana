@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, type Type } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 
+import {
+  CATALOG_SEVERITIES,
+  CATALOG_SEVERITY_RANGES,
+  CATALOG_SIGNAL_TYPES,
+  MAX_CATALOG_REPOSITORY_FILTERS,
+  type CatalogSeverity,
+  type CatalogSignalType,
+} from '../common/catalog_filters';
 import { MAX_BATCH_REPOSITORIES } from '../common/extraction_batch';
 import {
   MAX_CONNECTOR_ID_LENGTH,
@@ -44,6 +52,25 @@ const repositoryIdentity = schema.string({
 const revision = schema.string({ minLength: 1, maxLength: MAX_REVISION_LENGTH });
 const identitySegment = schema.string({ minLength: 1, maxLength: MAX_REPOSITORY_IDENTITY_LENGTH });
 const repositoryParams = schema.object({ owner: identitySegment, name: identitySegment });
+
+/** A repeated query parameter arrives as an array, a single one as a plain value. */
+const oneOrMany = <T>(type: Type<T>, maxSize: number) =>
+  schema.oneOf([type, schema.arrayOf(type, { minSize: 1, maxSize })]);
+
+const signalType: Type<CatalogSignalType> = schema.oneOf([
+  schema.literal('log'),
+  schema.literal('trace'),
+  schema.literal('metric'),
+]);
+const severity: Type<CatalogSeverity> = schema.oneOf([
+  schema.literal('low'),
+  schema.literal('medium'),
+  schema.literal('high'),
+  schema.literal('critical'),
+]);
+
+const asArray = <T>(value: T | readonly T[] | undefined): readonly T[] =>
+  value === undefined ? [] : Array.isArray(value) ? value : [value as T];
 
 /** A repository that an extraction batch may select. */
 export type ExtractableRepository = Pick<
@@ -309,10 +336,9 @@ export const registerRoutes = ({
       security: { authz: { enabled: false, reason: 'This private route is feature gated.' } },
       validate: {
         query: schema.object({
-          repository: repositoryIdentity,
-          kind: schema.maybe(
-            schema.oneOf([schema.literal('log'), schema.literal('trace'), schema.literal('metric')])
-          ),
+          repository: schema.maybe(oneOrMany(repositoryIdentity, MAX_CATALOG_REPOSITORY_FILTERS)),
+          kind: schema.maybe(oneOrMany(signalType, CATALOG_SIGNAL_TYPES.length)),
+          severity: schema.maybe(oneOrMany(severity, CATALOG_SEVERITIES.length)),
           q: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
           page: schema.number({ defaultValue: 1, min: 1, max: 100 }),
           perPage: schema.number({ defaultValue: 25, min: 1, max: 100 }),
@@ -322,9 +348,21 @@ export const registerRoutes = ({
     async (context, request, response) => {
       const { elasticsearch } = await context.core;
       const client = elasticsearch.client.asCurrentUser;
-      const filters: object[] = [{ term: { repository: request.query.repository } }];
-      if (request.query.kind !== undefined) {
-        filters.push({ term: { signal_type: request.query.kind } });
+      const repositories = asArray(request.query.repository);
+      const kinds = asArray(request.query.kind);
+      const severities = asArray(request.query.severity);
+      const filters: object[] = [];
+      if (repositories.length > 0) filters.push({ terms: { repository: repositories } });
+      if (kinds.length > 0) filters.push({ terms: { signal_type: kinds } });
+      if (severities.length > 0) {
+        filters.push({
+          bool: {
+            should: severities.map((level) => ({
+              range: { severity_score: CATALOG_SEVERITY_RANGES[level] },
+            })),
+            minimum_should_match: 1,
+          },
+        });
       }
       const { q } = request.query;
       // `title` and `description` are `semantic_text`, which rejects `match`/`multi_match`.

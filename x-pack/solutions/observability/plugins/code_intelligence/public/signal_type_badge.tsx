@@ -9,7 +9,9 @@ import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export type SignalType = 'log' | 'trace' | 'metric';
+import { CATALOG_SIGNAL_TYPES, type CatalogSignalType } from '../common/catalog_filters';
+
+type SignalType = CatalogSignalType;
 
 export const signalTypeLabels: Record<SignalType, string> = {
   log: i18n.translate('xpack.codeIntelligence.signalType.log', { defaultMessage: 'Log' }),
@@ -25,10 +27,8 @@ const signalTypeColors: Record<SignalType, string> = {
   metric: 'success',
 };
 
-const signalTypes: readonly string[] = ['log', 'trace', 'metric'];
-
 const isSignalType = (value: string | undefined): value is SignalType =>
-  value !== undefined && signalTypes.includes(value);
+  value !== undefined && (CATALOG_SIGNAL_TYPES as readonly string[]).includes(value);
 
 export const SignalTypeBadge = ({ signalType }: { signalType?: string }) => (
   <EuiBadge

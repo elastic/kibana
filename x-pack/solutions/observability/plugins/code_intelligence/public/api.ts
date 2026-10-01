@@ -7,6 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 
+import type { CatalogSeverity, CatalogSignalType } from '../common/catalog_filters';
 import type { BatchRepositoryRequest, ExtractionBatchStatus } from '../common/extraction_batch';
 import type { RepositorySettings, RepositorySettingsInput } from '../common/repository_settings';
 
@@ -78,19 +79,22 @@ export const startBatch = (
 export const getBatch = (http: HttpSetup, id: string): Promise<ExtractionBatchStatus> =>
   http.get(`/internal/code_intelligence/extractions/${encodeURIComponent(id)}`);
 
+/** An empty filter list matches every value. */
 export const getCatalog = (
   http: HttpSetup,
   query: {
-    repository: string;
-    kind?: 'log' | 'trace' | 'metric';
+    repositories: readonly string[];
+    kinds: readonly CatalogSignalType[];
+    severities: readonly CatalogSeverity[];
     q?: string;
     page: number;
   }
 ): Promise<CatalogResponse> =>
   http.get('/internal/code_intelligence/catalog', {
     query: {
-      repository: query.repository,
-      ...(query.kind === undefined ? {} : { kind: query.kind }),
+      ...(query.repositories.length === 0 ? {} : { repository: [...query.repositories] }),
+      ...(query.kinds.length === 0 ? {} : { kind: [...query.kinds] }),
+      ...(query.severities.length === 0 ? {} : { severity: [...query.severities] }),
       ...(query.q === undefined ? {} : { q: query.q }),
       page: query.page,
       perPage: 25,

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { HttpSetup } from '@kbn/core/public';
 import React from 'react';
 
+import { severityForScore } from '../common/catalog_filters';
 import type { CatalogItem, Repository } from './api';
 import { getCatalog } from './api';
 import { evidenceLanguage } from './catalog_entry_flyout';
@@ -44,16 +45,18 @@ const item: CatalogItem = {
       excerpt: 'logger.Error("upstream request failed", "err", err)',
     },
   ],
-  severity_score: 7,
+  severity_score: 70,
   validation: { status: 'valid', diagnostics: [] },
   updated_at: '2026-09-30T10:00:00.000Z',
 };
+
+const otherRepository: Repository = { ...repository, repository: 'open-telemetry/demo' };
 
 const renderView = () =>
   render(
     <CatalogView
       http={{} as HttpSetup}
-      repositories={[repository]}
+      repositories={[repository, otherRepository]}
       repositoriesLoading={false}
       reloadRepositories={jest.fn()}
     />
@@ -70,6 +73,7 @@ describe('CatalogView', () => {
 
     const row = await screen.findByTestId('codeIntelligenceCatalogRow');
     expect(within(row).getByTestId('codeIntelligenceSignalTypeBadge')).toHaveTextContent('Log');
+    expect(within(row).getByTestId('codeIntelligenceSeverityBadge')).toHaveTextContent('High');
     expect(row).toHaveTextContent('elastic/eis-gateway');
     expect(row).toHaveTextContent('Upstream request failed');
     expect(within(row).getByTestId('codeIntelligenceCatalogRowQuery')).toHaveTextContent(
@@ -92,6 +96,7 @@ describe('CatalogView', () => {
     expect(within(flyout).getByTestId('codeIntelligenceCatalogEntryValidation')).toHaveTextContent(
       'valid'
     );
+    expect(within(flyout).getByTestId('codeIntelligenceSeverityBadge')).toHaveTextContent('High');
     expect(within(flyout).getByTestId('codeIntelligenceCatalogEntryQuery')).toHaveTextContent(
       'upstream request failed*'
     );
@@ -113,6 +118,50 @@ describe('CatalogView', () => {
       'No catalog entries match these filters.'
     );
     expect(screen.queryByTestId('codeIntelligenceCatalogRow')).toBeNull();
+  });
+
+  it('loads every repository by default and sends each selected filter value', async () => {
+    getCatalogMock.mockResolvedValue({ page: 1, perPage: 25, total: 0, items: [] });
+    renderView();
+    await screen.findByTestId('codeIntelligenceCatalogEmpty');
+    expect(getCatalogMock).toHaveBeenLastCalledWith(expect.anything(), {
+      repositories: [],
+      kinds: [],
+      severities: [],
+      page: 1,
+    });
+
+    fireEvent.click(screen.getByTestId('codeIntelligence-repository-filter-button'));
+    fireEvent.click(await screen.findByText('elastic/eis-gateway'));
+    fireEvent.click(screen.getByText('open-telemetry/demo'));
+    fireEvent.click(screen.getByTestId('codeIntelligence-severity-filter-button'));
+    fireEvent.click(await screen.findByText('High'));
+    fireEvent.click(screen.getByText('Critical'));
+
+    await waitFor(() =>
+      expect(getCatalogMock).toHaveBeenLastCalledWith(expect.anything(), {
+        repositories: ['elastic/eis-gateway', 'open-telemetry/demo'],
+        kinds: [],
+        severities: ['high', 'critical'],
+        page: 1,
+      })
+    );
+  });
+});
+
+describe('severityForScore', () => {
+  it.each([
+    [0, 'low'],
+    [39, 'low'],
+    [40, 'medium'],
+    [59, 'medium'],
+    [60, 'high'],
+    [79, 'high'],
+    [80, 'critical'],
+    [100, 'critical'],
+    [undefined, undefined],
+  ])('maps %s to %s', (score, severity) => {
+    expect(severityForScore(score)).toBe(severity);
   });
 });
 
