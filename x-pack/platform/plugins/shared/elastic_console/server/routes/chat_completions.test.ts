@@ -1,0 +1,106 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { of } from 'rxjs';
+import type { CoreSetup, IRouter, KibanaRequest, RequestHandler } from '@kbn/core/server';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
+import { registerChatCompletionsRoute } from './chat_completions';
+
+const setup = () => {
+  const chatComplete = jest
+    .fn()
+    .mockImplementation(({ stream }: { stream: boolean }) =>
+      stream ? of() : Promise.resolve({ content: 'hi', toolCalls: [] })
+    );
+  const inference = {
+    getClient: jest.fn().mockReturnValue({ chatComplete }),
+    getConnectorById: jest.fn().mockResolvedValue({ connectorId: 'my-connector' }),
+    getDefaultConnector: jest.fn(),
+  };
+  const coreStart = {
+    featureFlags: { getBooleanValue$: jest.fn().mockReturnValue(of(true)) },
+    savedObjects: { getScopedClient: jest.fn() },
+    uiSettings: { asScopedToClient: jest.fn().mockReturnValue({ get: async () => true }) },
+  };
+  const coreSetup = {
+    getStartServices: async () => [coreStart, { inference }, {}],
+  } as unknown as CoreSetup<ElasticConsoleStartDependencies, ElasticConsolePluginStart>;
+
+  let handler: RequestHandler | undefined;
+  const router = {
+    post: (_config: unknown, routeHandler: RequestHandler) => {
+      handler = routeHandler;
+    },
+  } as unknown as IRouter;
+
+  registerChatCompletionsRoute({ router, coreSetup, logger: loggingSystemMock.createLogger() });
+
+  const call = async ({
+    body,
+    headers = {},
+  }: {
+    body: Record<string, unknown>;
+    headers?: Record<string, string>;
+  }) => {
+    if (!handler) {
+      throw new Error('route not registered');
+    }
+    const response = httpServerMock.createResponseFactory();
+    await handler(
+      {} as never,
+      httpServerMock.createKibanaRequest({
+        body: { model: 'my-connector', messages: [{ role: 'user', content: 'hi' }], ...body },
+        headers,
+      }) as KibanaRequest,
+      response
+    );
+    return response;
+  };
+
+  return { chatComplete, call };
+};
+
+describe('chat completions route prompt caching', () => {
+  it.each([true, false])(
+    'forwards prompt_cache_key as the session id (stream: %s)',
+    async (stream) => {
+      const { chatComplete, call } = setup();
+      await call({ body: { stream, prompt_cache_key: 'ses_1' } });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId: 'my-connector',
+          sessionId: 'ses_1',
+          cacheControl: { type: 'ephemeral', ttl: '5m' },
+          stream,
+        })
+      );
+    }
+  );
+
+  it('forwards the x-session-id header as the session id', async () => {
+    const { chatComplete, call } = setup();
+    await call({ body: { stream: true }, headers: { 'x-session-id': 'ses_2' } });
+
+    expect(chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sessionId: 'ses_2',
+        cacheControl: { type: 'ephemeral', ttl: '5m' },
+      })
+    );
+  });
+
+  it('does not set prompt caching options without a session id', async () => {
+    const { chatComplete, call } = setup();
+    await call({ body: { stream: false } });
+
+    const [[options]] = chatComplete.mock.calls;
+    expect(options).not.toHaveProperty('sessionId');
+    expect(options).not.toHaveProperty('cacheControl');
+  });
+});

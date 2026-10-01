@@ -25,6 +25,11 @@ import {
   createErrorResponse,
 } from '../lib/openai_format';
 import { resolveConnector } from '../lib/resolve_connector';
+import {
+  MAX_SESSION_ID_LENGTH,
+  resolvePromptCaching,
+  type PromptCaching,
+} from '../lib/prompt_caching';
 import { isElasticConsoleEnabled } from './is_enabled';
 
 const SOCKET_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
@@ -117,6 +122,11 @@ export const registerChatCompletionsRoute = ({
                 include_usage: schema.maybe(schema.boolean()),
               })
             ),
+            // OpenAI prompt caching fields; mapped to the EIS session id / cache control.
+            prompt_cache_key: schema.maybe(schema.string({ maxLength: MAX_SESSION_ID_LENGTH })),
+            prompt_cache_retention: schema.maybe(
+              schema.oneOf([schema.literal('in_memory'), schema.literal('24h')])
+            ),
           },
           { unknowns: 'allow' }
         ),
@@ -139,7 +149,15 @@ export const registerChatCompletionsRoute = ({
           temperature,
           tools,
           tool_choice: toolChoice,
+          prompt_cache_key: promptCacheKey,
+          prompt_cache_retention: promptCacheRetention,
         } = request.body;
+
+        const promptCaching = resolvePromptCaching({
+          promptCacheKey,
+          promptCacheRetention,
+          headers: request.headers,
+        });
 
         // Resolve connector: use x-connector-id header, or try model as connector ID, or use default
         const connectorIdHeader = request.headers['x-connector-id'];
@@ -165,6 +183,7 @@ export const registerChatCompletionsRoute = ({
             temperature,
             tools: inferenceTools,
             toolChoice: inferenceToolChoice,
+            promptCaching,
             model,
             request,
             response,
@@ -180,6 +199,7 @@ export const registerChatCompletionsRoute = ({
           temperature,
           tools: inferenceTools,
           toolChoice: inferenceToolChoice,
+          promptCaching,
           model,
           request,
           response,
@@ -224,6 +244,7 @@ const handleStreamingRequest = async ({
   temperature,
   tools,
   toolChoice,
+  promptCaching,
   model,
   request,
   response,
@@ -236,6 +257,7 @@ const handleStreamingRequest = async ({
   temperature?: number;
   tools?: any;
   toolChoice?: any;
+  promptCaching: PromptCaching;
   model: string;
   request: any;
   response: any;
@@ -258,6 +280,7 @@ const handleStreamingRequest = async ({
     temperature,
     tools,
     toolChoice,
+    ...promptCaching,
     stream: true,
     abortSignal: abortController.signal,
   });
@@ -325,6 +348,7 @@ const handleNonStreamingRequest = async ({
   temperature,
   tools,
   toolChoice,
+  promptCaching,
   model,
   request,
   response,
@@ -337,6 +361,7 @@ const handleNonStreamingRequest = async ({
   temperature?: number;
   tools?: any;
   toolChoice?: any;
+  promptCaching: PromptCaching;
   model: string;
   request: any;
   response: any;
@@ -350,6 +375,7 @@ const handleNonStreamingRequest = async ({
       temperature,
       tools,
       toolChoice,
+      ...promptCaching,
       stream: false,
     });
 
