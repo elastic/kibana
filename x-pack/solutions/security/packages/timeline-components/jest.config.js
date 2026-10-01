@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './last_updated';
+module.exports = {
+  preset: '@kbn/test',
+  roots: ['<rootDir>/x-pack/solutions/security/packages/timeline-components'],
+  rootDir: '../../../../..',
+};

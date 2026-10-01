@@ -9,12 +9,12 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
-import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
+import { stopPropagationAndPreventDefault } from '../../../utils/accessibility';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { createFilter, getAdditionalScreenReaderOnlyContext } from '../utils';
 import type { HoverActionComponentProps, FilterValueFnArgs } from './types';
 
-export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.filterIn', {
+export const FILTER_FOR_VALUE = i18n.translate('securitySolutionPackages.timelineComponents.hoverActions.filterIn', {
   defaultMessage: 'Filter for',
 });
 export const FILTER_FOR_VALUE_KEYBOARD_SHORTCUT = 'f';

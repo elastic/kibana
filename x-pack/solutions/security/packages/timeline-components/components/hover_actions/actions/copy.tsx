@@ -10,13 +10,13 @@ import copy from 'copy-to-clipboard';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
+import { stopPropagationAndPreventDefault } from '../../../utils/accessibility';
 import type { HoverActionComponentProps } from './types';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { COPY_TO_CLIPBOARD, SUCCESS_TOAST_TITLE } from './translations';
 import { WithCopyToClipboard } from '../../clipboard/with_copy_to_clipboard';
 
-export const FIELD = i18n.translate('xpack.timelines.hoverActions.fieldLabel', {
+export const FIELD = i18n.translate('securitySolutionPackages.timelineComponents.hoverActions.fieldLabel', {
   defaultMessage: 'Field',
 });
 
