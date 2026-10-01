@@ -6,7 +6,7 @@
  */
 
 import type { ProfilingStatus } from '@kbn/profiling-utils';
-import { hasProfilingData } from './has_profiling_data';
+import { hasProfilingData } from '.';
 
 const makeStatus = (otelData: boolean, universalProfilingData: boolean): ProfilingStatus => ({
   isEnabled: true,

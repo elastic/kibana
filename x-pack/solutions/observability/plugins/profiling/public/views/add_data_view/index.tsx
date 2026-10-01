@@ -30,7 +30,7 @@ import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
-import { hasProfilingData } from '../../components/contexts/profiling_status/has_profiling_data';
+import { hasProfilingData } from '../../utils/has_profiling_data';
 import { useProfilingStatus } from '../../components/contexts/profiling_status/use_profiling_status';
 import type { AddDataTab } from './types';
 import { AddDataTabs } from './types';
