@@ -12,7 +12,15 @@ import { datasourceSelector, requestDatasource } from './datasource';
 import { registerDatasourceListeners } from './datasource_listeners';
 import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
-import { createWorkspaceState, workspaceChanged, workspaceInitializedSelector } from './workspace';
+import {
+  createRuntimeGraphState,
+  initializeWorkspace,
+  workspaceChanged,
+  workspaceInitializedSelector,
+  workspaceSelector,
+  workspaceGraphMerged,
+  undoWorkspace,
+} from './workspace';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
@@ -52,9 +60,9 @@ describe('datasource listener', () => {
 
   it('keeps a new workspace uninitialized after selecting a datasource', async () => {
     env.mockedDeps.notifyReact.mockImplementation(() => {
-      const workspace = env.mockedDeps.getWorkspace();
+      const workspace = env.mockedDeps.getRuntimeGraph();
       if (workspace) {
-        env.store.dispatch(workspaceChanged(createWorkspaceState(workspace)));
+        env.store.dispatch(workspaceChanged(createRuntimeGraphState(workspace)));
       }
     });
 
@@ -62,6 +70,33 @@ describe('datasource listener', () => {
     await waitForPromise();
 
     expect(workspaceInitializedSelector(env.store.getState())).toBe(false);
+  });
+
+  it('clears graph state and history when switching datasource', async () => {
+    env.store.dispatch(initializeWorkspace());
+    env.store.dispatch(
+      workspaceGraphMerged({ nodes: [{ field: 'field', term: 'term' }], edges: [] })
+    );
+    env.store.dispatch(undoWorkspace());
+    expect(workspaceSelector(env.store.getState()).redoHistory).toHaveLength(1);
+
+    dispatchRequest();
+    await waitForPromise();
+
+    expect(workspaceSelector(env.store.getState())).toEqual({
+      isInitialized: false,
+      isLayoutRunning: false,
+      nodesById: {},
+      nodeIds: [],
+      edgesById: {},
+      edgeIds: [],
+      selectedNodeIds: [],
+      selectedEdgeIds: [],
+      blocklistedNodesById: {},
+      blocklistedNodeIds: [],
+      undoHistory: [],
+      redoHistory: [],
+    });
   });
 
   it('should initialize workspace with the current advanced settings', async () => {

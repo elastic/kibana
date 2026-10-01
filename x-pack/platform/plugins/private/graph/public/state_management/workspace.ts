@@ -12,7 +12,7 @@ import { createSelector } from './create_selector';
 import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.';
 import { fillWorkspace } from '.';
 import { reset } from './global';
-import { datasourceSelector } from './datasource';
+import { datasourceLoaded, datasourceSelector } from './datasource';
 import { settingsSelector } from './advanced_settings';
 import { liveResponseFieldsSelector, selectedFieldsSelector } from './fields';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
@@ -134,6 +134,7 @@ export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
   .case(reset, () => initialWorkspaceState)
+  .case(datasourceLoaded, () => initialWorkspaceState)
   .case(workspaceLayoutChanged, (state, isLayoutRunning) => ({ ...state, isLayoutRunning }))
   .case(initializeWorkspace, (state) => ({ ...state, isInitialized: true }))
   .case(workspaceChanged, (state, workspace) => ({

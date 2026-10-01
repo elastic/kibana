@@ -14,6 +14,7 @@ import type { IndexpatternDatasource } from './datasource';
 import { datasourceLoaded, setDatasource, requestDatasource } from './datasource';
 import type { MatchedAction } from './helpers';
 import { matchesAction } from './helpers';
+import { createRuntimeGraphState, workspaceChanged } from './workspace';
 
 /**
  * Listener loading field information when the datasource is switched. This will overwrite current settings
@@ -51,7 +52,8 @@ export const registerDatasourceListeners = (
 
       listenerApi.dispatch(loadFields(mapFields(indexPattern)));
       listenerApi.dispatch(datasourceLoaded());
-      createRuntimeGraph();
+      const runtimeGraph = createRuntimeGraph();
+      listenerApi.dispatch(workspaceChanged(createRuntimeGraphState(runtimeGraph)));
       notifyReact();
     },
   });
