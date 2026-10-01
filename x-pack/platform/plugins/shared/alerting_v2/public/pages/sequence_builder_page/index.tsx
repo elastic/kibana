@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getMinimumScheduleInterval } from '../../kibana_services';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -57,6 +58,7 @@ const useRuleFormServicesBag = (): RuleFormServices => {
       uiActions,
       dashboard,
       cps,
+      minimumScheduleInterval: getMinimumScheduleInterval(),
     }),
     [
       http,

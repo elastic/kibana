@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getMinimumScheduleInterval } from '../kibana_services';
 import type {
   BuilderState,
   ComposeDiscoverMode,
@@ -108,6 +109,7 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
+      minimumScheduleInterval: getMinimumScheduleInterval(),
       esqlMenu: ESQLMenu,
       esqlEditorActionsProvider: EsqlEditorActionsProvider,
       esqlEditorActionsRegister: EsqlEditorActionsRegister,
