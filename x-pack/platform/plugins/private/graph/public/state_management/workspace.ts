@@ -31,6 +31,7 @@ import {
   transformSearchResponse,
 } from '../services/workspace/graph_response_transformers';
 import { syncRuntimeTopology } from '../services/workspace/sync_runtime_topology';
+import { unpackGroupedNodes } from '../services/workspace/runtime_grouping';
 import type { GraphData, Workspace, WorkspaceField, WorkspaceNode } from '../types';
 import type { ServerResultNode } from '../types';
 import type { MatchedAction } from './helpers';
@@ -532,7 +533,7 @@ export const registerWorkspaceListeners = (
           .filter((node) => node !== undefined);
         const startNodes =
           selectedNodes.length > 0
-            ? workspace.returnUnpackedGroupeds(selectedNodes)
+            ? unpackGroupedNodes(selectedNodes, workspace.edges)
             : workspace.nodes;
         const request = buildExpandExploreRequest({
           startNodes,
@@ -563,13 +564,13 @@ export const registerWorkspaceListeners = (
           .filter((node) => node !== undefined);
         const unpackedNodes =
           selectedNodes.length > 0
-            ? workspace.returnUnpackedGroupeds(selectedNodes)
+            ? unpackGroupedNodes(selectedNodes, workspace.edges)
             : workspace.nodes;
         const nodes = limitNodesForConnectionSearch(
           unpackedNodes.filter((node) => node.parent === undefined)
         );
         const request = buildFillConnectionsRequest(
-          nodes.map((node) => buildNodeQuery(workspace.returnUnpackedGroupeds([node])))
+          nodes.map((node) => buildNodeQuery(unpackGroupedNodes([node], workspace.edges)))
         );
         try {
           const response = await searchGraph(indexName, request);
