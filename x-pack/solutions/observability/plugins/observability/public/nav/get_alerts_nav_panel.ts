@@ -22,6 +22,16 @@ import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/p
 const PANEL_ID = 'alerting';
 const ALERTS_LINK = 'observability-overview:alerts' as const;
 const ALERTS_ICON = 'warning';
+
+/** Classic Observability alerts label for nav and global search. */
+export const getObservabilityAlertsLinkTitle = (alertingV2Enabled: boolean): string =>
+  alertingV2Enabled
+    ? i18n.translate('xpack.observability.nav.alertsV1', {
+        defaultMessage: 'Alerts (V1)',
+      })
+    : i18n.translate('xpack.observability.alertsLinkTitle', {
+        defaultMessage: 'Alerts',
+      });
 const V1_RULES_MANAGEMENT_ID = 'triggersActionsRules';
 const MAINTENANCE_WINDOWS_MANAGEMENT_ID = 'maintenanceWindows';
 
@@ -61,6 +71,7 @@ const maybeSection = (
 
 const getAlertsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
   const alertsChildren: PanelOpenerChildDefinition[] = [];
+  const isV2Enabled = isAlertingV2Enabled(core);
 
   if (hasAlertingV2Capability(core, 'alerts') || canReadV1Alerts(core)) {
     alertsChildren.push({
@@ -71,12 +82,10 @@ const getAlertsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
     });
   }
 
-  if (canReadV1Alerts(core) && shouldShowV1ObservabilityAlertsTable(core)) {
+  if (isV2Enabled && canReadV1Alerts(core) && shouldShowV1ObservabilityAlertsTable(core)) {
     alertsChildren.push({
       link: ALERTS_LINK,
-      title: i18n.translate('xpack.observability.nav.alertsV1', {
-        defaultMessage: 'Alerts (V1)',
-      }),
+      title: getObservabilityAlertsLinkTitle(isV2Enabled),
     });
   }
 
@@ -164,7 +173,14 @@ export const shouldIncludeStackManagementRules = (core: CoreStart): boolean =>
 
 export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
   if (!isAlertingV2Enabled(core)) {
-    return [{ link: ALERTS_LINK, icon: ALERTS_ICON, getIsActive: getAlertsIsActive }];
+    return [
+      {
+        link: ALERTS_LINK,
+        icon: ALERTS_ICON,
+        title: getObservabilityAlertsLinkTitle(false),
+        getIsActive: getAlertsIsActive,
+      },
+    ];
   }
 
   const children = [

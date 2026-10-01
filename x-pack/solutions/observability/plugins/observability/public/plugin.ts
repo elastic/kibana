@@ -84,7 +84,10 @@ import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observabil
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
-import { shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
+import {
+  isAlertingV2Enabled,
+  shouldShowV1ObservabilityAlertsTable,
+} from '@kbn/alerting-v2-utils';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
@@ -95,6 +98,7 @@ import {
   RULES_PATH,
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
+import { getObservabilityAlertsLinkTitle } from './nav/get_alerts_nav_panel';
 import { setInvestigationsClient } from './services/investigations_client';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
@@ -215,9 +219,7 @@ export class Plugin
   private readonly deepLinks: AppDeepLink[] = [
     {
       id: 'alerts',
-      title: i18n.translate('xpack.observability.alertsLinkTitle', {
-        defaultMessage: 'Alerts (V1)',
-      }),
+      title: getObservabilityAlertsLinkTitle(false),
       order: 8001,
       path: ALERTS_PATH,
       visibleIn: ['projectSideNav'],
@@ -539,9 +541,16 @@ export class Plugin
     const { application } = coreStart;
     const config = this.initContext.config.get();
     setInvestigationsClient(pluginsStart.nightshiftInvestigations?.investigationsClient);
+    const alertingV2Enabled = isAlertingV2Enabled(coreStart);
+    const deepLinks = this.deepLinks.map((link) =>
+      link.id === 'alerts'
+        ? { ...link, title: getObservabilityAlertsLinkTitle(alertingV2Enabled) }
+        : link
+    );
+
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
-      deepLinks: this.deepLinks,
+      deepLinks,
       updater$: this.appUpdater$,
       pricing: coreStart.pricing,
       showV1AlertsInGlobalSearch: shouldShowV1ObservabilityAlertsTable(coreStart),

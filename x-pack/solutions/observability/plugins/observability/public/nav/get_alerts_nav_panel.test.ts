@@ -7,7 +7,11 @@
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { getAlertsNavPanel, shouldIncludeStackManagementRules } from './get_alerts_nav_panel';
+import {
+  getAlertsNavPanel,
+  getObservabilityAlertsLinkTitle,
+  shouldIncludeStackManagementRules,
+} from './get_alerts_nav_panel';
 
 const FULL_V2_CAPABILITIES = {
   alerting_v2_alerts: { read: true },
@@ -58,6 +62,16 @@ const getPanelChildren = (core: CoreStart) => getAlertsNavPanel(core)[0]?.childr
 const getSectionByTitle = (core: CoreStart, title?: string) =>
   getPanelChildren(core).find((section) => section.title === title);
 
+describe('getObservabilityAlertsLinkTitle', () => {
+  it('is Alerts when alerting v2 is disabled', () => {
+    expect(getObservabilityAlertsLinkTitle(false)).toBe('Alerts');
+  });
+
+  it('is Alerts (V1) when alerting v2 is enabled', () => {
+    expect(getObservabilityAlertsLinkTitle(true)).toBe('Alerts (V1)');
+  });
+});
+
 describe('getAlertsNavPanel', () => {
   let core: CoreStart;
 
@@ -75,6 +89,7 @@ describe('getAlertsNavPanel', () => {
       expect.objectContaining({
         link: 'observability-overview:alerts',
         icon: 'warning',
+        title: 'Alerts',
       })
     );
     expect(result[0]).not.toHaveProperty('renderAs');
