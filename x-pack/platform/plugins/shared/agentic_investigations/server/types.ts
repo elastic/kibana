@@ -14,6 +14,7 @@ import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platfor
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { ImpactReadClient } from './impact/services/impact_client';
+import type { SubjectsClient } from './subjects/services/subjects_client';
 import type { EscalationsService } from './escalations/services/escalations_service';
 
 export interface AgenticInvestigationsSetupDependencies {
@@ -25,7 +26,11 @@ export interface AgenticInvestigationsSetupDependencies {
    * them.
    */
   agentBuilderPlatform: AgentBuilderPlatformPluginSetup;
-  /** Registers the readonly investigation_impact attachment type and the `investigations.set_impact` tool. */
+  /**
+   * Registers the readonly investigation_impact, investigation_subject, and
+   * investigation_hypotheses attachment types and the `investigations.set_impact` and
+   * `investigations.set_hypotheses` tools.
+   */
   agentBuilder: AgentBuilderPluginSetup;
   /** Registers Impact workflow steps. */
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -55,6 +60,12 @@ export interface AgenticInvestigationsPluginStart {
    * route `security.authz`.
    */
   getImpactClient: (request: KibanaRequest) => ImpactReadClient;
+  /**
+   * Request-scoped investigation subjects: record them when starting or following up on an
+   * investigation, find investigations by subject, and claim subjects for a race-safe start.
+   * Checks the investigations manage privilege; space and user come from the request.
+   */
+  getSubjectsClient: (request: KibanaRequest) => SubjectsClient;
   getEscalationsService: () => EscalationsService;
 }
 
