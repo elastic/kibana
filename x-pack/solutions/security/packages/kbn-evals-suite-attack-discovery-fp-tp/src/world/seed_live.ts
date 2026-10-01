@@ -142,7 +142,7 @@ const createWithConflictRetry = async (
   params: { index: string; id: string; document: Record<string, unknown>; refresh?: string },
   { attempts = 3, delayMs = 750 }: { attempts?: number; delayMs?: number } = {}
 ): Promise<void> => {
-  for (let attempt = 1; ; attempt++) {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
     try {
       await esClient.create({ ...params, refresh: params.refresh as never });
       return;
@@ -186,7 +186,7 @@ const bulkWithConflictRetry = async (
   { attempts = 3, delayMs = 750 }: { attempts?: number; delayMs?: number } = {}
 ): Promise<void> => {
   let pending = operations;
-  for (let attempt = 1; ; attempt++) {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
     const result = await esClient.bulk({ refresh: 'wait_for', operations: pending });
     if (result.errors !== true) {
       return;
@@ -210,13 +210,15 @@ const bulkWithConflictRetry = async (
       }
       retry.push(pending[idx * 2], pending[idx * 2 + 1]);
     });
-    if (retry.length > 0 && !nonConflict && attempt < attempts) {
-      pending = retry;
-      await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
-      continue;
+    if (retry.length === 0 || nonConflict) {
+      throw new Error(`${label} bulk had item errors: ${JSON.stringify(items)}`);
     }
-    throw new Error(`${label} bulk had item errors: ${JSON.stringify(items)}`);
+    pending = retry;
+    if (attempt < attempts) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
+    }
   }
+  throw new Error(`${label} bulk retry exhausted: conflicts did not settle`);
 };
 
 const kbnErrorMessage = (body: unknown): string => {
