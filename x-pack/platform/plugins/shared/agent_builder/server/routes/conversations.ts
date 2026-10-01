@@ -475,7 +475,7 @@ export function registerConversationRoutes({
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
-          stability: 'tech_preview',
+          stability: 'stable',
           since: '9.6.0',
         },
       },
