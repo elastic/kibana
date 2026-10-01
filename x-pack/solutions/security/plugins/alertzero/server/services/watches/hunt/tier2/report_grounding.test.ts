@@ -245,6 +245,37 @@ describe('assertEsqlGroundedInReport', () => {
     ).toBe(false);
   });
 
+  it("still grounds an ASCII full-text term at exactly the tokenizer's length limit", () => {
+    // 255 is the tokenizer's own default max_token_length, not past it -- the boundary case the
+    // refusal test below needs to be more than a one-sided assertion.
+    const atLimit = 'r'.repeat(251) + 'role';
+    expect(atLimit).toHaveLength(255);
+    const query = `FROM logs-aws.* | WHERE MATCH(message, "${atLimit}") | LIMIT 10`;
+    expect(
+      assertEsqlGroundedInReport(query, {
+        reportText: `the actor reached ${atLimit}`,
+        iocValues: [],
+      }).ok
+    ).toBe(true);
+  });
+
+  it("refuses an ASCII full-text term past the tokenizer's own length limit", () => {
+    // Elasticsearch's standard tokenizer splits a token once it passes its default
+    // `max_token_length` (255), into a 255-character chunk plus whatever is left over -- so a
+    // 259-character literal ending in `role` grounds here as one term but analyzes into a separate
+    // `role` token Elasticsearch ORs in, same gap as the hyphenated and CJK cases above, just via
+    // length rather than character class.
+    const longRun = 'a'.repeat(255) + 'role';
+    expect(longRun).toHaveLength(259);
+    const query = `FROM logs-aws.* | WHERE MATCH(message, "${longRun}") | LIMIT 10`;
+    expect(
+      assertEsqlGroundedInReport(query, {
+        reportText: `the actor reached ${longRun}`,
+        iocValues: [],
+      }).ok
+    ).toBe(false);
+  });
+
   it('says an unfiltered query has no predicate, not that the report is missing from it', () => {
     const result = assertEsqlGroundedInReport('FROM logs-aws.* | LIMIT 1', {
       reportText,
