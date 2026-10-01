@@ -74,7 +74,13 @@ export function useServiceBadges(): ReactElement[] {
   });
 
   const badges: ReactElement[] = [
-    <Badge key="service" id="service" color="default" iconType="grid" data-test-subj="serviceFlyoutServiceBadge">
+    <Badge
+      key="service"
+      id="service"
+      color="default"
+      iconType="grid"
+      data-test-subj="serviceFlyoutServiceBadge"
+    >
       {SERVICE_BADGE_LABEL}
     </Badge>,
   ];

@@ -191,7 +191,12 @@ export function AlertsBadge(props: AlertsBadgeProps) {
       {label}
     </EuiBadge>
   ) : (
-    <EuiBadge data-test-subj={dataTestSubj} color={color} iconType={iconType} aria-label={ariaLabel}>
+    <EuiBadge
+      data-test-subj={dataTestSubj}
+      color={color}
+      iconType={iconType}
+      aria-label={ariaLabel}
+    >
       {label}
     </EuiBadge>
   );
