@@ -25,6 +25,9 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
     defaultEnabled: false,
     defaultEnabledInputs: [],
     showInUI: true,
+    isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
     ...overrides,
   };
 }
@@ -403,5 +406,57 @@ describe('buildIacIntegrations ↔ Deploy parity', () => {
         'aws.rds-aws/metrics',
       ])
     );
+  });
+});
+
+describe('buildPackageInputs', () => {
+  it('emits array defaults for multi fields when no user value is stored', () => {
+    // Regression test: buildStreamVars previously only emitted bool/string manifest defaults.
+    // A `tags` var with required:true, show_user:true, multi:true, default:['forwarded'] would
+    // have its default silently omitted, causing pruneUnsatisfiedInputs to remove the entire
+    // input and throw "No fully configured input ... missing aws-s3:tags".
+    const service = makeService({
+      id: 'aws_billing',
+      packageName: 'aws_billing',
+      dataStreams: ['billing'],
+      inputs: ['aws-s3'],
+      requiredConfig: ['tags'],
+      varDefsByInput: {
+        'aws-s3': {
+          tags: {
+            name: 'tags',
+            type: 'text',
+            required: true,
+            show_user: true,
+            multi: true,
+            default: ['forwarded', 'aws-billing'],
+          } as any,
+        },
+      },
+      varDefsByDataStream: {
+        billing: {
+          inputs: ['aws-s3'],
+          defaultEnabledInputs: ['aws-s3'],
+          requiredConfig: ['tags'],
+          varDefsByInput: {
+            'aws-s3': {
+              tags: {
+                name: 'tags',
+                type: 'text',
+                required: true,
+                show_user: true,
+                multi: true,
+                default: ['forwarded', 'aws-billing'],
+              } as any,
+            },
+          },
+        },
+      },
+    });
+
+    const inputs = buildPackageInputs([service], {}, 'us-east-1');
+    const streamVars = inputs['aws_billing-aws-s3']?.streams?.['aws_billing.billing']?.vars;
+
+    expect(streamVars?.tags).toEqual(['forwarded', 'aws-billing']);
   });
 });

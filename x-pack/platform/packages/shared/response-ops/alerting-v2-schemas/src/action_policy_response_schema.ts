@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { actorSchema, durationSchema } from './common';
+import { actorSchema, durationSchema, ESTIMATED_COUNT_NOTE } from './common';
 import {
   groupingModeSchema,
   actionPolicyDestinationSchema,
@@ -17,10 +17,6 @@ import { POLICY_MATCHER_DESCRIPTION, policyMatcherSchema } from './policy_matche
 export const actionPolicyResponseSchema = z
   .object({
     id: z.string().describe('The unique identifier for the action policy.'),
-    version: z
-      .string()
-      .optional()
-      .describe('The version, used for optimistic concurrency control.'),
     name: z.string().describe('The name of the action policy.'),
     description: z.string().describe('A description of the action policy.'),
     enabled: z.boolean().describe('Whether the action policy is enabled.'),
@@ -49,9 +45,11 @@ export const actionPolicyResponseSchema = z
       .nullable()
       .describe('The ISO datetime until which the policy is snoozed, or null if not snoozed.'),
     created_by: actorSchema.nullable().describe('The actor who created the action policy.'),
-    created_at: z.string().describe('The ISO datetime when the action policy was created.'),
+    created_at: z.iso.datetime().describe('The ISO datetime when the action policy was created.'),
     updated_by: actorSchema.nullable().describe('The actor who last updated the action policy.'),
-    updated_at: z.string().describe('The ISO datetime when the action policy was last updated.'),
+    updated_at: z.iso
+      .datetime()
+      .describe('The ISO datetime when the action policy was last updated.'),
   })
   .meta({ id: 'alerting_action_policy_response' });
 
@@ -60,7 +58,9 @@ export type ActionPolicyResponse = z.infer<typeof actionPolicyResponseSchema>;
 export const findActionPoliciesResponseSchema = z
   .object({
     items: z.array(actionPolicyResponseSchema).describe('The list of action policies.'),
-    total: z.number().describe('The total number of action policies matching the query.'),
+    total: z
+      .number()
+      .describe(`The number of action policies matching the query. ${ESTIMATED_COUNT_NOTE}`),
     page: z.number().describe('The current page number.'),
     per_page: z.number().describe('The number of action policies per page.'),
   })

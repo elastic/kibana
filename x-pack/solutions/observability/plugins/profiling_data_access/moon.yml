@@ -35,7 +35,6 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - common/**/*
     - server/**/*
     - jest.config.js
     - '!target/**/*'

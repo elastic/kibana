@@ -53,14 +53,16 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: '@local-stateful-
       expect(response.body).toStrictEqual({ affected_count: 2, errors: [] });
 
       // The API key rotation is not observable directly (Task Manager stores it
-      // encrypted), so assert the side effect via the saved object write. The
-      // OCC `version` is the reliable witness: every successful write bumps it,
-      // independently of the clock. `updated_at` is a weaker, clock-dependent
-      // proxy kept only as a sanity check that the write advanced the timestamp.
+      // encrypted). `affected_count` above is the real signal: a rule is only
+      // counted once both the task rotation and the saved-object write succeeded.
+      // The audit stamp is a weaker sanity check — `updated_at` has millisecond
+      // resolution, so create and rotation can share a millisecond and the
+      // comparison has to be non-strict.
       for (const created of [ruleA, ruleB]) {
         const fetched = await apiServices.alertingV2.rules.get(created.id);
-        expect(fetched.version).not.toBe(created.version);
-        expect(Date.parse(fetched.updated_at)).toBeGreaterThan(Date.parse(created.updated_at));
+        expect(Date.parse(fetched.updated_at)).toBeGreaterThanOrEqual(
+          Date.parse(created.updated_at)
+        );
       }
     }
   );
@@ -87,9 +89,9 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: '@local-stateful-
         ...created,
         updated_at: fetched.updated_at,
         updated_by: fetched.updated_by,
-        version: fetched.version,
       });
-      expect(fetched.version).not.toBe(created.version);
+      // Non-strict for the same reason as above: millisecond-resolution stamps.
+      expect(Date.parse(fetched.updated_at)).toBeGreaterThanOrEqual(Date.parse(created.updated_at));
     }
   );
 
@@ -196,7 +198,7 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: '@local-stateful-
       expect(response).toHaveStatusCode(403);
       // Verify the rule was left untouched after the forbidden call.
       const stored = await apiServices.alertingV2.rules.get(rule.id);
-      expect(stored.version).toBe(rule.version);
+      expect(stored).toStrictEqual(rule);
     }
   );
 
@@ -213,7 +215,7 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: '@local-stateful-
       });
       expect(response).toHaveStatusCode(403);
       const stored = await apiServices.alertingV2.rules.get(rule.id);
-      expect(stored.version).toBe(rule.version);
+      expect(stored).toStrictEqual(rule);
     }
   );
 });

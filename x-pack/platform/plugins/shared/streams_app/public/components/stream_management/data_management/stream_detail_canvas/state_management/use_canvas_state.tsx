@@ -4,14 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useContext, useRef, useMemo } from 'react';
 import { createActorContext } from '@xstate/react';
 import type { XYPosition } from '@xyflow/react';
-import type { CanvasStateServiceDeps } from './types';
+import type { Unit } from '../../../../../services/unit_repository';
+import type { CanvasCreateHistoryHandlers, CanvasStateServiceDeps } from './types';
 import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
 import type { Unit } from '../../../../../services/unit_repository';
 
 const CanvasStateContext = createActorContext(canvasStateMachine);
+const CanvasCreateHistoryContext =
+  React.createContext<React.MutableRefObject<CanvasCreateHistoryHandlers> | null>(null);
+
+const noopCreateHistory: CanvasCreateHistoryHandlers = {
+  hold: () => {},
+  commit: () => {},
+  discard: () => {},
+};
 
 const useCanvasStateSelector = CanvasStateContext.useSelector;
 
@@ -19,13 +28,28 @@ export const CanvasStateContextProvider = ({
   children,
   ...deps
 }: React.PropsWithChildren<CanvasStateServiceDeps>) => {
+  const createHistoryRef = useRef<CanvasCreateHistoryHandlers>(noopCreateHistory);
+
   return (
-    <CanvasStateContext.Provider
-      logic={canvasStateMachine.provide(createCanvasMachineImplementations(deps))}
-    >
-      {children}
-    </CanvasStateContext.Provider>
+    <CanvasCreateHistoryContext.Provider value={createHistoryRef}>
+      <CanvasStateContext.Provider
+        logic={canvasStateMachine.provide(
+          createCanvasMachineImplementations({ ...deps, createHistoryRef })
+        )}
+      >
+        {children}
+      </CanvasStateContext.Provider>
+    </CanvasCreateHistoryContext.Provider>
   );
+};
+
+/** Point the canvas machine's create transitions at the live undo stack. */
+export const useBindCanvasCreateHistory = (handlers: CanvasCreateHistoryHandlers) => {
+  const createHistoryRef = useContext(CanvasCreateHistoryContext);
+  if (!createHistoryRef) {
+    throw new Error('useBindCanvasCreateHistory must be used within CanvasStateContextProvider');
+  }
+  createHistoryRef.current = handlers;
 };
 
 export const useCanvasUrlRef = () => {
@@ -62,13 +86,12 @@ export const useCanvasSourcesRef = () => {
   return useCanvasStateSelector((state) => state.context.sourcesRef);
 };
 
-export const useCanvasNodePositions = () => {
-  return useCanvasStateSelector((state) => state.context.nodePositions);
+export const useCanvasDestinationsRef = () => {
+  return useCanvasStateSelector((state) => state.context.destinationsRef);
 };
 
-export const useGetCanvasState = () => {
-  const service = CanvasStateContext.useActorRef();
-  return useCallback(() => service.getSnapshot(), [service]);
+export const useCanvasNodePositions = () => {
+  return useCanvasStateSelector((state) => state.context.nodePositions);
 };
 
 export const useCanvasEvents = () => {
@@ -92,7 +115,7 @@ export const useCanvasEvents = () => {
       saveUnit: () => {
         service.send({ type: 'unit.save' });
       },
-      stageUnit: (unitDefinition: Unit) => {
+      changeUnitConnection: (unitDefinition: Unit) => {
         service.send({ type: 'unit.stage', unitDefinition });
       },
     }),

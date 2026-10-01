@@ -14,6 +14,7 @@ import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -23,6 +24,7 @@ import {
   EuiSpacer,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  useEuiTheme,
   useGeneratedHtmlId,
   EuiPopover,
   EuiButtonIcon,
@@ -43,10 +45,6 @@ import { ViewInDiscoverButton } from './discover_button';
 import { StreamFlyoutOverview } from './stream_flyout_overview';
 import { StreamDeleteModal } from '../stream_delete_modal';
 import { StreamProcessing } from './stream_processing';
-import {
-  useCanvasEvents,
-  useCanvasUrlRef,
-} from '../stream_management/data_management/stream_detail_canvas/state_management';
 
 const TABS = [
   {
@@ -85,7 +83,7 @@ export type StreamFlyoutTabId = (typeof TABS)[number]['id'];
 
 const DEFAULT_TAB: StreamFlyoutTabId = 'overview';
 
-const isStreamFlyoutTabId = (tab: string | null): tab is StreamFlyoutTabId => {
+const isStreamFlyoutTabId = (tab: string | null | undefined): tab is StreamFlyoutTabId => {
   return TABS.some(({ id }) => id === tab);
 };
 
@@ -158,12 +156,31 @@ const TAB_PAGES: Record<StreamFlyoutTabId, (props: StreamFlyoutPageProps) => Rea
   ),
 };
 
-function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProps) {
+function StreamFlyoutContent({
+  name,
+  onClose,
+  refreshStreams,
+  visibleTabs,
+  footer,
+  selectedTab: selectedTabProp,
+  onSelectTab,
+}: StreamFlyoutProps) {
+  const { euiTheme } = useEuiTheme();
   const { loading, definition } = useStreamFlyoutDetail();
-  const { flyoutTab } = useCanvasUrlRef();
-  const { selectTab } = useCanvasEvents();
+  const { push } = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const [uncontrolledTab, setUncontrolledTab] = useState<StreamFlyoutTabId>(DEFAULT_TAB);
+  const selectTab = onSelectTab ?? setUncontrolledTab;
   const { quality, isQualityLoading } = useDataSetQuality(name, definition);
-  const selectedTab = isStreamFlyoutTabId(flyoutTab) ? flyoutTab : DEFAULT_TAB;
+  const tabs = useMemo(
+    () => (visibleTabs ? TABS.filter((tab) => visibleTabs.includes(tab.id)) : TABS),
+    [visibleTabs]
+  );
+  const requestedTab = onSelectTab ? selectedTabProp : uncontrolledTab;
+  const selectedTab =
+    isStreamFlyoutTabId(requestedTab) && tabs.some((tab) => tab.id === requestedTab)
+      ? requestedTab
+      : DEFAULT_TAB;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isHeaderMenuOpen, setHeaderMenuOpen] = useState(false);
   const headerId = useGeneratedHtmlId();
@@ -214,7 +231,7 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
 
   const renderTabs = useMemo(
     () =>
-      TABS.filter(({ id }) => id !== 'processing' || isProcessingEnabled).map(({ id, label }) => (
+      tabs.filter(({ id }) => id !== 'processing' || isProcessingEnabled).map(({ id, label }) => (
         <EuiTab
           isSelected={id === selectedTab}
           key={id}
@@ -224,7 +241,7 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
           {label}
         </EuiTab>
       )),
-    [selectTab, selectedTab, isProcessingEnabled]
+    [selectTab, selectedTab, isProcessingEnabled, tabs]
   );
 
   const page = useMemo(
@@ -427,6 +444,18 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
         </EuiTabs>
       </EuiFlyoutHeader>
       {page}
+      {footer && (
+        <EuiFlyoutFooter>
+          {/* paddingSize="none" zeroes the footer's own padding from the parent flyout. */}
+          <div
+            css={css`
+              padding: ${euiTheme.size.base} ${euiTheme.size.l};
+            `}
+          >
+            {footer}
+          </div>
+        </EuiFlyoutFooter>
+      )}
       {showDeleteModal && Streams.ingest.all.GetResponse.is(definition) && (
         <StreamDeleteModal
           name={definition.stream.name}
@@ -443,9 +472,26 @@ export interface StreamFlyoutProps {
   name: string;
   onClose: () => void;
   refreshStreams?: () => void;
+  /** Limits the flyout to these tabs. Omit to show every tab. */
+  visibleTabs?: readonly StreamFlyoutTabId[];
+  footer?: React.ReactNode;
+  /**
+   * Controlled tab, used when the canvas stores the selection in the URL.
+   * Omit both this and `onSelectTab` to keep the selection in the flyout.
+   */
+  selectedTab?: string | null;
+  onSelectTab?: (tab: StreamFlyoutTabId) => void;
 }
 
-export function StreamFlyout({ name, onClose, refreshStreams }: StreamFlyoutProps) {
+export function StreamFlyout({
+  name,
+  onClose,
+  refreshStreams,
+  visibleTabs,
+  footer,
+  selectedTab,
+  onSelectTab,
+}: StreamFlyoutProps) {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
   return (
@@ -453,7 +499,15 @@ export function StreamFlyout({ name, onClose, refreshStreams }: StreamFlyoutProp
       name={name}
       streamsRepositoryClient={streamsRepositoryClient}
     >
-      <StreamFlyoutContent name={name} onClose={onClose} refreshStreams={refreshStreams} />
+      <StreamFlyoutContent
+        name={name}
+        onClose={onClose}
+        refreshStreams={refreshStreams}
+        visibleTabs={visibleTabs}
+        footer={footer}
+        selectedTab={selectedTab}
+        onSelectTab={onSelectTab}
+      />
     </StreamFlyoutDetailContextProvider>
   );
 }
