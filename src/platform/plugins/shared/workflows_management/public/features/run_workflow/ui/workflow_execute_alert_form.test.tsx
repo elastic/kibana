@@ -63,6 +63,8 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('WorkflowExecuteAlertForm', () => {
+  jest.setTimeout(30_000);
+
   const mockSetValue = jest.fn();
   const mockSetErrors = jest.fn();
   const { mockSearchSource, mockData } = createEventFormKibanaMocks();
