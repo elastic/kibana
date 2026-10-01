@@ -37660,7 +37660,6 @@
     "xpack.osquery.scheduleSection.frequencyLabel": "Frequenz",
     "xpack.osquery.scheduleSection.intervalFieldLabel": "Intervalle",
     "xpack.osquery.scheduleSection.intervalFieldUnit": "Sekunde(n)",
-    "xpack.osquery.scheduleSection.packQueryStaleIntervalError": "Eine oder mehrere Abfragen verwenden weiterhin einen Intervallplan. Die Intervalle pro Abfrage gelten nicht, solange das Paket einen Datum-und-Uhrzeitplan verwendet, und werden nicht gespeichert.",
     "xpack.osquery.scheduleSection.queryOverrideToggleDescription": "Wenn diese Option aktiviert ist, wird diese Abfrage nach einem eigenen Zeitplan ausgeführt, anstatt den des Pakets zu übernehmen. Der Modus (Intervall oder Wiederholung) bleibt derselbe wie im Paket.",
     "xpack.osquery.scheduleSection.queryOverrideToggleLabel": "Paketplan überschreiben",
     "xpack.osquery.scheduleSection.queryUsingPackScheduleLabel": "Paketplan verwenden",
