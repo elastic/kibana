@@ -48,6 +48,68 @@ test('throws error message for cost > 100 characters', () => {
   expect(() => taskSchema?.validate(task)).toThrow('cost');
 });
 
+describe('service account fields', () => {
+  const runAs = {
+    workloadType: 'workflow',
+    workloadId: 'workflow-1',
+    spaceId: 'default',
+    expectedServiceAccountId: 'sa-1',
+  };
+
+  test('allows a task without service account fields', () => {
+    const taskSchema = getLatestModelVersion()?.schemas?.create;
+    const task = getTask();
+    expect(taskSchema?.validate(task)).toEqual(task);
+  });
+
+  test('allows credentialType, runAs and runAsIntegrityCheck', () => {
+    const taskSchema = getLatestModelVersion()?.schemas?.create;
+    const task = getTask({
+      credentialType: 'service_account',
+      runAs,
+      runAsIntegrityCheck: 'encrypted-value',
+    });
+    expect(taskSchema?.validate(task)).toEqual(task);
+  });
+
+  test('allows a null expectedServiceAccountId', () => {
+    const taskSchema = getLatestModelVersion()?.schemas?.create;
+    const task = getTask({
+      credentialType: 'service_account',
+      runAs: { ...runAs, expectedServiceAccountId: null },
+    });
+    expect(taskSchema?.validate(task)).toEqual(task);
+  });
+
+  test('throws when runAs is null', () => {
+    const taskSchema = getLatestModelVersion()?.schemas?.create;
+    const task = getTask({ credentialType: 'service_account', runAs: null });
+    expect(() => taskSchema?.validate(task)).toThrow('runAs');
+  });
+
+  test('throws when a runAs field is missing', () => {
+    const taskSchema = getLatestModelVersion()?.schemas?.create;
+    const { workloadId, ...rest } = runAs;
+    const task = getTask({ credentialType: 'service_account', runAs: rest });
+    expect(() => taskSchema?.validate(task)).toThrow('workloadId');
+  });
+
+  test('throws when credentialType is longer than 100 characters', () => {
+    const taskSchema = getLatestModelVersion()?.schemas?.create;
+    const task = getTask({ credentialType: 'a'.repeat(101) });
+    expect(() => taskSchema?.validate(task)).toThrow('credentialType');
+  });
+
+  test('throws when a runAs field is longer than 1024 characters', () => {
+    const taskSchema = getLatestModelVersion()?.schemas?.create;
+    const task = getTask({
+      credentialType: 'service_account',
+      runAs: { ...runAs, workloadId: 'a'.repeat(1025) },
+    });
+    expect(() => taskSchema?.validate(task)).toThrow('workloadId');
+  });
+});
+
 function getTask(overrides = {}) {
   return {
     taskType: 'task-type',

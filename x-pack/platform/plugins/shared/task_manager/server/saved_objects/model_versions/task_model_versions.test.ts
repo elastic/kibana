@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ObjectType } from '@kbn/config-schema';
 import { taskModelVersions } from './task_model_versions';
 import { InstanceTaskCost } from '../../task';
 
@@ -13,6 +14,72 @@ type ForwardCompatibilityFn = (attributes: Attributes) => Attributes;
 
 const forwardCompatibilityV10 = taskModelVersions['10']!.schemas!
   .forwardCompatibility as ForwardCompatibilityFn;
+const forwardCompatibilityV13 = taskModelVersions['13']!.schemas!
+  .forwardCompatibility as ObjectType;
+const forwardCompatibilityV14 = taskModelVersions['14']!.schemas!
+  .forwardCompatibility as ObjectType;
+
+const getTaskAttributes = (overrides: Attributes = {}): Attributes => ({
+  taskType: 'task-type',
+  scheduledAt: '2026-09-29T00:00:00.000Z',
+  runAt: '2026-09-29T00:00:00.000Z',
+  params: '{}',
+  state: '{}',
+  traceparent: '',
+  attempts: 0,
+  status: 'idle',
+  startedAt: null,
+  ownerId: null,
+  retryAt: null,
+  ...overrides,
+});
+
+const runAs = {
+  workloadType: 'workflow',
+  workloadId: 'workflow-1',
+  spaceId: 'default',
+  expectedServiceAccountId: null,
+};
+
+const serviceAccountFields = {
+  credentialType: 'service_account',
+  runAs,
+  runAsIntegrityCheck: 'encrypted-value',
+};
+
+describe('taskModelVersions v13 forwardCompatibility', () => {
+  it('drops the fields added in v14', () => {
+    const result = forwardCompatibilityV13.validate(getTaskAttributes(serviceAccountFields));
+    expect(result).not.toHaveProperty('credentialType');
+    expect(result).not.toHaveProperty('runAs');
+    expect(result).not.toHaveProperty('runAsIntegrityCheck');
+  });
+});
+
+describe('taskModelVersions v14 forwardCompatibility', () => {
+  it('keeps the fields added in v14', () => {
+    const attributes = getTaskAttributes(serviceAccountFields);
+    expect(forwardCompatibilityV14.validate(attributes)).toEqual(attributes);
+  });
+
+  it('accepts a credentialType added in a later version', () => {
+    const attributes = getTaskAttributes({ credentialType: 'future_credential_type' });
+    expect(forwardCompatibilityV14.validate(attributes)).toEqual(attributes);
+  });
+
+  it('keeps runAs fields added in a later version', () => {
+    const attributes = getTaskAttributes({
+      ...serviceAccountFields,
+      runAs: { ...runAs, futureField: 'value' },
+    });
+    expect(forwardCompatibilityV14.validate(attributes)).toEqual(attributes);
+  });
+
+  it('drops top-level fields added in a later version', () => {
+    const result = forwardCompatibilityV14.validate(getTaskAttributes({ futureField: 'value' }));
+    expect(result).not.toHaveProperty('futureField');
+  });
+});
 
 describe('taskModelVersions v10 forwardCompatibility', () => {
   it('keeps cost unchanged when cost is undefined', () => {

@@ -144,3 +144,22 @@ export const taskSchemaV13 = taskSchemaV12.extends({
     })
   ),
 });
+
+export const taskSchemaV14 = taskSchemaV13.extends({
+  // A plain string rather than literals, so this version can still read credential types added later.
+  credentialType: schema.maybe(schema.string({ maxLength: 100 })),
+  // runAs is part of the AAD of the encrypted attributes, so fields added by a later version must
+  // survive a read and full rewrite by this version, or decryption fails.
+  runAs: schema.maybe(
+    schema.object(
+      {
+        workloadType: schema.string({ maxLength: 1024 }),
+        workloadId: schema.string({ maxLength: 1024 }),
+        spaceId: schema.string({ maxLength: 1024 }),
+        expectedServiceAccountId: schema.nullable(schema.string({ maxLength: 1024 })),
+      },
+      { unknowns: 'allow' }
+    )
+  ),
+  runAsIntegrityCheck: schema.maybe(schema.string()),
+});

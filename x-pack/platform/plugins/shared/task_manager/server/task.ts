@@ -403,6 +403,16 @@ export interface TaskUserScope {
   userName?: string;
 }
 
+/**
+ * The workload a task runs as when it runs as a service account.
+ */
+export interface TaskRunAs {
+  workloadType: string;
+  workloadId: string;
+  spaceId: string;
+  expectedServiceAccountId: string | null;
+}
+
 /*
  * A task instance represents all of the data required to store, fetch,
  * and execute a task.
@@ -639,6 +649,21 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
    */
   partition?: number;
+
+  /**
+   * How the task authenticates when it runs. Only written when the task is created.
+   */
+  credentialType?: string;
+
+  /**
+   * The workload the task runs as. Part of the AAD, so it is only written when the task is created.
+   */
+  runAs?: TaskRunAs;
+
+  /**
+   * Encrypted value whose decryption fails if `runAs` was changed. Only written when the task is created.
+   */
+  runAsIntegrityCheck?: string;
 }
 
 export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {

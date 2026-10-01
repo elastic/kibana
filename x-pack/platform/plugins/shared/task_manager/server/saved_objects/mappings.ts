@@ -97,6 +97,31 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
         // },
       },
     },
+    // Indexed to find the tasks that run as a given workload or service account
+    credentialType: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+    runAs: {
+      properties: {
+        workloadType: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        workloadId: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        spaceId: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        expectedServiceAccountId: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+      },
+    },
   },
 };
 

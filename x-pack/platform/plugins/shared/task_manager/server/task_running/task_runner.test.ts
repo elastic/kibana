@@ -299,6 +299,40 @@ describe('TaskManagerRunner', () => {
       expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed', 'framework-error']);
       expect(loggerMeta?.error?.stack_trace).toBeDefined();
     });
+    test('does not run a task that runs as a service account and schedules a retry', async () => {
+      const createTaskRunner = jest.fn();
+      const { runner, logger, store } = await readyToRunStageSetup({
+        instance: {
+          attempts: 1,
+          runAs: {
+            workloadType: 'workflow',
+            workloadId: 'workflow-1',
+            spaceId: 'default',
+            expectedServiceAccountId: null,
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner,
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(createTaskRunner).not.toHaveBeenCalled();
+      const loggerCall = logger.error.mock.calls[0][0];
+      const loggerMeta = logger.error.mock.calls[0][1];
+      expect(loggerCall as string).toMatchInlineSnapshot(
+        `"Task bar \\"foo\\" failed: Error: Task runs as a service account, which this version of Kibana cannot run"`
+      );
+      expect(loggerMeta?.tags).toEqual(['bar', 'foo', 'task-run-failed', 'framework-error']);
+      expect(store.remove).not.toHaveBeenCalled();
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      const instance = store.partialUpdate.mock.calls[0][0];
+      expect(instance.runAt?.getTime()).toBeGreaterThan(Date.now());
+    });
     test('logs user errors as expected when task fails', async () => {
       const { runner, logger } = await readyToRunStageSetup({
         instance: {

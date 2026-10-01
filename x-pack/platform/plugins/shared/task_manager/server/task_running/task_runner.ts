@@ -428,6 +428,12 @@ export class TaskManagerRunner implements TaskRunner {
         const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
 
         try {
+          if (this.instance.task.runAs) {
+            throw new Error(
+              'Task runs as a service account, which this version of Kibana cannot run'
+            );
+          }
+
           const sanitizedTaskInstance = omit(modifiedContext.taskInstance, [
             'apiKey',
             'uiamApiKey',

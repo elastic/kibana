@@ -34,8 +34,8 @@ export class TaskManagerDependenciesPlugin {
   public setup(_: CoreSetup, plugin: TaskManagerDependenciesPluginSetup) {
     plugin.encryptedSavedObjects.registerType({
       type: 'task',
-      attributesToEncrypt: new Set(['apiKey', 'uiamApiKey']),
-      attributesToIncludeInAAD: new Set(['id', 'taskType']),
+      attributesToEncrypt: new Set(['apiKey', 'uiamApiKey', 'runAsIntegrityCheck']),
+      attributesToIncludeInAAD: new Set(['id', 'taskType', 'runAs']),
       enforceRandomId: false,
     });
 

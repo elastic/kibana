@@ -768,6 +768,7 @@ export class TaskStore {
           const apiKey = updatedFields?.apiKey || doc?.apiKey;
           const uiamApiKey = updatedFields?.uiamApiKey || doc?.uiamApiKey;
           const userScope = updatedFields?.userScope || doc?.userScope;
+          const { credentialType, runAs, runAsIntegrityCheck } = doc;
 
           acc.set(doc.id, {
             type: 'task',
@@ -778,6 +779,13 @@ export class TaskStore {
               ...(apiKey ? { apiKey } : {}),
               ...(uiamApiKey ? { uiamApiKey } : {}),
               ...(userScope ? { userScope } : {}),
+              // A full replace drops every attribute it doesn't send. runAs is in the AAD, so it and
+              // runAsIntegrityCheck must be copied unchanged or decryption fails.
+              ...(!mergeAttributes && credentialType !== undefined ? { credentialType } : {}),
+              ...(!mergeAttributes && runAs !== undefined ? { runAs } : {}),
+              ...(!mergeAttributes && runAsIntegrityCheck !== undefined
+                ? { runAsIntegrityCheck }
+                : {}),
             },
             mergeAttributes,
           });
@@ -792,17 +800,42 @@ export class TaskStore {
       new Map()
     );
 
+    // The encryption-aware client would encrypt the stored runAsIntegrityCheck ciphertext again,
+    // so those tasks are written through the plain repository. Tasks that also hold a decrypted
+    // API key stay on the encryption-aware client so the key is never stored in plaintext.
+    const objectsToUpdate = Array.from(newDocs.values());
+    const plainRepositoryObjects =
+      soClientToUpdate === this.savedObjectsRepository
+        ? []
+        : objectsToUpdate.filter(
+            ({ attributes }) =>
+              attributes.runAsIntegrityCheck !== undefined &&
+              !attributes.apiKey &&
+              !attributes.uiamApiKey
+          );
+    const soClientObjects = objectsToUpdate.filter(
+      (object) => !plainRepositoryObjects.includes(object)
+    );
+
     let updatedSavedObjects: Awaited<
       ReturnType<typeof soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>>
     >['saved_objects'];
     try {
-      ({ saved_objects: updatedSavedObjects } =
-        await soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(
-          Array.from(newDocs.values()),
-          {
-            refresh: false,
-          }
-        ));
+      const [soClientResult, plainRepositoryResult] = await Promise.all([
+        soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(soClientObjects, {
+          refresh: false,
+        }),
+        plainRepositoryObjects.length
+          ? this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+              plainRepositoryObjects,
+              { refresh: false }
+            )
+          : { saved_objects: [] },
+      ]);
+      updatedSavedObjects = [
+        ...soClientResult.saved_objects,
+        ...plainRepositoryResult.saved_objects,
+      ];
     } catch (e) {
       await this.invalidateUnpersistedApiKeys([...apiKeySOFieldsMap.values()]);
       this.errors$.next(e);
@@ -1387,7 +1420,8 @@ export class TaskStore {
  * Returns true when a task document holds an encrypted API key credential
  * (either an ES API key or a UIAM API key) together with the `userScope`
  * metadata required to process it. Must be kept in sync with every credential
- * field registered for ESO encryption on the `task` saved object type.
+ * field registered for ESO encryption on the `task` saved object type, except
+ * `runAsIntegrityCheck`, which is never decrypted or re-encrypted on update.
  */
 export function docHasEncryptedApiKey(
   doc: Pick<ConcreteTaskInstance, 'apiKey' | 'uiamApiKey' | 'userScope'>
@@ -1400,7 +1434,17 @@ export function taskInstanceToAttributes(
   id: string
 ): SerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope', 'apiKey', 'uiamApiKey'),
+    ...omit(
+      doc,
+      'id',
+      'version',
+      'userScope',
+      'apiKey',
+      'uiamApiKey',
+      'credentialType',
+      'runAs',
+      'runAsIntegrityCheck'
+    ),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
@@ -1417,7 +1461,17 @@ export function partialTaskInstanceToAttributes(
   doc: PartialConcreteTaskInstance
 ): PartialSerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope', 'apiKey', 'uiamApiKey'),
+    ...omit(
+      doc,
+      'id',
+      'version',
+      'userScope',
+      'apiKey',
+      'uiamApiKey',
+      'credentialType',
+      'runAs',
+      'runAsIntegrityCheck'
+    ),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
     ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
     ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),
