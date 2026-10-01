@@ -117,7 +117,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           // These execution-acceptance checks alone establish that the run itself succeeded,
           // independently of the quality scores the judges assign.
           expect(output.execution_error).toBeUndefined();
-          expect(output.workflow_status).toBe('completed');
+          expect(output.workflow_status).toBe('complete');
           expect(output.investigation_id).toEqual(expect.any(String));
           expect(output.conversation_id).toEqual(expect.any(String));
           expect(
