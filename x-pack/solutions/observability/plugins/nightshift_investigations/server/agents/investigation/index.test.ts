@@ -6,7 +6,7 @@
  */
 
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
@@ -72,9 +72,6 @@ describe('Nightshift investigation agent type', () => {
       PROPOSALS_CREATE_TOOL_ID,
       ...SANDBOX_TOOL_IDS,
     ]);
-    expect(base.tools?.[0]?.tool_ids).not.toContain(
-      platformSignificantEventsTools.reportInvestigationProgress
-    );
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
     expect(base.instructions).toContain('/workspace/elastic.md');
@@ -190,7 +187,6 @@ describe('Nightshift investigation agent type', () => {
     }
     expect(instructions).toContain('"origin": "nightshift"');
     expect(instructions).toContain('**Check before you finish.**');
-    expect(instructions).not.toContain('investigation_progress_report');
     expect(instructions).not.toContain('blind_spots');
     expect(instructions).not.toMatch(/\d0-(critical|high|medium|low)/);
   });
