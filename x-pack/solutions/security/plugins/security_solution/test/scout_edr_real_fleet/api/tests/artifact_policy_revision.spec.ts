@@ -185,7 +185,8 @@ apiTest.describe(
         });
         expect(createItemResponse).toHaveStatusCode(200);
         const itemId = (createItemResponse.body as { item_id: string }).item_id;
-        expect(itemId).toStrictEqual(expect.any(String));
+        expect(typeof itemId).toBe('string');
+        expect(itemId.length).toBeGreaterThan(0);
 
         const revisionAfterCreate = await waitForPackagePolicyRevisionAbove(
           readPackagePolicyRevision,
