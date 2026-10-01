@@ -284,6 +284,23 @@ describe('EscalationsService.create', () => {
     expect(accessControl.entries[0]).not.toHaveProperty('added_at');
   });
 
+  it('deduplicates repeated assignees in both the private ACL entries and metadata', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'private',
+      assignees: ['user-a', 'user-b', 'user-a'],
+    });
+
+    const { accessControl, metadata } = client.create.mock.calls[0][0];
+    expect(accessControl.entries).toEqual([
+      { type: 'user', id: 'user-a', role: ConversationAccessControlRole.Member },
+      { type: 'user', id: 'user-b', role: ConversationAccessControlRole.Member },
+    ]);
+    expect(metadata.assignees).toEqual(['user-a', 'user-b']);
+  });
+
   it('does not add ACL entries for a public escalation', async () => {
     const { service, client } = makeService();
 
