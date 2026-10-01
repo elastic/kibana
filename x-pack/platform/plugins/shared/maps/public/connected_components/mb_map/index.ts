@@ -42,7 +42,6 @@ import type { MapExtentState } from '../../reducers/map/types';
 function mapStateToProps(state: MapStoreState) {
   const mapApi = getMapApi(state);
   return {
-    mapApi: getMapApi(state),
     initialMapCenter: mapApi ? null : getMapCenter(state),
     initialMapZoom: mapApi ? null : getMapZoom(state),
     zoom: getMapZoom(state),
