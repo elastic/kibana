@@ -10,7 +10,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import type { WorkflowAccessSubject, WorkflowYaml } from '@kbn/workflows';
+import type { ChildWorkflowApprovals, WorkflowAccessSubject, WorkflowYaml } from '@kbn/workflows';
 import { workflowSystemIndex } from './indices';
 
 export const workflowIndexName = workflowSystemIndex('workflows');
@@ -65,6 +65,7 @@ const storageSettings = {
       // Non-searchable fields (stored but not indexed)
       yaml: types.text({ index: false }),
       definition: types.object({ enabled: false }),
+      childWorkflowApprovals: types.object({ enabled: false }),
       deleted_at: types.date({}),
       valid: types.boolean({}),
       created_at: types.date({}),
@@ -74,6 +75,7 @@ const storageSettings = {
 } satisfies IndexStorageSettings;
 
 export interface WorkflowProperties extends WorkflowAccessSubject {
+  childWorkflowApprovals?: ChildWorkflowApprovals;
   // TODO: we can remove this name, since we use the WorkflowYaml object to get the name
   name: string;
   description?: string;

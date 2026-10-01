@@ -13,6 +13,8 @@ export type {
   CreateWorkflowCommand,
   // elasticsearch documents types
   EsWorkflow,
+  ChildWorkflowApproval,
+  ChildWorkflowApprovals,
   EsWorkflowCreate,
   EsWorkflowExecution,
   EsWorkflowStepExecution,

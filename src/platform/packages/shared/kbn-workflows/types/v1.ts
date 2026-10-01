@@ -18,6 +18,7 @@ import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/acces
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
+  WorkflowEffectiveIdentitySchema,
   WorkflowStepTokenUsageSchema,
   WorkflowTokenUsageSchema,
   WorkflowYaml,
@@ -136,7 +137,25 @@ export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
 
 export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
 
+export interface ChildWorkflowApproval {
+  path: string[];
+  workflowId: string;
+  runAsMode: 'inherit' | 'override';
+  yaml: string;
+  definition: WorkflowYaml;
+  version?: number;
+  createdAt: string;
+}
+
+export interface ChildWorkflowApprovals {
+  serviceAccountId: string;
+  approvedAt: string;
+  approvedBy: string;
+  snapshots: ChildWorkflowApproval[];
+}
+
 export interface EsWorkflowExecution {
+  childWorkflowApprovals?: ChildWorkflowApprovals;
   spaceId: string;
   id: string;
   workflowId: string;
@@ -159,7 +178,7 @@ export interface EsWorkflowExecution {
   createdAt: string;
   error: SerializedError | null;
   createdBy?: string; // Keep for backwards compatibility with existing documents
-  effectiveIdentity?: { type: 'service_account'; id: string };
+  effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
   startedAt: string;
   finishedAt: string;
@@ -314,7 +333,7 @@ export interface WorkflowExecutionDto {
   /** Ordered step IDs returned by modern runs, which support pagination beyond the search window. */
   stepExecutionIds?: string[];
   duration: number | null;
-  effectiveIdentity?: { type: 'service_account'; id: string };
+  effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
@@ -382,7 +401,10 @@ export const EsWorkflowSchema = z.object({
   version: z.number().optional(),
 });
 
-export type EsWorkflow = z.infer<typeof EsWorkflowSchema> & WorkflowAccessSubject;
+export type EsWorkflow = z.infer<typeof EsWorkflowSchema> &
+  WorkflowAccessSubject & {
+    childWorkflowApprovals?: ChildWorkflowApprovals;
+  };
 
 export type EsWorkflowCreate = Omit<
   EsWorkflow,

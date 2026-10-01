@@ -88,6 +88,7 @@ import {
   type ManagedInstallReadinessResult,
   waitForManagedWorkflowInstallReadiness,
 } from '../lib/wait_for_managed_workflow_install_readiness';
+import { ChildWorkflowApprovalService } from '../services/child_workflow_approval_service';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import { WorkflowAccessControlService } from '../services/workflow_access_control';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
@@ -337,6 +338,15 @@ export class WorkflowsService {
       this.crudService,
       this.pluginsStart.security?.authz
     ));
+  }
+
+  public async getChildWorkflowApprovalService(): Promise<ChildWorkflowApprovalService> {
+    await this.ensureInitialized();
+    return new ChildWorkflowApprovalService(
+      this.coreStart,
+      this.crudService,
+      await this.getAccessControl()
+    );
   }
 
   public async getWorkflow(

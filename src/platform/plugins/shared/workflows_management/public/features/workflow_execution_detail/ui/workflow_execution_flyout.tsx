@@ -1469,9 +1469,13 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         </EuiFlexGroup>
                         {workflowExecution?.effectiveIdentity?.type === 'service_account' && (
                           <EuiText size="s" data-test-subj="workflowExecutionFlyoutRunAs">
-                            {i18n.translate('workflows.executionFlyout.runAs', {
-                              defaultMessage: 'Run as',
-                            })}
+                            {workflowExecution.effectiveIdentity.inheritedFrom
+                              ? i18n.translate('workflows.execution.inheritedRunAsLabel', {
+                                  defaultMessage: 'Run as (inherited from parent)',
+                                })
+                              : i18n.translate('workflows.executionFlyout.runAs', {
+                                  defaultMessage: 'Run as',
+                                })}
                             {': '}
                             <ServiceAccountName id={workflowExecution.effectiveIdentity.id} />
                           </EuiText>

@@ -35,6 +35,7 @@ import {
   useWorkflowsCapabilities,
   WorkflowDetailBottomBar,
 } from '@kbn/workflows-ui';
+import { ChildWorkflowApprovals } from './child_workflow_approvals';
 import { useContextOverrideData } from './use_context_override_data';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
@@ -369,81 +370,96 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 
   return (
     <ReactFlowProvider>
-      <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
-        <EuiFlexItem css={styles.yamlEditor}>
-          {/*
-           * Two peer layers, both absolutely positioned inside the
-           * position:relative yamlEditor flex item:
-           *  - Layer 1 (YAML): always mounted so validation keeps running.
-           *  - Layer 2 (Graph): mounted while renderGraph is true; kept alive
-           *    for GRAPH_FADE_DURATION_MS + 40ms after switching back to YAML so the cross-fade plays out.
-           * The bottom bar floats (position:absolute) and overlays both layers.
-           */}
-          <div
-            css={[styles.editorLayer, showGraph ? styles.layerHidden : styles.layerVisible]}
-            {...(showGraph ? { inert: '' } : {})}
-          >
-            <React.Suspense fallback={<EuiLoadingSpinner />}>
-              <WorkflowYAMLEditor
-                highlightDiff={highlightDiff}
-                onStepRun={handleStepRun}
-                editorRef={editorRef}
-                isActive={!showGraph}
-                hideEditorTools={isVisualEditorEnabled}
-                openActionsRef={openActionsRef}
-                onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
-              />
-            </React.Suspense>
-          </div>
-          {isVisualEditorEnabled && renderGraph && (
+      <div
+        css={css`
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          min-height: 0;
+        `}
+      >
+        {!isExecutionsTab && workflow?.definition?.settings?.run_as && (
+          <ChildWorkflowApprovals
+            workflow={workflow}
+            hasUnsavedChanges={workflowYaml !== workflow?.yaml}
+          />
+        )}
+        <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
+          <EuiFlexItem css={styles.yamlEditor}>
+            {/*
+             * Two peer layers, both absolutely positioned inside the
+             * position:relative yamlEditor flex item:
+             *  - Layer 1 (YAML): always mounted so validation keeps running.
+             *  - Layer 2 (Graph): mounted while renderGraph is true; kept alive
+             *    for GRAPH_FADE_DURATION_MS + 40ms after switching back to YAML so the cross-fade plays out.
+             * The bottom bar floats (position:absolute) and overlays both layers.
+             */}
             <div
-              css={[styles.editorLayer, showGraph ? styles.layerVisible : styles.layerHidden]}
-              {...(showGraph ? {} : { inert: '' })}
+              css={[styles.editorLayer, showGraph ? styles.layerHidden : styles.layerVisible]}
+              {...(showGraph ? { inert: '' } : {})}
             >
               <React.Suspense fallback={<EuiLoadingSpinner />}>
-                <WorkflowVisualEditor
+                <WorkflowYAMLEditor
+                  highlightDiff={highlightDiff}
                   onStepRun={handleStepRun}
-                  direction={graphDirection}
-                  defaultViewport={graphViewportRef.current}
-                  onViewportChange={handleGraphViewportChange}
+                  editorRef={editorRef}
+                  isActive={!showGraph}
+                  hideEditorTools={isVisualEditorEnabled}
+                  openActionsRef={openActionsRef}
+                  onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
                 />
               </React.Suspense>
             </div>
-          )}
-          {isReadOnly && (
-            <EuiBadge
-              color="warning"
-              css={[styles.readOnlyBadge, css(readOnlyBadgeShadow)]}
-              data-test-subj="workflowEditorReadOnlyBadge"
-            >
-              {i18n.translate('workflows.workflowDetailEditor.readOnlyBadge', {
-                defaultMessage: 'Read only',
-              })}
-            </EuiBadge>
-          )}
-          {isVisualEditorEnabled && (
-            <WorkflowDetailBottomBar
-              editorView={editorView}
-              onEditorViewChange={handleEditorViewChange}
-              yamlActionsSlot={yamlActionsSlot}
-              toolsSlot={toolsSlot}
-              testWorkflowButton={testWorkflowButton}
-              testWorkflowButtonCompact={testWorkflowButtonCompact}
-              disableAutoCollapse={!hideControlsMenu}
-            />
-          )}
-        </EuiFlexItem>
-        {isExecutionGraphEnabled && (
-          <EuiFlexItem css={styles.visualEditor}>
-            <React.Suspense fallback={<EuiLoadingSpinner />}>
-              <ExecutionGraph />
-            </React.Suspense>
+            {isVisualEditorEnabled && renderGraph && (
+              <div
+                css={[styles.editorLayer, showGraph ? styles.layerVisible : styles.layerHidden]}
+                {...(showGraph ? {} : { inert: '' })}
+              >
+                <React.Suspense fallback={<EuiLoadingSpinner />}>
+                  <WorkflowVisualEditor
+                    onStepRun={handleStepRun}
+                    direction={graphDirection}
+                    defaultViewport={graphViewportRef.current}
+                    onViewportChange={handleGraphViewportChange}
+                  />
+                </React.Suspense>
+              </div>
+            )}
+            {isReadOnly && (
+              <EuiBadge
+                color="warning"
+                css={[styles.readOnlyBadge, css(readOnlyBadgeShadow)]}
+                data-test-subj="workflowEditorReadOnlyBadge"
+              >
+                {i18n.translate('workflows.workflowDetailEditor.readOnlyBadge', {
+                  defaultMessage: 'Read only',
+                })}
+              </EuiBadge>
+            )}
+            {isVisualEditorEnabled && (
+              <WorkflowDetailBottomBar
+                editorView={editorView}
+                onEditorViewChange={handleEditorViewChange}
+                yamlActionsSlot={yamlActionsSlot}
+                toolsSlot={toolsSlot}
+                testWorkflowButton={testWorkflowButton}
+                testWorkflowButtonCompact={testWorkflowButtonCompact}
+                disableAutoCollapse={!hideControlsMenu}
+              />
+            )}
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+          {isExecutionGraphEnabled && (
+            <EuiFlexItem css={styles.visualEditor}>
+              <React.Suspense fallback={<EuiLoadingSpinner />}>
+                <ExecutionGraph />
+              </React.Suspense>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
 
-      <WorkflowDetailConnectorFlyout editorRef={editorRef} />
-      {runConfirmationModal}
+        <WorkflowDetailConnectorFlyout editorRef={editorRef} />
+        {runConfirmationModal}
+      </div>
     </ReactFlowProvider>
   );
 });

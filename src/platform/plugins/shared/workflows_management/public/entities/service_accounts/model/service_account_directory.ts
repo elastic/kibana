@@ -8,11 +8,13 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { QueryClient } from '@kbn/react-query';
 
 export interface WorkflowServiceAccount {
   id: string;
   name: string;
+  description?: string;
   roles: string[];
   enabled: boolean;
   assumable: boolean;
@@ -21,6 +23,10 @@ export interface WorkflowServiceAccount {
 export interface ServiceAccountPage {
   serviceAccounts: WorkflowServiceAccount[];
   nextPage?: string;
+}
+
+export interface ServiceAccountDirectoryError {
+  error: 'forbidden' | 'unavailable';
 }
 
 export const serviceAccountQueryOptions = (http: HttpStart, id: string) => ({
@@ -50,21 +56,29 @@ export const createServiceAccountDirectory = (
     isEnabled() && id
       ? queryClient.fetchQuery(serviceAccountQueryOptions(http, id))
       : Promise.resolve(null),
-  list: (after?: string): Promise<ServiceAccountPage | null> =>
+  list: (
+    after?: string,
+    refresh = false
+  ): Promise<ServiceAccountPage | ServiceAccountDirectoryError | null> =>
     isEnabled()
       ? queryClient.fetchQuery({
           queryKey: ['workflows', 'serviceAccounts', 'page', after],
-          queryFn: async (): Promise<ServiceAccountPage | null> => {
+          queryFn: async (): Promise<ServiceAccountPage | ServiceAccountDirectoryError> => {
             try {
               return await http.get<ServiceAccountPage>('/internal/security/service_account', {
                 query: { limit: 100, ...(after ? { after } : {}) },
               });
-            } catch {
-              return null;
+            } catch (error) {
+              return {
+                error:
+                  isHttpFetchError(error) && error.response?.status === 403
+                    ? 'forbidden'
+                    : 'unavailable',
+              };
             }
           },
           retry: false,
-          staleTime: 30_000,
+          staleTime: refresh ? 0 : 30_000,
           cacheTime: 60_000,
         })
       : Promise.resolve(null),

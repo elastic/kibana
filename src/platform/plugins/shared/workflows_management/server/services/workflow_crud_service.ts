@@ -275,9 +275,15 @@ export class WorkflowCrudService {
           })
         : null);
     const write = async () => {
+      const approvals = options?.childApproval ?? previous?.childWorkflowApprovals;
+      const approvedDocument = {
+        ...document,
+        childWorkflowApprovals:
+          accountId && approvals?.serviceAccountId === accountId ? approvals : undefined,
+      };
       const response = await this.deps.workflowStorage.getClient().index({
         id,
-        document,
+        document: approvedDocument,
         ...(options?.create ? { op_type: 'create' as const } : {}),
         ...(options?.ifSeqNo != null && options?.ifPrimaryTerm != null
           ? { if_seq_no: options.ifSeqNo, if_primary_term: options.ifPrimaryTerm }

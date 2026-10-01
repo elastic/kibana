@@ -7,21 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiScreenReaderOnly,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { monaco } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
-import { ServiceAccountDetails, ServiceAccountRoles } from './service_account_details';
+import { useQueryClient } from '@kbn/react-query';
+import { ServiceAccountDetails } from './service_account_details';
 import type { WorkflowServiceAccount } from '../../../../entities/service_accounts';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getRunAsValue } from '../../lib/service_accounts/service_account_editor';
@@ -34,11 +26,11 @@ type Popup =
       position: monaco.IPosition;
       suggestions: ServiceAccountSuggestion[];
       selected: number;
+      accountId: string;
+      status: 'loading' | 'ready' | 'forbidden' | 'unavailable';
+      filtered: boolean;
     }
   | { kind: 'details'; position: monaco.IPosition; account: WorkflowServiceAccount };
-
-const getSuggestionLabel = ({ label }: ServiceAccountSuggestion): string =>
-  typeof label === 'string' ? label : label.label;
 
 export const ServiceAccountEditorWidgets = ({
   editor,
@@ -46,8 +38,13 @@ export const ServiceAccountEditorWidgets = ({
   editor: monaco.editor.IStandaloneCodeEditor | null;
 }) => {
   const accounts = useServiceAccountEditor();
-  const { cloud, serverless } = useKibana().services;
-  const { euiTheme } = useEuiTheme();
+  const { cloud, serverless, security, securityUi } = useKibana().services;
+  const queryClient = useQueryClient();
+  const [creation, setCreation] = useState<{
+    model: monaco.editor.ITextModel;
+    version: number;
+    position: monaco.IPosition;
+  } | null>(null);
   const [popup, setPopup] = useState<Popup | null>(null);
   const popupRef = useRef(popup);
   popupRef.current = popup;
@@ -55,6 +52,8 @@ export const ServiceAccountEditorWidgets = ({
   const chooseRef = useRef<(suggestion: ServiceAccountSuggestion) => void>(() => {});
   const closeTimer = useRef<ReturnType<typeof setTimeout>>();
   const closeRef = useRef<() => void>(() => {});
+  const retryRef = useRef<() => void>(() => {});
+  const dismissRef = useRef<() => void>(() => {});
   const widget = useMemo<monaco.editor.IContentWidget | null>(
     () =>
       node
@@ -157,12 +156,20 @@ export const ServiceAccountEditorWidgets = ({
       restoreHover();
     };
     closeRef.current = close;
-    const complete = async () => {
+    dismissRef.current = () => {
+      dismissed = true;
+      close();
+      editor.focus();
+    };
+    const complete = async (refresh = false) => {
+      clearTimeout(completionTimer);
       const model = editor.getModel();
       const position = editor.getPosition();
       const value = model && position && getRunAsValue(model, position);
       const eligible =
-        !!value && !editor.getOption(monaco.editor.EditorOption.readOnly) && editor.hasTextFocus();
+        !!value &&
+        !editor.getOption(monaco.editor.EditorOption.readOnly) &&
+        (editor.hasTextFocus() || node.contains(document.activeElement));
       valueFocused.set(Boolean(value));
       if (!eligible || !model || !position || !value) {
         dismissed = false;
@@ -180,12 +187,32 @@ export const ServiceAccountEditorWidgets = ({
       const version = model.getVersionId();
       const current = ++completionGeneration;
       const query = filterByTypedValue ? value.id.toLocaleLowerCase() : '';
-      const result = await accounts.completionProvider.provideCompletionItems(model, position, {
-        get isCancellationRequested() {
-          return current !== completionGeneration;
-        },
-        onCancellationRequested: () => ({ dispose() {} }),
+      pickerVisible.set(false);
+      const popupPosition = {
+        lineNumber: value.range.startLineNumber,
+        column: value.range.startColumn,
+      };
+      popupVisible.set(true);
+      setPopup({
+        kind: 'suggestions',
+        position: popupPosition,
+        suggestions: [],
+        selected: 0,
+        accountId: value.id,
+        status: 'loading',
+        filtered: Boolean(query),
       });
+      const result = await accounts.completionProvider.provideCompletionItems(
+        model,
+        position,
+        {
+          get isCancellationRequested() {
+            return current !== completionGeneration;
+          },
+          onCancellationRequested: () => ({ dispose() {} }),
+        },
+        refresh
+      );
       if (
         current !== completionGeneration ||
         model.isDisposed() ||
@@ -197,20 +224,31 @@ export const ServiceAccountEditorWidgets = ({
           ({ account }) =>
             !account || `${account.name} ${account.id}`.toLocaleLowerCase().includes(query)
         ) ?? [];
-      if (!suggestions.length) {
+      if (!result) {
         close();
         return;
       }
       hoverGeneration++;
       clearTimeout(hoverTimer);
-      pickerVisible.set(true);
+      pickerVisible.set(suggestions.length > 0);
       popupVisible.set(true);
       setPopup({
         kind: 'suggestions',
         position: { lineNumber: value.range.startLineNumber, column: value.range.startColumn },
         suggestions,
-        selected: 0,
+        selected: Math.max(
+          0,
+          suggestions.findIndex(({ account }) => account?.id === value.id)
+        ),
+        accountId: value.id,
+        status: result.error ?? 'ready',
+        filtered: Boolean(query),
       });
+    };
+    retryRef.current = () => {
+      editor.focus();
+      clearTimeout(completionTimer);
+      void complete(true);
     };
     const queueCompletion = () => {
       clearTimeout(completionTimer);
@@ -241,7 +279,7 @@ export const ServiceAccountEditorWidgets = ({
     };
     const move = (delta: number) => {
       setPopup((previous) =>
-        previous?.kind === 'suggestions'
+        previous?.kind === 'suggestions' && previous.suggestions.length > 0
           ? {
               ...previous,
               selected:
@@ -265,6 +303,18 @@ export const ServiceAccountEditorWidgets = ({
         run,
       });
     const disposables = [
+      editor.onDidChangeConfiguration((event) => {
+        if (event.hasChanged(monaco.editor.EditorOption.readOnly)) queueCompletion();
+      }),
+      editor.onMouseDown((event) => {
+        const model = editor.getModel();
+        const position = event.target.position;
+        if (model && position && getRunAsValue(model, position)) {
+          dismissed = false;
+          filterByTypedValue = false;
+          queueCompletion();
+        }
+      }),
       editor.onDidChangeCursorPosition(({ reason }) => {
         if (reason === monaco.editor.CursorChangeReason.Explicit) filterByTypedValue = false;
         queueCompletion();
@@ -280,7 +330,9 @@ export const ServiceAccountEditorWidgets = ({
         queueCompletion();
       }),
       editor.onDidBlurEditorText(() => {
-        closeTimer.current = setTimeout(close, 150);
+        closeTimer.current = setTimeout(() => {
+          if (!node.contains(document.activeElement)) close();
+        }, 150);
       }),
       editor.onDidChangeModel(() => {
         dismissed = false;
@@ -289,11 +341,17 @@ export const ServiceAccountEditorWidgets = ({
         restoreSuggestions();
       }),
       editor.onDidScrollChange(close),
+      action(
+        'focusControls',
+        [monaco.KeyMod.Shift + monaco.KeyCode.Tab],
+        () => node.querySelector<HTMLElement>('a[href], button')?.focus(),
+        'workflowServiceAccountPopupVisible'
+      ),
       action('next', [monaco.KeyCode.DownArrow], () => move(1)),
       action('previous', [monaco.KeyCode.UpArrow], () => move(-1)),
       action('accept', [monaco.KeyCode.Enter, monaco.KeyCode.Tab], () => {
         const current = popupRef.current;
-        if (current?.kind === 'suggestions')
+        if (current?.kind === 'suggestions' && current.suggestions[current.selected])
           chooseRef.current(current.suggestions[current.selected]);
       }),
       action(
@@ -400,98 +458,131 @@ export const ServiceAccountEditorWidgets = ({
     node?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
   }, [node, popup]);
 
-  if (!node || !popup) return null;
-  const selectedSuggestion =
-    popup.kind === 'suggestions' ? popup.suggestions[popup.selected] : undefined;
-  return createPortal(
-    <EuiPanel
-      paddingSize={popup.kind === 'details' ? 'm' : 'none'}
-      hasShadow
-      data-test-subj="serviceAccountEditorPopup"
-      onMouseEnter={() => clearTimeout(closeTimer.current)}
-      onMouseLeave={() => {
-        closeTimer.current = setTimeout(() => closeRef.current(), 250);
-      }}
-      css={css({
-        width: popup.kind === 'details' ? 340 : 440,
-        maxWidth: 'calc(100vw - 32px)',
-        maxHeight: 320,
-        overflowY: 'auto',
-      })}
-    >
-      {popup.kind === 'details' ? (
-        <ServiceAccountDetails
-          account={popup.account}
-          environment={{
-            isServerless: cloud?.isServerlessEnabled ?? Boolean(serverless),
-            projectName: cloud?.serverless.projectName,
-            projectId: cloud?.serverless.projectId,
-            projectType: cloud?.serverless.projectType,
+  const flyout =
+    creation &&
+    securityUi.components.getCreateServiceAccount({
+      onClose: () => {
+        setCreation(null);
+        editor?.focus();
+      },
+      onCreated: (account) => {
+        void queryClient.invalidateQueries({ queryKey: ['workflows', 'serviceAccounts'] });
+        setCreation(null);
+        // A create response must never overwrite another workflow or a changed draft.
+        if (
+          !editor ||
+          editor.getModel() !== creation.model ||
+          creation.model.isDisposed() ||
+          creation.model.getVersionId() !== creation.version ||
+          !accounts.isEnabled() ||
+          !security.serviceAccounts.canCreate() ||
+          editor.getOption(monaco.editor.EditorOption.readOnly)
+        )
+          return;
+        const value = getRunAsValue(creation.model, monaco.Position.lift(creation.position));
+        if (!value) return;
+        chooseRef.current({
+          label: account.name,
+          account: { ...account, enabled: true, assumable: true },
+          kind: monaco.languages.CompletionItemKind.Value,
+          range: value.range,
+          insertText:
+            (creation.model.getLineContent(value.range.startLineNumber)[
+              value.range.startColumn - 2
+            ] === ':'
+              ? ' '
+              : '') + JSON.stringify(account.id),
+        });
+      },
+    });
+  if (!node || !popup) return flyout;
+  return (
+    <>
+      {flyout}
+      {createPortal(
+        <EuiPanel
+          paddingSize={popup.kind === 'details' ? 'm' : 'none'}
+          hasShadow
+          data-test-subj="serviceAccountEditorPopup"
+          onFocusCapture={() => clearTimeout(closeTimer.current)}
+          onBlurCapture={() => {
+            closeTimer.current = setTimeout(() => {
+              if (!node.contains(document.activeElement) && !editor?.hasTextFocus())
+                closeRef.current();
+            }, 150);
           }}
-        />
-      ) : (
-        <>
-          <div
-            role="listbox"
-            aria-label={i18n.translate('workflows.editor.serviceAccountPickerAriaLabel', {
-              defaultMessage: 'Service accounts',
-            })}
-          >
-            {popup.suggestions.map((suggestion, index) => (
-              <EuiButtonEmpty
-                key={suggestion.account?.id ?? 'loadMore'}
-                role="option"
-                aria-selected={index === popup.selected}
-                color="text"
-                size="s"
-                flush="both"
-                data-test-subj="serviceAccountSuggestion"
-                onMouseDown={(event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault()}
-                onClick={() => chooseRef.current(suggestion)}
-                contentProps={{ css: css({ width: '100%' }) }}
-                textProps={false}
-                css={css({
-                  width: '100%',
-                  padding: euiTheme.size.s,
-                  height: 'auto',
-                  textAlign: 'left',
-                  fontWeight: euiTheme.font.weight.regular,
-                  backgroundColor:
-                    index === popup.selected ? euiTheme.colors.backgroundBasePrimary : undefined,
-                })}
-              >
-                <EuiFlexGroup
-                  gutterSize="s"
-                  alignItems="center"
-                  responsive={false}
-                  css={css({ width: '100%' })}
-                >
-                  {suggestion.account && (
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="user" aria-hidden={true} />
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem css={css({ overflowWrap: 'anywhere' })}>
-                    {getSuggestionLabel(suggestion)}
-                  </EuiFlexItem>
-                  {suggestion.account && (
-                    <EuiFlexItem grow={false}>
-                      <ServiceAccountRoles roles={suggestion.account.roles} />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiButtonEmpty>
-            ))}
-          </div>
-          <EuiScreenReaderOnly>
-            <div role="status" aria-live="polite">
-              {selectedSuggestion && getSuggestionLabel(selectedSuggestion)}{' '}
-              {selectedSuggestion?.account?.roles.join(', ')}
-            </div>
-          </EuiScreenReaderOnly>
-        </>
+          onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              event.stopPropagation();
+              dismissRef.current();
+            }
+          }}
+          onMouseEnter={() => clearTimeout(closeTimer.current)}
+          onMouseLeave={() => {
+            closeTimer.current = setTimeout(() => {
+              if (!node.contains(document.activeElement)) closeRef.current();
+            }, 250);
+          }}
+          css={css({
+            width: popup.kind === 'details' ? 340 : 440,
+            maxWidth: 'calc(100vw - 32px)',
+            maxHeight: 320,
+            ...(popup.kind === 'suggestions'
+              ? { display: 'flex', flexDirection: 'column', overflow: 'hidden' }
+              : { overflowY: 'auto' }),
+          })}
+        >
+          {popup.kind === 'details' ? (
+            <ServiceAccountDetails
+              account={popup.account}
+              environment={{
+                isServerless: cloud?.isServerlessEnabled ?? Boolean(serverless),
+                projectName: cloud?.serverless.projectName,
+                projectId: cloud?.serverless.projectId,
+                projectType: cloud?.serverless.projectType,
+              }}
+            />
+          ) : (
+            securityUi.components.getServiceAccountPicker({
+              selectedId: popup.accountId,
+              activeIndex: popup.selected,
+              onActiveIndexChange: (selected) =>
+                setPopup((current) =>
+                  current?.kind === 'suggestions' ? { ...current, selected } : current
+                ),
+              onSelect: (account) => {
+                const suggestion = popup.suggestions.find(
+                  (entry) => entry.account?.id === account.id
+                );
+                if (suggestion) chooseRef.current(suggestion);
+              },
+              directory: {
+                accounts: popup.suggestions.flatMap((entry) =>
+                  entry.account ? [entry.account] : []
+                ),
+                status: popup.status,
+                filtered: popup.filtered,
+                hasMore: popup.suggestions.some((entry) => !entry.account),
+                onRetry: () => retryRef.current(),
+                onLoadMore: () => {
+                  const suggestion = popup.suggestions.find((entry) => !entry.account);
+                  if (suggestion) chooseRef.current(suggestion);
+                },
+              },
+              onClose: () => dismissRef.current(),
+              onCreate: () => {
+                const model = editor?.getModel();
+                if (!model || !accounts.isEnabled() || !security.serviceAccounts.canCreate())
+                  return;
+                setCreation({ model, version: model.getVersionId(), position: popup.position });
+                dismissRef.current();
+              },
+            })
+          )}
+        </EuiPanel>,
+        node
       )}
-    </EuiPanel>,
-    node
+    </>
   );
 };

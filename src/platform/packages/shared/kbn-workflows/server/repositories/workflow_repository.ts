@@ -107,6 +107,8 @@ export class WorkflowRepository {
         createdBy: source.createdBy as string,
         lastUpdatedAt: new Date(source.updated_at as string),
         lastUpdatedBy: source.lastUpdatedBy as string,
+        childWorkflowApprovals:
+          source.childWorkflowApprovals as EsWorkflow['childWorkflowApprovals'],
         definition: source.definition as EsWorkflow['definition'],
         deleted_at: source.deleted_at ? new Date(source.deleted_at as string) : null,
         yaml: source.yaml as string,
@@ -136,6 +138,38 @@ export class WorkflowRepository {
   ): Promise<boolean> {
     const map = await this.areWorkflowsEnabled([{ workflowId, spaceId }], options);
     return map.get(`${spaceId}:${workflowId}`) ?? false;
+  }
+
+  /** Checks that an approved snapshot still belongs to the same enabled child document. */
+  async isWorkflowIncarnationCurrent(
+    workflowId: string,
+    spaceId: string,
+    createdAt: string
+  ): Promise<boolean> {
+    try {
+      const response = await this.options.esClient.get<{
+        spaceId: string;
+        created_at: string;
+        enabled: boolean;
+        deleted_at?: string | null;
+      }>({
+        index: this.options.indexName,
+        id: workflowId,
+        _source_includes: ['spaceId', 'created_at', 'enabled', 'deleted_at'],
+        realtime: true,
+      });
+      const source = response._source;
+      return Boolean(
+        source &&
+          source.spaceId === spaceId &&
+          source.enabled &&
+          !source.deleted_at &&
+          source.created_at === createdAt
+      );
+    } catch (error) {
+      if (error.statusCode === 404) return false;
+      throw error;
+    }
   }
 
   /** Reads the enabled state from the translog after an execution becomes searchable. */

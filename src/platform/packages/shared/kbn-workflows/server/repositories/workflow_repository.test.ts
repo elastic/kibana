@@ -588,3 +588,56 @@ describe('WorkflowRepository.isWorkflowEnabledRealtime', () => {
     await expect(repository.isWorkflowEnabledRealtime('workflow', 'default')).rejects.toBe(error);
   });
 });
+
+describe('WorkflowRepository.isWorkflowIncarnationCurrent', () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const repository = new WorkflowRepository({ esClient, logger: loggingSystemMock.create().get() });
+  const workflow = {
+    id: 'child',
+    yaml: 'name: Child',
+    definition: { name: 'Child', version: '1' as const, enabled: true, triggers: [], steps: [] },
+  };
+  const source = {
+    spaceId: 'default',
+    created_at: '2026-09-30T00:00:00.000Z',
+    yaml: workflow.yaml,
+    definition: workflow.definition,
+    enabled: true,
+    valid: true,
+  };
+
+  it.each([
+    [{}, true],
+    [{ yaml: 'changed' }, true],
+    [
+      { definition: { ...workflow.definition, steps: [{ name: 'injected', type: 'console' }] } },
+      true,
+    ],
+    [{ enabled: false }, false],
+    [{ valid: false }, true],
+    [{ created_at: '2026-10-01T00:00:00.000Z' }, false],
+    [{ spaceId: 'other' }, false],
+    [{ spaceId: '*' }, false],
+    [{ deleted_at: '2026-09-30' }, false],
+  ])('checks the live child incarnation without adopting edits: %j', async (override, expected) => {
+    esClient.get.mockResolvedValue({ _source: { ...source, ...override } } as never);
+    await expect(
+      repository.isWorkflowIncarnationCurrent(workflow.id, 'default', source.created_at)
+    ).resolves.toBe(expected);
+    expect(esClient.get).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'child', realtime: true })
+    );
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it('rejects missing children and propagates storage failures', async () => {
+    esClient.get.mockRejectedValueOnce({ statusCode: 404 });
+    await expect(
+      repository.isWorkflowIncarnationCurrent(workflow.id, 'default', source.created_at)
+    ).resolves.toBe(false);
+    esClient.get.mockRejectedValueOnce(new Error('Unavailable'));
+    await expect(
+      repository.isWorkflowIncarnationCurrent(workflow.id, 'default', source.created_at)
+    ).rejects.toThrow('Unavailable');
+  });
+});

@@ -9,7 +9,7 @@
 
 import omit from 'lodash/omit';
 import { v4 as generateUuid } from 'uuid';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   ExecutionStatus,
   pickManagedWorkflowFields,
@@ -25,6 +25,8 @@ import type { WorkflowExecutionForInputRendering } from '../workflow_context_man
 
 export interface BuildWorkflowExecutionDocumentParams {
   workflow: WorkflowExecutionEngineModel;
+  inheritedIdentity?: EsWorkflowExecution['effectiveIdentity'];
+  childWorkflowApprovals?: EsWorkflowExecution['childWorkflowApprovals'];
   spaceId: string;
   context: Record<string, unknown>;
   defaultTriggeredBy: string;
@@ -49,6 +51,8 @@ export const buildWorkflowExecutionDocument = (
 ): WorkflowExecutionForInputRendering => {
   const {
     workflow,
+    inheritedIdentity,
+    childWorkflowApprovals,
     spaceId,
     context,
     defaultTriggeredBy,
@@ -85,6 +89,7 @@ export const buildWorkflowExecutionDocument = (
     id: generateUuid(),
     spaceId,
     workflowId: workflow.id,
+    ...(childWorkflowApprovals ? { childWorkflowApprovals } : {}),
     ...pickManagedWorkflowFields(workflow),
     isTestRun: workflow.isTestRun,
     isEphemeral: workflow.isEphemeral,
@@ -94,7 +99,8 @@ export const buildWorkflowExecutionDocument = (
     status: missingIdentity ? ExecutionStatus.FAILED : ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
     executedBy: authenticatedUser ?? UNKNOWN_EXECUTION_IDENTITY,
-    ...(workflow.definition?.settings?.run_as
+    ...(inheritedIdentity ? { effectiveIdentity: inheritedIdentity } : {}),
+    ...(!inheritedIdentity && workflow.definition?.settings?.run_as
       ? {
           effectiveIdentity: {
             type: 'service_account' as const,

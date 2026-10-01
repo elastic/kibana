@@ -31,8 +31,20 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
     stepId: mappings.keyword(),
     createdBy: mappings.keyword(),
     executedBy: mappings.keyword(),
+    childWorkflowApprovals: mappings.object({ enabled: false, properties: {} }),
     effectiveIdentity: mappings.object({
-      properties: { type: mappings.keyword(), id: mappings.keyword() },
+      properties: {
+        type: mappings.keyword(),
+        id: mappings.keyword(),
+        inheritedFrom: mappings.object({
+          properties: {
+            workloadId: mappings.keyword(),
+            workflowId: mappings.keyword(),
+            executionId: mappings.keyword(),
+            revision: mappings.keyword(),
+          },
+        }),
+      },
     }),
     startedAt: mappings.date(),
     finishedAt: mappings.date(),

@@ -69,7 +69,11 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     );
   }
 
-  private getInput(): { workflowId: string; inputs: Record<string, unknown> } {
+  private getInput(): {
+    workflowId: string;
+    inputs: Record<string, unknown>;
+    inheritRunAs: boolean;
+  } {
     const step = this.init.node.configuration as WorkflowExecuteStep | WorkflowExecuteAsyncStep;
     const renderedWith =
       this.init.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
@@ -78,7 +82,14 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     const { 'workflow-id': workflowId, inputs = {} } = renderedWith;
     const mappedInputs =
       typeof inputs === 'object' && inputs !== null ? (inputs as Record<string, unknown>) : {};
-    return { workflowId: String(workflowId ?? ''), inputs: mappedInputs };
+    return {
+      workflowId: String(workflowId ?? ''),
+      inputs: mappedInputs,
+      inheritRunAs:
+        step.with.runAsMode === 'inherit' ||
+        step.with.runAsMode === 'override' ||
+        (step.with.runAsMode === undefined && step.with.inheritRunAs === true),
+    };
   }
 
   private assertValidWorkflowId(workflowId: string): void {
@@ -127,10 +138,14 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     // First iteration only: start step and run validation
     stepExecutionRuntime.startStep();
 
-    const { workflowId, inputs } = this.getInput();
+    const { workflowId, inputs, inheritRunAs } = this.getInput();
 
     // Persist resolved inputs for observability in the execution UI
-    stepExecutionRuntime.setInput({ 'workflow-id': workflowId, inputs });
+    stepExecutionRuntime.setInput({
+      'workflow-id': workflowId,
+      inputs,
+      ...(inheritRunAs ? { inheritRunAs: true } : {}),
+    });
 
     // Select executor based on step type
     const executor = node.type === 'workflow.execute' ? this.syncExecutor : this.asyncExecutor;
@@ -161,7 +176,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       }
 
       try {
-        await this.ensureWorkflowIsExecutable(targetWorkflow);
+        await this.ensureWorkflowIsExecutable(targetWorkflow, inheritRunAs);
       } catch (error) {
         stepExecutionRuntime.failStep(error as Error);
         workflowExecutionRuntime.navigateToNextNode();
@@ -173,7 +188,8 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         inputs,
         this.init.spaceId,
         this.init.request,
-        currentDepth
+        currentDepth,
+        inheritRunAs
       );
 
       this.handleResult(result);
@@ -209,7 +225,10 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     return workflowExecution.managed === true;
   }
 
-  private async ensureWorkflowIsExecutable(workflow: EsWorkflow): Promise<void> {
+  private async ensureWorkflowIsExecutable(
+    workflow: EsWorkflow,
+    inheritsIdentity = false
+  ): Promise<void> {
     const { node, stepExecutionRuntime } = this.init;
     const currentWorkflowId = stepExecutionRuntime.workflowExecution.workflowId;
     // Prevent a workflow from triggering itself (direct self-referencing)
@@ -225,7 +244,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         `Workflow "${workflow.id}" is disabled (referenced by step "${node.stepId}" in workflow "${currentWorkflowId}")`
       );
     }
-    if (!workflow.valid) {
+    if (!inheritsIdentity && !workflow.valid) {
       throw new Error(
         `Workflow "${workflow.id}" is not valid (referenced by step "${node.stepId}" in workflow "${currentWorkflowId}")`
       );
