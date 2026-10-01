@@ -7,7 +7,7 @@
 
 import type { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
-import { createWorkspace } from '../workspace/graph_client_workspace';
+import { createWorkspace } from '../workspace/runtime_workspace';
 import { GraphLayoutController } from '../workspace/graph_layout_controller';
 import { mergeRuntimeGraph } from '../workspace/runtime_graph_merge';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';

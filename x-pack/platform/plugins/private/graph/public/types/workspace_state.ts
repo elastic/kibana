@@ -93,12 +93,6 @@ export interface Workspace {
   edges: WorkspaceEdge[];
   blocklistedNodes: BlockListedNode[];
 
-  /**
-   * Flatten grouped nodes and return a flat array of nodes
-   * @param nodes List of nodes probably containing grouped nodes
-   */
-  returnUnpackedGroupeds(nodes: WorkspaceNode[]): WorkspaceNode[];
-
   runLayout(): void;
   stopLayout(): void;
   isLayoutRunning(): boolean;

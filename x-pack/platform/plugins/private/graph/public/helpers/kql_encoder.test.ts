@@ -22,8 +22,8 @@ describe('kql_encoder', () => {
     ];
     workspaceMock = {
       nodes,
+      edges: [],
       nodesMap: Object.fromEntries(nodes.map((node) => [node.id, node])),
-      returnUnpackedGroupeds: (selectedNodes: WorkspaceNode[]) => selectedNodes,
     } as unknown as Workspace;
   });
 

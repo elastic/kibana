@@ -6,7 +6,7 @@
  */
 
 import { createWorkspaceState } from '../../state_management/workspace';
-import { createWorkspace } from './graph_client_workspace';
+import { createWorkspace } from './runtime_workspace';
 import { GraphLayoutController } from './graph_layout_controller';
 import { makeNodeId } from './graph_merge_planner';
 import { mergeRuntimeGraph } from './runtime_graph_merge';

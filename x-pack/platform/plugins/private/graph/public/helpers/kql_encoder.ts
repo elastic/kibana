@@ -8,6 +8,7 @@
 import rison from '@kbn/rison';
 
 import type { Workspace, WorkspaceNode } from '../types';
+import { unpackGroupedNodes } from '../services/workspace/runtime_grouping';
 
 function escapeQuotes(str: string) {
   return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
@@ -23,7 +24,7 @@ export function getSelectedOrAllNodes(
   const selectedNodes = selectedNodeIds
     .map((nodeId) => workspace.nodesMap[nodeId])
     .filter((node): node is WorkspaceNode => node !== undefined);
-  return workspace.returnUnpackedGroupeds(selectedNodes);
+  return unpackGroupedNodes(selectedNodes, workspace.edges);
 }
 
 export function asKQL(
