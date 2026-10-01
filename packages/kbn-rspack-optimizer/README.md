@@ -76,6 +76,8 @@ Build Options:
   --dist                    Build for distribution (minified, no source maps)
   --examples                Include example plugins
   --test-plugins            Include test plugins
+  --no-dev-only             Exclude devOnly plugins (included by default, even with --dist;
+                            node scripts/build always excludes them)
   --themes <tags>           Comma-separated theme tags to build (default: all)
   --output-root <dir>       Output root directory (default: repo root)
   --no-cache                Disable filesystem caching

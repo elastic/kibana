@@ -26,6 +26,7 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       flex-wrap: wrap;
       align-items: center;
       gap: ${euiTheme.size.xs} ${euiTheme.size.m};
+      margin: 0;
     `,
     item: css`
       display: flex;
@@ -111,35 +112,37 @@ const renderTruncated = (value: ReactNode, text: string) => {
 
 /** A compact, responsive row of key-value pairs. */
 export const MetaBlocks: FunctionComponent<MetaBlocksProps> = ({ items, ...rest }) => {
-  const memoized = useEuiMemoizedStyles(styles);
+  const memoizedStyles = useEuiMemoizedStyles(styles);
 
   if (items.length === 0) {
     return null;
   }
 
   return (
-    <div css={memoized.list} data-test-subj={rest['data-test-subj'] ?? 'metablocks-container'}>
+    <dl css={memoizedStyles.list} data-test-subj={rest['data-test-subj'] ?? 'metablocks-container'}>
       {items.map(({ id, title, value, ...itemProps }, index) => {
         const truncatableText = getTruncatableText(value);
 
         return (
-          <EuiText key={id ?? index} {...itemProps} size="s" css={memoized.item}>
-            <span css={memoized.key}>{title}</span>
+          // `EuiText` renders a `div`, the one wrapper `dl` accepts around a `dt`/`dd` pair. It
+          // keeps each pair a single flex item, which is what makes the row wrap pair by pair.
+          <EuiText key={id ?? index} {...itemProps} size="s" css={memoizedStyles.item}>
+            <dt css={memoizedStyles.key}>{title}</dt>
             {truncatableText !== undefined ? (
-              <span css={memoized.truncatedValue}>
-                <span css={memoized.fullTextSizer} aria-hidden>
+              <dd css={memoizedStyles.truncatedValue}>
+                <span css={memoizedStyles.fullTextSizer} aria-hidden>
                   {truncatableText}
                 </span>
-                <span css={memoized.truncationOverlay}>
+                <span css={memoizedStyles.truncationOverlay}>
                   {renderTruncated(value, truncatableText)}
                 </span>
-              </span>
+              </dd>
             ) : (
-              <span css={memoized.value}>{value}</span>
+              <dd css={memoizedStyles.value}>{value}</dd>
             )}
           </EuiText>
         );
       })}
-    </div>
+    </dl>
   );
 };

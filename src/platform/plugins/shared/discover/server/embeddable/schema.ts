@@ -61,13 +61,3 @@ export const getDiscoverSessionEmbeddableSchema = (
     getDiscoverSessionByValueEmbeddableSchema(getDrilldownsSchema),
     getDiscoverSessionByReferenceEmbeddableSchema(getDrilldownsSchema),
   ]);
-
-export type DiscoverSessionEmbeddableByValueState = z.output<
-  ReturnType<typeof getDiscoverSessionByValueEmbeddableSchema>
->;
-export type DiscoverSessionEmbeddableByReferenceState = z.output<
-  ReturnType<typeof getDiscoverSessionByReferenceEmbeddableSchema>
->;
-export type DiscoverSessionEmbeddableState = z.output<
-  ReturnType<typeof getDiscoverSessionEmbeddableSchema>
->;

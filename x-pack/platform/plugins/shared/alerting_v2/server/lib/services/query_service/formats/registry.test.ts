@@ -10,7 +10,7 @@ import { jsonFormat } from './json_format';
 import {
   DEFAULT_ESQL_RESPONSE_FORMAT,
   ESQL_RESPONSE_FORMAT_NAMES,
-  getEsqlResponseFormat,
+  findEsqlResponseFormat,
 } from './registry';
 
 describe('ES|QL response format registry', () => {
@@ -19,18 +19,15 @@ describe('ES|QL response format registry', () => {
   });
 
   it('defaults to json', () => {
-    expect(DEFAULT_ESQL_RESPONSE_FORMAT).toBe('json');
+    expect(DEFAULT_ESQL_RESPONSE_FORMAT).toBe(jsonFormat);
   });
 
   it('resolves each registered name to its format', () => {
-    expect(getEsqlResponseFormat('json')).toBe(jsonFormat);
-    expect(getEsqlResponseFormat('arrow')).toBe(arrowFormat);
+    expect(findEsqlResponseFormat('json')).toBe(jsonFormat);
+    expect(findEsqlResponseFormat('arrow')).toBe(arrowFormat);
   });
 
-  it('fails fast on an unregistered name', () => {
-    const unregistered: string = 'csv';
-
-    // @ts-expect-error - unregistered name is not in the union
-    expect(() => getEsqlResponseFormat(unregistered)).toThrow();
+  it('returns undefined for an unregistered name', () => {
+    expect(findEsqlResponseFormat('csv')).toBeUndefined();
   });
 });

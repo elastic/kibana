@@ -6,7 +6,10 @@
  */
 
 import { FetchSuppressionsStep } from './fetch_suppressions_step';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createQueryService } from '../../services/query_service/query_service.mock';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { ESQL_QUERY_ROW_LIMIT } from '../queries';
 import { createAlertEpisodeSuppressionsResponse } from '../fixtures/dispatcher';
 import {
   createAlertEpisode,
@@ -117,6 +120,50 @@ describe('FetchSuppressionsStep', () => {
         })
       )
     ).toBe('ack');
+  });
+
+  it('warns when a suppressions chunk returns the row limit', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService, mockLogger } = createLoggerService();
+    const step = new FetchSuppressionsStep(queryService);
+
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createAlertEpisodeSuppressionsResponse(
+        Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
+          createAlertEpisodeSuppression({ rule_id: 'r1', group_hash: 'h1', episode_id: `e${i}` })
+        )
+      )
+    );
+
+    const state = createDispatcherPipelineState({
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e0' })],
+    });
+
+    await step.execute(state, loggerService);
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
+      labels: { code: ALERTING_LOG_CODES.FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED },
+    });
+  });
+
+  it('does not warn when every suppressions chunk stays under the row limit', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService, mockLogger } = createLoggerService();
+    const step = new FetchSuppressionsStep(queryService);
+
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createAlertEpisodeSuppressionsResponse([
+        createAlertEpisodeSuppression({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' }),
+      ])
+    );
+
+    const state = createDispatcherPipelineState({
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
+    });
+
+    await step.execute(state, loggerService);
+
+    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
   it('issues multiple ES|QL requests and concatenates results when input exceeds the size budget', async () => {

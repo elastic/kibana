@@ -95,7 +95,6 @@ export function createSharedNpmConfig({
         'history',
         'fp-ts',
         'io-ts',
-        'jquery',
         'lodash',
         'lodash/fp',
         'moment-timezone/moment-timezone',

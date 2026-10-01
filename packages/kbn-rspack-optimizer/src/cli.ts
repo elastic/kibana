@@ -63,8 +63,12 @@ export function runRspackCli(options: CliOptions = {}): void {
         throw createFlagError('expected --test-plugins to have no value');
       }
 
-      // cache and hmr are declared as positive booleans defaulting to true.
+      // dev-only, cache and hmr are declared as positive booleans defaulting to true.
       // getopts interprets --no-cache as cache=false and --no-hmr as hmr=false.
+      // dev-only defaults to true because a source server started in dev mode without the
+      // optimizer (scripts/functional_tests, --no-optimizer) discovers devOnly plugins, and the
+      // UI fails to load without their bundles.
+      const devOnly = flags['dev-only'] as boolean;
       const cache = flags.cache as boolean;
       const hmr = flags.hmr as boolean;
 
@@ -151,6 +155,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           repoRoot: REPO_ROOT,
           examples: false,
           testPlugins: false,
+          devOnly: false,
         });
         const pluginIds = ['core', ...allPlugins.filter((p) => !p.ignoreMetrics).map((p) => p.id)];
         validateLimitsForAllBundles(log, pluginIds, limitsPath);
@@ -233,6 +238,7 @@ export function runRspackCli(options: CliOptions = {}): void {
         cache,
         examples: effectiveExamples,
         testPlugins: effectiveTestPlugins,
+        devOnly: devOnly && !updateLimits,
         allowlistPluginGroups,
         themeTags: themes,
         log,
@@ -279,6 +285,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           'dist',
           'examples',
           'test-plugins',
+          'dev-only',
           'cache',
           'hmr',
           'profile',
@@ -304,6 +311,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           dist: false,
           examples: false,
           'test-plugins': false,
+          'dev-only': true,
           cache: true,
           hmr: true,
           profile: false,
@@ -317,6 +325,8 @@ export function runRspackCli(options: CliOptions = {}): void {
             --examples                Include example plugins
             --test-plugins            Include test plugins
             --shared-only             Build only shared frontend bundles
+            --no-dev-only             Exclude devOnly plugins (included by default, even with --dist;
+                                      node scripts/build always excludes them)
             --themes <tags>           Comma-separated theme tags to build (default: all)
             --plugin-groups <groups>  Comma-separated plugin groups to build (default: all).
                                       Mirrors the server's plugins.allowlistPluginGroups setting.

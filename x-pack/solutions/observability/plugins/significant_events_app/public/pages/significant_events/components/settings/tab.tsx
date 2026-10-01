@@ -19,13 +19,13 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiLink,
-  EuiPanel,
   EuiSpacer,
+  EuiSplitPanel,
   EuiSwitch,
   EuiText,
   EuiTextArea,
   EuiTextColor,
+  EuiTitle,
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -52,7 +52,6 @@ import {
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useDeveloperMode } from '../../../../hooks/use_developer_mode';
-import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
 import { getFormattedError } from '../../../../util/errors';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
@@ -80,7 +79,6 @@ const clampNumber = (value: string, min: number, max: number) => {
 
 export function SettingsTab() {
   const { core } = useKibana();
-  const modelSettingsUrl = useModelSettingsUrl();
 
   // Saving these settings hits Nightshift engine routes and core's UI settings
   // routes used by `core.settings.client` / `globalClient` (require
@@ -329,77 +327,33 @@ export function SettingsTab() {
 
       <EuiSpacer />
 
-      <StaleEventCleanupSection canManage={canManage} />
-
-      <CostEstimate />
-
-      <EuiSpacer />
-
       <RunLimitsSection />
 
       <EuiSpacer />
 
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiText size="s">
-            <h3>
-              {i18n.translate('xpack.significantEventsApp.settings.llmSectionTitle', {
-                defaultMessage: 'LLM selection',
-              })}
-            </h3>
-          </EuiText>
-        </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
-          <EuiText size="s">
-            <p>
-              {i18n.translate('xpack.significantEventsApp.settings.modelSettingsDescription', {
-                defaultMessage:
-                  'LLM models for Significant Events features are managed centrally in the Model Settings page under Stack Management.',
-              })}
-            </p>
-          </EuiText>
-          {modelSettingsUrl && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiLink
-                data-test-subj="significantEventsAppSettingsTabGoToModelSettingsLink"
-                href={modelSettingsUrl}
-                external
-              >
-                {i18n.translate('xpack.significantEventsApp.settings.modelSettingsLink', {
-                  defaultMessage: 'Go to Model Settings',
-                })}
-              </EuiLink>
-            </>
-          )}
-        </EuiPanel>
-      </EuiPanel>
-
-      <EuiSpacer />
-
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiText size="s">
+      <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ flexShrink: 0 }}>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.significantEventsApp.settings.scheduledDiscoveryTitle', {
                 defaultMessage: 'Scheduled discovery',
               })}
             </h3>
-          </EuiText>
-        </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
+          </EuiTitle>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem>
-                  <EuiText size="m">
+                  <EuiTitle size="xxs">
                     <h4>
                       {i18n.translate(
                         'xpack.significantEventsApp.settings.scheduledDiscoveryLabel',
                         { defaultMessage: 'Scheduled discovery' }
                       )}
                     </h4>
-                  </EuiText>
+                  </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
@@ -595,33 +549,33 @@ export function SettingsTab() {
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPanel>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
 
       <EuiSpacer />
 
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiText size="s">
+      <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ flexShrink: 0 }}>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.significantEventsApp.settings.dataSourcesSectionTitle', {
                 defaultMessage: 'Data sources',
               })}
             </h3>
-          </EuiText>
-        </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
+          </EuiTitle>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem>
-                  <EuiText size="m">
+                  <EuiTitle size="xxs">
                     <h4>
                       {i18n.translate('xpack.significantEventsApp.settings.indexPatternsLabel', {
                         defaultMessage: 'Index patterns',
                       })}
                     </h4>
-                  </EuiText>
+                  </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
@@ -685,34 +639,34 @@ export function SettingsTab() {
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPanel>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
 
       <EuiSpacer />
 
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiText size="s">
+      <EuiSplitPanel.Outer hasBorder hasShadow={false} css={{ flexShrink: 0 }}>
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.significantEventsApp.settings.continuousKiOnboardingTitle', {
                 defaultMessage: 'Continuous KI onboarding',
               })}
             </h3>
-          </EuiText>
-        </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
+          </EuiTitle>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem>
-                  <EuiText size="m">
+                  <EuiTitle size="xxs">
                     <h4>
                       {i18n.translate(
                         'xpack.significantEventsApp.settings.continuousKiOnboardingLabel',
                         { defaultMessage: 'Automatic onboarding' }
                       )}
                     </h4>
-                  </EuiText>
+                  </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="s">
@@ -819,33 +773,33 @@ export function SettingsTab() {
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPanel>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
 
       <EuiSpacer />
 
-      <EuiPanel
-        hasBorder={true}
+      <EuiSplitPanel.Outer
+        hasBorder
         hasShadow={false}
-        paddingSize="none"
-        grow={false}
+        css={{ flexShrink: 0 }}
         data-test-subj="nightshiftDeveloperModeSection"
       >
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiText size="s">
+        <EuiSplitPanel.Inner color="subdued">
+          <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.significantEventsApp.settings.developerModeTitle', {
                 defaultMessage: 'Nightshift developer mode',
               })}
             </h3>
-          </EuiText>
-        </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
+          </EuiTitle>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner>
           <EuiFlexGroup alignItems="flexStart" gutterSize="l">
             <EuiFlexItem grow={2}>
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.significantEventsApp.settings.developerModeHelpText', {
-                  defaultMessage: 'Show extra details and configuration options for expert users.',
+                  defaultMessage:
+                    'Show extra tabs, details, and configuration options for expert users.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -870,21 +824,28 @@ export function SettingsTab() {
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPanel>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+
+      {isDeveloperMode && (
+        <>
+          <EuiSpacer />
+          <StaleEventCleanupSection canManage={canManage} />
+          <CostEstimate />
+        </>
+      )}
 
       {isDeveloperMode && !isDeveloperModeSaving && (
         <>
           <EuiSpacer />
 
-          <EuiPanel
-            hasBorder={true}
+          <EuiSplitPanel.Outer
+            hasBorder
             hasShadow={false}
-            paddingSize="none"
-            grow={false}
+            css={{ flexShrink: 0 }}
             data-test-subj="nightshiftSettingsTuningPanel"
           >
-            <EuiPanel hasShadow={false} color="subdued">
+            <EuiSplitPanel.Inner color="subdued">
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -892,13 +853,13 @@ export function SettingsTab() {
                       <DeveloperModeBadge />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiText size="s">
+                      <EuiTitle size="xs">
                         <h3>
                           {i18n.translate('xpack.significantEventsApp.settings.tuningTitle', {
                             defaultMessage: 'Significant Events tuning',
                           })}
                         </h3>
-                      </EuiText>
+                      </EuiTitle>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -922,8 +883,8 @@ export function SettingsTab() {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiPanel>
-            <EuiPanel hasShadow={false} hasBorder={false}>
+            </EuiSplitPanel.Inner>
+            <EuiSplitPanel.Inner>
               <EuiCallOut
                 announceOnMount
                 size="s"
@@ -943,12 +904,14 @@ export function SettingsTab() {
                   setParsedTuningConfig(parsed);
                 }}
               />
-            </EuiPanel>
-          </EuiPanel>
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
         </>
       )}
 
       {isAppsEnabled && <AppsSection canEdit={canManageSlack} />}
+
+      <EuiSpacer />
 
       {isConfirmingZeroMatch && (
         <EuiConfirmModal

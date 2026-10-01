@@ -8,7 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { ProposalAttachmentData, ProposalWithMetadata } from '@kbn/proposals-common';
-import { PROPOSAL_ATTACHMENT_TYPE, proposalAttachmentDataSchema } from '@kbn/proposals-common';
+import {
+  isExpired,
+  PROPOSAL_ATTACHMENT_TYPE,
+  proposalAttachmentDataSchema,
+} from '@kbn/proposals-common';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
 import type { ProposalsService } from '../services/proposals_service';
 
@@ -23,11 +27,10 @@ export interface ProposalAttachmentTypeDeps {
  *
  * Expiry is reported by the banner instead: an expired proposal has no decision
  * to report, and `Decision: pending` underneath `EXPIRED` told the agent one was
- * still coming. That is reachable on every read now that `expired` is evaluated
- * live rather than snapshotted when the attachment was written.
+ * still coming.
  */
-const describeOutcome = (proposal: ProposalWithMetadata, isExpired: boolean): string => {
-  if (isExpired) {
+const describeOutcome = (proposal: ProposalWithMetadata, expired: boolean): string => {
+  if (expired) {
     return '';
   }
   if (proposal.status === 'pending') {
@@ -43,26 +46,18 @@ const describeOutcome = (proposal: ProposalWithMetadata, isExpired: boolean): st
  * only action the agent can request — it cannot run the action itself.
  */
 const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
-  // Deliberately NOT `PROPOSAL_WITHOUT_ACTION_LABEL`: this string is LLM prompt input
-  // and must stay untranslated and carry the analyst-directive clause. The UI badge
-  // ("No automated action") lives in public/translations.ts.
-  const label =
-    proposal.action?.name ??
-    proposal.actionWorkflowId ??
-    'No automated action — analyst carries this out themselves';
-
-  // Both, because they can disagree: `expired` is the deadline evaluated on
-  // read, while `status: 'expired'` is the settlement the gate writes when
-  // nobody answered — which it can do before the deadline itself passes.
-  const isExpired = proposal.expired || proposal.status === 'expired';
+  const expired = isExpired(proposal);
 
   const lines: string[] = [
-    `## Proposal: ${label}`,
+    `## Proposal: ${proposal.title}`,
     `Status: ${proposal.status}`,
+    // Its own line now that every proposal carries a title: the agent still has
+    // to know that nothing runs unless the analyst does it themselves.
+    proposal.actionWorkflowId ? '' : 'No automated action — analyst carries this out themselves',
     // Not "the deadline has passed": the gate can settle a proposal as expired
     // before its deadline, and `Decision deadline` below would then print a
     // future date directly under a banner claiming it was behind us.
-    isExpired ? 'EXPIRED: this proposal can no longer be decided.' : '',
+    expired ? 'EXPIRED: this proposal can no longer be decided.' : '',
     '',
     proposal.comment,
     '',
@@ -74,7 +69,7 @@ const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
       : '',
     proposal.expiresAt ? `Decision deadline: ${proposal.expiresAt}` : '',
     '',
-    describeOutcome(proposal, isExpired),
+    describeOutcome(proposal, expired),
   ];
 
   return lines.filter((l) => l !== '').join('\n');
@@ -121,7 +116,7 @@ export const createProposalAttachmentType = ({
         // proposal id here, which without this check would read it back to the
         // LLM for someone holding no proposals privilege at all.
         await privileges.assertCanRead(request);
-        const proposal = await getProposalsService().get(proposalId, spaceId);
+        const proposal = await getProposalsService().get(proposalId, spaceId, request);
         return { type: 'text', value: formatProposalForAgent(proposal) };
       } catch (error) {
         logger.warn(`Failed to read proposal ${proposalId} for its attachment: ${error}`);

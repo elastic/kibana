@@ -60,11 +60,21 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   date_modified: document.date_modified,
 });
 
+/** Some fields need to be read from config (registration object), and some from storage. */
+const mergeManagedAiIndex = (
+  registration: AiIndexProperties,
+  document: AiIndexDocument
+): AiIndexDocument => ({
+  ...document,
+  dest: registration.dest,
+});
+
 const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
 
 export interface AiIndexManagedBootstrap {
   isManaged: (id: string) => boolean;
   getManagedIds: () => string[];
+  getRegistration: (id: string) => AiIndexProperties | undefined;
   ensure: (id: string, spaceId: string) => Promise<boolean>;
 }
 
@@ -171,12 +181,10 @@ export class AiIndexService {
    * Creates or fully replaces a managed AI index. Managed entries are owned by
    * the registering plugin and cannot be mutated via the public API.
    *
-   * This is an idempotent upsert: it is safe to call on every access, so a
-   * managed entry always reflects the latest registration (the source of truth
-   * lives in code). It will overwrite an existing managed entry, but refuses to
-   * clobber a user-owned (unmanaged) entry that squats the same id, throwing
-   * {@link AiIndexIdConflictError} so the collision surfaces instead of
-   * silently destroying user data.
+   * This is an idempotent upsert. It will overwrite an existing managed entry,
+   * but refuses to clobber a user-owned (unmanaged) entry that squats the same
+   * id, throwing {@link AiIndexIdConflictError} so the collision surfaces
+   * instead of silently destroying user data.
    */
   async putManaged(
     aiIndexId: string,
@@ -282,7 +290,7 @@ export class AiIndexService {
   async get(aiIndexId: string, spaceId: string): Promise<AiIndexHttpItem> {
     const existing = await this.findDocument(aiIndexId, spaceId);
     if (existing) {
-      return toAiIndexItem(existing.document);
+      return this.toItem(existing.document);
     }
     if (!this.managedBootstrap?.isManaged(aiIndexId)) {
       throw new AiIndexNotFoundError(aiIndexId);
@@ -292,7 +300,7 @@ export class AiIndexService {
     if (!newManagedAiIndex) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
-    return toAiIndexItem(newManagedAiIndex.document);
+    return this.toItem(newManagedAiIndex.document);
   }
 
   /**
@@ -421,8 +429,16 @@ export class AiIndexService {
       if (!hit._source || hit._id === undefined) {
         return [];
       }
-      return [toAiIndexItem(toAiIndexDocument(hit._source, hit._id))];
+      return [this.toItem(toAiIndexDocument(hit._source, hit._id))];
     });
+  }
+
+  /** Managed documents are resolved against their registration on read; user-owned ones are returned as stored. */
+  private toItem(document: AiIndexDocument): AiIndexHttpItem {
+    const registration = document.managed
+      ? this.managedBootstrap?.getRegistration(document.id)
+      : undefined;
+    return toAiIndexItem(registration ? mergeManagedAiIndex(registration, document) : document);
   }
 
   private async findDocument(
