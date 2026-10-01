@@ -36,6 +36,7 @@ export const SelectStyle = ({ colors }: SelectStyleProps) => {
           const onSelectColor = () => dispatch(colorSelectedNodes(c));
           return (
             <EuiIcon
+              key={c}
               type="stopFill"
               color={c}
               css={colorPickerIconStyles}
