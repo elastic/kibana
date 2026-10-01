@@ -60,9 +60,9 @@ cmd_wait() {
   while true; do
     local elapsed=$((SECONDS - start))
     local status
-    # Statuses are returned newest first, so the first Libra entry is the current one.
-    status=$(gh api "repos/$REPO/commits/$sha/statuses?per_page=100" \
-      --jq '[.[] | select(.context == "Libra")][0] // empty | "\(.state)\t\(.description)"')
+    # The combined status keeps only the newest status per context, so this yields at most one line.
+    status=$(gh api "repos/$REPO/commits/$sha/status?per_page=100" --paginate \
+      --jq '.statuses[] | select(.context == "Libra") | "\(.state)\t\(.description)"')
 
     if [[ -z "$status" ]]; then
       if ((elapsed >= STARTUP_WINDOW_SECONDS)); then
@@ -114,7 +114,8 @@ cmd_threads() {
                 isOutdated
                 path
                 line
-                comments(first: 50) { nodes { databaseId url body author { login } } }
+                comments(first: 100) { nodes { databaseId url body author { login } } }
+                latest: comments(last: 1) { nodes { databaseId body author { login } } }
               }
             }
           }
@@ -123,9 +124,10 @@ cmd_threads() {
     --jq '.data.repository.pullRequest.reviewThreads.nodes[]
       | select(.isResolved | not)
       | .comments.nodes as $comments
+      | .latest.nodes[0] as $latest
       | ($comments | map(select(.author.login | test("^infra-vault-gh-plugin-prod") | not)) | length) as $otherReplies
       | select($comments[0].author.login | test("^infra-vault-gh-plugin-prod"))
-      | select($comments[-1].author.login | test("^infra-vault-gh-plugin-prod"))
+      | select($latest.author.login | test("^infra-vault-gh-plugin-prod"))
       | {
           threadId: .id,
           commentId: $comments[0].databaseId,
@@ -137,7 +139,7 @@ cmd_threads() {
           followUp: ($otherReplies > 0),
           otherReplies: $otherReplies
         }
-      + (if $otherReplies > 0 then { latestCommentId: $comments[-1].databaseId, latestBody: $comments[-1].body } else {} end)'
+      + (if $otherReplies > 0 then { latestCommentId: $latest.databaseId, latestBody: $latest.body } else {} end)'
 }
 
 cmd_resolve() {

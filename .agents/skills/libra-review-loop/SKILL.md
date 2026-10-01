@@ -23,9 +23,10 @@ This skill commits, pushes, replies to and resolves threads without asking. The 
 
 ## Before the first round
 
-1. Resolve the PR: `gh pr view --json number,headRefName,isDraft,labels,url`.
+1. Resolve the PR: `gh pr view [<pr>] --json number,headRefName,isDraft,labels,url`. Pass the number when the user gave one; without it, `gh` uses the PR for the current branch.
 2. Check that Libra will review it (see `.libra/settings.yaml`). Libra skips draft PRs unless they have the `ci:draft-checks` label, and skips any PR labelled `reviewer:skip-ai`. If either applies, tell the user and stop. Don't change labels or the draft state yourself.
-3. Make sure the local branch has the PR head (`git status -sb`, then `git pull --rebase` if it's behind). kibanamachine pushes fix-up commits to PR branches, and Libra doesn't review those.
+3. Make sure you're on the PR's head branch, because every commit and push in the loop goes to the current branch. If `git branch --show-current` isn't `headRefName`, or the branch doesn't track the PR's head repository, run `gh pr checkout <pr>`. If the working tree has uncommitted changes that aren't part of this PR, stop and ask the user instead.
+4. Make sure the local branch has the PR head (`git status -sb`, then `git pull --rebase` if it's behind). kibanamachine pushes fix-up commits to PR branches, and Libra doesn't review those.
 
 ## The loop
 
@@ -58,8 +59,7 @@ In later rounds, pass the commit you pushed in step 9, so a kibanamachine commit
 bash .agents/skills/libra-review-loop/scripts/libra.sh wait <pr> --sha <pushed-sha>
 ```
 
-- `clean`: stop and write the final report.
-- `findings`: continue with step 2.
+- `clean` or `findings`: continue with step 2. A clean review of the latest commit doesn't answer older threads.
 - `skipped`, `none`, `error` or `timeout`: stop and report the state and description to the user. Don't push an empty commit to retrigger Libra.
 
 ### 2. Collect
@@ -72,7 +72,10 @@ This also returns older threads that were never answered, so nothing gets lost b
 
 Libra reads replies to its comments when it reviews a new commit, and may answer them. Those threads come back with `followUp: true`; Libra's answer is in `latestBody`, and `otherReplies` counts the replies already posted. Handle them in step 3 under "Follow-ups", not as new findings.
 
-If `threads` prints nothing after `findings`, read the latest Libra review body with `gh api repos/elastic/kibana/pulls/<pr>/reviews --jq '[.[] | select(.user.login | startswith("infra-vault"))][-1].body'`.
+If `threads` prints nothing:
+
+- After `clean`: stop and write the final report.
+- After `findings`: the findings may be in the review body rather than in threads. Find the latest Libra review with `gh api repos/elastic/kibana/pulls/<pr>/reviews --paginate --jq '.[] | select(.user.login | startswith("infra-vault")) | .id' | tail -n 1`, then read it with `gh api repos/elastic/kibana/pulls/<pr>/reviews/<id> --jq .body`.
 
 ### 3. Triage
 
@@ -150,7 +153,7 @@ Write the replies for human reviewers: short, plain sentences, with no restateme
 
 ### 9. Push and resolve
 
-If step 7 made a commit, `git push` to the branch's upstream. If the push is rejected because kibanamachine pushed in the meantime, run `git pull --rebase`, push again, and edit the replies to quote the new SHA (`gh api -X PATCH repos/elastic/kibana/pulls/comments/<reply-id> -F body=@<file>`). Never force-push. Note the pushed SHA with `git rev-parse HEAD`, then run `libra.sh resolve <threadId>` for each valid finding. Go back to step 1 with `--sha <pushed-sha>`.
+If step 7 made a commit, `git push` to the branch's upstream. If the push is rejected because kibanamachine pushed in the meantime, run `git pull --rebase`, push again, and edit the replies to quote the new SHA (`gh api -X PATCH repos/elastic/kibana/pulls/comments/<reply-id> -F body=@<file>`). Never force-push. Note the pushed SHA with `git rev-parse HEAD`, then run `libra.sh resolve <threadId>` for each valid finding. Go back to step 1 with `--sha <pushed-sha>`. After round 5, run only `wait` on the pushed SHA so the final report can give Libra's state on it, then stop.
 
 If nothing was committed, there's no push and Libra won't review again. Stop and write the final report.
 
@@ -160,7 +163,7 @@ Stop and report to the user when any of these happens:
 
 - Libra flags the same rule again after you fixed it. Your sweep or check missed something, and another automatic round is unlikely to help.
 - A local check fails and the fix isn't clear.
-- Round 5 ends and Libra still has findings.
+- Round 5 ends. Wait for Libra on its push as described in step 9, but don't start a sixth round.
 
 ## Final report
 
