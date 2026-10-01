@@ -57,6 +57,9 @@ export const significantEventInvestigationSchema = z.object({
 });
 export type SignificantEventInvestigation = z.infer<typeof significantEventInvestigationSchema>;
 
+/** Status of a significant event's investigation, as the significant events API reports it. */
+export type InvestigationRunStatus = 'pending' | 'complete' | 'failed' | 'unavailable';
+
 export const significantEventSchema = significantEventBaseSchema.extend({
   '@timestamp': z.iso.datetime({ offset: true }),
   status: significantEventStatusSchema,
