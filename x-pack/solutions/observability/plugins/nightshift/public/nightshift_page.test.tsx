@@ -41,7 +41,7 @@ const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => {
 });
 const navigateToUrl = jest.fn();
 const navigateToApp = jest.fn();
-const featureFlags = { getBooleanValue: jest.fn() };
+const featureFlags = { useBooleanValue: jest.fn() };
 
 function renderPage(initialPath = '/') {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
@@ -60,7 +60,7 @@ describe('NightshiftPage', () => {
   beforeEach(() => {
     navigateToApp.mockClear();
     navigateToUrl.mockClear();
-    featureFlags.getBooleanValue.mockReturnValue(true);
+    featureFlags.useBooleanValue.mockReturnValue(true);
     mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: true, isLoading: false });
     mockUseKibana.mockReturnValue({
       services: {
@@ -282,7 +282,7 @@ describe('NightshiftPage', () => {
     });
 
     it('hides the sandbox secrets link when Nightshift is not enabled', async () => {
-      featureFlags.getBooleanValue.mockReturnValue(false);
+      featureFlags.useBooleanValue.mockReturnValue(false);
       withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
       renderPage();
       await openAppMenuOverflow();

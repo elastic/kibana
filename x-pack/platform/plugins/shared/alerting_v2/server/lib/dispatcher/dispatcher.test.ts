@@ -42,12 +42,13 @@ import {
 import { DispatcherService } from './dispatcher';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import {
-  createAlertEpisodeSuppressionsResponse,
   createDispatchableAlertEventsResponse,
   createEpisodeDataResponse,
+  createEpisodeSuppressionsResponse,
   createLastNotifiedTimestampsResponse,
+  createSeriesSuppressionsResponse,
 } from './fixtures/dispatcher';
-import { createAlertEpisode, createAlertEpisodeSuppression } from './fixtures/test_utils';
+import { createAlertEpisode, createEpisodeSuppressionRow } from './fixtures/test_utils';
 import { EpisodeScan } from './state';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {
@@ -65,7 +66,12 @@ import {
   StoreActionsStep,
   StoreExecutionHistoryStep,
 } from './steps';
-import type { AlertEpisode, AlertEpisodeSuppression, DispatcherHaltReason } from './types';
+import type {
+  AlertEpisode,
+  DispatcherHaltReason,
+  EpisodeSuppressionRow,
+  SeriesSuppressionRow,
+} from './types';
 
 function mockRulesFindByIds(
   spy: jest.SpyInstance,
@@ -226,7 +232,7 @@ describe('DispatcherService', () => {
         },
       ];
 
-      const suppressions: AlertEpisodeSuppression[] = [
+      const suppressions: EpisodeSuppressionRow[] = [
         {
           rule_id: 'rule-1',
           source: 'internal',
@@ -247,7 +253,8 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
           createEpisodeDataResponse([
             { episode_id: 'episode-1', data_json: null },
@@ -279,7 +286,7 @@ describe('DispatcherService', () => {
         .add(MAX_WINDOW_MINUTES, 'minutes')
         .toISOString();
 
-      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(4);
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(5);
       expect(queryEsClient.esql.query).toHaveBeenCalledWith(
         {
           query: getDispatchableAlertEventsQuery({
@@ -361,7 +368,7 @@ describe('DispatcherService', () => {
         },
       ];
 
-      const suppressions: AlertEpisodeSuppression[] = [
+      const suppressions: EpisodeSuppressionRow[] = [
         {
           rule_id: 'rule-1',
           source: 'internal',
@@ -382,7 +389,8 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
           createEpisodeDataResponse([{ episode_id: 'episode-2', data_json: null }])
         )
@@ -455,11 +463,12 @@ describe('DispatcherService', () => {
           ])
         )
         .mockResolvedValueOnce(
-          createAlertEpisodeSuppressionsResponse([
-            createAlertEpisodeSuppression({ should_suppress: true }),
-            createAlertEpisodeSuppression(secondEpisode),
+          createEpisodeSuppressionsResponse([
+            createEpisodeSuppressionRow({ should_suppress: true }),
+            createEpisodeSuppressionRow(secondEpisode),
           ])
         )
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
           createEpisodeDataResponse([{ episode_id: 'episode-2', data_json: null }])
         )
@@ -653,14 +662,13 @@ describe('DispatcherService', () => {
         },
       ];
 
-      // Suppression query results:
+      // Episode suppression query results:
       // - rule-001: ack at 16:03, then unack at 16:08 → should_suppress: false
       // - rule-002: ack at 16:03, no unack → should_suppress: true
       // - rule-003: no actions → no suppression records
-      // - rule-004: snoozed at 16:03 (null episode_id, applies to all) → should_suppress: true
       // - rule-005 series-1: deactivated at 16:08 → should_suppress: true
       // - rule-005 series-2: no actions → no suppression record
-      const suppressions: AlertEpisodeSuppression[] = [
+      const episodeSuppressions: EpisodeSuppressionRow[] = [
         {
           rule_id: 'rule-001',
           source: 'internal',
@@ -668,6 +676,7 @@ describe('DispatcherService', () => {
           group_hash: 'rule-001-series-1',
           episode_id: 'rule-001-series-1-episode-1',
           should_suppress: false,
+          last_ack_action: 'unack',
         },
         {
           rule_id: 'rule-002',
@@ -676,22 +685,7 @@ describe('DispatcherService', () => {
           group_hash: 'rule-002-series-1',
           episode_id: 'rule-002-series-1-episode-1',
           should_suppress: true,
-        },
-        {
-          rule_id: 'rule-004',
-          source: 'internal',
-          space_id: 'default',
-          group_hash: 'rule-004-series-1',
-          episode_id: null,
-          should_suppress: true,
-        },
-        {
-          rule_id: 'rule-004',
-          source: 'internal',
-          space_id: 'default',
-          group_hash: 'rule-004-series-2',
-          episode_id: null,
-          should_suppress: true,
+          last_ack_action: 'ack',
         },
         {
           rule_id: 'rule-005',
@@ -700,12 +694,35 @@ describe('DispatcherService', () => {
           group_hash: 'rule-005-series-1',
           episode_id: 'rule-005-series-1-episode-1',
           should_suppress: true,
+          last_deactivate_action: 'deactivate',
+        },
+      ];
+
+      // Series suppression query results:
+      // - rule-004: both series snoozed at 16:03 (series-level, applies to every episode)
+      const seriesSuppressions: SeriesSuppressionRow[] = [
+        {
+          rule_id: 'rule-004',
+          source: 'internal',
+          space_id: 'default',
+          group_hash: 'rule-004-series-1',
+          should_suppress: true,
+          last_snooze_action: 'snooze',
+        },
+        {
+          rule_id: 'rule-004',
+          source: 'internal',
+          space_id: 'default',
+          group_hash: 'rule-004-series-2',
+          should_suppress: true,
+          last_snooze_action: 'snooze',
         },
       ];
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(episodeSuppressions))
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse(seriesSuppressions))
         .mockResolvedValueOnce(createEpisodeDataResponse([]))
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
@@ -722,7 +739,7 @@ describe('DispatcherService', () => {
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
-      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(4);
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(5);
 
       const [{ operations }] = storageEsClient.bulk.mock.calls[0];
 
@@ -841,7 +858,7 @@ describe('DispatcherService', () => {
         episode_status: 'active',
       });
 
-      const suppressions: AlertEpisodeSuppression[] = [
+      const suppressions: EpisodeSuppressionRow[] = [
         {
           rule_id: null,
           source: 'pagerduty',
@@ -865,7 +882,8 @@ describe('DispatcherService', () => {
             externalEpisode('space-b'),
           ])
         )
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
           createEpisodeDataResponse([{ episode_id: 'pd-ep-1', data_json: null }])
         )
@@ -929,7 +947,7 @@ describe('DispatcherService', () => {
         },
       ];
 
-      const suppressions: AlertEpisodeSuppression[] = [
+      const suppressions: EpisodeSuppressionRow[] = [
         {
           rule_id: 'rule-1',
           source: 'internal',
@@ -950,7 +968,8 @@ describe('DispatcherService', () => {
 
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
-        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createSeriesSuppressionsResponse())
         .mockResolvedValueOnce(
           createEpisodeDataResponse([
             { episode_id: 'episode-critical', data_json: JSON.stringify({ severity: 'critical' }) },
