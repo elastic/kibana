@@ -170,6 +170,27 @@ describe('formatMemoryMergeSources', () => {
 });
 
 describe('createLlmSynthesizeMemoryGroup', () => {
+  it('shows the writer a colliding memory the entry did not name as one it replaces', async () => {
+    const existing = page('memory_checkout-redis', 'Checkout Redis', 'COLLIDING_FACT');
+    const output = jest.fn().mockResolvedValue({ output: { content: 'Written.' } });
+    const store = createStore({
+      get: jest.fn(async (id: string) => (id === existing.id ? existing : undefined)),
+    });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [{ slug: 'checkout-redis', title: 'Checkout Redis', tags: [], replaces: [] }],
+      synthesizeMemoryGroup: createLlmSynthesizeMemoryGroup({ inferenceClient: { output } as never }),
+      logger: loggerMock.create(),
+    });
+
+    const { input } = output.mock.calls[0][0];
+    expect(input).toContain('Memories this entry replaces:\n- id=memory_checkout-redis');
+    expect(input).toContain('COLLIDING_FACT');
+  });
+
   it('budgets a long transcript together with the replaced memories and asks only for content', async () => {
     const output = jest.fn().mockResolvedValue({ output: { content: 'Written content' } });
     const synthesize = createLlmSynthesizeMemoryGroup({
@@ -989,6 +1010,7 @@ describe('applyMemoryEdits', () => {
         primaryTerm: 2,
       }),
     });
+    const synthesizeMemoryGroup = jest.fn().mockResolvedValue({ content: 'Old and new facts.' });
 
     await applyMemoryEdits({
       store,
@@ -1002,12 +1024,13 @@ describe('applyMemoryEdits', () => {
           replaces: [],
         },
       ],
-      synthesizeMemoryGroup: async () => ({
-        content: 'Old and new facts.',
-      }),
+      synthesizeMemoryGroup,
       logger: loggerMock.create(),
     });
 
+    expect(synthesizeMemoryGroup).toHaveBeenCalledWith(
+      expect.objectContaining({ sources: [existing] })
+    );
     expect(store.update).toHaveBeenCalledWith(
       'memory_checkout-redis',
       expect.objectContaining({
