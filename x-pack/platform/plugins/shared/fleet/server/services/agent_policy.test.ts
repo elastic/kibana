@@ -1209,6 +1209,100 @@ describe('Agent policy', () => {
       );
     });
 
+    it('should look up package info once per unique package when version conditions are missing', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Simulate ~1000 same-package policies (Synthetics private location) missing the denormalized
+      // field. getPackageInfo is intentionally slow so the test doubles as a micro-benchmark:
+      // without dedupe this would be ~5s; with dedupe it stays near one lookup.
+      const LOOKUP_MS = 50;
+      const PACKAGE_POLICY_COUNT = 100;
+      jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
+        await new Promise((resolve) => setTimeout(resolve, LOOKUP_MS));
+        return {
+          name: pkgName,
+          version: pkgVersion,
+          title: 'Synthetics',
+          conditions: { agent: { version: '>=8.12.0' } },
+        } as any;
+      });
+
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue(
+        Array.from({ length: PACKAGE_POLICY_COUNT }, (_, i) => ({
+          id: `pp-${i}`,
+          package: { name: 'synthetics', title: 'Synthetics', version: '1.8.0' },
+          package_agent_version_condition: undefined,
+        })) as any
+      );
+
+      const started = Date.now();
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
+      const elapsedMs = Date.now() - started;
+
+      expect(getPackageInfo).toHaveBeenCalledTimes(1);
+      expect(getPackageInfo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pkgName: 'synthetics',
+          pkgVersion: '1.8.0',
+          prerelease: true,
+        })
+      );
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({
+          has_agent_version_conditions: true,
+          min_agent_version: '8.12.0',
+          package_agent_version_conditions: expect.arrayContaining([
+            {
+              name: 'synthetics',
+              title: 'Synthetics',
+              version_condition: '>=8.12.0',
+            },
+          ]),
+        })
+      );
+      // Sequential N lookups would be PACKAGE_POLICY_COUNT * LOOKUP_MS (~5s). Allow headroom for
+      // SO work but fail loudly if the dedupe regresses.
+      expect(elapsedMs).toBeLessThan(PACKAGE_POLICY_COUNT * LOOKUP_MS * 0.25);
+    });
+
+    it('should look up package info once per distinct package version in the fallback path', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
+        return {
+          name: pkgName,
+          version: pkgVersion,
+          title: pkgName,
+          conditions: {
+            agent: { version: pkgName === 'synthetics' ? '>=8.12.0' : '>=9.0.0' },
+          },
+        } as any;
+      });
+
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        {
+          id: 'pp-1',
+          package: { name: 'synthetics', title: 'Synthetics', version: '1.8.0' },
+        },
+        {
+          id: 'pp-2',
+          package: { name: 'synthetics', title: 'Synthetics', version: '1.8.0' },
+        },
+        {
+          id: 'pp-3',
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+        },
+      ] as any);
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
+
+      expect(getPackageInfo).toHaveBeenCalledTimes(2);
+    });
+
     it('should not fetch full package policies when deploying asynchronously', async () => {
       const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
