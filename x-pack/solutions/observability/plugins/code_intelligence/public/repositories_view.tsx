@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -52,7 +51,15 @@ const SUMMARY_SETTLE_DELAY_MS = 3000;
 
 type HealthColor = 'success' | 'danger' | 'warning' | 'primary' | 'subdued';
 
-const repositoryStatusLabels: Record<RepositoryExtractionStatus['status'], string> = {
+type RepositoryStatus = RepositoryExtractionStatus['status'] | 'ready' | 'disabled';
+
+const repositoryStatusLabels: Record<RepositoryStatus, string> = {
+  ready: i18n.translate('xpack.codeIntelligence.repositories.statusReady', {
+    defaultMessage: 'Ready',
+  }),
+  disabled: i18n.translate('xpack.codeIntelligence.repositories.statusDisabled', {
+    defaultMessage: 'Disabled',
+  }),
   pending: i18n.translate('xpack.codeIntelligence.repositories.statusPending', {
     defaultMessage: 'Waiting',
   }),
@@ -82,18 +89,30 @@ const batchStatusLabels: Record<ExtractionBatchStatus['status'], string> = {
   }),
 };
 
-const statusColor = (
-  status: RepositoryExtractionStatus['status'] | ExtractionBatchStatus['status']
-): HealthColor =>
+const statusColor = (status: RepositoryStatus | ExtractionBatchStatus['status']): HealthColor =>
   status === 'completed'
     ? 'success'
     : status === 'failed'
     ? 'danger'
     : status === 'partial'
     ? 'warning'
-    : status === 'pending'
+    : status === 'pending' || status === 'disabled'
     ? 'subdued'
     : 'primary';
+
+/** Batch statuses apply only while the batch runs; otherwise the stored state decides. */
+const repositoryStatus = (
+  enabled: boolean,
+  live: RepositoryExtractionStatus | undefined,
+  batchRunning: boolean,
+  /** Absent while the catalog counts are loading or could not be loaded. */
+  entryCount: number | undefined
+): RepositoryStatus | undefined => {
+  if (batchRunning && live !== undefined && live.status !== 'completed') return live.status;
+  if (!enabled) return 'disabled';
+  if (entryCount === undefined) return undefined;
+  return entryCount > 0 ? 'completed' : 'ready';
+};
 
 export const RepositoriesView = ({
   http,
@@ -233,35 +252,15 @@ export const RepositoriesView = ({
         render: ({ repository }: Repository) => {
           if (summaries === undefined) return <EuiText size="s">—</EuiText>;
           const counts = summaries.get(repository);
-          if (counts === undefined || counts.total === 0) {
-            return (
-              <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.codeIntelligence.repositories.noCatalogEntries', {
-                  defaultMessage: 'None',
-                })}
-              </EuiText>
-            );
-          }
           return (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-              <EuiFlexItem grow={false}>
-                <EuiLink
-                  data-test-subj={`codeIntelligenceViewCatalog-${repository}`}
-                  onClick={() => onViewCatalog(repository)}
-                >
-                  {i18n.translate('xpack.codeIntelligence.repositories.catalogEntryCount', {
-                    defaultMessage: '{count, plural, one {# entry} other {# entries}}',
-                    values: { count: counts.total },
-                  })}
-                </EuiLink>
-              </EuiFlexItem>
-              {[...CATALOG_SEVERITIES]
-                .reverse()
-                .filter((level) => counts.severities[level] > 0)
-                .map((level) => (
+              {[...CATALOG_SEVERITIES].reverse().map((level) => {
+                const count = counts?.severities[level] ?? 0;
+                return (
                   <EuiFlexItem grow={false} key={level}>
                     <EuiBadge
                       color={severityColors[level]}
+                      title={severityLabels[level]}
                       data-test-subj={`codeIntelligenceSeverityCount-${repository}-${level}`}
                       onClick={() => onViewCatalog(repository, level)}
                       onClickAriaLabel={i18n.translate(
@@ -272,40 +271,14 @@ export const RepositoriesView = ({
                         }
                       )}
                     >
-                      {i18n.translate('xpack.codeIntelligence.repositories.severityCount', {
-                        defaultMessage: '{severity} {count}',
-                        values: {
-                          severity: severityLabels[level],
-                          count: counts.severities[level],
-                        },
-                      })}
+                      {count}
                     </EuiBadge>
                   </EuiFlexItem>
-                ))}
+                );
+              })}
             </EuiFlexGroup>
           );
         },
-      },
-      {
-        field: 'enabled',
-        name: i18n.translate('xpack.codeIntelligence.repositories.enabledColumn', {
-          defaultMessage: 'In run all',
-        }),
-        width: '110px',
-        nameTooltip: {
-          content: i18n.translate('xpack.codeIntelligence.repositories.enabledColumnTooltip', {
-            defaultMessage:
-              'Whether Run all enabled repositories includes this repository. Change it with Edit.',
-          }),
-        },
-        render: (enabled: boolean) =>
-          enabled
-            ? i18n.translate('xpack.codeIntelligence.repositories.enabledYes', {
-                defaultMessage: 'Yes',
-              })
-            : i18n.translate('xpack.codeIntelligence.repositories.enabledNo', {
-                defaultMessage: 'No',
-              }),
       },
       {
         name: i18n.translate('xpack.codeIntelligence.repositories.revisionColumn', {
@@ -319,48 +292,47 @@ export const RepositoriesView = ({
         ),
       },
       {
-        name: i18n.translate('xpack.codeIntelligence.repositories.lastRunColumn', {
-          defaultMessage: 'Current or last batch',
+        name: i18n.translate('xpack.codeIntelligence.repositories.statusColumn', {
+          defaultMessage: 'Status',
         }),
-        render: ({ repository }: Repository) => {
-          const status = batch?.repositories.find((entry) => entry.repository === repository);
-          if (status === undefined) {
-            return (
-              <EuiText size="s">
-                {i18n.translate('xpack.codeIntelligence.repositories.notRun', {
-                  defaultMessage: 'Not in a batch this session',
-                })}
-              </EuiText>
-            );
-          }
+        render: ({ repository, enabled }: Repository) => {
+          const live = batch?.repositories.find((entry) => entry.repository === repository);
+          const status = repositoryStatus(
+            enabled,
+            live,
+            batch?.status === 'running',
+            summaries === undefined ? undefined : summaries.get(repository)?.total ?? 0
+          );
           return (
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiHealth
-                  color={statusColor(status.status)}
-                  data-test-subj={`codeIntelligenceRepositoryStatus-${repository}`}
-                >
-                  {repositoryStatusLabels[status.status]}
-                </EuiHealth>
+                {status === undefined ? (
+                  <EuiText
+                    size="s"
+                    data-test-subj={`codeIntelligenceRepositoryStatus-${repository}`}
+                  >
+                    —
+                  </EuiText>
+                ) : (
+                  <EuiHealth
+                    color={statusColor(status)}
+                    data-test-subj={`codeIntelligenceRepositoryStatus-${repository}`}
+                  >
+                    {repositoryStatusLabels[status]}
+                  </EuiHealth>
+                )}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  {status.commitSha === undefined
-                    ? status.revision
-                    : `${status.revision} (${status.commitSha.slice(0, 12)})`}
-                </EuiText>
-              </EuiFlexItem>
-              {status.errors.length > 0 && (
+              {live !== undefined && live.errors.length > 0 && (
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="danger">
-                    {status.errors.join('; ')}
+                    {live.errors.join('; ')}
                   </EuiText>
                 </EuiFlexItem>
               )}
-              {status.warnings.length > 0 && (
+              {live !== undefined && live.warnings.length > 0 && (
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="warning">
-                    {status.warnings.join('; ')}
+                    {live.warnings.join('; ')}
                   </EuiText>
                 </EuiFlexItem>
               )}

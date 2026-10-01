@@ -241,7 +241,7 @@ export const RepositoryFlyout = ({ http, editing, onSaved, onClose }: Props) => 
             <EuiSwitch
               data-test-subj="codeIntelligenceRepositoryFormEnabled"
               label={i18n.translate('xpack.codeIntelligence.repositoryForm.enabledLabel', {
-                defaultMessage: 'Include when running all',
+                defaultMessage: 'Enabled',
               })}
               checked={enabled}
               onChange={(event) => setEnabled(event.target.checked)}

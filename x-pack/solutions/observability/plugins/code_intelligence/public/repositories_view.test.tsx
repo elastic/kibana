@@ -109,32 +109,123 @@ describe('RepositoriesView', () => {
     expect(screen.queryByText('https://github.com/elastic/one.git')).toBeNull();
   });
 
-  it('shows catalog counts per severity and drills down into the catalog', async () => {
+  it('does not show the In run all column', () => {
+    renderView();
+
+    expect(screen.queryByRole('columnheader', { name: /In run all/ })).toBeNull();
+  });
+
+  it('shows every severity count, including zero, and drills down into the catalog', async () => {
     getCatalogSummaryMock.mockResolvedValue([
       {
         repository: 'elastic/one',
-        total: 12,
+        total: 11,
         severities: { low: 5, medium: 0, high: 4, critical: 2 },
       },
     ]);
     const { onViewCatalog } = renderView();
 
-    const total = await screen.findByTestId('codeIntelligenceViewCatalog-elastic/one');
-    expect(total).toHaveTextContent('12 entries');
-    expect(
-      screen.getByTestId('codeIntelligenceSeverityCount-elastic/one-critical')
-    ).toHaveTextContent('Critical 2');
-    expect(screen.getByTestId('codeIntelligenceSeverityCount-elastic/one-low')).toHaveTextContent(
-      'Low 5'
+    const critical = await screen.findByTestId(
+      'codeIntelligenceSeverityCount-elastic/one-critical'
     );
-    expect(screen.queryByTestId('codeIntelligenceSeverityCount-elastic/one-medium')).toBeNull();
-    expect(screen.queryByTestId('codeIntelligenceViewCatalog-elastic/two')).toBeNull();
-    expect(screen.getByText('None')).toBeInTheDocument();
+    expect(critical).toHaveTextContent(/^2$/);
+    expect(critical).toHaveAttribute('title', 'Critical');
+    expect(
+      screen.getByTestId('codeIntelligenceSeverityCount-elastic/one-medium')
+    ).toHaveTextContent(/^0$/);
+    expect(screen.getByTestId('codeIntelligenceSeverityCount-elastic/one-low')).toHaveTextContent(
+      /^5$/
+    );
+    expect(screen.getByTestId('codeIntelligenceSeverityCount-elastic/two-high')).toHaveTextContent(
+      /^0$/
+    );
+    expect(screen.queryByTestId('codeIntelligenceViewCatalog-elastic/one')).toBeNull();
+    expect(screen.queryByText(/\d+ entries/)).toBeNull();
 
-    fireEvent.click(total);
-    expect(onViewCatalog).toHaveBeenLastCalledWith('elastic/one');
     fireEvent.click(screen.getByTestId('codeIntelligenceSeverityCount-elastic/one-high'));
     expect(onViewCatalog).toHaveBeenLastCalledWith('elastic/one', 'high');
+  });
+
+  it('shows Completed with entries, Ready without, and Disabled when not enabled', async () => {
+    getCatalogSummaryMock.mockResolvedValue([
+      {
+        repository: 'elastic/one',
+        total: 3,
+        severities: { low: 3, medium: 0, high: 0, critical: 0 },
+      },
+      {
+        repository: 'elastic/off',
+        total: 3,
+        severities: { low: 3, medium: 0, high: 0, critical: 0 },
+      },
+    ]);
+    renderView([
+      repositoryRow('elastic/one'),
+      repositoryRow('elastic/two'),
+      repositoryRow('elastic/off', { enabled: false }),
+    ]);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('codeIntelligenceRepositoryStatus-elastic/one')).toHaveTextContent(
+        'Completed'
+      )
+    );
+    expect(screen.getByRole('columnheader', { name: 'Status' })).toBeInTheDocument();
+    expect(screen.getByTestId('codeIntelligenceRepositoryStatus-elastic/two')).toHaveTextContent(
+      'Ready'
+    );
+    expect(screen.getByTestId('codeIntelligenceRepositoryStatus-elastic/off')).toHaveTextContent(
+      'Disabled'
+    );
+  });
+
+  it('does not guess Ready or Completed when the catalog counts cannot be loaded', async () => {
+    getCatalogSummaryMock.mockRejectedValue(new Error('unavailable'));
+    renderView([repositoryRow('elastic/one'), repositoryRow('elastic/off', { enabled: false })]);
+
+    await waitFor(() => expect(getCatalogSummaryMock).toHaveBeenCalled());
+    expect(screen.getByTestId('codeIntelligenceRepositoryStatus-elastic/one')).toHaveTextContent(
+      /^—$/
+    );
+    expect(screen.getByTestId('codeIntelligenceRepositoryStatus-elastic/off')).toHaveTextContent(
+      'Disabled'
+    );
+  });
+
+  it('derives the status from the catalog once a batch finishes, without the revision', async () => {
+    getCatalogSummaryMock.mockResolvedValue([
+      {
+        repository: 'elastic/two',
+        total: 2,
+        severities: { low: 2, medium: 0, high: 0, critical: 0 },
+      },
+    ]);
+    startBatchMock.mockResolvedValue({ id: 'running-id' });
+    getBatchMock.mockResolvedValue({
+      ...runningBatch,
+      status: 'completed',
+      repositories: runningBatch.repositories.map((entry) => ({
+        ...entry,
+        status: 'completed',
+        commitSha: '0123456789abcdef',
+      })),
+    });
+    renderView();
+
+    fireEvent.click(runButton());
+
+    await waitFor(() => expect(getBatchMock).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(screen.getByTestId('codeIntelligenceRepositoryStatus-elastic/two')).toHaveTextContent(
+        'Completed'
+      )
+    );
+    expect(screen.getByTestId('codeIntelligenceRepositoryStatus-elastic/one')).toHaveTextContent(
+      'Ready'
+    );
+    expect(screen.queryByText(/0123456789ab/)).toBeNull();
+    expect(screen.getByTestId('codeIntelligenceRevision-elastic/two')).toHaveTextContent('main');
+    expect(screen.getAllByText('main')).toHaveLength(1);
   });
 
   it('reloads the catalog counts when a batch finishes and again once writes are searchable', async () => {
@@ -166,9 +257,11 @@ describe('RepositoriesView', () => {
     expect(runButton()).toHaveTextContent('Run all enabled repositories');
     fireEvent.click(runButton());
 
-    expect(
-      await screen.findByTestId('codeIntelligenceRepositoryStatus-elastic/one')
-    ).toHaveTextContent('Running');
+    await waitFor(() =>
+      expect(screen.getByTestId('codeIntelligenceRepositoryStatus-elastic/one')).toHaveTextContent(
+        'Running'
+      )
+    );
     expect(screen.getByTestId('codeIntelligenceRepositoryStatus-elastic/two')).toHaveTextContent(
       'Waiting'
     );
@@ -217,6 +310,8 @@ describe('RepositoriesView', () => {
 
     fireEvent.click(screen.getAllByTestId('codeIntelligenceEditRepository')[1]);
     const flyout = screen.getByTestId('codeIntelligenceRepositoryFlyout');
+    expect(within(flyout).getByText('Enabled')).toBeInTheDocument();
+    expect(within(flyout).queryByText(/running all/)).toBeNull();
     expect(within(flyout).getByRole('heading', { name: 'Edit elastic/two' })).toBeInTheDocument();
     expect(screen.getByTestId('codeIntelligenceRepositoryFormRepository')).toHaveValue(
       'elastic/two'
