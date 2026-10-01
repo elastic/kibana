@@ -9,7 +9,6 @@ import React, { memo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
-import { AttachmentsOverviewSection } from '../attachments_overview';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 
@@ -18,6 +17,13 @@ const SUMMARY_LIMIT = 120;
 export interface OverviewTabProps {
   investigation: Investigation;
   attachments: VersionedAttachment[] | undefined;
+  /**
+   * Renders the "Attachments" subsection with links to security pages. Supplied by the caller so
+   * this package can link to Security app pages without taking a dependency on Kibana core or
+   * security_solution. Omitted entirely when the caller does not supply a URL builder (see
+   * `getSecurityAppUrl` on `registerAgenticInvestigationTemplateUI`).
+   */
+  renderAttachmentsOverview?: (attachments: VersionedAttachment[]) => React.ReactNode;
   /**
    * Rendered under a "Proposed actions" heading when supplied. Omitted entirely otherwise: this
    * package cannot fetch a conversation's proposals itself, so a host that can (see
@@ -28,7 +34,7 @@ export interface OverviewTabProps {
 }
 
 export const OverviewTab = memo<OverviewTabProps>(
-  ({ investigation, attachments, proposedActionsContent }) => {
+  ({ investigation, attachments, renderAttachmentsOverview, proposedActionsContent }) => {
     const { summary } = investigation;
     const [expanded, setExpanded] = useState(false);
 
@@ -61,10 +67,8 @@ export const OverviewTab = memo<OverviewTabProps>(
           </EuiFlexItem>
         )}
 
-        {attachments && attachments.length > 0 && (
-          <EuiFlexItem>
-            <AttachmentsOverviewSection attachments={attachments} />
-          </EuiFlexItem>
+        {renderAttachmentsOverview && attachments && attachments.length > 0 && (
+          <EuiFlexItem>{renderAttachmentsOverview(attachments)}</EuiFlexItem>
         )}
 
         {proposedActionsContent && (
