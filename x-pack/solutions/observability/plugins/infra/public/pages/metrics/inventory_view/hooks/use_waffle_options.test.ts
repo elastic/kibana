@@ -13,6 +13,16 @@ import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../../../alerting/use_alert_prefill');
+jest.mock('../../../../hooks/use_is_pod_schema_selector_enabled', () => ({
+  useIsPodSchemaSelectorEnabled: jest.fn(() => false),
+}));
+
+const updateTopbarMenuVisibilityBySchema = jest.fn();
+jest.mock('../../../../containers/ml/infra_ml_capabilities', () => ({
+  useInfraMLCapabilitiesContext: () => ({
+    updateTopbarMenuVisibilityBySchema,
+  }),
+}));
 
 const mockUseUrlState = useUrlState as jest.MockedFunction<typeof useUrlState>;
 const mockUseAlertPrefillContext = useAlertPrefillContext as jest.MockedFunction<
@@ -39,6 +49,7 @@ const setPrefillState = jest.fn((args: Partial<WaffleOptionsState>) => args);
 
 describe('useWaffleOptions', () => {
   beforeEach(() => {
+    updateTopbarMenuVisibilityBySchema.mockClear();
     mockUseAlertPrefillContext.mockReturnValue({
       inventoryPrefill: {
         setPrefillState,
@@ -46,6 +57,20 @@ describe('useWaffleOptions', () => {
     } as unknown as ReturnType<typeof useAlertPrefillContext>);
 
     mockUseUrlState.mockReturnValue([{}, jest.fn()]);
+  });
+
+  it('syncs Anomaly detection topbar visibility from preferredSchema on mount and change', () => {
+    mockUseUrlState.mockReturnValue([{ preferredSchema: 'semconv' }, jest.fn()]);
+
+    const { result } = renderUseWaffleOptionsHook();
+
+    expect(updateTopbarMenuVisibilityBySchema).toHaveBeenCalledWith('semconv');
+
+    act(() => {
+      result.current.changePreferredSchema('ecs');
+    });
+
+    expect(updateTopbarMenuVisibilityBySchema).toHaveBeenLastCalledWith('ecs');
   });
 
   it('should sync the options to the inventory alert preview context', () => {

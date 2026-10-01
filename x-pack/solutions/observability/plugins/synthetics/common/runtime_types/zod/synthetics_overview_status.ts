@@ -35,6 +35,11 @@ export const OverviewPingCodec = z.looseObject({
   labels: z.record(z.string(), z.string()).optional(),
 });
 
+export const LinkedRemoteLocationCodec = z.object({
+  remoteName: z.string(),
+  locationId: z.string(),
+});
+
 export const OverviewStatusMetaDataCodec = z.looseObject({
   monitorQueryId: z.string(),
   configId: z.string(),
@@ -62,12 +67,21 @@ export const OverviewStatusMetaDataCodec = z.looseObject({
   overallStatus: z.string(),
   projectId: z.string().optional(),
   updated_at: z.string().optional(),
+  created_at: z.string().optional(),
   timestamp: z.string().optional(),
   spaces: z.array(z.string()).optional(),
   urls: z.string().optional(),
   maintenanceWindows: z.array(z.string()).optional(),
   remote: remoteMonitorInfoSchema.optional(),
+  linkedRemoteLocations: z.array(LinkedRemoteLocationCodec).optional(),
   origin: MonitorOriginCodec.optional(),
+});
+
+export const OverviewStatusFilterIdCodec = z.looseObject({
+  monitorQueryId: z.string(),
+  remoteName: z.string().optional(),
+  locationId: z.string().optional(),
+  linkedRemoteLocations: z.array(LinkedRemoteLocationCodec).optional(),
 });
 
 export const OverviewStatusCodec = z.looseObject({
@@ -86,7 +100,7 @@ export const OverviewStatusCodec = z.looseObject({
   disabledConfigs: z.record(z.string(), OverviewStatusMetaDataCodec),
   enabledMonitorQueryIds: z.array(z.string()),
   disabledMonitorQueryIds: z.array(z.string()),
-  allIds: z.array(z.string()),
+  allIds: z.array(OverviewStatusFilterIdCodec),
 });
 
 export const PaginatedOverviewStatusCodec = OverviewStatusCodec.extend({
@@ -94,6 +108,10 @@ export const PaginatedOverviewStatusCodec = OverviewStatusCodec.extend({
   total: z.number().optional(),
   page: z.number().optional(),
   perPage: z.number().optional(),
+  upIds: z.array(OverviewStatusFilterIdCodec).optional(),
+  downIds: z.array(OverviewStatusFilterIdCodec).optional(),
+  pendingIds: z.array(OverviewStatusFilterIdCodec).optional(),
+  staleIds: z.array(OverviewStatusFilterIdCodec).optional(),
 });
 
 export const OverviewStalePriorRunCodec = z.looseObject({

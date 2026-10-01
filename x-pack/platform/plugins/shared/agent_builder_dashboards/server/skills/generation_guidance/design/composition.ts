@@ -14,7 +14,7 @@ A well-composed dashboard tells a coherent story about the data:
 2. **Lead with high-level metrics** (Metric or Gauge panels): total counts, averages, key performance indicators that give an at-a-glance summary.
 3. **Follow with time-series trends** (XY line/area panels): how the key metrics change over time.
 4. **Follow with breakdowns and distributions** (XY bar, Heatmap, Tagcloud, or ranking tables): top-N rankings, categorical splits, and density views. A table of top countries belongs here, not with summary metrics.
-5. **When creating a dashboard or explicitly adding panels, include as many as are valuable for the underlying data and user intent.** Let the richness and diversity of the available fields drive the panel count instead of a fixed numeric target. Prettify arranges the existing panels.
+5. **When creating a dashboard or explicitly adding panels, include as many as are valuable for the underlying data and user intent.** Let the richness and diversity of the available fields drive the panel count instead of a fixed numeric target. Enhance arranges the existing panels.
 6. **Every panel should serve a clear purpose.** Do not add panels just to fill space, but do not artificially limit the dashboard when more panels would provide genuine insight.
 
 When the user's request is vague (e.g., "create a dashboard for my logs"), explore the discovered index mapping thoroughly and compose a rich dashboard that covers the breadth of the available data — overview metrics, time-series trends, breakdowns, and distributions. Let the fields drive the panel count rather than defaulting to a minimal set.

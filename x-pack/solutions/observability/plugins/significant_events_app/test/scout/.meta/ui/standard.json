@@ -1,0 +1,56 @@
+{
+  "sha1": "6c806147fad5fd09bb653942cbfa9ba0e7e4d56a",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "0bd58b8ab7d8a12-4976b6ba39021f6",
+      "title": "Significant Events app loads and redirects / to /streams tab by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
+        "line": 46,
+        "column": 25
+      }
+    },
+    {
+      "id": "0bd58b8ab7d8a12-03d40d846322c7b",
+      "title": "Significant Events app renders navigation tabs without Detections and links to Settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "0bd58b8ab7d8a12-7b747e6e6d30582",
+      "title": "Significant Events app shows the not-enabled empty prompt when the feature flag is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events_app/test/scout/ui/tests/significant_events.spec.ts",
+        "line": 78,
+        "column": 54
+      }
+    }
+  ]
+}

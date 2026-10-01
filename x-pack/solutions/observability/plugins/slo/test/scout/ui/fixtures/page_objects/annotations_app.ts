@@ -19,4 +19,8 @@ export class AnnotationsApp {
     await this.appMenu.clickOverflowItem('sloHeaderAnnotationsLink');
     await this.page.getByTestId('annotationsPage').waitFor({ state: 'visible' });
   }
+
+  async clickCreateAnnotation() {
+    await this.appMenu.clickItem('o11yRenderToolsRightCreateAnnotationButton');
+  }
 }

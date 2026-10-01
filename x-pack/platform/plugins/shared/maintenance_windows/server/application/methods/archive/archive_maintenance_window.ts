@@ -76,9 +76,17 @@ async function archiveWithOCC(
       });
     }
 
+    // Decode raw SO attributes into the domain model first so the write transform sees the
+    // correct domain types (AlertingScopeAttributes with `enabled`) rather than the raw
+    // storage types (AlertsFilterQueryAttributes without `enabled`).
+    const domainWindow = transformMaintenanceWindowAttributesToMaintenanceWindow({
+      attributes,
+      id,
+    });
+
     const updatedMaintenanceWindowAttributes =
       transformMaintenanceWindowToMaintenanceWindowAttributes({
-        ...attributes,
+        ...domainWindow,
         events,
         expirationDate,
         updatedAt: modificationMetadata.updatedAt,

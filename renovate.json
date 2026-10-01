@@ -45,18 +45,13 @@
         "style-loader",
         "val-loader",
         "webpack",
-        "webpack-bundle-analyzer",
         "webpack-cli",
         "webpack-dev-server",
-        "webpack-merge",
-        "webpack-sources",
-        "@statoscope/webpack-plugin",
-        "@types/webpack-bundle-analyzer",
-        "@types/webpack-sources"
+        "webpack-merge"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations", "ci:build-webpack-bundle-analyzer"],
+      "addLabels": ["Team:Operations"],
       "minimumReleaseAge": "60 days",
       "enabled": false
     },
@@ -132,7 +127,6 @@
         "openai",
         "@types/json-schema",
         "table",
-        "@huggingface/hub",
         "cache-manager",
         "cache-manager-fs-hash",
         "keyv",
@@ -888,7 +882,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript", "typescript-7"],
+      "matchDepNames": ["typescript", "typescript-7", "oxlint-tsgolint"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1287,29 +1281,11 @@
       "enabled": true
     },
     {
-      "groupName": "search-ui ai dependency",
-      "matchDepNames": ["ai", "@ai-sdk/langchain"],
-      "reviewers": ["team:search-ml-ux"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Search", "Team:Enterprise Search"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "search-ui kea dependency",
       "matchDepNames": ["kea"],
       "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Search", "Team:Enterprise Search", "effort:high", "upgrade-risk:medium"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "search-ui swr dependency",
-      "matchDepNames": ["swr"],
-      "reviewers": ["team:search-ml-ux"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Search", "Team:Enterprise Search"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1325,15 +1301,6 @@
     {
       "groupName": "vinyl",
       "matchDepNames": ["vinyl", "vinyl-fs", "@types/vinyl", "@types/vinyl-fs"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "watchpack",
-      "matchDepNames": ["watchpack", "@types/watchpack"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -2424,7 +2391,7 @@
     },
     {
       "groupName": "oxlint",
-      "matchDepNames": ["oxlint"],
+      "matchDepNames": ["oxlint", "@oxlint/plugins"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

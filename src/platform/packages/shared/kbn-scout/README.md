@@ -344,6 +344,16 @@ Here we have logic to start Kibana and Elasticsearch servers using `kbn-test` fu
 
 Scout supports two distinct types of tests: UI and API, each with their own directory structure and import patterns:
 
+##### Auditing page object usage
+
+`node scripts/scout audit` prints, for every `pageObjects.<key>` in this package, how many files and which modules use it. It walks each `.ts` file under `test/scout*` and the solution Scout packages with the TypeScript compiler, so it counts property access and destructuring and ignores comments and strings. Import graph tools cannot do this because page objects are Proxy fixtures, not imports.
+
+It also reports exported class names that appear in more than one Scout module (the FTR duplication pattern), and compares every custom server config set against the default: sets with identical or subset differences could be merged, and sets whose only differences are runtime updatable settings (`feature_flags.overrides`, or keys a plugin declares in `dynamicConfig`) could use `apiServices.core.settings()` instead of booting their own servers. `--format text` prints only the findings with the reason for each, in a form that reads well in Slack. The default JSON is for tooling.
+
+Run it by hand when you add, move, or remove a page object or a config set. A scheduled Buildkite pipeline (`kibana / scout / quality-audit`) also runs it on the 1st and 15th of each month and posts a summary to `#kibana-scout-stats`, with the full report in the build annotation. Read the output against the placement policy above. The command reports facts only, it does not decide.
+
+The audit is a set of small functions in `src/cli/audit.ts` and `src/cli/audit_config_sets.ts` so the same facts can feed a scheduled run and the `scout-best-practices-reviewer` skill on every PR. To add a check, add a function that returns facts, include it in the report, and give it a section in `formatAuditReportForSlack`.
+
 #### Setting up Test Directory
 
 To get started with Scout testing for your plugin, you need to create the appropriate directory structure in your plugin's root directory:

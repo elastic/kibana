@@ -28,9 +28,12 @@ function isEditingFromDashboard(
   return isVizApp && hasOriginatingApp;
 }
 
-const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessVectordb.nav.performance', {
-  defaultMessage: 'Performance',
-});
+const MONITOR_PERFORMANCE_TITLE = i18n.translate(
+  'xpack.serverlessVectordb.nav.monitorPerformance',
+  {
+    defaultMessage: 'Monitor performance',
+  }
+);
 const ALERTS_AND_INSIGHTS_TITLE = i18n.translate(
   'xpack.serverlessVectordb.nav.mngt.alertsAndInsights',
   {
@@ -98,6 +101,7 @@ export function createNavigationTree({
             children: [
               { link: 'management:index_management', breadcrumbStatus: 'hidden' },
               { link: 'management:data_federation', breadcrumbStatus: 'hidden' },
+              { link: 'management:esql_views', breadcrumbStatus: 'hidden' },
             ],
             title: i18n.translate('xpack.serverlessVectordb.nav.ingest.indices.title', {
               defaultMessage: 'Indices and data streams',
@@ -146,6 +150,7 @@ export function createNavigationTree({
             title: ACCESS_TITLE,
             children: [
               { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+              { link: 'management:service_accounts', breadcrumbStatus: 'hidden' },
               { link: 'management:roles', breadcrumbStatus: 'hidden' },
             ],
           },
@@ -162,7 +167,11 @@ export function createNavigationTree({
               {
                 id: 'cloudLinkDeployment',
                 cloudLink: 'deployment',
-                title: PERFORMANCE_TITLE,
+                title: MONITOR_PERFORMANCE_TITLE,
+              },
+              {
+                id: 'cloudLinkSearchPower',
+                cloudLink: 'searchPower',
               },
               {
                 cloudLink: 'userAndRoles',

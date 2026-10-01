@@ -7,19 +7,21 @@
 
 import { proposalToInvestigation } from './proposal_to_investigation';
 import type { ProposalItem } from '../../../common/proposals/list';
-import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 
 const baseProposal: ProposalItem = {
   id: 'prop-001',
   spaceId: 'default',
   conversationId: 'conv-001',
+  title: 'A proposed action',
   comment: 'A detailed description of the proposed action.',
   status: 'pending',
   impact: 'high',
   confidence: 'high',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2026-09-10T10:00:00.000Z',
   expired: false,
+  conversationAssignees: [],
 };
 
 describe('proposalToInvestigation', () => {
@@ -38,6 +40,8 @@ describe('proposalToInvestigation', () => {
       // decision is about, and repeats the CTA label right beside it.
       const result = proposalToInvestigation({
         ...baseProposal,
+        // What the server stores when the caller names nothing itself.
+        title: 'Isolate host',
         action: { name: 'Isolate host' } as ProposalWithMetadata['action'],
         actionWorkflowId: 'system-alertzero-action-isolate-host',
       });
@@ -45,6 +49,29 @@ describe('proposalToInvestigation', () => {
       expect(result.title).not.toBe('Isolate host');
       expect(result.title).not.toBe('system-alertzero-action-isolate-host');
       expect(result.primaryActionLabel).toBe('Isolate host');
+    });
+
+    // The card renders the summary as plain text, so a markdown comment
+    // arrived as literal asterisks and headings.
+    it('summarises the row with the title rather than the markdown comment', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        title: 'Tune the Okta rule',
+        comment: '**Bold heading**\n\nSome *markdown* body',
+      });
+
+      expect(result.summary).toBe('Tune the Okta rule');
+    });
+
+    it('labels the row with the proposal title over the action name', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        title: 'Tune the Okta rule',
+        action: { name: 'Edit rule' } as ProposalWithMetadata['action'],
+        actionWorkflowId: 'system-alertzero-action-edit-rule',
+      });
+
+      expect(result.primaryActionLabel).toBe('Tune the Okta rule');
     });
 
     it('falls back to a placeholder when the conversation title could not be read', () => {
@@ -58,7 +85,6 @@ describe('proposalToInvestigation', () => {
       ['respond', 'respond'],
       ['investigate', 'investigate'],
       ['configure', 'configure'],
-      ['tune', 'configure'], // legacy mapping
     ] as const)('category %s → bucket %s', (category, expected) => {
       const result = proposalToInvestigation({ ...baseProposal, category });
       expect(result.recommendedAction).toBe(expected);
@@ -73,6 +99,79 @@ describe('proposalToInvestigation', () => {
       const { category: _c, ...noCategory } = { ...baseProposal, category: undefined };
       const result = proposalToInvestigation(noCategory as ProposalItem);
       expect(result.recommendedAction).toBe('investigate');
+    });
+  });
+
+  describe('closed action label derivation', () => {
+    const decidedAt = '2026-09-10T11:00:00.000Z';
+    const closeAction = {
+      name: 'Close alerts as false positive',
+    } as ProposalWithMetadata['action'];
+
+    it('uses "N alerts closed as false positive" once the close succeeded', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        decidedAt,
+        status: 'succeeded',
+        actionInput: { alertIds: ['a1', 'a2', 'a3'], reason: 'false_positive' },
+      });
+      expect(result.primaryActionLabel).toBe('3 alerts closed as false positive');
+    });
+
+    it('singularises "alert" when count is 1', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        decidedAt,
+        status: 'succeeded',
+        actionInput: { alertIds: ['a1'], reason: 'false_positive' },
+      });
+      expect(result.primaryActionLabel).toBe('1 alert closed as false positive');
+    });
+
+    it.each(['no_action', 'expired', 'failed'] as const)(
+      'keeps the proposal title for a %s proposal, since nothing was closed',
+      (status) => {
+        const result = proposalToInvestigation({
+          ...baseProposal,
+          decidedAt,
+          status,
+          title: 'Close alerts as false positive',
+          action: closeAction,
+          actionInput: { alertIds: ['a1', 'a2'], reason: 'false_positive' },
+        });
+        expect(result.primaryActionLabel).toBe('Close alerts as false positive');
+      }
+    );
+
+    it('keeps the proposal title for a succeeded proposal of another action', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        decidedAt,
+        status: 'succeeded',
+        title: 'Isolate host',
+        action: { name: 'Isolate host' } as ProposalWithMetadata['action'],
+        actionInput: { alertIds: ['a1'] },
+      });
+      expect(result.primaryActionLabel).toBe('Isolate host');
+    });
+
+    it('falls back to the proposal title when alertIds is absent', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        decidedAt,
+        status: 'succeeded',
+        title: 'Close alerts as false positive',
+      });
+      expect(result.primaryActionLabel).toBe('Close alerts as false positive');
+    });
+
+    it('does not override primaryActionLabel for pending proposals', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        title: 'Close alerts as false positive',
+        actionInput: { alertIds: ['a1', 'a2'], reason: 'false_positive' },
+      });
+      expect(result.primaryActionLabel).toBe('Close alerts as false positive');
     });
   });
 
@@ -140,6 +239,25 @@ describe('proposalToInvestigation', () => {
     });
   });
 
+  describe('assignee', () => {
+    // `Investigation.assignee` is singular because the flyout header renders one avatar.
+    it('takes the first assignee', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        conversationAssignees: ['first.analyst', 'second.analyst'],
+      });
+      expect(result.assignee).toBe('first.analyst');
+    });
+
+    it('is null when nobody is assigned', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        conversationAssignees: [],
+      });
+      expect(result.assignee).toBeNull();
+    });
+  });
+
   describe('fixed fields', () => {
     it('id equals proposal id', () => {
       const result = proposalToInvestigation(baseProposal);
@@ -151,9 +269,19 @@ describe('proposalToInvestigation', () => {
       expect(result.events).toEqual([]);
     });
 
-    it('affectedSurface is undefined', () => {
+    it('affectedSurface is undefined when Impact was not hydrated', () => {
       const result = proposalToInvestigation(baseProposal);
       expect(result.affectedSurface).toBeUndefined();
+      expect(result.entityIds).toBeUndefined();
+    });
+
+    it('copies hydrated entity ids onto the card and uses the first as affectedSurface', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        entityIds: ['cfo@corp', 'host-1'],
+      });
+      expect(result.entityIds).toEqual(['cfo@corp', 'host-1']);
+      expect(result.affectedSurface).toBe('cfo@corp');
     });
 
     it('pendingProposalCount is 1 for undecided proposals', () => {

@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
@@ -26,10 +27,20 @@ import {
   mintInboundEventIdentityAttributes,
   toRawActionIdentityAttributes,
 } from '../../../../inbound/event_identity';
+import {
+  assertInboundEventsToggleAllowed,
+  resolveCreateInboundEventsEnabled,
+} from '../../../../inbound/inbound_events_enabled';
 
 export async function create({
   context,
-  action: { actionTypeId, name, config, secrets },
+  action: {
+    actionTypeId,
+    name,
+    config,
+    secrets,
+    isInboundEventsEnabled: requestedInboundEventsEnabled,
+  },
   options,
 }: ConnectorCreateParams): Promise<Connector> {
   const id = options?.id || SavedObjectsUtils.generateId();
@@ -80,6 +91,10 @@ export async function create({
   }
 
   ensureNotKibanaManagedAuthType({ actionTypeId, secrets, config });
+  assertInboundEventsToggleAllowed({
+    actionTypeId,
+    requestedEnabled: requestedInboundEventsEnabled,
+  });
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
@@ -146,10 +161,16 @@ export async function create({
         )
       : validatedActionTypeConfig;
 
-  const identityAttributes = await mintInboundEventIdentityAttributes(context, {
-    connectorId: id,
+  const isInboundEventsEnabled = resolveCreateInboundEventsEnabled({
     actionTypeId,
+    requestedEnabled: requestedInboundEventsEnabled,
   });
+  const identityAttributes = isInboundEventsEnabled
+    ? await mintInboundEventIdentityAttributes(context, {
+        connectorId: id,
+        actionTypeId,
+      })
+    : undefined;
 
   const result = await tryCatch(
     async () =>
@@ -163,6 +184,7 @@ export async function create({
           secrets: validatedActionTypeSecrets,
           ...(authMode !== undefined ? { authMode } : {}),
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
+          hasInboundEventIdentity: Boolean(identityAttributes),
         },
         { id }
       )
@@ -234,5 +256,6 @@ export async function create({
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
+    ...(connectorTypeHasInboundEvents(actionTypeId) ? { isInboundEventsEnabled } : {}),
   };
 }

@@ -24,19 +24,7 @@ export {
 } from './components/watch.gen';
 
 export {
-  ApprovalRequirement,
-  WatchApprovalGate,
   WatchAutonomyLevel,
-  WatchLedgerEntry,
-  WatchRunOutcome,
-  WatchScopeRoutingSettings,
-  WatchSelectSetting,
-  WatchSettings,
-  WatchSkill,
-  WatchSkillAttachment,
-  WatchTriggersSettings,
-  WatchWorker,
-  WatchWorkerAttachment,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,
@@ -47,20 +35,18 @@ export {
 
 export {
   AnalysisWindowDays,
+  FpCountThreshold,
+  FpRateThresholdPct,
+  LookbackDays,
+  MaxGapsPerRun,
+  RuleCoverageWorkerExtras,
   RuleTuningWorkerExtras,
 } from './components/detection_watch_settings.gen';
 
 export {
-  TemplateId,
-  RecommendedAction,
-  ProposalStatus,
-  WatchTier,
-  EvidenceRef,
-  TimelineEvent,
-  Investigation,
-  Proposal,
-  Escalation,
-} from './components/investigation.gen';
+  AutoCloseConfidenceScoreMinThreshold,
+  AlertTriageWorkerExtras,
+} from './components/floor_watch_settings.gen';
 
 export { ListWatchesResponse } from './watches/list_watches_route.gen';
 export { GetWatchResponse } from './watches/get_watch_route.gen';
@@ -70,4 +56,40 @@ export {
   UpdateWorkerRequestParams,
   UpdateWorkerResponse,
 } from './workers/update_worker_route.gen';
-export { ListSkillsResponse } from './skills/list_skills_route.gen';
+export {
+  AffectedAsset,
+  HuntCompleteness,
+  HuntForThreatHit,
+  HuntForThreatResult,
+  HuntForThreatStatus,
+  HuntIncompleteness,
+  HuntIncompleteReason,
+  HuntIoc,
+  HuntIocType,
+  HuntTechnology,
+  IndexScopeStatus,
+  IndexScopeWindow,
+  ResolvedIndexScope,
+} from './components/hunt.gen';
+export { HuntForThreatRequestBody, HuntForThreatResponse } from './hunt/hunt_for_threat_route.gen';
+export {
+  HuntIndexScopeRequestQuery,
+  HuntIndexScopeResponse,
+} from './hunt/hunt_index_scope_route.gen';
+export {
+  HuntBehaviorArticleContext,
+  HuntBehaviorIoc,
+  HuntBehaviorRequestBody,
+  HuntBehaviorResponse,
+  HuntBehaviorStatus,
+} from './hunt/hunt_behavior_route.gen';
+export {
+  CandidatesRequestBody,
+  CandidatesResponse,
+  CandidateSkipReason,
+} from './hunt/candidates_route.gen';
+export {
+  HuntCoordinatorRequestBody,
+  HuntCoordinatorResponse,
+  HuntCoordinatorStatus,
+} from './hunt/hunt_coordinator_route.gen';
