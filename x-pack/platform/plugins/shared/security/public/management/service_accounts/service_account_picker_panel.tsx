@@ -78,9 +78,8 @@ export const ServiceAccountPickerPanel = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {status === 'ready' && hasSuggestions ? (
-        children
-      ) : (
+      {children}
+      {(status !== 'ready' || !hasSuggestions) && (
         <EuiText size="s" css={css({ padding: euiTheme.size.m })}>
           {status === 'loading' && (
             <div role="status">

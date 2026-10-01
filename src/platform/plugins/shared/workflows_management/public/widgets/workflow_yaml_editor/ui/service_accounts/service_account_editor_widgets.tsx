@@ -565,6 +565,7 @@ export const ServiceAccountEditorWidgets = ({
                   current?.kind === 'suggestions' ? { ...current, selected } : current
                 ),
               onSelect: (account) => {
+                if (!account) return;
                 const suggestion = popup.suggestions.find(
                   (entry) => entry.account?.id === account.id
                 );

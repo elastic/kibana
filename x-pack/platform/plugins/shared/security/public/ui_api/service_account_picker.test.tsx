@@ -104,6 +104,38 @@ describe('getServiceAccountPicker UI API', () => {
     expect(core.http.get).not.toHaveBeenCalled();
   });
 
+  it('pins a current user option that selects null and moves with the keyboard', async () => {
+    const { render, onSelect } = setup();
+    await render({ allowCurrentUser: true, search: 'reader' });
+    const currentUser = await screen.findByRole('option', { name: 'Current user' });
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      'Current user',
+      expect.stringContaining('Investigation reader'),
+    ]);
+    expect(currentUser).toHaveAttribute('aria-current', 'true');
+    act(() => currentUser.focus());
+    await user.keyboard('{ArrowDown}{Enter}');
+    expect(onSelect).toHaveBeenLastCalledWith(account);
+    await user.click(currentUser);
+    expect(onSelect).toHaveBeenLastCalledWith(null);
+  });
+
+  it('offers the current user even when accounts cannot be listed', async () => {
+    const { core, render, onSelect } = setup();
+    core.http.get.mockRejectedValue(
+      Object.assign(new Error('Forbidden'), {
+        request: new Request('http://localhost'),
+        response: new Response(null, { status: 403 }),
+      })
+    );
+    await render({ allowCurrentUser: true, selectedId: account.id });
+    expect(await screen.findByText(/Ask your administrator for access/)).toBeVisible();
+    const currentUser = screen.getByRole('option', { name: 'Current user' });
+    expect(currentUser).not.toHaveAttribute('aria-current');
+    await user.click(currentUser);
+    expect(onSelect).toHaveBeenCalledWith(null);
+  });
+
   it('filters ineligible accounts and loads subsequent pages without duplicates', async () => {
     const { core, render } = setup();
     core.http.get

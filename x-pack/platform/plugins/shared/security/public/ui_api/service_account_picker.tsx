@@ -24,7 +24,10 @@ export interface ServiceAccountPickerDirectory {
 
 export interface ServiceAccountPickerProps {
   selectedId?: string;
-  onSelect: (account: ServiceAccountDirectoryEntry) => void;
+  /** Receives `null` when the user picks "Current user". */
+  onSelect: (account: ServiceAccountDirectoryEntry | null) => void;
+  /** Pins a "Current user" option first, selected when `selectedId` is empty. */
+  allowCurrentUser?: boolean;
   search?: string;
   onClose?: () => void;
   /** Supply a directory when the host already loads accounts, for example in an editor. */
