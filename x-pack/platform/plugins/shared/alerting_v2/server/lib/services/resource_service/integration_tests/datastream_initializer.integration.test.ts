@@ -186,6 +186,59 @@ describe('DatastreamInitializer forceReset (integration)', () => {
     ).rejects.toThrow(/field alias/);
   });
 
+  it('resolves episode.* through ES|QL filters, aggregations and grouping like the director and dispatcher queries', async () => {
+    await seedV7DataStream();
+    await initialize(currentDefinition);
+
+    await writeDocument('alert-1-pending', {
+      '@timestamp': '2026-01-01T00:00:00.000Z',
+      type: 'alert',
+      alert: { id: 'alert-1', status: 'pending', status_count: 1 },
+      space_id: 'default',
+    });
+
+    await writeDocument('alert-1-active', {
+      '@timestamp': '2026-01-01T00:01:00.000Z',
+      type: 'alert',
+      alert: { id: 'alert-1', status: 'active' },
+      space_id: 'default',
+    });
+
+    await writeDocument('alert-2-inactive', {
+      '@timestamp': '2026-01-01T00:02:00.000Z',
+      type: 'alert',
+      alert: { id: 'alert-2', status: 'inactive' },
+      space_id: 'default',
+    });
+
+    await writeDocument('signal', {
+      '@timestamp': '2026-01-01T00:03:00.000Z',
+      type: 'signal',
+      space_id: 'default',
+    });
+
+    const { columns, values } = await esServer.getClient().esql.query({
+      query: `FROM ${TEST_DATA_STREAM}
+        | WHERE type == "alert" AND episode.status IS NOT NULL
+        | STATS last_status = LAST(episode.status, @timestamp),
+                max_status_count = MAX(episode.status_count),
+                events = COUNT(*)
+          BY episode.id
+        | SORT episode.id ASC`,
+    });
+
+    expect(columns.map(({ name }) => name)).toEqual([
+      'last_status',
+      'max_status_count',
+      'events',
+      'episode.id',
+    ]);
+    expect(values).toEqual([
+      ['active', 1, 2, 'alert-1'],
+      ['inactive', null, 1, 'alert-2'],
+    ]);
+  });
+
   it('does not reset a data stream created from the current version on restart', async () => {
     await initialize(currentDefinition);
     await writeDocument('alert-doc', {
