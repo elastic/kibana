@@ -127,24 +127,22 @@ steps:
 
             <{{ variables.investigation_url }}|View the investigation>
 
-      # Edits the thread's status message, or posts one when the thread has none yet. messageTs
-      # renders empty rather than null then, since the connector accepts only a string.
-      - name: post_result
-        type: slack2.sendMessage
+      - name: update_result
+        type: slack2.updateMessage
+        if: '${{ variables.status_message_ts != null }}'
         connector-id: '{{ event.connectorId }}'
         with:
           channel: '{{ event.channel }}'
-          threadTs: '{{ event.threadId | default: event.messageId }}'
           messageTs: '{{ variables.status_message_ts }}'
           text: '{{ variables.result_text }}'
         on-failure:
           continue: true
 
-      # The status message could not be edited, for example because someone deleted it, so the
-      # result goes in a new message that later runs edit instead.
-      - name: repost_result
+      # The thread has no status message, or it could not be edited, for example because someone
+      # deleted it, so the result goes in a new message that later runs edit instead.
+      - name: post_result
         type: slack2.sendMessage
-        if: '${{ steps.post_result.error != null and variables.status_message_ts != null }}'
+        if: '${{ steps.update_result.output.ts == null }}'
         connector-id: '{{ event.connectorId }}'
         with:
           channel: '{{ event.channel }}'
@@ -156,7 +154,7 @@ steps:
       - name: set_result_message
         type: data.set
         with:
-          result_message_ts: '${{ steps.repost_result.output.ts | default: steps.post_result.output.ts }}'
+          result_message_ts: '${{ steps.post_result.output.ts | default: steps.update_result.output.ts }}'
 
       # Records the message now holding the result when it is a new one or when recording the first
       # run's message failed, so the thread keeps a single status message for later runs to edit.

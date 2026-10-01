@@ -71,8 +71,8 @@ describe('Nightshift Slack thread workflow', () => {
       'investigate',
       'get_investigation',
       'set_result',
+      'update_result',
       'post_result',
-      'repost_result',
       'set_result_message',
       'record_result_message',
     ]);
@@ -118,21 +118,23 @@ describe('Nightshift Slack thread workflow', () => {
   });
 
   it('edits the status message with the result, and posts a new one when it cannot', () => {
-    expect(requireStep('post_result')).toMatchObject({
-      type: 'slack2.sendMessage',
+    expect(requireStep('update_result')).toMatchObject({
+      type: 'slack2.updateMessage',
+      if: '${{ variables.status_message_ts != null }}',
       with: { messageTs: '{{ variables.status_message_ts }}', text: '{{ variables.result_text }}' },
     });
-    const repostResult = requireStep('repost_result');
-    expect(repostResult).toMatchObject({
-      if: '${{ steps.post_result.error != null and variables.status_message_ts != null }}',
+    const postResult = requireStep('post_result');
+    expect(postResult).toMatchObject({
+      type: 'slack2.sendMessage',
+      if: '${{ steps.update_result.output.ts == null }}',
       with: { text: '{{ variables.result_text }}' },
     });
-    expect(repostResult.with).not.toHaveProperty('messageTs');
+    expect(postResult.with).not.toHaveProperty('messageTs');
   });
 
   it('records the message holding the result when it is new or was not recorded', () => {
     expect(requireStep('set_result_message').with?.result_message_ts).toBe(
-      '${{ steps.repost_result.output.ts | default: steps.post_result.output.ts }}'
+      '${{ steps.post_result.output.ts | default: steps.update_result.output.ts }}'
     );
     expect(requireStep('record_result_message')).toMatchObject({
       if: '${{ variables.result_message_ts != null and (variables.result_message_ts != variables.status_message_ts or steps.record_status_message.error != null) }}',
