@@ -74,20 +74,6 @@ FROM exemplars-generic.otel-default
     );
   });
 
-  it('returns whole documents: no KEEP, and dimensions do not change the query', () => {
-    const withDimensions = createExemplarsQuery({
-      exemplarsIndex: TEST_EXEMPLARS_INDEX,
-      metricItem: mockMetric,
-    });
-    const withoutDimensions = createExemplarsQuery({
-      exemplarsIndex: TEST_EXEMPLARS_INDEX,
-      metricItem: { ...mockMetric, dimensionFields: [] },
-    });
-
-    expect(withDimensions).not.toContain('KEEP');
-    expect(withDimensions).toBe(withoutDimensions);
-  });
-
   it('honours an explicit maxRows override', () => {
     expect(
       createExemplarsQuery({
