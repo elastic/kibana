@@ -1634,6 +1634,42 @@ describe('runRelationshipMaintainer', () => {
       );
     });
 
+    it('logs a target-validation search rejection once, labelled as the entity write stage', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, entityMetadataClient, relationshipsClient, bulkUpdate } = makeClients();
+      const logger = loggerMock.create();
+
+      search
+        .mockResolvedValueOnce(successResponse([{ key: { 'user.name': 'alice' }, doc_count: 5 }]))
+        .mockRejectedValueOnce(new Error('validation boom'));
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'accesses_frequently', type: 'keyword' },
+          { name: 'accesses_infrequently', type: 'keyword' },
+        ],
+        values: [['user:alice@corp', ['host:H1'], null]],
+      });
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        relationshipsClient,
+        integrations: [{ ...baseConfig, validateTargetIds: true }],
+        maintainerName: 'communicates_with',
+      });
+
+      const messages = logger.error.mock.calls.map(([m]) => m);
+      expect(messages).toHaveLength(1);
+      expect(messages[0]).toContain('[communicates_with][elastic_defend] Entity write failed:');
+      expect(messages[0]).toContain('Target ID validation failed on chunk 1/1');
+      expect(messages[0]).toContain('validation boom');
+      expect(bulkUpdate).not.toHaveBeenCalled();
+    });
+
     it('logs a prefixed error identifying the metadata write as the failing stage', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, entityMetadataClient, relationshipsClient, bulkAppend } = makeClients();
