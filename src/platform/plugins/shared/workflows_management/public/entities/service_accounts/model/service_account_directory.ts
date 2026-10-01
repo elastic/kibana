@@ -57,32 +57,30 @@ export const createServiceAccountDirectory = (
     isEnabled() && id
       ? queryClient.fetchQuery(serviceAccountQueryOptions(http, id))
       : Promise.resolve(null),
-  list: (
+  list: async (
     after?: string,
     refresh = false
-  ): Promise<ServiceAccountPage | ServiceAccountDirectoryError | null> =>
-    isEnabled()
-      ? queryClient.fetchQuery({
-          queryKey: ['workflows', 'serviceAccounts', 'page', after],
-          queryFn: async (): Promise<ServiceAccountPage | ServiceAccountDirectoryError> => {
-            try {
-              return await http.get<ServiceAccountPage>('/internal/security/service_account', {
-                query: { limit: 100, ...(after ? { after } : {}) },
-              });
-            } catch (error) {
-              return {
-                error:
-                  isHttpFetchError(error) && error.response?.status === 403
-                    ? 'forbidden'
-                    : 'unavailable',
-              };
-            }
-          },
-          retry: false,
-          staleTime: refresh ? 0 : 30_000,
-          cacheTime: 60_000,
-        })
-      : Promise.resolve(null),
+  ): Promise<ServiceAccountPage | ServiceAccountDirectoryError | null> => {
+    if (!isEnabled()) return null;
+    try {
+      // Failures are thrown rather than returned so that the query cache never stores them.
+      return await queryClient.fetchQuery({
+        queryKey: ['workflows', 'serviceAccounts', 'page', after],
+        queryFn: () =>
+          http.get<ServiceAccountPage>('/internal/security/service_account', {
+            query: { limit: 100, ...(after ? { after } : {}) },
+          }),
+        retry: false,
+        staleTime: refresh ? 0 : 30_000,
+        cacheTime: 60_000,
+      });
+    } catch (error) {
+      return {
+        error:
+          isHttpFetchError(error) && error.response?.status === 403 ? 'forbidden' : 'unavailable',
+      };
+    }
+  },
 });
 
 export type ServiceAccountDirectory = ReturnType<typeof createServiceAccountDirectory>;

@@ -17,7 +17,10 @@ import type { ServiceAccountPickerStatus } from '@kbn/security-plugin/public';
 import { ServiceAccountDetails } from './service_account_details';
 import type { WorkflowServiceAccount } from '../../../../entities/service_accounts';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { getRunAsValue } from '../../lib/service_accounts/service_account_editor';
+import {
+  createServiceAccountSuggestion,
+  getRunAsValue,
+} from '../../lib/service_accounts/service_account_editor';
 import type { ServiceAccountSuggestion } from '../../lib/service_accounts/service_account_editor';
 import { useServiceAccountEditor } from '../hooks/use_service_account_editor';
 
@@ -224,7 +227,10 @@ export const ServiceAccountEditorWidgets = ({
       const suggestions =
         result?.suggestions.filter(
           ({ account }) =>
-            !account || `${account.name} ${account.id}`.toLocaleLowerCase().includes(query)
+            !account ||
+            `${account.name} ${account.id} ${account.description ?? ''}`
+              .toLocaleLowerCase()
+              .includes(query)
         ) ?? [];
       if (!result) {
         close();
@@ -480,25 +486,18 @@ export const ServiceAccountEditorWidgets = ({
           editor.getModel() !== creation.model ||
           creation.model.isDisposed() ||
           creation.model.getVersionId() !== creation.version ||
-          !accounts.isEnabled() ||
-          !security.serviceAccounts.canCreate() ||
           editor.getOption(monaco.editor.EditorOption.readOnly)
         )
           return;
         const value = getRunAsValue(creation.model, monaco.Position.lift(creation.position));
         if (!value) return;
-        chooseRef.current({
-          label: account.name,
-          account: { ...account, enabled: true, assumable: true },
-          kind: monaco.languages.CompletionItemKind.Value,
-          range: value.range,
-          insertText:
-            (creation.model.getLineContent(value.range.startLineNumber)[
-              value.range.startColumn - 2
-            ] === ':'
-              ? ' '
-              : '') + JSON.stringify(account.id),
-        });
+        chooseRef.current(
+          createServiceAccountSuggestion(creation.model, value.range, {
+            ...account,
+            enabled: true,
+            assumable: true,
+          })
+        );
       },
     });
   if (!node || !popup) return flyout;
