@@ -50,15 +50,13 @@ export function createMockGraphStore({
     stop: jest.fn(),
     isRunning: jest.fn(() => false),
   };
-  const workspaceMock = {
-    simpleSearch: jest.fn(),
+  const workspaceMock: RuntimeGraph = {
     nodes: [],
+    nodesMap: {},
     edges: [],
-    selectedNodes: [],
-    getEdgeSelection: jest.fn(() => []),
-    options: {},
+    edgesMap: {},
     blocklistedNodes: [],
-  } as unknown as RuntimeGraph;
+  };
 
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
     ...coreStart,
