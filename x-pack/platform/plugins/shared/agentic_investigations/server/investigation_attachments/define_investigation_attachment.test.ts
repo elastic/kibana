@@ -29,6 +29,9 @@ import {
   InvestigationAttachmentInvalidRequestError,
 } from './errors';
 import { createInMemoryStorage } from './in_memory_storage.mock';
+import { hypothesesAttachment } from '../hypotheses/attachments/hypotheses_attachment_type';
+import { impactAttachment } from '../impact/attachments/impact_attachment_type';
+import { subjectAttachment } from '../subjects/attachments/subject_attachment_type';
 
 const TYPE = 'investigation_note';
 const SPACE_ID = 'default';
@@ -85,7 +88,7 @@ const hiddenNote = defineInvestigationAttachment<typeof TYPE, typeof storageSett
 );
 
 const noteId = (conversationId = CONVERSATION_ID, spaceId = SPACE_ID) =>
-  hashInvestigationAttachmentId(spaceId, conversationId);
+  note.documentId(spaceId, conversationId);
 
 const body = (overrides: Partial<NoteDocument> = {}): NoteDocument => ({
   spaceId: SPACE_ID,
@@ -125,6 +128,64 @@ describe('hashInvestigationAttachmentId', () => {
       hashInvestigationAttachmentId('a', 'b:c')
     );
     expect(hashInvestigationAttachmentId('s', 'c')).toBe(hashInvestigationAttachmentId('s', 'c'));
+  });
+});
+
+describe('documentId', () => {
+  const otherType = defineInvestigationAttachment<
+    'investigation_other_note',
+    typeof storageSettings,
+    NoteDocument
+  >({
+    type: 'investigation_other_note',
+    storageSettings,
+    schema: noteSchema,
+    format: (document) => document.text,
+    agentDescription: 'Another note.',
+  });
+
+  it('puts the type into the id, so two types of one conversation get different attachment ids', () => {
+    expect(note.documentId(SPACE_ID, CONVERSATION_ID)).toBe(
+      hashInvestigationAttachmentId(TYPE, SPACE_ID, CONVERSATION_ID)
+    );
+    expect(note.documentId(SPACE_ID, CONVERSATION_ID)).not.toBe(
+      otherType.documentId(SPACE_ID, CONVERSATION_ID)
+    );
+  });
+
+  it('tells documents of one conversation apart by their key parts', () => {
+    expect(note.documentId(SPACE_ID, CONVERSATION_ID, 'alert', 'a-1')).not.toBe(
+      note.documentId(SPACE_ID, CONVERSATION_ID, 'alert', 'a-2')
+    );
+  });
+
+  it('leaves the type out for an index with legacy untyped ids', () => {
+    const legacy = defineInvestigationAttachment<typeof TYPE, typeof storageSettings, NoteDocument>(
+      {
+        type: TYPE,
+        storageSettings,
+        schema: noteSchema,
+        format: (document) => document.text,
+        agentDescription: 'A legacy note.',
+        legacyUntypedDocumentIds: true,
+      }
+    );
+    expect(legacy.documentId(SPACE_ID, CONVERSATION_ID)).toBe(
+      hashInvestigationAttachmentId(SPACE_ID, CONVERSATION_ID)
+    );
+  });
+
+  it('never gives the investigation attachment types of one conversation the same id', () => {
+    const ids = [
+      impactAttachment.documentId(SPACE_ID, CONVERSATION_ID),
+      hypothesesAttachment.documentId(SPACE_ID, CONVERSATION_ID),
+      subjectAttachment.documentId(SPACE_ID, CONVERSATION_ID, 'manual', CONVERSATION_ID),
+    ];
+    expect(new Set(ids).size).toBe(ids.length);
+    // Impact documents predate the factory; their ids must not change.
+    expect(impactAttachment.documentId(SPACE_ID, CONVERSATION_ID)).toBe(
+      hashInvestigationAttachmentId(SPACE_ID, CONVERSATION_ID)
+    );
   });
 });
 

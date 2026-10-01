@@ -21,7 +21,6 @@ import {
   type InvestigationSubjectKey,
 } from '../../../common/subjects/subject';
 import {
-  hashInvestigationAttachmentId,
   InvestigationAttachmentInvalidRequestError,
   type InvestigationAttachmentDocService,
 } from '../../investigation_attachments';
@@ -49,7 +48,7 @@ export const subjectDocumentId = (
   spaceId: string,
   conversationId: string,
   { type, id }: InvestigationSubjectKey
-): string => hashInvestigationAttachmentId(spaceId, conversationId, type, id);
+): string => subjectAttachment.documentId(spaceId, conversationId, type, id);
 
 const subjectKey = ({ type, id }: InvestigationSubjectKey): string => `${type}\0${id}`;
 

@@ -28,6 +28,7 @@ import {
 import { attachFromTool, type AttachedFromTool } from './attach_from_tool';
 import { attachWithPublicClient } from './attach_with_public_client';
 import { createInvestigationAttachmentType } from './create_attachment_type';
+import { hashInvestigationAttachmentId } from './doc_id';
 
 export interface InvestigationAttachmentConfig<
   TType extends string,
@@ -45,6 +46,12 @@ export interface InvestigationAttachmentConfig<
   schema: z.ZodType<InvestigationAttachmentDocument<TStored>>;
   /** Upper bound on documents per conversation; 1 (the default) for one document per conversation. */
   maxDocumentsPerConversation?: number;
+  /**
+   * Keeps document ids that leave the type out, for an index whose ids predate the factory.
+   * The document id is also the conversation attachment id, so every other type puts its type
+   * into the id; that keeps two types of one conversation from sharing an attachment.
+   */
+  legacyUntypedDocumentIds?: boolean;
   /** Text the LLM sees for the attachment. */
   format: (document: InvestigationAttachmentDocument<TStored>) => string;
   /** Rules the agent follows when the attachment is in the conversation. */
@@ -91,6 +98,11 @@ export interface InvestigationAttachmentDefinition<
   type: TType;
   /** Whether the write paths hide the conversation attachment from the chat. */
   hiddenInConversation: boolean;
+  /**
+   * Deterministic document id, which is also the conversation attachment id and origin.
+   * `keyParts` tell several documents of one conversation apart.
+   */
+  documentId: (spaceId: string, conversationId: string, ...keyParts: string[]) => string;
   /** Storage and service on the internal user; callers authorize and pass the request's space. */
   createService: (deps: {
     esClient: ElasticsearchClient;
@@ -161,10 +173,13 @@ export const defineInvestigationAttachment = <
     });
 
   const hidden = config.hiddenInConversation === true;
+  const typePart = config.legacyUntypedDocumentIds ? [] : [config.type];
 
   return {
     type: config.type,
     hiddenInConversation: hidden,
+    documentId: (spaceId, conversationId, ...keyParts) =>
+      hashInvestigationAttachmentId(...typePart, spaceId, conversationId, ...keyParts),
     createService: ({ esClient, logger }) =>
       createServiceFromStorage(
         new StorageIndexAdapter<TSettings, TStored>(
