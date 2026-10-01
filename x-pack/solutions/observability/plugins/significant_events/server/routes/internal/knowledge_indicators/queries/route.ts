@@ -42,6 +42,7 @@ import {
 } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
+import { assertSourceEnabled } from '../../../utils/assert_source_enabled';
 import { resolveSourceIds } from '../../../utils/resolve_source_ids';
 import { listAllSources } from '../../../utils/list_all_sources';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
@@ -732,6 +733,8 @@ const persistQueriesRoute = createServerRoute({
       scopedClients.getKnowledgeIndicatorClient(),
     ]);
 
+    assertSourceEnabled(source);
+
     return persistQueries(source.id, queries, {
       kiClient,
       viewName: source.view_name,
@@ -792,6 +795,9 @@ const upsertQueryRoute = createServerRoute({
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const streamName = targetName ?? (await resolveExistingQueryStreamName(kiClient, queryId));
     const { source } = await sourcesClient.get(streamName);
+    // Any upsert can install a rule: a new query gets one, and an edit that changes the ES|QL
+    // replaces the old one with an enabled rule.
+    assertSourceEnabled(source);
 
     validateEsqlQueryForSourceOrThrow({
       esqlQuery: queryBody.esql.query,
