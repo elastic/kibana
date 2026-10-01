@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { act, renderHook } from '@testing-library/react';
 
 import { useAddToCase } from '.';
@@ -107,6 +108,49 @@ describe('useAddToCase', () => {
         type: 'security.alert',
       },
     ]);
+  });
+
+  it('opens the case selector with the provided attachments verbatim', () => {
+    mockCanUserCreateAndReadCases.mockReturnValue(true);
+    const mockOpenSelectCaseModal = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cases: {
+          hooks: {
+            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({
+              open: mockOpenSelectCaseModal,
+            }),
+          },
+        },
+      },
+    });
+    const attachments = [
+      {
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        attachmentId: 'attack-1',
+        metadata: { title: 'An attack', alertCount: 1, index: 'attack-index' },
+      },
+    ];
+
+    const { result } = renderHook(
+      () =>
+        useAddToCase({
+          canUserCreateAndReadCases: mockCanUserCreateAndReadCases,
+          title: mockTitle,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    act(() => {
+      result.current.onAddToCase({
+        alertIds: mockAlertIds,
+        markdownComments: mockMarkdownComments,
+        attachments,
+      });
+    });
+
+    const { getAttachments } = mockOpenSelectCaseModal.mock.calls[0][0];
+    expect(getAttachments()).toEqual(attachments);
   });
 
   it.each([true, false])('forwards the case path on success when isNewCase is %s', (isNewCase) => {

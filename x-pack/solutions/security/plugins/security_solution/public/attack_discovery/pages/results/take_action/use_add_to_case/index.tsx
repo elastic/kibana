@@ -6,7 +6,10 @@
  */
 
 import { COMMENT_ATTACHMENT_TYPE, SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
+import type {
+  CaseAttachmentWithoutOwner,
+  CaseAttachmentsWithoutOwner,
+} from '@kbn/cases-plugin/public/types';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { getOriginalAlertIds, type Replacements } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
@@ -21,6 +24,14 @@ interface Props {
   title: string;
 }
 
+export interface AddToCaseParams {
+  alertIds: string[];
+  markdownComments: string[];
+  replacements?: Replacements;
+  /** When non-empty, posted verbatim instead of the payload built from `alertIds` / `markdownComments`. */
+  attachments?: CaseAttachmentsWithoutOwner;
+}
+
 export const useAddToCase = ({
   canUserCreateAndReadCases,
   onClick,
@@ -28,15 +39,7 @@ export const useAddToCase = ({
   title,
 }: Props): {
   disabled: boolean;
-  onAddToCase: ({
-    alertIds,
-    markdownComments,
-    replacements,
-  }: {
-    alertIds: string[];
-    markdownComments: string[];
-    replacements?: Replacements;
-  }) => void;
+  onAddToCase: (params: AddToCaseParams) => void;
 } => {
   const { cases } = useKibana().services;
   const { alertsIndexPattern } = useAssistantContext();
@@ -61,15 +64,12 @@ export const useAddToCase = ({
   });
 
   const onAddToCase = useCallback(
-    ({
-      alertIds,
-      markdownComments,
-      replacements,
-    }: {
-      alertIds: string[];
-      markdownComments: string[];
-      replacements?: Replacements;
-    }) => {
+    ({ alertIds, attachments, markdownComments, replacements }: AddToCaseParams) => {
+      if (attachments != null && attachments.length > 0) {
+        openSelectCaseModal({ getAttachments: () => attachments });
+        return;
+      }
+
       const userCommentAttachments = markdownComments.map<CaseAttachmentWithoutOwner>((x) => ({
         type: COMMENT_ATTACHMENT_TYPE,
         data: { content: x },
