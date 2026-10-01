@@ -239,8 +239,8 @@ export async function reconcileSourceCatalog({
   const catalogSlugs = new Set(sources.map((source) => source.slug));
   const ownedRuleSourceIds = new Set(ownedRuleIds);
 
-  // One failing source must not leave the others' rules firing or skip the orphan sweep below,
-  // so failures are collected and thrown once everything else ran.
+  // One failing source must not leave the others' rules firing or skip the steps below, so
+  // failures are collected and thrown once everything else ran.
   const failures: unknown[] = [];
   for (const source of sources) {
     try {
@@ -259,13 +259,18 @@ export async function reconcileSourceCatalog({
   }
 
   // Cancel before retiring: a run left going could write indicators or rules back for a
-  // source that is gone.
+  // source that is gone. A run that fails to cancel does not stop the retire: its slug cannot be
+  // matched to a source id once the row is gone, and the next reconcile cancels and retires again.
   if (onboardingClient) {
     for (const sourceSlug of runningSourceSlugs) {
       if (catalogSlugs.has(sourceSlug)) {
         continue;
       }
-      await onboardingClient.cancelBySourceSlug({ sourceSlug, request });
+      try {
+        await onboardingClient.cancelBySourceSlug({ sourceSlug, request });
+      } catch (error) {
+        failures.push(error);
+      }
     }
   }
 
@@ -276,7 +281,11 @@ export async function reconcileSourceCatalog({
       survivingReconcileIds.push(sourceId);
       continue;
     }
-    await retireSourceKnowledge({ sourceId, kiClient });
+    try {
+      await retireSourceKnowledge({ sourceId, kiClient });
+    } catch (error) {
+      failures.push(error);
+    }
   }
 
   if (failures.length > 0) {

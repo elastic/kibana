@@ -115,6 +115,41 @@ describe('reconcileSourceCatalog', () => {
     expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'orphan-slug', request });
   });
 
+  it('cancels the other orphan runs and retires gone sources when one orphan cancel fails', async () => {
+    const kiClient = makeKiClient(['gone-1']);
+    cancelBySourceSlug.mockRejectedValueOnce(new Error('orphan cancel rejected'));
+
+    await expect(
+      reconcileSourceCatalog({
+        sourcesClient: makeSourcesClient([]),
+        kiClient,
+        onboardingClient: onboardingWithRuns(['orphan-a-slug', 'orphan-b-slug']),
+        maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+        request,
+      })
+    ).rejects.toThrow('orphan cancel rejected');
+
+    expect(cancelBySourceSlug).toHaveBeenCalledWith({ sourceSlug: 'orphan-b-slug', request });
+    expect(kiClient.deleteOwnedRules).toHaveBeenCalledWith('gone-1');
+  });
+
+  it('retires the other gone sources when retiring one fails', async () => {
+    const kiClient = makeKiClient(['gone-1', 'gone-2']);
+    kiClient.deleteOwnedRules.mockRejectedValueOnce(new Error('rules unavailable'));
+
+    await expect(
+      reconcileSourceCatalog({
+        sourcesClient: makeSourcesClient([]),
+        kiClient,
+        onboardingClient: onboardingWithRuns([]),
+        maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+        request,
+      })
+    ).rejects.toThrow('rules unavailable');
+
+    expect(kiClient.deleteOwnedRules).toHaveBeenCalledWith('gone-2');
+  });
+
   it('enables rules for an enabled source and leaves onboarding running', async () => {
     const kiClient = makeKiClient(['enabled-source']);
     await reconcileSourceCatalog({
