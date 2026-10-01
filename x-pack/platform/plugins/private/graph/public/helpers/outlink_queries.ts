@@ -7,7 +7,7 @@
 
 import type { RuntimeGraph, WorkspaceNode } from '../types';
 import { buildNodeQuery } from '../services/workspace/graph_request_builders';
-import { unpackGroupedNodes } from '../services/workspace/runtime_grouping';
+import { isTopLevelNode, unpackGroupedNodes } from '../services/workspace/runtime_grouping';
 
 export const buildWorkspaceQuery = (
   runtimeGraph: RuntimeGraph,
@@ -15,7 +15,7 @@ export const buildWorkspaceQuery = (
   loose = false
 ) => {
   const should = nodes
-    .filter((node) => node.parent === undefined)
+    .filter(isTopLevelNode)
     .map((node) => buildNodeQuery(unpackGroupedNodes([node], runtimeGraph.edges)));
   return {
     bool: {

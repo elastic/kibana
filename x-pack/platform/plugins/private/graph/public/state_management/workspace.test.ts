@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuntimeGraph, WorkspaceField } from '../types';
+import type { RuntimeGraph, WorkspaceField, WorkspaceNode } from '../types';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
 import { setDatasource } from './datasource';
 import { loadFields } from './fields';
@@ -74,6 +74,16 @@ const createRuntimeGraphMock = () =>
     blocklistedNodes: [],
   } as unknown as jest.Mocked<RuntimeGraph> & { mergeGraph: jest.Mock });
 
+const addRuntimeNode = (runtimeGraph: RuntimeGraph, id = 'selected') => {
+  const node = {
+    id,
+    parent: null,
+    data: { field: 'field-name', term: id },
+  } as WorkspaceNode;
+  runtimeGraph.nodes.push(node);
+  runtimeGraph.nodesMap[id] = node;
+};
+
 const createRuntimeGraphListenerEnvironment = () => {
   const workspace = createRuntimeGraphMock();
   const environment = createMockGraphStore({
@@ -82,7 +92,19 @@ const createRuntimeGraphListenerEnvironment = () => {
       getRuntimeGraph: jest.fn(() => workspace),
       exploreGraph: jest.fn().mockResolvedValue({ vertices: [], connections: [] }),
       searchGraph: jest.fn((_index: string, _request: object) => new Promise(() => {})),
-      mergeRuntimeGraph: jest.fn((_workspace, graph) => workspace.mergeGraph(graph)),
+      mergeRuntimeGraph: jest.fn((_workspace, graph) => {
+        workspace.mergeGraph(graph);
+        graph.nodes.forEach((node, index) => {
+          const id = node.id ?? `node-${index}`;
+          const runtimeNode = {
+            id,
+            parent: null,
+            data: { field: node.field ?? 'field-name', term: node.term ?? id },
+          } as WorkspaceNode;
+          workspace.nodes.push(runtimeNode);
+          workspace.nodesMap[id] = runtimeNode;
+        });
+      }),
     },
   });
 
@@ -534,6 +556,7 @@ describe('workspace listeners', () => {
 
     it('fills existing connections through the listener transport', async () => {
       const environment = createRuntimeGraphListenerEnvironment();
+      addRuntimeNode(environment.workspace);
       environment.mockedDeps.searchGraph.mockResolvedValue({
         hits: { total: { value: 0 } },
         aggregations: { matrix: { buckets: [] } },
@@ -547,11 +570,15 @@ describe('workspace listeners', () => {
         'data-view-title',
         expect.objectContaining({ size: 0 })
       );
-      expect(environment.workspace.mergeGraph).toHaveBeenCalledWith({ nodes: [], edges: [] });
+      expect(environment.workspace.mergeGraph).toHaveBeenCalledWith({
+        nodes: [{ field: 'field-name', term: 'selected' }],
+        edges: [],
+      });
     });
 
     it('ignores stale fill-connection responses', async () => {
       const environment = createRuntimeGraphListenerEnvironment();
+      addRuntimeNode(environment.workspace);
       const resolvers: Array<
         (response: {
           hits: { total: { value: number } };

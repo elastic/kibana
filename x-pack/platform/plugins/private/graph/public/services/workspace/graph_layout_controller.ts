@@ -7,6 +7,7 @@
 
 import d3 from 'd3';
 import type { WorkspaceEdge, WorkspaceLayoutController, WorkspaceNode } from '../../types';
+import { isTopLevelNode } from './runtime_grouping';
 
 interface GraphLayoutControllerOptions {
   getNodes: () => WorkspaceNode[];
@@ -33,7 +34,7 @@ export class GraphLayoutController implements WorkspaceLayoutController {
 
     const nodes = this.options.getNodes();
     const effectiveEdges = this.createEffectiveEdges(this.options.getEdges());
-    const visibleNodes = nodes.filter(({ parent }) => parent === undefined);
+    const visibleNodes = nodes.filter(isTopLevelNode);
     this.updateChildCounts(nodes);
 
     this.force = d3.layout
