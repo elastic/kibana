@@ -70,7 +70,7 @@ The OpenSearch connector has the following actions:
 `searchMonitors`
 :   Search for monitors by `name`, source `index`, or `enabled` state. Omit all filters to list monitors.
 
-`createMonitor` _(not yet available)_
+`createMonitor`
 :   Create a new query-level, bucket-level, or doc-level monitor (`monitorType`) with a `schedule`, `inputs`, and `triggers`. The `inputs`/`triggers` shape follows the [OpenSearch monitor definition](https://docs.opensearch.org/latest/observing-your-data/alerting/api/#create-a-query-level-monitor) and varies by monitor type.
 
 `updateMonitor` _(not yet available)_

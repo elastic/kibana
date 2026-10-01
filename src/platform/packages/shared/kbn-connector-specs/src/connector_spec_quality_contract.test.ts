@@ -218,6 +218,31 @@ describe('connector spec quality contracts', () => {
       }
     );
 
+    it.each(allSpecs)(
+      '%s docs page marks only non-tool actions as not yet available',
+      (_exportName, spec) => {
+        const docsPagePath = getDocsPagePath(spec);
+        if (docsPagePath === undefined || !fs.existsSync(docsPagePath)) {
+          return;
+        }
+        const supportsWorkflows = spec.metadata.supportedFeatureIds.includes('workflows');
+        const unavailableActionKeys = new Set(
+          Object.entries(spec.actions)
+            .filter(([, action]) => !supportsWorkflows && !action.isTool)
+            .map(([actionName]) => toHeadingKey(actionName))
+        );
+        const wronglyMarked = fs
+          .readFileSync(docsPagePath, 'utf8')
+          .split('\n')
+          .map((line) => line.trim())
+          .filter((line) => line.endsWith(NOT_YET_AVAILABLE_MARKER))
+          .map((line) => line.slice(0, -NOT_YET_AVAILABLE_MARKER.length).trim())
+          .filter((heading) => !unavailableActionKeys.has(toHeadingKey(heading)));
+
+        expect(wronglyMarked).toEqual([]);
+      }
+    );
+
     it.each(allSpecs)('%s docs page avoids internal vocabulary', (_exportName, spec) => {
       const docsPagePath = getDocsPagePath(spec);
       if (docsPagePath === undefined || !fs.existsSync(docsPagePath)) {
