@@ -8,7 +8,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { useAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
+import { useAlertZeroInvestigationsCapabilities } from './hooks/use_alertzero_investigations_capabilities';
 import { PlaceholderPage } from './components/placeholder_page';
 import {
   NAV_ALERTS,
@@ -27,7 +27,7 @@ import { LandingPage } from './pages/landing_page';
  * on a page whose list requests would be rejected with 403.
  */
 const EscalationsRoute: React.FC = () => {
-  const { showEscalations } = useAgenticInvestigationsCapabilities();
+  const { showEscalations } = useAlertZeroInvestigationsCapabilities();
   return showEscalations ? <EscalationsPage /> : <Redirect to="/" />;
 };
 
