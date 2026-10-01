@@ -7,6 +7,7 @@
 
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
+import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
   getInvestigationAgentType,
@@ -25,6 +26,14 @@ const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ];
 
+const INVESTIGATION_TOOL_IDS = [
+  'investigations.set_impact',
+  'investigations.set_hypotheses',
+  'investigations.get',
+];
+
+const ALL_PLUGINS = { investigationToolsEnabled: true, proposalsEnabled: true } as const;
+
 const staticBase = (type: AgentTypeDefinition): AgentBaseConfiguration => {
   if (typeof type.baseConfiguration === 'function') {
     throw new Error('expected a static base configuration');
@@ -36,7 +45,11 @@ describe('Nightshift investigation agent type', () => {
   it('registers under the Nightshift investigation type id', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
 
-    registerInvestigationAgentType(agentBuilder, { sandboxEnabled: false, cortexEnabled: false });
+    registerInvestigationAgentType(agentBuilder, {
+      sandboxEnabled: false,
+      cortexEnabled: false,
+      ...ALL_PLUGINS,
+    });
 
     expect(agentBuilder.agents.registerType).toHaveBeenCalledWith(
       expect.objectContaining({ id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID })
@@ -45,7 +58,7 @@ describe('Nightshift investigation agent type', () => {
 
   it('carries a standalone sandbox prompt and no Elastic tools', () => {
     const base = staticBase(
-      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })
+      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
     );
 
     expect(base).toMatchObject({
@@ -55,9 +68,13 @@ describe('Nightshift investigation agent type', () => {
       post_execution_workflow_ids: ['system-nightshift-agent-optimize'],
     });
     expect(base.tools?.[0]?.tool_ids).toEqual([
-      platformSignificantEventsTools.reportInvestigationProgress,
+      ...INVESTIGATION_TOOL_IDS,
+      PROPOSALS_CREATE_TOOL_ID,
       ...SANDBOX_TOOL_IDS,
     ]);
+    expect(base.tools?.[0]?.tool_ids).not.toContain(
+      platformSignificantEventsTools.reportInvestigationProgress
+    );
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
     expect(base.instructions).toContain('/workspace/elastic.md');
@@ -76,6 +93,7 @@ describe('Nightshift investigation agent type', () => {
         sandboxEnabled: true,
         cortexEnabled: false,
         memoryEnabled: true,
+        ...ALL_PLUGINS,
       })
     );
 
@@ -91,6 +109,7 @@ describe('Nightshift investigation agent type', () => {
         sandboxEnabled: true,
         cortexEnabled: true,
         decisionTreesEnabled: true,
+        ...ALL_PLUGINS,
       })
     );
 
@@ -109,7 +128,7 @@ describe('Nightshift investigation agent type', () => {
 
   it('drops both cortex workflows when cortex is disabled', () => {
     const base = staticBase(
-      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false })
+      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false, ...ALL_PLUGINS })
     );
 
     expect(base.workflow_ids).toBeUndefined();
@@ -118,13 +137,14 @@ describe('Nightshift investigation agent type', () => {
 
   it('drops the hydrate workflow when cortex is on but the sandbox is not configured', () => {
     const base = staticBase(
-      getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: true })
+      getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: true, ...ALL_PLUGINS })
     );
 
     expect(base.workflow_ids).toBeUndefined();
     expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
     expect(base.tools?.[0]?.tool_ids).toEqual([
-      platformSignificantEventsTools.reportInvestigationProgress,
+      ...INVESTIGATION_TOOL_IDS,
+      PROPOSALS_CREATE_TOOL_ID,
     ]);
   });
 
@@ -134,9 +154,44 @@ describe('Nightshift investigation agent type', () => {
         sandboxEnabled: true,
         cortexEnabled: true,
         telemetryConnectorId: 'elasticsearch-telemetry',
+        ...ALL_PLUGINS,
       })
     );
 
     expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
+  });
+
+  it('offers the investigation and proposal tools only when their plugins are enabled', () => {
+    const base = staticBase(
+      getInvestigationAgentType({
+        sandboxEnabled: false,
+        cortexEnabled: false,
+        investigationToolsEnabled: false,
+        proposalsEnabled: false,
+      })
+    );
+
+    expect(base.tools?.[0]?.tool_ids).toEqual([]);
+  });
+
+  it('instructs the agent to record its findings with the investigation tools', () => {
+    const { instructions } = staticBase(
+      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
+    );
+
+    for (const tool of [
+      'set_conversation_metadata',
+      'investigations.set_impact',
+      'investigations.set_hypotheses',
+      'investigations.get',
+      'proposals.create',
+    ]) {
+      expect(instructions).toContain(`\`${tool}\``);
+    }
+    expect(instructions).toContain('"origin": "nightshift"');
+    expect(instructions).toContain('**Check before you finish.**');
+    expect(instructions).not.toContain('investigation_progress_report');
+    expect(instructions).not.toContain('blind_spots');
+    expect(instructions).not.toMatch(/\d0-(critical|high|medium|low)/);
   });
 });
