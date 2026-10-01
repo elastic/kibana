@@ -181,7 +181,7 @@ export interface PackagePolicySOAttributes {
   bump_agent_policy_revision?: boolean;
   latest_revision?: boolean;
   inputs_for_versions?: Record<string, PackagePolicyInput[]>;
-  package_agent_version_condition?: string | null;
+  package_agent_version_condition?: string;
   condition?: string | null;
 }
 

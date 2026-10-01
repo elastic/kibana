@@ -2353,10 +2353,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),
             updated_by: options?.user?.username ?? 'system',
-            // Explicitly clear the stored condition (rather than omitting the key) when the
-            // target package has none, otherwise a partial SO update leaves the stale value in
-            // place and computeMinAgentVersionData keeps advertising the old minimum version.
-            package_agent_version_condition: pkgInfo?.conditions?.agent?.version ?? null,
+            // A partial SO update drops undefined keys, so a stale condition would survive an
+            // upgrade to a package without one. Write an empty string (falsy, and valid for the
+            // frozen model version schemas) to clear it.
+            package_agent_version_condition: pkgInfo?.conditions?.agent?.version ?? '',
           },
           version,
         });

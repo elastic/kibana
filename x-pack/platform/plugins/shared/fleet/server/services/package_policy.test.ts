@@ -6640,7 +6640,7 @@ describe('Package policy service', () => {
 
       const updatedAttributes = (savedObjectsClient.bulkUpdate.mock.calls[0][0] as any)[0]
         .attributes;
-      expect(updatedAttributes).toHaveProperty('package_agent_version_condition', null);
+      expect(updatedAttributes).toHaveProperty('package_agent_version_condition', '');
     });
 
     it('should not persist spaceIds in SO attributes', async () => {
