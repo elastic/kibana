@@ -156,7 +156,10 @@ const useAccordionExpansionEffect = (
   logsOverviewApi: UnifiedDocViewerLogsOverviewApi | null,
   recordId: string
 ) => {
-  const initialAccordionSection = useRef(logOverviewContext$.getValue()?.initialAccordionSection);
+  const initialContext = logOverviewContext$.getValue();
+  const initialAccordionSection = useRef(
+    initialContext?.recordId === recordId ? initialContext.initialAccordionSection : undefined
+  );
 
   useEffect(() => {
     if (!logsOverviewApi) {

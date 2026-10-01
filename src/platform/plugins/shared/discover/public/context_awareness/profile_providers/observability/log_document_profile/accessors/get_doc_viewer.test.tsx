@@ -159,6 +159,20 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
     expect(logOverviewContext$.getValue()).toBeUndefined();
   });
 
+  it('discards a section queued for another record without opening it', async () => {
+    const record = buildRecord('doc-1');
+    const logOverviewContext$ = new BehaviorSubject<LogOverviewContext | undefined>({
+      recordId: buildRecord('doc-2').id,
+      initialAccordionSection: 'quality_issues',
+    });
+    const { renderTab } = buildDocViewer(logOverviewContext$);
+
+    render(<>{renderTab(record)}</>);
+
+    await waitFor(() => expect(logOverviewContext$.getValue()).toBeUndefined());
+    expect(mockOpenAndScrollToSection).not.toHaveBeenCalled();
+  });
+
   // `openAndScrollToSection` only ever opens, never closes, so each ordering starts the hook from a
   // different section and the pair covers both arms.
   const directions = [
