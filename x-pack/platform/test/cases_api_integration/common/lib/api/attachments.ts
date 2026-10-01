@@ -6,7 +6,11 @@
  */
 
 import type SuperTest from 'supertest';
-import { CASES_INTERNAL_URL, CASES_URL } from '@kbn/cases-plugin/common/constants';
+import {
+  CASES_INTERNAL_URL,
+  CASES_URL,
+  COMMENT_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
 import {
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
@@ -33,7 +37,7 @@ import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
 import { createCase } from './case';
-import { postCaseReq } from '../mock';
+import { buildUnifiedAlertReq, postCaseReq } from '../mock';
 
 export const bulkGetAttachments = async ({
   supertest,
@@ -152,15 +156,32 @@ export const createCaseAndBulkCreateAttachments = async ({
   expectedHttpCode?: number;
 }): Promise<{ theCase: Case; attachments: BulkCreateAttachmentsRequestV2 }> => {
   const postedCase = await createCase(supertest, postCaseReq);
-  const attachments = getAttachments(numberOfAttachments);
   const patchedCase = await bulkCreateAttachments({
     supertest,
     caseId: postedCase.id,
-    params: attachments,
+    params: getUnifiedAttachments(numberOfAttachments),
+    auth,
+    expectedHttpCode,
   });
 
-  return { theCase: patchedCase, attachments };
+  // Responses are projected to the legacy shape, so callers compare against the legacy form.
+  return { theCase: patchedCase, attachments: getAttachments(numberOfAttachments) };
 };
+
+export const getUnifiedAttachments = (numberOfAttachments: number) =>
+  [...Array(numberOfAttachments)].map((_, index) =>
+    index % 10 === 0
+      ? {
+          type: COMMENT_ATTACHMENT_TYPE,
+          data: { content: `Test ${index + 1}` },
+          owner: 'securitySolutionFixture',
+        }
+      : buildUnifiedAlertReq('securitySolutionFixture', {
+          alertId: [`test-id-${index + 1}`],
+          index: [`test-index-${index + 1}`],
+          rule: { id: `rule-test-id-${index + 1}`, name: `Test ${index + 1}` },
+        })
+  );
 
 export const getAttachments = (numberOfAttachments: number): BulkCreateAttachmentsRequest => {
   return [...Array(numberOfAttachments)].map((_, index) => {

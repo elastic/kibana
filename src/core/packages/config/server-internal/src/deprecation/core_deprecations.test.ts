@@ -105,4 +105,39 @@ describe('core deprecations', () => {
       expect(messages).toHaveLength(0);
     });
   });
+
+  describe('xpack.searchNotebooks', () => {
+    it('removes the unused settings and logs a warning', () => {
+      const { migrated, messages, levels } = applyCoreDeprecations({
+        xpack: {
+          searchNotebooks: {
+            enabled: false,
+            catalog: { url: 'https://example.com/catalog.json', ttl: 900, errorTTL: 3600 },
+          },
+        },
+      });
+      expect(migrated).toEqual({});
+      expect(messages).toEqual(['You no longer need to configure "xpack.searchNotebooks".']);
+      expect(levels).toEqual(['warning']);
+    });
+
+    it('removes the legacy xpack.search.notebooks settings and keeps other xpack.search settings', () => {
+      const { migrated, messages, levels } = applyCoreDeprecations({
+        xpack: {
+          search: {
+            notebooks: { catalog: { url: 'https://example.com/catalog.json' } },
+            other: 'x',
+          },
+        },
+      });
+      expect(migrated).toEqual({ xpack: { search: { other: 'x' } } });
+      expect(messages).toEqual(['You no longer need to configure "xpack.search.notebooks".']);
+      expect(levels).toEqual(['warning']);
+    });
+
+    it('does not log a warning when the settings are unset', () => {
+      const { messages } = applyCoreDeprecations({ xpack: { search: {} } });
+      expect(messages).toHaveLength(0);
+    });
+  });
 });

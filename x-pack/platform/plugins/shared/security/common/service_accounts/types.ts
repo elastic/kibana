@@ -21,6 +21,7 @@ export interface ServiceAccountDirectoryEntry {
   /** Opaque identifier. Its structure differs between backends and must not be parsed. */
   id: string;
   name: string;
+  description?: string;
   /**
    * Role names assigned to the account.
    */

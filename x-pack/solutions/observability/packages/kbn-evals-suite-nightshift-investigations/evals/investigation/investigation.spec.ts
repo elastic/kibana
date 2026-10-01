@@ -15,7 +15,9 @@ import { loadInvestigationDataset } from './datasets';
 import {
   ANTI_LEAKAGE_EVALUATOR,
   CAUSE_COMPLETENESS_EVALUATOR,
+  DECISION_TREE_HELPFULNESS_EVALUATOR,
   GOAL_PASS_EVALUATOR,
+  TRUTHFULNESS_EVALUATOR,
   createInvestigationJudges,
 } from './judges';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
@@ -49,21 +51,14 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
           5 * 60_000
       );
-      await fetch('/internal/search_inference_endpoints/settings', {
-        method: 'PUT',
-        headers: { 'elastic-api-version': '1' },
-        body: JSON.stringify({
-          features: [
-            { feature_id: 'significant_events_investigation', endpoints: [{ id: connector.id }] },
-          ],
-        }),
-      });
       await expect
         .poll(
           async () =>
             (
               await fetch<{ available: boolean }>(
-                '/internal/nightshift/investigations/availability'
+                `/internal/nightshift/investigations/availability?connector_id=${encodeURIComponent(
+                  connector.id
+                )}`
               )
             ).available,
           { timeout: 60_000 }
@@ -90,7 +85,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           trustUpstreamDataset: Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
           concurrency,
           metadata: { concurrency },
-          task: (example) => runInvestigation(fetch, example),
+          task: (example) => runInvestigation(fetch, example, connector),
         },
         judges
       );
@@ -167,9 +162,15 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           expect(persistedOutput).not.toBeNull();
           expect(persistedOutput?.case_id).toBe(output.case_id);
           expect(persistedOutput?.query).toBe(output.query);
-          // All three RCA judges scored this run, each in its own evaluation trace.
+          // All RCA judges scored this run, each in its own evaluation trace.
           expect(new Set(exampleScores.map((each) => each.evaluator.name))).toEqual(
-            new Set([GOAL_PASS_EVALUATOR, CAUSE_COMPLETENESS_EVALUATOR, ANTI_LEAKAGE_EVALUATOR])
+            new Set([
+              GOAL_PASS_EVALUATOR,
+              CAUSE_COMPLETENESS_EVALUATOR,
+              ANTI_LEAKAGE_EVALUATOR,
+              TRUTHFULNESS_EVALUATOR,
+              DECISION_TREE_HELPFULNESS_EVALUATOR,
+            ])
           );
           for (const exampleScore of exampleScores) {
             expect(exampleScore.evaluator.kind).toBe('llm');
