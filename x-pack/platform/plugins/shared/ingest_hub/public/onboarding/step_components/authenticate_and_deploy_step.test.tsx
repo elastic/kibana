@@ -767,7 +767,10 @@ describe('AuthenticateAndDeployStep', () => {
         ]),
         deploymentMethod: 'agent_based',
         setDeploymentMethod: jest.fn(),
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        removeDeployInstances: jest.fn(),
       });
       mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
     });
@@ -851,7 +854,10 @@ describe('AuthenticateAndDeployStep', () => {
         awsServicesMap: new Map([['awsfargate', agentService]]),
         deploymentMethod: 'agent_based',
         setDeploymentMethod: jest.fn(),
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        removeDeployInstances: jest.fn(),
       });
       mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
     });
@@ -896,7 +902,10 @@ describe('AuthenticateAndDeployStep', () => {
         ]),
         deploymentMethod: 'agent_based',
         setDeploymentMethod: mockSetDeploymentMethod,
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        removeDeployInstances: jest.fn(),
       });
       rerender(
         <I18nProvider>
