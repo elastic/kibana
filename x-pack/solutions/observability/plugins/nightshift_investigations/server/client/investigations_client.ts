@@ -16,10 +16,11 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart, ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import type { InvestigationSubjectKey } from '@kbn/agentic-investigations-plugin/common';
+import type { InvestigationSubject as StoredInvestigationSubject } from '@kbn/agentic-investigations-plugin/common';
 import {
   INVESTIGATION_TEMPLATE_ID,
   MAX_EVIDENCE_TEXT_LENGTH,
+  MAX_SUBJECTS_PER_CONVERSATION,
 } from '@kbn/agentic-investigations-plugin/common';
 import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
@@ -77,6 +78,7 @@ import {
   toStartSubjects,
   toSubjectKeys,
   withoutRecordedSubjects,
+  type WorkflowSubjectInput,
 } from './investigation_subjects';
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
@@ -409,6 +411,7 @@ export class NightshiftInvestigationsClient {
     const resolvedSubject = withDerivedSubjectSummary(subject, prepared.message);
 
     const spaceId = this.getSpaceId();
+    this.warnOnSpaceMismatch(spaceId);
 
     const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
     const workflow = await workflowsManagement.management.getWorkflow(
@@ -464,19 +467,14 @@ export class NightshiftInvestigationsClient {
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
-    const investigationId = await this.resolveInvestigation({
+    const { id: investigationId, recorded } = await this.resolveInvestigation({
       conversations,
       agenticInvestigations,
-      keys: toSubjectKeys(subjects, newInvestigationId),
+      subjects,
       newInvestigationId,
     });
     const isFollowUp = investigationId !== newInvestigationId;
 
-    const recorded = isFollowUp
-      ? await agenticInvestigations
-          .getSubjectsClient(this.request)
-          .listByConversationIds([investigationId])
-      : [];
     const newSubjects = withoutRecordedSubjects(subjects, recorded);
     const newAlertIds = new Set(newSubjects.map(({ id }) => id));
 
@@ -535,17 +533,39 @@ export class NightshiftInvestigationsClient {
   private async resolveInvestigation({
     conversations,
     agenticInvestigations,
-    keys,
+    subjects,
     newInvestigationId,
   }: {
     conversations: ConversationPublicClient;
     agenticInvestigations: AgenticInvestigationsPluginStart;
-    keys: InvestigationSubjectKey[];
+    subjects: WorkflowSubjectInput[];
     newInvestigationId: string;
-  }): Promise<string> {
+  }): Promise<{ id: string; recorded: StoredInvestigationSubject[] }> {
+    const newInvestigation = { id: newInvestigationId, recorded: [] };
+    const keys = toSubjectKeys(subjects, newInvestigationId);
     if (keys.length === 0) {
-      return newInvestigationId;
+      return newInvestigation;
     }
+
+    const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
+    // An investigation holds at most MAX_SUBJECTS_PER_CONVERSATION subjects. Continuing a full one
+    // would fail its run on recording the subjects, and every later overlapping start would land
+    // on it again, so a full investigation is treated as no match.
+    const withRoom = async (
+      id: string
+    ): Promise<{ id: string; recorded: StoredInvestigationSubject[] } | undefined> => {
+      const recorded = await subjectsClient.listByConversationIds([id]);
+      if (
+        recorded.length + withoutRecordedSubjects(subjects, recorded).length >
+        MAX_SUBJECTS_PER_CONVERSATION
+      ) {
+        this.logger.warn(
+          `Investigation "${id}" shares a subject but has no room for more subjects; not continuing it`
+        );
+        return undefined;
+      }
+      return { id, recorded };
+    };
 
     const open = await agenticInvestigations
       .getInvestigationsClient(this.request)
@@ -556,19 +576,23 @@ export class NightshiftInvestigationsClient {
       open.map(({ id }) => id),
       callerUsername
     );
-    const owned = candidates.find(({ isOwner, status }) => isOwner && status === 'open');
-    if (owned) {
-      return owned.id;
+    const owned = candidates.filter(({ isOwner, status }) => isOwner && status === 'open');
+    for (const candidate of owned) {
+      const target = await withRoom(candidate.id);
+      if (target) {
+        return target;
+      }
     }
-    if (candidates.length > 0) {
+    if (candidates.length > owned.length) {
       this.logger.warn(
         `Open investigations [${candidates
+          .filter((candidate) => !owned.includes(candidate))
           .map(({ id }) => id)
           .join(', ')}] share a subject but are owned by another identity; starting a new one`
       );
     }
 
-    const claim = await agenticInvestigations.getSubjectsClient(this.request).claimSubjects({
+    const claim = await subjectsClient.claimSubjects({
       conversationId: newInvestigationId,
       subjects: keys,
       isHolderOpen: async (conversationId) => {
@@ -577,7 +601,7 @@ export class NightshiftInvestigationsClient {
       },
     });
     if (claim.claimed) {
-      return newInvestigationId;
+      return newInvestigation;
     }
 
     // The holder may not have its conversation yet: a concurrent start claimed the subjects and
@@ -588,13 +612,16 @@ export class NightshiftInvestigationsClient {
       [claim.heldBy],
       callerUsername
     );
-    if (!holder || (holder.isOwner && holder.status === 'open')) {
-      return claim.heldBy;
+    if (!holder) {
+      return { id: claim.heldBy, recorded: [] };
+    }
+    if (holder.isOwner && holder.status === 'open') {
+      return (await withRoom(holder.id)) ?? newInvestigation;
     }
     this.logger.warn(
       `Investigation "${claim.heldBy}" holds a subject of this start but is closed or owned by another identity; starting a new one`
     );
-    return newInvestigationId;
+    return newInvestigation;
   }
 
   /**
@@ -625,7 +652,8 @@ export class NightshiftInvestigationsClient {
       !execution ||
       !isInvestigationWorkflowExecution(execution) ||
       TerminalExecutionStatuses.includes(execution.status) ||
-      (executionId !== investigationId && inputs?.investigation_id !== investigationId)
+      // The investigation the run works on: its `investigation_id` input, or itself without one.
+      (asString(inputs?.investigation_id) ?? executionId) !== investigationId
     ) {
       throw new InvestigationNotFoundError(investigationId);
     }
@@ -662,8 +690,17 @@ export class NightshiftInvestigationsClient {
         ? []
         : await subjectsClient.listByConversationIds([conversation.id]);
       const missing = withoutRecordedSubjects(subjects, recorded);
-      if (missing.length > 0) {
-        await subjectsClient.upsertSubjects(conversation.id, missing);
+      // Starts never continue a full investigation, but a run started some other way may still
+      // bring more subjects than fit. Record what fits rather than fail the run.
+      const room = Math.max(MAX_SUBJECTS_PER_CONVERSATION - recorded.length, 0);
+      if (missing.length > room) {
+        this.logger.warn(
+          `Investigation "${conversation.id}" has room for ${room} of ${missing.length} new subjects; recording the first ${room}`
+        );
+      }
+      const recordable = missing.slice(0, room);
+      if (recordable.length > 0) {
+        await subjectsClient.upsertSubjects(conversation.id, recordable);
       }
     }
 
@@ -838,6 +875,20 @@ export class NightshiftInvestigationsClient {
       triggerType: first.triggerType ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
       startedAt: first.createdAt,
     };
+  }
+
+  /**
+   * The workflow runs in `spaceId`, but Agent Builder and agentic investigations take the space
+   * from the request. A step's fake request carries the workflow's space, so the two agree; if a
+   * request ever lacks it, matching and claims would happen in another space than the run.
+   */
+  private warnOnSpaceMismatch(spaceId: string): void {
+    const requestSpaceId = this.spaces?.spacesService.getSpaceId(this.request);
+    if (requestSpaceId !== undefined && requestSpaceId !== spaceId) {
+      this.logger.warn(
+        `Starting an investigation in space "${spaceId}" from a request scoped to space "${requestSpaceId}"; subjects are matched in the request's space`
+      );
+    }
   }
 
   private requireWriteDeps(): {

@@ -26,15 +26,6 @@ it('requires the workspace, since channel ids repeat across workspaces', () => {
   expect(params?.safeParse({ body: BODY }).success).toBe(true);
 });
 
-it('requires the execution handling an event, and an event to release', () => {
-  const parse = (body: object) => params?.safeParse({ body: { ...BODY, ...body } }).success;
-  expect(parse({ event_id: 'Ev1' })).toBe(false);
-  expect(parse({ execution_id: 'exec-1' })).toBe(false);
-  expect(parse({ release_event: true })).toBe(false);
-  expect(parse({ event_id: 'Ev1', execution_id: 'exec-1' })).toBe(true);
-  expect(parse({ event_id: 'Ev1', execution_id: 'exec-1', release_event: true })).toBe(true);
-});
-
 it('passes the status message and the delivered event to the client', async () => {
   findOrCreateSlackThread.mockResolvedValue({
     investigation_id: 'inv-1',
@@ -46,9 +37,7 @@ it('passes the status message and the delivered event to the client', async () =
     handler({
       request: {},
       getInvestigationsClient,
-      params: {
-        body: { ...BODY, status_message_ts: '1700.0002', event_id: 'Ev1', execution_id: 'exec-1' },
-      },
+      params: { body: { ...BODY, status_message_ts: '1700.0002', event_id: 'Ev1' } },
     } as never)
   ).resolves.toEqual({ investigation_id: 'inv-1', title: 'Checkout errors', duplicate: true });
   expect(findOrCreateSlackThread).toHaveBeenCalledWith({
@@ -58,30 +47,19 @@ it('passes the status message and the delivered event to the client', async () =
     text: undefined,
     create: false,
     statusMessageTs: '1700.0002',
-    event: { eventId: 'Ev1', executionId: 'exec-1' },
+    eventId: 'Ev1',
   });
 });
 
-it('passes a release of the event to the client', async () => {
-  findOrCreateSlackThread.mockResolvedValue({
-    investigation_id: 'inv-1',
-    title: 'Checkout errors',
-  });
-
-  await handler({
-    request: {},
-    getInvestigationsClient,
-    params: {
-      body: { ...BODY, event_id: 'Ev1', execution_id: 'exec-1', release_event: true },
-    },
-  } as never);
-
-  expect(findOrCreateSlackThread).toHaveBeenCalledWith(
-    expect.objectContaining({
-      event: { eventId: 'Ev1', executionId: 'exec-1' },
-      releaseEvent: true,
-    })
-  );
+it.each([
+  ['workspace', 129],
+  ['channel', 257],
+  ['thread_ts', 65],
+  ['status_message_ts', 65],
+  ['event_id', 257],
+])('bounds %s so the thread key and the recorded event fit the thread subject', (field, length) => {
+  expect(params?.safeParse({ body: BODY }).success).toBe(true);
+  expect(params?.safeParse({ body: { ...BODY, [field]: 'x'.repeat(length) } }).success).toBe(false);
 });
 
 it('returns an empty body for a thread without an investigation', async () => {

@@ -27,10 +27,20 @@ import {
 } from '../client/errors';
 
 /**
- * Agentic investigations rejects a caller without the investigations privileges with this error.
- * Only its type is part of that plugin's contract, so it is recognised by name.
+ * Errors agentic investigations throws in-process: a caller without the investigations
+ * privileges, an input it rejects, and a write that lost a concurrent update. Only their types are
+ * part of that plugin's contract, so they are recognised by name.
  */
-const INVESTIGATIONS_FORBIDDEN_ERROR_NAME = 'InvestigationsForbiddenError';
+const AGENTIC_INVESTIGATIONS_ERRORS = {
+  InvestigationsForbiddenError: forbidden,
+  InvestigationAttachmentInvalidRequestError: badRequest,
+  InvestigationAttachmentConflictError: conflict,
+} as const;
+
+const isAgenticInvestigationsError = (
+  error: unknown
+): error is Error & { name: keyof typeof AGENTIC_INVESTIGATIONS_ERRORS } =>
+  error instanceof Error && Object.hasOwn(AGENTIC_INVESTIGATIONS_ERRORS, error.name);
 
 export function rethrowInvestigationClientError(error: unknown): never {
   if (
@@ -39,8 +49,8 @@ export function rethrowInvestigationClientError(error: unknown): never {
   ) {
     throw badRequest(error.message);
   }
-  if (error instanceof Error && error.name === INVESTIGATIONS_FORBIDDEN_ERROR_NAME) {
-    throw forbidden(error.message);
+  if (isAgenticInvestigationsError(error)) {
+    throw AGENTIC_INVESTIGATIONS_ERRORS[error.name](error.message);
   }
   if (error instanceof InvestigationNotFoundError) {
     throw notFound(error.message);
