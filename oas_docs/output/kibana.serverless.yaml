@@ -10991,17 +10991,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/episodes/_bulk_ack:
+  /api/alerting/v2/alerts/_bulk_ack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_ack</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_ack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-ack
+      operationId: post-alerting-v2-alerts-bulk-ack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11115,17 +11115,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/episodes/_bulk_activate:
+  /api/alerting/v2/alerts/_bulk_activate:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_activate</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_activate</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-activate
+      operationId: post-alerting-v2-alerts-bulk-activate
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11235,17 +11235,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/episodes/_bulk_assign:
+  /api/alerting/v2/alerts/_bulk_assign:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_assign</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_assign</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-assign
+      operationId: post-alerting-v2-alerts-bulk-assign
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11357,17 +11357,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/episodes/_bulk_deactivate:
+  /api/alerting/v2/alerts/_bulk_deactivate:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_deactivate</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_deactivate</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-deactivate
+      operationId: post-alerting-v2-alerts-bulk-deactivate
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11477,17 +11477,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/episodes/_bulk_tag:
+  /api/alerting/v2/alerts/_bulk_tag:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_tag</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_tag</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-tag
+      operationId: post-alerting-v2-alerts-bulk-tag
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11601,17 +11601,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/episodes/_bulk_unack:
+  /api/alerting/v2/alerts/_bulk_unack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/_bulk_unack</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/_bulk_unack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create the same action for multiple alert episodes in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-bulk-unack
+      operationId: post-alerting-v2-alerts-bulk-unack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11721,17 +11721,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/episodes/{episode_id}/_ack:
+  /api/alerting/v2/alerts/{alert_id}/_ack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/{episode_id}/_ack</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_ack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-episode-id-ack
+      operationId: post-alerting-v2-alerts-alert-id-ack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11740,9 +11740,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the alert episode to apply the action to.
+        - description: Identifier of the alert to apply the action to.
           in: path
-          name: episode_id
+          name: alert_id
           required: true
           schema:
             maxLength: 150
@@ -11765,15 +11765,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required episode_id
+                  summary: Path is missing required alert_id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        episode_id:
+                        alert_id:
                           - Required
                     error: Bad Request
-                    message: 'episode_id: Required'
+                    message: 'alert_id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -11851,17 +11851,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/episodes/{episode_id}/_activate:
+  /api/alerting/v2/alerts/{alert_id}/_activate:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/{episode_id}/_activate</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_activate</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-episode-id-activate
+      operationId: post-alerting-v2-alerts-alert-id-activate
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -11870,9 +11870,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the alert episode to apply the action to.
+        - description: Identifier of the alert to apply the action to.
           in: path
-          name: episode_id
+          name: alert_id
           required: true
           schema:
             maxLength: 150
@@ -11896,15 +11896,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required episode_id
+                  summary: Path is missing required alert_id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        episode_id:
+                        alert_id:
                           - Required
                     error: Bad Request
-                    message: 'episode_id: Required'
+                    message: 'alert_id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -11998,17 +11998,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/episodes/{episode_id}/_assign:
+  /api/alerting/v2/alerts/{alert_id}/_assign:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/{episode_id}/_assign</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_assign</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-episode-id-assign
+      operationId: post-alerting-v2-alerts-alert-id-assign
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12017,9 +12017,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the alert episode to apply the action to.
+        - description: Identifier of the alert to apply the action to.
           in: path
-          name: episode_id
+          name: alert_id
           required: true
           schema:
             maxLength: 150
@@ -12043,15 +12043,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required episode_id
+                  summary: Path is missing required alert_id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        episode_id:
+                        alert_id:
                           - Required
                     error: Bad Request
-                    message: 'episode_id: Required'
+                    message: 'alert_id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12129,17 +12129,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/episodes/{episode_id}/_deactivate:
+  /api/alerting/v2/alerts/{alert_id}/_deactivate:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/{episode_id}/_deactivate</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_deactivate</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-episode-id-deactivate
+      operationId: post-alerting-v2-alerts-alert-id-deactivate
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12148,9 +12148,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the alert episode to apply the action to.
+        - description: Identifier of the alert to apply the action to.
           in: path
-          name: episode_id
+          name: alert_id
           required: true
           schema:
             maxLength: 150
@@ -12174,15 +12174,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required episode_id
+                  summary: Path is missing required alert_id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        episode_id:
+                        alert_id:
                           - Required
                     error: Bad Request
-                    message: 'episode_id: Required'
+                    message: 'alert_id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12276,17 +12276,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/episodes/{episode_id}/_tag:
+  /api/alerting/v2/alerts/{alert_id}/_tag:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/{episode_id}/_tag</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_tag</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-episode-id-tag
+      operationId: post-alerting-v2-alerts-alert-id-tag
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12295,9 +12295,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the alert episode to apply the action to.
+        - description: Identifier of the alert to apply the action to.
           in: path
-          name: episode_id
+          name: alert_id
           required: true
           schema:
             maxLength: 150
@@ -12323,15 +12323,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required episode_id
+                  summary: Path is missing required alert_id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        episode_id:
+                        alert_id:
                           - Required
                     error: Bad Request
-                    message: 'episode_id: Required'
+                    message: 'alert_id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12409,17 +12409,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/episodes/{episode_id}/_unack:
+  /api/alerting/v2/alerts/{alert_id}/_unack:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/episodes/{episode_id}/_unack</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{alert_id}/_unack</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create an action for a specific alert episode.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-episodes-episode-id-unack
+      operationId: post-alerting-v2-alerts-alert-id-unack
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -12428,9 +12428,9 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the alert episode to apply the action to.
+        - description: Identifier of the alert to apply the action to.
           in: path
-          name: episode_id
+          name: alert_id
           required: true
           schema:
             maxLength: 150
@@ -12453,15 +12453,15 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required episode_id
+                  summary: Path is missing required alert_id
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        episode_id:
+                        alert_id:
                           - Required
                     error: Bad Request
-                    message: 'episode_id: Required'
+                    message: 'alert_id: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
