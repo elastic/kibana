@@ -30,7 +30,7 @@ describe('FrequencyHelpPopover', () => {
     expect(screen.getByText('On status change')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Notifies once when an episode opens and once when it recovers. No repeat notifications while it remains active.'
+        'Notifies once when an alert opens and once when it recovers. No repeat notifications while it remains active.'
       )
     ).toBeInTheDocument();
     expect(screen.getByText('On status change + repeat at interval')).toBeInTheDocument();

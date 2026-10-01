@@ -13,6 +13,23 @@ import {
   INBOX_ANNOUNCEMENT_BANNER_DISMISSED_STORAGE_KEY,
 } from './inbox_announcement_banner';
 
+const mockGlobalClientGet = jest.fn(() => false);
+const mockGetUrlForApp = jest.fn(
+  (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
+);
+
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: (token: unknown) => {
+    const services: Record<string, unknown> = {
+      settings: { globalClient: { get: mockGlobalClientGet, set: jest.fn() } },
+      application: { getUrlForApp: mockGetUrlForApp },
+      notifications: { toasts: { addError: jest.fn() } },
+    };
+    return services[token as string] ?? {};
+  },
+  CoreStart: (key: string) => key,
+}));
+
 const renderBanner = () =>
   render(
     <IntlProvider locale="en">
@@ -22,20 +39,42 @@ const renderBanner = () =>
 
 describe('InboxAnnouncementBanner', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+    mockGlobalClientGet.mockReturnValue(false);
     window.localStorage.clear();
   });
 
   it('renders title and description', () => {
     renderBanner();
 
+    expect(screen.getByText('Introducing a new alerts experience')).toBeInTheDocument();
     expect(
-      screen.getByText('Introducing a new alerts experience')
+      screen.getByText(/We've improved the alerts experience to work across alerting frameworks/)
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "We've improved the alerts experience to work across alerting frameworks. This new alerts page includes alerts from Kibana ES|QL alerting, Kibana standard alerting, and external sources so you can triage them in one place."
-      )
-    ).toBeInTheDocument();
+  });
+
+  it('renders the Enable standard view link when Standard Alerts is disabled', () => {
+    renderBanner();
+
+    expect(screen.getByTestId('inboxAnnouncementBannerStandardLink')).toHaveTextContent(
+      'Enable standard view'
+    );
+  });
+
+  it('opens the confirm modal with Advanced Settings path and Enabled standard view CTA', () => {
+    renderBanner();
+
+    fireEvent.click(screen.getByTestId('inboxAnnouncementBannerStandardLink'));
+
+    expect(screen.getByTestId('inboxAnnouncementBannerStandardConfirmModal')).toBeInTheDocument();
+    expect(screen.getByTestId('confirmModalConfirmButton')).toHaveTextContent(
+      'Enabled standard view'
+    );
+    expect(screen.getByTestId('inboxAnnouncementBannerAdvancedSettingsLink')).toHaveAttribute(
+      'href',
+      `/app/management/kibana/settings?query=${encodeURIComponent('Standard alerts experience')}`
+    );
+    expect(screen.getByText(/Alerting → Standard alerts experience/)).toBeInTheDocument();
   });
 
   it('renders the medium announcement illustration', () => {

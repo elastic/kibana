@@ -141,7 +141,13 @@ const { useHasData } = jest.requireMock('../../hooks/use_has_data');
 
 jest.mock('../../hooks/use_get_available_rules_with_descriptions');
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public');
+jest.mock('./components/new_alerts_experience_banner', () => ({
+  NewAlertsExperienceBanner: () => null,
+}));
+
+jest.mock('./components/standard_rules_only_callout', () => ({
+  StandardRulesOnlyCallout: () => null,
+}));
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
@@ -233,7 +239,7 @@ describe('AlertsPage with all capabilities', () => {
     const wrapper = await setup();
     await waitFor(() => {
       expect(wrapper.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alerts');
-      expect(wrapper.getByTestId('observabilityAlertsV1OnlyBadge')).toHaveTextContent('v1 only');
+      expect(wrapper.getByTestId('observabilityAlertsStandardBadge')).toHaveTextContent('Standard');
     });
   });
 

@@ -71,7 +71,7 @@ describe('AlertEpisodeTimelineActionEvent', () => {
     renderEvent(makeEntry({ action_type: 'assign', assignee_uid: 'user-2' }));
 
     expect(screen.getByTestId('alertingV2TimelineActionAssignee')).toHaveTextContent(
-      'assigned the episode to user-2'
+      'assigned the alert to user-2'
     );
   });
 
@@ -80,7 +80,7 @@ describe('AlertEpisodeTimelineActionEvent', () => {
 
     // The avatar renders the assignee's initials next to their name
     expect(screen.getByTestId('alertingV2TimelineActionAssignee')).toHaveTextContent(
-      'assigned the episode to JDJane Doe'
+      'assigned the alert to JDJane Doe'
     );
   });
 

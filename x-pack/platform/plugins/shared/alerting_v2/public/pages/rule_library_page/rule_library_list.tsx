@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import {
   ContentList,
   ContentListFooter,
@@ -17,11 +17,11 @@ import {
 import type { ContentListItem, ContentListItemConfig } from '@kbn/content-list';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { useAlertingLocators } from '../../application/locator_context';
 import { RULE_TEMPLATES_CONTENT_LIST_ID } from '../../constants';
 import { UserCapabilities } from '../../services/user_capabilities';
+import { RuleLibraryEmptyState } from './rule_library_empty_state';
 import {
   useRuleTemplatesDataSource,
   type RuleTemplateContentListItem,
@@ -88,29 +88,6 @@ export const RuleLibraryList = ({ onCreateFromTemplate }: RuleLibraryListProps) 
     );
   };
 
-  const emptyState = (
-    <EuiEmptyPrompt
-      data-test-subj="ruleLibraryEmptyPrompt"
-      iconType="indexOpen"
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.alertingV2.ruleLibrary.emptyTitle"
-            defaultMessage="No rule templates"
-          />
-        </h2>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.alertingV2.ruleLibrary.emptyBody"
-            defaultMessage="Rule templates are provided by Fleet integrations. Update or install integrations to view available rule templates."
-          />
-        </p>
-      }
-    />
-  );
-
   return (
     <ContentListProvider
       id={RULE_TEMPLATES_CONTENT_LIST_ID}
@@ -152,7 +129,7 @@ export const RuleLibraryList = ({ onCreateFromTemplate }: RuleLibraryListProps) 
         fields: RULE_LIBRARY_FEATURES_FIELDS,
       }}
     >
-      <ContentList emptyState={emptyState} data-test-subj="ruleLibraryList">
+      <ContentList emptyState={<RuleLibraryEmptyState />} data-test-subj="ruleLibraryList">
         <ContentListToolbar>
           <ContentListToolbar.Filters>
             <RuleTemplateTagsFilter />

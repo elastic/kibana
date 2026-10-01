@@ -45,7 +45,7 @@ const ActionSentence = ({ entry, assigneeProfile, inlineDetailStyles }: ActionSe
       <span data-test-subj="alertingV2TimelineActionAssignee">
         <FormattedMessage
           id="xpack.alertingV2EpisodesUi.details.timeline.assignedEpisodeTo"
-          defaultMessage="assigned the episode to {assignee}"
+          defaultMessage="assigned the alert to {assignee}"
           values={{
             assignee: (
               <span css={inlineDetailStyles}>

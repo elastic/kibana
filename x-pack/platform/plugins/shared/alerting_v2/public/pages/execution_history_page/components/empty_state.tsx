@@ -25,7 +25,7 @@ export const PoliciesEmptyState = () => (
       <p>
         <FormattedMessage
           id="xpack.alertingV2.executionHistory.emptyBody"
-          defaultMessage="Summary events appear here after the dispatcher evaluates episodes against an action policy."
+          defaultMessage="Summary events appear here after the dispatcher evaluates alerts against an action policy."
         />
       </p>
     }
