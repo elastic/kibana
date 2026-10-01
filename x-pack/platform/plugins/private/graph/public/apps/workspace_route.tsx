@@ -68,6 +68,7 @@ export const WorkspaceRoute = ({
 }: WorkspaceRouteProps) => {
   // D3 continues to own a mutable runtime workspace while serializable graph state lives in Redux.
   const workspaceRef = useRef<RuntimeWorkspace>();
+  const layoutControllerRef = useRef<GraphLayoutController>();
   // Callbacks retained during store initialization need access to the completed store.
   // This ref is a temporary bridge until further workspace state optimizations remove that dependency.
   const storeRef = useRef<GraphStore>();
@@ -134,14 +135,19 @@ export const WorkspaceRoute = ({
     runtimeSequenceRef.current = applyRuntimeGraphMerge(
       workspace,
       graph,
-      runtimeSequenceRef.current
+      runtimeSequenceRef.current,
+      layoutControllerRef.current!
     );
   };
 
   const notifyWorkspaceChanged = () => {
     const workspace = workspaceRef.current;
     if (workspace) {
-      storeRef.current?.dispatch(workspaceRuntimeChanged(createWorkspaceState(workspace)));
+      storeRef.current?.dispatch(
+        workspaceRuntimeChanged(
+          createWorkspaceState(workspace, layoutControllerRef.current?.isRunning())
+        )
+      );
     }
   };
 
@@ -151,7 +157,7 @@ export const WorkspaceRoute = ({
       addBasePath,
       indexPatternProvider,
       createWorkspace: (indexPattern, exploreControls) => {
-        workspaceRef.current?.layoutController.stop();
+        layoutControllerRef.current?.stop();
         runtimeSequenceRef.current = 0;
         const layoutTopology = new ReduxLayoutTopology({
           getState: () => storeRef.current?.getState(),
@@ -162,16 +168,17 @@ export const WorkspaceRoute = ({
           getEdges: () => layoutTopology.getEdges(),
           onTick: () =>
             storeRef.current?.dispatch(
-              workspaceLayoutChanged(Boolean(workspaceRef.current?.layoutController.isRunning()))
+              workspaceLayoutChanged(Boolean(layoutControllerRef.current?.isRunning()))
             ),
         });
+        layoutControllerRef.current = layoutController;
         const createdWorkspace = (workspaceRef.current = createWorkspace({
-          layoutController,
           topologyChangeHandler: notifyWorkspaceChanged,
         }));
         return createdWorkspace;
       },
       getWorkspace: () => workspaceRef.current,
+      getLayoutController: () => layoutControllerRef.current,
       savePolicy: graphSavePolicy,
       contentClient,
       changeUrl: (newUrl) => history.push(newUrl),

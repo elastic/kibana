@@ -443,7 +443,10 @@ const selectNodesAndNeighbors = (state: WorkspaceState): string[] => {
   return state.nodeIds.filter((id) => selectedNodeIds.has(id));
 };
 
-export const createWorkspaceState = (workspace: RuntimeWorkspace): WorkspaceSnapshot => {
+export const createWorkspaceState = (
+  workspace: RuntimeWorkspace,
+  isLayoutRunning = false
+): WorkspaceSnapshot => {
   const blocklistedNodes = (workspace.blocklistedNodes ?? []) as WorkspaceNode[];
   const nodesById = Object.fromEntries(workspace.nodes.map((node) => [node.id, toNodeState(node)]));
   const edgesById = Object.fromEntries(
@@ -471,7 +474,7 @@ export const createWorkspaceState = (workspace: RuntimeWorkspace): WorkspaceSnap
   );
 
   return {
-    isLayoutRunning: workspace.layoutController.isRunning(),
+    isLayoutRunning,
     nodesById,
     // IDs use field + '..' + term; repeated nodes or delimiter collisions can produce the same ID.
     // Derive IDs from the map so duplicates cannot make the normalized collections inconsistent.
@@ -537,6 +540,7 @@ export const registerWorkspaceListeners = (
     exploreGraph,
     searchGraph,
     mergeRuntimeGraph,
+    getLayoutController,
   }: GraphStoreDependencies
 ) => {
   startListening({
@@ -637,10 +641,13 @@ export const registerWorkspaceListeners = (
         return;
       }
 
+      const layoutController = getLayoutController();
+      if (!layoutController) return;
+
       if (startWorkspaceLayout.match(action)) {
-        workspace.layoutController.start();
+        layoutController.start();
       } else {
-        workspace.layoutController.stop();
+        layoutController.stop();
         notifyReact();
       }
     },
@@ -680,7 +687,10 @@ export const registerWorkspaceListeners = (
         return;
       }
 
-      syncRuntimeTopology(workspace, listenerApi.getState().workspace);
+      const layoutController = getLayoutController();
+      if (layoutController) {
+        syncRuntimeTopology(workspace, listenerApi.getState().workspace, layoutController);
+      }
     },
   });
 

@@ -19,8 +19,9 @@ describe('graphui-workspace', function () {
     let init = null;
     let runtimeSequence = 0;
     const vertexFields = [{ name: 'field1' }, { name: 'field2' }];
+    let layoutController;
     const mergeGraph = (workspace, graph) => {
-      runtimeSequence = mergeRuntimeGraph(workspace, graph, runtimeSequence);
+      runtimeSequence = mergeRuntimeGraph(workspace, graph, runtimeSequence, layoutController);
     };
     const mergeSearchResult = (workspace) => {
       mergeGraph(workspace, transformSearchResponse(mockedResult, vertexFields));
@@ -36,31 +37,12 @@ describe('graphui-workspace', function () {
       init = function () {
         const changeHandler = jest.fn();
         const topologyChangeHandler = jest.fn();
-        const callNodeProxy = function (indexName, query, responseHandler) {
-          responseHandler(mockedResult);
-        };
         const runtime = { workspace: undefined };
-        const layoutController = new GraphLayoutController({
+        layoutController = new GraphLayoutController({
           getNodes: () => runtime.workspace?.nodes ?? [],
           getEdges: () => runtime.workspace?.edges ?? [],
         });
-        const options = {
-          layoutController,
-          indexName: 'indexName',
-          vertex_fields: vertexFields,
-          changeHandler,
-          topologyChangeHandler,
-          graphExploreProxy: callNodeProxy,
-          exploreControls: {
-            useSignificance: false,
-            sampleSize: 2000,
-            timeoutMillis: 5000,
-            sampleDiversityField: null,
-            maxValuesPerDoc: 1,
-            minDocCount: 1,
-          },
-        };
-        const workspace = createWorkspace(options);
+        const workspace = createWorkspace({ topologyChangeHandler });
         runtime.workspace = workspace;
         return {
           workspace,
@@ -71,12 +53,12 @@ describe('graphui-workspace', function () {
       };
     });
     it('starts layout after merging topology', function () {
-      const layoutController = {
+      layoutController = {
         stop: jest.fn(),
         start: jest.fn(),
         isRunning: jest.fn(() => false),
       };
-      const workspace = createWorkspace({ layoutController });
+      const workspace = createWorkspace();
 
       mergeGraph(workspace, { nodes: [], edges: [] });
 
@@ -89,7 +71,7 @@ describe('graphui-workspace', function () {
     });
     it('notifies topology changes separately from layout ticks', function () {
       const { workspace, changeHandler, topologyChangeHandler } = init();
-      workspace.runLayout = jest.fn();
+      layoutController.start = jest.fn();
 
       workspace.mergeGraph({
         nodes: [{ field: 'field1', term: 'a', weight: 1, depth: 0 }],
@@ -98,7 +80,7 @@ describe('graphui-workspace', function () {
 
       expect(topologyChangeHandler).toHaveBeenCalledTimes(2);
       expect(changeHandler).not.toHaveBeenCalled();
-      expect(workspace.runLayout).toHaveBeenCalledTimes(1);
+      expect(layoutController.start).toHaveBeenCalledTimes(1);
     });
 
     it('snapshots new edges safely before and after layout initializes references', function () {
@@ -120,7 +102,7 @@ describe('graphui-workspace', function () {
         expect(edge.topSourceId).toBe(workspace.nodes[0].id);
         expect(edge.topTargetId).toBe(workspace.nodes[1].id);
       } finally {
-        workspace.stopLayout();
+        layoutController.stop();
       }
     });
 

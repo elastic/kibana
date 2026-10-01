@@ -119,11 +119,15 @@ export const registerPersistenceListeners = (
       listenerApi.dispatch(updateSettings(advancedSettings));
       listenerApi.dispatch(loadTemplates(urlTemplates));
       listenerApi.dispatch(initializeWorkspace());
-      listenerApi.dispatch(workspaceChanged(createWorkspaceState(createdWorkspace)));
+      listenerApi.dispatch(
+        workspaceChanged(
+          createWorkspaceState(createdWorkspace, deps.getLayoutController()?.isRunning())
+        )
+      );
       if (urlQuery) {
         listenerApi.dispatch(submitSearch(urlQuery));
       }
-      createdWorkspace.layoutController.start();
+      deps.getLayoutController()?.start();
     },
   });
 
@@ -151,7 +155,9 @@ export const registerPersistenceListeners = (
           getState: () => {
             const currentWorkspace = deps.getWorkspace();
             if (currentWorkspace) {
-              listenerApi.dispatch(workspaceRuntimeChanged(createWorkspaceState(currentWorkspace)));
+              listenerApi.dispatch(workspaceRuntimeChanged(
+                  createWorkspaceState(currentWorkspace, deps.getLayoutController()?.isRunning())
+                ));
             }
             return listenerApi.getState();
           },

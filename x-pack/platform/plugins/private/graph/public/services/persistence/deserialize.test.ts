@@ -16,6 +16,7 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
   let workspace: RuntimeWorkspace;
+  let layoutController: GraphLayoutController;
   let runtimeSequence: number;
 
   beforeEach(() => {
@@ -116,11 +117,11 @@ describe('deserialize', () => {
         },
       }),
     } as GraphWorkspaceSavedObject;
-    const layoutController = new GraphLayoutController({
+    layoutController = new GraphLayoutController({
       getNodes: () => workspace?.nodes ?? [],
       getEdges: () => workspace?.edges ?? [],
     });
-    workspace = createWorkspace({ layoutController });
+    workspace = createWorkspace();
   });
 
   function callSavedWorkspaceToAppState() {
@@ -135,7 +136,12 @@ describe('deserialize', () => {
       } as DataView,
       workspace,
       (runtimeWorkspace, graph) => {
-        runtimeSequence = mergeRuntimeGraph(runtimeWorkspace, graph, runtimeSequence);
+        runtimeSequence = mergeRuntimeGraph(
+          runtimeWorkspace,
+          graph,
+          runtimeSequence,
+          layoutController
+        );
       }
     );
   }

@@ -651,7 +651,7 @@ describe('workspace listeners', () => {
 
       environment.store.dispatch(deleteSelectedNodes());
 
-      expect(environment.workspace.layoutController.start).toHaveBeenCalled();
+      expect(environment.mockedDeps.getLayoutController()!.start).toHaveBeenCalled();
     });
   });
 
@@ -741,8 +741,8 @@ describe('workspace listeners', () => {
       environment.store.dispatch(startWorkspaceLayout());
       environment.store.dispatch(stopWorkspaceLayout());
 
-      expect(environment.workspace.layoutController.start).toHaveBeenCalled();
-      expect(environment.workspace.layoutController.stop).toHaveBeenCalled();
+      expect(environment.mockedDeps.getLayoutController()!.start).toHaveBeenCalled();
+      expect(environment.mockedDeps.getLayoutController()!.stop).toHaveBeenCalled();
       expect(environment.mockedDeps.notifyReact).toHaveBeenCalled();
     });
   });

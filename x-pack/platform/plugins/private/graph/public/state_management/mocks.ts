@@ -45,12 +45,12 @@ export function createMockGraphStore({
   initialStateOverwrites?: Partial<GraphState>;
 }): MockedGraphEnvironment {
   const coreStart = coreMock.createStart();
+  const layoutControllerMock = {
+    start: jest.fn(),
+    stop: jest.fn(),
+    isRunning: jest.fn(() => false),
+  };
   const workspaceMock = {
-    layoutController: {
-      start: jest.fn(),
-      stop: jest.fn(),
-      isRunning: jest.fn(() => false),
-    },
     simpleSearch: jest.fn(),
     nodes: [],
     edges: [],
@@ -70,6 +70,7 @@ export function createMockGraphStore({
     } as unknown as ChromeStart,
     createWorkspace: jest.fn((_index: string, _advancedSettings) => workspaceMock),
     getWorkspace: jest.fn(() => workspaceMock),
+    getLayoutController: jest.fn(() => layoutControllerMock),
     contentClient: {
       get: jest.fn(),
       search: jest.fn(),

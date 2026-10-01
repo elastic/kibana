@@ -6,10 +6,19 @@
  */
 
 import { getIcon } from '../../helpers/style_choices';
-import type { RuntimeWorkspace, WorkspaceEdge, WorkspaceNode } from '../../types/workspace_state';
+import type {
+  RuntimeWorkspace,
+  WorkspaceEdge,
+  WorkspaceLayoutController,
+  WorkspaceNode,
+} from '../../types/workspace_state';
 import type { WorkspaceState } from '../../state_management/workspace';
 
-export const syncRuntimeTopology = (workspace: RuntimeWorkspace, state: WorkspaceState): void => {
+export const syncRuntimeTopology = (
+  workspace: RuntimeWorkspace,
+  state: WorkspaceState,
+  layoutController: WorkspaceLayoutController
+): void => {
   const nodesMap: Record<string, WorkspaceNode> = {};
   state.nodeIds.forEach((id) => {
     const node = state.nodesById[id];
@@ -56,5 +65,5 @@ export const syncRuntimeTopology = (workspace: RuntimeWorkspace, state: Workspac
   workspace.nodes = state.nodeIds.map((id) => nodesMap[id]);
   workspace.edgesMap = edgesMap;
   workspace.edges = state.edgeIds.map((id) => edgesMap[id]);
-  workspace.layoutController.start();
+  layoutController.start();
 };

@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { RuntimeWorkspace, RuntimeWorkspaceOptions } from '../../types/workspace_state';
+import type { RuntimeWorkspace } from '../../types/workspace_state';
 
-export const createWorkspace = ({
-  layoutController,
+export const createWorkspace = (
+  { topologyChangeHandler }: Pick<RuntimeWorkspace, 'topologyChangeHandler'> = {}
+): RuntimeWorkspace => ({
+  blocklistedNodes: [],
   topologyChangeHandler,
-}: RuntimeWorkspaceOptions): RuntimeWorkspace => {
-  return {
-    blocklistedNodes: [],
-    layoutController,
-    topologyChangeHandler,
-    nodesMap: {},
-    edgesMap: {},
-    nodes: [],
-    edges: [],
-  };
-};
+  nodesMap: {},
+  edgesMap: {},
+  nodes: [],
+  edges: [],
+});
