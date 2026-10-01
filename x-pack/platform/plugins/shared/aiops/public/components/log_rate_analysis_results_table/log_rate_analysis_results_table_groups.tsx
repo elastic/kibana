@@ -40,7 +40,6 @@ import { stringHash } from '@kbn/ml-string-hash';
 
 import usePrevious from 'react-use/lib/usePrevious';
 import useMountedState from 'react-use/lib/useMountedState';
-import { useIsInteractive } from '../../hooks/use_is_interactive';
 
 import { LogRateAnalysisResultsTable } from './log_rate_analysis_results_table';
 import { LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE, useColumns } from './use_columns';
