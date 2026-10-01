@@ -874,8 +874,8 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 % * Fix the **Tracking containment** rule editor breaking when you select a data view [#289778]({{kib-pull}}289778).
 
 **Dashboards and Visualizations**:
-* Increase the TinyMath expression length limit so longer visualization formulas no longer fail [#290314]({{kib-pull}}290314).
-* Fix Go to URL drilldowns leaving Mustache tokens such as `event.values.[0]` unreplaced in the drilldown name [#290363]({{kib-pull}}290363).
+* Increase the TinyMath expression length limit so longer visualization formulas don't fail [#290314]({{kib-pull}}290314).
+* Fix **Go to URL** drilldowns leaving Mustache tokens such as `event.values.[0]` unreplaced in the drilldown name [#290363]({{kib-pull}}290363).
 
 **Data ingestion and {{fleet}}**:
 * Fix deleting a managed integration policy leaving the agent listed as active [#290181]({{kib-pull}}290181).
@@ -914,7 +914,7 @@ For the {{elastic-sec}} 9.4.8 release information, refer to [{{elastic-sec}} Sol
 * Hide the **Activate user** action on deactivated users when you have read-only access [#289801]({{kib-pull}}289801).
 * Fix a failed audit log write after startup crashing {{kib}}. {{kib}} now reports a degraded state and turns the audit logger off instead [#287360]({{kib-pull}}287360).
 * Fix {{kib}} shutting down when the product documentation installer downloads a corrupt or incomplete artifact [#291142]({{kib-pull}}291142).
-* Fix PDF and PNG reports using too much memory, and failing on memory-constrained instances, when you generate them from a wide browser window [#289062]({{kib-pull}}289062).
+* Fix PDF and PNG reports using too much memory and failing on memory-constrained instances when you generate them from a wide browser window [#289062]({{kib-pull}}289062).
 
 **Machine learning and {{infer}}**:
 * Fix streaming {{infer}} requests returning no content when `elasticsearch.compression` is enabled, which made Agent Builder report an empty response [#290381]({{kib-pull}}290381).
