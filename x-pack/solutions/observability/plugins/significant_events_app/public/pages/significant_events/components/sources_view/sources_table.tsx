@@ -61,7 +61,6 @@ export function SourcesTable({
   onToggleSourceEnabled,
   onOnboardSource,
   onStopOnboarding,
-  onResetSourceKnowledge,
   onDeleteSource,
 }: {
   sources: NightshiftSource[];
@@ -81,7 +80,6 @@ export function SourcesTable({
   onToggleSourceEnabled: (source: NightshiftSource, enabled: boolean) => void;
   onOnboardSource: (sourceId: string) => void;
   onStopOnboarding: (sourceId: string) => void;
-  onResetSourceKnowledge: (source: NightshiftSource) => void;
   onDeleteSource: (source: NightshiftSource) => void;
 }) {
   const {
@@ -110,7 +108,6 @@ export function SourcesTable({
         onboardTooltip={onboardTooltip}
         onOnboard={onOnboardSource}
         onStopOnboarding={onStopOnboarding}
-        onResetKnowledge={onResetSourceKnowledge}
         onDelete={onDeleteSource}
       />
     ),

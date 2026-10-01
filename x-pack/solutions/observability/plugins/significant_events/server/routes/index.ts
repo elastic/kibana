@@ -24,7 +24,6 @@ import { internalMaintenanceRoutes } from './internal/maintenance/route';
 import { internalRunQuotaRoutes } from './internal/run_quotas/route';
 import { internalCostRoutes } from './internal/cost/route';
 import { reconcileRoutes } from './internal/knowledge_indicators/reconcile_route';
-import { resetSourceKnowledgeRoutes } from './internal/knowledge_indicators/reset_source_knowledge_route';
 import { syncRoutes } from './internal/knowledge_indicators/sync_route';
 import { internalScheduledDiscoveryRoutes } from './internal/scheduled_discovery/route';
 
@@ -49,7 +48,6 @@ export const significantEventsRouteRepository = {
   ...internalRunQuotaRoutes,
   ...internalCostRoutes,
   ...reconcileRoutes,
-  ...resetSourceKnowledgeRoutes,
   ...syncRoutes,
   ...internalScheduledDiscoveryRoutes,
 };

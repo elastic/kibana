@@ -58,23 +58,9 @@ describe('useSourcesApi knowledge invalidation', () => {
       dependencies: {
         start: {
           nightshiftSources: { getClient: jest.fn().mockResolvedValue({ fetch }) },
-          significantEvents: { significantEventsRepositoryClient: { fetch } },
         },
       },
     } as never);
-  });
-
-  it('marks every knowledge query stale and refetches only the reset source', async () => {
-    const { result, invalidateQueries } = setup();
-
-    act(() => result.current.resetSourceKnowledge.mutate(nginxSource));
-
-    await waitFor(() => expect(result.current.resetSourceKnowledge.isSuccess).toBe(true));
-    for (const queryKey of KNOWLEDGE_PREFIXES) {
-      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey, refetchType: 'none' });
-      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: [...queryKey, 'source-1'] });
-    }
-    expect(invalidateQueries).not.toHaveBeenCalledWith({ queryKey: ['features'] });
   });
 
   it('does not refetch the knowledge of a deleted source', async () => {

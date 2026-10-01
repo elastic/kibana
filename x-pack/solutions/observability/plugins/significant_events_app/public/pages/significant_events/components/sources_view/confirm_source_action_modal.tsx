@@ -11,7 +11,7 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import React from 'react';
 
 /** Destructive row actions that ask for confirmation first. */
-export type SourceAction = 'delete' | 'reset';
+export type SourceAction = 'delete';
 
 /** What the modal confirms: a row action, or saving a new query from the source flyout. */
 type ConfirmedSourceAction = SourceAction | 'changeQuery';
@@ -36,20 +36,6 @@ const ACTION_COPY: Record<
     }),
     confirmLabel: i18n.translate('xpack.significantEventsApp.sources.deleteModal.confirm', {
       defaultMessage: 'Delete source',
-    }),
-  },
-  reset: {
-    getTitle: (title) =>
-      i18n.translate('xpack.significantEventsApp.sources.resetModal.title', {
-        defaultMessage: 'Reset the knowledge of "{title}"?',
-        values: { title },
-      }),
-    body: i18n.translate('xpack.significantEventsApp.sources.resetModal.body', {
-      defaultMessage:
-        'Its knowledge indicators and rules are deleted and any running onboarding is stopped. The source is kept, so you can onboard it again.',
-    }),
-    confirmLabel: i18n.translate('xpack.significantEventsApp.sources.resetModal.confirm', {
-      defaultMessage: 'Reset knowledge',
     }),
   },
   changeQuery: {

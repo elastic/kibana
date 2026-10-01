@@ -66,7 +66,7 @@ export function SourcesView() {
     bulkOnboardFeaturesOnly,
     bulkOnboardQueriesOnly,
   } = useKiGeneration();
-  const { setSourceEnabled, deleteSource, resetSourceKnowledge } = useSourcesApi();
+  const { setSourceEnabled, deleteSource } = useSourcesApi();
 
   const aiFeatures = useAIFeatures();
   const allConnectors = aiFeatures?.genAiConnectors?.connectors ?? [];
@@ -110,9 +110,7 @@ export function SourcesView() {
     if (!pendingAction) {
       return;
     }
-    const { action, source } = pendingAction;
-    const mutation = action === 'delete' ? deleteSource : resetSourceKnowledge;
-    mutation.mutate(source, { onSettled: () => setPendingAction(undefined) });
+    deleteSource.mutate(pendingAction.source, { onSettled: () => setPendingAction(undefined) });
   };
 
   const handleQueryChange: SignificantEventsSearchBarProps['onQueryChange'] = (queryPayload) => {
@@ -272,7 +270,6 @@ export function SourcesView() {
                 }
                 onOnboardSource={(sourceId) => bulkScheduleOnboarding([sourceId])}
                 onStopOnboarding={cancelOnboarding}
-                onResetSourceKnowledge={(source) => setPendingAction({ action: 'reset', source })}
                 onDeleteSource={(source) => setPendingAction({ action: 'delete', source })}
               />
             </EuiFlexItem>
@@ -291,7 +288,7 @@ export function SourcesView() {
         <ConfirmSourceActionModal
           action={pendingAction.action}
           source={pendingAction.source}
-          isLoading={deleteSource.isLoading || resetSourceKnowledge.isLoading}
+          isLoading={deleteSource.isLoading}
           onCancel={() => setPendingAction(undefined)}
           onConfirm={onConfirmPendingAction}
         />

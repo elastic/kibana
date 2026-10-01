@@ -86,16 +86,6 @@ export const STOP_SOURCE_ONBOARDING_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Stop source onboarding' }
 );
 
-export const RESET_SOURCE_KNOWLEDGE_ACTION_LABEL = i18n.translate(
-  'xpack.significantEventsApp.sources.resetKnowledgeActionLabel',
-  { defaultMessage: 'Reset knowledge' }
-);
-
-export const RESET_SOURCE_KNOWLEDGE_ACTION_DESCRIPTION = i18n.translate(
-  'xpack.significantEventsApp.sources.resetKnowledgeActionDescription',
-  { defaultMessage: 'Delete the knowledge indicators and rules of this source' }
-);
-
 export const DELETE_SOURCE_ACTION_LABEL = i18n.translate(
   'xpack.significantEventsApp.sources.deleteActionLabel',
   { defaultMessage: 'Delete' }

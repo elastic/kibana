@@ -28,7 +28,6 @@ jest.mock('../../../../hooks/use_sources_api', () => ({
   useSourcesApi: () => ({
     setSourceEnabled: { mutate: jest.fn(), isLoading: false },
     deleteSource: mockDeleteSource,
-    resetSourceKnowledge: { mutate: jest.fn(), isLoading: false },
   }),
 }));
 jest.mock('../../../../hooks/use_ai_features', () => ({ useAIFeatures: () => null }));
@@ -214,11 +213,10 @@ describe('SourcesView', () => {
     expect(screen.getByTestId('sourceFlyoutMock')).toHaveTextContent(/^Nginx errors$/);
   });
 
-  it('shows the onboard, reset and delete actions inline, without an overflow menu', () => {
+  it('shows the onboard and delete actions inline, without an overflow menu', () => {
     setup({ sources: [nginxSource], canManage: true });
 
     expect(screen.getByTestId('significantEventsAppSourcesTableOnboardButton')).toBeEnabled();
-    expect(screen.getByTestId('significantEventsAppSourcesTableResetButton')).toBeEnabled();
     expect(screen.getByTestId('significantEventsAppSourcesTableDeleteButton')).toBeEnabled();
     expect(screen.queryByTestId('euiCollapsedItemActionsButton')).not.toBeInTheDocument();
   });

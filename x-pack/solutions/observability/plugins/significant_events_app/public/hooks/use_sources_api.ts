@@ -33,10 +33,7 @@ export function useSourcesApi() {
       notifications: { toasts },
     },
     dependencies: {
-      start: {
-        nightshiftSources,
-        significantEvents: { significantEventsRepositoryClient },
-      },
+      start: { nightshiftSources },
     },
   } = useKibana();
   const queryClient = useQueryClient();
@@ -48,14 +45,6 @@ export function useSourcesApi() {
     Promise.all(
       SOURCE_KNOWLEDGE_QUERY_KEYS.map((queryKey) =>
         queryClient.invalidateQueries({ queryKey, refetchType: 'none' })
-      )
-    );
-  // Refetch one source's queries only. Each Sources table row holds its own, so refetching whole
-  // prefixes would send a request per row.
-  const refetchSourceKnowledge = (sourceId: string) =>
-    Promise.all(
-      SOURCE_KNOWLEDGE_QUERY_KEYS.map((queryKey) =>
-        queryClient.invalidateQueries({ queryKey: [...queryKey, sourceId] })
       )
     );
 
@@ -132,25 +121,7 @@ export function useSourcesApi() {
     onSettled: () => Promise.all([invalidateSources(), markKnowledgeStale()]),
   });
 
-  const resetSourceKnowledge = useMutation<void, Error, NightshiftSource>({
-    mutationFn: async ({ id }) => {
-      await significantEventsRepositoryClient.fetch(
-        'POST /internal/streams/{streamName}/knowledge_indicators/_reset',
-        // The KI routes still name their path param `streamName`; it takes the source id.
-        { params: { path: { streamName: id } }, signal: null }
-      );
-    },
-    onSuccess: (_, source) => {
-      toasts.addSuccess({ title: getKnowledgeResetToastTitle(source.title) });
-    },
-    onError: (error) => {
-      toasts.addError(getFormattedError(error), { title: RESET_ERROR_TOAST_TITLE });
-    },
-    onSettled: (_, __, source) =>
-      Promise.all([markKnowledgeStale(), refetchSourceKnowledge(source.id)]),
-  });
-
-  return { createSource, updateSource, setSourceEnabled, deleteSource, resetSourceKnowledge };
+  return { createSource, updateSource, setSourceEnabled, deleteSource };
 }
 
 const getSourceCreatedToastTitle = (title: string) =>
@@ -171,12 +142,6 @@ const getSourceDeletedToastTitle = (title: string) =>
     values: { title },
   });
 
-const getKnowledgeResetToastTitle = (title: string) =>
-  i18n.translate('xpack.significantEventsApp.sources.knowledgeResetToastTitle', {
-    defaultMessage: 'Knowledge of "{title}" reset',
-    values: { title },
-  });
-
 const SET_ENABLED_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.sources.setEnabledErrorToastTitle',
   { defaultMessage: 'Could not update the source' }
@@ -185,9 +150,4 @@ const SET_ENABLED_ERROR_TOAST_TITLE = i18n.translate(
 const DELETE_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.sources.deleteErrorToastTitle',
   { defaultMessage: 'Could not delete the source' }
-);
-
-const RESET_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.significantEventsApp.sources.resetErrorToastTitle',
-  { defaultMessage: 'Could not reset the knowledge of the source' }
 );

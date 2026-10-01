@@ -16,8 +16,6 @@ import React from 'react';
 import {
   DELETE_SOURCE_ACTION_DESCRIPTION,
   DELETE_SOURCE_ACTION_LABEL,
-  RESET_SOURCE_KNOWLEDGE_ACTION_DESCRIPTION,
-  RESET_SOURCE_KNOWLEDGE_ACTION_LABEL,
   RUN_SOURCE_ONBOARDING_BUTTON_LABEL,
   STOP_SOURCE_ONBOARDING_BUTTON_LABEL,
 } from './translations';
@@ -30,7 +28,6 @@ interface SourceActionsColumnProps {
   onboardTooltip: string;
   onOnboard: (sourceId: string) => void;
   onStopOnboarding: (sourceId: string) => void;
-  onResetKnowledge: (source: NightshiftSource) => void;
   onDelete: (source: NightshiftSource) => void;
 }
 
@@ -45,7 +42,6 @@ export function SourceActionsColumn({
   onboardTooltip,
   onOnboard,
   onStopOnboarding,
-  onResetKnowledge,
   onDelete,
 }: SourceActionsColumnProps) {
   const isOnboardingInProgress =
@@ -81,16 +77,6 @@ export function SourceActionsColumn({
             />
           </EuiToolTip>
         )}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={RESET_SOURCE_KNOWLEDGE_ACTION_DESCRIPTION}>
-          <EuiButtonIcon
-            data-test-subj="significantEventsAppSourcesTableResetButton"
-            iconType="eraser"
-            aria-label={RESET_SOURCE_KNOWLEDGE_ACTION_LABEL}
-            onClick={() => onResetKnowledge(source)}
-          />
-        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={DELETE_SOURCE_ACTION_DESCRIPTION}>
