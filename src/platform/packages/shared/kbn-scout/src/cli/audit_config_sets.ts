@@ -234,8 +234,24 @@ export function listConfigSetFiles(repoRoot: string): ConfigSetFile[] {
   return out;
 }
 
+// Some config sets read secrets from the environment and throw on CI when they are missing.
+// The audit compares settings, not secrets, so an empty value is enough to load them.
+const PLACEHOLDER_ENV = { KIBANA_TESTING_AI_CONNECTORS: Buffer.from('{}').toString('base64') };
+
 /** Compares every config set against the default set of the same flavor and file. */
 export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsReport> {
+  const unsetKeys = Object.keys(PLACEHOLDER_ENV).filter((key) => process.env[key] === undefined);
+  Object.entries(PLACEHOLDER_ENV).forEach(([key, value]) => {
+    if (unsetKeys.includes(key)) process.env[key] = value;
+  });
+  try {
+    return await compareConfigSets(repoRoot);
+  } finally {
+    unsetKeys.forEach((key) => delete process.env[key]);
+  }
+}
+
+async function compareConfigSets(repoRoot: string): Promise<ConfigSetsReport> {
   const runtimeKeys = findRuntimeUpdatableKeys(repoRoot);
   const defaults = new Map<string, ScoutServerConfig>();
   const loadDefault = async (flavor: ConfigSetFlavor, file: string) => {
