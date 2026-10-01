@@ -170,6 +170,12 @@ const PATTERN_OPERATORS: ReadonlySet<string> = new Set(['like', 'rlike']);
 const WORD_CHARACTER = /[\p{L}\p{N}_]/u;
 
 /**
+ * Unambiguously one token under the standard tokenizer: letters, digits and underscore
+ * throughout, with no punctuation an analyzer could split on.
+ */
+const SINGLE_TOKEN = /^[\p{L}\p{N}_]+$/u;
+
+/**
  * True when `value` appears in `text` as a term of its own rather than buried inside a longer
  * word. A report describing an `unsuccessful login` contains the characters of `success`, but the
  * rows `WHERE event.outcome == "success"` brings back are the opposite of what it describes, and
@@ -333,6 +339,21 @@ const requiredRegexpCore = (alternative: string): string[] => {
  *   a match on short tokens alone — `MATCH(process.command_line, "net use")` keeps the
  *   placeholder — and costs nothing that can be verified.
  *
+ * `match` and `:` split their literal on whitespace here and compare each piece whole, but
+ * Elasticsearch's own analyzer also splits on punctuation, and `MATCH` ORs whatever it produces.
+ * `MATCH(message, "escalated-role")` is one term above and verified as a report artifact once —
+ * but the query that actually runs matches any document holding the analyzed `escalated` **or**
+ * `role`, so a document containing only `role` comes back as a hit this gate had already approved
+ * as `escalated-role`. Whether a given field's mapping would really split it is not something this
+ * gate can see, so there is no correct simulation of the analyzer to fall back on — only a choice
+ * about which direction to be wrong in. The choice here: a term has to be letters, digits and
+ * underscore throughout (unambiguously one token under the standard tokenizer) to ground at all;
+ * anything else — hyphenated, dotted, multi-word-as-one-literal — keeps the placeholder regardless
+ * of whether the report contains it. `MATCH_PHRASE` is exempt, because its terms are conjunctive
+ * and ordered rather than independent OR alternatives: a hyphenated or multi-word phrase still has
+ * to appear together, in order, so it stays grounded by the whitespace-split rule above with no
+ * extra check, and is the shape to steer generation at when a value cannot stand as one token.
+ *
  * `LIKE` needs neither the alternation rule nor `RLIKE`'s whitelist: its only wildcards are `*`
  * for any sequence and `?` for exactly one character, so every fragment between them is text the
  * matching rows contain.
@@ -348,7 +369,15 @@ const groundingRequirements = (operator: string, literal: string): string[][] =>
     const terms = literal.split(/\s+/).filter((term) => term.length > 0);
     // A literal with no term asks for nothing, and an empty requirement list is satisfied by
     // everything, so it has to fail here rather than pass vacuously.
-    return terms.length > 0 ? terms.map((term) => [term]) : [[]];
+    if (terms.length === 0) {
+      return [[]];
+    }
+    if (operator === 'match_phrase') {
+      return terms.map((term) => [term]);
+    }
+    // `match` and `:` OR their terms — see the comment above this function for why a term this
+    // gate cannot confirm is a single token refuses rather than grounds as one.
+    return terms.map((term) => (SINGLE_TOKEN.test(term) ? [term] : []));
   }
   return [[literal]];
 };

@@ -193,7 +193,35 @@ describe('assertEsqlGroundedInReport', () => {
   });
 
   it('accepts a report value passed to a full-text function in the filter', () => {
+    const query = 'FROM logs-aws.* | WHERE MATCH(message, "AssumeRole") | LIMIT 10';
+    expect(
+      assertEsqlGroundedInReport(query, {
+        reportText: 'the actor reached escalated-role via AssumeRole',
+        iocValues: [],
+      }).ok
+    ).toBe(true);
+  });
+
+  it('refuses a hyphenated full-text term even when the report contains it verbatim', () => {
+    // `escalated-role` is not unambiguously one token under the standard tokenizer. Whether a
+    // field's mapping would split it on the hyphen is not something this gate can see, and the
+    // executed MATCH query would OR whatever the analyzer produces -- so a document holding only
+    // `role` would come back as a hit this gate had approved as `escalated-role`. MATCH_PHRASE is
+    // the escape hatch for exactly this shape; see that test below.
     const query = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role") | LIMIT 10';
+    expect(
+      assertEsqlGroundedInReport(query, {
+        reportText: 'the actor reached escalated-role',
+        iocValues: [],
+      }).ok
+    ).toBe(false);
+  });
+
+  it('still grounds a hyphenated value under MATCH_PHRASE, the escape hatch', () => {
+    // MATCH_PHRASE's terms are conjunctive and ordered, not independent OR alternatives, so a
+    // hyphenated or multi-word phrase still has to appear together, in order -- safe regardless
+    // of how the field's analyzer would tokenize it.
+    const query = 'FROM logs-aws.* | WHERE MATCH_PHRASE(message, "escalated-role") | LIMIT 10';
     expect(
       assertEsqlGroundedInReport(query, {
         reportText: 'the actor reached escalated-role',
@@ -459,9 +487,9 @@ describe('assertEsqlGroundedInReport', () => {
     it('requires every term of a full-text match to be grounded', () => {
       // A match query ORs its terms by default, so an ungrounded term widens the result exactly
       // as an ungrounded OR branch does.
-      const grounded = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role")';
-      const widened = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role unrelated-term")';
-      const text = 'the actor reached escalated-role';
+      const grounded = 'FROM logs-aws.* | WHERE MATCH(message, "AssumeRole")';
+      const widened = 'FROM logs-aws.* | WHERE MATCH(message, "AssumeRole irrelevant")';
+      const text = 'the actor called AssumeRole';
       expect(assertEsqlGroundedInReport(grounded, { reportText: text, iocValues: [] }).ok).toBe(
         true
       );
@@ -471,13 +499,15 @@ describe('assertEsqlGroundedInReport', () => {
     });
 
     it('refuses a match whose term is too short for the gate to judge', () => {
-      // A short term is not a term Elasticsearch ignores: `MATCH(message, "escalated-role up")`
+      // A short term is not a term Elasticsearch ignores: `MATCH(message, "AssumeRole up")`
       // returns documents holding only `up`, so excusing it from the requirement — which an
       // earlier version of this test asserted as intent — counted those rows as the report's.
-      const query = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role up")';
+      // A single-token first term keeps this isolated to the short-term rule, not the hyphenated
+      // -term rule the tests above cover.
+      const query = 'FROM logs-aws.* | WHERE MATCH(message, "AssumeRole up")';
       expect(
         assertEsqlGroundedInReport(query, {
-          reportText: 'the actor reached escalated-role',
+          reportText: 'the actor called AssumeRole',
           iocValues: [],
         }).ok
       ).toBe(false);
