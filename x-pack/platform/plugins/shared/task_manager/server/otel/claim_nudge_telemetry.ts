@@ -7,10 +7,7 @@
 
 import { type Attributes, type Counter, metrics, ValueType } from '@opentelemetry/api';
 
-/**
- * Which API requested the nudge. Orthogonal sources of the same event, so they live as an
- * attribute on one counter rather than as separate counters.
- */
+/** Which API requested the nudge. */
 export type ClaimNudgeSource = 'run_soon';
 
 class TaskManagerClaimNudgeTelemetry {

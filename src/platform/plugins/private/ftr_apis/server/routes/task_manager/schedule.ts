@@ -70,14 +70,9 @@ export interface TaskToSchedule {
 }
 
 const scheduleBodySchema = schema.object({
-  // Extended rather than added to `taskToScheduleSchema`, which `bulk_schedule` also uses: only
-  // this route converts `runAt` to a Date, so accepting it there would pass a string to
-  // `bulkSchedule`.
+  // Not in `taskToScheduleSchema`: `bulk_schedule` would pass `runAt` through as a string.
   task: taskToScheduleSchema.extends({
-    /**
-     * ISO date string. Lets tests create a task that regular polling will not claim for a known
-     * amount of time, which is otherwise impossible without writing to the task index directly.
-     */
+    /** ISO date string. */
     runAt: schema.maybe(
       schema.string({
         maxLength: 100,

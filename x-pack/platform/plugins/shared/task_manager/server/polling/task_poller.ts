@@ -10,7 +10,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Subject, Subscription } from 'rxjs';
+import { Subject, Subscription, of } from 'rxjs';
 
 import type { Option } from 'fp-ts/Option';
 import { none } from 'fp-ts/Option';
@@ -18,6 +18,7 @@ import type { Logger } from '@kbn/core/server';
 import { TaskErrorSource } from '../task_running';
 import type { Result } from '../lib/result_type';
 import { asOk, asErr } from '../lib/result_type';
+import { createThrottledClaimNudge } from '../claim_nudge/create_throttled_claim_nudge';
 
 type WorkFn<H> = () => Promise<H>;
 
@@ -25,11 +26,10 @@ interface Opts<H> {
   logger: Logger;
   initialPollInterval: number;
   pollInterval$: Observable<number>;
-  /**
-   * Emits when a Kibana node requests an immediate claim cycle (e.g. via `runSoon`),
-   * triggering a cycle right away instead of waiting for the next `pollInterval`.
-   */
+  /** Requests an extra claim cycle, e.g. from `runSoon`. */
   claimNudge$?: Observable<void>;
+  /** While true, claim nudges are ignored. */
+  backpressure$?: Observable<boolean>;
   getCapacity: () => number;
   work: WorkFn<H>;
 }
@@ -56,23 +56,66 @@ export function createTaskPoller<T, H>({
   initialPollInterval,
   pollInterval$,
   claimNudge$,
+  backpressure$,
   getCapacity,
   work,
 }: Opts<H>): TaskPoller<T, H> {
   const hasCapacity = () => getCapacity() > 0;
   let running: boolean = false;
   let isCycleRunning: boolean = false;
-  let nudgeRequestedDuringCycle: boolean = false;
+  let nudgePending = false;
+  let backpressureActive = false;
   let timeoutId: NodeJS.Timeout | null = null;
+  let subscribeTimeoutId: NodeJS.Timeout | null = null;
   let subscriptions: Subscription | null = null;
   let pollInterval = initialPollInterval;
-  let pollIntervalDelay = 0;
+  let nextCycleAt = 0;
+  let lastCycleStart = 0;
   const subject = new Subject<Result<H, PollingError<T>>>();
+  const claimCycleStart$ = new Subject<void>();
+
+  function scheduleNextCycle() {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+    if (!running || isCycleRunning) {
+      return;
+    }
+    timeoutId = setTimeout(
+      runScheduledCycle,
+      nudgePending ? 0 : Math.max(nextCycleAt - Date.now(), 0)
+    );
+  }
+
+  function runScheduledCycle() {
+    void runCycle().catch((e) => {
+      subject.next(asPollingError(e, PollingErrorType.PollerError));
+    });
+  }
 
   async function runCycle() {
+    if (!running || isCycleRunning) {
+      return;
+    }
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
     timeoutId = null;
-    isCycleRunning = true;
     const start = Date.now();
+    const cycleDue = start >= nextCycleAt;
+    // Backpressure may have started since the nudge was accepted.
+    if (!cycleDue && (!nudgePending || backpressureActive)) {
+      nudgePending = false;
+      scheduleNextCycle();
+      return;
+    }
+    nudgePending = false;
+    // Any cycle, nudged or regular, restarts the poll interval.
+    nextCycleAt = start + pollInterval;
+    lastCycleStart = start;
+    isCycleRunning = true;
+    claimCycleStart$.next();
     try {
       if (hasCapacity()) {
         const result = await work();
@@ -87,20 +130,7 @@ export function createTaskPoller<T, H>({
     }
 
     if (running) {
-      const nextDelay = nudgeRequestedDuringCycle
-        ? 0
-        : Math.max(pollInterval - (Date.now() - start) + (pollIntervalDelay % pollInterval), 0);
-      nudgeRequestedDuringCycle = false;
-      // Set the next runCycle call
-      timeoutId = setTimeout(
-        () =>
-          runCycle().catch((e) => {
-            subject.next(asPollingError(e, PollingErrorType.PollerError));
-          }),
-        nextDelay
-      );
-      // Reset delay, it's designed to shuffle only once
-      pollIntervalDelay = 0;
+      scheduleNextCycle();
     } else {
       logger.info('Task poller finished running its last cycle');
     }
@@ -111,24 +141,13 @@ export function createTaskPoller<T, H>({
       return;
     }
 
-    if (isCycleRunning) {
-      // Coalesce bursts of nudges into a single immediate follow-up cycle.
-      nudgeRequestedDuringCycle = true;
-      return;
-    }
-
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      timeoutId = null;
-    }
-
-    runCycle().catch((e) => {
-      subject.next(asPollingError(e, PollingErrorType.PollerError));
-    });
+    nudgePending = true;
+    runScheduledCycle();
   }
 
   function subscribe() {
-    if (subscriptions) {
+    subscribeTimeoutId = null;
+    if (!running || subscriptions) {
       return;
     }
     subscriptions = new Subscription();
@@ -145,15 +164,36 @@ export function createTaskPoller<T, H>({
           );
           return;
         }
-        pollInterval = interval;
+        if (pollInterval !== interval) {
+          pollInterval = interval;
+          // Reschedule the pending cycle for the new interval.
+          nextCycleAt = lastCycleStart + interval;
+          scheduleNextCycle();
+        }
         logger.debug(`Task poller now using interval of ${interval}ms`);
       })
     );
+    if (backpressure$) {
+      subscriptions.add(
+        backpressure$.subscribe((active) => {
+          backpressureActive = active;
+          if (active) {
+            // The throttle cannot discard a nudge already queued behind an in-flight cycle.
+            nudgePending = false;
+            scheduleNextCycle();
+          }
+        })
+      );
+    }
     if (claimNudge$) {
       subscriptions.add(
-        claimNudge$.subscribe(() => {
-          // RxJS reports a throw here through `reportUnhandledError`, which defers it into a
-          // macrotask and crashes Kibana. A missed nudge must never cost more than a poll interval.
+        createThrottledClaimNudge({
+          claimNudge$,
+          claimCycleStart$,
+          backpressure$: backpressure$ ?? of(false),
+          logger,
+        }).subscribe(() => {
+          // RxJS rethrows subscriber errors asynchronously, which would crash Kibana.
           try {
             logger.debug('Task poller received a claim nudge, running a claim cycle immediately');
             runCycleNow();
@@ -171,12 +211,11 @@ export function createTaskPoller<T, H>({
       if (!running) {
         logger.info('Starting the task poller');
         running = true;
-        runCycle().catch((e) => {
-          subject.next(asPollingError(e, PollingErrorType.PollerError));
-        });
+        nextCycleAt = Date.now();
+        runScheduledCycle();
         // We need to subscribe shortly after start. Otherwise, the observables start emiting events
         // too soon for the task run statistics module to capture.
-        setTimeout(() => subscribe(), 0);
+        subscribeTimeoutId = setTimeout(subscribe, 0);
       }
     },
     stop: () => {
@@ -186,11 +225,13 @@ export function createTaskPoller<T, H>({
         timeoutId = null;
       }
       running = false;
-      // Otherwise a nudge from the previous run makes the first cycle after `start()` schedule a
-      // redundant immediate follow-up.
-      nudgeRequestedDuringCycle = false;
-      // Releases the nudge throttle's pending duration timer, which would otherwise keep the event
-      // loop alive until it elapsed, and drops this poller as an observer of the nudge service.
+      if (subscribeTimeoutId) {
+        clearTimeout(subscribeTimeoutId);
+        subscribeTimeoutId = null;
+      }
+      // Don't carry a nudge into the next `start()`.
+      nudgePending = false;
+      // Also clears the nudge throttle's timer.
       subscriptions?.unsubscribe();
       subscriptions = null;
     },

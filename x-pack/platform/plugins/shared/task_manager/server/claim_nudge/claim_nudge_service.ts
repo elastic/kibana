@@ -13,8 +13,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MGET_DEFAULT_POLL_INTERVAL } from '../config';
 
 const GLOBAL_CLAIM_NUDGE_ID = 'global';
-// The signal document is never read back — only the index's global checkpoint matters — but the
-// fields are mapped anyway so the index is self-describing and easy to inspect when debugging.
+// Never read back (only the checkpoint matters); mapped so the index is easy to inspect.
 const CLAIM_NUDGE_MAPPINGS: estypes.MappingTypeMapping = {
   dynamic: false,
   properties: {
@@ -27,40 +26,22 @@ const CLAIM_NUDGE_MAPPINGS: estypes.MappingTypeMapping = {
     },
   },
 };
-// One shard because every nudge writes the same document, so there is never a second shard whose
-// checkpoint could lag behind it. Auto-expanding replicas keeps single-node clusters green.
-// Serverless manages both itself and rejects them, so it gets the platform defaults instead.
+// Every nudge writes one document, so one shard. Serverless rejects these settings.
 const CLAIM_NUDGE_SETTINGS: estypes.IndicesIndexSettings = {
   number_of_shards: 1,
   auto_expand_replicas: '0-1',
 };
-// Long-poll timeout for `_fleet/global_checkpoints`. Kept under 60s so idle proxies/load
-// balancers (which see no bytes while the request waits) don't close the connection first.
+// Under 60s so idle proxies don't close the long-poll connection first.
 export const CHECKPOINT_WAIT_TIMEOUT = '50s';
-// Headroom above CHECKPOINT_WAIT_TIMEOUT so the client doesn't time out before the server does.
+// Above CHECKPOINT_WAIT_TIMEOUT so the server times out first.
 export const REQUEST_TIMEOUT_MS = 65_000;
 const ERROR_RETRY_BASE_DELAY_MS = 1_000;
 export const ERROR_RETRY_MAX_DELAY_MS = 60_000;
 const ERROR_LOG_THROTTLE_MS = 60_000;
-// `runSoon` awaits the nudge, so both requests below get one bounded attempt rather than the
-// client's default 30s and three retries. Aborting doesn't cancel the work — Elasticsearch still
-// applies it — so waiting longer only delays the caller.
-//
-// Matched to the default poll_interval: past that the regular poll has already claimed the task.
 export const NUDGE_WRITE_TIMEOUT_MS = MGET_DEFAULT_POLL_INTERVAL;
-// More generous: a timeout here drops every nudge coalesced onto the in-flight create, and it is
-// paid at most once per process.
-export const NUDGE_CREATE_TIMEOUT_MS = 3_000;
+export const NUDGE_CREATE_TIMEOUT_MS = 60_000;
+export const MISSING_INDEX_RETRY_DELAY_MS = 1_000;
 
-/**
- * Long-polls a dedicated, low-volume Elasticsearch index via the Fleet
- * `_fleet/global_checkpoints?wait_for_advance` API so Task Manager is notified almost
- * immediately when a `runSoon(..., { requestImmediateClaim: true })` happens on another Kibana
- * node, instead of waiting for the next poll interval.
- *
- * Best-effort: if the long-poll fails or is disabled, regular polling still picks up tasks;
- * this only nudges an existing poll cycle to run sooner.
- */
 export interface TaskManagerClaimNudgeServiceOptions {
   logger: Logger;
   esClient: ElasticsearchClient;
@@ -73,6 +54,7 @@ interface ClaimNudgeSignal {
   nonce: string;
 }
 
+/** Sends and watches best-effort claim nudges via a signal index's global checkpoint. */
 export class TaskManagerClaimNudgeService {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
@@ -84,7 +66,11 @@ export class TaskManagerClaimNudgeService {
   private requestController: AbortController | undefined;
   private baselineSet = false;
   private lastErrorLoggedAt = 0;
-  private ensureIndexPromise: Promise<void> | undefined;
+  private indexReady = false;
+  private creationNotification: Promise<void> | undefined;
+  private readonly outboundControllers = new Set<AbortController>();
+  private stopped = false;
+  private generation = 0;
   private consecutiveErrors = 0;
 
   constructor({ logger, esClient, index, isServerless }: TaskManagerClaimNudgeServiceOptions) {
@@ -94,29 +80,27 @@ export class TaskManagerClaimNudgeService {
     this.isServerless = isServerless;
   }
 
-  /**
-   * Emits whenever the claim nudge signal index advances, meaning some Kibana node
-   * (possibly this one) requested an immediate claim cycle.
-   */
+  /** Emits when any Kibana node, including this one, sends a nudge. */
   public get claimNudge$() {
     return this.claimNudgeSubject.asObservable();
   }
 
-  /**
-   * Begin long-polling the claim nudge signal index. Safe to call multiple times; only the
-   * first call while stopped has an effect.
-   */
+  /** Starts watching for nudges; a no-op while already started. */
   public start() {
     if (this.started) {
       return;
     }
 
     this.started = true;
+    this.stopped = false;
     this.baselineSet = false;
     this.runController = new AbortController();
-    // The loop retries internally, so reaching here means it can no longer recover on its own.
-    // Log loudly rather than surfacing an unhandled rejection, which would take Kibana down.
-    void this.watchCheckpoints(this.runController.signal).catch((err) => {
+    const runSignal = this.runController.signal;
+    // The loop retries internally; an escape here is unrecoverable, and must not crash Kibana.
+    void this.watchCheckpoints(runSignal).catch((err) => {
+      if (runSignal.aborted) {
+        return;
+      }
       this.started = false;
       this.logger.error(
         `Task Manager claim nudge watch loop for index ${this.index} stopped unexpectedly; ` +
@@ -125,91 +109,113 @@ export class TaskManagerClaimNudgeService {
     });
   }
 
-  /**
-   * Stop long-polling, aborting the in-flight request and any pending retry delay.
-   */
+  /** Stops watching and sending, aborting in-flight requests. */
   public stop() {
     this.started = false;
+    this.stopped = true;
+    this.generation += 1;
+    this.creationNotification = undefined;
+    for (const controller of this.outboundControllers) {
+      controller.abort();
+    }
     this.runController?.abort();
     this.runController = undefined;
     this.requestController?.abort();
     this.requestController = undefined;
   }
 
-  /**
-   * Writes a new signal document, advancing the claim nudge index's global checkpoint so any
-   * node currently long-polling immediately observes it and triggers a claim cycle.
-   *
-   * No `refresh`: the checkpoint advances once the write replicates, which has nothing to do
-   * with searchability — a refresh would only add cost and latency for no benefit here.
-   */
-  public async notify() {
-    await this.ensureIndexExists();
+  /** Sends a nudge, creating the signal index first if needed. Never rejects on create failure. */
+  public notify(): Promise<void> {
+    // Not `started`: UI-only nodes send without ever watching.
+    if (this.stopped) {
+      return Promise.resolve();
+    }
+    if (this.indexReady) {
+      return this.writeSignal();
+    }
+    if (!this.creationNotification) {
+      const generation = this.generation;
+      const notification = this.createIndex()
+        .then(async () => {
+          if (this.stopped || generation !== this.generation) {
+            return;
+          }
+          // Later callers write separately so their updates precede a checkpoint advance.
+          this.indexReady = true;
+          await this.writeSignal();
+        })
+        .catch((err) => {
+          if (this.stopped || generation !== this.generation) {
+            return;
+          }
+          // Logged once here rather than by every caller sharing this attempt.
+          this.logger.warn(
+            `Could not confirm the Task Manager claim nudge for index ${
+              this.index
+            }; the next poll cycle will claim the task: ${this.getErrorMessage(err)}`
+          );
+        })
+        .finally(() => {
+          if (this.creationNotification === notification) {
+            this.creationNotification = undefined;
+          }
+        });
+      this.creationNotification = notification;
+    }
+    return this.creationNotification;
+  }
 
+  private async writeSignal() {
     const document: ClaimNudgeSignal = {
       updated_at: new Date().toISOString(),
       nonce: v4(),
     };
-
-    // Contents don't matter; the write itself is the signal. `nonce` ensures each call is a
-    // real change rather than a no-op.
-    await this.esClient.index<ClaimNudgeSignal>(
-      {
-        index: this.index,
-        id: GLOBAL_CLAIM_NUDGE_ID,
-        document,
-      },
-      { requestTimeout: NUDGE_WRITE_TIMEOUT_MS, maxRetries: 0 }
+    // No refresh: the checkpoint advances on write, not on searchability.
+    await this.withRequest((signal) =>
+      this.esClient.index<ClaimNudgeSignal>(
+        { index: this.index, id: GLOBAL_CLAIM_NUDGE_ID, document },
+        { signal, requestTimeout: NUDGE_WRITE_TIMEOUT_MS, maxRetries: 0 }
+      )
     );
   }
 
-  /**
-   * Creates the signal index if needed; nothing else does. Only `notify()` calls this — the watch
-   * loop relies on `wait_for_index: true` instead. Memoized so a healthy node pays for it once.
-   *
-   * A failure aborts the nudge rather than falling through to the write, which would let
-   * Elasticsearch auto-create the index without the mappings and settings above.
-   */
-  private async ensureIndexExists() {
-    if (!this.ensureIndexPromise) {
-      this.ensureIndexPromise = this.createIndex().catch((err) => {
-        // Allow a later call to retry rather than caching the failure for the process lifetime.
-        this.ensureIndexPromise = undefined;
-        throw err;
-      });
+  private async withRequest<T>(request: (signal: AbortSignal) => Promise<T>): Promise<T> {
+    // Per request: the client aborts the given signal on its own request timeout.
+    const controller = new AbortController();
+    this.outboundControllers.add(controller);
+    try {
+      return await request(controller.signal);
+    } finally {
+      this.outboundControllers.delete(controller);
     }
-
-    return this.ensureIndexPromise;
   }
 
   private async createIndex() {
     try {
-      await this.esClient.indices.create(
-        {
-          index: this.index,
-          mappings: CLAIM_NUDGE_MAPPINGS,
-          ...(this.isServerless ? {} : { settings: CLAIM_NUDGE_SETTINGS }),
-        },
-        { requestTimeout: NUDGE_CREATE_TIMEOUT_MS, maxRetries: 0 }
+      await this.withRequest((signal) =>
+        this.esClient.indices.create(
+          {
+            index: this.index,
+            mappings: CLAIM_NUDGE_MAPPINGS,
+            ...(this.isServerless ? {} : { settings: CLAIM_NUDGE_SETTINGS }),
+          },
+          { signal, requestTimeout: NUDGE_CREATE_TIMEOUT_MS, maxRetries: 0 }
+        )
       );
     } catch (err) {
-      // Every Kibana node races to create the index; losing that race is the expected outcome.
+      // Expected when another node created it first.
       if (err?.body?.error?.type !== 'resource_already_exists_exception') {
         throw err;
       }
     }
   }
 
-  /**
-   * `runSignal` is aborted by `stop()`: it cancels a pending retry delay and keeps a loop
-   * abandoned mid-retry from resuming if `start()` is called before that delay elapses.
-   */
+  /** `runSignal` is aborted by `stop()`, so an abandoned loop cannot resume after a restart. */
   private async watchCheckpoints(runSignal: AbortSignal) {
     let checkpoints: estypes.FleetCheckpoint[] = [];
 
     while (this.started && !runSignal.aborted) {
-      // Not `runSignal`: the ES client dispatches a synthetic abort event on the signal it is
-      // given when its request timeout fires, which would spill into later iterations.
+      // Not `runSignal`: the client aborts the given signal on its own request timeout.
       const requestController = new AbortController();
       this.requestController = requestController;
 
@@ -227,18 +233,18 @@ export class TaskManagerClaimNudgeService {
               signal: requestController.signal,
               requestTimeout: REQUEST_TIMEOUT_MS,
               retryOnTimeout: false,
-              // The backoff below is the only retry; transport retries would bypass its jitter
-              // and hide failures from `consecutiveErrors`.
+              // Retries go through the jittered backoff below.
               maxRetries: 0,
             }
           );
 
-        // Any resolved response — even a timeout — counts as a success for backoff purposes.
+        if (!this.started || runSignal.aborted) {
+          return;
+        }
+
         this.consecutiveErrors = 0;
 
-        // The first response only establishes the checkpoint later ones are compared against, so a
-        // nudge racing the watcher's first call is never delivered. Accepted: it costs the one
-        // poll interval a nudge would have saved, and nudging is best-effort by contract.
+        // The first response is only a baseline; a nudge racing it falls back to polling.
         const hasAdvanced =
           this.baselineSet &&
           !timedOut &&
@@ -252,9 +258,20 @@ export class TaskManagerClaimNudgeService {
         }
       } catch (err) {
         if (!this.started || runSignal.aborted) {
-          // Expected: `stop()` aborted the in-flight request.
           this.logger.debug(`Task Manager claim nudge watch loop for index ${this.index} stopped.`);
           return;
+        }
+
+        if (err?.body?.error?.type === 'index_not_found_exception') {
+          // `wait_for_index` timed out before any node sent a nudge.
+          this.logger.debug(
+            `Task Manager claim nudge index ${this.index} does not exist yet; retrying in ${MISSING_INDEX_RETRY_DELAY_MS}ms`
+          );
+          this.consecutiveErrors = 0;
+          this.baselineSet = false;
+          checkpoints = [];
+          await this.delay(MISSING_INDEX_RETRY_DELAY_MS, runSignal);
+          continue;
         }
 
         this.consecutiveErrors += 1;
@@ -262,7 +279,7 @@ export class TaskManagerClaimNudgeService {
         this.logThrottledWarning(err, retryDelayMs);
         await this.delay(retryDelayMs, runSignal);
       } finally {
-        // Identity-checked so an abandoned loop can't clear a newer loop's controller.
+        // Don't clear a newer loop's controller.
         if (this.requestController === requestController) {
           this.requestController = undefined;
         }
@@ -270,10 +287,7 @@ export class TaskManagerClaimNudgeService {
     }
   }
 
-  /**
-   * Equal jitter: half the exponential backoff is guaranteed, the other half is randomized.
-   * Keeps nodes from retrying in lockstep without letting the delay collapse near zero.
-   */
+  /** Exponential backoff with equal jitter. */
   private calculateRetryDelayMs() {
     const half =
       Math.min(
@@ -302,10 +316,7 @@ export class TaskManagerClaimNudgeService {
     return err instanceof Error ? err.message : String(err);
   }
 
-  /**
-   * Resolves after `ms`, or early on abort so `stop()` doesn't leave a timer holding the event
-   * loop open for up to a minute.
-   */
+  /** Resolves after `ms`, or early on abort. */
   private delay(ms: number, signal: AbortSignal) {
     return new Promise<void>((resolve) => {
       if (signal.aborted) {

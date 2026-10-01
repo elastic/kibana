@@ -88,11 +88,8 @@ export interface RunSoonOptions {
   /** Run even when the task is already running on another node. */
   force?: boolean;
   /**
-   * Asks background task nodes to claim this task immediately instead of waiting for the next
-   * `poll_interval`. Best-effort: the task still runs on the next regular poll if the nudge fails.
-   *
-   * Off by default: a nudged run arrives within milliseconds, early enough that a task gating its
-   * work on an elapsed grace period can find nothing to do. Opt in per call site.
+   * Also requests a best-effort extra claim cycle on background nodes. The cycle may claim other
+   * eligible tasks too, so any required delay must be part of a task's eligibility.
    */
   requestImmediateClaim?: boolean;
 }
@@ -140,22 +137,16 @@ export class TaskScheduling {
     return this.claimNudgeService !== undefined;
   }
 
-  /**
-   * Asks background task nodes to run an immediate claim cycle. Best-effort: on failure,
-   * regular polling remains the fallback.
-   */
   private async notifyClaimNudge(taskId: string, source: ClaimNudgeSource) {
     if (!this.claimNudgeService) {
       return;
     }
-    // Counted before the write, so a nudge that Elasticsearch never confirms still shows up here.
-    taskManagerClaimNudgeTelemetry.recordClaimNudge(source);
     try {
+      taskManagerClaimNudgeTelemetry.recordClaimNudge(source);
       await this.claimNudgeService.notify();
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      // Deliberately not "failed": the nudge is bounded to a short timeout, and aborting it does
-      // not stop Elasticsearch from applying the write, so it may well have landed anyway.
+      // Not "failed": a timed-out write may still have been applied.
       this.logger.warn(
         `Could not confirm the Task Manager claim nudge for task ${taskId}; it will run on the next poll cycle: ${message}`
       );
@@ -359,7 +350,7 @@ export class TaskScheduling {
    *
    * @param taskId - The task being scheduled.
    * @param forceOrOptions - Legacy positional `force`, or the options bag. Set
-   * `requestImmediateClaim` to ask background nodes to claim the task straight away.
+   * `requestImmediateClaim` to also request a best-effort extra claim cycle.
    * @returns {Promise<RunSoonResult>}
    */
   public async runSoon(
@@ -369,8 +360,7 @@ export class TaskScheduling {
     const options: RunSoonOptions =
       typeof forceOrOptions === 'boolean' ? { force: forceOrOptions } : forceOrOptions ?? {};
     const force = options.force === true;
-    // Both the forced refresh and the nudge itself only serve an immediate claim cycle, so they
-    // stand or fall together: without one there is no cycle for the other to help.
+    // The refresh only serves the nudge, so both are skipped together.
     const nudge = options.requestImmediateClaim === true && this.claimNudgeEnabled;
     let forced: boolean = false;
     let conflict: boolean = false;
@@ -423,7 +413,7 @@ export class TaskScheduling {
     }
 
     if (!conflict && nudge) {
-      await this.notifyClaimNudge(taskId, 'run_soon');
+      void this.notifyClaimNudge(taskId, 'run_soon');
     }
 
     return conflict ? { id: task.id, forced, conflict: true } : { id: task.id, forced };

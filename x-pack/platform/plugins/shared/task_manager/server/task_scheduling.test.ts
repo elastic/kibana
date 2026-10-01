@@ -145,7 +145,6 @@ describe('TaskScheduling', () => {
     );
   });
 
-  // schedule() never nudges: immediate claims are a runSoon-only concern.
   test('does not notify the claim nudge', async () => {
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     const task = {
@@ -227,8 +226,7 @@ describe('TaskScheduling', () => {
       statusCode: 409,
     });
 
-    // The interval branch, where the 409 path does move `runAt`. Even then the caller asked to
-    // schedule a task that already exists, so there is nothing newly claimable to nudge for.
+    // The 409 path moves `runAt` here, but the task already existed, so there is nothing to nudge.
     await taskScheduling.ensureScheduled(
       {
         id: 'my-foo-id',
@@ -1342,8 +1340,7 @@ describe('TaskScheduling', () => {
   });
 
   describe('runSoon', () => {
-    // Nudging stays off unless asked for: a nudged claim lands within milliseconds, early enough
-    // to change what the task observes when it runs.
+    // Opt-in, since a nudged claim can run the task early enough to change what it observes.
     test('does not nudge or force a refresh by default', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
@@ -1562,6 +1559,47 @@ describe('TaskScheduling', () => {
       await expect(result).rejects.toEqual(404);
     });
 
+    test('awaits persistence and refresh but returns while notification is still pending', async () => {
+      const id = 'async-nudge';
+      const task = taskManagerMock.createTask({ id, status: TaskStatus.Idle });
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      mockTaskStore.get.mockResolvedValueOnce(task);
+      let finishUpdate = () => {};
+      mockTaskStore.update.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishUpdate = () => resolve(task);
+          })
+      );
+      let failNotification = (_error: Error) => {};
+      claimNudgeService.notify.mockImplementationOnce(
+        () =>
+          new Promise((_resolve, reject) => {
+            failNotification = reject;
+          })
+      );
+      const onResult = jest.fn();
+      const result = taskScheduling.runSoon(id, { requestImmediateClaim: true }).then(onResult);
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(onResult).not.toHaveBeenCalled();
+      expect(claimNudgeService.notify).not.toHaveBeenCalled();
+      finishUpdate();
+      await result;
+      expect(mockTaskStore.update).toHaveBeenCalledWith(expect.anything(), {
+        validate: false,
+        refresh: true,
+      });
+      expect(onResult).toHaveBeenCalledWith({ id, forced: false });
+      expect(recordClaimNudgeSpy).toHaveBeenCalledTimes(1);
+      failNotification(new Error('late notification failure'));
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(taskSchedulingOpts.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('late notification failure')
+      );
+    });
+
     test('does not fail the request when the claim nudge notification fails', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
@@ -1592,7 +1630,7 @@ describe('TaskScheduling', () => {
       const result = await taskScheduling.runSoon(id);
 
       expect(result).toEqual({ id, forced: false });
-      // As above: the nudge service is absent from this instance, so only the spy is meaningful.
+      // No nudge service to assert on, so check telemetry instead.
       expect(recordClaimNudgeSpy).not.toHaveBeenCalled();
       expect(mockTaskStore.update).toHaveBeenCalledWith(expect.anything(), {
         validate: false,

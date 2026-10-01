@@ -6,16 +6,15 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { Subject, withLatestFrom, BehaviorSubject, combineLatest, timer } from 'rxjs';
+import { Subject, withLatestFrom, BehaviorSubject, combineLatest } from 'rxjs';
 import {
   distinctUntilChanged,
-  filter,
   startWith,
   pairwise,
   map as rxMap,
   share,
+  shareReplay,
   scan,
-  throttle,
 } from 'rxjs';
 import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
@@ -27,7 +26,11 @@ import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
 import type { TaskManagerConfig } from './config';
-import { WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS } from './config';
+import {
+  CLAIM_STRATEGY_MGET,
+  LOW_UTILIZATION_POLL_INTERVAL,
+  WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS,
+} from './config';
 
 import type {
   TaskMarkRunning,
@@ -98,11 +101,7 @@ export interface TaskPollingLifecycleOpts {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
-  /**
-   * Triggers an immediate claim cycle when another node requests one, instead of waiting for
-   * `poll_interval`. Throttled to one cycle per poll interval, and ignored entirely while this
-   * node is backing off from Elasticsearch errors.
-   */
+  /** Requests extra claim cycles; ignored during Elasticsearch backpressure and its recovery. */
   claimNudgeService?: TaskManagerClaimNudgeService;
 }
 
@@ -133,7 +132,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private stopped = false;
   private readonly executionControlService: TaskExecutionControlService;
   private executionControlSubscription?: Subscription;
-  private errorBackoffSubscription?: Subscription;
   private backpressureSubscription?: Subscription;
 
   public pool: TaskPool;
@@ -212,32 +210,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       this.currentPollInterval = newPollInterval;
     });
 
-    // Ignore claim nudges while the last error-count window saw Elasticsearch errors (the same
-    // signal that reduces capacity and widens the poll interval above). `errorCheck$` only emits
-    // on its flush interval, so this trails reality by up to that window in both directions; it is
-    // a coarse brake, not a guarantee. The regular poll picks up nudged tasks either way.
-    let inErrorBackoff = false;
-    this.errorBackoffSubscription = errorCheck$.subscribe(({ count, isBlockException }) => {
-      inErrorBackoff = count > 0 || isBlockException;
-    });
-    const claimNudge$ = claimNudgeService?.claimNudge$.pipe(
-      // Checked before the throttle so an ignored nudge does not open a window of its own.
-      filter(() => {
-        if (inErrorBackoff) {
-          logger.debug(
-            'Ignoring claim nudge because task manager is backing off after Elasticsearch errors; the next regular poll cycle will claim the task'
-          );
-          return false;
-        }
-        return true;
-      }),
-      // Caps nudge-triggered cycles at one per poll interval. Dropping a throttled nudge rather
-      // than deferring it matters: the leading nudge's cycle re-anchored the cadence, so a regular
-      // cycle is already due when the window closes, and a nudge there only re-anchors it later,
-      // delaying the expired-task cancellation that rides on every cycle. Re-read per window so
-      // the window widens with the managed poll interval.
-      throttle(() => timer(this.currentPollInterval), { leading: true, trailing: false })
-    );
+    const claimNudgeSuppressed$ = new BehaviorSubject(false);
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
@@ -264,24 +237,44 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       startWith({ windowsSinceError: BACKPRESSURE_HOLD_INTERVALS, reason: null })
     );
 
+    const normalPollInterval =
+      claimStrategy === CLAIM_STRATEGY_MGET
+        ? Math.max(pollInterval, LOW_UTILIZATION_POLL_INTERVAL)
+        : pollInterval;
     // `active` is the current managed-config state OR a recent ES-pressure error,
     // so a sustained block reads as one period; distinctUntilChanged emits on change.
-    this.backpressureSubscription = combineLatest([
+    const backpressureState$ = combineLatest([
       this.capacityConfiguration$,
       this.pollIntervalConfiguration$,
       recentBackpressure$,
-    ])
+    ]).pipe(
+      rxMap(([capacity, currentPollInterval, recent]) => {
+        const active =
+          isBackpressureActive(capacity, startingCapacity, currentPollInterval) ||
+          recent.windowsSinceError < BACKPRESSURE_HOLD_INTERVALS;
+        return {
+          active,
+          reason: active ? recent.reason : null,
+          // Nudges also wait for the error-raised poll interval to recover.
+          suppressNudges: active || currentPollInterval > normalPollInterval,
+        };
+      }),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+    this.backpressureSubscription = backpressureState$
       .pipe(
-        rxMap(([capacity, currentPollInterval, recent]) => {
-          const active =
-            isBackpressureActive(capacity, startingCapacity, currentPollInterval) ||
-            recent.windowsSinceError < BACKPRESSURE_HOLD_INTERVALS;
-          return { active, reason: active ? recent.reason : null };
-        }),
         distinctUntilChanged((a, b) => a.active === b.active && a.reason === b.reason),
-        rxMap((snapshot) => asTaskManagerBackpressureEvent(asOk(snapshot)))
+        rxMap(({ active, reason }) => asTaskManagerBackpressureEvent(asOk({ active, reason })))
       )
       .subscribe(emitEvent);
+    this.backpressureSubscription.add(
+      backpressureState$
+        .pipe(
+          rxMap(({ suppressNudges }) => suppressNudges),
+          distinctUntilChanged()
+        )
+        .subscribe((suppressNudges) => claimNudgeSuppressed$.next(suppressNudges))
+    );
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: MAX_BUFFER_OPERATIONS,
@@ -329,7 +322,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       logger,
       initialPollInterval: pollInterval,
       pollInterval$: this.pollIntervalConfiguration$,
-      claimNudge$,
+      claimNudge$: claimNudgeService?.claimNudge$,
+      backpressure$: claimNudgeSuppressed$,
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
         if (!capacity) {
@@ -418,8 +412,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   public stop() {
     this.stopped = true;
     this.executionControlSubscription?.unsubscribe();
-    // `countErrors()` is cold, so this subscription owns its own flush interval timer.
-    this.errorBackoffSubscription?.unsubscribe();
     this.backpressureSubscription?.unsubscribe();
     this.poller.stop();
   }

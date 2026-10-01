@@ -254,8 +254,7 @@ describe('TaskManagerPlugin', () => {
       });
 
       expect(mockClaimNudgeService.start).not.toHaveBeenCalled();
-      // A node that doesn't poll still has to be able to nudge the ones that do, so construction
-      // must stay outside the `shouldRunBackgroundTasks` guard even though `start()` is inside it.
+      // Non-polling nodes still construct the service so they can nudge the ones that poll.
       expect(TaskManagerClaimNudgeService as jest.Mock).toHaveBeenCalledTimes(1);
     });
 

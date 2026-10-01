@@ -10,14 +10,14 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   CHECKPOINT_WAIT_TIMEOUT,
   ERROR_RETRY_MAX_DELAY_MS,
+  MISSING_INDEX_RETRY_DELAY_MS,
   NUDGE_CREATE_TIMEOUT_MS,
   NUDGE_WRITE_TIMEOUT_MS,
   REQUEST_TIMEOUT_MS,
   TaskManagerClaimNudgeService,
 } from './claim_nudge_service';
 
-// `lodash.random` binds `Math.random` at load time, so spying on the global doesn't work.
-// Returning `max` by default makes the backoff tests land exactly on the ceiling.
+// lodash binds `Math.random` at load, so mock `random`; `max` lands on the backoff ceiling.
 const mockRandom = jest.fn((max: number) => max);
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
@@ -46,9 +46,7 @@ function createService({
   };
 }
 
-/**
- * Defaults to an already-existing index, the steady state on every Kibana boot after the first.
- */
+// Defaults to an already-existing index, the steady state after the first boot.
 function createEsClientMock() {
   return {
     index: jest.fn(),
@@ -95,7 +93,7 @@ describe('TaskManagerClaimNudgeService', () => {
       );
     });
 
-    it('bounds both requests and disables retries, so a slow cluster cannot stall runSoon', async () => {
+    it('allows cold index creation while bounding steady-state writes and disabling retries', async () => {
       const esClient = createEsClientMock();
       (esClient.indices.create as jest.Mock).mockResolvedValue(undefined);
       const { service } = createService({ esClient });
@@ -103,19 +101,88 @@ describe('TaskManagerClaimNudgeService', () => {
       await service.notify();
 
       expect(esClient.indices.create).toHaveBeenCalledWith(expect.any(Object), {
+        signal: expect.any(AbortSignal),
         requestTimeout: NUDGE_CREATE_TIMEOUT_MS,
         maxRetries: 0,
       });
       expect(esClient.index).toHaveBeenCalledWith(expect.any(Object), {
+        signal: expect.any(AbortSignal),
         requestTimeout: NUDGE_WRITE_TIMEOUT_MS,
         maxRetries: 0,
       });
 
-      // Asserting the wiring above only pins that the constants are passed through. The claim in the
-      // title is about their size: a nudge is an optimization, so it must never outlast the poll
-      // cycle it is trying to beat.
       expect(NUDGE_WRITE_TIMEOUT_MS).toBeLessThanOrEqual(1_000);
-      expect(NUDGE_CREATE_TIMEOUT_MS).toBeLessThanOrEqual(5_000);
+      expect(NUDGE_CREATE_TIMEOUT_MS).toBe(60_000);
+    });
+
+    it('coalesces notifications during creation but sends later updates separately', async () => {
+      const esClient = createEsClientMock();
+      const { service } = createService({ esClient });
+      let finishCreation = () => {};
+      let finishFirstWrite = () => {};
+      (esClient.indices.create as jest.Mock).mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            finishCreation = resolve;
+          })
+      );
+      (esClient.index as jest.Mock).mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            finishFirstWrite = resolve;
+          })
+      );
+      const notifications = [service.notify(), service.notify(), service.notify()];
+      expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+      expect(esClient.index).not.toHaveBeenCalled();
+      finishCreation();
+      await flushPromises();
+      expect(esClient.index).toHaveBeenCalledTimes(1);
+      // Arrives after the first write started, so it needs its own write.
+      await service.notify();
+      expect(esClient.index).toHaveBeenCalledTimes(2);
+      finishFirstWrite();
+      await Promise.all(notifications);
+      service.stop();
+    });
+
+    it('aborts cold creation on stop and never writes after it eventually resolves', async () => {
+      const esClient = createEsClientMock();
+      const { service } = createService({ esClient });
+      let finishCreation = () => {};
+      (esClient.indices.create as jest.Mock).mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            finishCreation = resolve;
+          })
+      );
+      const notification = service.notify();
+      const signal = (esClient.indices.create as jest.Mock).mock.calls[0][1].signal;
+      service.stop();
+      expect(signal.aborted).toBe(true);
+      finishCreation();
+      await notification;
+      await service.notify();
+      expect(esClient.index).not.toHaveBeenCalled();
+      expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('aborts an outbound write on a UI-only node that never started a watcher', async () => {
+      const esClient = createEsClientMock();
+      const { service, logger } = createService({ esClient });
+      (esClient.index as jest.Mock).mockImplementationOnce(
+        (_params, { signal }) =>
+          new Promise((_resolve, reject) => {
+            signal.addEventListener('abort', () => reject(new Error('aborted')), { once: true });
+          })
+      );
+      const notification = service.notify();
+      await flushPromises();
+      expect(esClient.index).toHaveBeenCalledTimes(1);
+      service.stop();
+      await expect(notification).resolves.toBeUndefined();
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(esClient.fleet.globalCheckpoints).not.toHaveBeenCalled();
     });
 
     it('generates a new nonce on every call', async () => {
@@ -192,10 +259,15 @@ describe('TaskManagerClaimNudgeService', () => {
       (esClient.indices.create as jest.Mock)
         .mockRejectedValueOnce(new Error('ES unavailable'))
         .mockResolvedValueOnce(undefined);
-      const { service } = createService({ esClient });
+      const { service, logger } = createService({ esClient });
 
-      await expect(service.notify()).rejects.toThrow('ES unavailable');
+      await expect(Promise.all([service.notify(), service.notify()])).resolves.toEqual([
+        undefined,
+        undefined,
+      ]);
       expect(esClient.index).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('ES unavailable'));
 
       await service.notify();
 
@@ -216,7 +288,9 @@ describe('TaskManagerClaimNudgeService', () => {
           return { global_checkpoints: [1], timed_out: false };
         }
 
-        service.stop();
+        if (calls > 2) {
+          service.stop();
+        }
         return { global_checkpoints: [2], timed_out: false };
       });
 
@@ -227,6 +301,29 @@ describe('TaskManagerClaimNudgeService', () => {
       await flushPromises();
 
       expect(nudgeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores a late checkpoint response after stop even if the transport does not reject', async () => {
+      const esClient = createEsClientMock();
+      const { service } = createService({ esClient });
+      let finishRequest = () => {};
+      (esClient.fleet.globalCheckpoints as jest.Mock)
+        .mockResolvedValueOnce({ global_checkpoints: [1], timed_out: false })
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              finishRequest = () => resolve({ global_checkpoints: [2], timed_out: false });
+            })
+        );
+      const onNudge = jest.fn();
+      service.claimNudge$.subscribe(onNudge);
+      service.start();
+      await flushPromises();
+      service.stop();
+      finishRequest();
+      await flushPromises();
+      expect(onNudge).not.toHaveBeenCalled();
+      expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(2);
     });
 
     it('does not emit on the first (baseline-establishing) response', async () => {
@@ -311,9 +408,7 @@ describe('TaskManagerClaimNudgeService', () => {
           return { global_checkpoints: [1], timed_out: false };
         }
         if (calls === 2) {
-          // A timeout still reports where the checkpoint currently is, so it must be adopted too;
-          // otherwise a recreated index would leave the watcher waiting on a checkpoint that no
-          // longer exists.
+          // Adopt timed-out checkpoints too, or a recreated index would leave the watcher stuck.
           return { global_checkpoints: [7], timed_out: true };
         }
 
@@ -325,8 +420,7 @@ describe('TaskManagerClaimNudgeService', () => {
       await flushPromises();
 
       const requests = (esClient.fleet.globalCheckpoints as jest.Mock).mock.calls;
-      // Without this the request would always send `[]`, `wait_for_advance` would return
-      // immediately every time, and the watch loop would spin against Elasticsearch.
+      // Always sending `[]` would make `wait_for_advance` return immediately and spin the loop.
       expect(requests[0][0].checkpoints).toEqual([]);
       expect(requests[1][0].checkpoints).toEqual([1]);
       expect(requests[2][0].checkpoints).toEqual([7]);
@@ -352,8 +446,7 @@ describe('TaskManagerClaimNudgeService', () => {
       const { service } = createService({ esClient });
 
       (esClient.fleet.globalCheckpoints as jest.Mock).mockImplementation(async () => {
-        // Yield a microtask before stopping so the reentrant `start()` below sees
-        // `started === true` and hits the no-op guard (a real ES call couldn't resolve this fast).
+        // Yield so the second `start()` below runs while still started and hits the no-op guard.
         await Promise.resolve();
         service.stop();
         return { global_checkpoints: [1], timed_out: false };
@@ -364,6 +457,55 @@ describe('TaskManagerClaimNudgeService', () => {
       await flushPromises();
 
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
+    });
+
+    it('quietly retries missing-index waits at a bounded rate until a sender creates it', async () => {
+      jest.useFakeTimers();
+      const esClient = createEsClientMock();
+      const { service, logger } = createService({ esClient });
+      const missingIndex = Object.assign(new Error('missing index'), {
+        body: { error: { type: 'index_not_found_exception' } },
+      });
+      (esClient.fleet.globalCheckpoints as jest.Mock)
+        .mockRejectedValueOnce(missingIndex)
+        .mockRejectedValueOnce(missingIndex)
+        .mockRejectedValueOnce(missingIndex)
+        .mockResolvedValueOnce({ global_checkpoints: [1], timed_out: false })
+        .mockResolvedValueOnce({ global_checkpoints: [2], timed_out: false })
+        .mockImplementation(() => new Promise(() => {}));
+      const onNudge = jest.fn();
+      service.claimNudge$.subscribe(onNudge);
+      service.start();
+      await jest.advanceTimersByTimeAsync(0);
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(attempt);
+        await jest.advanceTimersByTimeAsync(MISSING_INDEX_RETRY_DELAY_MS - 1);
+        expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(attempt);
+        await jest.advanceTimersByTimeAsync(1);
+      }
+      expect(onNudge).toHaveBeenCalledTimes(1);
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Task Manager claim nudge index ${INDEX} does not exist yet; retrying in ${MISSING_INDEX_RETRY_DELAY_MS}ms`
+      );
+      expect(esClient.indices.create).not.toHaveBeenCalled();
+      service.stop();
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('cancels the missing-index retry delay on stop', async () => {
+      jest.useFakeTimers();
+      const esClient = createEsClientMock();
+      const { service } = createService({ esClient });
+      (esClient.fleet.globalCheckpoints as jest.Mock).mockRejectedValue({
+        body: { error: { type: 'index_not_found_exception' } },
+      });
+      service.start();
+      await jest.advanceTimersByTimeAsync(0);
+      service.stop();
+      await jest.advanceTimersByTimeAsync(60_000);
+      expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
+      expect(jest.getTimerCount()).toBe(0);
     });
 
     it('retries after a backoff when the request throws, and recovers', async () => {
@@ -478,8 +620,7 @@ describe('TaskManagerClaimNudgeService', () => {
       await jest.advanceTimersByTimeAsync(0);
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
 
-      // Ceiling after the 1st failure is 1_000ms. Even with the jittered half at 0, the guaranteed
-      // half (500ms) must still elapse — full jitter would have allowed this to fire immediately.
+      // With zero jitter, the guaranteed half of the 1s ceiling must still elapse.
       await jest.advanceTimersByTimeAsync(499);
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
 
@@ -549,7 +690,6 @@ describe('TaskManagerClaimNudgeService', () => {
       service.stop();
       await jest.advanceTimersByTimeAsync(0);
 
-      // A timer left pending here would keep the event loop alive well past plugin shutdown.
       expect(jest.getTimerCount()).toBe(0);
 
       await jest.advanceTimersByTimeAsync(ERROR_RETRY_MAX_DELAY_MS);
@@ -580,7 +720,6 @@ describe('TaskManagerClaimNudgeService', () => {
       await jest.advanceTimersByTimeAsync(0);
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(2);
 
-      // Once the abandoned loop's delay would have elapsed, only the new loop should be polling.
       await jest.advanceTimersByTimeAsync(ERROR_RETRY_MAX_DELAY_MS);
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(2);
 
@@ -660,9 +799,7 @@ describe('TaskManagerClaimNudgeService', () => {
       await flushPromises();
 
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
-      // The call count alone is over-determined: `started`, the aborted signal and the catch's early
-      // return each stop the loop on their own. Only the early return keeps the abort out of the
-      // backoff path, so pin that it was logged as a clean stop and never counted as an error.
+      // Several guards stop the loop; only the catch's early return keeps the abort out of backoff.
       expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('stopped.'));
       expect(logger.warn).not.toHaveBeenCalled();
     });

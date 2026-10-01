@@ -50,8 +50,7 @@ export const registerTaskManagerGetRoute = (
         const { id, taskType, status, runAt, scheduledAt, attempts } = await startContract.get(
           taskId
         );
-        // Projected rather than returned whole: the task document also carries `apiKey`,
-        // `uiamApiKey`, and `userScope`, which no test needs.
+        // Omits credentials such as `apiKey` and `userScope`.
         return res.ok({ body: { id, taskType, status, runAt, scheduledAt, attempts } });
       } catch (err) {
         if (SavedObjectsErrorHelpers.isNotFoundError(err)) {

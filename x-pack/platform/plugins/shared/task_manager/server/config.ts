@@ -104,9 +104,7 @@ export const configSchema = schema.object(
     grant_uiam_api_keys: schema.boolean({ defaultValue: false }),
     /* The number of normal cost tasks that this Kibana instance will run simultaneously */
     capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
-    /* Lets a `runSoon(..., { requestImmediateClaim: true })` on any Kibana node trigger an
-     * immediate claim cycle on background task nodes. Regular polling remains the fallback if
-     * this is disabled or fails. */
+    /* Lets `runSoon(..., { requestImmediateClaim: true })` request an extra claim cycle. */
     claim_nudge: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),

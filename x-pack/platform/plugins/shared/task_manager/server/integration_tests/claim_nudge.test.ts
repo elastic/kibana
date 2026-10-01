@@ -7,19 +7,23 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
-import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
+import {
+  createTestServers,
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+} from '@kbn/core-test-helpers-kbn-server';
+import type { createTaskPoller } from '../polling/task_poller';
+import { TaskManagerClaimNudgeService } from '../claim_nudge/claim_nudge_service';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskStatus } from '../task';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
-import { injectTask, setupTestServers, retry } from './lib';
+import { injectTask, retry } from './lib';
 import { setupKibanaServer } from './lib/setup_test_servers';
 
-// Long enough that a nudged claim is clearly distinguishable from one that waited for the next
-// poll cycle, even with CI jitter.
+// Long enough to tell a nudged claim from a regular one despite CI jitter.
 const POLLING_INTERVAL = 20000;
-// Derived from POLLING_INTERVAL so the retry budget stays inside the `elapsedMs` assertion below
-// (half the poll interval) if that interval is ever retuned.
 const NUDGE_RETRY_INTERVAL_MS = 100;
+// A quarter of the poll interval, inside the `POLLING_INTERVAL / 2` assertion below.
 const NUDGE_RETRY_OPTS = {
   times: POLLING_INTERVAL / 4 / NUDGE_RETRY_INTERVAL_MS,
   intervalMs: NUDGE_RETRY_INTERVAL_MS,
@@ -48,8 +52,7 @@ jest.mock('../queries/task_claiming', () => {
   return {
     ...actual,
     TaskClaiming: jest.fn().mockImplementation((opts: TaskClaimingOpts) => {
-      // We need to register here because once the class is instantiated, adding
-      // definitions won't get claimed because of "partitionIntoClaimingBatches".
+      // Definitions added after instantiation aren't claimed ("partitionIntoClaimingBatches").
       opts.definitions.registerTaskDefinitions({
         _claimNudgeTestType: mockTaskType,
       });
@@ -58,6 +61,26 @@ jest.mock('../queries/task_claiming', () => {
   };
 });
 
+const mockCompletedCycles: Array<{ startedAt: number; finishedAt: number }> = [];
+jest.mock('../polling/task_poller', () => {
+  const actual = jest.requireActual('../polling/task_poller');
+  return {
+    ...actual,
+    createTaskPoller: (opts: Parameters<typeof createTaskPoller>[0]) =>
+      actual.createTaskPoller({
+        ...opts,
+        work: async () => {
+          const startedAt = Date.now();
+          const result = await opts.work();
+          mockCompletedCycles.push({ startedAt, finishedAt: Date.now() });
+          return result;
+        },
+      }),
+  };
+});
+
+const nudgeStartSpy = jest.spyOn(TaskManagerClaimNudgeService.prototype, 'start');
+const notifySpy = jest.spyOn(TaskManagerClaimNudgeService.prototype, 'notify');
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 
 function injectFutureTask(esClient: Parameters<typeof injectTask>[0], id: string) {
@@ -84,8 +107,7 @@ function latestStartContract(): TaskManagerStartContract {
   return lastResult.value as TaskManagerStartContract;
 }
 
-// One-off tasks self-clean when they run, but a failing assertion can leave the doc behind where
-// the next scenario (same ES cluster) would claim it.
+// A failed assertion can leave the task behind for the next scenario on the shared cluster.
 async function cleanupTask(taskManagerPlugin: TaskManagerStartContract, id: string) {
   try {
     await taskManagerPlugin.removeIfExists(id);
@@ -94,34 +116,46 @@ async function cleanupTask(taskManagerPlugin: TaskManagerStartContract, id: stri
   }
 }
 
-// One ES server is shared across all scenarios (as in `task_manager_switch_task_claimers.test.ts`)
-// so the suite pays the slow ES startup cost once while still using fresh plugin configs.
+// One ES server is shared across scenarios to pay its startup cost once.
 describe('claim nudge', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
+  let uiServer: TestKibanaUtils | undefined;
+
+  beforeAll(async () => {
+    const { startES } = createTestServers({
+      adjustTimeout: (timeout) => jest.setTimeout(timeout),
+      settings: { es: { license: 'trial' } },
+    });
+    esServer = await startES();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCompletedCycles.length = 0;
   });
 
-  /**
-   * Whichever scenario runs first brings up ES too, so the suite stays runnable with `-t` rather
-   * than only in declaration order.
-   */
-  async function startKibanaWith(taskManager: Record<string, unknown>) {
-    const settings = { xpack: { task_manager: taskManager } };
+  async function startKibanaWith(taskManager: Record<string, unknown>, backgroundOnly = false) {
+    const settings = {
+      server: { uuid: uuidV4() },
+      node: { roles: backgroundOnly ? ['background_tasks'] : ['ui', 'background_tasks'] },
+      xpack: { task_manager: taskManager },
+    };
 
     if (kibanaServer) {
       await kibanaServer.stop();
-      ({ kibanaServer } = await setupKibanaServer(settings));
-    } else {
-      ({ esServer, kibanaServer } = await setupTestServers(settings));
     }
+    ({ kibanaServer } = await setupKibanaServer(settings));
 
     // `beforeEach` clears the spy, so this counts only the Kibana root created above.
     expect(taskManagerStartSpy).toHaveBeenCalledTimes(1);
     return latestStartContract();
   }
+
+  afterEach(async () => {
+    await uiServer?.stop();
+    uiServer = undefined;
+  });
 
   afterAll(async () => {
     if (kibanaServer) {
@@ -132,52 +166,76 @@ describe('claim nudge', () => {
     }
   });
 
-  it('claims a runSoon task almost immediately instead of waiting for the next poll interval', async () => {
-    const taskManagerPlugin = await startKibanaWith({
-      claim_strategy: 'mget',
-      poll_interval: POLLING_INTERVAL,
-      unsafe: {
-        exclude_task_types: ['[A-Za-z]*'],
-      },
-    });
+  it.each([false, true])(
+    'claims before the regular deadline (UI-only sender: %s)',
+    async (uiOnlySender) => {
+      const taskManagerConfig = {
+        claim_strategy: 'mget',
+        poll_interval: POLLING_INTERVAL,
+        unsafe: { exclude_task_types: ['[A-Za-z]*'] },
+      };
+      const receiver = await startKibanaWith(taskManagerConfig, uiOnlySender);
+      let sender = receiver;
+      if (uiOnlySender) {
+        ({ kibanaServer: uiServer } = await setupKibanaServer({
+          server: { uuid: uuidV4() },
+          node: { roles: ['ui'] },
+          xpack: { task_manager: taskManagerConfig },
+        }));
+        sender = latestStartContract();
+        expect(sender).not.toBe(receiver);
+      }
+      // A UI-only sender must not claim locally or start its own checkpoint watcher.
+      expect(nudgeStartSpy).toHaveBeenCalledTimes(1);
+      const watcher: TaskManagerClaimNudgeService = nudgeStartSpy.mock.contexts[0];
+      const receivedNudges: number[] = [];
+      const subscription = watcher.claimNudge$.subscribe(() => receivedNudges.push(Date.now()));
+      mockTaskTypeRunFn.mockImplementation(() => ({ state: {} }));
+      const esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
+      const primingId = uuidV4();
+      const id = uuidV4();
+      try {
+        await injectFutureTask(esClient, primingId);
+        await sender.runSoon(primingId, { requestImmediateClaim: true });
+        // runSoon doesn't await delivery; await it here so it can't throttle the measured nudge.
+        await notifySpy.mock.results[0].value;
+        const primedAt = Date.now();
+        await injectFutureTask(esClient, id);
 
-    mockTaskTypeRunFn.mockImplementation(() => ({ state: {} }));
-
-    const esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
-
-    // Spend this process's first nudge on a throwaway task, then wait out the throttle window.
-    // Whether that nudge is delivered depends on whether the signal index already existed when
-    // this Kibana started: against a fresh one it is consumed as the watcher's baseline, against
-    // an existing one it lands and opens a window that would drop the next nudge (see
-    // `claim_nudge_service`). Waiting covers both, and clearing the spy afterwards keeps the
-    // throwaway task's own run out of the count below.
-    const primingId = uuidV4();
-    await injectFutureTask(esClient, primingId);
-    await taskManagerPlugin.runSoon(primingId, { requestImmediateClaim: true });
-    await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL));
-    await cleanupTask(taskManagerPlugin, primingId);
-    mockTaskTypeRunFn.mockClear();
-
-    const id = uuidV4();
-    await injectFutureTask(esClient, id);
-
-    const before = Date.now();
-    await taskManagerPlugin.runSoon(id, { requestImmediateClaim: true });
-
-    try {
-      await retry(async () => {
-        expect(mockTaskTypeRunFn).toHaveBeenCalledTimes(1);
-      }, NUDGE_RETRY_OPTS);
-      const elapsedMs = Date.now() - before;
-
-      expect(elapsedMs).toBeLessThan(POLLING_INTERVAL / 2);
-    } finally {
-      await cleanupTask(taskManagerPlugin, id);
+        // Sync to the poller's phase: wait for a regular cycle one interval after the last nudge.
+        await retry(
+          async () => {
+            const cycle = mockCompletedCycles[mockCompletedCycles.length - 1];
+            const lastNudge = receivedNudges[receivedNudges.length - 1] ?? primedAt;
+            expect(cycle.startedAt).toBeGreaterThanOrEqual(
+              Math.max(primedAt, lastNudge) + POLLING_INTERVAL
+            );
+            expect(Date.now() - cycle.startedAt).toBeLessThan(2000);
+          },
+          { times: (POLLING_INTERVAL * 3) / 100, intervalMs: 100 }
+        );
+        const regularCycle = mockCompletedCycles[mockCompletedCycles.length - 1];
+        const before = Date.now();
+        await sender.runSoon(id, { requestImmediateClaim: true });
+        await retry(async () => {
+          expect(mockCreateTaskRunner).toHaveBeenCalledWith(
+            expect.objectContaining({
+              taskInstance: expect.objectContaining({ id }),
+            })
+          );
+        }, NUDGE_RETRY_OPTS);
+        expect(receivedNudges.some((receivedAt) => receivedAt >= before)).toBe(true);
+        expect(Date.now() - before).toBeLessThan(POLLING_INTERVAL / 2);
+        expect(Date.now()).toBeLessThan(regularCycle.startedAt + POLLING_INTERVAL);
+      } finally {
+        subscription.unsubscribe();
+        await cleanupTask(sender, primingId);
+        await cleanupTask(sender, id);
+      }
     }
-  });
+  );
 
-  // Only that the task still runs. That scheduling never nudges is pinned by the unit test
-  // 'does not notify the claim nudge'.
+  // That schedule() never nudges is covered by the 'does not notify the claim nudge' unit test.
   it('still runs a schedule() task', async () => {
     const taskManagerPlugin = await startKibanaWith({
       claim_strategy: 'mget',
@@ -206,31 +264,37 @@ describe('claim nudge', () => {
     }
   });
 
-  it('still claims a runSoon task (via regular polling) when claim_nudge.enabled is false', async () => {
-    const taskManagerPlugin = await startKibanaWith({
-      claim_strategy: 'mget',
-      poll_interval: 1000,
-      claim_nudge: {
-        enabled: false,
-      },
-      unsafe: {
-        exclude_task_types: ['[A-Za-z]*'],
-      },
-    });
-
-    mockTaskTypeRunFn.mockImplementation(() => ({ state: {} }));
-
-    const id = uuidV4();
-    await injectFutureTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, id);
-
-    await taskManagerPlugin.runSoon(id, { requestImmediateClaim: true });
-
-    try {
-      await retry(async () => {
-        expect(mockTaskTypeRunFn).toHaveBeenCalledTimes(1);
+  it.each(['disabled', 'failed'])(
+    'falls back to regular polling when signaling is %s',
+    async (signaling) => {
+      const taskManagerPlugin = await startKibanaWith({
+        claim_strategy: 'mget',
+        poll_interval: 1000,
+        claim_nudge: {
+          enabled: signaling !== 'disabled',
+        },
+        unsafe: {
+          exclude_task_types: ['[A-Za-z]*'],
+        },
       });
-    } finally {
-      await cleanupTask(taskManagerPlugin, id);
+
+      mockTaskTypeRunFn.mockImplementation(() => ({ state: {} }));
+
+      const id = uuidV4();
+      await injectFutureTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, id);
+
+      if (signaling === 'failed') {
+        notifySpy.mockRejectedValueOnce(new Error('signal unavailable'));
+      }
+      await taskManagerPlugin.runSoon(id, { requestImmediateClaim: true });
+
+      try {
+        await retry(async () => {
+          expect(mockTaskTypeRunFn).toHaveBeenCalledTimes(1);
+        });
+      } finally {
+        await cleanupTask(taskManagerPlugin, id);
+      }
     }
-  });
+  );
 });
