@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
@@ -32,6 +33,7 @@ export const GettingStartedWithLocations = ({ footer }: { footer?: ReactNode }) 
     <EuiFlexGroup
       direction="column"
       gutterSize="l"
+      css={contentCss}
       data-test-subj="syntheticsGettingStartedWithLocations"
     >
       <EuiFlexItem>
@@ -107,6 +109,12 @@ export const GettingStartedWithLocations = ({ footer }: { footer?: ReactNode }) 
     </EuiFlexGroup>
   );
 };
+
+const contentCss = css`
+  width: 100%;
+  max-width: 1100px;
+  margin-inline: auto;
+`;
 
 const CREATE_FIRST_MONITOR_LABEL = i18n.translate(
   'xpack.synthetics.gettingStarted.createFirstMonitor.title',
