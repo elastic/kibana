@@ -64,7 +64,15 @@ export class ProposalsPlugin
 
     registerFeatures({ features });
 
-    registerProposalAttachment(agentBuilder);
+    // The service only exists from start() onwards, but `format()` is never
+    // called before then, so it is resolved lazily rather than captured here.
+    registerProposalAttachment(agentBuilder, {
+      getProposalsService: () => this.requireProposalsService(),
+      // Reads go through the internal user, so the formatter has to check the
+      // caller's privilege itself — same as every other proposal read surface.
+      privileges: this.getProposalPrivilegesChecker(coreSetup),
+      logger: this.logger,
+    });
 
     // Declares ownership of this plugin's managed workflows. Without it the
     // startup orphan sweep treats every workflow we installed as owned by an
@@ -111,6 +119,8 @@ export class ProposalsPlugin
       storage,
       logger: this.logger,
       getWorkflowsApi: () => this.requireWorkflowsApi(),
+      getAttachmentsClient: (request) =>
+        plugins.agentBuilder.attachments.getScopedClient({ request }),
     });
 
     void initializeManagedWorkflows({

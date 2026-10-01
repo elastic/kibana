@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-export { PROPOSAL_ATTACHMENT_TYPE } from './src/attachment';
+export { PROPOSAL_ATTACHMENT_TYPE, proposalAttachmentDataSchema } from './src/attachment';
+export type { ProposalAttachmentData } from './src/attachment';
 
 export {
   MAX_CHARTS_SUMMARY_BUCKETS,
   PROPOSALS_API_VERSION,
   PROPOSALS_INDEX_NAME,
   PROPOSALS_INTERNAL_URL,
+  PROPOSAL_SETTLING_POLL_INTERVAL_MS,
   PROPOSAL_UNCATEGORIZED,
   PROPOSALS_RESUME_CHANNEL,
   PROPOSALS_UI_CAPABILITY_DECIDE,
@@ -36,7 +38,12 @@ export {
   dismissReasonSchema,
   isAwaitingDecision,
   isExpired,
+  isProposalSettling,
   listProposalsQuerySchema,
+  MAX_PROPOSALS_PAGE_OFFSET,
+  MAX_PROPOSALS_PAGE_SIZE,
+  DEFAULT_PROPOSAL_TITLE,
+  MAX_TITLE_LENGTH,
   proposalFiltersSchema,
   proposalCategorySchema,
   proposalConfidenceSchema,
@@ -99,6 +106,11 @@ export {
   getProposalStepCommonDefinition,
   getProposalStepInputSchema,
   getProposalStepOutputSchema,
+  SettleIncompleteProposalStepId,
+  settleIncompleteProposalStepCommonDefinition,
+  settleIncompleteProposalStepInputSchema,
+  settleIncompleteProposalStepOutputSchema,
+  settleIncompleteProposalStatusSchema,
   UpdateProposalStepId,
   updateProposalStepCommonDefinition,
   updateProposalStepInputSchema,

@@ -160,6 +160,14 @@ describe('toTyped / toDraft', () => {
     expect(toTyped('true', boolMeta)).toBe(true);
   });
 
+  it('toTyped: bool typed true → true (SO resume path: stored boolean passes through)', () => {
+    expect(toTyped(true, boolMeta)).toBe(true);
+  });
+
+  it('toTyped: bool typed false → false (SO resume path: stored boolean passes through)', () => {
+    expect(toTyped(false, boolMeta)).toBe(false);
+  });
+
   it('toTyped: bool string "false" → false', () => {
     expect(toTyped('false', boolMeta)).toBe(false);
   });
