@@ -51,6 +51,7 @@ const createMockWorkflowEvaluator = (): {
     evaluator: {
       name: 'Inner',
       kind: 'CODE' as const,
+      direction: 'maximize',
       evaluate,
     },
   };

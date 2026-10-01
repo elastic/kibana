@@ -1,0 +1,681 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  getAllowedAutonomyLevels,
+  RULE_COVERAGE_DEFAULT_EXTRAS,
+  RULE_TUNING_DEFAULT_EXTRAS,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_IDS,
+  WorkerScheduleInterval,
+  WorkerSettings,
+} from '@kbn/alertzero-common';
+import { SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
+import { createWorkerSettingsRegistration } from './worker_settings';
+
+const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
+const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+const RULE_COVERAGE_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
+const FORENSICS_WORKER_ID = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
+
+const SCHEDULED_WORKER_IDS: string[] = [
+  AD_WORKER_ID,
+  RULE_TUNING_WORKER_ID,
+  RULE_COVERAGE_WORKER_ID,
+];
+
+const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
+  (id) => !SCHEDULED_WORKER_IDS.includes(id)
+);
+
+/**
+ * Stored defaults per unscheduled Worker. Owning no schedule is all these Workers have in
+ * common: Alert Triage also carries Watch-owned `extras`, which changes what already-installed
+ * spaces receive, so it is spelled out rather than assumed uniform.
+ */
+const UNSCHEDULED_WORKER_DEFAULTS = new Map<string, Record<string, unknown>>([
+  [
+    SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+    {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+    },
+  ],
+]);
+
+const storedDefaultsFor = (workerId: string): Record<string, unknown> =>
+  UNSCHEDULED_WORKER_DEFAULTS.get(workerId) ?? { settingsVersion: 1, autonomyLevel: 'manual' };
+
+/** Workers whose stored values carry no `extras` at all. */
+const NO_EXTRAS_WORKER_IDS = UNSCHEDULED_WORKER_IDS.filter(
+  (id) => !UNSCHEDULED_WORKER_DEFAULTS.has(id)
+);
+
+/** Workers whose gate is all-or-nothing, so `assisted` means the same thing as `manual`. */
+const WORKERS_WITHOUT_ASSISTED: string[] = [FORENSICS_WORKER_ID];
+
+const expectInvalid = (
+  applied: ReturnType<ReturnType<typeof createWorkerSettingsRegistration>['applyPatch']>
+): string => {
+  if (!('invalid' in applied)) {
+    throw new Error('Expected the patch to be rejected');
+  }
+  return applied.invalid;
+};
+
+describe('createWorkerSettingsRegistration', () => {
+  it.each([...SYSTEM_SECURITY_WORKER_IDS])(
+    '%s defaults round-trip through the public WorkerSettings schema',
+    (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+      const projected = registration.toSettings(registration.createDefaultValues());
+
+      expect(WorkerSettings.parse(projected)).toEqual(projected);
+      expect(projected).toEqual(
+        expect.objectContaining({
+          workerId,
+          autonomy: 'manual',
+        })
+      );
+    }
+  );
+
+  it.each([...SYSTEM_SECURITY_WORKER_IDS])(
+    '%s does not silently strip projected keys',
+    (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+      const projected = registration.toSettings(registration.createDefaultValues());
+      const parsed = WorkerSettings.parse(projected);
+
+      expect(Object.keys(parsed).sort()).toEqual(Object.keys(projected).sort());
+      expect(parsed).toEqual(projected);
+    }
+  );
+
+  describe('schedule interval — attack discovery (opted in)', () => {
+    const registration = createWorkerSettingsRegistration(AD_WORKER_ID);
+
+    it('defaults to 24h at the current settings version and projects it', () => {
+      expect(registration.createDefaultValues()).toEqual({
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        scheduleInterval: '24h',
+      });
+      expect(registration.toSettings(registration.createDefaultValues())).toEqual({
+        workerId: AD_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '24h',
+      });
+    });
+
+    it('fills a missing schedule interval from the declaration default', () => {
+      const stored = { settingsVersion: 1, autonomyLevel: 'manual' };
+
+      expect(registration.withMissingDefaults(stored)).toEqual({
+        ...stored,
+        scheduleInterval: '24h',
+      });
+      expect(registration.toSettings(stored)).toEqual({
+        workerId: AD_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '24h',
+      });
+    });
+
+    it('reads a persisted interval back as stored', () => {
+      expect(
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '30m',
+        })
+      ).toEqual({ workerId: AD_WORKER_ID, autonomy: 'manual', scheduleInterval: '30m' });
+    });
+
+    it('throws on an unrecognised settings version', () => {
+      expect(() =>
+        registration.toSettings({
+          settingsVersion: 3,
+          autonomyLevel: 'manual',
+          scheduleInterval: '24h',
+        })
+      ).toThrow(/Unsupported settings version/);
+    });
+
+    it('throws on a stored autonomy level outside the shared scale', () => {
+      expect(() =>
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'yolo',
+          scheduleInterval: '24h',
+        })
+      ).toThrow(/settings are invalid: autonomy/);
+    });
+
+    it('reads a stored level this Worker no longer offers as the closest one it does', () => {
+      // Attack Discovery dropped its assisted gate; a document written while it existed must not
+      // strand the Worker as unreadable, and must not be read as MORE autonomous than stored.
+      expect(
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'assisted',
+          scheduleInterval: '24h',
+        })
+      ).toEqual({ workerId: AD_WORKER_ID, autonomy: 'manual', scheduleInterval: '24h' });
+    });
+
+    it('leaves a stored level this Worker does offer alone', () => {
+      expect(
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'supervised',
+          scheduleInterval: '24h',
+        })
+      ).toEqual({ workerId: AD_WORKER_ID, autonomy: 'supervised', scheduleInterval: '24h' });
+    });
+
+    it('rejects unsupported stored fields by name', () => {
+      expect(() =>
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '24h',
+          candidateLimit: 5,
+        })
+      ).toThrow(/unsupported fields: candidateLimit/);
+    });
+
+    it.each(['1m', '2h', '7d'])('applies a %s interval patch', (scheduleInterval) => {
+      const applied = registration.applyPatch(registration.createDefaultValues(), {
+        scheduleInterval,
+      });
+
+      expect(applied).toEqual({
+        values: { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval },
+      });
+    });
+
+    it('leaves autonomy untouched when only the interval is patched', () => {
+      const applied = registration.applyPatch(
+        { settingsVersion: 1, autonomyLevel: 'supervised', scheduleInterval: '24h' },
+        { scheduleInterval: '15m' }
+      );
+
+      expect(applied).toEqual({
+        values: { settingsVersion: 1, autonomyLevel: 'supervised', scheduleInterval: '15m' },
+      });
+    });
+
+    // `supervised` rather than `assisted`: this worker gates exactly one thing, so it
+    // allows only `manual` and `supervised`. The interval is what is under test here,
+    // but the patch still has to be one the worker would accept.
+    it('leaves the interval untouched when only autonomy is patched', () => {
+      const applied = registration.applyPatch(
+        { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '15m' },
+        { autonomy: 'supervised' }
+      );
+
+      expect(applied).toEqual({
+        values: { settingsVersion: 1, autonomyLevel: 'supervised', scheduleInterval: '15m' },
+      });
+    });
+
+    it('rejects an autonomy patch outside the levels this Worker allows', () => {
+      // Attack Discovery has no assisted gate, so the patch is refused rather than stored.
+      const applied = registration.applyPatch(
+        { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '15m' },
+        { autonomy: 'assisted' }
+      );
+
+      expect(applied).toMatchObject({
+        invalid: expect.stringContaining('autonomy'),
+      });
+    });
+  });
+
+  describe('Worker-specific settings — detection rule tuning', () => {
+    const registration = createWorkerSettingsRegistration(RULE_TUNING_WORKER_ID);
+    const defaultExtras = RULE_TUNING_DEFAULT_EXTRAS;
+    const storedDefaults = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '2h',
+      extras: defaultExtras,
+    };
+
+    it('stores extras nested and projects them under settings.extras', () => {
+      expect(registration.createDefaultValues()).toEqual(storedDefaults);
+      expect(registration.toSettings(registration.createDefaultValues())).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: defaultExtras,
+      });
+    });
+
+    it('fills extras from defaults when a stored document has none', () => {
+      const stored = {
+        settingsVersion: 1,
+        autonomyLevel: 'assisted',
+        scheduleInterval: '2h',
+      };
+
+      expect(registration.withMissingDefaults(stored)).toEqual({
+        ...stored,
+        extras: defaultExtras,
+      });
+      expect(registration.toSettings(stored)).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'assisted',
+        scheduleInterval: '2h',
+        extras: defaultExtras,
+      });
+    });
+
+    it('upgrades a version-4 document without extras onto the current defaults', () => {
+      // The shape installed before extras existed: settings version, autonomy, and interval only.
+      const stored = {
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        scheduleInterval: '2h',
+      };
+
+      expect(registration.withMissingDefaults(stored)).toEqual({
+        ...stored,
+        extras: defaultExtras,
+      });
+      expect(registration.toSettings(stored)).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: defaultExtras,
+      });
+    });
+
+    it('fills only the extras keys an older document does not have', () => {
+      const stored = {
+        ...storedDefaults,
+        extras: { analysisWindowDays: 21 },
+      };
+
+      expect(registration.withMissingDefaults(stored)).toEqual({
+        ...storedDefaults,
+        extras: { ...defaultExtras, analysisWindowDays: 21 },
+      });
+      expect(registration.toSettings(stored)).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { ...defaultExtras, analysisWindowDays: 21 },
+      });
+    });
+
+    it('leaves a complete extras object untouched', () => {
+      expect(registration.withMissingDefaults(storedDefaults)).toBe(storedDefaults);
+    });
+
+    it('reads a stored supervised level as assisted, the closest level it still offers', () => {
+      // Rule Tuning has no unattended level: the document written while it did stays readable.
+      expect(registration.toSettings({ ...storedDefaults, autonomyLevel: 'supervised' })).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'assisted',
+        scheduleInterval: '2h',
+        extras: defaultExtras,
+      });
+    });
+
+    it('persists the projected level on the next save, so the document heals', () => {
+      expect(
+        registration.applyPatch(
+          { ...storedDefaults, autonomyLevel: 'supervised' },
+          { scheduleInterval: '6h' }
+        )
+      ).toEqual({
+        values: { ...storedDefaults, autonomyLevel: 'assisted', scheduleInterval: '6h' },
+      });
+    });
+
+    it('fills every extras key when the stored object is empty', () => {
+      const stored = { ...storedDefaults, extras: {} };
+
+      expect(registration.withMissingDefaults(stored)).toEqual(storedDefaults);
+      expect(registration.toSettings(stored)).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: defaultExtras,
+      });
+    });
+
+    it('persists default extras when a shared-field patch is applied to a document that has none', () => {
+      expect(
+        registration.applyPatch(
+          { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '2h' },
+          { scheduleInterval: '6h' }
+        )
+      ).toEqual({
+        values: { ...storedDefaults, scheduleInterval: '6h' },
+      });
+    });
+
+    it('keeps extras when a shared-field patch omits them', () => {
+      expect(registration.applyPatch(storedDefaults, { scheduleInterval: '6h' })).toEqual({
+        values: { ...storedDefaults, scheduleInterval: '6h' },
+      });
+    });
+
+    it('replaces extras whole when the patch supplies them', () => {
+      // Seeded at a level this Worker allows (manual/assisted); the assertion is about extras.
+      expect(
+        registration.applyPatch(
+          { ...storedDefaults, autonomyLevel: 'assisted' },
+          { extras: { ...defaultExtras, analysisWindowDays: 21 } }
+        )
+      ).toEqual({
+        values: {
+          ...storedDefaults,
+          autonomyLevel: 'assisted',
+          extras: { ...defaultExtras, analysisWindowDays: 21 },
+        },
+      });
+    });
+
+    it('rejects an extras replacement missing a required field, naming it', () => {
+      expect(expectInvalid(registration.applyPatch(storedDefaults, { extras: {} }))).toContain(
+        'extras.analysisWindowDays'
+      );
+    });
+
+    it('rejects an unknown extras key, naming it', () => {
+      expect(
+        expectInvalid(
+          registration.applyPatch(storedDefaults, {
+            extras: { ...defaultExtras, previewDepth: 3 },
+          })
+        )
+      ).toMatch(/extras.*previewDepth/);
+    });
+
+    it('does not replace a present invalid extras value when filling the rest', () => {
+      expect(() =>
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { analysisWindowDays: 0 },
+        })
+      ).toThrow(/extras\.analysisWindowDays/);
+    });
+
+    it.each([7.5, 0, 31])('rejects a stored analysis window of %s', (analysisWindowDays) => {
+      expect(() =>
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { ...defaultExtras, analysisWindowDays },
+        })
+      ).toThrow(/extras\.analysisWindowDays/);
+    });
+
+    it.each([1, 101, 10.5])('rejects a stored FP count threshold of %s', (fpCountThreshold) => {
+      expect(() =>
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { ...defaultExtras, fpCountThreshold },
+        })
+      ).toThrow(/extras\.fpCountThreshold/);
+    });
+
+    it.each([-1, 101, 50.5])('rejects a stored FP rate threshold of %s', (fpRateThresholdPct) => {
+      expect(() =>
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { ...defaultExtras, fpRateThresholdPct },
+        })
+      ).toThrow(/extras\.fpRateThresholdPct/);
+    });
+
+    it.each(['fpCountThreshold', 'fpRateThresholdPct'] as const)(
+      'rejects an extras replacement missing %s, naming it',
+      (missing) => {
+        const extras: Record<string, number> = { ...defaultExtras };
+        delete extras[missing];
+
+        expect(expectInvalid(registration.applyPatch(storedDefaults, { extras }))).toContain(
+          `extras.${missing}`
+        );
+      }
+    );
+  });
+
+  describe('Worker-specific settings — alert triage', () => {
+    const registration = createWorkerSettingsRegistration(
+      SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+    );
+
+    // Documents installed before this Worker's `extras` and narrowed autonomy levels existed
+    // still carry `settingsVersion: 1` and no `extras` at all. The settings version must not
+    // have moved on, or every such document becomes unreadable after upgrade.
+    it('reads a pre-existing v1 document with no extras and a since-dropped autonomy level', () => {
+      const stored = { settingsVersion: 1, autonomyLevel: 'assisted' };
+
+      expect(registration.withMissingDefaults(stored)).toEqual({
+        ...stored,
+        extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+      });
+      expect(registration.toSettings(stored)).toEqual({
+        workerId: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+        autonomy: 'manual',
+        extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+      });
+    });
+
+    it('persists the backfilled extras and projected autonomy on the next save', () => {
+      const stored = { settingsVersion: 1, autonomyLevel: 'assisted' };
+
+      expect(registration.applyPatch(stored, {})).toEqual({
+        values: {
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+        },
+      });
+    });
+  });
+
+  describe('Worker-specific settings — detection rule coverage', () => {
+    const registration = createWorkerSettingsRegistration(RULE_COVERAGE_WORKER_ID);
+    const defaultExtras = RULE_COVERAGE_DEFAULT_EXTRAS;
+    const storedDefaults = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '1h',
+      extras: defaultExtras,
+    };
+
+    it('stores extras nested and projects them under settings.extras', () => {
+      expect(registration.createDefaultValues()).toEqual(storedDefaults);
+      expect(registration.toSettings(registration.createDefaultValues())).toEqual({
+        workerId: RULE_COVERAGE_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '1h',
+        extras: defaultExtras,
+      });
+    });
+
+    it('replaces extras whole when the patch supplies them', () => {
+      const extras = { lookbackDays: 30, maxGapsPerRun: 20 };
+
+      expect(registration.applyPatch(storedDefaults, { extras })).toEqual({
+        values: { ...storedDefaults, extras },
+      });
+    });
+
+    it.each(['lookbackDays', 'maxGapsPerRun'] as const)(
+      'rejects an extras replacement missing %s, naming it',
+      (missing) => {
+        const extras: Record<string, number> = { ...defaultExtras };
+        delete extras[missing];
+
+        expect(expectInvalid(registration.applyPatch(storedDefaults, { extras }))).toContain(
+          `extras.${missing}`
+        );
+      }
+    );
+
+    it('rejects an unknown extras key, naming it', () => {
+      expect(
+        expectInvalid(
+          registration.applyPatch(storedDefaults, {
+            extras: { ...defaultExtras, maxOpenChecks: 100 },
+          })
+        )
+      ).toMatch(/extras.*maxOpenChecks/);
+    });
+
+    it.each([7, 91, 10.5])('rejects a lookback of %s in a patch and in storage', (lookbackDays) => {
+      const extras = { ...defaultExtras, lookbackDays };
+
+      expect(expectInvalid(registration.applyPatch(storedDefaults, { extras }))).toContain(
+        'extras.lookbackDays'
+      );
+      expect(() => registration.toSettings({ ...storedDefaults, extras })).toThrow(
+        /extras\.lookbackDays/
+      );
+    });
+
+    it.each([0, 51, 2.5])(
+      'rejects max gaps per run of %s in a patch and in storage',
+      (maxGapsPerRun) => {
+        const extras = { ...defaultExtras, maxGapsPerRun };
+
+        expect(expectInvalid(registration.applyPatch(storedDefaults, { extras }))).toContain(
+          'extras.maxGapsPerRun'
+        );
+        expect(() => registration.toSettings({ ...storedDefaults, extras })).toThrow(
+          /extras\.maxGapsPerRun/
+        );
+      }
+    );
+  });
+
+  describe('Workers that declare no extras', () => {
+    it.each([...UNSCHEDULED_WORKER_IDS, AD_WORKER_ID])(
+      "%s rejects another Worker's extras field, naming it",
+      (workerId) => {
+        const registration = createWorkerSettingsRegistration(workerId);
+
+        expect(
+          expectInvalid(
+            registration.applyPatch(registration.createDefaultValues(), {
+              extras: { analysisWindowDays: 7 },
+            })
+          )
+        ).toMatch(/extras/);
+      }
+    );
+  });
+
+  describe('schedule interval — the Workers that own no schedule', () => {
+    it.each(UNSCHEDULED_WORKER_IDS)('%s default values are unchanged', (workerId) => {
+      expect(createWorkerSettingsRegistration(workerId).createDefaultValues()).toEqual(
+        storedDefaultsFor(workerId)
+      );
+    });
+
+    it.each(UNSCHEDULED_WORKER_IDS)('%s omits the interval from public settings', (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+      const projected = registration.toSettings(registration.createDefaultValues());
+
+      expect(projected).not.toHaveProperty('scheduleInterval');
+    });
+
+    it.each(NO_EXTRAS_WORKER_IDS)('%s projects no extras either', (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+
+      expect(registration.toSettings(registration.createDefaultValues())).not.toHaveProperty(
+        'extras'
+      );
+    });
+
+    it.each(UNSCHEDULED_WORKER_IDS)('%s rejects a stored schedule interval by name', (workerId) => {
+      expect(() =>
+        createWorkerSettingsRegistration(workerId).toSettings({
+          ...storedDefaultsFor(workerId),
+          scheduleInterval: '30m',
+        })
+      ).toThrow(/scheduleInterval/);
+    });
+
+    it.each(UNSCHEDULED_WORKER_IDS)('%s rejects an interval patch, naming it', (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+
+      expect(
+        expectInvalid(
+          registration.applyPatch(registration.createDefaultValues(), { scheduleInterval: '30m' })
+        )
+      ).toContain('scheduleInterval');
+    });
+
+    it.each(UNSCHEDULED_WORKER_IDS.filter((id) => !WORKERS_WITHOUT_ASSISTED.includes(id)))(
+      '%s still accepts an autonomy patch',
+      (workerId) => {
+        const registration = createWorkerSettingsRegistration(workerId);
+        // Which level that is differs per Worker; the catalog narrows to what each gate honours.
+        const [level] = getAllowedAutonomyLevels(workerId).filter((it) => it !== 'manual');
+
+        expect(
+          registration.applyPatch(registration.createDefaultValues(), { autonomy: level })
+        ).toEqual({ values: { ...storedDefaultsFor(workerId), autonomyLevel: level } });
+      }
+    );
+  });
+
+  describe('Endpoint analysis autonomy', () => {
+    const registration = createWorkerSettingsRegistration(FORENSICS_WORKER_ID);
+
+    it('defaults to manual', () => {
+      expect(registration.createDefaultValues()).toEqual({
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+      });
+    });
+
+    it('accepts supervised', () => {
+      expect(
+        registration.applyPatch(registration.createDefaultValues(), { autonomy: 'supervised' })
+      ).toEqual({ values: { settingsVersion: 1, autonomyLevel: 'supervised' } });
+    });
+
+    it('rejects assisted, which would gate the same proposals as manual', () => {
+      expect(
+        expectInvalid(
+          registration.applyPatch(registration.createDefaultValues(), { autonomy: 'assisted' })
+        )
+      ).toContain('autonomy');
+    });
+  });
+});
+
+describe('WorkerScheduleInterval API schema', () => {
+  // The OpenAPI pattern is a literal in watch_settings.schema.yaml because a .schema.yaml cannot
+  // import a TS constant. This keeps that copy a strict subset of what the workflow engine accepts,
+  // so no value the API admits can fail at schedule-registration time.
+  it.each(['1m', '2h', '365d'])(
+    'accepts %p, which the workflow engine also accepts',
+    (interval) => {
+      expect(WorkerScheduleInterval.safeParse(interval).success).toBe(true);
+      expect(SCHEDULED_INTERVAL_PATTERN.test(interval)).toBe(true);
+    }
+  );
+
+  it.each(['0m', '60s', 'abc', '1000000d'])('rejects %p', (interval) => {
+    expect(WorkerScheduleInterval.safeParse(interval).success).toBe(false);
+  });
+});

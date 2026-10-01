@@ -16,5 +16,6 @@ describe('CertificatesPage', () => {
     const { findByText } = render(<CertificatesPage />);
 
     expect(await findByText('No Certificates found.')).toBeInTheDocument();
+    expect(await findByText('Spaces')).toBeInTheDocument();
   });
 });

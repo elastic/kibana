@@ -6,6 +6,7 @@
  */
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { QueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { errors } from '@elastic/elasticsearch';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -41,22 +42,21 @@ describe('detectDataPresence', () => {
     return createRuleResponse({
       kind: 'alert',
       grouping: { fields: groupingFields },
-      no_data_strategy: 'emit',
-      query: {
-        format: 'standalone',
-        breach: { query: 'FROM metrics-* | WHERE avg_cpu > 90' },
-        no_data: { query: 'FROM metrics-* | STATS COUNT(*) BY host.name' },
+      no_data: {
+        strategy: 'alert',
+        query: 'FROM metrics-* | STATS COUNT(*) BY host.name',
       },
+      query: { base: 'FROM metrics-* | WHERE avg_cpu > 90' },
       ...overrides,
     });
   }
 
-  it("returns an empty set when no_data_strategy is 'none'", async () => {
+  it("returns an empty set when no_data.strategy is 'ignore'", async () => {
     const { queryService, scopedEsClient } = setup();
 
     const result = await detectDataPresence({
       queryService,
-      rule: buildRule({ no_data_strategy: 'none' }),
+      rule: buildRule({ no_data: { strategy: 'ignore' } }),
       input: createRuleExecutionInput(),
       logger: loggerService,
     });
@@ -65,17 +65,12 @@ describe('detectDataPresence', () => {
     expect(result).toEqual(new Set());
   });
 
-  it('returns an empty set when a standalone rule omits the query.no_data block', async () => {
+  it('returns an empty set when the rule carries no no_data configuration', async () => {
     const { queryService, scopedEsClient } = setup();
 
     const result = await detectDataPresence({
       queryService,
-      rule: createRuleResponse({
-        kind: 'alert',
-        no_data_strategy: 'emit',
-        grouping: { fields: groupingFields },
-        query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
-      }),
+      rule: buildRule({ no_data: undefined }),
       input: createRuleExecutionInput(),
       logger: loggerService,
     });
@@ -142,7 +137,7 @@ describe('detectDataPresence', () => {
     expect(result).toEqual(new Set());
   });
 
-  it('uses the composed base query as the no-data query', async () => {
+  it('falls back to the base query when no_data carries no presence query', async () => {
     const { queryService, scopedEsClient } = setup();
 
     const baseQuery = 'FROM metrics-* | STATS AVG(cpu) BY host.name';
@@ -155,13 +150,9 @@ describe('detectDataPresence', () => {
       queryService,
       rule: createRuleResponse({
         kind: 'alert',
-        no_data_strategy: 'emit',
+        no_data: { strategy: 'alert' },
         grouping: { fields: groupingFields },
-        query: {
-          format: 'composed',
-          base: baseQuery,
-          breach: { segment: 'WHERE AVG(cpu) > 0.9' },
-        },
+        query: { base: baseQuery, breach: { segment: 'WHERE AVG(cpu) > 0.9' } },
       }),
       input,
       logger: loggerService,
@@ -207,8 +198,9 @@ describe('detectDataPresence', () => {
       logger: loggerService,
     }).catch((e: Error) => e);
 
-    expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(QueryResponseSizeExceededError);
     expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+    expect((error as QueryResponseSizeExceededError).queryType).toBe('data_presence');
   });
 
   it('does not classify ES|QL 5xx errors as user errors (server-side, retryable)', async () => {

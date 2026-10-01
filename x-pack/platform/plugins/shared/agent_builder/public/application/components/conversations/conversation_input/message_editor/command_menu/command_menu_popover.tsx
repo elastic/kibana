@@ -55,7 +55,10 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
   const isMounted = isActive && activeCommand !== null && anchorPosition !== null;
   const isOpen = isMounted && hasVisibleContent;
   let announcementText = '';
-  let panelAriaLabel = '';
+  let panelAriaLabel = i18n.translate(
+    'xpack.agentBuilder.conversationInput.commandMenuPopover.defaultPanelLabel',
+    { defaultMessage: 'Command suggestions' }
+  );
   if (activeCommand) {
     const { name } = activeCommand.command;
     announcementText = i18n.translate(

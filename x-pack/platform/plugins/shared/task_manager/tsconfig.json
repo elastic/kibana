@@ -9,12 +9,11 @@
     "server/**/*.json",
     "common/**/*",
     "test/scout/**/*",
-    "test/scout_task_manager_uiam/**/*"
+    "test/scout_uiam_local/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/tracing-utils",
-    "@kbn/uiam-api-keys-provisioning-status",
     "@kbn/usage-collection-plugin",
     "@kbn/config-schema",
     "@kbn/config",

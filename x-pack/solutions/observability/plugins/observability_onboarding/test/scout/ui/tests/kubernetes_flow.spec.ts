@@ -12,11 +12,18 @@ import { test } from '../fixtures';
 // Cold mount after a full-page `gotoApp` reload can exceed the default 10s
 // `expect` timeout under CI load, so post-reload render waits get a larger budget.
 const APP_BOOT_TIMEOUT = 30_000;
+const V2_FF_ID = 'observability.addDataPageV2Enabled';
 
 test.describe.serial(
   'Kubernetes Onboarding',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    test.beforeAll(async ({ apiServices }) => {
+      await apiServices.core.settings({
+        'feature_flags.overrides': { [V2_FF_ID]: true },
+      });
+    });
+
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
@@ -26,7 +33,7 @@ test.describe.serial(
       page,
     }) => {
       await pageObjects.onboarding.goto();
-      await pageObjects.onboarding.selectKubernetesUseCase();
+      await pageObjects.onboarding.clickKubernetesTile();
 
       await expect(page).toHaveURL(/\/kubernetes(\?|$|#)/);
       await expect(pageObjects.kubernetes.layout('otel')).toBeVisible();

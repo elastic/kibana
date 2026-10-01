@@ -410,7 +410,7 @@ describe('createTransport', () => {
       const transport = new transportClass(baseConstructorParams);
       const requestParams = { method: 'GET', path: '/' };
 
-      await expect(transport.request(requestParams, {})).rejects.toThrowError('woups');
+      await expect(transport.request(requestParams, {})).rejects.toThrow('woups');
 
       expect(transportRequestMock).toHaveBeenCalledTimes(1);
       expect(handler).not.toHaveBeenCalled();
@@ -425,7 +425,7 @@ describe('createTransport', () => {
       const transport = new transportClass(baseConstructorParams);
       const requestParams = { method: 'GET', path: '/' };
 
-      await expect(transport.request(requestParams, {})).rejects.toThrowError('woups');
+      await expect(transport.request(requestParams, {})).rejects.toThrow('woups');
 
       expect(transportRequestMock).toHaveBeenCalledTimes(1);
     });
@@ -446,7 +446,7 @@ describe('createTransport', () => {
       const transport = new transportClass(baseConstructorParams);
       const requestParams = { method: 'GET', path: '/' };
 
-      await expect(transport.request(requestParams, {})).rejects.toThrowError(error);
+      await expect(transport.request(requestParams, {})).rejects.toThrow(error);
 
       expect(transportRequestMock).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledTimes(1);
@@ -469,7 +469,7 @@ describe('createTransport', () => {
       const transport = new transportClass(baseConstructorParams);
       const requestParams = { method: 'GET', path: '/' };
 
-      await expect(transport.request(requestParams, {})).rejects.toThrowError(error);
+      await expect(transport.request(requestParams, {})).rejects.toThrow(error);
 
       expect(transportRequestMock).toHaveBeenCalledTimes(1);
     });
@@ -515,7 +515,7 @@ describe('createTransport', () => {
       const transport = new transportClass(baseConstructorParams);
       const requestParams = { method: 'GET', path: '/' };
 
-      await expect(transport.request(requestParams, {})).rejects.toThrowError(error);
+      await expect(transport.request(requestParams, {})).rejects.toThrow(error);
 
       expect(transportRequestMock).toHaveBeenCalledTimes(2);
     });
@@ -631,7 +631,7 @@ describe('createTransport', () => {
         transport.request(requestParams, {
           asStream: { retryOn401: true } as unknown as TransportRequestOptions['asStream'],
         })
-      ).rejects.toThrowError(/token expired/);
+      ).rejects.toThrow(/token expired/);
 
       expect(transportRequestMock).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledTimes(1);
@@ -691,7 +691,7 @@ describe('createTransport', () => {
         transport.request(requestParams, {
           asStream: { retryOn401: true } as unknown as TransportRequestOptions['asStream'],
         })
-      ).rejects.toThrowError(/token expired/);
+      ).rejects.toThrow(/token expired/);
 
       expect(transportRequestMock).toHaveBeenCalledTimes(2);
     });

@@ -21,11 +21,10 @@ import {
   getEditorExtensions,
   getEsqlPolicies,
   getInferenceEndpoints,
-  getTimeseriesIndices,
   getViews,
   getDatasets,
 } from '@kbn/esql-utils';
-import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
+import type { getEsqlColumns, getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { clearCacheWhenOld } from '../helpers';
 import { getHistoryItems } from '../history_local_storage';
@@ -33,7 +32,11 @@ import type { ESQLEditorDeps } from '../types';
 import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
 import { useCanCreateLookupIndex } from '../lookup_join';
 import { useCanSuggestResourceBrowser } from '../resource_browser/use_can_suggest_resource_browser';
-import { DATA_SOURCES_CACHE_KEY, HISTORY_STARRED_ITEMS_CACHE_KEY } from '../helpers';
+import {
+  DATA_SOURCES_CACHE_KEY,
+  HISTORY_STARRED_ITEMS_CACHE_KEY,
+  TIMESERIES_INDICES_CACHE_KEY,
+} from '../helpers';
 
 type MemoizedFn<TArgs extends unknown[], TResult> = (...args: TArgs) => {
   timestamp: number;
@@ -69,6 +72,11 @@ type MemoizedHistoryStarredItems = MemoizedFn<
   Promise<string[]>
 >;
 
+type MemoizedTimeseriesIndices = MemoizedFn<
+  [CoreStart['http'], AbortSignal?],
+  ReturnType<typeof getTimeseriesIndices>
+>;
+
 interface UseEsqlCallbacksParams {
   core: CoreStart;
   data: ESQLEditorDeps['data'];
@@ -84,6 +92,8 @@ interface UseEsqlCallbacksParams {
   memoizedFieldsFromESQL: MemoizedFieldsFromESQL;
   historyStarredItemsCache: MapCache;
   memoizedHistoryStarredItems: MemoizedHistoryStarredItems;
+  timeseriesIndicesCache: MapCache;
+  memoizedTimeseriesIndices: MemoizedTimeseriesIndices;
   favoritesClient: FavoritesClient<StarredQueryMetadata>;
   getJoinIndicesCallback: Required<ESQLCallbacks>['getJoinIndices'];
   enableResourceBrowser: boolean;
@@ -104,6 +114,8 @@ export const useEsqlCallbacks = ({
   memoizedFieldsFromESQL,
   historyStarredItemsCache,
   memoizedHistoryStarredItems,
+  timeseriesIndicesCache,
+  memoizedTimeseriesIndices,
   favoritesClient,
   getJoinIndicesCallback,
   enableResourceBrowser,
@@ -228,10 +240,12 @@ export const useEsqlCallbacks = ({
   );
 
   const getTimeseriesIndicesCallback = useCallback(async () => {
+    clearCacheWhenOld(timeseriesIndicesCache, TIMESERIES_INDICES_CACHE_KEY);
     return (
-      (await getTimeseriesIndices(core.http, lifecycleAbortControllerRef.current.signal)) || []
+      (await memoizedTimeseriesIndices(core.http, lifecycleAbortControllerRef.current.signal)
+        .result) || { indices: [] }
     );
-  }, [core.http]);
+  }, [core.http, memoizedTimeseriesIndices, timeseriesIndicesCache]);
 
   const getViewsCallback = useCallback(async () => {
     const views = await getViews(core.http, lifecycleAbortControllerRef.current.signal);

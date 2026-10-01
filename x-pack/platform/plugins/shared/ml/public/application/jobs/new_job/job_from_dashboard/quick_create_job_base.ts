@@ -28,6 +28,7 @@ import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
 import type { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
+import { getIsMlCpsEnabled } from '../../../services/ml_server_info';
 
 interface CreationState {
   success: boolean;
@@ -83,7 +84,8 @@ export class QuickJobCreatorBase {
     dashboard?: DashboardApi;
   }) {
     const datafeedId = createDatafeedId(jobId);
-    const projectRouting = this.cps?.cpsManager?.getProjectRouting();
+    const isMlCpsEnabled = getIsMlCpsEnabled();
+    const projectRouting = isMlCpsEnabled ? this.cps?.cpsManager?.getProjectRouting() : undefined;
     const datafeed = {
       ...datafeedConfig,
       job_id: jobId,

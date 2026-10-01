@@ -45,6 +45,14 @@ describe('updateState', () => {
     `);
   });
 
+  it('keeps pendingConfigs meta on the first execution when prior state is empty', () => {
+    const pendingConfigs = {
+      'mon-1-loc-1': { pendingCount: 1, configId: 'mon-1', locationId: 'loc-1' },
+    };
+    const result = updateState({} as SyntheticsCommonState, true, { pendingConfigs });
+    expect(result.meta).toEqual({ pendingConfigs });
+  });
+
   it('updates the correct field in subsequent calls', () => {
     spy
       .mockImplementationOnce(() => 'first date string')
@@ -295,7 +303,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
@@ -317,6 +325,7 @@ describe('setRecoveredAlertsContext', () => {
         idWithLocation,
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
+        pendingThreshold: 2,
         checks: undefined,
         grouping: undefined,
         hostName: undefined,
@@ -399,7 +408,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -421,6 +430,7 @@ describe('setRecoveredAlertsContext', () => {
           'Monitor "test-monitor" from us_west is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
         locationId: location,
         downThreshold: 1,
+        pendingThreshold: 2,
         checks: undefined,
         grouping: undefined,
         hostName: undefined,
@@ -498,7 +508,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -520,6 +530,7 @@ describe('setRecoveredAlertsContext', () => {
           'Monitor "test-monitor" from us_west is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
+        pendingThreshold: 2,
         stateId: '123456',
         checks: undefined,
         grouping: undefined,
@@ -584,7 +595,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -604,6 +615,7 @@ describe('setRecoveredAlertsContext', () => {
           'Monitor "test-monitor" from Unnamed-location is recovered. Alert when 1 out of the last 1 checks are down from at least 1 location.',
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
+        pendingThreshold: 2,
         locationNames: 'Unnamed-location',
         locationName: 'Unnamed-location',
         lastErrorMessage: 'test-error-message',
@@ -670,7 +682,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -693,6 +705,7 @@ describe('setRecoveredAlertsContext', () => {
         stateId: '123456',
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
+        pendingThreshold: 2,
         locationNames: 'us-central and us-east',
         locationName: 'us-central and us-east',
         monitorType: 'HTTP',
@@ -755,7 +768,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: false,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -778,6 +791,7 @@ describe('setRecoveredAlertsContext', () => {
         stateId: '123456',
         timestamp: '2023-02-26T00:00:00.000Z',
         downThreshold: 1,
+        pendingThreshold: 2,
         locationNames: 'us-central and us-east',
         locationName: 'us-central and us-east',
         monitorType: 'HTTP',
@@ -847,7 +861,7 @@ describe('setRecoveredAlertsContext', () => {
         groupByLocation: true,
         stalePendingConfigs: {},
       });
-      expect(alertsClientMock.setAlertData).toBeCalledWith(
+      expect(alertsClientMock.setAlertData).toHaveBeenCalledWith(
         expect.objectContaining({
           id: configId,
           context: expect.objectContaining({
@@ -918,7 +932,7 @@ describe('setRecoveredAlertsContext', () => {
         groupByLocation: true,
         stalePendingConfigs,
       });
-      expect(alertsClientMock.setAlertData).toBeCalledWith(
+      expect(alertsClientMock.setAlertData).toHaveBeenCalledWith(
         expect.objectContaining({
           id: configId,
           context: expect.objectContaining({
@@ -967,7 +981,7 @@ describe('setRecoveredAlertsContext', () => {
         groupByLocation: true,
         stalePendingConfigs: {},
       });
-      expect(alertsClientMock.setAlertData).toBeCalledWith(
+      expect(alertsClientMock.setAlertData).toHaveBeenCalledWith(
         expect.objectContaining({
           id: configId,
           context: expect.objectContaining({
@@ -1056,7 +1070,7 @@ describe('setRecoveredAlertsContext', () => {
         groupByLocation: true,
         stalePendingConfigs,
       });
-      expect(alertsClientMock.setAlertData).toBeCalledWith(
+      expect(alertsClientMock.setAlertData).toHaveBeenCalledWith(
         expect.objectContaining({
           id: configId,
           context: expect.objectContaining({

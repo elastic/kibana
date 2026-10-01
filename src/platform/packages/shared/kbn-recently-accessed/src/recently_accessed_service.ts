@@ -35,6 +35,11 @@ export class RecentlyAccessedService {
         });
       },
 
+      /** Removes an item from the history. */
+      remove: (id: string) => {
+        history.removeIf((item) => item.id === id);
+      },
+
       /** Gets the current array of history items. */
       get: () => history.get(),
 

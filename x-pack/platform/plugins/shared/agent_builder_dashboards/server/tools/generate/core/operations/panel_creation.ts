@@ -7,16 +7,21 @@
 
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  readEsqlQuery,
+  resolveEsqlQueryEdit,
+  toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
-import type { PanelFailure } from '../utils';
+import type { OperationFailure } from '../utils';
 import { getErrorMessage } from '../utils';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
+import type { InlinePanelOperationType } from '../resolve_panel';
 import type { DashboardOperation } from './registry';
-import type { ResolveCustomContentTemplate } from './types';
+import type { ResolveAttachmentPanel, ResolveCustomContentTemplate } from './types';
 import {
   PANEL_TYPE_DEFINITIONS,
   type AddPanelsItemInput,
+  type CustomContentPanelConfig,
   type NewPanelInput,
   type PanelContent,
   type PanelRequestInput,
@@ -176,19 +181,23 @@ const getResolvedPanelCreationRequests = ({
  * - `source: 'config'`: built by value from the panel type's registry definition.
  * - `source: 'request'`: read from the up-front parallel resolution (keyed by
  *   panel input index).
+ * - `source: 'attachment'`: built from the referenced visualization attachment.
  *
- * Returns `undefined` and records a failure when a panel request didn't resolve.
+ * Returns `undefined` and records a failure when a panel request or attachment
+ * didn't resolve.
  */
 export const createPanelInputMaterializer = ({
   resolvedPanelCreationRequests,
   operationIndex,
   operationType,
   failures,
+  resolveAttachmentPanel,
 }: {
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   operationIndex: number;
-  operationType: DashboardOperation['operation'];
-  failures: PanelFailure[];
+  operationType: InlinePanelOperationType;
+  failures: OperationFailure[];
+  resolveAttachmentPanel?: ResolveAttachmentPanel;
 }): ((item: NewPanelInput, panelInputIndex: number) => MaterializedPanelInput | undefined) => {
   const resolvedRequestByInputIndex = new Map(
     getResolvedPanelCreationRequests({
@@ -202,6 +211,18 @@ export const createPanelInputMaterializer = ({
       return {
         panelContent: PANEL_TYPE_DEFINITIONS[item.type].buildPanelContent(item.config),
       };
+    }
+
+    if (item.source === 'attachment') {
+      if (!resolveAttachmentPanel) {
+        throw new Error('Attachment panel resolver is required for attachment-source panels.');
+      }
+      const resolved = resolveAttachmentPanel(item.attachment_id, operationType);
+      if (resolved.type === 'failure') {
+        failures.push(resolved.failure);
+        return undefined;
+      }
+      return { panelContent: resolved.panelContent };
     }
 
     const resolvedRequest = resolvedRequestByInputIndex.get(panelInputIndex);
@@ -228,29 +249,27 @@ export const createPanelInputMaterializer = ({
 export const applyCustomContentTemplates = async (
   materialized: Array<{ panel: MaterializedPanelInput | undefined }>,
   resolveTemplate: ResolveCustomContentTemplate,
-  failures: PanelFailure[]
+  failures: OperationFailure[]
 ): Promise<void> => {
   await Promise.all(
     materialized.map(async (entry) => {
       const { panel } = entry;
       if (!panel) return;
       if (panel.panelContent.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE) return;
-      const config = panel.panelContent.config as CustomContentState;
-      if (!config.prompt || config.template) return;
+      const { prompt, esqlQuery, ...persistedConfig } = panel.panelContent
+        .config as CustomContentPanelConfig & CustomContentState;
+      if (!prompt || persistedConfig.template) return;
 
       try {
-        const template = await resolveTemplate({
-          prompt: config.prompt,
-          esqlQuery: config.esqlQuery,
-        });
+        const { template } = await resolveTemplate({ prompt, esqlQuery });
         panel.panelContent = {
           ...panel.panelContent,
-          config: { ...(config as Record<string, unknown>), template },
+          config: { ...persistedConfig, esql_query: toEsqlQueryState(esqlQuery), template },
         };
       } catch (err) {
         failures.push({
           type: DASHBOARD_OPERATION_FAILURE_TYPES.addPanels,
-          identifier: config.prompt,
+          identifier: prompt,
           error: getErrorMessage(err),
         });
         entry.panel = undefined;
@@ -264,17 +283,15 @@ export const mergeAndResolveCustomContentEdit = async (
   existing: CustomContentState,
   resolveTemplate: ResolveCustomContentTemplate
 ): Promise<CustomContentState> => {
-  const mergedPrompt = editConfig.prompt ?? existing.prompt ?? '';
-  const mergedEsqlQuery =
-    editConfig.esqlQuery === undefined
-      ? existing.esqlQuery
-      : editConfig.esqlQuery === null
-      ? undefined
-      : editConfig.esqlQuery;
-  const template = await resolveTemplate({
-    prompt: mergedPrompt,
-    esqlQuery: mergedEsqlQuery,
+  const { query: mergedEsqlQuery, isChanging: isQueryChanging } = resolveEsqlQueryEdit(
+    editConfig.esqlQuery,
+    readEsqlQuery(existing)
+  );
+  const { template } = await resolveTemplate({
+    prompt: editConfig.prompt ?? '',
+    esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
     existingTemplate: existing.template,
+    hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
   });
-  return { prompt: mergedPrompt, esqlQuery: mergedEsqlQuery, template };
+  return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
 };

@@ -9,15 +9,16 @@ import {
   AgentExecutionMode,
   agentBuilderDefaultAgentId,
   ToolOrigin,
-  type AgentCapabilities,
+  type AgentConfiguration,
   type ConversationTemplate,
-  type SerializedMetadataValue,
+  type MetadataFieldValue,
 } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { ScopedRunner } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import { resolveAllowedSubagents } from '../../../agents/utils/resolve_allowed_subagents';
 import { createSubagentTool } from './run_subagent';
 import { createSendMessageTool } from './send_message';
 import { createSleepTool } from './sleep';
@@ -27,7 +28,12 @@ import { createAskUserQuestionTool } from './ask_user_question';
 import { createReadFileTool } from './read_file';
 import { createListFilesTool } from './list_files';
 import { createBashTool } from './bash';
-import { createDiscoverApisTool, createDescribeApiTool, createExecuteApiTool } from './api';
+import {
+  createDiscoverApisTool,
+  createDescribeApiTool,
+  createDescribeApiTypeTool,
+  createExecuteApiTool,
+} from './api';
 import { createTodoTool } from '../../../tools/builtin/todo';
 import { createSetConversationMetadataTool } from '../../../tools/builtin/set_conversation_metadata';
 import { builtinToolToExecutable } from '../utils/select_tools';
@@ -38,11 +44,10 @@ export interface RegisterInternalToolsParams {
   context: AgentHandlerContext;
   agentId?: string;
   executionId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
   backgroundExecutionService: BackgroundExecutionService;
-  /** Callback to merge key/value updates into the active conversation's metadata. */
-  updateConversationMetadata?: (updates: Record<string, SerializedMetadataValue>) => Promise<void>;
+  /** Callback to patch key/value updates into the active conversation's metadata. */
+  updateConversationMetadata?: (updates: Record<string, MetadataFieldValue>) => Promise<unknown>;
   /** Active conversation template, used to validate values written by the LLM. */
   conversationTemplate?: ConversationTemplate;
   /** The agent's resolved skills, used by the `search_relevant_skills` tool. */
@@ -59,6 +64,12 @@ export interface RegisterInternalToolsParams {
   subagentTracker: SubagentTracker;
   /** Existence probe for stale-entry recovery in persistent `run_subagent`. */
   conversationExists: (conversationId: string) => Promise<boolean>;
+  /**
+   * The executing agent's persisted configuration. Consulted for
+   * config-driven tool decisions such as the `subagent_ids` allowlist that
+   * gates `run_subagent` / `send_message` / `sleep`.
+   */
+  agentConfiguration: AgentConfiguration;
 }
 
 /**
@@ -70,7 +81,6 @@ export const registerInternalTools = async ({
   context,
   agentId,
   executionId,
-  capabilities,
   abortSignal,
   backgroundExecutionService,
   updateConversationMetadata,
@@ -80,6 +90,7 @@ export const registerInternalTools = async ({
   parentConversationId,
   subagentTracker,
   conversationExists,
+  agentConfiguration,
 }: RegisterInternalToolsParams): Promise<void> => {
   const {
     toolManager,
@@ -91,6 +102,7 @@ export const registerInternalTools = async ({
     interactivity,
     defaultConnectorId,
     subAgentExecutor,
+    agentRegistry,
     analyticsService,
     trackingService,
     filesystemService,
@@ -118,42 +130,58 @@ export const registerInternalTools = async ({
     tools.push(createTodoTool({ todoStateManager }));
   }
 
-  // HTTP API introspection/invocation — FF-gated.
-  if (experimentalFeatures.apiTools) {
+  // HTTP API introspection/invocation — always on, except discovery, which is FF-gated.
+  const discoveryEnabled = experimentalFeatures.apiDiscovery;
+  tools.push(createDescribeApiTool({ discoveryEnabled }));
+  tools.push(createDescribeApiTypeTool({ discoveryEnabled }));
+  tools.push(createExecuteApiTool({ selfClient, discoveryEnabled }));
+  if (discoveryEnabled) {
     tools.push(createDiscoverApisTool());
-    tools.push(createDescribeApiTool());
-    tools.push(createExecuteApiTool({ selfClient }));
   }
 
   // run_subagent + send_message + sleep — experimental; reserved for top-level
   // runs (see `canSpawnSubagents` above for why sub-agents can't nest-spawn).
+  // All three share the same registration gate: the parent agent's resolved
+  // `subagent_ids` allowlist must be non-empty. Per-call reachability for
+  // `send_message` is enforced in the handler (§3.5 of the design).
   if (experimentalFeatures.subagents && canSpawnSubagents) {
-    tools.push(
-      createSubagentTool({
-        agentId: agentId ?? agentBuilderDefaultAgentId,
-        executionId: executionId ?? '',
-        connectorId: defaultConnectorId,
-        capabilities,
-        subAgentExecutor,
-        abortSignal,
-        backgroundExecutionService,
-        parentConversationId,
-        subagentTracker,
-        conversationExists,
-      })
-    );
-    tools.push(
-      createSendMessageTool({
-        agentId: agentId ?? agentBuilderDefaultAgentId,
-        executionId: executionId ?? '',
-        capabilities,
-        subAgentExecutor,
-        abortSignal,
-        backgroundExecutionService,
-        subagentTracker,
-      })
-    );
-    tools.push(createSleepTool());
+    const allowedSubagents = await resolveAllowedSubagents({
+      configuredIds: agentConfiguration.subagent_ids ?? [],
+      agentRegistry,
+      logger,
+    });
+
+    if (allowedSubagents.length > 0) {
+      const allowedIds = new Set(allowedSubagents.map((a) => a.id));
+      const ownerAgentId = agentId ?? agentBuilderDefaultAgentId;
+
+      tools.push(
+        createSubagentTool({
+          ownerAgentId,
+          allowedSubagents,
+          executionId: executionId ?? '',
+          connectorId: defaultConnectorId,
+          subAgentExecutor,
+          abortSignal,
+          backgroundExecutionService,
+          parentConversationId,
+          subagentTracker,
+          conversationExists,
+        })
+      );
+      tools.push(
+        createSendMessageTool({
+          agentId: ownerAgentId,
+          executionId: executionId ?? '',
+          subAgentExecutor,
+          abortSignal,
+          backgroundExecutionService,
+          subagentTracker,
+          allowedIds,
+        })
+      );
+      tools.push(createSleepTool());
+    }
   }
 
   // ask_user_question — not available in standalone mode.

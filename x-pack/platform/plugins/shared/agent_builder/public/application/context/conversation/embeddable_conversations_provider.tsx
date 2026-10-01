@@ -21,14 +21,12 @@ import { removeAttachmentFromList } from './remove_attachment_from_list';
 import { removeAttachmentById } from './remove_attachment_by_id';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { StreamingProvider } from '../streaming/streaming_context';
+import { ConversationStreamService } from '../../../services/events';
 import { useConversationActions } from './use_conversation_actions';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
-import { AppLeaveContext } from '../app_leave_context';
 import { useEffectiveSpaceDefaultAgent } from '../../hooks/use_space_default_agent';
 import { RedirectLoading } from '../../components/redirects/redirect_loading';
-
-const noopOnAppLeave = () => {};
 
 /**
  * Pins restricted (non-`manageAgents`) users to their space's default agent.
@@ -90,6 +88,10 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
+  const conversationStreamService = useMemo(
+    () => new ConversationStreamService(services.eventsService),
+    [services.eventsService]
+  );
 
   const kibanaServices = useMemo(
     () => ({
@@ -157,6 +159,14 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     [persistedConversationId, updatePersistedConversationId]
   );
 
+  const resetInitialMessage = useCallback(() => {
+    setCurrentProps((prevProps) => ({
+      ...prevProps,
+      initialMessage: undefined,
+      autoSendInitialMessage: false,
+    }));
+  }, []);
+
   const validateAndSetConversationId = useCallback(
     async (id: string) => {
       try {
@@ -205,21 +215,18 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     return persistedConversationId;
   }, [currentProps, persistedConversationId]);
 
+  useEffect(() => {
+    if (conversationId && currentProps.initialMessage) {
+      resetInitialMessage();
+    }
+  }, [conversationId, currentProps.initialMessage, resetInitialMessage]);
+
   const conversationActions = useConversationActions({
     conversationId,
     queryClient,
     conversationsService: services.conversationsService,
     onDeleteConversation,
   });
-
-  // Resets the {initialMessage} and {autoSendInitialMessage} flags after an initial message has been sent or set in the {ConversationInput} component
-  const resetInitialMessage = useCallback(() => {
-    setCurrentProps((prevProps) => ({
-      ...prevProps,
-      initialMessage: undefined,
-      autoSendInitialMessage: false,
-    }));
-  }, []);
 
   // Resets the {attachments} array after attachment(s) have been sent as part of a Conversation Round.
   const resetAttachments = useCallback(() => {
@@ -253,13 +260,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
-      shouldStickToBottom: true,
       isEmbeddedContext: true,
       sessionTag: currentProps.sessionTag,
       agentId: currentProps.agentId ?? agentBuilderDefaultAgentId,
       initialMessage: currentProps.initialMessage,
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       greetingMessage: currentProps.greetingMessage,
+      onSubmit: currentProps.onSubmit,
       resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
       setConversationId,
@@ -277,6 +284,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       currentProps.initialMessage,
       currentProps.autoSendInitialMessage,
       currentProps.greetingMessage,
+      currentProps.onSubmit,
       currentProps.browserApiTools,
       currentProps.attachments,
       upsertAttachments,
@@ -294,13 +302,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <AgentBuilderServicesContext.Provider value={services}>
-            <AppLeaveContext.Provider value={noopOnAppLeave}>
-              <StreamingProvider>
-                <PinnedConversationProvider baseValue={conversationContextValue}>
-                  {children}
-                </PinnedConversationProvider>
-              </StreamingProvider>
-            </AppLeaveContext.Provider>
+            <StreamingProvider conversationStreamService={conversationStreamService}>
+              <PinnedConversationProvider baseValue={conversationContextValue}>
+                {children}
+              </PinnedConversationProvider>
+            </StreamingProvider>
           </AgentBuilderServicesContext.Provider>
         </QueryClientProvider>
       </I18nProvider>

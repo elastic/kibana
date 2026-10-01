@@ -18,13 +18,15 @@ import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
+import { resolveExtractObservables } from '../../../common/utils/case_settings';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
 import {
   validateCustomFieldsStructure,
   validateRequiredCustomFields,
-  resolveGlobalFields,
+  resolveGlobalFieldsWithoutStaleMirrorRequired,
   validateCaseExtendedFields,
+  validateRequiredGlobalFields,
 } from './validators';
 import type { CreateUserAction, CommonUserActionArgs } from '../../services/user_actions/types';
 import type { InlineField } from '../../../common/types/domain/template/fields';
@@ -51,6 +53,11 @@ import {
   ensureTemplateVersionIsPinned,
   resolveTemplateForCreate,
 } from './expand_template_defaults';
+import {
+  CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
+  CREATE_CASE_WITH_TEMPLATE_COUNTER,
+  incrementCasesClientCounter,
+} from '../usage_counters';
 
 /**
  * Creates a new case.
@@ -156,6 +163,21 @@ export const create = async (
       }
     }
 
+    // Default extractObservables when the caller omitted it and template expansion did not fill it.
+    // Precedence: caller-explicit > template definition > space config > owner default > false.
+    if (query.settings.extractObservables === undefined) {
+      query = {
+        ...query,
+        settings: {
+          ...query.settings,
+          extractObservables: resolveExtractObservables(
+            query.owner,
+            configurations[0]?.extractObservables
+          ),
+        },
+      };
+    }
+
     // Global (isGlobal) field-definition defaults are applied client-side by the create-case UI
     // before submission, so UI-created cases persist them — but API and workflow-step callers
     // only send the fields they know about, which left every global field empty on non-UI cases.
@@ -176,11 +198,17 @@ export const create = async (
     // exists, defeating the point of this flag.
     const hadExtendedFieldsBeforeDefaults = query.extended_fields !== undefined;
     let globalFields: InlineField[] | undefined;
+    const resolveGlobals = (owner: string) =>
+      resolveGlobalFieldsWithoutStaleMirrorRequired(
+        owner,
+        fieldDefinitionsService,
+        customFieldsConfiguration
+      );
     // Hoisted for create-time Activity filtering: compare persisted fields against the same
     // template ∪ global default baseline used for injection (global wins on key collision).
     let globalFieldsDefaults: Record<string, string> = {};
     if (clientArgs.config.templates.enabled) {
-      globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+      globalFields = await resolveGlobals(query.owner);
       globalFieldsDefaults = Object.fromEntries(
         // A field without a default produces '' — writing that adds no information and, for a
         // required field, would immediately fail its own validation. Only inject real defaults.
@@ -289,8 +317,7 @@ export const create = async (
     });
 
     if (normalizedCase.extended_fields) {
-      globalFields =
-        globalFields ?? (await resolveGlobalFields(query.owner, fieldDefinitionsService));
+      globalFields = globalFields ?? (await resolveGlobals(query.owner));
       await validateCaseExtendedFields({
         extendedFields: normalizedCase.extended_fields,
         templateId: query.template?.id,
@@ -300,6 +327,20 @@ export const create = async (
         owner: query.owner,
         partial: !hadExtendedFieldsBeforeDefaults,
         preResolvedTemplateFields: resolvedTemplateFields,
+      });
+    }
+
+    // v1-parity `required` enforcement: a required global field with no default and no value
+    // fails the create with a 400, exactly like a required v1 custom field does through
+    // validateRequiredCustomFields. Runs AFTER defaults injection and pairing so the map is
+    // the one that will be persisted — a linked customFields value (or a v1 configuration
+    // defaultValue pairing copied across) satisfies the global field. Must run even when
+    // extended_fields is absent: that is the no-value path this check exists to reject.
+    if (clientArgs.config.templates.enabled) {
+      globalFields = globalFields ?? (await resolveGlobals(query.owner));
+      validateRequiredGlobalFields({
+        globalFields,
+        extendedFields: normalizedCase.extended_fields ?? {},
       });
     }
 
@@ -422,12 +463,21 @@ export const create = async (
       });
     }
 
-    if (query.template?.id) {
+    // Bucketed on what was persisted, not on the request, so this reads the same way as the bulk
+    // path and stays true if template pinning ever stops mirroring the request one-for-one.
+    const persistedTemplateId = newCase.attributes.template?.id;
+
+    incrementCasesClientCounter(
+      clientArgs,
+      persistedTemplateId ? CREATE_CASE_WITH_TEMPLATE_COUNTER : CREATE_CASE_WITHOUT_TEMPLATE_COUNTER
+    );
+
+    if (persistedTemplateId) {
       try {
-        await templatesService.incrementUsageStats(query.template.id);
+        await templatesService.incrementUsageStats(persistedTemplateId);
       } catch (error) {
         logger.warn(
-          `Failed to update template usage stats for template ${query.template.id}: ${error}`
+          `Failed to update template usage stats for template ${persistedTemplateId}: ${error}`
         );
       }
     }

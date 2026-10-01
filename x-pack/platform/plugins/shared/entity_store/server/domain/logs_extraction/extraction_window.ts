@@ -8,11 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import moment from 'moment';
 import { parseDurationToMs } from '../../infra/time';
-import type {
-  EngineLogExtractionState,
-  LogExtractionConfig,
-  RemoteLogExtractionState,
-} from '../saved_objects';
+import type { EngineLogExtractionState, LogExtractionConfig } from '../saved_objects';
 
 export const WINDOW_CAP_GRACE_PERIOD_MS = 30_000;
 const MAX_LAG_LOOKBACK_FACTOR = 1.5;
@@ -56,79 +52,6 @@ export const resolveMainExtractionWindow = ({
     computeLookbackStart(config.lookbackPeriod);
   const effectiveWindowEnd = computeEffectiveWindowEnd(config.delay);
   return { fromDateISO, effectiveWindowEnd };
-};
-
-export interface RemoteExtractionWindow {
-  effectiveFromDateISO: string;
-  effectiveWindowEnd: string;
-  recoveryId: string | undefined;
-  isWindowOverride: boolean;
-}
-
-/**
- * Window for the remote extraction path.
- *
- * Resume order: explicit `windowOverride` → mid entity-page recovery (`paginationRecoveryId` +
- * `checkpointTimestamp`) → slice-boundary recovery (`checkpointTimestamp` only) → lookback fallback.
- * Logs context for each branch so lagging / recovering state is observable.
- */
-export const resolveRemoteExtractionWindow = ({
-  config,
-  state,
-  windowOverride,
-  logger,
-}: {
-  config: Pick<LogExtractionConfig, 'lookbackPeriod' | 'delay'>;
-  state: Pick<RemoteLogExtractionState, 'checkpointTimestamp' | 'paginationRecoveryId'>;
-  windowOverride?: { fromDateISO: string; toDateISO: string };
-  logger: Logger;
-}): RemoteExtractionWindow => {
-  if (windowOverride != null) {
-    return {
-      effectiveFromDateISO: windowOverride.fromDateISO,
-      effectiveWindowEnd: windowOverride.toDateISO,
-      recoveryId: undefined,
-      isWindowOverride: true,
-    };
-  }
-
-  const effectiveWindowEnd = computeEffectiveWindowEnd(config.delay);
-
-  if (state.paginationRecoveryId && state.checkpointTimestamp) {
-    const effectiveFromDateISO = state.checkpointTimestamp;
-    const recoveryId = state.paginationRecoveryId;
-    logger.warn(
-      `extraction resuming from broken state: checkpointTimestamp=${effectiveFromDateISO}, paginationRecoveryId=${recoveryId}`
-    );
-    return { effectiveFromDateISO, effectiveWindowEnd, recoveryId, isWindowOverride: false };
-  }
-
-  if (state.checkpointTimestamp) {
-    logger.debug(
-      `extraction resuming after slice boundary: checkpointTimestamp=${state.checkpointTimestamp}`
-    );
-    return {
-      effectiveFromDateISO: state.checkpointTimestamp,
-      effectiveWindowEnd,
-      recoveryId: undefined,
-      isWindowOverride: false,
-    };
-  }
-
-  if (state.paginationRecoveryId && !state.checkpointTimestamp) {
-    logger.error(
-      `extraction can't be resumed from broken state because checkpointTimestamp is null (recovery id is present), defaulting to lookback period`
-    );
-  }
-
-  const effectiveFromDateISO = computeLookbackStart(config.lookbackPeriod);
-  logger.debug(`extraction starting fresh: fromDateISO=${effectiveFromDateISO}`);
-  return {
-    effectiveFromDateISO,
-    effectiveWindowEnd,
-    recoveryId: undefined,
-    isWindowOverride: false,
-  };
 };
 
 /**

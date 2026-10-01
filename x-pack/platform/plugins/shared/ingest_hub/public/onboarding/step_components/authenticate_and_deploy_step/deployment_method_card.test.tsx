@@ -14,7 +14,7 @@ function renderCard(props: { onChange?: jest.Mock } = {}) {
   const onChange = props.onChange ?? jest.fn();
   render(
     <I18nProvider>
-      <DeploymentMethodCard selectedMethod="managed_integrations" onChange={onChange} />
+      <DeploymentMethodCard selectedMethod="managed_integration" onChange={onChange} />
     </I18nProvider>
   );
   return { onChange };
@@ -46,7 +46,20 @@ describe('DeploymentMethodCard', () => {
     const { onChange } = renderCard();
     fireEvent.click(screen.getByTestId('deploymentMethodCard-editButton'));
     fireEvent.click(screen.getByTestId('editDeploymentMethodModal-saveButton'));
-    expect(onChange).toHaveBeenCalledWith('managed_integrations');
+    expect(onChange).toHaveBeenCalledWith('managed_integration');
+    expect(screen.queryByTestId('editDeploymentMethodModal')).not.toBeInTheDocument();
+  });
+
+  it('Edit button is disabled with tooltip when disabled=true, does not open modal', () => {
+    const onChange = jest.fn();
+    render(
+      <I18nProvider>
+        <DeploymentMethodCard selectedMethod="managed_integration" onChange={onChange} disabled />
+      </I18nProvider>
+    );
+    const editButton = screen.getByTestId('deploymentMethodCard-editButton');
+    expect(editButton).toBeDisabled();
+    fireEvent.click(editButton);
     expect(screen.queryByTestId('editDeploymentMethodModal')).not.toBeInTheDocument();
   });
 });

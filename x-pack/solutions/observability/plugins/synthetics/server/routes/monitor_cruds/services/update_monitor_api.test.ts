@@ -258,6 +258,29 @@ describe('UpdateMonitorAPI', () => {
       expect(mocks.getMaintenanceWindows).toHaveBeenCalledWith('default');
     });
 
+    it.each(['project', 'agent'])(
+      'fetches maintenance windows for an enabled-only patch on origin %s',
+      async (origin) => {
+        const { routeContext, mocks } = createMockRouteContext();
+        mocks.findDecryptedMonitors.mockResolvedValue([
+          mockDecryptedMonitor({
+            attributes: {
+              [ConfigKey.MONITOR_SOURCE_TYPE]: origin,
+              [ConfigKey.MAINTENANCE_WINDOWS]: ['mw-1'],
+            },
+          }),
+        ]);
+        mocks.getMaintenanceWindows.mockResolvedValue([{ id: 'mw-1', title: 'Weekend deploy' }]);
+
+        const api = new UpdateMonitorAPI(routeContext);
+        const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
+
+        expect(result.perIdErrors).toEqual({});
+        expect(result.survivors).toHaveLength(1);
+        expect(mocks.getMaintenanceWindows).toHaveBeenCalledWith('default');
+      }
+    );
+
     it('uses the normalized API config before validation and persistence', async () => {
       const { normalizeAPIConfig, validateMonitor } = jest.requireMock('../monitor_validation');
       normalizeAPIConfig.mockImplementation((m: Record<string, unknown>) => {
@@ -310,19 +333,57 @@ describe('UpdateMonitorAPI', () => {
   });
 
   describe('invalid_origin', () => {
-    it.each(['project', 'agent'])('rejects origin %s', async (origin) => {
+    it.each(['project', 'agent'])('rejects non-`enabled` patches on origin %s', async (origin) => {
       const { routeContext, mocks } = createMockRouteContext();
       mocks.findDecryptedMonitors.mockResolvedValue([
         mockDecryptedMonitor({ attributes: { [ConfigKey.MONITOR_SOURCE_TYPE]: origin } }),
       ]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
+      const result = await api.execute({ updates: updatesFor(['mon-1'], { tags: ['new-tag'] }) });
 
       expect(result.survivors).toHaveLength(0);
       expect(result.perIdErrors['mon-1'].code).toBe('invalid_origin');
       expect(result.perIdErrors['mon-1'].message).toContain(origin);
     });
+
+    it.each(['project', 'agent'])(
+      'rejects `enabled` combined with another field on origin %s',
+      async (origin) => {
+        const { routeContext, mocks } = createMockRouteContext();
+        mocks.findDecryptedMonitors.mockResolvedValue([
+          mockDecryptedMonitor({ attributes: { [ConfigKey.MONITOR_SOURCE_TYPE]: origin } }),
+        ]);
+
+        const api = new UpdateMonitorAPI(routeContext);
+        const result = await api.execute({
+          updates: updatesFor(['mon-1'], { enabled: false, tags: ['new-tag'] }),
+        });
+
+        expect(result.survivors).toHaveLength(0);
+        expect(result.perIdErrors['mon-1'].code).toBe('invalid_origin');
+      }
+    );
+
+    it.each(['project', 'agent'])(
+      'allows an `enabled`-only patch on origin %s (reconciled on next push)',
+      async (origin) => {
+        const { routeContext, mocks } = createMockRouteContext();
+        mocks.findDecryptedMonitors.mockResolvedValue([
+          mockDecryptedMonitor({ attributes: { [ConfigKey.MONITOR_SOURCE_TYPE]: origin } }),
+        ]);
+
+        const api = new UpdateMonitorAPI(routeContext);
+        const result = await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
+
+        expect(result.perIdErrors['mon-1']).toBeUndefined();
+        expect(result.survivors).toHaveLength(1);
+        const survivor = result.survivors[0].monitorWithRevision as Record<string, unknown>;
+        expect(survivor.enabled).toBe(false);
+        // CONFIG_HASH reset so the next CLI push re-syncs the source-of-truth config.
+        expect(survivor[ConfigKey.CONFIG_HASH]).toBe('');
+      }
+    );
 
     it('does not call validateMonitor for rejected origins (short-circuit)', async () => {
       const { validateMonitor } = jest.requireMock('../monitor_validation');
@@ -332,7 +393,7 @@ describe('UpdateMonitorAPI', () => {
       ]);
 
       const api = new UpdateMonitorAPI(routeContext);
-      await api.execute({ updates: updatesFor(['mon-1'], { enabled: false }) });
+      await api.execute({ updates: updatesFor(['mon-1'], { tags: ['new-tag'] }) });
 
       expect(validateMonitor).not.toHaveBeenCalled();
     });
@@ -644,10 +705,15 @@ describe('UpdateMonitorAPI', () => {
       ]);
 
       const api = new UpdateMonitorAPI(routeContext);
+      // mon-project gets a non-`enabled` patch so it stays rejected as
+      // invalid_origin (an `enabled`-only patch on a project monitor is allowed).
       const result = await api.execute({
-        updates: updatesFor(['mon-ok', 'mon-project', 'mon-bad', 'mon-missing'], {
-          enabled: false,
-        }),
+        updates: [
+          { id: 'mon-ok', attributes: { enabled: false } },
+          { id: 'mon-project', attributes: { tags: ['new-tag'] } },
+          { id: 'mon-bad', attributes: { enabled: false } },
+          { id: 'mon-missing', attributes: { enabled: false } },
+        ],
       });
 
       expect(result.survivors).toHaveLength(1);

@@ -96,6 +96,11 @@ import {
   throwIfFieldRepresentationConflicts,
   throwIfInvalidLinkedFieldValues,
 } from '../../common/utils/pair_field_representations';
+import {
+  APPLY_TEMPLATE_COUNTER,
+  CLEAR_TEMPLATE_COUNTER,
+  incrementCasesClientCounter,
+} from '../usage_counters';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -213,11 +218,9 @@ function getID(
 async function getAlertComments({
   casesToSync,
   caseService,
-  isCasesAttachmentsEnabled,
 }: {
   casesToSync: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
-  isCasesAttachmentsEnabled: boolean;
 }): Promise<SavedObjectsFindResponse<AttachmentAttributes>> {
   const idsOfCasesToSync = casesToSync.map(({ updateReq }) => updateReq.id);
 
@@ -244,7 +247,6 @@ async function getAlertComments({
     options: {
       filter: alertFilter,
     },
-    mode: isCasesAttachmentsEnabled ? 'unified' : 'legacy',
   })) as SavedObjectsFindResponse<AttachmentAttributes>;
 }
 
@@ -276,13 +278,11 @@ async function updateAlerts({
   casesWithStatusChangedAndSynced,
   caseService,
   alertsService,
-  isCasesAttachmentsEnabled,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   alertsService: AlertService;
-  isCasesAttachmentsEnabled: boolean;
 }): Promise<Map<string, number>> {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -308,7 +308,6 @@ async function updateAlerts({
   const totalAlerts = await getAlertComments({
     casesToSync,
     caseService,
-    isCasesAttachmentsEnabled,
   });
 
   const alertsToUpdateByCaseId = totalAlerts.saved_objects.reduce(
@@ -468,6 +467,69 @@ export interface UpdateRequestWithOriginalCase {
 }
 
 /**
+ * Counts the cases that had a template applied or cleared, once per case.
+ *
+ * A `template` key only survives into `updateReq` when it differs from the case's current
+ * template, so re-sending an unchanged one is not an apply. Restricted to the cases that actually
+ * persisted, since a bulk update can partially fail, and deduped by id so a request repeating a
+ * case id counts that case once, keeping the first change as `updatedFieldsByCaseId` does.
+ */
+const countTemplateChanges = (
+  casesToUpdate: UpdateRequestWithOriginalCase[],
+  persistedCaseIds: Set<string>
+): {
+  appliedCases: number;
+  clearedCases: number;
+  casesPerTemplateId: Map<string, number>;
+} => {
+  const countedCaseIds = new Set<string>();
+  const casesPerTemplateId = new Map<string, number>();
+  let appliedCases = 0;
+  let clearedCases = 0;
+
+  for (const { updateReq } of casesToUpdate) {
+    const { id, template } = updateReq;
+    const isCountable =
+      template !== undefined && persistedCaseIds.has(id) && !countedCaseIds.has(id);
+
+    if (isCountable) {
+      countedCaseIds.add(id);
+
+      if (template === null) {
+        clearedCases += 1;
+      } else {
+        appliedCases += 1;
+        casesPerTemplateId.set(template.id, (casesPerTemplateId.get(template.id) ?? 0) + 1);
+      }
+    }
+  }
+
+  return { appliedCases, clearedCases, casesPerTemplateId };
+};
+
+/**
+ * Adds the cases that just received a template to each template's usage tally.
+ *
+ * Best effort: the tally is a display concern, so a failure is logged and swallowed rather than
+ * failing an update whose cases are already persisted.
+ */
+const incrementTemplateUsageStats = async (
+  casesPerTemplateId: Map<string, number>,
+  templatesService: TemplatesService,
+  logger: CasesClientArgs['logger']
+): Promise<void> => {
+  await Promise.allSettled(
+    [...casesPerTemplateId].map(async ([templateId, caseCount]) => {
+      try {
+        await templatesService.incrementUsageStats(templateId, caseCount);
+      } catch (error) {
+        logger.warn(`Failed to update template usage stats for template ${templateId}: ${error}`);
+      }
+    })
+  );
+};
+
+/**
  * Updates the specified cases with new values
  *
  * @ignore
@@ -492,10 +554,7 @@ export const bulkUpdate = async (
     logger,
     authorization,
     closeReasonValidator,
-    config,
   } = clientArgs;
-
-  const isCasesAttachmentsEnabled = config.attachments?.enabled === true;
 
   try {
     const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
@@ -839,7 +898,6 @@ export const bulkUpdate = async (
       casesWithSyncSettingChangedToOn,
       caseService,
       alertsService,
-      isCasesAttachmentsEnabled,
     });
 
     userActionsDict = userActionService.creator.addSyncedAlertsCountToUserActions({
@@ -907,6 +965,17 @@ export const bulkUpdate = async (
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
     const updatedCasesResponse = decodeOrThrow(PatchCasesResponseRt)(returnUpdatedCase);
+
+    const { appliedCases, clearedCases, casesPerTemplateId } = countTemplateChanges(
+      casesToUpdate,
+      new Set(updatedCasesResponse.map(({ id }) => id))
+    );
+
+    incrementCasesClientCounter(clientArgs, APPLY_TEMPLATE_COUNTER, appliedCases);
+    incrementCasesClientCounter(clientArgs, CLEAR_TEMPLATE_COUNTER, clearedCases);
+
+    await incrementTemplateUsageStats(casesPerTemplateId, templatesService, logger);
+
     const updatedFieldsByCaseId = casesToUpdate.reduce<Map<string, string[]>>(
       (acc, { updateReq }) => {
         // Keep first occurrence for duplicate ids handling.

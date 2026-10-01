@@ -58,6 +58,8 @@ import {
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import { OWNER_INFO } from '../../../common/constants/owners';
+import type { Owner } from '../../../common/constants/types';
 import { ensureGlobalFieldDefinitions } from './ensure_field_definitions';
 
 /**
@@ -245,6 +247,7 @@ export async function get(
         return {
           ...caseConfigureWithoutConnector,
           connector,
+          extractObservables: caseConfigureWithoutConnector.extractObservables,
           mappings: mappings != null ? mappings.mappings : [],
           version: configuration.version ?? '',
           error,
@@ -420,10 +423,15 @@ export async function update(
       originalConfiguration: configuration,
     });
 
-    const res = {
+    const merged = {
       ...configuration.attributes,
       ...patch.attributes,
+    };
+
+    const res = {
+      ...merged,
       connector: patch.attributes.connector ?? configuration.attributes.connector,
+      extractObservables: merged.extractObservables,
       mappings,
       version: patch.version ?? '',
       error,
@@ -567,6 +575,11 @@ export async function create(
         updated_at: null,
         updated_by: null,
         observableTypes: validatedConfigurationRequest.observableTypes ?? [],
+        extractObservables:
+          validatedConfigurationRequest.extractObservables ??
+          OWNER_INFO[validatedConfigurationRequest.owner as Owner]?.features.observables
+            .autoExtractDefault ??
+          false,
       },
       id: savedObjectID,
     });

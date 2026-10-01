@@ -7,38 +7,23 @@
 
 import React, { useMemo } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiSkeletonText,
-  EuiEmptyPrompt,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiSkeletonText, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { pagePathGetters } from '../../common/page_paths';
-import {
-  fullWidthContentCss,
-  WithHeaderLayout,
-  WithoutHeaderLayout,
-} from '../../components/layouts';
-import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
-import { useGoBack } from '../../common/use_go_back';
+import { fullWidthContentCss, WithoutHeaderLayout } from '../../components/layouts';
 import {
   useScheduledExecutionDetails,
   mapScheduledDetailsToQueryData,
 } from '../../actions/use_scheduled_execution_details';
-import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
-
-const tableWrapperCss = {
-  paddingLeft: '10px',
-};
+import { QueryDetailsHeader } from '../live_queries/details/query_details_header';
+import { ResultTabs } from '../saved_queries/edit/tabs';
+import { ExportFiltersProvider } from '../../results/export_filters_context';
+import { getPackViewDateWindow } from '../../common/pack_view_date_window';
+import type { LiveQueryDetailsItem } from '../../actions/use_live_query_details';
 
 const ScheduledExecutionDetailsPageComponent = () => {
-  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { scheduleId, executionCount: executionCountStr } = useParams<{
     scheduleId: string;
     executionCount: string;
@@ -53,8 +38,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
   });
 
   const historyPath = pagePathGetters.history();
-  const handleGoBack = useGoBack(historyPath);
-  const historyNavProps = useRouterNavigate(historyPath, handleGoBack);
+  const historyNavProps = useRouterNavigate(historyPath);
 
   const { data, isLoading, isError } = useScheduledExecutionDetails({
     scheduleId,
@@ -67,51 +51,88 @@ const ScheduledExecutionDetailsPageComponent = () => {
     [data, scheduleId]
   );
 
-  const LeftColumn = useMemo(
-    () => (
-      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiButtonEmpty iconType="chevronSingleLeft" {...historyNavProps} flush="left" size="xs">
-            <FormattedMessage
-              id="xpack.osquery.scheduledExecutionDetails.viewHistoryTitle"
-              defaultMessage="View history"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        {!isHistoryEnabled && (
-          <EuiFlexItem>
-            <EuiText>
-              <h1>
-                <FormattedMessage
-                  id="xpack.osquery.scheduledExecutionDetails.pageTitle"
-                  defaultMessage="Scheduled execution details"
-                />
-              </h1>
-            </EuiText>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ),
-    [historyNavProps, isHistoryEnabled]
+  const hasExecutionHits = Boolean(data?.timestamp && (data.agentCount > 0 || data.totalRows > 0));
+
+  const headerData = useMemo<LiveQueryDetailsItem | undefined>(() => {
+    if (!queryData || !hasExecutionHits) return undefined;
+
+    return {
+      action_id: scheduleId,
+      '@timestamp': data?.timestamp ?? '',
+      queries: queryData,
+      agent_all: false,
+      agent_ids: [],
+      agent_platforms: [],
+      agent_policy_ids: [],
+    };
+  }, [queryData, scheduleId, data?.timestamp, hasExecutionHits]);
+
+  // `data.timestamp` is the newest response document for this execution, so the
+  // View-in window has to bracket it in both directions — anchoring the start there
+  // would exclude every earlier agent response.
+  const viewInWindow = useMemo(
+    () => getPackViewDateWindow({ isScheduled: true, timestamp: data?.timestamp }),
+    [data?.timestamp]
   );
 
   if (!isValid) {
     return <Redirect to={historyPath} />;
   }
 
-  const tableBlock = (
-    <div css={tableWrapperCss}>
-      <PackQueriesStatusTable
-        actionId={scheduleId}
-        data={queryData}
-        startDate={data?.timestamp}
-        showResultsHeader
-        scheduleId={scheduleId}
-        executionCount={executionCount}
-        packName={data?.packName}
+  const backToHistoryButton = (
+    <EuiButtonEmpty {...historyNavProps} iconType="chevronSingleLeft">
+      <FormattedMessage
+        id="xpack.osquery.scheduledExecutionDetails.backToHistory"
+        defaultMessage="Back to History"
       />
-    </div>
+    </EuiButtonEmpty>
   );
+
+  const emptyPrompt = (
+    <EuiEmptyPrompt
+      iconType="search"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.osquery.scheduledExecutionDetails.emptyTitle"
+            defaultMessage="No details for this execution"
+          />
+        </h2>
+      }
+      body={
+        <FormattedMessage
+          id="xpack.osquery.scheduledExecutionDetails.emptyBody"
+          defaultMessage="This scheduled execution has no recorded results yet."
+        />
+      }
+      actions={backToHistoryButton}
+    />
+  );
+
+  const detailsBlock =
+    headerData && queryData?.length ? (
+      <ExportFiltersProvider>
+        <QueryDetailsHeader
+          actionId={scheduleId}
+          data={headerData}
+          scheduleId={scheduleId}
+          executionCount={executionCount}
+          packName={data?.packName}
+          viewInStartDate={viewInWindow.startDate}
+          viewInEndDate={viewInWindow.endDate}
+          viewInMode={viewInWindow.mode}
+        />
+        <ResultTabs
+          actionId={queryData[0].action_id}
+          startDate={data?.timestamp}
+          failedAgentsCount={queryData[0].failed ?? 0}
+          scheduleId={scheduleId}
+          executionCount={executionCount}
+        />
+      </ExportFiltersProvider>
+    ) : (
+      emptyPrompt
+    );
 
   const errorPrompt = (
     <EuiEmptyPrompt
@@ -130,14 +151,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
           defaultMessage="There was an error loading the details for this scheduled execution. Please try again."
         />
       }
-      actions={
-        <EuiButtonEmpty {...historyNavProps} iconType="chevronSingleLeft">
-          <FormattedMessage
-            id="xpack.osquery.scheduledExecutionDetails.backToHistory"
-            defaultMessage="Back to History"
-          />
-        </EuiButtonEmpty>
-      }
+      actions={backToHistoryButton}
     />
   );
 
@@ -152,35 +166,13 @@ const ScheduledExecutionDetailsPageComponent = () => {
       {errorPrompt}
     </>
   ) : (
-    <>
-      <EuiSpacer size="m" />
-      {tableBlock}
-    </>
+    detailsBlock
   );
 
-  if (isHistoryEnabled) {
-    return (
-      <WithoutHeaderLayout restrictWidth={false}>
-        <div css={fullWidthContentCss}>
-          {LeftColumn}
-          {content}
-        </div>
-      </WithoutHeaderLayout>
-    );
-  }
-
-  if (isLoading || isError) {
-    return (
-      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-        {content}
-      </WithHeaderLayout>
-    );
-  }
-
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-      {tableBlock}
-    </WithHeaderLayout>
+    <WithoutHeaderLayout restrictWidth={false}>
+      <div css={fullWidthContentCss}>{content}</div>
+    </WithoutHeaderLayout>
   );
 };
 

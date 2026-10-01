@@ -95,29 +95,41 @@ describe('parseDefaultProjectRouting', () => {
     });
   });
 
-  it('treats the legacy PROJECT_ROUTING.ALL constant as no restriction', () => {
+  it('treats PROJECT_ROUTING.ALL as exists `_alias` with no exclusions', () => {
     expect(parseDefaultProjectRouting(PROJECT_ROUTING.ALL, availableProjectIds)).toEqual({
-      filterExpressions: [],
+      filterExpressions: [
+        {
+          operator: FilterOperator.EXISTS,
+          tagName: '_alias',
+          tagValue: undefined,
+        },
+      ],
       excludedOverrides: [],
     });
   });
 
-  it('treats the legacy PROJECT_ROUTING.ORIGIN constant as excluding every project but the origin', () => {
+  it('treats PROJECT_ROUTING.ORIGIN as exists `_alias` excluding every project but the origin', () => {
     expect(
       parseDefaultProjectRouting(PROJECT_ROUTING.ORIGIN, availableProjectIds, 'origin')
     ).toEqual({
-      filterExpressions: [],
+      filterExpressions: [
+        {
+          operator: FilterOperator.EXISTS,
+          tagName: '_alias',
+          tagValue: undefined,
+        },
+      ],
       excludedOverrides: ['linked1', 'linked2'],
     });
   });
 
-  it('falls back to generic filter decoding for PROJECT_ROUTING.ORIGIN when no origin id is known', () => {
+  it('treats PROJECT_ROUTING.ORIGIN as exists `_alias` with no exclusions when no origin id is known', () => {
     expect(parseDefaultProjectRouting(PROJECT_ROUTING.ORIGIN, availableProjectIds)).toEqual({
       filterExpressions: [
         {
-          operator: FilterOperator.EQUALS,
+          operator: FilterOperator.EXISTS,
           tagName: '_alias',
-          tagValue: '_origin',
+          tagValue: undefined,
         },
       ],
       excludedOverrides: [],
@@ -228,7 +240,30 @@ describe('areProjectRoutingsEquivalent', () => {
     ).toBe(true);
   });
 
-  it('treats PROJECT_ROUTING.ORIGIN as equivalent to excluding every non-origin project', () => {
+  it('does not treat PROJECT_ROUTING.ALL as equivalent to blank routing', () => {
+    expect(areProjectRoutingsEquivalent(PROJECT_ROUTING.ALL, '', availableProjectIds)).toBe(false);
+  });
+
+  it('treats PROJECT_ROUTING.ORIGIN as equivalent to exists `_alias` plus origin-only selection', () => {
+    expect(
+      areProjectRoutingsEquivalent(
+        PROJECT_ROUTING.ORIGIN,
+        '_alias:* AND _id:origin',
+        availableProjectIds,
+        'origin'
+      )
+    ).toBe(true);
+    expect(
+      areProjectRoutingsEquivalent(
+        PROJECT_ROUTING.ORIGIN,
+        '_alias:* AND (_id:* AND NOT (_id:linked1 OR _id:linked2))',
+        availableProjectIds,
+        'origin'
+      )
+    ).toBe(true);
+  });
+
+  it('does not treat bare origin-only exclusions as ORIGIN', () => {
     expect(
       areProjectRoutingsEquivalent(
         PROJECT_ROUTING.ORIGIN,
@@ -236,7 +271,7 @@ describe('areProjectRoutingsEquivalent', () => {
         availableProjectIds,
         'origin'
       )
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it('does not treat a snapshot of a non-origin project as ORIGIN', () => {

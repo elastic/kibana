@@ -115,13 +115,23 @@ describe('ProjectPicker', () => {
     expect(screen.getByTestId('cps-project-picker-button-label')).toHaveTextContent('All');
   });
 
+  it('should display customTooltipContent on the picker button when provided', async () => {
+    const customTooltipContent = 'Custom project picker tooltip';
+    await renderProjectPicker({ customTooltipContent });
+
+    await userEvent.hover(screen.getByTestId('cps-project-picker-button-tooltip'));
+
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent(customTooltipContent);
+  });
+
   it('should open the popover with the project list', async () => {
     await renderProjectPicker();
 
     await userEvent.click(screen.getByTestId('cps-project-picker-button'));
 
     expect(screen.getByLabelText('Cross-project search (CPS) scope')).toBeInTheDocument();
-    expect(screen.getByText('Cross-project search')).toBeInTheDocument();
+    expect(screen.getByText('Change project scope')).toBeInTheDocument();
     expect(screen.getByTestId('projectPickerList')).toBeInTheDocument();
     expect(screen.getAllByTestId('projectPickerListItem')).toHaveLength(3);
     expect(screen.getByText('Origin CPSProject')).toBeInTheDocument();

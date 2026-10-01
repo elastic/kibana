@@ -36,7 +36,7 @@ export const UNRESOLVE = i18n.translate('xpack.alertingV2.episodesUi.resolveActi
 });
 
 export const EDIT_TAGS = i18n.translate('xpack.alertingV2.episodesUi.tagsAction.editTags', {
-  defaultMessage: 'Edit Tags',
+  defaultMessage: 'Edit alert tags',
 });
 
 export const EDIT_ASSIGNEE = i18n.translate(
@@ -56,7 +56,7 @@ export const OPEN_IN_DISCOVER = i18n.translate(
 export const TAGS_FLYOUT_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.flyoutTitle',
   {
-    defaultMessage: 'Edit Tags',
+    defaultMessage: 'Edit alert tags',
   }
 );
 
@@ -87,3 +87,10 @@ export const getBulkPartialSuccessToast = (processed: number, total: number): st
       '{processed} of {total} {total, plural, one {episode} other {episodes}} updated successfully.',
     values: { processed, total },
   });
+
+export const UNRESOLVE_NOT_AVAILABLE = i18n.translate(
+  'xpack.alertingV2Episodes.actions.unresolveNotAvailable',
+  {
+    defaultMessage: 'Unresolve is not available for classic alerts',
+  }
+);

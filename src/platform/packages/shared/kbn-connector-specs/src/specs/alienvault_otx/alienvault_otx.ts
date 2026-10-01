@@ -41,6 +41,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
   actions: {
     getIndicator: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           indicatorType: z
@@ -75,6 +76,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     searchPulses: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           query: z.string().optional().describe('Search query'),
@@ -111,6 +113,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     getPulse: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           pulseId: z.string().describe('Pulse ID'),
@@ -136,6 +139,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     getRelatedPulses: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           indicatorType: z

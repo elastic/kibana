@@ -11,25 +11,28 @@
  *
  * info:
  *   title: Create Attack Discovery Schedule Internal API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
 import {
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoverySchedule,
 } from '../../../common/schedules/schedule_types.gen';
 
+export const CreateAttackDiscoveryScheduleRequestBody = lazySchema(
+  () => AttackDiscoveryScheduleCreateProps
+);
 export type CreateAttackDiscoveryScheduleRequestBody = z.infer<
   typeof CreateAttackDiscoveryScheduleRequestBody
 >;
-export const CreateAttackDiscoveryScheduleRequestBody = AttackDiscoveryScheduleCreateProps;
 export type CreateAttackDiscoveryScheduleRequestBodyInput = z.input<
   typeof CreateAttackDiscoveryScheduleRequestBody
 >;
 
+export const CreateAttackDiscoveryScheduleResponse = lazySchema(() => AttackDiscoverySchedule);
 export type CreateAttackDiscoveryScheduleResponse = z.infer<
   typeof CreateAttackDiscoveryScheduleResponse
 >;
-export const CreateAttackDiscoveryScheduleResponse = AttackDiscoverySchedule;

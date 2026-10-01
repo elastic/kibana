@@ -14,6 +14,7 @@ import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { licenseService } from '../../../../common/hooks/use_license';
 import { ALERT_ANALYSIS_WORKFLOW_API_VERSION, ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE } from './api';
 import { AlertAnalysisWorkflowPage } from '.';
 
@@ -83,16 +84,28 @@ describe('AlertAnalysisWorkflowPage', () => {
     workflowId: 'system-security-alert-analysis-default',
   });
 
-  const renderComponent = () => {
+  const renderComponent = ({
+    canEditRules = true,
+    canReadRules = true,
+    canSaveAdvancedSettings = true,
+    isEnterprise = true,
+    settingsRequest,
+  }: {
+    canEditRules?: boolean;
+    canReadRules?: boolean;
+    canSaveAdvancedSettings?: boolean;
+    isEnterprise?: boolean;
+    settingsRequest?: jest.Mock;
+  } = {}) => {
+    (licenseService.isEnterprise as jest.Mock).mockReturnValue(isEnterprise);
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
-      advancedSettings: { show: true, save: true },
+      advancedSettings: { show: true, save: canSaveAdvancedSettings },
       securitySolution: { show: true, crud: true },
-      workflowsManagement: { updateWorkflow: true },
     };
-    // The page reads rules-edit via useUserPrivileges (not raw capabilities).
+    // The page reads rules privileges via useUserPrivileges (not raw capabilities).
     useUserPrivilegesMock.mockReturnValue({
-      rulesPrivileges: { rules: { read: true, edit: true } },
+      rulesPrivileges: { rules: { read: canReadRules, edit: canEditRules } },
     });
     coreStart.application.getUrlForApp.mockImplementation(
       (appId, options) => `/app/${appId}${options?.path ?? ''}`
@@ -101,6 +114,9 @@ describe('AlertAnalysisWorkflowPage', () => {
       const [path, options] = args as [string, { method?: string; body?: string } | undefined];
 
       if (path === ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE) {
+        if (options?.method !== 'PUT' && settingsRequest) {
+          return settingsRequest();
+        }
         return options?.method === 'PUT'
           ? settingsGetResponse(JSON.parse(options.body as string))
           : settingsGetResponse();
@@ -134,6 +150,7 @@ describe('AlertAnalysisWorkflowPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
     useLoadConnectorsMock.mockReturnValue({
       data: [builtInInferenceEndpoint, externalInferenceEndpoint],
       isLoading: false,
@@ -143,6 +160,37 @@ describe('AlertAnalysisWorkflowPage', () => {
       { id: 'my-custom-agent', name: 'My Custom Agent', readonly: false },
       { id: 'platform.builtin', name: 'Built-in Agent', readonly: true },
     ]);
+  });
+
+  it.each([
+    { reason: 'the license is below Enterprise', isEnterprise: false },
+    { reason: 'rules read is unauthorized', canReadRules: false },
+    { reason: 'rules edit is unauthorized', canEditRules: false },
+    { reason: 'advanced settings save is unauthorized', canSaveAdvancedSettings: false },
+  ])('renders not found without loading data when $reason', async (overrides) => {
+    renderComponent(overrides);
+
+    expect(await screen.findByTestId('notFoundPage')).toBeInTheDocument();
+    expect(coreStart.http.fetch).not.toHaveBeenCalled();
+    expect(useLoadConnectorsMock).not.toHaveBeenCalled();
+    expect(listAgentsMock).not.toHaveBeenCalled();
+  });
+
+  it('shows an error prompt and retries a failed settings request', async () => {
+    const settingsRequest = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('Unable to load settings'))
+      .mockResolvedValueOnce(settingsGetResponse());
+
+    renderComponent({ settingsRequest });
+
+    expect(await screen.findByTestId('alertAnalysisWorkflowSettingsError')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertAnalysisWorkflowSettingsLoading')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('alertAnalysisWorkflowSettingsRetryButton'));
+
+    expect(await screen.findByTestId('alertAnalysisWorkflowSaveButton')).toBeInTheDocument();
+    expect(settingsRequest).toHaveBeenCalledTimes(2);
   });
 
   it('loads Agent Builder models and lists built-in and external inference endpoints', async () => {

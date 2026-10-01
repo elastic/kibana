@@ -248,7 +248,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('disableButton');
 
+      await testSubjects.existOrFail('untrackAlertsModal');
+
       await testSubjects.click('untrackAlertsModalSwitch');
+      await retry.waitFor('untrack switch to be checked', () =>
+        testSubjects.isEuiSwitchChecked('untrackAlertsModalSwitch')
+      );
 
       await testSubjects.click('confirmModalConfirmButton');
 
@@ -576,13 +581,21 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
         expect(expandRulesErrorLink).to.have.length(1);
       });
-      await refreshAlertsList();
       await testSubjects.click('expandRulesError');
-      const expandedRow = await find.allByCssSelector('.euiTableRow-isExpandedRow');
-      expect(expandedRow).to.have.length(1);
-      expect(await (await expandedRow[0].findByTagName('div')).getVisibleText()).to.equal(
-        'Error from last run\nFailed to execute alert type'
+      let expandedRowText = '';
+      await retry.waitForWithTimeout(
+        'expanded rule error row to render its content',
+        30000,
+        async () => {
+          const expandedRows = await find.allByCssSelector('.euiTableRow-isExpandedRow');
+          if (expandedRows.length !== 1) {
+            return false;
+          }
+          expandedRowText = await (await expandedRows[0].findByTagName('div')).getVisibleText();
+          return expandedRowText === 'Error from last run\nFailed to execute alert type';
+        }
       );
+      expect(expandedRowText).to.equal('Error from last run\nFailed to execute alert type');
     });
 
     it('should filter alerts by the alert type', async () => {

@@ -10,7 +10,7 @@ import type { History } from 'history';
 import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiText, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { extractQueryParams, PageLoading, PageError } from '../../../../shared_imports';
@@ -130,12 +130,12 @@ export class FollowerIndicesList extends PureComponent<
         iconType="managementApp"
         data-test-subj="emptyPrompt"
         title={
-          <h1>
+          <h2>
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexList.emptyPromptTitle"
               defaultMessage="Create your first follower index"
             />
-          </h1>
+          </h2>
         }
         body={
           <p>
@@ -180,17 +180,6 @@ export class FollowerIndicesList extends PureComponent<
 
     return (
       <>
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexList.followerIndicesDescription"
-              defaultMessage="A follower index replicates a leader index on a remote cluster."
-            />
-          </p>
-        </EuiText>
-
-        <EuiSpacer size="l" />
-
         <FollowerIndicesTable
           followerIndices={followerIndices}
           selectedItems={selectedItems}

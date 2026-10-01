@@ -6,7 +6,10 @@
  */
 
 import { FetchSuppressionsStep } from './fetch_suppressions_step';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createQueryService } from '../../services/query_service/query_service.mock';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { ESQL_QUERY_ROW_LIMIT } from '../queries';
 import { createAlertEpisodeSuppressionsResponse } from '../fixtures/dispatcher';
 import {
   createAlertEpisode,
@@ -42,8 +45,12 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(1);
-    expect(result.data?.suppressions?.[0].should_suppress).toBe(true);
+    expect(result.data?.suppressions?.size).toBe(1);
+    expect(
+      result.data?.suppressions?.suppressionReasonFor(
+        createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })
+      )
+    ).toBe('unknown suppression reason');
   });
 
   it('returns empty suppressions when no episodes exist', async () => {
@@ -55,7 +62,7 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(0);
+    expect(result.data?.suppressions?.size).toBe(0);
   });
 
   it('returns empty suppressions when episodes is undefined', async () => {
@@ -67,7 +74,7 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(0);
+    expect(result.data?.suppressions?.size).toBe(0);
   });
 
   it('parses external suppressions (source != internal, null rule_id) correctly', async () => {
@@ -102,12 +109,61 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(1);
-    const suppression = result.data?.suppressions?.[0];
-    expect(suppression?.source).toBe('pagerduty');
-    expect(suppression?.rule_id).toBeNull();
-    expect(suppression?.should_suppress).toBe(true);
-    expect(suppression?.last_ack_action).toBe('ack');
+    expect(result.data?.suppressions?.size).toBe(1);
+    expect(
+      result.data?.suppressions?.suppressionReasonFor(
+        createAlertEpisode({
+          source: 'pagerduty',
+          rule_id: null,
+          group_hash: 'pd-hash',
+          episode_id: 'pd-ep-1',
+        })
+      )
+    ).toBe('ack');
+  });
+
+  it('warns when a suppressions chunk returns the row limit', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService, mockLogger } = createLoggerService();
+    const step = new FetchSuppressionsStep(queryService);
+
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createAlertEpisodeSuppressionsResponse(
+        Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
+          createAlertEpisodeSuppression({ rule_id: 'r1', group_hash: 'h1', episode_id: `e${i}` })
+        )
+      )
+    );
+
+    const state = createDispatcherPipelineState({
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e0' })],
+    });
+
+    await step.execute(state, loggerService);
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
+      labels: { code: ALERTING_LOG_CODES.FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED },
+    });
+  });
+
+  it('does not warn when every suppressions chunk stays under the row limit', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService, mockLogger } = createLoggerService();
+    const step = new FetchSuppressionsStep(queryService);
+
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createAlertEpisodeSuppressionsResponse([
+        createAlertEpisodeSuppression({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' }),
+      ])
+    );
+
+    const state = createDispatcherPipelineState({
+      episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
+    });
+
+    await step.execute(state, loggerService);
+
+    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
   it('issues multiple ES|QL requests and concatenates results when input exceeds the size budget', async () => {
@@ -159,7 +215,24 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(2);
-    expect(result.data?.suppressions?.map((s) => s.episode_id)).toEqual(['e0', 'e199']);
+    expect(result.data?.suppressions?.size).toBe(2);
+    expect(
+      result.data?.suppressions?.suppressionReasonFor(
+        createAlertEpisode({
+          rule_id: `${longSegment}-r0`,
+          group_hash: `${longSegment}-g0`,
+          episode_id: 'e0',
+        })
+      )
+    ).toBeDefined();
+    expect(
+      result.data?.suppressions?.suppressionReasonFor(
+        createAlertEpisode({
+          rule_id: `${longSegment}-r199`,
+          group_hash: `${longSegment}-g199`,
+          episode_id: 'e199',
+        })
+      )
+    ).toBeUndefined();
   });
 });

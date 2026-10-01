@@ -32,6 +32,8 @@ type FlyoutSectionButtonAction = FlyoutSectionActionBase & {
 export type FlyoutSectionAction = FlyoutSectionLinkAction | FlyoutSectionButtonAction;
 
 export interface FlyoutSectionProps {
+  /** Seeds the section's DOM id and the title id naming it; auto-generated when omitted. */
+  id?: string;
   /** Section title */
   title: ReactNode;
   /** Icon beside the title */
@@ -40,11 +42,18 @@ export interface FlyoutSectionProps {
   tooltip?: ReactNode;
   action?: FlyoutSectionAction;
   hasBorder?: boolean;
+  /**
+   * The border belongs to bordered children, so the section reports itself as bordered without
+   * wrapping them in a second panel. Requires `hasBorder`.
+   */
+  borderOnChildren?: boolean;
   'data-test-subj'?: string;
   children?: ReactNode;
 }
 
 export interface FlyoutSubsectionProps {
+  /** DOM id for the subsection wrapper, for use as a scroll or link target. */
+  id?: string;
   title: ReactNode;
   hasBorder?: boolean;
   'data-test-subj'?: string;

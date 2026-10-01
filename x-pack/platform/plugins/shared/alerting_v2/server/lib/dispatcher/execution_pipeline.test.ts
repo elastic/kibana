@@ -8,6 +8,7 @@
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { DispatcherPipeline } from './execution_pipeline';
 import { createDispatcherPipelineInput, createMockDispatcherStep } from './fixtures/test_utils';
+import { EpisodeScan, EpisodeTriage } from './state';
 import type { DispatcherPipelineState } from './types';
 
 jest.mock('./with_dispatcher_span', () => ({
@@ -78,12 +79,12 @@ describe('DispatcherPipeline', () => {
 
       const step1 = createMockDispatcherStep('step1', async (state) => {
         statesReceived.push({ ...state });
-        return { type: 'continue', data: { episodes: [] } };
+        return { type: 'continue', data: { scan: EpisodeScan.empty() } };
       });
 
       const step2 = createMockDispatcherStep('step2', async (state) => {
         statesReceived.push({ ...state });
-        return { type: 'continue', data: { dispatchable: [], suppressed: [] } };
+        return { type: 'continue', data: { triage: EpisodeTriage.empty() } };
       });
 
       const step3 = createMockDispatcherStep('step3', async (state) => {
@@ -97,18 +98,18 @@ describe('DispatcherPipeline', () => {
       const result = await pipeline.execute(input, createLoggerService().loggerService);
 
       expect(statesReceived[0]).toEqual({ input });
-      expect(statesReceived[0].episodes).toBeUndefined();
+      expect(statesReceived[0].scan).toBeUndefined();
 
       expect(statesReceived[1].input).toEqual(input);
-      expect(statesReceived[1].episodes).toBeDefined();
-      expect(statesReceived[1].dispatchable).toBeUndefined();
+      expect(statesReceived[1].scan).toBeDefined();
+      expect(statesReceived[1].triage).toBeUndefined();
 
       expect(statesReceived[2].input).toEqual(input);
-      expect(statesReceived[2].episodes).toBeDefined();
-      expect(statesReceived[2].dispatchable).toBeDefined();
+      expect(statesReceived[2].scan).toBeDefined();
+      expect(statesReceived[2].triage).toBeDefined();
 
-      expect(result.finalState.episodes).toBeDefined();
-      expect(result.finalState.dispatchable).toBeDefined();
+      expect(result.finalState.scan).toBeDefined();
+      expect(result.finalState.triage).toBeDefined();
     });
 
     it('propagates errors from steps', async () => {
