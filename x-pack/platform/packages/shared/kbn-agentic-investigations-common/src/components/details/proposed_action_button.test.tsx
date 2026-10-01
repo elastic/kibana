@@ -212,6 +212,5 @@ describe('ProposedActionButton', () => {
       expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
       expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
     });
-
   });
 });

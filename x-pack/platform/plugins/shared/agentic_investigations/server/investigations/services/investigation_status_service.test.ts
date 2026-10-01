@@ -220,8 +220,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
       .mockResolvedValue({});
 
     const get = jest.fn().mockImplementation(() => {
-      if (!getProposalResult)
-        return Promise.resolve({ decision: 'dismissed', status: 'decided' });
+      if (!getProposalResult) return Promise.resolve({ decision: 'dismissed', status: 'decided' });
       if (getProposalResult instanceof Error) return Promise.reject(getProposalResult);
       return Promise.resolve(getProposalResult);
     });
