@@ -8,6 +8,7 @@
 import { createWorkspace } from './graph_client_workspace';
 import { GraphLayoutController } from './graph_layout_controller';
 import { makeNodeId } from './graph_merge_planner';
+import { mergeRuntimeGraph } from './runtime_graph_merge';
 import { transformExpandResponse, transformSearchResponse } from './graph_response_transformers';
 
 describe('graphui-workspace', function () {
@@ -15,14 +16,19 @@ describe('graphui-workspace', function () {
     // var fooResource=null;
     let mockedResult = null;
     let init = null;
+    let runtimeSequence = 0;
+    const mergeGraph = (workspace, graph) => {
+      runtimeSequence = mergeRuntimeGraph(workspace, graph, runtimeSequence);
+    };
     const mergeSearchResult = (workspace) => {
-      workspace.mergeGraph(transformSearchResponse(mockedResult, workspace.options.vertex_fields));
+      mergeGraph(workspace, transformSearchResponse(mockedResult, workspace.options.vertex_fields));
     };
     const mergeExpandResult = (workspace) => {
-      workspace.mergeGraph(transformExpandResponse(mockedResult, workspace.options.vertex_fields));
+      mergeGraph(workspace, transformExpandResponse(mockedResult, workspace.options.vertex_fields));
     };
 
     beforeEach(function () {
+      runtimeSequence = 0;
       //Setup logic here
       // fooResource={"foo":"bar"};
       init = function () {
@@ -71,7 +77,7 @@ describe('graphui-workspace', function () {
       };
       const workspace = createWorkspace({ layoutController });
 
-      workspace.mergeGraph({ nodes: [], edges: [] });
+      mergeGraph(workspace, { nodes: [], edges: [] });
 
       expect(layoutController.start).toHaveBeenCalled();
     });

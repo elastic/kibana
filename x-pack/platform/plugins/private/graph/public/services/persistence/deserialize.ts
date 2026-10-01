@@ -206,7 +206,8 @@ export function makeNodeId(field: string, term: string) {
 export function savedWorkspaceToAppState(
   savedWorkspace: GraphWorkspaceSavedObject,
   indexPattern: DataView,
-  workspaceInstance: Workspace
+  workspaceInstance: Workspace,
+  mergeRuntimeGraph: (workspace: Workspace, graph: GraphData) => void
 ): {
   urlTemplates: UrlTemplate[];
   advancedSettings: AdvancedSettings;
@@ -246,7 +247,7 @@ export function savedWorkspaceToAppState(
 
   // ================== nodes and edges =============================
   const graph = getNodesAndEdges(persistedWorkspaceState, allFields);
-  workspaceInstance.mergeGraph(graph);
+  mergeRuntimeGraph(workspaceInstance, graph);
   resolveGroups(persistedWorkspaceState.vertices, workspaceInstance);
 
   // ================== blocklist =============================
