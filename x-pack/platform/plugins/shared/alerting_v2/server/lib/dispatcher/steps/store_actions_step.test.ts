@@ -107,7 +107,7 @@ describe('StoreActionsStep', () => {
         {
           group_hash: 'hash-1',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-          actor: 'system',
+          actor: { type: 'internal' },
           action_type: 'suppress',
           rule_id: 'rule-1',
           source: 'internal',
@@ -151,7 +151,7 @@ describe('StoreActionsStep', () => {
         {
           group_hash: 'hash-1',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-          actor: 'system',
+          actor: { type: 'internal' },
           action_type: 'suppress',
           rule_id: 'rule-1',
           source: 'internal',
@@ -194,7 +194,7 @@ describe('StoreActionsStep', () => {
     expect(callArgs.docs[0]).toEqual({
       group_hash: 'hash-1',
       last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-      actor: 'system',
+      actor: { type: 'internal' },
       action_type: 'fire',
       rule_id: 'rule-1',
       source: 'internal',
@@ -202,7 +202,7 @@ describe('StoreActionsStep', () => {
       space_id: 'default',
     });
     expect(callArgs.docs[1]).toEqual({
-      actor: 'system',
+      actor: { type: 'internal' },
       action_type: 'notified',
       rule_id: 'rule-1',
       group_hash: 'hash-1',
@@ -364,7 +364,7 @@ describe('StoreActionsStep', () => {
     expect(callArgs.docs[0]).toEqual({
       group_hash: 'hash-suppressed',
       last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-      actor: 'system',
+      actor: { type: 'internal' },
       action_type: 'suppress',
       rule_id: 'rule-suppressed',
       source: 'internal',
@@ -375,7 +375,7 @@ describe('StoreActionsStep', () => {
     expect(callArgs.docs[1]).toEqual({
       group_hash: 'hash-throttled',
       last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
-      actor: 'system',
+      actor: { type: 'internal' },
       action_type: 'suppress',
       rule_id: 'rule-throttled',
       source: 'internal',
@@ -386,7 +386,7 @@ describe('StoreActionsStep', () => {
     expect(callArgs.docs[2]).toEqual({
       group_hash: 'hash-dispatch',
       last_series_event_timestamp: '2026-01-22T07:20:00.000Z',
-      actor: 'system',
+      actor: { type: 'internal' },
       action_type: 'fire',
       rule_id: 'rule-dispatch',
       source: 'internal',
@@ -436,7 +436,7 @@ describe('StoreActionsStep', () => {
         {
           group_hash: 'hash-unmatched',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-          actor: 'system',
+          actor: { type: 'internal' },
           action_type: 'unmatched',
           rule_id: 'rule-unmatched',
           source: 'internal',
@@ -547,7 +547,7 @@ describe('StoreActionsStep', () => {
     expect(noActionDocs[0]).toEqual({
       group_hash: 'hash-unmatched',
       last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
-      actor: 'system',
+      actor: { type: 'internal' },
       action_type: 'unmatched',
       rule_id: 'rule-unmatched',
       source: 'internal',
@@ -732,7 +732,7 @@ describe('StoreActionsStep', () => {
           rule_id: null,
           group_hash: 'pd-group-hash',
           space_id: 'space-a',
-          actor: 'system',
+          actor: { type: 'internal' },
         })
       );
     });
@@ -774,7 +774,7 @@ describe('StoreActionsStep', () => {
           rule_id: null,
           group_hash: 'pd-group-hash',
           space_id: 'space-a',
-          actor: 'system',
+          actor: { type: 'internal' },
         })
       );
     });

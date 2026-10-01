@@ -7,7 +7,10 @@
 
 import { inject, injectable } from 'inversify';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import type { AlertActionDocument } from '../../../resources/datastreams/alert_actions';
+import {
+  alertActionActorType,
+  type AlertActionDocument,
+} from '../../../resources/datastreams/alert_actions';
 import type {
   AlertEpisode,
   DispatcherStep,
@@ -92,7 +95,7 @@ export class StoreActionsStep implements DispatcherStep {
       const firstEpisode = group.episodes[0];
       const spaceId = firstEpisode?.space_id ?? 'default';
       const action: AlertActionDocument = {
-        actor: 'system',
+        actor: { type: alertActionActorType.internal },
         action_type: 'notified',
         rule_id: firstEpisode?.rule_id ?? null,
         group_hash: firstEpisode?.group_hash ?? 'unknown',
@@ -131,7 +134,7 @@ export function toAction({
   return {
     group_hash: episode.group_hash,
     last_series_event_timestamp: episode.last_event_timestamp,
-    actor: 'system',
+    actor: { type: alertActionActorType.internal },
     action_type: actionType,
     rule_id: episode.rule_id,
     source: episode.source,
