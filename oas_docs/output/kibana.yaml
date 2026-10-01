@@ -10387,7 +10387,7 @@ paths:
                   throttle:
                     strategy: on_status_change
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_action_policy'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_put_action_policy'
       responses:
         '200':
           content:
@@ -152227,6 +152227,66 @@ components:
         - per_page
         - total
         - search_matches
+    Kibana_HTTP_APIs_alerting_put_action_policy:
+      additionalProperties: false
+      type: object
+      properties:
+        description:
+          description: A description of the action policy.
+          maxLength: 1024
+          type: string
+        destinations:
+          description: The list of destinations. At least one is required.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_destination'
+          maxItems: 10
+          minItems: 1
+          type: array
+        enabled:
+          description: Whether the action policy is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state; otherwise it becomes the new stored value.
+          type: boolean
+        group_by:
+          description: The fields used to group alerts.
+          items:
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 16
+          type: array
+        grouping_mode:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
+          description: The grouping mode for alert notifications.
+        matcher:
+          additionalProperties: false
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
+          type: object
+          properties:
+            expression:
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              maxLength: 4096
+              nullable: true
+              type: string
+            tags:
+              description: Rule tags this policy should match. The policy applies to alerts from any rule that has at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              items:
+                maxLength: 128
+                minLength: 1
+                type: string
+              maxItems: 50
+              nullable: true
+              type: array
+        name:
+          description: The name of the action policy.
+          maxLength: 256
+          minLength: 1
+          type: string
+        throttle:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
+          description: The throttle configuration for notifications.
+      required:
+        - name
+        - description
+        - destinations
     Kibana_HTTP_APIs_alerting_rule_artifact:
       additionalProperties: false
       type: object
