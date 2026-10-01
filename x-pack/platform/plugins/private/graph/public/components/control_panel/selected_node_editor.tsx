@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkspaceNode } from '../../types';
+import type { SelectedNodeView } from './selected_node_item';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
 import { gphFormGroupSmallStyles } from './control_plane.styles';
@@ -22,8 +22,8 @@ import {
 } from '../../state_management';
 
 interface SelectedNodeEditorProps {
-  selectedNodes: WorkspaceNode[];
-  selectedNode: WorkspaceNode;
+  selectedNodes: SelectedNodeView[];
+  selectedNode: SelectedNodeView;
 }
 
 export const SelectedNodeEditor = ({ selectedNodes, selectedNode }: SelectedNodeEditorProps) => {
