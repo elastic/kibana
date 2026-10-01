@@ -229,10 +229,7 @@ export function initializeFetch({
             query: searchSourceQuery,
           });
 
-          const esqlMode = isEsqlMode(savedSearch);
           if (
-            esqlMode &&
-            searchSourceQuery &&
             isOfAggregateQueryType(searchSourceQuery) &&
             (!fetchContext.query || isOfQueryType(fetchContext.query))
           ) {
