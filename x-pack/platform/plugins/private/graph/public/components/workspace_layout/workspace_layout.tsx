@@ -29,11 +29,6 @@ import { colorChoices } from '../../helpers/style_choices';
 import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 import { getEditUrl } from '../../services/url';
 
-/**
- * Each component, which depends on `worksapce`
- * should not be memoized, since it will not get updates.
- * This behaviour should be changed after migrating `worksapce` to redux
- */
 const FieldManagerMemoized = memo(FieldManager);
 const GuidancePanelMemoized = memo(GuidancePanel);
 

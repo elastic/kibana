@@ -88,8 +88,7 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
     [requestAdapter]
   );
 
-  // Replacement function for graphClientWorkspace's comms so
-  // that it works with Kibana.
+  // Adapts Graph Explore requests to Kibana HTTP, inspector, and loading services.
   const callNodeProxy = useCallback(
     (
       indexName: string,
@@ -130,7 +129,7 @@ export const useGraphLoader = ({ toastNotifications, coreStart }: UseGraphLoader
     [coreStart.http, getRequestInspector, handleHttpError, requestAdapter, toastNotifications]
   );
 
-  // Helper function for the graphClientWorkspace to perform a query
+  // Adapts Elasticsearch search requests to Kibana HTTP, inspector, and loading services.
   const callSearchNodeProxy = useCallback(
     (
       indexName: string,

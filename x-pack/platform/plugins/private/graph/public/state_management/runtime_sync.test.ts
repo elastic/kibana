@@ -10,12 +10,7 @@ import { createMockGraphStore } from './mocks';
 import { registerFieldsListeners, updateFieldProperties } from './fields';
 import type { WorkspaceField, WorkspaceNode } from '../types';
 
-/**
- * This suite tests listeners that only exist to sync the legacy world
- * with the redux state management. They can be discarded once everything is
- * migrated.
- */
-describe('legacy sync listeners', () => {
+describe('runtime synchronization listeners', () => {
   let env: MockedGraphEnvironment;
 
   beforeEach(() => {
