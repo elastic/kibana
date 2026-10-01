@@ -81,6 +81,7 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     The only reasons to **not** use \`TS\` for time series are:
     - request is about returning raw documents (no aggregations / STATS commands)
     - user explicitly asked to use FROM
+    - user asked for PromQL or provided a PromQL expression, in which case use \`PROMQL\`
 
     ## ES|QL query formatting
 
@@ -99,11 +100,12 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
         ? ''
         : `## Using named parameters for start and end time periods
 
-    Unless specified otherwise, you should always use named parameters (?_tstart and ?_tend) for start and end time in WHERE conditions, BUCKET ranges or TRANGE ,
+    Unless specified otherwise, you should always use named parameters (?_tstart and ?_tend) for start and end time in WHERE conditions, BUCKET ranges, TRANGE or the PROMQL start and end options,
     examples:
     - "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend"
     - "FROM myindex | ... BUCKET(@timestamp, 100, ?_tstart, ?_tend)"
     - "TS mytsds | WHERE TRANGE(?_tstart, ?_tend)"
+    - "PROMQL index=mytsds start=?_tstart end=?_tend request_rate=(sum by (host) (rate(requests)))"
 
     NEVER hardcode time ranges into the query itself (absolute or using now() syntax)
 

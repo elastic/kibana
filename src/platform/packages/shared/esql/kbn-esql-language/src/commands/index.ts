@@ -17,6 +17,7 @@ export * from './definitions/types';
 export * from './definitions/all_operators';
 export * from './definitions/utils/promql';
 export { inlineCastsMapping } from './definitions/generated/inline_casts_mapping';
+export { promqlFunctionDefinitions } from './definitions/generated/promql_functions';
 
 // Utilities from definitions
 export { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from './registry/constants';
