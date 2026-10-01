@@ -12,7 +12,9 @@ import {
   resolveEvalSuite,
   resolveEvaluationConnectorId,
   resolveProfileEnvOverrides,
+  shouldEnforceTraceExport,
 } from '../run_helpers';
+import { runTraceExportPreflight } from '../trace_export_preflight';
 import { buildPlaywrightArgs } from './playwright_args';
 
 const formatEnvPrefix = (overrides: Record<string, string>, redactedKeys: ReadonlySet<string>) =>
@@ -58,9 +60,9 @@ export const runSuiteCmd: Command<void> = {
       'evaluations-kbn-url',
       'evaluations-kbn-api-key',
     ],
-    boolean: ['dry-run'],
+    boolean: ['dry-run', 'allow-missing-traces'],
     alias: { model: 'project', judge: 'evaluation-connector-id' },
-    default: { 'dry-run': false },
+    default: { 'dry-run': false, 'allow-missing-traces': false },
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
@@ -136,6 +138,12 @@ export const runSuiteCmd: Command<void> = {
     if (flagsReader.boolean('dry-run')) {
       return;
     }
+
+    await runTraceExportPreflight({
+      env: { ...process.env, ...envOverrides },
+      enforce: shouldEnforceTraceExport(flagsReader, exportProfile),
+      log,
+    });
 
     await new Promise<void>((resolve, reject) => {
       const childEnv: Record<string, string> = { ...process.env, ...envOverrides } as Record<
