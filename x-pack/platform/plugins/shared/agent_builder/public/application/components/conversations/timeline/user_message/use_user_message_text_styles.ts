@@ -10,7 +10,7 @@ import { css, type SerializedStyles } from '@emotion/react';
 import { euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import { COMMAND_BADGE_MAX_WIDTH_CH } from '../../conversation_input/message_editor/command_badge/constants';
 import { MARKDOWN_BLOCK_SPACER_CLASS_NAME } from '../response/markdown_plugins';
-import { markdownContainerStyles } from '../response/markdown_container.styles';
+import { markdownContainerStyles } from '../response/use_markdown_container_styles';
 
 export interface UserMessageTextStyles {
   container: SerializedStyles;

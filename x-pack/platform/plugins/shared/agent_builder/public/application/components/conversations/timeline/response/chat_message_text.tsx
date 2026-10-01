@@ -38,7 +38,7 @@ import {
   createRenderRenderer,
   createConversationMarkdownComponents,
 } from './markdown_plugins';
-import { markdownContainerStyles } from './markdown_container.styles';
+import { markdownContainerStyles } from './use_markdown_container_styles';
 import { useStepsFromSavedTurns } from '../../../../hooks/use_steps_from_saved_turns';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import { useMarkdownLinkClick } from './use_markdown_link_click';
