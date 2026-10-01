@@ -53,6 +53,8 @@ interface AgentBasedSectionProps {
   failedInstances: string[];
   /** Per-instance error message from the last deploy attempt, keyed by instanceId. */
   deployErrors?: Record<string, string>;
+  /** When false, AWS credential entry is skipped — use for packages that declare no credential vars. Defaults to true. */
+  requiresCredentials?: boolean;
 }
 
 export function AgentBasedSection({
@@ -65,6 +67,7 @@ export function AgentBasedSection({
   hasFailed,
   failedInstances,
   deployErrors,
+  requiresCredentials = true,
 }: AgentBasedSectionProps) {
   const location = useLocation();
   // True when the wizard was opened via ?deploymentId=<id> (resume / edit mode).
@@ -86,6 +89,7 @@ export function AgentBasedSection({
   // ── Credential method ──────────────────────────────────────────────────────
   const credentialMethod = persistedCredentialMethod;
   const [isCredentialReady, setIsCredentialReady] = useState(() => {
+    if (!requiresCredentials) return true;
     // For methods backed by persisted text fields, initialize ready from stored values.
     if (persistedCredentialMethod === 'shared_credentials') {
       return !!(persistedSharedCredentialFile || persistedCredentialProfileName);
@@ -95,6 +99,31 @@ export function AgentBasedSection({
     }
     return false;
   });
+
+  // Sync isCredentialReady when requiresCredentials flips (e.g. a secondary manifest loads after
+  // mount and changes the service's credential requirements). useState initializer only runs once.
+  const requiresCredentialsPrev = useRef(requiresCredentials);
+  useEffect(() => {
+    if (requiresCredentials === requiresCredentialsPrev.current) return;
+    requiresCredentialsPrev.current = requiresCredentials;
+    if (!requiresCredentials) {
+      setIsCredentialReady(true);
+      return;
+    }
+    if (persistedCredentialMethod === 'shared_credentials') {
+      setIsCredentialReady(!!(persistedSharedCredentialFile || persistedCredentialProfileName));
+    } else if (persistedCredentialMethod === 'assume_role') {
+      setIsCredentialReady(!!persistedRoleArn);
+    } else {
+      setIsCredentialReady(false);
+    }
+  }, [
+    requiresCredentials,
+    persistedCredentialMethod,
+    persistedSharedCredentialFile,
+    persistedCredentialProfileName,
+    persistedRoleArn,
+  ]);
 
   // In-memory secrets — never persisted.
   const [staticKeyCreds, setStaticKeyCreds] = useState<AwsStaticKeyCredentials | undefined>(
@@ -344,95 +373,97 @@ export function AgentBasedSection({
             </p>
           </EuiText>
 
-          {/* Credential fields — show in existing mode always; in new-policy mode until the policy
-              is created AND credentials are in memory (re-show after Back navigation remount). */}
-          {(!isPolicyCreated || agentHostsMode === 'existing' || !isCredentialReady) && (
-            <>
-              <EuiSpacer size="m" />
+          {/* Credential fields — omitted entirely when requiresCredentials=false (packages with no
+              credential vars); otherwise shown until the policy is created and credentials are
+              in memory (re-shown after Back navigation remount). */}
+          {requiresCredentials &&
+            (!isPolicyCreated || agentHostsMode === 'existing' || !isCredentialReady) && (
+              <>
+                <EuiSpacer size="m" />
 
-              {/* Resume callout — credentials are never persisted; user must re-enter them. */}
-              {isEditMode && !isCredentialReady && (
-                <>
-                  <KbnWarningCallout
-                    announceOnMount
-                    size="s"
-                    title={i18n.translate(
-                      'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.resumeCredentialsCallout',
-                      {
-                        defaultMessage:
-                          'Credentials aren’t saved between sessions — re-enter them to continue.',
-                      }
-                    )}
-                    data-test-subj="agentBasedSection-resumeCredentialsCallout"
-                  />
-                  <EuiSpacer size="m" />
-                </>
-              )}
+                {/* Resume callout — credentials are never persisted; user must re-enter them. */}
+                {isEditMode && !isCredentialReady && (
+                  <>
+                    <KbnWarningCallout
+                      announceOnMount
+                      size="s"
+                      title={i18n.translate(
+                        'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.resumeCredentialsCallout',
+                        {
+                          defaultMessage:
+                            'Credentials aren’t saved between sessions — re-enter them to continue.',
+                        }
+                      )}
+                      data-test-subj="agentBasedSection-resumeCredentialsCallout"
+                    />
+                    <EuiSpacer size="m" />
+                  </>
+                )}
 
-              {/* Credential method selector */}
-              <CredentialMethodSelector
-                value={credentialMethod}
-                onChange={handleCredentialMethodChange}
-              />
+                {/* Credential method selector */}
+                <CredentialMethodSelector
+                  value={credentialMethod}
+                  onChange={handleCredentialMethodChange}
+                />
 
-              <EuiSpacer size="m" />
+                <EuiSpacer size="m" />
 
-              {/* Credential fields */}
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                {credentialMethod === 'static_keys' && (
-                  <LazyAwsStaticKeysForm
-                    onReadyChange={setIsCredentialReady}
-                    onFieldsChange={(creds) => {
-                      setStaticKeyCreds(creds ?? undefined);
-                      notifyCredentialChange('static_keys', {
-                        staticCreds: creds ?? undefined,
-                      });
-                    }}
-                    data-test-subj="agentBasedSection-directAccessKeysForm"
-                  />
-                )}
-                {credentialMethod === 'temporary_keys' && (
-                  <LazyAwsTemporaryKeysForm
-                    onReadyChange={setIsCredentialReady}
-                    onFieldsChange={(creds) => {
-                      setTemporaryKeyCreds(creds ?? undefined);
-                      notifyCredentialChange('temporary_keys', { tempCreds: creds ?? undefined });
-                    }}
-                    data-test-subj="agentBasedSection-temporaryKeysForm"
-                  />
-                )}
-                {credentialMethod === 'shared_credentials' && (
-                  <SharedCredentialsForm
-                    sharedCredentialFile={persistedSharedCredentialFile ?? ''}
-                    credentialProfileName={persistedCredentialProfileName ?? ''}
-                    onSharedCredentialFileChange={(val) => {
-                      setAgentBasedDeployment({ sharedCredentialFile: val });
-                      notifyCredentialChange('shared_credentials', { sharedFile: val });
-                      // Recompute from both fields: either one non-empty is sufficient.
-                      setIsCredentialReady(!!(val || persistedCredentialProfileName));
-                    }}
-                    onCredentialProfileNameChange={(val) => {
-                      setAgentBasedDeployment({ credentialProfileName: val });
-                      notifyCredentialChange('shared_credentials', { profileName: val });
-                      // Recompute from both fields: either one non-empty is sufficient.
-                      setIsCredentialReady(!!(persistedSharedCredentialFile || val));
-                    }}
-                  />
-                )}
-                {credentialMethod === 'assume_role' && (
-                  <AssumeRoleForm
-                    roleArn={persistedRoleArn ?? ''}
-                    onRoleArnChange={(val) => {
-                      setAgentBasedDeployment({ roleArn: val });
-                      notifyCredentialChange('assume_role', { arn: val });
-                      setIsCredentialReady(!!val);
-                    }}
-                  />
-                )}
-              </Suspense>
-              <EuiSpacer size="l" />
-            </>
-          )}
+                {/* Credential fields */}
+                <Suspense fallback={<EuiLoadingSpinner />}>
+                  {credentialMethod === 'static_keys' && (
+                    <LazyAwsStaticKeysForm
+                      onReadyChange={setIsCredentialReady}
+                      onFieldsChange={(creds) => {
+                        setStaticKeyCreds(creds ?? undefined);
+                        notifyCredentialChange('static_keys', {
+                          staticCreds: creds ?? undefined,
+                        });
+                      }}
+                      data-test-subj="agentBasedSection-directAccessKeysForm"
+                    />
+                  )}
+                  {credentialMethod === 'temporary_keys' && (
+                    <LazyAwsTemporaryKeysForm
+                      onReadyChange={setIsCredentialReady}
+                      onFieldsChange={(creds) => {
+                        setTemporaryKeyCreds(creds ?? undefined);
+                        notifyCredentialChange('temporary_keys', { tempCreds: creds ?? undefined });
+                      }}
+                      data-test-subj="agentBasedSection-temporaryKeysForm"
+                    />
+                  )}
+                  {credentialMethod === 'shared_credentials' && (
+                    <SharedCredentialsForm
+                      sharedCredentialFile={persistedSharedCredentialFile ?? ''}
+                      credentialProfileName={persistedCredentialProfileName ?? ''}
+                      onSharedCredentialFileChange={(val) => {
+                        setAgentBasedDeployment({ sharedCredentialFile: val });
+                        notifyCredentialChange('shared_credentials', { sharedFile: val });
+                        // Recompute from both fields: either one non-empty is sufficient.
+                        setIsCredentialReady(!!(val || persistedCredentialProfileName));
+                      }}
+                      onCredentialProfileNameChange={(val) => {
+                        setAgentBasedDeployment({ credentialProfileName: val });
+                        notifyCredentialChange('shared_credentials', { profileName: val });
+                        // Recompute from both fields: either one non-empty is sufficient.
+                        setIsCredentialReady(!!(persistedSharedCredentialFile || val));
+                      }}
+                    />
+                  )}
+                  {credentialMethod === 'assume_role' && (
+                    <AssumeRoleForm
+                      roleArn={persistedRoleArn ?? ''}
+                      onRoleArnChange={(val) => {
+                        setAgentBasedDeployment({ roleArn: val });
+                        notifyCredentialChange('assume_role', { arn: val });
+                        setIsCredentialReady(!!val);
+                      }}
+                    />
+                  )}
+                </Suspense>
+                <EuiSpacer size="l" />
+              </>
+            )}
 
           <AgentPolicyPanel
             agentHostsMode={agentHostsMode}
@@ -534,6 +565,7 @@ export function AgentBasedSection({
             onClose={() => setIsFlyoutOpen(false)}
             isIntegrationFlow
             hideIncomingDataStep
+            hideViewAgentsButton
             onAgentPolicyCreated={!isPolicyCreated ? handleAgentPolicyCreated : undefined}
             defaultAgentPolicyName={!isPolicyCreated ? newAgentPolicy.name : undefined}
             forceCreatePolicy={!isPolicyCreated}

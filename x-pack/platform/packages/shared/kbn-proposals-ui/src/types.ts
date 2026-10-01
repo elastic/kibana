@@ -29,5 +29,6 @@ export type ApprovalProposal = Pick<
   | 'decision'
   | 'decidedBy'
   | 'decidedAt'
+  | 'dismissReason'
   | 'rationale'
 >;
