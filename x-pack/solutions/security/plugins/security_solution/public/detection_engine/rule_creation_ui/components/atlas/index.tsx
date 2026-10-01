@@ -27,8 +27,8 @@ import * as i18n from './translations';
 import { MitreAtlasTechniqueFields } from './technique_fields';
 import { useAtlasThreatOptions } from './use_atlas_threat_options';
 
-const MitreAtlasContainer = styled.div`
-  margin-top: 16px;
+const MitreAtlasContainer = styled.div<{ $compact?: boolean }>`
+  margin-top: ${({ $compact }) => ($compact ? '0' : '16px')};
 `;
 
 interface AddItemProps {
@@ -36,10 +36,13 @@ interface AddItemProps {
   dataTestSubj: string; // eslint-disable-line react/no-unused-prop-types
   idAria: string;
   isDisabled: boolean;
+  /** When nested under Threat mappings, hide the outer "… threats" section label. */
+  hideThreatsLabel?: boolean;
 }
 
 // eslint-disable-next-line react/display-name
-export const AddMitreAtlasThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
+export const AddMitreAtlasThreat = memo(
+  ({ field, idAria, isDisabled, hideThreatsLabel = false }: AddItemProps) => {
   const { tactics: tacticsOptions } = useAtlasThreatOptions();
 
   const removeTactic = useCallback(
@@ -164,10 +167,10 @@ export const AddMitreAtlasThreat = memo(({ field, idAria, isDisabled }: AddItemP
   );
 
   return (
-    <MitreAtlasContainer>
+    <MitreAtlasContainer $compact={hideThreatsLabel}>
       {values.map((threat, index) => (
         <div key={index}>
-          {index === 0 ? (
+          {index === 0 && !hideThreatsLabel ? (
             <EuiFormRow
               fullWidth
               label={`${field.label} ${i18n.THREATS}`}

@@ -21,14 +21,11 @@ import { isEsqlRule, isThreatMatchRule } from '../../../../../common/detection_e
 import type { AboutStepRule, RuleStepProps } from '../../../common/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
-import { AddMitreAtlasThreat } from '../atlas';
 import type { FieldHook, FormHook } from '../../../../shared_imports';
 import { Field, Form, getUseField, UseField } from '../../../../shared_imports';
 
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema as defaultSchema } from './schema';
-import { atlasThreatDefault } from './default_value';
-import { AddMitreAttackThreatWithDefault } from './add_mitre_attack_threat_with_default';
 import * as I18n from './translations';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/eui_form';
@@ -44,6 +41,7 @@ import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useAllEsqlRuleFields } from '../../hooks';
 import { MaxSignals } from '../max_signals';
 import { ThreatMatchIndicatorPathEdit } from '../../../rule_creation/components/threat_match_indicator_path_edit';
+import { ThreatMappings } from '../threat_mappings';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -256,25 +254,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleFalsePositives',
               }}
             />
-            <UseField
-              path="threat"
-              component={AddMitreAttackThreatWithDefault}
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleMitreThreat',
-                isDisabled: isFieldDisabled,
-                dataTestSubj: 'detectionEngineStepAboutRuleMitreThreat',
-              }}
-            />
-            <UseField
-              path="atlasThreat"
-              defaultValue={atlasThreatDefault}
-              component={AddMitreAtlasThreat}
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleMitreAtlasThreat',
-                isDisabled: isFieldDisabled,
-                dataTestSubj: 'detectionEngineStepAboutRuleMitreAtlasThreat',
-              }}
-            />
+            <ThreatMappings isDisabled={isFieldDisabled} />
             <EuiSpacer size="l" />
             <UseField
               path="investigationFields"

@@ -40,8 +40,8 @@ const lazyMitreConfiguration = () => {
   );
 };
 
-const MitreAttackContainer = styled.div`
-  margin-top: 16px;
+const MitreAttackContainer = styled.div<{ $compact?: boolean }>`
+  margin-top: ${({ $compact }) => ($compact ? '0' : '16px')};
 `;
 
 interface AddItemProps {
@@ -49,10 +49,13 @@ interface AddItemProps {
   dataTestSubj: string; // eslint-disable-line react/no-unused-prop-types
   idAria: string;
   isDisabled: boolean;
+  /** When nested under Threat mappings, hide the outer "… threats" section label. */
+  hideThreatsLabel?: boolean;
 }
 
 // eslint-disable-next-line react/display-name
-export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
+export const AddMitreAttackThreat = memo(
+  ({ field, idAria, isDisabled, hideThreatsLabel = false }: AddItemProps) => {
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
   );
@@ -229,7 +232,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
   );
 
   return (
-    <MitreAttackContainer>
+    <MitreAttackContainer $compact={hideThreatsLabel}>
       {values.map((threat, index) => {
         const tacticUnsupported = isUnsupportedTactic(threat);
         const tacticError = tacticUnsupported
@@ -241,7 +244,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
           : undefined;
         return (
           <div key={index}>
-            {index === 0 ? (
+            {index === 0 && !hideThreatsLabel ? (
               <EuiFormRow
                 fullWidth
                 label={`${field.label} ${i18n.THREATS}`}
