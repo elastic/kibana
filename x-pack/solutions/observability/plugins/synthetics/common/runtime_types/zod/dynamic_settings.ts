@@ -33,5 +33,6 @@ export const LocationMonitorsType = z.array(
   z.looseObject({
     id: z.string(),
     count: z.number(),
+    browserCount: z.number(),
   })
 );

@@ -629,7 +629,7 @@ describe('SyntheticsPrivateLocation', () => {
 
     it('assigns a browser monitor only to elastic-agent-complete agents', async () => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const browserConfig = { ...dummyBrowserConfig, id: 'browser-id' } as HeartbeatConfig;
+      const browserConfig = { ...dummyBrowserConfig, id: 'browser-id' } as unknown as HeartbeatConfig;
       const completeAgentIds = ['complete-a', 'complete-b'];
 
       const policy = await syntheticsPrivateLocation.generateNewPolicy(
@@ -653,7 +653,7 @@ describe('SyntheticsPrivateLocation', () => {
 
     it('moves a browser pin off a non-complete agent on edit', async () => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const browserConfig = { ...dummyBrowserConfig, id: 'browser-id' } as HeartbeatConfig;
+      const browserConfig = { ...dummyBrowserConfig, id: 'browser-id' } as unknown as HeartbeatConfig;
       const completeAgentIds = ['complete-a', 'complete-b'];
 
       const policy = await syntheticsPrivateLocation.generateNewPolicy(
@@ -677,7 +677,7 @@ describe('SyntheticsPrivateLocation', () => {
 
     it('pins a browser monitor to nobody when no complete agent is enrolled', async () => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const browserConfig = { ...dummyBrowserConfig, id: 'browser-id' } as HeartbeatConfig;
+      const browserConfig = { ...dummyBrowserConfig, id: 'browser-id' } as unknown as HeartbeatConfig;
 
       const policy = await syntheticsPrivateLocation.generateNewPolicy(
         browserConfig,
