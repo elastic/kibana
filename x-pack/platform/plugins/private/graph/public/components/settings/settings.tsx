@@ -29,6 +29,7 @@ import {
   updateSettings,
   saveTemplate,
   removeTemplate,
+  type UrlTemplateState,
 } from '../../state_management';
 
 const tabs = [
@@ -55,14 +56,14 @@ const tabs = [
 
 export interface StateProps {
   advancedSettings: AdvancedSettings;
-  urlTemplates: UrlTemplate[];
+  urlTemplates: UrlTemplateState[];
   allFields: WorkspaceField[];
 }
 
 export interface DispatchProps {
   updateSettings: (advancedSettings: AdvancedSettings) => void;
-  removeTemplate: (urlTemplate: UrlTemplate) => void;
-  saveTemplate: (props: { index: number; template: UrlTemplate }) => void;
+  removeTemplate: (id: string) => void;
+  saveTemplate: (props: { id?: string; template: UrlTemplate }) => void;
 }
 
 export type BlocklistedNodeDisplay = Pick<WorkspaceNode, 'id' | 'label' | 'icon'> &
