@@ -10,6 +10,7 @@
 - [Azure Functions](/reference/connectors-kibana/azure-functions-action-type.md): Invoke HTTP-triggered functions, read function keys, and start, stop, or restart function apps.
 - [Azure Kubernetes Service (AKS)](/reference/connectors-kibana/azure-aks-action-type.md): List, inspect, and manage AKS clusters and node pools.
 - [Azure Monitor](/reference/connectors-kibana/azure-monitor-action-type.md): List and triage alerts, query metrics and logs, and control alert rules in Azure Monitor.
+- [Azure SQL](/reference/connectors-kibana/azure-sql-action-type.md): Query tables, search rows, explore schema, and execute SQL in an Azure SQL Database.
 - [BigQuery](/reference/connectors-kibana/bigquery-action-type.md): Run GoogleSQL queries and retrieve results from Google BigQuery.
 - [Bitbucket](/reference/connectors-kibana/bitbucket-action-type.md): Open, review, comment on, and merge pull requests, create branches, report commit build statuses, and trigger pipelines in Bitbucket Cloud.
 - [Box](/reference/connectors-kibana/box-action-type.md): Search files and folders, read content, and query enterprise content using Box AI.

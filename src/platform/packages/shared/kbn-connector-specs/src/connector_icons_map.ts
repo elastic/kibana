@@ -431,4 +431,9 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconazurefunctions" */ './specs/azure_functions/icon')
     ),
   ],
+
+  [
+    '.azure_sql',
+    lazy(() => import(/* webpackChunkName: "connectorIconazuresql" */ './specs/azure_sql/icon')),
+  ],
 ]);

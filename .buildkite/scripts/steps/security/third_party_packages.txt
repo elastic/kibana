@@ -45,6 +45,7 @@ tar-fs
 browserslist
 react-day-picker
 mysql2
+mssql
 jszip
 @rsdoctor/rspack-plugin
 @rspack/core
@@ -73,3 +74,4 @@ graphql
 oxlint-tsgolint
 bump-cli
 @oxlint/plugins
+@types/mssql
