@@ -27,7 +27,7 @@ import {
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 /**
@@ -142,8 +142,13 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         externalAdditionalControls={externalAdditionalControls}
         onFullScreenChange={onFullScreenChange}
         {...props}
-        {...(props.previewMode
+        {...(props.isInteractive ?? true
           ? {
+              enableInTableSearch: true,
+              canDragAndDropColumns: true,
+              visibleCellActions: 3, // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
+            }
+          : {
               isSortEnabled: false,
               disableCellActions: true,
               disableColumnActions: true,
@@ -153,11 +158,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
               rowsPerPageOptions: [],
               actions: false,
               isResizable: false,
-            }
-          : {
-              enableInTableSearch: true,
-              canDragAndDropColumns: true,
-              visibleCellActions: 3, // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
             })}
       />
     );

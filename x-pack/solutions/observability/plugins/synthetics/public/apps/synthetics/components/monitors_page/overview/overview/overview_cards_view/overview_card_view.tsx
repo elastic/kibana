@@ -83,12 +83,12 @@ const UnGroupedCardView = ({
   monitorsSortedByStatus,
   setFlyoutConfigCallback,
   loaded,
-  previewMode = false,
+  isInteractive = true,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   loaded: boolean;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) => {
   const dispatch = useDispatch();
   const trendData = useSelector(selectOverviewTrends);
@@ -262,7 +262,7 @@ const UnGroupedCardView = ({
                                 <MetricItem
                                   monitor={monitor}
                                   onClick={setFlyoutConfigCallback}
-                                  previewMode={previewMode}
+                                  isInteractive={isInteractive}
                                 />
                               </EuiFlexItem>
                             ))}
@@ -293,12 +293,12 @@ export const OverviewCardView = ({
   monitorsSortedByStatus,
   setFlyoutConfigCallback,
   loaded,
-  previewMode = false,
+  isInteractive = true,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   loaded: boolean;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) => {
   const { field: groupField } = useSelector(selectOverviewGroupBy);
   const view = useSelector(selectOverviewView);
@@ -310,7 +310,7 @@ export const OverviewCardView = ({
         monitorsSortedByStatus={monitorsSortedByStatus}
         setFlyoutConfigCallback={setFlyoutConfigCallback}
         loaded={loaded}
-        previewMode={previewMode}
+        isInteractive={isInteractive}
       />
     );
   }

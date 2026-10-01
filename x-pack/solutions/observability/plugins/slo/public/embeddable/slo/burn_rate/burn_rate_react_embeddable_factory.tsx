@@ -146,7 +146,7 @@ export const getBurnRateEmbeddableFactory = ({
                     sloInstanceId={sloInstanceId}
                     duration={duration}
                     reloadSubject={reload$}
-                    previewMode={viewMode === 'preview'}
+                    isInteractive={viewMode !== 'non-interactive'}
                   />
                 </QueryClientProvider>
               </PluginContext.Provider>

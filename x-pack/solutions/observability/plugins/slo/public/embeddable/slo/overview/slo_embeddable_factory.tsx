@@ -250,7 +250,7 @@ export const getOverviewEmbeddableFactory = ({
                     dashboardFilters={dashboardFilters}
                     remoteName={remoteName}
                     reloadSubject={reload$}
-                    previewMode={viewMode === 'preview'}
+                    isInteractive={viewMode !== 'non-interactive'}
                   />
                 </QueryClientProvider>
               </PluginContext.Provider>

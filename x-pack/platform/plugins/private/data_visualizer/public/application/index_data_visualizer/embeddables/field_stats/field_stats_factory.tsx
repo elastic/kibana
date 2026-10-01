@@ -437,7 +437,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 resetData$={reset$}
                 timeRange={timeRange}
                 onRenderComplete={dataLoadingApi.onRenderComplete}
-                previewMode={viewMode === 'preview'}
+                isInteractive={viewMode !== 'non-interactive'}
               />
             </EuiFlexItem>
           );

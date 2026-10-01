@@ -81,7 +81,7 @@ interface Props {
   timeRange: TimeRange;
   onLoaded?: () => void;
   lastReloadRequestTime: number | undefined;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 /**
@@ -144,7 +144,7 @@ export function SloAlertsTable({
   timeRange,
   onLoaded,
   lastReloadRequestTime,
-  previewMode = false,
+  isInteractive = true,
 }: Props) {
   const ref = useRef<AlertsTableImperativeApi>(null);
 
@@ -177,7 +177,7 @@ export function SloAlertsTable({
         cases,
         settings,
       }}
-      {...(previewMode && {
+      {...(!isInteractive && {
         renderActionsCell: undefined, // explicitly send in undefined so that actions cell does not render
         renderCellValue: (props) => {
           return <ObservabilityAlertsTableCellValue {...props} allowLinks={false} />;

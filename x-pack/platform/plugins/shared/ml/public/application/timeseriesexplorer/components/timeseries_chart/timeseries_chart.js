@@ -137,7 +137,7 @@ class TimeseriesChartIntl extends Component {
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
     modelPlotEnabled: PropTypes.bool.isRequired,
-    previewMode: PropTypes.bool,
+    isInteractive: PropTypes.bool,
     renderFocusChartOnly: PropTypes.bool.isRequired,
     selectedJob: PropTypes.object,
     showForecast: PropTypes.bool.isRequired,
@@ -547,7 +547,7 @@ class TimeseriesChartIntl extends Component {
       .attr('width', fcsWidth)
       .attr('height', focusZoomPanelHeight)
       .attr('class', 'chart-border');
-    if (!this.props.previewMode) this.createZoomInfoElements(zoomGroup, fcsWidth);
+    if (this.props.isInteractive) this.createZoomInfoElements(zoomGroup, fcsWidth);
 
     // Create the elements for annotations
     const annotateBrush = this.annotateBrush.bind(this);
@@ -655,7 +655,7 @@ class TimeseriesChartIntl extends Component {
       focusChartData,
       focusForecastData,
       modelPlotEnabled,
-      previewMode,
+      isInteractive,
       selectedJob,
       showAnnotations,
       showForecast,
@@ -860,7 +860,7 @@ class TimeseriesChartIntl extends Component {
     dots.exit().remove();
     // Create any new dots that are needed i.e. if number of chart points has increased.
     const dot = dots.enter().append('circle').attr('r', LINE_CHART_ANOMALY_RADIUS);
-    if (!previewMode) {
+    if (isInteractive) {
       dot.on('click', function (d) {
         d3.event.preventDefault();
         if (d.anomalyScore === undefined) return;
@@ -909,7 +909,7 @@ class TimeseriesChartIntl extends Component {
       .enter()
       .append('path')
       .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'));
-    if (!previewMode) {
+    if (isInteractive) {
       marker.on('click', function (d) {
         d3.event.preventDefault();
         if (d.anomalyScore === undefined) return;

@@ -33,12 +33,12 @@ export const StatusGridComponent = ({
   reload$,
   filters,
   view,
-  previewMode = false,
+  isInteractive = true,
 }: {
   reload$: Subject<boolean>;
   filters: MonitorFilters;
   view: OverviewView;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) => {
   const overviewStore = useRef(getOverviewStore());
 
@@ -52,7 +52,7 @@ export const StatusGridComponent = ({
         filters={filters}
         singleMonitor={singleMonitor}
         view={view}
-        previewMode={previewMode}
+        isInteractive={isInteractive}
       />
     </SyntheticsEmbeddableContext>
   );
@@ -129,12 +129,12 @@ const MonitorsOverviewList = ({
   filters,
   singleMonitor,
   view,
-  previewMode,
+  isInteractive,
 }: {
   filters: MonitorFilters;
   singleMonitor?: boolean;
   view: OverviewView;
-  previewMode: boolean;
+  isInteractive: boolean;
 }) => {
   const dispatch = useDispatch();
 
@@ -157,5 +157,5 @@ const MonitorsOverviewList = ({
     return <SingleMonitorView />;
   }
 
-  return <OverviewGrid view={view} isEmbeddable previewMode={previewMode} />;
+  return <OverviewGrid view={view} isEmbeddable isInteractive={isInteractive} />;
 };

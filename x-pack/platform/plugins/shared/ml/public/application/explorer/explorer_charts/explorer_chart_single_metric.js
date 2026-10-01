@@ -76,7 +76,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     id: PropTypes.string.isRequired,
     euiTheme: PropTypes.object.isRequired,
     isEmbeddable: PropTypes.bool,
-    previewMode: PropTypes.bool,
+    isInteractive: PropTypes.bool,
   };
 
   constructor(props) {
@@ -123,7 +123,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       timeBuckets,
       showSelectedInterval,
       onPointerUpdate,
-      previewMode,
+      isInteractive,
       id: chartId,
     } = this.props;
     const element = this.rootNode;
@@ -405,7 +405,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       dots.exit().remove();
       // Create any new dots that are needed i.e. if number of chart points has increased.
       const dot = dots.enter().append('circle').attr('r', LINE_CHART_ANOMALY_RADIUS);
-      if (!previewMode) {
+      if (isInteractive) {
         dot.on('click', function (d) {
           d3.event.preventDefault();
           if (d.anomalyScore === undefined) return;

@@ -68,7 +68,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
         resetData$={props.resetData$}
         onRenderComplete={props.onRenderComplete}
         onFieldsCountChange={props.onFieldsCountChange}
-        previewMode={props.previewMode}
+        isInteractive={props.isInteractive}
       />
     );
   }
@@ -94,7 +94,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
         resetData$={props.resetData$}
         onRenderComplete={props.onRenderComplete}
         onFieldsCountChange={props.onFieldsCountChange}
-        previewMode={props.previewMode}
+        isInteractive={props.isInteractive}
       />
     );
   } else {
@@ -205,7 +205,7 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
             timeRange={props.timeRange}
             onRenderComplete={props.onRenderComplete}
             onFieldsCountChange={props.onFieldsCountChange}
-            previewMode={props.previewMode}
+            isInteractive={props.isInteractive}
           />
         </DatePickerContextProvider>
       </KibanaContextProvider>

@@ -146,8 +146,8 @@ describe('SloErrorBudget', () => {
     expect(screen.getByRole('progressbar')).toBeTruthy();
   });
 
-  describe('preview mode', () => {
-    it('disables the SLO name link when previewMode is true', async () => {
+  describe('isInteractive', () => {
+    it('disables the SLO name link when isInteractive is false', async () => {
       const slo = buildSlo({ id: 'test-slo-id', name: 'My Test SLO' });
       useFetchSloDetailsMock.mockReturnValue({
         isLoading: false,
@@ -156,14 +156,16 @@ describe('SloErrorBudget', () => {
         refetch: jest.fn(),
       });
 
-      render(<SloErrorBudget sloId="test-slo-id" sloInstanceId={ALL_VALUE} previewMode={true} />);
+      render(
+        <SloErrorBudget sloId="test-slo-id" sloInstanceId={ALL_VALUE} isInteractive={false} />
+      );
 
       await waitFor(() => {
         expect(screen.getByTestId('o11ySloErrorBudgetLink')).toBeDisabled();
       });
     });
 
-    it('does not disable the SLO name link when previewMode is false', async () => {
+    it('does not disable the SLO name link when isInteractive is true', async () => {
       const slo = buildSlo({ id: 'test-slo-id', name: 'My Test SLO' });
       useFetchSloDetailsMock.mockReturnValue({
         isLoading: false,
@@ -172,7 +174,7 @@ describe('SloErrorBudget', () => {
         refetch: jest.fn(),
       });
 
-      render(<SloErrorBudget sloId="test-slo-id" sloInstanceId={ALL_VALUE} previewMode={false} />);
+      render(<SloErrorBudget sloId="test-slo-id" sloInstanceId={ALL_VALUE} isInteractive={true} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('o11ySloErrorBudgetLink')).not.toBeDisabled();

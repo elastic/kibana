@@ -389,7 +389,10 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
           }, []);
 
           const displaySettings = useMemo(
-            () => ({ ...(state.display_settings ?? {}), previewMode: viewMode === 'preview' }),
+            () => ({
+              ...(state.display_settings ?? {}),
+              isInteractive: viewMode !== 'non-interactive',
+            }),
             [viewMode]
           );
 

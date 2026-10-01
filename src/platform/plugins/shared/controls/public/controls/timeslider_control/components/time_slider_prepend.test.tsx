@@ -34,28 +34,30 @@ describe('TimeSliderPrepend', () => {
   });
 
   describe('previous and next buttons', () => {
-    it('should enable previous and next buttons when viewMode is not preview', () => {
+    it('should enable previous and next buttons when viewMode is not non-interactive', () => {
       const { getByTestId } = render(<TimeSliderPrepend {...defaultProps} viewMode="view" />);
       expect(getByTestId('timeSlider-previousTimeWindow')).not.toBeDisabled();
       expect(getByTestId('timeSlider-nextTimeWindow')).not.toBeDisabled();
     });
 
-    it('should disable previous and next buttons when viewMode is preview', () => {
-      const { getByTestId } = render(<TimeSliderPrepend {...defaultProps} viewMode="preview" />);
+    it('should disable previous and next buttons when viewMode is non-interactive', () => {
+      const { getByTestId } = render(
+        <TimeSliderPrepend {...defaultProps} viewMode="non-interactive" />
+      );
       expect(getByTestId('timeSlider-previousTimeWindow')).toBeDisabled();
       expect(getByTestId('timeSlider-nextTimeWindow')).toBeDisabled();
     });
   });
 
   describe('play button', () => {
-    it('should pass disablePlayButton=true to PlayButton when viewMode is preview', () => {
-      render(<TimeSliderPrepend {...defaultProps} viewMode="preview" />);
+    it('should pass disablePlayButton=true to PlayButton when viewMode is non-interactive', () => {
+      render(<TimeSliderPrepend {...defaultProps} viewMode="non-interactive" />);
       expect(mockPlayButton).toHaveBeenCalledWith(
         expect.objectContaining({ disablePlayButton: true })
       );
     });
 
-    it('should pass disablePlayButton=false to PlayButton when viewMode is not preview and disablePlayButton prop is false', () => {
+    it('should pass disablePlayButton=false to PlayButton when viewMode is not non-interactive and disablePlayButton prop is false', () => {
       render(<TimeSliderPrepend {...defaultProps} viewMode="view" disablePlayButton={false} />);
       expect(mockPlayButton).toHaveBeenCalledWith(
         expect.objectContaining({ disablePlayButton: false })

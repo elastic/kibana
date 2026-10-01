@@ -109,7 +109,7 @@ export interface FieldStatisticTableEmbeddableProps {
    */
   onFieldsCountChange?: (fieldsCount: number | undefined) => void;
 
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 export type ESQLDataVisualizerGridEmbeddableState = Omit<

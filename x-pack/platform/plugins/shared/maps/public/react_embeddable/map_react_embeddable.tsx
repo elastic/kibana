@@ -147,7 +147,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
           attributes: savedMap.getSavedObjectId() !== undefined ? 'skip' : 'deepEquality',
           mapSettings: 'deepEquality',
           savedObjectId: 'skip',
-          ...(viewMode$.getValue() === 'preview' && { mapCenter: 'skip' }),
+          ...(viewMode$.getValue() === 'non-interactive' && { mapCenter: 'skip' }),
         };
       },
       applySerializedState: async (nextState) => {
@@ -254,7 +254,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
                   : undefined
               }
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
-              previewMode={viewMode === 'preview'}
+              isInteractive={viewMode !== 'non-interactive'}
             />
           </Provider>
         );

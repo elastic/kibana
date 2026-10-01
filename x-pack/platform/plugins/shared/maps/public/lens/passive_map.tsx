@@ -55,7 +55,7 @@ export function PassiveMap(props: Props) {
       <EmbeddableRenderer<MapEmbeddableState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
-          viewMode$: new BehaviorSubject(!props.interactive ? 'preview' : 'view'),
+          viewMode$: new BehaviorSubject(!props.interactive ? 'non-interactive' : 'view'),
           hideFilterActions: true,
           getSerializedStateForChild: () => {
             const basemapLayerDescriptor = createBasemapLayerDescriptor();

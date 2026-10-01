@@ -25,13 +25,13 @@ export const LocationStatusBadges = ({
   locations,
   configId,
   spaces,
-  previewMode = false,
+  isInteractive = true,
 }: {
   locations: LocationsStatus;
   loading: boolean;
   configId: string;
   spaces?: string[];
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) => {
   const [toDisplay, setToDisplay] = useState(DEFAULT_DISPLAY_COUNT);
 
@@ -60,7 +60,7 @@ export const LocationStatusBadges = ({
             locationLabel={loc.label}
             color={loc.color}
             spaces={spaces}
-            previewMode={previewMode}
+            isInteractive={isInteractive}
           />
         </EuiFlexItem>
       ))}
@@ -112,14 +112,14 @@ const MonitorDetailLinkForLocation = ({
   locationLabel,
   color,
   spaces,
-  previewMode = false,
+  isInteractive = true,
 }: {
   configId: string;
   locationId: string;
   locationLabel: string;
   color: string;
   spaces?: string[];
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) => {
   const monitorDetailLinkUrl = useMonitorDetailLocator({
     configId,
@@ -127,14 +127,7 @@ const MonitorDetailLinkForLocation = ({
     spaces,
   });
 
-  return previewMode ? (
-    <EuiBadge
-      iconType={() => <EuiIcon size="m" type="dot" color={color} aria-hidden={true} />}
-      color="hollow"
-    >
-      {locationLabel}
-    </EuiBadge>
-  ) : (
+  return isInteractive ? (
     <EuiBadge
       iconType={() => <EuiIcon size="m" type="dot" color={color} aria-hidden={true} />}
       color="hollow"
@@ -145,6 +138,13 @@ const MonitorDetailLinkForLocation = ({
           locationLabel,
         },
       })}
+    >
+      {locationLabel}
+    </EuiBadge>
+  ) : (
+    <EuiBadge
+      iconType={() => <EuiIcon size="m" type="dot" color={color} aria-hidden={true} />}
+      color="hollow"
     >
       {locationLabel}
     </EuiBadge>

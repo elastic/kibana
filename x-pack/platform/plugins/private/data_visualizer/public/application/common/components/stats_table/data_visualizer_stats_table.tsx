@@ -63,7 +63,7 @@ interface DataVisualizerTableProps<T extends object> {
   renderFieldName?: FieldStatisticTableEmbeddableProps['renderFieldName'];
   error?: Error | string;
   isEsql?: boolean;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -80,7 +80,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
   renderFieldName,
   error,
   isEsql = false,
-  previewMode = false,
+  isInteractive = true,
 }: DataVisualizerTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -92,7 +92,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
     pageState,
     updatePageState,
     isEsql,
-    previewMode
+    isInteractive
   );
   const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
   const [dimensions, setDimensions] = useState(calculateTableColumnsDimensions());
@@ -329,7 +329,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',
             })}
-            {!previewMode && (
+            {isInteractive && (
               <EuiToolTip
                 content={
                   !showDistributions

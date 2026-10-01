@@ -85,8 +85,8 @@ const FilterButton: FC<{
 export const EntityFieldNamesAndFilterButtons: FC<{
   api?: SingleMetricViewerEmbeddableApi;
   entityData: { entities: MlEntity[]; count: number };
-  previewMode?: boolean;
-}> = ({ api, entityData, previewMode = false }) => {
+  isInteractive?: boolean;
+}> = ({ api, entityData, isInteractive = true }) => {
   return (
     <EuiFlexGroup alignItems="center">
       {entityData.entities.map((entity, i) => {
@@ -98,7 +98,7 @@ export const EntityFieldNamesAndFilterButtons: FC<{
                   {`${entity.fieldName}: ${entity.fieldValue}`}
                 </EuiTextColor>
               </EuiFlexItem>
-              {!previewMode && api !== undefined ? (
+              {isInteractive && api !== undefined ? (
                 <>
                   <EuiFlexItem grow={false}>
                     <FilterButton

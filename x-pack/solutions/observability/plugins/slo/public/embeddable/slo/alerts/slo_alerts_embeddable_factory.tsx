@@ -183,7 +183,7 @@ export function getAlertsEmbeddableFactory({
                       slos={slos}
                       timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
                       reloadSubject={reload$}
-                      previewMode={viewMode === 'preview'}
+                      isInteractive={viewMode !== 'non-interactive'}
                     />
                   </QueryClientProvider>
                 </PluginContext.Provider>

@@ -21,14 +21,14 @@ const mockSloOverview = jest.fn();
 jest.mock('./slo_overview', () => ({
   SloOverview: (props: Record<string, unknown>) => {
     mockSloOverview(props);
-    // Reflect the click-disabled state that SloOverview applies internally in preview mode,
+    // Reflect the click-disabled state that SloOverview applies internally when not interactive,
     // so tests can assert on actual rendered behavior rather than only prop values.
     return (
       <div data-test-subj="slo-overview">
         <button
           data-test-subj="slo-overview-card"
-          onClick={props.previewMode ? undefined : () => {}}
-          disabled={Boolean(props.previewMode)}
+          onClick={props.isInteractive ? () => {} : undefined}
+          disabled={!props.isInteractive}
         >
           SloOverview
         </button>
@@ -205,7 +205,7 @@ describe('SloOverviewPanelContent', () => {
     expect(queryByTestId(container, 'sloSingleOverviewPanel')).not.toBeInTheDocument();
   });
 
-  describe('previewMode', () => {
+  describe('isInteractive', () => {
     beforeEach(() => {
       mockSloOverview.mockClear();
       useFetchSloDetailsMock.mockReturnValue({
@@ -219,17 +219,17 @@ describe('SloOverviewPanelContent', () => {
       });
     });
 
-    it('disables the SLO card interaction in preview mode', () => {
+    it('disables the SLO card interaction when isInteractive is false', () => {
       const { container } = render(
-        <SloOverviewPanelContent {...defaultProps} previewMode={true} />
+        <SloOverviewPanelContent {...defaultProps} isInteractive={false} />
       );
 
       expect(getByTestId(container, 'slo-overview-card')).toBeDisabled();
     });
 
-    it('keeps the SLO card interactive when not in preview mode', () => {
+    it('keeps the SLO card interactive when isInteractive is true', () => {
       const { container } = render(
-        <SloOverviewPanelContent {...defaultProps} previewMode={false} />
+        <SloOverviewPanelContent {...defaultProps} isInteractive={true} />
       );
 
       expect(getByTestId(container, 'slo-overview-card')).not.toBeDisabled();

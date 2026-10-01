@@ -111,7 +111,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
     syncTooltips,
     syncCursor,
     uiState: vis.uiState,
-    interactive: !disableTriggers && viewMode !== 'preview',
+    interactive: !disableTriggers && viewMode !== 'non-interactive',
     inspectorAdapters,
     executionContext,
     onRender$: onRender,

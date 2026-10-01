@@ -35,11 +35,11 @@ export const OverviewGrid = memo(
   ({
     view,
     isEmbeddable,
-    previewMode = false,
+    isInteractive = true,
   }: {
     view: OverviewView;
     isEmbeddable?: boolean;
-    previewMode?: boolean;
+    isInteractive?: boolean;
   }) => {
     const dispatch = useDispatch();
 
@@ -85,7 +85,7 @@ export const OverviewGrid = memo(
             </EuiFlexGroup>
           </EuiFlexItem>
 
-          {!previewMode && (
+          {isInteractive && (
             <>
               <EuiFlexItem grow={false}>
                 <ShowLastRunToggle />
@@ -142,12 +142,12 @@ export const OverviewGrid = memo(
             monitorsSortedByStatus={monitorsSortedByStatus}
             setFlyoutConfigCallback={setFlyoutConfigCallback}
             loaded={isInitialized}
-            previewMode={previewMode}
+            isInteractive={isInteractive}
           />
         ) : view === 'compactView' ? (
           <OverviewGridCompactView
             setFlyoutConfigCallback={setFlyoutConfigCallback}
-            previewMode={previewMode}
+            isInteractive={isInteractive}
           />
         ) : null}
         <MaybeMonitorDetailsFlyout setFlyoutConfigCallback={setFlyoutConfigCallback} />

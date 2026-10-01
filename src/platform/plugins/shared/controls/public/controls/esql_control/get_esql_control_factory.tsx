@@ -260,7 +260,7 @@ export const getESQLControlFactory = <
                   hide_exists: true,
                   hide_sort: true,
                   placeholder: VariableControlsStrings.emptySelectionPlaceholder,
-                  previewMode: viewMode === 'preview',
+                  isInteractive: viewMode !== 'non-interactive',
                 },
                 customStrings: {
                   invalidSelectionsLabel: VariableControlsStrings.getIncompatibleSelectionsLabel(

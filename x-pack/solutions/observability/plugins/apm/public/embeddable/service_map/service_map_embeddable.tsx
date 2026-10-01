@@ -542,7 +542,7 @@ export function ServiceMapEmbeddable({
             isFullscreen={false}
             fullMapHref={fullMapHref}
             isEmbedded
-            isInteractive={viewMode !== 'preview'}
+            isInteractive={viewMode !== 'non-interactive'}
             showEmbeddedControls={showEmbeddedControls}
             showFocusMap={showFocusMapInPopover}
             alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}

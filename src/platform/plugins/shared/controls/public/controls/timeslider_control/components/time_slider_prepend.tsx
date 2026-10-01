@@ -29,7 +29,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   const [isPaused, setIsPaused] = useState(true);
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
   const [subscription, setSubscription] = useState<Subscription | undefined>(undefined);
-  const previewMode = props.viewMode === 'preview';
+  const isInteractive = props.viewMode !== 'non-interactive';
 
   const playNextFrame = useCallback(() => {
     // advance to next frame
@@ -69,10 +69,10 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   }, [props, subscription, timeoutId]);
 
   useEffect(() => {
-    if (previewMode) {
+    if (!isInteractive) {
       onPause();
     }
-  }, [previewMode, onPause]);
+  }, [isInteractive, onPause]);
 
   return (
     <>
@@ -90,7 +90,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
             color="text"
             aria-label={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
             data-test-subj="timeSlider-previousTimeWindow"
-            disabled={previewMode}
+            disabled={!isInteractive}
           />
         </EuiToolTip>
       </EuiFlexItem>
@@ -100,7 +100,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
           onPause={onPause}
           waitForControlOutputConsumersToLoad$={props.waitForControlOutputConsumersToLoad$}
           viewMode={props.viewMode}
-          disablePlayButton={previewMode || props.disablePlayButton}
+          disablePlayButton={!isInteractive || props.disablePlayButton}
           isPaused={isPaused}
         />
       </EuiFlexItem>
@@ -118,7 +118,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
             color="text"
             aria-label={TimeSliderStrings.control.getNextButtonAriaLabel()}
             data-test-subj="timeSlider-nextTimeWindow"
-            disabled={previewMode}
+            disabled={!isInteractive}
           />
         </EuiToolTip>
       </EuiFlexItem>

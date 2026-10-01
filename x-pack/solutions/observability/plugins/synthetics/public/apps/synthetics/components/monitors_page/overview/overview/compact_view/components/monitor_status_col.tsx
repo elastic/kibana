@@ -34,11 +34,11 @@ import { getLatestDownSummary } from '../get_latest_down_summary';
 export const MonitorStatusCol = ({
   monitor,
   openFlyout,
-  previewMode = false,
+  isInteractive = true,
 }: {
   monitor: OverviewStatusMetaData;
   openFlyout: (monitor: OverviewStatusMetaData) => void;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) => {
   const timestamp = monitor.timestamp ? parseTimestamp(monitor.timestamp) : null;
   // Per-user, per-space display preference set from the overview's display
@@ -85,7 +85,7 @@ export const MonitorStatusCol = ({
               isBrowserType={
                 monitor.type === MonitorTypeEnum.BROWSER || monitor.type === MonitorTypeEnum.API
               }
-              onClickBadge={() => (previewMode ? null : openFlyout(monitor))}
+              onClickBadge={() => (isInteractive ? openFlyout(monitor) : null)}
             />
           </EuiFlexItem>
           {isStaleLastRun ? (

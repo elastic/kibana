@@ -41,7 +41,7 @@ interface Props {
   groupBy: GroupByField;
   summary?: GroupSummary;
   filters?: Filter[];
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 export function GroupListView({
@@ -53,7 +53,7 @@ export function GroupListView({
   groupBy,
   summary,
   filters,
-  previewMode = false,
+  isInteractive = true,
 }: Props) {
   const groupQuery = `"${groupBy}": "${group}"`;
   const query = kqlQuery ? `${groupQuery} and ${kqlQuery}` : groupQuery;
@@ -175,7 +175,7 @@ export function GroupListView({
                     >
                       <EuiLink
                         data-test-subj="o11yGroupListViewLink"
-                        {...(previewMode
+                        {...(!isInteractive
                           ? {
                               disabled: true,
                             }
@@ -213,7 +213,7 @@ export function GroupListView({
                   loading={isLoading || isRefetching}
                   error={isError}
                   view={view}
-                  previewMode={previewMode}
+                  isInteractive={isInteractive}
                 />
                 <EuiSpacer size="m" />
                 {total > 0 && total > itemsPerPage ? (

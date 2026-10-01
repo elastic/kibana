@@ -97,7 +97,7 @@ function ExplorerChartContainer({
   timefilter,
   timeRange,
   onSelectEntity,
-  previewMode,
+  isInteractive,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
@@ -261,7 +261,7 @@ function ExplorerChartContainer({
             infoTooltip={{ ...series.infoTooltip, chartType }}
             wrapLabel={wrapLabel}
             onSelectEntity={onSelectEntity}
-            showFilterIcons={!previewMode && showFilterIcons}
+            showFilterIcons={isInteractive && showFilterIcons}
           />
         </EuiFlexItem>
 
@@ -280,7 +280,7 @@ function ExplorerChartContainer({
                 color="warning"
               />
             )}
-            {!previewMode && explorerSeriesLink && (
+            {isInteractive && explorerSeriesLink && (
               <EuiToolTip position="top" content={textViewButton}>
                 {/* href needs to be full link with base path while ChromeRecentlyAccessed requires only relative path */}
                 {/* disabling because we need button to behave as link and to have a callback */}
@@ -350,7 +350,7 @@ function ExplorerChartContainer({
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
                   euiTheme={euiTheme}
-                  previewMode={previewMode}
+                  isInteractive={isInteractive}
                 />
               )}
             </MlTooltipComponent>
@@ -374,7 +374,7 @@ function ExplorerChartContainer({
                   chartTheme={chartTheme}
                   cursor$={chartsService.activeCursor.activeCursor$}
                   euiTheme={euiTheme}
-                  previewMode={previewMode}
+                  isInteractive={isInteractive}
                 />
               )}
             </MlTooltipComponent>
@@ -401,7 +401,7 @@ export const ExplorerChartsContainerUI = ({
   timefilter,
   timeRange,
   onSelectEntity,
-  previewMode,
+  isInteractive,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
@@ -471,7 +471,7 @@ export const ExplorerChartsContainerUI = ({
                   timefilter={timefilter}
                   timeRange={timeRange}
                   onSelectEntity={onSelectEntity}
-                  previewMode={previewMode}
+                  isInteractive={isInteractive}
                   tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
                   showSelectedInterval={showSelectedInterval}
                   chartsService={chartsService}

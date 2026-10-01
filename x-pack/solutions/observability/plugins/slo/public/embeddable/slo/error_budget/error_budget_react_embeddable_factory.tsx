@@ -145,7 +145,7 @@ export const getErrorBudgetEmbeddableFactory = ({
                     sloId={sloId}
                     sloInstanceId={sloInstanceId}
                     reloadSubject={reload$}
-                    previewMode={viewMode === 'preview'}
+                    isInteractive={viewMode !== 'non-interactive'}
                   />
                 </QueryClientProvider>
               </PluginContext.Provider>

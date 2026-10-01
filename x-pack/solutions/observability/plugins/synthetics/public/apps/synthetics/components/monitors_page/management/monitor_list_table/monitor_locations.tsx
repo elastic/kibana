@@ -21,7 +21,7 @@ interface Props {
   locations?: ServiceLocations;
   configId: string;
   spaces?: string[];
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 export const MonitorLocations = ({
@@ -29,7 +29,7 @@ export const MonitorLocations = ({
   locations,
   configId,
   spaces,
-  previewMode = false,
+  isInteractive = true,
 }: Props) => {
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
 
@@ -53,7 +53,7 @@ export const MonitorLocations = ({
         locations={locationsToDisplay}
         loading={false}
         spaces={spaces}
-        previewMode={previewMode}
+        isInteractive={isInteractive}
       />
     );
   } else {
@@ -76,7 +76,7 @@ export const MonitorLocations = ({
         locations={locationsToDisplay}
         loading={true}
         spaces={spaces}
-        previewMode={previewMode}
+        isInteractive={isInteractive}
       />
     );
   }

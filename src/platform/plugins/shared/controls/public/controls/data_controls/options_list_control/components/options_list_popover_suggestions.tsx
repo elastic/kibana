@@ -99,7 +99,7 @@ export const OptionsListPopoverSuggestions = ({
       return;
 
     return {
-      disabled: displaySettings.previewMode,
+      disabled: !displaySettings.isInteractive,
       key: 'exists-option',
       checked: existsSelected ? 'on' : undefined,
       label: OptionsListStrings.controlAndPopover.getExists(),
@@ -110,7 +110,7 @@ export const OptionsListPopoverSuggestions = ({
     suggestions,
     existsSelected,
     showOnlySelected,
-    displaySettings.previewMode,
+    displaySettings.isInteractive,
     displaySettings.hide_exists,
     styles,
   ]);
@@ -125,7 +125,7 @@ export const OptionsListPopoverSuggestions = ({
       }
 
       return {
-        disabled: displaySettings.previewMode,
+        disabled: !displaySettings.isInteractive,
         key: String(suggestion.value),
         label: String(fieldFormatter?.(suggestion.value) ?? suggestion.value),
         checked: (selectedOptions ?? []).includes(suggestion.value as string) ? 'on' : undefined,
@@ -162,7 +162,7 @@ export const OptionsListPopoverSuggestions = ({
     suggestions,
     availableOptions,
     showOnlySelected,
-    displaySettings.previewMode,
+    displaySettings.isInteractive,
     selectedOptions,
     invalidSelections,
     existsSelectableOption,

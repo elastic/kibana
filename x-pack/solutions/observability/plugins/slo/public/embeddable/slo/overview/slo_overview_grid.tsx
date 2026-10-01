@@ -72,10 +72,10 @@ const ITEMS_PER_ROW = 4;
 
 export function SloCardChartList({
   sloId,
-  previewMode = false,
+  isInteractive = true,
 }: {
   sloId: string;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) {
   const {
     http: { basePath },
@@ -171,15 +171,15 @@ export function SloCardChartList({
           <Settings
             baseTheme={baseTheme}
             onElementClick={
-              previewMode
-                ? undefined
-                : ([d]) => {
+              isInteractive
+                ? ([d]) => {
                     if (isMetricElementEvent(d)) {
                       const { columnIndex, rowIndex } = d;
                       const slo = sloList?.results[rowIndex * ITEMS_PER_ROW + columnIndex];
                       setSelectedSlo(slo ?? null);
                     }
                   }
+                : undefined
             }
             locale={i18n.getLocale()}
           />

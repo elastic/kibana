@@ -69,7 +69,7 @@ export const useDataVisualizerGridData = ({
   savedRandomSamplerPreference,
   onUpdate,
   projectRouting,
-  previewMode = false,
+  isInteractive = true,
 }: {
   // Data view is required for non-ES|QL queries like kuery or lucene
   input: Required<FieldStatisticTableEmbeddableProps, 'dataView'>;
@@ -77,7 +77,7 @@ export const useDataVisualizerGridData = ({
   savedRandomSamplerPreference?: RandomSamplerOption;
   onUpdate?: (params: Dictionary<unknown>) => void;
   projectRouting?: string;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) => {
   const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
   const { services } = useDataVisualizerKibana();
@@ -613,7 +613,7 @@ export const useDataVisualizerGridData = ({
   // Inject custom action column for the index based visualizer
   // Hide the column completely if no access to any of the plugins
   const extendedColumns = useMemo(() => {
-    if (previewMode || !input.dataView) return undefined;
+    if (!isInteractive || !input.dataView) return undefined;
     const actions = getActions(
       input.dataView,
       services,
@@ -635,7 +635,7 @@ export const useDataVisualizerGridData = ({
 
     return [actionColumn];
   }, [
-    previewMode,
+    isInteractive,
     input.dataView,
     services,
     searchQueryLanguage,

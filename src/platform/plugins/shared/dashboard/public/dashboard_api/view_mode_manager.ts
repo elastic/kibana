@@ -45,7 +45,7 @@ export function initializeViewModeManager({
   });
 
   function getInitialViewMode() {
-    if (creationOptionsViewMode === 'preview') return creationOptionsViewMode;
+    if (creationOptionsViewMode === 'non-interactive') return creationOptionsViewMode;
 
     if (isManaged || !getDashboardCapabilities().showWriteControls || !canUserEditDashboard) {
       return 'view';
@@ -62,14 +62,14 @@ export function initializeViewModeManager({
   }
 
   const viewMode$ = new BehaviorSubject<ViewMode>(getInitialViewMode());
-  const disableTriggers$ = new BehaviorSubject<boolean>(viewMode$.getValue() === 'preview');
+  const disableTriggers$ = new BehaviorSubject<boolean>(viewMode$.getValue() === 'non-interactive');
 
   const disableTriggersSubscription = viewMode$.subscribe((viewMode) => {
-    disableTriggers$.next(viewMode === 'preview');
+    disableTriggers$.next(viewMode === 'non-interactive');
   });
 
   function setViewMode(viewMode: ViewMode) {
-    if (creationOptionsViewMode === 'preview') return;
+    if (creationOptionsViewMode === 'non-interactive') return;
     // block the Dashboard from entering edit mode if this Dashboard is managed.
     if (isManaged && viewMode?.toLowerCase() === 'edit') {
       return;

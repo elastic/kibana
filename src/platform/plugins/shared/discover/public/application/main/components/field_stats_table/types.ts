@@ -199,5 +199,5 @@ export interface FieldStatisticsTableProps {
   /**
    * Whether the table should be interactive or not
    */
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }

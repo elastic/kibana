@@ -26,7 +26,7 @@ interface Props {
   onRenderComplete?: () => void;
   reloadSubject: Subject<FetchContext>;
   onEdit: () => void;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 export function SloAlertsWrapper({
@@ -36,7 +36,7 @@ export function SloAlertsWrapper({
   onRenderComplete,
   reloadSubject,
   onEdit,
-  previewMode = false,
+  isInteractive = true,
 }: Props) {
   const {
     application: { navigateToUrl },
@@ -115,7 +115,7 @@ export function SloAlertsWrapper({
               onEdit();
             }}
             data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
-            disabled={previewMode}
+            disabled={!isInteractive}
           >
             {showInstanceCountBreakdown ? (
               <SloIncludedCount slos={slos} />
@@ -130,7 +130,7 @@ export function SloAlertsWrapper({
             )}
           </EuiLink>
         </EuiFlexItem>
-        {!previewMode && (
+        {isInteractive && (
           <EuiFlexItem grow={false}>
             <EuiLink
               data-test-subj="o11ySloAlertsWrapperGoToAlertsLink"
@@ -161,7 +161,7 @@ export function SloAlertsWrapper({
             timeRange={timeRange}
             onLoaded={() => setIsTableLoaded(true)}
             lastReloadRequestTime={lastRefreshTime}
-            previewMode={previewMode}
+            isInteractive={isInteractive}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

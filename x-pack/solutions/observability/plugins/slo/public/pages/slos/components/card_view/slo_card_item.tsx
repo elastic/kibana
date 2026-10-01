@@ -35,7 +35,7 @@ export interface Props {
   loading: boolean;
   error: boolean;
   refetchRules: () => void;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
@@ -66,7 +66,7 @@ export function SloCardItem({
   activeAlerts,
   historicalSummary,
   refetchRules,
-  previewMode = false,
+  isInteractive = true,
 }: Props) {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -129,12 +129,12 @@ export function SloCardItem({
               rules={rules}
               activeAlerts={activeAlerts}
               handleCreateRule={handleCreateRule}
-              previewMode={previewMode}
+              isInteractive={isInteractive}
             />
           }
-          previewMode={previewMode}
+          isInteractive={isInteractive}
         />
-        {!previewMode && (
+        {isInteractive && (
           <div className={isActionsPopoverOpen ? '' : 'sloCardItemActions_hover'}>
             <SloCardItemActions
               slo={slo}
@@ -188,13 +188,13 @@ export function SloCardChart({
   badges,
   onClick,
   historicalSliData,
-  previewMode = false,
+  isInteractive = true,
 }: {
   badges: React.ReactNode;
   slo: SLOWithSummaryResponse;
   historicalSliData?: Array<{ key?: number; value?: number }>;
   onClick?: () => void;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) {
   const {
     application: { navigateToUrl },
@@ -215,7 +215,7 @@ export function SloCardChart({
             iconAlign: 'right',
           },
         }}
-        {...(!previewMode && {
+        {...(isInteractive && {
           onElementClick: ([d]) => {
             if (onClick) {
               onClick();

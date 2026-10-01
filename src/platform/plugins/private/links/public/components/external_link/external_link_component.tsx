@@ -51,7 +51,7 @@ export const ExternalLinkComponent = ({
     <EuiListGroupItem
       external
       color="text"
-      isDisabled={viewMode === 'preview' || Boolean(link.error)}
+      isDisabled={viewMode === 'non-interactive' || Boolean(link.error)}
       className={'linksPanelLink'}
       showToolTip={Boolean(link.error)}
       toolTipProps={{

@@ -49,7 +49,7 @@ export interface Props {
   layerList: ILayer[];
   waitUntilTimeLayersLoad$: Observable<void>;
   euiTheme?: any;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 interface State {
@@ -240,7 +240,7 @@ export class MapContainer extends Component<Props, State> {
       exitFullScreen,
       mapInitError,
       renderTooltipContent,
-      previewMode,
+      isInteractive,
     } = this.props;
 
     if (mapInitError) {
@@ -266,16 +266,16 @@ export class MapContainer extends Component<Props, State> {
           css={mapWrapperStyles}
           style={{ backgroundColor: this.props.settings.backgroundColor }}
         >
-          {!previewMode && <MapControlsThemeStyles />}
+          {isInteractive && <MapControlsThemeStyles />}
           <MBMap
             addFilters={addFilters}
             getFilterActions={getFilterActions}
             getActionContext={getActionContext}
             onSingleValueTrigger={onSingleValueTrigger}
             renderTooltipContent={renderTooltipContent}
-            previewMode={previewMode}
+            isInteractive={isInteractive}
           />
-          {!previewMode && !this.props.settings.hideToolbarOverlay && !isScreenshotMode() && (
+          {isInteractive && !this.props.settings.hideToolbarOverlay && !isScreenshotMode() && (
             <ToolbarOverlay
               addFilters={addFilters}
               getFilterActions={getFilterActions}
@@ -284,7 +284,7 @@ export class MapContainer extends Component<Props, State> {
               showTimesliderButton={this.state.showTimesliderButton}
             />
           )}
-          {!previewMode && <RightSideControls />}
+          {isInteractive && <RightSideControls />}
           {this.props.isTimesliderOpen && (
             <Timeslider waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$} />
           )}

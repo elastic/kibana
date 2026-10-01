@@ -25,7 +25,7 @@ interface Props {
   slo: SLOWithSummaryResponse;
   rules: Array<Rule<BurnRateRuleParams>> | undefined;
   handleCreateRule?: () => void;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 export function SloCardItemBadges({
@@ -33,7 +33,7 @@ export function SloCardItemBadges({
   activeAlerts,
   rules,
   handleCreateRule,
-  previewMode = false,
+  isInteractive = true,
 }: Props) {
   const { onStateChange } = useUrlSearchState();
 
@@ -63,13 +63,13 @@ export function SloCardItemBadges({
             <SLOCardItemInstanceBadge slo={slo} />
             <SloRulesBadge
               rules={rules}
-              onClick={previewMode ? undefined : handleCreateRule}
+              onClick={isInteractive ? handleCreateRule : undefined}
               isRemote={!!slo.remote}
             />
             <SloRemoteBadge slo={slo} />
             <SloTagsBadge
               slo={slo}
-              onClick={previewMode ? undefined : handleTagClick}
+              onClick={isInteractive ? handleTagClick : undefined}
               defaultVisibleTags={1}
             />
           </>

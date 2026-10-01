@@ -58,7 +58,7 @@ export function SearchEmbeddablFieldStatsTableComponent({
       searchSessionId={fetchContext?.searchSessionId}
       isEsqlMode={isEsql}
       timeRange={fetchContext?.timeRange}
-      previewMode={viewMode === 'preview'}
+      isInteractive={viewMode !== 'non-interactive'}
     />
   );
 }

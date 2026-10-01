@@ -17,19 +17,19 @@ describe('TimeSliderPopoverButton', () => {
     to: 1000,
     formatDate: (v: number) => String(v),
     onClick: jest.fn(),
-    previewMode: false,
+    isInteractive: true,
   };
 
-  it('should enable the popover toggle button when previewMode is false', () => {
+  it('should enable the popover toggle button when isInteractive is true', () => {
     const { getByTestId } = render(
-      <TimeSliderPopoverButton {...defaultProps} previewMode={false} />
+      <TimeSliderPopoverButton {...defaultProps} isInteractive={true} />
     );
     expect(getByTestId('timeSlider-popoverToggleButton')).not.toBeDisabled();
   });
 
-  it('should disable the popover toggle button when previewMode is true', () => {
+  it('should disable the popover toggle button when isInteractive is false', () => {
     const { getByTestId } = render(
-      <TimeSliderPopoverButton {...defaultProps} previewMode={true} />
+      <TimeSliderPopoverButton {...defaultProps} isInteractive={false} />
     );
     expect(getByTestId('timeSlider-popoverToggleButton')).toBeDisabled();
   });

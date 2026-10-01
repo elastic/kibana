@@ -319,9 +319,11 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                       }
                       onResize={(size) => chartWidth$.next(size)}
                       selection={selectedCells}
-                      onCellsSelection={viewMode === 'preview' ? undefined : onCellsSelection}
+                      onCellsSelection={
+                        viewMode === 'non-interactive' ? undefined : onCellsSelection
+                      }
                       onPaginationChange={
-                        viewMode === 'preview'
+                        viewMode === 'non-interactive'
                           ? undefined
                           : (update) => {
                               if (update.fromPage) {

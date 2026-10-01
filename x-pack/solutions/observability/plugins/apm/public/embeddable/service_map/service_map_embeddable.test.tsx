@@ -545,7 +545,7 @@ describe('ServiceMapEmbeddable', () => {
     });
   });
 
-  describe('preview mode', () => {
+  describe('non-interactive mode', () => {
     const dataWithNodes = {
       nodes: [
         {
@@ -568,21 +568,21 @@ describe('ServiceMapEmbeddable', () => {
       });
     });
 
-    it('passes isInteractive=false to ServiceMapGraph when viewMode is preview', () => {
-      renderEmbeddable({ viewMode: 'preview' });
+    it('passes isInteractive=false to ServiceMapGraph when viewMode is non-interactive', () => {
+      renderEmbeddable({ viewMode: 'non-interactive' });
 
       const lastProps = mockServiceMapGraph.mock.calls.at(-1)?.[0];
       expect(lastProps?.isInteractive).toBe(false);
     });
 
-    it('shows node interaction controls when not in preview mode', () => {
+    it('shows node interaction controls when interactive', () => {
       const { queryByTestId } = renderEmbeddable();
 
       expect(queryByTestId('serviceMapInteractionControls')).toBeInTheDocument();
     });
 
-    it('hides node interaction controls in preview mode', () => {
-      const { queryByTestId } = renderEmbeddable({ viewMode: 'preview' });
+    it('hides node interaction controls when non-interactive', () => {
+      const { queryByTestId } = renderEmbeddable({ viewMode: 'non-interactive' });
 
       expect(queryByTestId('serviceMapInteractionControls')).not.toBeInTheDocument();
     });

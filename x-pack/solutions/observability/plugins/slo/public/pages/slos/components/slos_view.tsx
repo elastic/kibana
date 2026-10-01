@@ -22,10 +22,10 @@ export interface Props {
   loading: boolean;
   error: boolean;
   view: ViewType;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
-export function SlosView({ sloList, loading, error, view, previewMode = false }: Props) {
+export function SlosView({ sloList, loading, error, view, isInteractive = true }: Props) {
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
   }
@@ -41,7 +41,7 @@ export function SlosView({ sloList, loading, error, view, previewMode = false }:
           sloList={sloList}
           loading={loading}
           error={error}
-          previewMode={previewMode}
+          isInteractive={isInteractive}
         />
       </Wrapper>
     );

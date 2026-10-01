@@ -214,7 +214,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                     onRenderComplete={onRenderComplete}
                     onError={onError}
                     timeRange$={appliedTimeRange$}
-                    previewMode={viewMode === 'preview'}
+                    isInteractive={viewMode !== 'non-interactive'}
                   />
                 </div>
               </KibanaContextProvider>

@@ -22,7 +22,7 @@ export function BurnRate({
   sloInstanceId,
   duration,
   reloadSubject,
-  previewMode = false,
+  isInteractive = true,
 }: EmbeddableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
@@ -86,7 +86,7 @@ export function BurnRate({
               onClick={() => {
                 setSelectedSlo(slo);
               }}
-              disabled={previewMode}
+              disabled={!isInteractive}
             >
               <h2>{slo.name}</h2>
             </EuiLink>

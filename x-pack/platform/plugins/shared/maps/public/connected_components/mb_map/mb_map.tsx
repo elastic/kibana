@@ -75,7 +75,7 @@ export interface Props {
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => Promise<void>;
   renderTooltipContent?: RenderToolTipContent;
-  previewMode?: boolean;
+  isInteractive?: boolean;
   timeslice?: Timeslice;
   featureModeActive: boolean;
   filterModeActive: boolean;

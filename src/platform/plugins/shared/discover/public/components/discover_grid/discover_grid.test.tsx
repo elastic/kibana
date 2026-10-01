@@ -63,13 +63,13 @@ const baseProps = {
   onUpdateSampleSize: jest.fn(),
 };
 
-describe('DiscoverGrid preview mode', () => {
+describe('DiscoverGrid isInteractive', () => {
   beforeEach(() => {
     mockUnifiedDataTable.mockClear();
   });
 
-  it('passes interactive props to UnifiedDataTable when previewMode is false', () => {
-    render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} previewMode={false} />);
+  it('passes interactive props to UnifiedDataTable when isInteractive is true', () => {
+    render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} isInteractive={true} />);
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastProps?.canDragAndDropColumns).toBe(true);
     expect(lastProps?.visibleCellActions).toBe(3);
@@ -78,8 +78,8 @@ describe('DiscoverGrid preview mode', () => {
     expect(lastProps?.disableCellActions).not.toBe(true);
   });
 
-  it('passes disabled props to UnifiedDataTable when previewMode is true', () => {
-    render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} previewMode={true} />);
+  it('passes disabled props to UnifiedDataTable when isInteractive is false', () => {
+    render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} isInteractive={false} />);
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastProps?.isSortEnabled).toBe(false);
     expect(lastProps?.disableCellActions).toBe(true);
@@ -93,7 +93,7 @@ describe('DiscoverGrid preview mode', () => {
     expect(lastProps?.canDragAndDropColumns).toBeUndefined();
   });
 
-  it('defaults to interactive mode when previewMode is not set', () => {
+  it('defaults to interactive mode when isInteractive is not set', () => {
     render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} />);
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastProps?.canDragAndDropColumns).toBe(true);

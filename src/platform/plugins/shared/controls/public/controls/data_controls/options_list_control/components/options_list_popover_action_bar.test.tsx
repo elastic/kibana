@@ -40,7 +40,7 @@ const renderComponent = ({
   disableMultiValueEmptySelection = false,
 }: {
   componentApi: OptionsListComponentApi;
-  displaySettings: OptionsListDisplaySettings & { previewMode?: boolean };
+  displaySettings: OptionsListDisplaySettings & { isInteractive?: boolean };
   showOnlySelected?: boolean;
   disableMultiValueEmptySelection?: boolean;
 }) => {
@@ -162,7 +162,7 @@ describe('Options list popover', () => {
     expect(getSelectAllCheckbox()).toBeDisabled();
   });
 
-  test('should disable bulk select checkbox when previewMode is true', () => {
+  test('should disable bulk select checkbox when isInteractive is false', () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.setTotalCardinality(3);
     contextMock.componentApi.setAvailableOptions([
@@ -172,7 +172,7 @@ describe('Options list popover', () => {
     ]);
     renderComponent({
       ...contextMock,
-      displaySettings: { ...contextMock.displaySettings, previewMode: true },
+      displaySettings: { ...contextMock.displaySettings, isInteractive: false },
     });
 
     expect(getSelectAllCheckbox()).toBeDisabled();

@@ -23,7 +23,7 @@ export interface EmbeddableSloProps {
   sloInstanceId: string | undefined;
   reloadSubject?: Subject<boolean>;
   onRenderComplete?: () => void;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 export type ErrorBudgetApi = DefaultEmbeddableApi<ErrorBudgetEmbeddableState> &

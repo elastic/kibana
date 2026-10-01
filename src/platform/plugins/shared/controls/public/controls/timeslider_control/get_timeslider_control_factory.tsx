@@ -383,7 +383,7 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
                   formatDate={formatDate}
                   from={from}
                   to={to}
-                  previewMode={viewMode === 'preview'}
+                  isInteractive={viewMode !== 'non-interactive'}
                 />
               }
               isOpen={isPopoverOpen}

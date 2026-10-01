@@ -127,14 +127,14 @@ export const MonitorsTable = ({
   items,
   setFlyoutConfigCallback,
   enableServerPagination = true,
-  previewMode = false,
+  isInteractive = true,
 }: {
   items: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   // Set to `false` when `items` is a subset of the overall result set (e.g. a
   // single group's monitors) — see `resolveTablePaginationState` above.
   enableServerPagination?: boolean;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) => {
   const { loaded, status, loading, total } = useOverviewStatusState();
 
@@ -167,7 +167,7 @@ export const MonitorsTable = ({
     setFlyoutConfigCallback,
     items: pageOfItems,
     isFlyoutOpen,
-    previewMode,
+    isInteractive,
   });
 
   const dispatch = useDispatch();
@@ -219,9 +219,8 @@ export const MonitorsTable = ({
       const locationLabel = monitor.locations[0]?.label ?? '';
       return {
         style: { cursor: 'pointer' },
-        onClick: previewMode
-          ? undefined
-          : (e) => {
+        onClick: isInteractive
+          ? (e) => {
               const target = e.target as HTMLElement;
               // Skip flyout when clicking interactive elements that have their own behavior
               if (target.closest('a, button, [role="button"]')) {
@@ -236,10 +235,11 @@ export const MonitorsTable = ({
                   spaces,
                 })
               );
-            },
+            }
+          : undefined,
       };
     },
-    [previewMode, dispatch, setFlyoutConfigCallback]
+    [isInteractive, dispatch, setFlyoutConfigCallback]
   );
 
   const isLoading = !status || !loaded || loading;
@@ -250,8 +250,8 @@ export const MonitorsTable = ({
       items={pageOfItems}
       columns={columns}
       loading={isLoading}
-      pagination={previewMode ? undefined : pagination}
-      sorting={previewMode ? undefined : sorting}
+      pagination={isInteractive ? pagination : undefined}
+      sorting={isInteractive ? sorting : undefined}
       onChange={onTableChange}
       rowProps={getRowProps}
       noItemsMessage={

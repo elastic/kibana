@@ -32,14 +32,14 @@ export interface GroupOverviewPanelProps {
   groupFilters: GroupFilters;
   dashboardFilters?: Filter[];
   reloadSubject: Subject<boolean>;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 export function GroupOverviewPanel({
   groupFilters,
   dashboardFilters = [],
   reloadSubject,
-  previewMode = false,
+  isInteractive = true,
 }: GroupOverviewPanelProps) {
   return (
     <div
@@ -66,7 +66,7 @@ export function GroupOverviewPanel({
             kqlQuery={groupFilters.kql_query ?? ''}
             filters={[...(toStoredFilters(groupFilters.filters) ?? []), ...dashboardFilters]}
             reloadSubject={reloadSubject}
-            previewMode={previewMode}
+            isInteractive={isInteractive}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -76,17 +76,17 @@ export function GroupOverviewPanel({
 
 export function SingleOverviewCardList({
   sloId,
-  previewMode,
+  isInteractive,
 }: {
   sloId: string;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) {
   return (
     <div data-test-subj="sloSingleOverviewPanel" style={{ width: '100%' }}>
       <SloCardChartList
         data-test-subj="sloSingleOverviewPanel"
         sloId={sloId}
-        previewMode={previewMode}
+        isInteractive={isInteractive}
       />
     </div>
   );
@@ -100,7 +100,7 @@ export interface SloOverviewPanelContentProps {
   dashboardFilters?: Filter[];
   remoteName: string | undefined;
   reloadSubject: Subject<boolean>;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 export function SloOverviewPanelContent({
@@ -111,7 +111,7 @@ export function SloOverviewPanelContent({
   dashboardFilters,
   remoteName,
   reloadSubject,
-  previewMode,
+  isInteractive,
 }: SloOverviewPanelContentProps) {
   const { data: sloDetails } = useFetchSloDetails({
     sloId: sloId ?? undefined,
@@ -127,12 +127,12 @@ export function SloOverviewPanelContent({
         groupFilters={groupFilters!}
         dashboardFilters={dashboardFilters}
         reloadSubject={reloadSubject}
-        previewMode={previewMode}
+        isInteractive={isInteractive}
       />
     );
   }
   if (showCardList && sloId) {
-    return <SingleOverviewCardList sloId={sloId} previewMode={previewMode} />;
+    return <SingleOverviewCardList sloId={sloId} isInteractive={isInteractive} />;
   }
   return (
     <SloOverview
@@ -140,7 +140,7 @@ export function SloOverviewPanelContent({
       sloInstanceId={sloInstanceId}
       reloadSubject={reloadSubject}
       remoteName={remoteName}
-      previewMode={previewMode}
+      isInteractive={isInteractive}
     />
   );
 }

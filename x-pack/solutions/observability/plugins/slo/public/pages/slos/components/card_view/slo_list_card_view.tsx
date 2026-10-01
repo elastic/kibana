@@ -24,7 +24,7 @@ export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }
 
 const useColumns = () => {
@@ -44,7 +44,7 @@ const useColumns = () => {
   }
 };
 
-export function SloListCardView({ sloList, loading, error, previewMode = false }: Props) {
+export function SloListCardView({ sloList, loading, error, isInteractive = true }: Props) {
   const sloIdsAndInstanceIds = sloList.map((slo) => [slo.id, slo.instanceId] as [string, string]);
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
@@ -82,7 +82,7 @@ export function SloListCardView({ sloList, loading, error, previewMode = false }
               }
               historicalSummaryLoading={historicalSummaryLoading}
               refetchRules={refetchRules}
-              previewMode={previewMode}
+              isInteractive={isInteractive}
             />
           </EuiFlexItem>
         ))}

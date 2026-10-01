@@ -133,7 +133,7 @@ export const OptionsListPopoverActionBar = ({
     hasNoOptions ||
     hasTooManyOptions ||
     showOnlySelected ||
-    displaySettings.previewMode ||
+    !displaySettings.isInteractive ||
     isEmptySelectionDisabled;
 
   const handleBulkAction = useCallback(

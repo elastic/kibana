@@ -522,7 +522,7 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
-          isDisabled={viewMode === 'preview'}
+          isDisabled={viewMode === 'non-interactive'}
           showDatePicker={showDatePicker}
           query={query as Query | undefined}
           screenTitle={title}
@@ -553,7 +553,7 @@ export function InternalDashboardTopNav({
           esqlApproximation={{
             isApproximate: esqlApproximation ?? false,
             onChange: dashboardApi.setEsqlApproximation,
-            disabled: viewMode === 'preview' || !hasEsqlPanel,
+            disabled: viewMode === 'non-interactive' || !hasEsqlPanel,
             additionalText: i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
               defaultMessage:
                 'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',

@@ -277,7 +277,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
               isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
               isEdit={viewMode === 'edit'}
-              previewMode={viewMode === 'preview'}
+              isInteractive={viewMode !== 'non-interactive'}
               max={max}
               min={min}
               onChange={selections.setValue}

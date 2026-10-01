@@ -45,7 +45,7 @@ export interface Props {
 export function MapRenderer(props: Props) {
   const mapApiRef = useRef<MapApi | undefined>(undefined);
   const beforeApiReadyLayerListRef = useRef<LayerDescriptor[] | undefined>(undefined);
-  const viewMode$ = new BehaviorSubject(props.interactive === false ? 'preview' : 'view');
+  const viewMode$ = new BehaviorSubject(props.interactive === false ? 'non-interactive' : 'view');
 
   useEffect(() => {
     if (mapApiRef.current) {

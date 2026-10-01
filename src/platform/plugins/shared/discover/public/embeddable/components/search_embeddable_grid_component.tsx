@@ -410,7 +410,7 @@ export function SearchEmbeddableGridComponent({
       setExpandedDoc={setExpandedDoc}
       searchContext={searchContext}
       flyoutMenuTrailingActions={flyoutMenuTrailingActions}
-      previewMode={viewMode === 'preview'}
+      isInteractive={viewMode !== 'non-interactive'}
     />
   );
 }

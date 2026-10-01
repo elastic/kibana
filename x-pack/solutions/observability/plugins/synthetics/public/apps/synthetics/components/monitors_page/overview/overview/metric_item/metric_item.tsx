@@ -122,12 +122,12 @@ export const MetricItem = ({
   monitor,
   onClick,
   style,
-  previewMode = false,
+  isInteractive = true,
 }: {
   monitor: OverviewStatusMetaData;
   style?: React.CSSProperties;
   onClick: (params: FlyoutParamProps) => void;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) => {
   const status = monitor.overallStatus;
   const showLastRun = useSelector(selectOverviewShowLastRun);
@@ -230,9 +230,8 @@ export const MetricItem = ({
         <Chart id={`${monitor.configId}-${locationId}-metric-chart`}>
           <Settings
             onElementClick={
-              previewMode
-                ? undefined
-                : () => {
+              isInteractive
+                ? () => {
                     if (testInProgress) {
                       dispatch(toggleTestNowFlyoutAction(monitor.configId));
                       dispatch(toggleErrorPopoverOpen(null));
@@ -250,6 +249,7 @@ export const MetricItem = ({
                       });
                     }
                   }
+                : undefined
             }
             baseTheme={chartBaseTheme}
             locale={i18n.getLocale()}
@@ -265,7 +265,7 @@ export const MetricItem = ({
                     <div
                       tabIndex={0}
                       css={{ width: '100%', minWidth: 0 }}
-                      {...(!previewMode && {
+                      {...(isInteractive && {
                         role: 'button',
                         onMouseDown: (e) => e.stopPropagation(),
                         onMouseUp: (e) => e.stopPropagation(),
@@ -321,7 +321,7 @@ export const MetricItem = ({
             ]}
           />
         </Chart>
-        {!previewMode && (
+        {isInteractive && (
           <div className={isPopoverOpen ? '' : 'cardItemActions_hover'}>
             <ActionsPopover
               monitor={monitor}
@@ -332,7 +332,7 @@ export const MetricItem = ({
             />
           </div>
         )}
-        {configIdByLocation && !previewMode && (
+        {configIdByLocation && isInteractive && (
           <MetricItemIcon
             monitor={monitor}
             status={status}

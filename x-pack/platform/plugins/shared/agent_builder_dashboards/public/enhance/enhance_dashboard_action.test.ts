@@ -153,15 +153,18 @@ describe('createEnhanceDashboardAction', () => {
     ).resolves.toBe(false);
   });
 
-  it.each(['view', 'print', 'preview'] as const)('is incompatible in %s mode', async (viewMode) => {
-    const { action } = createAction();
+  it.each(['view', 'print', 'non-interactive'] as const)(
+    'is incompatible in %s mode',
+    async (viewMode) => {
+      const { action } = createAction();
 
-    await expect(
-      action.isCompatible!({
-        dashboardApi: createDashboardApi({ viewMode }),
-      })
-    ).resolves.toBe(false);
-  });
+      await expect(
+        action.isCompatible!({
+          dashboardApi: createDashboardApi({ viewMode }),
+        })
+      ).resolves.toBe(false);
+    }
+  );
 
   it('is incompatible without write access', async () => {
     const { action } = createAction({ canWriteDashboards: false });

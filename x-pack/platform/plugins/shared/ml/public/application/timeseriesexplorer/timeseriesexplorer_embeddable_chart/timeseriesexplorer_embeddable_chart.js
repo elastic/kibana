@@ -516,7 +516,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       chartHeight,
       lastRefresh,
       onForecastComplete,
-      previewMode,
+      isInteractive,
       selectedEntities,
       selectedDetectorIndex,
       selectedJob,
@@ -571,7 +571,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
       autoZoomDuration,
-      previewMode,
+      isInteractive,
     };
 
     const entityControls = this.getControlsForDetector();
@@ -629,10 +629,10 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
               <EntityFieldNamesAndFilterButtons
                 api={this.props.api}
                 entityData={chartDetails.entityData}
-                previewMode={previewMode}
+                isInteractive={isInteractive}
               />
               <EuiFlexGroup style={{ float: 'right' }} alignItems="center">
-                {!previewMode && showModelBoundsCheckbox && (
+                {isInteractive && showModelBoundsCheckbox && (
                   <TimeseriesExplorerCheckbox
                     id="toggleModelBoundsCheckbox"
                     label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
@@ -643,7 +643,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   />
                 )}
 
-                {!previewMode && showAnnotationsCheckbox && (
+                {isInteractive && showAnnotationsCheckbox && (
                   <TimeseriesExplorerCheckbox
                     id="toggleAnnotationsCheckbox"
                     label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
@@ -654,7 +654,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   />
                 )}
 
-                {!previewMode && showForecastCheckbox && (
+                {isInteractive && showForecastCheckbox && (
                   <EuiFlexItem grow={false}>
                     <TimeseriesExplorerCheckbox
                       id="toggleShowForecastCheckbox"
@@ -671,7 +671,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   </EuiFlexItem>
                 )}
 
-                {!previewMode &&
+                {isInteractive &&
                   arePartitioningFieldsProvided &&
                   selectedJob &&
                   shouldShowForecastButton === true && (

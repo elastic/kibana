@@ -78,7 +78,7 @@ const WithFiltersComponent = ({
     <OverviewStatus
       titleAppend={hasFilters ? <ShowSelectedFilters filters={filters ?? {}} /> : null}
       hideTitle={true}
-      areStatsClickable={viewMode !== 'preview'}
+      areStatsClickable={viewMode !== 'non-interactive'}
       onStatusFilterClick={(statusFilter) => {
         application?.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
           path: `?statusFilter=${statusFilter}`,

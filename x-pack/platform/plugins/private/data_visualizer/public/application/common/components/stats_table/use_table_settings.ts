@@ -29,13 +29,13 @@ export function useTableSettings<TypeOfItem extends object>(
   pageState: DataVisualizerTableState,
   updatePageState: (update: DataVisualizerTableState) => void,
   isEsql: boolean = false,
-  previewMode: boolean
+  isInteractive: boolean
 ): UseTableSettingsReturnValue<TypeOfItem> {
   const { pageIndex, pageSize, sortField, sortDirection } = pageState;
 
   const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = useCallback(
     ({ page, sort }: CriteriaWithPagination<TypeOfItem>) => {
-      if (previewMode) return;
+      if (!isInteractive) return;
       const result = {
         ...pageState,
         pageIndex: page?.index ?? pageState.pageIndex,
@@ -45,7 +45,7 @@ export function useTableSettings<TypeOfItem extends object>(
       };
       updatePageState(result);
     },
-    [pageState, updatePageState, previewMode]
+    [pageState, updatePageState, isInteractive]
   );
 
   const pagination = useMemo(
@@ -53,14 +53,14 @@ export function useTableSettings<TypeOfItem extends object>(
       pageIndex,
       pageSize,
       totalItemCount: items.length,
-      ...(!previewMode && { pageSizeOptions: isEsql ? [10, 25] : PAGE_SIZE_OPTIONS }),
+      ...(isInteractive && { pageSizeOptions: isEsql ? [10, 25] : PAGE_SIZE_OPTIONS }),
     }),
-    [items, pageIndex, pageSize, isEsql, previewMode]
+    [items, pageIndex, pageSize, isEsql, isInteractive]
   );
 
   const sorting = useMemo(
     () =>
-      previewMode
+      !isInteractive
         ? undefined
         : {
             sort: {
@@ -68,7 +68,7 @@ export function useTableSettings<TypeOfItem extends object>(
               direction: sortDirection as Direction,
             },
           },
-    [sortField, sortDirection, previewMode]
+    [sortField, sortDirection, isInteractive]
   );
 
   return { onTableChange, pagination, sorting };

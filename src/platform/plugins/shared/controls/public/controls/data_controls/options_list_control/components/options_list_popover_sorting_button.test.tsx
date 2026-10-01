@@ -123,13 +123,13 @@ describe('Options list sorting button', () => {
     expect(optionsText).toEqual(['By document count', 'Numerically']);
   });
 
-  test('when previewMode is true, disables the sorting button', () => {
+  test('when isInteractive is false, disables the sorting button', () => {
     const contextMock = getOptionsListContextMock();
     const component = render(
       <OptionsListControlContext.Provider
         value={{
           componentApi: contextMock.componentApi,
-          displaySettings: { ...contextMock.displaySettings, previewMode: true },
+          displaySettings: { ...contextMock.displaySettings, isInteractive: false },
         }}
       >
         <OptionsListPopoverSortingButton showOnlySelected={false} />

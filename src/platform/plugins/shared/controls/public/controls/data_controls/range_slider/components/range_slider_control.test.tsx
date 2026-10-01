@@ -150,8 +150,10 @@ describe('RangeSliderControl', () => {
     expect(rangeSliderControl.getByTestId('rangeSlider__upperBoundFieldNumber')).not.toBeDisabled();
   });
 
-  it('should disable range slider inputs when previewMode is true', () => {
-    const rangeSliderControl = render(<RangeSliderControl {...defaultProps} previewMode={true} />);
+  it('should disable range slider inputs when isInteractive is false', () => {
+    const rangeSliderControl = render(
+      <RangeSliderControl {...defaultProps} isInteractive={false} />
+    );
 
     expect(rangeSliderControl.getByTestId('rangeSlider__lowerBoundFieldNumber')).toBeDisabled();
     expect(rangeSliderControl.getByTestId('rangeSlider__upperBoundFieldNumber')).toBeDisabled();

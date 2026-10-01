@@ -39,8 +39,8 @@ jest.mock('./saved_search_grid', () => ({
     mockDiscoverGridEmbeddableProps(props);
     return (
       <div data-test-subj="mockedDiscoverGridEmbeddable">
-        {/* Mirror the real component's renderCustomToolbar suppression in preview mode */}
-        {!props.previewMode && <div data-test-subj="discoverGridToolbar">Toolbar</div>}
+        {/* Mirror the real component's renderCustomToolbar suppression when not interactive */}
+        {Boolean(props.isInteractive) && <div data-test-subj="discoverGridToolbar">Toolbar</div>}
       </div>
     );
   },
@@ -395,8 +395,8 @@ describe('SearchEmbeddableGridComponent', () => {
     });
   });
 
-  describe('previewMode', () => {
-    it('should pass previewMode=true to DiscoverGridEmbeddable when viewMode is preview', async () => {
+  describe('isInteractive', () => {
+    it('should pass isInteractive=false to DiscoverGridEmbeddable when viewMode is non-interactive', async () => {
       const savedSearch = createSavedSearch(false);
       const api = createApi(savedSearch);
       const stateManager = createStateManager();
@@ -404,7 +404,7 @@ describe('SearchEmbeddableGridComponent', () => {
       stateManager.rows.next(rows);
       stateManager.totalHitCount.next(rows.length);
 
-      (api.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('preview');
+      (api.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('non-interactive');
 
       render(
         <DiscoverTestProvider services={services}>
@@ -430,10 +430,10 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
       });
 
-      expect(getLastGridProps().previewMode).toBe(true);
+      expect(getLastGridProps().isInteractive).toBe(false);
     });
 
-    it('should show grid toolbar controls when not in preview mode', async () => {
+    it('should show grid toolbar controls when interactive', async () => {
       renderComponent({ isEsql: false });
 
       await waitFor(() => {
@@ -443,7 +443,7 @@ describe('SearchEmbeddableGridComponent', () => {
       expect(screen.queryByTestId('discoverGridToolbar')).toBeInTheDocument();
     });
 
-    it('should hide grid toolbar controls in preview mode', async () => {
+    it('should hide grid toolbar controls when not interactive', async () => {
       const savedSearch = createSavedSearch(false);
       const api = createApi(savedSearch);
       const stateManager = createStateManager();
@@ -451,7 +451,7 @@ describe('SearchEmbeddableGridComponent', () => {
       stateManager.rows.next(rows);
       stateManager.totalHitCount.next(rows.length);
 
-      (api.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('preview');
+      (api.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('non-interactive');
 
       const { queryByTestId } = render(
         <DiscoverTestProvider services={services}>

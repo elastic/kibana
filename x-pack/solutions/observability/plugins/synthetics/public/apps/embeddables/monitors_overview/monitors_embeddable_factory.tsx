@@ -182,7 +182,7 @@ export const getMonitorsEmbeddableFactory = (
                 reload$={reload$}
                 filters={filters || DEFAULT_FILTERS}
                 view={view}
-                previewMode={viewMode === 'preview'}
+                isInteractive={viewMode !== 'non-interactive'}
               />
             </div>
           );

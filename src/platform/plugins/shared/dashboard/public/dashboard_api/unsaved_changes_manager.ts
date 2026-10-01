@@ -92,7 +92,7 @@ export function initializeUnsavedChangesManager({
   const unsavedChangesSubscription = combineLatest([viewMode$, dashboardStateChanges$])
     .pipe(
       debounceTime(DEBOUNCE_TIME),
-      filter(([viewMode]) => viewMode !== 'preview') // don't track unsaved changes in preview mode
+      filter(([viewMode]) => viewMode !== 'non-interactive') // don't track unsaved changes in non-interactive mode
     )
     .subscribe(([viewMode, dashboardChanges]) => {
       const hasUnsavedChanges = Object.keys(dashboardChanges ?? {}).length > 0;

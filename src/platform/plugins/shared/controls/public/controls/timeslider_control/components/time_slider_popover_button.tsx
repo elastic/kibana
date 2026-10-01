@@ -15,7 +15,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Props {
   onClick: () => void;
-  previewMode: boolean;
+  isInteractive: boolean;
   formatDate: (epoch: number) => string;
   from: number;
   to: number;
@@ -66,7 +66,7 @@ export function TimeSliderPopoverButton(props: Props) {
       onClick={props.onClick}
       data-test-subj="timeSlider-popoverToggleButton"
       css={styles.anchor}
-      disabled={props.previewMode}
+      disabled={!props.isInteractive}
     >
       <EuiText className="timeSlider__anchorText eui-textTruncate" size="s">
         <span>{props.formatDate(props.from)}</span>

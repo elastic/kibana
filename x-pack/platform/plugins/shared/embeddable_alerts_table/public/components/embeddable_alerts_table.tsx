@@ -167,7 +167,7 @@ export const EmbeddableAlertsTable = ({
         lastReloadRequestTime={lastReloadRequestTime}
         onUpdate={onUpdate}
         showAlertStatusWithFlapping
-        renderActionsCell={viewMode === 'preview' ? undefined : AlertActionsCell}
+        renderActionsCell={viewMode === 'non-interactive' ? undefined : AlertActionsCell}
         toolbarVisibility={{
           showFullScreenSelector: false,
           showColumnSelector: false,
@@ -187,7 +187,7 @@ export const EmbeddableAlertsTable = ({
         browserFields={{}}
         services={services}
         renderCellValue={
-          viewMode === 'preview'
+          viewMode === 'non-interactive'
             ? (props) => {
                 if (props.columnId === ALERT_RULE_NAME && props.alert) {
                   const ruleName = props.alert[ALERT_RULE_NAME]?.[0] as string | undefined;

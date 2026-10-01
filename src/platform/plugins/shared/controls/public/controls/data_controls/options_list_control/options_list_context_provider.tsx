@@ -16,7 +16,7 @@ import type { OptionsListCustomStrings } from './types';
 
 interface Context {
   componentApi: OptionsListComponentApi;
-  displaySettings: OptionsListDisplaySettings & { previewMode?: boolean };
+  displaySettings: OptionsListDisplaySettings & { isInteractive?: boolean };
   // Optional custom strings to override default labels
   customStrings?: OptionsListCustomStrings;
 }

@@ -137,10 +137,10 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
     });
   });
 
-  describe('preview mode', () => {
-    it('passes undefined onCellsSelection and onPaginationChange when viewMode is preview', async () => {
+  describe('non-interactive mode', () => {
+    it('passes undefined onCellsSelection and onPaginationChange when viewMode is non-interactive', async () => {
       const uuid = 'preview-uuid';
-      const viewMode$ = new BehaviorSubject<'preview'>('preview');
+      const viewMode$ = new BehaviorSubject<'non-interactive'>('non-interactive');
       const parentApi = {
         executionContext: { type: 'dashboard', id: 'dashboard-id' },
         viewMode$,

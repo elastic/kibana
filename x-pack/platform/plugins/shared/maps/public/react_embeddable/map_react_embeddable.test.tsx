@@ -57,9 +57,9 @@ jest.mock('../connected_components/map_container', () => ({
     return (
       <div>
         MockMapContainer
-        {/* Mirror the real MapContainer: ToolbarOverlay and RightSideControls are hidden in preview mode */}
-        {!props.previewMode && <div data-test-subj="mapToolbarOverlay">Toolbar</div>}
-        {!props.previewMode && <div data-test-subj="mapRightSideControls">Controls</div>}
+        {/* Mirror the real MapContainer: ToolbarOverlay and RightSideControls are hidden when not interactive */}
+        {Boolean(props.isInteractive) && <div data-test-subj="mapToolbarOverlay">Toolbar</div>}
+        {Boolean(props.isInteractive) && <div data-test-subj="mapRightSideControls">Controls</div>}
       </div>
     );
   },
@@ -120,9 +120,9 @@ describe('map embeddable', () => {
     });
   });
 
-  describe('previewMode', () => {
-    it('passes previewMode=true to MapContainer when viewMode is preview', (done) => {
-      const viewMode$ = new BehaviorSubject<'preview'>('preview');
+  describe('isInteractive', () => {
+    it('passes isInteractive=false to MapContainer when viewMode is non-interactive', (done) => {
+      const viewMode$ = new BehaviorSubject<'non-interactive'>('non-interactive');
       const parentApi = { viewMode$ };
       const uuid = 'preview-map-1';
       const finalizeApi = (api: any) => ({
@@ -145,13 +145,13 @@ describe('map embeddable', () => {
           mockMapContainer.mockClear();
           render(<Component />);
           const lastProps = mockMapContainer.mock.calls.at(-1)?.[0];
-          expect(lastProps?.previewMode).toBe(true);
+          expect(lastProps?.isInteractive).toBe(false);
           done();
         })
         .catch(done);
     });
 
-    it('shows toolbar and controls when not in preview mode', (done) => {
+    it('shows toolbar and controls when interactive', (done) => {
       const viewMode$ = new BehaviorSubject<'view'>('view');
       const parentApi = { viewMode$ };
       const uuid = 'view-map-toolbar';
@@ -180,8 +180,8 @@ describe('map embeddable', () => {
         .catch(done);
     });
 
-    it('hides toolbar and controls in preview mode', (done) => {
-      const viewMode$ = new BehaviorSubject<'preview'>('preview');
+    it('hides toolbar and controls when not interactive', (done) => {
+      const viewMode$ = new BehaviorSubject<'non-interactive'>('non-interactive');
       const parentApi = { viewMode$ };
       const uuid = 'preview-map-toolbar';
       const finalizeApi = (api: any) => ({

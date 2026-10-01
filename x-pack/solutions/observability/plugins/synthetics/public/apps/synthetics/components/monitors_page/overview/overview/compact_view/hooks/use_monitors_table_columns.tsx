@@ -53,12 +53,12 @@ export const useMonitorsTableColumns = ({
   setFlyoutConfigCallback,
   items,
   isFlyoutOpen,
-  previewMode = false,
+  isInteractive = true,
 }: {
   items: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   isFlyoutOpen?: boolean;
-  previewMode?: boolean;
+  isInteractive?: boolean;
 }) => {
   const history = useHistory();
   // Skip the histogram fetch while the flyout is open — the column it feeds
@@ -139,9 +139,13 @@ export const useMonitorsTableColumns = ({
         field: 'overallStatus',
         name: STATUS,
         width: '160px',
-        sortable: !previewMode,
+        sortable: isInteractive,
         render: (_overallStatus: string, monitor: OverviewStatusMetaData) => (
-          <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} previewMode={previewMode} />
+          <MonitorStatusCol
+            monitor={monitor}
+            openFlyout={openFlyout}
+            isInteractive={isInteractive}
+          />
         ),
       },
       {
@@ -152,7 +156,7 @@ export const useMonitorsTableColumns = ({
         // ellipsis. The URL column it replaced was 15% wide on its own.
         // Reclaimed budget comes from the Tags column (15% → 12%).
         width: '25%',
-        sortable: !previewMode,
+        sortable: isInteractive,
         render: (name: OverviewStatusMetaData['name'], monitor) => (
           <EuiFlexGroup
             direction="column"
@@ -169,9 +173,9 @@ export const useMonitorsTableColumns = ({
                   <MonitorTypeBadge
                     monitorType={monitor.type}
                     onClick={
-                      previewMode
-                        ? undefined
-                        : () => onClickMonitorFilter('monitorTypes', monitor.type)
+                      isInteractive
+                        ? () => onClickMonitorFilter('monitorTypes', monitor.type)
+                        : undefined
                     }
                   />
                 </EuiFlexItem>
@@ -214,9 +218,7 @@ export const useMonitorsTableColumns = ({
                     className="eui-textTruncate"
                     css={{ display: 'block', width: '100%' }}
                   >
-                    {previewMode ? (
-                      monitor.urls
-                    ) : (
+                    {isInteractive ? (
                       <EuiLink
                         data-test-subj="syntheticsCompactViewUrl"
                         href={monitor.urls}
@@ -236,6 +238,8 @@ export const useMonitorsTableColumns = ({
                       >
                         {monitor.urls}
                       </EuiLink>
+                    ) : (
+                      monitor.urls
                     )}
                   </EuiText>
                 </EuiToolTip>
@@ -253,7 +257,7 @@ export const useMonitorsTableColumns = ({
             <MonitorLocations
               configId={monitor.configId}
               locationsWithStatus={monitor.locations}
-              previewMode={previewMode}
+              isInteractive={isInteractive}
             />
           );
         },
@@ -319,7 +323,7 @@ export const useMonitorsTableColumns = ({
               render: (monitor: OverviewStatusMetaData) => (
                 <TagsList
                   tags={monitor.tags}
-                  onClick={previewMode ? undefined : (tag) => onClickMonitorFilter('tags', tag)}
+                  onClick={isInteractive ? (tag) => onClickMonitorFilter('tags', tag) : undefined}
                 />
               ),
             },
@@ -389,16 +393,16 @@ export const useMonitorsTableColumns = ({
           <MonitorTimestamp timestamp={updatedAt} absolute={absoluteTimestamps} />
         ),
       },
-      ...(previewMode
-        ? []
-        : [
+      ...(isInteractive
+        ? [
             {
               name: ACTIONS,
               render: (monitor: OverviewStatusMetaData) => <MonitorsActions monitor={monitor} />,
               align: 'right',
               width: '40px',
             } as EuiBasicTableColumn<OverviewStatusMetaData>,
-          ]),
+          ]
+        : []),
     ];
 
     return allColumns
@@ -415,7 +419,7 @@ export const useMonitorsTableColumns = ({
     minInterval,
     onClickMonitorFilter,
     openFlyout,
-    previewMode,
+    isInteractive,
     showFromAllSpaces,
     // Depending on the resolved space id (a string) instead of the whole
     // `space` object keeps the columns array referentially stable: the hook

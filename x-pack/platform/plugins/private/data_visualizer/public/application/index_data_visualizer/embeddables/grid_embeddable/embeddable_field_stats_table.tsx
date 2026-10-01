@@ -51,7 +51,7 @@ const EmbeddableFieldStatsTableWrapper = (
   } = useDataVisualizerGridData({
     input: props,
     dataVisualizerListState,
-    previewMode: props.previewMode,
+    isInteractive: props.isInteractive,
   });
 
   const totalCount = overallStats?.totalCount;
@@ -75,7 +75,7 @@ const EmbeddableFieldStatsTableWrapper = (
               item={item}
               dataView={props.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
-              onAddFilter={props.previewMode ? undefined : onAddFilter}
+              onAddFilter={props.isInteractive ? onAddFilter : undefined}
               totalDocuments={props.totalDocuments}
             />
           );
@@ -89,7 +89,7 @@ const EmbeddableFieldStatsTableWrapper = (
       searchString,
       props.totalDocuments,
       onAddFilter,
-      props.previewMode,
+      props.isInteractive,
     ]
   );
 
@@ -115,7 +115,7 @@ const EmbeddableFieldStatsTableWrapper = (
       overallStatsRunning={overallStatsProgress.isRunning}
       totalCount={totalCount}
       renderFieldName={props.renderFieldName}
-      previewMode={props.previewMode}
+      isInteractive={props.isInteractive}
     />
   );
 };
