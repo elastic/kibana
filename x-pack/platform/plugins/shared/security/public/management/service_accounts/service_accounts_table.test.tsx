@@ -120,12 +120,12 @@ describe('ServiceAccountsTable', () => {
     renderTable();
 
     await user.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await user.click(screen.getByRole('option', { name: 'viewer' }));
+    await user.click(await screen.findByRole('option', { name: 'viewer' }));
 
     expect(screen.getByText('nightshift-relay')).toBeVisible();
     expect(screen.queryByText('incident-responder')).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('option', { name: 'viewer' }));
+    await user.click(await screen.findByRole('option', { name: 'viewer' }));
 
     expect(screen.getByText('incident-responder')).toBeVisible();
     expect(screen.getByText('nightshift-relay')).toBeVisible();
@@ -208,7 +208,7 @@ describe('ServiceAccountsTable', () => {
 
     await user.click(screen.getByTestId('pagination-button-next'));
     await user.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await user.click(screen.getByRole('option', { name: 'editor' }));
+    await user.click(await screen.findByRole('option', { name: 'editor' }));
 
     expect(screen.getByText('account-00')).toBeVisible();
     expect(screen.queryByText('account-10')).not.toBeInTheDocument();

@@ -16,7 +16,8 @@ export const ALL_CASES_CREATE_NEW_CASE_TABLE_BTN = '[data-test-subj="cases-table
 export const ALL_CASES_IN_PROGRESS_CASES_STATS =
   '[data-test-subj="inProgressStatsHeader"] .euiStat__title';
 
-// Legacy table renders `case-details-link`; the redesign card list renders `cases-list-item-title`.
+// Matches the case title in both view modes: the table view (`case-details-link`)
+// and the card list (`cases-list-item-title`).
 export const ALL_CASES_NAME =
   '[data-test-subj="case-details-link"],[data-test-subj="cases-list-item-title"]';
 

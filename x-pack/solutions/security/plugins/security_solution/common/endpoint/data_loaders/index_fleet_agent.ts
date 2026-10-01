@@ -19,7 +19,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { usageTracker } from './usage_tracker';
 import type { HostMetadata } from '../types';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
-import { createToolingLogger, wrapErrorAndRejectPromise } from './utils';
+import { createToolingLogger, EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
 
 const defaultFleetAgentGenerator = new FleetAgentGenerator();
 
@@ -201,32 +201,59 @@ export const deleteIndexedFleetAgents = async (
   };
 
   if (indexedData.agents.length) {
-    // Fleet refuses to delete an agent policy while any active agent still references it.
-    // Agents are indexed into `.fleet-agents`; a `.fleet-agents-*` pattern does not match that
-    // index, so the policy delete then races whatever side effect removed the agents.
-    response.agents = await esClient
-      .deleteByQuery({
-        index: [indexedData.fleetAgentsIndex, `${indexedData.fleetAgentsIndex}-*`],
-        allow_no_indices: true,
-        ignore_unavailable: true,
-        refresh: true,
-        wait_for_completion: true,
-        conflicts: 'proceed',
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'local_metadata.elastic.agent.id': indexedData.agents.map(
-                    (agent) => agent.local_metadata.elastic.agent.id
-                  ),
-                },
-              },
-            ],
+    const query = {
+      bool: {
+        filter: [
+          {
+            terms: {
+              'local_metadata.elastic.agent.id': indexedData.agents.map(
+                (agent) => agent.local_metadata.elastic.agent.id
+              ),
+            },
           },
-        },
-      })
-      .catch(wrapErrorAndRejectPromise);
+        ],
+      },
+    };
+
+    // Agents are indexed into `.fleet-agents`. A `.fleet-agents-*` pattern does not match
+    // that index, so include both. Fleet also rewrites these docs during cleanup. With
+    // `conflicts: 'proceed'` that rewrite is skipped, and when every hit conflicts
+    // `refresh: true` does not refresh the index. Refresh the concrete index before retrying.
+    const agentIndices = [indexedData.fleetAgentsIndex, `${indexedData.fleetAgentsIndex}-*`];
+    let deleted: DeleteByQueryResponse | undefined;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      deleted = await esClient
+        .deleteByQuery({
+          index: agentIndices,
+          allow_no_indices: true,
+          ignore_unavailable: true,
+          wait_for_completion: true,
+          conflicts: 'proceed',
+          refresh: true,
+          query,
+        })
+        .catch(wrapErrorAndRejectPromise);
+
+      if ((deleted.version_conflicts ?? 0) === 0) {
+        break;
+      }
+
+      // The refresh only lets the next delete see a new version. A failed
+      // refresh must not end the retry or replace the conflict error.
+      await esClient.indices
+        .refresh({ index: agentIndices, ignore_unavailable: true, allow_no_indices: true })
+        .catch(() => undefined);
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+
+    const versionConflicts = deleted?.version_conflicts ?? 0;
+    if (versionConflicts > 0) {
+      throw new EndpointDataLoadingError(
+        `Failed to delete Fleet agents after 5 attempts: ${versionConflicts} document version conflict(s) left the agents in place`
+      );
+    }
+
+    response.agents = deleted;
   }
 
   return response;

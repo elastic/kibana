@@ -42,6 +42,10 @@ export {
   MINIMUM_DIAGNOSTICS_AGENT_VERSION,
 } from './is_agent_request_diagnostics_supported';
 export {
+  isAgentRestartSupported,
+  MINIMUM_RESTART_AGENT_VERSION,
+} from './is_agent_restart_supported';
+export {
   isAgentMigrationSupported,
   MINIMUM_MIGRATE_AGENT_VERSION,
   isAgentEligibleForMigration,

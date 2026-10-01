@@ -23,12 +23,13 @@ import {
   defaultUser,
   postCommentUserReq,
   getPostCaseRequest,
-  postCommentAlertReq,
-  postCommentActionsReq,
-  postCommentActionsReleaseReq,
-  postCommentAlertMultipleIdsReq,
-  persistableStateAttachment,
-  postExternalReferenceESReq,
+  postUnifiedActionsReq,
+  postUnifiedActionsReleaseReq,
+  postUnifiedAlertReq,
+  postUnifiedAlertMultipleIdsReq,
+  postUnifiedCommentReq,
+  postUnifiedIndicatorReq,
+  postUnifiedLensReq,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
   getConfigurationRequest,
@@ -197,13 +198,13 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: [
-            postCommentUserReq,
-            postCommentAlertReq,
-            postCommentAlertMultipleIdsReq,
-            postCommentActionsReq,
-            postCommentActionsReleaseReq,
-            postExternalReferenceESReq,
-            persistableStateAttachment,
+            postUnifiedCommentReq,
+            postUnifiedAlertReq,
+            postUnifiedAlertMultipleIdsReq,
+            postUnifiedActionsReq,
+            postUnifiedActionsReleaseReq,
+            postUnifiedIndicatorReq,
+            postUnifiedLensReq,
           ],
         });
 
@@ -252,7 +253,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const patchedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentAlertReq, postCommentAlertMultipleIdsReq],
+          params: [postUnifiedAlertReq, postUnifiedAlertMultipleIdsReq],
           auth: { user: superUser, space: 'space1' },
         });
 
