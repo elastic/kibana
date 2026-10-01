@@ -11,6 +11,12 @@ import { parse } from 'yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './floor_alert_triage.yaml';
 import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './floor_alert_triage_review.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { convertToWorkflowGraph } from '../../../graph/build_execution_graph/build_execution_graph';
+import type { WorkflowYaml } from '../../../spec/schema';
+import {
+  DEFAULT_PARALLEL_MAX_CONCURRENCY,
+  DEFAULT_PARALLEL_MAX_FAN_OUT,
+} from '../../../spec/schema';
 import { ExecutionStatus } from '../../../types/latest';
 
 interface YamlStep {
@@ -595,7 +601,7 @@ describe('floor_alert_triage — set_az_tags', () => {
 // add_verdict_notes — the only verdict note on the Worker path
 // ---------------------------------------------------------------------------
 describe('floor_alert_triage — add_verdict_notes', () => {
-  const noteTemplate = (stepByName('add_verdict_notes')?.with?.body as { note: { note: string } })
+  const noteTemplate = (stepByName('add_verdict_note')?.with?.body as { note: { note: string } })
     .note.note;
 
   const renderNote = (contributingFactors: string[]) =>
@@ -630,6 +636,163 @@ describe('floor_alert_triage — add_verdict_notes', () => {
   it('tells the sub-workflow it is called by the Worker, which suppresses its own note', () => {
     const inputs = stepByName('classify_alerts')?.with?.inputs as Record<string, unknown>;
     expect(inputs.calledByWorker).toBe(true);
+  });
+
+  describe('writing the notes in parallel chunks', () => {
+    const loop = stepByName('add_verdict_notes') as YamlStep & {
+      concurrency?: { max: number };
+      mode?: string;
+    };
+    const parallel = stepByName('write_note_chunk') as YamlStep & {
+      concurrency?: { max: number };
+      mode?: string;
+    };
+    const verdicts = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        alert_id: `alert-${i + 1}`,
+        classification: 'false_positive',
+      }));
+
+    const renderChunks = (count: number): Array<Array<{ alert_id: string }>> =>
+      JSON.parse(
+        renderString((loop.foreach ?? '').replace(/^\$\{\{/, '{{').trim(), {
+          steps: { classify_alerts: { output: { verdicts: verdicts(count) } } },
+        })
+      );
+
+    it('loops over chunks of verdicts and fans each chunk out in a parallel step', () => {
+      expect(loop.type).toBe('foreach');
+      expect(loop.foreach).toContain('chunk: 20');
+      expect(parallel.type).toBe('parallel');
+      expect(parallel.steps?.map((step) => step.name)).toEqual(['add_verdict_note']);
+    });
+
+    it('splits the verdicts into chunks that keep every alert exactly once', () => {
+      const chunks = renderChunks(45);
+      expect(chunks.map((chunk) => chunk.length)).toEqual([20, 20, 5]);
+      expect(chunks.flat().map(({ alert_id: id }) => id)).toEqual(
+        verdicts(45).map(({ alert_id: id }) => id)
+      );
+    });
+
+    it('writes no notes for a run without verdicts', () => {
+      expect(renderChunks(0)).toEqual([]);
+    });
+
+    // A fan-out that is no larger than the concurrency finishes in one tick; a larger one runs in
+    // waves, and every wave reloads the execution state.
+    it('keeps each chunk within the concurrency so it finishes in one tick', () => {
+      const chunkSize = Number(/chunk: (\d+)/.exec(loop.foreach ?? '')?.[1]);
+      expect(parallel.concurrency?.max).toBeGreaterThanOrEqual(chunkSize);
+      // The schema ceilings for a parallel step.
+      expect(parallel.concurrency?.max).toBeLessThanOrEqual(DEFAULT_PARALLEL_MAX_CONCURRENCY);
+      expect(chunkSize).toBeLessThanOrEqual(DEFAULT_PARALLEL_MAX_FAN_OUT);
+    });
+
+    // The schema accepts a branch with `on-failure` or `if`; only building the graph rejects it,
+    // and in the engine that rejection would be a failed run rather than a failed test.
+    it('builds an execution graph, which rejects flow control inside a branch', () => {
+      expect(() => convertToWorkflowGraph(parsed as unknown as WorkflowYaml)).not.toThrow();
+    });
+
+    it('lets every note in a chunk run even when one fails', () => {
+      expect(parallel.mode).toBe('settled');
+    });
+
+    it('reads the verdicts for the fan-out from a step output, not from the chunk scope', () => {
+      expect(stepByName('current_note_chunk')?.with?.verdicts).toBe('${{ foreach.item }}');
+      expect(parallel.foreach).toBe('${{ steps.current_note_chunk.output.verdicts }}');
+    });
+
+    // A parallel branch is a straight line of atomic steps: flow control, including `on-failure`
+    // and `if`, is rejected when the graph is built.
+    it('keeps the branch body free of flow control', () => {
+      (parallel.steps ?? []).forEach((step) => {
+        expect(step['on-failure']).toBeUndefined();
+        expect(step.if).toBeUndefined();
+        expect(step.foreach).toBeUndefined();
+      });
+    });
+
+    describe('retrying the notes that did not complete', () => {
+      const collectExpr = stepByName('collect_chunk_failed_notes')?.with
+        ?.chunk_failed_verdicts as string;
+      const recordExpr = stepByName('record_failed_verdict_notes')?.with
+        ?.failed_note_verdicts as string;
+      const retry = stepByName('retry_failed_verdict_notes');
+
+      const failedVerdictsOf = (results: unknown[]): unknown =>
+        evalExpr(collectExpr, { steps: { write_note_chunk: { output: { results } } } });
+
+      it('collects the verdict of every branch that did not complete', () => {
+        const [a, b, c, d] = verdicts(4);
+        expect(
+          failedVerdictsOf([
+            { index: 0, key: a, status: 'completed' },
+            { index: 1, key: b, status: 'failed' },
+            { index: 2, key: c, status: 'completed' },
+            { index: 3, key: d, status: 'timed_out' },
+          ])
+        ).toEqual([b, d]);
+      });
+
+      it('collects nothing when every note completed', () => {
+        const [a, b] = verdicts(2);
+        expect(
+          failedVerdictsOf([
+            { index: 0, key: a, status: 'completed' },
+            { index: 1, key: b, status: 'completed' },
+          ])
+        ).toEqual([]);
+      });
+
+      it('accumulates the failures across chunks', () => {
+        const [a, b, c] = verdicts(3);
+        expect(
+          evalExpr(recordExpr, {
+            variables: { failed_note_verdicts: [a], chunk_failed_verdicts: [b, c] },
+          })
+        ).toEqual([a, b, c]);
+        expect(
+          evalExpr(recordExpr, {
+            variables: { failed_note_verdicts: [a], chunk_failed_verdicts: [] },
+          })
+        ).toEqual([a]);
+      });
+
+      it('starts the accumulator empty before the first chunk', () => {
+        const names = parsed.steps.map((step) => step.name);
+        expect(stepByName('init_failed_verdict_notes')?.with?.failed_note_verdicts).toEqual([]);
+        expect(names.indexOf('init_failed_verdict_notes')).toBeLessThan(
+          names.indexOf('add_verdict_notes')
+        );
+      });
+
+      it('retries each failed note serially, with the retry the notes always had', () => {
+        const retryStep = stepByName('retry_verdict_note');
+        expect(retry?.type).toBe('foreach');
+        expect(retry?.foreach).toContain('variables.failed_note_verdicts');
+        expect(retryStep?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+        // A note that still fails fails the run, as it did before the notes ran in parallel.
+        expect(retryStep?.['on-failure']?.continue).toBeUndefined();
+      });
+
+      it('runs after the notes and before the review is started', () => {
+        const names = parsed.steps.map((step) => step.name);
+        expect(names.indexOf('retry_failed_verdict_notes')).toBeGreaterThan(
+          names.indexOf('add_verdict_notes')
+        );
+        expect(names.indexOf('gate_fp_close')).toBeGreaterThan(
+          names.indexOf('retry_failed_verdict_notes')
+        );
+      });
+
+      it('writes the same note as the first attempt', () => {
+        expect(stepByName('retry_verdict_note')?.with).toEqual(
+          stepByName('add_verdict_note')?.with
+        );
+      });
+    });
   });
 });
 

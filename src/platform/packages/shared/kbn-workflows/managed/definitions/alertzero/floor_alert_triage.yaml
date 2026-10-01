@@ -53,7 +53,8 @@ consts:
 #   5. compute_fp_candidates     — filter verdicts to false_positive at or above the floor
 #   6. attach_impact             — entity × verdict summary
 #   7. set_az_tags               — static AZ classification tags (R5, always), in bulk
-#   8. add_verdict_notes         — verdict + Investigation reference per alert (R4/R13, always)
+#   8. add_verdict_notes         — verdict + Investigation reference per alert (R4/R13, always),
+#                                  written 20 at a time
 #   9. gate_fp_close             — start the closure review and record its dispatch (if any FP candidates)
 #  10. close_investigation_no_fp — explicit close when there are no FP candidates
 #
@@ -471,37 +472,119 @@ steps:
   # 8. Write a verdict note to each alert referencing the Investigation (R4, R13).
   #    Always written — never gated on autonomy level. The only verdict note on the
   #    Worker path: the sub-workflow skips its own when calledByWorker is true.
+  #
+  #    The notes API takes one note per call and each call takes about a second (the write
+  #    waits for the next index refresh), so a serial loop costs about a second per alert.
+  #    Notes are written 20 at a time instead: each chunk is a `parallel` fan-out of 20
+  #    branches at concurrency 20, which finishes within one tick because the fan-out does not
+  #    exceed the concurrency. That is the schema ceiling for concurrency, and well under the
+  #    fan-out ceiling of 100.
+  #
+  #    A parallel branch cannot carry `on-failure`, so a note that fails here is not retried in
+  #    place. `settled` lets every note in the chunk run, the failed ones are collected, and
+  #    they are retried serially afterwards with the same retry as before. A note that still
+  #    fails fails the run, as it always did.
   # ---------------------------------------------------------------------------
-  - name: add_verdict_notes
-    foreach: "${{ steps.classify_alerts.output.verdicts | json }}"
-    type: kibana.request
-    on-failure:
-      retry:
-        max-attempts: 3
-        delay: 5s
+  - name: init_failed_verdict_notes
+    type: data.set
     with:
-      method: PATCH
-      path: "/s/{{ workflow.spaceId }}/api/note"
-      body:
-        note:
-          eventId: "{{ foreach.item.alert_id }}"
-          timelineId: ''
-          note: |
-            [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
+      failed_note_verdicts: []
 
-            **Verdict:** {{ foreach.item.classification }}
-            **Confidence:** {{ foreach.item.confidence_score }}
+  - name: add_verdict_notes
+    type: foreach
+    foreach: "${{ steps.classify_alerts.output.verdicts | chunk: 20 | json }}"
+    steps:
+      # Copied out of `foreach.item`: inside the parallel step below `foreach.item` is a single
+      # verdict, not the chunk.
+      - name: current_note_chunk
+        type: data.set
+        with:
+          verdicts: "${{ foreach.item }}"
 
-            {{ foreach.item.rationale }}
-            {% if foreach.item.contributing_factors.size > 0 %}
-            **Contributing factors**
-            {% for factor in foreach.item.contributing_factors %}
-            - {{ factor }}
-            {%- endfor %}
-            {% endif %}
-      headers:
-        kbn-xsrf: string
-        Content-Type: application/json
+      - name: write_note_chunk
+        type: parallel
+        foreach: "${{ steps.current_note_chunk.output.verdicts }}"
+        mode: settled
+        concurrency:
+          max: 20
+        steps:
+          - name: add_verdict_note
+            type: kibana.request
+            with:
+              method: PATCH
+              path: "/s/{{ workflow.spaceId }}/api/note"
+              body:
+                note:
+                  eventId: "{{ foreach.item.alert_id }}"
+                  timelineId: ''
+                  note: |
+                    [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
+
+                    **Verdict:** {{ foreach.item.classification }}
+                    **Confidence:** {{ foreach.item.confidence_score }}
+
+                    {{ foreach.item.rationale }}
+                    {% if foreach.item.contributing_factors.size > 0 %}
+                    **Contributing factors**
+                    {% for factor in foreach.item.contributing_factors %}
+                    - {{ factor }}
+                    {%- endfor %}
+                    {% endif %}
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+
+      # A branch's `key` is the verdict it was given, so the verdicts of the notes that did not
+      # complete can be read straight off the results. Anything but `completed` counts, so a
+      # timed-out branch is retried as well.
+      - name: collect_chunk_failed_notes
+        type: data.set
+        with:
+          chunk_failed_verdicts: >-
+            ${{ steps.write_note_chunk.output.results
+                | where_exp: 'r', 'r.status != "completed"'
+                | map: 'key' }}
+
+      - name: record_failed_verdict_notes
+        type: data.set
+        with:
+          failed_note_verdicts: "${{ variables.failed_note_verdicts | concat: variables.chunk_failed_verdicts }}"
+
+  # Empty on a clean run, so this loop does nothing. The note is the same one as above: keep the
+  # two in step.
+  - name: retry_failed_verdict_notes
+    type: foreach
+    foreach: "${{ variables.failed_note_verdicts | json }}"
+    steps:
+      - name: retry_verdict_note
+        type: kibana.request
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+        with:
+          method: PATCH
+          path: "/s/{{ workflow.spaceId }}/api/note"
+          body:
+            note:
+              eventId: "{{ foreach.item.alert_id }}"
+              timelineId: ''
+              note: |
+                [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
+
+                **Verdict:** {{ foreach.item.classification }}
+                **Confidence:** {{ foreach.item.confidence_score }}
+
+                {{ foreach.item.rationale }}
+                {% if foreach.item.contributing_factors.size > 0 %}
+                **Contributing factors**
+                {% for factor in foreach.item.contributing_factors %}
+                - {{ factor }}
+                {%- endfor %}
+                {% endif %}
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
 
   - name: post_comment_alert_updates
     type: ai.conversation.add_user_message
