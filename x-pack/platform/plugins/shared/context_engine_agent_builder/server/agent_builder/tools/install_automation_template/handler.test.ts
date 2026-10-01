@@ -95,10 +95,28 @@ describe('installAutomationTemplateHandler', () => {
     expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.document_orchestration);
   });
 
-  it('overwrites the attached workflow when its tag matches the template', async () => {
+  it('does not overwrite a tagged workflow whose name differs from the requested name', async () => {
+    // A differently-named tagged automation of the same template type must not be overwritten;
+    // the new name is a distinct automation and should be installed alongside the existing one.
     getWorkflow.mockResolvedValue({
       id: 'wf-existing',
-      name: 'Renamed orchestration',
+      name: 'different-automation-name',
+      tags: [AUTOMATION_TEMPLATE_TAGS.document_orchestration],
+    });
+
+    const result = await installAutomationTemplateHandler({
+      params: documentParams,
+      ...createDeps([{ type: 'workflow', value: 'wf-existing' }]),
+    });
+
+    expect(result.replaced).toBe(false);
+    expect(saveAutomationHandlerMock.mock.calls[0][0].params).not.toHaveProperty('workflowId');
+  });
+
+  it('overwrites an existing workflow whose name matches the requested name regardless of tag', async () => {
+    getWorkflow.mockResolvedValue({
+      id: 'wf-existing',
+      name: 'flight-activity-docs',
       tags: [AUTOMATION_TEMPLATE_TAGS.document_orchestration],
     });
 
@@ -175,10 +193,10 @@ describe('installAutomationTemplateHandler', () => {
     );
   });
 
-  it('overwrites the index metadata automation when its tag matches', async () => {
+  it('overwrites the index metadata automation when its name matches', async () => {
     getWorkflow.mockResolvedValue({
       id: 'wf-metadata',
-      name: 'Index metadata KI automation',
+      name: 'loyalty-index-metadata',
       tags: [AUTOMATION_TEMPLATE_TAGS.index_metadata],
     });
 
@@ -219,10 +237,10 @@ describe('installAutomationTemplateHandler', () => {
     expect(yaml).toContain('unit_key: "Province"');
   });
 
-  it('overwrites the unit profile automation when its tag matches', async () => {
+  it('overwrites the unit profile automation when its name matches', async () => {
     getWorkflow.mockResolvedValue({
       id: 'wf-unit',
-      name: 'Unit profile KI automation',
+      name: 'loyalty-province-profile',
       tags: [AUTOMATION_TEMPLATE_TAGS.unit_profile],
     });
 
@@ -261,10 +279,10 @@ describe('installAutomationTemplateHandler', () => {
     expect(yaml).toContain('ki_id: constraint-foo');
   });
 
-  it('overwrites targeted_ki_writer when already attached', async () => {
+  it('overwrites targeted_ki_writer when its name matches', async () => {
     getWorkflow.mockResolvedValue({
       id: 'wf-ki-writer',
-      name: 'Targeted KI writer',
+      name: 'loyalty-constraints',
       tags: [AUTOMATION_TEMPLATE_TAGS.targeted_ki_writer],
     });
     const kisYaml = `- ki_id: constraint-foo\n  ki:\n    type: constraint\n    title: "T"\n    description: "D"\n    content: "C"\n    tags:\n      - constraint\n    references:\n      - uri: index://foo\n        relation: derived_from`;

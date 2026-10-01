@@ -141,11 +141,15 @@ export const findInstalledTemplateWorkflowId = async ({
       continue;
     }
 
-    if (workflow.tags?.includes(templateTag)) {
-      return workflow.id ?? automation.value;
-    }
-
-    if (templateName && workflow.name === templateName && nameMatch === undefined) {
+    // When a name is provided (always the case now that name is mandatory) use exact name
+    // matching only. A tag match without a name match would overwrite a differently-named
+    // automation of the same template type, which is the opposite of the multi-instance intent.
+    // The tag path is retained only for callers that supply no name (pre-name backwards compat).
+    if (templateName) {
+      if (workflow.name === templateName && nameMatch === undefined) {
+        nameMatch = workflow.id ?? automation.value;
+      }
+    } else if (workflow.tags?.includes(templateTag) && nameMatch === undefined) {
       nameMatch = workflow.id ?? automation.value;
     }
   }
