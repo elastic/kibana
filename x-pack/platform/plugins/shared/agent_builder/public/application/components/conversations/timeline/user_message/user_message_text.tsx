@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiMarkdownFormat } from '@elastic/eui';
 import { useMarkdownLinkClick } from '../response/use_markdown_link_click';
-import { useUserMessageMarkdownPlugins } from './user_message_markdown_plugins';
+import {
+  escapeCommandBadgeLabels,
+  useUserMessageMarkdownPlugins,
+} from './user_message_markdown_plugins';
 
 interface UserMessageTextProps {
   text: string;
@@ -22,6 +25,7 @@ export const UserMessageText: React.FC<UserMessageTextProps> = ({ text, onHoverI
     onHoverImage,
     onLinkClick: handleLinkClick,
   });
+  const markdown = useMemo(() => escapeCommandBadgeLabels(text), [text]);
 
   return (
     <>
@@ -31,7 +35,7 @@ export const UserMessageText: React.FC<UserMessageTextProps> = ({ text, onHoverI
           parsingPluginList={parsingPluginList}
           processingPluginList={processingPluginList}
         >
-          {text}
+          {markdown}
         </EuiMarkdownFormat>
       </div>
       {externalLinkModal}

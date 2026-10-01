@@ -52,6 +52,18 @@ export const decodeBadgeName = (path: string): string => {
   }
 };
 
+const BADGE_LINK_PATTERN = /\[([^\]]+)\]\((\w+):\/\/([^)]*)\)/g;
+// Characters EUI's markdown parser (GFM mode) can backslash-escape.
+const ESCAPABLE_MARKDOWN_CHARACTERS = /[\\`*{}[\]()#+\-.!_>~|]/g;
+
+/** Escapes markdown syntax in command badge labels, so names like `logs-*,metrics-*` stay literal. */
+export const escapeCommandBadgeLabels = (text: string): string =>
+  text.replace(BADGE_LINK_PATTERN, (link, label: string, scheme: string, rest: string) =>
+    COMMAND_SCHEMES.has(scheme)
+      ? `[${label.replace(ESCAPABLE_MARKDOWN_CHARACTERS, '\\$&')}](${scheme}://${rest})`
+      : link
+  );
+
 interface UseUserMessageMarkdownPluginsArgs {
   onHoverImage?: (name: string | null) => void;
   onLinkClick: (href: string, e: React.MouseEvent<HTMLAnchorElement>) => void;

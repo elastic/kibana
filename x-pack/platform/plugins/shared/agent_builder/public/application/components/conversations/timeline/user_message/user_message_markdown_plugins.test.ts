@@ -10,6 +10,7 @@ import {
   COMMAND_SCHEMES,
   parseSchemeAndPath,
   decodeBadgeName,
+  escapeCommandBadgeLabels,
 } from './user_message_markdown_plugins';
 
 describe('ALLOWED_LINK_PROTOCOLS', () => {
@@ -79,5 +80,31 @@ describe('decodeBadgeName', () => {
 
   it('falls back to the raw path on malformed percent-encoding', () => {
     expect(decodeBadgeName('%E0%A4%A')).toBe('%E0%A4%A');
+  });
+});
+
+describe('escapeCommandBadgeLabels', () => {
+  it('escapes markdown syntax in command badge labels', () => {
+    expect(escapeCommandBadgeLabels('[@dashboard/logs-*,metrics-*](sml://entry-1)')).toBe(
+      '[@dashboard/logs\\-\\*,metrics\\-\\*](sml://entry-1)'
+    );
+  });
+
+  it('keeps the href of command badges unchanged', () => {
+    expect(escapeCommandBadgeLabels('[/my_skill](skill://skill-1?key=a_b)')).toBe(
+      '[/my\\_skill](skill://skill-1?key=a_b)'
+    );
+  });
+
+  it('leaves image badges and regular links unchanged', () => {
+    const text = '[my_*photo*.png](image://photo.png) and [*Elastic*](https://www.elastic.co)';
+
+    expect(escapeCommandBadgeLabels(text)).toBe(text);
+  });
+
+  it('leaves text outside badges unchanged', () => {
+    expect(escapeCommandBadgeLabels('Use *this* [/Summarize](skill://skill-1) **now**')).toBe(
+      'Use *this* [/Summarize](skill://skill-1) **now**'
+    );
   });
 });

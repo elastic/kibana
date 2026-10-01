@@ -286,6 +286,18 @@ describe('UserMessageText', () => {
       expect(screen.getByText('@dashboard/A')).toBeInTheDocument();
     });
 
+    it.each(['@dashboard/logs-*,metrics-*', '@dashboard/a `code` b', '@dashboard/~~old~~ sales'])(
+      'renders markdown characters in a command badge label literally: %s',
+      (label) => {
+        const { container } = renderWithProvider(
+          <UserMessageText text={`[${label}](sml://entry-1)`} />
+        );
+
+        expect(screen.getByText(label)).toBeInTheDocument();
+        expect(container.querySelector('em, code, del')).not.toBeInTheDocument();
+      }
+    );
+
     it('renders an image badge for image scheme links', () => {
       renderWithProvider(<UserMessageText text="[photo.png](image://photo.png)" />);
 
