@@ -26,7 +26,7 @@ import type { SyntheticsServerSetup } from '../../types';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import { agentIdCondition, assignAgentById } from './assign_by_condition';
+import { agentIdCondition, assignAgentById, UNASSIGNED_CONDITION } from './assign_by_condition';
 import { PackagePolicyService } from './package_policy_service';
 import * as getPrivateLocationsModule from '../get_private_locations';
 import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
@@ -627,6 +627,96 @@ describe('SyntheticsPrivateLocation', () => {
       expect(listAgents).not.toHaveBeenCalled();
     });
 
+    it('assigns a browser monitor only to elastic-agent-complete agents', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const browserConfig = { ...dummyBrowserConfig, id: 'browser-id' } as HeartbeatConfig;
+      const completeAgentIds = ['complete-a', 'complete-b'];
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        browserConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        { agentIds: ['basic', ...completeAgentIds], completeAgentIds },
+        undefined,
+        'active'
+      );
+
+      expect(policy?.condition).toBe(
+        assignAgentById(browserConfig.id, completeAgentIds)?.condition
+      );
+    });
+
+    it('moves a browser pin off a non-complete agent on edit', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const browserConfig = { ...dummyBrowserConfig, id: 'browser-id' } as HeartbeatConfig;
+      const completeAgentIds = ['complete-a', 'complete-b'];
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        browserConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        { agentIds: ['basic', ...completeAgentIds], completeAgentIds },
+        agentIdCondition('basic'),
+        'active'
+      );
+
+      expect(policy?.condition).toBe(
+        assignAgentById(browserConfig.id, completeAgentIds)?.condition
+      );
+    });
+
+    it('pins a browser monitor to nobody when no complete agent is enrolled', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const browserConfig = { ...dummyBrowserConfig, id: 'browser-id' } as HeartbeatConfig;
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        browserConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        { agentIds: ['basic'], completeAgentIds: [] },
+        undefined,
+        'active'
+      );
+
+      expect(policy?.condition).toBe(UNASSIGNED_CONDITION);
+    });
+
+    it('still assigns lightweight monitors to non-complete agents', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const agentIds = ['basic', 'complete'];
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        testConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        { agentIds, completeAgentIds: ['complete'] },
+        undefined,
+        'active'
+      );
+
+      expect(policy?.condition).toBe(assignAgentById(testConfig.id, agentIds)?.condition);
+    });
+
     it('omits condition when no agent is enrolled instead of stamping a sentinel pin', async () => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
 
@@ -639,7 +729,9 @@ describe('SyntheticsPrivateLocation', () => {
         [],
         undefined,
         undefined,
-        { agentIds: [] }
+        { agentIds: [], completeAgentIds: [] },
+        undefined,
+        'active'
       );
 
       expect(policy?.condition).toBeUndefined();
@@ -1035,6 +1127,40 @@ describe('SyntheticsPrivateLocation', () => {
       const agentIds = result.get('condition-location')?.agentIds ?? [];
       expect(agentIds).toHaveLength(1001);
       expect(agentIds).toEqual(expect.arrayContaining(['agent-0', 'agent-999', 'agent-1000']));
+    });
+
+    it('records complete agent ids separately from enrolled agents', async () => {
+      const listAgents = jest.fn().mockResolvedValue({
+        agents: [
+          { id: 'basic', local_metadata: { elastic: { agent: { complete: false } } } },
+          { id: 'complete', local_metadata: { elastic: { agent: { complete: true } } } },
+          { id: 'missing-flag' },
+        ],
+        total: 3,
+      });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const getEnrolledAgentsByLocation = (
+        syntheticsPrivateLocation as unknown as {
+          getEnrolledAgentsByLocation: (
+            locations: Array<{ id: string; agentPolicyId: string }>
+          ) => Promise<Map<string, { agentIds: string[]; completeAgentIds: string[] }>>;
+        }
+      ).getEnrolledAgentsByLocation.bind(syntheticsPrivateLocation);
+
+      const result = await getEnrolledAgentsByLocation([
+        { id: 'condition-location', agentPolicyId: 'single-agent-policy' },
+      ]);
+
+      expect(result.get('condition-location')).toEqual({
+        agentIds: ['basic', 'complete', 'missing-flag'],
+        completeAgentIds: ['complete'],
+      });
     });
 
     it('escapes quotes in the agent policy id before building the agents kuery', async () => {

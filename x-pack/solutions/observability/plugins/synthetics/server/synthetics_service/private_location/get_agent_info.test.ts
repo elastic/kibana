@@ -6,7 +6,7 @@
  */
 
 import type { SyntheticsServerSetup } from '../../types';
-import { getAgentInfo } from './get_agent_info';
+import { getAgentInfo, isCompleteElasticAgent } from './get_agent_info';
 
 const MIB = 1024 * 1024;
 const GIB = 1024 * MIB;
@@ -14,7 +14,10 @@ const GIB = 1024 * MIB;
 interface FakeAgent {
   id?: string;
   last_checkin?: string;
-  local_metadata?: { host?: { memory?: number } };
+  local_metadata?: {
+    host?: { memory?: number };
+    elastic?: { agent?: { complete?: boolean } };
+  };
 }
 
 const agent = (over: FakeAgent = {}): FakeAgent => ({
@@ -56,11 +59,36 @@ describe('getAgentInfo', () => {
     expect(info.get('a')).toEqual({
       lastCheckin: Date.parse('2026-08-01T00:00:00.000Z'),
       memoryMib: null,
+      complete: false,
     });
     expect(info.get('b')).toEqual({
       lastCheckin: Date.parse('2026-08-01T00:01:00.000Z'),
       memoryMib: 2048,
+      complete: false,
     });
+  });
+
+  it('marks only elastic-agent-complete as browser-capable', async () => {
+    const listAgents = pagedListAgents([
+      [
+        agent({
+          id: 'complete',
+          local_metadata: { elastic: { agent: { complete: true } } },
+        }),
+        agent({
+          id: 'basic',
+          local_metadata: { elastic: { agent: { complete: false } } },
+        }),
+        agent({ id: 'missing', local_metadata: {} }),
+      ],
+    ]);
+
+    const info = await getInfo(listAgents);
+
+    expect(info.get('complete')?.complete).toBe(true);
+    expect(info.get('basic')?.complete).toBe(false);
+    expect(info.get('missing')?.complete).toBe(false);
+    expect(isCompleteElasticAgent(undefined)).toBe(false);
   });
 
   it('converts host.memory bytes to MiB, rounding to the nearest MiB', async () => {

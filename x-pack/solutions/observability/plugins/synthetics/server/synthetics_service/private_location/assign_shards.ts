@@ -12,6 +12,14 @@ import { createHash } from 'crypto';
 const EPSILON = 1e-9;
 
 /**
+ * Shard target that matches no real agent. {@link ./assign_by_condition}
+ * stamps this as `UNASSIGNED_CONDITION` so the monitor runs on zero agents
+ * instead of every agent (an absent condition). Used when a browser monitor
+ * has no `elastic-agent-complete` agent to run on.
+ */
+export const UNASSIGNED_AGENT_ID = '__synthetics_unassigned__';
+
+/**
  * Deterministic monitor→agent assignment for scalable private locations.
  *
  * Uses rendezvous (highest-random-weight) hashing so that when an agent is
@@ -115,12 +123,17 @@ const placeByLpt = (
   nodeIds: string[],
   load: Map<string, number>,
   capacityOf: (id: string) => number,
-  assignment: Map<string, string>
+  assignment: Map<string, string>,
+  nodesFor?: (monitor: { id: string; browser?: boolean }) => string[]
 ): void => {
   for (const monitor of orderedMonitors) {
+    const nodes = nodesFor ? nodesFor(monitor) : nodeIds;
+    if (nodes.length === 0) {
+      continue;
+    }
     const relativeLoad = (id: string) => (load.get(id)! + monitor.cost) / capacityOf(id);
-    const minScore = Math.min(...nodeIds.map(relativeLoad));
-    const candidates = nodeIds.filter((id) => relativeLoad(id) <= minScore + EPSILON);
+    const minScore = Math.min(...nodes.map(relativeLoad));
+    const candidates = nodes.filter((id) => relativeLoad(id) <= minScore + EPSILON);
     const target = assignShard(monitor.id, candidates)!;
     assignment.set(monitor.id, target);
     load.set(target, load.get(target)! + monitor.cost);
@@ -160,6 +173,11 @@ export interface MonitorPlacement {
   cost: number;
   /** Agent the monitor is currently pinned to; undefined/stale ⇒ needs placing. */
   currentAgentId?: string;
+  /**
+   * Browser monitors run only on `elastic-agent-complete` when
+   * {@link rebalanceByCost} is given `browserAgentIds`.
+   */
+  browser?: boolean;
 }
 
 /**
@@ -195,6 +213,10 @@ export interface MonitorPlacement {
  *   load-balancing moves (anti-flap hysteresis — a freshly-recovered agent is
  *   excluded until stable). Defaults to all healthy agents. Failover ignores
  *   this: a stale monitor can be placed on any healthy agent.
+ * @param opts.browserAgentIds subset of `healthyAgentIds` running
+ *   `elastic-agent-complete`. Browser monitors are placed only on these; when
+ *   none are eligible the monitor is pinned to {@link UNASSIGNED_AGENT_ID} so
+ *   it runs on zero agents. Omit to allow browsers on any healthy agent.
  * @returns monitor id → assigned agent id (only moved monitors differ from input)
  */
 export const rebalanceByCost = (
@@ -203,6 +225,7 @@ export const rebalanceByCost = (
   opts: {
     capacities?: ReadonlyMap<string, number>;
     recoveryAgentIds?: string[];
+    browserAgentIds?: string[];
   } = {}
 ): Map<string, string> => {
   const assignment = new Map<string, string>();
@@ -210,15 +233,27 @@ export const rebalanceByCost = (
     return assignment;
   }
 
-  const { capacities, recoveryAgentIds } = opts;
+  const { capacities, recoveryAgentIds, browserAgentIds } = opts;
   const healthySet = new Set(healthyAgentIds);
+  const browserCapable = new Set(
+    browserAgentIds === undefined
+      ? healthyAgentIds
+      : browserAgentIds.filter((id) => healthySet.has(id))
+  );
+  const agentCanRun = (monitor: MonitorPlacement, agentId: string): boolean =>
+    monitor.browser !== true || browserCapable.has(agentId);
   const capacityOf = makeCapacityOf(healthyAgentIds, capacities);
   const load = new Map<string, number>(healthyAgentIds.map((id) => [id, 0]));
 
-  // Phase 1 — retain: a monitor already on a healthy agent stays there (locality).
+  // Phase 1 — retain: a monitor already on a healthy agent that can run it stays
+  // there (locality). A browser pinned to a non-complete agent is unplaced.
   const unplaced: MonitorPlacement[] = [];
   for (const monitor of monitors) {
-    if (monitor.currentAgentId && healthySet.has(monitor.currentAgentId)) {
+    if (
+      monitor.currentAgentId &&
+      healthySet.has(monitor.currentAgentId) &&
+      agentCanRun(monitor, monitor.currentAgentId)
+    ) {
       assignment.set(monitor.id, monitor.currentAgentId);
       load.set(monitor.currentAgentId, load.get(monitor.currentAgentId)! + monitor.cost);
     } else {
@@ -228,26 +263,37 @@ export const rebalanceByCost = (
 
   // Phase 2 — failover: place stale/unassigned monitors heaviest-first onto the
   // agent with the lowest projected relative load (LPT), rendezvous tie-break.
-  // NOTE: this is not fenced — if a monitor's old agent was a false-positive stale
-  // (or hasn't polled the revised policy yet) while the new agent has started,
-  // both run it briefly. That short overlap is accepted (steady state is
-  // exactly-once, Heartbeat indexing is idempotent); see the tradeoffs in the
-  // POC design (https://github.com/elastic/kibana/pull/278434).
+  // Browser monitors only consider complete agents. NOTE: this is not fenced —
+  // if a monitor's old agent was a false-positive stale (or hasn't polled the
+  // revised policy yet) while the new agent has started, both run it briefly.
+  // That short overlap is accepted (steady state is exactly-once, Heartbeat
+  // indexing is idempotent); see the tradeoffs in the POC design
+  // (https://github.com/elastic/kibana/pull/278434).
   const ordered = [...unplaced].sort((a, b) => b.cost - a.cost || (a.id < b.id ? -1 : 1));
-  placeByLpt(ordered, healthyAgentIds, load, capacityOf, assignment);
+  placeByLpt(ordered, healthyAgentIds, load, capacityOf, assignment, (monitor) =>
+    monitor.browser === true ? [...browserCapable] : healthyAgentIds
+  );
+  for (const monitor of ordered) {
+    if (!assignment.has(monitor.id)) {
+      assignment.set(monitor.id, UNASSIGNED_AGENT_ID);
+    }
+  }
 
   // Phase 3 — load-balance onto under-utilised recovery agents, moving the fewest
   // monitors that each strictly reduce Σ (load − fairShare)².
   const recovery = (recoveryAgentIds ?? healthyAgentIds).filter((id) => healthySet.has(id));
   if (recovery.length > 0) {
-    const totalCost = monitors.reduce((sum, m) => sum + m.cost, 0);
+    const totalCost = monitors.reduce((sum, monitor) => {
+      const agentId = assignment.get(monitor.id);
+      return agentId && agentId !== UNASSIGNED_AGENT_ID ? sum + monitor.cost : sum;
+    }, 0);
     const totalCapacity = healthyAgentIds.reduce((sum, id) => sum + capacityOf(id), 0);
     const fairShare = (id: string) => (totalCost * capacityOf(id)) / totalCapacity;
 
     const monitorsByAgentId = new Map<string, MonitorPlacement[]>();
     for (const monitor of monitors) {
       const agentId = assignment.get(monitor.id);
-      if (!agentId) {
+      if (!agentId || agentId === UNASSIGNED_AGENT_ID) {
         continue;
       }
       const list = monitorsByAgentId.get(agentId) ?? [];
@@ -264,54 +310,66 @@ export const rebalanceByCost = (
 
     // Each iteration performs one move that strictly lowers the objective, so it
     // can never cycle; the monitor-count cap just bounds the work done per pass.
+    const preferLowerSurplus = (a: string, b: string) =>
+      surplusOf(a) < surplusOf(b) - EPSILON || (surplusOf(a) <= surplusOf(b) && a < b);
     for (let i = 0; i < monitors.length; i++) {
-      // Recipient = the most under-utilised recovery agent. Fixing it loses
-      // nothing: Δ = 2c(c − gap) shrinks as the recipient's surplus does, so the
-      // lowest-surplus recipient minimises Δ for *every* candidate monitor — if no
-      // move helps it, no move helps any other recipient either.
-      const recipient = pick(
-        recovery,
-        (a, b) => surplusOf(a) < surplusOf(b) - EPSILON || (surplusOf(a) <= surplusOf(b) && a < b)
-      );
-      if (recipient === undefined) {
-        break;
-      }
+      // Recipient = the most under-utilised recovery agent that can take an
+      // improving move. When every monitor can run on every agent, that is
+      // always the single lowest-surplus agent (Δ shrinks as its surplus does).
+      // Browser monitors can't move onto a non-complete agent, so a recipient
+      // with no eligible move is skipped and the next one is tried.
+      let pool = recovery;
+      let chosen: { donor: string; monitor: MonitorPlacement; recipient: string } | undefined;
+      while (pool.length > 0 && chosen === undefined) {
+        const recipient = pick(pool, preferLowerSurplus);
+        if (recipient === undefined) {
+          break;
+        }
 
-      // Δ objective for moving cost c donor→recipient is 2c(c − gap), so c ≥ gap
-      // never helps. Scan every donor's monitors and take the most negative Δ,
-      // tie-broken on (agent id, monitor id) so the result stays deterministic and
-      // independent of input order. Scanning *all* donors matters: the single
-      // highest-surplus donor may hold only monitors too heavy to help (e.g. one
-      // browser check) while a lighter donor still has a beneficial move — stopping
-      // at the first donor would leave the recovery agent starved.
-      let best: { donor: string; monitor: MonitorPlacement; delta: number } | undefined;
-      for (const donor of healthyAgentIds) {
-        if (donor === recipient) {
+        // Δ objective for moving cost c donor→recipient is 2c(c − gap), so c ≥ gap
+        // never helps. Scan every donor's monitors and take the most negative Δ,
+        // tie-broken on (agent id, monitor id) so the result stays deterministic and
+        // independent of input order. Scanning *all* donors matters: the single
+        // highest-surplus donor may hold only monitors too heavy to help (e.g. one
+        // browser check) while a lighter donor still has a beneficial move — stopping
+        // at the first donor would leave the recovery agent starved.
+        let best: { donor: string; monitor: MonitorPlacement; delta: number } | undefined;
+        for (const donor of healthyAgentIds) {
+          if (donor === recipient) {
+            continue;
+          }
+          const gap = surplusOf(donor) - surplusOf(recipient);
+          if (gap <= EPSILON) {
+            continue; // donor carries no more than its share relative to the recipient
+          }
+          for (const monitor of monitorsByAgentId.get(donor) ?? []) {
+            if (!agentCanRun(monitor, recipient)) {
+              continue;
+            }
+            const delta = 2 * monitor.cost * (monitor.cost - gap);
+            if (delta >= -EPSILON) {
+              continue; // not a strict improvement (c ≥ gap)
+            }
+            const breaksTie =
+              best !== undefined &&
+              delta <= best.delta &&
+              (donor < best.donor || (donor === best.donor && monitor.id < best.monitor.id));
+            if (best === undefined || delta < best.delta || breaksTie) {
+              best = { donor, monitor, delta };
+            }
+          }
+        }
+        if (best === undefined) {
+          pool = pool.filter((id) => id !== recipient);
           continue;
         }
-        const gap = surplusOf(donor) - surplusOf(recipient);
-        if (gap <= EPSILON) {
-          continue; // donor carries no more than its share relative to the recipient
-        }
-        for (const monitor of monitorsByAgentId.get(donor) ?? []) {
-          const delta = 2 * monitor.cost * (monitor.cost - gap);
-          if (delta >= -EPSILON) {
-            continue; // not a strict improvement (c ≥ gap)
-          }
-          const breaksTie =
-            best !== undefined &&
-            delta <= best.delta &&
-            (donor < best.donor || (donor === best.donor && monitor.id < best.monitor.id));
-          if (best === undefined || delta < best.delta || breaksTie) {
-            best = { donor, monitor, delta };
-          }
-        }
+        chosen = { donor: best.donor, monitor: best.monitor, recipient };
       }
-      if (best === undefined) {
+      if (chosen === undefined) {
         break; // balanced — no single move improves it
       }
 
-      const { donor: moverDonor, monitor: mover } = best;
+      const { donor: moverDonor, monitor: mover, recipient } = chosen;
       assignment.set(mover.id, recipient);
       load.set(moverDonor, load.get(moverDonor)! - mover.cost);
       load.set(recipient, load.get(recipient)! + mover.cost);

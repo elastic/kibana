@@ -20,11 +20,21 @@ export interface AgentInfo {
    * in the balancer (see `makeCapacityOf` in `assign_shards.ts`).
    */
   memoryMib: number | null;
+  /**
+   * `elastic-agent-complete` image. Browser monitors can run only on these
+   * agents; a missing or false flag is not complete.
+   */
+  complete: boolean;
 }
 
 interface AgentLocalMetadata {
   host?: { memory?: number };
+  elastic?: { agent?: { complete?: boolean } };
 }
+
+/** True when the agent is the `elastic-agent-complete` image (browser-capable). */
+export const isCompleteElasticAgent = (localMetadata: unknown): boolean =>
+  (localMetadata as AgentLocalMetadata | undefined)?.elastic?.agent?.complete === true;
 
 /**
  * Per enrolled agent (for a single location's agent policy), keyed by Fleet
@@ -86,7 +96,11 @@ export const getAgentInfo = async (
           ? Math.round(host.memory / BYTES_PER_MIB)
           : null;
 
-      byAgentId.set(agent.id, { lastCheckin: last, memoryMib });
+      byAgentId.set(agent.id, {
+        lastCheckin: last,
+        memoryMib,
+        complete: isCompleteElasticAgent(agent.local_metadata),
+      });
     }
 
     fetched += agents.length;

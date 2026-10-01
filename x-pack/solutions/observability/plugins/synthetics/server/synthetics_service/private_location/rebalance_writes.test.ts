@@ -66,9 +66,9 @@ describe('toMonitorPlacements', () => {
     );
 
     expect(placements).toEqual([
-      { id: 'm1', cost: LIGHTWEIGHT_COST_MIB, currentAgentId: 'agent-a' },
-      { id: 'm2', cost: BROWSER_COST_MIB, currentAgentId: 'agent-b' },
-      { id: 'm3', cost: LIGHTWEIGHT_COST_MIB, currentAgentId: undefined },
+      { id: 'm1', cost: LIGHTWEIGHT_COST_MIB, currentAgentId: 'agent-a', browser: false },
+      { id: 'm2', cost: BROWSER_COST_MIB, currentAgentId: 'agent-b', browser: true },
+      { id: 'm3', cost: LIGHTWEIGHT_COST_MIB, currentAgentId: undefined, browser: false },
     ]);
   });
 
