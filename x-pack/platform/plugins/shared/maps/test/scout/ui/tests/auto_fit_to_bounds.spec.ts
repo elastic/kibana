@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags, test } from '@kbn/scout';
+import { test } from '@kbn/scout';
 
 const KBN_ARCHIVE = 'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json';
 const ES_ARCHIVE_LOGSTASH = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
@@ -21,7 +21,7 @@ const DOCUMENT_EXAMPLE_MAP_ID = 'd2e73f40-e14a-11e8-a35a-370a8516603a';
 test.describe(
   'Maps - auto fit map to bounds',
   {
-    tag: tags.stateful.classic,
+    tag: '@local-stateful-classic',
   },
   () => {
     let prevDefaultIndex: string | number | boolean | undefined;

@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { tags, test } from '@kbn/scout';
+import { test } from '@kbn/scout';
 
 const KBN_ARCHIVE = 'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json';
 const ES_ARCHIVE_LOGSTASH = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
@@ -22,7 +22,7 @@ const LOAD_CLUSTERS_REQUEST_NAME = 'load layer features (Clustered logstash-*)';
 test.describe(
   'Maps - blended vector layer',
   {
-    tag: tags.stateful.classic,
+    tag: '@local-stateful-classic',
   },
   () => {
     let prevDefaultIndex: string | number | boolean | undefined;
