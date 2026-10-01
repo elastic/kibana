@@ -75,8 +75,7 @@ export function findUnrecognizedTeams(
 
 /**
  * Return the registry teams that own nothing in CODEOWNERS, sorted for stable output.
- * Tooling only resolves teams through CODEOWNERS, so these entries are unreachable and
- * their operational data in the private overlay goes stale.
+ * Tooling resolves teams through CODEOWNERS, so these entries are unreachable.
  */
 export function findUnusedRegistryTeams(registry: Team[], codeownersTeams: Set<string>): string[] {
   return registry
@@ -142,7 +141,8 @@ function main(): void {
 
   if (unusedTeams.length > 0) {
     hasErrors = true;
-    console.error('\nERROR: The following teams in teams.jsonc own nothing in CODEOWNERS:\n');
+    console.error('\nERROR: The following teams in teams.jsonc are not used:');
+    console.error('They own no paths in CODEOWNERS.\n');
     for (const team of unusedTeams) {
       console.error(`  - ${team}`);
     }

@@ -20,9 +20,8 @@ import { getTeamByGithubHandle } from './teams';
  * `code_owner_areas.ts` before it was migrated to derive from `teams.jsonc`.
  *
  * This guards the ~10 consumers of `findAreaForCodeOwner` (Scout/FTR reporters)
- * against regressions: every handle that previously had an area must keep
- * resolving to the same area through the registry. Handles removed from the
- * registry because they own nothing in CODEOWNERS are dropped from the snapshot.
+ * against regressions: every registry handle that previously had an area must
+ * keep resolving to the same area.
  */
 const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   platform: [
