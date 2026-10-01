@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID } from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_USAGE_PARENT_ID } from '@kbn/significant-events-schema';
 import {
   COST_BUDGET_GROUPS,
   FEATURE_ID_TO_COST_BUDGET_GROUP,
@@ -373,7 +373,7 @@ const searchPeriod = async ({
       bool: {
         filter: [
           {
-            term: { 'inference.parent_feature_id': SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID },
+            term: { 'inference.parent_feature_id': NIGHTSHIFT_USAGE_PARENT_ID },
           },
           { range: { '@timestamp': { gte: periodStart, lt: periodEnd } } },
         ],

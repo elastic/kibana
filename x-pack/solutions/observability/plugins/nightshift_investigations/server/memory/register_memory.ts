@@ -10,7 +10,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import {
-  createInvestigationOptimizeTelemetry,
+  createInvestigationMemoryTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
@@ -188,7 +188,7 @@ export const runMemoryOptimize = async ({
     inference: getInference(),
     savedObjects: getSavedObjects(),
     uiSettings: getUiSettings(),
-    telemetryMetadata: createInvestigationOptimizeTelemetry(interactionId),
+    telemetryMetadata: createInvestigationMemoryTelemetry(interactionId),
     logger,
   });
   if (!model) {

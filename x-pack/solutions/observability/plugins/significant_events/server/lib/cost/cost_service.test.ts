@@ -8,12 +8,12 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  NIGHTSHIFT_DISCOVERY_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_USAGE_ID,
+  NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
+  NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
+  NIGHTSHIFT_USAGE_PARENT_ID,
 } from '@kbn/significant-events-schema';
 import { FEATURE_ID_TO_COST_BUDGET_GROUP, type TokenTrackingCoverage } from '../../../common/cost';
 import { calculateSignificantEventsCost, createUnavailableCostResponse } from './cost_service';
@@ -40,11 +40,11 @@ const PRICES: PriceMap = new Map([
 ]);
 
 const KNOWN_FEATURE_IDS = [
-  SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  NIGHTSHIFT_DISCOVERY_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+  NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
+  NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
 ] as const;
 
 const modelBucket = ({
@@ -203,7 +203,7 @@ describe('calculateSignificantEventsCost', () => {
               filter: [
                 {
                   term: {
-                    'inference.parent_feature_id': SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+                    'inference.parent_feature_id': NIGHTSHIFT_USAGE_PARENT_ID,
                   },
                 },
                 expect.objectContaining({ range: { '@timestamp': expect.any(Object) } }),
@@ -276,7 +276,7 @@ describe('calculateSignificantEventsCost', () => {
     });
 
     const result = await calculate({ esClient });
-    expect(FEATURE_ID_TO_COST_BUDGET_GROUP[SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]).toBe(
+    expect(FEATURE_ID_TO_COST_BUDGET_GROUP[NIGHTSHIFT_DISCOVERY_USAGE_ID]).toBe(
       'discovery'
     );
     expect(result.today.groups.map((group) => group.group)).toEqual([
@@ -298,7 +298,7 @@ describe('calculateSignificantEventsCost', () => {
       aggregations: aggregations({
         total: 25,
         features: {
-          [SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID]: featureBucket({
+          [NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID]: featureBucket({
             featureTotal: 25,
             models: [modelBucket({ key: SONNET, total: 25, prompt: 25 })],
           }),
@@ -331,7 +331,7 @@ describe('calculateSignificantEventsCost', () => {
     const esClient = createEsClient(() => ({
       aggregations: aggregations({
         total: 1350,
-        features: { [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: priced },
+        features: { [NIGHTSHIFT_DISCOVERY_USAGE_ID]: priced },
       }),
     }));
 
@@ -354,7 +354,7 @@ describe('calculateSignificantEventsCost', () => {
       esClient: createEsClient(() => ({
         aggregations: aggregations({
           total: 150,
-          features: { [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: clamped },
+          features: { [NIGHTSHIFT_DISCOVERY_USAGE_ID]: clamped },
         }),
       })),
     });
@@ -382,7 +382,7 @@ describe('calculateSignificantEventsCost', () => {
         aggregations: aggregations({
           total: 100,
           features: {
-            [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]:
+            [NIGHTSHIFT_DISCOVERY_USAGE_ID]:
               gte === TODAY_START ? zeroCached : positiveCached,
           },
         }),
@@ -408,7 +408,7 @@ describe('calculateSignificantEventsCost', () => {
       aggregations: aggregations({
         total: 70,
         features: {
-          [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: featureBucket({
+          [NIGHTSHIFT_DISCOVERY_USAGE_ID]: featureBucket({
             featureTotal: 70,
             models: [modelBucket({ key: 'unknown-model', total: 40, prompt: 40 })],
             missing: 30,
@@ -433,7 +433,7 @@ describe('calculateSignificantEventsCost', () => {
       aggregations: aggregations({
         total: 25,
         features: {
-          [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: featureBucket({
+          [NIGHTSHIFT_DISCOVERY_USAGE_ID]: featureBucket({
             featureTotal: 10,
             models: [modelBucket({ key: SONNET, total: 10, prompt: 10 })],
           }),
@@ -456,7 +456,7 @@ describe('calculateSignificantEventsCost', () => {
       aggregations: aggregations({
         total: 100,
         features: {
-          [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: featureBucket({
+          [NIGHTSHIFT_DISCOVERY_USAGE_ID]: featureBucket({
             featureTotal: 100,
             models: [modelBucket({ key: SONNET, total: 50, prompt: 50 })],
             missing: 20,
@@ -482,7 +482,7 @@ describe('calculateSignificantEventsCost', () => {
       aggregations: aggregations({
         total: 300_010,
         features: {
-          [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: featureBucket({
+          [NIGHTSHIFT_DISCOVERY_USAGE_ID]: featureBucket({
             featureTotal: 300_010,
             models: [modelBucket({ key: GPT_54, total: 300_010, prompt: 300_000, completion: 10 })],
             crossings: { [GPT_54]: { doc_count: 4 } },
@@ -516,7 +516,7 @@ describe('calculateSignificantEventsCost', () => {
       aggregations: aggregations({
         total: 5,
         features: {
-          [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: featureBucket({
+          [NIGHTSHIFT_DISCOVERY_USAGE_ID]: featureBucket({
             featureTotal: 5,
             models: [modelBucket({ key: 'missing', total: 5, prompt: 5 })],
           }),
@@ -537,7 +537,7 @@ describe('calculateSignificantEventsCost', () => {
       'missing known feature bucket',
       () => {
         const value = aggregations({ total: 0 });
-        delete value.feature_buckets.buckets[SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID];
+        delete value.feature_buckets.buckets[NIGHTSHIFT_DISCOVERY_USAGE_ID];
         return { aggregations: value };
       },
     ],
@@ -546,14 +546,14 @@ describe('calculateSignificantEventsCost', () => {
       () => {
         const value = aggregations({ total: 0 });
         const bucket =
-          value.feature_buckets.buckets[SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID];
+          value.feature_buckets.buckets[NIGHTSHIFT_DISCOVERY_USAGE_ID];
         return {
           aggregations: {
             ...value,
             feature_buckets: {
               buckets: {
                 ...value.feature_buckets.buckets,
-                [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: {
+                [NIGHTSHIFT_DISCOVERY_USAGE_ID]: {
                   ...bucket,
                   models: undefined,
                 },
@@ -631,7 +631,7 @@ describe('calculateSignificantEventsCost', () => {
       aggregations: aggregations({
         total: 300_010,
         features: {
-          [SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID]: featureBucket({
+          [NIGHTSHIFT_DISCOVERY_USAGE_ID]: featureBucket({
             featureTotal: 300_010,
             models: [modelBucket({ key: GPT_54, total: 300_010, prompt: 300_000, completion: 10 })],
             crossings: { [GPT_54]: { doc_count: 1 } },

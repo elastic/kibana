@@ -12,20 +12,20 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import {
   NightshiftModelBlockedError,
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+  NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+  NIGHTSHIFT_USAGE_PARENT_ID,
+  NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
+  NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
 } from '@kbn/significant-events-schema';
 
-/** Attributes Cortex and Semantic Memory optimize LLM calls to Nightshift investigation spend. */
-export const createInvestigationOptimizeTelemetry = (
+/** Attributes Cortex and Semantic Memory optimize LLM calls to Nightshift investigation memory spend. */
+export const createInvestigationMemoryTelemetry = (
   interactionId: string
 ): ConnectorTelemetryMetadata => ({
-  pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-  aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-  productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  pluginId: NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+  aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
+  productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+  productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
   interactionId,
 });
 
