@@ -21,13 +21,12 @@ import {
   GRAPH_RELATIONSHIP_NODE_ID,
   GRAPH_RELATIONSHIP_NODE_SHAPE_ID,
   GRAPH_RELATIONSHIP_NODE_HANDLE_ID,
-  GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID,
   GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID,
   GRAPH_RELATIONSHIP_NODE_ICON_BADGE_ID,
 } from '../../test_ids';
 
 export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, label, interactive } = props.data as RelationshipNodeViewModel;
+  const { id, label } = props.data as RelationshipNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
