@@ -7,12 +7,17 @@
 
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/logging';
-import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
+import { SELF_AGENT_ID, type AgentApprovals } from '@kbn/agent-builder-common';
 
 export interface ResolvedSubagent {
   /** real ID or SELF_AGENT_ID */
   id: string;
   description: string;
+  /**
+   * The sub-agent's stored auto-approval defaults. Never set for `_self`: the running agent's
+   * defaults are already part of its grant.
+   */
+  approvals?: AgentApprovals;
 }
 
 const SELF_DESCRIPTION = 'This agent (self-fork).';
@@ -23,7 +28,11 @@ const CONCURRENCY = 5;
  * Minimal shape needed from the agent registry
  */
 export interface SubagentRegistryLookup {
-  get: (id: string) => Promise<{ description?: string } | undefined>;
+  get: (
+    id: string
+  ) => Promise<
+    { description?: string; configuration?: { approvals?: AgentApprovals } } | undefined
+  >;
 }
 
 /**
@@ -32,7 +41,8 @@ export interface SubagentRegistryLookup {
  *   - `_self` passes through untouched with a fixed description; no registry
  *     lookup is performed for it.
  *   - Real ids are fetched via `agentRegistry.get(id)` in parallel with
- *     bounded concurrency. Ids that don't exist, are denied by access
+ *     bounded concurrency, and carry the agent's stored auto-approval
+ *     defaults. Ids that don't exist, are denied by access
  *     control, or fail to deserialize are silently dropped (a debug log is
  *     emitted). This mirrors how the UI hides agents the current user
  *     cannot see, and avoids leaking existence of hidden agents into the
@@ -73,7 +83,12 @@ export const resolveAllowedSubagents = async ({
             logger?.debug(`resolveAllowedSubagents: dropping "${id}" (not found)`);
             return undefined;
           }
-          return { id, description: def.description ?? NO_DESCRIPTION };
+          const approvals = def.configuration?.approvals;
+          return {
+            id,
+            description: def.description ?? NO_DESCRIPTION,
+            ...(approvals ? { approvals } : {}),
+          };
         } catch (err) {
           logger?.debug(
             `resolveAllowedSubagents: dropping "${id}" (${

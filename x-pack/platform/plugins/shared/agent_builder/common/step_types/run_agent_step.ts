@@ -131,7 +131,7 @@ export const InputSchema = z.object({
     })
     .optional()
     .describe(
-      'Actions pre-approved for this step, which the agent may then take without a user confirmation. The grant covers this step execution and the sub-agents it spawns.'
+      "Actions pre-approved for this step, which the agent may then take without a user confirmation. The grant covers this step execution and the sub-agents it spawns, and adds to any defaults stored in the agent's configuration."
     ),
   /**
    * Optional runtime overrides for the agent configuration. These replace the corresponding
@@ -545,8 +545,10 @@ When a schema is provided, the agent's response will be available in \`output.st
 \`\`\`
 
 A destructive API normally requires the user to confirm the call, which a workflow cannot do.
-Listing an API here pre-approves it for this step and for any sub-agents it spawns. Every other
-destructive API is still refused, and omitting the field keeps that stricter behavior for all of them.
+Listing an API here pre-approves it for this step and for any sub-agents it spawns. The grant adds
+to the auto-approved APIs stored in the agent's configuration, which apply to every run of the
+agent. Every other destructive API is still refused, and omitting the field leaves only the
+agent's stored defaults.
 
 An entry can also be a namespace wildcard, or \`*\` for every API on that backend. Prefer the
 narrowest grant that works: \`indices.*\` includes \`indices.delete\`, and \`*\` lets the agent

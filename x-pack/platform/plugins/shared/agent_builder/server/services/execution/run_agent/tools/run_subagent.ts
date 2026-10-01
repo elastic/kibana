@@ -14,6 +14,7 @@ import { capitalize, uniqBy } from 'lodash';
 import {
   ToolType,
   apiTargets,
+  applyAgentApprovals,
   isApiAutoApproved,
   isRoundCompleteEvent,
   internalTools,
@@ -26,6 +27,7 @@ import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_
 import { findUnknownApis, formatUnknownApis } from '@kbn/agent-builder-common/apis/known_apis';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type {
+  AgentApprovals,
   ApiTarget,
   AssistantResponse,
   AutoApprovedApi,
@@ -94,6 +96,7 @@ A sub-agent has no user of its own to confirm anything, so every destructive \`$
 
 - Only pass \`auto_approved_apis\` when the task you are delegating genuinely has to mutate state. A read-only task needs no grant, and a read-only API is dropped from one: the sub-agent can already call it.
 - Each entry is an exact identifier (\`indices.create\`), a namespace wildcard (\`indices.*\`), or \`*\` for every API on that backend. Grant the narrowest set that lets the task finish: \`indices.*\` includes \`indices.delete\`, and \`*\` lets the sub-agent perform any destructive operation the user could, unattended.
+- The sub-agent already runs with every API you have pre-approved, plus any its own agent configuration pre-approves. Requested APIs covered by either are granted without asking the user.
 - The user is asked once, for the whole grant, before the sub-agent starts. If they deny it, the sub-agent still runs but without destructive access — report that back rather than re-requesting the same grant.
 - The grant covers only this delegation. A later \`${internalTools.sendMessageToAgent}\` to a persistent sub-agent does not inherit it.
 `;
@@ -179,12 +182,15 @@ const formatGrantedApis = (apis: readonly AutoApprovedApi[]): string =>
 const resolveSubagentApiGrant = async ({
   requested,
   interactivity,
+  subagentApprovals,
   prompts,
   promptId,
   agentId,
 }: {
   requested: AutoApprovedApi[];
   interactivity: InteractivityConfig;
+  /** The sub-agent's stored defaults, which it runs with regardless of the grant. */
+  subagentApprovals?: AgentApprovals;
   prompts: ToolPromptManager;
   promptId: string;
   agentId: string;
@@ -213,8 +219,9 @@ const resolveSubagentApiGrant = async ({
     return settled('not_required');
   }
 
+  const coveredGrant = applyAgentApprovals({ interactivity, approvals: subagentApprovals });
   const pending = destructive.filter(
-    ({ target, api }) => !isApiAutoApproved({ interactivity, target, api })
+    ({ target, api }) => !isApiAutoApproved({ interactivity: coveredGrant, target, api })
   );
   if (pending.length === 0) {
     return settled('granted');
@@ -305,6 +312,9 @@ export const createSubagentTool = ({
   const orderedAllowed = orderAllowedWithSelfFirst(allowedSubagents);
   const allowedIds = orderedAllowed.map((a) => a.id) as [string, ...string[]];
   const allowedIdsSet = new Set(allowedIds);
+  const approvalsBySubagentId = new Map(
+    orderedAllowed.map((subagent) => [subagent.id, subagent.approvals])
+  );
 
   const schema = z.object({
     agent_id: z
@@ -403,6 +413,7 @@ export const createSubagentTool = ({
         const grant = await resolveSubagentApiGrant({
           requested: requestedApis,
           interactivity,
+          subagentApprovals: approvalsBySubagentId.get(agent_id),
           prompts,
           promptId: `${SubAgentToolName}.${callContext.toolCallId}.auto_approved_apis`,
           agentId: subagentLabel,

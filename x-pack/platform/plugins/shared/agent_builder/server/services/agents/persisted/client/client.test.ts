@@ -9,11 +9,14 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   AGENT_ACCESS_CONTROL_MAX_ENTRIES,
   AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  AgentAccessControlMode,
   AgentAccessControlRole,
+  agentBuilderDefaultAgentId,
   isAgentNotFoundError,
   type AgentAccessControlEntry,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
+import type { AgentCreateRequest } from '../../../../../common/agents';
 import { buildReadAccessFilter } from '../../access_control';
 import { getUserFromRequest } from '../../../utils';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
@@ -563,6 +566,213 @@ describe('AgentClient', () => {
       });
 
       expect(Date.parse(String(indexedEntries()[0].added_at))).not.toBeNaN();
+    });
+  });
+
+  describe('auto-approval defaults configuration', () => {
+    const errorMessage =
+      'Only the agent owner, managers, and administrators can configure auto-approved APIs.';
+    const defaultAgentErrorMessage = `The default agent (${agentBuilderDefaultAgentId}) does not support auto-approved APIs.`;
+    const approvals = { auto_approved_apis: { elasticsearch: ['indices.delete'] } };
+    const otherUser = { id: 'user-2', username: 'other-user', isAdmin: false };
+    const adminUser = { id: 'user-3', username: 'admin-user', isAdmin: true };
+    const toolsService = {
+      getRegistry: jest.fn().mockResolvedValue({ has: jest.fn().mockResolvedValue(true) }),
+    };
+
+    const buildClient = (user: typeof mockUser = mockUser): Promise<AgentClient> => {
+      getUserFromRequestMock.mockResolvedValue(user);
+      return createClient({
+        space: testSpace,
+        logger,
+        request: {} as never,
+        security: {} as never,
+        toolsService: toolsService as never,
+        elasticsearch: {
+          client: {
+            asScoped: jest.fn(() => ({
+              asCurrentUser: {},
+              asInternalUser: {},
+            })),
+          },
+        } as never,
+      });
+    };
+
+    const buildCreateProfile = ({
+      id = 'agent-1',
+      accessMode,
+    }: { id?: string; accessMode?: AgentAccessControlMode } = {}): AgentCreateRequest => ({
+      id,
+      name: 'Agent 1',
+      description: 'desc',
+      configuration: { tools: [], approvals },
+      ...(accessMode !== undefined && { access_control: { access_mode: accessMode } }),
+    });
+
+    // Builds a persisted agent document owned by `mockUser`.
+    const buildDoc = ({
+      id = 'agent-1',
+      accessMode,
+      entries = [],
+      storedApprovals,
+    }: {
+      id?: string;
+      accessMode: AgentAccessControlMode;
+      entries?: AgentAccessControlEntry[];
+      storedApprovals?: typeof approvals;
+    }) => ({
+      _id: id,
+      _source: {
+        id,
+        name: 'Agent 1',
+        type: 'chat',
+        space: testSpace,
+        description: 'desc',
+        created_by_id: mockUser.id,
+        created_by_name: mockUser.username,
+        access_control: { access_mode: accessMode, entries },
+        config: { tools: [], ...(storedApprovals && { approvals: storedApprovals }) },
+        created_at: '2020-01-01T00:00:00.000Z',
+        updated_at: '2020-01-01T00:00:00.000Z',
+      },
+    });
+
+    const indexedApprovals = () => mockEsClient.index.mock.calls[0][0].document.config.approvals;
+
+    describe('create', () => {
+      beforeEach(() => {
+        mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } }).mockResolvedValue({
+          hits: { hits: [buildDoc({ accessMode: AgentAccessControlMode.Public })] },
+        });
+      });
+
+      it('lets the creator set defaults on a new public agent', async () => {
+        const ownerClient = await buildClient();
+
+        await ownerClient.create(buildCreateProfile({ accessMode: AgentAccessControlMode.Public }));
+
+        expect(indexedApprovals()).toEqual(approvals);
+      });
+
+      it('rejects defaults on an agent created with the default agent id', async () => {
+        const adminClient = await buildClient(adminUser);
+
+        await expect(
+          adminClient.create(buildCreateProfile({ id: agentBuilderDefaultAgentId }))
+        ).rejects.toThrow(defaultAgentErrorMessage);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('update', () => {
+      const mockStoredDoc = (document: ReturnType<typeof buildDoc>) =>
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [document] } });
+
+      it('lets the owner set defaults on a public agent', async () => {
+        const ownerClient = await buildClient();
+        mockStoredDoc(buildDoc({ accessMode: AgentAccessControlMode.Public }));
+
+        await ownerClient.update('agent-1', { configuration: { approvals } });
+
+        expect(indexedApprovals()).toEqual(approvals);
+      });
+
+      it('lets a manager set defaults on a shared agent', async () => {
+        const managerClient = await buildClient(otherUser);
+        mockStoredDoc(
+          buildDoc({
+            accessMode: AgentAccessControlMode.Shared,
+            entries: [{ type: 'user', id: otherUser.id, role: AgentAccessControlRole.Manager }],
+          })
+        );
+
+        await managerClient.update('agent-1', { configuration: { approvals } });
+
+        expect(indexedApprovals()).toEqual(approvals);
+      });
+
+      it('lets an admin set defaults on an agent they do not own', async () => {
+        const adminClient = await buildClient(adminUser);
+        mockStoredDoc(buildDoc({ accessMode: AgentAccessControlMode.Shared }));
+
+        await adminClient.update('agent-1', { configuration: { approvals } });
+
+        expect(indexedApprovals()).toEqual(approvals);
+      });
+
+      it('rejects an editor changing the defaults of a public agent', async () => {
+        const editorClient = await buildClient(otherUser);
+        mockStoredDoc(
+          buildDoc({ accessMode: AgentAccessControlMode.Public, storedApprovals: approvals })
+        );
+
+        await expect(
+          editorClient.update('agent-1', {
+            configuration: { approvals: { auto_approved_apis: { elasticsearch: [] } } },
+          })
+        ).rejects.toThrow(errorMessage);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('lets an editor save the agent with its defaults unchanged', async () => {
+        const editorClient = await buildClient(otherUser);
+        mockStoredDoc(
+          buildDoc({ accessMode: AgentAccessControlMode.Public, storedApprovals: approvals })
+        );
+
+        await editorClient.update('agent-1', {
+          name: 'Renamed',
+          configuration: {
+            approvals: { auto_approved_apis: { elasticsearch: ['indices.delete'], kibana: [] } },
+          },
+        });
+
+        expect(indexedApprovals()).toEqual(approvals);
+      });
+
+      it('lets the owner share an agent that has defaults', async () => {
+        const ownerClient = await buildClient();
+        mockStoredDoc(
+          buildDoc({ accessMode: AgentAccessControlMode.Private, storedApprovals: approvals })
+        );
+
+        await ownerClient.update('agent-1', {
+          access_control: { access_mode: AgentAccessControlMode.Public },
+        });
+
+        expect(indexedApprovals()).toEqual(approvals);
+      });
+
+      it('rejects defaults on the default agent, even from an admin', async () => {
+        const adminClient = await buildClient(adminUser);
+        mockStoredDoc(
+          buildDoc({ id: agentBuilderDefaultAgentId, accessMode: AgentAccessControlMode.Public })
+        );
+
+        await expect(
+          adminClient.update(agentBuilderDefaultAgentId, { configuration: { approvals } })
+        ).rejects.toThrow(defaultAgentErrorMessage);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+    });
+
+    it('lets the owner add an access entry to an agent that has defaults', async () => {
+      const ownerClient = await buildClient();
+      mockEsClient.index.mockResolvedValue({ _seq_no: 1, _primary_term: 1 });
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            buildDoc({ accessMode: AgentAccessControlMode.Private, storedApprovals: approvals }),
+          ],
+        },
+      });
+
+      await ownerClient.updateAccessControl('agent-1', {
+        entries: [{ type: 'user', id: otherUser.id, role: AgentAccessControlRole.User }],
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
   });
 });

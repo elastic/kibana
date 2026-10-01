@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
+import { SELF_AGENT_ID, type AgentApprovals } from '@kbn/agent-builder-common';
 import { resolveAllowedSubagents } from './resolve_allowed_subagents';
 
-type MockValue = { description?: string } | 'deny' | 'missing';
+type MockValue =
+  | { description?: string; configuration?: { approvals?: AgentApprovals } }
+  | 'deny'
+  | 'missing';
 
 const makeRegistry = (map: Record<string, MockValue>) => ({
   get: jest.fn(async (id: string) => {
@@ -113,6 +116,22 @@ describe('resolveAllowedSubagents', () => {
       agentRegistry: registry,
     });
     expect(out[0].description).toBe('(no description)');
+  });
+
+  it('carries the stored defaults of each sub-agent that has them', async () => {
+    const approvals = { auto_approved_apis: { elasticsearch: ['indices.delete'] } };
+    const registry = makeRegistry({
+      withDefaults: { description: 'With defaults', configuration: { approvals } },
+      none: { description: 'None', configuration: {} },
+    });
+    const out = await resolveAllowedSubagents({
+      configuredIds: ['withDefaults', 'none'],
+      agentRegistry: registry,
+    });
+    expect(out).toEqual([
+      { id: 'withDefaults', description: 'With defaults', approvals },
+      { id: 'none', description: 'None' },
+    ]);
   });
 
   it('dedupes _self as well', async () => {

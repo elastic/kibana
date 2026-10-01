@@ -158,6 +158,26 @@ sub-agent through `run_subagent`, and the user is asked once to approve them bef
 approval covers only the delegated execution, so a sub-agent can hold access the parent run was not
 configured with, though never more than the delegating user could exercise themselves.
 
+##### Agent-level defaults
+
+An agent can store the same grant in its configuration, as `configuration.approvals` on
+`POST /api/agent_builder/agents` and `PUT /api/agent_builder/agents/{id}`, or from the
+auto-approved APIs section of the agent editor. Every run of the agent adds the stored defaults to
+the grant supplied by the caller, whether the run comes from a conversation, a tool run, or the
+`ai.agent` workflow step. A caller can widen the defaults for a run, but never narrow them. Send
+empty lists to clear the defaults.
+
+The defaults apply to everyone who runs the agent. Changing them needs the same access as changing
+the agent's access control: the owner, users with the Manager role, and administrators can do it,
+and `permissions.update_access_control` in the agent response tells the current user whether they
+can. Other editors can still save the agent as long as they resubmit the defaults unchanged. The
+default agent does not support defaults. Built-in agents can declare them as
+`configuration.approvals` in their registered definition.
+
+Runtime configuration overrides cannot supply `approvals`: the defaults are always read from the
+agent definition. A sub-agent spawned through `run_subagent` runs with the parent's effective grant,
+plus any APIs granted for the delegation, plus its own defaults.
+
 ### Error handling
 
 All agentBuilder errors inherit from the `AgentBuilderError` error type. Various error utilities

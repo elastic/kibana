@@ -13,7 +13,7 @@ import { allToolsSelection, allToolsSelectionWildcard } from '@kbn/agent-builder
  * floor for every agent of that type; fields left unset keep the agent's own value
  * (including legacy "undefined means all" semantics for skill_ids / connector_ids).
  */
-export type AgentBaseConfiguration = Partial<AgentConfiguration>;
+export type AgentBaseConfiguration = Partial<Omit<AgentConfiguration, 'approvals'>>;
 
 /**
  * Delimiter inserted between a type's base instructions and the agent's own
