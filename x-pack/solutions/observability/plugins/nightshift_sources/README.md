@@ -41,6 +41,12 @@ security extension authorizes each call against the Nightshift feature (`all` ca
 does not include the type. `create` and `update` parse the same wire schemas as HTTP, so a
 blank title still 400s.
 
+`setup.onSourceChange(listener)` subscribes an engine to every committed write: `created`,
+`updated` (with `previous`, which covers `_enable` and `_disable`) and `deleted`, each with the
+request that made it. The write awaits every listener before it returns, so an engine can
+clean up after a deleted source before the caller refetches. A listener that throws is logged;
+the write already happened and is not undone. Rolled-back writes are not reported.
+
 ## Query validation
 
 A source is rows only. On create and update the ES|QL must:
@@ -88,8 +94,8 @@ moves only when the normalized query changes, and is monotonic so two edits in t
 millisecond still advance the cursor) and reconcile their own state: disable rules,
 cancel onboarding, skip the source when picking candidates, re-onboard after a query change.
 The plugin cannot call engines directly without reintroducing the dependency cycle it exists to
-avoid; a lifecycle listener registry on the setup contract is the planned follow-up if the
-reconcile latency turns out to matter.
+avoid. Engines that need to react right away subscribe through `setup.onSourceChange` (see
+[Engine access](#engine-access)); the reconcile stays as the safety net.
 
 ## Elasticsearch privileges
 
