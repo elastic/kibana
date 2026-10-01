@@ -101,7 +101,13 @@ const ensureAttackDataStreamSafe = async (esClient: EsClient, index: string): Pr
       )
     );
   }
-  await esClient.indices.createDataStream({ name: index });
+  await esClient.indices.createDataStream({ name: index }).catch((error: { statusCode?: number }) => {
+    // concurrent eval tasks can both observe the 404 and race to provision;
+    // already-exists means someone else made the stream — that is success
+    if (error.statusCode !== 400 && error.statusCode !== 409) {
+      throw error;
+    }
+  });
 };
 
 const createWithConflictRetry = async (
@@ -139,20 +145,42 @@ const bulkItemConflicts = (items: unknown[]): boolean =>
       )
   );
 
+const isConflictItem = (item: unknown): boolean =>
+  typeof item === 'object' &&
+  item !== null &&
+  Object.values(item as Record<string, { status?: number; error?: { type?: string } }>).some(
+    (op) => op?.status === 409 || op?.error?.type === 'version_conflict_engine_exception'
+  );
+
 const bulkWithConflictRetry = async (
   esClient: EsClient,
   label: string,
   operations: unknown[],
   { attempts = 3, delayMs = 750 }: { attempts?: number; delayMs?: number } = {}
 ): Promise<void> => {
+  let pending = operations;
   for (let attempt = 1; ; attempt++) {
-    const result = await esClient.bulk({ refresh: 'wait_for', operations });
+    const result = await esClient.bulk({ refresh: 'wait_for', operations: pending });
     if (result.errors !== true) {
       return;
     }
-    const items = result.items ?? [];
-    if (bulkItemConflicts(items) && attempt < attempts) {
-      // serverless ignores the delete refresh: just-deleted ids can 409 on reseed
+    const items: unknown[] = result.items ?? [];
+    // retry ONLY the (operation, document) pairs whose item failed — a mixed
+    // 409 batch must not resend succeeded items (they would conflict with
+    // their own previous create)
+    const retry: unknown[] = [];
+    let nonConflict = false;
+    items.forEach((item, idx) => {
+      if (!isConflictItem(item)) {
+        if (Object.values(item as Record<string, { status?: number }>).some((op) => (op?.status ?? 200) >= 300)) {
+          nonConflict = true;
+        }
+        return;
+      }
+      retry.push(pending[idx * 2], pending[idx * 2 + 1]);
+    });
+    if (retry.length > 0 && !nonConflict && attempt < attempts) {
+      pending = retry;
       await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
       continue;
     }

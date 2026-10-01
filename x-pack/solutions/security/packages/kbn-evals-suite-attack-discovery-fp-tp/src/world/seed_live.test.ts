@@ -197,6 +197,38 @@ describe('seedFixture', () => {
     kbnRequest = jest.fn().mockResolvedValue({ statusCode: 200, body: {} });
   });
 
+  it('retries only failed items of a mixed 409 bulk batch', async () => {
+    // plan.alertOperations pairs: first create succeeds, second 409s
+    esClient.bulk
+      .mockResolvedValueOnce({
+        errors: true,
+        items: [
+          { create: { status: 201 } },
+          { create: { status: 409, error: { type: 'version_conflict_engine_exception' } } },
+        ],
+      })
+      .mockResolvedValueOnce({ errors: false });
+
+    await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
+
+    const secondCall = esClient.bulk.mock.calls[1][0];
+    // only the failed pair (op + doc) is resent, not the whole batch
+    expect(secondCall.operations).toHaveLength(2);
+  });
+
+  it('treats an already-exists race on createDataStream as provisioned', async () => {
+    esClient.indices.getDataStream
+      .mockRejectedValueOnce(Object.assign(new Error('not found'), { statusCode: 404 }))
+      .mockResolvedValue({ data_streams: [] });
+    esClient.indices.createDataStream.mockRejectedValueOnce(
+      Object.assign(new Error('resource_already_exists_exception'), { statusCode: 400 })
+    );
+
+    await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
+
+    expect(esClient.create).toHaveBeenCalled();
+  });
+
   it('retries alert bulk item 409s after a delete-then-reseed race', async () => {
     esClient.bulk
       .mockResolvedValueOnce({

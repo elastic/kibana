@@ -110,9 +110,10 @@ refresh; wait a moment and rerun.
 Classic-stack caveats: the seeder writes the Attack Discovery document to the
 `-default` namespace data stream, so on classic it only pairs with workflows
 running in the default space. The seeder preflights the Attack Discovery
-data stream and refuses to seed when it does not exist yet (it is created when
-the first Attack Discovery alert runs) — run the Attack Discovery worker once
-before seeding a fresh stack.
+data stream: when it is missing but a matching security alerts index template
+is installed, the seeder provisions the stream itself — no worker run needed on
+a prepared stack. It only refuses when no matching template exists; start the
+security solution (or run the Attack Discovery worker once) and retry.
 
 ## Reproducibility
 
