@@ -302,13 +302,22 @@ const solidToneColor = (tone: MetricTone, euiTheme: EuiThemeComputed): string =>
   toneColor(tone, euiTheme);
 
 /**
+ * Label for a default step, taken from the same legend the hex map
+ * shows for this metric (`< 200ms`, `200ms – 500ms`, `≥ 500ms`) so
+ * Custom → Steps opens with the bands already on screen.
+ */
+const defaultStepLabel = (metric: MetricDescriptor, tone: MetricTone): string =>
+  getMetricLegend(metric).find((entry) => entry.tone === tone)?.label ?? TONE_LABEL[tone];
+
+/**
  * Default Steps rules for a numeric metric: one threshold per severity
- * band (Healthy / At risk / Unhealthy) at the metric's own warn/crit values,
- * coloured with the same translucent `toneColor` Automatic tiles paint.
- * Unedited Steps therefore stays pixel-identical to Automatic after
- * Apply. The editor flattens these for the colour picker; Apply drops
- * the seed rather than persisting picker-normalized hexes, so a
- * round-trip through Custom → Steps → Apply cannot drift the grid.
+ * band at the metric's own warn/crit values, labelled with the hex-map
+ * legend for that band and coloured with the same translucent
+ * `toneColor` Automatic tiles paint. Unedited Steps therefore stays
+ * pixel-identical to Automatic after Apply. The editor flattens these
+ * for the colour picker; Apply drops the seed rather than persisting
+ * picker-normalized hexes, so a round-trip through Custom → Steps →
+ * Apply cannot drift the grid.
  */
 const buildDefaultStepRules = (
   metric: MetricDescriptor,
@@ -322,15 +331,15 @@ const buildDefaultStepRules = (
   const minValue = Math.round(metric.range.min);
   if (direction === 'asc') {
     return [
-      { color: goodColor, label: TONE_LABEL.good, value: minValue },
-      { color: warningColor, label: TONE_LABEL.warning, value: warn },
-      { color: dangerColor, label: TONE_LABEL.danger, value: crit },
+      { color: goodColor, label: defaultStepLabel(metric, 'good'), value: minValue },
+      { color: warningColor, label: defaultStepLabel(metric, 'warning'), value: warn },
+      { color: dangerColor, label: defaultStepLabel(metric, 'danger'), value: crit },
     ];
   }
   return [
-    { color: dangerColor, label: TONE_LABEL.danger, value: minValue },
-    { color: warningColor, label: TONE_LABEL.warning, value: crit },
-    { color: goodColor, label: TONE_LABEL.good, value: warn },
+    { color: dangerColor, label: defaultStepLabel(metric, 'danger'), value: minValue },
+    { color: warningColor, label: defaultStepLabel(metric, 'warning'), value: crit },
+    { color: goodColor, label: defaultStepLabel(metric, 'good'), value: warn },
   ];
 };
 
@@ -1964,7 +1973,7 @@ const BucketMetricControlsFlyout = ({
     setDraftColoring((current) => ({ ...current, ...patch }));
 
   // Changing Color-by drops step rules that belonged to the previous
-  // metric so Steps re-seeds Healthy / At risk / Unhealthy from the new one
+  // metric so Steps re-seeds the hex-map legend labels from the new one
   // (CPU util must not keep Restarts' 3 / 10 bands).
   const handleMetricChange = (nextMetricId: string) => {
     setDraftMetricId(nextMetricId);

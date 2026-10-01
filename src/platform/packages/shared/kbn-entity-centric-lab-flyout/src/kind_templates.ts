@@ -5411,12 +5411,22 @@ const buildLlmTemplate = (
  * gets rendered with the "AWS region" tag and a `Region:` label
  * showing the instance id.
  */
+/** `null` = inventory has no alert rules configured; omit to use kind-template demo data. */
+export type AlertsActiveOverride = number | null | undefined;
+
+const emptyAlertsTabData = (): AlertsTabData => ({
+  activeCount: 0,
+  totalCount: 0,
+  overTime: INCIDENT_X_DOMAIN.map((x) => ({ x, y: 0 })),
+  details: [],
+});
+
 export const buildKindTemplate = (
   entityName: string,
   kind: EntityKind | undefined,
   health: EntityHealthVariant = 'healthy',
   typeLabel?: string,
-  alertsActiveOverride?: number
+  alertsActiveOverride?: AlertsActiveOverride
 ): { overview: EntityOverview; tabs: EntityTabsData } | undefined => {
   if (!kind) return undefined;
   let result: { overview: EntityOverview; tabs: EntityTabsData } | undefined;
@@ -5468,7 +5478,9 @@ export const buildKindTemplate = (
       result = buildLlmTemplate(entityName, health, typeLabel);
       break;
   }
-  if (result && alertsActiveOverride !== undefined) {
+  if (result && alertsActiveOverride === null) {
+    result.tabs.alerts = emptyAlertsTabData();
+  } else if (result && alertsActiveOverride !== undefined) {
     const alerts = result.tabs.alerts;
     const rules = ALERT_RULES_BY_KIND[kind];
     const details: AlertRow[] = [];

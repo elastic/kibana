@@ -79,6 +79,9 @@ export const DETAIL_DIMENSION: VariationDimension = {
 
 export type PhaseVariation = 'phase1' | 'phase3';
 
+/** Data profile default for ElasticOn (Phase 1 uses the standard demo dataset). */
+export const getDataProfileDefaultForPhase = (_phase: PhaseVariation): DataVariation => 'default';
+
 export const PHASE_DIMENSION: VariationDimension = {
   id: 'phase',
   label: 'Phase',
@@ -158,9 +161,12 @@ export const resolveVariationDefaultOption = (
   if (!dim) {
     return '';
   }
+  const phase = (selections.phase ?? PHASE_DIMENSION.defaultOption) as PhaseVariation;
   if (dimensionId === 'dashboardStyle') {
-    const phase = (selections.phase ?? PHASE_DIMENSION.defaultOption) as PhaseVariation;
     return getDashboardStyleDefaultForPhase(phase);
+  }
+  if (dimensionId === 'data') {
+    return getDataProfileDefaultForPhase(phase);
   }
   return dim.defaultOption;
 };

@@ -8,6 +8,8 @@
 import { useEffect, useState } from 'react';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
+import type { EntityCategoryId } from './fake_entities';
+import { getEntitySearchFieldNames } from './entity_search_fields';
 
 const KEYWORD = (name: string): FieldSpec => ({
   name,
@@ -17,23 +19,12 @@ const KEYWORD = (name: string): FieldSpec => ({
   searchable: true,
 });
 
-// The fields the ElasticOn Inventory search bar offers for autocomplete
-// and "+ Add filter". These mirror the seeded `Entity` shape (see
-// `entity_kql.ts`), so a query typed against them actually filters.
-const ENTITY_FIELDS: Record<string, FieldSpec> = {
-  name: KEYWORD('name'),
-  type: KEYWORD('type'),
-  category: KEYWORD('category'),
-  health: KEYWORD('health'),
-  'cloud.provider': KEYWORD('cloud.provider'),
-  environment: KEYWORD('environment'),
-  team: KEYWORD('team'),
-  region: KEYWORD('region'),
-  cluster: KEYWORD('cluster'),
-  namespace: KEYWORD('namespace'),
-  deployment: KEYWORD('deployment'),
-  node: KEYWORD('node'),
-};
+const buildEntitySearchFields = (
+  categoryScope?: EntityCategoryId
+): Record<string, FieldSpec> =>
+  Object.fromEntries(
+    getEntitySearchFieldNames(categoryScope).map((name) => [name, KEYWORD(name)])
+  );
 
 /**
  * An ad-hoc (unsaved) data view describing the fake entity fields, purely
@@ -42,7 +33,10 @@ const ENTITY_FIELDS: Record<string, FieldSpec> = {
  * in-memory by `compileEntityKql` — so we create it with `skipFetchFields`
  * and swallow any failure (the bar still works for typed KQL without it).
  */
-export const useEntityLabDataView = (enabled: boolean): DataView | undefined => {
+export const useEntityLabDataView = (
+  enabled: boolean,
+  categoryScope?: EntityCategoryId
+): DataView | undefined => {
   const {
     dependencies: {
       start: { dataViews },
@@ -51,15 +45,19 @@ export const useEntityLabDataView = (enabled: boolean): DataView | undefined => 
   const [dataView, setDataView] = useState<DataView | undefined>();
 
   useEffect(() => {
-    if (!enabled || dataView) return;
+    if (!enabled) {
+      setDataView(undefined);
+      return;
+    }
     let cancelled = false;
+    setDataView(undefined);
     dataViews
       .create(
         {
           id: 'entity-centric-lab-adhoc',
           title: 'entity-centric-lab*',
           name: 'Entities (lab)',
-          fields: ENTITY_FIELDS,
+          fields: buildEntitySearchFields(categoryScope),
         },
         true
       )
@@ -72,7 +70,7 @@ export const useEntityLabDataView = (enabled: boolean): DataView | undefined => 
     return () => {
       cancelled = true;
     };
-  }, [enabled, dataView, dataViews]);
+  }, [enabled, categoryScope, dataViews]);
 
   return dataView;
 };

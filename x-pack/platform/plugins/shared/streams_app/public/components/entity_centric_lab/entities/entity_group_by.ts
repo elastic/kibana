@@ -25,6 +25,7 @@ import {
   getVisibleTagKeys,
 } from './fake_entities';
 import { CLOUD_PROVIDERS } from './cloud_providers';
+import { isCloudInventoryScope, isKubernetesInventoryScope } from './entity_search_fields';
 
 export type GroupByFieldId = string;
 
@@ -160,15 +161,16 @@ const CORE_FIELDS: readonly GroupByFieldDef[] = [
     }),
     valueOf: (entity) => HEALTH_LABEL[entity.health] ?? UNKNOWN,
   },
-  {
-    id: 'provider',
-    label: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.field.provider', {
-      defaultMessage: 'Cloud provider',
-    }),
-    valueOf: (entity) =>
-      entity.provider ? PROVIDER_LABEL[entity.provider] ?? entity.provider : UNKNOWN,
-  },
 ];
+
+const CLOUD_PROVIDER_FIELD: GroupByFieldDef = {
+  id: 'provider',
+  label: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.field.provider', {
+    defaultMessage: 'Cloud provider',
+  }),
+  valueOf: (entity) =>
+    entity.provider ? PROVIDER_LABEL[entity.provider] ?? entity.provider : UNKNOWN,
+};
 
 const tagGroupByFields = (isElasticOn: boolean, isPhase1 = false): GroupByFieldDef[] =>
   getVisibleTagKeys(isElasticOn, isPhase1).map((key) => ({
@@ -179,32 +181,34 @@ const tagGroupByFields = (isElasticOn: boolean, isPhase1 = false): GroupByFieldD
 
 /**
  * Fields offered in the Group by dropdown. Includes the per-category "extra"
- * attributes (e.g. Hosts → OS / Cloud provider / Service name) when the page is
- * scoped to a category that declares them. ElasticOn omits Application.
+ * attributes (e.g. Hosts → OS / Cloud provider / Service name) when the
+ * inventory is scoped to a category that declares them. K8s hierarchy fields
+ * (Cluster / Namespace / Node) and Cloud provider follow the same scope
+ * rules as the search bar ({@link getEntitySearchFieldNames}). ElasticOn
+ * omits Application.
  *
  * In Phase 1 the "Health" field is replaced by "Alerts" (no health concept).
  */
 export const getGroupByFields = (
-  categoryScope?: EntityCategoryId,
+  inventoryCategoryScope?: EntityCategoryId,
   isElasticOn = false,
   phase: string = 'phase3'
 ): GroupByFieldDef[] => {
   const isPhase1 = phase === 'phase1';
-  const fields = isPhase1
-    ? CORE_FIELDS.filter((f) => f.id !== 'health')
-    : CORE_FIELDS;
+  const coreFields = isPhase1 ? CORE_FIELDS.filter((f) => f.id !== 'health') : CORE_FIELDS;
+  const cloudFields = isCloudInventoryScope(inventoryCategoryScope) ? [CLOUD_PROVIDER_FIELD] : [];
+  const fields = [...coreFields, ...cloudFields];
   const alertsField = isPhase1 ? [ALERTS_FIELD] : [];
-  const attrFields: GroupByFieldDef[] = categoryScope
-    ? getCategoryExtraFilters(categoryScope).map((def) => ({
+  const attrFields: GroupByFieldDef[] = inventoryCategoryScope
+    ? getCategoryExtraFilters(inventoryCategoryScope).map((def) => ({
         id: `attr:${def.key}`,
         label: def.label,
         valueOf: (entity: Entity) => entity.attributes?.[def.key] || UNKNOWN,
       }))
     : [];
 
-  // K8s-specific group-by fields — only when scoped to the Kubernetes category.
-  const k8sFields: GroupByFieldDef[] =
-    categoryScope === 'kubernetes'
+  // K8s-specific group-by fields — only when the inventory is K8s-scoped.
+  const k8sFields: GroupByFieldDef[] = isKubernetesInventoryScope(inventoryCategoryScope)
       ? [
           {
             id: 'k8s:cluster',

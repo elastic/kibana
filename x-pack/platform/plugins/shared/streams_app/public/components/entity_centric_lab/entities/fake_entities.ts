@@ -69,9 +69,9 @@ export const ENTITY_CATEGORIES: readonly EntityCategoryDescriptor[] = [
   { id: 'kubernetes', label: 'Kubernetes', icon: 'logoKubernetes' },
   { id: 'databases', label: 'Databases', icon: 'database' },
   { id: 'storage', label: 'Storage', icon: 'folderOpen' },
+  { id: 'functions', label: 'Functions', icon: 'function' },
   { id: 'networking', label: 'Networking', icon: 'globe' },
   { id: 'services', label: 'APM Services', icon: 'apmApp' },
-  { id: 'functions', label: 'Functions', icon: 'function' },
   { id: 'middlewares', label: 'Messaging', icon: 'logstashIf' },
   { id: 'llms', label: 'AI/ML', icon: 'sparkles' },
   // Catch-all bucket — rendered as a nav section so user-typed

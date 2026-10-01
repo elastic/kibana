@@ -21,6 +21,7 @@ import {
   entityTypeToKind,
   inferEntityKind,
   normalizeEntityHealth,
+  type AlertsActiveOverride,
   type EntityKind,
 } from './kind_templates';
 import { INCIDENT_X_DOMAIN } from './time_domain';
@@ -294,7 +295,7 @@ export const buildFakeEntityTabsData = (
   entityName: string,
   entityType?: string,
   entityHealth?: string,
-  alertsActiveOverride?: number
+  alertsActiveOverride?: AlertsActiveOverride
 ): EntityTabsData => {
   const storyTabs = getStoryTabsData(entityName);
   if (storyTabs) {

@@ -78,6 +78,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { FAKE_ENTITY_TYPES } from '../fake_entity_types';
 import { K8sDetailDashboard } from './k8s_detail_dashboard';
+import { podPhaseBadgeForEntity } from './bucket_metrics';
 import { buildFakeEntities, getCategoryDescriptor } from './fake_entities';
 import { VariationProvider, useVariation } from './variation_context';
 import { VariationSwitcher } from './variation_switcher';
@@ -254,6 +255,18 @@ const computeChildAlertsBadge = (
   return { label: '0 active alerts', color: 'success' };
 };
 
+const inventoryAlertsActiveOverride = (
+  entity: { alerts?: { active: number } } | undefined
+): number | null | undefined => {
+  if (!entity) {
+    return undefined;
+  }
+  if (entity.alerts === undefined) {
+    return null;
+  }
+  return entity.alerts.active;
+};
+
 // ---------------------------------------------------------------------------
 // Main page component
 // ---------------------------------------------------------------------------
@@ -309,10 +322,10 @@ const EntityDetailPageInner = () => {
     () => buildFakeEntityOverview(entityName, entityType, entityHealth, entityRegion),
     [entityName, entityType, entityHealth, entityRegion]
   );
-  const alertsActiveCount = entity?.alerts?.active;
+  const alertsActiveOverride = inventoryAlertsActiveOverride(entity);
   const tabsData = useMemo(
-    () => buildFakeEntityTabsData(entityName, entityType, entityHealth, alertsActiveCount),
-    [entityName, entityType, entityHealth, alertsActiveCount]
+    () => buildFakeEntityTabsData(entityName, entityType, entityHealth, alertsActiveOverride),
+    [entityName, entityType, entityHealth, alertsActiveOverride]
   );
 
   const displayName = useEntityDisplayName(entityName, entityType);
@@ -338,6 +351,8 @@ const EntityDetailPageInner = () => {
     const rest = overview.tags.filter((_, index) => index !== healthIndex);
     return [overview.tags[healthIndex], ...rest];
   }, [overview.tags, isPhase1, entity]);
+
+  const podPhaseBadge = useMemo(() => podPhaseBadgeForEntity(entity), [entity]);
 
   // Tab template override (wizard customisations)
   const entityTypeId = useMemo(
@@ -921,6 +936,13 @@ const EntityDetailPageInner = () => {
                 <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
               </EuiFlexItem>
             ))}
+            {podPhaseBadge ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color={podPhaseBadge.color} data-test-subj="entityDetailPagePodPhaseBadge">
+                  {podPhaseBadge.label}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </StreamsAppPageTemplate.Header>
         <StreamsAppPageTemplate.Body>
@@ -959,7 +981,8 @@ const EntityDetailPageInner = () => {
           onNavigateEntity={openChildEntity}
           hideHealthBadge={isPhase1}
           alertsBadge={isPhase1 ? computeChildAlertsBadge(childEntity) : undefined}
-          alertsActiveCount={childEntity?.alerts?.active}
+          alertsActiveCount={inventoryAlertsActiveOverride(childEntity)}
+          podPhaseBadge={podPhaseBadgeForEntity(childEntity)}
           hideAiSummary={isPhase1}
           hideOwnership={isPhase1}
           hideEvents={isPhase1}

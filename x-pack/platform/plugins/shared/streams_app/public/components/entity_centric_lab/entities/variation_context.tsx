@@ -27,8 +27,10 @@ import React, {
 
 import { GROUP_BY_STORAGE_KEY } from './storage_keys';
 import {
+  PHASE_DIMENSION,
   VARIATION_DIMENSIONS,
   resolveVariationDefaultOption,
+  type PhaseVariation,
   type VariationDimension,
 } from './variation_registry';
 
@@ -50,6 +52,17 @@ const readFromStorage = (): Record<string, string> => {
     }
   } catch {
     // localStorage unavailable (private browsing, etc.) — fall back to defaults
+  }
+  // Phase 1 demos always start on the Default data profile (Messaging-only
+  // empty state). Ignore persisted overrides so Full/Empty/10k+ do not stick.
+  const phase = (map.phase ?? PHASE_DIMENSION.defaultOption) as PhaseVariation;
+  if (phase === 'phase1' && map.data) {
+    delete map.data;
+    try {
+      localStorage.removeItem(`${STORAGE_PREFIX}data`);
+    } catch {
+      // ignore
+    }
   }
   return map;
 };
@@ -137,15 +150,18 @@ export const VariationProvider = ({ children }: PropsWithChildren<{}>) => {
         //   - bucket metric selections (Alerts vs Health default)
         //   - group-by (phase1 has 'alerts' field, phase3 has 'health')
         //   - dashboard style (Phase 1 → list + flyout preview)
+        //   - data profile (Phase 1 → Default demo dataset)
         if (dimensionId === 'phase') {
           try {
             localStorage.removeItem('entityCentricLab.bucketMetricSelection.v4');
             localStorage.removeItem(GROUP_BY_STORAGE_KEY);
             localStorage.removeItem(`${STORAGE_PREFIX}dashboardStyle`);
+            localStorage.removeItem(`${STORAGE_PREFIX}data`);
           } catch {
             // ignore
           }
           delete next.dashboardStyle;
+          delete next.data;
         }
         return next;
       });

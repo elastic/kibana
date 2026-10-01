@@ -135,6 +135,7 @@ import {
   matchesExtraFilters,
   matchesTagFilters,
 } from './fake_entities';
+import { podPhaseBadgeForEntity } from './bucket_metrics';
 import { GroupedGridView } from './grouped_grid_view';
 // CloudSideNav removed — cloud entities now live under functional categories.
 import { EntitiesListView } from './entities_list_view';
@@ -229,6 +230,25 @@ type ViewMode = 'grid' | 'list' | 'geomap';
 
 const isViewMode = (value: unknown): value is ViewMode =>
   value === 'grid' || value === 'list' || value === 'geomap';
+
+/**
+ * Phase 1 demos always open on the hex map, grouped Category → Type.
+ * Applied once per full page load so a stale localStorage choice (list
+ * view, a different grouping) does not stick, while changing the view
+ * and walking the left nav still persists until the next reload.
+ */
+let phase1InventoryDefaultsApplied = false;
+let phase1InventoryDefaultsNeedStateSync = false;
+
+const applyPhase1InventoryDefaultsToStorage = (): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, 'grid');
+    window.localStorage.setItem(GROUP_BY_STORAGE_KEY, JSON.stringify(DEFAULT_GROUP_BY));
+  } catch {
+    // Storage blocked — the in-memory sync below still sets the layout.
+  }
+};
 
 /**
  * View-mode state that survives navigation between the cross-category
@@ -492,6 +512,41 @@ const ONBOARDING_CATEGORY_MAP: Partial<Record<EntityCategoryId, string>> = {
   networking: 'network',
   middlewares: 'messaging',
   llms: 'aiml',
+};
+
+const scenarioBannerDismissedKey = (scenario: string) =>
+  `elasticOn_scenarioBannerDismissed_${scenario}`;
+
+const readScenarioBannerDismissed = (scenario: string): boolean => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  try {
+    return sessionStorage.getItem(scenarioBannerDismissedKey(scenario)) === 'true';
+  } catch {
+    return false;
+  }
+};
+
+const persistScenarioBannerDismissed = (scenario: string): void => {
+  try {
+    sessionStorage.setItem(scenarioBannerDismissedKey(scenario), 'true');
+  } catch {
+    // ignore
+  }
+};
+
+/** Inventory-backed alerts override for flyout tab data (`null` = no rules configured). */
+const inventoryAlertsActiveOverride = (
+  entity: Entity | undefined
+): number | null | undefined => {
+  if (!entity) {
+    return undefined;
+  }
+  if (entity.alerts === undefined) {
+    return null;
+  }
+  return entity.alerts.active;
 };
 
 const computeAlertsBadge = (
@@ -801,10 +856,18 @@ const AllEntitiesViewInner = ({
     }
   }, [uiSettings]);
 
+  // Top-level category filter (All resources) — declared early so search
+  // field autocomplete can follow the same scope as K8s facet filters.
+  const [categoryFilter, setCategoryFilter] = useState<string>(CATEGORY_FILTER_ALL);
+  const isCrossCategoryPage = !categoryScope && isElasticOn;
+  const effectiveCategoryScope: EntityCategoryId | undefined =
+    categoryScope ??
+    (categoryFilter !== CATEGORY_FILTER_ALL ? (categoryFilter as EntityCategoryId) : undefined);
+
   // ElasticOn Inventory unified search bar: an ad-hoc data view (fields only,
   // no backing index) powers autocomplete + "+ Add filter"; the KQL / filters
   // are evaluated against the seeded entities in-memory (see `entity_kql.ts`).
-  const labDataView = useEntityLabDataView(isElasticOn);
+  const labDataView = useEntityLabDataView(isElasticOn, effectiveCategoryScope);
   // "+ Add filter" chips (transient; not persisted with saved views yet).
   const [labFilters, setLabFilters] = useState<Filter[]>([]);
   // Bumped on every (auto-)refresh to re-roll the fake metric readings so
@@ -900,13 +963,26 @@ const AllEntitiesViewInner = ({
     (scenarioVariation === 'transition' && transitionCompleted) ||
     scenarioVariation === 'banner-admin' ||
     scenarioVariation === 'banner-user';
-  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(() =>
+    readScenarioBannerDismissed(scenarioVariation)
+  );
+
+  const dismissScenarioBanner = useCallback(() => {
+    setBannerDismissed(true);
+    persistScenarioBannerDismissed(scenarioVariation);
+  }, [scenarioVariation]);
+
+  const startScenarioTour = useCallback(() => {
+    dismissScenarioBanner();
+    setIsTourActive(true);
+    setTourStep(1);
+  }, [dismissScenarioBanner]);
 
   const prevScenarioRef = useRef(scenarioVariation);
   useEffect(() => {
     if (prevScenarioRef.current !== scenarioVariation) {
       prevScenarioRef.current = scenarioVariation;
-      setBannerDismissed(false);
+      setBannerDismissed(readScenarioBannerDismissed(scenarioVariation));
       sessionStorage.removeItem('elasticOn_transitionCompleted');
       setTransitionCompleted(false);
     }
@@ -1003,6 +1079,15 @@ const AllEntitiesViewInner = ({
   // categories. Search stays local (transient) because a specific-
   // entity query is per-view, not a preference.
   const [activeTagFilters, setActiveTagFilters] = useEntitiesTagFilters();
+  // Runs before the view-mode / group-by hooks hydrate so Phase 1 reads
+  // the demo defaults (hex map, Category → Type) instead of a stale choice.
+  useState(() => {
+    if (!isElasticOn || !isPhase1 || phase1InventoryDefaultsApplied) return 0;
+    applyPhase1InventoryDefaultsToStorage();
+    phase1InventoryDefaultsApplied = true;
+    phase1InventoryDefaultsNeedStateSync = true;
+    return 0;
+  });
   const [viewMode, setViewMode] = useEntitiesViewMode();
   const [pageSizes, setPageSizes] = usePageSizes();
 
@@ -1040,8 +1125,8 @@ const AllEntitiesViewInner = ({
   // current page (e.g. a Hosts-only attribute after navigating away) collapses
   // back to the default layout rather than rendering an empty grouping.
   const groupByFields = useMemo(
-    () => getGroupByFields(categoryScope, isElasticOn, phaseVariation as string),
-    [categoryScope, isElasticOn, phaseVariation]
+    () => getGroupByFields(effectiveCategoryScope, isElasticOn, phaseVariation as string),
+    [effectiveCategoryScope, isElasticOn, phaseVariation]
   );
 
   // Sanitise: strip groupBy IDs that don't exist in the current field
@@ -1090,11 +1175,8 @@ const AllEntitiesViewInner = ({
   }, [isElasticOn, groupBy, activeGroupByFields, categoryScope]);
 
   // ---------------------------------------------------------------------------
-  // Top-level Category filter — all state and derived values declared in one
-  // block so nothing references a variable before its declaration (TDZ).
+  // Top-level Category filter — derived values (state lives above for search).
   // ---------------------------------------------------------------------------
-  const [categoryFilter, setCategoryFilter] = useState<string>(CATEGORY_FILTER_ALL);
-  const isCrossCategoryPage = !categoryScope && isElasticOn;
   const visibleCategories = useMemo(
     () => getVisibleEntityCategories(isElasticOn),
     [isElasticOn]
@@ -1103,8 +1185,6 @@ const AllEntitiesViewInner = ({
     const present = new Set(scopedEntities.map((e) => e.category));
     return visibleCategories.filter((c) => present.has(c.id));
   }, [scopedEntities, visibleCategories]);
-  const effectiveCategoryScope: EntityCategoryId | undefined =
-    categoryScope ?? (categoryFilter !== CATEGORY_FILTER_ALL ? (categoryFilter as EntityCategoryId) : undefined);
   const categoryFilteredEntities = useMemo(
     () =>
       isCrossCategoryPage && categoryFilter !== CATEGORY_FILTER_ALL
@@ -1319,6 +1399,22 @@ const AllEntitiesViewInner = ({
   // walking the left nav from Kubernetes → Hosts → Databases doesn't
   // silently drop the user back to Overview each time.
   const [categoryTab, setCategoryTab] = useCategoryTab();
+  // Phase 1 landing: hex map, every category, grouped Category → Type.
+  // The storage write above covers the first mount; this also catches a
+  // phase switch to Phase 1 after the persisted hooks have already hydrated.
+  useEffect(() => {
+    if (!isElasticOn || !isPhase1) {
+      if (!isPhase1) phase1InventoryDefaultsApplied = false;
+      return;
+    }
+    if (phase1InventoryDefaultsApplied && !phase1InventoryDefaultsNeedStateSync) return;
+    applyPhase1InventoryDefaultsToStorage();
+    phase1InventoryDefaultsApplied = true;
+    phase1InventoryDefaultsNeedStateSync = false;
+    setViewMode('grid');
+    setGroupBy([...DEFAULT_GROUP_BY]);
+    setCategoryFilter(CATEGORY_FILTER_ALL);
+  }, [isElasticOn, isPhase1, setViewMode, setGroupBy, setCategoryFilter]);
   // Overview is the default landing tab on both the per-category pages
   // and the cross-category `/entities` page. On the cross-category page
   // Overview aggregates every category (see `AllEntitiesOverviewView`),
@@ -1347,6 +1443,10 @@ const AllEntitiesViewInner = ({
   const appliedLoadViewIdRef = useRef<string | null>(null);
   useEffect(() => {
     if (!isLatest || !loadViewId) return;
+    // Phase 1 always opens on All categories + the hex map. A `loadView`
+    // param (including one left over from a default-view redirect) must
+    // not replace that landing.
+    if (isPhase1) return;
     if (appliedLoadViewIdRef.current === loadViewId) return;
     const view = savedViewsList.find((candidate) => candidate.id === loadViewId);
     if (!view) return;
@@ -1371,6 +1471,7 @@ const AllEntitiesViewInner = ({
     setViewMode,
     setGroupBy,
     updateTimeRange,
+    isPhase1,
   ]);
 
   // Latest: if the loaded view is deleted (e.g. from the nav's "Manage saved
@@ -1399,6 +1500,9 @@ const AllEntitiesViewInner = ({
   const { defaultViewId } = savedViewsApi;
   useEffect(() => {
     if (!isElasticOn) return;
+    // Phase 1 stays on All categories (hex map, Category → Type) instead of
+    // bouncing to a saved default view.
+    if (isPhase1) return;
     // Only the cross-category landing — never a category or cloud sub-page the
     // user navigated to on purpose.
     if (categoryScope !== undefined) return;
@@ -1426,7 +1530,7 @@ const AllEntitiesViewInner = ({
       pathname = `/entities/${viewCategory}`;
     }
     history.replace({ pathname, search: `?loadView=${encodeURIComponent(view.id)}` });
-  }, [isElasticOn, categoryScope, loadViewId, defaultViewId, savedViewsList, history]);
+  }, [isElasticOn, isPhase1, categoryScope, loadViewId, defaultViewId, savedViewsList, history]);
 
   const filteredEntitiesBeforeCluster = useMemo(() => {
     // ElasticOn: `search` holds a KQL expression driven by the unified
@@ -2612,9 +2716,7 @@ const AllEntitiesViewInner = ({
                       </p>
                       <EuiFlexGroup gutterSize="s" responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <EuiLink onClick={() => { setBannerDismissed(true); setIsTourActive(true); setTourStep(1); }}>
-                            Take a tour
-                          </EuiLink>
+                          <EuiLink onClick={startScenarioTour}>Take a tour</EuiLink>
                         </EuiFlexItem>
                         {scenarioVariation === 'transition' || scenarioVariation === 'banner-admin' ? (
                           <EuiFlexItem grow={false}>
@@ -2622,7 +2724,7 @@ const AllEntitiesViewInner = ({
                           </EuiFlexItem>
                         ) : null}
                         <EuiFlexItem grow={false}>
-                          <EuiLink onClick={() => setBannerDismissed(true)}>Dismiss</EuiLink>
+                          <EuiLink onClick={dismissScenarioBanner}>Dismiss</EuiLink>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiCallOut>
@@ -2825,9 +2927,7 @@ const AllEntitiesViewInner = ({
                       </p>
                       <EuiFlexGroup gutterSize="s" responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <EuiLink onClick={() => { setBannerDismissed(true); setIsTourActive(true); setTourStep(1); }}>
-                            Take a tour
-                          </EuiLink>
+                          <EuiLink onClick={startScenarioTour}>Take a tour</EuiLink>
                         </EuiFlexItem>
                         {scenarioVariation === 'transition' || scenarioVariation === 'banner-admin' ? (
                           <EuiFlexItem grow={false}>
@@ -2835,7 +2935,7 @@ const AllEntitiesViewInner = ({
                           </EuiFlexItem>
                         ) : null}
                         <EuiFlexItem grow={false}>
-                          <EuiLink onClick={() => setBannerDismissed(true)}>Dismiss</EuiLink>
+                          <EuiLink onClick={dismissScenarioBanner}>Dismiss</EuiLink>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiCallOut>
@@ -2893,7 +2993,10 @@ const AllEntitiesViewInner = ({
             }
             hideHealthBadge={isPhase1}
             alertsBadge={isPhase1 ? computeAlertsBadge(selectedEntity) : undefined}
-            alertsActiveCount={isPhase1 ? selectedEntity?.alerts?.active : undefined}
+            alertsActiveCount={
+              isPhase1 ? inventoryAlertsActiveOverride(selectedEntity) : undefined
+            }
+            podPhaseBadge={podPhaseBadgeForEntity(selectedEntity)}
             hideAiSummary={isPhase1}
             hideOwnership={isPhase1}
             hideEvents={isPhase1}
@@ -2922,7 +3025,10 @@ const AllEntitiesViewInner = ({
               minimalTabs={isInfraShortTerm}
               hideHealthBadge={isPhase1}
               alertsBadge={isPhase1 ? computeAlertsBadge(childEntity) : undefined}
-              alertsActiveCount={isPhase1 ? childEntity?.alerts?.active : undefined}
+              alertsActiveCount={
+                isPhase1 ? inventoryAlertsActiveOverride(childEntity) : undefined
+              }
+              podPhaseBadge={podPhaseBadgeForEntity(childEntity)}
               hideAiSummary={isPhase1}
               hideOwnership={isPhase1}
               hideEvents={isPhase1}

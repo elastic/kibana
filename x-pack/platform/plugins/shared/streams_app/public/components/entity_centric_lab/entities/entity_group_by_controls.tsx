@@ -99,6 +99,12 @@ export const EntityGroupByControls = ({
     const isLocked = lockedFieldIds.includes(field.id);
     const selectedIndex = groupBy.indexOf(field.id);
     const isSelected = selectedIndex !== -1 || isLocked;
+    const orderLabel =
+      selectedIndex !== -1
+        ? selectedIndex + 1
+        : isLocked
+          ? lockedFieldIds.indexOf(field.id) + 1
+          : null;
     return (
       <EuiContextMenuItem
         key={field.id}
@@ -108,7 +114,7 @@ export const EntityGroupByControls = ({
         data-test-subj={`entityCentricLabGroupByOption-${field.id}`}
       >
         {field.label}
-        {isSelected && !isLocked ? ` (${selectedIndex + 1})` : ''}
+        {isSelected && orderLabel ? ` (${orderLabel})` : ''}
       </EuiContextMenuItem>
     );
   });

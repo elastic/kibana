@@ -72,6 +72,27 @@ export const TONE_LABEL: Record<MetricTone, string> = {
   }),
 };
 
+/** EUI badge color for inventory status chips (hex map legend tones). */
+export const toneToBadgeColor = (tone: MetricTone): string => {
+  switch (tone) {
+    case 'good':
+      return 'success';
+    case 'warning':
+      return 'warning';
+    case 'danger':
+      return 'danger';
+    case 'info':
+      return 'primary';
+    case 'accent':
+      return 'accent';
+    case 'neutral':
+    case 'subdued':
+      return 'default';
+    default:
+      return 'default';
+  }
+};
+
 export const toneColor = (tone: MetricTone, _euiTheme: EuiThemeComputed): string => {
   switch (tone) {
     case 'good':
@@ -1976,6 +1997,40 @@ export const resolveMetricReading = (
     displayValue: formatNumeric(metric, value),
     rawValue: value,
   };
+};
+
+const podPhaseMetric = (): Extract<MetricDescriptor, { kind: 'categorical' }> => {
+  const metric = K8S_PODS_METRICS.find((candidate) => candidate.id === 'phase');
+  if (!metric || metric.kind !== 'categorical') {
+    throw new Error('Expected kubernetes pod phase metric');
+  }
+  return metric;
+};
+
+/**
+ * Pod phase for an inventory entity — same `last` reading as the Pods hex map
+ * when Color by is Phase.
+ */
+export const resolvePodPhaseForEntity = (
+  entityName: string,
+  entityHealth?: EntityHealthHint
+): MetricReading => resolveMetricReading(entityName, podPhaseMetric(), 'last', entityHealth);
+
+export const podPhaseBadgeForEntity = (
+  entity:
+    | {
+        readonly name: string;
+        readonly health: EntityHealthHint;
+        readonly category: string;
+        readonly subType?: string;
+      }
+    | undefined
+): { label: string; color: string } | undefined => {
+  if (!entity || entity.category !== 'kubernetes' || entity.subType !== 'Pods') {
+    return undefined;
+  }
+  const reading = resolvePodPhaseForEntity(entity.name, entity.health);
+  return { label: reading.displayValue, color: toneToBadgeColor(reading.tone) };
 };
 
 /**

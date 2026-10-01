@@ -182,12 +182,17 @@ interface EntityFlyoutProps {
    */
   readonly alertsBadge?: { label: string; color: string };
   /**
-   * Optional override for the Alerts tab counter badge. When provided,
-   * this count is used instead of `tabsData.alerts.activeCount` so the
-   * tab badge matches the header badge (which reads from the entity's
-   * actual `alerts.active` field).
+   * Optional override for the Alerts tab counter badge and tab content.
+   * When `null`, the entity has no alert rules configured (inventory `na`).
+   * When a number, that active count is used instead of kind-template demo data.
+   * When omitted, kind-template demo data is used.
    */
-  readonly alertsActiveCount?: number;
+  readonly alertsActiveCount?: number | null;
+  /**
+   * Kubernetes pod phase badge (Running / Pending / …). When provided, replaces
+   * the default demo "Running" chip so the flyout matches the hex map.
+   */
+  readonly podPhaseBadge?: { label: string; color: string };
   /** When true the AI-generated summary is hidden from the Overview tab (Phase 1). */
   readonly hideAiSummary?: boolean;
   /** When true the Ownership section is hidden from the Overview tab (Phase 1). */
@@ -386,6 +391,7 @@ export const EntityFlyout = ({
   hideHealthBadge = false,
   alertsBadge,
   alertsActiveCount,
+  podPhaseBadge,
   hideAiSummary = false,
   hideOwnership = false,
   hideEvents = false,
@@ -784,7 +790,13 @@ export const EntityFlyout = ({
           defaultMessage: 'Alerts',
         }),
         appendBadge: (() => {
-          const count = alertsActiveCount ?? tabsData.alerts.activeCount;
+          if (alertsActiveCount === null) {
+            return undefined;
+          }
+          if (alertsActiveCount !== undefined) {
+            return alertsActiveCount > 0 ? alertsActiveCount : undefined;
+          }
+          const count = tabsData.alerts.activeCount;
           return count > 0 ? count : undefined;
         })(),
       },
@@ -1060,12 +1072,10 @@ export const EntityFlyout = ({
               <EuiBadge color={tag.color}>{tag.label}</EuiBadge>
             </EuiFlexItem>
           ))}
-          {kind === 'pod' ? (
+          {kind === 'pod' && podPhaseBadge ? (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="success" data-test-subj="entityCentricLabFlyoutPodPhaseBadge">
-                {i18n.translate('entityCentricLabFlyout.flyout.podPhaseRunning', {
-                  defaultMessage: 'Running',
-                })}
+              <EuiBadge color={podPhaseBadge.color} data-test-subj="entityCentricLabFlyoutPodPhaseBadge">
+                {podPhaseBadge.label}
               </EuiBadge>
             </EuiFlexItem>
           ) : null}
