@@ -185,8 +185,7 @@ export class RelayClient implements RelayClientContract {
       tenant_key: tenantKey,
       channel,
       message,
-      ...(threadTs ? { thread_ts: threadTs } : {}),
-      ...(messageTs ? { message_ts: messageTs } : {}),
+      ...(messageTs ? { message_ts: messageTs } : threadTs ? { thread_ts: threadTs } : {}),
     });
 
     const body = response.data as RelayTriggerResponseBody | undefined;
