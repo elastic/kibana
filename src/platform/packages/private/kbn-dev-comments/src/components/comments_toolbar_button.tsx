@@ -41,9 +41,9 @@ export const CommentsToolbarButton = () => {
   return (
     <EuiToolTip
       title={`${label} (${SHORTCUT})`}
-      content={i18n.translate('devComments.button.passThrough', {
-        defaultMessage: 'Hold {key} to click through to the page',
-        values: { key: PASS_THROUGH_KEY },
+      content={i18n.translate('devComments.button.modifiers', {
+        defaultMessage: 'Hold {passThroughKey} to click through to the page',
+        values: { passThroughKey: PASS_THROUGH_KEY },
       })}
       anchorProps={ignoreProps}
     >

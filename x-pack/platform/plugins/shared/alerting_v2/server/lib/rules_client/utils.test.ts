@@ -767,32 +767,29 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBeUndefined();
     });
 
-    it('includes the version when provided', () => {
-      const attrs = createRuleSoAttributes({ metadata: { name: 'rule-1' } });
-
-      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs, 'WzNEW=');
-      expect(result.version).toBe('WzNEW=');
-    });
-
-    it('omits the version when not provided', () => {
-      const attrs = createRuleSoAttributes({ metadata: { name: 'rule-1' } });
+    it('exposes the persisted version counter on the rule', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule' }, version: 7 });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
-      expect(result.version).toBeUndefined();
-    });
-
-    it('exposes the persisted version as metadata.version on the API response', () => {
-      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', version: 7 } });
-
-      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
-      expect(result.metadata.version).toBe(7);
+      expect(result.version).toBe(7);
     });
 
     it('falls back to the baseline version when the rule has no version yet', () => {
-      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', version: undefined } });
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule' }, version: undefined });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
-      expect(result.metadata.version).toBe(1);
+      expect(result.version).toBe(1);
+    });
+  });
+
+  describe('transformRuleSoAttributesToRuleApiResponse version counter', () => {
+    it('exposes the version counter and satisfies the strict API schema', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'rule-1' }, version: 7 });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.version).toBe(7);
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
   });
 

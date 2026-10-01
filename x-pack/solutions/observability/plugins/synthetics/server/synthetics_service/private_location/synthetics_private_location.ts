@@ -22,7 +22,7 @@ import {
   BROWSER_TEST_NOW_RUN,
   LIGHTWEIGHT_TEST_NOW_RUN,
 } from '../synthetics_monitor/synthetics_monitor_client';
-import { scheduleCleanUpTask } from './clean_up_task';
+import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
 import type { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import type {
@@ -249,8 +249,8 @@ export class SyntheticsPrivateLocation {
         newPolicy.condition = null;
       }
       if (testRunId) {
-        // Cleanup TTL is keyed off this name: browser = 15m, lightweight = 2m.
-        // API journeys share synthexec with browser and can exceed 2m.
+        // These names mark a policy as a Test Now run: the leftover scan skips
+        // them, and the daily clean up sweeps any whose own clean up never ran.
         newPolicy.name =
           config.type === MonitorTypeEnum.BROWSER || config.type === MonitorTypeEnum.API
             ? BROWSER_TEST_NOW_RUN
@@ -454,7 +454,7 @@ export class SyntheticsPrivateLocation {
       });
       if (result?.created && result?.created?.length > 0 && testRunId) {
         // ignore await here, we don't want to wait for this to finish
-        void scheduleCleanUpTask(this.server);
+        void scheduleTestNowCleanUp(this.server, result.created);
       }
       return result;
     } catch (e) {
@@ -769,8 +769,8 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async getAgentPolicies() {
-    return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
+  async getAgentPolicies(spaceId: string = ALL_SPACES_ID) {
+    return getAgentPoliciesAsInternalUser({ server: this.server, spaceId });
   }
 
   /**
