@@ -34,10 +34,7 @@ const feedbackDocId = (conversationId: string, executionId: string) =>
   `${conversationId}::${executionId}`;
 
 export class FeedbackClient {
-  constructor(
-    private readonly esClient: ElasticsearchClient,
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
 
   async write(
     conversationId: string,
