@@ -20,9 +20,11 @@ import {
   DEFAULT_INVESTIGATIONS_PAGE_SIZE,
   INVESTIGATION_METADATA_STATUSES,
   INVESTIGATION_SEVERITIES,
+  INVESTIGATION_SEVERITY_NONE,
   INVESTIGATIONS_SORT_FIELDS,
   MAX_INVESTIGATION_CANDIDATES,
   MAX_INVESTIGATION_FILTER_VALUES,
+  MAX_INVESTIGATION_ID_FILTER_VALUES,
   MAX_INVESTIGATIONS_PAGE_SIZE,
 } from './constants';
 
@@ -30,6 +32,10 @@ const MAX_ID_LENGTH = 256;
 const MAX_FILTER_TEXT_LENGTH = 256;
 
 export type InvestigationSeverity = (typeof INVESTIGATION_SEVERITIES)[number];
+/** A severity filter value: a severity, or `none` for investigations without one. */
+export type InvestigationSeverityFilterValue =
+  | InvestigationSeverity
+  | typeof INVESTIGATION_SEVERITY_NONE;
 export type InvestigationMetadataStatus = (typeof INVESTIGATION_METADATA_STATUSES)[number];
 export type InvestigationsSortField = (typeof INVESTIGATIONS_SORT_FIELDS)[number];
 
@@ -37,9 +43,12 @@ export type InvestigationsSortField = (typeof INVESTIGATIONS_SORT_FIELDS)[number
  * A multi-valued filter. A query string sends one value as a string and several as repeated
  * keys, so both forms are accepted and normalized to an array.
  */
-const multiValued = <TItem extends z.ZodType>(item: TItem) =>
+const multiValued = <TItem extends z.ZodType>(
+  item: TItem,
+  maxValues: number = MAX_INVESTIGATION_FILTER_VALUES
+) =>
   z
-    .union([item, z.array(item).min(1).max(MAX_INVESTIGATION_FILTER_VALUES)])
+    .union([item, z.array(item).min(1).max(maxValues)])
     .transform((value): Array<z.output<TItem>> => (Array.isArray(value) ? value : [value]))
     .optional();
 
@@ -54,8 +63,11 @@ export const investigationIdParamsSchema = z.object({ id: investigationIdSchema 
 
 /** Filters shared by the list and the severity counts. All of them are ANDed. */
 export const investigationFiltersSchema = z.object({
+  /** Investigation (conversation) ids, for reading a known set such as the cards on screen. */
+  id: multiValued(investigationIdSchema, MAX_INVESTIGATION_ID_FILTER_VALUES),
   status: multiValued(z.enum(INVESTIGATION_METADATA_STATUSES)),
-  severity: multiValued(z.enum(INVESTIGATION_SEVERITIES)),
+  /** `none` matches investigations whose severity has not been set. */
+  severity: multiValued(z.enum([...INVESTIGATION_SEVERITIES, INVESTIGATION_SEVERITY_NONE])),
   /** True: only investigations an agent or driver workflow is working on now. False: the rest. */
   in_progress: booleanParam,
   subject_type: multiValued(z.enum(INVESTIGATION_SUBJECT_TYPES)),
@@ -159,6 +171,11 @@ export interface InvestigationSummary {
   in_progress: boolean;
   subjects: InvestigationSubjectResponse[];
   impact?: InvestigationImpactResponse;
+  /**
+   * Proposed actions waiting for a decision. Absent when the proposals plugin is unavailable or
+   * the caller may not read proposals.
+   */
+  pending_proposal_count?: number;
 }
 
 /** One investigation, with hypotheses and proposed actions. */

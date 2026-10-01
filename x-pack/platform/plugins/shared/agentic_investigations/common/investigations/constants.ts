@@ -23,6 +23,7 @@ export const INVESTIGATION_CLOSE_PREVIEW_URL =
 /** The caller's investigation and escalation API privileges, so a UI can enable write actions without UI capabilities. */
 export const INVESTIGATIONS_PRIVILEGES_URL =
   `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/_privileges` as const;
+
 /** Read one investigation: conversation, metadata, side-index entities, and in-progress state. */
 export const INVESTIGATION_BY_ID_URL = `${INVESTIGATIONS_INTERNAL_URL}/{id}` as const;
 
@@ -31,6 +32,9 @@ export const INVESTIGATIONS_SEVERITY_COUNTS_URL =
   `${INVESTIGATIONS_INTERNAL_URL}/_severity_counts` as const;
 
 export const INVESTIGATION_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
+
+/** Severity filter value for investigations whose severity has not been set. */
+export const INVESTIGATION_SEVERITY_NONE = 'none' as const;
 
 /** `metadata.status` values. A missing status reads as open. */
 export const INVESTIGATION_METADATA_STATUSES = ['open', 'closed'] as const;
@@ -50,6 +54,9 @@ export const MAX_INVESTIGATION_CANDIDATES = 1000;
 
 /** Bound on the values one multi-valued list filter carries. */
 export const MAX_INVESTIGATION_FILTER_VALUES = 20;
+
+/** Bound on the investigation ids one list call reads, so one call can hydrate a page of cards. */
+export const MAX_INVESTIGATION_ID_FILTER_VALUES = MAX_INVESTIGATIONS_PAGE_SIZE;
 
 /** Builtin agent tool that reads an investigation. */
 export const GET_INVESTIGATION_TOOL_ID = 'investigations.get' as const;

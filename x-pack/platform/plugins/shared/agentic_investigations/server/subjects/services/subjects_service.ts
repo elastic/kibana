@@ -229,6 +229,11 @@ export class SubjectsService {
     return { subjects, claims };
   }
 
+  /** Maintenance: removes every subject claim in every space. Callers authorize this themselves. */
+  async deleteAllClaimsAcrossSpaces(): Promise<number> {
+    return this.deps.claims.deleteAllAcrossSpaces();
+  }
+
   private async assertSubjectCeiling(
     conversationId: string,
     spaceId: string,
