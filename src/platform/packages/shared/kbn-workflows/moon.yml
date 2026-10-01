@@ -17,6 +17,7 @@ project:
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/packages/shared/kbn-workflows
 dependsOn:
+  - '@kbn/entity-access-control'
   - '@kbn/i18n'
   - '@kbn/zod'
   - '@kbn/es-query'

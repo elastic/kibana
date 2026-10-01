@@ -15,6 +15,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
 
+  // Migration recommendation: MIGRATE TO SCOUT (borderline)
+  // Single test: navigates to the Relationships tab of a data view and asserts the count badge
+  // shows 1 (one saved search from the discover fixture references logstash-*). The count itself
+  // is derived directly from the relationships API response — there is no complex UI logic being
+  // exercised — so the tab-navigation + render cycle is the only part that truly requires a browser.
+  // This could alternatively be an API integration test for the relationships endpoint plus a
+  // component test for the count badge. It is kept as Scout because it is the only coverage for
+  // the relationships feature and the tab navigation + loading state is worth a smoke test.
   describe('data view relationships', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);

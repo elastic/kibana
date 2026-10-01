@@ -326,6 +326,7 @@ describe('MaintenanceWindowsService', () => {
       ...window,
       scope: {
         alerting: {
+          enabled: true,
           kql: "_id: '1234'",
           filters: [
             {

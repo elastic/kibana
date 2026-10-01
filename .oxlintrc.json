@@ -1,28 +1,33 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-
   // Every rule enabled here (and in ./.oxlint/*.jsonc) is intentionally absent from
   // `@kbn/eslint-config` so each rule runs in exactly one linter. When enabling a rule here,
   // delete it from packages/kbn-eslint-config/*.js; when removing one, add it back there.
   // A rule whose ESLint options are stricter than oxlint's implementation must stay in ESLint.
-
   "extends": [
     "./.oxlint/javascript.jsonc",
     "./.oxlint/typescript.jsonc",
     "./.oxlint/jest.jsonc",
     "./.oxlint/react.jsonc"
   ],
-
-  "plugins": ["react", "typescript", "import", "jsx-a11y", "react-perf", "node", "jest"],
-
-  "jsPlugins": [
-    { "name": "@kbn/eslint", "specifier": "./packages/kbn-eslint-plugin-eslint/oxlint_plugin.js" }
+  "plugins": [
+    "react",
+    "typescript",
+    "import",
+    "jsx-a11y",
+    "react-perf",
+    "node",
+    "jest"
   ],
-
+  "jsPlugins": [
+    {
+      "name": "@kbn/eslint",
+      "specifier": "./packages/kbn-eslint-plugin-eslint/oxlint_plugin.js"
+    }
+  ],
   "categories": {
     "correctness": "off"
   },
-
   // Oxlint 1.79 drops rule options inherited from JSON configs, so option-bearing rules stay here.
   // https://github.com/oxc-project/oxc/issues/22230
   "rules": {
@@ -48,10 +53,30 @@
         }
       }
     ],
-    "dot-notation": ["error", { "allowKeywords": true }],
-    "react/no-multi-comp": ["error", { "ignoreStateless": true }],
-    "react/no-unknown-property": ["error", { "ignore": ["css"] }],
-    "react/prefer-es6-class": ["error", "always"],
+    "dot-notation": [
+      "error",
+      {
+        "allowKeywords": true
+      }
+    ],
+    "react/no-multi-comp": [
+      "error",
+      {
+        "ignoreStateless": true
+      }
+    ],
+    "react/no-unknown-property": [
+      "error",
+      {
+        "ignore": [
+          "css"
+        ]
+      }
+    ],
+    "react/prefer-es6-class": [
+      "error",
+      "always"
+    ],
     "@kbn/eslint/no_async_promise_body": "error",
     "@kbn/eslint/no_async_foreach": "error",
     "@kbn/eslint/require_kibana_feature_privileges_naming": "warn",
@@ -394,6 +419,53 @@
       }
     },
     {
+      // Security Solution API tests may call endpoints through the generated Scout API clients
+      // exposed by `@kbn/security-solution-test-api-clients/scout`
+      "files": ["x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/api/**/*.ts"],
+      "rules": {
+        "@kbn/eslint/scout_require_api_client_in_api_test": [
+          "error",
+          {
+            "alternativeFixtures": [
+              "esClient",
+              "detectionsApi",
+              "discoveriesApi",
+              "endpointExceptionsApi",
+              "endpointManagementApi",
+              "entityAnalyticsApi",
+              "exceptionsApi",
+              "listsApi",
+              "osqueryApi",
+              "timelinesApi"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      // Agent Builder API tests authenticate through role-scoped API client fixtures
+      "files": [
+        "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/*/api/**/*.ts",
+        "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/**/*.ts"
+      ],
+      "rules": {
+        "@kbn/eslint/scout_require_api_client_in_api_test": [
+          "error",
+          { "alternativeFixtures": ["esClient", "asAdmin", "asViewer", "asPrivilegedUser"] }
+        ]
+      }
+    },
+    {
+      // Workflows API tests use WorkflowsApiService (wrapping kbnClient/API) for workflow operations
+      "files": [
+        "src/platform/plugins/shared/workflows_management/test/scout/api/**/*.ts",
+        "src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/**/*.ts"
+      ],
+      "rules": {
+        "@kbn/eslint/scout_require_api_client_in_api_test": "off"
+      }
+    },
+    {
       "files": [
         "src/platform/plugins/shared/**/*.ts",
         "x-pack/solutions/**/*.ts",
@@ -414,6 +486,7 @@
         "**/json_schemas/**",
         "src/platform/plugins/shared/telemetry/**",
         "x-pack/solutions/security/packages/test-api-clients/**",
+        "x-pack/solutions/security/packages/kbn-security-evals-matrix/**",
         "x-pack/platform/plugins/shared/automatic_import/**"
       ],
       "rules": {
@@ -483,8 +556,10 @@
       }
     }
   ],
-
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.
-  "ignorePatterns": ["x-pack/solutions/security/test/security_solution_cypress/cypress/support/index.d.ts"]
+  "ignorePatterns": [
+    "x-pack/solutions/security/test/security_solution_cypress/cypress/support/index.d.ts",
+    "src/platform/packages/shared/kbn-flot-charts/lib/**"
+  ]
 }

@@ -12,6 +12,7 @@ import { restoreTSBuildArtifacts } from './restore_ts_build_artifacts';
 import { LocalFileSystem } from './file_system/local_file_system';
 import {
   buildCandidateShaList,
+  cleanTypeCheckArtifacts,
   getPullRequestNumber,
   isCiEnvironment,
   readRecentCommitShas,
@@ -20,6 +21,7 @@ import {
 
 jest.mock('./utils', () => ({
   buildCandidateShaList: jest.fn(),
+  cleanTypeCheckArtifacts: jest.fn(),
   getPullRequestNumber: jest.fn(),
   isCiEnvironment: jest.fn(),
   readRecentCommitShas: jest.fn(),
@@ -45,6 +47,9 @@ const mockedReadRecentCommitShas = readRecentCommitShas as jest.MockedFunction<
 >;
 const mockedResolveCurrentCommitSha = resolveCurrentCommitSha as jest.MockedFunction<
   typeof resolveCurrentCommitSha
+>;
+const mockedCleanTypeCheckArtifacts = cleanTypeCheckArtifacts as jest.MockedFunction<
+  typeof cleanTypeCheckArtifacts
 >;
 
 const createLog = (): SomeDevLog => {
@@ -118,6 +123,9 @@ describe('restoreTSBuildArtifacts', () => {
 
     await restoreTSBuildArtifacts(log);
 
-    expect(log.warning).toHaveBeenCalledWith('Failed to restore TypeScript build artifacts: boom');
+    expect(log.warning).toHaveBeenCalledWith(
+      'Failed to restore TypeScript build artifacts: boom. Running type check without the cache.'
+    );
+    expect(mockedCleanTypeCheckArtifacts).toHaveBeenCalledWith(log);
   });
 });

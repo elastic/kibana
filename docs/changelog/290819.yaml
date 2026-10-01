@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/290819
+issues:
+- https://github.com/elastic/search-team/issues/16040
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix automations created on the workflow page not appearing in the list

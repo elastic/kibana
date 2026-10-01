@@ -29,6 +29,10 @@ export const NAV_STREAMS = i18n.translate('xpack.alertzero.chrome.nav.streams', 
   defaultMessage: 'Streams',
 });
 
+export const NAV_ESCALATIONS = i18n.translate('xpack.alertzero.chrome.nav.escalations', {
+  defaultMessage: 'Escalations',
+});
+
 export const NAV_WATCHES = i18n.translate('xpack.alertzero.chrome.nav.watches', {
   defaultMessage: 'Watches',
 });
