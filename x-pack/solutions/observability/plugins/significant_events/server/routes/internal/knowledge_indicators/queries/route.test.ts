@@ -766,31 +766,8 @@ describe('upsertQueryRoute', () => {
     expect(upsertQuery).not.toHaveBeenCalled();
   });
 
-  it('rejects a new query for a disabled source, which would get a live rule', async () => {
+  it('rejects every upsert for a disabled source, which would get a live rule', async () => {
     const upsertQuery = jest.fn();
-    const handlerParams = {
-      params: { path: { queryId: 'q1' }, body: { ...upsertBody, target_name: 'logs.test' } },
-      request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: { get: jest.fn().mockResolvedValue({ source: disabledSource }) },
-        licensing: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-          upsertQuery,
-          getQueryLinks: jest.fn().mockResolvedValue([]),
-        }),
-      }),
-      server: makeServer(),
-      maintenanceService: makeMaintenanceService(),
-    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
-
-    await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({
-      output: { statusCode: 409 },
-    });
-    expect(upsertQuery).not.toHaveBeenCalled();
-  });
-
-  it('still edits a stored query of a disabled source', async () => {
-    const upsertQuery = jest.fn().mockResolvedValue(undefined);
     const handlerParams = {
       params: { path: { queryId: 'q1' }, body: upsertBody },
       request: {},
@@ -806,8 +783,10 @@ describe('upsertQueryRoute', () => {
       maintenanceService: makeMaintenanceService(),
     } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
 
-    await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
-    expect(upsertQuery).toHaveBeenCalledWith('logs.test', expect.objectContaining({ id: 'q1' }));
+    await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+    expect(upsertQuery).not.toHaveBeenCalled();
   });
 
   it('does not persist when ES|QL is invalid', async () => {

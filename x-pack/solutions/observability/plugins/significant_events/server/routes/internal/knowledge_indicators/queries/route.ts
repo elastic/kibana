@@ -795,10 +795,9 @@ const upsertQueryRoute = createServerRoute({
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const streamName = targetName ?? (await resolveExistingQueryStreamName(kiClient, queryId));
     const { source } = await sourcesClient.get(streamName);
-    if (!source.enabled && !(await findExistingQueryLink(kiClient, queryId))) {
-      // Editing a stored query of a disabled source stays possible; a new one would get a live rule.
-      assertSourceEnabled(source);
-    }
+    // Any upsert can install a rule: a new query gets one, and an edit that changes the ES|QL
+    // replaces the old one with an enabled rule.
+    assertSourceEnabled(source);
 
     validateEsqlQueryForSourceOrThrow({
       esqlQuery: queryBody.esql.query,
@@ -816,7 +815,10 @@ const upsertQueryRoute = createServerRoute({
   },
 });
 
-async function findExistingQueryLink(kiClient: KnowledgeIndicatorClient, queryId: string) {
+async function resolveExistingQueryStreamName(
+  kiClient: KnowledgeIndicatorClient,
+  queryId: string
+): Promise<string> {
   // Empty stream list means "no stream filter"; include expired and unbacked so
   // an omitted target_name can still resolve an existing query for update.
   const [existing] = await kiClient.getQueryLinks([], {
@@ -824,14 +826,6 @@ async function findExistingQueryLink(kiClient: KnowledgeIndicatorClient, queryId
     ruleUnbacked: 'include',
     includeExpired: true,
   });
-  return existing;
-}
-
-async function resolveExistingQueryStreamName(
-  kiClient: KnowledgeIndicatorClient,
-  queryId: string
-): Promise<string> {
-  const existing = await findExistingQueryLink(kiClient, queryId);
   if (!existing) {
     throw new QueryNotFoundError(`Query [${queryId}] not found`);
   }
