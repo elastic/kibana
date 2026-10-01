@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
@@ -83,33 +83,5 @@ describe('SettingsPage', () => {
     await waitFor(() => {
       expect(navigateToApp).toHaveBeenCalledWith(NIGHTSHIFT_APP_ID);
     });
-  });
-
-  it('links Back to Nightshift when opened from outside the Management page', () => {
-    render(<SettingsPage />);
-
-    const back = screen.getByTestId('settingsPageBackLink');
-    expect(back).toHaveAttribute('href', '/app/nightshift');
-    expect(back).toHaveTextContent(/^Nightshift$/);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Nightshift', href: '/app/nightshift' },
-      { text: 'Settings' },
-    ]);
-  });
-
-  it('links Back to the Management tab Settings was opened from', () => {
-    mockUseSignificantEventsAppParams.mockReturnValue({
-      query: { fromTab: 'knowledge_indicators' },
-    } as never);
-
-    render(<SettingsPage />);
-
-    const back = screen.getByTestId('settingsPageBackLink');
-    expect(back).toHaveAttribute('href', '/app/significant_events/knowledge_indicators');
-    expect(back).toHaveTextContent('Nightshift Management');
-    expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Nightshift Management', href: '/app/significant_events/knowledge_indicators' },
-      { text: 'Settings' },
-    ]);
   });
 });

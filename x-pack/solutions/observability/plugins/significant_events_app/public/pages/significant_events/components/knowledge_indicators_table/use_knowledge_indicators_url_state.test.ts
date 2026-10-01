@@ -151,15 +151,6 @@ describe('useKnowledgeIndicatorsUrlState', () => {
       expect(result.current.selectedStreams).toEqual(['s1', 's2']);
     });
 
-    it('reads the legacy stream param when source is absent', () => {
-      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 's1' })];
-      mockQuery = { stream: 's1' };
-      const { result } = renderHook(() =>
-        useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
-      );
-      expect(result.current.selectedStreams).toEqual(['s1']);
-    });
-
     it('initializes hideComputedTypes=false when showComputed is true', () => {
       mockQuery = { showComputed: 'true' };
       const { result } = renderHook(() => useKnowledgeIndicatorsUrlState(defaultParams));

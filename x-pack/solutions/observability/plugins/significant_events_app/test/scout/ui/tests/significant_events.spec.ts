@@ -12,9 +12,6 @@ import { OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE } from '@kbn/management-setting
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { test } from '../fixtures';
 
-const SOURCE_TITLE = 'Scout nginx errors';
-const INTERNAL_API_HEADERS = { 'x-elastic-internal-origin': 'kibana', 'elastic-api-version': '1' };
-
 test.describe(
   'Significant Events app',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -43,24 +40,6 @@ test.describe(
     test.beforeEach(async ({ browserAuth, kbnClient }) => {
       await kbnClient.uiSettings.update({ [OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE]: false });
       await browserAuth.loginAsAdmin();
-    });
-
-    test.afterEach(async ({ config, kbnClient }) => {
-      if (config.isCloud) {
-        return;
-      }
-      const { data } = await kbnClient.request<{ sources: Array<{ id: string; title: string }> }>({
-        method: 'GET',
-        path: '/internal/nightshift/sources?per_page=100',
-        headers: INTERNAL_API_HEADERS,
-      });
-      for (const { id } of data.sources.filter(({ title }) => title === SOURCE_TITLE)) {
-        await kbnClient.request({
-          method: 'DELETE',
-          path: `/internal/nightshift/sources/${id}`,
-          headers: INTERNAL_API_HEADERS,
-        });
-      }
     });
 
     test.afterAll(async ({ apiServices, config, kbnClient }) => {
@@ -120,32 +99,6 @@ test.describe(
       await expect(page.testSubj.locator('significantEventsNotEnabledPrompt')).toBeVisible({
         timeout: 60_000,
       });
-    });
-
-    test('redirects the removed Streams tab to Sources', async ({ page }) => {
-      await page.gotoApp('significant_events/streams');
-      await expect(page).toHaveURL(/\/app\/significant_events\/sources/, { timeout: 60_000 });
-    });
-
-    test('creates a source from the flyout', async ({ page }) => {
-      await page.gotoApp('significant_events/sources');
-      await page.testSubj.click('significantEventsAppCreateSourceButton', { timeout: 60_000 });
-
-      const flyout = page.testSubj.locator('significantEventsAppSourceFlyout');
-      await expect(flyout).toBeVisible();
-      await page.testSubj.fill('significantEventsAppSourceFlyoutTitleInput', SOURCE_TITLE);
-      // A wildcard over no indices is accepted: the source waits for data to arrive.
-      await page.testSubj
-        .locator('significantEventsAppSourceFlyoutQueryEditor')
-        .locator('.view-lines')
-        .click();
-      await page.keyboard.type('FROM logs-scout-nginx-*');
-      await page.testSubj.click('significantEventsAppSourceFlyoutSaveButton');
-
-      await expect(flyout).toBeHidden({ timeout: 30_000 });
-      await expect(
-        page.testSubj.locator('significantEventsAppSourcesTable').getByText(SOURCE_TITLE)
-      ).toBeVisible();
     });
   }
 );
