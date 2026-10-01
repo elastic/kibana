@@ -17,9 +17,11 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import {
   defaultUser,
   postCaseReq,
-  postCommentUserReq,
   postExternalReferenceESReq,
   postExternalReferenceSOReq,
+  getUnifiedFilesAttachmentReq,
+  postUnifiedCommentReq,
+  postUnifiedIndicatorReq,
 } from '../../../../common/lib/mock';
 import {
   bulkCreateAttachments,
@@ -243,7 +245,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentUserReq, postExternalReferenceSOReq],
+        params: [postUnifiedCommentReq, getUnifiedFilesAttachmentReq()],
       });
 
       const externalRefComment = patchedCase.comments?.find(
@@ -286,7 +288,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const patchedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentUserReq, postExternalReferenceESReq],
+        params: [postUnifiedCommentReq, postUnifiedIndicatorReq],
       });
 
       const externalRefComment = patchedCase.comments?.find(
@@ -396,14 +398,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('400s when bulk creating a non registered external reference attachment type', async () => {
+    it('400s when bulk creating a non registered attachment type', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
         params: [
-          postExternalReferenceSOReq,
-          { ...postExternalReferenceSOReq, externalReferenceAttachmentTypeId: 'not-exists' },
+          getUnifiedFilesAttachmentReq(),
+          { ...getUnifiedFilesAttachmentReq(), type: 'not-exists' },
         ],
         expectedHttpCode: 400,
       });

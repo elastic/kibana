@@ -54,12 +54,25 @@ const ruleEventSource = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const createClient = (queryImpl: (request: { query: string }) => Promise<ESQLSearchResponse>) => {
+interface EsqlRequest {
+  query: string;
+  params?: Array<Record<string, string>>;
+}
+
+const createClient = (queryImpl: (request: EsqlRequest) => Promise<ESQLSearchResponse>) => {
   const query = jest.fn(queryImpl);
   return {
     client: new RuleEventsClient({ esClient: { esql: { query } } as never, space: 'default' }),
     query,
   };
+};
+
+/** Returns the pipe commands and bound params of the page query (not the total count query). */
+const getPageRequest = ({ mock }: ReturnType<typeof createClient>['query']) => {
+  const [pageRequest] = mock.calls
+    .map(([request]) => request)
+    .filter((request) => !request.query.includes('STATS total'));
+  return { commands: pageRequest.query.split(' | '), params: pageRequest.params };
 };
 
 const lastQuery = (query: jest.Mock, predicate: (q: string) => boolean = () => true): string => {
@@ -237,29 +250,42 @@ describe('RuleEventsClient', () => {
       );
     });
 
-    it('orders stages: created_at -> time range -> free-text -> latest-per-group -> status', async () => {
+    it('filters search, time range and status against the latest revision of each series', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
 
       await client.findLatestByCurrentStatePaginated({
         from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
         search: 'checkout',
-        status: ['open'],
+        status: ['closed'],
       });
 
-      const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
-      const createdAtIdx = q.indexOf('INLINE STATS created_at');
-      const timeRangeIdx = q.indexOf('@timestamp >= TO_DATETIME');
-      const freeTextIdx = q.indexOf('FIELD_EXTRACT');
-      const latestPerGroupIdx = q.indexOf('INLINE STATS latest_ts');
-      const statusIdx = q.indexOf('`alert.status` IN');
-
-      expect(createdAtIdx).toBeGreaterThanOrEqual(0);
-      expect(timeRangeIdx).toBeGreaterThan(createdAtIdx);
-      expect(freeTextIdx).toBeGreaterThan(timeRangeIdx);
-      expect(latestPerGroupIdx).toBeGreaterThan(freeTextIdx);
-      expect(statusIdx).toBeGreaterThan(latestPerGroupIdx);
+      const { commands, params } = getPageRequest(query);
+      expect(commands).toEqual([
+        'FROM .rule-events METADATA _id, _source',
+        'WHERE space_id == "default" AND type == "alert" AND source == "elastic.significant_events"',
+        'INLINE STATS created_at = MIN(@timestamp) BY group_hash',
+        // Latest revision per series.
+        'INLINE STATS latest_ts = MAX(@timestamp) BY group_hash',
+        'WHERE @timestamp == latest_ts',
+        'INLINE STATS tiebreaker_id = MAX(_id) BY group_hash',
+        'WHERE _id == tiebreaker_id',
+        'WHERE TO_LOWER(FIELD_EXTRACT(data, "title")) LIKE "*checkout*" OR TO_LOWER(FIELD_EXTRACT(data, "summary")) LIKE "*checkout*" OR TO_LOWER(FIELD_EXTRACT(data, "symptom_hypothesis")) LIKE "*checkout*" OR TO_LOWER(FIELD_EXTRACT(data, "event_id")) == TO_LOWER("checkout")',
+        // Created before the range ends, and still active or updated after it starts.
+        'WHERE created_at <= TO_DATETIME(?overlapToIso)',
+        'WHERE (`alert.status` IN ("active")) OR @timestamp >= TO_DATETIME(?overlapFromIso)',
+        'WHERE `alert.status` IN ("inactive")',
+        'EVAL data_json = JSON_EXTRACT(_source, "$.data")',
+        'SORT @timestamp DESC, _id ASC',
+        'LIMIT 25',
+        'KEEP _source, data_json, created_at',
+      ]);
+      expect(params).toEqual([
+        { overlapToIso: '2026-01-02T00:00:00.000Z' },
+        { overlapFromIso: '2026-01-01T00:00:00.000Z' },
+      ]);
     });
 
     it('returns hits decorated with the lineage creation timestamp', async () => {

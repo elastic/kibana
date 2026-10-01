@@ -367,6 +367,14 @@ export const getSignificantEventTableColumns = ({
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
+    field: '@timestamp',
+    name: i18n.translate('xpack.significantEventsApp.significantEventsTab.lastUpdatedColumn', {
+      defaultMessage: 'Last updated',
+    }),
+    width: '200px',
+    render: (timestamp: string) => formatTimestamp(timestamp),
+  },
+  {
     name: '',
     width: '112px',
     align: 'right' as const,
