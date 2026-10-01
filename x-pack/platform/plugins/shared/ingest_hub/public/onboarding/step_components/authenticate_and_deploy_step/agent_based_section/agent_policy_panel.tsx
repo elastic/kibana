@@ -193,8 +193,9 @@ export function AgentPolicyPanel({
         </>
       )}
 
-      {/* New-policy mode: post-create — show policy summary + Add another agent button */}
-      {agentHostsMode === 'new' && isPolicyCreated && (
+      {/* Post-create: show policy summary + Add another agent button.
+          agentHostsMode switches to 'existing' after creation, so check isPolicyCreated alone. */}
+      {isPolicyCreated && !isEditMode && (
         <>
           <EuiText size="s" color="subdued">
             <p>

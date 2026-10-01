@@ -203,7 +203,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
         // Clean up package policies for removed services before creating new ones.
         if (hasPendingCleanup) {
-          const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
+          const targetPolicyIds =
+            agentHostsMode === 'existing' ? selectedAgentPolicyIds ?? [] : agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
           const cleanupOps = await cleanupAgentBasedPolicies({
             pendingCleanupPolicyIds: effectivePendingCleanup,
             currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance ?? {},
@@ -238,7 +239,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // agents if the replacement creation fails again.
         let dirtyUpdateApplied = false;
         if ((detectAndReviewStep.isDirty ?? false) && !isNewPolicyDeploy) {
-          const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
+          const targetPolicyIds =
+            agentHostsMode === 'existing' ? selectedAgentPolicyIds ?? [] : agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
           // Active instances only — exclude cleanedLiveStale and deselected instances.
           const byPolicy = new Map<string, string[]>();
           for (const [instanceId, policyId] of Object.entries(
@@ -415,7 +417,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         //   (including the very first Next click when the flyout ran), so we target the existing
         //   policy to avoid creating a second one (double-creation guard applies on retry too).
         if (agentHostsMode === 'existing' || agentPolicyId) {
-          const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
+          const targetPolicyIds =
+            agentHostsMode === 'existing' ? selectedAgentPolicyIds ?? [] : agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
           resolvedAgentPolicyIds = targetPolicyIds;
 
           const result = await deployToExistingAgentPolicies(targetsToDeploy, {
