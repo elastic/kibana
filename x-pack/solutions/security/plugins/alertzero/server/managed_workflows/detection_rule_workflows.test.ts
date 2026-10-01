@@ -845,7 +845,7 @@ describe('detection rule workflows', () => {
         expect(proposedBody.query).toContain(
           '{% else %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% endif %}'
         );
-        expect(proposedBody.filters).toContain('steps.build_exception_filter.output.filters');
+        expect(proposedBody.filters).toContain('steps.compute_proposed_filters.output.filters');
         expect(proposedBody.filters).toContain('| default: steps.fetch_rule.output.filters');
       });
 
