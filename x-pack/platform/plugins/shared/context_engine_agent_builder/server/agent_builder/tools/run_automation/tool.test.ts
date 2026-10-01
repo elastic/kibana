@@ -34,7 +34,10 @@ describe('run_automation tool', () => {
         } as never),
     });
 
-  const createConfirmationContext = (toolParams: { workflowId: string }, spaceId = 'default') => {
+  const createConfirmationContext = (
+    toolParams: { workflowId: string; pilotSize?: number },
+    spaceId = 'default'
+  ) => {
     const handlerContext = agentBuilderMocks.tools.createHandlerContext();
     return {
       toolParams,
@@ -165,6 +168,38 @@ describe('run_automation tool', () => {
 
       expect(confirmation?.message).not.toContain('disabled');
       expect(confirmation?.message).not.toContain('enabled');
+    });
+  });
+
+  describe('pilot', () => {
+    it('accepts a pilot size from 1 to 10 and rejects anything else', () => {
+      const { schema } = createTool();
+
+      expect(schema.safeParse({ workflowId: 'wf-1' }).success).toBe(true);
+      expect(schema.safeParse({ workflowId: 'wf-1', pilotSize: 3 }).success).toBe(true);
+      expect(schema.safeParse({ workflowId: 'wf-1', pilotSize: 0 }).success).toBe(false);
+      expect(schema.safeParse({ workflowId: 'wf-1', pilotSize: 11 }).success).toBe(false);
+      expect(schema.safeParse({ workflowId: 'wf-1', pilotSize: 2.5 }).success).toBe(false);
+    });
+
+    it('asks to run a pilot of the named size rather than the full corpus', async () => {
+      getWorkflowMock.mockResolvedValue({ id: 'wf-1', name: 'Nightly Enrichment', enabled: true });
+
+      const confirmation = await createTool().confirmation?.getConfirmation?.(
+        createConfirmationContext({ workflowId: 'wf-1', pilotSize: 3 })
+      );
+
+      expect(confirmation?.message).toMatch(/Run a pilot of "Nightly Enrichment" over 3 /);
+      expect(confirmation?.message).not.toContain('full corpus');
+      expect(confirmation?.confirm_text).toBe('Run pilot');
+    });
+
+    it('describes pilot mode without telling the agent when to use it', () => {
+      const { description, schema } = createTool();
+      const pilotDescription = schema.shape.pilotSize.description ?? '';
+
+      expect(pilotDescription).toMatch(/document_orchestration|unit_profile/);
+      expect(`${description} ${pilotDescription}`).not.toMatch(/before the full run|always pilot/i);
     });
   });
 });

@@ -51,13 +51,29 @@ const findStep = (steps: TemplateStep[], name: string): TemplateStep | undefined
 };
 
 /** Renders one step's ES|QL the way the workflow engine would, for a unit named "ON". */
-const renderUnitQuery = (yaml: string, stepName: string): string => {
+const renderUnitQuery = (
+  yaml: string,
+  stepName: string,
+  inputs: Record<string, number> = {}
+): string => {
   const definition = parse(yaml);
   const query = findStep(definition.steps, stepName)?.with?.query ?? '';
   return createWorkflowLiquidEngine().parseAndRenderSync(query, {
     consts: definition.consts,
+    inputs,
     steps: { unit_context: { output: { unit: 'ON', unit_escaped: 'ON' } } },
   });
+};
+
+const documentValues = {
+  aiIndexId: 'airline-loyalty',
+  automationName: 'flight-activity-docs',
+  sourceIndex: 'loyalty-docs',
+  titleField: 'title',
+  bodyField: 'body',
+  corpusFilter: '',
+  maxDocuments: 50,
+  bodyMaxChars: 12000,
 };
 
 describe('automation template rendering', () => {
@@ -220,6 +236,68 @@ describe('automation template rendering', () => {
       expect(() =>
         renderUnitProfileTemplate({ ...unitValues, metricFields: ['Points` | DROP x'] })
       ).toThrow(/metricFields/);
+    });
+  });
+
+  describe('pilot runs', () => {
+    const pilotTemplates = [
+      {
+        name: 'document',
+        yaml: () => renderDocumentOrchestrationTemplate(documentValues),
+        step: 'discover_documents',
+        budget: documentValues.maxDocuments,
+      },
+      {
+        name: 'unit profile',
+        yaml: () => renderUnitProfileTemplate(unitValues),
+        step: 'discover_units',
+        budget: unitValues.maxUnits,
+      },
+    ];
+
+    it.each(pilotTemplates)(
+      'declares a bounded pilot_size input on the manual trigger of the $name template',
+      ({ yaml }) => {
+        const [trigger] = parse(yaml()).triggers;
+
+        expect(trigger.type).toBe('manual');
+        expect(trigger.inputs.properties.pilot_size).toEqual(
+          expect.objectContaining({ type: 'integer', minimum: 1, maximum: 10 })
+        );
+      }
+    );
+
+    it.each(pilotTemplates)(
+      'discovers only pilot_size items in a pilot of the $name template',
+      ({ yaml, step }) => {
+        expect(renderUnitQuery(yaml(), step, { pilot_size: 3 })).toMatch(/\| LIMIT 3\s*(\||$)/);
+      }
+    );
+
+    it.each(pilotTemplates)(
+      'discovers the full budget when the $name template runs without a pilot size',
+      ({ yaml, step, budget }) => {
+        expect(renderUnitQuery(yaml(), step)).toMatch(new RegExp(`\\| LIMIT ${budget}\\s*(\\||$)`));
+      }
+    );
+
+    it.each(pilotTemplates)(
+      'never lets a pilot of the $name template exceed the budget',
+      ({ yaml, step, budget }) => {
+        expect(renderUnitQuery(yaml(), step, { pilot_size: budget + 5 })).toMatch(
+          new RegExp(`\\| LIMIT ${budget}\\s*(\\||$)`)
+        );
+      }
+    );
+
+    it('orders documents so a pilot reads the first documents of the full run', () => {
+      const query = renderUnitQuery(
+        renderDocumentOrchestrationTemplate(documentValues),
+        'discover_documents'
+      );
+
+      expect(query.indexOf('| SORT _id')).toBeGreaterThan(-1);
+      expect(query.indexOf('| SORT _id')).toBeLessThan(query.indexOf('| LIMIT'));
     });
   });
 

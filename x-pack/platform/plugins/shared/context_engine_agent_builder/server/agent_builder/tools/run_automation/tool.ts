@@ -25,12 +25,25 @@ import { getRunAutomationErrorMessage, runAutomationHandler } from './handler';
 import type { SavedWorkflowSummary } from '../save_automation/handler';
 import { tryResolveSavedWorkflowById } from '../save_automation/handler';
 
+const MAX_PILOT_SIZE = 10;
+
 const runAutomationSchema = z.object({
   workflowId: z
     .string()
     .min(1)
     .max(MAX_AI_INDEX_AUTOMATION_LENGTH)
-    .describe('Id of the saved workflow automation to run over the full corpus.'),
+    .describe('Id of the saved workflow automation to run.'),
+  pilotSize: z
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_PILOT_SIZE)
+    .optional()
+    .describe(
+      'Run a pilot over only this many documents or units instead of the full corpus, and wait ' +
+        'for it to finish so the result reports its duration. Works on automations installed ' +
+        'from the document_orchestration or unit_profile template. Omit for a full run.'
+    ),
 });
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -55,9 +68,11 @@ export const createRunAutomationTool = ({
     openWorldHint: true,
   },
   description: dedent`
-    Run a saved Context Engine workflow automation over the full corpus.
-    Starts execution asynchronously and returns an execution id — the run continues after this
-    call returns. Use platform.core.get_workflow_execution_status to check progress.
+    Run a saved Context Engine workflow automation over the full corpus, or as a pilot over a few
+    documents or units with pilotSize.
+    A full run starts asynchronously and returns an execution id — the run continues after this
+    call returns. Use platform.core.get_workflow_execution_status to check progress. A pilot waits
+    for the run and returns its status and durationMs, or an execution id to poll if it is slow.
     A disabled workflow is enabled in order to run, and stays enabled afterwards.
     Call this with the workflowId that install_automation_template or save_automation returned.
     Its confirmation dialog is where the user decides whether to run; do not ask in chat first.
@@ -70,13 +85,18 @@ export const createRunAutomationTool = ({
       const { request, spaceId } = context;
       const workflowId =
         typeof toolParams.workflowId === 'string' ? toolParams.workflowId : undefined;
+      const pilotSize = typeof toolParams.pilotSize === 'number' ? toolParams.pilotSize : undefined;
+      const confirmText = pilotSize !== undefined ? 'Run pilot' : 'Run automation';
+      const describeRun = (label: string): string =>
+        pilotSize !== undefined
+          ? `Run a pilot of ${label} over ${pilotSize} documents or units? This costs a model call per item and writes up to ${pilotSize} knowledge indicators.`
+          : `Run ${label} over the full corpus? This costs a model call per document.`;
 
       if (!workflowId) {
         return {
           title: 'Run workflow automation',
-          message:
-            'Run this automation over the full corpus? This costs a model call per document.',
-          confirm_text: 'Run automation',
+          message: describeRun('this automation'),
+          confirm_text: confirmText,
           cancel_text: 'Cancel',
         };
       }
@@ -132,8 +152,8 @@ export const createRunAutomationTool = ({
 
       return {
         title: 'Run workflow automation',
-        message: `Run ${workflowLabel} over the full corpus? This costs a model call per document.${enableBlockNotice}`,
-        confirm_text: 'Run automation',
+        message: `${describeRun(workflowLabel)}${enableBlockNotice}`,
+        confirm_text: confirmText,
         cancel_text: 'Cancel',
       };
     },

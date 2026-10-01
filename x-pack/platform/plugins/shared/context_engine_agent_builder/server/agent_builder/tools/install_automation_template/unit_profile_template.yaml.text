@@ -61,6 +61,14 @@ tags:
 
 triggers:
   - type: manual
+    inputs:
+      properties:
+        pilot_size:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Profiles only this many of the most active units, to measure a run before the full one.
+      additionalProperties: false
 
 steps:
   # The mapping is fetched once, outside the per-unit loop, and handed to every `profile_unit`
@@ -72,6 +80,7 @@ steps:
       path: /{{ consts.unit_index }}/_mapping
 
   # All units in one query, ranked by activity descending, capped at `max_units`. No paging.
+  # A pilot takes the top `pilot_size` of the same ranking, so the full run replaces its KIs.
   - name: discover_units
     type: elasticsearch.esql.query
     with:
@@ -81,7 +90,7 @@ steps:
         {{ consts.corpus_filter }}
         | STATS docs = COUNT(*) BY `{{ consts.unit_key }}`
         | SORT docs DESC, `{{ consts.unit_key }}` ASC
-        | LIMIT {{ consts.max_units }}
+        | LIMIT {{ inputs.pilot_size | default: consts.max_units | at_most: consts.max_units }}
         | KEEP `{{ consts.unit_key }}`
 
   # Units are chunked into batches of at most 100 before entering `parallel`: the engine

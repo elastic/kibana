@@ -188,4 +188,117 @@ describe('runAutomationHandler', () => {
     expect(result.reason).toContain('could not be enabled');
     expect(result.reason).toContain('Workflow has no valid definition');
   });
+
+  it('starts a full run without inputs and without waiting', async () => {
+    getWorkflowMock.mockResolvedValue({ id: workflowId, enabled: true });
+    executeWorkflow.mockResolvedValue({ success: true, execution: { execution_id: 'exec-1' } });
+
+    await runAutomationHandler(buildDeps());
+
+    expect(executeWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowParams: {}, waitForCompletion: false })
+    );
+  });
+
+  describe('pilot', () => {
+    const pilotWorkflow = {
+      id: workflowId,
+      enabled: true,
+      definition: {
+        triggers: [
+          {
+            type: 'manual',
+            inputs: { properties: { pilot_size: { type: 'integer', minimum: 1, maximum: 10 } } },
+          },
+        ],
+      },
+    };
+
+    const buildPilotDeps = () => ({ ...buildDeps(), params: { workflowId, pilotSize: 3 } });
+
+    it('passes the pilot size as an input and waits for the run to finish', async () => {
+      getWorkflowMock.mockResolvedValue(pilotWorkflow);
+      executeWorkflow.mockResolvedValue({
+        success: true,
+        execution: {
+          execution_id: 'exec-pilot',
+          status: 'completed',
+          started_at: '2026-10-01T10:00:00.000Z',
+          finished_at: '2026-10-01T10:01:30.000Z',
+        },
+      });
+
+      const result = await runAutomationHandler(buildPilotDeps());
+
+      expect(executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowParams: { pilot_size: 3 },
+          waitForCompletion: true,
+          completionTimeoutSec: expect.any(Number),
+        })
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          started: true,
+          executionId: 'exec-pilot',
+          pilotSize: 3,
+          status: 'completed',
+          durationMs: 90000,
+        })
+      );
+      expect(result.statusCheckHint).toBeUndefined();
+    });
+
+    it('reports the failure message when the pilot run fails', async () => {
+      getWorkflowMock.mockResolvedValue(pilotWorkflow);
+      executeWorkflow.mockResolvedValue({
+        success: true,
+        execution: {
+          execution_id: 'exec-pilot',
+          status: 'failed',
+          started_at: '2026-10-01T10:00:00.000Z',
+          finished_at: '2026-10-01T10:00:05.000Z',
+          error_message: 'ES|QL syntax error',
+        },
+      });
+
+      const result = await runAutomationHandler(buildPilotDeps());
+
+      expect(result.status).toBe('failed');
+      expect(result.errorMessage).toBe('ES|QL syntax error');
+    });
+
+    it('returns the execution id to poll when the pilot outlasts the wait', async () => {
+      getWorkflowMock.mockResolvedValue(pilotWorkflow);
+      executeWorkflow.mockResolvedValue({
+        success: true,
+        execution: {
+          execution_id: 'exec-slow',
+          status: 'running',
+          started_at: '2026-10-01T10:00:00.000Z',
+        },
+      });
+
+      const result = await runAutomationHandler(buildPilotDeps());
+
+      expect(result.status).toBe('running');
+      expect(result.durationMs).toBeUndefined();
+      expect(result.statusCheckHint).toContain('exec-slow');
+    });
+
+    it('refuses a pilot of a workflow that does not declare the pilot_size input', async () => {
+      getWorkflowMock.mockResolvedValue({
+        id: workflowId,
+        enabled: true,
+        definition: { triggers: [{ type: 'manual' }] },
+      });
+
+      const result = await runAutomationHandler(buildPilotDeps());
+
+      expect(executeWorkflow).not.toHaveBeenCalled();
+      expect(result.started).toBe(false);
+      expect(result.reason).toMatch(/pilot_size/);
+      expect(result.reason).toMatch(/reinstall/i);
+    });
+  });
 });

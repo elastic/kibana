@@ -50,6 +50,14 @@ tags:
 
 triggers:
   - type: manual
+    inputs:
+      properties:
+        pilot_size:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Summarizes only this many documents, to measure a run before the full one.
+      additionalProperties: false
 
 steps:
   # Fetched once, outside the loop, and handed to every summary. Without it the model only ever
@@ -61,6 +69,8 @@ steps:
       method: GET
       path: /{{ consts.source_index }}/_mapping
 
+  # Sorted by _id so a pilot's documents are the first of the full run's, and the full run
+  # replaces the pilot's KIs instead of adding to them.
   - name: discover_documents
     type: elasticsearch.esql.query
     with:
@@ -69,7 +79,8 @@ steps:
         {{ consts.corpus_filter }}
         | EVAL body = SUBSTRING(`{{ consts.body_field }}`, 1, {{ consts.body_max_chars }})
         | KEEP _id, `{{ consts.title_field }}`, body
-        | LIMIT {{ consts.max_documents }}
+        | SORT _id ASC
+        | LIMIT {{ inputs.pilot_size | default: consts.max_documents | at_most: consts.max_documents }}
 
   # Documents are chunked into batches of at most 100 before entering `parallel`: the engine
   # throws above that fan-out limit. Each batch runs concurrently; batches run sequentially.
