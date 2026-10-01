@@ -304,9 +304,9 @@ export class FlyoutSystemApp {
     return this.page.testSubj.locator(`pushFlyout-${pushSubjSuffix(label)}`);
   }
 
-  /** Only system flyouts render their width, from inside their own React root. */
-  pushRenderedWidth(label: PushFlyoutLabel): Locator {
-    return this.pushFlyout(label).locator(subj(`pushFlyoutRenderedWidth-${pushSubjSuffix(label)}`));
+  /** Read it inside `expect.poll`, since the width keeps changing while a resize settles. */
+  async pushFlyoutWidth(label: PushFlyoutLabel): Promise<number> {
+    return (await this.pushFlyout(label).boundingBox())?.width ?? 0;
   }
 
   private pushToggle(label: PushFlyoutLabel): Locator {

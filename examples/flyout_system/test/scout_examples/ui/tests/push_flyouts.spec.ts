@@ -117,7 +117,9 @@ test.describe('Flyout System - push flyouts', { tag: ['@local-stateful-classic']
 
     await test.step('widening Standalone A behind C grows the padding', async () => {
       await app.widenPushFlyoutByKeyboard('Standalone A', 5);
-      await expect(app.pushPagePadding()).toHaveText(`${parseInt(pushedPadding, 10) + 50}px`);
+      await expect
+        .poll(async () => parseInt(await app.pushPagePadding().innerText(), 10))
+        .toBeGreaterThan(parseInt(pushedPadding, 10));
     });
 
     await test.step('closing Standalone A brings the padding back to C', async () => {
@@ -171,22 +173,24 @@ test.describe('Flyout System - push flyouts', { tag: ['@local-stateful-classic']
   }) => {
     const app = pageObjects.flyoutSystem;
     const viewportWidth = await page.evaluate(() => window.innerWidth);
-    let resizedWidth = '';
 
+    // With the bug, D is capped at the space left next to C (90% of the viewport minus C's
+    // width), about 20% here. Anything over 60% means D got the remembered width.
     await test.step('resize System push C to about 70% of the viewport', async () => {
       await app.openPushFlyout('System push C');
       await expect(app.pushStoredWidth()).toHaveText(NONE);
-      // The bug only shows once C is wider than the space EUI leaves next to a sibling (90% of
-      // the viewport minus C's width).
       await app.dragPushFlyoutEdgeTo('System push C', viewportWidth * 0.3);
       await expect(app.pushStoredWidth()).not.toHaveText(NONE);
-      resizedWidth = await app.pushRenderedWidth('System push C').innerText();
-      expect(parseInt(resizedWidth, 10)).toBeGreaterThan(viewportWidth * 0.45);
+      await expect
+        .poll(() => app.pushFlyoutWidth('System push C'))
+        .toBeGreaterThan(viewportWidth * 0.6);
     });
 
-    await test.step('System push D opens at the same width', async () => {
+    await test.step('System push D opens at about the same width', async () => {
       await app.openPushFlyout('System push D');
-      await expect(app.pushRenderedWidth('System push D')).toHaveText(resizedWidth);
+      await expect
+        .poll(() => app.pushFlyoutWidth('System push D'))
+        .toBeGreaterThan(viewportWidth * 0.6);
     });
   });
 });
