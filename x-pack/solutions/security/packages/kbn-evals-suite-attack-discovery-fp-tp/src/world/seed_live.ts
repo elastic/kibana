@@ -190,9 +190,9 @@ const bulkWithConflictRetry = async (
     items.forEach((item, idx) => {
       if (!isConflictItem(item)) {
         if (
-          Object.values(item as Record<string, { status?: number; error?: { type?: string } }>).some(
-            (op) => (op?.status ?? 200) >= 300
-          )
+          Object.values(
+            item as Record<string, { status?: number; error?: { type?: string } }>
+          ).some((op) => (op?.status ?? 200) >= 300)
         ) {
           nonConflict = true;
         }
