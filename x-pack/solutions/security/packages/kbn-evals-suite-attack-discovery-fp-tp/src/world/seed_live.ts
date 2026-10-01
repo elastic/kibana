@@ -185,7 +185,7 @@ const bulkWithConflictRetry = async (
   operations: unknown[],
   { attempts = 3, delayMs = 750 }: { attempts?: number; delayMs?: number } = {}
 ): Promise<void> => {
-  let pending = operations;
+  const pending = operations;
   for (let attempt = 1; attempt <= attempts; attempt++) {
     const result = await esClient.bulk({ refresh: 'wait_for', operations: pending });
     if (result.errors !== true) {
@@ -213,10 +213,10 @@ const bulkWithConflictRetry = async (
     if (retry.length === 0 || nonConflict) {
       throw new Error(`${label} bulk had item errors: ${JSON.stringify(items)}`);
     }
-    pending = retry;
-    if (attempt < attempts) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
-    }
+    return bulkWithConflictRetry(esClient, label, retry, {
+      attempts: attempts - attempt,
+      delayMs: delayMs * attempt,
+    });
   }
   throw new Error(`${label} bulk retry exhausted: conflicts did not settle`);
 };
