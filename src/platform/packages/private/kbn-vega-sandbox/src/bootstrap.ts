@@ -46,6 +46,7 @@ let controller: VegaSandboxRenderController | undefined;
 let initialized = false;
 let hrefInterceptorInstalled = false;
 let pendingRestoreState: unknown | undefined;
+let latestDimensions: { height?: number; width?: number } | undefined;
 let renderGeneration = 0;
 let validateRequestCounter = 0;
 // Captured from the first valid init message; narrows targetOrigin for outbound posts.
@@ -244,6 +245,7 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
   const generation = ++renderGeneration;
   const isCurrent = (): boolean => generation === renderGeneration;
   const { renderId, descriptor } = message;
+  latestDimensions = message.dimensions;
   let capturedState: unknown;
   if (controller?.view) {
     const state = controller.view.getState();
@@ -320,8 +322,9 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
     return;
   }
 
-  if (message.dimensions) {
-    await controller.resize(message.dimensions);
+  // Apply the most recent size, which may have arrived while the render was in flight.
+  if (latestDimensions) {
+    await controller.resize(latestDimensions);
   }
 
   if (!isCurrent()) {
@@ -376,6 +379,7 @@ const handleMessage = (message: MessageEvent): void => {
       });
       return;
     case 'resize':
+      latestDimensions = message.data.dimensions;
       controller?.resize(message.data.dimensions);
       return;
     case 'restoreState':

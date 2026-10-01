@@ -178,4 +178,32 @@ describe('sandbox bootstrap rerender restore', () => {
       { type: 'rendered', renderId: 'r2' },
     ]);
   });
+
+  it('applies a resize received while a render is in flight to the new view', async () => {
+    const nextView = createController();
+    let resolveRender!: (value: VegaSandboxRenderController) => void;
+    const pendingRender = new Promise<VegaSandboxRenderController>((resolve) => {
+      resolveRender = resolve;
+    });
+    renderVegaDescriptorMock.mockReturnValueOnce(pendingRender);
+
+    initSandbox();
+    postRender('r1');
+    await flushAsync();
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: { type: 'resize', dimensions: { width: 640, height: 480 } },
+        origin: 'https://kibana.example',
+        source: window.parent,
+      })
+    );
+
+    resolveRender(nextView);
+    await pendingRender;
+    await flushAsync();
+
+    expect(nextView.resize).toHaveBeenCalledWith({ width: 640, height: 480 });
+    expect(posted).toEqual(expect.arrayContaining([{ type: 'rendered', renderId: 'r1' }]));
+  });
 });
