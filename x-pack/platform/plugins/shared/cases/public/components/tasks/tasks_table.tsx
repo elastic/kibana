@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiScreenReaderOnly,
   EuiText,
   EuiTextColor,
@@ -53,11 +54,20 @@ const STATUS_BADGES: Partial<Record<CaseTask['status'], { label: string; color: 
 export interface TasksTableProps {
   caseId: string;
   tasks: CaseTask[];
+  commentCounts: Record<string, number>;
+  onOpen: (task: CaseTask) => void;
   onEdit: (task: CaseTask) => void;
   onAddSubtask: (task: CaseTask) => void;
 }
 
-export const TasksTable: React.FC<TasksTableProps> = ({ caseId, tasks, onEdit, onAddSubtask }) => {
+export const TasksTable: React.FC<TasksTableProps> = ({
+  caseId,
+  tasks,
+  commentCounts,
+  onOpen,
+  onEdit,
+  onAddSubtask,
+}) => {
   const { euiTheme } = useEuiTheme();
   const { permissions } = useCasesContext();
   const { mutate: updateTask } = useUpdateTask(caseId);
@@ -135,12 +145,31 @@ export const TasksTable: React.FC<TasksTableProps> = ({ caseId, tasks, onEdit, o
                     size="s"
                     css={isTaskFinished(task) ? { textDecoration: 'line-through' } : undefined}
                   >
-                    {title}
+                    <EuiLink
+                      color="text"
+                      onClick={() => onOpen(task)}
+                      data-test-subj={`cases-task-open-${task.id}`}
+                    >
+                      {title}
+                    </EuiLink>
                   </EuiText>
                 </EuiFlexItem>
                 {badge && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color={badge.color}>{badge.label}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {(commentCounts[task.id] ?? 0) > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      aria-label={i18n.COMMENT_COUNT_ARIA(commentCounts[task.id])}
+                      data-test-subj={`cases-task-comment-count-${task.id}`}
+                    >
+                      <EuiIcon type="editorComment" size="s" aria-hidden={true} />{' '}
+                      {commentCounts[task.id]}
+                    </EuiText>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -205,28 +234,25 @@ export const TasksTable: React.FC<TasksTableProps> = ({ caseId, tasks, onEdit, o
         );
       },
     },
-    ...(permissions.update || permissions.delete
-      ? [
-          {
-            name: (
-              <EuiScreenReaderOnly>
-                <span>{i18n.COLUMN_ACTIONS}</span>
-              </EuiScreenReaderOnly>
-            ),
-            width: '48px',
-            align: 'right',
-            render: (task: CaseTask) => (
-              <TaskRowActions
-                caseId={caseId}
-                task={task}
-                subtaskCount={subtaskCounts[task.id] ?? 0}
-                onEdit={onEdit}
-                onAddSubtask={onAddSubtask}
-              />
-            ),
-          } as EuiBasicTableColumn<CaseTask>,
-        ]
-      : []),
+    {
+      name: (
+        <EuiScreenReaderOnly>
+          <span>{i18n.COLUMN_ACTIONS}</span>
+        </EuiScreenReaderOnly>
+      ),
+      width: '48px',
+      align: 'right',
+      render: (task: CaseTask) => (
+        <TaskRowActions
+          caseId={caseId}
+          task={task}
+          subtaskCount={subtaskCounts[task.id] ?? 0}
+          onOpen={onOpen}
+          onEdit={onEdit}
+          onAddSubtask={onAddSubtask}
+        />
+      ),
+    } as EuiBasicTableColumn<CaseTask>,
   ];
 
   return (

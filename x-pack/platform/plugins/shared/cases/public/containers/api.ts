@@ -69,6 +69,8 @@ import {
   getCaseTaskDetailsUrl,
   getCaseTasksApplyTemplateUrl,
   getTaskTemplateDetailsUrl,
+  getTaskCommentsUrl,
+  getTaskCommentDetailsUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -82,6 +84,7 @@ import {
 } from '../../common/constants';
 import type { CaseTask } from '../../common/types/domain/task/v1';
 import type { CaseTaskTemplate } from '../../common/types/domain/task_template/v1';
+import type { CaseTaskComment } from '../../common/types/domain/task_comment/v1';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
@@ -805,3 +808,32 @@ export const updateTaskTemplate = async (
 
 export const deleteTaskTemplate = async (templateId: string): Promise<void> =>
   KibanaServices.get().http.fetch(getTaskTemplateDetailsUrl(templateId), { method: 'DELETE' });
+
+export const getTaskComments = async (
+  caseId: string,
+  taskId: string,
+  signal?: AbortSignal
+): Promise<taskApiV1.TaskCommentsResponse> =>
+  KibanaServices.get().http.fetch<taskApiV1.TaskCommentsResponse>(
+    getTaskCommentsUrl(caseId, taskId),
+    { method: 'GET', signal }
+  );
+
+export const addTaskComment = async (
+  caseId: string,
+  taskId: string,
+  request: taskApiV1.TaskCommentCreateRequest
+): Promise<CaseTaskComment> =>
+  KibanaServices.get().http.fetch<CaseTaskComment>(getTaskCommentsUrl(caseId, taskId), {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+
+export const deleteTaskComment = async (
+  caseId: string,
+  taskId: string,
+  commentId: string
+): Promise<void> =>
+  KibanaServices.get().http.fetch(getTaskCommentDetailsUrl(caseId, taskId, commentId), {
+    method: 'DELETE',
+  });

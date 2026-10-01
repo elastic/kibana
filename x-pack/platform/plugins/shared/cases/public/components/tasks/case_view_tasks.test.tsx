@@ -155,14 +155,44 @@ describe('CaseViewTasks', () => {
     });
   });
 
-  it('hides the checkbox and actions for read-only users', () => {
+  it('leaves read-only users with the checkbox hidden and only Open task in the row menu', async () => {
     renderWithTestingProviders(<CaseViewTasks caseId="case-1" />, {
       wrapperProps: { permissions: readCasesPermissions() },
     });
 
     expect(screen.queryByTestId('cases-task-done-root-1')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('cases-task-actions-root-1')).not.toBeInTheDocument();
     expect(screen.queryByTestId('cases-tasks-add')).not.toBeInTheDocument();
+    expect(screen.getByTestId('cases-task-comment-count-root-1')).toHaveTextContent('2');
+
+    await userEvent.click(screen.getByTestId('cases-task-actions-root-1'));
+    expect(screen.getByText('Open task')).toBeInTheDocument();
+    expect(screen.queryByText('Edit task')).not.toBeInTheDocument();
+  });
+
+  it('opens the task detail flyout from the title', async () => {
+    mockedHooks.useGetTaskComments.mockReturnValue({
+      data: { comments: [], total: 0 },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof hooks.useGetTaskComments>);
+    mockedHooks.useAddTaskComment.mockReturnValue({
+      mutateAsync: jest.fn(),
+      isLoading: false,
+    } as unknown as ReturnType<typeof hooks.useAddTaskComment>);
+    mockedHooks.useDeleteTaskComment.mockReturnValue({
+      mutateAsync: jest.fn(),
+      isLoading: false,
+    } as unknown as ReturnType<typeof hooks.useDeleteTaskComment>);
+    renderWithTestingProviders(<CaseViewTasks caseId="case-1" />, {
+      wrapperProps: { permissions: readCasesPermissions() },
+    });
+
+    await userEvent.click(screen.getByTestId('cases-task-open-root-1'));
+    const flyout = await screen.findByTestId('cases-task-detail-flyout');
+    expect(within(flyout).getByText('Block sender')).toBeInTheDocument();
+    expect(within(flyout).getByTestId('cases-task-comments-empty')).toBeInTheDocument();
+    expect(within(flyout).queryByTestId('cases-task-comment-input')).not.toBeInTheDocument();
   });
 
   it('offers delete only to users with the delete privilege', async () => {

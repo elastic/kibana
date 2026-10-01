@@ -207,3 +207,77 @@ export const HIDE_COMPLETED = i18n.translate('xpack.cases.tasks.hideCompleted', 
 export const TASK_ACTIONS = i18n.translate('xpack.cases.tasks.actions.tooltip', {
   defaultMessage: 'Task actions',
 });
+
+export const OPEN_TASK = i18n.translate('xpack.cases.tasks.openTask', {
+  defaultMessage: 'Open task',
+});
+
+export const COMMENTS = (count: number) =>
+  i18n.translate('xpack.cases.tasks.comments.title', {
+    values: { count },
+    defaultMessage: 'Comments ({count})',
+  });
+
+export const COMMENT_COUNT_ARIA = (count: number) =>
+  i18n.translate('xpack.cases.tasks.comments.countAriaLabel', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# comment} other {# comments}}',
+  });
+
+export const NO_COMMENTS_TITLE = i18n.translate('xpack.cases.tasks.comments.emptyTitle', {
+  defaultMessage: 'No comments yet',
+});
+
+export const NO_COMMENTS_BODY = i18n.translate('xpack.cases.tasks.comments.emptyBody', {
+  defaultMessage: 'Add the first note for this task.',
+});
+
+export const COMMENTS_LOAD_ERROR = i18n.translate('xpack.cases.tasks.comments.loadError', {
+  defaultMessage: "Comments couldn't be loaded",
+});
+
+export const COMMENT_LABEL = i18n.translate('xpack.cases.tasks.comments.label', {
+  defaultMessage: 'Comment',
+});
+
+export const COMMENT_PLACEHOLDER = i18n.translate('xpack.cases.tasks.comments.placeholder', {
+  defaultMessage: 'Write a comment',
+});
+
+export const ADD_COMMENT = i18n.translate('xpack.cases.tasks.comments.add', {
+  defaultMessage: 'Add comment',
+});
+
+export const DELETE_COMMENT = i18n.translate('xpack.cases.tasks.comments.delete', {
+  defaultMessage: 'Delete comment',
+});
+
+export const DELETE_COMMENT_ARIA = (name: string) =>
+  i18n.translate('xpack.cases.tasks.comments.deleteAriaLabel', {
+    values: { name },
+    defaultMessage: 'Delete comment by {name}',
+  });
+
+export const DELETE_COMMENT_TITLE = i18n.translate('xpack.cases.tasks.comments.deleteModalTitle', {
+  defaultMessage: 'Delete comment?',
+});
+
+export const DELETE_COMMENT_BODY = i18n.translate('xpack.cases.tasks.comments.deleteModalBody', {
+  defaultMessage: "This can't be undone.",
+});
+
+export const CLOSE = i18n.translate('xpack.cases.tasks.close', {
+  defaultMessage: 'Close',
+});
+
+export const NO_ASSIGNEES = i18n.translate('xpack.cases.tasks.detail.noAssignees', {
+  defaultMessage: 'No assignees',
+});
+
+export const NO_DUE_DATE = i18n.translate('xpack.cases.tasks.detail.noDueDate', {
+  defaultMessage: 'No due date',
+});
+
+export const NO_DESCRIPTION = i18n.translate('xpack.cases.tasks.detail.noDescription', {
+  defaultMessage: 'No description',
+});

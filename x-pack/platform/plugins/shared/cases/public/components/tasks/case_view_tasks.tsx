@@ -26,6 +26,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetCaseTasks } from '../../containers/use_case_tasks';
 import { SidebarToggleButton } from '../case_view/components/sidebar/sidebar_toggle_button';
 import { ApplyTaskListModal } from './apply_task_list_modal';
+import { TaskDetailFlyout } from './task_detail_flyout';
 import { TaskFlyout } from './task_flyout';
 import { isTaskFinished, TasksTable } from './tasks_table';
 import * as i18n from './translations';
@@ -33,6 +34,7 @@ import * as i18n from './translations';
 type Dialog =
   | { kind: 'add'; parentTask?: CaseTask }
   | { kind: 'edit'; task: CaseTask }
+  | { kind: 'detail'; task: CaseTask }
   | { kind: 'apply' }
   | null;
 
@@ -114,6 +116,8 @@ export const CaseViewTasks: React.FC<CaseViewTasksProps> = ({ caseId }) => {
         <TasksTable
           caseId={caseId}
           tasks={visibleTasks}
+          commentCounts={data?.comment_counts ?? {}}
+          onOpen={(task) => setDialog({ kind: 'detail', task })}
           onEdit={(task) => setDialog({ kind: 'edit', task })}
           onAddSubtask={(parentTask) => setDialog({ kind: 'add', parentTask })}
         />
@@ -157,6 +161,15 @@ export const CaseViewTasks: React.FC<CaseViewTasksProps> = ({ caseId }) => {
       )}
       {dialog?.kind === 'edit' && (
         <TaskFlyout caseId={caseId} task={dialog.task} onClose={closeDialog} />
+      )}
+      {dialog?.kind === 'detail' && (
+        <TaskDetailFlyout
+          caseId={caseId}
+          // The row's task may be stale after an edit; prefer the fresh copy from the list.
+          task={tasks.find(({ id }) => id === dialog.task.id) ?? dialog.task}
+          onEdit={(task) => setDialog({ kind: 'edit', task })}
+          onClose={closeDialog}
+        />
       )}
       {dialog?.kind === 'apply' && <ApplyTaskListModal caseId={caseId} onClose={closeDialog} />}
     </EuiFlexItem>

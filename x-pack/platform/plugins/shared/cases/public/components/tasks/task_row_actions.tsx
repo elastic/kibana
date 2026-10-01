@@ -24,6 +24,7 @@ export interface TaskRowActionsProps {
   caseId: string;
   task: CaseTask;
   subtaskCount: number;
+  onOpen: (task: CaseTask) => void;
   onEdit: (task: CaseTask) => void;
   onAddSubtask: (task: CaseTask) => void;
 }
@@ -32,6 +33,7 @@ export const TaskRowActions: React.FC<TaskRowActionsProps> = ({
   caseId,
   task,
   subtaskCount,
+  onOpen,
   onEdit,
   onAddSubtask,
 }) => {
@@ -48,6 +50,9 @@ export const TaskRowActions: React.FC<TaskRowActionsProps> = ({
   };
 
   const items = [
+    <EuiContextMenuItem key="open" icon="expand" onClick={() => (setIsOpen(false), onOpen(task))}>
+      {i18n.OPEN_TASK}
+    </EuiContextMenuItem>,
     permissions.update && (
       <EuiContextMenuItem key="edit" icon="pencil" onClick={() => (setIsOpen(false), onEdit(task))}>
         {i18n.EDIT_TASK}
@@ -89,10 +94,6 @@ export const TaskRowActions: React.FC<TaskRowActionsProps> = ({
       </EuiContextMenuItem>
     ),
   ].filter((item): item is React.ReactElement => Boolean(item));
-
-  if (items.length === 0) {
-    return null;
-  }
 
   return (
     <>

@@ -11,12 +11,15 @@ import { useCasesToast } from '../common/use_cases_toast';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import type { ServerError } from '../types';
 import {
+  addTaskComment,
   applyTaskTemplate,
   createTask,
   createTaskTemplate,
   deleteTask,
+  deleteTaskComment,
   deleteTaskTemplate,
   getCaseTasks,
+  getTaskComments,
   getTaskTemplates,
   updateTask,
   updateTaskTemplate,
@@ -146,4 +149,53 @@ export const useDeleteTaskTemplate = () =>
     casesMutationsKeys.deleteTaskTemplate,
     deleteTaskTemplate,
     i18n.TASK_LIST_DELETED
+  );
+
+export const useGetTaskComments = (caseId: string, taskId: string) => {
+  const { showErrorToast } = useCasesToast();
+  return useQuery(
+    casesQueriesKeys.taskComments(caseId, taskId),
+    ({ signal }) => getTaskComments(caseId, taskId, signal),
+    { onError: (error: ServerError) => showErrorToast(error, { title: i18n.ERROR_TITLE }) }
+  );
+};
+
+const useTaskCommentMutation = <TVariables>(
+  caseId: string,
+  taskId: string,
+  mutationKey: readonly string[],
+  mutationFn: (variables: TVariables) => Promise<unknown>,
+  successTitle: string
+) => {
+  const { showErrorToast, showSuccessToast } = useCasesToast();
+  const queryClient = useQueryClient();
+
+  return useMutation(mutationFn, {
+    mutationKey,
+    onSuccess: () => {
+      showSuccessToast(successTitle);
+      queryClient.invalidateQueries(casesQueriesKeys.taskComments(caseId, taskId));
+      // The task list carries the comment counts.
+      queryClient.invalidateQueries({ queryKey: casesQueriesKeys.caseTasks(caseId), exact: true });
+    },
+    onError: (error: ServerError) => showErrorToast(error, { title: i18n.ERROR_TITLE }),
+  });
+};
+
+export const useAddTaskComment = (caseId: string, taskId: string) =>
+  useTaskCommentMutation(
+    caseId,
+    taskId,
+    casesMutationsKeys.addTaskComment,
+    (comment: string) => addTaskComment(caseId, taskId, { comment }),
+    i18n.TASK_COMMENT_ADDED
+  );
+
+export const useDeleteTaskComment = (caseId: string, taskId: string) =>
+  useTaskCommentMutation(
+    caseId,
+    taskId,
+    casesMutationsKeys.deleteTaskComment,
+    (commentId: string) => deleteTaskComment(caseId, taskId, commentId),
+    i18n.TASK_COMMENT_DELETED
   );

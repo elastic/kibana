@@ -30,6 +30,8 @@ import {
   CASE_TASK_DETAILS_URL,
   CASE_TASKS_APPLY_TEMPLATE_URL,
   CASE_TASK_TEMPLATE_DETAILS_URL,
+  CASE_TASK_COMMENTS_URL,
+  CASE_TASK_COMMENT_DETAILS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -135,4 +137,18 @@ export const getCaseTasksApplyTemplateUrl = (caseId: string): string => {
 
 export const getTaskTemplateDetailsUrl = (templateId: string): string => {
   return CASE_TASK_TEMPLATE_DETAILS_URL.replace('{template_id}', templateId);
+};
+
+export const getTaskCommentsUrl = (caseId: string, taskId: string): string => {
+  return CASE_TASK_COMMENTS_URL.replace('{case_id}', caseId).replace('{task_id}', taskId);
+};
+
+export const getTaskCommentDetailsUrl = (
+  caseId: string,
+  taskId: string,
+  commentId: string
+): string => {
+  return CASE_TASK_COMMENT_DETAILS_URL.replace('{case_id}', caseId)
+    .replace('{task_id}', taskId)
+    .replace('{comment_id}', commentId);
 };

@@ -121,6 +121,14 @@ export const TASK_LIST_SAVED = i18n.translate('xpack.cases.containers.tasks.list
   defaultMessage: 'Task list saved',
 });
 
+export const TASK_COMMENT_ADDED = i18n.translate('xpack.cases.containers.tasks.commentAdded', {
+  defaultMessage: 'Comment added',
+});
+
+export const TASK_COMMENT_DELETED = i18n.translate('xpack.cases.containers.tasks.commentDeleted', {
+  defaultMessage: 'Comment deleted',
+});
+
 export const TASK_LIST_DELETED = i18n.translate('xpack.cases.containers.tasks.listDeleted', {
   defaultMessage: 'Task list deleted',
 });

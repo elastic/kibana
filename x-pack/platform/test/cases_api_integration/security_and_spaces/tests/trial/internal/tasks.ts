@@ -11,6 +11,7 @@ import {
   CASES_TASK_TEMPLATES_URL,
   CASE_TASKS_URL,
   CASE_TASK_DETAILS_URL,
+  CASE_TASK_COMMENTS_URL,
   CASE_TASKS_APPLY_TEMPLATE_URL,
   CASES_URL,
 } from '@kbn/cases-plugin/common/constants';
@@ -191,6 +192,43 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const { count } = await es.count({ index: '.kibana_alerting_cases', q: 'type:cases-tasks' });
+      expect(count).to.be(0);
+    });
+
+    it('keeps task comments on the task and removes them with it', async () => {
+      const theCase = await createCase(supertest, getPostCaseRequest());
+      const task = await createTask(theCase.id, { title: 'Discuss me' });
+      const commentsUrl = CASE_TASK_COMMENTS_URL.replace('{case_id}', theCase.id).replace(
+        '{task_id}',
+        task.id
+      );
+
+      const comment = (await request(supertest, 'post', commentsUrl, {
+        body: { comment: 'Gateway logs show nothing after 14:00.' },
+      })) as { id: string; task_id: string };
+      expect(comment.task_id).to.be(task.id);
+
+      const { comments, total } = (await request(supertest, 'get', commentsUrl, {})) as {
+        comments: Array<{ id: string }>;
+        total: number;
+      };
+      expect(total).to.be(1);
+      expect(comments[0].id).to.be(comment.id);
+
+      const listed = await listTasks(theCase.id);
+      expect(
+        (listed as unknown as { comment_counts: Record<string, number> }).comment_counts[task.id]
+      ).to.be(1);
+
+      // Task notes must not appear in the case activity.
+      const { userActions } = await findCaseUserActions({ supertest, caseID: theCase.id });
+      expect(userActions.map((action) => action.type)).to.not.contain('comment');
+
+      await request(supertest, 'delete', taskUrl(theCase.id, task.id), { expectedHttpCode: 204 });
+      const { count } = await es.count({
+        index: '.kibana_alerting_cases',
+        q: 'type:cases-task-comments',
+      });
       expect(count).to.be(0);
     });
 
