@@ -178,11 +178,14 @@ export function HeaderActions({
     handleInvestigate,
     isInvestigating,
     investigateActionLabel,
+    investigateEbtProps,
     viewInvestigationUrl,
     viewInvestigationActionLabel,
+    viewInvestigationEbtProps,
     markInvestigationViewed,
   } = useInvestigateAlert({
     alertId,
+    ebtElement: 'alertDetailsPageActions',
     enabled: isPopoverOpen,
     onInvestigate: () => setIsPopoverOpen(false),
   });
@@ -279,6 +282,7 @@ export function HeaderActions({
                               handleClosePopover();
                             }}
                             data-test-subj="alertDetailsViewInvestigation"
+                            {...viewInvestigationEbtProps}
                           >
                             <EuiText size="s">{viewInvestigationActionLabel}</EuiText>
                           </EuiButtonEmpty>
@@ -291,6 +295,7 @@ export function HeaderActions({
                             iconType="inspect"
                             onClick={handleInvestigate}
                             data-test-subj="alertDetailsInvestigate"
+                            {...investigateEbtProps}
                           >
                             <EuiText size="s">{investigateActionLabel}</EuiText>
                           </EuiButtonEmpty>

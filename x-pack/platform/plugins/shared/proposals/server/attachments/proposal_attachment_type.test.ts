@@ -30,7 +30,6 @@ const proposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMe
   category: 'configure',
   origin: 'alertzero',
   createdAt: '2026-09-01T00:00:00.000Z',
-  expired: false,
   ...overrides,
 });
 
@@ -189,16 +188,11 @@ describe('proposalAttachmentType', () => {
       });
     });
 
-    // Reachable on every read now that `expired` is evaluated live: saying a
-    // decision was pending underneath the expiry banner contradicted it, and
-    // dropped the "do not decide this yourself" instruction exactly where it
-    // matters most.
-    it.each([
-      ['the deadline has passed', proposal({ status: 'pending', expired: true })],
-      ['the gate settled it as expired', proposal({ status: 'expired', expired: false })],
-    ])('should not report a pending decision when %s', async (_, expiredProposal) => {
+    // Saying a decision was pending underneath the expiry banner contradicted it, and dropped the
+    // "do not decide this yourself" instruction exactly where it matters most.
+    it('should not report a pending decision once the gate settles the proposal as expired', async () => {
       const { type, get } = createType();
-      get.mockResolvedValue(expiredProposal);
+      get.mockResolvedValue(proposal({ status: 'expired' }));
 
       const { value } = (await represent(type)) as { value: string };
 
@@ -213,7 +207,8 @@ describe('proposalAttachmentType', () => {
     it.each<Partial<ProposalWithMetadata>>([
       { status: 'superseded', supersededBy: 'proposal-2' },
       { status: 'failed', decision: 'approved', supersededBy: 'proposal-2' },
-      { status: 'pending', supersededBy: 'proposal-2', expired: true },
+      { status: 'pending', supersededBy: 'proposal-2' },
+      { status: 'expired', supersededBy: 'proposal-2' },
       { status: 'superseded' },
     ])('describes replaced proposals as historical: %j', async (overrides) => {
       const { type, get } = createType();
