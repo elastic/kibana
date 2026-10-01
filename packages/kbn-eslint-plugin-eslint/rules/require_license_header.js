@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelEslint = require('@babel/eslint-parser');
-
-const { assert, normalizeWhitespace, init } = require('../lib');
+const { assert, normalizeWhitespace, init, parseLicense } = require('../lib');
 
 function isHashbang(text) {
   return text.trim().startsWith('#!') && !text.trim().includes('\n');
@@ -39,16 +37,13 @@ module.exports = {
 
           assert(!!license, '"license" option is required');
 
-          const parsed = babelEslint.parse(license, { requireConfigFile: false });
-          assert(!parsed.body.length, '"license" option must only include a single comment');
-          assert(
-            parsed.comments.length === 1,
-            '"license" option must only include a single comment'
-          );
+          const { hasBody, commentCount, nodeValue } = parseLicense(license);
+          assert(!hasBody, '"license" option must only include a single comment');
+          assert(commentCount === 1, '"license" option must only include a single comment');
 
           return {
             source: license,
-            nodeValue: normalizeWhitespace(parsed.comments[0].value),
+            nodeValue,
           };
         });
 
