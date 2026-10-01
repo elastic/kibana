@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { MockLocatorProvider } from '../../../test_utils/test_providers';
 import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
 
 const ELASTIC_UID = 'elastic_uid';
@@ -63,6 +64,15 @@ jest.mock('../../../hooks/use_fetch_workflow', () => ({
   useFetchWorkflow: (id: string) => ({
     data: { id, name: `Workflow ${id}` },
     isLoading: false,
+  }),
+}));
+
+jest.mock('../../../hooks/use_fetch_matching_rules', () => ({
+  useFetchMatchingRules: () => ({
+    data: { items: [], total: 0, page: 1, per_page: 10 },
+    isLoading: false,
+    isFetching: false,
+    isError: false,
   }),
 }));
 
@@ -133,14 +143,16 @@ const renderFlyout = (props: RenderProps = {}) => {
 
   render(
     <QueryClientProvider client={createQueryClient()}>
-      <I18nProvider>
-        <ActionPolicyDetailsFlyout
-          policy={policy}
-          canWrite={props.canWrite ?? true}
-          isStateLoading={props.isStateLoading}
-          {...handlers}
-        />
-      </I18nProvider>
+      <MockLocatorProvider>
+        <I18nProvider>
+          <ActionPolicyDetailsFlyout
+            policy={policy}
+            canWrite={props.canWrite ?? true}
+            isStateLoading={props.isStateLoading}
+            {...handlers}
+          />
+        </I18nProvider>
+      </MockLocatorProvider>
     </QueryClientProvider>
   );
 
@@ -392,8 +404,18 @@ describe('ActionPolicyDetailsFlyout', () => {
   });
 
   describe('affected rules', () => {
-    it('renders the See all affected rules link in the Policy scope title', () => {
-      renderFlyout();
+    const tagScopedPolicy = createPolicy({
+      matcher: { tags: ['prod'], expression: 'data.severity : "critical"' },
+    });
+
+    it.each<[string, ActionPolicyResponse['matcher']]>([
+      ['rule tags', { tags: ['prod'] }],
+      [
+        'rule tags and a matching query',
+        { tags: ['prod'], expression: 'data.severity : "critical"' },
+      ],
+    ])('renders the See all affected rules link when the scope has %s', (_, matcher) => {
+      renderFlyout({ policy: createPolicy({ matcher }) });
 
       expect(
         within(screen.getByTestId('actionPolicyDetailsFlyoutPolicyScopeBlock')).getByTestId(
@@ -402,9 +424,24 @@ describe('ActionPolicyDetailsFlyout', () => {
       ).toHaveTextContent('See all affected rules');
     });
 
+    it.each<[string, ActionPolicyResponse['matcher']]>([
+      ['a catch-all policy', null],
+      [
+        'a policy with a matching query and no rule tags',
+        { expression: 'data.severity : "critical"' },
+      ],
+    ])('hides the link for %s', (_, matcher) => {
+      renderFlyout({ policy: createPolicy({ matcher }) });
+
+      expect(screen.getByText('Policy scope')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('actionPolicyDetailsFlyoutSeeAffectedRulesLink')
+      ).not.toBeInTheDocument();
+    });
+
     it('hides the link when the user cannot read rules', () => {
       mockCanReadRules = false;
-      renderFlyout();
+      renderFlyout({ policy: tagScopedPolicy });
 
       expect(screen.getByText('Policy scope')).toBeInTheDocument();
       expect(
@@ -414,7 +451,7 @@ describe('ActionPolicyDetailsFlyout', () => {
 
     it('opens the Affected rules flyout when the link is clicked', async () => {
       const user = userEvent.setup({ pointerEventsCheck: 0 });
-      renderFlyout();
+      renderFlyout({ policy: tagScopedPolicy });
 
       await user.click(screen.getByTestId('actionPolicyDetailsFlyoutSeeAffectedRulesLink'));
 

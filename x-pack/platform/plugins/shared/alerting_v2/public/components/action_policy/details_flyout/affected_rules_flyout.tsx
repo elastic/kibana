@@ -12,25 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { AffectedRulesTable } from './affected_rules_table';
-import {
-  POLICY_SCOPE_LABEL,
-  PolicyScopeSummary,
-  getPolicyScopeKind,
-  type PolicyScopeKind,
-} from './policy_scope_summary';
-
-const ALL_RULES_CALLOUT_TITLES: Record<
-  Extract<PolicyScopeKind, 'catchAll' | 'expressionOnly'>,
-  string
-> = {
-  catchAll: i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.catchAll', {
-    defaultMessage: 'All rules in this space that create alerts are handled by this policy.',
-  }),
-  expressionOnly: i18n.translate('xpack.alertingV2.actionPolicy.affectedRules.expressionOnly', {
-    defaultMessage:
-      'All rules in this space that create alerts may be handled by this policy, depending on the matching query.',
-  }),
-};
+import { POLICY_SCOPE_LABEL, PolicyScopeSummary, getPolicyScopeKind } from './policy_scope_summary';
 
 const MATCHING_QUERY_CALLOUT_TITLE = i18n.translate(
   'xpack.alertingV2.actionPolicy.affectedRules.tagsAndExpression',
@@ -51,7 +33,7 @@ interface Props {
 const { Header, Body } = FlyoutTemplate;
 
 export const AffectedRulesFlyout = ({ matcher, historyKey, onClose, ownFocus = false }: Props) => {
-  const scopeKind = getPolicyScopeKind(matcher);
+  const hasMatchingQuery = getPolicyScopeKind(matcher) === 'tagsAndExpression';
 
   return (
     <FlyoutTemplate
@@ -83,27 +65,17 @@ export const AffectedRulesFlyout = ({ matcher, historyKey, onClose, ownFocus = f
           })}
           data-test-subj="actionPolicyAffectedRulesRules"
         >
-          {scopeKind === 'tagsOnly' || scopeKind === 'tagsAndExpression' ? (
+          {hasMatchingQuery && (
             <>
-              {scopeKind === 'tagsAndExpression' && (
-                <>
-                  <KbnInfoCallout
-                    size="s"
-                    title={MATCHING_QUERY_CALLOUT_TITLE}
-                    data-test-subj="actionPolicyAffectedRulesMatchingQueryCallout"
-                  />
-                  <EuiSpacer size="m" />
-                </>
-              )}
-              <AffectedRulesTable matcher={matcher} />
+              <KbnInfoCallout
+                size="s"
+                title={MATCHING_QUERY_CALLOUT_TITLE}
+                data-test-subj="actionPolicyAffectedRulesMatchingQueryCallout"
+              />
+              <EuiSpacer size="m" />
             </>
-          ) : (
-            <KbnInfoCallout
-              size="s"
-              title={ALL_RULES_CALLOUT_TITLES[scopeKind]}
-              data-test-subj="actionPolicyAffectedRulesAllRulesCallout"
-            />
           )}
+          <AffectedRulesTable matcher={matcher} />
         </Body.Section>
       </Body>
     </FlyoutTemplate>

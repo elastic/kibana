@@ -38,7 +38,7 @@ import {
 } from '../labels';
 import { AffectedRulesFlyout } from './affected_rules_flyout';
 import { DestinationCard } from './destination_card';
-import { POLICY_SCOPE_LABEL, PolicyScopeSummary } from './policy_scope_summary';
+import { POLICY_SCOPE_LABEL, PolicyScopeSummary, getPolicyScopeKind } from './policy_scope_summary';
 import { Column, SubsectionColumns } from './subsection_columns';
 
 const TAKE_ACTION_BUTTON_ID = 'actionPolicyDetailsFlyoutTakeAction';
@@ -96,6 +96,9 @@ export const ActionPolicyDetailsFlyout = ({
   const snoozedActive = isSnoozed(snoozedUntil);
   const isLicenseValid = useIsActionPoliciesLicenseValid();
   const isEnableBlockedByLicense = !policy.enabled && !isLicenseValid;
+  const scopeKind = getPolicyScopeKind(policy.matcher);
+  const showAffectedRulesLink =
+    canReadRules && (scopeKind === 'tagsOnly' || scopeKind === 'tagsAndExpression');
 
   const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
   const [isAffectedRulesOpen, setIsAffectedRulesOpen] = useState(false);
@@ -238,7 +241,7 @@ export const ActionPolicyDetailsFlyout = ({
                   <EuiFlexItem component="span" grow={false}>
                     {POLICY_SCOPE_LABEL}
                   </EuiFlexItem>
-                  {canReadRules && (
+                  {showAffectedRulesLink && (
                     <EuiFlexItem component="span" grow={false}>
                       <EuiLink
                         onClick={() => setIsAffectedRulesOpen(true)}

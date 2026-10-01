@@ -67,26 +67,6 @@ describe('AffectedRulesFlyout', () => {
     expect(within(policyScope).getByText('data.severity : "critical"')).toBeInTheDocument();
   });
 
-  it('says every rule is handled for a catch-all policy, without fetching rules', () => {
-    renderFlyout(null);
-
-    expect(screen.getByTestId('actionPolicyAffectedRulesAllRulesCallout')).toHaveTextContent(
-      'All rules in this space that create alerts are handled by this policy.'
-    );
-    expect(screen.queryByTestId('actionPolicyAffectedRulesTable')).not.toBeInTheDocument();
-    expect(mockUseFetchMatchingRules).not.toHaveBeenCalled();
-  });
-
-  it('says every rule may be handled for an expression-only policy, without fetching rules', () => {
-    renderFlyout({ expression: 'data.severity : "critical"' });
-
-    expect(screen.getByTestId('actionPolicyAffectedRulesAllRulesCallout')).toHaveTextContent(
-      'All rules in this space that create alerts may be handled by this policy, depending on the matching query.'
-    );
-    expect(screen.queryByTestId('actionPolicyAffectedRulesTable')).not.toBeInTheDocument();
-    expect(mockUseFetchMatchingRules).not.toHaveBeenCalled();
-  });
-
   it('lists the rules matching the policy tags', () => {
     const matcher = { tags: ['cpu', 'prod'] };
     renderFlyout(matcher);
@@ -197,7 +177,7 @@ describe('AffectedRulesFlyout', () => {
 
   it('calls onClose when the close button is clicked', async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
-    const { onClose } = renderFlyout(null);
+    const { onClose } = renderFlyout({ tags: ['cpu'] });
 
     await user.click(screen.getByTestId('euiFlyoutCloseButton'));
 
