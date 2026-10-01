@@ -15,7 +15,7 @@ import {
   dataViewWithTimefieldMock,
   dataViewWithAtTimefieldMock,
 } from '../__mocks__/data_view_with_timefield';
-import { currentSuggestionMock } from '../__mocks__/suggestions';
+import { currentSuggestionMock, allSuggestionsMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { UnifiedHistogramExternalVisContextStatus, UnifiedHistogramSuggestionType } from '../types';
 
@@ -885,5 +885,92 @@ describe('LensVisService attributes', () => {
       isTransformationalESQL: false,
     });
     expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
+  });
+
+  it('should inject table with approximationApplied:true into Lens layers for ES|QL STATS query', async () => {
+    const queryStats = { esql: 'from logstash-* | stats maxB = max(bytes)' };
+    const columns = [{ id: 'maxB', name: 'maxB', meta: { type: 'number' as const } }];
+    const table = {
+      type: 'datatable' as const,
+      rows: [{ maxB: 100 }],
+      columns,
+      meta: { type: 'es_ql' as const, approximationApplied: true },
+    };
+
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryStats,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns,
+      isPlainRecord: true,
+      allSuggestions: allSuggestionsMock,
+      table,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(
+      UnifiedHistogramSuggestionType.lensSuggestion
+    );
+
+    const layers = lensVis.visContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+    const layerValues = Object.values(layers);
+    expect(layerValues.length).toBeGreaterThan(0);
+    for (const layer of layerValues) {
+      expect((layer as { table?: typeof table }).table?.meta?.approximationApplied).toBe(true);
+    }
+  });
+
+  it('should inject table with approximationApplied:false into Lens layers for ES|QL STATS query', async () => {
+    const queryStats = { esql: 'from logstash-* | stats maxB = max(bytes)' };
+    const columns = [{ id: 'maxB', name: 'maxB', meta: { type: 'number' as const } }];
+    const table = {
+      type: 'datatable' as const,
+      rows: [{ maxB: 100 }],
+      columns,
+      meta: { type: 'es_ql' as const, approximationApplied: false },
+    };
+
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryStats,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns,
+      isPlainRecord: true,
+      allSuggestions: allSuggestionsMock,
+      table,
+    });
+
+    const layers = lensVis.visContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+    const layerValues = Object.values(layers);
+    expect(layerValues.length).toBeGreaterThan(0);
+    for (const layer of layerValues) {
+      expect((layer as { table?: typeof table }).table?.meta?.approximationApplied).toBe(false);
+    }
+  });
+
+  it('should not inject table into Lens layers when table is not provided', async () => {
+    const queryStats = { esql: 'from logstash-* | stats maxB = max(bytes)' };
+    const columns = [{ id: 'maxB', name: 'maxB', meta: { type: 'number' as const } }];
+
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryStats,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns,
+      isPlainRecord: true,
+      allSuggestions: allSuggestionsMock,
+      table: undefined,
+    });
+
+    const layers = lensVis.visContext?.attributes.state.datasourceStates.textBased?.layers ?? {};
+    const layerValues = Object.values(layers);
+    for (const layer of layerValues) {
+      expect((layer as { table?: unknown }).table).toBeUndefined();
+    }
   });
 });
