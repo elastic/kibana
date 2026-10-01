@@ -6,7 +6,8 @@
 #   bash .agents/skills/libra-review-loop/scripts/libra.sh threads <pr>
 #   bash .agents/skills/libra-review-loop/scripts/libra.sh resolve <thread-id>
 #
-# wait     Blocks until Libra finishes reviewing <sha> (default: the PR head commit) and prints:
+# wait     Blocks until Libra finishes reviewing <sha> (default: the newest PR commit not pushed by
+#          kibanamachine) and prints:
 #            libra=<clean|findings|skipped|error|none|timeout> sha=<sha> description="<status text>"
 #          clean     Libra reviewed the commit and found nothing.
 #          findings  Libra posted a review; run `threads` to read it.
@@ -49,7 +50,10 @@ cmd_wait() {
     esac
   done
   if [[ -z "$sha" ]]; then
-    sha=$(gh pr view "$pr" -R "$REPO" --json headRefOid --jq .headRefOid)
+    # Libra doesn't review kibanamachine fix-up commits, so the PR head can be a commit it never reviews.
+    sha=$(gh api "repos/$REPO/pulls/$pr/commits?per_page=100" --paginate \
+      --jq '.[] | select((.author.login // "") != "kibanamachine") | .sha' | tail -n 1)
+    [[ -n "$sha" ]] || die "no commit on PR $pr that Libra would review"
   fi
 
   local start=$SECONDS

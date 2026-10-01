@@ -1,6 +1,6 @@
 ---
 name: libra-review-loop
-description: Drives an elastic/kibana PR through Libra AI review rounds until Libra has nothing left to say. Waits for Libra's review on the pushed commit, fixes each finding together with every other instance of the same problem, checks that new guard tests actually fail, pushes once per round, then replies to and resolves the threads. Use when the user asks to address, fix, or loop on Libra review comments, or comments from infra-vault-gh-plugin-prod[bot].
+description: Drives an elastic/kibana PR through Libra AI review rounds until Libra has nothing left to say. Waits for Libra's review on the pushed commit, fixes each finding together with every other instance of the same problem, checks that new guard tests actually fail, replies in the threads, then pushes once per round and resolves the fixed threads. Use when the user asks to address, fix, or loop on Libra review comments, or comments from infra-vault-gh-plugin-prod[bot].
 ---
 
 # Libra Review Loop
@@ -39,17 +39,24 @@ Round N:
 - [ ] 4. Fix every instance of each rule
 - [ ] 5. Prove new guard tests fail
 - [ ] 6. Run local checks
-- [ ] 7. Commit and push
-- [ ] 8. Reply to and resolve threads
+- [ ] 7. Commit (if anything changed)
+- [ ] 8. Reply in threads
+- [ ] 9. Push and resolve
 ```
 
 ### 1. Wait
 
+In the first round, run `wait` without `--sha`. It then checks the newest PR commit not pushed by kibanamachine, which is the last commit Libra could have reviewed:
+
 ```bash
-bash .agents/skills/libra-review-loop/scripts/libra.sh wait <pr> --sha "$(git rev-parse HEAD)"
+bash .agents/skills/libra-review-loop/scripts/libra.sh wait <pr>
 ```
 
-Pass `--sha` with the commit you pushed, so a later kibanamachine commit doesn't hide Libra's result.
+In later rounds, pass the commit you pushed in step 9, so a kibanamachine commit pushed after it doesn't hide Libra's result:
+
+```bash
+bash .agents/skills/libra-review-loop/scripts/libra.sh wait <pr> --sha <pushed-sha>
+```
 
 - `clean`: stop and write the final report.
 - `findings`: continue with step 2.
@@ -119,11 +126,15 @@ Run scoped checks on what changed, as described in `AGENTS.md`:
 
 Fix any failures before committing.
 
-### 7. Commit and push
+### 7. Commit
 
-Make one commit per round. Write a message that says what the round fixed and why, not "Address comments". Then `git pull --rebase` and `git push` to the branch's upstream. Never force-push unless you rebased, and then use `--force-with-lease`.
+If the round changed files, first pick up any kibanamachine commits (`git stash && git pull --rebase && git stash pop`), so the commit SHA you quote in the replies doesn't change when you push. Then make one commit. Write a message that says what the round fixed and why, not "Address comments". Don't push yet.
 
-### 8. Reply and resolve
+If nothing changed, because every finding was a false positive, out of scope, or a follow-up that needs only a reply, skip to step 8. There will be no push in step 9.
+
+### 8. Reply
+
+Post the replies before pushing. Libra reads the discussion when it starts reviewing a new commit, so replies posted after the push may be missed.
 
 Reply in every thread from step 2, except follow-ups that step 3 says to leave alone. Always reply to the thread's first comment (`commentId`), including for follow-ups. Write the body to a file and pass it with `-F body=@<absolute-path>`:
 
@@ -131,13 +142,17 @@ Reply in every thread from step 2, except follow-ups that step 3 says to leave a
 gh api repos/elastic/kibana/pulls/<pr>/comments -F in_reply_to=<commentId> -F body=@/tmp/libra-reply-<commentId>.md
 ```
 
-- **Valid**: say what changed, in which commit, which other instances of the rule were fixed, and which check now guards it. Then run `libra.sh resolve <threadId>`.
+- **Valid**: say what changed, in which commit (the SHA from step 7), which other instances of the rule were fixed, and which check now guards it.
 - **False positive**: give the evidence, such as the experiment you ran or the code that shows the claim is wrong. React 👎 so Libra gets the feedback (`gh api repos/elastic/kibana/pulls/comments/<commentId>/reactions -f content=-1`). Leave the thread unresolved so a human reviewer can see it.
 - **Out of scope**: explain why, and say who should decide or where it will be handled. Leave the thread unresolved.
 
 Write the replies for human reviewers: short, plain sentences, with no restatement of Libra's comment.
 
-Then go back to step 1 with the new HEAD.
+### 9. Push and resolve
+
+If step 7 made a commit, `git push` to the branch's upstream. If the push is rejected because kibanamachine pushed in the meantime, run `git pull --rebase`, push again, and edit the replies to quote the new SHA (`gh api -X PATCH repos/elastic/kibana/pulls/comments/<reply-id> -F body=@<file>`). Never force-push. Note the pushed SHA with `git rev-parse HEAD`, then run `libra.sh resolve <threadId>` for each valid finding. Go back to step 1 with `--sha <pushed-sha>`.
+
+If nothing was committed, there's no push and Libra won't review again. Stop and write the final report.
 
 ## Stopping early
 
