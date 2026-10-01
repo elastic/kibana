@@ -21,6 +21,9 @@ describe('cortexOptimizeStepDefinition', () => {
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
   const getFakeRequest = jest.fn().mockReturnValue(request);
   const getAgentBuilder = jest.fn();
+  const getInference = jest.fn();
+  const getSavedObjects = jest.fn();
+  const getUiSettings = jest.fn();
   const analytics = coreMock.createSetup().analytics;
 
   beforeEach(() => {
@@ -33,11 +36,12 @@ describe('cortexOptimizeStepDefinition', () => {
     prompt: string;
     response: string;
     agent_id?: string;
-    round_connector_id?: string;
     conversation_id?: string;
     round_id?: string;
     tool_calls?: unknown;
     tool_results?: unknown;
+    connector_id?: string;
+    round_connector_id?: string;
   }) =>
     ({
       input,
@@ -61,6 +65,9 @@ describe('cortexOptimizeStepDefinition', () => {
   it('optimizes with the request-scoped ES client', async () => {
     const definition = cortexOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       analytics,
       logger: loggerMock.create(),
     });
@@ -73,6 +80,8 @@ describe('cortexOptimizeStepDefinition', () => {
         conversation_id: 'conv-1',
         round_id: 'round-1',
         tool_calls: [{ tool_id: 'nightshift.sandbox_bash', params: { command: 'ls' } }],
+        connector_id: 'manual-model',
+        round_connector_id: 'round-model',
       })
     );
 
@@ -89,16 +98,23 @@ describe('cortexOptimizeStepDefinition', () => {
       analytics,
       conversationId: 'conv-1',
       roundId: 'round-1',
+      requestedConnectorId: 'manual-model',
+      roundConnectorId: 'round-model',
       logger: expect.anything(),
       getAgentBuilder,
-      connectorId: undefined,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
     });
     expect(result).toEqual({ output: { status: 'ok' } });
   });
 
-  it('forwards the Agent Builder connector id from the round', async () => {
+  it('forwards the round connector as the lenient round model', async () => {
     const definition = cortexOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       analytics,
       logger: loggerMock.create(),
     });
@@ -113,13 +129,19 @@ describe('cortexOptimizeStepDefinition', () => {
     );
 
     expect(runCortexOptimize).toHaveBeenCalledWith(
-      expect.objectContaining({ connectorId: 'anthropic-sonnet' })
+      expect.objectContaining({
+        roundConnectorId: 'anthropic-sonnet',
+        requestedConnectorId: undefined,
+      })
     );
   });
 
   it('passes no tool calls when the round did not report any', async () => {
     const definition = cortexOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       analytics,
       logger: loggerMock.create(),
     });
@@ -138,6 +160,9 @@ describe('cortexOptimizeStepDefinition', () => {
   it('skips when the cortex flag is off', async () => {
     const definition = cortexOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       analytics,
       logger: loggerMock.create(),
       isEnabled: () => false,
@@ -157,6 +182,9 @@ describe('cortexOptimizeStepDefinition', () => {
   it('attaches each tool call its results by tool_call_id', async () => {
     const definition = cortexOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       analytics,
       logger: loggerMock.create(),
     });

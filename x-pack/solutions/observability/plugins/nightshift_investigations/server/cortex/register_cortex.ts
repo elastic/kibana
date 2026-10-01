@@ -7,11 +7,13 @@
 
 import type {
   AnalyticsServiceSetup,
+  CoreStart,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
@@ -122,8 +124,12 @@ export const runCortexOptimize = async ({
   analytics,
   conversationId,
   roundId,
+  requestedConnectorId,
+  roundConnectorId,
+  getInference,
+  getSavedObjects,
+  getUiSettings,
   logger,
-  connectorId: requestedConnectorId,
 }: {
   request: KibanaRequest;
   agentId?: string;
@@ -138,8 +144,12 @@ export const runCortexOptimize = async ({
   analytics: AnalyticsServiceSetup;
   conversationId?: string;
   roundId?: string;
+  requestedConnectorId?: string;
+  roundConnectorId?: string;
+  getInference: () => InferenceServerStart | undefined;
+  getSavedObjects: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
-  connectorId?: string;
 }): Promise<void> => {
   // Only the Nightshift investigator writes to Cortex: it is the one agent whose post-execution
   // hook runs this workflow, and other agents' rounds must not edit the wiki. An unidentified
@@ -162,8 +172,12 @@ export const runCortexOptimize = async ({
 
   const model = await createOptimizeModel({
     request,
-    connectorId: requestedConnectorId,
+    requestedConnectorId,
+    roundConnectorId,
     agentBuilder: getAgentBuilder(),
+    inference: getInference(),
+    savedObjects: getSavedObjects(),
+    uiSettings: getUiSettings(),
     telemetryMetadata: createInvestigationOptimizeTelemetry(interactionId),
     logger,
   });

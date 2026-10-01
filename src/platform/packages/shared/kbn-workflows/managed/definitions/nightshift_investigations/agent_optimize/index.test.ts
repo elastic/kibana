@@ -37,6 +37,7 @@ describe('nightshift agent optimize workflow', () => {
     expect(Object.keys(inputs.properties).sort()).toEqual(
       [
         'agent_id',
+        'connector_id',
         'conversation_id',
         'prompt',
         'response',
@@ -47,6 +48,12 @@ describe('nightshift agent optimize workflow', () => {
         'workflow_context',
       ].sort()
     );
+  });
+
+  it('bounds the strict and round model inputs', () => {
+    const { properties } = workflow.triggers[0].inputs;
+    expect(properties.connector_id).toEqual(expect.objectContaining({ maxLength: 500 }));
+    expect(properties.round_connector_id).toEqual(expect.objectContaining({ maxLength: 500 }));
   });
 
   it('obtains one sandbox then optimizes cortex and memory in parallel with that id', () => {
@@ -79,6 +86,7 @@ describe('nightshift agent optimize workflow', () => {
                 type: 'nightshift.cortexOptimize',
                 with: expect.objectContaining({
                   sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}',
+                  connector_id: '{{ inputs.connector_id }}',
                   round_connector_id: '{{ inputs.round_connector_id }}',
                   conversation_id: '{{ inputs.conversation_id }}',
                   round_id: '{{ inputs.round_id }}',
@@ -97,6 +105,7 @@ describe('nightshift agent optimize workflow', () => {
                 type: 'nightshift.memoryOptimize',
                 with: expect.objectContaining({
                   sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}',
+                  connector_id: '{{ inputs.connector_id }}',
                   round_connector_id: '{{ inputs.round_connector_id }}',
                   conversation_id: '{{ inputs.conversation_id }}',
                   round_id: '{{ inputs.round_id }}',

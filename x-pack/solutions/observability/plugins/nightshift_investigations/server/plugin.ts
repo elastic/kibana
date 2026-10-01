@@ -32,11 +32,15 @@ import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/insta
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
-import { isInvestigationAvailable } from './is_investigation_available';
+import {
+  isInvestigationInfrastructureAvailable,
+  isInvestigationRunAvailable,
+} from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
+import { resolveModelStepDefinition } from './step_definitions/resolve_model';
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
 import { memoryMaterializeToSandboxStepDefinition } from './step_definitions/memory_materialize_to_sandbox';
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
@@ -102,11 +106,12 @@ export class NightshiftInvestigationsPlugin
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
+  private inference?: NightshiftInvestigationsStartDeps['inference'];
   private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
-  private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
   private elasticsearch?: ElasticsearchServiceStart;
   private savedObjects?: CoreStart['savedObjects'];
+  private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
   private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
@@ -303,6 +308,14 @@ export class NightshiftInvestigationsPlugin
             getAgentAvailability: () => this.getInvestigationAvailability(),
           })
         );
+        plugins.workflowsExtensions.registerStepDefinition(
+          resolveModelStepDefinition({
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            logger: this.logger.get('resolve_model'),
+          })
+        );
         // Obtain + materialize steps are always registered so the combined workflow
         // can no-op a disabled writer branch instead of failing on an unknown
         // step type. Obtain runs first and hands sandbox_id to both writers.
@@ -335,6 +348,9 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           cortexOptimizeStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             analytics: core.analytics,
             logger: this.logger.get('cortex'),
             isEnabled: () => this.cortexEnabled,
@@ -343,6 +359,9 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           memoryOptimizeStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             getMemoryEsClient: this.memoryService.getClientWhenReady,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
@@ -430,11 +449,12 @@ export class NightshiftInvestigationsPlugin
     this.spaces = plugins.spaces;
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
+    this.inference = plugins.inference;
     this.sandboxStart = plugins.sandbox;
-    this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
     this.ruleRegistry = plugins.ruleRegistry;
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
+    this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
     this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
@@ -482,12 +502,12 @@ export class NightshiftInvestigationsPlugin
       getInvestigationsClient: this.getInvestigationsClient,
       deleteAllInvestigations: () => investigationSweepRepository.deleteAllAcrossSpaces(),
       isInvestigationAvailable: (request) =>
-        isInvestigationAvailable({
+        isInvestigationRunAvailable({
           request,
           featureFlags: coreStart.featureFlags,
           agentBuilder: this.agentBuilder,
+          inference: this.inference,
           logger: this.logger,
-          searchInferenceEndpoints: this.searchInferenceEndpoints,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
@@ -509,8 +529,8 @@ export class NightshiftInvestigationsPlugin
         return {
           featureFlags: this.featureFlags,
           agentBuilder: this.agentBuilder,
+          inference: this.inference,
           logger: this.logger,
-          searchInferenceEndpoints: this.searchInferenceEndpoints,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
@@ -537,13 +557,29 @@ export class NightshiftInvestigationsPlugin
       agentAvailability: this.getInvestigationAvailability(),
       investigationQuotaCallback: this.investigationQuotaCallback,
       investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
-      isAvailable: () =>
-        isInvestigationAvailable({
+      inference: this.inference,
+      savedObjects: this.savedObjects,
+      uiSettings: this.uiSettings,
+      isAvailable: (connectorId) =>
+        isInvestigationRunAvailable({
           request,
           featureFlags: this.featureFlags!,
           agentBuilder: this.agentBuilder,
+          inference: this.inference,
           logger: this.logger,
-          searchInferenceEndpoints: this.searchInferenceEndpoints,
+          connectorId,
+          spaceId: resolvedSpaceId,
+          spaces: this.spaces,
+          workflowsExtensions: this.workflowsExtensionsStart,
+          workflowsManagement: this.workflowsManagement,
+        }),
+      isInfrastructureAvailable: () =>
+        isInvestigationInfrastructureAvailable({
+          request,
+          featureFlags: this.featureFlags!,
+          agentBuilder: this.agentBuilder,
+          inference: this.inference,
+          logger: this.logger,
           spaceId: resolvedSpaceId,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,

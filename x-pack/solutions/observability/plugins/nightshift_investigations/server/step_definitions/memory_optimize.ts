@@ -8,8 +8,10 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { MAX_KEYWORD_LENGTH } from '../../common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runMemoryOptimize } from '../memory/register_memory';
@@ -28,12 +30,18 @@ const OPTIMIZE_TIMEOUT_MS = 120_000;
 
 export const memoryOptimizeStepDefinition = ({
   getAgentBuilder,
+  getInference,
+  getSavedObjects,
+  getUiSettings,
   getMemoryEsClient,
   logger,
   isEnabled,
   telemetry,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
+  getInference: () => InferenceServerStart | undefined;
+  getSavedObjects: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings: () => CoreStart['uiSettings'] | undefined;
   getMemoryEsClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isEnabled?: () => boolean;
@@ -79,9 +87,14 @@ export const memoryOptimizeStepDefinition = ({
           'Workspace key from nightshift.obtainSandbox. Already space-scoped. ' +
             'Omit when there is no conversation sandbox.'
         ),
+      connector_id: z
+        .string()
+        .max(MAX_KEYWORD_LENGTH)
+        .optional()
+        .describe('Strict model override for a direct run. Fails when the id does not resolve.'),
       round_connector_id: z
         .string()
-        .max(1024)
+        .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Inference connector the triggering agent used for this round.'),
       conversation_id: z
@@ -148,7 +161,11 @@ export const memoryOptimizeStepDefinition = ({
               signal,
               logger,
               getAgentBuilder,
-              connectorId: context.input.round_connector_id,
+              getInference,
+              getSavedObjects,
+              getUiSettings,
+              requestedConnectorId: context.input.connector_id,
+              roundConnectorId: context.input.round_connector_id,
               interactionId: workflowExecutionId,
             }),
           OPTIMIZE_TIMEOUT_MS,

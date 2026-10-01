@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart, ScopedModel } from '@kbn/agent-builder-server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import {
+  NightshiftModelBlockedError,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
   SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
@@ -27,47 +30,72 @@ export const createInvestigationOptimizeTelemetry = (
 });
 
 /**
- * Same LLM path Agent Builder converse uses:
- * `runtime.createModelProvider` → `resolveSelectedConnectorId` → bound client.
- *
- * Pass the triggering round's connector as `connectorId` (the workflow's
- * `round_connector_id` input) so optimize inherits that turn.
+ * Picks the optimize model with the Nightshift resolver (strict override, then the round's
+ * model, then the Nightshift default), then loads it through Agent Builder's model provider.
+ * Model problems throw so the optimize step fails visibly; only missing plugins skip.
  */
 export const createOptimizeModel = async ({
   request,
-  connectorId,
+  requestedConnectorId,
+  roundConnectorId,
   agentBuilder,
+  inference,
+  savedObjects,
+  uiSettings,
   telemetryMetadata,
   logger,
 }: {
   request: KibanaRequest;
-  connectorId?: string;
+  requestedConnectorId?: string;
+  roundConnectorId?: string;
   agentBuilder: AgentBuilderPluginStart | undefined;
+  inference: InferenceServerStart | undefined;
+  savedObjects: CoreStart['savedObjects'] | undefined;
+  uiSettings: CoreStart['uiSettings'] | undefined;
   telemetryMetadata?: ConnectorTelemetryMetadata;
   logger: Logger;
 }): Promise<ScopedModel | undefined> => {
-  if (!agentBuilder) {
-    logger.info('Optimize skipped — Agent Builder unavailable');
+  if (!agentBuilder || !inference || !savedObjects || !uiSettings) {
+    logger.info('Optimize skipped — Agent Builder or model resolution unavailable');
     return undefined;
   }
 
-  const defaultConnectorId = connectorId?.trim() || undefined;
+  let connectorId: string;
+  try {
+    connectorId = await resolveNightshiftModelForRequest({
+      request,
+      inference,
+      savedObjects,
+      uiSettings,
+      step: 'investigation',
+      requestedId: requestedConnectorId,
+      roundConnectorId,
+      onFallback: (reason) =>
+        logger.warn(`Optimize round model is unavailable, using the default: ${reason.message}`),
+    });
+  } catch (error) {
+    if (error instanceof NightshiftModelBlockedError) {
+      logger.error(error);
+    }
+    throw error;
+  }
+
   const modelProvider = agentBuilder.runtime.createModelProvider({
     request,
-    ...(defaultConnectorId ? { defaultConnectorId } : {}),
+    defaultConnectorId: connectorId,
     ...(telemetryMetadata ? { telemetryMetadata } : {}),
   });
 
   try {
     const model = await modelProvider.getDefaultModel();
-    logger.info('Optimize model resolved from Agent Builder');
     logger.debug(`Optimize connector=${model.connector.connectorId}`);
     return model;
-  } catch (err) {
-    logger.info('Optimize skipped — no Agent Builder model');
-    logger.debug(
-      `Optimize model resolution failed: ${err instanceof Error ? err.message : String(err)}`
+  } catch (error) {
+    logger.error(
+      `Optimize model "${connectorId}" could not be loaded: ${
+        error instanceof Error ? error.message : String(error)
+      }`
     );
-    return undefined;
+    throw error;
   }
 };

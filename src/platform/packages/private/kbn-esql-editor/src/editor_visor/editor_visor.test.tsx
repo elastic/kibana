@@ -177,7 +177,7 @@ describe('Quick search visor', () => {
       await waitFor(() => {
         expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
         expect(getByTestId('esqlVisorModeKql')).toBeInTheDocument();
-        expect(getByText('AI mode')).toBeInTheDocument();
+        expect(getByText('Query with AI')).toBeInTheDocument();
       });
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'true');
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'false');

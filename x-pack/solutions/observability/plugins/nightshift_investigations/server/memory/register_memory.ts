@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import {
   createInvestigationOptimizeTelemetry,
@@ -144,8 +145,12 @@ export const runMemoryOptimize = async ({
   spaceId,
   signal,
   getAgentBuilder,
+  getInference,
+  getSavedObjects,
+  getUiSettings,
   logger,
-  connectorId: requestedConnectorId,
+  requestedConnectorId,
+  roundConnectorId,
   interactionId,
 }: {
   request: KibanaRequest;
@@ -160,21 +165,29 @@ export const runMemoryOptimize = async ({
   spaceId: string;
   signal?: AbortSignal;
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
+  getInference: () => InferenceServerStart | undefined;
+  getSavedObjects: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
-  connectorId?: string;
+  requestedConnectorId?: string;
+  roundConnectorId?: string;
   interactionId: string;
 }): Promise<MemoryOptimizeSummary | undefined> => {
   logger.debug(
     `Memory optimize wiring space=${spaceId} agent=${agentId} ` +
-      `connector=${requestedConnectorId ?? '(agent default)'} ` +
+      `connector=${requestedConnectorId ?? '(none)'} round=${roundConnectorId ?? '(none)'} ` +
       `recalledIds=${recalledIds.length} toolCalls=${toolCalls.length} userChars=${userMessage.length} ` +
       `assistantChars=${assistantMessage.length} user=${JSON.stringify(previewText(userMessage))}`
   );
 
   const model = await createOptimizeModel({
     request,
-    connectorId: requestedConnectorId,
+    requestedConnectorId,
+    roundConnectorId,
     agentBuilder: getAgentBuilder(),
+    inference: getInference(),
+    savedObjects: getSavedObjects(),
+    uiSettings: getUiSettings(),
     telemetryMetadata: createInvestigationOptimizeTelemetry(interactionId),
     logger,
   });

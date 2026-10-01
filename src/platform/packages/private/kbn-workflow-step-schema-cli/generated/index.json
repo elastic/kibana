@@ -609,6 +609,7 @@
     "nightshift.memoryMaterializeToSandbox",
     "nightshift.memoryOptimize",
     "nightshift.obtainSandbox",
+    "nightshift.resolveModel",
     "nightshift.triggerInvestigation",
     "notion.getDataSource",
     "notion.getPage",
@@ -800,6 +801,7 @@
     "shodan.getHostInfo",
     "shodan.getServices",
     "shodan.searchHosts",
+    "significantEvents.resolveModel",
     "slack",
     "slack2.createConversation",
     "slack2.getConversationHistory",
@@ -987,11 +989,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "66b5bfd5a698cc86f9a297797121a263ffffad22b2be77169a2b46a551eba939"
+      "sha256": "42c6caab6a3acaf545de6af87d2d0d8827df8dd1f3669c247afa4f2966f62065"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "9cc0fe9709568ec797b2a86bffb1a0cc4761a68115153649c4c81fbfb3614427"
+      "sha256": "76f78d00524041c3e9b6b05c832214bef9d222ddc97c729318a6617cc62988e8"
     }
   }
 }

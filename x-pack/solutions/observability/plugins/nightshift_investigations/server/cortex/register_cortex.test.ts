@@ -20,6 +20,20 @@ import { hydrateCortexWorkspace, runCortexOptimize } from './register_cortex';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { materializeCortex } from './materialize';
 
+// Mirrors the resolver's precedence; the resolver itself is covered in @kbn/nightshift-ai.
+jest.mock('@kbn/nightshift-ai', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai'),
+  resolveNightshiftModelForRequest: jest.fn(
+    async ({
+      requestedId,
+      roundConnectorId,
+    }: {
+      requestedId?: string;
+      roundConnectorId?: string;
+    }) => requestedId || roundConnectorId || 'nightshift-default'
+  ),
+}));
+
 jest.mock('./optimize', () => ({
   createLlmProposeCortexEdits: jest.fn(() => jest.fn()),
   optimizeCortex: jest.fn(),
@@ -107,6 +121,9 @@ describe('runCortexOptimize', () => {
   const getAgentBuilder = jest.fn().mockReturnValue({
     runtime: { createModelProvider },
   });
+  const getInference = jest.fn().mockReturnValue({});
+  const getSavedObjects = jest.fn().mockReturnValue({});
+  const getUiSettings = jest.fn().mockReturnValue({});
 
   const toolCalls: InvestigationToolCall[] = [
     { tool_id: 'nightshift_sandbox_bash', params: { command: 'cat /workspace/cortex/README.md' } },
@@ -123,7 +140,8 @@ describe('runCortexOptimize', () => {
     {
       calls = toolCalls,
       connectorId,
-    }: { calls?: InvestigationToolCall[]; connectorId?: string } = {}
+      roundConnectorId,
+    }: { calls?: InvestigationToolCall[]; connectorId?: string; roundConnectorId?: string } = {}
   ) =>
     runCortexOptimize({
       request,
@@ -138,8 +156,12 @@ describe('runCortexOptimize', () => {
       conversationId: 'conversation-1',
       roundId: 'round-1',
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       logger: loggerMock.create(),
-      connectorId,
+      requestedConnectorId: connectorId,
+      roundConnectorId,
     });
 
   beforeEach(() => {
@@ -151,6 +173,9 @@ describe('runCortexOptimize', () => {
       }),
     });
     getAgentBuilder.mockReturnValue({ runtime: { createModelProvider } });
+    getInference.mockReturnValue({});
+    getSavedObjects.mockReturnValue({});
+    getUiSettings.mockReturnValue({});
   });
 
   it('runs for the Nightshift investigation agent', async () => {
@@ -167,7 +192,7 @@ describe('runCortexOptimize', () => {
   });
 
   it('attributes inherited connector calls to the Nightshift investigation feature', async () => {
-    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { connectorId: 'anthropic-sonnet' });
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { roundConnectorId: 'anthropic-sonnet' });
     expect(createModelProvider).toHaveBeenCalledWith({
       request,
       defaultConnectorId: 'anthropic-sonnet',
@@ -189,7 +214,7 @@ describe('runCortexOptimize', () => {
   });
 
   it('reports applied Cortex edits with the completed round identifiers', async () => {
-    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { connectorId: 'anthropic-sonnet' });
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { roundConnectorId: 'anthropic-sonnet' });
     const call = jest.mocked(optimizeCortex).mock.calls[0]?.[0];
     if (!call) {
       throw new Error('Cortex optimizer was not invoked');
@@ -231,8 +256,36 @@ describe('runCortexOptimize', () => {
     expect(optimizeCortex).not.toHaveBeenCalled();
   });
 
+  it('treats connector_id as a strict override over the round model', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+      connectorId: 'manual-model',
+      roundConnectorId: 'round-model',
+    });
+
+    expect(createModelProvider).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultConnectorId: 'manual-model' })
+    );
+  });
+
+  it('uses the Nightshift default when no model is passed', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+
+    expect(createModelProvider).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultConnectorId: 'nightshift-default' })
+    );
+  });
+
+  it('fails the optimize run when the model cannot be loaded', async () => {
+    createModelProvider.mockReturnValue({
+      getDefaultModel: jest.fn().mockRejectedValue(new Error('connector gone')),
+    });
+
+    await expect(run(NIGHTSHIFT_INVESTIGATION_AGENT_ID)).rejects.toThrow('connector gone');
+    expect(optimizeCortex).not.toHaveBeenCalled();
+  });
+
   it('inherits the triggering agent connector via createModelProvider', async () => {
-    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { connectorId: 'anthropic-sonnet' });
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { roundConnectorId: 'anthropic-sonnet' });
 
     expect(createModelProvider).toHaveBeenCalledWith(
       expect.objectContaining({ request, defaultConnectorId: 'anthropic-sonnet' })

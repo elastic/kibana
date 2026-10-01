@@ -8,8 +8,10 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, CoreStart, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runCortexOptimize } from '../cortex/register_cortex';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
@@ -42,11 +44,17 @@ export const withToolResults = (
 
 export const cortexOptimizeStepDefinition = ({
   getAgentBuilder,
+  getInference,
+  getSavedObjects,
+  getUiSettings,
   analytics,
   logger,
   isEnabled,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
+  getInference: () => InferenceServerStart | undefined;
+  getSavedObjects: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings: () => CoreStart['uiSettings'] | undefined;
   analytics: AnalyticsServiceSetup;
   logger: Logger;
   isEnabled?: () => boolean;
@@ -74,11 +82,6 @@ export const cortexOptimizeStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
-      round_connector_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Inference connector the triggering agent used for this round.'),
       conversation_id: z
         .string()
         .max(1024)
@@ -89,6 +92,16 @@ export const cortexOptimizeStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Id of the completed round. Recorded on the edit telemetry events.'),
+      connector_id: z
+        .string()
+        .max(MAX_KEYWORD_LENGTH)
+        .optional()
+        .describe('Strict model override for a direct run. Fails when the id does not resolve.'),
+      round_connector_id: z
+        .string()
+        .max(MAX_KEYWORD_LENGTH)
+        .optional()
+        .describe('Inference connector the triggering agent used for this round.'),
       tool_calls: toolCallsSchema.describe(
         'Investigator tool calls from this round. Shows the optimizer what the investigator queried.'
       ),
@@ -128,9 +141,13 @@ export const cortexOptimizeStepDefinition = ({
             analytics,
             conversationId: context.input.conversation_id,
             roundId: context.input.round_id,
+            requestedConnectorId: context.input.connector_id,
+            roundConnectorId: context.input.round_connector_id,
             logger,
             getAgentBuilder,
-            connectorId: context.input.round_connector_id,
+            getInference,
+            getSavedObjects,
+            getUiSettings,
           }),
         OPTIMIZE_TIMEOUT_MS,
         `Cortex optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`

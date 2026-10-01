@@ -35,6 +35,9 @@ describe('memoryOptimizeStepDefinition', () => {
   const getMemoryEsClient = jest.fn().mockResolvedValue(esClient);
   const getFakeRequest = jest.fn().mockReturnValue(request);
   const getAgentBuilder = jest.fn();
+  const getInference = jest.fn();
+  const getSavedObjects = jest.fn();
+  const getUiSettings = jest.fn();
   const telemetry = {
     reportSemanticMemoryMaterialized: jest.fn(),
     reportSemanticMemoryOptimized: jest.fn(),
@@ -83,6 +86,9 @@ describe('memoryOptimizeStepDefinition', () => {
   it('optimizes with the injected internal client and never the scoped client', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
@@ -133,7 +139,11 @@ describe('memoryOptimizeStepDefinition', () => {
       signal: expect.any(AbortSignal),
       logger: expect.anything(),
       getAgentBuilder,
-      connectorId: undefined,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
+      requestedConnectorId: undefined,
+      roundConnectorId: undefined,
       interactionId: 'workflow-exec-1',
     });
     expect(getMemoryEsClient).toHaveBeenCalledTimes(1);
@@ -163,6 +173,9 @@ describe('memoryOptimizeStepDefinition', () => {
   it('derives the storage boundary from trusted workflow context, not caller inputs', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
@@ -194,6 +207,9 @@ describe('memoryOptimizeStepDefinition', () => {
   it('defaults an absent persisted recalled set to empty', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
@@ -221,6 +237,9 @@ describe('memoryOptimizeStepDefinition', () => {
   it('skips when the memory flag is off', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       getMemoryEsClient,
       logger: loggerMock.create(),
       isEnabled: () => false,
@@ -240,9 +259,12 @@ describe('memoryOptimizeStepDefinition', () => {
     expect(result).toEqual({ output: { status: 'ok', skipped: true } });
   });
 
-  it('forwards the Agent Builder connector id from the round', async () => {
+  it('forwards the round connector as the lenient round model', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
@@ -259,7 +281,7 @@ describe('memoryOptimizeStepDefinition', () => {
     );
 
     expect(runMemoryOptimize).toHaveBeenCalledWith(
-      expect.objectContaining({ connectorId: 'anthropic-sonnet' })
+      expect.objectContaining({ roundConnectorId: 'anthropic-sonnet' })
     );
   });
 
@@ -267,6 +289,9 @@ describe('memoryOptimizeStepDefinition', () => {
     runMemoryOptimizeMock.mockRejectedValueOnce(new Error('model failed'));
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
@@ -298,6 +323,9 @@ describe('memoryOptimizeStepDefinition', () => {
     async (agentId) => {
       const definition = memoryOptimizeStepDefinition({
         getAgentBuilder,
+        getInference,
+        getSavedObjects,
+        getUiSettings,
         getMemoryEsClient,
         logger: loggerMock.create(),
         telemetry: telemetry as never,
@@ -317,6 +345,9 @@ describe('memoryOptimizeStepDefinition', () => {
     runMemoryOptimizeMock.mockResolvedValueOnce(undefined);
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
@@ -358,6 +389,9 @@ describe('memoryOptimizeStepDefinition', () => {
     });
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
@@ -388,6 +422,9 @@ describe('memoryOptimizeStepDefinition', () => {
   it('fails clearly when the internal Memory client is unavailable', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       getMemoryEsClient: async () => {
         throw new Error('Semantic Memory internal Elasticsearch client is unavailable');
       },

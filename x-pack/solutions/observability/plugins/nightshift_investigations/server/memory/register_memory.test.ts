@@ -15,6 +15,20 @@ import {
 import { createMemoryStore, loadRoundSteps, runMemoryOptimize } from './register_memory';
 import { optimizeMemory } from './optimize';
 
+// Mirrors the resolver's precedence; the resolver itself is covered in @kbn/nightshift-ai.
+jest.mock('@kbn/nightshift-ai', () => ({
+  ...jest.requireActual('@kbn/nightshift-ai'),
+  resolveNightshiftModelForRequest: jest.fn(
+    async ({
+      requestedId,
+      roundConnectorId,
+    }: {
+      requestedId?: string;
+      roundConnectorId?: string;
+    }) => requestedId || roundConnectorId || 'nightshift-default'
+  ),
+}));
+
 jest.mock('./optimize', () => ({
   createLlmProposeMemoryExtractions: jest.fn(() => jest.fn()),
   createLlmProposeMemoryLabels: jest.fn(() => jest.fn()),
@@ -38,6 +52,9 @@ describe('runMemoryOptimize', () => {
   const request = { headers: {} } as never;
   const createModelProvider = jest.fn();
   const getAgentBuilder = jest.fn();
+  const getInference = jest.fn().mockReturnValue({});
+  const getSavedObjects = jest.fn().mockReturnValue({});
+  const getUiSettings = jest.fn().mockReturnValue({});
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,6 +65,9 @@ describe('runMemoryOptimize', () => {
       }),
     });
     getAgentBuilder.mockReturnValue({ runtime: { createModelProvider } });
+    getInference.mockReturnValue({});
+    getSavedObjects.mockReturnValue({});
+    getUiSettings.mockReturnValue({});
   });
 
   it('attributes inherited connector calls to the Nightshift investigation feature', async () => {
@@ -61,8 +81,11 @@ describe('runMemoryOptimize', () => {
       esClient: {} as never,
       spaceId: 'default',
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       logger: loggerMock.create(),
-      connectorId: 'anthropic-sonnet',
+      roundConnectorId: 'anthropic-sonnet',
       interactionId: 'execution-1',
     });
 
@@ -80,6 +103,42 @@ describe('runMemoryOptimize', () => {
     expect(optimizeMemory).toHaveBeenCalled();
   });
 
+  const runWithModels = (models: { requestedConnectorId?: string; roundConnectorId?: string }) =>
+    runMemoryOptimize({
+      request,
+      agentId: 'nightshift.investigation',
+      userMessage: 'why?',
+      assistantMessage: 'redis',
+      toolCalls: [],
+      recalledIds: [],
+      esClient: {} as never,
+      spaceId: 'default',
+      getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
+      logger: loggerMock.create(),
+      interactionId: 'execution-1',
+      ...models,
+    });
+
+  it('treats connector_id as a strict override over the round model', async () => {
+    await runWithModels({ requestedConnectorId: 'manual-model', roundConnectorId: 'round-model' });
+
+    expect(createModelProvider).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultConnectorId: 'manual-model' })
+    );
+  });
+
+  it('fails the optimize run when the model cannot be loaded', async () => {
+    createModelProvider.mockReturnValue({
+      getDefaultModel: jest.fn().mockRejectedValue(new Error('connector gone')),
+    });
+
+    await expect(runWithModels({})).rejects.toThrow('connector gone');
+    expect(optimizeMemory).not.toHaveBeenCalled();
+  });
+
   it('passes every tool call of the round to the optimizer', async () => {
     const toolCalls = [
       { tool_id: 'platform.streams.investigation_progress_report', params: { step: 'triage' } },
@@ -95,6 +154,9 @@ describe('runMemoryOptimize', () => {
       esClient: {} as never,
       spaceId: 'default',
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       logger: loggerMock.create(),
       interactionId: 'execution-1',
     });
@@ -120,6 +182,9 @@ describe('runMemoryOptimize', () => {
       esClient: {} as never,
       spaceId: 'default',
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       logger: loggerMock.create(),
       interactionId: 'execution-1',
     });
@@ -170,6 +235,9 @@ describe('runMemoryOptimize', () => {
       esClient: {} as never,
       spaceId: 'default',
       getAgentBuilder,
+      getInference,
+      getSavedObjects,
+      getUiSettings,
       logger: loggerMock.create(),
       interactionId: 'execution-1',
     });

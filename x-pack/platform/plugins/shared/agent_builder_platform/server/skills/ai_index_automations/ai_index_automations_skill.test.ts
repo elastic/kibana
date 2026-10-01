@@ -344,6 +344,7 @@ describe('aiIndexAutomationsSkill', () => {
         '`elasticsearch.search`',
         '`elasticsearch.request`',
         '`ai.prompt`',
+        '`parallel`',
         '`foreach`',
         '`if`',
         '`data.set`',
