@@ -1074,7 +1074,6 @@ x-pack/platform/packages/shared/ingest-pipelines @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/security-solution
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-ml-ux @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/search-ml-ux
-x-pack/platform/packages/shared/kbn-ai-tools-cli @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
 x-pack/platform/packages/shared/kbn-apm-api-shared @elastic/obs-signals-traces-team
 x-pack/platform/packages/shared/kbn-apm-common @elastic/obs-signals-traces-team
@@ -2676,6 +2675,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_monitori
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_storage/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_docs/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/google_gke/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_threat_intelligence/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/graphql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng

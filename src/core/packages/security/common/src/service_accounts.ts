@@ -14,6 +14,8 @@
  */
 export interface CreateServiceAccountParams {
   name: string;
+  /** Optional description, supported by Elasticsearch service accounts. */
+  description?: string;
   /**
    * Role names that bound the new account's privileges. Required and non-empty: an account is
    * never given its creator's privileges by default, since a workload inheriting whatever its
@@ -113,6 +115,8 @@ export interface ServiceAccount {
   id: string;
   /** The name the account was created with. */
   name: string;
+  /** Optional description, supported by Elasticsearch service accounts. */
+  description?: string;
   /** The role names the account was created with. See {@link CreateServiceAccountParams.roles}. */
   roles: string[];
 }

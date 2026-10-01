@@ -37758,7 +37758,6 @@
     "xpack.osquery.scheduleSection.frequencyLabel": "Frequência",
     "xpack.osquery.scheduleSection.intervalFieldLabel": "Intervalos",
     "xpack.osquery.scheduleSection.intervalFieldUnit": "segundo(s)",
-    "xpack.osquery.scheduleSection.packQueryStaleIntervalError": "Uma ou mais consultas ainda usam um agendamento por intervalo. Intervalos por consulta não se aplicam enquanto o pacote usa um agendamento de data e hora e não serão salvos.",
     "xpack.osquery.scheduleSection.queryOverrideToggleDescription": "Quando ativada, esta consulta é executada no próprio agendamento, em vez de herdar o do pacote. O modo (intervalo ou recorrência) permanece o mesmo do pacote.",
     "xpack.osquery.scheduleSection.queryOverrideToggleLabel": "Substituir agendamento do pacote",
     "xpack.osquery.scheduleSection.queryUsingPackScheduleLabel": "Usando agendamento do pacote",

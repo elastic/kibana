@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, KibanaRequest } from '@kbn/core/server';
+import type { IRouter, KibanaRequest, CustomRequestHandlerContext } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   AgenticInvestigationsPluginSetup,
@@ -18,10 +18,19 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { SubscriptionAvailability } from '../common/availability';
+
+export type AlertZeroRequestHandlerContext = CustomRequestHandlerContext<{
+  licensing: LicensingApiRequestHandlerContext;
+  alertzero: { subscription: SubscriptionAvailability; hasRequiredDependencies: boolean };
+}>;
 
 /**
  * The subset of security_solution's rule-attachment service this plugin actually calls.
@@ -57,6 +66,7 @@ export type AlertTriageAttachmentServiceProvider = (
  * reading `xpack.alertzero` config themselves.
  */
 export interface AlertZeroPluginSetup {
+  setServerlessTierAvailable: (available: boolean) => void;
   /**
    * `false` when the `xpack.alertzero.enabled` kill switch is off, in which case AlertZero
    * registered nothing — including its `securitySolution:enableAlertZero` advanced setting.
@@ -82,18 +92,19 @@ export interface AlertZeroSetupDependencies {
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
-  agentBuilder: AgentBuilderPluginSetup;
-  agenticInvestigations: AgenticInvestigationsPluginSetup;
-  proposals: ProposalsPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
+  agenticInvestigations?: AgenticInvestigationsPluginSetup;
+  proposals?: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface AlertZeroStartDependencies {
+  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
-  agentBuilder: AgentBuilderPluginStart;
-  agenticInvestigations: AgenticInvestigationsPluginStart;
-  proposals: ProposalsPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  agenticInvestigations?: AgenticInvestigationsPluginStart;
+  proposals?: ProposalsPluginStart;
   /**
    * Optional, matching the plugin manifest. Requiring it would take the whole
    * plugin down with it, including the index-scope, Tier 1 and candidates routes
@@ -110,5 +121,5 @@ export interface AlertZeroStartDependencies {
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
 
-export type AlertZeroRouter = IRouter;
+export type AlertZeroRouter = IRouter<AlertZeroRequestHandlerContext>;
 export type AlertZeroSpaceIdResolver = (request: KibanaRequest) => string;
