@@ -604,36 +604,37 @@ describe('floor_alert_triage — closure review hand-off', () => {
     expect(stepByName('start_fp_review')?.['on-failure']?.continue).toBeUndefined();
   });
 
-  describe('reading the review back', () => {
+  describe('reading the review status', () => {
     const outcomeTemplate = stepByName('resolve_review_dispatch')?.with?.review_dispatch as string;
-    const resolveDispatch = (read: { error?: unknown; output?: { status?: string } }): string =>
-      renderString(outcomeTemplate, { steps: { read_review_execution: read } }).trim();
+    const resolveDispatch = (status: string): string =>
+      renderString(outcomeTemplate, {
+        steps: { start_fp_review: { output: { status } } },
+      }).trim();
 
-    it('reads the child execution of the same space by its id, retrying before it gives up', () => {
-      const read = stepByName('read_review_execution');
-      expect(read?.type).toBe('kibana.request');
-      expect(read?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-      expect(read?.['on-failure']?.continue).toBe(true);
+    // The status comes from `workflow.executeAsync` itself. A separate read of the execution
+    // would need extra privileges and retries, and would add a branch for "could not read".
+    it('takes the status from the executeAsync output and never reads the execution again', () => {
       expect(
-        renderString(String((read?.with as { path: string }).path), {
-          workflow: { spaceId: 'security' },
-          steps: { start_fp_review: { output: { executionId: 'exec-1' } } },
-        })
-      ).toBe('/s/security/api/workflows/executions/exec-1');
+        allSteps.some(
+          (step) =>
+            step.type === 'kibana.request' &&
+            /executions/.test(String((step.with as { path?: string })?.path))
+        )
+      ).toBe(false);
+      expect(JSON.stringify(parsed)).not.toContain('read_review_execution');
     });
 
     it.each([
-      [{ output: { status: 'skipped' } }, 'limit'],
-      [{ output: { status: 'failed' } }, 'failed'],
-      [{ output: { status: 'cancelled' } }, 'failed'],
-      [{ output: { status: 'timed_out' } }, 'failed'],
-      [{ output: { status: 'pending' } }, 'started'],
-      [{ output: { status: 'running' } }, 'started'],
-      [{ output: { status: 'waiting_for_child' } }, 'started'],
-      [{ output: { status: 'completed' } }, 'started'],
-      [{ error: { message: 'boom' } }, 'unknown'],
-    ])('resolves %j to "%s"', (read, expected) => {
-      expect(resolveDispatch(read)).toBe(expected);
+      ['skipped', 'limit'],
+      ['failed', 'failed'],
+      ['cancelled', 'failed'],
+      ['timed_out', 'failed'],
+      ['pending', 'started'],
+      ['running', 'started'],
+      ['waiting_for_child', 'started'],
+      ['completed', 'started'],
+    ])('resolves the status "%s" to "%s"', (status, expected) => {
+      expect(resolveDispatch(status)).toBe(expected);
     });
 
     // The Worker matches the review's status by string. Tie each literal to the engine's enum so a
@@ -651,7 +652,6 @@ describe('floor_alert_triage — closure review hand-off', () => {
     it.each([
       ['handle_review_started', 'started'],
       ['handle_review_limit', 'limit'],
-      ['handle_review_unknown', 'unknown'],
       ['handle_review_failed', 'failed'],
     ])('"%s" runs only for the "%s" dispatch', (branchName, dispatch) => {
       expect(stepByName(branchName)?.condition).toBe(
@@ -671,14 +671,12 @@ describe('floor_alert_triage — closure review hand-off', () => {
       });
     });
 
-    it('leaves the Investigation open when the review state is unknown or the review failed', () => {
-      for (const branch of ['handle_review_unknown', 'handle_review_failed']) {
-        expect(
-          flatten(stepByName(branch)?.steps ?? []).some(
-            (step) => step.type === 'ai.conversation.metadata.patch'
-          )
-        ).toBe(false);
-      }
+    it('leaves the Investigation open when the review failed', () => {
+      expect(
+        flatten(stepByName('handle_review_failed')?.steps ?? []).some(
+          (step) => step.type === 'ai.conversation.metadata.patch'
+        )
+      ).toBe(false);
     });
 
     it('fails the run for a review that ended without a decision, after commenting', () => {

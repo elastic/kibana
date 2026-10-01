@@ -452,9 +452,10 @@ steps:
   #    proposal, applies the outcome (re-tag on dismissal) and closes the Investigation.
   #
   #    The review drops a batch when the rule already has its limit of reviews waiting for a
-  #    decision. The engine decides that while starting the child, so the dispatch itself still succeeds and
-  #    only the child's execution record says `skipped`. That record is read back below, because
-  #    nothing else closes the Investigation of a batch whose review never ran.
+  #    decision. The engine decides that while starting the child, so the dispatch itself still
+  #    succeeds and `workflow.executeAsync` reports the child's status as `skipped`. That status
+  #    is read below, because nothing else closes the Investigation of a batch whose review never
+  #    ran.
   #
   #    Autonomy (`manual` gates, `supervised` auto-approves) is passed to the review, which owns
   #    the mapping to `autoApprove`.
@@ -466,7 +467,7 @@ steps:
       - name: start_fp_review
         type: workflow.executeAsync
         # Reached only when the review could not be started at all. A review that was started
-        # and then skipped or failed is handled from its execution record below. The fallback
+        # and then skipped or failed is handled from its reported status below. The fallback
         # re-throws afterwards, so the run fails and shows up in execution history.
         on-failure:
           fallback:
@@ -489,40 +490,21 @@ steps:
             confidence_floor: "${{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}"
             autonomy: "{{ consts.worker_settings.autonomy }}"
 
-      # The status is already final for a dropped child: the engine applies the concurrency
-      # policy before it returns the execution id.
+      # `workflow.executeAsync` reports the child's status as it was when the engine returned
+      # the execution id, and the engine applies the concurrency policy and validates the inputs
+      # before that, so `skipped` and `failed` are already final here. No separate read of the
+      # execution is needed.
       #
-      # This reads a managed workflow's execution through the public route, as the identity the
-      # Worker runs as (neither workflow sets `run_as`). That identity needs the workflows
-      # execution read privilege and the managed execution read privilege
-      # (`readManagedExecution`); without the latter the route answers 403 on every batch, the
-      # outcome below is `unknown` and the Investigation stays open, with the error in its comment. Retried before continue: true takes over so a
-      # blip does not leave the Investigation open; if the read still fails, the outcome below
-      # is `unknown` and the Investigation is left open with a comment saying so.
-      - name: read_review_execution
-        type: kibana.request
-        on-failure:
-          retry:
-            max-attempts: 3
-            delay: 5s
-          continue: true
-        with:
-          method: GET
-          path: "/s/{{ workflow.spaceId }}/api/workflows/executions/{{ steps.start_fp_review.output.executionId }}"
-          headers:
-            elastic-api-version: "2023-10-31"
-
       # One value per outcome so every branch below is a single comparison (if-conditions take
       # no filters, and `and`/`or` have no precedence).
       #   limit   → skipped by the per-rule limit
       #   failed  → the review never ran to a decision (rejected inputs, cancelled, timed out)
-      #   unknown → the read failed, so nothing is known about the review
       #   started → pending, running, parked or already finished
       - name: resolve_review_dispatch
         type: data.set
         with:
           review_dispatch: >-
-            {% if steps.read_review_execution.error != blank %}unknown{% elsif steps.read_review_execution.output.status == 'skipped' %}limit{% elsif steps.read_review_execution.output.status == 'failed' or steps.read_review_execution.output.status == 'cancelled' or steps.read_review_execution.output.status == 'timed_out' %}failed{% else %}started{% endif %}
+            {% if steps.start_fp_review.output.status == 'skipped' %}limit{% elsif steps.start_fp_review.output.status == 'failed' or steps.start_fp_review.output.status == 'cancelled' or steps.start_fp_review.output.status == 'timed_out' %}failed{% else %}started{% endif %}
 
       - name: handle_review_started
         type: if
@@ -575,21 +557,6 @@ steps:
                 {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor {% if variables.fp_candidate_count == 1 %}stays{% else %}stay{% endif %} open and tagged az:false_positive.
                 Decide the pending proposals for this rule to let new ones through.
 
-      - name: handle_review_unknown
-        type: if
-        condition: "${{ variables.review_dispatch == 'unknown' }}"
-        steps:
-          - name: post_comment_review_unknown
-            type: ai.conversation.add_user_message
-            on-failure:
-              continue: true
-            with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              message: >-
-                ⚠️ The closure review was started, but its state could not be read after retries ({{ steps.read_review_execution.error.message }}).
-                If a closure proposal exists for this rule it is in the decision queue and posts its outcome here. If the rule was already at its limit of waiting proposals, none was created and {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}stays{% else %}stay{% endif %} open and tagged az:false_positive.
-                This Investigation stays open for review.
-
       - name: handle_review_failed
         type: if
         condition: "${{ variables.review_dispatch == 'failed' }}"
@@ -601,7 +568,7 @@ steps:
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
-                ⚠️ The closure review ended without a decision (status: {{ steps.read_review_execution.output.status }}).
+                ⚠️ The closure review ended without a decision (status: {{ steps.start_fp_review.output.status }}).
                 {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive. This Investigation stays open for review.
 
           # Fails the run so a review that never ran shows up in execution history, like a
@@ -610,7 +577,7 @@ steps:
             type: workflow.fail
             with:
               message: >-
-                The Alert Triage closure review ended as {{ steps.read_review_execution.output.status }}
+                The Alert Triage closure review ended as {{ steps.start_fp_review.output.status }}
                 before it reached a decision. The alerts were classified, tagged and noted.
 
   # ---------------------------------------------------------------------------

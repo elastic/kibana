@@ -314,7 +314,6 @@ const workerOutcome = (execution) => {
   if (execution.status === 'failed') return 'worker failed';
   if (ran.has('post_comment_review_limit')) return 'skipped by limit';
   if (ran.has('post_comment_review_started')) return 'review started';
-  if (ran.has('post_comment_review_unknown')) return 'review state unknown';
   if (ran.has('post_comment_review_failed')) return 'review failed';
   if (ran.has('post_comment_outcome_no_fp')) return 'no FP candidates (no review)';
   return execution.status;
