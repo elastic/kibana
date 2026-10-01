@@ -9,8 +9,10 @@ import { lastValueFrom } from 'rxjs';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
 import type {
   TimeRange,
@@ -29,6 +31,11 @@ import {
 } from './common';
 import { ALL_COLUMNS_LIST } from './columns/registry';
 import { enrichEntityRows } from './enrich_entity_rows';
+
+const GRID_QUERY_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.queryError',
+  { defaultMessage: 'Error loading entities table' }
+);
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -63,7 +70,8 @@ export interface UseEntityGridDataOptions {
   pageSize: number;
   cursors: Array<string | null>;
   onNextCursor: (pageIndex: number, cursor: string) => void;
-  whereExpression?: string;
+  searchExpression?: string;
+  entityExpression?: string;
   timeRange: TimeRange;
   view?: 'resolved' | 'raw';
 }
@@ -75,7 +83,8 @@ export const useEntityGridData = ({
   pageSize,
   cursors,
   onNextCursor,
-  whereExpression,
+  searchExpression,
+  entityExpression,
   timeRange,
   view = 'resolved',
 }: UseEntityGridDataOptions) => {
@@ -94,7 +103,7 @@ export const useEntityGridData = ({
   const cursorStr = cursors[pageIndex] ?? null;
   const cursor: PageCursor | null = cursorStr ? decodeCursor(cursorStr) : null;
 
-  // whereExpression (URL filters, global query, NAT card IN-list, …) is part of every
+  // Filter expressions (search bar, URL filters, NAT card IN-list, …) are part of every
   // key so shell + count + enrich all invalidate together when tiles/filters change.
   const shellQueryKey = [
     'entity-grid-fe',
@@ -103,7 +112,8 @@ export const useEntityGridData = ({
     pageIndex,
     pageSize,
     cursorStr,
-    whereExpression,
+    searchExpression,
+    entityExpression,
     timeRange,
     view,
     concreteEntityIndexName,
@@ -113,7 +123,8 @@ export const useEntityGridData = ({
   const countQueryKey = [
     'entity-grid-fe-count',
     sortField,
-    whereExpression,
+    searchExpression,
+    entityExpression,
     timeRange,
     view,
     concreteEntityIndexName,
@@ -139,7 +150,8 @@ export const useEntityGridData = ({
         pageSize,
         view,
         concreteEntityIndexName,
-        filterExpression: whereExpression,
+        searchExpression,
+        entityExpression,
       };
 
       const allRows = await runQuery(buildSortQuery(args));
@@ -155,6 +167,9 @@ export const useEntityGridData = ({
     },
     {
       enabled: !!concreteEntityIndexName,
+      // Keep painting the last page while the next shell key loads (page/sort/filter).
+      // Count stays strict below so pagination totals don't lag behind the tile/filter.
+      keepPreviousData: true,
       onSuccess: (result) => {
         if (result.next_cursor && !cursors[pageIndex + 1]) {
           onNextCursor(pageIndex + 1, result.next_cursor);
@@ -183,7 +198,8 @@ export const useEntityGridData = ({
         pageSize,
         view,
         concreteEntityIndexName,
-        filterExpression: whereExpression,
+        searchExpression,
+        entityExpression,
       };
 
       const [countRow] = await runQuery(buildCountQuery(args));
@@ -192,7 +208,7 @@ export const useEntityGridData = ({
     {
       enabled: !!concreteEntityIndexName,
       // Do not keepPreviousData: a stale unfiltered total leaves phantom pages when
-      // whereExpression gains a NAT card IN-list (shell updates, count would look wrong).
+      // entityExpression gains a NAT tile IN-list (shell updates, count would look wrong).
     }
   );
 
@@ -205,7 +221,8 @@ export const useEntityGridData = ({
       entityIdsKey,
       sortField,
       sortDirection,
-      whereExpression,
+      searchExpression,
+      entityExpression,
       timeRange,
       view,
       concreteEntityIndexName,
@@ -232,7 +249,8 @@ export const useEntityGridData = ({
         pageSize,
         view,
         concreteEntityIndexName,
-        filterExpression: whereExpression,
+        searchExpression,
+        entityExpression,
       };
 
       return enrichEntityRows(rows, args, skip, { runQuery, http });
@@ -242,6 +260,9 @@ export const useEntityGridData = ({
       onSuccess: () => setUpdatedAt(Date.now()),
     }
   );
+
+  // Prefer shell (empties the grid), then count / enrich — one toast when several fail together.
+  useErrorToast(GRID_QUERY_ERROR_TITLE, shellQuery.error ?? countQuery.error ?? enrichQuery.error);
 
   return {
     rows: enrichQuery.data ?? shellRows ?? [],

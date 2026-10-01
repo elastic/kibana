@@ -38,6 +38,7 @@ import {
   RAW_VIEW_COLUMNS,
   RESOLVED_VIEW_COLUMNS,
   toList,
+  joinAnd,
 } from '../components/home/new_entities_table';
 import type {
   RowActions,
@@ -317,7 +318,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
-  const { whereExpression } = useEntityGridFilters();
+  const { searchExpression, entityExpression } = useEntityGridFilters();
 
   const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
   useErrorToast(
@@ -494,18 +495,18 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     [combinedFilter, groupingPageSize, groupingPageIndex]
   );
 
-  const gridWhereExpression = useMemo(() => {
-    const parts = [whereExpression, tileWhereExpression].filter(Boolean);
-    return parts.length ? parts.join(' AND ') : undefined;
-  }, [whereExpression, tileWhereExpression]);
+  const gridEntityExpression = useMemo(
+    () => joinAnd(entityExpression, tileWhereExpression),
+    [entityExpression, tileWhereExpression]
+  );
 
   useUpdateEffect(() => {
     setPage(0);
-  }, [gridWhereExpression, setPage]);
+  }, [searchExpression, gridEntityExpression, setPage]);
 
   useUpdateEffect(() => {
     setGroupingPageIndex(0);
-  }, [tileWhereExpression, whereExpression, viewBy]);
+  }, [tileWhereExpression, searchExpression, entityExpression, viewBy]);
 
   useUpdateEffect(() => {
     if (!activeTile || selectedEntityIds.length <= MAX_TILE_FILTER_ENTITY_IDS) {
@@ -877,7 +878,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 view={viewBy}
                 timeRange={timeRange}
                 watchlistNames={watchlistNames}
-                whereExpression={gridWhereExpression}
+                searchExpression={searchExpression}
+                entityExpression={gridEntityExpression}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
                 groupSelectorComponent={viewControls}

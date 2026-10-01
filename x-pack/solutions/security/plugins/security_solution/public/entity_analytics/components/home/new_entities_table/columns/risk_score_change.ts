@@ -14,6 +14,9 @@ import {
   buildKeepClause,
   buildResolvedViewFilter,
   buildFilterClause,
+  buildLookupJoinClause,
+  buildSearchIdInClause,
+  entityAliasOf,
   toList,
   buildSortSuffix,
   buildCursorClause,
@@ -33,7 +36,8 @@ const buildRiskScoreChangeBaseQuery = (
   timeRange: TimeRange,
   concreteEntityIndexName: string,
   view: 'resolved' | 'raw',
-  filterExpression?: string
+  searchExpression?: string,
+  entityExpression?: string
 ): string => {
   const days = TIME_RANGE_DAYS[timeRange];
   return [
@@ -42,10 +46,11 @@ const buildRiskScoreChangeBaseQuery = (
     `| WHERE ${ENTITY_ID_FIELD_COALESCE} == "entity.id"`,
     `| EVAL \`entity.id\` = ${ENTITY_ID_COALESCE}, score = ${RISK_SCORE_COALESCE}`,
     `| STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\``,
-    `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``,
+    ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
+    buildLookupJoinClause(concreteEntityIndexName),
     `| WHERE ${ENTITY_TYPE_FILTER} AND ${RISK_SCORE_NORM_FIELD} IS NOT NULL`,
     ...buildResolvedViewFilter(view),
-    ...buildFilterClause(filterExpression),
+    ...buildFilterClause(entityExpression),
     `| EVAL ${RISK_SCORE_CHANGE_FIELD} = ${RISK_SCORE_NORM_FIELD} - reference_score`,
     buildKeepClause(RISK_SCORE_CHANGE_FIELD),
   ].join('\n');
@@ -59,7 +64,8 @@ const buildRiskScoreChangeDataQuery = ({
   pageSize,
   view,
   concreteEntityIndexName,
-  filterExpression,
+  searchExpression,
+  entityExpression,
 }: QueryArgs): string =>
   [
     buildRiskScoreChangeBaseQuery(
@@ -67,7 +73,8 @@ const buildRiskScoreChangeDataQuery = ({
       timeRange,
       concreteEntityIndexName,
       view,
-      filterExpression
+      searchExpression,
+      entityExpression
     ),
     ...buildCursorClause(cursor),
     buildSortSuffix(RISK_SCORE_CHANGE_FIELD, dir, pageSize),
@@ -78,7 +85,8 @@ const buildRiskScoreChangeCountQuery = ({
   timeRange,
   view,
   concreteEntityIndexName,
-  filterExpression,
+  searchExpression,
+  entityExpression,
 }: QueryArgs): string =>
   [
     buildRiskScoreChangeBaseQuery(
@@ -86,7 +94,8 @@ const buildRiskScoreChangeCountQuery = ({
       timeRange,
       concreteEntityIndexName,
       view,
-      filterExpression
+      searchExpression,
+      entityExpression
     ),
     `| STATS total = COUNT(*)`,
   ].join('\n');

@@ -11,7 +11,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store';
 import { useEntityAnalyticsUrlState } from './use_entity_analytics_url_state';
 import type { EntityFilters } from './use_entity_analytics_url_state';
-import { buildFilterClause, esc, toList } from './common';
+import { buildFilterClause, esc, joinAnd, toList } from './common';
 
 /** Membership on multivalue keyword fields — scalar `IN` returns null for multi-valued docs. */
 const buildMvContainsExpression = (field: string, values: string[]): string => {
@@ -51,8 +51,8 @@ export const useEntityGridFilters = () => {
   return useMemo(() => {
     const { esqlExpression: filterBarExpr } = convertFiltersToESQLExpression(globalFilters);
     const queryExpr = convertQueryToESQLExpression(globalQuery);
-    const entityExpr = buildEntityFiltersExpression(entityFilters);
-    const parts = [filterBarExpr, queryExpr, entityExpr].filter(Boolean);
-    return { whereExpression: parts.length ? parts.join(' AND ') : undefined };
+    const searchExpression = joinAnd(filterBarExpr, queryExpr);
+    const entityExpression = buildEntityFiltersExpression(entityFilters) || undefined;
+    return { searchExpression, entityExpression };
   }, [globalFilters, globalQuery, entityFilters]);
 };
