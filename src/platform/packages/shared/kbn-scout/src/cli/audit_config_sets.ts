@@ -60,6 +60,8 @@ export interface ConfigSetsReport {
   identical: string[][];
   /** Sets whose differences are a strict subset of another set's. */
   subsets: Array<{ set: string; of: string }>;
+  /** Sets left out of the checks because they must stay separate on purpose, with the reason. */
+  keptSeparate: Array<{ set: string; reason: string }>;
   /** The runtime updatable keys the check used. */
   runtimeKeys: string[];
 }
@@ -281,7 +283,8 @@ export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsRepor
     });
   }
 
-  return { ...summarizeConfigSets(sets, runtimeKeys), failed };
+  const keptSeparate = Object.entries(KEEP_SEPARATE).map(([set, reason]) => ({ set, reason }));
+  return { ...summarizeConfigSets(sets, runtimeKeys), failed, keptSeparate };
 }
 
 // `session_idle (stateful)` or `uiam_local (serverless/security_complete)`: the file
@@ -356,5 +359,14 @@ export function summarizeConfigSets(
     for (const b of nearest) subsets.push({ set: label(a), of: label(b) });
   }
 
-  return { sets, failed: [], sameAsDefault, runtimeOnly, identical, subsets, runtimeKeys };
+  return {
+    sets,
+    failed: [],
+    sameAsDefault,
+    runtimeOnly,
+    identical,
+    subsets,
+    keptSeparate: [],
+    runtimeKeys,
+  };
 }
