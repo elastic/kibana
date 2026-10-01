@@ -42,21 +42,25 @@ describe('useMenuHeaderStyle', () => {
     expect(typeof renderHook(() => useMenuHeaderStyle()).result.current).toBe('object');
   });
 
-  it('uses App Header standard inset and baseline alignment', () => {
+  it('matches App Header standard height and inset', () => {
     const { result } = renderHook(() => useMenuHeaderStyle('standard'));
     const { styles } = result.current;
 
     expect(styles).toContain('padding:16px');
     expect(styles).toContain('min-height:64px');
-    expect(styles).toContain('line-height: 2.25em');
+    expect(styles).toContain('display:flex');
+    expect(styles).toContain('align-items:center');
+    expect(styles).not.toContain('line-height:2.25em');
   });
 
-  it('uses App Header compact inset without the standard baseline tweak', () => {
+  it('matches App Header compact height and inset', () => {
     const { result } = renderHook(() => useMenuHeaderStyle('compact'));
     const { styles } = result.current;
 
     expect(styles).toContain('padding:8px');
     expect(styles).toContain('min-height:48px');
-    expect(styles).not.toContain('line-height: 2.25em');
+    expect(styles).toContain('display:flex');
+    expect(styles).toContain('align-items:center');
+    expect(styles).not.toContain('line-height:2.25em');
   });
 });

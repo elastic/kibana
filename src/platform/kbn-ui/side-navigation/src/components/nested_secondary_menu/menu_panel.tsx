@@ -10,6 +10,7 @@
 import React, { useCallback } from 'react';
 import type { FC, ReactNode } from 'react';
 
+import type { IconType } from '@elastic/eui';
 import { EuiScreenReaderOnly, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -36,11 +37,15 @@ export interface PanelProps {
    * Content shown above the scrolling panel body when the panel has no `title`.
    */
   header?: PanelChildren;
+  /**
+   * Icon shown beside the panel title when `title` is set.
+   */
+  iconType?: IconType;
   id: string;
   title?: string;
 }
 
-export const Panel: FC<PanelProps> = ({ children, footer, header, id, title }) => {
+export const Panel: FC<PanelProps> = ({ children, footer, header, iconType, id, title }) => {
   const { currentPanel, panelStackDepth, returnFocusId } = useNestedMenu();
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useScroll(true);
@@ -121,6 +126,7 @@ export const Panel: FC<PanelProps> = ({ children, footer, header, id, title }) =
       <SecondaryMenu
         data-test-subj={nestedPanelTestSubj}
         footer={footerNode}
+        iconType={iconType}
         ref={panelRef}
         title={title}
         isPanel={false}

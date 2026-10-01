@@ -9,8 +9,15 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { EuiButtonIcon, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import type { IconType } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -24,6 +31,10 @@ export interface HeaderProps {
   title?: string;
   'aria-describedby'?: string;
   /**
+   * Primary-nav icon shown beside the header title.
+   */
+  iconType?: IconType;
+  /**
    * Header spacing. Defaults to Navigation's `secondaryHeaderSpacing`, or `standard`.
    */
   spacing?: SecondaryHeaderSpacing;
@@ -32,43 +43,45 @@ export interface HeaderProps {
 export const Header: FC<HeaderProps> = ({
   title,
   'aria-describedby': ariaDescribedBy,
+  iconType,
   spacing: spacingProp,
 }) => {
   const { goBack } = useNestedMenu();
-  const { euiTheme } = useEuiTheme();
   const spacing = useSecondaryHeaderSpacing(spacingProp);
   const headerStyle = useMenuHeaderStyle(spacing);
 
-  const titleStyle = css`
-    align-items: center;
-    display: flex;
-    gap: ${euiTheme.size.xs};
-    ${headerStyle}
-  `;
-
   return (
-    <div css={titleStyle}>
-      <EuiToolTip
-        content={i18n.translate('kbnUI.sideNavigation.goBackButtonIconAriaLabel', {
-          defaultMessage: 'Go back',
-        })}
-        disableScreenReaderOutput
-      >
-        <EuiButtonIcon
-          aria-describedby={ariaDescribedBy}
-          aria-label={i18n.translate('kbnUI.sideNavigation.goBackButtonIconAriaLabel', {
+    <EuiFlexGroup css={headerStyle} alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={i18n.translate('kbnUI.sideNavigation.goBackButtonIconAriaLabel', {
             defaultMessage: 'Go back',
           })}
-          color="text"
-          iconType="chevronSingleLeft"
-          onClick={goBack}
-        />
-      </EuiToolTip>
-      {title && (
-        <EuiTitle size="xs">
-          <h4>{title}</h4>
-        </EuiTitle>
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            aria-describedby={ariaDescribedBy}
+            aria-label={i18n.translate('kbnUI.sideNavigation.goBackButtonIconAriaLabel', {
+              defaultMessage: 'Go back',
+            })}
+            color="text"
+            iconType="chevronSingleLeft"
+            onClick={goBack}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      {iconType && (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={iconType} size="m" color="subdued" />
+        </EuiFlexItem>
       )}
-    </div>
+      {title && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            <h4>{title}</h4>
+          </EuiText>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };

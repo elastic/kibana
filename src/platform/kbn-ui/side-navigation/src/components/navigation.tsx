@@ -217,6 +217,7 @@ export const Navigation = ({
                       {(closePopover, ids) => (
                         <SideNav.SecondaryMenu
                           title={secondaryMenuTitle ?? item.label}
+                          iconType={item.iconType}
                           badgeType={item.badgeType}
                           isNew={getIsNewSecondary(item.id)}
                         >
@@ -296,6 +297,7 @@ export const Navigation = ({
                       <SideNav.NestedSecondaryMenu>
                         <SideNav.NestedSecondaryMenu.Panel
                           id={MAIN_PANEL_ID}
+                          iconType="boxesVertical"
                           title={i18n.translate(
                             'kbnUI.sideNavigation.nestedSecondaryMenuMoreTitle',
                             {
@@ -368,6 +370,7 @@ export const Navigation = ({
                             header={({ panelNavigationInstructionsId }) => (
                               <SideNav.NestedSecondaryMenu.Header
                                 title={item.secondaryMenuTitle ?? item.label}
+                                iconType={item.iconType}
                                 aria-describedby={panelNavigationInstructionsId}
                               />
                             )}
@@ -440,6 +443,7 @@ export const Navigation = ({
                       {(closePopover, ids) => (
                         <SideNav.SecondaryMenu
                           title={secondaryMenuTitle ?? item.label}
+                          iconType={item.iconType}
                           badgeType={item.badgeType}
                           isNew={getIsNewSecondary(item.id)}
                         >
@@ -495,6 +499,7 @@ export const Navigation = ({
               return (
                 <SideNav.SecondaryMenu
                   badgeType={openerNode.badgeType}
+                  iconType={openerNode.iconType}
                   isPanel
                   title={openerNode.secondaryMenuTitle ?? openerNode.label}
                   isNew={getIsNewSecondary(openerNode.id)}

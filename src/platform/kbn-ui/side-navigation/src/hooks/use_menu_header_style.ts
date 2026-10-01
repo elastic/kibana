@@ -12,9 +12,8 @@ import { css } from '@emotion/react';
 
 /**
  * Secondary menu header spacing.
- * `standard` matches the App Header standard inset; line-height aligns the `xs`
- * title baseline with the app header's `s` title.
- * `compact` matches the App Header compact layout (48px floor, 8px inset).
+ * Matches the App Header height contract: `standard` is 64px / `size.base`,
+ * `compact` is 48px / `size.s`. Content is flex-centered for baseline alignment.
  */
 export type SecondaryHeaderSpacing = 'standard' | 'compact';
 
@@ -26,20 +25,21 @@ export function useMenuHeaderStyle(spacing: SecondaryHeaderSpacing = 'standard')
 
   const isCompact = spacing === 'compact';
 
-  // Optical: secondary titles stay xs while App Header standard uses s.
-  // 2.25em lowers the xs baseline to match the adjacent app-header title.
   return css`
     --border-width: ${euiTheme.border.width.thin};
     // 20px is forced by section dividers
     --horizontal-padding: calc(20px - var(--border-width));
 
+    display: flex;
+    align-items: center;
     flex-shrink: 0;
     padding: ${isCompact ? euiTheme.size.s : euiTheme.size.base} var(--horizontal-padding);
     margin: 0 1px;
     min-height: ${isCompact ? '48px' : '64px'};
-    ${!isCompact &&
-    css`
-      line-height: 2.25em;
-    `}
+
+    & h4 {
+      margin-block: 0;
+      font-weight: ${euiTheme.font.weight.medium};
+    }
   `;
 }

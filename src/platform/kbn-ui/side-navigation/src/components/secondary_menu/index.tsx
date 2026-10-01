@@ -9,8 +9,8 @@
 
 import React, { forwardRef } from 'react';
 import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
-import { EuiTitle, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import type { IconType } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
 import type { BadgeType } from '../../../types';
 import { BetaBadge } from '../beta_badge';
@@ -27,6 +27,10 @@ export interface SecondaryMenuProps {
   badgeType?: BadgeType;
   children: ReactNode;
   footer?: ReactNode;
+  /**
+   * Primary-nav icon shown beside the header title (e.g. gear for Stack Management).
+   */
+  iconType?: IconType;
   isNew?: boolean;
   isPanel?: boolean;
   /**
@@ -43,29 +47,40 @@ interface SecondaryMenuComponent
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  ({ badgeType, children, footer, title, isNew = false, spacing: spacingProp }, ref) => {
-    const { euiTheme } = useEuiTheme();
+  (
+    { badgeType, children, footer, iconType, title, isNew = false, spacing: spacingProp },
+    ref
+  ) => {
     const spacing = useSecondaryHeaderSpacing(spacingProp);
     const headerStyle = useMenuHeaderStyle(spacing);
     const scrollStyles = useScroll(true);
-
-    const titleWithBadgeStyles = css`
-      display: flex;
-      align-items: center;
-      gap: ${euiTheme.size.xs};
-    `;
+    const showBadge = Boolean(badgeType && (badgeType !== 'new' || isNew));
 
     return (
       <div ref={ref} css={scrollLayoutStyles}>
-        <EuiTitle css={headerStyle} size="xs">
-          <div css={titleWithBadgeStyles}>
-            <h4>{title}</h4>
-            {/* Always show non-new badges, only show new ones if isNew check allows it */}
-            {badgeType && (badgeType !== 'new' || isNew) && (
+        <EuiFlexGroup
+          css={headerStyle}
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+        >
+          {iconType && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={iconType} size="m" color="subdued" />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              <h4>{title}</h4>
+            </EuiText>
+          </EuiFlexItem>
+          {/* Always show non-new badges, only show new ones if isNew check allows it */}
+          {showBadge && badgeType && (
+            <EuiFlexItem grow={false}>
               <BetaBadge type={badgeType} alignment="text-bottom" />
-            )}
-          </div>
-        </EuiTitle>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <div css={scrollStyles}>{children}</div>
         {footer}
       </div>
