@@ -672,6 +672,13 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  comboBoxSelectValidOption: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.comboBoxSelectValidOption',
+    {
+      defaultMessage: 'Please select a valid option or clear your entry',
+    }
+  ),
+
   settingsModeQuoted: i18n.translate('xpack.dataFederation.createDatasetForm.settingsModeQuoted', {
     defaultMessage: 'Quoted',
   }),

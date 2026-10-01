@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
-import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
-import type {
-  CreateDatasetFormValues,
-  DatasetPartitionDetectionFormValue,
-} from '../../create_dataset_form_state';
+import type { DatasetPartitionDetectionFormValue } from '../../create_dataset_form_state';
 import { DescribedOptionDisplay } from '../described_option_display';
 
 type Option = EuiComboBoxOptionOption<string> & {
@@ -22,6 +17,12 @@ type Option = EuiComboBoxOptionOption<string> & {
   description: string;
   'data-test-subj': string;
 };
+
+export interface PartitionDetectionChange {
+  value: DatasetPartitionDetectionFormValue;
+  /** False while the input holds typed text that has not been resolved to an option. */
+  isValid: boolean;
+}
 
 const renderPartitionDetectionOption = (option: EuiComboBoxOptionOption<string>) => {
   const opt = option as Option;
@@ -57,18 +58,24 @@ const PARTITION_DETECTION_OPTIONS: Option[] = [
 ];
 
 export function PartitionDetectionSelect({
-  control,
+  value,
+  onChange,
+  onBlur,
+  isInvalid,
 }: {
-  control: Control<CreateDatasetFormValues>;
+  value: DatasetPartitionDetectionFormValue;
+  onChange: (next: PartitionDetectionChange) => void;
+  onBlur: () => void;
+  isInvalid: boolean;
 }) {
-  const { field: partitionDetectionField } = useController({
-    name: 'settings.partition_detection',
-    control,
-  });
+  // EuiComboBox clears its search text right after reporting a selection, before the new `value` prop
+  // arrives; the search handler reads this ref so that report cannot revert the selection.
+  const latestValue = useRef(value);
+  useEffect(() => {
+    latestValue.current = value;
+  }, [value]);
 
-  const selectedOption = PARTITION_DETECTION_OPTIONS.find(
-    (o) => o.value === partitionDetectionField.value
-  );
+  const selectedOption = PARTITION_DETECTION_OPTIONS.find((o) => o.value === value);
 
   return (
     <EuiComboBox
@@ -90,11 +97,16 @@ export function PartitionDetectionSelect({
           : []
       }
       renderOption={renderPartitionDetectionOption}
+      isInvalid={isInvalid}
+      onSearchChange={(searchValue) => {
+        onChange({ value: latestValue.current, isValid: !searchValue });
+      }}
       onChange={(nextSelectedOptions) => {
         const next = nextSelectedOptions?.[0] as Option | undefined;
-        partitionDetectionField.onChange(next?.value ?? '');
+        latestValue.current = next?.value ?? '';
+        onChange({ value: latestValue.current, isValid: true });
       }}
-      onBlur={partitionDetectionField.onBlur}
+      onBlur={onBlur}
       fullWidth
     />
   );

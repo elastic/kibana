@@ -15,14 +15,27 @@ import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import { useWizardStep } from '../wizard_step_context';
 
 const ADDITIONAL_STEP_FIELDS: Array<FieldPath<CreateDatasetFormValues>> = [
+  'settings.partition_detection',
   'settings.partition_path',
+  'settings.error_mode',
   'settings.max_errors',
   'settings.max_error_ratio',
   'settings.skip_rows',
+  'settings.mode',
+  'settings.header_row',
+  'settings.trim_spaces',
   'settings.delimiter',
   'settings.quote',
   'settings.escape',
 ];
+
+const COMBO_BOX_VALIDITY_FIELDS = [
+  'ui.modeIsValid',
+  'ui.headerRowIsValid',
+  'ui.trimSpacesIsValid',
+  'ui.partitionDetectionIsValid',
+  'ui.errorModeIsValid',
+] as const;
 
 export function StepAdditional() {
   const { control, getFieldState, trigger } = useFormContext<CreateDatasetFormValues>();
@@ -31,6 +44,7 @@ export function StepAdditional() {
     (field) => getFieldState(field, formState).invalid
   );
   const settings = useWatch({ control, name: 'settings' });
+  const comboBoxValidity = useWatch({ control, name: COMBO_BOX_VALIDITY_FIELDS }).join();
   const updateContent = useWizardStep();
   const [hasAttemptedValidation, setHasAttemptedValidation] = useState(false);
 
@@ -49,9 +63,10 @@ export function StepAdditional() {
     // The form uses react-hook-form's default `onSubmit` mode, and the wizard never submits it,
     // so errors shown after a Next attempt would otherwise not clear until Next is clicked again.
     // Any settings change is watched because some rules depend on other settings (e.g. CSV mode).
+    // The combo box validity flags are watched because unresolved typed text fails their rules.
     if (!hasAttemptedValidation) return;
     trigger(ADDITIONAL_STEP_FIELDS);
-  }, [settings, hasAttemptedValidation, trigger]);
+  }, [settings, comboBoxValidity, hasAttemptedValidation, trigger]);
 
   return (
     <div data-test-subj="createDatasetWizardAdditionalStep">

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController, useWatch } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
@@ -27,7 +27,23 @@ const DEFAULT_FILE_EXCLUSIONS_DISPLAY = `[${DEFAULT_FILE_EXCLUSIONS.map(
 ).join(', ')}]`;
 
 export function SharedAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const partitionDetection = useWatch({ control, name: 'settings.partition_detection' });
+  const { field: partitionDetectionField, fieldState: partitionDetectionState } = useController({
+    name: 'settings.partition_detection',
+    control,
+    rules: {
+      validate: (_value, { ui }) =>
+        ui.partitionDetectionIsValid === false
+          ? createDatasetWizardStrings.comboBoxSelectValidOption
+          : true,
+    },
+  });
+  const {
+    field: { onChange: setPartitionDetectionIsValid },
+  } = useController({ name: 'ui.partitionDetectionIsValid', control });
+
+  // The combo box's typed text does not survive unmounting, so neither should the flag that reflects it.
+  useEffect(() => () => setPartitionDetectionIsValid(true), [setPartitionDetectionIsValid]);
+
   const { field: partitionPathField, fieldState: partitionPathState } = useController({
     name: 'settings.partition_path',
     control,
@@ -69,11 +85,21 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
           />
         }
         fullWidth
+        isInvalid={Boolean(partitionDetectionState.error)}
+        error={partitionDetectionState.error?.message}
       >
-        <PartitionDetectionSelect control={control} />
+        <PartitionDetectionSelect
+          value={partitionDetectionField.value}
+          onChange={({ value, isValid }) => {
+            partitionDetectionField.onChange(value);
+            setPartitionDetectionIsValid(isValid);
+          }}
+          onBlur={partitionDetectionField.onBlur}
+          isInvalid={Boolean(partitionDetectionState.error)}
+        />
       </EuiFormRow>
 
-      {partitionDetection === 'template' ? (
+      {partitionDetectionField.value === 'template' ? (
         <EuiFormRow
           label={
             <FormRowLabelWithInfo

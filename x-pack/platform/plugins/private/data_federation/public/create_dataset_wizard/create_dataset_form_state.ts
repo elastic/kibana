@@ -98,6 +98,16 @@ export interface CreateDatasetFormValues {
     formatWasAutoDetected: boolean;
     additionalCommonSettingsIsOpen: boolean;
     additionalAdvancedSettingsIsOpen: boolean;
+    /** False while the quote mode combo box holds typed text that has not been resolved to an option. */
+    modeIsValid: boolean;
+    /** False while the header row combo box holds typed text that has not been resolved to an option. */
+    headerRowIsValid: boolean;
+    /** False while the trim whitespace combo box holds typed text that has not been resolved to an option. */
+    trimSpacesIsValid: boolean;
+    /** False while the partition detection combo box holds typed text that has not been resolved to an option. */
+    partitionDetectionIsValid: boolean;
+    /** False while the error mode combo box holds typed text that has not been resolved to an option. */
+    errorModeIsValid: boolean;
     /**
      * Passthrough-only dataset settings not managed by the wizard UI.
      * Used to preserve API-supported settings on edit, and included in review/request output.

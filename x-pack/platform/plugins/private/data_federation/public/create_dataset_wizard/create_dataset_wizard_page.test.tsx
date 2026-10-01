@@ -995,6 +995,214 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetSettingsEscape')).toHaveAttribute('aria-invalid', 'true');
   });
 
+  it('blocks Next while the quote mode combo box holds text that is not a selected option', async () => {
+    const { getByTestId, getAllByTestId, findByTestId, findByText, queryByText, queryByTestId } =
+      renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    const selectMode = async (mode: string) => {
+      const modeInput = getByTestId('createDatasetSettingsMode').querySelector('input');
+      await act(async () => {
+        fireEvent.click(modeInput ?? getByTestId('createDatasetSettingsMode'));
+      });
+      const candidates = getAllByTestId(`createDatasetSettingsModeOption-${mode}`);
+      const option = candidates.find((el) => el.getAttribute('role') === 'option') ?? candidates[0];
+      await act(async () => {
+        fireEvent.click(option);
+      });
+    };
+
+    // Start from a valid selection so the form value is a real option, then type over it.
+    await selectMode('quoted');
+    const input = getByTestId('createDatasetSettingsMode').querySelector('input');
+    if (!input) throw new Error('quote mode input not found');
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'bogus' } });
+      fireEvent.blur(input);
+    });
+
+    await clickNext(getByTestId);
+    expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
+    expect(
+      await findByText(createDatasetWizardStrings.comboBoxSelectValidOption)
+    ).toBeInTheDocument();
+    await waitFor(() => expect(getByTestId('nextButton')).toBeDisabled());
+
+    await act(async () => {
+      fireEvent.change(input, { target: { value: '' } });
+    });
+    await selectMode('plain');
+    await waitFor(() => expect(getByTestId('nextButton')).toBeEnabled());
+    expect(queryByText(createDatasetWizardStrings.comboBoxSelectValidOption)).toBeNull();
+
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+  });
+
+  it.each([
+    ['partition detection', 'createDatasetSettingsPartitionDetection', 'hive'],
+    ['error mode', 'createDatasetSettingsErrorMode', 'skip_row'],
+  ])(
+    'blocks Next while the %s combo box holds text that is not a selected option',
+    async (_label, testSubj, optionValue) => {
+      const { getByTestId, getAllByTestId, findByTestId, findByText, queryByText, queryByTestId } =
+        renderWizard();
+
+      fireEvent.click(getByTestId('createDatasetDataSource'));
+      fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+      fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+      fireEvent.change(getByTestId('createDatasetResource'), {
+        target: { value: 's3://bucket/*' },
+      });
+      selectFormat(getByTestId, 'parquet');
+
+      await clickNext(getByTestId);
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+      ).toBeInTheDocument();
+
+      const input = getByTestId(testSubj).querySelector('input');
+      if (!input) throw new Error(`${testSubj} input not found`);
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'bogus' } });
+        fireEvent.blur(input);
+      });
+
+      await clickNext(getByTestId);
+      expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
+      expect(
+        await findByText(createDatasetWizardStrings.comboBoxSelectValidOption)
+      ).toBeInTheDocument();
+      await waitFor(() => expect(getByTestId('nextButton')).toBeDisabled());
+
+      await act(async () => {
+        fireEvent.change(input, { target: { value: '' } });
+      });
+      await act(async () => {
+        fireEvent.click(input);
+      });
+      const candidates = getAllByTestId(`${testSubj}Option-${optionValue}`);
+      const option = candidates.find((el) => el.getAttribute('role') === 'option') ?? candidates[0];
+      await act(async () => {
+        fireEvent.click(option);
+      });
+      await waitFor(() => expect(getByTestId('nextButton')).toBeEnabled());
+      expect(queryByText(createDatasetWizardStrings.comboBoxSelectValidOption)).toBeNull();
+
+      await clickNext(getByTestId);
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardMappingStep'))
+      ).toBeInTheDocument();
+    }
+  );
+
+  it('blocks Next while the trim whitespace combo box holds text that is not a selected option', async () => {
+    const { getByTestId, getByRole, findByTestId, findByText, queryByText, queryByTestId } =
+      renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    const advancedAccordion = getByTestId('createDatasetWizardAdvancedSettings');
+    fireEvent.click(within(advancedAccordion).getByRole('button', { expanded: false }));
+
+    const input = getByTestId('createDatasetSettingsTrimSpaces').querySelector('input');
+    if (!input) throw new Error('trim spaces input not found');
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'bogus' } });
+      fireEvent.blur(input);
+    });
+
+    await clickNext(getByTestId);
+    expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
+    expect(
+      await findByText(createDatasetWizardStrings.comboBoxSelectValidOption)
+    ).toBeInTheDocument();
+    await waitFor(() => expect(getByTestId('nextButton')).toBeDisabled());
+
+    await act(async () => {
+      fireEvent.change(input, { target: { value: '' } });
+    });
+    await act(async () => {
+      fireEvent.click(input);
+    });
+    await act(async () => {
+      fireEvent.click(
+        getByRole('option', { name: new RegExp(`^${createDatasetWizardStrings.trueLabel}`) })
+      );
+    });
+    await waitFor(() => expect(getByTestId('nextButton')).toBeEnabled());
+    expect(queryByText(createDatasetWizardStrings.comboBoxSelectValidOption)).toBeNull();
+
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+  });
+
+  it('blocks Next while the header row combo box holds text that is not a selected option', async () => {
+    const { getByTestId, getByRole, findByTestId, findByText, queryByText, queryByTestId } =
+      renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    const input = getByTestId('createDatasetSettingsHeaderRow').querySelector('input');
+    if (!input) throw new Error('header row input not found');
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'bogus' } });
+      fireEvent.blur(input);
+    });
+
+    await clickNext(getByTestId);
+    expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
+    expect(
+      await findByText(createDatasetWizardStrings.comboBoxSelectValidOption)
+    ).toBeInTheDocument();
+    await waitFor(() => expect(getByTestId('nextButton')).toBeDisabled());
+
+    await act(async () => {
+      fireEvent.change(input, { target: { value: '' } });
+    });
+    await act(async () => {
+      fireEvent.click(input);
+    });
+    await act(async () => {
+      fireEvent.click(
+        getByRole('option', { name: createDatasetWizardStrings.settingsHeaderRowFalse })
+      );
+    });
+    await waitFor(() => expect(getByTestId('nextButton')).toBeEnabled());
+    expect(queryByText(createDatasetWizardStrings.comboBoxSelectValidOption)).toBeNull();
+
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+  });
+
   it('allows navigation once an invalid additional setting is fixed', async () => {
     const { getByTestId, findByTestId, queryByTestId } = renderWizard();
 

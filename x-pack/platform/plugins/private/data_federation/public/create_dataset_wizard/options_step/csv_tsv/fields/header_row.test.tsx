@@ -12,31 +12,36 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import type { DatasetBooleanFormValue } from '../../../create_dataset_form_state';
-import { HeaderRow } from './header_row';
+import { HeaderRow, type HeaderRowChange } from './header_row';
 
 const renderComponent = ({
   value = '',
   onChange = () => {},
 }: {
   value?: DatasetBooleanFormValue;
-  onChange?: (next: DatasetBooleanFormValue) => void;
+  onChange?: (next: HeaderRowChange) => void;
 } = {}) =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <HeaderRow value={value} onChange={onChange} onBlur={() => {}} />
+        <HeaderRow value={value} onChange={onChange} onBlur={() => {}} isInvalid={false} />
       </I18nProvider>
     </EuiProvider>
   );
 
+const getInput = (getByTestId: ReturnType<typeof render>['getByTestId']): HTMLInputElement => {
+  const input = getByTestId('createDatasetSettingsHeaderRow').querySelector('input');
+  if (!input) throw new Error('header row input not found');
+  return input;
+};
+
 describe('HeaderRow', () => {
-  it('calls onChange when the user selects an option', async () => {
+  it('reports the selected option as valid', async () => {
     const onChange = jest.fn();
     const { getByTestId, getByRole } = renderComponent({ onChange });
 
-    const combo = getByTestId('createDatasetSettingsHeaderRow');
     await act(async () => {
-      fireEvent.click(combo.querySelector('input') ?? combo);
+      fireEvent.click(getInput(getByTestId));
     });
 
     await act(async () => {
@@ -45,7 +50,7 @@ describe('HeaderRow', () => {
       );
     });
 
-    expect(onChange).toHaveBeenCalledWith('false');
+    expect(onChange).toHaveBeenLastCalledWith({ value: 'false', isValid: true });
   });
 
   it('clearing the selection results in empty form value', async () => {
@@ -56,6 +61,35 @@ describe('HeaderRow', () => {
       fireEvent.click(getByTestId('comboBoxClearButton'));
     });
 
-    expect(onChange).toHaveBeenCalledWith('');
+    expect(onChange).toHaveBeenLastCalledWith({ value: '', isValid: true });
+  });
+
+  it('reports typed text that has not been resolved to an option as invalid, keeping the value', async () => {
+    const onChange = jest.fn();
+    const { getByTestId } = renderComponent({ value: 'true', onChange });
+
+    await act(async () => {
+      fireEvent.change(getInput(getByTestId), { target: { value: 'bogus' } });
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith({ value: 'true', isValid: false });
+  });
+
+  it('reports the newly selected option as valid after typed text is replaced by a selection', async () => {
+    const onChange = jest.fn();
+    const { getByTestId, getByRole } = renderComponent({ value: 'true', onChange });
+
+    await act(async () => {
+      fireEvent.change(getInput(getByTestId), {
+        target: { value: createDatasetWizardStrings.settingsHeaderRowFalse.slice(0, 2) },
+      });
+    });
+    await act(async () => {
+      fireEvent.click(
+        getByRole('option', { name: createDatasetWizardStrings.settingsHeaderRowFalse })
+      );
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith({ value: 'false', isValid: true });
   });
 });

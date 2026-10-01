@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
@@ -22,6 +22,12 @@ const renderQuoteModeOption = (option: EuiComboBoxOptionOption<string>) => {
   const opt = option as QuoteModeOption;
   return <DescribedOptionDisplay title={opt.label} description={opt.description} />;
 };
+
+export interface QuoteModeChange {
+  value: DatasetModeFormValue;
+  /** False while the input holds typed text that has not been resolved to an option. */
+  isValid: boolean;
+}
 
 const OPTIONS: QuoteModeOption[] = [
   {
@@ -48,14 +54,23 @@ export function QuoteMode({
   value,
   onChange,
   onBlur,
+  isInvalid,
   defaultValue,
 }: {
   value: DatasetModeFormValue;
-  onChange: (next: DatasetModeFormValue) => void;
+  onChange: (next: QuoteModeChange) => void;
   onBlur: () => void;
+  isInvalid: boolean;
   /** Format-specific default: quoted for CSV, plain for TSV. */
   defaultValue?: DatasetModeFormValue;
 }) {
+  // EuiComboBox clears its search text right after reporting a selection, before the new `value` prop
+  // arrives; the search handler reads this ref so that report cannot revert the selection.
+  const latestValue = useRef(value);
+  useEffect(() => {
+    latestValue.current = value;
+  }, [value]);
+
   const options = useMemo(
     (): QuoteModeOption[] =>
       OPTIONS.map((option) => ({
@@ -93,9 +108,14 @@ export function QuoteMode({
       rowHeight="auto"
       renderOption={renderQuoteModeOption}
       selectedOptions={selectedOptions}
+      isInvalid={isInvalid}
+      onSearchChange={(searchValue) => {
+        onChange({ value: latestValue.current, isValid: !searchValue });
+      }}
       onChange={(nextSelectedOptions) => {
         const next = nextSelectedOptions?.[0] as QuoteModeOption | undefined;
-        onChange(next?.value ?? '');
+        latestValue.current = next?.value ?? '';
+        onChange({ value: latestValue.current, isValid: true });
       }}
       onBlur={onBlur}
     />

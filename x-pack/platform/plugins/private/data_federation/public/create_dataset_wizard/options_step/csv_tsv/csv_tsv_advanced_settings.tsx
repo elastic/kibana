@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
@@ -46,7 +46,22 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
     },
   });
   const { field: columnPrefixField } = useController({ name: 'settings.column_prefix', control });
-  const { field: trimSpacesField } = useController({ name: 'settings.trim_spaces', control });
+  const { field: trimSpacesField, fieldState: trimSpacesState } = useController({
+    name: 'settings.trim_spaces',
+    control,
+    rules: {
+      validate: (_value, { ui }) =>
+        ui.trimSpacesIsValid === false
+          ? createDatasetWizardStrings.comboBoxSelectValidOption
+          : true,
+    },
+  });
+  const {
+    field: { onChange: setTrimSpacesIsValid },
+  } = useController({ name: 'ui.trimSpacesIsValid', control });
+
+  // The combo box's typed text does not survive unmounting, so neither should the flag that reflects it.
+  useEffect(() => () => setTrimSpacesIsValid(true), [setTrimSpacesIsValid]);
 
   return (
     <div data-test-subj="createDatasetCsvTsvAdvancedSettings">
@@ -191,11 +206,17 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           />
         }
         fullWidth
+        isInvalid={Boolean(trimSpacesState.error)}
+        error={trimSpacesState.error?.message}
       >
         <TrimSpaces
           value={trimSpacesField.value}
-          onChange={(next) => trimSpacesField.onChange(next)}
+          onChange={({ value, isValid }) => {
+            trimSpacesField.onChange(value);
+            setTrimSpacesIsValid(isValid);
+          }}
           onBlur={trimSpacesField.onBlur}
+          isInvalid={Boolean(trimSpacesState.error)}
         />
       </EuiFormRow>
     </div>

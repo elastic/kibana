@@ -12,41 +12,75 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import type { DatasetBooleanFormValue } from '../../../create_dataset_form_state';
-import { TrimSpaces } from './trim_spaces';
+import { TrimSpaces, type TrimSpacesChange } from './trim_spaces';
 
 const renderComponent = ({
   value = '',
   onChange = () => {},
 }: {
   value?: DatasetBooleanFormValue;
-  onChange?: (next: DatasetBooleanFormValue) => void;
+  onChange?: (next: TrimSpacesChange) => void;
 } = {}) =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <TrimSpaces value={value} onChange={onChange} onBlur={() => {}} />
+        <TrimSpaces value={value} onChange={onChange} onBlur={() => {}} isInvalid={false} />
       </I18nProvider>
     </EuiProvider>
   );
+
+const getInput = (getByTestId: ReturnType<typeof render>['getByTestId']): HTMLInputElement => {
+  const input = getByTestId('createDatasetSettingsTrimSpaces').querySelector('input');
+  if (!input) throw new Error('trim spaces input not found');
+  return input;
+};
 
 describe('TrimSpaces', () => {
   it.each([
     ['true', createDatasetWizardStrings.trueLabel],
     ['false', createDatasetWizardStrings.falseLabel],
-  ] as const)('calls onChange with %s when the user selects it', async (expected, label) => {
+  ] as const)('reports %s as valid when the user selects it', async (expected, label) => {
     const onChange = jest.fn();
     const { getByTestId, getByRole } = renderComponent({ onChange });
 
-    const combo = getByTestId('createDatasetSettingsTrimSpaces');
     await act(async () => {
-      fireEvent.click(combo.querySelector('input') ?? combo);
+      fireEvent.click(getInput(getByTestId));
     });
 
     await act(async () => {
       fireEvent.click(getByRole('option', { name: new RegExp(`^${label}`) }));
     });
 
-    expect(onChange).toHaveBeenCalledWith(expected);
+    expect(onChange).toHaveBeenLastCalledWith({ value: expected, isValid: true });
+  });
+
+  it('reports typed text that has not been resolved to an option as invalid, keeping the value', async () => {
+    const onChange = jest.fn();
+    const { getByTestId } = renderComponent({ value: 'false', onChange });
+
+    await act(async () => {
+      fireEvent.change(getInput(getByTestId), { target: { value: 'bogus' } });
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith({ value: 'false', isValid: false });
+  });
+
+  it('reports the newly selected option as valid after typed text is replaced by a selection', async () => {
+    const onChange = jest.fn();
+    const { getByTestId, getByRole } = renderComponent({ value: 'false', onChange });
+
+    await act(async () => {
+      fireEvent.change(getInput(getByTestId), {
+        target: { value: createDatasetWizardStrings.trueLabel.slice(0, 2) },
+      });
+    });
+    await act(async () => {
+      fireEvent.click(
+        getByRole('option', { name: new RegExp(`^${createDatasetWizardStrings.trueLabel}`) })
+      );
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith({ value: 'true', isValid: true });
   });
 
   it('displays false when the value is false', () => {
@@ -65,6 +99,6 @@ describe('TrimSpaces', () => {
       fireEvent.click(getByTestId('comboBoxClearButton'));
     });
 
-    expect(onChange).toHaveBeenCalledWith('');
+    expect(onChange).toHaveBeenLastCalledWith({ value: '', isValid: true });
   });
 });
