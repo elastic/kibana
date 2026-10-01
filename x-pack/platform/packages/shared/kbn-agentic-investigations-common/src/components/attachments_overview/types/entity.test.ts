@@ -92,6 +92,15 @@ describe('getEntityRow', () => {
     ).toBeUndefined();
   });
 
+  it('skips null/invalid members in the entities array', () => {
+    const data = {
+      entities: [null, { identifierType: 'host', identifier: 'web-01' }, 42],
+    };
+    const row = getEntityRow([makeAttachment('security.entity', data)], getUrl)!;
+    expect(row.label).toContain('1 entity');
+    expect(row.href).toContain('web-01');
+  });
+
   it('puts entity terms into cspq query language kuery', () => {
     const data = { identifierType: 'user', identifier: 'alice@corp' };
     const row = getEntityRow([makeAttachment('security.entity', data)], getUrl)!;
