@@ -7,7 +7,7 @@
 
 import type { EntityMaintainerState } from '../../../../../tasks/entity_maintainers/types';
 
-export const AUTOMATED_RESOLUTION_STATE_VERSION = 4;
+export const AUTOMATED_RESOLUTION_STATE_VERSION = 3;
 
 export interface PerRuleLastRunStats extends EntityMaintainerState {
   resolutionsCreated: number;
@@ -31,7 +31,6 @@ export interface PerRuleState extends EntityMaintainerState {
 // `version` tracks one-time upgrades of this state blob (see migrate.ts):
 //   2 — reset email watermark
 //   3 — reset SID watermarks (windows + CrowdStrike)
-//   4 — reset email watermark (multi-host `local` users)
 export interface AutomatedResolutionState extends EntityMaintainerState {
   version: number;
   rules: Record<string, PerRuleState>;

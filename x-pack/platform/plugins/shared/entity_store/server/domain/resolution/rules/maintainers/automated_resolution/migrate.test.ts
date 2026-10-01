@@ -26,7 +26,7 @@ const FIXTURES: Record<string, unknown> = {
     lastProcessedTimestamp: '2026-05-30T10:00:00Z',
     lastRun: { resolutionsCreated: 42, skippedAmbiguousBuckets: 3 },
   },
-  'already-migrated': {
+  'already-migrated-v3': {
     version: AUTOMATED_RESOLUTION_STATE_VERSION,
     rules: {
       [EMAIL_RULE]: {
@@ -57,19 +57,6 @@ const FIXTURES: Record<string, unknown> = {
       [CROWDSTRIKE_RULE]: {
         lastProcessedTimestamp: '2026-09-10T00:00:00Z',
         lastRun: { resolutionsCreated: 0, skippedAmbiguousBuckets: 0 },
-      },
-    },
-  },
-  'v3-email-local-backfill': {
-    version: 3,
-    rules: {
-      [EMAIL_RULE]: {
-        lastProcessedTimestamp: '2026-09-20T00:00:00Z',
-        lastRun: { resolutionsCreated: 4, skippedAmbiguousBuckets: 12 },
-      },
-      [SID_RULE]: {
-        lastProcessedTimestamp: '2026-09-20T00:00:00Z',
-        lastRun: { resolutionsCreated: 3, skippedAmbiguousBuckets: 0 },
       },
     },
   },
@@ -144,7 +131,7 @@ describe('automated-resolution state migration', () => {
   });
 
   it('preserves unknown rule ids on versioned state and sanitizes watermarks', () => {
-    const output = migrate(FIXTURES['already-migrated'], logger);
+    const output = migrate(FIXTURES['already-migrated-v3'], logger);
 
     expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
     expect(output.rules[EMAIL_RULE].lastProcessedTimestamp).toBe('2026-05-31T08:30:00Z');
@@ -155,11 +142,11 @@ describe('automated-resolution state migration', () => {
     });
   });
 
-  it('resets the SID, CrowdStrike and email watermarks on a v2 upgrade', () => {
+  it('resets the SID and CrowdStrike watermarks on a v2 upgrade', () => {
     const output = migrate(FIXTURES['v2-sid-backfill'], logger);
 
     expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
-    expect(output.rules[EMAIL_RULE].lastProcessedTimestamp).toBeNull();
+    expect(output.rules[EMAIL_RULE].lastProcessedTimestamp).toBe('2026-05-31T08:30:00Z');
     expect(output.rules[SID_RULE].lastProcessedTimestamp).toBeNull();
     expect(output.rules[SID_RULE].lastRun).toEqual({
       resolutionsCreated: 0,
@@ -167,17 +154,6 @@ describe('automated-resolution state migration', () => {
       ...ZEROED_STATS,
     });
     expect(output.rules[CROWDSTRIKE_RULE].lastProcessedTimestamp).toBeNull();
-  });
-
-  it('resets only the email watermark on a v3 upgrade so skipped local groups are re-examined', () => {
-    const output = migrate(FIXTURES['v3-email-local-backfill'], logger);
-
-    expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
-    expect(output.rules[EMAIL_RULE]).toEqual({
-      lastProcessedTimestamp: null,
-      lastRun: { resolutionsCreated: 4, skippedAmbiguousBuckets: 12, ...ZEROED_STATS },
-    });
-    expect(output.rules[SID_RULE].lastProcessedTimestamp).toBe('2026-09-20T00:00:00Z');
   });
 
   it('resets the email watermark once when version is missing from per-rule state', () => {

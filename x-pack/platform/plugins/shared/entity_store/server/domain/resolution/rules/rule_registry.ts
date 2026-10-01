@@ -52,10 +52,9 @@ export type EsqlMatchSpec = {
   exclusionPattern?: string;
   /**
    * When true (the default), decline a group that has more unresolved entities
-   * than distinct unresolved namespaces. `local` entities do not count: there is
-   * one per host, so several of them are one user on several hosts. Set false
-   * only when the match value identifies one account, so same-namespace
-   * duplicates are identifier drift.
+   * than distinct unresolved namespaces. Unresolved `local` entities (one per
+   * user name per host) are not counted. Set false only when the match value
+   * identifies one account, so same-namespace duplicates are identifier drift.
    */
   declineSameNamespaceDuplicates?: boolean;
 } & (
@@ -80,7 +79,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     id: RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH,
     kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
     description:
-      'Links user entities that share the same email address, compared case-insensitively, across identity providers. Disable if shared mailboxes or role accounts produce false links.',
+      'Links user entities that share the same email address, compared case-insensitively, across identity providers. Several `local` users with that email (one per user name per host) are linked too. Unlinked users in the same identity provider that share an address are left unlinked. Disable if shared mailboxes or role accounts produce false links.',
     defaultEnabled: true,
     matcher: {
       field: 'user.email',

@@ -74,23 +74,15 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
   };
 };
 
-/**
- * One-time watermark resets: state stored below `version` gets these rules'
- * watermarks cleared so entities already behind them are examined again.
- */
-const WATERMARK_RESETS: ReadonlyArray<{ version: number; ruleIds: readonly string[] }> = [
-  // Case-insensitive email match: heal pre-existing case-split groups.
-  { version: 2, ruleIds: [RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH] },
-  // `local` entities created while windows scanned empty feeders, and
-  // CrowdStrike same-namespace SID buckets the old guard declined.
-  {
-    version: 3,
-    ruleIds: [RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE, RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE],
-  },
-  // Email groups with several `local` entities that the same-namespace guard
-  // declined as ambiguous.
-  { version: 4, ruleIds: [RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH] },
-];
+// 2 — email watermark (case-insensitive match)
+const EMAIL_WATERMARK_RESET_VERSION = 2;
+// 3 — SID watermarks: `local` entities created while windows scanned empty
+// feeders, and CrowdStrike same-namespace SID buckets the old guard declined
+const SID_WATERMARK_RESET_VERSION = 3;
+const SID_WATERMARK_RESET_RULE_IDS = [
+  RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+  RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE,
+] as const;
 
 const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleState> => {
   if (!isRecord(value)) {
@@ -109,8 +101,7 @@ const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleSt
  *
  * In practice there are three real inputs:
  *  - the current `{ version, rules }` shape — passed through when version is current,
- *    which also preserves rule ids this version may not know yet; an older version
- *    gets the `WATERMARK_RESETS` entries above it;
+ *    which also preserves rule ids this version may not know yet;
  *  - `{ rules }` without `version` — email watermark is reset so case-insensitive
  *    matching can heal pre-existing case-split groups (one-time);
  *  - the original flat `{ lastProcessedTimestamp, lastRun }` — moved into
@@ -149,15 +140,28 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
     };
   }
 
-  for (const reset of WATERMARK_RESETS) {
-    if (storedVersion >= reset.version) {
-      continue;
-    }
-    for (const ruleId of reset.ruleIds) {
+  if (storedVersion < EMAIL_WATERMARK_RESET_VERSION && Object.hasOwn(rules, emailRuleId)) {
+    const emailState = rules[emailRuleId];
+    rules[emailRuleId] = {
+      lastProcessedTimestamp: null,
+      lastRun: sanitizeLastRun(emailState.lastRun),
+    };
+  }
+
+  // The SID rules kept advancing their watermarks: windows over empty
+  // `windows`/`system` scans after the IdP gate change, CrowdStrike over
+  // same-namespace SID buckets the old guard declined. Those entities sit
+  // behind the watermark and would never be re-examined without a reset.
+  if (storedVersion < SID_WATERMARK_RESET_VERSION) {
+    for (const ruleId of SID_WATERMARK_RESET_RULE_IDS) {
       if (!Object.hasOwn(rules, ruleId)) {
         continue;
       }
-      rules[ruleId] = { lastProcessedTimestamp: null, lastRun: rules[ruleId].lastRun };
+      const ruleState = rules[ruleId];
+      rules[ruleId] = {
+        lastProcessedTimestamp: null,
+        lastRun: sanitizeLastRun(ruleState.lastRun),
+      };
     }
   }
 

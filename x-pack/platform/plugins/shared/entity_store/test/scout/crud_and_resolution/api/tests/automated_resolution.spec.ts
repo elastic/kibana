@@ -23,6 +23,7 @@ import {
   clearResolutionRuleOverrides,
   seedUserEntity,
   waitForResolution,
+  assertResolutionGroup,
   assertNotResolved,
   assertSidRuleWatermarked,
   triggerMaintainerRun,
@@ -507,61 +508,55 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
       await waitForResolution(esClient, localB, adEntity);
       await waitForResolution(esClient, oktaEntity, adEntity);
 
-      const groupResponse = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
-        { headers: defaultHeaders, responseType: 'json' }
-      );
-      expect(groupResponse.statusCode).toBe(200);
-      expect(groupResponse.body.group_size).toBe(4);
-      expect(groupResponse.body.target.entity.id).toBe(adEntity);
+      await assertResolutionGroup(apiClient, defaultHeaders, {
+        targetId: adEntity,
+        aliasIds: [localA, localB, oktaEntity],
+      });
     }
   );
 
   apiTest(
-    'Email declines two Active Directory users sharing a mailbox',
+    'Email declines two Active Directory users sharing a mailbox, even next to local users',
     async ({ apiClient, esClient }) => {
       const sharedEmail = 'helpdesk@email-ambiguous.example';
-      const adA = 'test-ambiguous-ad-a';
-      const adB = 'test-ambiguous-ad-b';
-      const oktaEntity = 'test-ambiguous-okta';
-      const controlOkta = 'test-ambiguous-control-okta';
-      const controlEntra = 'test-ambiguous-control-entra';
+      const declined = [
+        ['test-ambiguous-ad-a', 'active_directory'],
+        ['test-ambiguous-ad-b', 'active_directory'],
+        ['test-ambiguous-okta', 'okta'],
+        ['user:helpdesk@host-a@local', 'local'],
+        ['user:helpdesk@host-b@local', 'local'],
+      ];
+      for (const [entityId, namespace] of declined) {
+        await seedUserEntity(esClient, { entityId, namespace, email: sharedEmail });
+      }
 
+      // A clean pair in the same run: once it links, the run has processed the declined group.
+      const runCompletedProbeEmail = 'probe@email-ambiguous.example';
+      const runCompletedProbeOkta = 'test-ambiguous-probe-okta';
+      const runCompletedProbeEntra = 'test-ambiguous-probe-entra';
       await seedUserEntity(esClient, {
-        entityId: adA,
-        namespace: 'active_directory',
-        email: sharedEmail,
-      });
-      await seedUserEntity(esClient, {
-        entityId: adB,
-        namespace: 'active_directory',
-        email: sharedEmail,
-      });
-      await seedUserEntity(esClient, {
-        entityId: oktaEntity,
+        entityId: runCompletedProbeOkta,
         namespace: 'okta',
-        email: sharedEmail,
-      });
-      const controlEmail = 'control@email-ambiguous.example';
-      await seedUserEntity(esClient, {
-        entityId: controlOkta,
-        namespace: 'okta',
-        email: controlEmail,
+        email: runCompletedProbeEmail,
       });
       await seedUserEntity(esClient, {
-        entityId: controlEntra,
+        entityId: runCompletedProbeEntra,
         namespace: 'entra_id',
-        email: controlEmail,
+        email: runCompletedProbeEmail,
       });
 
       await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
         sync: true,
       });
-      await waitForResolution(esClient, controlEntra, controlOkta);
+      await waitForResolution(esClient, runCompletedProbeEntra, runCompletedProbeOkta);
 
-      await assertNotResolved(esClient, adA);
-      await assertNotResolved(esClient, adB, 1_000);
-      await assertNotResolved(esClient, oktaEntity, 1_000);
+      // The run already finished, so each entity after the first needs only a short check.
+      const settledRunCheckMs = 1_000;
+      const [[firstEntityId], ...rest] = declined;
+      await assertNotResolved(esClient, firstEntityId);
+      for (const [entityId] of rest) {
+        await assertNotResolved(esClient, entityId, settledRunCheckMs);
+      }
     }
   );
 
@@ -585,13 +580,10 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
       await waitForResolution(esClient, localA, adEntity);
       await waitForResolution(esClient, localB, adEntity);
 
-      const adGroup = await apiClient.get(
-        `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${adEntity}&apiVersion=2`,
-        { headers: defaultHeaders, responseType: 'json' }
-      );
-      expect(adGroup.statusCode).toBe(200);
-      expect(adGroup.body.group_size).toBe(3);
-      expect(adGroup.body.target.entity.id).toBe(adEntity);
+      await assertResolutionGroup(apiClient, defaultHeaders, {
+        targetId: adEntity,
+        aliasIds: [localA, localB],
+      });
     }
   );
 

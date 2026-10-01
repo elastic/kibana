@@ -255,14 +255,18 @@ async function readWatermarkCandidate(
   return toTimestamp(response.values[0][maxTsIndex]);
 }
 
-// A `local` user id is `user:<name>@<host.id>@local`, so several `local`
-// entities sharing a value are one user seen on several hosts, not a collision.
-// Only duplicates outside `local` count.
-function hasSameNamespaceDuplicates(row: MatchGroupRow): boolean {
-  const nonLocalNamespaces = row.unresolvedNamespaces.filter(
-    (namespace) => namespace !== USER_ENTITY_NAMESPACE.Local
-  ).length;
-  return nonLocalNamespaces < row.unresolvedCount - row.unresolvedLocalCount;
+// A `local` user id is `user:<user.name>@<host.id>@local`, one per user name per
+// host, so several `local` entities sharing a value are not a collision.
+function countNonLocalUnresolved(row: MatchGroupRow): {
+  entityCount: number;
+  namespaceCount: number;
+} {
+  return {
+    entityCount: row.unresolvedCount - row.unresolvedLocalCount,
+    namespaceCount: row.unresolvedNamespaces.filter(
+      (namespace) => namespace !== USER_ENTITY_NAMESPACE.Local
+    ).length,
+  };
 }
 
 async function resolveMatchGroup(
@@ -294,10 +298,11 @@ async function resolveMatchGroup(
   // must not make Okta the target). SID rules set this false: a SID names one
   // account, so duplicates are identifier drift, not a collision. Well-known
   // SIDs are excluded at query time so LocalSystem never reaches this path.
-  if (declineSameNamespaceDuplicates && hasSameNamespaceDuplicates(row)) {
+  const nonLocal = countNonLocalUnresolved(row);
+  if (declineSameNamespaceDuplicates && nonLocal.namespaceCount < nonLocal.entityCount) {
     stats.skippedAmbiguousBuckets++;
     logger.warn(
-      `${ruleId}: declining ambiguous bucket '${row.matchValue}': ${row.unresolvedCount} unresolved entities across ${row.unresolvedNamespaces.length} namespaces`
+      `${ruleId}: declining ambiguous bucket '${row.matchValue}': ${nonLocal.entityCount} unresolved entities across ${nonLocal.namespaceCount} namespaces (${row.unresolvedLocalCount} local not counted)`
     );
     return;
   }
