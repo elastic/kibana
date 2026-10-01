@@ -67,6 +67,7 @@ export const WorkspaceRoute = ({
 }: WorkspaceRouteProps) => {
   // D3 continues to own a mutable runtime workspace while serializable graph state lives in Redux.
   const workspaceRef = useRef<RuntimeWorkspace>();
+  const layoutControllerRef = useRef<GraphLayoutController>();
   const storeRef = useRef<GraphStore>();
   const runtimeSequenceRef = useRef(0);
   const history = useHistory();
@@ -131,14 +132,19 @@ export const WorkspaceRoute = ({
     runtimeSequenceRef.current = applyRuntimeGraphMerge(
       workspace,
       graph,
-      runtimeSequenceRef.current
+      runtimeSequenceRef.current,
+      layoutControllerRef.current!
     );
   };
 
   const notifyWorkspaceChanged = () => {
     const workspace = workspaceRef.current;
     if (workspace) {
-      storeRef.current?.dispatch(workspaceRuntimeChanged(createWorkspaceState(workspace)));
+      storeRef.current?.dispatch(
+        workspaceRuntimeChanged(
+          createWorkspaceState(workspace, layoutControllerRef.current?.isRunning())
+        )
+      );
     }
   };
 
@@ -148,7 +154,7 @@ export const WorkspaceRoute = ({
       addBasePath,
       indexPatternProvider,
       createWorkspace: (indexPattern, exploreControls) => {
-        workspaceRef.current?.layoutController.stop();
+        layoutControllerRef.current?.stop();
         runtimeSequenceRef.current = 0;
         const layoutTopology = new ReduxLayoutTopology({
           getState: () => storeRef.current?.getState(),
@@ -159,10 +165,12 @@ export const WorkspaceRoute = ({
           getEdges: () => layoutTopology.getEdges(),
           onTick: notifyWorkspaceChanged,
         });
-        const createdWorkspace = (workspaceRef.current = createWorkspace({ layoutController }));
+        layoutControllerRef.current = layoutController;
+        const createdWorkspace = (workspaceRef.current = createWorkspace());
         return createdWorkspace;
       },
       getWorkspace: () => workspaceRef.current,
+      getLayoutController: () => layoutControllerRef.current,
       savePolicy: graphSavePolicy,
       contentClient,
       changeUrl: (newUrl) => history.push(newUrl),

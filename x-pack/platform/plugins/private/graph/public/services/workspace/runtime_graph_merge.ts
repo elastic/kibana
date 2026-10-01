@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { GraphData, RuntimeWorkspace } from '../../types/workspace_state';
+import type {
+  GraphData,
+  RuntimeWorkspace,
+  WorkspaceLayoutController,
+} from '../../types/workspace_state';
 import {
   materializeRuntimeEdge,
   materializeRuntimeNode,
@@ -16,9 +20,10 @@ import {
 export const mergeRuntimeGraph = (
   workspace: RuntimeWorkspace,
   graph: GraphData,
-  initialSequence: number
+  initialSequence: number,
+  layoutController: WorkspaceLayoutController
 ): number => {
-  workspace.layoutController.stop();
+  layoutController.stop();
   const { normalizedNodes, newNodes } = prepareIncomingNodes(
     graph.nodes,
     new Set(Object.keys(workspace.nodesMap))
@@ -49,6 +54,6 @@ export const mergeRuntimeGraph = (
     workspace.edges.push(edge);
   });
 
-  workspace.layoutController.start();
+  layoutController.start();
   return sequence;
 };

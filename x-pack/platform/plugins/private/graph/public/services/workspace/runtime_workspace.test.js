@@ -18,8 +18,9 @@ describe('graphui-workspace', function () {
     let init = null;
     let runtimeSequence = 0;
     const vertexFields = [{ name: 'field1' }, { name: 'field2' }];
+    let layoutController;
     const mergeGraph = (workspace, graph) => {
-      runtimeSequence = mergeRuntimeGraph(workspace, graph, runtimeSequence);
+      runtimeSequence = mergeRuntimeGraph(workspace, graph, runtimeSequence, layoutController);
     };
     const mergeSearchResult = (workspace) => {
       mergeGraph(workspace, transformSearchResponse(mockedResult, vertexFields));
@@ -33,29 +34,12 @@ describe('graphui-workspace', function () {
       //Setup logic here
       // fooResource={"foo":"bar"};
       init = function () {
-        const callNodeProxy = function (indexName, query, responseHandler) {
-          responseHandler(mockedResult);
-        };
         const runtime = { workspace: undefined };
-        const layoutController = new GraphLayoutController({
+        layoutController = new GraphLayoutController({
           getNodes: () => runtime.workspace?.nodes ?? [],
           getEdges: () => runtime.workspace?.edges ?? [],
         });
-        const options = {
-          layoutController,
-          indexName: 'indexName',
-          vertex_fields: vertexFields,
-          graphExploreProxy: callNodeProxy,
-          exploreControls: {
-            useSignificance: false,
-            sampleSize: 2000,
-            timeoutMillis: 5000,
-            sampleDiversityField: null,
-            maxValuesPerDoc: 1,
-            minDocCount: 1,
-          },
-        };
-        const workspace = createWorkspace(options);
+        const workspace = createWorkspace();
         runtime.workspace = workspace;
         return {
           workspace,
@@ -64,12 +48,12 @@ describe('graphui-workspace', function () {
       };
     });
     it('starts layout after merging topology', function () {
-      const layoutController = {
+      layoutController = {
         stop: jest.fn(),
         start: jest.fn(),
         isRunning: jest.fn(() => false),
       };
-      const workspace = createWorkspace({ layoutController });
+      const workspace = createWorkspace();
 
       mergeGraph(workspace, { nodes: [], edges: [] });
 

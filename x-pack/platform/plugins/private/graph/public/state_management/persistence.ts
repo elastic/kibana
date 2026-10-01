@@ -112,11 +112,15 @@ export const registerPersistenceListeners = (
       listenerApi.dispatch(loadFields(allFields));
       listenerApi.dispatch(updateSettings(advancedSettings));
       listenerApi.dispatch(loadTemplates(urlTemplates));
-      listenerApi.dispatch(workspaceChanged(createWorkspaceState(createdWorkspace)));
+      listenerApi.dispatch(
+        workspaceChanged(
+          createWorkspaceState(createdWorkspace, deps.getLayoutController()?.isRunning())
+        )
+      );
       if (urlQuery) {
         listenerApi.dispatch(submitSearch(urlQuery));
       }
-      createdWorkspace.layoutController.start();
+      deps.getLayoutController()?.start();
     },
   });
 

@@ -33,6 +33,7 @@ import type {
   SearchResults,
   IndexPatternProvider,
   RuntimeWorkspace,
+  WorkspaceLayoutController,
 } from '../types';
 import { registerPersistenceListeners } from './persistence';
 import type { MetaDataState } from './meta_data';
@@ -55,6 +56,7 @@ export interface GraphStoreDependencies
   indexPatternProvider: IndexPatternProvider;
   createWorkspace: (index: string, advancedSettings: AdvancedSettings) => RuntimeWorkspace;
   getWorkspace: () => RuntimeWorkspace | undefined;
+  getLayoutController: () => WorkspaceLayoutController | undefined;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   contentClient: ContentClient;
