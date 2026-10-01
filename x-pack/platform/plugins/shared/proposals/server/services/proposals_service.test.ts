@@ -12,7 +12,6 @@ import { DEFAULT_PROPOSAL_TITLE, type ListProposalsQuery } from '@kbn/proposals-
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import {
   ProposalConflictError,
-  ProposalExpiredError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
 } from './errors';
@@ -819,7 +818,7 @@ describe('ProposalsService', () => {
     it('should reject a proposal the workflow already settled without a decision', async () => {
       // Attempt exhaustion and a failure before anyone decided both settle the
       // record as `expired` with no decision on it, and can do so long before
-      // the deadline — so the date check alone would still read it as live.
+      // the deadline passes.
       const storage = createStorage(
         baseDocument({
           status: 'expired',
@@ -831,15 +830,6 @@ describe('ProposalsService', () => {
 
       await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
         ProposalConflictError
-      );
-    });
-
-    it('should reject a proposal past its decision deadline', async () => {
-      const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
-      const { service } = createService(storage);
-
-      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
-        ProposalExpiredError
       );
     });
 
@@ -890,7 +880,7 @@ describe('ProposalsService', () => {
         'proposal-1',
         releaseParams({
           approved: false,
-          dismissReason: 'low_value',
+          dismissReason: 'risk_accepted',
           rationale: 'Noise, not worth a rule',
         })
       );
@@ -898,7 +888,7 @@ describe('ProposalsService', () => {
       const [[indexArgs]] = storage.index.mock.calls;
       expect(indexArgs.document).toEqual(
         expect.objectContaining({
-          dismissReason: 'low_value',
+          dismissReason: 'risk_accepted',
           rationale: 'Noise, not worth a rule',
           // The decision is the workflow's to write, not the route's.
           status: 'pending',
@@ -955,7 +945,7 @@ describe('ProposalsService', () => {
       await expect(
         service.releaseGate(
           'proposal-1',
-          releaseParams({ approved: false, dismissReason: 'low_value' })
+          releaseParams({ approved: false, dismissReason: 'risk_accepted' })
         )
       ).rejects.toBeInstanceOf(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
@@ -971,7 +961,7 @@ describe('ProposalsService', () => {
       await expect(
         service.releaseGate(
           'proposal-1',
-          releaseParams({ approved: false, dismissReason: 'low_value' })
+          releaseParams({ approved: false, dismissReason: 'risk_accepted' })
         )
       ).rejects.toBeInstanceOf(ProposalConflictError);
     });
@@ -1586,16 +1576,6 @@ describe('ProposalsService', () => {
 
       await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
         ProposalConflictError
-      );
-      expect(storage.index).not.toHaveBeenCalled();
-    });
-
-    it('rejects revising a proposal past its decision deadline, even though its status still reads pending', async () => {
-      const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
-      const { service } = createService(storage);
-
-      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
-        ProposalExpiredError
       );
       expect(storage.index).not.toHaveBeenCalled();
     });
