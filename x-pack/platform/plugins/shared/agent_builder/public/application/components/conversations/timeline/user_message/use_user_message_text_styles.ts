@@ -10,7 +10,7 @@ import { css, type SerializedStyles } from '@emotion/react';
 import { euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import { COMMAND_BADGE_MAX_WIDTH_CH } from '../../conversation_input/message_editor/command_badge/constants';
 import { MARKDOWN_BLOCK_SPACER_CLASS_NAME } from '../response/markdown_plugins';
-import { markdownContainerStyles } from '../response/use_markdown_container_styles';
+import { useMarkdownContainerStyles } from '../response/use_markdown_container_styles';
 
 export interface UserMessageTextStyles {
   container: SerializedStyles;
@@ -22,13 +22,13 @@ export interface UserMessageTextStyles {
 }
 
 export const useUserMessageTextStyles = (): UserMessageTextStyles => {
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
+  const { euiTheme } = useEuiTheme();
+  const markdownContainerStyles = useMarkdownContainerStyles();
 
   return useMemo(
     () => ({
       container: css`
-        ${markdownContainerStyles(euiThemeContext)}
+        ${markdownContainerStyles}
 
         /* Avoids extra blank lines: remark's leftover "\\n" text nodes would otherwise render under the inherited white-space: pre-wrap (user_message.tsx). */
         .euiMarkdownFormat {
@@ -89,6 +89,6 @@ export const useUserMessageTextStyles = (): UserMessageTextStyles => {
         ${euiTextTruncate('100%')}
       `,
     }),
-    [euiThemeContext, euiTheme]
+    [euiTheme, markdownContainerStyles]
   );
 };

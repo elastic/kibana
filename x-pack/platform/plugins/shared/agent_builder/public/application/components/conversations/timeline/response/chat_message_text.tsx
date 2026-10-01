@@ -11,7 +11,6 @@ import {
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
-  useEuiTheme,
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
@@ -38,7 +37,7 @@ import {
   createRenderRenderer,
   createConversationMarkdownComponents,
 } from './markdown_plugins';
-import { markdownContainerStyles } from './use_markdown_container_styles';
+import { useMarkdownContainerStyles } from './use_markdown_container_styles';
 import { useStepsFromSavedTurns } from '../../../../hooks/use_steps_from_saved_turns';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import { useMarkdownLinkClick } from './use_markdown_link_click';
@@ -64,7 +63,7 @@ export function ChatMessageText({
   conversationId,
   isStreaming = false,
 }: Props) {
-  const euiThemeContext = useEuiTheme();
+  const markdownContainerStyles = useMarkdownContainerStyles();
 
   const { attachmentsService, renderersService, conversationsService, startDependencies } =
     useAgentBuilderServices();
@@ -156,7 +155,7 @@ export function ChatMessageText({
 
   return (
     <>
-      <EuiText size="s" css={markdownContainerStyles(euiThemeContext)}>
+      <EuiText size="s" css={markdownContainerStyles}>
         <EuiMarkdownFormat
           textSize="s"
           parsingPluginList={parsingPluginList}
