@@ -261,7 +261,7 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
         <h3>
           <FormattedMessage
             id="xpack.alertingV2.ruleCreateOptionsPanel.legacyRuleTypesTitle"
-            defaultMessage="Classic rule types"
+            defaultMessage="Standard rule types"
           />
         </h3>
       </EuiTitle>

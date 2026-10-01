@@ -234,7 +234,7 @@ export const EPISODES_KPIS_ERROR = i18n.translate('xpack.alertingV2.episodes.kpi
 export const CLASSIC_ALERT_DETAILS_TITLE = i18n.translate(
   'xpack.alertingV2.episodes.classicAlertDetails.title',
   {
-    defaultMessage: 'Classic alert',
+    defaultMessage: 'Standard rule alert',
   }
 );
 
