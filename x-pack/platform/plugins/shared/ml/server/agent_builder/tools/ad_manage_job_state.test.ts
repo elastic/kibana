@@ -288,34 +288,32 @@ describe('adManageJobStateTool', () => {
       });
     });
 
-    it('operation=delete_job uses the current-user ML client when mlClient is unavailable', async () => {
+    it('operation=delete_job fails closed when mlClient is unavailable', async () => {
       const ml = createMlMock();
-      await adManageJobStateTool.handler(
+      const result = await adManageJobStateTool.handler(
         { operation: 'delete_job', job_id: 'scratch-job' },
         createContext(ml)
       );
 
-      expect(ml.getJobs).toHaveBeenCalledWith({ job_id: 'scratch-job' });
-      expect(ml.stopDatafeed).toHaveBeenCalledWith({
-        datafeed_id: 'datafeed-scratch-job',
-        force: true,
-      });
-      expect(ml.deleteDatafeed).toHaveBeenCalledWith({ datafeed_id: 'datafeed-scratch-job' });
-      expect(ml.deleteJob).toHaveBeenCalledWith({
-        job_id: 'scratch-job',
-        delete_user_annotations: true,
-      });
+      expect(ml.getJobs).not.toHaveBeenCalled();
+      expect(ml.stopDatafeed).not.toHaveBeenCalled();
+      expect(ml.deleteDatafeed).not.toHaveBeenCalled();
+      expect(ml.deleteJob).not.toHaveBeenCalled();
+      expect(getResultData(result).type).toBe(ToolResultType.error);
+      expect(String(getResultData(result).data.message)).toMatch(/unavailable/i);
     });
 
     it('operation=delete_job refuses jobs that are not in the scratch group', async () => {
-      const ml = createMlMock();
-      ml.getJobs.mockResolvedValue({ jobs: [{ groups: ['production'] }] });
-      const result = await adManageJobStateTool.handler(
+      const currentUserMl = createMlMock();
+      const mlClient = createMlMock();
+      mlClient.getJobs.mockResolvedValue({ jobs: [{ groups: ['production'] }] });
+      const result = await createToolWithMlClient(mlClient).handler(
         { operation: 'delete_job', job_id: 'prod-job' },
-        createContext(ml)
+        createContext(currentUserMl)
       );
 
-      expect(ml.deleteJob).not.toHaveBeenCalled();
+      expect(mlClient.deleteJob).not.toHaveBeenCalled();
+      expect(currentUserMl.deleteJob).not.toHaveBeenCalled();
       expect(getResultData(result).type).toBe(ToolResultType.error);
       expect(String(getResultData(result).data.message)).toMatch('ml-agent-scratch');
     });
