@@ -70,6 +70,7 @@ describe('EditConnector sync controls', () => {
     renderWithTestingProviders(<EditConnector {...props} />);
 
     expect(await screen.findByTestId('connector-sync-settings')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-sync-tech-preview-badge')).toBeInTheDocument();
     expect(screen.getByTestId('sync-from-external-service')).toBeEnabled();
   });
 

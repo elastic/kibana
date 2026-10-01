@@ -92,6 +92,7 @@ describe('ConfigureCasesRedesign', () => {
     useLicenseMock.mockReturnValue({
       isAtLeastGold: () => true,
       isAtLeastPlatinum: () => true,
+      isAtLeastEnterprise: () => true,
     });
 
     const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
@@ -568,5 +569,83 @@ describe('ConfigureCasesRedesign', () => {
 
     expect(screen.queryByTestId('cases-redesign-observable-types-section')).not.toBeInTheDocument();
     expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();
+  });
+
+  describe('external sync defaults', () => {
+    const enableExternalSync = (enabled = true) => {
+      const { useCasesConfig } = jest.requireMock('../../common/lib/kibana');
+      useCasesConfig.mockReturnValue({ bidirectionalSyncEnabled: enabled });
+    };
+
+    it('renders the section with a technical preview badge and the defaults', async () => {
+      enableExternalSync();
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          externalSync: { autoPush: true, conflictStrategy: 'kibana' },
+        },
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('cases-redesign-external-sync-section')).toBeInTheDocument();
+      expect(screen.getByTestId('external-sync-tech-preview-badge')).toBeInTheDocument();
+      expect(screen.getByTestId('connector-auto-push-switch')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+      expect(screen.getByTestId('connector-conflict-strategy-select')).toHaveValue('kibana');
+    });
+
+    it('persists the external sync defaults when a control changes', async () => {
+      enableExternalSync();
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await userEvent.click(await screen.findByTestId('connector-auto-push-switch'));
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          externalSync: { autoPush: true, conflictStrategy: 'external' },
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+        })
+      );
+    });
+
+    it('disables the controls when the user lacks settings permissions', async () => {
+      enableExternalSync();
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />, {
+        wrapperProps: { permissions: noCasesSettingsPermission() },
+      });
+
+      expect(await screen.findByTestId('connector-auto-push-switch')).toBeDisabled();
+      expect(screen.getByTestId('connector-conflict-strategy-select')).toBeDisabled();
+    });
+
+    it('does not render the section when the feature is off', async () => {
+      enableExternalSync(false);
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await screen.findByTestId('cases-redesign-settings-panel');
+      expect(screen.queryByTestId('cases-redesign-external-sync-section')).not.toBeInTheDocument();
+    });
+
+    it('does not render the section below an Enterprise license', async () => {
+      enableExternalSync();
+      useLicenseMock.mockReturnValue({
+        isAtLeastGold: () => true,
+        isAtLeastPlatinum: () => true,
+        isAtLeastEnterprise: () => false,
+      });
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await screen.findByTestId('cases-redesign-settings-panel');
+      expect(screen.queryByTestId('cases-redesign-external-sync-section')).not.toBeInTheDocument();
+    });
   });
 });

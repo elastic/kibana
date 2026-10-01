@@ -14,38 +14,30 @@ import { SyncSettings } from './sync_settings';
 
 describe('SyncSettings', () => {
   const onChange = jest.fn();
-  const settings = { syncAlerts: true };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders auto-push off and external-wins when the case has no sync settings', () => {
-    renderWithTestingProviders(
-      <SyncSettings settings={settings} disabled={false} onChange={onChange} />
-    );
+  it('renders auto-push off and external-wins when there is no value', () => {
+    renderWithTestingProviders(<SyncSettings disabled={false} onChange={onChange} />);
 
     expect(screen.getByTestId('connector-auto-push-switch')).not.toBeChecked();
     expect(screen.getByTestId('connector-conflict-strategy-select')).toHaveValue('external');
   });
 
-  it('turns auto-push on and keeps the other settings', async () => {
-    renderWithTestingProviders(
-      <SyncSettings settings={settings} disabled={false} onChange={onChange} />
-    );
+  it('turns auto-push on and keeps the conflict strategy', async () => {
+    renderWithTestingProviders(<SyncSettings disabled={false} onChange={onChange} />);
 
     await userEvent.click(screen.getByTestId('connector-auto-push-switch'));
 
-    expect(onChange).toHaveBeenCalledWith({
-      syncAlerts: true,
-      externalSync: { autoPush: true, conflictStrategy: 'external' },
-    });
+    expect(onChange).toHaveBeenCalledWith({ autoPush: true, conflictStrategy: 'external' });
   });
 
-  it('changes the conflict strategy', async () => {
+  it('changes the conflict strategy and keeps auto-push', async () => {
     renderWithTestingProviders(
       <SyncSettings
-        settings={{ ...settings, externalSync: { autoPush: true, conflictStrategy: 'external' } }}
+        value={{ autoPush: true, conflictStrategy: 'external' }}
         disabled={false}
         onChange={onChange}
       />
@@ -56,14 +48,11 @@ describe('SyncSettings', () => {
       'kibana'
     );
 
-    expect(onChange).toHaveBeenCalledWith({
-      syncAlerts: true,
-      externalSync: { autoPush: true, conflictStrategy: 'kibana' },
-    });
+    expect(onChange).toHaveBeenCalledWith({ autoPush: true, conflictStrategy: 'kibana' });
   });
 
-  it('disables both controls while the case is saving', () => {
-    renderWithTestingProviders(<SyncSettings settings={settings} disabled onChange={onChange} />);
+  it('disables both controls', () => {
+    renderWithTestingProviders(<SyncSettings disabled onChange={onChange} />);
 
     expect(screen.getByTestId('connector-auto-push-switch')).toBeDisabled();
     expect(screen.getByTestId('connector-conflict-strategy-select')).toBeDisabled();

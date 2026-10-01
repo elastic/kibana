@@ -8,11 +8,10 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
-import type { CaseUI } from '../../../common/ui/types';
 import type { ExternalSyncSettings } from '../../../common/types/domain';
 import * as i18n from './translations';
 
-const DEFAULT_EXTERNAL_SYNC: ExternalSyncSettings = {
+export const DEFAULT_EXTERNAL_SYNC: ExternalSyncSettings = {
   autoPush: false,
   conflictStrategy: 'external',
 };
@@ -23,44 +22,51 @@ const CONFLICT_STRATEGY_OPTIONS = [
 ];
 
 interface SyncSettingsProps {
-  settings: CaseUI['settings'];
-  disabled: boolean;
-  onChange: (settings: CaseUI['settings']) => void;
+  value?: ExternalSyncSettings;
+  disabled?: boolean;
+  compressed?: boolean;
+  onChange: (value: ExternalSyncSettings) => void;
 }
 
-const SyncSettingsComponent: React.FC<SyncSettingsProps> = ({ settings, disabled, onChange }) => {
-  const externalSync = settings.externalSync ?? DEFAULT_EXTERNAL_SYNC;
-
+const SyncSettingsComponent: React.FC<SyncSettingsProps> = ({
+  value = DEFAULT_EXTERNAL_SYNC,
+  disabled = false,
+  compressed = false,
+  onChange,
+}) => {
   const update = useCallback(
-    (patch: Partial<ExternalSyncSettings>) =>
-      onChange({ ...settings, externalSync: { ...externalSync, ...patch } }),
-    [externalSync, onChange, settings]
+    (patch: Partial<ExternalSyncSettings>) => onChange({ ...value, ...patch }),
+    [onChange, value]
   );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="connector-sync-settings">
       <EuiFlexItem grow={false}>
         <EuiSwitch
-          compressed
+          compressed={compressed}
           label={i18n.AUTO_PUSH_LABEL}
-          checked={externalSync.autoPush}
+          checked={value.autoPush}
           disabled={disabled}
           onChange={(e) => update({ autoPush: e.target.checked })}
           data-test-subj="connector-auto-push-switch"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFormRow label={i18n.CONFLICT_STRATEGY_LABEL} display="rowCompressed" fullWidth>
+        <EuiFormRow
+          label={i18n.CONFLICT_STRATEGY_LABEL}
+          display={compressed ? 'rowCompressed' : 'row'}
+          fullWidth
+        >
           <EuiSelect
-            compressed
+            compressed={compressed}
             fullWidth
             options={CONFLICT_STRATEGY_OPTIONS}
-            value={externalSync.conflictStrategy}
+            value={value.conflictStrategy}
             disabled={disabled}
             onChange={(e) => {
-              const { value } = e.target;
-              if (value === 'external' || value === 'kibana') {
-                update({ conflictStrategy: value });
+              const strategy = e.target.value;
+              if (strategy === 'external' || strategy === 'kibana') {
+                update({ conflictStrategy: strategy });
               }
             }}
             aria-label={i18n.CONFLICT_STRATEGY_LABEL}

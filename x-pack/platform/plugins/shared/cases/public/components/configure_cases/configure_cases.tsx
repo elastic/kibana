@@ -12,6 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
   EuiPageBody,
@@ -24,6 +26,8 @@ import {
 import { useKibana } from '../../common/lib/kibana';
 import { CasesPageBody } from '../app/cases_page_body';
 import { Connectors } from './connectors';
+import { SyncSettings } from '../edit_connector/sync_settings';
+import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import * as configureCasesI18n from './translations';
 import { useConfigureCasesController } from './use_configure_cases_controller';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -63,6 +67,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     hasMinimumLicensePermissionsForObservables,
     isObservablesFeatureEnabled,
     isExtractObservablesEnabled,
+    isExternalSyncEnabled,
     configurationId,
     configurationVersion,
     closureType,
@@ -72,6 +77,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     templates,
     observableTypes,
     extractObservables,
+    externalSync,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isFetchingCaseConfiguration,
@@ -90,6 +96,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     onChangeConnector,
     onChangeClosureType,
     onChangeExtractObservables,
+    onChangeExternalSync,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,
@@ -157,6 +164,43 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                       onAddNewConnector={onAddNewConnector}
                     />
                   </SettingsSection>
+                )}
+
+                {hasMinimumLicensePermissions && isExternalSyncEnabled && (
+                  <>
+                    <EuiHorizontalRule margin="l" />
+                    <SettingsSection
+                      data-test-subj="cases-redesign-external-sync-section"
+                      title={
+                        <EuiFlexGroup
+                          component="span"
+                          alignItems="center"
+                          gutterSize="s"
+                          responsive={false}
+                        >
+                          <EuiFlexItem component="span" grow={false}>
+                            {configureCasesI18n.EXTERNAL_SYNC_TITLE}
+                          </EuiFlexItem>
+                          <EuiFlexItem component="span" grow={false}>
+                            <ExperimentalBadge data-test-subj="external-sync-tech-preview-badge" />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      }
+                      description={configureCasesI18n.EXTERNAL_SYNC_DESC}
+                    >
+                      <SyncSettings
+                        value={externalSync}
+                        disabled={
+                          isPersistingConfiguration ||
+                          isLoadingCaseConfiguration ||
+                          isFetchingCaseConfiguration ||
+                          isConfigurationFetchError ||
+                          !permissions.settings
+                        }
+                        onChange={onChangeExternalSync}
+                      />
+                    </SettingsSection>
+                  </>
                 )}
 
                 {hasMinimumLicensePermissions && <EuiHorizontalRule margin="l" />}

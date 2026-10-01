@@ -22,6 +22,10 @@ export const EDIT_CONNECTOR_ARIA = i18n.translate(
   }
 );
 
+export const SYNC_TITLE = i18n.translate('xpack.cases.editConnector.syncTitle', {
+  defaultMessage: 'Sync',
+});
+
 export const AUTO_PUSH_LABEL = i18n.translate('xpack.cases.editConnector.autoPushLabel', {
   defaultMessage: 'Push changes automatically',
 });

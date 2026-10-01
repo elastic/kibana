@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -21,12 +22,17 @@ import {
 import { isEmpty } from 'lodash/fp';
 
 import type { CaseUI, CaseConnectors } from '../../../common/ui/types';
-import type { ActionConnector, CaseConnector } from '../../../common/types/domain';
+import type {
+  ActionConnector,
+  CaseConnector,
+  ExternalSyncSettings,
+} from '../../../common/types/domain';
+import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import * as i18n from './translations';
 import { getConnectorById } from '../utils';
 import { usePushToService } from '../use_push_to_service';
-import { useApplicationCapabilities, useCasesConfig } from '../../common/lib/kibana';
-import { useLicense } from '../../common/use_license';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
+import { useIsExternalSyncEnabled } from '../../common/use_is_external_sync_enabled';
 import { usePostSyncCase } from '../../containers/use_post_sync_case';
 import { PushButton } from './push_button';
 import { PushCallouts } from './push_callouts';
@@ -73,8 +79,7 @@ export const EditConnector = React.memo(
     const { actions } = useApplicationCapabilities();
     const { permissions } = useCasesContext();
     const canUseConnectors = permissions.connectors && actions.read;
-    const { bidirectionalSyncEnabled } = useCasesConfig();
-    const { isAtLeastEnterprise } = useLicense();
+    const isExternalSyncEnabled = useIsExternalSyncEnabled();
     const { isLoading: isSyncing, mutate: syncFromExternalService } = usePostSyncCase();
 
     const onEditClick = useCallback(() => setIsEdit(true), []);
@@ -133,8 +138,7 @@ export const EditConnector = React.memo(
     const showHeaderDivider = showHeader || (showEditAction && !isOutlined);
     // Sync needs a saved connector on the case and the same privilege as push.
     const showSyncControls =
-      bidirectionalSyncEnabled &&
-      isAtLeastEnterprise() &&
+      isExternalSyncEnabled &&
       showPushAction &&
       isValidConnector &&
       permissions.update &&
@@ -144,6 +148,11 @@ export const EditConnector = React.memo(
     const handleSync = useCallback(
       () => syncFromExternalService({ caseId: caseData.id, connectorName }),
       [caseData.id, connectorName, syncFromExternalService]
+    );
+    const caseSettings = caseData.settings;
+    const handleSyncSettingsChange = useCallback(
+      (externalSync: ExternalSyncSettings) => onUpdateSettings?.({ ...caseSettings, externalSync }),
+      [caseSettings, onUpdateSettings]
     );
 
     const syncButton = showSyncControls ? (
@@ -209,12 +218,24 @@ export const EditConnector = React.memo(
               fields={caseConnectorFields}
             />
           )}
-          {showSyncControls && onUpdateSettings ? (
+          {showSyncControls ? (
             <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">
+                    <h4>{i18n.SYNC_TITLE}</h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ExperimentalBadge compact data-test-subj="connector-sync-tech-preview-badge" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
               <SyncSettings
-                settings={caseData.settings}
+                compressed
+                value={caseSettings.externalSync}
                 disabled={isLoading}
-                onChange={onUpdateSettings}
+                onChange={handleSyncSettingsChange}
               />
             </EuiFlexItem>
           ) : null}

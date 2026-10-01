@@ -314,3 +314,12 @@ export const CASE_SETTINGS_TITLE = i18n.translate('xpack.cases.settings.title', 
 export const BACK_TO_CASES = i18n.translate('xpack.cases.settings.backToCases', {
   defaultMessage: 'Cases',
 });
+
+export const EXTERNAL_SYNC_TITLE = i18n.translate('xpack.cases.configureCases.externalSyncTitle', {
+  defaultMessage: 'Sync with the external system',
+});
+
+export const EXTERNAL_SYNC_DESC = i18n.translate('xpack.cases.configureCases.externalSyncDesc', {
+  defaultMessage:
+    'Defaults for new cases that have a connector. Each case can override them in its Connectors panel.',
+});
