@@ -202,8 +202,9 @@ export function DiscoverLayout() {
   const onRemoveColumnsWithTracking = useCallback(
     (columnNames: string[]) => {
       const removedColumnNames = onRemoveColumns(columnNames);
-      removedColumnNames.forEach((columnName) => {
-        void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableClearSelectedFields({
+        fieldNames: removedColumnNames,
+        fieldsMetadata,
       });
     },
     [onRemoveColumns, scopedEBTManager, fieldsMetadata]
