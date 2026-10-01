@@ -393,7 +393,9 @@ describe('SlackAppService', () => {
         kibana_version: '9.2.0',
         license_info: 'platinum',
         created_by_user_key: 'admin',
+        agent_id: 'nightshift.investigation',
       });
+      expect(getRegistry).not.toHaveBeenCalled();
       expect(JSON.stringify(startInstall.mock.calls)).not.toContain('essu_raw-token-must-not-leak');
       expect(JSON.stringify(startInstall.mock.calls)).not.toContain('kibana_api_key');
       expect(soClient.create).toHaveBeenCalledWith(

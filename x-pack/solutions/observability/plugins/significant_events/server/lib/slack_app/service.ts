@@ -456,6 +456,8 @@ export class SlackAppService {
         kibana_version: this.server.kibanaVersion,
         license_info: license.type ?? 'basic',
         ...(username ? { created_by_user_key: username } : {}),
+        // TODO: use resolveSlackAgentId once Relay is space aware
+        ...(this.server.agentBuilder ? { agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID } : {}),
       });
     } catch (error) {
       this.logger.error(`Slack app install failed: ${this.toErrorMessage(error)}`);
