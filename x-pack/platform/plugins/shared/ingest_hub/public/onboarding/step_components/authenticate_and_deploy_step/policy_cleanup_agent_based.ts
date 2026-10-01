@@ -100,7 +100,11 @@ export async function updateAgentBasedPolicy(
   let existingNamespace: string | undefined;
   let existingVersion: string | undefined;
   let existingPolicyIds: string[] | undefined;
-  const existingVarValues: Record<string, string> = {};
+  // Fleet can return password vars as a secret reference: { isSecretRef: true, id: '...' }.
+  // Preserve both plain strings and secret refs so a service-var-only dirty redeploy does not
+  // send an empty vars block that clears AWS credentials already stored as Fleet secrets.
+  type ExistingVarValue = string | { isSecretRef: boolean; id: string };
+  const existingVarValues: Record<string, ExistingVarValue> = {};
   try {
     const existing = await sendGetOnePackagePolicy(policyId);
     if (existing.error) throw existing.error;
@@ -108,13 +112,15 @@ export async function updateAgentBasedPolicy(
     existingNamespace = existing.data?.item?.namespace;
     existingVersion = existing.data?.item?.package?.version;
     existingPolicyIds = existing.data?.item?.policy_ids;
-    // Extract plain-string var values so they can be merged with newly built vars.
-    // Access/temporary keys are memory-only and lost after Back/Next; preserving them here
-    // prevents a service-var-only dirty redeploy from silently clearing credential vars.
     for (const [key, entry] of Object.entries(
       (existing.data?.item?.vars ?? {}) as Record<string, { value: unknown }>
     )) {
-      if (typeof entry?.value === 'string') existingVarValues[key] = entry.value;
+      const v = entry?.value;
+      if (typeof v === 'string') {
+        existingVarValues[key] = v;
+      } else if (v && typeof v === 'object' && (v as Record<string, unknown>).isSecretRef === true) {
+        existingVarValues[key] = v as { isSecretRef: boolean; id: string };
+      }
     }
   } catch {
     throw new Error(
@@ -164,7 +170,7 @@ export async function updateAgentBasedPolicy(
   // left over after switching to shared_credentials). When no credentials are in memory (access/
   // temp keys are memory-only and lost after reload), merge existing vars as a base so a
   // service-var-only dirty redeploy does not silently clear credential fields from the policy.
-  let vars: Record<string, string> | undefined;
+  let vars: Record<string, string | { isSecretRef: boolean; id: string }> | undefined;
   if (agentCredentials) {
     vars = builtVars;
   } else {
