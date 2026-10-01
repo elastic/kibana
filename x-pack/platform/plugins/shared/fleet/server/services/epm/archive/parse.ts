@@ -759,6 +759,14 @@ export function parseDataStreamElasticsearchEntry(
     parsedElasticsearchEntry.dynamic_namespace = expandedElasticsearch.dynamic_namespace;
   }
 
+  // Columnar readiness flag (`elasticsearch.columnar.supported`, package-spec 3.7.0). It is a
+  // data-stream-level field only, so it has no counterpart in parseTopLevelElasticsearchEntry.
+  // @ts-expect-error upgrade typescript v5.1.6
+  if (expandedElasticsearch?.columnar) {
+    // @ts-expect-error upgrade typescript v5.1.6
+    parsedElasticsearchEntry.columnar = expandedElasticsearch.columnar;
+  }
+
   return parsedElasticsearchEntry;
 }
 

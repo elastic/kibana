@@ -38,6 +38,15 @@ export interface Field {
   include_in_root?: boolean;
   null_value?: string;
   dimension?: boolean;
+  /**
+   * Field-level overrides that are only applied when the resolved index mode belongs to the
+   * columnar family (`columnar` / `logsdb_columnar`). Ignored in every other index mode, the
+   * same way `dimension` is only honoured for `time_series`. See package-spec 3.7.0.
+   */
+  columnar?: {
+    doc_values?: boolean;
+    index?: boolean;
+  };
   default_field?: boolean;
   runtime?: boolean | string;
   subobjects?: boolean;

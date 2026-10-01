@@ -168,15 +168,25 @@ export const PackagePolicyInputsSchema = {
 };
 
 export const ExperimentalDataStreamFeaturesSchema = schema.arrayOf(
-  schema.object({
-    data_stream: schema.string({ maxLength: PACKAGE_POLICY_DATA_STREAM_MAX_LENGTH }),
-    features: schema.object({
-      synthetic_source: schema.maybe(schema.boolean({ defaultValue: false })),
-      tsdb: schema.maybe(schema.boolean({ defaultValue: false })),
-      doc_value_only_numeric: schema.maybe(schema.boolean({ defaultValue: false })),
-      doc_value_only_other: schema.maybe(schema.boolean({ defaultValue: false })),
-    }),
-  }),
+  schema.object(
+    {
+      data_stream: schema.string({ maxLength: PACKAGE_POLICY_DATA_STREAM_MAX_LENGTH }),
+      features: schema.object({
+        synthetic_source: schema.maybe(schema.boolean({ defaultValue: false })),
+        tsdb: schema.maybe(schema.boolean({ defaultValue: false })),
+        doc_value_only_numeric: schema.maybe(schema.boolean({ defaultValue: false })),
+        doc_value_only_other: schema.maybe(schema.boolean({ defaultValue: false })),
+        columnar: schema.maybe(schema.boolean({ defaultValue: false })), // tech preview: logsdb_columnar index mode
+      }),
+    },
+    {
+      validate(val) {
+        if (val.features.tsdb && val.features.columnar) {
+          return 'tsdb and columnar cannot both be enabled on the same data stream';
+        }
+      },
+    }
+  ),
   { maxSize: 100 }
 );
 

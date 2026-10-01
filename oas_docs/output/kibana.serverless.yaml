@@ -163370,6 +163370,8 @@ components:
                 additionalProperties: true
                 type: object
                 properties:
+                  columnar:
+                    type: boolean
                   doc_value_only_numeric:
                     type: boolean
                   doc_value_only_other:
@@ -163785,6 +163787,8 @@ components:
                 additionalProperties: false
                 type: object
                 properties:
+                  columnar:
+                    type: boolean
                   doc_value_only_numeric:
                     type: boolean
                   doc_value_only_other:

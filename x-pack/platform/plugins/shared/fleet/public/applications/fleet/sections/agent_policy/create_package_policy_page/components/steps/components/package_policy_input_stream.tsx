@@ -48,6 +48,7 @@ import {
 } from '../../../../../../../../../common/services';
 
 import type {
+  ExperimentalDataStreamFeature,
   NewPackagePolicyInputStream,
   PackageInfo,
   RegistryStreamWithDataStream,
@@ -66,6 +67,7 @@ import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_gr
 
 import { useCreatePackagePolicyFormContext } from '../../../contexts/create_package_policy_form_context';
 
+import { ColumnarIndexModeToggle } from './columnar_index_mode_toggle';
 import { PackagePolicyConditionField } from './package_policy_condition_field';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
@@ -92,6 +94,12 @@ interface Props {
   varGroupSelections?: Record<string, string>;
   /** Parent input's `policy_template`; required for correct composable multi-template matching. */
   inputPolicyTemplate?: string;
+  /** Per-data-stream indexing opt-ins stored on `packagePolicy.package`. */
+  experimentalDataStreamFeatures?: ExperimentalDataStreamFeature[];
+  /** When provided, renders the columnar index mode toggle under advanced options. */
+  onExperimentalDataStreamFeaturesChange?: (
+    experimentalDataStreamFeatures: ExperimentalDataStreamFeature[]
+  ) => void;
 }
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
@@ -108,6 +116,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     hasStreamToggle = true,
     varGroupSelections = {},
     inputPolicyTemplate,
+    experimentalDataStreamFeatures,
+    onExperimentalDataStreamFeaturesChange,
   }) => {
     const { docLinks } = useStartServices();
     const { isAgentlessEnabled } = useAgentless();
@@ -278,15 +288,27 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const datasetList = uniq(dataStreamsData?.data_streams) ?? [];
     const datastreams = sortDatastreamsByDataset(datasetList, packageInfo.name);
 
+    // Columnar index mode opt-in is keyed by the package's index template name, which only
+    // matches for integration packages (input packages create templates per custom dataset).
+    const showColumnarIndexModeToggle =
+      !!onExperimentalDataStreamFeaturesChange && packageInfo.type !== 'input';
+
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatastream);
     const hasAdvancedOptions = useMemo(() => {
       return (
         showConditionField ||
         advancedVars.length > 0 ||
+        showColumnarIndexModeToggle ||
         (isPackagePolicyEdit && showPipelinesAndMappings)
       );
-    }, [advancedVars.length, isPackagePolicyEdit, showConditionField, showPipelinesAndMappings]);
+    }, [
+      advancedVars.length,
+      isPackagePolicyEdit,
+      showConditionField,
+      showColumnarIndexModeToggle,
+      showPipelinesAndMappings,
+    ]);
 
     const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
     const flexWidth = isBiggerScreen ? 7 : 5;
@@ -646,6 +668,15 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                           </EuiFlexItem>
                         );
                       })}
+                      {showColumnarIndexModeToggle && (
+                        <EuiFlexItem>
+                          <ColumnarIndexModeToggle
+                            registryDataStream={packageInputStream.data_stream}
+                            experimentalDataStreamFeatures={experimentalDataStreamFeatures}
+                            onChange={onExperimentalDataStreamFeaturesChange!}
+                          />
+                        </EuiFlexItem>
+                      )}
                       {isPackagePolicyEdit &&
                         showPipelinesAndMappings &&
                         packagePolicyInputStream.data_stream.type && (
