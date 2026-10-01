@@ -15,10 +15,10 @@ import {
 
 /*
  * Covers the UI capability gating on the Alerts (episodes) page (PR #277710).
- * Episode row actions are rendered as UnifiedDataTable leading controls:
- * read-only users only get the read-safe "Open in Discover" action, while
- * editors get the mutating actions (resolve, ack, snooze, tag, assign, ...)
- * which collapse into the overflow actions menu.
+ * Episode row actions are rendered as UnifiedDataTable leading controls.
+ * Editors get the mutating actions (resolve, ack, snooze, tag, assign, ...),
+ * which collapse into the overflow actions menu. Alerts-only readers cannot
+ * resolve the rule required by "Open in Discover", so they get no actions.
  *
  * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
  * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
@@ -53,7 +53,7 @@ test.describe('Alerts page - read/write privileges', { tag: '@local-stateful-cla
     await expect(alertEpisodesList.rowActionsMenuButton).toBeVisible();
   });
 
-  test('read-only user only sees the read-safe open-in-discover action', async ({
+  test('alerts-only read user does not see episode actions', async ({
     browserAuth,
     pageObjects,
   }) => {
@@ -62,8 +62,8 @@ test.describe('Alerts page - read/write privileges', { tag: '@local-stateful-cla
     await alertEpisodesList.goto();
     await expect(alertEpisodesList.pageContainer).toBeVisible();
 
-    await test.step('the read-safe open-in-discover control is available', async () => {
-      await expect(alertEpisodesList.openInDiscoverRowControl).toBeVisible();
+    await test.step('the rule-dependent open-in-discover control is not rendered', async () => {
+      await expect(alertEpisodesList.openInDiscoverRowControl).toHaveCount(0);
     });
 
     await test.step('the mutating actions menu is not rendered', async () => {
