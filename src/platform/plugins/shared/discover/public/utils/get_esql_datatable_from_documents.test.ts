@@ -13,7 +13,9 @@ import { FetchStatus } from '../application/types';
 import { getEsqlDatatableFromDocuments } from './get_esql_datatable_from_documents';
 
 const baseColumns = [{ id: 'maxB', name: 'maxB', meta: { type: 'number' as const } }];
-const baseResult = [{ id: 'r1', raw: { maxB: 100 }, flattened: { maxB: 100 } }] as unknown as DataTableRecord[];
+const baseResult = [
+  { id: 'r1', raw: { maxB: 100 }, flattened: { maxB: 100 } },
+] as unknown as DataTableRecord[];
 
 const completeMsg = (approximationApplied?: boolean) => ({
   fetchStatus: FetchStatus.COMPLETE,
