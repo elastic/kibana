@@ -11,6 +11,8 @@ applies_to:
 
 The Sentry connector connects directly to the Sentry API. It lets a workflow or agent triage Sentry issues — list, read, resolve, ignore, reopen, and assign — plus bulk-update issues, provision issue alert rules, and audit monitor coverage, without opening the Sentry console.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Overview
 
 The Sentry connector uses Sentry's REST API with Bearer token authentication. You configure your Sentry organization slug and an auth token when creating the connector.

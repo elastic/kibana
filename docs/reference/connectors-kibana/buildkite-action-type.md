@@ -11,6 +11,8 @@ applies_to:
 
 The Buildkite connector lets a workflow or agent drive a Buildkite CI/CD pipeline without opening the Buildkite console: trigger a build, observe its state, self-heal a failure by retrying failed jobs, stop a bad build, and unblock a manual deploy gate. It also posts findings back onto a build as annotations, and lists jobs, pipelines, and artifacts for triage.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Overview
 
 The Buildkite connector connects to Buildkite's officially hosted remote MCP server using the API-token pass-through endpoint (`https://mcp.buildkite.com/direct`), rather than calling the Buildkite REST API directly. See the [Buildkite MCP server documentation](https://buildkite.com/docs/apis/mcp-server) for details on the underlying server.

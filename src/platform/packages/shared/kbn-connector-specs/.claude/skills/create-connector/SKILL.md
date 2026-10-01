@@ -213,8 +213,9 @@ First run the deterministic checks, and fix every failure for your connector:
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_quality_contract.test.ts
 ```
 
-They check that the docs page exists at the URL derived from the connector id, that an Agent Builder-only
-connector's page says so, that the docs page avoids internal wording ("custom connector", "MCP-native",
+They check that the docs page exists at the URL derived from the connector id, that it states the
+availability `supportedFeatureIds` allows (and only that), that a page for a connector without workflow
+support does not describe workflow use, that the docs page avoids internal wording ("custom connector", "MCP-native",
 "connector spec"), that the navigation links resolve, that every tool action and input parameter has a
 description, and that every input string and array has a `.max()`. Do not re-check those by hand.
 
@@ -315,10 +316,9 @@ This step requires documentation skills from https://github.com/elastic/elastic-
 
    Three things a template page will not teach you:
 
-   - **State what the connector can be used with.** A recent convention, because it is common for a
-     connector to work with only Agent Builder or only Workflows. A first-PR connector ships
-     `supportedFeatureIds: ['agentBuilder']` (see Step 2), so the page must say so rather than implying
-     workflow support — follow `gitlab-action-type.md`:
+   - **State what the connector can be used with**, right after the intro paragraph, matching
+     `supportedFeatureIds`. A first-PR connector ships `supportedFeatureIds: ['agentBuilder']` (see
+     Step 2) — follow `gitlab-action-type.md`:
 
      ```
      ::::{note}
@@ -327,9 +327,13 @@ This step requires documentation skills from https://github.com/elastic/elastic-
      ::::
      ```
 
-     Check the opening sentence too: "a workflow or agent can..." promises the same thing in prose.
-     An `isTool: false` action on such a connector is reachable only through the `_execute` API, so do
-     not describe it as available in workflows or agents either.
+     A connector that supports both says `You can use this connector in **Agent Builder** and
+     **Workflows**.`, and a Workflows-only one says it is available in **Workflows** only.
+
+     On an Agent Builder-only page, nothing else may suggest workflow use: not the opening sentence
+     ("a workflow or agent can..."), and not the actions. An `isTool: false` action on such a connector
+     is reachable only through the `_execute` API — mark it `_(not yet available)_` and explain the
+     marker in the note (see `databricks-action-type.md`) instead of calling it "workflow only".
    - **Do not use internal vocabulary.** "custom connector", "MCP-native", "connector spec" and
      "stack connector" are our words for our implementation; a reader has no way to tell what a
      *non*-custom connector would be. Describe what the connector does instead.

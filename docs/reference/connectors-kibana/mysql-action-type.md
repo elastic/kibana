@@ -92,8 +92,8 @@ Search Rows
     - **maxRows** (optional): Maximum number of rows to return (1-1000, default: 100).
     - **database** (optional): The database name. Uses the configured default if omitted.
 
-Execute SQL
-:   Run any SQL statement against the MySQL database. No restrictions — `INSERT`, `UPDATE`, `DELETE`, `DROP`, and DDL are all permitted. Use only when the workflow explicitly requires a write or destructive operation. Prefer **Query** for read-only access.
+Execute SQL _(not yet available)_
+:   Run any SQL statement against the MySQL database. No restrictions — `INSERT`, `UPDATE`, `DELETE`, `DROP`, and DDL are all permitted. Use only when a write or destructive operation is explicitly required. Not exposed to AI agents; becomes usable when workflow support is added. Prefer **Query** for read-only access.
     - **sql** (required): The SQL statement to execute.
 
 

@@ -23,7 +23,15 @@ const CONNECTORS_LIST_SNIPPET = path.join(
   CONNECTOR_DOCS_DIR,
   '_snippets/data-context-sources-connectors-list.md'
 );
-const AGENT_BUILDER_ONLY_NOTE = /\*\*Agent Builder\*\* only/i;
+const AVAILABILITY_STATEMENTS = {
+  agentBuilderAndWorkflows:
+    /You can use this connector in \*\*Agent Builder\*\* and \*\*Workflows\*\*\./,
+  agentBuilderOnly: /\*\*Agent Builder\*\* only/i,
+  workflowsOnly: /\*\*Workflows\*\* only/i,
+};
+type Availability = keyof typeof AVAILABILITY_STATEMENTS;
+const WORKFLOW_USE_CLAIM =
+  /\b(workflow[- ]only|reserved for workflows|available to workflows|(?:from|in|for|by) (?:a |your )?workflows?|workflows? or agents?|workflows and agents|workflow authors?)\b/gi;
 const INTERNAL_VOCABULARY =
   /\b(custom connectors?|MCP-native|connector specs?|stack connectors?)\b/gi;
 const UNION_KEYS = ['anyOf', 'oneOf', 'allOf'] as const;
@@ -42,6 +50,18 @@ const getDocsPagePath = (spec: ConnectorSpec): string | undefined => {
     .replace(/([a-z])([A-Z])/g, '$1-$2')
     .toLowerCase();
   return path.join(CONNECTOR_DOCS_DIR, `${slug}-action-type.md`);
+};
+
+const getAvailability = ({ metadata }: ConnectorSpec): Availability | undefined => {
+  const agentBuilder = metadata.supportedFeatureIds.includes('agentBuilder');
+  const workflows = metadata.supportedFeatureIds.includes('workflows');
+  if (agentBuilder && workflows) {
+    return 'agentBuilderAndWorkflows';
+  }
+  if (agentBuilder) {
+    return 'agentBuilderOnly';
+  }
+  return workflows ? 'workflowsOnly' : undefined;
 };
 
 const toInputJsonSchema = (schema: z.ZodType): JsonSchema =>
@@ -132,19 +152,36 @@ describe('connector spec quality contracts', () => {
     });
 
     it.each(allSpecs)(
-      '%s docs page states Agent Builder-only availability when workflows are not supported',
+      '%s docs page states only the availability its supportedFeatureIds allow',
       (_exportName, spec) => {
         const docsPagePath = getDocsPagePath(spec);
-        const { supportedFeatureIds } = spec.metadata;
+        const availability = getAvailability(spec);
+        if (docsPagePath === undefined || !fs.existsSync(docsPagePath) || !availability) {
+          return;
+        }
+        const docsPage = fs.readFileSync(docsPagePath, 'utf8');
+        const statedAvailability = (Object.keys(AVAILABILITY_STATEMENTS) as Availability[]).filter(
+          (key) => AVAILABILITY_STATEMENTS[key].test(docsPage)
+        );
+
+        expect(statedAvailability).toEqual([availability]);
+      }
+    );
+
+    it.each(allSpecs)(
+      '%s docs page does not claim workflow use when workflows are not supported',
+      (_exportName, spec) => {
+        const docsPagePath = getDocsPagePath(spec);
         if (
           docsPagePath === undefined ||
           !fs.existsSync(docsPagePath) ||
-          supportedFeatureIds.includes('workflows') ||
-          !supportedFeatureIds.includes('agentBuilder')
+          spec.metadata.supportedFeatureIds.includes('workflows')
         ) {
           return;
         }
-        expect(AGENT_BUILDER_ONLY_NOTE.test(fs.readFileSync(docsPagePath, 'utf8'))).toBe(true);
+        const matches = fs.readFileSync(docsPagePath, 'utf8').match(WORKFLOW_USE_CLAIM) ?? [];
+
+        expect(matches).toEqual([]);
       }
     );
 

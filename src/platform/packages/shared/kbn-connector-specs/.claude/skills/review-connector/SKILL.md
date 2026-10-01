@@ -22,7 +22,8 @@ Start with the deterministic checks and report every failure for the connector u
 node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_quality_contract.test.ts
 ```
 
-They cover the docs page location, the Agent Builder-only note, internal wording in the docs page,
+They cover the docs page location, the availability statement and workflow claims on the docs page,
+internal wording in the docs page,
 navigation links, action and parameter descriptions, and `.max()` bounds on input strings and arrays.
 The checklist below is for what a test cannot judge: whether those descriptions and limits are *right*.
 
@@ -344,7 +345,9 @@ actual documented behavior — flag them even without live access to the API, ba
   page that promises workflow support the spec does not declare, including in the opening sentence ("a
   workflow or agent can..."). `gitlab-action-type.md` carries the expected note.
   An `isTool: false` action on such a connector is reachable only through the `_execute` API; flag a
-  page that presents it as a workflow step or agent capability.
+  page that presents it as a workflow step or agent capability — it should be marked
+  `_(not yet available)_`, as in `databricks-action-type.md`. The contract test checks the availability
+  statement and the common workflow phrases; read the rest of the page for claims it cannot match.
 - **Shared files carrying another connector's entries**: Diff `toc.yml`, the connector-list snippet,
   `all_specs.ts`, `connector_icons_map.ts`, and `CODEOWNERS`. Flag any added line that does not refer to
   this connector, and any link to a file that does not exist in the branch. The AKS PR added a dangling

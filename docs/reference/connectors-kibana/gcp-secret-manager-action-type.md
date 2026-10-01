@@ -11,6 +11,8 @@ applies_to:
 
 The Google Cloud Secret Manager connector lets a workflow drive credential rotation and revocation without an operator opening the Google Cloud console. It lists and inspects secrets, stores new secret versions, disables and re-enables versions, destroys retired ones, and reads the access policy on a secret.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Overview
 
 The Google Cloud Secret Manager connector calls the Google Cloud Secret Manager API (`secretmanager.googleapis.com`). You upload a service account JSON key when creating the connector; every action then runs as that service account, using a short-lived access token the connector mints for each request.
