@@ -5,7 +5,7 @@ CLIs that turn CI test results into GitHub issues on `elastic/kibana`.
 ## `node scripts/report_failed_tests`
 
 Reads JUnit and Scout reports of a CI job and files or updates one `failed-test` issue per
-failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` for failed test jobs.
+failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every job.
 
 ### Buildkite reporting
 

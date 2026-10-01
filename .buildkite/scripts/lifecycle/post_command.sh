@@ -53,24 +53,26 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'\
         --no-github-update --no-index-errors
     else
+      echo "--- Run Failed Test Reporter (JUnit)"
+      node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" \
+        --no-github-update 'target/junit/**/*.xml'
+
+      # Scout: only update GitHub once a Scout lane has failed in at least 2 attempts
+      # of the current build. The counter is set by run_test_lane.sh on real test
+      # failures (exit 10) and is not incremented by agent-lost retries (exit -1).
+      # BK annotations are still produced because target/test_failures artifacts are
+      # generated regardless of --no-github-update.
+      SCOUT_FAILURE_COUNT=0
+      if [[ -n "${BUILDKITE_STEP_KEY:-}" ]]; then
+        SCOUT_FAILURE_COUNT=$(buildkite-agent meta-data get "${BUILDKITE_STEP_KEY}_scout_failure_count" --default "0" 2>/dev/null || echo 0)
+      fi
       if [[ "${REPORT_FAILED_TESTS_TO_GITHUB:-}" == "true" ]]; then
-        # Scout: only report to GitHub once a lane has failed in at least 2 attempts of the current
-        # build. The counter is set by run_test_lane.sh on real test failures (exit 10), not agent-lost retries.
-        SCOUT_FAILURE_COUNT=0
-        if [[ -n "${BUILDKITE_STEP_KEY:-}" ]]; then
-          SCOUT_FAILURE_COUNT=$(buildkite-agent meta-data get "${BUILDKITE_STEP_KEY}_scout_failure_count" --default "0" 2>/dev/null || echo 0)
-        fi
         buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_github_test_reporting" "$(jq -cn \
           --argjson scout "$([[ "$SCOUT_FAILURE_COUNT" -ge 2 ]] && echo true || echo false)" \
           --arg label "${BUILDKITE_LABEL:-}" \
           '{scout: $scout, label: $label}')"
       fi
-
-      echo "--- Run Failed Test Reporter (JUnit)"
-      node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" \
-        --no-github-update 'target/junit/**/*.xml'
-
-      echo "--- Run Failed Test Reporter (Scout)"
+      echo "--- Run Failed Test Reporter (Scout, failure_count=$SCOUT_FAILURE_COUNT)"
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" --no-github-update \
         '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
     fi

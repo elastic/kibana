@@ -22,9 +22,9 @@ const buildkite = new BuildkiteClient();
 const JUNIT = 'target/junit/**/*.xml';
 const SCOUT_DIR = '.scout/reports/scout-playwright-test-failures-';
 const SCOUT = `${SCOUT_DIR}*/scout-failures-*.ndjson`;
-export const MAX_REPORTED_FAILURES = 50;
+const MAX_REPORTED_FAILURES = 50;
 
-export interface ReportingAttempt {
+interface ReportingAttempt {
   job: Job;
   label: string;
   patterns: string[];
@@ -89,7 +89,6 @@ export const reportFailedTestIssues = async (): Promise<void> => {
   const root = mkdtempSync(Path.resolve('target', 'failed-test-issues-'));
   let failureCount = 0;
   for (const attempts of pending) {
-    let stepFailureCount = 0;
     for (const { job, patterns } of attempts) {
       const attemptDirectory = Path.join(root, 'attempts', job.id);
       mkdirSync(attemptDirectory, { recursive: true });
@@ -106,12 +105,14 @@ export const reportFailedTestIssues = async (): Promise<void> => {
           { stdio: 'inherit' }
         );
       }
-      stepFailureCount = Math.max(stepFailureCount, await countFailures(attemptDirectory));
+      failureCount += await countFailures(attemptDirectory);
+      // Report filenames are unique per attempt; fail rather than overwrite an earlier attempt's report
       cpSync(attemptDirectory, Path.join(root, attempts[attempts.length - 1].job.id), {
         recursive: true,
+        force: false,
+        errorOnExist: true,
       });
     }
-    failureCount += stepFailureCount;
   }
 
   if (failureCount > MAX_REPORTED_FAILURES) {
