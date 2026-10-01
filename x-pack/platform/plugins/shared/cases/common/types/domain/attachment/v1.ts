@@ -12,6 +12,7 @@ import {
   MAX_COMMENT_LENGTH,
   MAX_FILENAME_LENGTH,
   MAX_RULE_NAME_LENGTH,
+  MAX_INDEX_NAME_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 
@@ -88,7 +89,10 @@ export type UserCommentAttachment = z.infer<typeof UserCommentAttachmentSchema>;
 export const EventAttachmentPayloadSchema = z.object({
   type: z.literal(AttachmentType.event),
   eventId: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
-  index: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
+  index: z.union([
+    z.array(z.string().max(MAX_INDEX_NAME_LENGTH)),
+    z.string().max(MAX_INDEX_NAME_LENGTH),
+  ]),
   owner: z.string().max(MAX_TITLE_LENGTH),
 });
 
@@ -98,7 +102,10 @@ export const EventAttachmentPayloadSchema = z.object({
 export const AlertAttachmentPayloadSchema = z.object({
   type: z.literal(AttachmentType.alert),
   alertId: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
-  index: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
+  index: z.union([
+    z.array(z.string().max(MAX_INDEX_NAME_LENGTH)),
+    z.string().max(MAX_INDEX_NAME_LENGTH),
+  ]),
   rule: z.object({
     id: z.string().max(MAX_TITLE_LENGTH).nullable(),
     name: z.string().max(MAX_RULE_NAME_LENGTH).nullable(),
