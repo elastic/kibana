@@ -293,6 +293,7 @@ test.describe(
 
       await page.testSubj.click('canvasFlyoutStreamMenu-processingToggle');
       await expect(processingTab).toBeVisible();
+      await page.testSubj.click('canvasFlyoutStreamMenu-button');
       await expect(processingToggle).toHaveText('Remove processing');
       await page.getByText('Remove processing').click();
       await page.getByText('Confirm removal').isDisabled();
