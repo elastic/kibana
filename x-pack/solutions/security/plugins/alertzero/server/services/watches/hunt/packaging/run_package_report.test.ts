@@ -8,7 +8,11 @@
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
-import { PackageReportIdentityError, runPackageReport } from './run_package_report';
+import {
+  PackageReportIdentityError,
+  computeExpectedProposalCount,
+  runPackageReport,
+} from './run_package_report';
 import type { RunPackageReportDeps } from './run_package_report';
 
 const reportId = 'rpt-package-1';
@@ -153,7 +157,7 @@ const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDe
   }),
   resolveHostEnrollment: async () => ({ enrolled: true, agentId: 'agent-1' }),
   rehydrateProcessSelectors: async () => [],
-  hasExistingProposals: async () => false,
+  countExistingProposals: async () => 0,
   ...overrides,
 });
 
@@ -356,7 +360,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: true,
         attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
-        deps: deps({ hasExistingProposals: async () => true }),
+        deps: deps({ countExistingProposals: async () => 1 }),
       });
       expect(result.status).toBe('packaged');
       if (result.status !== 'packaged') {
@@ -382,7 +386,7 @@ describe('runPackageReport', () => {
         hasConfirmedHit: true,
         attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
         deps: deps({
-          hasExistingProposals: async () => {
+          countExistingProposals: async () => {
             throw new Error('proposals index unavailable');
           },
         }),
@@ -398,7 +402,7 @@ describe('runPackageReport', () => {
     });
 
     it('never looks up existing Proposals on a clean run: there is nothing to suppress', async () => {
-      const hasExistingProposals = jest.fn(async () => true);
+      const countExistingProposals = jest.fn(async () => 1);
       const result = await runPackageReport({
         spaceId: 'default',
         reportId,
@@ -407,7 +411,7 @@ describe('runPackageReport', () => {
         huntStatus: 'success',
         hasConfirmedHit: false,
         attachments: [sseAttachment({ hit: false })],
-        deps: deps({ hasExistingProposals }),
+        deps: deps({ countExistingProposals }),
       });
       expect(result.status).toBe('packaged');
       if (result.status !== 'packaged') {
@@ -415,7 +419,69 @@ describe('runPackageReport', () => {
       }
       expect(result.dismiss).toBe(true);
       expect(result.mintSuppression).toBe('none');
-      expect(hasExistingProposals).not.toHaveBeenCalled();
+      expect(countExistingProposals).not.toHaveBeenCalled();
+    });
+
+    // A nonzero baseline always means the guard above suppressed this run's mint, so
+    // expectedProposalCount stays 0 along with proposals -- see the `computeExpectedProposalCount`
+    // suite below for the formula itself, including the `existingProposalCount > 0` +
+    // `mintSuppression: 'none'` combination this guard currently never lets through.
+    it('reports no expected count when a nonzero baseline suppresses the mint', async () => {
+      const result = await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: true,
+        attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        deps: deps({ countExistingProposals: async () => 4 }),
+      });
+      expect(result.status).toBe('packaged');
+      if (result.status !== 'packaged') {
+        return;
+      }
+      expect(result.proposals).toEqual([]);
+      expect(result.mintSuppression).toBe('existing_proposals');
+      expect(result.expectedProposalCount).toBe(0);
+    });
+  });
+
+  // `runPackageReport` can never reach `computeExpectedProposalCount` with a nonzero
+  // `existingProposalCount` and `mintSuppression: 'none'` together today -- the existing-Proposals
+  // guard above suppresses minting entirely whenever any Proposal already exists. Tested directly
+  // here, independent of that coupling, because the formula is the fix for
+  // elastic/security-team#19822's future (the coarse guard is explicitly temporary) and has to stay
+  // correct even while nothing in this file's own integration tests can exercise it end to end.
+  describe('computeExpectedProposalCount', () => {
+    it("sums the pre-run baseline and this run's new proposals when not suppressed", () => {
+      expect(
+        computeExpectedProposalCount({
+          mintSuppression: 'none',
+          existingProposalCount: 4,
+          newProposalCount: 3,
+        })
+      ).toBe(7);
+    });
+
+    it('is 0 when minting was suppressed, regardless of baseline', () => {
+      expect(
+        computeExpectedProposalCount({
+          mintSuppression: 'existing_proposals',
+          existingProposalCount: 4,
+          newProposalCount: 0,
+        })
+      ).toBe(0);
+    });
+
+    it('is 0 when the existing-Proposals check itself failed', () => {
+      expect(
+        computeExpectedProposalCount({
+          mintSuppression: 'check_failed',
+          existingProposalCount: 0,
+          newProposalCount: 0,
+        })
+      ).toBe(0);
     });
   });
 });

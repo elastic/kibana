@@ -131,7 +131,17 @@ steps:
   # margin for the common case. The later read is preferred and the first is its
   # fallback (see resolve_settlement_counts), so the pair can only ever see more
   # than a single call would -- never less.
-  - name: requery_proposals
+  #
+  # Three independently-scoped pairs rather than one unfiltered requery: `size`
+  # on this route caps at 100 and only bounds the returned `proposals` array, so
+  # counting pending/executing by filtering that array (the previous approach)
+  # silently undercounted past 100 Proposals on an Investigation. `total` is the
+  # server's own hit count for whatever filter was sent -- accurate at any
+  # volume regardless of `size` -- so each pair asks the question it actually
+  # needs answered (all Proposals / only pending / only executing) and reads
+  # `total` rather than paging through results this gate has no use for.
+  # `size: 1` on every pair: the only thing any of them reads is `total`.
+  - name: requery_created
     type: kibana.request
     with:
       method: GET
@@ -140,11 +150,11 @@ steps:
         elastic-api-version: "1"
       query:
         conversationId: "{{ inputs.investigationConversationId }}"
-        size: 100
+        size: 1
     on-failure:
       continue: true
 
-  - name: requery_proposals_retry
+  - name: requery_created_retry
     type: kibana.request
     with:
       method: GET
@@ -153,31 +163,81 @@ steps:
         elastic-api-version: "1"
       query:
         conversationId: "{{ inputs.investigationConversationId }}"
-        size: 100
+        size: 1
+    on-failure:
+      continue: true
+
+  - name: requery_pending
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        conversationId: "{{ inputs.investigationConversationId }}"
+        status: pending
+        size: 1
+    on-failure:
+      continue: true
+
+  - name: requery_pending_retry
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        conversationId: "{{ inputs.investigationConversationId }}"
+        status: pending
+        size: 1
+    on-failure:
+      continue: true
+
+  - name: requery_executing
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        conversationId: "{{ inputs.investigationConversationId }}"
+        status: executing
+        size: 1
+    on-failure:
+      continue: true
+
+  - name: requery_executing_retry
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        conversationId: "{{ inputs.investigationConversationId }}"
+        status: executing
+        size: 1
     on-failure:
       continue: true
 
   # Reads the later requery and falls back to the first one, rather than reading
   # the retry alone: both calls swallow their own failure, so a transient failure
   # on the second read would otherwise discard a first read that had succeeded,
-  # collapse created_count to 0, and leave `settled` false forever -- an
-  # Investigation that never closes even though every Proposal was decided. The
-  # retry exists to see *more* than the first read, so it must never be able to
-  # see less. `| default:` against another step's output is this package's
-  # existing idiom for that (forensics_run_endpoint_analysis.yaml's host_name
-  # chains two step outputs and a literal the same way).
-  #
-  # `where`/`size` on a nil `.proposals` (both requeries failed) resolve to 0
-  # rather than hard-failing the way `foreach` on a nil source does, so the
-  # trailing literal guard is only needed on the scalar. `total` rather than the
-  # array length is the created count, so this never assumes one page is
-  # complete.
+  # collapse a count to 0, and leave `settled` false forever -- an Investigation
+  # that never closes even though every Proposal was decided. The retry exists to
+  # see *more* than the first read, so it must never be able to see less.
+  # `| default:` against another step's output is this package's existing idiom
+  # for that (forensics_run_endpoint_analysis.yaml's host_name chains two step
+  # outputs and a literal the same way).
   - name: resolve_settlement_counts
     type: data.set
     with:
-      created_count: "${{ steps.requery_proposals_retry.output.total | default: steps.requery_proposals.output.total | default: 0 }}"
-      pending_count: "${{ steps.requery_proposals_retry.output.proposals | default: steps.requery_proposals.output.proposals | where: 'status', 'pending' | size }}"
-      executing_count: "${{ steps.requery_proposals_retry.output.proposals | default: steps.requery_proposals.output.proposals | where: 'status', 'executing' | size }}"
+      created_count: "${{ steps.requery_created_retry.output.total | default: steps.requery_created.output.total | default: 0 }}"
+      pending_count: "${{ steps.requery_pending_retry.output.total | default: steps.requery_pending.output.total | default: 0 }}"
+      executing_count: "${{ steps.requery_executing_retry.output.total | default: steps.requery_executing.output.total | default: 0 }}"
 
   # Three-term `and` chain with no `or` mixed in, which associates left-to-right
   # and so avoids the mixed and/or precedence hazard create_proposal.yaml warns
