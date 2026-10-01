@@ -264,6 +264,67 @@ describe('executeRuleOperations', () => {
 
       expect(result.data.recovery).toEqual({ strategy: 'no_breach' });
     });
+
+    it('throws when a later set_query drops the breach a stored condition recovery needs', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+      };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+        },
+      ];
+
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(
+        'recovery.strategy "condition" requires query.breach'
+      );
+      await expect(executeRuleOperations(existing, ops)).rejects.toBeInstanceOf(
+        RuleOperationValidationError
+      );
+    });
+
+    it('keeps a stored condition recovery when set_query still includes a breach', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+      };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+        },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.query).toEqual({
+        base: 'FROM metrics-*',
+        breach: { segment: 'WHERE cpu > 0.9' },
+      });
+      expect(result.data.recovery).toEqual({
+        strategy: 'condition',
+        segment: 'WHERE cpu < 0.5',
+      });
+    });
+
+    it('allows set_query to drop the breach when the same call switches recovery off condition', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+        recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+      };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+        },
+        { operation: 'set_recovery', recovery: { strategy: 'no_breach' } },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.query).toEqual({ base: 'FROM metrics-* | WHERE cpu > 0.9' });
+      expect(result.data.recovery).toEqual({ strategy: 'no_breach' });
+    });
   });
 
   describe('set_query with a breach segment', () => {
@@ -424,6 +485,50 @@ describe('executeRuleOperations', () => {
       ];
 
       const result = await executeRuleOperations({}, ops);
+      expect(result.data.recovery).toEqual({
+        strategy: 'condition',
+        segment: 'WHERE cpu < 0.5',
+      });
+    });
+
+    it('throws when a later set_query drops the breach the condition recovery needs', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+      };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_recovery',
+          recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+        },
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+        },
+      ];
+
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(
+        'recovery.strategy "condition" requires query.breach'
+      );
+    });
+
+    it('passes when set_recovery precedes the set_query that adds the breach', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+      };
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_recovery',
+          recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+        },
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+        },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.query?.breach).toEqual({ segment: 'WHERE cpu > 0.9' });
       expect(result.data.recovery).toEqual({
         strategy: 'condition',
         segment: 'WHERE cpu < 0.5',

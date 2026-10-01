@@ -438,13 +438,6 @@ export const executeRuleOperations = async (
             ? { ...next, state_transition: stateTransition }
             : omit(next, 'state_transition');
         }
-
-        if (!isRecoveryConditionUsableWithBreach(next)) {
-          throw new RuleOperationValidationError(
-            'recovery.strategy "condition" requires query.breach. Without a breach segment ' +
-              'every row of the base query breaches, so the rule could never recover.'
-          );
-        }
         break;
       }
 
@@ -574,6 +567,17 @@ export const executeRuleOperations = async (
 
   if (!isLifecycleConfigAllowedForKind(next)) {
     throw new RuleOperationValidationError('Signal rules cannot set recovery or no_data.');
+  }
+
+  // `set_query` replaces the query and `set_recovery` replaces the strategy, so
+  // either one can leave `condition` with nothing to contrast against. Judge
+  // the combination after both have been applied — a query-only edit never
+  // enters `set_recovery`.
+  if (!isRecoveryConditionUsableWithBreach(next)) {
+    throw new RuleOperationValidationError(
+      'recovery.strategy "condition" requires query.breach. Without a breach segment ' +
+        'every row of the base query breaches, so the rule could never recover.'
+    );
   }
 
   if (!isAbsenceDistinguishableFromBreach(next)) {
