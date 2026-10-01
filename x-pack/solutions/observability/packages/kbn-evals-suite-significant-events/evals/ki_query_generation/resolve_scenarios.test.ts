@@ -153,7 +153,7 @@ describe('assertQueryGenerationDatasetSafety', () => {
 });
 
 describe('resolveQueryGenerationDatasetName', () => {
-  const CANONICAL = 'sigevents: KI query generation (toggle) (canonical) [baseline]';
+  const CANONICAL = 'sigevents: KI query generation (toggle) (canonical)';
 
   it('keeps the canonical name for unfiltered runs', () => {
     const res = resolveQueryGenerationDatasets(DATASETS, undefined);
@@ -164,7 +164,7 @@ describe('resolveQueryGenerationDatasetName', () => {
     const res = resolveQueryGenerationDatasets(DATASETS, 'ledger-db-disconnect');
     const name = resolveQueryGenerationDatasetName(res, CANONICAL);
     expect(name).toMatch(
-      /^sigevents: KI query generation \(toggle\) \(canonical\) \[baseline\] \[focused:[0-9a-f]{12}\]$/
+      /^sigevents: KI query generation \(toggle\) \(canonical\) \[focused:[0-9a-f]{12}\]$/
     );
     expect(name).not.toContain('ledger-db-disconnect');
     expect(name).not.toBe(CANONICAL);

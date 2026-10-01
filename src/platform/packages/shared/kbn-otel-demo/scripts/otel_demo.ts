@@ -143,7 +143,6 @@ run(
         demoType,
         scenarioIds: reset ? [] : scenarioIds,
         codeScenarioId: reset ? undefined : codeScenarioId,
-        configPath,
         version,
         reset,
       }).catch((error) => {

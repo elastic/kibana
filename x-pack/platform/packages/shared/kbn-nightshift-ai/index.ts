@@ -66,14 +66,7 @@ export {
   type ComputedFeatureGenerationResult,
   type GenerateAllComputedFeaturesOptions,
 } from './src/significant_events/features/computed';
-export {
-  CODE_ANALYSIS_PROVIDER_KEY,
-  codeAnalysisGenerator,
-} from './src/significant_events/features/computed/code_analysis';
-export type {
-  ComputedFeatureProvider,
-  ComputedFeatureGeneratorOptions,
-} from './src/significant_events/features/computed/types';
+export type { ComputedFeatureGeneratorOptions } from './src/significant_events/features/computed/types';
 export { selectLogPatternsForLlm } from './src/significant_events/features/computed/log_patterns';
 export { pickErrorLogFields } from './src/significant_events/features/computed/error_logs';
 export {

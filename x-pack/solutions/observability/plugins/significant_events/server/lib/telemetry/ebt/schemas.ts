@@ -12,7 +12,6 @@ import type {
   AgentToolEventInvestigationAttachProps,
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
-  CodeAnalysisGroundingProps,
   DetectionScanProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
@@ -385,47 +384,6 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   },
 };
 
-const codeAnalysisGroundingSchema: RootSchema<CodeAnalysisGroundingProps> = {
-  stream_name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  stream_type: {
-    type: 'keyword',
-    _meta: {
-      description: 'The type of the stream: wired or classic',
-    },
-  },
-  status: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'Outcome of code_analysis grounding: feature, no_match, no_candidates, no_strings, or unavailable',
-    },
-  },
-  repository: {
-    type: 'keyword',
-    _meta: {
-      description: 'The repository/index selected to ground the stream against',
-      optional: true,
-    },
-  },
-  candidate_count: {
-    type: 'long',
-    _meta: {
-      description: 'The number of candidate code repositories considered',
-    },
-  },
-  verified_count: {
-    type: 'long',
-    _meta: {
-      description: 'The number of distinctive log strings verified against the selected code',
-    },
-  },
-};
-
 const discoveryTriggeredSchema = {
   execution_id: {
     type: 'keyword' as const,
@@ -705,7 +663,6 @@ export {
   agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
-  codeAnalysisGroundingSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,

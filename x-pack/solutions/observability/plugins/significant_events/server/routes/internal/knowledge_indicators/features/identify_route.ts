@@ -29,7 +29,6 @@ import {
   prepareInferredSampling,
 } from '../../../../lib/significant_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/significant_events/features/should_identify_features';
-import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
 import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
@@ -340,15 +339,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       .nullable()
       .optional(),
   }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-    telemetry,
-    maintenanceService,
-  }) => {
+  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
     const { streamDataEsClient, streamsClient, licensing, tuningConfig } = scopedClients;
 
@@ -370,13 +361,6 @@ const identifyComputedFeaturesRoute = createServerRoute({
       streamsClient.getStream(streamName),
     ]);
 
-    // Enable code_analysis grounding only when the feature flag is on and Agent
-    // Builder is available; otherwise the provider is omitted and the computed
-    // feature is skipped.
-    const codeGroundingEnabled =
-      Boolean(server.agentBuilder?.tools) &&
-      (await isSignificantEventsSemanticCodeSearchGroundingEnabled(server.core.featureFlags));
-
     try {
       const { features: computedFeatures, errors } = await identifyComputedFeatures({
         stream,
@@ -389,9 +373,6 @@ const identifyComputedFeaturesRoute = createServerRoute({
         runId,
         signal: getRequestAbortSignal(request),
         timeoutMs: computedFeaturesTimeoutMs,
-        ...(codeGroundingEnabled
-          ? { agentBuilderTools: server.agentBuilder?.tools, request, telemetry }
-          : {}),
       });
 
       return {

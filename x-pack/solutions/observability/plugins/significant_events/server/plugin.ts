@@ -120,7 +120,6 @@ import { createSignificantEventsAvailability } from './agent_builder/tools/signi
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
-import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
@@ -364,10 +363,6 @@ export class SignificantEventsPlugin
       });
       registerSignificantEventsKIQueryGenerationAgentTypes({
         agentBuilder: plugins.agentBuilder,
-        isSemanticCodeSearchGroundingEnabled: async () =>
-          this.server?.core
-            ? isSignificantEventsSemanticCodeSearchGroundingEnabled(this.server.core.featureFlags)
-            : false,
       });
       void core
         .getStartServices()

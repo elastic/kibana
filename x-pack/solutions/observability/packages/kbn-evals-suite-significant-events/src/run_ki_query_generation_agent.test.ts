@@ -23,12 +23,10 @@ describe('buildKIQueryGenerationEvalUserMessage', () => {
         sources: ['logs.test'],
         samplingSource: 'logs.test',
       },
-      groundingContext: 'Use repository test/repo.',
     });
 
     expect(message).toContain('`target_id`: logs.test');
     expect(message).toContain('include `expects_matches` on every candidate query');
-    expect(message).toContain('Use repository test/repo.');
   });
 });
 
