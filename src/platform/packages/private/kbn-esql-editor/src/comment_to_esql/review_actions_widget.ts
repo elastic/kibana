@@ -91,6 +91,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
   }
 
   public dispose(): void {
+    const ownsFocus = this.domNode?.contains(document.activeElement) ?? false;
     this.isFocusPending = false;
     this.editor.removeContentWidget(this);
 
@@ -104,6 +105,10 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
 
     this.domNode = undefined;
     this.buttons = [];
+
+    if (ownsFocus) {
+      this.editor.focus();
+    }
   }
 
   private buildDom(): HTMLElement {

@@ -142,6 +142,45 @@ describe('ReviewActionsWidget', () => {
       widget.dispose();
     });
 
+    it.each([
+      ['Undo', 0],
+      ['Replace', 1],
+    ])('returns focus to the editor when disposed while %s has focus', (_, buttonIndex) => {
+      const editorFocus = jest.fn();
+      const { widget, dom, undoButton, replaceButton } = setup(editorFocus);
+
+      [undoButton, replaceButton][buttonIndex].focus();
+      widget.dispose();
+
+      expect(editorFocus).toHaveBeenCalledTimes(1);
+      dom.remove();
+    });
+
+    it('does not move focus to the editor when disposed while focus is elsewhere', () => {
+      const editorFocus = jest.fn();
+      const { widget, dom } = setup(editorFocus);
+      const outside = document.createElement('input');
+      document.body.appendChild(outside);
+      outside.focus();
+
+      widget.dispose();
+
+      expect(editorFocus).not.toHaveBeenCalled();
+      expect(document.activeElement).toBe(outside);
+      outside.remove();
+      dom.remove();
+    });
+
+    it('does not move focus to the editor when disposed before ever being focused', () => {
+      const editorFocus = jest.fn();
+      const { widget, dom } = setup(editorFocus);
+
+      widget.dispose();
+
+      expect(editorFocus).not.toHaveBeenCalled();
+      dom.remove();
+    });
+
     it('does not focus after being disposed', () => {
       const { widget, dom, undoButton } = setup();
 
