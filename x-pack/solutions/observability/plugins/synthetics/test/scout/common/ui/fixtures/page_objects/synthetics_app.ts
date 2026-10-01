@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { euiSelectors } from '@kbn/scout-oblt';
 import type { ScoutPage, KibanaUrl, Locator } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { FormMonitorType } from '../constants';
@@ -272,7 +273,7 @@ export class SyntheticsAppPage {
 
   async getMonitorRowLocator(monitorName: string) {
     const monitorRow = this.page.locator(
-      `.euiTableRow:has([data-test-subj="syntheticsMonitorDetailsLinkLink"]:has-text("${monitorName}"))`
+      `${euiSelectors.basicTable.ROW_SELECTOR}:has([data-test-subj="syntheticsMonitorDetailsLinkLink"]:has-text("${monitorName}"))`
     );
     await expect(monitorRow).toBeVisible();
     await monitorRow.scrollIntoViewIfNeeded();

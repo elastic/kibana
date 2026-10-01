@@ -32,10 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         1400,
         1600
       );
-      const filterAlerts = await find.byCssSelector(
-        '[data-test-subj="maintenanceWindowScopedQuerySwitch"] .euiSwitch__button'
-      );
-      await filterAlerts.click();
+      // Alerts toggle is ON by default — the filter panel is already expanded.
       await testSubjects.setValue('queryInput', 'kibana.alert.rule.name: custom-threshold-rule-1');
       await svlCommonScreenshots.takeScreenshot(
         'create-maintenance-window-filter',

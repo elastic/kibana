@@ -18,7 +18,17 @@ import type {
   EmbeddablePublicDefinition,
   HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, combineLatest, EMPTY, map, merge, skip, switchMap, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  EMPTY,
+  firstValueFrom,
+  map,
+  merge,
+  skip,
+  switchMap,
+  tap,
+} from 'rxjs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { parse } from 'hjson';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -235,7 +245,9 @@ export const vegaEmbeddableFactory = (
       getInspectorAdapters: () => inspectorAdapters,
       // Only when the flag is on: the public dashboards-as-code schema is registered then, so
       // exported JSON can be round-tripped through the REST API.
-      supportsJsonExport: core.featureFlags.getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false),
+      supportsJsonExport: await firstValueFrom(
+        core.featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
+      ),
     });
 
     // Identities must be stable: `VegaVisComponent` rebuilds its Vega view whenever `fireEvent`

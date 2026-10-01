@@ -64,6 +64,7 @@ const getEpisodeGroupingFromRow = (
 
 export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
   const status = row.flattened[columnId] as AlertEpisodeStatus;
+  const isFlapping = row.flattened.is_flapping === true;
 
   const episodeAction: EpisodeActionState = {
     episodeId: row.flattened['episode.id'] as string,
@@ -72,11 +73,13 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
     lastAckAction: (row.flattened.last_ack_action as string | undefined) ?? null,
     lastAssigneeUid: (row.flattened.last_assignee_uid as string | undefined) ?? null,
     lastAckActor: (row.flattened.last_ack_actor as string | undefined) ?? null,
+    lastDeactivateAction: null,
+    lastDeactivateActor: null,
   };
 
   const groupAction: EpisodeStatusGroupAction = {
     lastSnoozeAction: (row.flattened.last_snooze_action as string | undefined) ?? null,
-    snoozeExpiry: (row.flattened.snooze_expiry as string | undefined) ?? null,
+    snoozedUntil: (row.flattened.snoozed_until as string | undefined) ?? null,
   };
 
   return (
@@ -84,6 +87,7 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
       status={status}
       episodeAction={episodeAction}
       groupAction={groupAction}
+      isFlapping={isFlapping}
     />
   );
 };
