@@ -179,7 +179,9 @@ describe('seedFixture', () => {
       search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
       updateByQuery: jest.fn().mockResolvedValue({ updated: 1 }),
       indices: {
-        getDataStream: jest.fn().mockResolvedValue({ data_streams: [{ name: FP_TP_ATTACK_INDEX }] }),
+        getDataStream: jest
+          .fn()
+          .mockResolvedValue({ data_streams: [{ name: FP_TP_ATTACK_INDEX }] }),
       },
     };
     kbnRequest = jest.fn().mockResolvedValue({ statusCode: 200, body: {} });
