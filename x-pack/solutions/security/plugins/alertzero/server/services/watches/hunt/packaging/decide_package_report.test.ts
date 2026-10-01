@@ -17,7 +17,7 @@ import {
   MAX_SUMMARY_BULLETS_CHARS,
   MAX_SUMMARY_PROPOSAL_BULLETS,
 } from '../../../../../common/step_types/package_report';
-import type { CurrentRunState, Subject } from './types';
+import type { CurrentRunHost, CurrentRunState, ProcessSelector, Subject } from './types';
 
 const isolateHost: ActionCatalogEntry = {
   workflowId: 'system-security-action-isolate-host',
@@ -110,11 +110,23 @@ const setAssetCriticality: ActionCatalogEntry = {
   },
 };
 
+const enrolledHost = (
+  name: string,
+  agentId: string,
+  capabilities: string[] = []
+): CurrentRunHost => ({ name, enrolled: true, agentId, capabilities });
+
+const selector = (
+  overrides: Partial<ProcessSelector> & Pick<ProcessSelector, 'processKey' | 'processName'>
+): ProcessSelector => ({ hostName: 'host-a', iocMatched: false, ...overrides });
+
 const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
   runId: 'run-1',
   reportId: 'rpt-1',
   sseCount: 1,
   hasConfirmedHit: true,
+  severity: 'high',
+  confidence: 0.7,
   titles: ['Shadow admin AssumeRole'],
   evidenceLines: ['Tier 1 hits in cloudtrail'],
   techniques: ['T1078.004'],
@@ -122,7 +134,7 @@ const baseHitState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState
   techniqueNames: {},
   users: [],
   corroboratedTechniques: ['T1078.004'],
-  hosts: [{ name: 'host-a', enrolled: true, agentId: 'agent-a' }],
+  hosts: [enrolledHost('host-a', 'agent-a')],
   processSelectors: [],
   // Fully-covered defaults: no recommendation trigger fires unless a test overrides one.
   services: [],
@@ -153,10 +165,7 @@ describe('decidePackageReport', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
-        hosts: [
-          { name: 'host-a', enrolled: true, agentId: 'agent-a' },
-          { name: 'host-b', enrolled: true, agentId: 'agent-b' },
-        ],
+        hosts: [enrolledHost('host-a', 'agent-a'), enrolledHost('host-b', 'agent-b')],
       }),
       catalog: { ok: true, actions: [isolateHost, configureAction] },
     });
@@ -176,9 +185,7 @@ describe('decidePackageReport', () => {
 
   it('does not drop or duplicate subject keys when catalog order changes', () => {
     const state = baseHitState({
-      processSelectors: [
-        { pid: 4242, processKey: 'pid:4242', hostName: 'host-a', processName: 'proc.exe' },
-      ],
+      processSelectors: [selector({ pid: 4242, processKey: 'pid:4242', processName: 'proc.exe' })],
     });
     const a = decidePackageReport({
       conversationId,
@@ -214,7 +221,7 @@ describe('decidePackageReport', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
-        hosts: [{ name: 'ghost', enrolled: false }],
+        hosts: [{ name: 'ghost', enrolled: false, capabilities: [] }],
       }),
       catalog: { ok: true, actions: [isolateHost] },
     });
@@ -228,8 +235,8 @@ describe('decidePackageReport', () => {
       conversationId,
       state: baseHitState({
         hosts: [
-          { name: 'host-a', enrolled: true, agentId: 'agent-a' },
-          { name: 'ghost', enrolled: false },
+          enrolledHost('host-a', 'agent-a'),
+          { name: 'ghost', enrolled: false, capabilities: [] },
         ],
       }),
       catalog: { ok: true, actions: [isolateHost] },
@@ -476,13 +483,8 @@ describe('decidePackageReport', () => {
       conversationId,
       state: baseHitState({
         processSelectors: [
-          { pid: 100, processKey: 'pid:100', hostName: 'host-a', processName: 'a.exe' },
-          {
-            entityId: 'ent-9',
-            processKey: 'entity:ent-9',
-            hostName: 'host-a',
-            processName: 'b.exe',
-          },
+          selector({ pid: 100, processKey: 'pid:100', processName: 'a.exe' }),
+          selector({ entityId: 'ent-9', processKey: 'entity:ent-9', processName: 'b.exe' }),
         ],
       }),
       catalog: { ok: true, actions: [killProcess] },
@@ -520,17 +522,9 @@ describe('decidePackageReport', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
-        hosts: [
-          { name: 'host-a', enrolled: true, agentId: 'agent-a' },
-          { name: 'host-b', enrolled: true, agentId: 'agent-b' },
-        ],
+        hosts: [enrolledHost('host-a', 'agent-a'), enrolledHost('host-b', 'agent-b')],
         processSelectors: [
-          {
-            entityId: 'ent-1',
-            processKey: 'entity:ent-1',
-            hostName: 'host-a',
-            processName: 'a.exe',
-          },
+          selector({ entityId: 'ent-1', processKey: 'entity:ent-1', processName: 'a.exe' }),
         ],
       }),
       catalog: { ok: true, actions: [killProcess] },

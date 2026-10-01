@@ -13,7 +13,12 @@ import {
 } from './proposal_copy';
 import type { CurrentRunHost, CurrentRunState, ProcessSelector, Subject } from './types';
 
-const host: CurrentRunHost = { name: 'WIN-ANALYST01', enrolled: true, agentId: 'agent-1' };
+const host: CurrentRunHost = {
+  name: 'WIN-ANALYST01',
+  enrolled: true,
+  agentId: 'agent-1',
+  capabilities: [],
+};
 const hostSubject: Subject = { kind: 'host', value: host.name, reachable: true, host };
 const processSubject = (processSelector: ProcessSelector): Subject => ({
   kind: 'process',
@@ -63,6 +68,7 @@ const withPid: ProcessSelector = {
   hostName: host.name,
   processName: 'powershell.exe',
   observedAt: '2026-09-27T16:34:41.000Z',
+  iocMatched: false,
 };
 
 const withEntityOnly: ProcessSelector = {
@@ -70,6 +76,7 @@ const withEntityOnly: ProcessSelector = {
   processKey: 'entity_id:ent-9',
   hostName: host.name,
   processName: 'aws.exe',
+  iocMatched: false,
 };
 
 const withTechnique: ProcessSelector = {
@@ -82,6 +89,8 @@ const baseState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState =>
   reportId: 'rpt-1',
   sseCount: 1,
   hasConfirmedHit: true,
+  severity: 'high',
+  confidence: 0.7,
   titles: ['Hunt: PowerShell (T1059.001) [ti-repor]'],
   evidenceLines: [],
   techniques: ['T1059.001'],

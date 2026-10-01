@@ -202,6 +202,58 @@ describe('makeRehydrateProcessSelectors', () => {
     expect(selectors[0].techniqueId).toBe('T1059.001');
   });
 
+  it('marks a selector iocMatched when its ref carried matched.ioc, and false otherwise', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-ioc', {
+        '@timestamp': '2026-09-26T10:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'ioc.exe' },
+        event: { type: 'start' },
+      }),
+      found('logs-endpoint.events-default', 'ev-plain', {
+        '@timestamp': '2026-09-26T10:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 200, name: 'plain.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [
+        { ...eventRef('logs-endpoint.events-default', 'ev-ioc'), matched: { ioc: true } },
+        eventRef('logs-endpoint.events-default', 'ev-plain'),
+      ],
+    });
+    expect(selectors.find((s) => s.pid === 100)?.iocMatched).toBe(true);
+    expect(selectors.find((s) => s.pid === 200)?.iocMatched).toBe(false);
+  });
+
+  it('ORs iocMatched across refs for the same process even when a technique-attributed ref wins the slot', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-ioc', {
+        '@timestamp': '2026-09-26T09:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'a.exe' },
+        event: { type: 'start' },
+      }),
+      found('logs-endpoint.events-default', 'ev-technique', {
+        '@timestamp': '2026-09-26T12:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'a.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [
+        { ...eventRef('logs-endpoint.events-default', 'ev-ioc'), matched: { ioc: true } },
+        eventRef('logs-endpoint.events-default', 'ev-technique', 'T1059.001'),
+      ],
+    });
+    expect(selectors).toHaveLength(1);
+    expect(selectors[0]).toMatchObject({ techniqueId: 'T1059.001', iocMatched: true });
+  });
+
   it('leaves techniqueId undefined for a plain sample ref with no technique match', async () => {
     const esClient = esClientWith([
       found('logs-endpoint.events-default', 'ev-1', {

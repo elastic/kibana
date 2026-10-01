@@ -51,7 +51,7 @@ interface RehydrateSource {
 interface RehydrateRef {
   index: string;
   id: string;
-  matched?: { technique_id?: string };
+  matched?: { technique_id?: string; ioc?: true };
 }
 
 interface Candidate {
@@ -67,6 +67,8 @@ interface Candidate {
    * is implicated in.
    */
   techniqueId?: string;
+  /** The ref that produced this candidate was the Tier 1 IOC match; OR-ed across refs on dedupe. */
+  iocMatched: boolean;
 }
 
 const asTypeList = (value: string | string[] | undefined): string[] =>
@@ -93,6 +95,7 @@ const extractCandidate = (source: RehydrateSource, ref: RehydrateRef): Candidate
     processName: source.process?.name ?? source.process?.executable ?? 'unknown process',
     timestamp: source['@timestamp'] ?? new Date(0).toISOString(),
     techniqueId: ref.matched?.technique_id,
+    iocMatched: ref.matched?.ioc === true,
   };
 };
 
@@ -171,9 +174,17 @@ export const makeRehydrateProcessSelectors = (
     for (const candidate of candidates) {
       const key = `${candidate.hostName}|${candidate.processKey}`;
       const existing = byKey.get(key);
-      if (!existing || isBetterCandidate(candidate, existing)) {
+      if (!existing) {
         byKey.set(key, candidate);
+        continue;
       }
+      // A process that matched an IOC in one ref stays matched even when a newer or
+      // technique-attributed ref wins the slot.
+      const iocMatched = existing.iocMatched || candidate.iocMatched;
+      byKey.set(key, {
+        ...(isBetterCandidate(candidate, existing) ? candidate : existing),
+        iocMatched,
+      });
     }
 
     const byHost = new Map<string, Candidate[]>();
@@ -197,6 +208,7 @@ export const makeRehydrateProcessSelectors = (
           observedAt: candidate.timestamp,
           processName: candidate.processName,
           techniqueId: candidate.techniqueId,
+          iocMatched: candidate.iocMatched,
         });
       }
     }
