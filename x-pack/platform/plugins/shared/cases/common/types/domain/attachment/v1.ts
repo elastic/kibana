@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { limitedStringSchema, mimeTypeString, jsonValueSchema } from '../../../schema';
 import { UserSchema } from '../user/v1';
 import {
+  MAX_ATTACHMENT_ID_LENGTH,
   MAX_COMMENT_LENGTH,
   MAX_FILENAME_LENGTH,
   MAX_RULE_NAME_LENGTH,
@@ -88,7 +89,10 @@ export type UserCommentAttachment = z.infer<typeof UserCommentAttachmentSchema>;
  */
 export const EventAttachmentPayloadSchema = z.object({
   type: z.literal(AttachmentType.event),
-  eventId: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
+  eventId: z.union([
+    z.array(z.string().max(MAX_ATTACHMENT_ID_LENGTH)),
+    z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+  ]),
   index: z.union([
     z.array(z.string().max(MAX_INDEX_NAME_LENGTH)),
     z.string().max(MAX_INDEX_NAME_LENGTH),
@@ -101,7 +105,10 @@ export const EventAttachmentPayloadSchema = z.object({
  */
 export const AlertAttachmentPayloadSchema = z.object({
   type: z.literal(AttachmentType.alert),
-  alertId: z.union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)]),
+  alertId: z.union([
+    z.array(z.string().max(MAX_ATTACHMENT_ID_LENGTH)),
+    z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+  ]),
   index: z.union([
     z.array(z.string().max(MAX_INDEX_NAME_LENGTH)),
     z.string().max(MAX_INDEX_NAME_LENGTH),
