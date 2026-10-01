@@ -25,6 +25,6 @@ export const WatchesRoutes: React.FC = () => (
     {/* Land on the first catalog Watch rather than an empty section. */}
     <Route path="/watches" exact render={() => <Redirect to={DEFAULT_WATCH_PATH} />} />
     {/* Anything deeper than /watches/<id> matches nothing above; leave the section rather than render blank. */}
-    <Redirect to="/" />
+    <Redirect to="/watches" />
   </Routes>
 );
