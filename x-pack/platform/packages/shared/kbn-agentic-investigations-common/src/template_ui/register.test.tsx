@@ -157,6 +157,63 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
   });
 
+  it('replaces the overview body with renderOverview and passes it the proposed actions', async () => {
+    const { contract } = createFakeService();
+    const renderOverview = jest.fn(
+      ({
+        conversation: { id },
+        proposedActionsContent,
+      }: {
+        conversation: Conversation;
+        proposedActionsContent?: React.ReactNode;
+      }) => (
+        <div>
+          <span>custom overview for {id}</span>
+          {proposedActionsContent}
+        </div>
+      )
+    );
+    register(contract, {
+      renderOverview,
+      renderProposedActions: () => <span>proposals</span>,
+    });
+
+    const OverviewTabContent = contract.getTab('investigation.overview')?.content;
+    if (!OverviewTabContent) {
+      throw new Error('Expected a registered overview tab');
+    }
+    renderWithKibanaRenderContext(
+      <OverviewTabContent conversation={conversation} isOpenedFromChat={false} />
+    );
+
+    expect(await screen.findByText('custom overview for conversation-1')).toBeInTheDocument();
+    expect(screen.getByText('proposals')).toBeInTheDocument();
+    expect(renderOverview).toHaveBeenCalledWith(
+      expect.objectContaining({ conversation, attachmentsService })
+    );
+  });
+
+  it('shows the severity and the running state in the header', async () => {
+    const { contract } = createFakeService();
+    register(contract, {
+      renderRunningState: ({ conversationId }) => <span>running {conversationId}</span>,
+    });
+    const Header = getSlot(contract, 'investigation', 'header');
+
+    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+
+    expect(await screen.findByText('running conversation-1')).toBeInTheDocument();
+    expect(screen.getByTestId('investigationFlyoutSeverity')).toHaveTextContent('High');
+  });
+
+  it('registers the brief card when supplied', () => {
+    const { contract } = createFakeService();
+    const BriefCard = () => <span>card</span>;
+    register(contract, { briefCard: BriefCard });
+
+    expect(contract.getTemplateUIDefinition('investigation')?.briefCard).toBe(BriefCard);
+  });
+
   it('registers the template UI definition with a header and footer', () => {
     const { contract } = createFakeService();
 

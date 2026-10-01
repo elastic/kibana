@@ -7,7 +7,9 @@
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { ComponentType } from 'react';
 import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
+import type { InvestigationCardProps } from './investigations/components/investigation_card';
 
 export interface AgenticInvestigationsPublicSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
@@ -25,4 +27,10 @@ export interface AgenticInvestigationsPublicConfig {
 }
 
 export type AgenticInvestigationsPublicPluginSetup = Record<string, never>;
-export type AgenticInvestigationsPublicPluginStart = Record<string, never>;
+export interface AgenticInvestigationsPublicPluginStart {
+  /**
+   * The investigation card the `investigation` template's brief card renders, for a solution
+   * that lists investigations from the query API itself. Loaded on first render.
+   */
+  InvestigationCard: ComponentType<InvestigationCardProps>;
+}

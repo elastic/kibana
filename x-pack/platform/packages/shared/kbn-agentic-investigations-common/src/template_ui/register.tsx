@@ -8,10 +8,19 @@
 import React, { Suspense, lazy } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiSkeletonText } from '@elastic/eui';
-import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
+import type {
+  ConversationTemplateBriefCardRenderProps,
+  ConversationTemplateServiceStartContract,
+} from '@kbn/agent-builder-browser';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
 import { ConversationTitle } from './conversation_title';
-import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
+import type {
+  RenderAssignees,
+  RenderStatus,
+  RenderLinkedInvestigations,
+  RenderOverview,
+  RenderRunningState,
+} from './types';
 
 /**
  * The slot contents are loaded on demand: registration runs during every consuming plugin's
@@ -82,6 +91,18 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
    */
   renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
+  /**
+   * When provided, replaces the overview tab body so the caller can add sections from data it
+   * fetches. See `RenderOverview`.
+   */
+  renderOverview?: RenderOverview;
+  /** When provided, the header shows the investigation's running state next to its age. */
+  renderRunningState?: RenderRunningState;
+  /**
+   * Card Agent Builder renders for conversations on this template. Must be self-contained; see
+   * `ConversationTemplateUIDefinition.briefCard`.
+   */
+  briefCard?: React.ComponentType<ConversationTemplateBriefCardRenderProps>;
 }
 
 /**
@@ -102,6 +123,9 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderAssignees,
   renderStatus,
   renderCloseInvestigationModal,
+  renderOverview,
+  renderRunningState,
+  briefCard,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
@@ -114,6 +138,7 @@ export const registerAgenticInvestigationTemplateUI = ({
             conversation={conversation}
             attachmentsService={attachmentsService}
             renderProposedActions={renderProposedActions}
+            renderOverview={renderOverview}
           />
         </Suspense>
       );
@@ -126,6 +151,7 @@ export const registerAgenticInvestigationTemplateUI = ({
       name,
       icon,
       tabs: [overviewTabId],
+      ...(briefCard && { briefCard }),
       detailsFlyout: {
         header: function InvestigationFlyoutHeader({ conversation, refetchConversation }) {
           return (
@@ -136,6 +162,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                 conversation={conversation}
                 renderAssignees={renderAssignees}
                 renderStatus={renderStatus}
+                renderRunningState={renderRunningState}
                 refetchConversation={refetchConversation}
               />
             </Suspense>

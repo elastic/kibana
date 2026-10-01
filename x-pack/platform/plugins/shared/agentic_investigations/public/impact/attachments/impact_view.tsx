@@ -15,13 +15,29 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { Impact, ImpactEntity } from '../../../common/impact/impact';
+import type { Impact } from '../../../common/impact/impact';
+import type { InvestigationEvidence } from '../../../common/evidence';
 import { EvidenceView } from '../../evidence/evidence_view';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 
-const entityLabel = (entity: ImpactEntity): string => entity.name ?? entity.id;
+/** The impact fields this view reads, shared by the stored document and the query API. */
+export interface ImpactContentEntity {
+  id: string;
+  name?: string;
+  evidence?: InvestigationEvidence;
+}
 
-const EntityBadges = ({ entities }: { entities: ImpactEntity[] }) => (
+export interface ImpactContentProps {
+  summary?: string;
+  evidence?: InvestigationEvidence;
+  entities?: ImpactContentEntity[];
+  /** `details` also renders per-entity evidence. */
+  variant: 'inline' | 'details';
+}
+
+const entityLabel = (entity: ImpactContentEntity): string => entity.name ?? entity.id;
+
+const EntityBadges = ({ entities }: { entities: ImpactContentEntity[] }) => (
   <EuiFlexGroup gutterSize="s" wrap responsive={false} data-test-subj="investigationImpactEntities">
     {entities.map((entity) => (
       <EuiFlexItem key={entity.id} grow={false}>
@@ -31,7 +47,7 @@ const EntityBadges = ({ entities }: { entities: ImpactEntity[] }) => (
   </EuiFlexGroup>
 );
 
-const EntitiesWithEvidence = ({ entities }: { entities: ImpactEntity[] }) => (
+const EntitiesWithEvidence = ({ entities }: { entities: ImpactContentEntity[] }) => (
   <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="investigationImpactEntities">
     {entities.map((entity) => (
       <EuiFlexItem key={entity.id} grow={false} data-test-subj="investigationImpactEntity">
@@ -48,8 +64,10 @@ const EntitiesWithEvidence = ({ entities }: { entities: ImpactEntity[] }) => (
  * Impact of an investigation: the summary, its evidence, and the affected entities. The details
  * flyout shows each entity's evidence; the inline chat render lists entities only.
  */
-export const ImpactView: React.FC<InvestigationAttachmentContentProps<Impact>> = ({
-  document: { summary, evidence, entities = [] },
+export const ImpactContent: React.FC<ImpactContentProps> = ({
+  summary,
+  evidence,
+  entities = [],
   variant,
 }) => {
   const hasSummary = Boolean(summary?.trim());
@@ -90,3 +108,8 @@ export const ImpactView: React.FC<InvestigationAttachmentContentProps<Impact>> =
     </EuiFlexGroup>
   );
 };
+
+export const ImpactView: React.FC<InvestigationAttachmentContentProps<Impact>> = ({
+  document: { summary, evidence, entities },
+  variant,
+}) => <ImpactContent summary={summary} evidence={evidence} entities={entities} variant={variant} />;

@@ -91,4 +91,42 @@ describe('OverviewTab', () => {
     expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
     expect(screen.getByText('Attachment summary')).toBeInTheDocument();
   });
+
+  it('renders the host sections in order and only those supplied', () => {
+    render(
+      <OverviewTab
+        investigation={investigation}
+        attachments={[attachment]}
+        attachmentsService={attachmentsService}
+        proposedActionsContent={<span>proposal</span>}
+        sections={{
+          subjects: <span>checkout alert</span>,
+          impact: <span>checkout is down</span>,
+          conclusion: 'A **bad** deploy.',
+          trace: <span>hypotheses</span>,
+        }}
+      />
+    );
+
+    const headings = screen.getAllByRole('heading').map(({ textContent }) => textContent);
+    expect(headings).toEqual([
+      'Subject',
+      "What's happened",
+      'Attachment summary',
+      'Impact',
+      'Conclusion',
+      'Proposed actions',
+      'Investigation trace',
+    ]);
+    expect(screen.getByText('bad')).toBeInTheDocument();
+  });
+
+  it('leaves out the sections an investigation has no data for', () => {
+    renderTab({ attachments: [] });
+
+    expect(screen.queryByText('Subject')).not.toBeInTheDocument();
+    expect(screen.queryByText('Impact')).not.toBeInTheDocument();
+    expect(screen.queryByText('Conclusion')).not.toBeInTheDocument();
+    expect(screen.queryByText('Investigation trace')).not.toBeInTheDocument();
+  });
 });

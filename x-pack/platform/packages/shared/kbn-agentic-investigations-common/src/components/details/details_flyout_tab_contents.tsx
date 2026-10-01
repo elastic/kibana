@@ -6,7 +6,13 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiMarkdownFormat,
+  EuiText,
+} from '@elastic/eui';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
@@ -27,11 +33,28 @@ export interface OverviewTabProps {
    * what appears while it is empty or loading.
    */
   proposedActionsContent?: React.ReactNode;
+  /**
+   * Sections a host renders from investigation data this package cannot fetch. Each one renders
+   * only when supplied, so an investigation without that data simply lacks the section.
+   */
+  sections?: OverviewSections;
+}
+
+/** Host-rendered overview sections, in the order the tab shows them. */
+export interface OverviewSections {
+  /** What the investigation is about. Shown above the subject attachments. */
+  subjects?: React.ReactNode;
+  impact?: React.ReactNode;
+  /** The conclusion, as markdown. */
+  conclusion?: string;
+  /** How the investigation got there: hypotheses and their evidence. */
+  trace?: React.ReactNode;
 }
 
 export const OverviewTab = memo<OverviewTabProps>(
-  ({ investigation, attachments, attachmentsService, proposedActionsContent }) => {
+  ({ investigation, attachments, attachmentsService, proposedActionsContent, sections = {} }) => {
     const { summary } = investigation;
+    const { subjects, impact, conclusion, trace } = sections;
     const [expanded, setExpanded] = useState(false);
 
     const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
@@ -40,6 +63,12 @@ export const OverviewTab = memo<OverviewTabProps>(
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
+        {subjects && (
+          <EuiFlexItem data-test-subj="investigationOverviewSubjects">
+            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.subjects}>{subjects}</DetailsBlock>
+          </EuiFlexItem>
+        )}
+
         {summary && (
           <EuiFlexItem>
             <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.overview}>
@@ -70,11 +99,31 @@ export const OverviewTab = memo<OverviewTabProps>(
           attachmentsService={attachmentsService}
         />
 
+        {impact && (
+          <EuiFlexItem data-test-subj="investigationOverviewImpact">
+            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.impact}>{impact}</DetailsBlock>
+          </EuiFlexItem>
+        )}
+
+        {conclusion && (
+          <EuiFlexItem data-test-subj="investigationOverviewConclusion">
+            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.conclusion}>
+              <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
+            </DetailsBlock>
+          </EuiFlexItem>
+        )}
+
         {proposedActionsContent && (
           <EuiFlexItem>
             <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.proposedActions}>
               {proposedActionsContent}
             </DetailsBlock>
+          </EuiFlexItem>
+        )}
+
+        {trace && (
+          <EuiFlexItem data-test-subj="investigationOverviewTrace">
+            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.trace}>{trace}</DetailsBlock>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

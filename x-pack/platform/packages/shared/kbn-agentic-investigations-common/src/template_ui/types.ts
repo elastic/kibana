@@ -6,6 +6,8 @@
  */
 
 import type React from 'react';
+import type { Conversation } from '@kbn/agent-builder-common';
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 
 /**
  * Props passed to the `renderAssignees` render prop.
@@ -96,3 +98,31 @@ export interface LinkedInvestigationsSlotRenderProps {
 export type RenderLinkedInvestigations = (
   props: LinkedInvestigationsSlotRenderProps
 ) => React.ReactNode;
+
+/**
+ * Props passed to the `renderOverview` render prop: everything the default overview tab reads,
+ * plus the proposed actions content already rendered by `renderProposedActions`.
+ */
+export interface OverviewSlotRenderProps {
+  conversation: Conversation;
+  attachmentsService: AttachmentServiceStartContract;
+  proposedActionsContent?: React.ReactNode;
+}
+
+/**
+ * A render prop that replaces the overview tab body, so a plugin can add sections from data it
+ * fetches (subjects, impact, conclusion, trace). It typically renders `OverviewTab` with
+ * `sections`. When absent the tab renders `OverviewTab` from the conversation alone.
+ */
+export type RenderOverview = (props: OverviewSlotRenderProps) => React.ReactNode;
+
+/** Props passed to the `renderRunningState` render prop. */
+export interface RunningStateSlotRenderProps {
+  conversationId: string;
+}
+
+/**
+ * A render prop that shows whether an agent is working on the investigation now. Supplied by the
+ * consuming plugin, because the running state is not on the conversation.
+ */
+export type RenderRunningState = (props: RunningStateSlotRenderProps) => React.ReactNode;
