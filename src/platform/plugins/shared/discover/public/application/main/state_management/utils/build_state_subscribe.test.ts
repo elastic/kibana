@@ -16,6 +16,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { createDataViewDataSource, DataSourceType } from '../../../../../common/data_sources';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { internalStateActions, type TabState } from '../redux';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 
@@ -178,6 +179,35 @@ describe('buildStateSubscribe', () => {
     );
 
     expect(dataState.refetch$.next).not.toHaveBeenCalled();
+  });
+
+  it('pauses auto refresh when an ES|QL query switches to an index without a time field', async () => {
+    jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource').mockResolvedValue({
+      esqlSource: {} as Awaited<
+        ReturnType<typeof resolveEsqlSourceModule.resolveEsqlSource>
+      >['esqlSource'],
+      dataView: dataViewMock,
+    });
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateGlobalState)({
+        globalState: { refreshInterval: { pause: false, value: 5000 } },
+      })
+    );
+
+    await getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: { type: DataSourceType.Esql },
+          query: { esql: 'FROM no-time' },
+        },
+      })
+    );
+
+    expect(toolkit.getCurrentTab().globalState.refreshInterval).toEqual({
+      pause: true,
+      value: 5000,
+    });
   });
 
   it('should not resolve an empty ES|QL query', async () => {

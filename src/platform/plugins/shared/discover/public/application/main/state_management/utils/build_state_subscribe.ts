@@ -106,7 +106,7 @@ export const buildStateSubscribe =
         previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
       });
       dispatch(
-        internalStateActions.setDataView({
+        internalStateActions.assignNextDataView({
           tabId,
           dataView,
         })
