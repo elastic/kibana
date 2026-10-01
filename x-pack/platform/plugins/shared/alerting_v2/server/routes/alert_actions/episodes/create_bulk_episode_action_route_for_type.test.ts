@@ -44,8 +44,8 @@ describe('createBulkEpisodeActionRouteForType', () => {
     const request = {
       body: {
         items: [
-          { episode_id: 'episode-1', assignee_uid: 'u_abc123' },
-          { episode_id: 'episode-2', assignee_uid: null },
+          { alert_id: 'episode-1', assignee_uid: 'u_abc123' },
+          { alert_id: 'episode-2', assignee_uid: null },
         ],
       },
     } as unknown as KibanaRequest;
@@ -59,8 +59,8 @@ describe('createBulkEpisodeActionRouteForType', () => {
     await route.handle();
 
     expect(alertActionsClient.createBulkEpisodeActions).toHaveBeenCalledWith([
-      { action_type: 'assign', episode_id: 'episode-1', assignee_uid: 'u_abc123' },
-      { action_type: 'assign', episode_id: 'episode-2', assignee_uid: null },
+      { action_type: 'assign', alert_id: 'episode-1', assignee_uid: 'u_abc123' },
+      { action_type: 'assign', alert_id: 'episode-2', assignee_uid: null },
     ]);
     expect(ctx.response.ok).toHaveBeenCalledWith({
       body: { affected_count: 2, errors: [] },
@@ -71,7 +71,7 @@ describe('createBulkEpisodeActionRouteForType', () => {
     const RouteClass = makeRouteClass();
     const { ctx } = createRouteDependencies();
     const request = {
-      body: { items: [{ episode_id: 'episode-1', assignee_uid: null }] },
+      body: { items: [{ alert_id: 'episode-1', assignee_uid: null }] },
     } as unknown as KibanaRequest;
     const alertActionsClient = createAlertActionsClientMock();
     alertActionsClient.createBulkEpisodeActions.mockRejectedValueOnce(new Error('boom'));

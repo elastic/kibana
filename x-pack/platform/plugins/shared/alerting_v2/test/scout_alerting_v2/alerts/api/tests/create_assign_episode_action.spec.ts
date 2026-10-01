@@ -163,19 +163,16 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest(
-    'schema: rejects episode_id in the body (strict mode) with 400',
-    async ({ apiClient }) => {
-      // The episode id moved to the path; the assign body only carries the
-      // assignee.
-      const response = await apiClient.post(getAssignEpisodeActionUrl('any-episode'), {
-        headers: writerHeaders,
-        body: { episode_id: 'any-episode', assignee_uid: 'u_someone' },
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    }
-  );
+  apiTest('schema: rejects alert_id in the body (strict mode) with 400', async ({ apiClient }) => {
+    // The episode id moved to the path; the assign body only carries the
+    // assignee.
+    const response = await apiClient.post(getAssignEpisodeActionUrl('any-episode'), {
+      headers: writerHeaders,
+      body: { alert_id: 'any-episode', assignee_uid: 'u_someone' },
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
 
   apiTest('schema: rejects assignee_uid over 256 chars with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getAssignEpisodeActionUrl('any-episode'), {
@@ -222,8 +219,8 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
       body: { assignee_uid: 'u_someone' },
     });
     expect(response).toHaveStatusCode(404);
-    expect(response.body.code).toBe('ALERT_EPISODE_NOT_FOUND');
-    expect(response.body.details).toMatchObject({ episode_id: 'unknown-episode' });
+    expect(response.body.code).toBe('ALERT_NOT_FOUND');
+    expect(response.body.details).toMatchObject({ alert_id: 'unknown-episode' });
   });
 
   apiTest(

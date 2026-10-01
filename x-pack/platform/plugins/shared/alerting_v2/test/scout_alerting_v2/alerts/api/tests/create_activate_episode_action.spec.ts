@@ -181,8 +181,8 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
       body: { reason: 'valid reason' },
     });
     expect(response).toHaveStatusCode(404);
-    expect(response.body.code).toBe('ALERT_EPISODE_NOT_FOUND');
-    expect(response.body.details).toMatchObject({ episode_id: 'unknown-episode' });
+    expect(response.body.code).toBe('ALERT_NOT_FOUND');
+    expect(response.body.details).toMatchObject({ alert_id: 'unknown-episode' });
   });
 
   apiTest(
@@ -219,9 +219,9 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
       });
 
       expect(response).toHaveStatusCode(409);
-      expect(response.body.code).toBe('ALERT_EPISODE_NOT_LATEST');
+      expect(response.body.code).toBe('ALERT_NOT_LATEST');
       expect(response.body.details).toMatchObject({
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
         group_hash: groupHash,
       });
 
@@ -256,7 +256,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
       });
 
       expect(response).toHaveStatusCode(409);
-      expect(response.body.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
+      expect(response.body.code).toBe('INVALID_ALERT_STATE_TRANSITION');
 
       const ruleEvents = await apiServices.alertingV2.ruleEvents.find(ruleId);
       expect(ruleEvents).toHaveLength(1);

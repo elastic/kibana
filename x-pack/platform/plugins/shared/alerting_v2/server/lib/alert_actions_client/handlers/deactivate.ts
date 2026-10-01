@@ -43,8 +43,8 @@ const assertEpisodeIsDeactivatable = (alertEvent: AlertEventRecord): void => {
     code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
     details: {
       group_hash: alertEvent.group_hash,
-      episode_id: alertEvent.episode_id,
-      episode_status: status,
+      alert_id: alertEvent.episode_id,
+      alert_status: status,
       action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
     },
   });

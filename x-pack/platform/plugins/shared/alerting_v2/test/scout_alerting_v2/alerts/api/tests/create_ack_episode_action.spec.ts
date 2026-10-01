@@ -120,18 +120,15 @@ apiTest.describe('Create ack episode action API', { tag: '@local-stateful-classi
     }
   );
 
-  apiTest(
-    'schema: rejects episode_id in the body (strict mode) with 400',
-    async ({ apiClient }) => {
-      // The episode id moved to the path; the ack body must be empty.
-      const response = await apiClient.post(getAckEpisodeActionUrl('any-episode'), {
-        headers: writerHeaders,
-        body: { episode_id: 'any-episode' },
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    }
-  );
+  apiTest('schema: rejects alert_id in the body (strict mode) with 400', async ({ apiClient }) => {
+    // The alert id moved to the path; the ack body must be empty.
+    const response = await apiClient.post(getAckEpisodeActionUrl('any-episode'), {
+      headers: writerHeaders,
+      body: { alert_id: 'any-episode' },
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getAckEpisodeActionUrl('any-episode'), {
@@ -157,8 +154,8 @@ apiTest.describe('Create ack episode action API', { tag: '@local-stateful-classi
       body: {},
     });
     expect(response).toHaveStatusCode(404);
-    expect(response.body.code).toBe('ALERT_EPISODE_NOT_FOUND');
-    expect(response.body.details).toMatchObject({ episode_id: 'unknown-episode' });
+    expect(response.body.code).toBe('ALERT_NOT_FOUND');
+    expect(response.body.details).toMatchObject({ alert_id: 'unknown-episode' });
   });
 
   apiTest(
