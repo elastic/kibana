@@ -487,6 +487,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // services/serviceVars here means a resume after a Back→add-service→Next sequence
         // restores the complete service set, not just what was deployed first.
         let soOk = true;
+        // Default true: when there is no deployment record to update, there is no cleanup to track
+        // either, so the failure return and isDirty-clear conditions below degrade gracefully.
+        let cleanupFullySucceeded = true;
         if (onboardingDeploymentId) {
           // Build the persisted policy-ID list from the post-cleanup snapshot: filter out
           // instance IDs removed by cleanup (cleanedLiveStale) before merging with current
@@ -502,7 +505,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           const allLiveStaleSucceededInDeploy = Object.keys(liveStalePolicyIds).every((id) =>
             cleanedLiveStale.includes(id)
           );
-          const cleanupFullySucceeded =
+          cleanupFullySucceeded =
             Object.keys(remainingPending).length === 0 && allLiveStaleSucceededInDeploy;
           soOk = await updateDeployment(onboardingDeploymentId, {
             ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
@@ -531,7 +534,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                     : { ...priorIds, ...policyIdsByInstance },
                 }
               : {}),
-            ...(cleanupFullySucceeded || (dirtyUpdateApplied && mergedFailed.length === 0)
+            // Only update services when cleanup fully succeeded: if cleanup partially failed,
+            // the stale policies are still live. Reducing services before they are removed
+            // would lose the pending-cleanup record on resume, leaving orphaned policies.
+            ...(cleanupFullySucceeded
               ? {
                   services: selectedServiceIds,
                   serviceVars: toSOServiceVars(
@@ -569,10 +575,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           ...(isNewPolicyDeploy && mergedFailed.length > 0 ? {} : { policyIdsByInstance }),
           failedInstances: mergedFailed,
           deployErrors: mergedErrors,
-          // Clear drift flag only when the SO write confirmed the new state — if the SO PUT
-          // failed, the updated settings were not persisted, so isDirty must stay true to force
-          // a retry rather than silently losing the change.
-          ...(dirtyUpdateApplied && mergedFailed.length === 0 && soOk
+          // Clear drift flag only when: (a) the SO write confirmed the new state and (b) cleanup
+          // fully succeeded so the SO services list was updated. If cleanup partially failed, isDirty
+          // stays true so the user retries the full dirty+cleanup cycle rather than silently losing
+          // the cleanup record.
+          ...(dirtyUpdateApplied && mergedFailed.length === 0 && soOk && cleanupFullySucceeded
             ? { isDirty: false, isPolicySelectionDirty: false }
             : {}),
           // When switching to 'new' agent-policy mode, deployNewAgentPolicy created fresh package
@@ -588,9 +595,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             ? { pendingCleanupPolicyIds: { ...remainingPending, ...oldPolicyIdsByInstance } }
             : {}),
         });
-        // Block navigation when the SO write failed: the updated settings are not durable.
-        // isDirty is already kept true by the soOk guard above, so a retry re-runs the SO write.
-        return { failed: mergedFailed.length > 0 || !soOk };
+        // Block navigation when the SO write failed or cleanup did not fully complete: the updated
+        // settings are not durable, or stale policies remain. isDirty and pendingCleanupPolicyIds
+        // stay set so a retry re-runs the full cycle.
+        return { failed: mergedFailed.length > 0 || !soOk || !cleanupFullySucceeded };
       } catch (err) {
         // Unexpected error — mark all retried instances as failed.
         const msg = extractErrorMessage(err);
