@@ -118,7 +118,11 @@ export async function updateAgentBasedPolicy(
       const v = entry?.value;
       if (typeof v === 'string') {
         existingVarValues[key] = v;
-      } else if (v && typeof v === 'object' && (v as Record<string, unknown>).isSecretRef === true) {
+      } else if (
+        v &&
+        typeof v === 'object' &&
+        (v as Record<string, unknown>).isSecretRef === true
+      ) {
         existingVarValues[key] = v as { isSecretRef: boolean; id: string };
       }
     }
