@@ -7,6 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { isRecord } from '../../lib/type_guards';
 import type { MetricsSample } from './collector';
 import type { DispatchRecord } from './types';
 
@@ -63,6 +64,28 @@ export const buildRunPaths = (outDir: string, runId: string): RunPaths => {
 export const writeJson = (file: string, value: unknown): void => {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);
+};
+
+const runExistsError = (runId: string, dir: string): Error =>
+  new Error(`Run "${runId}" already exists in ${dir}; pick another --run-id or --out-dir.`);
+
+/** Fails when `runId` has already been started, so a new run cannot overwrite or extend its files. */
+export const assertRunIsNew = (paths: RunPaths, runId: string): void => {
+  if (fs.existsSync(paths.manifest)) throw runExistsError(runId, paths.dir);
+};
+
+/**
+ * Claims the run directory by creating its manifest exclusively, so two starts with the same id
+ * cannot both proceed. Later updates of the manifest use `writeJson`.
+ */
+export const createRunManifest = (paths: RunPaths, manifest: RunManifest): void => {
+  fs.mkdirSync(paths.dir, { recursive: true });
+  try {
+    fs.writeFileSync(paths.manifest, `${JSON.stringify(manifest, null, 2)}\n`, { flag: 'wx' });
+  } catch (error) {
+    if (isRecord(error) && error.code === 'EEXIST') throw runExistsError(manifest.runId, paths.dir);
+    throw error;
+  }
 };
 
 export const readJson = <T>(file: string): T => {

@@ -37,7 +37,9 @@ import { buildReport, distribution, renderReportMarkdown } from './lib/report';
 import type { RunManifest, RunPaths } from './lib/run_store';
 import {
   appendNdjson,
+  assertRunIsNew,
   buildRunPaths,
+  createRunManifest,
   readDispatches,
   readJson,
   readSamples,
@@ -275,6 +277,10 @@ const finalizeReport = async ({
 };
 
 const runCommand = async (config: LoadTestConfig, log: ToolingLog): Promise<void> => {
+  const runId = config.runId ?? generateRunId();
+  const paths = buildRunPaths(config.outDir, runId);
+  assertRunIsNew(paths, runId);
+
   const clients = connect(config, log);
   const { esClient, kbnClient } = clients;
   // A dry run only builds the plan, so it needs the alerts to clone but not a working Worker.
@@ -306,11 +312,8 @@ const runCommand = async (config: LoadTestConfig, log: ToolingLog): Promise<void
   }
   logPlan(plan, log);
 
-  const runId = config.runId ?? generateRunId();
-  const paths = buildRunPaths(config.outDir, runId);
-  writeJson(paths.plan, plan);
-
   if (!target) {
+    writeJson(paths.plan, plan);
     log.info(`Dry run: plan written to ${paths.plan}; nothing was indexed or dispatched.`);
     return;
   }
@@ -336,7 +339,8 @@ const runCommand = async (config: LoadTestConfig, log: ToolingLog): Promise<void
       lastDispatchOffsetMs: plan.lastDispatchOffsetMs,
     },
   };
-  writeJson(paths.manifest, manifest);
+  createRunManifest(paths, manifest);
+  writeJson(paths.plan, plan);
   log.info(`Run ${runId}: writing to ${paths.dir}`);
 
   const dispatches: DispatchRecord[] = [];
