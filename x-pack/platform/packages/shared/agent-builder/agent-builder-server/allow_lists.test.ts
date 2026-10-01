@@ -17,6 +17,14 @@ describe('isAllowedBuiltinTool', () => {
     expect(isAllowedBuiltinTool('nightshift_sandbox_bash')).toBe(true);
     expect(isAllowedBuiltinTool('nightshift_sandbox_view_file')).toBe(true);
   });
+
+  it('allows the agentic investigations tools', () => {
+    expect(isAllowedBuiltinTool('investigations.set_impact')).toBe(true);
+  });
+
+  it('rejects unlisted tool ids', () => {
+    expect(isAllowedBuiltinTool('investigations.not_a_tool')).toBe(false);
+  });
 });
 
 describe('isAllowedBuiltinAttachment', () => {
