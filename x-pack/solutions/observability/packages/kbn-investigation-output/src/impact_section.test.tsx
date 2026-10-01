@@ -119,6 +119,25 @@ describe('ImpactSection', () => {
     expect(order.indexOf(chart)).toBeLessThan(order.indexOf(description));
   });
 
+  it('puts the evidence chart before the impact summary', () => {
+    render(
+      <I18nProvider>
+        <ImpactSection
+          impact={{
+            summary: 'Checkout failed.',
+            evidence: { chart: sampleChart },
+          }}
+        />
+      </I18nProvider>
+    );
+
+    const section = screen.getByTestId('investigationOutputImpact');
+    const chart = screen.getByTestId('investigationEvidenceChart');
+    const summary = screen.getByTestId('investigationOutputImpactSummary');
+    const order = Array.from(section.querySelectorAll('*'));
+    expect(order.indexOf(chart)).toBeLessThan(order.indexOf(summary));
+  });
+
   it('cuts a long summary short behind "Show more" and shows it in full on click', () => {
     const summary = `${'Checkout failed for most shoppers. '.repeat(20)}Final sentence.`;
     const entities = Array.from({ length: 8 }, (_, index) => ({ name: `service-${index}` }));

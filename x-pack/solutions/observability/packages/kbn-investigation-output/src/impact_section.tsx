@@ -92,9 +92,9 @@ const ImpactEntityRow: React.FC<{ entity: InvestigationImpactEntity; isLast: boo
 };
 
 /**
- * What the investigation found was affected: the impact summary (long ones cut short behind
- * "Show more"), the evidence backing it (chart first), then the impacted entities in one shared
- * panel.
+ * What the investigation found was affected: the evidence backing the impact (chart first), the
+ * impact summary (long ones cut short behind "Show more"), then the impacted entities in one
+ * shared panel.
  */
 export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
   const { summary = '', evidence, entities = [] } = impact;
@@ -112,12 +112,20 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
 
   return (
     <div data-test-subj="investigationOutputImpact">
-      {trimmedSummary && (
-        <div data-test-subj="investigationOutputImpactSummary">
-          <EuiMarkdownFormat textSize="s" color="default">
-            {shownSummary}
-          </EuiMarkdownFormat>
+      {evidence && (
+        <div data-test-subj="investigationOutputImpactEvidence">
+          <EvidenceItem evidence={evidence} />
         </div>
+      )}
+      {trimmedSummary && (
+        <>
+          {evidence && <EuiSpacer size="s" />}
+          <div data-test-subj="investigationOutputImpactSummary">
+            <EuiMarkdownFormat textSize="s" color="default">
+              {shownSummary}
+            </EuiMarkdownFormat>
+          </div>
+        </>
       )}
       {isSummaryLong && (
         <EuiButtonEmpty
@@ -135,14 +143,6 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
                 defaultMessage: 'Show more',
               })}
         </EuiButtonEmpty>
-      )}
-      {evidence && (
-        <>
-          {trimmedSummary && <EuiSpacer size="s" />}
-          <div data-test-subj="investigationOutputImpactEvidence">
-            <EvidenceItem evidence={evidence} />
-          </div>
-        </>
       )}
       {entities.length > 0 && (
         <>

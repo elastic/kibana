@@ -248,7 +248,8 @@ Each entry has a `chart`, a `description`, or both:
   no HTML.
 - `chart` — optional, a small static chart of the observation. Add one when the observation is a
   trend over time or a comparison across a few categories — for example an error rate spiking at a
-  deploy, or latency per region. Shape:
+  deploy, or latency per region. The chart renders in a narrow flyout, so keep `title` and both
+  axis `label`s to a few words — a long one gets cut off. Shape:
   - `type`: `line` for values over time, `bar` for counts or comparisons.
   - `title`: what the chart shows, e.g. "orders-api pool utilization".
   - `x_axis`: `{ "type": "time" }` when x values are ISO 8601 timestamps, `{ "type": "category" }`
@@ -257,6 +258,9 @@ Each entry has a `chart`, a `description`, or both:
   - `y_axis`: optional `label` and `unit` (`number`, `percent` on a 0–100 scale, `bytes`, `ms`,
     `s`).
   - `series`: 1–5 named series of `{ "x": ..., "y": <number> }` points, at most 100 points each.
+    **All series in one chart must share the same unit** — one axis, one scale. Don't mix, for
+    example, a latency series (`ms`) with a count series (`number`) in the same chart; give them
+    separate charts instead.
   - `annotations`: optional, at most 5 markers such as the deploy time
     (`{ "x": "<timestamp>", "label": "Deploy v2.3.1" }`), or a highlighted range when `x_end` is set.
   - `stacked`: optional, bar charts only.

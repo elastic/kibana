@@ -78,13 +78,15 @@ const SEVERITY_BADGES: Record<Severity, { color: string; label: string }> = {
     }),
   },
   '40-medium': {
-    color: 'accent',
+    // Matches the severity dot color on the Nightshift landing page (`SEVERITY_DOT_COLOR`).
+    color: 'primary',
     label: i18n.translate('xpack.nightshiftInvestigations.flyout.severityMedium', {
       defaultMessage: 'Medium',
     }),
   },
   '20-low': {
-    color: 'default',
+    // Matches the severity dot color on the Nightshift landing page (`SEVERITY_DOT_COLOR`).
+    color: 'success',
     label: i18n.translate('xpack.nightshiftInvestigations.flyout.severityLow', {
       defaultMessage: 'Low',
     }),
