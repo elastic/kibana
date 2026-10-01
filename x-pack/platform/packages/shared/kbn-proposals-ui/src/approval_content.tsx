@@ -204,7 +204,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             color: 'danger',
             iconType: 'cross',
             onClick: declineConfirmAction,
-            isDisabled: isDeclineDisabled,
+            isDisabled: isDeclineDisabled || primaryAction?.isDisabled,
             'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm-decline` : undefined,
           }
         : primaryAction;
