@@ -81,6 +81,13 @@ silently resolves to `any` — nothing fails to compile, but the handler gets ze
 its own Zod schema. Do this for every action as you write it, not as a later cleanup pass; with a dozen
 or more actions in one file it's easy to leave some untyped if you defer it.
 
+**Wrap every Zod schema in `lazySchema()`.** Whenever a Zod schema is assigned to a variable, wrap it in
+`lazySchema(() => ...)` from `@kbn/zod/v4`. This covers the input schemas in `types.ts` and also
+module-level helpers, e.g. `const IpAddressSchema = lazySchema(() => z.union([z.ipv4(), z.ipv6()]));`.
+Wrap the spec's `schema` and any inline action `input` the same way. `lazySchema` defers building the
+schema until first use, so loading the connector registry does not build every connector's schemas at
+import time.
+
 **Keep `test.enabled: true`.** The scaffold generates `test: { enabled: true, handler: ... }` — don't
 drop `enabled` when you flesh out the handler body.
 
@@ -266,6 +273,8 @@ Then, before treating the connector as done, re-read the whole diff once, end to
 - A size bound measured with `.length` on a serialized string where the message says "bytes"
 - A regex guarding a URL path that has only been tested for what it accepts, never for what it must reject
 - Handlers still typed with implicit `any` (missing the `input: XInput` annotation)
+- A Zod schema assigned to a variable (`const XSchema = z.…`), or a spec `schema` / inline action
+  `input`, that is not wrapped in `lazySchema(() => ...)`
 - `test.enabled` missing or set to `false`
 - Leftover schemas/constants from earlier iterations that are no longer referenced anywhere
 - Repeated calls to the same helper (e.g. building a base URL twice) that should be a single local variable

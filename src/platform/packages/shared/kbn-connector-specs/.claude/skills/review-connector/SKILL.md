@@ -101,9 +101,12 @@ The checklist below is for what a test cannot judge: whether those descriptions 
   pagination and polling loops), response shaping, credential exchanges, and code repeated across
   handlers. Each moved file needs its own test file. See `gmail/mime.ts` and
   `azure_monitor/azure_ad_token.ts` for the pattern.
-- **`lazySchema()` wrapping**: Every schema in `types.ts` — and every inline `z.object()` used as an
-  action `input` — must be wrapped with `lazySchema(() => z.object({...}))` from `@kbn/zod/v4`. Bare
-  `z.object()` is a runtime behavior difference, not just style. Flag any unwrapped schema.
+- **`lazySchema()` wrapping**: Every Zod schema assigned to a variable must be wrapped with
+  `lazySchema(() => ...)` from `@kbn/zod/v4`. That means the input schemas in `types.ts`, and also
+  module-level helpers in any file, such as
+  `const IpAddressSchema = lazySchema(() => z.union([z.ipv4(), z.ipv6()]));`. The spec's `schema` and
+  every inline action `input` are wrapped the same way. A bare `z.…` at module level is built eagerly at
+  import, which is a runtime behavior difference, not just style. Flag any unwrapped schema.
 - **`callToolJson` vs `callToolContent`** (MCP connectors): Typed data actions (search, list, get) must
   use `callToolJson(ctx, 'tool_name', args)`. File download or binary actions must use
   `callToolContent(ctx, 'tool_name', args)`. Using `callToolJson` on a binary response corrupts data;

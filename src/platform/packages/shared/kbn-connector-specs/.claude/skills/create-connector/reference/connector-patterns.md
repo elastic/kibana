@@ -74,7 +74,7 @@ After running the generator, fill in the TODO placeholders.
 
 ```typescript
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import { SearchInputSchema, GetItemInputSchema } from './types';
 import type { SearchInput, GetItemInput } from './types';
@@ -97,9 +97,11 @@ export const YourConnector: ConnectorSpec = {
     types: [{ type: 'bearer' }],     // or 'api_key_header', 'oauth_client_credentials'
   },
 
-  schema: z.object({
-    // Config fields (optional — only if the connector needs user-configured settings)
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      // Config fields (optional — only if the connector needs user-configured settings)
+    })
+  ),
 
   actions: {
     search: {
@@ -157,17 +159,21 @@ Define Zod schemas and inferred types in a separate `types.ts` file alongside th
 **Path**: `src/platform/packages/shared/kbn-connector-specs/src/specs/<name>/types.ts`
 
 ```typescript
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const SearchInputSchema = z.object({
-  query: z.string().describe('Search query string'),
-  limit: z.number().optional().describe('Maximum results (default: 20)'),
-});
+export const SearchInputSchema = lazySchema(() =>
+  z.object({
+    query: z.string().describe('Search query string'),
+    limit: z.number().optional().describe('Maximum results (default: 20)'),
+  })
+);
 export type SearchInput = z.infer<typeof SearchInputSchema>;
 
-export const GetItemInputSchema = z.object({
-  id: z.string().describe('The item ID'),
-});
+export const GetItemInputSchema = lazySchema(() =>
+  z.object({
+    id: z.string().describe('The item ID'),
+  })
+);
 export type GetItemInput = z.infer<typeof GetItemInputSchema>;
 ```
 
@@ -176,12 +182,23 @@ This pattern (used by ServiceNow, Slack, GitHub connectors):
 - Keeps the main connector file focused on handler logic
 - Gives handlers full autocomplete without inline `as` casts
 
+**Every Zod schema assigned to a variable is wrapped in `lazySchema()`** — not only the exported
+input schemas, but module-level helpers too:
+
+```typescript
+const IpAddressSchema = lazySchema(() => z.union([z.ipv4(), z.ipv6()]));
+```
+
+`lazySchema` defers building the schema until first use, so loading the connector registry does not
+build every connector's schemas at import time. The spec's `schema` and any inline action `input` are
+wrapped the same way.
+
 ## MCP-Native Connector Pattern
 
 For connectors backed by an MCP server. Uses `withMcpClient` from `lib/mcp` to wrap MCP tool calls as typed actions.
 
 ```typescript
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import { withMcpClient } from '../../lib/mcp/with_mcp_client';
 import { UISchemas } from '../../connector_spec_ui';
@@ -202,20 +219,24 @@ export const YourMcpConnector: ConnectorSpec = {
     types: [{ type: 'bearer' }],
   },
 
-  schema: z.object({
-    serverUrl: UISchemas.url('https://mcp.example.com/mcp/')
-      .describe('MCP server URL')
-      .meta({ label: 'Server URL' }),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      serverUrl: UISchemas.url('https://mcp.example.com/mcp/')
+        .describe('MCP server URL')
+        .meta({ label: 'Server URL' }),
+    })
+  ),
 
   actions: {
     search: {
       isTool: true,
       scope: 'read',
       description: 'Search Your Service by keyword using the underlying MCP tool.',
-      input: z.object({
-        query: z.string().describe('Keyword or natural-language search query'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          query: z.string().describe('Keyword or natural-language search query'),
+        })
+      ),
       handler: withMcpClient(async (client, input) => {
         return client.callTool({ name: 'your_search', arguments: input });
       }),
@@ -225,7 +246,7 @@ export const YourMcpConnector: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description: 'List all MCP tools exposed by the server. Useful for dynamic discovery.',
-      input: z.object({}),
+      input: lazySchema(() => z.object({})),
       handler: withMcpClient(async (client) => {
         return client.listTools();
       }),
@@ -234,10 +255,12 @@ export const YourMcpConnector: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description: 'Call any MCP tool by name with arbitrary arguments. Use listTools first to discover available tools.',
-      input: z.object({
-        name: z.string().describe('The MCP tool name (from listTools)'),
-        arguments: z.record(z.unknown()).optional().describe('Tool arguments as a key/value map'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          name: z.string().describe('The MCP tool name (from listTools)'),
+          arguments: z.record(z.unknown()).optional().describe('Tool arguments as a key/value map'),
+        })
+      ),
       handler: withMcpClient(async (client, input) => {
         return client.callTool(input);
       }),
@@ -451,17 +474,19 @@ block even though the DNS URL was already read.
 Schema config fields define the "Connector settings" section of the creation form. Every field in the `schema` object **must** have `.meta()` with at least a `label`, or the field will render as an unlabeled input.
 
 ```typescript
-schema: z.object({
-  instanceUrl: z
-    .string()
-    .url()
-    .describe('ServiceNow instance URL')
-    .meta({
-      label: 'Instance URL',           // REQUIRED - displayed as the field label
-      widget: 'text',                   // Widget type (text, password, select, etc.)
-      placeholder: 'https://your-instance.service-now.com',
-    }),
-}),
+schema: lazySchema(() =>
+  z.object({
+    instanceUrl: z
+      .string()
+      .url()
+      .describe('ServiceNow instance URL')
+      .meta({
+        label: 'Instance URL',           // REQUIRED - displayed as the field label
+        widget: 'text',                   // Widget type (text, password, select, etc.)
+        placeholder: 'https://your-instance.service-now.com',
+      }),
+  })
+),
 ```
 
 Available `.meta()` options: `label`, `widget`, `placeholder`, `helpText`, `hidden`, `sensitive`, `disabled`, `order`.
@@ -492,11 +517,13 @@ For URL fields, use the `UISchemas.url()` helper from `connector_spec_ui.ts`:
 ```typescript
 import { UISchemas } from '../../connector_spec_ui';
 
-schema: z.object({
-  apiUrl: UISchemas.url('https://api.example.com')
-    .describe('API endpoint URL')
-    .meta({ label: 'API URL' }),
-}),
+schema: lazySchema(() =>
+  z.object({
+    apiUrl: UISchemas.url('https://api.example.com')
+      .describe('API endpoint URL')
+      .meta({ label: 'API URL' }),
+  })
+),
 ```
 
 ## OAuth Auth Configuration
@@ -819,15 +846,19 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
   never exercise the encoding path.
 
 ```typescript
-export const SearchInputSchema = z.object({
-  query: z.string().describe('Keyword or natural-language search query'),
-  limit: z.number().optional().describe('Maximum results to return (1–100, default 20)'),
-  state: z.string().optional().describe('Filter by state: "new", "in_progress", or "resolved"'),
-});
+export const SearchInputSchema = lazySchema(() =>
+  z.object({
+    query: z.string().describe('Keyword or natural-language search query'),
+    limit: z.number().optional().describe('Maximum results to return (1–100, default 20)'),
+    state: z.string().optional().describe('Filter by state: "new", "in_progress", or "resolved"'),
+  })
+);
 
-export const GetItemInputSchema = z.object({
-  id: z.string().describe('The item sys_id, returned by the search action'),
-});
+export const GetItemInputSchema = lazySchema(() =>
+  z.object({
+    id: z.string().describe('The item sys_id, returned by the search action'),
+  })
+);
 ```
 
 ### `skill` property

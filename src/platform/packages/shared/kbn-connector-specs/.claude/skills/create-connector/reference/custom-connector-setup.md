@@ -236,16 +236,18 @@ Every Zod parameter schema **must** call `.describe()`. Include:
 - A concrete example
 
 ```typescript
-const SearchInputSchema = z.object({
-  query: z.string().describe('Full-text search query. Example: "Q4 budget report"'),
-  maxResults: z
-    .number()
-    .int()
-    .min(1)
-    .max(50)
-    .optional()
-    .describe('Maximum number of results to return (1–50). Defaults to 10.'),
-});
+const SearchInputSchema = lazySchema(() =>
+  z.object({
+    query: z.string().describe('Full-text search query. Example: "Q4 budget report"'),
+    maxResults: z
+      .number()
+      .int()
+      .min(1)
+      .max(50)
+      .optional()
+      .describe('Maximum number of results to return (1–50). Defaults to 10.'),
+  })
+);
 ```
 
 ### `skill` property
