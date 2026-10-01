@@ -135,8 +135,11 @@ export const AlertsPageContent = memo(({ dataView }: AlertsPageContentProps) => 
         noPadding={globalFullScreen}
         data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
       >
-        <Display show={!hasFullScreenContent}>
+        {/* Must stay a direct child of the page wrapper: CSS sticky is confined to its parent's height. */}
+        {!hasFullScreenContent && (
           <SecurityAppHeader title={PAGE_TITLE} menu={headerMenu} spacing="largeBleed" />
+        )}
+        <Display show={!hasFullScreenContent}>
           <EuiSpacer size="m" />
           <SearchBarSection dataView={dataView} />
           <EuiSpacer size="m" />

@@ -11,7 +11,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { TestProviders } from '../../../common/mock';
-import { AlertsPageContent, SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID } from './content';
+import {
+  ALERTS_PAGE_ASSIGNEE_FILTER_TEST_ID,
+  AlertsPageContent,
+  SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID,
+} from './content';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { GO_TO_RULES_MENU_ITEM_TEST_ID } from './header/use_alerts_header_menu';
@@ -74,23 +78,36 @@ describe('AlertsPageContent', () => {
     expect(screen.getByTestId(ADD_INTEGRATIONS_MENU_ITEM_TEST_ID)).toBeInTheDocument();
   });
 
-  it('hides the header and search bar while the alerts table is in full screen', async () => {
+  it('renders the header as a direct child of the page wrapper so it can stay sticky', async () => {
+    renderWithProviders(<AlertsPageContent dataView={dataView} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root).parentElement).toBe(
+        screen.getByTestId(SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID)
+      );
+    });
+  });
+
+  it('hides the header and filters while the alerts table is in full screen', async () => {
     renderWithProviders(<AlertsPageContent dataView={dataView} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeVisible();
+      expect(screen.getByTestId(ALERTS_PAGE_ASSIGNEE_FILTER_TEST_ID)).toBeVisible();
     });
 
     document.body.classList.add('euiDataGrid__restrictBody');
 
     await waitFor(() => {
-      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).not.toBeVisible();
+      expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.title)).not.toBeInTheDocument();
+      expect(screen.getByTestId(ALERTS_PAGE_ASSIGNEE_FILTER_TEST_ID)).not.toBeVisible();
     });
 
     document.body.classList.remove('euiDataGrid__restrictBody');
 
     await waitFor(() => {
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeVisible();
+      expect(screen.getByTestId(ALERTS_PAGE_ASSIGNEE_FILTER_TEST_ID)).toBeVisible();
     });
   });
 
