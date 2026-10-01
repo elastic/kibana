@@ -35,6 +35,9 @@ import { isElasticConsoleEnabled } from './is_enabled';
 const SOCKET_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 // Agent conversations (long histories, tool results, base64 images) easily exceed the 1MB default.
 const MAX_BODY_BYTES = 20 * 1024 * 1024; // 20MB
+// Long agent sessions accumulate many messages; the body size limit bounds the total payload.
+export const MAX_MESSAGES = 10_000;
+export const MAX_CONTENT_PARTS = 2_000;
 
 export const registerChatCompletionsRoute = ({
   router,
@@ -71,7 +74,7 @@ export const registerChatCompletionsRoute = ({
                   schema.oneOf([
                     schema.string(),
                     schema.arrayOf(schema.recordOf(schema.string(), schema.any()), {
-                      maxSize: 100,
+                      maxSize: MAX_CONTENT_PARTS,
                     }),
                   ])
                 ),
@@ -91,7 +94,7 @@ export const registerChatCompletionsRoute = ({
                 tool_call_id: schema.maybe(schema.string()),
                 name: schema.maybe(schema.string()),
               }),
-              { minSize: 1, maxSize: 1000 }
+              { minSize: 1, maxSize: MAX_MESSAGES }
             ),
             stream: schema.boolean({ defaultValue: false }),
             temperature: schema.maybe(schema.number()),

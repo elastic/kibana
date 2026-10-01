@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
-import { registerChatCompletionsRoute } from './chat_completions';
+import { MAX_CONTENT_PARTS, MAX_MESSAGES, registerChatCompletionsRoute } from './chat_completions';
 
 const setup = () => {
   const chatComplete = jest
@@ -80,6 +80,35 @@ describe('chat completions route config', () => {
   it('accepts request bodies up to 20MB', () => {
     const { getRouteConfig } = setup();
     expect(getRouteConfig()?.options?.body?.maxBytes).toBe(20 * 1024 * 1024);
+  });
+
+  const validateBody = (body: Record<string, unknown>) => {
+    const validate = setup().getRouteConfig()?.validate;
+    if (!validate || typeof validate === 'function' || !validate.body) {
+      throw new Error('missing body validation');
+    }
+    return (validate.body as { validate: (value: unknown) => unknown }).validate(body);
+  };
+
+  it('accepts long conversations up to MAX_MESSAGES messages', () => {
+    const message = { role: 'user', content: 'hi' };
+    expect(() =>
+      validateBody({ messages: Array.from({ length: MAX_MESSAGES }, () => message) })
+    ).not.toThrow();
+    expect(() =>
+      validateBody({ messages: Array.from({ length: MAX_MESSAGES + 1 }, () => message) })
+    ).toThrow();
+  });
+
+  it('accepts messages with up to MAX_CONTENT_PARTS content parts', () => {
+    const part = { type: 'text', text: 'hi' };
+    const content = (length: number) => Array.from({ length }, () => part);
+    expect(() =>
+      validateBody({ messages: [{ role: 'user', content: content(MAX_CONTENT_PARTS) }] })
+    ).not.toThrow();
+    expect(() =>
+      validateBody({ messages: [{ role: 'user', content: content(MAX_CONTENT_PARTS + 1) }] })
+    ).toThrow();
   });
 });
 
