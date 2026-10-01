@@ -8,7 +8,7 @@ creation without importing Security's implementation or building a directory cli
 const picker = security.uiApi.components.getServiceAccountPicker({
   selectedId,
   onSelect: (account) => {
-    setSelectedId(account.id);
+    setSelectedId(account?.id);
     setIsOpen(false);
   },
   onClose: () => setIsOpen(false),
@@ -25,6 +25,10 @@ renders nothing when service accounts are disabled. Manage and Create account fo
 capabilities. Creation reuses `getCreateServiceAccount`'s flyout implementation and selects the newly
 created account. Products must still authorize and persist their workload binding on the server;
 a picker selection does not grant permission to execute as that account.
+
+`allowCurrentUser` pins a "Current user" option first. It stays available while accounts load or
+when the user cannot list them, appears selected when `selectedId` is empty, and calls `onSelect`
+with `null`. The host decides what running as the current user means for its workload.
 
 Hosts that already own a directory (such as Monaco completion providers) can supply `directory`
 with accounts, loading/access/error state, pagination, and retry callbacks. This prevents duplicate

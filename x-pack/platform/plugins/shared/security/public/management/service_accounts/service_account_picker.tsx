@@ -46,6 +46,7 @@ export const ServiceAccountPicker = ({
   roleManagementEnabled,
   selectedId,
   onSelect,
+  allowCurrentUser = false,
   search = '',
   onClose,
   directory,
@@ -130,15 +131,21 @@ export const ServiceAccountPicker = ({
     },
   };
   const query = search.toLocaleLowerCase();
-  const choices = source.accounts.filter(
-    (account) =>
-      account.enabled &&
-      account.assumable &&
-      `${account.name} ${account.id} ${account.description ?? ''}`
-        .toLocaleLowerCase()
-        .includes(query)
-  );
-  const optionCount = choices.length + (source.hasMore ? 1 : 0);
+  const ready = source.status === 'ready';
+  const choices = ready
+    ? source.accounts.filter(
+        (account) =>
+          account.enabled &&
+          account.assumable &&
+          `${account.name} ${account.id} ${account.description ?? ''}`
+            .toLocaleLowerCase()
+            .includes(query)
+      )
+    : [];
+  const hasMore = ready && Boolean(source.hasMore);
+  const offset = allowCurrentUser ? 1 : 0;
+  const loadMoreIndex = offset + choices.length;
+  const optionCount = loadMoreIndex + (hasMore ? 1 : 0);
   const active = Math.max(0, Math.min(activeIndex ?? localActiveIndex, optionCount - 1));
   const moveTo = (index: number) => {
     setLocalActiveIndex(index);
@@ -152,11 +159,48 @@ export const ServiceAccountPicker = ({
   const loadMoreLabel = i18n.translate('xpack.security.serviceAccountPicker.loadMore', {
     defaultMessage: 'Load more service accounts',
   });
-  const selected = choices[active];
+  const currentUserLabel = i18n.translate('xpack.security.serviceAccountPicker.currentUser', {
+    defaultMessage: 'Current user',
+  });
+  const selected = choices[active - offset];
+  const activeLabel =
+    allowCurrentUser && active === 0
+      ? currentUserLabel
+      : selected
+      ? `${selected.name} ${selected.roles.join(', ')}`
+      : hasMore
+      ? loadMoreLabel
+      : '';
   useEffect(() => {
     optionRefs.current[active]?.scrollIntoView({ block: 'nearest' });
   }, [active, source.status, selected?.id]);
   if (!enabled) return null;
+
+  const optionProps = (index: number, onClick: () => void) => ({
+    role: 'option',
+    tabIndex: index === active ? 0 : -1,
+    'aria-selected': index === active,
+    buttonRef: (element: HTMLButtonElement | null) => {
+      optionRefs.current[index] = element;
+    },
+    color: 'text' as const,
+    size: 's' as const,
+    flush: 'both' as const,
+    onMouseDown: (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault(),
+    onFocus: () => moveTo(index),
+    onClick,
+    contentProps: { css: css({ width: '100%', minWidth: 0 }) },
+    textProps: false as const,
+    css: css({
+      width: '100%',
+      padding: euiTheme.size.s,
+      height: 'auto',
+      textAlign: 'left',
+      whiteSpace: 'normal',
+      fontWeight: euiTheme.font.weight.regular,
+      backgroundColor: index === active ? euiTheme.colors.backgroundBasePrimary : undefined,
+    }),
+  });
 
   return (
     <>
@@ -164,126 +208,121 @@ export const ServiceAccountPicker = ({
         <ServiceAccountPickerPanel
           core={core}
           status={source.status}
-          hasSuggestions={optionCount > 0}
+          hasSuggestions={optionCount > offset}
           filtered={Boolean(query || source.filtered)}
           onRetry={source.onRetry}
           onCreate={onCreate ?? (() => setCreating(true))}
         >
-          <div
-            role="listbox"
-            tabIndex={-1}
-            aria-label={i18n.translate('xpack.security.serviceAccountPicker.ariaLabel', {
-              defaultMessage: 'Service accounts',
-            })}
-            css={css({ minHeight: 0, overflowY: 'auto' })}
-            onKeyDown={(event) => {
-              if (event.key === 'Escape' && onClose) {
-                event.preventDefault();
-                event.stopPropagation();
-                onClose();
-              }
-              if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-                event.preventDefault();
-                event.stopPropagation();
-                const next =
-                  (active + (event.key === 'ArrowDown' ? 1 : -1) + optionCount) % optionCount;
-                moveTo(next);
-                optionRefs.current[next]?.focus();
-              }
-            }}
-          >
-            {choices.map((account, index) => (
-              <EuiButtonEmpty
-                key={account.id}
-                role="option"
-                tabIndex={index === active ? 0 : -1}
-                aria-selected={index === active}
-                aria-current={account.id === selectedId ? 'true' : undefined}
-                buttonRef={(element) => {
-                  optionRefs.current[index] = element;
-                }}
-                color="text"
-                size="s"
-                flush="both"
-                data-test-subj="serviceAccountSuggestion"
-                onMouseDown={(event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault()}
-                onFocus={() => moveTo(index)}
-                onClick={() => onSelect(account)}
-                contentProps={{ css: css({ width: '100%', minWidth: 0 }) }}
-                textProps={false}
-                css={css({
-                  width: '100%',
-                  padding: euiTheme.size.s,
-                  height: 'auto',
-                  textAlign: 'left',
-                  whiteSpace: 'normal',
-                  fontWeight: euiTheme.font.weight.regular,
-                  backgroundColor:
-                    index === active ? euiTheme.colors.backgroundBasePrimary : undefined,
-                })}
-              >
-                <EuiFlexGroup
-                  gutterSize="s"
-                  alignItems="center"
-                  responsive={false}
-                  css={css({ width: '100%' })}
+          {optionCount > 0 && (
+            <div
+              role="listbox"
+              tabIndex={-1}
+              aria-label={i18n.translate('xpack.security.serviceAccountPicker.ariaLabel', {
+                defaultMessage: 'Service accounts',
+              })}
+              css={css({ minHeight: 0, overflowY: 'auto' })}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape' && onClose) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onClose();
+                }
+                if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  const next =
+                    (active + (event.key === 'ArrowDown' ? 1 : -1) + optionCount) % optionCount;
+                  moveTo(next);
+                  optionRefs.current[next]?.focus();
+                }
+              }}
+            >
+              {allowCurrentUser && (
+                <EuiButtonEmpty
+                  {...optionProps(0, () => onSelect(null))}
+                  aria-current={selectedId ? undefined : 'true'}
+                  data-test-subj="serviceAccountCurrentUserOption"
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon
-                      type={account.id === selectedId ? 'check' : 'user'}
-                      aria-hidden={true}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem css={css({ minWidth: 0, overflowWrap: 'anywhere' })}>
-                    <span>{account.name}</span>
-                    {account.description && (
-                      <EuiText size="xs" color="subdued" component="span">
-                        {account.description}
-                      </EuiText>
-                    )}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
-                      {account.roles.length === 0 && (
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type={selectedId ? 'user' : 'check'} aria-hidden={true} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>{currentUserLabel}</EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiButtonEmpty>
+              )}
+              {choices.map((account, choiceIndex) => (
+                <EuiButtonEmpty
+                  key={account.id}
+                  {...optionProps(offset + choiceIndex, () => onSelect(account))}
+                  aria-current={account.id === selectedId ? 'true' : undefined}
+                  data-test-subj="serviceAccountSuggestion"
+                >
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    alignItems="center"
+                    responsive={false}
+                    css={css({ width: '100%' })}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon
+                        type={account.id === selectedId ? 'check' : 'user'}
+                        aria-hidden={true}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem css={css({ minWidth: 0, overflowWrap: 'anywhere' })}>
+                      <span>{account.name}</span>
+                      {account.description && (
                         <EuiText size="xs" color="subdued" component="span">
-                          {i18n.translate('xpack.security.serviceAccountPicker.noRoles', {
-                            defaultMessage: 'No roles assigned',
-                          })}
+                          {account.description}
                         </EuiText>
                       )}
-                      {account.roles.map((role) => (
-                        <EuiFlexItem key={role} grow={false}>
-                          <EuiBadge color="hollow" iconType="user">
-                            {role}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiButtonEmpty>
-            ))}
-            {source.hasMore && (
-              <EuiButtonEmpty
-                role="option"
-                aria-selected={active === choices.length}
-                tabIndex={active === choices.length ? 0 : -1}
-                onMouseDown={(event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault()}
-                buttonRef={(element) => {
-                  optionRefs.current[choices.length] = element;
-                }}
-                data-test-subj="serviceAccountSuggestion"
-                onFocus={() => moveTo(choices.length)}
-                onClick={source.onLoadMore}
-                css={css({ width: '100%', padding: euiTheme.size.s })}
-              >
-                {loadMoreLabel}
-              </EuiButtonEmpty>
-            )}
-          </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
+                        {account.roles.length === 0 && (
+                          <EuiText size="xs" color="subdued" component="span">
+                            {i18n.translate('xpack.security.serviceAccountPicker.noRoles', {
+                              defaultMessage: 'No roles assigned',
+                            })}
+                          </EuiText>
+                        )}
+                        {account.roles.map((role) => (
+                          <EuiFlexItem key={role} grow={false}>
+                            <EuiBadge color="hollow" iconType="user">
+                              {role}
+                            </EuiBadge>
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiButtonEmpty>
+              ))}
+              {hasMore && (
+                <EuiButtonEmpty
+                  role="option"
+                  aria-selected={active === loadMoreIndex}
+                  tabIndex={active === loadMoreIndex ? 0 : -1}
+                  onMouseDown={(event: React.MouseEvent<HTMLButtonElement>) =>
+                    event.preventDefault()
+                  }
+                  buttonRef={(element) => {
+                    optionRefs.current[loadMoreIndex] = element;
+                  }}
+                  data-test-subj="serviceAccountSuggestion"
+                  onFocus={() => moveTo(loadMoreIndex)}
+                  onClick={source.onLoadMore}
+                  css={css({ width: '100%', padding: euiTheme.size.s })}
+                >
+                  {loadMoreLabel}
+                </EuiButtonEmpty>
+              )}
+            </div>
+          )}
           <EuiScreenReaderOnly>
             <div role="status" aria-live="polite">
-              {selected?.name ?? (source.hasMore ? loadMoreLabel : '')} {selected?.roles.join(', ')}
+              {activeLabel}
             </div>
           </EuiScreenReaderOnly>
         </ServiceAccountPickerPanel>
