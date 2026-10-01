@@ -157,7 +157,10 @@ export class MapsPage {
    */
   private async waitForLoadCycleIfNeeded(isLoading: () => Promise<boolean>) {
     if (await isLoading()) return;
-    await expect.poll(isLoading, { timeout: 500 }).toBe(true).catch(() => {});
+    await expect
+      .poll(isLoading, { timeout: 500 })
+      .toBe(true)
+      .catch(() => {});
   }
 
   async getLayerTocTooltipMsg(layerName: string): Promise<string> {
