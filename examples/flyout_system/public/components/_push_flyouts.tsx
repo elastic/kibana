@@ -29,8 +29,8 @@ import { FLYOUT_MIN_WIDTH } from '../utils';
 
 const APP_MAIN_SCROLL_ID = 'app-main-scroll';
 
-/** Labels contain spaces, which are not valid in `id` references. */
-const slug = (label: string) => label.replace(/\s+/g, '-');
+/** Labels contain spaces, which are not valid in `id` or `data-test-subj` references. */
+const slug = (label: string) => label.replace(/\s+/g, '');
 
 const readPagePadding = () =>
   document.getElementById(APP_MAIN_SCROLL_ID)?.style.paddingInlineEnd ?? '';
@@ -48,7 +48,7 @@ const PagePadding: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  return <strong data-test-subj="pushFlyoutsPagePadding">{padding || '(none)'}</strong>;
+  return <strong data-test-subj="pushFlyoutPagePadding">{padding || '(none)'}</strong>;
 };
 
 /** Rendered pixel width of the enclosing `.euiFlyout`, updated on every resize. */
@@ -70,7 +70,7 @@ const RenderedWidth: React.FC<{ label: string }> = ({ label }) => {
     <EuiText size="s">
       <p>
         Rendered width:{' '}
-        <strong ref={ref} data-test-subj={`pushFlyoutsRenderedWidth-${slug(label)}`}>
+        <strong ref={ref} data-test-subj={`pushFlyoutRenderedWidth-${slug(label)}`}>
           {width === null ? '…' : `${width}px`}
         </strong>
       </p>
@@ -81,7 +81,7 @@ const RenderedWidth: React.FC<{ label: string }> = ({ label }) => {
 /** A plain `EuiFlyout` with `session="never"`, rendered in this app's React root. */
 const StandalonePushFlyout: React.FC<{ label: string }> = ({ label }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const titleId = `pushFlyoutsStandalone-${slug(label)}`;
+  const titleId = `pushFlyoutTitle-${slug(label)}`;
 
   return (
     <>
@@ -89,7 +89,7 @@ const StandalonePushFlyout: React.FC<{ label: string }> = ({ label }) => {
         size="s"
         color={isOpen ? 'danger' : 'primary'}
         onClick={() => setIsOpen(!isOpen)}
-        data-test-subj={`pushFlyoutsToggle-${label}`}
+        data-test-subj={`pushFlyoutToggle-${slug(label)}`}
       >
         {isOpen ? `Close ${label}` : `Open ${label}`}
       </EuiButton>
@@ -102,7 +102,7 @@ const StandalonePushFlyout: React.FC<{ label: string }> = ({ label }) => {
           minWidth={FLYOUT_MIN_WIDTH}
           onClose={() => setIsOpen(false)}
           aria-labelledby={titleId}
-          data-test-subj={`pushFlyoutsStandalone-${label}`}
+          data-test-subj={`pushFlyout-${slug(label)}`}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
@@ -146,7 +146,8 @@ const SystemFlyout: React.FC<SystemFlyoutProps> = ({
   const open = () => {
     const ref = overlays.openFlyoutTemplate(
       {
-        id: `pushFlyoutsSystem-${slug(label)}`,
+        id: `pushFlyout-${slug(label)}`,
+        'data-test-subj': `pushFlyout-${slug(label)}`,
         session: 'start',
         type,
         size: storedWidth ?? 's',
@@ -190,7 +191,7 @@ const SystemFlyout: React.FC<SystemFlyoutProps> = ({
       size="s"
       color={isOpen ? 'danger' : 'primary'}
       onClick={isOpen ? () => overlayRef.current?.close() : open}
-      data-test-subj={`pushFlyoutsToggle-${label}`}
+      data-test-subj={`pushFlyoutToggle-${slug(label)}`}
     >
       {isOpen ? `Close ${label}` : `Open ${label}`}
     </EuiButton>
@@ -224,7 +225,7 @@ export const PushFlyouts: React.FC<{ overlays: OverlayStart }> = ({ overlays }) 
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               Remembered width:{' '}
-              <strong data-test-subj="pushFlyoutsStoredWidth">
+              <strong data-test-subj="pushFlyoutStoredWidth">
                 {storedWidth === undefined ? '(none)' : `${storedWidth}px`}
               </strong>
             </EuiText>
