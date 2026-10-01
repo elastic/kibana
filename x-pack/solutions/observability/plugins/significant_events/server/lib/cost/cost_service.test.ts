@@ -276,9 +276,7 @@ describe('calculateSignificantEventsCost', () => {
     });
 
     const result = await calculate({ esClient });
-    expect(FEATURE_ID_TO_COST_BUDGET_GROUP[NIGHTSHIFT_DISCOVERY_USAGE_ID]).toBe(
-      'discovery'
-    );
+    expect(FEATURE_ID_TO_COST_BUDGET_GROUP[NIGHTSHIFT_DISCOVERY_USAGE_ID]).toBe('discovery');
     expect(result.today.groups.map((group) => group.group)).toEqual([
       'discovery',
       'investigation',
@@ -382,8 +380,7 @@ describe('calculateSignificantEventsCost', () => {
         aggregations: aggregations({
           total: 100,
           features: {
-            [NIGHTSHIFT_DISCOVERY_USAGE_ID]:
-              gte === TODAY_START ? zeroCached : positiveCached,
+            [NIGHTSHIFT_DISCOVERY_USAGE_ID]: gte === TODAY_START ? zeroCached : positiveCached,
           },
         }),
       };
@@ -545,8 +542,7 @@ describe('calculateSignificantEventsCost', () => {
       'missing model subaggregation',
       () => {
         const value = aggregations({ total: 0 });
-        const bucket =
-          value.feature_buckets.buckets[NIGHTSHIFT_DISCOVERY_USAGE_ID];
+        const bucket = value.feature_buckets.buckets[NIGHTSHIFT_DISCOVERY_USAGE_ID];
         return {
           aggregations: {
             ...value,

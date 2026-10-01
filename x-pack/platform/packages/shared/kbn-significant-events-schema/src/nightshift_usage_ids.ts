@@ -15,12 +15,10 @@ export const NIGHTSHIFT_USAGE_PRODUCT_FEATURE = 'nightshift' as const;
 
 export const NIGHTSHIFT_KI_EXTRACTION_USAGE_ID = 'nightshift_ki_extraction' as const;
 
-export const NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID =
-  'nightshift_ki_query_generation' as const;
+export const NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID = 'nightshift_ki_query_generation' as const;
 
 export const NIGHTSHIFT_DISCOVERY_USAGE_ID = 'nightshift_discovery' as const;
 
 export const NIGHTSHIFT_INVESTIGATION_USAGE_ID = 'nightshift_investigation' as const;
 
-export const NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID =
-  'nightshift_investigation_memory' as const;
+export const NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID = 'nightshift_investigation_memory' as const;
