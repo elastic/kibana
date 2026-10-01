@@ -10,6 +10,7 @@ import type {
   UserCommentAttachmentPayload,
   FileAttachmentMetadata,
   AlertAttachmentPayload,
+  EventAttachmentPayload,
   PersistableStateAttachmentPayload,
   ExternalReferenceAttachmentPayload,
 } from '../../../common/types/domain';
@@ -18,6 +19,7 @@ import {
   FILE_ATTACHMENT_TYPE,
   LEGACY_FILE_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import type { FileAttachmentRequest } from '../types';
 
@@ -125,6 +127,29 @@ export const createUnifiedAlertRequests = (
     type: SECURITY_ALERT_ATTACHMENT_TYPE,
     attachmentId: attachmentIds,
     owner: `${value}`,
+  }));
+};
+
+export const createEventRequests = (
+  numberOfRequests: number,
+  eventIds: string | string[]
+): EventAttachmentPayload[] => {
+  return Array.from({ length: numberOfRequests }, () => ({
+    type: AttachmentType.event as const,
+    eventId: eventIds,
+    index: eventIds,
+    owner: 'test',
+  }));
+};
+
+export const createUnifiedEventRequests = (
+  numberOfRequests: number,
+  attachmentIds: string | string[]
+): UnifiedReferenceAttachmentPayload[] => {
+  return Array.from({ length: numberOfRequests }, () => ({
+    type: SECURITY_EVENT_ATTACHMENT_TYPE,
+    attachmentId: attachmentIds,
+    owner: 'test',
   }));
 };
 

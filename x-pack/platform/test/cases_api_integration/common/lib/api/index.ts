@@ -12,6 +12,7 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 
 import type SuperTest from 'supertest';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_REPORTERS_URL,
@@ -20,6 +21,7 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   CASES_INTERNAL_URL,
   CASES_URL,
+  COMMENT_ATTACHMENT_TYPE,
   INTERNAL_CASE_METRICS_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
@@ -201,6 +203,54 @@ export const deleteUnifiedAttachments = async (es: Client): Promise<void> => {
     body: {},
     conflicts: 'proceed',
   });
+};
+
+/**
+ * Indexes unified comments for a case straight into ES, skipping the API and its per-case limits.
+ */
+export const seedUnifiedComments = async ({
+  es,
+  caseId,
+  count,
+  owner = 'securitySolutionFixture',
+}: {
+  es: Client;
+  caseId: string;
+  count: number;
+  owner?: string;
+}): Promise<void> => {
+  const now = new Date().toISOString();
+  const operations = Array.from({ length: count }, (_, index) => [
+    {
+      index: {
+        _index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        _id: `${CASE_ATTACHMENT_SAVED_OBJECT}:seeded-${caseId}-${index}`,
+      },
+    },
+    {
+      type: CASE_ATTACHMENT_SAVED_OBJECT,
+      [CASE_ATTACHMENT_SAVED_OBJECT]: {
+        type: COMMENT_ATTACHMENT_TYPE,
+        owner,
+        data: { content: `seeded comment ${index}` },
+        created_at: now,
+        created_by: { username: 'elastic', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      },
+      references: [
+        { type: CASE_SAVED_OBJECT, id: caseId, name: `associated-${CASE_SAVED_OBJECT}` },
+      ],
+      namespaces: ['default'],
+      updated_at: now,
+      coreMigrationVersion: '8.8.0',
+    },
+  ]).flat();
+
+  const response = await es.bulk({ operations, refresh: 'wait_for' });
+  expect(response.errors).to.be(false);
 };
 
 export const deleteConfiguration = async (es: Client): Promise<void> => {

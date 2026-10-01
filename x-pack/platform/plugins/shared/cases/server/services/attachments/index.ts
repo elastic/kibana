@@ -20,7 +20,7 @@ import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, isNonLocalIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
 import {
   UNIFIED_ALERT_TYPES_ARRAY,
@@ -35,13 +35,7 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
-  LEGACY_FILE_ATTACHMENT_TYPE,
 } from '../../../common/constants';
-import {
-  FILE_ATTACHMENT_TYPE,
-  PERSISTABLE_ATTACHMENT_TYPES,
-  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
-} from '../../../common/constants/attachments';
 import {
   getAttachmentSavedObjectType,
   getAttachmentTypeFromAttributes,
@@ -91,8 +85,6 @@ import {
   decodeAttachmentSavedObject,
   getTransformerForPatchAttributes,
 } from './operations/utils';
-
-const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
 
 /**
  * Ensures alert attachments include a rule name
@@ -311,92 +303,22 @@ export class AttachmentService {
   }
 
   /**
-   * Counts attachments that contribute to the
-   * `MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES` limit:
-   * - Legacy: `persistableState` and `externalReference` rows in
-   *   `cases-comments`, EXCLUDING `.files` (file attachments are limited
-   *   separately).
-   * - Unified: persistable-state subtypes plus every
-   *   {@link UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP} type except `file`.
-   *
-   * Files are intentionally excluded on both sides; the request-side
-   * `PersistableStateAndExternalReferencesLimiter.countOfItemsInRequest`
-   * filters them out symmetrically.
+   * Counts every attachment on a case, legacy and unified, for `MAX_ATTACHMENTS_PER_CASE`.
    */
-  public async countPersistableStateAndExternalReferenceAttachments({
-    caseId,
-  }: {
-    caseId: string;
-  }): Promise<number> {
+  public async countAttachments({ caseId }: { caseId: string }): Promise<number> {
     try {
-      this.context.log.debug(
-        `Attempting to count persistableState and externalReference attachments for case id ${caseId}`
-      );
+      this.context.log.debug(`Attempting to count attachments for case id ${caseId}`);
 
-      const legacyTypeFilter = buildFilter({
-        filters: [AttachmentType.persistableState, AttachmentType.externalReference],
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
-      });
-
-      const excludeLegacyFilesFilter = fromKueryExpression(
-        `not ${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceAttachmentTypeId: ${LEGACY_FILE_ATTACHMENT_TYPE}`
-      );
-
-      const legacyFilter = combineFilters([legacyTypeFilter, excludeLegacyFilesFilter]);
-
-      const legacyFindPromise = this.context.unsecuredSavedObjectsClient.find<{
-        total: number;
-      }>({
-        type: CASE_COMMENT_SAVED_OBJECT,
+      const response = await this.context.unsecuredSavedObjectsClient.find({
+        type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
         hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        filter: legacyFilter,
+        perPage: 0,
       });
 
-      const unifiedTypesToCount = [
-        ...PERSISTABLE_ATTACHMENT_TYPES_ARRAY,
-        ...Object.keys(UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP).filter(
-          (type) => type !== FILE_ATTACHMENT_TYPE
-        ),
-        // Unmapped custom subtypes (e.g. FTR `.test`) keep the legacy type name.
-        AttachmentType.persistableState,
-        AttachmentType.externalReference,
-      ];
-      // Files are stored with the unified `file` type (not the legacy
-      // `.files` externalReference subtype), so excluding `file` from the type
-      // list is enough — no subtype filter needed. `externalReferenceAttachmentTypeId`
-      // isn't mapped on `cases-attachments`, so filtering on it would 400.
-      const unifiedFilter = buildFilter({
-        filters: unifiedTypesToCount,
-        field: 'type',
-        operator: 'or',
-        type: CASE_ATTACHMENT_SAVED_OBJECT,
-      });
-
-      const unifiedFindPromise = this.context.unsecuredSavedObjectsClient.find<{
-        total: number;
-      }>({
-        type: CASE_ATTACHMENT_SAVED_OBJECT,
-        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        filter: unifiedFilter,
-      });
-
-      const [legacyResponse, unifiedResponse] = await Promise.all([
-        legacyFindPromise,
-        unifiedFindPromise,
-      ]);
-
-      return legacyResponse.total + unifiedResponse.total;
+      return response.total;
     } catch (error) {
       this.context.log.error(
-        `Error while attempting to count persistableState and externalReference attachments for case id ${caseId}: ${error}`
+        `Error while attempting to count attachments for case id ${caseId}: ${error}`
       );
       throw error;
     }

@@ -13,7 +13,7 @@ import type { AttachmentService } from '../../services';
 import type { Limiter } from './types';
 import { AlertLimiter } from './limiters/alerts';
 import { FileLimiter } from './limiters/files';
-import { PersistableStateAndExternalReferencesLimiter } from './limiters/persistable_state_and_external_references';
+import { TotalAttachmentsLimiter } from './limiters/total_attachments';
 
 export class AttachmentLimitChecker {
   private readonly limiters: Limiter[];
@@ -26,7 +26,7 @@ export class AttachmentLimitChecker {
     this.limiters = [
       new AlertLimiter(attachmentService),
       new FileLimiter(fileService),
-      new PersistableStateAndExternalReferencesLimiter(attachmentService),
+      new TotalAttachmentsLimiter(attachmentService),
     ];
   }
 
