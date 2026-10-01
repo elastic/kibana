@@ -1934,7 +1934,7 @@
     "sass-loader": "10.5.2",
     "selenium-webdriver": "4.48.0",
     "sharp": "0.35.4",
-    "simple-git": "3.36.0",
+    "simple-git": "4.0.2",
     "sinon": "22.1.0",
     "sort-package-json": "3.2.1",
     "source-map": "0.7.6",
