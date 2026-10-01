@@ -232,6 +232,7 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
           menu={menu}
           favorite={config?.favorite}
           share={config?.share}
+          alwaysShowTitleActions={config?.alwaysShowTitleActions}
           experimentalDashboardAiAction={config?.experimentalDashboardAiAction}
           {...secondaryContent}
           sticky={false}

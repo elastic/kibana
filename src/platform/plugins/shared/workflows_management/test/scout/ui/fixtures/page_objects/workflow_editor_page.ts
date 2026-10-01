@@ -56,13 +56,11 @@ export class WorkflowEditorPage {
   }
 
   async openAccessDialog(): Promise<void> {
-    await this.page.testSubj.locator('appHeader').hover();
     await this.page.testSubj.click('~shareTopNavButton');
     await this.accessMode.waitFor({ state: 'visible' });
   }
 
   async hoverDisabledAccessButton(): Promise<void> {
-    await this.page.testSubj.locator('appHeader').hover();
     await this.page.testSubj.locator('~shareTopNavButton').hover({ force: true });
   }
 

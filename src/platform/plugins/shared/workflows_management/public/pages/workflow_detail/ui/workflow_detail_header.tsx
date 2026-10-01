@@ -481,6 +481,7 @@ export const WorkflowDetailHeader = React.memo(
     const share = useMemo(() => {
       if (!workflowId || isManagedWorkflow) return undefined;
       return {
+        label: i18n.translate('workflows.access.buttonLabel', { defaultMessage: 'Access control' }),
         onClick: () => setIsAccessOpen(true),
         isDisabled: !canManageAccess,
         tooltip: !canManageAccess
@@ -507,6 +508,7 @@ export const WorkflowDetailHeader = React.memo(
             back={back}
             badges={badges}
             share={share}
+            alwaysShowTitleActions
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
             spacing="compact"

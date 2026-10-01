@@ -52,7 +52,7 @@ test.describe('Workflow administrator sharing', { tag: tags.stateful.classic }, 
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  test('grants execution access through Sharing and preserves the owner', async ({
+  test('grants execution access through Access control and preserves the owner', async ({
     apiClient,
     browserAuth,
     page,
@@ -64,7 +64,7 @@ test.describe('Workflow administrator sharing', { tag: tags.stateful.classic }, 
     await editor.gotoWorkflow(workflowId);
     await expect(page.testSubj.locator('workflowBottomBarRunButton')).toBeDisabled();
     await editor.openAccessDialog();
-    await expect(page.getByRole('heading', { name: 'Sharing', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Access control', exact: true })).toBeVisible();
     await expect(page.getByText("You are editing another user's access settings")).toBeVisible();
     await editor.addAccessUser('test admin');
     await editor.setAccessRole('elastic_admin', 'executor');

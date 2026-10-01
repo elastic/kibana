@@ -136,7 +136,7 @@ export const WorkflowAccessControlModal = ({
         <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
           <EuiFlexItem grow={false}>
             <EuiModalHeaderTitle id="workflowAccessTitle">
-              {i18n.translate('workflows.access.sharingModalTitle', { defaultMessage: 'Sharing' })}
+              {i18n.translate('workflows.access.modalTitle', { defaultMessage: 'Access control' })}
             </EuiModalHeaderTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

@@ -63,6 +63,27 @@ describe('AppHeaderView', () => {
     expect(onClick.mock.calls[0][0].triggerElement).toBeUndefined();
   });
 
+  it.each([
+    [undefined, '0', 'none'],
+    [true, '1', 'auto'],
+  ])(
+    'sets title action visibility with alwaysShowTitleActions=%s',
+    (alwaysShowTitleActions, opacity, pointerEvents) => {
+      render(
+        <AppHeaderView
+          title="Workflow"
+          alwaysShowTitleActions={alwaysShowTitleActions}
+          share={{ label: 'Access control', onClick: jest.fn() }}
+        />
+      );
+
+      expect(screen.getByRole('button', { name: 'Access control' })).toBeInTheDocument();
+      const container = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleActions).parentElement;
+      expect(container).toHaveStyleRule('opacity', opacity);
+      expect(container).toHaveStyleRule('pointer-events', pointerEvents);
+    }
+  );
+
   it('does not derive a title share action from a menu share item', async () => {
     const runShare = jest.fn();
 

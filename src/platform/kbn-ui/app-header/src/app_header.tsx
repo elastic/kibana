@@ -52,6 +52,7 @@ const getPublicAppHeaderViewProps = ({
   menu,
   favorite,
   share,
+  alwaysShowTitleActions,
   experimentalDashboardAiAction,
   description,
   metadata,
@@ -72,6 +73,7 @@ const getPublicAppHeaderViewProps = ({
     menu,
     favorite,
     share,
+    alwaysShowTitleActions,
     experimentalDashboardAiAction,
     ...secondaryContent,
     sticky,
@@ -92,6 +94,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
     menu,
     favorite,
     share,
+    alwaysShowTitleActions,
     experimentalDashboardAiAction,
     titleAppend,
     description,
@@ -160,6 +163,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
             experimentalDashboardAiAction={experimentalDashboardAiAction}
           />
         }
+        alwaysShowTitleActions={alwaysShowTitleActions}
         titleAppend={titleAppend}
         trailing={<AppMenu menu={menu} staticItems={staticItems} fallbackMenu={fallbackMenu} />}
         secondaryContent={
