@@ -27,6 +27,11 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  AgenticInvestigationsPluginSetup,
+  AgenticInvestigationsPluginStart,
+} from '@kbn/agentic-investigations-plugin/server';
+import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { DeleteAllInvestigationsResult } from './storage';
 import type { TriggerEmitter } from './workflows/triggers/emit';
@@ -50,6 +55,13 @@ export interface NightshiftInvestigationsServerStart {
 
 export interface NightshiftInvestigationsSetupDeps {
   agentBuilder?: AgentBuilderPluginSetup;
+  /**
+   * Stores investigations as conversations. Registers the investigation workflow as a driver
+   * workflow so its runs count as in progress. Without it investigations are unavailable.
+   */
+  agenticInvestigations?: AgenticInvestigationsPluginSetup;
+  /** Provides the `proposals.create` tool the investigation agent proposes actions with. */
+  proposals?: ProposalsPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   sandbox?: SandboxPluginSetup;
@@ -61,6 +73,8 @@ export interface NightshiftInvestigationsSetupDeps {
 export interface NightshiftInvestigationsStartDeps {
   actions?: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  agenticInvestigations?: AgenticInvestigationsPluginStart;
+  proposals?: ProposalsPluginStart;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   inference?: InferenceServerStart;
   ruleRegistry?: RuleRegistryPluginStartContract;

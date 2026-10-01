@@ -76,17 +76,16 @@ export interface StartInvestigationRequest {
   stream_names?: string[];
   /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
-  /**
-   * Caller-supplied key for concurrency control. Passed to the workflow engine as
-   * `concurrency_key`, which maps to `concurrencyGroupKey` in the execution index.
-   * Two starts with the same key cancel-and-replace the in-flight run (cancel-in-progress
-   * strategy). Use a stable, unique caller-side ID — e.g. the alert _id or event UUID.
-   */
-  concurrency_key?: string;
   context?: InvestigationContext | AlertInvestigationContext;
 }
 
 export interface StartInvestigationResponse {
+  /**
+   * The investigation, which is an Agent Builder conversation with this id. A start whose
+   * subjects overlap an open investigation continues that one, so the id can be an existing
+   * investigation's. The investigation workflow creates the conversation, so for a few seconds
+   * after a first start the id may not resolve yet.
+   */
   investigation_id: string;
 }
 

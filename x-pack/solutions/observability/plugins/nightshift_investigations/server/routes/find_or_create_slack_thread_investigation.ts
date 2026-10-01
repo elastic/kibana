@@ -18,13 +18,14 @@ export const findOrCreateSlackThreadInvestigationRoute = createNightshiftInvesti
     access: 'internal',
     summary: "Find or create a Slack thread's investigation",
     description:
-      'Returns the investigation and status message for a Slack thread. With ' +
-      '`create`, a thread without one gets a pending investigation; otherwise the response is ' +
-      'empty. With `status_message_ts`, records that message as the thread status message. ' +
-      'With `event_id` and `execution_id`, records the delivered event for that execution and ' +
-      'marks the response `duplicate` when another execution already recorded it. With ' +
-      '`release_event`, removes the event as recorded for that execution instead. Called by the ' +
-      'Slack thread workflow.',
+      'Returns the investigation and status message for a Slack thread, found by the ' +
+      "thread's Agent Builder conversation origin (`team:<T>/channel:<C>/thread:<ts>`) or its " +
+      '`slack_thread` subject. With `create`, a thread without one gets a new investigation ' +
+      'conversation with that origin and the thread as its subject; otherwise the response is ' +
+      'empty. With `status_message_ts`, records that message as the thread status message on the ' +
+      "thread's subject. With `event_id`, records the delivered event on the thread's subject and " +
+      'marks the response `duplicate` when the thread already recorded it. Called by the Slack ' +
+      'thread workflow, whose identity must own the investigation.',
   },
   security: {
     authz: {
@@ -32,25 +33,15 @@ export const findOrCreateSlackThreadInvestigationRoute = createNightshiftInvesti
     },
   },
   params: z.object({
-    body: z
-      .object({
-        workspace: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-        channel: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-        thread_ts: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-        text: z.string().max(MAX_SLACK_TEXT_LENGTH).optional(),
-        create: z.boolean(),
-        status_message_ts: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
-        event_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
-        /** The workflow execution handling `event_id`. */
-        execution_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
-        release_event: z.boolean().optional(),
-      })
-      .refine((body) => (body.event_id === undefined) === (body.execution_id === undefined), {
-        message: 'event_id and execution_id must be given together',
-      })
-      .refine((body) => !body.release_event || body.event_id !== undefined, {
-        message: 'release_event requires event_id',
-      }),
+    body: z.object({
+      workspace: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      channel: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      thread_ts: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      text: z.string().max(MAX_SLACK_TEXT_LENGTH).optional(),
+      create: z.boolean(),
+      status_message_ts: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+      event_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+    }),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
@@ -62,8 +53,6 @@ export const findOrCreateSlackThreadInvestigationRoute = createNightshiftInvesti
       create,
       status_message_ts: statusMessageTs,
       event_id: eventId,
-      execution_id: executionId,
-      release_event: releaseEvent,
     } = params.body;
     try {
       return (
@@ -74,9 +63,7 @@ export const findOrCreateSlackThreadInvestigationRoute = createNightshiftInvesti
           text,
           create,
           statusMessageTs,
-          ...(eventId !== undefined &&
-            executionId !== undefined && { event: { eventId, executionId } }),
-          ...(releaseEvent && { releaseEvent }),
+          eventId,
         })) ?? {}
       );
     } catch (error) {

@@ -43,7 +43,6 @@ it('loads the alert and builds the investigation context server-side', async () 
   expect(start).toHaveBeenCalledWith({
     subject: { type: 'alert', id: 'alert-1' },
     title: 'Test rule',
-    concurrency_key: 'alert-1',
     context: { alerts: [expect.objectContaining({ id: 'alert-1', rule_id: 'rule-1' })] },
     trigger_type: 'manual',
   });
@@ -59,14 +58,14 @@ it('keeps a caller-provided title', async () => {
   expect(start).toHaveBeenCalledWith(expect.objectContaining({ title: 'Custom title' }));
 });
 
-it('keeps a caller-provided concurrency key', async () => {
-  await handler({
-    request: {},
-    getInvestigationsClient,
-    getAlertsClient,
-    params: { body: { subject: { type: 'alert', id: 'alert-1' }, concurrency_key: 'key-1' } },
-  } as never);
-  expect(start).toHaveBeenCalledWith(expect.objectContaining({ concurrency_key: 'key-1' }));
+it('no longer accepts a concurrency key', () => {
+  expect(
+    schema.safeParse({ subject: { type: 'alert', id: 'alert-1' }, concurrency_key: 'key-1' })
+      .success
+  ).toBe(true);
+  expect(
+    schema.parse({ subject: { type: 'alert', id: 'alert-1' }, concurrency_key: 'key-1' })
+  ).not.toHaveProperty('concurrency_key');
 });
 
 it('forwards connector_id for an alert investigation', async () => {

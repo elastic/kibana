@@ -9,14 +9,15 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { createInferenceRequestError } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
+import { createConversationAlreadyExistsError } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import {
   NIGHTSHIFT_DEFAULT_MODELS,
   NightshiftModelNotFoundError,
 } from '@kbn/significant-events-schema';
-import type { InvestigationStatus } from '../../common';
 import { freeFormContextSchema } from '../../common/schemas';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
@@ -24,13 +25,8 @@ import type {
   InvestigationAttributes,
   InvestigationRecord,
   InvestigationRepository,
-  InvestigationThread,
 } from '../storage';
-import {
-  InvestigationAlreadyExistsError,
-  InvestigationStaleWriteError,
-  MAX_THREAD_SEEN_EVENTS,
-} from '../storage';
+import { InvestigationStaleWriteError } from '../storage';
 import {
   InvestigationConflictError,
   InvalidInvestigationContextError,
@@ -44,6 +40,8 @@ import { NightshiftInvestigationsClient } from './investigations_client';
 jest.mock('../lib/install_investigation_agent', () => ({
   installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
 }));
+
+jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: () => 'inv-new' }));
 
 const installInvestigationAgentMock = installInvestigationAgent as jest.MockedFunction<
   typeof installInvestigationAgent
@@ -61,7 +59,77 @@ const mockWorkflowsManagement = {
   management: mockManagement,
 } as unknown as WorkflowsServerPluginSetup;
 
-const mockAgentBuilder = {} as unknown as AgentBuilderPluginStart;
+const conversations = {
+  bulkGet: jest.fn(),
+  create: jest.fn(),
+  getByOrigin: jest.fn(),
+  patchMetadata: jest.fn(),
+};
+
+const mockAgentBuilder = {
+  conversations: { getScopedClient: jest.fn().mockResolvedValue(conversations) },
+} as unknown as AgentBuilderPluginStart;
+
+const subjectsClient = {
+  upsertSubjects: jest.fn(),
+  findConversationIdsBySubjects: jest.fn(),
+  listByConversationIds: jest.fn(),
+  claimSubjects: jest.fn(),
+};
+const agenticInvestigationsClient = { findOpenBySubjects: jest.fn() };
+
+const mockAgenticInvestigations = {
+  getSubjectsClient: jest.fn().mockReturnValue(subjectsClient),
+  getInvestigationsClient: jest.fn().mockReturnValue(agenticInvestigationsClient),
+} as unknown as AgenticInvestigationsPluginStart;
+
+/** A conversation as `bulkGet` returns it. */
+const makeConversation = ({
+  id,
+  title = 'Latency is too high',
+  status,
+  owner = true,
+  templateId = 'investigation',
+}: {
+  id: string;
+  title?: string;
+  status?: 'open' | 'closed';
+  owner?: boolean;
+  templateId?: string;
+}) => ({
+  id,
+  title,
+  template_id: templateId,
+  metadata: status ? { status } : {},
+  permissions: { rename: owner, delete: owner, update_access_control: owner },
+});
+
+/** Makes `bulkGet` find these conversations, and only these. */
+const withConversations = (...found: Array<ReturnType<typeof makeConversation>>) => {
+  conversations.bulkGet.mockImplementation(
+    async (ids: string[]) =>
+      new Map(found.filter(({ id }) => ids.includes(id)).map((c) => [c.id, c]))
+  );
+};
+
+const makeStoredSubject = (
+  overrides: Partial<{
+    conversationId: string;
+    subjectType: string;
+    subjectId: string;
+    triggerType: string;
+    createdAt: string;
+    slack: Record<string, string>;
+  }> = {}
+) => ({
+  id: 'doc-1',
+  spaceId: SPACE_ID,
+  conversationId: 'inv-1',
+  subjectType: 'alert',
+  subjectId: 'alert-1',
+  createdAt: '2026-08-24T12:00:00.000Z',
+  ...overrides,
+});
 
 const mockLogger = {
   info: jest.fn(),
@@ -95,6 +163,7 @@ const makeClient = (
     logger: mockLogger,
     spaceIdOverride: SPACE_ID,
     agentBuilder: mockAgentBuilder,
+    agenticInvestigations: mockAgenticInvestigations,
     agentAvailability: mockAgentAvailability,
     investigationQuotaCallback,
     investigationRepository: repository,
@@ -154,6 +223,17 @@ beforeEach(() => {
   getSetting.mockResolvedValue(false);
   getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
   repository = createMockRepository();
+  withConversations();
+  conversations.create.mockImplementation(async ({ id, title }: { id: string; title: string }) =>
+    makeConversation({ id, title })
+  );
+  conversations.getByOrigin.mockResolvedValue(undefined);
+  conversations.patchMetadata.mockResolvedValue({ conversation: {}, changedFields: ['status'] });
+  subjectsClient.upsertSubjects.mockResolvedValue([]);
+  subjectsClient.findConversationIdsBySubjects.mockResolvedValue([]);
+  subjectsClient.listByConversationIds.mockResolvedValue([]);
+  subjectsClient.claimSubjects.mockResolvedValue({ claimed: true });
+  agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([]);
 });
 
 describe('NightshiftInvestigationsClient.get()', () => {
@@ -269,9 +349,9 @@ describe('NightshiftInvestigationsClient.get()', () => {
   });
 
   it('returns the stored severity', async () => {
-    repository.get.mockResolvedValue(makeRecord({ severity: 'high' }));
+    repository.get.mockResolvedValue(makeRecord({ severity: '60-high' }));
     const result = await makeClient().get('inv-1');
-    expect(result.severity).toBe('high');
+    expect(result.severity).toBe('60-high');
   });
 
   it('leaves severity unset when the record has none', async () => {
@@ -369,6 +449,7 @@ describe('NightshiftInvestigationsClient.list()', () => {
     expect(result.results[0]).not.toHaveProperty('conclusion');
     expect(result.results[0]).not.toHaveProperty('hypotheses');
     expect(result.results[0]).not.toHaveProperty('recommendations');
+    expect(result.results[0]).not.toHaveProperty('blind_spots');
     expect(result.results[0]).not.toHaveProperty('conversation_id');
   });
 
@@ -388,11 +469,11 @@ describe('NightshiftInvestigationsClient.list()', () => {
 
   it('returns severity on list items when stored', async () => {
     repository.find.mockResolvedValue(
-      findResult([makeRecord({ severity: 'critical' }, { id: 'inv-42' })])
+      findResult([makeRecord({ severity: '80-critical' }, { id: 'inv-42' })])
     );
 
     const result = await makeClient().list({});
-    expect(result.results[0].severity).toBe('critical');
+    expect(result.results[0].severity).toBe('80-critical');
   });
 });
 
@@ -415,10 +496,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
       },
     ],
   };
-
-  beforeEach(() => {
-    repository.get.mockResolvedValue(undefined);
-  });
 
   it('calls runWorkflow with the correct inputs and returns investigation_id', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
@@ -444,7 +521,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.anything(),
       'nightshift-investigations'
     );
-    expect(result).toEqual({ investigation_id: 'exec-123' });
+    expect(result).toEqual({ investigation_id: 'inv-new' });
     expect(getConnectorById).toHaveBeenCalledWith(
       NIGHTSHIFT_DEFAULT_MODELS.investigation,
       mockRequest
@@ -474,7 +551,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
-  it('rejects an unknown custom connector before launching or persisting', async () => {
+  it('rejects an unknown custom connector before launching or claiming', async () => {
     getConnectorById.mockRejectedValue(createInferenceRequestError('not found', 404));
 
     await expect(
@@ -488,7 +565,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     expect(mockManagement.getWorkflow).not.toHaveBeenCalled();
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
-    expect(repository.create).not.toHaveBeenCalled();
+    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
   });
 
   it('reports a missing default model instead of generic unavailability', async () => {
@@ -540,7 +617,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.anything(),
       'nightshift-investigations'
     );
-    expect(result).toEqual({ investigation_id: 'exec-manual' });
+    expect(result).toEqual({ investigation_id: 'inv-new' });
   });
 
   it('labels a manual run with its prompt so it does not read as "manual" while running', async () => {
@@ -559,8 +636,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       message: '  Why did payment\n  timeouts increase?  ',
     });
 
-    // The workflow context feeds ensureOrCreate(), the record write feeds the list immediately;
-    // both have to carry the same summary or the headline changes when the workflow catches up.
+    // The context feeds runs started without subjects; the subjects are what _ensure records.
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
       expect.anything(),
       SPACE_ID,
@@ -570,13 +646,15 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.anything(),
       'nightshift-investigations'
     );
-    expect(repository.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        attributes: expect.objectContaining({
-          subject_summary: 'Why did payment timeouts increase?',
-        }),
-      })
-    );
+    const { subjects } = mockManagement.runWorkflow.mock.calls[0][2];
+    expect(subjects).toEqual([
+      {
+        type: 'manual',
+        id: 'inv-new',
+        triggerType: 'manual',
+        summary: 'Why did payment timeouts increase?',
+      },
+    ]);
   });
 
   it('truncates a long prompt rather than storing it whole as the headline', async () => {
@@ -688,7 +766,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
-  it('passes the title as a workflow input and persists it on the pending record', async () => {
+  it('passes the title as a workflow input', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
@@ -702,10 +780,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
     const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
     expect(inputs.title).toBe('Checkout latency breach');
     expect(inputs.context).not.toHaveProperty('title');
-    expect(repository.create).toHaveBeenCalledWith({
-      id: 'exec-123',
-      attributes: expect.objectContaining({ title: 'Checkout latency breach', status: 'pending' }),
-    });
   });
 
   it.each([
@@ -729,7 +803,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
       expect(installInvestigationAgentMock).not.toHaveBeenCalled();
       expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
-      expect(repository.create).not.toHaveBeenCalled();
+      expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
     }
   );
 
@@ -763,7 +837,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(inputs.context).not.toHaveProperty('summary');
   });
 
-  it('includes concurrency_key in inputs when provided', async () => {
+  it('runs the workflow on the investigation id, without a concurrency key', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-456');
 
@@ -771,16 +845,11 @@ describe('NightshiftInvestigationsClient.start()', () => {
       title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-99' },
       trigger_type: 'manual',
-      concurrency_key: 'key-abc',
     });
 
-    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
-      expect.anything(),
-      SPACE_ID,
-      expect.objectContaining({ concurrency_key: 'key-abc' }),
-      expect.anything(),
-      'nightshift-investigations'
-    );
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.investigation_id).toBe('inv-new');
+    expect(inputs).not.toHaveProperty('concurrency_key');
   });
 
   it('uses the caller-supplied message and stream_names when provided', async () => {
@@ -869,7 +938,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
     ).rejects.toThrow('Workflow launch failed');
 
     expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
-    expect(repository.create).not.toHaveBeenCalled();
   });
 
   it('does not consume again when agent installation fails after admission', async () => {
@@ -886,7 +954,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
-    expect(repository.create).not.toHaveBeenCalled();
+    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
   });
 
   it('throws InvestigationUnavailableError when the workflow is not installed', async () => {
@@ -1052,7 +1120,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
           trigger_type: 'manual',
           context: { event_uuid: '3f2504e0-4f89-11d3-9a0c-0305e82c3301' },
         })
-      ).resolves.toEqual({ investigation_id: 'exec-791' });
+      ).resolves.toEqual({ investigation_id: 'inv-new' });
     });
 
     it('leaves the free-form context of a significant event subject alone', async () => {
@@ -1066,7 +1134,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
           trigger_type: 'manual',
           context: { event_uuid: 'se-1', severity: 'high' },
         })
-      ).resolves.toEqual({ investigation_id: 'exec-790' });
+      ).resolves.toEqual({ investigation_id: 'inv-new' });
     });
 
     it('does not require alerts for a significant event subject', async () => {
@@ -1079,7 +1147,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
           subject: { type: 'significant_event', id: 'se-1' },
           trigger_type: 'manual',
         })
-      ).resolves.toEqual({ investigation_id: 'exec-789' });
+      ).resolves.toEqual({ investigation_id: 'inv-new' });
     });
 
     it('builds the brief from the snapshot rather than the bare subject id', async () => {
@@ -1231,926 +1299,537 @@ describe('NightshiftInvestigationsClient.update()', () => {
   });
 });
 
-describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
-  const EXECUTION_ID = 'exec-123';
-
-  const makeEnsureExecution = (overrides: Record<string, unknown> = {}) => ({
-    id: EXECUTION_ID,
-    workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-    status: ExecutionStatus.RUNNING,
-    startedAt: '2024-01-01T00:00:00Z',
-    executedBy: 'workflow-user',
-    context: {
-      inputs: {
-        message: 'Investigate this',
-        title: 'Investigate this',
-        concurrency_key: 'key-1',
-        context: {
-          source: 'alert',
-          alert_id: 'alert-42',
-          trigger_type: 'automatic',
-        },
-      },
-    },
-    ...overrides,
+describe('NightshiftInvestigationsClient.start() on investigations', () => {
+  const mockWorkflow = {
+    id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+    enabled: true,
+    valid: true,
+    definition: { steps: [] },
+  };
+  const makeAlert = (id: string) => ({
+    id,
+    rule_id: 'rule-1',
+    rule_name: 'Latency is too high',
+    rule_type_id: 'apm.transaction_duration',
+    rule_category: 'Latency threshold',
+    reason: `Latency is 2.5s for ${id}`,
+    status: 'active',
+    start: '2026-08-24T12:00:00.000Z',
   });
-
-  it('is a no-op when the record is already running', async () => {
-    repository.get.mockResolvedValue(makeRecord({ status: 'running' }, { id: EXECUTION_ID }));
-
-    await makeClient().ensureOrCreate(EXECUTION_ID);
-
-    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
-    expect(repository.create).not.toHaveBeenCalled();
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it.each<InvestigationStatus>(['completed', 'failed', 'cancelled'])(
-    'throws InvestigationConflictError when the record is already %s',
-    async (status) => {
-      repository.get.mockResolvedValue(makeRecord({ status }, { id: EXECUTION_ID }));
-
-      await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-        InvestigationConflictError
-      );
-      expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
-      expect(repository.create).not.toHaveBeenCalled();
-      expect(repository.update).not.toHaveBeenCalled();
-    }
-  );
-
-  it('transitions a pending record to running, stamping it from the execution document', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord(
-        { status: 'pending', completed_at: undefined },
-        { id: EXECUTION_ID, version: 'v1' }
-      )
-    );
-    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
-
-    await makeClient().ensureOrCreate(EXECUTION_ID);
-
-    expect(repository.update).toHaveBeenCalledWith({
-      id: EXECUTION_ID,
-      patch: {
-        status: 'running',
-        started_at: '2024-01-01T00:00:00Z',
-        executed_by: 'workflow-user',
-      },
-      version: 'v1',
+  const startAlerts = (...ids: string[]) =>
+    makeClient().start({
+      title: 'Latency is too high',
+      subject: { type: 'alert', id: ids[0] },
+      trigger_type: 'automatic',
+      context: { alerts: ids.map(makeAlert) },
     });
-    expect(repository.create).not.toHaveBeenCalled();
+  const runInputs = () => mockManagement.runWorkflow.mock.calls[0][2];
+
+  beforeEach(() => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-1');
   });
 
-  it('treats losing the pending-to-running race to its own retried ensure as a no-op', async () => {
-    repository.get
-      .mockResolvedValueOnce(
-        makeRecord(
-          { status: 'pending', completed_at: undefined },
-          { id: EXECUTION_ID, version: 'v1' }
-        )
-      )
-      .mockResolvedValueOnce(
-        makeRecord(
-          { status: 'running', completed_at: undefined },
-          { id: EXECUTION_ID, version: 'v2' }
-        )
-      );
-    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
-    repository.update.mockRejectedValue(new InvestigationStaleWriteError(EXECUTION_ID));
-
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
-  });
-
-  it('throws InvestigationConflictError when it loses the pending-to-running race to another run', async () => {
-    repository.get
-      .mockResolvedValueOnce(
-        makeRecord(
-          { status: 'pending', completed_at: undefined },
-          { id: EXECUTION_ID, version: 'v1' }
-        )
-      )
-      .mockResolvedValueOnce(
-        makeRecord(
-          { status: 'running', completed_at: undefined, execution_id: 'exec-follow-up' },
-          { id: EXECUTION_ID, version: 'v2' }
-        )
-      );
-    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
-    repository.update.mockRejectedValue(new InvestigationStaleWriteError(EXECUTION_ID));
-
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-      InvestigationConflictError
-    );
-  });
-
-  it('throws InvestigationConflictError when a continuing run already owns the record', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord(
-        { status: 'running', completed_at: undefined, execution_id: 'exec-follow-up' },
-        { id: EXECUTION_ID }
-      )
-    );
-
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-      InvestigationConflictError
-    );
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('throws InvestigationNotFoundError when a pending record has no readable execution', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord({ status: 'pending', completed_at: undefined }, { id: EXECUTION_ID })
-    );
-    mockManagement.getWorkflowExecution.mockResolvedValue(null);
-
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-      InvestigationNotFoundError
-    );
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('creates the record from the execution document', async () => {
-    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
-
-    await makeClient().ensureOrCreate(EXECUTION_ID);
-
-    expect(repository.create).toHaveBeenCalledWith({
-      id: EXECUTION_ID,
-      attributes: expect.objectContaining({
-        title: 'Investigate this',
-        status: 'running',
-        subject_type: 'alert',
-        subject_id: 'alert-42',
-        trigger_type: 'automatic',
-        concurrency_key: 'key-1',
-        executed_by: 'workflow-user',
-        created_at: '2024-01-01T00:00:00Z',
-        started_at: '2024-01-01T00:00:00Z',
-      }),
+  it('leaves every write to the workflow: the start only reads, claims, and runs', async () => {
+    await expect(startAlerts('alert-1', 'alert-2')).resolves.toEqual({
+      investigation_id: 'inv-new',
     });
-  });
 
-  it('throws InvestigationMetadataMissingError when the execution inputs carry no title', async () => {
-    mockManagement.getWorkflowExecution.mockResolvedValue(
-      makeEnsureExecution({
-        context: {
-          inputs: {
-            message: 'Investigate this',
-            context: { source: 'alert', alert_id: 'alert-42' },
-          },
-        },
-      })
-    );
-
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-      InvestigationMetadataMissingError
-    );
-    expect(repository.create).not.toHaveBeenCalled();
-  });
-
-  it('cancels a superseded running investigation sharing the concurrency key', async () => {
-    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
-    const superseded = makeRecord(
-      { status: 'running', concurrency_key: 'key-1', completed_at: undefined },
-      { id: 'inv-old' }
-    );
-    repository.find.mockResolvedValue(findResult([superseded]));
-
-    await makeClient().ensureOrCreate(EXECUTION_ID);
-
-    expect(repository.find).toHaveBeenCalledWith(
+    expect(conversations.create).not.toHaveBeenCalled();
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
+    expect(subjectsClient.claimSubjects).toHaveBeenCalledWith(
       expect.objectContaining({
-        concurrencyKey: 'key-1',
-        statuses: ['pending', 'running'],
-        sortField: 'created_at',
-        sortOrder: 'desc',
-        perPage: 2,
+        conversationId: 'inv-new',
+        subjects: [
+          { type: 'alert', id: 'alert-1' },
+          { type: 'alert', id: 'alert-2' },
+        ],
       })
     );
-    expect(repository.update).toHaveBeenCalledWith({
-      id: 'inv-old',
-      patch: expect.objectContaining({ status: 'cancelled' }),
-      version: '1',
+    expect(runInputs()).toMatchObject({
+      investigation_id: 'inv-new',
+      subjects: [
+        { type: 'alert', id: 'alert-1', triggerType: 'automatic', snapshot: makeAlert('alert-1') },
+        { type: 'alert', id: 'alert-2', triggerType: 'automatic', snapshot: makeAlert('alert-2') },
+      ],
     });
-    expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ id: EXECUTION_ID }));
   });
 
-  it('cancels the older record rather than itself when a concurrent ensure already created it', async () => {
-    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
-    repository.find.mockResolvedValue(
-      findResult([
-        makeRecord(
-          { status: 'running', concurrency_key: 'key-1', completed_at: undefined },
-          { id: EXECUTION_ID }
-        ),
-        makeRecord(
-          { status: 'running', concurrency_key: 'key-1', completed_at: undefined },
-          { id: 'inv-old' }
-        ),
-      ])
+  it('continues the most recently updated open investigation sharing any subject', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([
+      { id: 'inv-recent' },
+      { id: 'inv-older' },
+    ]);
+    withConversations(
+      makeConversation({ id: 'inv-recent' }),
+      makeConversation({ id: 'inv-older' })
     );
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      makeStoredSubject({ conversationId: 'inv-recent', subjectId: 'alert-1' }),
+    ]);
 
-    await makeClient().ensureOrCreate(EXECUTION_ID);
+    await expect(startAlerts('alert-1', 'alert-3')).resolves.toEqual({
+      investigation_id: 'inv-recent',
+    });
 
-    expect(repository.update).toHaveBeenCalledTimes(1);
-    expect(repository.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'inv-old',
-        patch: expect.objectContaining({ status: 'cancelled' }),
+    expect(agenticInvestigationsClient.findOpenBySubjects).toHaveBeenCalledWith([
+      { type: 'alert', id: 'alert-1' },
+      { type: 'alert', id: 'alert-3' },
+    ]);
+    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+    expect(subjectsClient.listByConversationIds).toHaveBeenCalledWith(['inv-recent']);
+    const inputs = runInputs();
+    expect(inputs.investigation_id).toBe('inv-recent');
+    // Only the subject the investigation does not hold yet is added.
+    expect(inputs.subjects).toEqual([expect.objectContaining({ id: 'alert-3' })]);
+    // The brief says it continues and describes the new alert only.
+    expect(inputs.message).toContain('This continues the investigation');
+    expect(inputs.message).toContain('Latency is 2.5s for alert-3');
+    expect(inputs.message).not.toContain('Latency is 2.5s for alert-1');
+  });
+
+  it('describes the alerts again when every alert is already part of the investigation', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+    withConversations(makeConversation({ id: 'inv-1' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([makeStoredSubject()]);
+
+    await startAlerts('alert-1');
+
+    const inputs = runInputs();
+    expect(inputs.subjects).toEqual([]);
+    expect(inputs.message).toContain('reported again');
+    expect(inputs.message).toContain('Latency is 2.5s for alert-1');
+  });
+
+  it('prefixes a non-alert follow-up with the caller message', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+    withConversations(makeConversation({ id: 'inv-1' }));
+
+    await makeClient().start({
+      title: 'Checkout errors',
+      subject: { type: 'significant_event', id: 'se-1' },
+      trigger_type: 'automatic',
+      message: 'Checkout errors re-opened',
+    });
+
+    expect(runInputs().message).toMatch(
+      /^This continues the investigation[\s\S]*Checkout errors re-opened$/
+    );
+  });
+
+  it('never continues a closed investigation', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-closed' }]);
+    withConversations(makeConversation({ id: 'inv-closed', status: 'closed' }));
+
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
+    expect(subjectsClient.claimSubjects).toHaveBeenCalled();
+  });
+
+  it('opens a new investigation rather than continue one owned by another identity', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-theirs' }]);
+    withConversations(makeConversation({ id: 'inv-theirs', owner: false }));
+
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('inv-theirs'));
+    expect(runInputs().message).not.toContain('This continues the investigation');
+  });
+
+  it('continues the investigation holding a claimed subject', async () => {
+    subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
+    withConversations(makeConversation({ id: 'inv-holder' }));
+
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-holder' });
+    expect(runInputs().investigation_id).toBe('inv-holder');
+  });
+
+  it('continues a claim holder whose conversation its own workflow has not created yet', async () => {
+    subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-pending' });
+
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-pending' });
+  });
+
+  it('is not blocked by a claim held by an investigation it cannot write', async () => {
+    subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-theirs' });
+    withConversations(makeConversation({ id: 'inv-theirs', owner: false }));
+
+    await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
+  });
+
+  it('treats a closed or missing claim holder as no longer holding the subject', async () => {
+    withConversations(makeConversation({ id: 'inv-closed', status: 'closed' }));
+    await startAlerts('alert-1');
+
+    const { isHolderOpen } = subjectsClient.claimSubjects.mock.calls[0][0];
+    await expect(isHolderOpen('inv-closed')).resolves.toBe(false);
+    await expect(isHolderOpen('inv-missing')).resolves.toBe(false);
+  });
+
+  it('records a question without a subject id under the new investigation, matching nothing', async () => {
+    await makeClient().start({
+      title: 'Payment timeouts',
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'manual',
+      message: 'Why did payment timeouts increase?',
+    });
+
+    expect(agenticInvestigationsClient.findOpenBySubjects).not.toHaveBeenCalled();
+    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+    expect(runInputs().subjects).toEqual([
+      expect.objectContaining({ type: 'manual', id: 'inv-new' }),
+    ]);
+  });
+
+  it('throws InvestigationUnavailableError without agentic investigations', async () => {
+    await expect(
+      makeClient({ agenticInvestigations: undefined }).start({
+        title: 'Latency is too high',
+        subject: { type: 'significant_event', id: 'se-1' },
+        trigger_type: 'manual',
       })
-    );
-  });
-
-  it('cancels nothing when the only in-flight record sharing the key is itself', async () => {
-    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
-    repository.find.mockResolvedValue(
-      findResult([
-        makeRecord(
-          { status: 'running', concurrency_key: 'key-1', completed_at: undefined },
-          { id: EXECUTION_ID }
-        ),
-      ])
-    );
-
-    await makeClient().ensureOrCreate(EXECUTION_ID);
-
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('still creates the record when the superseded cancel loses a write race', async () => {
-    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
-    repository.find.mockResolvedValue(
-      findResult([
-        makeRecord(
-          { status: 'running', concurrency_key: 'key-1', completed_at: undefined },
-          { id: 'inv-old' }
-        ),
-      ])
-    );
-    repository.update.mockRejectedValue(new InvestigationStaleWriteError('inv-old'));
-
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
-
-    expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ id: EXECUTION_ID }));
-    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('inv-old'));
-  });
-
-  it('throws InvestigationNotFoundError when the execution does not exist', async () => {
-    mockManagement.getWorkflowExecution.mockResolvedValue(null);
-
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-      InvestigationNotFoundError
-    );
-    expect(repository.create).not.toHaveBeenCalled();
-  });
-
-  it('accepts a manual execution of the Nightshift investigation workflow', async () => {
-    mockManagement.getWorkflowExecution.mockResolvedValue(
-      makeEnsureExecution({
-        workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-        originManagedWorkflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-        context: {
-          inputs: {
-            message: 'Investigate last error',
-            title: 'Investigate last error',
-            context: {
-              source: 'manual',
-              manual_id: 'manual',
-              trigger_type: 'manual',
-            },
-          },
-        },
-      })
-    );
-
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
-    expect(repository.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: EXECUTION_ID,
-        attributes: expect.objectContaining({
-          subject_type: 'manual',
-          subject_id: 'manual',
-        }),
-      })
-    );
-  });
-
-  it('throws InvestigationNotFoundError for an execution of an unrelated workflow', async () => {
-    mockManagement.getWorkflowExecution.mockResolvedValue(
-      makeEnsureExecution({ workflowId: 'some-other-workflow', originManagedWorkflowId: undefined })
-    );
-
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-      InvestigationNotFoundError
-    );
-    expect(repository.create).not.toHaveBeenCalled();
-  });
-
-  it('throws InvestigationMetadataMissingError for executions without an investigation subject', async () => {
-    mockManagement.getWorkflowExecution.mockResolvedValue(
-      makeEnsureExecution({ context: { inputs: { message: 'bare run' } } })
-    );
-
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-      InvestigationMetadataMissingError
-    );
-    expect(repository.create).not.toHaveBeenCalled();
-  });
-
-  it('tolerates a conflict from a concurrent ensure', async () => {
-    mockManagement.getWorkflowExecution.mockResolvedValue(makeEnsureExecution());
-    repository.create.mockRejectedValue(new InvestigationAlreadyExistsError(EXECUTION_ID));
-
-    await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
-  });
-
-  describe('subject recovery from execution inputs', () => {
-    // recoverSubjectFromInput / recoverTriggerTypeFromInput are called here (and only here) on the
-    // create path. These cases were previously on get() which used the same functions; after the
-    // read path moved to the SO store the functions stayed live but lost their only coverage.
-
-    it('recovers a significant_event subject via significant_event_id', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeEnsureExecution({
-          context: {
-            inputs: {
-              title: 'Investigate this',
-              context: { source: 'significant_event', significant_event_id: 'se-99' },
-            },
-          },
-        })
-      );
-      await makeClient().ensureOrCreate(EXECUTION_ID);
-      const { attributes: attrs } = repository.create.mock.calls[0][0];
-      expect(attrs.subject_type).toBe('significant_event');
-      expect(attrs.subject_id).toBe('se-99');
-    });
-
-    it('throws InvestigationMetadataMissingError when all significant_event id fields are empty', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeEnsureExecution({
-          context: {
-            inputs: {
-              title: 'Investigate this',
-              context: { source: 'significant_event', significant_event_id: '' },
-            },
-          },
-        })
-      );
-      await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-        InvestigationMetadataMissingError
-      );
-      expect(repository.create).not.toHaveBeenCalled();
-    });
-
-    it('throws InvestigationMetadataMissingError when the source is unrecognized', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeEnsureExecution({
-          context: {
-            inputs: { title: 'Investigate this', context: { source: 'chat', some_id: 'x' } },
-          },
-        })
-      );
-      await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
-        InvestigationMetadataMissingError
-      );
-      expect(repository.create).not.toHaveBeenCalled();
-    });
-
-    it('stores subject_summary from ctx.summary for a significant_event subject', async () => {
-      const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeEnsureExecution({
-          context: {
-            inputs: {
-              title: 'Investigate this',
-              context: {
-                source: 'significant_event',
-                significant_event_id: 'event-42',
-                summary: long,
-              },
-            },
-          },
-        })
-      );
-      await makeClient().ensureOrCreate(EXECUTION_ID);
-      const { attributes: attrs } = repository.create.mock.calls[0][0];
-      expect(attrs.subject_type).toBe('significant_event');
-      expect(attrs.subject_id).toBe('event-42');
-      expect(attrs.subject_summary).toBe(long);
-    });
-
-    it('stores subject_summary for an alert subject', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeEnsureExecution({
-          context: {
-            inputs: {
-              title: 'Investigate this',
-              context: { source: 'alert', alert_id: 'alert-99', summary: 'CPU saturation' },
-            },
-          },
-        })
-      );
-      await makeClient().ensureOrCreate(EXECUTION_ID);
-      const { attributes: attrs } = repository.create.mock.calls[0][0];
-      expect(attrs.subject_type).toBe('alert');
-      expect(attrs.subject_id).toBe('alert-99');
-      expect(attrs.subject_summary).toBe('CPU saturation');
-    });
-
-    it('falls back to manual trigger_type when context carries none', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeEnsureExecution({
-          context: {
-            inputs: { title: 'Investigate this', context: { source: 'alert', alert_id: 'a-1' } },
-          },
-        })
-      );
-      await makeClient().ensureOrCreate(EXECUTION_ID);
-      const { attributes: attrs } = repository.create.mock.calls[0][0];
-      expect(attrs.trigger_type).toBe('manual');
-    });
+    ).rejects.toThrow(InvestigationUnavailableError);
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 });
 
-describe('NightshiftInvestigationsClient.ensureOrCreate() continuing an investigation', () => {
-  const INVESTIGATION_ID = 'inv-slack';
-  const EXECUTION_ID = 'exec-follow-up';
+describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
+  const subjects = [
+    { type: 'alert', id: 'alert-1', triggerType: 'automatic' },
+    { type: 'alert', id: 'alert-2', triggerType: 'automatic' },
+  ];
+  const withExecution = ({
+    inputs = { title: 'Latency is too high', investigation_id: 'inv-1', subjects },
+    status = ExecutionStatus.RUNNING,
+    workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+  }: {
+    inputs?: Record<string, unknown>;
+    status?: ExecutionStatus;
+    workflowId?: string;
+  } = {}) =>
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-1',
+      workflowId,
+      status,
+      context: { inputs },
+    });
 
-  const makeFollowUpExecution = (inputs: Record<string, unknown> = {}) => ({
-    id: EXECUTION_ID,
-    workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-    status: ExecutionStatus.RUNNING,
-    startedAt: '2024-01-02T00:00:00Z',
-    executedBy: 'slack-app',
-    context: { inputs: { investigation_id: INVESTIGATION_ID, ...inputs } },
+  it('creates the investigation conversation and records the run subjects', async () => {
+    withExecution();
+
+    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).resolves.toBe('inv-1');
+
+    expect(mockManagement.getWorkflowExecution).toHaveBeenCalledWith('exec-1', SPACE_ID, {
+      includeOutput: false,
+      request: mockRequest,
+    });
+    expect(conversations.create).toHaveBeenCalledWith({
+      id: 'inv-1',
+      title: 'Latency is too high',
+      agentId: 'nightshift.investigation',
+      templateId: 'investigation',
+      accessControl: { access_mode: 'public' },
+    });
+    // A conversation this call created holds no subjects yet.
+    expect(subjectsClient.listByConversationIds).not.toHaveBeenCalled();
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
   });
 
-  const mockExecutions = (executions: Record<string, unknown>) =>
-    mockManagement.getWorkflowExecution.mockImplementation(
-      async (id: string) => executions[id] ?? null
-    );
+  it('records only the subjects an existing investigation does not hold', async () => {
+    withExecution();
+    withConversations(makeConversation({ id: 'inv-1' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([makeStoredSubject()]);
 
-  it.each<[InvestigationStatus, Record<string, unknown>]>([
-    ['pending', {}],
-    ['completed', { completed_at: null, error: null }],
-    ['failed', { completed_at: null, error: null }],
-  ])('moves a %s investigation to running for the run that names it', async (status, cleared) => {
-    repository.get.mockResolvedValue(
-      makeRecord({ status, conversation_id: 'conv-slack' }, { id: INVESTIGATION_ID, version: 'v2' })
-    );
-    mockExecutions({ [EXECUTION_ID]: makeFollowUpExecution() });
+    await makeClient().ensureOrCreate('inv-1', 'exec-1');
 
-    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).resolves.toBe(
-      'conv-slack'
-    );
+    expect(conversations.create).not.toHaveBeenCalled();
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [subjects[1]]);
+  });
+
+  it('reopens a closed investigation it continues', async () => {
+    withExecution();
+    withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
+
+    await makeClient().ensureOrCreate('inv-1', 'exec-1');
+
+    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', { status: 'open' });
+  });
+
+  it('writes nothing to an investigation the run does not own', async () => {
+    withExecution();
+    withConversations(makeConversation({ id: 'inv-1', status: 'closed', owner: false }));
+
+    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).resolves.toBe('inv-1');
+
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('does not own'));
+  });
+
+  it('starts an investigation for a run started without one, from its context', async () => {
+    withExecution({
+      inputs: {
+        title: 'Checkout errors',
+        context: {
+          source: 'significant_event',
+          significant_event_id: 'se-1',
+          summary: 'Checkout errors spiked',
+          trigger_type: 'manual',
+        },
+      },
+    });
+
+    await expect(makeClient().ensureOrCreate('exec-1')).resolves.toBe('exec-1');
 
     expect(mockManagement.getWorkflowExecution).toHaveBeenCalledWith(
-      EXECUTION_ID,
+      'exec-1',
       SPACE_ID,
       expect.anything()
     );
-    expect(repository.update).toHaveBeenCalledWith({
-      id: INVESTIGATION_ID,
-      patch: {
-        status: 'running',
-        started_at: '2024-01-02T00:00:00Z',
-        executed_by: 'slack-app',
-        execution_id: EXECUTION_ID,
-        ...cleared,
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('exec-1', [
+      {
+        type: 'significant_event',
+        id: 'se-1',
+        triggerType: 'manual',
+        summary: 'Checkout errors spiked',
       },
-      version: 'v2',
-    });
+    ]);
   });
 
-  it.each<[string, Partial<InvestigationAttributes>]>([
-    ['another continuing run', { status: 'running', execution_id: 'exec-other' }],
-    ['the run it is named after', { status: 'running' }],
-  ])('rejects the run while %s owns the investigation', async (_, attributes) => {
-    repository.get.mockResolvedValue(makeRecord(attributes, { id: INVESTIGATION_ID }));
-    mockExecutions({ [EXECUTION_ID]: makeFollowUpExecution() });
+  it('records no subject for a run whose inputs describe none', async () => {
+    withExecution({ inputs: { title: 'Free-form question' } });
 
-    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
-      InvestigationConflictError
-    );
-    expect(repository.update).not.toHaveBeenCalled();
+    await makeClient().ensureOrCreate('exec-1');
+
+    expect(conversations.create).toHaveBeenCalled();
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
   });
 
-  it('rejects the run while the pending investigation still awaits the live run it is named after', async () => {
-    repository.get.mockResolvedValue(makeRecord({ status: 'pending' }, { id: INVESTIGATION_ID }));
-    mockExecutions({
-      [EXECUTION_ID]: makeFollowUpExecution(),
-      [INVESTIGATION_ID]: { ...makeFollowUpExecution(), id: INVESTIGATION_ID },
-    });
-
-    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
-      InvestigationConflictError
+  it('agrees with a concurrent run that created the conversation first', async () => {
+    withExecution();
+    conversations.create.mockRejectedValue(
+      createConversationAlreadyExistsError({ conversationId: 'inv-1' })
     );
-    expect(repository.update).not.toHaveBeenCalled();
+    conversations.bulkGet
+      .mockResolvedValueOnce(new Map())
+      .mockResolvedValue(new Map([['inv-1', makeConversation({ id: 'inv-1' })]]));
+
+    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).resolves.toBe('inv-1');
   });
 
-  it('returns the conversation without writing when the run already owns the investigation', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord(
-        { status: 'running', execution_id: EXECUTION_ID, conversation_id: 'conv-slack' },
-        { id: INVESTIGATION_ID }
-      )
-    );
-    mockExecutions({ [EXECUTION_ID]: makeFollowUpExecution() });
+  it('rejects an id that names a conversation which is not an investigation', async () => {
+    withExecution();
+    withConversations(makeConversation({ id: 'inv-1', templateId: 'escalation' }));
 
-    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).resolves.toBe(
-      'conv-slack'
-    );
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('rejects the run that loses the claim to a concurrent continuation', async () => {
-    repository.get
-      .mockResolvedValueOnce(makeRecord({ status: 'completed' }, { id: INVESTIGATION_ID }))
-      .mockResolvedValueOnce(
-        makeRecord({ status: 'running', execution_id: 'exec-other' }, { id: INVESTIGATION_ID })
-      );
-    mockExecutions({ [EXECUTION_ID]: makeFollowUpExecution() });
-    repository.update.mockRejectedValue(new InvestigationStaleWriteError(INVESTIGATION_ID));
-
-    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
-      InvestigationConflictError
-    );
-    expect(repository.update).toHaveBeenCalledTimes(1);
-  });
-
-  it('claims the investigation again when the write it lost to left it unowned', async () => {
-    repository.get
-      .mockResolvedValueOnce(
-        makeRecord({ status: 'completed' }, { id: INVESTIGATION_ID, version: 'v1' })
-      )
-      .mockResolvedValueOnce(
-        makeRecord(
-          { status: 'completed', conversation_id: 'conv-slack' },
-          { id: INVESTIGATION_ID, version: 'v2' }
-        )
-      );
-    mockExecutions({ [EXECUTION_ID]: makeFollowUpExecution() });
-    repository.update
-      .mockRejectedValueOnce(new InvestigationStaleWriteError(INVESTIGATION_ID))
-      .mockResolvedValueOnce(undefined);
-
-    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).resolves.toBe(
-      'conv-slack'
-    );
-    expect(repository.update).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: INVESTIGATION_ID, version: 'v2' })
-    );
-  });
-
-  it('reports a reopened investigation without its previous completion or error', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord({ status: 'running', completed_at: null, error: null }, { id: INVESTIGATION_ID })
-    );
-
-    const investigation = await makeClient().get(INVESTIGATION_ID);
-
-    expect(investigation.completed_at).toBeUndefined();
-    expect(investigation.error).toBeUndefined();
-  });
-
-  it('rejects a run that names a different investigation', async () => {
-    repository.get.mockResolvedValue(makeRecord({}, { id: INVESTIGATION_ID }));
-    mockManagement.getWorkflowExecution.mockResolvedValue(
-      makeFollowUpExecution({ investigation_id: 'someone-else' })
-    );
-
-    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
+    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
       InvestigationNotFoundError
     );
-    expect(repository.update).not.toHaveBeenCalled();
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
   });
 
-  it.each([ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.CANCELLED])(
-    'rejects a run that has already finished as "%s", so a replay cannot reopen the investigation',
-    async (status) => {
-      repository.get.mockResolvedValue(
-        makeRecord({ status: 'completed' }, { id: INVESTIGATION_ID })
-      );
-      mockManagement.getWorkflowExecution.mockResolvedValue({ ...makeFollowUpExecution(), status });
+  it.each<[string, Parameters<typeof withExecution>[0]]>([
+    [
+      'a run that names a different investigation',
+      { inputs: { title: 't', investigation_id: 'inv-2' } },
+    ],
+    ['a run that has finished', { status: ExecutionStatus.COMPLETED }],
+    ['a run of another workflow', { workflowId: 'some-other-workflow' }],
+  ])('rejects %s', async (_label, execution) => {
+    withExecution(execution);
 
-      await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
-        InvestigationNotFoundError
-      );
-      expect(repository.update).not.toHaveBeenCalled();
-    }
-  );
-
-  it('rejects a run of another workflow', async () => {
-    repository.get.mockResolvedValue(makeRecord({}, { id: INVESTIGATION_ID }));
-    mockManagement.getWorkflowExecution.mockResolvedValue({
-      ...makeFollowUpExecution(),
-      workflowId: 'some-other-workflow',
-    });
-
-    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
+    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
       InvestigationNotFoundError
     );
-    expect(repository.update).not.toHaveBeenCalled();
+    expect(conversations.create).not.toHaveBeenCalled();
   });
 
-  it('rejects a continuation of an investigation that does not exist', async () => {
-    await expect(makeClient().ensureOrCreate(INVESTIGATION_ID, EXECUTION_ID)).rejects.toThrow(
+  it('rejects a run that does not exist', async () => {
+    mockManagement.getWorkflowExecution.mockResolvedValue(null);
+
+    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
       InvestigationNotFoundError
     );
-    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('throws InvestigationMetadataMissingError when the run carries no title', async () => {
+    withExecution({ inputs: { investigation_id: 'inv-1' } });
+
+    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
+      InvestigationMetadataMissingError
+    );
   });
 });
 
 describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
-  const THREAD = { workspace: 'T1', channel: 'C1', threadTs: '1700.0001' };
-  const SLACK_THREAD: InvestigationThread = {
-    surface: 'slack',
-    workspace: 'T1',
-    channel: 'C1',
-    thread_ts: '1700.0001',
-  };
-
-  it('creates a pending investigation with ids derived from the thread', async () => {
-    const result = await makeClient().findOrCreateSlackThread({
-      ...THREAD,
-      text: '<@U999> checkout is   failing\nsince the deploy',
-      create: true,
+  const THREAD = { workspace: 'T1', channel: 'C1', threadTs: '1712345678.000100' };
+  const THREAD_KEY = 'team:T1/channel:C1/thread:1712345678.000100';
+  const threadSubject = (slack: Record<string, string> = {}) =>
+    makeStoredSubject({
+      subjectType: 'slack_thread',
+      subjectId: THREAD_KEY,
+      slack: { channel: 'C1', thread_ts: THREAD.threadTs, ...slack },
     });
 
-    const { id, attributes } = repository.create.mock.calls[0][0];
-    expect(attributes).toMatchObject({
-      title: 'checkout is failing since the deploy',
-      status: 'pending',
-      subject_type: 'manual',
-      // The placeholder id, so the UI hides the subject rather than showing raw Slack ids.
-      subject_id: 'manual',
-      trigger_type: 'manual',
-      thread: { surface: 'slack', workspace: 'T1', channel: 'C1', thread_ts: '1700.0001' },
-      conversation_id: expect.any(String),
-    });
-    expect(result).toEqual({
-      investigation_id: id,
-      title: attributes.title,
-      status_message_ts: undefined,
-    });
-
-    const again = await makeClient().findOrCreateSlackThread({ ...THREAD, create: true });
-    expect(repository.create.mock.calls[1][0].id).toBe(id);
-    expect(repository.create.mock.calls[1][0].attributes.conversation_id).toBe(
-      attributes.conversation_id
-    );
-    expect(again?.investigation_id).toBe(id);
-  });
-
-  it("resumes the thread's conversation when the investigation workflow runs on it", async () => {
-    const created = await makeClient().findOrCreateSlackThread({ ...THREAD, create: true });
-    const { id, attributes } = repository.create.mock.calls[0][0];
-    repository.get.mockResolvedValue(makeRecord(attributes, { id }));
-    mockManagement.getWorkflowExecution.mockImplementation(async (executionId: string) =>
-      executionId === 'exec-slack'
-        ? {
-            id: 'exec-slack',
-            workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-            status: ExecutionStatus.RUNNING,
-            startedAt: '2024-01-02T00:00:00Z',
-            context: { inputs: { investigation_id: created?.investigation_id } },
-          }
-        : null
-    );
-
-    await expect(makeClient().ensureOrCreate(id, 'exec-slack')).resolves.toBe(
-      attributes.conversation_id
-    );
-  });
-
-  it('keys the thread by its workspace, since channel ids repeat across workspaces', async () => {
-    await makeClient().findOrCreateSlackThread({ ...THREAD, create: true });
-    await makeClient().findOrCreateSlackThread({ ...THREAD, workspace: 'T2', create: true });
-
-    const [first, second] = repository.create.mock.calls.map(([{ id, attributes }]) => ({
-      id,
-      conversationId: attributes.conversation_id,
-    }));
-    expect(second.id).not.toBe(first.id);
-    expect(second.conversationId).not.toBe(first.conversationId);
-  });
-
-  it('gives the thread a conversation per space, since conversations are shared across spaces', async () => {
-    await makeClient().findOrCreateSlackThread({ ...THREAD, create: true });
-    await makeClient({ spaceIdOverride: 'other-space' }).findOrCreateSlackThread({
-      ...THREAD,
-      create: true,
-    });
-
-    const [first, second] = repository.create.mock.calls.map(([{ id, attributes }]) => ({
-      id,
-      conversationId: attributes.conversation_id,
-    }));
-    // Saved object ids are scoped to their space.
-    expect(second.id).toBe(first.id);
-    expect(second.conversationId).not.toBe(first.conversationId);
-  });
-
-  it('records the status message given on create', async () => {
-    const result = await makeClient().findOrCreateSlackThread({
-      ...THREAD,
-      create: true,
-      statusMessageTs: '1700.0002',
-    });
-
-    expect(repository.create.mock.calls[0][0].attributes.thread).toEqual({
-      ...SLACK_THREAD,
-      status_message_ts: '1700.0002',
-    });
-    expect(result?.status_message_ts).toBe('1700.0002');
-  });
-
-  it('returns the existing investigation and its status message', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord(
-        { conversation_id: 'conv-1', thread: { ...SLACK_THREAD, status_message_ts: '1700.0002' } },
-        { id: 'inv-9' }
-      )
-    );
+  it('finds the investigation by the thread conversation origin', async () => {
+    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    withConversations(makeConversation({ id: 'inv-1', title: 'Checkout is slow' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      threadSubject({ status_message_ts: '1712345679.000200' }),
+    ]);
 
     await expect(
       makeClient().findOrCreateSlackThread({ ...THREAD, create: false })
     ).resolves.toEqual({
-      investigation_id: 'inv-9',
-      title: 'Latency is too high',
-      status_message_ts: '1700.0002',
+      investigation_id: 'inv-1',
+      title: 'Checkout is slow',
+      slack_message_ts: '1712345679.000200',
     });
-    expect(repository.create).not.toHaveBeenCalled();
-    expect(repository.update).not.toHaveBeenCalled();
+    expect(conversations.getByOrigin).toHaveBeenCalledWith({
+      external_conversation_id: THREAD_KEY,
+    });
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
   });
 
-  it('records the status message on an existing investigation whatever its status', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord(
-        { status: 'completed', conversation_id: 'conv-1', thread: SLACK_THREAD },
-        { id: 'inv-9', version: 'v1' }
-      )
-    );
+  it("falls back to the thread's subject when the origin names another conversation", async () => {
+    conversations.getByOrigin.mockResolvedValue({ id: 'chat-1', template_id: undefined });
+    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
+    withConversations(makeConversation({ id: 'inv-1' }));
 
-    const result = await makeClient().findOrCreateSlackThread({
-      ...THREAD,
-      create: false,
-      statusMessageTs: '1700.0003',
-    });
-
-    expect(repository.update).toHaveBeenCalledWith({
-      id: 'inv-9',
-      patch: { thread: { ...SLACK_THREAD, status_message_ts: '1700.0003' } },
-      version: 'v1',
-    });
-    expect(result?.status_message_ts).toBe('1700.0003');
-  });
-
-  const handled = (eventId: string, executionId = 'exec-1') => ({
-    event_id: eventId,
-    execution_id: executionId,
-  });
-
-  it('records a new event and marks one another execution handled as a duplicate', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord({ thread: { ...SLACK_THREAD, seen_events: [handled('Ev1')] } }, { id: 'inv-9' })
-    );
-
-    const fresh = await makeClient().findOrCreateSlackThread({
-      ...THREAD,
-      create: false,
-      event: { eventId: 'Ev2', executionId: 'exec-2' },
-    });
-    expect(fresh).not.toHaveProperty('duplicate');
-    expect(repository.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        patch: {
-          thread: { ...SLACK_THREAD, seen_events: [handled('Ev1'), handled('Ev2', 'exec-2')] },
-        },
-      })
-    );
-
-    repository.update.mockClear();
-    const redelivered = await makeClient().findOrCreateSlackThread({
-      ...THREAD,
-      create: false,
-      event: { eventId: 'Ev1', executionId: 'exec-3' },
-    });
-    expect(redelivered).toMatchObject({ investigation_id: 'inv-9', duplicate: true });
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('does not treat the execution that handled an event asking again as a duplicate', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord({ thread: { ...SLACK_THREAD, seen_events: [handled('Ev1')] } }, { id: 'inv-9' })
-    );
-
-    const retried = await makeClient().findOrCreateSlackThread({
-      ...THREAD,
-      create: false,
-      event: { eventId: 'Ev1', executionId: 'exec-1' },
-    });
-
-    expect(retried).not.toHaveProperty('duplicate');
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('gives an event back only for the execution that handled it', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord(
-        { thread: { ...SLACK_THREAD, seen_events: [handled('Ev0'), handled('Ev1')] } },
-        { id: 'inv-9', version: 'v1' }
-      )
-    );
-
-    const otherExecution = await makeClient().findOrCreateSlackThread({
-      ...THREAD,
-      create: false,
-      event: { eventId: 'Ev1', executionId: 'exec-2' },
-      releaseEvent: true,
-    });
-    expect(otherExecution).not.toHaveProperty('duplicate');
-    expect(repository.update).not.toHaveBeenCalled();
-
-    const released = await makeClient().findOrCreateSlackThread({
-      ...THREAD,
-      create: false,
-      event: { eventId: 'Ev1', executionId: 'exec-1' },
-      releaseEvent: true,
-    });
-    expect(released).not.toHaveProperty('duplicate');
-    expect(repository.update).toHaveBeenCalledWith({
-      id: 'inv-9',
-      patch: { thread: { ...SLACK_THREAD, seen_events: [handled('Ev0')] } },
-      version: 'v1',
-    });
-  });
-
-  it('keeps only the most recent events', async () => {
-    const seen = Array.from({ length: MAX_THREAD_SEEN_EVENTS }, (_, i) => handled(`Ev${i}`));
-    repository.get.mockResolvedValue(
-      makeRecord({ thread: { ...SLACK_THREAD, seen_events: seen } })
-    );
-
-    await makeClient().findOrCreateSlackThread({
-      ...THREAD,
-      create: false,
-      event: { eventId: 'EvNew', executionId: 'exec-1' },
-    });
-
-    expect(repository.update.mock.calls[0][0].patch.thread?.seen_events).toEqual([
-      ...seen.slice(1),
-      handled('EvNew'),
+    await expect(
+      makeClient().findOrCreateSlackThread({ ...THREAD, create: false })
+    ).resolves.toMatchObject({ investigation_id: 'inv-1' });
+    expect(subjectsClient.findConversationIdsBySubjects).toHaveBeenCalledWith([
+      { type: 'slack_thread', id: THREAD_KEY },
     ]);
   });
 
-  it('tells exactly one of two concurrent deliveries of an event that it is new', async () => {
-    const before = makeRecord({ thread: SLACK_THREAD }, { id: 'inv-9', version: 'v1' });
-    const after = makeRecord(
-      { thread: { ...SLACK_THREAD, seen_events: [handled('Ev1', 'exec-other')] } },
-      { id: 'inv-9', version: 'v2' }
-    );
-    repository.get.mockResolvedValueOnce(before).mockResolvedValueOnce(after);
-    repository.update.mockRejectedValueOnce(new InvestigationStaleWriteError('inv-9'));
+  it('records a new status message on the thread subject', async () => {
+    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([threadSubject()]);
 
-    const result = await makeClient().findOrCreateSlackThread({
-      ...THREAD,
-      create: false,
-      event: { eventId: 'Ev1', executionId: 'exec-1' },
-    });
-
-    expect(result).toMatchObject({ duplicate: true });
-    expect(repository.update).toHaveBeenCalledTimes(1);
+    await expect(
+      makeClient().findOrCreateSlackThread({ ...THREAD, create: false, slackMessageTs: '2.0' })
+    ).resolves.toMatchObject({ slack_message_ts: '2.0' });
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      {
+        type: 'slack_thread',
+        id: THREAD_KEY,
+        slack: { channel: 'C1', thread_ts: THREAD.threadTs, status_message_ts: '2.0' },
+      },
+    ]);
   });
 
-  it('records the event of a thread it creates', async () => {
-    repository.get
-      .mockResolvedValueOnce(undefined)
-      .mockImplementationOnce(async (id) =>
-        makeRecord(repository.create.mock.calls[0][0].attributes, { id, version: 'v1' })
-      );
+  it('does not write the status message to an investigation another identity owns', async () => {
+    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    withConversations(makeConversation({ id: 'inv-1', owner: false }));
 
-    const result = await makeClient().findOrCreateSlackThread({
-      ...THREAD,
-      create: true,
-      event: { eventId: 'Ev1', executionId: 'exec-1' },
-    });
+    await makeClient().findOrCreateSlackThread({ ...THREAD, create: false, slackMessageTs: '2.0' });
 
-    expect(result).not.toHaveProperty('duplicate');
-    expect(repository.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        patch: { thread: { ...SLACK_THREAD, seen_events: [handled('Ev1')] } },
-        version: 'v1',
-      })
-    );
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalled();
   });
 
   it('does not create an investigation for a thread without create', async () => {
     await expect(
       makeClient().findOrCreateSlackThread({ ...THREAD, create: false })
     ).resolves.toBeUndefined();
-    expect(repository.create).not.toHaveBeenCalled();
+    expect(conversations.create).not.toHaveBeenCalled();
+  });
+
+  it('creates the investigation with the thread origin and the thread as its subject', async () => {
+    await expect(
+      makeClient().findOrCreateSlackThread({
+        ...THREAD,
+        create: true,
+        text: '<@U123> why is   checkout slow?',
+      })
+    ).resolves.toEqual({ investigation_id: 'inv-new', title: 'why is checkout slow?' });
+
+    expect(subjectsClient.claimSubjects).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conversationId: 'inv-new',
+        subjects: [{ type: 'slack_thread', id: THREAD_KEY }],
+      })
+    );
+    expect(conversations.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'inv-new',
+        title: 'why is checkout slow?',
+        templateId: 'investigation',
+        origin: { external_conversation_id: THREAD_KEY },
+      })
+    );
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-new', [
+      {
+        type: 'slack_thread',
+        id: THREAD_KEY,
+        triggerType: 'manual',
+        slack: { channel: 'C1', thread_ts: THREAD.threadTs },
+        summary: 'why is checkout slow?',
+      },
+    ]);
+  });
+
+  it('agrees with a concurrent create for the same thread', async () => {
+    subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-first' });
+
+    await expect(
+      makeClient().findOrCreateSlackThread({ ...THREAD, create: true, text: 'hello' })
+    ).resolves.toMatchObject({ investigation_id: 'inv-first' });
+    expect(conversations.create).toHaveBeenCalledWith(expect.objectContaining({ id: 'inv-first' }));
+  });
+
+  it('keys a thread without a workspace by channel and thread', async () => {
+    await makeClient().findOrCreateSlackThread({ channel: 'C1', threadTs: '1.0', create: false });
+
+    expect(conversations.getByOrigin).toHaveBeenCalledWith({
+      external_conversation_id: 'channel:C1/thread:1.0',
+    });
+  });
+
+  it('throws InvestigationUnavailableError when creating while investigations are unavailable', async () => {
+    await expect(
+      makeClient({ isAvailable: jest.fn().mockResolvedValue(false) }).findOrCreateSlackThread({
+        ...THREAD,
+        create: true,
+      })
+    ).rejects.toThrow(InvestigationUnavailableError);
+    expect(conversations.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('NightshiftInvestigationsClient.getLifecycleSubject()', () => {
+  it('attributes lifecycle events to the first recorded subject', async () => {
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      makeStoredSubject({ subjectId: 'alert-2', createdAt: '2026-08-24T13:00:00.000Z' }),
+      makeStoredSubject({
+        subjectId: 'alert-1',
+        triggerType: 'automatic',
+        createdAt: '2026-08-24T12:00:00.000Z',
+      }),
+    ]);
+
+    await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toEqual({
+      subject: { type: 'alert', id: 'alert-1' },
+      triggerType: 'automatic',
+      startedAt: '2026-08-24T12:00:00.000Z',
+    });
+    expect(subjectsClient.listByConversationIds).toHaveBeenCalledWith(['inv-1']);
+  });
+
+  it('reports a Slack thread as a manual subject, after any other subject', async () => {
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      makeStoredSubject({ subjectType: 'slack_thread', subjectId: 'team:T/channel:C/thread:1' }),
+    ]);
+
+    await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toMatchObject({
+      subject: { type: 'manual', id: 'team:T/channel:C/thread:1' },
+      triggerType: 'manual',
+    });
+  });
+
+  it('returns undefined for an investigation without subjects', async () => {
+    await expect(makeClient().getLifecycleSubject('inv-1')).resolves.toBeUndefined();
   });
 });
