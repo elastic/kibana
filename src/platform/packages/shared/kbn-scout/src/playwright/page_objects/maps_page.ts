@@ -129,12 +129,12 @@ export class MapsPage {
     await this.saveAndReturnButton.click();
   }
 
-  /** Waits until map layers are loaded. Works in both standalone (expanded TOC) and minimized TOC contexts. */
+  /** Waits until map layers are loaded. */
   async waitForLayersToLoad() {
     await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
 
     // Mapbox GL renders a <canvas> only after mapApi is initialised; mapContainer is
-    // visible before that, so gate both branches on this signal.
+    // visible before that, so gate on this signal before checking loading state.
     await this.page.waitForFunction(
       () =>
         Boolean(document.querySelector('[data-test-subj="mapContainer"]')?.querySelector('canvas')),
@@ -142,38 +142,22 @@ export class MapsPage {
       { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
     );
 
-    // Wait until one of the two TOC states has rendered before branching; an immediate
-    // isVisible() snapshot after mapContainer can race with the TOC appearing.
-    const mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
-    const expandButton = this.page.testSubj.locator('mapExpandLayerControlButton');
-    await this.page
-      .locator('[data-test-subj="mapLayerTOC"], [data-test-subj="mapExpandLayerControlButton"]')
-      .waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    const isLoading = () =>
+      this.mapContainer.getAttribute('data-map-loading').then((v) => v === 'true');
 
-    if (await mapLayerToc.isVisible()) {
-      // Maps uses EuiLoadingSpinner (role=progressbar) while a layer loads; there is no
-      // dedicated layer-loading data-test-subj, so wait for toggles + no progressbars.
-      await this.page.waitForFunction(
-        () => {
-          const toc = document.querySelector('[data-test-subj="mapLayerTOC"]');
-          if (!toc) {
-            return false;
-          }
-          const layerCount = toc.querySelectorAll(
-            '[data-test-subj^="layerTocActionsPanelToggleButton"]'
-          ).length;
-          const spinnerCount = toc.querySelectorAll('[role="progressbar"]').length;
-          return layerCount > 0 && spinnerCount === 0;
-        },
-        undefined,
-        { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
-      );
-    } else {
-      await expandButton.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-      await expect(expandButton.locator('[role="progressbar"]')).toHaveCount(0, {
-        timeout: DEFAULT_MAP_LOADING_TIMEOUT,
-      });
-    }
+    await this.waitForLoadCycleIfNeeded(isLoading);
+    await expect.poll(isLoading, { timeout: DEFAULT_MAP_LOADING_TIMEOUT }).toBe(false);
+  }
+
+  /**
+   * If the map is not currently loading, waits up to 500 ms for a load cycle to begin —
+   * bridging the gap between a triggering action resolving and the new request's loading
+   * state reaching the DOM. Falls through if no load starts in that window
+   * (e.g. the action required no re-fetch).
+   */
+  private async waitForLoadCycleIfNeeded(isLoading: () => Promise<boolean>) {
+    if (await isLoading()) return;
+    await expect.poll(isLoading, { timeout: 500 }).toBe(true).catch(() => {});
   }
 
   async getLayerTocTooltipMsg(layerName: string): Promise<string> {

@@ -79,6 +79,7 @@ export interface Props {
   featureModeActive: boolean;
   filterModeActive: boolean;
   onMapMove?: (lat: number, lon: number, zoom: number) => void;
+  isMapLoading: boolean;
 }
 
 export class MbMap extends Component<Props> {
@@ -96,8 +97,11 @@ export class MbMap extends Component<Props> {
     this._isMounted = true;
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps: Props) {
     this._debouncedSync();
+    if (this._containerRef && prevProps.isMapLoading !== this.props.isMapLoading) {
+      this._containerRef.dataset.mapLoading = String(this.props.isMapLoading);
+    }
   }
 
   componentWillUnmount() {
@@ -444,6 +448,9 @@ export class MbMap extends Component<Props> {
 
   _setContainerRef = (element: HTMLDivElement) => {
     this._containerRef = element;
+    if (element) {
+      element.dataset.mapLoading = String(this.props.isMapLoading);
+    }
   };
 
   render() {

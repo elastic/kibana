@@ -26,6 +26,7 @@ import {
   getTimeslice,
   getMapCenter,
   getMapZoom,
+  isMapLoading,
 } from '../../selectors/map_selectors';
 import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
 import {
@@ -48,6 +49,7 @@ function mapStateToProps(state: MapStoreState) {
     settings: getMapSettings(state),
     customIcons: getCustomIcons(state),
     layerList: getLayerList(state),
+    isMapLoading: isMapLoading(state),
     spatialFiltersLayer: getSpatialFiltersLayer(state),
     inspectorAdapters: getInspectorAdapters(state),
     isFullScreen: getIsFullScreen(state),
