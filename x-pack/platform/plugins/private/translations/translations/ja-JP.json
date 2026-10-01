@@ -39144,7 +39144,6 @@
     "xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.contentNoDate": "このモデルはサポート終了となり、現在はご利用いただけません。",
     "xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.title": "製品サポート終了のお知らせ",
     "xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.content": "プレビュー",
-    "xpack.searchInferenceEndpoints.eisModelCard.supports": "{taskTypes}をサポート",
     "xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button": "クラウド使用状況を表示",
     "xpack.searchInferenceEndpoints.eisModelsPage.description": "Elastic Inference Serviceのモデルとエンドポイントを管理",
     "xpack.searchInferenceEndpoints.eisModelspage.error.body": "モデルデータの取得中にエラーが発生しました。",

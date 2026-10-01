@@ -39029,7 +39029,6 @@
     "xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.contentNoDate": "Dieses Modell hat das Lebensende erreicht und ist nicht mehr verfügbar.",
     "xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.title": "End-of-Life-Mitteilung",
     "xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.content": "Vorschau",
-    "xpack.searchInferenceEndpoints.eisModelCard.supports": "Unterstützt {taskTypes}",
     "xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button": "Cloud-Nutzung anzeigen",
     "xpack.searchInferenceEndpoints.eisModelsPage.description": "Modelle und Endpunkte für Elastic Inference Service verwalten",
     "xpack.searchInferenceEndpoints.eisModelspage.error.body": "Beim Abrufen der Modelldaten ist ein Fehler aufgetreten.",
