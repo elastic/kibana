@@ -322,7 +322,7 @@ describe('DispatcherService', () => {
           expect.objectContaining({
             group_hash: 'hash-1',
             last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
-            actor: 'system',
+            actor: { type: 'internal' },
             action_type: 'fire',
             rule_id: 'rule-1',
             source: 'internal',
@@ -330,7 +330,7 @@ describe('DispatcherService', () => {
           expect.objectContaining({
             group_hash: 'hash-2',
             last_series_event_timestamp: '2026-01-22T07:15:00.000Z',
-            actor: 'system',
+            actor: { type: 'internal' },
             action_type: 'fire',
             rule_id: 'rule-2',
             source: 'internal',
@@ -414,7 +414,7 @@ describe('DispatcherService', () => {
           expect.objectContaining({
             group_hash: 'hash-1',
             last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
-            actor: 'system',
+            actor: { type: 'internal' },
             action_type: 'suppress',
             rule_id: 'rule-1',
             source: 'internal',
@@ -422,7 +422,7 @@ describe('DispatcherService', () => {
           expect.objectContaining({
             group_hash: 'hash-2',
             last_series_event_timestamp: '2026-01-22T07:15:00.000Z',
-            actor: 'system',
+            actor: { type: 'internal' },
             action_type: 'fire',
             rule_id: 'rule-2',
             source: 'internal',
@@ -743,7 +743,7 @@ describe('DispatcherService', () => {
             group_hash: 'rule-001-series-1',
             last_series_event_timestamp: '2026-01-27T16:15:00.000Z',
             action_type: 'fire',
-            actor: 'system',
+            actor: { type: 'internal' },
             source: 'internal',
           }),
         ])
@@ -1434,7 +1434,7 @@ describe('DispatcherService', () => {
             expect.objectContaining({
               group_hash: blockingEpisode.group_hash,
               action_type: 'unmatched',
-              actor: 'system',
+              actor: { type: 'internal' },
               rule_id: blockingEpisode.rule_id,
               reason: expect.stringContaining('escape hatch'),
             }),

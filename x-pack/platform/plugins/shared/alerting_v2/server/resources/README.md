@@ -79,7 +79,8 @@ This stream is the dispatcher's durable memory and also stores user/system actio
 | `@timestamp` | `date` | Action time; stamped by ES via the final pipeline. |
 | `last_series_event_timestamp` | `date` | Timestamp of the related series event. |
 | `expiry` | `date` | Optional expiry for temporary actions such as snooze. |
-| `actor` | `keyword` | Who performed the action. |
+| `actor.type` | `keyword` | `user`, or `internal` for writes made by Kibana itself (e.g. the dispatcher). |
+| `actor.profile_uid` | `keyword` | User profile uid of a `user` actor. Absent for `internal` actors and for users without a resolvable profile. |
 | `action_type` | `keyword` | `fire`, `suppress`, `notified`, `ack`, `deactivate`, and related values. |
 | `group_hash` | `keyword` | Series identity. |
 | `episode_id` | `keyword` | Optional episode scope. |
@@ -184,7 +185,7 @@ Disallowed changes:
 
 Elasticsearch cannot apply some mapping changes to existing backing indices, for example turning a concrete field into an `alias`. For those, set `forceReset: { version }` on the resource definition, where `version` is the last datastream version with the old mapping. On startup, `DatastreamInitializer` installs the current template, then deletes a data stream created from that version or below and recreates it. Installing the template first means that a write from a node still running the previous version recreates the data stream with the current mapping. All of its documents are lost.
 
-`.rule-events` uses `forceReset: { version: 7 }` for the `episode.*` to `alert.*` rename in v8. Keep `forceReset.version` unchanged when bumping the datastream version later.
+`.rule-events` uses `forceReset: { version: 7 }` for the `episode.*` to `alert.*` rename in v8, and `.alert-actions` uses `forceReset: { version: 6 }` for the `actor` keyword to object change in v7. Keep `forceReset.version` unchanged when bumping the datastream versions later.
 
 ## Example: adding a new optional alert event field
 

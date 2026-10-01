@@ -12,6 +12,7 @@ import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { getAlertEventsResourceDefinition } from '../../../../resources/datastreams/alert_events';
+import { getAlertActionsResourceDefinition } from '../../../../resources/datastreams/alert_actions';
 import { getIngestTimestampPipeline } from '../../../../resources/datastreams/ingest_timestamp_pipeline';
 import type { ResourceDefinition } from '../../../../resources/datastreams/types';
 import { DatastreamInitializer } from '../datastream_initializer';
@@ -252,5 +253,115 @@ describe('DatastreamInitializer forceReset (integration)', () => {
     expect(await countDocuments()).toBe(0);
     expect(await getDataStreamVersion()).toBe(currentDefinition.version);
     await expectCurrentMapping();
+  });
+});
+
+describe('DatastreamInitializer forceReset for .alert-actions (integration)', () => {
+  // Distinct name to avoid colliding with any running prod/dev data stream.
+  const TEST_ACTIONS_DATA_STREAM = '.alert-actions-reset-integration-test';
+
+  const currentActionsDefinition: ResourceDefinition = {
+    ...getAlertActionsResourceDefinition(),
+    key: `data_stream:${TEST_ACTIONS_DATA_STREAM}`,
+    dataStreamName: TEST_ACTIONS_DATA_STREAM,
+    finalPipeline: getIngestTimestampPipeline(TEST_ACTIONS_DATA_STREAM),
+  };
+
+  // The v6 mapping stored the actor as a keyword.
+  const v6ActionsDefinition: ResourceDefinition = {
+    ...currentActionsDefinition,
+    version: 6,
+    mappings: {
+      dynamic: false,
+      properties: {
+        '@timestamp': { type: 'date' },
+        actor: { type: 'keyword' },
+        action_type: { type: 'keyword' },
+        space_id: { type: 'keyword' },
+      },
+    },
+    forceReset: undefined,
+  };
+
+  let esServer: EsTestCluster;
+  let logger: MockedLogger;
+
+  const initialize = (definition: ResourceDefinition) =>
+    new DatastreamInitializer(logger, esServer.getClient(), definition).initialize();
+
+  const writeDocument = (id: string, document: Record<string, unknown>) =>
+    esServer.getClient().create({ index: TEST_ACTIONS_DATA_STREAM, id, document, refresh: true });
+
+  beforeAll(async () => {
+    esServer = createTestEsCluster({
+      log: new ToolingLog({ writeTo: process.stdout, level: 'info' }),
+    });
+    await esServer.start();
+  });
+
+  afterAll(async () => {
+    await esServer.stop();
+  });
+
+  beforeEach(() => {
+    logger = loggerMock.create();
+  });
+
+  afterEach(async () => {
+    const esClient = esServer.getClient();
+    await esClient.indices.deleteDataStream({ name: TEST_ACTIONS_DATA_STREAM }, { ignore: [404] });
+    await esClient.indices.deleteIndexTemplate(
+      { name: TEST_ACTIONS_DATA_STREAM },
+      { ignore: [404] }
+    );
+    await esClient.ingest.deletePipeline(
+      { id: currentActionsDefinition.finalPipeline.id },
+      { ignore: [404] }
+    );
+  });
+
+  it('recreates a data stream created from v6 with the actor object and rejects keyword actors', async () => {
+    await initialize(v6ActionsDefinition);
+    await writeDocument('v6-doc', {
+      '@timestamp': new Date().toISOString(),
+      actor: 'u_profile_1',
+      action_type: 'ack',
+      space_id: 'default',
+    });
+
+    await initialize(currentActionsDefinition);
+
+    const esClient = esServer.getClient();
+    const { count } = await esClient.count({ index: TEST_ACTIONS_DATA_STREAM });
+    expect(count).toBe(0);
+
+    const {
+      data_streams: [dataStream],
+    } = await esClient.indices.getDataStream({ name: TEST_ACTIONS_DATA_STREAM });
+    expect(dataStream._meta?.version).toBe(currentActionsDefinition.version);
+
+    const mappings = await esClient.indices.getMapping({ index: TEST_ACTIONS_DATA_STREAM });
+    const [properties] = Object.values(mappings).map((index) => index.mappings.properties);
+    expect(properties).toMatchObject({
+      actor: {
+        properties: {
+          type: { type: 'keyword' },
+          profile_uid: { type: 'keyword' },
+        },
+      },
+    });
+
+    await writeDocument('v7-doc', {
+      actor: { type: 'user', profile_uid: 'u_profile_1' },
+      action_type: 'ack',
+      space_id: 'default',
+    });
+    await expect(
+      writeDocument('keyword-actor-doc', {
+        actor: 'u_profile_1',
+        action_type: 'ack',
+        space_id: 'default',
+      })
+    ).rejects.toThrow(/object mapping for \[actor\]/);
   });
 });

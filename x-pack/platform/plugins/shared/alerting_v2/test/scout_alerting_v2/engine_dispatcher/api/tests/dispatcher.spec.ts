@@ -121,7 +121,7 @@ const buildAlertAction = ({
   expiry,
 }: BuildAlertActionInput): AlertAction => ({
   '@timestamp': timestamp,
-  actor: 'elastic',
+  actor: { type: 'user', profile_uid: 'elastic' },
   action_type: actionType,
   last_series_event_timestamp: lastSeriesEventTimestamp,
   rule_id: ruleId,
@@ -359,7 +359,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         expect(event).toMatchObject({
           group_hash: 'rule-1-series-1',
           rule_id: 'rule-1',
-          actor: 'system',
+          actor: { type: 'internal' },
           action_type: 'fire',
           source: 'internal',
           reason: `dispatched by policy ${ACTION_POLICY_ID}`,
@@ -394,7 +394,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         expect(action).toMatchObject({
           rule_id: 'rule-1',
           action_type: 'notified',
-          actor: 'system',
+          actor: { type: 'internal' },
           source: 'internal',
         });
 
@@ -467,7 +467,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
       for (const action of notifiedActions) {
         expect(action).toMatchObject({
-          actor: 'system',
+          actor: { type: 'internal' },
           action_type: 'notified',
           rule_id: 'rule-1',
           source: 'internal',
@@ -755,7 +755,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
             rule_id: 'rule-001',
             group_hash: 'rule-001-series-1',
             action_type: 'fire',
-            actor: 'system',
+            actor: { type: 'internal' },
             source: 'internal',
           }),
         ])
@@ -972,7 +972,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         expect(fires[0]).toMatchObject({
           rule_id: ruleId,
           action_type: 'fire',
-          actor: 'system',
+          actor: { type: 'internal' },
           source: 'internal',
         });
       }
@@ -1037,7 +1037,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         expect(action).toMatchObject({
           rule_id: 'rule-matcher',
           action_type: 'fire',
-          actor: 'system',
+          actor: { type: 'internal' },
           source: 'internal',
         });
       }
@@ -1113,7 +1113,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         expect(action).toMatchObject({
           rule_id: 'rule-groupby',
           action_type: 'fire',
-          actor: 'system',
+          actor: { type: 'internal' },
           source: 'internal',
         });
       }
@@ -1130,7 +1130,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         expect(action).toMatchObject({
           action_type: 'notified',
           rule_id: 'rule-groupby',
-          actor: 'system',
+          actor: { type: 'internal' },
           source: 'internal',
         });
 
@@ -1508,7 +1508,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           rule_id: 'rule-mw',
           group_hash: 'rule-mw-series-1',
           action_type: 'suppress',
-          actor: 'system',
+          actor: { type: 'internal' },
           source: 'internal',
           reason: `maintenance_window:${mw.id}`,
         });
@@ -1810,7 +1810,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         rule_id: 'rule-1',
         group_hash: 'rule-1-throttle-series',
         action_type: 'suppress',
-        actor: 'system',
+        actor: { type: 'internal' },
         source: 'internal',
         reason: `suppressed by throttled policy ${ACTION_POLICY_ID}`,
       });
@@ -1882,7 +1882,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         source: 'pagerduty',
         group_hash: 'pd-group-1',
         space_id: 'default',
-        actor: 'system',
+        actor: { type: 'internal' },
         action_type: 'fire',
       });
 
@@ -1894,7 +1894,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       expect(notifiedActions[0]).toMatchObject({
         source: 'pagerduty',
         space_id: 'default',
-        actor: 'system',
+        actor: { type: 'internal' },
         action_type: 'notified',
       });
     }

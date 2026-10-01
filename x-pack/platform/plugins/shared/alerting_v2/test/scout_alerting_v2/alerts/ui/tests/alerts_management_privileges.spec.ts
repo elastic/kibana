@@ -80,7 +80,7 @@ test.describe(
         {
           '@timestamp': now,
           last_series_event_timestamp: now,
-          actor: null,
+          actor: { type: 'user' },
           action_type: 'tag',
           group_hash: SEEDED_GROUP_HASH,
           rule_id: SEEDED_RULE_ID,
