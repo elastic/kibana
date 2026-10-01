@@ -94,7 +94,7 @@ steps:
 
   - name: fail_if_missing_privileges
     type: if
-    condition: "${{ steps.probe_privileges.output.data.has_all_required != true }}"
+    condition: "${{ steps.probe_privileges.output.has_all_required != true }}"
     steps:
       - name: missing_asset_criticality_privilege
         type: workflow.fail
@@ -120,7 +120,7 @@ steps:
   - name: capture_previous
     type: data.set
     with:
-      previous_level: "{{ steps.read_previous.output.data.criticality_level | default: '' }}"
+      previous_level: "{{ steps.read_previous.output.criticality_level | default: '' }}"
       criticality_level: "{{ inputs.actionInput.criticality_level | default: 'high_impact' }}"
 
   # Upsert the record. No retries: a repeated POST is harmless but would hide
@@ -152,9 +152,9 @@ steps:
     with:
       id_field: "{{ inputs.actionInput.id_field }}"
       id_value: "{{ inputs.actionInput.id_value }}"
-      criticality_level: "{{ steps.dispatch.output.data.criticality_level }}"
+      criticality_level: "{{ steps.dispatch.output.criticality_level }}"
       previous_level: "{{ variables.previous_level }}"
       message: >-
         {{ consts.actionLabel }} for {{ inputs.actionInput.id_field }} {{ inputs.actionInput.id_value }}
-        set to {{ steps.dispatch.output.data.criticality_level }}{% if variables.previous_level != "" %} (was {{ variables.previous_level }}){% endif %}.
+        set to {{ steps.dispatch.output.criticality_level }}{% if variables.previous_level != "" %} (was {{ variables.previous_level }}){% endif %}.
         To revert, DELETE /api/asset_criticality?id_field={{ inputs.actionInput.id_field }}&id_value={{ inputs.actionInput.id_value | url_encode }}{% if variables.previous_level != "" %} or POST the previous level back{% endif %}.

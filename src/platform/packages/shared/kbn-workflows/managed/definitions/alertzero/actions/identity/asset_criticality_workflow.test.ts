@@ -145,7 +145,7 @@ describe('AlertZero set asset criticality workflow', () => {
     expect(readPrevious?.with?.path).toContain('/api/asset_criticality?id_field=');
     expect(readPrevious?.with?.path).toContain('inputs.actionInput.id_value | url_encode');
     expect(readPrevious?.['on-failure']).toEqual({ continue: true });
-    expect(capture?.with?.previous_level).toContain('steps.read_previous.output.data.criticality_level');
+    expect(capture?.with?.previous_level).toContain('steps.read_previous.output.criticality_level');
   });
 
   it('upserts through the public API with the versioned header, wait_for refresh, and no retry', () => {
