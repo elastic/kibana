@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/ui';
 import {
   ALERTING_V2_ALERTS_ALL_ROLE,
@@ -13,12 +14,14 @@ import {
   test,
 } from '../fixtures';
 
+const SEEDED_RULE_ID = `scout-alerts-privileges-${randomUUID()}`;
+
 /*
  * Covers the UI capability gating on the Alerts (episodes) page (PR #277710).
- * Episode row actions are rendered as UnifiedDataTable leading controls:
- * read-only users only get the read-safe "Open in Discover" action, while
- * editors get the mutating actions (resolve, ack, snooze, tag, assign, ...)
- * which collapse into the overflow actions menu.
+ * Episode row actions are rendered as UnifiedDataTable leading controls.
+ * Editors get the mutating actions (resolve, ack, snooze, tag, assign, ...),
+ * which collapse into the overflow actions menu. Alerts-only readers cannot
+ * resolve the rule required by "Open in Discover", so they get no actions.
  *
  * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
  * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
@@ -26,14 +29,14 @@ import {
  */
 test.describe('Alerts page - read/write privileges', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
     // Seed a single active episode so the episodes table renders a row whose
     // leading action controls we can assert against. The default list filter
     // is "Active" over "now-24h", so the event must be recent and active.
     await apiServices.alertingV2.ruleEvents.seed([
       buildAlertEvent({
         '@timestamp': new Date().toISOString(),
-        rule: { id: 'scout-alerts-privileges-rule', version: 1 },
+        rule: { id: SEEDED_RULE_ID, version: 1 },
         group_hash: 'scout-alerts-privileges-group',
         episode: { id: 'scout-alerts-privileges-episode', status: 'active' },
       }),
@@ -41,7 +44,7 @@ test.describe('Alerts page - read/write privileges', { tag: '@local-stateful-cla
   });
 
   test.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.ruleEvents.cleanUp();
+    await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
   });
 
   test('editor sees the mutating episode actions menu', async ({ browserAuth, pageObjects }) => {
@@ -49,11 +52,13 @@ test.describe('Alerts page - read/write privileges', { tag: '@local-stateful-cla
     const { alertEpisodesList } = pageObjects;
     await alertEpisodesList.goto();
     await expect(alertEpisodesList.pageContainer).toBeVisible();
+    await alertEpisodesList.searchEpisodes(`rule.id: "${SEEDED_RULE_ID}"`);
+    await expect(alertEpisodesList.itemCount).toHaveText('Showing 1 episode');
 
     await expect(alertEpisodesList.rowActionsMenuButton).toBeVisible();
   });
 
-  test('read-only user only sees the read-safe open-in-discover action', async ({
+  test('alerts-only read user does not see episode actions', async ({
     browserAuth,
     pageObjects,
   }) => {
@@ -61,9 +66,11 @@ test.describe('Alerts page - read/write privileges', { tag: '@local-stateful-cla
     const { alertEpisodesList } = pageObjects;
     await alertEpisodesList.goto();
     await expect(alertEpisodesList.pageContainer).toBeVisible();
+    await alertEpisodesList.searchEpisodes(`rule.id: "${SEEDED_RULE_ID}"`);
+    await expect(alertEpisodesList.itemCount).toHaveText('Showing 1 episode');
 
-    await test.step('the read-safe open-in-discover control is available', async () => {
-      await expect(alertEpisodesList.openInDiscoverRowControl).toBeVisible();
+    await test.step('the rule-dependent open-in-discover control is not rendered', async () => {
+      await expect(alertEpisodesList.openInDiscoverRowControl).toHaveCount(0);
     });
 
     await test.step('the mutating actions menu is not rendered', async () => {
