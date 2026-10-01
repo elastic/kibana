@@ -802,6 +802,53 @@ describe('buildEsqlFetchSubscribe', () => {
     expect(toolkit.getCurrentTab().profileAppStateDefaults.fieldsToReset).toEqual('none');
   });
 
+  test('keeps restored columns when a STATS query is reset to a wide FROM query', async () => {
+    const { toolkit, replaceUrlState, dataState, tabId } = await setupTest({
+      appState: { columns: ['f1', 'f2'] },
+    });
+    const documents$ = dataState.data$.documents$;
+    const fromQuery = 'from the-data-view-title';
+    const manyFields = makeEsqlSource(['f1', 'f2', 'f3', 'f4', 'f5', 'f6'], fromQuery);
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      dataSource: manyFields,
+      query: { esql: fromQuery },
+    });
+    replaceUrlState.mockClear();
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      dataSource: makeEsqlSource(
+        ['count', 'bucket'],
+        'from the-data-view-title | stats count() by bucket'
+      ),
+      query: { esql: 'from the-data-view-title | stats count() by bucket' },
+    });
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId,
+      appState: { columns: ['count', 'bucket'] },
+    });
+    replaceUrlState.mockClear();
+
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { columns: ['f1', 'f2'] },
+      })
+    );
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [],
+      dataSource: manyFields,
+      query: { esql: fromQuery },
+    });
+
+    expect(replaceUrlState).not.toHaveBeenCalled();
+  });
+
   test('should clear stale columns from a STATS query to a zero-result query', async () => {
     const { replaceUrlState, dataState, tabId } = await setupTest({});
     const documents$ = dataState.data$.documents$;

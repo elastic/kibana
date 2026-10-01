@@ -142,10 +142,17 @@ export const buildEsqlFetchSubscribe = ({
     const indexPatternChanged =
       getIndexPatternFromESQLQuery(nextQuery.esql) !== getIndexPatternFromESQLQuery(prevQuery);
 
-    const changeDefaultColumns =
-      indexPatternChanged || !isEqual(nextDefaultColumns, prevDefaultColumns);
-
     const appStateColumns = getCurrentTab().appState.columns ?? [];
+
+    const summaryDefault = nextDefaultColumns.length === 0;
+    const selectionStillValid =
+      appStateColumns.length > 0 &&
+      appStateColumns.every((column) => column === SOURCE_COLUMN || allColumns.includes(column));
+    const changeDefaultColumns =
+      indexPatternChanged ||
+      (!isEqual(nextDefaultColumns, prevDefaultColumns) &&
+        !(summaryDefault && selectionStillValid));
+
     const stickSource = !shouldResetProfileAppStateDefaultField(
       getCurrentTab().profileAppStateDefaults,
       'columns'
