@@ -174,12 +174,9 @@ export const ConfigSchema = schema.object({
   runWorkflows: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
-  // Technical preview of case task lists. Off on serverless until GA.
+  // Technical preview of case task lists.
   tasks: schema.object({
-    enabled: offeringBasedSchema({
-      serverless: schema.boolean({ defaultValue: false }),
-      traditional: schema.boolean({ defaultValue: true }),
-    }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
 });

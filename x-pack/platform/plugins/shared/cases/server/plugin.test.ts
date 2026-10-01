@@ -346,6 +346,9 @@ describe('Cases Plugin', () => {
             "stack": Object {
               "enabled": true,
             },
+            "tasks": Object {
+              "enabled": true,
+            },
             "templates": Object {
               "enabled": true,
             },
