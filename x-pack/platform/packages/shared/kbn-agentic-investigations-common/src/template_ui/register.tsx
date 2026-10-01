@@ -9,6 +9,7 @@ import React, { Suspense, lazy } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiSkeletonText } from '@elastic/eui';
 import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
 import { ConversationTitle } from './conversation_title';
 import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
@@ -32,6 +33,11 @@ const LazyEscalationHeaderSlot = lazy(() =>
 );
 const LazyEscalationOverviewSlot = lazy(() =>
   import('./slots').then(({ EscalationOverviewSlot }) => ({ default: EscalationOverviewSlot }))
+);
+const LazyAttachmentsOverviewSection = lazy(() =>
+  import('../components/attachments_overview').then(({ AttachmentsOverviewSection }) => ({
+    default: AttachmentsOverviewSection,
+  }))
 );
 
 /**
@@ -77,6 +83,13 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
    */
   renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
+  /**
+   * When provided, the overview tab renders an "Attachments" subsection with count links to the
+   * relevant Security pages. Supplied by the caller so this package can build Security app URLs
+   * without depending on Kibana core or security_solution.
+   * @example `(path) => core.application.getUrlForApp('securitySolutionUI', { path })`
+   */
+  getSecurityAppUrl?: (path: string) => string;
 }
 
 /**
@@ -96,8 +109,23 @@ export const registerAgenticInvestigationTemplateUI = ({
   renderAssignees,
   renderStatus,
   renderCloseInvestigationModal,
+  getSecurityAppUrl,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
+
+  // Build the renderAttachmentsOverview callback once, captured in the tab closure.
+  // LazyAttachmentsOverviewSection is module-level lazy so its chunk only loads when the first
+  // flyout opens, not on every plugin start.
+  const renderAttachmentsOverview = getSecurityAppUrl
+    ? (attachments: VersionedAttachment[]) => (
+        <Suspense fallback={null}>
+          <LazyAttachmentsOverviewSection
+            attachments={attachments}
+            getSecurityAppUrl={getSecurityAppUrl}
+          />
+        </Suspense>
+      )
+    : undefined;
 
   conversationTemplates.registerTab(overviewTabId, () => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
@@ -107,6 +135,7 @@ export const registerAgenticInvestigationTemplateUI = ({
           <LazyOverviewSlot
             conversation={conversation}
             renderProposedActions={renderProposedActions}
+            renderAttachmentsOverview={renderAttachmentsOverview}
           />
         </Suspense>
       );

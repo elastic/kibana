@@ -24,6 +24,5 @@
     "@kbn/proposals-ui",
     "@kbn/ui-ai-components",
     "@kbn/rison",
-    "@kbn/kibana-react-plugin",
   ]
 }
