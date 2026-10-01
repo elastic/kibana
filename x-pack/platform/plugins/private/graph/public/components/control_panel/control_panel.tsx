@@ -102,11 +102,7 @@ const ControlPanelComponent = ({
         styles.gphSidebar,
       ]}
     >
-      <ControlPanelToolBar
-        workspace={workspace}
-        liveResponseFields={liveResponseFields}
-        onSetControl={onSetControl}
-      />
+      <ControlPanelToolBar liveResponseFields={liveResponseFields} onSetControl={onSetControl} />
 
       <div>
         <div css={gphSidebarHeaderStyles}>
@@ -114,7 +110,7 @@ const ControlPanelComponent = ({
             defaultMessage: 'Selections',
           })}
         </div>
-        <SelectionToolBar workspace={workspace} onSetControl={onSetControl} />
+        <SelectionToolBar onSetControl={onSetControl} />
         <div css={styles.gphSelectionList}>
           {selectedNodes.length === 0 && (
             <p className="help-block">
