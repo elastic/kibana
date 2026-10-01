@@ -103,9 +103,9 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
   const commentWithExampleType =
     tabs.length > 1
       ? i18n.translate('vectordbOnboarding.apiStep.consoleCommentWithExampleType', {
-          defaultMessage: '{consoleComment} ({exampleType})',
-          values: { consoleComment, exampleType },
-        })
+        defaultMessage: '{consoleComment} ({exampleType})',
+        values: { consoleComment, exampleType },
+      })
       : consoleComment;
 
   const requestWithComment = `
@@ -119,14 +119,14 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
       <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
         {visiblePills.length > 0 && (
           <>
-            <EuiPanel paddingSize="s" color="transparent">
+            <EuiPanel paddingSize="s" color="transparent" hasBorder={false}>
               <OnboardingPills pills={visiblePills} telemetryPrefix={telemetryPrefix} />
             </EuiPanel>
             <EuiSpacer size="s" />
           </>
         )}
         <EuiPanel paddingSize="none" hasBorder={false} hasShadow={true} color="plain">
-          <EuiPanel paddingSize="s" hasShadow={false} color="transparent">
+          <EuiPanel paddingSize="s" hasShadow={false} color="transparent" hasBorder={false}>
             <EuiFlexGroup
               justifyContent="spaceBetween"
               alignItems="center"
