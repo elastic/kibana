@@ -1,5 +1,5 @@
 {
-  "sha1": "6b2d63d2443d001db241a56ea876647d8a373e78",
+  "sha1": "ab8b154a933c0099c137b1181f5cea1ef8b51178",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 496,
+        "line": 478,
         "column": 7
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 952,
+        "line": 934,
         "column": 20
       }
     },
@@ -42,22 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 997,
+        "line": 979,
         "column": 16
-      }
-    },
-    {
-      "id": "82fdabaac554eba-d5a5bd8c0bf7175",
-      "title": "Agent Builder — conversations access-control API non-owners can manage attachments on public conversations, but not private ones",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1190,
-        "column": 26
       }
     },
     {
@@ -70,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1288,
+        "line": 1172,
         "column": 26
       }
     },
@@ -84,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1349,
-        "column": 19
+        "line": 1223,
+        "column": 70
       }
     },
     {
@@ -98,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1401,
-        "column": 11
+        "line": 1275,
+        "column": 29
       }
     },
     {

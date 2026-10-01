@@ -1,5 +1,5 @@
 {
-  "sha1": "504af76b1b9e8453ab5ccd5360db85c119aac6d0",
+  "sha1": "b840194f895993f618f8208fd90dbf55e4a3ba0e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -145,32 +145,6 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_service_account.spec.ts",
         "line": 318,
         "column": 18
-      }
-    },
-    {
-      "id": "8787fdb38dae7c3-0dc849e50be6fb9",
-      "title": "Create Serverless service accounts persists the requested name and roles in UIAM",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_uiam_service_account.spec.ts",
-        "line": 36,
-        "column": 15
-      }
-    },
-    {
-      "id": "8787fdb38dae7c3-026c73e4916e641",
-      "title": "Create Serverless service accounts rejects descriptions on Serverless",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_uiam_service_account.spec.ts",
-        "line": 70,
-        "column": 15
       }
     },
     {
