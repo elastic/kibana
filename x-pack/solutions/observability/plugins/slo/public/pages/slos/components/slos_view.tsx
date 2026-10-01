@@ -36,7 +36,7 @@ export function SlosView({ sloList, loading, error, view, isInteractive = true }
 
   if (view === 'cardView') {
     return (
-      <Wrapper sloList={sloList}>
+      <Wrapper sloList={sloList} isInteractive={isInteractive}>
         <SloListCardView
           sloList={sloList}
           loading={loading}
@@ -49,7 +49,7 @@ export function SlosView({ sloList, loading, error, view, isInteractive = true }
 
   if (view === 'compactView') {
     return (
-      <Wrapper sloList={sloList}>
+      <Wrapper sloList={sloList} isInteractive={isInteractive}>
         <SloListCompactView
           sloList={sloList}
           loading={loading}
@@ -61,17 +61,21 @@ export function SlosView({ sloList, loading, error, view, isInteractive = true }
   }
 
   return (
-    <Wrapper sloList={sloList}>
+    <Wrapper sloList={sloList} isInteractive={isInteractive}>
       <SloListView sloList={sloList} loading={loading} error={error} />
     </Wrapper>
   );
 }
 
-function Wrapper({ children, sloList }: { children: React.ReactNode } & Pick<Props, 'sloList'>) {
+function Wrapper({
+  children,
+  sloList,
+  isInteractive = true,
+}: { children: React.ReactNode; isInteractive?: boolean } & Pick<Props, 'sloList'>) {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <HealthCallout sloList={sloList} />
+        <HealthCallout sloList={sloList} isInteractive={isInteractive} />
       </EuiFlexItem>
       <EuiFlexItem>
         <ActionModalProvider>{children}</ActionModalProvider>

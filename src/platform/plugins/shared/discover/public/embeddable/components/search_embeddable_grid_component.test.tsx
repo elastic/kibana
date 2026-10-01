@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -37,12 +37,7 @@ const mockDiscoverGridEmbeddableProps = jest.fn();
 jest.mock('./saved_search_grid', () => ({
   DiscoverGridEmbeddable: (props: Record<string, unknown>) => {
     mockDiscoverGridEmbeddableProps(props);
-    return (
-      <div data-test-subj="mockedDiscoverGridEmbeddable">
-        {/* Mirror the real component's renderCustomToolbar suppression when not interactive */}
-        {Boolean(props.isInteractive) && <div data-test-subj="discoverGridToolbar">Toolbar</div>}
-      </div>
-    );
+    return <div data-test-subj="mockedDiscoverGridEmbeddable" />;
   },
 }));
 
@@ -431,53 +426,6 @@ describe('SearchEmbeddableGridComponent', () => {
       });
 
       expect(getLastGridProps().isInteractive).toBe(false);
-    });
-
-    it('should show grid toolbar controls when interactive', async () => {
-      renderComponent({ isEsql: false });
-
-      await waitFor(() => {
-        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
-      });
-
-      expect(screen.queryByTestId('discoverGridToolbar')).toBeInTheDocument();
-    });
-
-    it('should hide grid toolbar controls when not interactive', async () => {
-      const savedSearch = createSavedSearch(false);
-      const api = createApi(savedSearch);
-      const stateManager = createStateManager();
-      const docViewerRef = React.createRef<DocViewerApi>();
-      stateManager.rows.next(rows);
-      stateManager.totalHitCount.next(rows.length);
-
-      (api.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('non-interactive');
-
-      const { queryByTestId } = render(
-        <DiscoverTestProvider services={services}>
-          <SearchEmbeddableGridComponent
-            api={api}
-            dataView={dataViewMock}
-            stateManager={stateManager}
-            enableDocumentViewer={true}
-            inlineEditing={{
-              isActive: false,
-              hasPendingChanges: false,
-              onApply: jest.fn(),
-              onCancel: jest.fn(),
-            }}
-            docViewerRef={docViewerRef}
-            expandedDoc={undefined}
-            initialDocViewerTabId={undefined}
-          />
-        </DiscoverTestProvider>
-      );
-
-      await waitFor(() => {
-        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
-      });
-
-      expect(queryByTestId('discoverGridToolbar')).not.toBeInTheDocument();
     });
   });
 });

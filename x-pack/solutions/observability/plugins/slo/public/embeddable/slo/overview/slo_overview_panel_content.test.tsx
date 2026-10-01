@@ -21,19 +21,7 @@ const mockSloOverview = jest.fn();
 jest.mock('./slo_overview', () => ({
   SloOverview: (props: Record<string, unknown>) => {
     mockSloOverview(props);
-    // Reflect the click-disabled state that SloOverview applies internally when not interactive,
-    // so tests can assert on actual rendered behavior rather than only prop values.
-    return (
-      <div data-test-subj="slo-overview">
-        <button
-          data-test-subj="slo-overview-card"
-          onClick={props.isInteractive ? () => {} : undefined}
-          disabled={!props.isInteractive}
-        >
-          SloOverview
-        </button>
-      </div>
-    );
+    return <div data-test-subj="slo-overview">SloOverview</div>;
   },
 }));
 jest.mock('./slo_overview_grid', () => ({
@@ -219,20 +207,18 @@ describe('SloOverviewPanelContent', () => {
       });
     });
 
-    it('disables the SLO card interaction when isInteractive is false', () => {
-      const { container } = render(
-        <SloOverviewPanelContent {...defaultProps} isInteractive={false} />
-      );
+    it('passes isInteractive=false down to SloOverview', () => {
+      render(<SloOverviewPanelContent {...defaultProps} isInteractive={false} />);
 
-      expect(getByTestId(container, 'slo-overview-card')).toBeDisabled();
+      const lastProps = mockSloOverview.mock.calls.at(-1)?.[0];
+      expect(lastProps?.isInteractive).toBe(false);
     });
 
-    it('keeps the SLO card interactive when isInteractive is true', () => {
-      const { container } = render(
-        <SloOverviewPanelContent {...defaultProps} isInteractive={true} />
-      );
+    it('passes isInteractive=true down to SloOverview', () => {
+      render(<SloOverviewPanelContent {...defaultProps} isInteractive={true} />);
 
-      expect(getByTestId(container, 'slo-overview-card')).not.toBeDisabled();
+      const lastProps = mockSloOverview.mock.calls.at(-1)?.[0];
+      expect(lastProps?.isInteractive).toBe(true);
     });
   });
 });

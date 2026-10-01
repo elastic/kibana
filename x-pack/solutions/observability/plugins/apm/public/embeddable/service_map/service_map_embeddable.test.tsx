@@ -27,10 +27,6 @@ jest.mock('../../components/app/service_map/graph', () => ({
       <>
         {props.fullMapHref ? <a href={props.fullMapHref as string}>View in Service map</a> : null}
         <button data-test-subj="serviceMapFitViewButton">Fit view</button>
-        {/* Mirror real component: click/drag controls are only active when isInteractive=true */}
-        {Boolean(props.isInteractive) && (
-          <div data-test-subj="serviceMapInteractionControls">Interaction controls</div>
-        )}
       </>
     );
   },
@@ -573,18 +569,6 @@ describe('ServiceMapEmbeddable', () => {
 
       const lastProps = mockServiceMapGraph.mock.calls.at(-1)?.[0];
       expect(lastProps?.isInteractive).toBe(false);
-    });
-
-    it('shows node interaction controls when interactive', () => {
-      const { queryByTestId } = renderEmbeddable();
-
-      expect(queryByTestId('serviceMapInteractionControls')).toBeInTheDocument();
-    });
-
-    it('hides node interaction controls when non-interactive', () => {
-      const { queryByTestId } = renderEmbeddable({ viewMode: 'non-interactive' });
-
-      expect(queryByTestId('serviceMapInteractionControls')).not.toBeInTheDocument();
     });
   });
 });
