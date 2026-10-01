@@ -26,7 +26,7 @@ export interface SignificantEventsAlertingContext {
 
 export interface ResolveSignificantEventsAlertingContextParams {
   getAlertingV2RulesClient: () => Promise<RulesClientApi>;
-  isServerless: boolean;
+  cpsEnabled: boolean;
 }
 
 export interface RuleBackedQueryCandidate {
@@ -64,7 +64,7 @@ export function createSignificantEventsAlertingContextResolver(
         alertsReader: ALERTS_READER_V2,
         rulesClient: new RulesAdapterV2({
           rulesClient: alertingV2RulesClient,
-          isServerless: params.isServerless,
+          cpsEnabled: params.cpsEnabled,
         }),
         alertingV2RulesClient,
       };
