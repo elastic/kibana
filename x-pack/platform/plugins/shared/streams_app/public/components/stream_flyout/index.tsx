@@ -232,10 +232,10 @@ function StreamFlyoutContent({
   // Check if we are in an invalid state and then reset the processing tab selection
   // to the overview tab.
   useEffect(() => {
-    if (!loading && !isProcessingEnabled && selectedTab === 'processing') {
+    if (definition && !loading && !isProcessingEnabled && selectedTab === 'processing') {
       selectTab('overview');
     }
-  }, [loading, isProcessingEnabled, selectedTab, selectTab]);
+  }, [definition, loading, isProcessingEnabled, selectedTab, selectTab]);
 
   const deleteStream = useCallback(async () => {
     if (!Streams.ingest.all.GetResponse.is(definition)) {
