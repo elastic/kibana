@@ -87,10 +87,7 @@ export const registerPersistenceListeners = (
         return;
       }
 
-      const createdWorkspace = deps.createRuntimeGraph(
-        indexPattern.title,
-        settingsSelector(listenerApi.getState())
-      );
+      const createdWorkspace = deps.createRuntimeGraph();
       const { urlTemplates, advancedSettings, allFields } = savedWorkspaceToAppState(
         savedWorkspace,
         indexPattern,
@@ -134,16 +131,16 @@ export const registerPersistenceListeners = (
     effect: async (action: MatchedAction<GraphWorkspaceSavedObject>, listenerApi) => {
       listenerApi.cancelActiveListeners();
       const state = listenerApi.getState();
-      const workspace = deps.getWorkspace();
+      const runtimeGraph = deps.getRuntimeGraph();
       const selectedDatasource = datasourceSelector(state).current;
-      if (!workspace || selectedDatasource.type === 'none') {
+      if (!runtimeGraph || selectedDatasource.type === 'none') {
         return;
       }
 
       const savedObjectId = await Promise.race([
         showModal({
           deps,
-          workspace,
+          runtimeGraph,
           savedWorkspace: action.payload,
           state,
           selectedDatasource,
@@ -161,13 +158,13 @@ export const registerPersistenceListeners = (
 
 function showModal({
   deps,
-  workspace,
+  runtimeGraph,
   savedWorkspace,
   state,
   selectedDatasource,
 }: {
   deps: GraphStoreDependencies;
-  workspace: RuntimeGraph;
+  runtimeGraph: RuntimeGraph;
   savedWorkspace: GraphWorkspaceSavedObject;
   state: GraphState;
   selectedDatasource: IndexpatternDatasource;
@@ -204,7 +201,7 @@ function showModal({
           values: { workspaceTitle: savedWorkspace.title },
         });
         let text;
-        if (!canSaveData && workspace.nodes.length > 0) {
+        if (!canSaveData && runtimeGraph.nodes.length > 0) {
           text = i18n.translate('xpack.graph.saveWorkspace.successNotification.noDataSavedText', {
             defaultMessage: 'The configuration was saved, but the data was not saved',
           });
@@ -236,7 +233,7 @@ function showModal({
 
   openSaveModal({
     savePolicy: deps.savePolicy,
-    hasData: workspace.nodes.length > 0 || workspace.blocklistedNodes.length > 0,
+    hasData: runtimeGraph.nodes.length > 0 || runtimeGraph.blocklistedNodes.length > 0,
     workspace: savedWorkspace,
     saveWorkspace: saveWorkspaceHandler,
     services: deps,

@@ -54,7 +54,7 @@ describe('datasource listener', () => {
     env.store.dispatch(updateSettings(newSettings));
     dispatchRequest();
     await waitForPromise();
-    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith('test-pattern', newSettings);
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith();
   });
 
   it('should not carry over diversity field into new workspace', async () => {
@@ -65,9 +65,7 @@ describe('datasource listener', () => {
     env.store.dispatch(updateSettings(newSettings));
     dispatchRequest();
     await waitForPromise();
-    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith('test-pattern', {
-      timeoutMillis: 123,
-    });
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith();
   });
 
   it('should discard a stale response when a newer datasource request finishes first', async () => {
@@ -99,10 +97,7 @@ describe('datasource listener', () => {
 
     expect(fieldsSelector(env.store.getState()).map(({ name }) => name)).toEqual(['second-field']);
     expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledTimes(1);
-    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith(
-      'second-pattern',
-      expect.anything()
-    );
+    expect(env.mockedDeps.createRuntimeGraph).toHaveBeenCalledWith();
   });
 
   it('should error with a toast and abort if index pattern is not found', async () => {

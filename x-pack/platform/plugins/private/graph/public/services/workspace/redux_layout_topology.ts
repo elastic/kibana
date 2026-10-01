@@ -10,7 +10,7 @@ import type { RuntimeGraph, WorkspaceEdge, WorkspaceNode } from '../../types';
 
 interface ReduxLayoutTopologyOptions {
   getState: () => GraphState | undefined;
-  getWorkspace: () => RuntimeGraph | undefined;
+  getRuntimeGraph: () => RuntimeGraph | undefined;
 }
 
 /** Supplies mutable D3 objects in the normalized topology order owned by Redux. */
@@ -18,34 +18,34 @@ export class ReduxLayoutTopology {
   constructor(private readonly options: ReduxLayoutTopologyOptions) {}
 
   public getNodes(): WorkspaceNode[] {
-    const workspace = this.options.getWorkspace();
+    const runtimeGraph = this.options.getRuntimeGraph();
     const state = this.options.getState();
-    if (!workspace || !state || !this.hasSynchronizedNodes(workspace, state)) {
+    if (!runtimeGraph || !state || !this.hasSynchronizedNodes(runtimeGraph, state)) {
       return [];
     }
-    return state.workspace.nodeIds.map((nodeId) => workspace.nodesMap[nodeId]);
+    return state.workspace.nodeIds.map((nodeId) => runtimeGraph.nodesMap[nodeId]);
   }
 
   public getEdges(): WorkspaceEdge[] {
-    const workspace = this.options.getWorkspace();
+    const runtimeGraph = this.options.getRuntimeGraph();
     const state = this.options.getState();
-    if (!workspace || !state || !this.hasSynchronizedEdges(workspace, state)) {
+    if (!runtimeGraph || !state || !this.hasSynchronizedEdges(runtimeGraph, state)) {
       return [];
     }
-    return state.workspace.edgeIds.map((edgeId) => workspace.edgesMap[edgeId]);
+    return state.workspace.edgeIds.map((edgeId) => runtimeGraph.edgesMap[edgeId]);
   }
 
-  private hasSynchronizedNodes(workspace: RuntimeGraph, state: GraphState): boolean {
+  private hasSynchronizedNodes(runtimeGraph: RuntimeGraph, state: GraphState): boolean {
     return (
-      workspace.nodes.length === state.workspace.nodeIds.length &&
-      state.workspace.nodeIds.every((nodeId) => workspace.nodesMap[nodeId] !== undefined)
+      runtimeGraph.nodes.length === state.workspace.nodeIds.length &&
+      state.workspace.nodeIds.every((nodeId) => runtimeGraph.nodesMap[nodeId] !== undefined)
     );
   }
 
-  private hasSynchronizedEdges(workspace: RuntimeGraph, state: GraphState): boolean {
+  private hasSynchronizedEdges(runtimeGraph: RuntimeGraph, state: GraphState): boolean {
     return (
-      workspace.edges.length === state.workspace.edgeIds.length &&
-      state.workspace.edgeIds.every((edgeId) => workspace.edgesMap[edgeId] !== undefined)
+      runtimeGraph.edges.length === state.workspace.edgeIds.length &&
+      state.workspace.edgeIds.every((edgeId) => runtimeGraph.edgesMap[edgeId] !== undefined)
     );
   }
 }

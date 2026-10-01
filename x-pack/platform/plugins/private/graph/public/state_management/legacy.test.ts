@@ -31,7 +31,7 @@ describe('legacy sync listeners', () => {
         },
       },
     });
-    env.mockedDeps.getWorkspace()!.nodes.push({
+    env.mockedDeps.getRuntimeGraph()!.nodes.push({
       color: 'pink',
       data: {
         field: 'field1',
@@ -44,7 +44,7 @@ describe('legacy sync listeners', () => {
         prevName: 'a',
       },
     } as WorkspaceNode);
-    env.mockedDeps.getWorkspace()!.nodes.push({
+    env.mockedDeps.getRuntimeGraph()!.nodes.push({
       color: 'pink',
       data: {
         field: 'field2',
@@ -79,10 +79,10 @@ describe('legacy sync listeners', () => {
         },
       })
     );
-    const workspace = env.mockedDeps.getWorkspace()!;
-    expect(workspace.nodes[0].color).toEqual('red');
-    expect(workspace.nodes[0].icon.id).toEqual('x');
-    expect(workspace.nodes[1].color).toEqual('pink');
-    expect(workspace.nodes[1].icon.id).toEqual('b');
+    const runtimeGraph = env.mockedDeps.getRuntimeGraph()!;
+    expect(runtimeGraph.nodes[0].color).toEqual('red');
+    expect(runtimeGraph.nodes[0].icon.id).toEqual('x');
+    expect(runtimeGraph.nodes[1].color).toEqual('pink');
+    expect(runtimeGraph.nodes[1].icon.id).toEqual('b');
   });
 });

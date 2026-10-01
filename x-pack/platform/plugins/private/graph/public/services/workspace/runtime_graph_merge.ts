@@ -18,7 +18,7 @@ import {
 } from './graph_merge_planner';
 
 export const mergeRuntimeGraph = (
-  workspace: RuntimeGraph,
+  runtimeGraph: RuntimeGraph,
   graph: GraphData,
   initialSequence: number,
   layoutController: WorkspaceLayoutController
@@ -26,32 +26,32 @@ export const mergeRuntimeGraph = (
   layoutController.stop();
   const { normalizedNodes, newNodes } = prepareIncomingNodes(
     graph.nodes,
-    new Set(Object.keys(workspace.nodesMap))
+    new Set(Object.keys(runtimeGraph.nodesMap))
   );
   graph.nodes = normalizedNodes;
 
   let sequence = initialSequence;
   newNodes.forEach((incomingNode) => {
     const node = materializeRuntimeNode(incomingNode, sequence++);
-    workspace.nodes.push(node);
-    workspace.nodesMap[node.id] = node;
+    runtimeGraph.nodes.push(node);
+    runtimeGraph.nodesMap[node.id] = node;
   });
 
   planIncomingEdges({
     edges: graph.edges,
     nodes: normalizedNodes,
-    existingEdges: workspace.edgesMap,
+    existingEdges: runtimeGraph.edgesMap,
   }).forEach((operation) => {
     if (operation.type === 'update') {
-      const edge = workspace.edgesMap[operation.id];
+      const edge = runtimeGraph.edgesMap[operation.id];
       edge.weight = operation.weight;
       edge.doc_count = operation.docCount;
       return;
     }
 
-    const edge = materializeRuntimeEdge(operation, workspace.nodesMap);
-    workspace.edgesMap[edge.id] = edge;
-    workspace.edges.push(edge);
+    const edge = materializeRuntimeEdge(operation, runtimeGraph.nodesMap);
+    runtimeGraph.edgesMap[edge.id] = edge;
+    runtimeGraph.edges.push(edge);
   });
 
   layoutController.start();

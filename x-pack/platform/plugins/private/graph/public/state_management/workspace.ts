@@ -425,13 +425,15 @@ const selectNodesAndNeighbors = (state: WorkspaceState): string[] => {
 };
 
 export const createRuntimeGraphState = (
-  workspace: RuntimeGraph,
+  runtimeGraph: RuntimeGraph,
   isLayoutRunning = false
 ): WorkspaceState => {
-  const nodesById = Object.fromEntries(workspace.nodes.map((node) => [node.id, toNodeState(node)]));
-  const blocklistedNodes = (workspace.blocklistedNodes ?? []) as WorkspaceNode[];
+  const nodesById = Object.fromEntries(
+    runtimeGraph.nodes.map((node) => [node.id, toNodeState(node)])
+  );
+  const blocklistedNodes = (runtimeGraph.blocklistedNodes ?? []) as WorkspaceNode[];
   const edgesById = Object.fromEntries(
-    workspace.edges.map((edge) => {
+    runtimeGraph.edges.map((edge) => {
       const id = getEdgeId(edge);
       return [
         id,
@@ -454,7 +456,7 @@ export const createRuntimeGraphState = (
     isInitialized: true,
     isLayoutRunning,
     nodesById,
-    nodeIds: workspace.nodes.map(({ id }) => id),
+    nodeIds: runtimeGraph.nodes.map(({ id }) => id),
     edgesById,
     edgeIds: Object.keys(edgesById),
     selectedNodeIds: [],
@@ -509,7 +511,7 @@ const topologyActionTypes = new Set([
 export const registerWorkspaceListeners = (
   startListening: StartGraphListening,
   {
-    getWorkspace,
+    getRuntimeGraph,
     notifyReact,
     http,
     notifications,
@@ -523,8 +525,8 @@ export const registerWorkspaceListeners = (
   startListening({
     predicate: (action) => requestActionTypes.has(action.type),
     effect: async (action, listenerApi) => {
-      const workspace = getWorkspace();
-      if (!workspace) {
+      const runtimeGraph = getRuntimeGraph();
+      if (!runtimeGraph) {
         return;
       }
 
@@ -538,16 +540,16 @@ export const registerWorkspaceListeners = (
         const indexName = datasource.title;
         const selectedNodes = listenerApi
           .getState()
-          .workspace.selectedNodeIds.map((id) => workspace.nodesMap[id])
+          .workspace.selectedNodeIds.map((id) => runtimeGraph.nodesMap[id])
           .filter((node) => node !== undefined);
         const startNodes =
           selectedNodes.length > 0
-            ? unpackGroupedNodes(selectedNodes, workspace.edges)
-            : workspace.nodes;
+            ? unpackGroupedNodes(selectedNodes, runtimeGraph.edges)
+            : runtimeGraph.nodes;
         const request = buildExpandExploreRequest({
           startNodes,
-          existingNodes: workspace.nodes,
-          blocklistedNodes: workspace.blocklistedNodes,
+          existingNodes: runtimeGraph.nodes,
+          blocklistedNodes: runtimeGraph.blocklistedNodes,
           fields: vertexFields,
           targetFields: action.payload,
           settings: exploreControls,
@@ -557,7 +559,7 @@ export const registerWorkspaceListeners = (
           listenerApi.throwIfCancelled();
           const graph = transformExpandResponse(response, action.payload);
           listenerApi.dispatch(workspaceGraphMerged(graph));
-          mergeRuntimeGraph(workspace, graph);
+          mergeRuntimeGraph(runtimeGraph, graph);
         } catch (error) {
           if (!listenerApi.signal.aborted) {
             handleSearchQueryError(error as Error);
@@ -572,17 +574,17 @@ export const registerWorkspaceListeners = (
         const indexName = datasource.title;
         const selectedNodes = listenerApi
           .getState()
-          .workspace.selectedNodeIds.map((id) => workspace.nodesMap[id])
+          .workspace.selectedNodeIds.map((id) => runtimeGraph.nodesMap[id])
           .filter((node) => node !== undefined);
         const unpackedNodes =
           selectedNodes.length > 0
-            ? unpackGroupedNodes(selectedNodes, workspace.edges)
-            : workspace.nodes;
+            ? unpackGroupedNodes(selectedNodes, runtimeGraph.edges)
+            : runtimeGraph.nodes;
         const nodes = limitNodesForConnectionSearch(
           unpackedNodes.filter((node) => node.parent === undefined)
         );
         const request = buildFillConnectionsRequest(
-          nodes.map((node) => buildNodeQuery(unpackGroupedNodes([node], workspace.edges)))
+          nodes.map((node) => buildNodeQuery(unpackGroupedNodes([node], runtimeGraph.edges)))
         );
         try {
           const response = await searchGraph(indexName, request);
@@ -590,17 +592,17 @@ export const registerWorkspaceListeners = (
           const { graph, existingEdgeDocCounts } = transformFillConnectionsResponse({
             response,
             nodes,
-            existingEdgeIds: new Set(Object.keys(workspace.edgesMap)),
+            existingEdgeIds: new Set(Object.keys(runtimeGraph.edgesMap)),
             useSignificance: exploreControls.useSignificance,
             minDocCount: exploreControls.minDocCount,
             maxNewEdges: action.payload ?? 10,
           });
           Object.entries(existingEdgeDocCounts).forEach(([id, docCount]) => {
-            const edge = workspace.edgesMap[id];
+            const edge = runtimeGraph.edgesMap[id];
             edge.doc_count = Math.max(edge.doc_count ?? 0, docCount);
           });
           listenerApi.dispatch(workspaceGraphMerged(graph));
-          mergeRuntimeGraph(workspace, graph);
+          mergeRuntimeGraph(runtimeGraph, graph);
         } catch (error) {
           if (!listenerApi.signal.aborted) {
             handleSearchQueryError(error as Error);
@@ -613,8 +615,8 @@ export const registerWorkspaceListeners = (
   startListening({
     predicate: (action) => layoutActionTypes.has(action.type),
     effect: (action) => {
-      const workspace = getWorkspace();
-      if (!workspace) {
+      const runtimeGraph = getRuntimeGraph();
+      if (!runtimeGraph) {
         return;
       }
 
@@ -633,20 +635,20 @@ export const registerWorkspaceListeners = (
   startListening({
     predicate: (action) => presentationActionTypes.has(action.type),
     effect: (action, listenerApi) => {
-      const workspace = getWorkspace();
-      if (!workspace) {
+      const runtimeGraph = getRuntimeGraph();
+      if (!runtimeGraph) {
         return;
       }
 
       if (setNodeLabel.match(action)) {
-        const node = workspace.nodesMap[action.payload.nodeId];
+        const node = runtimeGraph.nodesMap[action.payload.nodeId];
         if (node) {
           node.label = action.payload.label;
         }
       } else if (colorSelectedNodes.match(action)) {
         const { selectedNodeIds } = listenerApi.getState().workspace;
         selectedNodeIds.forEach((nodeId) => {
-          const node = workspace.nodesMap[nodeId];
+          const node = runtimeGraph.nodesMap[nodeId];
           if (node) {
             node.color = action.payload;
           }
@@ -659,14 +661,14 @@ export const registerWorkspaceListeners = (
   startListening({
     predicate: (action) => topologyActionTypes.has(action.type),
     effect: (_action, listenerApi) => {
-      const workspace = getWorkspace();
-      if (!workspace) {
+      const runtimeGraph = getRuntimeGraph();
+      if (!runtimeGraph) {
         return;
       }
 
       const layoutController = getLayoutController();
       if (layoutController) {
-        syncRuntimeTopology(workspace, listenerApi.getState().workspace, layoutController);
+        syncRuntimeTopology(runtimeGraph, listenerApi.getState().workspace, layoutController);
       }
     },
   });
@@ -675,8 +677,8 @@ export const registerWorkspaceListeners = (
     predicate: fillWorkspace.match,
     effect: async (_action, listenerApi) => {
       listenerApi.cancelActiveListeners();
-      const workspace = getWorkspace();
-      if (!workspace) {
+      const runtimeGraph = getRuntimeGraph();
+      if (!runtimeGraph) {
         return;
       }
 
@@ -693,7 +695,7 @@ export const registerWorkspaceListeners = (
           fields
         );
         listenerApi.throwIfCancelled();
-        mergeRuntimeGraph(workspace, { nodes: topTermNodes, edges: [] });
+        mergeRuntimeGraph(runtimeGraph, { nodes: topTermNodes, edges: [] });
         listenerApi.dispatch(initializeWorkspace());
         notifyReact();
         listenerApi.dispatch(fillWorkspaceConnections(fields.length * 10));
@@ -719,7 +721,7 @@ export const registerWorkspaceListeners = (
       listenerApi.dispatch(initializeWorkspace());
 
       // type casting is safe, at this point workspace should be loaded
-      const workspace = getWorkspace() as RuntimeGraph;
+      const runtimeGraph = getRuntimeGraph() as RuntimeGraph;
       const liveResponseFields = liveResponseFieldsSelector(listenerApi.getState());
       const numHops = 2;
       const state = listenerApi.getState();
@@ -736,7 +738,7 @@ export const registerWorkspaceListeners = (
             query: { query_string: { query: action.payload } },
             fields: liveResponseFields,
             numHops,
-            blocklistedNodes: workspace.blocklistedNodes,
+            blocklistedNodes: runtimeGraph.blocklistedNodes,
             settings: exploreControls,
           });
         } else {
@@ -747,7 +749,7 @@ export const registerWorkspaceListeners = (
                 query,
                 fields: liveResponseFields,
                 numHops,
-                blocklistedNodes: workspace.blocklistedNodes,
+                blocklistedNodes: runtimeGraph.blocklistedNodes,
                 settings: exploreControls,
               });
         }
@@ -756,7 +758,7 @@ export const registerWorkspaceListeners = (
         listenerApi.throwIfCancelled();
         const graph = transformSearchResponse(response, vertexFields);
         listenerApi.dispatch(workspaceGraphMerged(graph));
-        mergeRuntimeGraph(workspace, graph);
+        mergeRuntimeGraph(runtimeGraph, graph);
       } catch (error) {
         if (listenerApi.signal.aborted) return;
         handleSearchQueryError(error as Error);

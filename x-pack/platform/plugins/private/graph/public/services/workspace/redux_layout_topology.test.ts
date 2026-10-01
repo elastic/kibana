@@ -32,7 +32,7 @@ describe('ReduxLayoutTopology', () => {
     } as unknown as GraphState;
     const topology = new ReduxLayoutTopology({
       getState: () => state,
-      getWorkspace: () => workspace,
+      getRuntimeGraph: () => workspace,
     });
 
     expect(topology.getNodes()).toEqual([secondNode, firstNode]);
@@ -53,7 +53,7 @@ describe('ReduxLayoutTopology', () => {
     } as unknown as GraphState;
     const topology = new ReduxLayoutTopology({
       getState: () => state,
-      getWorkspace: () => workspace,
+      getRuntimeGraph: () => workspace,
     });
 
     expect(topology.getNodes()).toEqual([]);
