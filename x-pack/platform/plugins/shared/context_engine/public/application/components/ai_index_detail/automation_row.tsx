@@ -11,6 +11,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiText,
   EuiToolTip,
@@ -21,6 +22,7 @@ import React, { useCallback, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { useAutomationRowMenuItems } from '../../hooks/use_automation_row_menu_items';
+import { useRunAutomation } from '../../hooks/use_run_automation';
 import { ItemRow } from '../item_row';
 import { ItemRowIcon } from '../item_row_icon';
 import { AutomationDeleteConfirmModal } from './automation_delete_confirm_modal';
@@ -54,6 +56,7 @@ export const AutomationRow = ({
     { defaultMessage: 'Actions for {name}', values: { name: displayName } }
   );
 
+  const { isRunning, runAutomation } = useRunAutomation(automation.value);
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
   const openPreview = useCallback(() => setIsPreviewOpen(true), []);
   const openDeleteModal = useCallback(() => setIsDeleteModalOpen(true), []);
@@ -73,30 +76,66 @@ export const AutomationRow = ({
         label={displayName}
         icon={<ItemRowIcon iconType="workflow" />}
         actions={
-          <EuiPopover
-            panelPaddingSize="none"
-            anchorPosition="downRight"
-            isOpen={isMenuOpen}
-            closePopover={() => setIsMenuOpen(false)}
-            aria-label={actionsAriaLabel}
-            button={
-              <EuiToolTip content={actionsAriaLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="ellipsis"
-                  color="text"
-                  aria-label={actionsAriaLabel}
-                  onClick={() => setIsMenuOpen((open) => !open)}
-                  data-test-subj="contextAutomationRowActionsButton"
-                  {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
-                    action: CONTEXT_ENGINE_UI_EBT.action.automations.ROW_ACTIONS_MENU,
-                  })}
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              {isRunning ? (
+                <EuiLoadingSpinner
+                  size="m"
+                  aria-label={i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.automations.runningAriaLabel',
+                    { defaultMessage: 'Running {name}', values: { name: displayName } }
+                  )}
+                  data-test-subj="contextAutomationRowRunningSpinner"
                 />
-              </EuiToolTip>
-            }
-          >
-            <EuiContextMenuPanel items={menuItems} />
-          </EuiPopover>
+              ) : (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.automations.runTooltip',
+                    { defaultMessage: 'Run {name}', values: { name: displayName } }
+                  )}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="play"
+                    color="text"
+                    aria-label={i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.automations.runAriaLabel',
+                      { defaultMessage: 'Run {name}', values: { name: displayName } }
+                    )}
+                    onClick={runAutomation}
+                    isDisabled={isDisabled}
+                    data-test-subj="contextAutomationRowRunButton"
+                  />
+                </EuiToolTip>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+                isOpen={isMenuOpen}
+                closePopover={() => setIsMenuOpen(false)}
+                aria-label={actionsAriaLabel}
+                button={
+                  <EuiToolTip content={actionsAriaLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="ellipsis"
+                      color="text"
+                      aria-label={actionsAriaLabel}
+                      onClick={() => setIsMenuOpen((open) => !open)}
+                      data-test-subj="contextAutomationRowActionsButton"
+                      {...getEbtProps({
+                        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                        action: CONTEXT_ENGINE_UI_EBT.action.automations.ROW_ACTIONS_MENU,
+                      })}
+                    />
+                  </EuiToolTip>
+                }
+              >
+                <EuiContextMenuPanel items={menuItems} />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         data-test-subj="contextAiIndexAutomationRow"
       >
