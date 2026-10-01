@@ -584,21 +584,17 @@ describe('refreshing a suite issue', () => {
     expect(metadata?.['report.history'][29].generatedAt).toBe('2026-09-09T09:04:41.000Z');
   });
 
-  it('comments that the suite still appears to be flaky, linking its failures and how to skip it', () => {
-    const { suite } = singleTestReport();
-
-    expect(renderFlakySuiteIssueComment(suite, { reopened: false })).toMatchInlineSnapshot(`
+  it('comments that the suite still appears to be flaky and how to skip it', () => {
+    expect(renderFlakySuiteIssueComment({ reopened: false })).toMatchInlineSnapshot(`
       "This test suite still appears to be flaky.
 
       > [!TIP]
-      > [Review the failures](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20suite',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.file.path:'x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts')),(match_phrase:(suite.title.keyword:'Default%20status%20alert'))))))))). If you'd like to skip the test, ask the #kibana-operations team to \`/skip\` it, or skip the test case manually."
+      > Review the failures. If you'd like to skip the test, ask the #kibana-operations team to \`/skip\` it, or skip the test case manually."
     `);
   });
 
   it('says why the issue is reopened', () => {
-    const { suite } = singleTestReport();
-
-    expect(renderFlakySuiteIssueComment(suite, { reopened: true })).toMatch(
+    expect(renderFlakySuiteIssueComment({ reopened: true })).toMatch(
       /^This test suite appears to be flaky again after this issue was closed\.\n\n> \[!TIP\]/
     );
   });

@@ -26,7 +26,6 @@ import {
   isPullRequestRef,
   KIBANA_BLOB_URL,
   plural,
-  suiteDashboardUrl,
   table,
   targetEnvironment,
   testsTable,
@@ -644,20 +643,17 @@ export const renderFlakySuiteIssueBody = (
 };
 
 /**
- * The comment of a refresh that found new failures, pointing at the suite's failures and at how to
- * skip it; the numbers are in the body. A `kibanamachine` comment is what turns into a Slack
- * notification (elastic/kibana-operations `triage/`), so the body has to be updated first: the
- * notification reads its metadata.
+ * The comment of a refresh that found new failures, saying how to skip the suite; the numbers are
+ * in the body. A `kibanamachine` comment is what turns into a Slack notification
+ * (elastic/kibana-operations `triage/`), so the body has to be updated first: the notification
+ * reads its metadata.
  */
-export const renderFlakySuiteIssueComment = (
-  suite: Pick<FlakySuite, 'filePath' | 'suiteTitle'>,
-  { reopened }: { reopened: boolean }
-): string =>
+export const renderFlakySuiteIssueComment = ({ reopened }: { reopened: boolean }): string =>
   [
     reopened
       ? 'This test suite appears to be flaky again after this issue was closed.'
       : 'This test suite still appears to be flaky.',
     '> [!TIP]\n' +
-      `> [Review the failures](${suiteDashboardUrl(suite)}). If you'd like to skip the test, ` +
-      'ask the #kibana-operations team to `/skip` it, or skip the test case manually.',
+      "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
+      'to `/skip` it, or skip the test case manually.',
   ].join('\n\n');

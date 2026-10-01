@@ -34,8 +34,7 @@ the whole file, has it refreshed instead (`--no-update-issues` turns this off):
 - the body is rewritten with the report's numbers, and its metadata keeps the test ids and branches
   recorded before, so `/skip` still covers a branch the suite stopped failing on this week;
 - a comment is posted when the suite failed since the last report, saying it still appears to be
-  flaky, with a link to its failures in the Scout dashboard (filtered on its file and `describe`
-  block) and how to skip it. Comments by `kibanamachine` are what the Slack notifications of
+  flaky and how to skip it. Comments by `kibanamachine` are what the Slack notifications of
   `triage/` react to, so the body is written first: the notification reads `report.count` from
   it to tell a new failure from an existing one;
 - a closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
