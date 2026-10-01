@@ -13,15 +13,13 @@ import styled from '@emotion/styled';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { PageScope } from '../../../data_view_manager/constants';
-import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
-import { FiltersGlobal } from '../../../common/components/filters_global';
-import { HeaderPage } from '../../../common/components/header_page';
-import { LastEventTime } from '../../../common/components/last_event_time';
+import { SecurityAppHeader } from '../../../common/components/app_header';
+import { useLastEventTimeText } from '../../../common/components/last_event_time/use_last_event_time_text';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { NetworkKpiComponent } from '../components/kpi_network';
-import { SiemSearchBar } from '../../../common/components/search_bar';
+import { SearchWithDataView } from '../../components/search_with_data_view';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -76,7 +74,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const { tabName } = useParams<{ tabName: string }>();
 
     const canUseMaps = kibana.services.application.capabilities.maps_v2.show;
-    const { uiSettings } = kibana.services;
+    const { uiSettings, docLinks } = kibana.services;
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.events) {
@@ -88,6 +86,10 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const { dataView, status } = useDataView(PageScope.explore);
     const selectedPatterns = useSelectedPatterns(dataView);
     const indicesExist = dataView.hasMatchedIndices();
+    const lastEventTimeText = useLastEventTimeText({
+      indexKey: LastEventIndexKey.network,
+      indexNames: selectedPatterns,
+    });
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -146,22 +148,19 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         {indicesExist ? (
           <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal>
-              <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
-            </FiltersGlobal>
 
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
               <Display show={!globalFullScreen}>
-                <HeaderPage
-                  subtitle={
-                    <LastEventTime
-                      indexKey={LastEventIndexKey.network}
-                      indexNames={selectedPatterns}
-                    />
-                  }
+                <SecurityAppHeader
                   title={i18n.PAGE_TITLE}
-                  border
+                  description={lastEventTimeText}
+                  spacing="largeBleed"
+                  docLink={docLinks.links.securitySolution.entityAnalytics.explore.networkPage}
                 />
+
+                <SearchWithDataView dataView={dataView} />
+
+                <EuiSpacer size="l" />
 
                 {canUseMaps && (
                   <>
