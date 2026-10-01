@@ -49,7 +49,6 @@ const PAGINATION_ARIA_LABEL = i18n.translate(
   }
 );
 
-
 export interface HeaderProps {
   /**
    * The document to display
