@@ -12,14 +12,15 @@ import {
 } from '../../../../../../../common/constants';
 
 const statusValues = Object.values(GAP_AUTO_FILL_STATUS);
-const { maxRuleTypesSize } = gapAutoFillSchedulerLimits;
+const { maxBackfills } = gapAutoFillSchedulerLimits;
+const MAX_LOGS_PER_PAGE = 100;
 
 export const findGapAutoFillSchedulerLogsParamsSchema = schema.object({
   id: schema.string(),
   start: schema.string(),
   end: schema.string(),
   page: schema.number({ defaultValue: 1, min: 1 }),
-  perPage: schema.number({ defaultValue: 50, min: 1, max: 100 }),
+  perPage: schema.number({ defaultValue: 50, min: 1, max: MAX_LOGS_PER_PAGE }),
   sortField: schema.oneOf([schema.literal('@timestamp')], { defaultValue: '@timestamp' }),
   sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
     defaultValue: 'desc',
@@ -50,13 +51,14 @@ export const gapAutoFillSchedulerLogEntrySchema = schema.object({
         status: schema.maybe(schema.string()),
         error: schema.maybe(schema.string()),
       }),
-      { maxSize: maxRuleTypesSize }
+      // One result per processed rule. A run processes at most maxBackfills rules.
+      { maxSize: maxBackfills.max }
     )
   ),
 });
 
 export const gapAutoFillSchedulerLogsResultSchema = schema.object({
-  data: schema.arrayOf(gapAutoFillSchedulerLogEntrySchema, { maxSize: 100 }),
+  data: schema.arrayOf(gapAutoFillSchedulerLogEntrySchema, { maxSize: MAX_LOGS_PER_PAGE }),
   total: schema.number(),
   page: schema.number(),
   perPage: schema.number(),
