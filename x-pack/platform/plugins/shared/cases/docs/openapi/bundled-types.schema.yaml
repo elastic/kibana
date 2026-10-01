@@ -1722,6 +1722,318 @@ paths:
               examples:
                 response401:
                   $ref: '#/components/examples/response_401'
+  /api/cases/{caseId}/attachments:
+    post:
+      summary: Create a case attachment
+      operationId: createCaseAttachmentDefaultSpace
+      description: |
+        Adds a single attachment, such as a comment or an alert, to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case. NOTE: Each case can have a maximum of 1,000 alerts.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/unified_attachment_request'
+            examples:
+              createCommentAttachmentRequest:
+                $ref: '#/components/examples/create_unified_comment_attachment_request'
+              createAlertAttachmentRequest:
+                $ref: '#/components/examples/create_unified_alert_attachment_request'
+      responses:
+        '201':
+          description: Indicates a successful call. Returns the created attachment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/unified_attachment_response'
+              examples:
+                createAttachmentResponse:
+                  $ref: '#/components/examples/get_unified_attachment_response'
+        '400':
+          description: |
+            The request body is invalid, the attachment type is not registered, the owner does not match the case, or a case limit was exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response400:
+                  $ref: '#/components/examples/response_400_invalid_attachment'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have the required privileges for the case owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
+        '404':
+          description: The case was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404'
+    get:
+      summary: Find case attachments
+      operationId: findCaseAttachmentsDefaultSpace
+      description: |
+        Returns a paginated list of attachments for a case, optionally filtered by type. Attachments that you do not have privileges to read are not returned. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/attachment_type_filter'
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/sort_order'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/unified_attachments_find_response'
+              examples:
+                findAttachmentsResponse:
+                  $ref: '#/components/examples/find_unified_attachments_response'
+        '400':
+          description: A query parameter is invalid or exceeds its limit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+    delete:
+      summary: Delete all case attachments
+      operationId: deleteCaseAttachmentsDefaultSpace
+      description: |
+        Deletes all attachments from a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have the required privileges for the case owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
+        '404':
+          description: The case has no attachments.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+  /api/cases/{caseId}/attachments/{attachmentId}:
+    get:
+      summary: Get a case attachment
+      operationId: getCaseAttachmentDefaultSpace
+      description: |
+        Returns a single attachment from a case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/attachment_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/unified_attachment_response'
+              examples:
+                getAttachmentResponse:
+                  $ref: '#/components/examples/get_unified_attachment_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have the required privileges for the attachment owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
+        '404':
+          description: The attachment was not found in the case.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404'
+    put:
+      summary: Replace a case attachment
+      operationId: replaceCaseAttachmentDefaultSpace
+      description: |
+        Fully replaces an attachment. You cannot change the attachment type or owner. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/attachment_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/unified_attachment_put_request'
+            examples:
+              replaceAttachmentRequest:
+                $ref: '#/components/examples/update_unified_attachment_request'
+      responses:
+        '200':
+          description: Indicates a successful call. Returns the replaced attachment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/unified_attachment_response'
+              examples:
+                replaceAttachmentResponse:
+                  $ref: '#/components/examples/get_unified_attachment_response'
+        '400':
+          description: |
+            The request body is invalid, or it changes the attachment type or owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response400:
+                  $ref: '#/components/examples/response_400_invalid_attachment'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have the required privileges for the attachment owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
+        '404':
+          description: The attachment was not found in the case.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404'
+        '409':
+          description: The attachment changed since you read it. Get the latest version and retry.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+    delete:
+      summary: Delete a case attachment
+      operationId: deleteCaseAttachmentDefaultSpace
+      description: |
+        Deletes a single attachment from a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      x-state: Technical preview
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/attachment_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response401:
+                  $ref: '#/components/examples/response_401'
+        '403':
+          description: The user does not have the required privileges for the attachment owner.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response403:
+                  $ref: '#/components/examples/response_403'
+        '404':
+          description: The attachment was not found in the case.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response_4xx'
+              examples:
+                response404:
+                  $ref: '#/components/examples/response_404'
   /api/cases/{caseId}/comments:
     post:
       summary: Add a case comment or alert
@@ -2396,6 +2708,35 @@ components:
       schema:
         type: string
         example: 9c235210-6834-11ea-a78c-6ffb38a34414
+    attachment_type_filter:
+      in: query
+      name: type
+      description: |
+        Filters the returned attachments by one or more attachment types, such as `comment` or `security.alert`. To filter by multiple types, repeat the parameter. Limited to 20 types.
+      required: false
+      schema:
+        oneOf:
+          - type: string
+            minLength: 1
+            maxLength: 50
+          - type: array
+            minItems: 1
+            maxItems: 20
+            items:
+              type: string
+              minLength: 1
+              maxLength: 50
+      example: comment
+    attachment_id:
+      in: path
+      name: attachmentId
+      description: |
+        The identifier for the attachment. To retrieve attachment IDs, use the find case attachments API.
+      required: true
+      schema:
+        type: string
+        maxLength: 512
+        example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
     comment_id:
       in: path
       name: commentId
@@ -4497,6 +4838,157 @@ components:
         index:
           description: The alert index.
           type: string
+    unified_attachment_attachment_id:
+      description: |
+        The ID or IDs of the referenced entities, such as alert document IDs. Required for reference attachment types, such as alerts and events.
+      oneOf:
+        - type: string
+        - type: array
+          items:
+            type: string
+      example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+    unified_attachment_data:
+      type: object
+      nullable: true
+      additionalProperties: true
+      description: |
+        Type-specific content for the attachment. Required for value attachment types, such as comments. For the `comment` type, this is an object with a `content` string of up to 30,000 characters.
+      example:
+        content: A new comment.
+    unified_attachment_metadata:
+      type: object
+      nullable: true
+      additionalProperties: true
+      description: |
+        Type-specific metadata for the attachment. For alert types, this includes the alert `index` and the `rule` that generated the alert.
+    unified_attachment_type:
+      type: string
+      description: |
+        The attachment type. The type must be registered in Kibana and determines the accepted shape of `attachmentId`, `data`, and `metadata`. Common types include `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `file`, `lens`, and `dashboard`. Legacy attachment types such as `user` or `alert` are not accepted.
+      example: comment
+    unified_attachment_response:
+      title: Case attachment response
+      type: object
+      required:
+        - created_at
+        - created_by
+        - id
+        - owner
+        - pushed_at
+        - pushed_by
+        - type
+        - updated_at
+        - updated_by
+        - version
+      properties:
+        attachmentId:
+          $ref: '#/components/schemas/unified_attachment_attachment_id'
+        created_at:
+          type: string
+          format: date-time
+          example: '2026-09-30T09:16:17.416Z'
+        created_by:
+          $ref: '#/components/schemas/case_response_created_by_properties'
+        data:
+          $ref: '#/components/schemas/unified_attachment_data'
+        id:
+          type: string
+          description: The attachment identifier.
+          example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
+        metadata:
+          $ref: '#/components/schemas/unified_attachment_metadata'
+        owner:
+          $ref: '#/components/schemas/owner'
+        pushed_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        pushed_by:
+          $ref: '#/components/schemas/case_response_pushed_by_properties'
+        type:
+          $ref: '#/components/schemas/unified_attachment_type'
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        updated_by:
+          $ref: '#/components/schemas/case_response_updated_by_properties'
+        version:
+          type: string
+          description: The attachment version. Use it to replace the attachment.
+          example: WzIwNDMxLDFd
+    unified_attachments_find_response:
+      title: Find case attachments response
+      type: object
+      required:
+        - data
+        - page
+        - per_page
+        - total
+      properties:
+        data:
+          type: array
+          description: The attachments on the requested page.
+          items:
+            $ref: '#/components/schemas/unified_attachment_response'
+        page:
+          type: integer
+          description: The current page number.
+          example: 1
+        per_page:
+          type: integer
+          description: The number of items per page.
+          example: 20
+        total:
+          type: integer
+          description: The total number of attachments that match the query.
+          example: 1
+    unified_attachment_request:
+      title: Create case attachment request
+      description: |
+        The attachment to add to the case. Reference attachment types, such as alerts, require `attachmentId`. Value attachment types, such as comments, require `data`. The `owner` must match the owner of the case. Unknown properties are rejected.
+      type: object
+      required:
+        - owner
+        - type
+      properties:
+        attachmentId:
+          $ref: '#/components/schemas/unified_attachment_attachment_id'
+        data:
+          $ref: '#/components/schemas/unified_attachment_data'
+        metadata:
+          $ref: '#/components/schemas/unified_attachment_metadata'
+        owner:
+          $ref: '#/components/schemas/owner'
+        type:
+          $ref: '#/components/schemas/unified_attachment_type'
+    unified_attachment_put_request:
+      title: Replace case attachment request
+      description: |
+        The full replacement for the attachment. The `type` and `owner` must match the existing attachment. Reference attachment types require `attachmentId` and value attachment types require `data`. Unknown properties are rejected.
+      type: object
+      required:
+        - owner
+        - type
+        - version
+      properties:
+        attachmentId:
+          $ref: '#/components/schemas/unified_attachment_attachment_id'
+        data:
+          $ref: '#/components/schemas/unified_attachment_data'
+        metadata:
+          $ref: '#/components/schemas/unified_attachment_metadata'
+        owner:
+          $ref: '#/components/schemas/owner'
+        type:
+          $ref: '#/components/schemas/unified_attachment_type'
+        version:
+          type: string
+          description: |
+            The current version of the attachment. To retrieve it, use the get case attachment API. If the attachment changed since you read it, the request fails with a 409 status code.
+          example: WzIwNDMxLDFd
     alert_identifiers:
       title: Alert identifiers
       description: |
@@ -5929,6 +6421,80 @@ components:
         - id: f6a7d0c3-d52d-432c-b2e6-447cd7fce04d
           index: .alerts-observability.logs.alerts-default
           attached_at: '2022-07-25T20:09:40.963Z'
+    find_unified_attachments_response:
+      summary: A page of case attachments.
+      value:
+        data:
+          - id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+            version: WzIzLDFd
+            type: comment
+            owner: cases
+            data:
+              content: A new comment.
+            created_at: '2026-09-30T19:32:13.104Z'
+            created_by:
+              email: null
+              full_name: null
+              username: elastic
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+            pushed_at: null
+            pushed_by: null
+            updated_at: null
+            updated_by: null
+        page: 1
+        per_page: 20
+        total: 1
+    create_unified_comment_attachment_request:
+      summary: Adds a comment to a case.
+      value:
+        type: comment
+        owner: cases
+        data:
+          content: A new comment.
+    create_unified_alert_attachment_request:
+      summary: Adds an Elastic Security alert to a case.
+      value:
+        type: security.alert
+        owner: securitySolution
+        attachmentId: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+        metadata:
+          index: .internal.alerts-security.alerts-default-000001
+          rule:
+            id: 94309390-b76c-11ee-b4d6-39d8a0fcbc1b
+            name: Endpoint Security
+    get_unified_attachment_response:
+      summary: A single comment attachment.
+      value:
+        id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+        version: WzIzLDFd
+        type: comment
+        owner: cases
+        data:
+          content: A new comment.
+        created_at: '2026-09-30T19:32:13.104Z'
+        created_by:
+          email: null
+          full_name: null
+          username: elastic
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+        pushed_at: null
+        pushed_by: null
+        updated_at: null
+        updated_by: null
+    response_400_invalid_attachment:
+      summary: The attachment payload is invalid.
+      value:
+        error: Bad Request
+        message: 'Invalid attachment payload for type ''comment'': data.content: Comment content must be a non-empty string'
+        statusCode: 400
+    update_unified_attachment_request:
+      summary: Replaces the content of a comment.
+      value:
+        type: comment
+        owner: cases
+        data:
+          content: An updated comment.
+        version: WzIzLDFd
     add_comment_request:
       summary: Adds a comment to a case.
       value:

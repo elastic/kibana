@@ -1,0 +1,25 @@
+title: Find case attachments response
+type: object
+required:
+  - data
+  - page
+  - per_page
+  - total
+properties:
+  data:
+    type: array
+    description: The attachments on the requested page.
+    items:
+      $ref: 'unified_attachment_response.yaml'
+  page:
+    type: integer
+    description: The current page number.
+    example: 1
+  per_page:
+    type: integer
+    description: The number of items per page.
+    example: 20
+  total:
+    type: integer
+    description: The total number of attachments that match the query.
+    example: 1

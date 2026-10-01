@@ -38,8 +38,8 @@ export const putAttachmentRoute = createCasesRoute<
     body: createIoTsRouteValidation(UnifiedAttachmentPutRequestRt),
   },
   routerOptions: {
-    // TODO(security-team#15572): flip to 'public' once this API is ready to ship.
-    access: 'internal',
+    access: 'public',
+    availability: { stability: 'tech_preview', since: '9.6.0' },
     summary: `Replace a case attachment`,
     tags: ['oas-tag:cases'],
     description: 'You cannot change the attachment type or the owner of an attachment.',
