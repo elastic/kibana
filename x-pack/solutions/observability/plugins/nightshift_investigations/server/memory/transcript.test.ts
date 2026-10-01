@@ -8,6 +8,7 @@
 import { SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID } from '../tools/investigation_progress_report/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import {
+  isEvidenceCall,
   readsSeededKnowledge,
   renderMemoryTranscript,
   stepsFromRound,
@@ -239,6 +240,9 @@ describe('readsSeededKnowledge', () => {
     ['nightshift_sandbox_bash', { command: 'cat /workspace/cortex/INDEX.md' }],
     ['nightshift_sandbox_bash', { command: 'grep -r redis cortex/ decision-trees/' }],
     ['nightshift_sandbox_bash', { command: 'ls /workspace/decision-trees' }],
+    ['nightshift_sandbox_bash', { command: 'cat /workspace/elastic.md' }],
+    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: 'connectors.md' }],
+    ['read_file', { path: '/workspace/decision-trees/decision_tree_checkout-redis-lag.md' }],
   ])('matches %s %j', (toolId, params) => {
     expect(readsSeededKnowledge(toolId, params)).toBe(true);
   });
@@ -250,8 +254,7 @@ describe('readsSeededKnowledge', () => {
       'nightshift_sandbox_bash',
       { command: 'esql "FROM traces-* | WHERE service.name == \\"cortex\\""' },
     ],
-    ['nightshift_sandbox_bash', { command: 'cat /workspace/elastic.md' }],
-    ['nightshift_sandbox_write_file', { file_path: '/workspace/cortex/topics/new.md' }],
+    ['nightshift_sandbox_bash', { command: 'cat /workspace/elastic.mdx' }],
   ])('does not match %s %j', (toolId, params) => {
     expect(readsSeededKnowledge(toolId, params)).toBe(false);
   });
@@ -292,5 +295,26 @@ describe('renderMemoryTranscript with evidenceOnly', () => {
     expect(text).toContain('CORTEX_PAGE');
     expect(text).toContain('TREE_BODY');
     expect(text).toContain('PROGRESS_SUMMARY');
+  });
+});
+
+describe('isEvidenceCall', () => {
+  it.each([
+    ['write_todos', { todos: [] }],
+    ['list_files', { path: '/skills' }],
+    ['load_skill', { name: 'x' }],
+    ['nightshift_sandbox_write_file', { file_path: 'notes.md', content: 'x' }],
+    ['nightshift_sandbox_str_replace', { file_path: 'notes.md', old_str: 'a', new_str: 'b' }],
+  ])('drops %s', (toolId, params) => {
+    expect(isEvidenceCall(toolId, params)).toBe(false);
+  });
+
+  it.each([
+    ['nightshift_sandbox_bash', { command: 'esql "FROM traces-*"' }],
+    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '/workspace/memories/a.md' }],
+    ['observability.get_traces', { service: 'checkout' }],
+    ['run_subagent', { task: 'x' }],
+  ])('keeps %s', (toolId, params) => {
+    expect(isEvidenceCall(toolId, params)).toBe(true);
   });
 });

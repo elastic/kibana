@@ -6,11 +6,13 @@
  */
 
 import Path from 'path';
+import { internalTools } from '@kbn/agent-builder-common';
 import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID } from '../tools/investigation_progress_report/tool';
-import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
+import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
+import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
 
 /**
  * The text the Semantic Memory critique, extraction, and writer calls read.
@@ -25,8 +27,9 @@ import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool'
  *     agent's inferences, so the calls that write memories omit it.
  *
  * With `evidenceOnly`, calls that are not evidence are dropped with their results: reads of the
- * Cortex and decision-tree files Nightshift seeded into the sandbox, and the agent's progress
- * reports, which often restate them.
+ * knowledge Nightshift seeded into the sandbox (Cortex, decision trees, environment docs), and
+ * calls that only record the agent's own process (progress reports, todos, skills, file edits).
+ * Any other tool is kept, so a new query tool is not silently hidden.
  *
  * When the persisted round cannot be read, the investigation is built from the hook's tool calls
  * and results, or falls back to tool-call parameters when no results were passed.
@@ -52,17 +55,35 @@ const MAX_NOTE_CHARS = 400;
 const RESULT_EXCERPT_CHARS = [1_500, 800, 400, 0];
 
 const SEEDED_ROOTS = [CORTEX_WORKSPACE_ROOT, DECISION_TREE_WORKSPACE_ROOT];
-// A bash command names a seeded directory by absolute or workspace-relative path.
+const SEEDED_FILES = ['/workspace/elastic.md', '/workspace/connectors.md'];
+// A bash command names a seeded directory or file by absolute or workspace-relative path.
 const SEEDED_PATH_IN_COMMAND = new RegExp(
-  `(?:^|[\\s'"=(:<])(?:/workspace/|\\./)?(?:${SEEDED_ROOTS.map((root) =>
-    Path.posix.basename(root)
-  ).join('|')})(?:/|[\\s'";|)&>]|$)`
+  `(?:^|[\\s'"=(:<])(?:/workspace/|\\./)?(?:${[...SEEDED_ROOTS, ...SEEDED_FILES]
+    .map((path) => Path.posix.basename(path).replace('.', '\\.'))
+    .join('|')})(?:/|[\\s'";|)&>]|$)`
 );
 
+const NON_EVIDENCE_TOOL_IDS = new Set<string>([
+  SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
+  internalTools.writeTodos,
+  internalTools.listFiles,
+  internalTools.loadSkill,
+  internalTools.searchRelevantSkills,
+  internalTools.sleep,
+  internalTools.setConversationMetadata,
+  internalTools.askUserQuestion,
+  SANDBOX_WRITE_FILE_TOOL_ID,
+  SANDBOX_STR_REPLACE_TOOL_ID,
+]);
+
 export const readsSeededKnowledge = (toolId: string, params: Record<string, unknown>): boolean => {
-  if (toolId === SANDBOX_VIEW_FILE_TOOL_ID && typeof params.file_path === 'string') {
-    const resolved = Path.posix.resolve('/workspace', params.file_path);
-    return SEEDED_ROOTS.some((root) => resolved === root || resolved.startsWith(`${root}/`));
+  const filePath = params.file_path ?? params.path;
+  if (typeof filePath === 'string') {
+    const resolved = Path.posix.resolve('/workspace', filePath);
+    return (
+      SEEDED_FILES.includes(resolved) ||
+      SEEDED_ROOTS.some((root) => resolved === root || resolved.startsWith(`${root}/`))
+    );
   }
   return (
     toolId.endsWith('bash') &&
@@ -71,9 +92,8 @@ export const readsSeededKnowledge = (toolId: string, params: Record<string, unkn
   );
 };
 
-const isEvidenceCall = (toolId: string, params: Record<string, unknown>): boolean =>
-  toolId !== SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID &&
-  !readsSeededKnowledge(toolId, params);
+export const isEvidenceCall = (toolId: string, params: Record<string, unknown>): boolean =>
+  !NON_EVIDENCE_TOOL_IDS.has(toolId) && !readsSeededKnowledge(toolId, params);
 
 const clip = (text: string, max: number): string =>
   text.length <= max ? text : `${text.slice(0, max)}… (+${text.length - max} chars)`;
