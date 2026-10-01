@@ -20,9 +20,9 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
-  InvestigationImpact,
-  InvestigationImpactEntity,
-} from '@kbn/significant-events-schema';
+  InvestigationImpactEntityResponse,
+  InvestigationImpactResponse,
+} from '@kbn/agentic-investigations-plugin/common';
 import { EvidenceItem } from './evidence_list';
 
 /** Impact summaries longer than this are cut short behind "Show more". */
@@ -36,12 +36,14 @@ const truncateAtWord = (text: string, maxLength: number): string => {
 };
 
 export interface ImpactSectionProps {
-  impact: InvestigationImpact;
+  impact: Pick<InvestigationImpactResponse, 'summary' | 'evidence'> & {
+    entities?: InvestigationImpactEntityResponse[];
+  };
 }
 
-const EntityHeader: React.FC<{ entity: InvestigationImpactEntity }> = ({ entity }) => (
+const EntityHeader: React.FC<{ entity: InvestigationImpactEntityResponse }> = ({ entity }) => (
   <EuiText size="s">
-    <strong>{entity.name}</strong>
+    <strong>{entity.name ?? entity.id}</strong>
     {entity.type && (
       <EuiTextColor color="subdued" data-test-subj="investigationOutputImpactEntityType">
         {` · ${entity.type}`}
@@ -54,7 +56,7 @@ const EntityHeader: React.FC<{ entity: InvestigationImpactEntity }> = ({ entity 
  * One impacted entity, as a row of the shared entity panel. Its evidence is collapsed by default
  * so the impact summary leads.
  */
-const ImpactEntityRow: React.FC<{ entity: InvestigationImpactEntity; isLast: boolean }> = ({
+const ImpactEntityRow: React.FC<{ entity: InvestigationImpactEntityResponse; isLast: boolean }> = ({
   entity,
   isLast,
 }) => {
@@ -155,7 +157,7 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
           >
             {entities.map((entity, index) => (
               <ImpactEntityRow
-                key={`${entity.name}-${index}`}
+                key={entity.id}
                 entity={entity}
                 isLast={index === entities.length - 1}
               />
