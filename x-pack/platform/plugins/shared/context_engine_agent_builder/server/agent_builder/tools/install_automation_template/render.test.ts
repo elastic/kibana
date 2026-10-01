@@ -101,6 +101,15 @@ describe('automation template rendering', () => {
     expect(() => parse(yaml)).not.toThrow();
   });
 
+  it('divides the KI budget by the claims per document for a per-claim variant', () => {
+    expect(CONTEXT_ENGINE_DOCUMENT_TEMPLATE).not.toMatch(
+      /multiplies it by the claims per document/
+    );
+    expect(CONTEXT_ENGINE_DOCUMENT_TEMPLATE).toMatch(
+      /sets it to the budget divided by the claims\s+#\s+per document/
+    );
+  });
+
   it('backticks every field identifier so names containing spaces parse', () => {
     expect(CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE).toContain('BY `{{ consts.category_field }}`');
     expect(CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE).toContain(

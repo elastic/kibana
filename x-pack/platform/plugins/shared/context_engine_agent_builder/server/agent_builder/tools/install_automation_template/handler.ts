@@ -103,8 +103,8 @@ const renderTemplate = (params: InstallAutomationTemplateParams, aiIndexId: stri
 };
 
 /**
- * The workflow this template already attached to the AI index, if one exists.
- * A tag match wins; a matching workflow name covers a copy saved before the tag existed.
+ * The automation on the AI index with exactly the requested name, if one exists. A workflow tagged
+ * as a different template is never matched, so one template cannot overwrite another.
  */
 export const findInstalledTemplateWorkflowId = async ({
   aiIndexId,

@@ -601,4 +601,22 @@ describe('aiIndexAutomationsSkill', () => {
       expect(catalog).toMatch(/do not present the budget itself as a limit or a policy/);
     });
   });
+
+  describe('reinstalling a template', () => {
+    const content = aiIndexAutomationsSkill.content;
+
+    it('replaces by name rather than always replacing what the template attached', () => {
+      expect(content).not.toMatch(/calling it again replaces\s+the automation that template/i);
+      expect(content).not.toMatch(/Calling it again replaces/);
+      expect(content).not.toMatch(/Calling the tool again replaces/);
+      expect(content).not.toMatch(/It does not add a second automation/);
+    });
+
+    it('states the name rule wherever the install tool is introduced', () => {
+      const prose = content.replace(/\s+/g, ' ');
+      const nameRule =
+        /the same `name` replaces that automation in place.{0,80}a different `name` adds another/g;
+      expect((prose.match(nameRule) ?? []).length).toBeGreaterThanOrEqual(3);
+    });
+  });
 });

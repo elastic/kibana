@@ -69,8 +69,9 @@ Whatever the strategy, a generated workflow has to:
   than writing an empty list.
 
 Index metadata, bottom-up document, unit profile and targeted-ki-writer automations are all
-installed by `platform.context_engine.install_automation_template`, and calling it again replaces
-the automation that template already attached. `targeted-ki-writer` is installed with
+installed by `platform.context_engine.install_automation_template`. Every install takes a `name`:
+installing again with the same `name` replaces that automation in place, and a different `name` adds
+another automation to the AI index. `targeted-ki-writer` is installed with
 `template: targeted_ki_writer` — the same tool, same pattern as the others.
 
 Two more references are attached and shared with `analyze-and-improve`: `ki_shapes`, the KI
@@ -283,7 +284,8 @@ in `strategy_catalog` as worked examples. These are what each one becomes as a w
 
 Index metadata, bottom-up document and unit profile automations are installed by
 `platform.context_engine.install_automation_template`. Do not write their YAML and do not start a
-subagent for them. Calling the tool again replaces the workflow already attached to the AI index.
+subagent for them. Installing with the same `name` replaces that automation in place; a different
+`name` adds another.
 Outlier, atomic facts, detection and connector automations have no template of their own. Do not
 look for one and do not invent a name; start from the shape of `unit-profile-template`, which is
 the YAML the install tool provides for the Cumulative strategy. It is a
@@ -303,7 +305,6 @@ install arguments almost one for one.
 `sourceIndex` and `categoryField`, a keyword field an analyst would group by. The AI index is the
 one attached to the conversation. The tool fills the consts and attaches the workflow. Do not write
 the YAML and do not start a subagent.
-Calling it again replaces the automation this template already attached.
 
 **Bottom-Up** (`type: document`) — call `platform.context_engine.install_automation_template` with
 `template: document_orchestration`. Pass `sourceIndex`, `titleField` and `bodyField`. The AI index
@@ -314,9 +315,8 @@ to an empty filter, 50 documents and 12000 characters. Keep `maxDocuments` withi
 A `WHERE` line may omit the leading `|`; the tool adds it. The tool attaches only the orchestration.
 Each parallel branch is one `workflow.execute` of the system workflow
 `system-context-engine-document-summary`, which is already installed and is not an automation on
-the AI index. Do not save it and do not start a subagent. Calling the tool again replaces the
-orchestration already attached and keeps the same workflow id. Run that workflow id, not the
-system summary. When the pass yields many near-identically-titled entries, say so: the installed
+the AI index. Do not save it and do not start a subagent. Run the orchestration's workflow id, not
+the system summary. When the pass yields many near-identically-titled entries, say so: the installed
 summary writes one indicator per document, and clustering them is a custom workflow.
 
 **Cumulative / Wiki-style** (`type: entity`) — call
@@ -690,10 +690,9 @@ is neither: it does not confirm and it does not start a run.
 `platform.context_engine.install_automation_template` once. Pass `template: index_metadata`,
 `template: document_orchestration` or `template: unit_profile` and the consts it asks for. Do not
 write the YAML and do not call
-`platform.context_engine.save_automation` for these. If this template is already an automation on
-the AI index, the tool replaces that workflow's definition and keeps the same workflow id. The
-result says `replaced: true` when it did. It does not add a second automation and it does not start
-a run. The document summary workflow is
+`platform.context_engine.save_automation` for these. Installing with the same `name` replaces that
+automation in place and keeps its workflow id, and the result says `replaced: true`; a different
+`name` adds another automation. The install does not start a run. The document summary workflow is
 `system-context-engine-document-summary`. It is not attached to the AI index.
 
 **Every other strategy** — call `platform.context_engine.save_automation`. The tool confirms the save

@@ -37,7 +37,8 @@ consts:
   # The agreed corpus filter, as a complete ES|QL line. Set to "" to take the whole index.
   corpus_filter: __CORPUS_FILTER__
   # The KI budget: one model call and one KI per document, 100 at most during onboarding. A
-  # one-KI-per-claim variant multiplies it by the claims per document.
+  # one-KI-per-claim variant sets it to the budget divided by the claims
+  # per document.
   max_documents: __MAX_DOCUMENTS__
   # Bodies are truncated before they reach the prompt so one long document cannot exhaust the
   # context window and silently drop the rest of the batch.
