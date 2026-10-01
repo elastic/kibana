@@ -11,6 +11,8 @@ import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflow
 interface GetKiIdentificationStatusHandlerParams {
   streamName: string;
   sourceSlug: string;
+  /** The source's `esql_updated_at`; runs that started earlier ran another query. */
+  queryUpdatedAt?: string;
   request: KibanaRequest;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
 }
@@ -18,12 +20,14 @@ interface GetKiIdentificationStatusHandlerParams {
 export async function getKiIdentificationStatusToolHandler({
   streamName,
   sourceSlug,
+  queryUpdatedAt,
   request,
   streamsKIsOnboardingClient,
 }: GetKiIdentificationStatusHandlerParams) {
   const { executionId, ...statusResult } = await streamsKIsOnboardingClient.getStatus({
     streamName,
     sourceSlug,
+    queryUpdatedAt,
     request,
   });
 

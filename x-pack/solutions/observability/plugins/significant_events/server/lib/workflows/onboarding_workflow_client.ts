@@ -21,7 +21,7 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
-import { WorkflowExecutionService } from './workflow_execution_service';
+import { isStartedBefore, WorkflowExecutionService } from './workflow_execution_service';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
 
 const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, total: 0 };
@@ -274,10 +274,16 @@ export class SignificantEventsKIsOnboardingClient {
   async getStatus({
     streamName,
     sourceSlug,
+    queryUpdatedAt,
     request,
   }: {
     streamName: string;
     sourceSlug?: string;
+    /**
+     * The source's `esql_updated_at`, set at creation and moved on every query change. Runs that
+     * started earlier ran another query, or belonged to a deleted source with the same slug.
+     */
+    queryUpdatedAt?: string;
     request: KibanaRequest;
   }): Promise<KIsOnboardingStatusResult> {
     const slug = await this.resolveSourceSlug({ sourceId: streamName, sourceSlug, request });
@@ -285,6 +291,7 @@ export class SignificantEventsKIsOnboardingClient {
       request,
       spaceId: request.spaceId,
       queryParams: { concurrencyGroupKey: buildConcurrencyKey(slug) },
+      ignoreStartedBefore: queryUpdatedAt,
     });
 
     if (result.status !== SignificantEventsWorkflowStatus.Completed) {
@@ -318,7 +325,11 @@ export class SignificantEventsKIsOnboardingClient {
     sources,
     request,
   }: {
-    sources: Array<{ id: string; slug: string }>;
+    /**
+     * `esql_updated_at`, when set, drops runs that started before the current query, including
+     * runs of a deleted source that had the same slug.
+     */
+    sources: Array<{ id: string; slug: string; esql_updated_at?: string }>;
     request: KibanaRequest;
   }): Promise<Record<string, SignificantEventsWorkflowStatusResult>> {
     if (sources.length === 0) {
@@ -326,10 +337,10 @@ export class SignificantEventsKIsOnboardingClient {
     }
 
     const statuses: Record<string, SignificantEventsWorkflowStatusResult> = {};
-    const idsBySlug = new Map<string, string>();
+    const sourcesBySlug = new Map<string, { id: string; esql_updated_at?: string }>();
 
-    for (const { id, slug } of sources) {
-      idsBySlug.set(slug, id);
+    for (const { id, slug, esql_updated_at: queryUpdatedAt } of sources) {
+      sourcesBySlug.set(slug, { id, esql_updated_at: queryUpdatedAt });
       statuses[id] = {
         status: SignificantEventsWorkflowStatus.NotStarted,
         executionId: null,
@@ -343,11 +354,14 @@ export class SignificantEventsKIsOnboardingClient {
         continue;
       }
       const slug = parseSourceSlugFromConcurrencyKey(execution.concurrencyGroupKey);
-      const sourceId = slug === null ? undefined : idsBySlug.get(slug);
-      if (sourceId === undefined) {
+      const source = slug === null ? undefined : sourcesBySlug.get(slug);
+      if (
+        source === undefined ||
+        (source.esql_updated_at !== undefined && isStartedBefore(execution, source.esql_updated_at))
+      ) {
         continue;
       }
-      statuses[sourceId] = WorkflowExecutionService.toStatusResult({
+      statuses[source.id] = WorkflowExecutionService.toStatusResult({
         execution,
         workflowId: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
       });

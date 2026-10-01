@@ -151,6 +151,7 @@ const onboardingExecuteRoute = createServerRoute({
     return streamsKIsOnboardingClient.getStatus({
       streamName: source.id,
       sourceSlug: source.slug,
+      queryUpdatedAt: source.esql_updated_at,
       request,
     });
   },
@@ -195,6 +196,7 @@ const onboardingStatusRoute = createServerRoute({
     return streamsKIsOnboardingClient.getStatus({
       streamName: source.id,
       sourceSlug: source.slug,
+      queryUpdatedAt: source.esql_updated_at,
       request,
     });
   },

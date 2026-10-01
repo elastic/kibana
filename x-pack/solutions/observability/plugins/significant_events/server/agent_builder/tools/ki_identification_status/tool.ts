@@ -61,6 +61,7 @@ export const createKiIdentificationStatusTool = ({
       const status = await getKiIdentificationStatusToolHandler({
         streamName: source.id,
         sourceSlug: source.slug,
+        queryUpdatedAt: source.esql_updated_at,
         request,
         streamsKIsOnboardingClient,
       });
