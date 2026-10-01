@@ -23,12 +23,6 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ExternalServicesProvider,
-  type ExternalServices,
-} from '../../../context/external_services';
-import { FEATURE_FLAGS } from '../../../common/constants';
-import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('./hooks');
@@ -266,27 +260,15 @@ describe('MetricsExperienceGridContent', () => {
     expect(lastCall.dimensions).toEqual([dimensions[0]]);
   });
 
-  it('keeps the histogram bounds fetch disabled when the heatmaps flag is off (default)', () => {
-    render(<MetricsExperienceGridContent {...defaultProps} />, { wrapper: IntlProvider });
-
-    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ enabled: false })
-    );
-  });
-
-  it('fetches histogram bounds for the visible page when the heatmaps flag is on', () => {
-    const featureFlags = createFeatureFlagsMock({ [FEATURE_FLAGS.IS_HEATMAPS_ENABLED]: true });
-
+  it('fetches histogram bounds for the visible page', () => {
     render(
-      <ExternalServicesProvider externalServices={{ featureFlags } as ExternalServices}>
-        <MetricsExperienceGridContent
-          {...defaultProps}
-          fetchParams={{
-            ...fetchParams,
-            query: { esql: 'TS test-metrics-histograms | WHERE host.name == "a"' },
-          }}
-        />
-      </ExternalServicesProvider>,
+      <MetricsExperienceGridContent
+        {...defaultProps}
+        fetchParams={{
+          ...fetchParams,
+          query: { esql: 'TS test-metrics-histograms | WHERE host.name == "a"' },
+        }}
+      />,
       { wrapper: IntlProvider }
     );
 
@@ -301,15 +283,20 @@ describe('MetricsExperienceGridContent', () => {
     );
   });
 
-  it('keeps the histogram bounds fetch disabled while the chart section is hidden', () => {
-    const featureFlags = createFeatureFlagsMock({ [FEATURE_FLAGS.IS_HEATMAPS_ENABLED]: true });
+  it('keeps the histogram bounds fetch disabled while Discover is loading', () => {
+    render(<MetricsExperienceGridContent {...defaultProps} isDiscoverLoading />, {
+      wrapper: IntlProvider,
+    });
 
-    render(
-      <ExternalServicesProvider externalServices={{ featureFlags } as ExternalServices}>
-        <MetricsExperienceGridContent {...defaultProps} isComponentVisible={false} />
-      </ExternalServicesProvider>,
-      { wrapper: IntlProvider }
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
     );
+  });
+
+  it('keeps the histogram bounds fetch disabled while the chart section is hidden', () => {
+    render(<MetricsExperienceGridContent {...defaultProps} isComponentVisible={false} />, {
+      wrapper: IntlProvider,
+    });
 
     expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: false })

@@ -24,7 +24,9 @@ import {
   classifyHistogramBounds,
   type RawHistogramBound,
 } from '../../../../common/utils/classify_histogram_bounds';
+import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../../common/constants';
 import { useTelemetry } from '../../../../context/ebt_telemetry_context';
+import { useFeatureFlag } from '../../../../hooks';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import {
   MetricsExecutionContextAction,
@@ -36,8 +38,9 @@ import { useReportChartSectionError } from '../../../chart/hooks/use_report_char
 export type HistogramBoundsByMetricKey = ReadonlyMap<string, HistogramBoundsResult>;
 
 /**
- * `idle`: nothing to fetch. `loading`: requests in flight, `bounds` is empty.
- * `ready`: every chart on the page has settled, including per-chart errors.
+ * `idle`: nothing to fetch. `loading`: requests in flight; `bounds` keeps the previous
+ * result until the new one arrives. `ready`: every chart on the page has settled,
+ * including per-chart errors.
  */
 export interface HistogramBoundsState {
   readonly status: 'idle' | 'loading' | 'ready';
@@ -48,7 +51,11 @@ type BoundsRow = Record<string, RawHistogramBound>;
 
 const EMPTY_BOUNDS: HistogramBoundsByMetricKey = new Map();
 const IDLE_STATE: HistogramBoundsState = { status: 'idle', bounds: EMPTY_BOUNDS };
-const LOADING_STATE: HistogramBoundsState = { status: 'loading', bounds: EMPTY_BOUNDS };
+
+const getLoadingState = (bounds: HistogramBoundsByMetricKey): HistogramBoundsState => ({
+  status: 'loading',
+  bounds,
+});
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
@@ -56,7 +63,7 @@ const toError = (error: unknown): Error =>
 /**
  * Fetches raw MIN/MAX bounds for each histogram chart on the visible page, one request per chart.
  * Results are keyed by `getMetricUniqueKey` and published together once every request settles.
- * Sends nothing when `enabled` is false.
+ * Sends nothing when `enabled` is false or the heatmaps feature flag is off.
  */
 export const useFetchHistogramBounds = ({
   enabled,
@@ -77,7 +84,13 @@ export const useFetchHistogramBounds = ({
 }): HistogramBoundsState => {
   const reportError = useReportChartSectionError();
   const { trackEsqlQueryFailure } = useTelemetry();
-  const [state, setState] = useState<HistogramBoundsState>(IDLE_STATE);
+  const isHeatmapsEnabled = useFeatureFlag(
+    FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
+    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
+  );
+  const fetchEnabled = enabled && isHeatmapsEnabled;
+  const [histogramBoundsState, setHistogramBoundsState] =
+    useState<HistogramBoundsState>(IDLE_STATE);
 
   const queries = useMemo(
     () =>
@@ -102,7 +115,7 @@ export const useFetchHistogramBounds = ({
   const requestKey = useMemo(
     () =>
       JSON.stringify({
-        enabled,
+        enabled: fetchEnabled,
         queries: [...queries].sort((left, right) => left.metricKey.localeCompare(right.metricKey)),
         timeFrom: relativeTimeRange?.from ?? null,
         timeTo: relativeTimeRange?.to ?? null,
@@ -111,11 +124,11 @@ export const useFetchHistogramBounds = ({
         indexPattern: dataView?.getIndexPattern() ?? null,
         searchSessionId: searchSessionId ?? null,
       }),
-    [enabled, queries, relativeTimeRange, filters, esqlVariables, dataView, searchSessionId]
+    [fetchEnabled, queries, relativeTimeRange, filters, esqlVariables, dataView, searchSessionId]
   );
 
   const queriesRef = useLatest(queries);
-  const enabledRef = useLatest(enabled);
+  const enabledRef = useLatest(fetchEnabled);
   const dataViewRef = useLatest(dataView);
   const relativeTimeRangeRef = useLatest(relativeTimeRange);
   const filtersRef = useLatest(filters);
@@ -130,27 +143,44 @@ export const useFetchHistogramBounds = ({
     const currentQueries = queriesRef.current;
     const currentDataView = dataViewRef.current;
     if (!enabledRef.current || currentQueries.length === 0 || !currentDataView) {
-      setState(IDLE_STATE);
+      setHistogramBoundsState(IDLE_STATE);
       return;
     }
 
-    setState(LOADING_STATE);
+    setHistogramBoundsState((previous) => getLoadingState(previous.bounds));
 
     const controller = new AbortController();
     const { signal } = controller;
+    const failures: Array<{ error: unknown; boundsQuery: HistogramBoundsQuery }> = [];
 
-    const reportFailure = (error: unknown, { metricKey, esqlQuery }: HistogramBoundsQuery) => {
+    const reportBatchFailure = (
+      batch: ReadonlyArray<{ error: unknown; boundsQuery: HistogramBoundsQuery }>
+    ) => {
+      const [first] = batch;
+      const error =
+        batch.length === 1
+          ? first.error
+          : new AggregateError(
+              batch.map(({ error: failure }) => toError(failure)),
+              `Histogram bounds failed for ${batch.length} charts: ${batch
+                .map(({ boundsQuery }) => boundsQuery.metricKey)
+                .join(', ')}`
+            );
+
       reportErrorRef.current({
         error,
         source: 'useFetchHistogramBounds',
         labels: {
           page: `metrics_${MetricsExecutionContextAction.FETCH}_${MetricsExecutionContextName.HISTOGRAM_BOUNDS}`,
           profile_id: profileIdRef.current,
-          chart_id: metricKey,
+          ...(batch.length === 1 ? { chart_id: first.boundsQuery.metricKey } : {}),
         },
       });
 
-      const failureEvent = buildEsqlQueryFailureEvent({ error, esqlQuery });
+      const failureEvent = buildEsqlQueryFailureEvent({
+        error: first.error,
+        esqlQuery: first.boundsQuery.esqlQuery,
+      });
       if (failureEvent) {
         trackEsqlQueryFailureRef.current(failureEvent);
       }
@@ -183,7 +213,7 @@ export const useFetchHistogramBounds = ({
         ];
       } catch (error) {
         if (!signal.aborted) {
-          reportFailure(error, boundsQuery);
+          failures.push({ error, boundsQuery });
         }
         return [boundsQuery.metricKey, { status: 'error', error: toError(error) }];
       }
@@ -193,7 +223,10 @@ export const useFetchHistogramBounds = ({
       if (signal.aborted) {
         return;
       }
-      setState({ status: 'ready', bounds: new Map(entries) });
+      if (failures.length > 0) {
+        reportBatchFailure(failures);
+      }
+      setHistogramBoundsState({ status: 'ready', bounds: new Map(entries) });
     });
 
     return () => {
@@ -214,5 +247,5 @@ export const useFetchHistogramBounds = ({
     trackEsqlQueryFailureRef,
   ]);
 
-  return state;
+  return histogramBoundsState;
 };

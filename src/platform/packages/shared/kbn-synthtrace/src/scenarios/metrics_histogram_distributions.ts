@@ -8,148 +8,10 @@
  */
 
 /**
- * Goal
- * ----
- * A single TSDB index that exercises every histogram case the Metrics in
- * Discover histogram work needs: the min/max bounds query, the distribution
- * query per histogram type, the heatmap render, and the grid settings that
- * switch between them.
+ * Time-series histogram data for the Metrics grid in Discover: bounds,
+ * distributions, heatmaps, and the settings that switch between them.
  *
- * Open `TS test-metrics-histograms` in Discover (ES|QL mode) to get the grid.
- *
- * Mechanism
- * ---------
- * The metrics grid needs a time_series index whose metric fields carry
- * `time_series_metric`, which no synthtrace client writes. So `bootstrap`
- * creates the indices and bulk-indexes every document with the raw ES client,
- * and `generate` contributes nothing. `--from` / `--to` still drive the time
- * range, and the index `time_series` window is padded a day either side so a
- * sub-range with no data can be selected to test the empty case.
- *
- * Mapped field types (what each one is for)
- * -----------------------------------------
- * | field                   | mapping                 | covers                                          |
- * |-------------------------|-------------------------|-------------------------------------------------|
- * | latency.legacy          | histogram               | the `TO_TDIGEST(...)` cast path                  |
- * | latency.exp             | exponential_histogram   | the uncast path; same shape as legacy to compare |
- * | latency.tdigest         | tdigest                 | the uncast path with exact stored min/max        |
- * | latency.bimodal         | exponential_histogram   | two stable modes, so a heatmap shows two bands   |
- * | latency.wide            | exponential_histogram   | 0.001 to 10000, several orders of magnitude      |
- * | latency.point           | histogram               | one centroid, so min == max (the `point` case)   |
- * | latency.sparse          | histogram               | absent from the first 40% of the range           |
- * | latency.signed          | exponential_histogram   | negative, zero and positive buckets, native form |
- * | system.cpu.utilization  | double / gauge          | must be SKIPPED by the bounds query              |
- * | system.requests.count   | long / counter          | must be SKIPPED by the bounds query              |
- * | zz_filler.histogram_N   | exponential_histogram   | pushes the grid past one page (20 charts)        |
- *
- * `latency.signed` and `latency.tdigest` carry explicit `min`/`max`, so their
- * bounds are exact and assertable. The rest omit them, leaving Elasticsearch to
- * estimate from the buckets, which is what real data does.
- *
- * `latency.sparse` reports from 40% of the range onwards rather than in a slice
- * in the middle, and that is deliberate. Measured on ES 9.6.0-SNAPSHOT,
- * `METRICS_INFO` only lists a field that the most recent documents carry: with
- * the field confined to a middle slice it was never discovered at all, so the
- * grid never charted it, no matter how much of the range it covered or what
- * time filter the request carried. Ending at the present keeps it discoverable
- * while still leaving the first 40% of the range empty for it.
- *
- * `latency.exp` drifts: a Gaussian latency spike peaks in the middle of the
- * range, so the distribution moves up and back down. Static data makes a
- * correct heatmap and a broken one look the same, which is the whole reason the
- * spike is there.
- *
- * Companion index (mixed types)
- * -----------------------------
- * `test-metrics-histograms-mixed` maps every core field again with a different
- * type. `METRICS_INFO` over `TS test-metrics-histograms*` returns one row per
- * field type, so the grid charts each field once per index with that index's
- * type, and each chart's bounds query targets only its own index:
- *
- * | field                  | main index            | mixed index           | bounds on main | bounds on mixed |
- * |------------------------|-----------------------|-----------------------|----------------|-----------------|
- * | latency.legacy         | histogram             | exponential_histogram | TO_TDIGEST     | uncast          |
- * | latency.exp            | exponential_histogram | histogram             | uncast         | TO_TDIGEST      |
- * | latency.tdigest        | tdigest               | exponential_histogram | uncast         | uncast          |
- * | latency.bimodal        | exponential_histogram | tdigest               | uncast         | uncast          |
- * | latency.wide           | exponential_histogram | histogram             | uncast         | TO_TDIGEST      |
- * | latency.point          | histogram             | tdigest, min == max   | TO_TDIGEST     | uncast          |
- * | latency.sparse         | histogram             | exponential_histogram | TO_TDIGEST     | uncast          |
- * | latency.signed         | exponential_histogram | double / gauge        | uncast         | SKIPPED         |
- * | system.cpu.utilization | double / gauge        | long / gauge          | SKIPPED        | SKIPPED         |
- * | system.requests.count  | long / counter        | double / counter      | SKIPPED        | SKIPPED         |
- *
- * The mixed index centres its distributions lower than the main index, so the
- * two charts of a field get visibly different bounds. It writes every fifth
- * interval plus the last one, so its most recent documents carry every field
- * (see `latency.sparse` above). Fillers are main-index only. On a cluster without `tdigest`
- * metric support, its `tdigest` fields fall back to legacy `histogram`.
- *
- * Measured on ES 9.6.0-SNAPSHOT: an uncast aggregation over the wildcard itself
- * fails with `Cannot use field [latency.exp] due to ambiguities`. The per-index
- * charts never hit it; a hand-written query over the wildcard needs a
- * conversion such as `TO_TDIGEST(latency.exp)`.
- *
- * Related
- * -------
- * - https://github.com/elastic/observability-dev/issues/6166 (min/max bounds)
- * - https://github.com/elastic/observability-dev/issues/6167 (distribution query)
- * - https://github.com/elastic/observability-dev/issues/6168 (heatmap render)
- * - https://github.com/elastic/observability-dev/issues/6171 (grid settings)
- *
- * Supported --scenarioOpts (and defaults)
- * ---------------------------------------
- * - indexName (string, default: 'test-metrics-histograms')
- * - hosts (number, default: 3): `host.name` dimension values.
- * - services (number, default: 2): `service.name` dimension values.
- * - fillerHistograms (number, default: 12): extra exponential histogram fields
- *   named `zz_filler.histogram_N`. They sort last, so with the default 10 real
- *   fields page 1 holds 10 fillers and page 2 holds 2 -- both pages carry
- *   histograms, which is what makes the per-page bounds fetch observable.
- * - intervalSeconds (number, default: 60): spacing between documents.
- * - maxDocuments (number, default: 20000): safety cap. The interval is widened
- *   automatically when the requested range would exceed it.
- * - mixedTypeIndex (boolean, default: true): also write the mixed-type companion index.
- * - spike (boolean, default: true): the mid-range latency spike.
- *
- * Run
- * ---
- *   node scripts/synthtrace metrics_histogram_distributions \
- *     --from now-6h --to now --target http://elastic:changeme@localhost:9200
- *
- *   # single page of charts, no fillers
- *   ... --scenarioOpts='{"fillerHistograms":0}'
- *
- * Every run drops the main and mixed indices first, so re-running never merges
- * stale data.
- *
- * Validation conditions (must hold in Elasticsearch)
- * --------------------------------------------------
- * The bounds query the grid issues returns a range for the spread fields, an
- * equal min/max for `latency.point`, and nulls outside the data window:
- *
- *   POST /_query
- *   {
- *     "query": "TS test-metrics-histograms | STATS min_legacy = MIN(TO_TDIGEST(latency.legacy)), max_legacy = MAX(TO_TDIGEST(latency.legacy)), min_exp = MIN(latency.exp), max_exp = MAX(latency.exp), min_td = MIN(latency.tdigest), max_td = MAX(latency.tdigest), min_point = MIN(TO_TDIGEST(latency.point)), max_point = MAX(TO_TDIGEST(latency.point)), min_signed = MIN(latency.signed), max_signed = MAX(latency.signed)"
- *   }
- *
- * Measured over a `--from now-6h --to now` run on ES 9.6.0-SNAPSHOT:
- *
- *   min_legacy 17.101   max_legacy 2698.572   (cast path)
- *   min_exp    17.103   max_exp    2698.839   (uncast, bucket-boundary rounding)
- *   min_td     22.818   max_td     2011.325   (exact: stored min/max)
- *   min_point  5.0      max_point  5.0        (the `point` case)
- *   min_signed -120.0   max_signed 210.0      (exact, spans zero)
- *   min_wide   0.001    max_wide   10000.0
- *
- * Narrowing the same query to a window before the data returns null for every
- * column, and a window in the first 40% of the range returns null for
- * `latency.sparse` while the other fields still return numbers.
- *
- * The distribution query behind the heatmap must run for all three types:
- *
- *   POST /_query
- *   { "query": "TS test-metrics-histograms | STATS count = COUNT(latency.bimodal, bucket) BY bucket = BUCKET(latency.bimodal, 12, 14, 380), time = TBUCKET(30 minutes) | EVAL lower = RANGE_MIN(bucket) | SORT time ASC, lower ASC" }
+ * Run instructions and options live in EXAMPLES.md (`metrics_histogram_distributions`).
  */
 
 import type { Client } from '@elastic/elasticsearch';
@@ -169,9 +31,8 @@ const BULK_CHUNK_SIZE = 500;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
- * `tdigest` is a 9.3-preview field type the ES client's `MappingProperty` union
- * does not cover yet, so mappings are assembled untyped and cast once at the
- * `indices.create` call, the same way the Scout metrics fixtures do it.
+ * Mappings stay untyped until the ES client's `MappingProperty` includes `tdigest`.
+ * Once it does, the cast at `indices.create` can go away.
  */
 type EsMappingProperty = Record<string, unknown>;
 
@@ -336,24 +197,28 @@ const SIGNED_POSITIVES = { values: [8, 55, 210], counts: [40, 90, 15] };
 
 const CORE_METRICS: readonly MetricSpec[] = [
   {
+    // Covers the `TO_TDIGEST(...)` cast path.
     name: 'latency.legacy',
     mapping: HISTOGRAM_MAPPING,
     value: ({ spikeFactor, hostIndex, volume, random }) =>
       buildDistribution(45 * spikeFactor * (1 + hostIndex * 0.4), volume, random),
   },
   {
+    // Covers the uncast path; same shape as `latency.legacy` so the two can be compared.
     name: 'latency.exp',
     mapping: EXPONENTIAL_MAPPING,
     value: ({ spikeFactor, hostIndex, volume, random }) =>
       buildDistribution(45 * spikeFactor * (1 + hostIndex * 0.4), volume, random),
   },
   {
+    // Covers the uncast path with exact stored min/max.
     name: TDIGEST_FIELD,
     mapping: TDIGEST_MAPPING,
     value: ({ spikeFactor, volume, random }) =>
       toTDigest(buildDistribution(60 * spikeFactor, volume, random)),
   },
   {
+    // Covers two stable modes, so a heatmap shows two bands.
     name: 'latency.bimodal',
     mapping: EXPONENTIAL_MAPPING,
     value: ({ progress, volume, random }) => {
@@ -376,6 +241,7 @@ const CORE_METRICS: readonly MetricSpec[] = [
     },
   },
   {
+    // Covers 0.001 to 10000, several orders of magnitude.
     name: 'latency.wide',
     mapping: EXPONENTIAL_MAPPING,
     value: ({ volume, random }) => ({
@@ -386,11 +252,13 @@ const CORE_METRICS: readonly MetricSpec[] = [
     }),
   },
   {
+    // Covers one centroid, so min == max (the `point` case).
     name: 'latency.point',
     mapping: HISTOGRAM_MAPPING,
     value: ({ volume }) => ({ values: [5], counts: [volume] }),
   },
   {
+    // Covers a field absent from the first 40% of the range.
     name: 'latency.sparse',
     mapping: HISTOGRAM_MAPPING,
     // Reports over the middle of the range only, so a window outside that
@@ -403,6 +271,7 @@ const CORE_METRICS: readonly MetricSpec[] = [
         : undefined,
   },
   {
+    // Covers negative, zero, and positive buckets in native form.
     name: 'latency.signed',
     mapping: EXPONENTIAL_MAPPING,
     // Written in the native OTel form rather than the coerced values/counts
@@ -417,12 +286,14 @@ const CORE_METRICS: readonly MetricSpec[] = [
     }),
   },
   {
+    // Covers a gauge the bounds query must skip.
     name: 'system.cpu.utilization',
     mapping: { type: 'double', time_series_metric: 'gauge' },
     value: ({ progress, hostIndex, random }) =>
       round(0.3 + 0.25 * Math.sin(progress * Math.PI * 4 + hostIndex) + random() * 0.05, 4),
   },
   {
+    // Covers a counter the bounds query must skip.
     name: 'system.requests.count',
     mapping: { type: 'long', time_series_metric: 'counter' },
     value: ({ bucketIndex, hostIndex }) => bucketIndex * 37 + hostIndex * 1000,
@@ -437,21 +308,44 @@ const mixedDistribution = ({ hostIndex, volume, random }: PointContext): LegacyH
  * so a wildcard over both indices charts every field once per type.
  */
 const MIXED_METRICS: readonly MetricSpec[] = [
-  { name: 'latency.legacy', mapping: EXPONENTIAL_MAPPING, value: mixedDistribution },
-  { name: 'latency.exp', mapping: HISTOGRAM_MAPPING, value: mixedDistribution },
-  { name: TDIGEST_FIELD, mapping: EXPONENTIAL_MAPPING, value: mixedDistribution },
   {
+    // Covers the uncast path for the same field the main index casts.
+    name: 'latency.legacy',
+    mapping: EXPONENTIAL_MAPPING,
+    value: mixedDistribution,
+  },
+  {
+    // Covers the `TO_TDIGEST(...)` cast path for the same field the main index leaves uncast.
+    name: 'latency.exp',
+    mapping: HISTOGRAM_MAPPING,
+    value: mixedDistribution,
+  },
+  {
+    // Covers the uncast exponential path for the field stored as `tdigest` on the main index.
+    name: TDIGEST_FIELD,
+    mapping: EXPONENTIAL_MAPPING,
+    value: mixedDistribution,
+  },
+  {
+    // Covers `tdigest` with exact stored min/max.
     name: 'latency.bimodal',
     mapping: TDIGEST_MAPPING,
     value: (context) => toTDigest(mixedDistribution(context)),
   },
-  { name: 'latency.wide', mapping: HISTOGRAM_MAPPING, value: mixedDistribution },
   {
+    // Covers the `TO_TDIGEST(...)` cast path.
+    name: 'latency.wide',
+    mapping: HISTOGRAM_MAPPING,
+    value: mixedDistribution,
+  },
+  {
+    // Covers `tdigest` with min == max.
     name: 'latency.point',
     mapping: TDIGEST_MAPPING,
     value: ({ volume }) => ({ centroids: [5], counts: [volume], min: 5, max: 5 }),
   },
   {
+    // Covers the uncast path over the same sparse window as the main index.
     name: 'latency.sparse',
     mapping: EXPONENTIAL_MAPPING,
     value: (context) =>
@@ -460,17 +354,20 @@ const MIXED_METRICS: readonly MetricSpec[] = [
         : undefined,
   },
   {
+    // Covers a gauge the bounds query must skip.
     name: 'latency.signed',
     mapping: { type: 'double', time_series_metric: 'gauge' },
     value: ({ random }) => round(-120 + random() * 330, 3),
   },
   {
+    // Covers a gauge the bounds query must skip.
     name: 'system.cpu.utilization',
     mapping: { type: 'long', time_series_metric: 'gauge' },
     value: ({ progress, hostIndex }) =>
       Math.round(30 + 25 * Math.sin(progress * Math.PI * 4 + hostIndex)),
   },
   {
+    // Covers a counter the bounds query must skip.
     name: 'system.requests.count',
     mapping: { type: 'double', time_series_metric: 'counter' },
     value: ({ bucketIndex, hostIndex }) => bucketIndex * 12.5 + hostIndex * 500,
@@ -641,7 +538,9 @@ const scenario: Scenario = async ({ logger, from, to, scenarioOpts }) => {
         if (operations.length === 0) return;
         const response = await esClient.bulk({ operations, refresh: false });
         if (response.errors) {
-          const firstFailure = response.items.find((item) => item.index?.error)?.index?.error;
+          const firstFailure = response.items
+            .map((item) => item.create?.error)
+            .find((error) => error !== undefined);
           throw new Error(`Bulk indexing failed: ${JSON.stringify(firstFailure)}`);
         }
         indexed += operations.length / 2;

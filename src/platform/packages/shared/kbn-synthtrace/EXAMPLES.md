@@ -671,6 +671,30 @@ node scripts/synthtrace infra_hosts_missing_normalized_load --from now-1w --to n
 node scripts/synthtrace infra_hosts_missing_normalized_load --from now-1w --to now --scenarioOpts='{"numLinuxHosts":2,"numWindowsPartialHosts":3,"numWindowsMinimalHosts":1}'
 ```
 
+#### `metrics_histogram_distributions`
+
+Generates histogram metrics for the Metrics grid in Discover.
+
+**Options:**
+
+- `indexName` (string, default: `test-metrics-histograms`)
+- `hosts` (number, default: 3): `host.name` dimension values
+- `services` (number, default: 2): `service.name` dimension values
+- `fillerHistograms` (number, default: 12): extra exponential histogram fields named `zz_filler.histogram_N`
+- `intervalSeconds` (number, default: 60): spacing between documents
+- `maxDocuments` (number, default: 20000): safety cap. The interval widens when the range would exceed it
+- `mixedTypeIndex` (boolean, default: true): also write `<indexName>-mixed`, with each core field mapped to a different type
+- `spike` (boolean, default: true): mid-range latency spike
+
+**Usage:**
+
+```sh
+node scripts/synthtrace metrics_histogram_distributions --from now-6h --to now
+
+# single page of charts, no fillers
+node scripts/synthtrace metrics_histogram_distributions --from now-6h --to now --scenarioOpts='{"fillerHistograms":0}'
+```
+
 ### Combined Scenarios
 
 #### `logs_traces_hosts`

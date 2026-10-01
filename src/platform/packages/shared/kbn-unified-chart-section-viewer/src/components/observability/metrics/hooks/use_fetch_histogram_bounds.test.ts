@@ -10,6 +10,9 @@
 jest.mock('../utils/execute_esql_query', () => ({
   executeEsqlQuery: jest.fn(),
 }));
+jest.mock('../../../../hooks', () => ({
+  useFeatureFlag: jest.fn(() => true),
+}));
 const mockReportError = jest.fn();
 jest.mock('../../../chart/hooks/use_report_chart_section_error', () => ({
   useReportChartSectionError: jest.fn(() => mockReportError),
@@ -27,11 +30,13 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import type { ParsedMetricItem } from '../../../../types';
+import { useFeatureFlag } from '../../../../hooks';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
 import { useFetchHistogramBounds } from './use_fetch_histogram_bounds';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
+const mockUseFeatureFlag = useFeatureFlag as jest.MockedFunction<typeof useFeatureFlag>;
 
 type BoundsRow = Record<string, number | string | null>;
 
@@ -45,6 +50,14 @@ const deferred = () => {
       resolvePromise({ documents: rows, rawResponse: {}, requestParams: { query: '' } });
   });
   return { promise, resolve };
+};
+
+const deferredRejection = () => {
+  let reject: (error: Error) => void = () => {};
+  const promise = new Promise<Awaited<ReturnType<typeof resolved>>>((_resolve, rejectPromise) => {
+    reject = rejectPromise;
+  });
+  return { promise, reject };
 };
 
 const createMetric = (overrides: Partial<ParsedMetricItem>): ParsedMetricItem => ({
@@ -104,6 +117,7 @@ const getQueriedSources = () =>
 describe('useFetchHistogramBounds', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseFeatureFlag.mockReturnValue(true);
     mockExecuteEsqlQuery.mockImplementation(() => resolved([{ min_value: 1, max_value: 5 }]));
   });
 
@@ -260,6 +274,93 @@ describe('useFetchHistogramBounds', () => {
 
     expect(mockReportError).not.toHaveBeenCalled();
     expect(mockTrackEsqlQueryFailure).not.toHaveBeenCalled();
+  });
+
+  it('keeps the previous bounds while a refetch is loading', async () => {
+    const initialProps = createProps({ metricItems: [histogramA] });
+    const { result, rerender } = renderBoundsHook(initialProps);
+
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    const previousBounds = result.current.bounds;
+
+    const slow = deferred();
+    mockExecuteEsqlQuery.mockImplementationOnce(() => slow.promise);
+    rerender({
+      ...initialProps,
+      fetchParams: {
+        ...initialProps.fetchParams,
+        relativeTimeRange: { from: 'now-1h', to: 'now' },
+      },
+    });
+
+    await waitFor(() => expect(result.current.status).toBe('loading'));
+    expect(result.current.bounds).toBe(previousBounds);
+
+    await act(async () => {
+      slow.resolve([{ min_value: 9, max_value: 11 }]);
+    });
+
+    expect(result.current.status).toBe('ready');
+    expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
+      status: 'range',
+      min: 9,
+      max: 11,
+    });
+  });
+
+  it('reports every chart failure once, after all requests settle', async () => {
+    const failureA = new Error('verification_exception');
+    const failureB = new Error('verification_exception');
+    const slowA = deferredRejection();
+    const slowB = deferredRejection();
+    mockExecuteEsqlQuery
+      .mockImplementationOnce(() => slowA.promise)
+      .mockImplementationOnce(() => slowB.promise);
+
+    const { result } = renderBoundsHook(createProps());
+
+    await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2));
+    await act(async () => {
+      slowA.reject(failureA);
+    });
+    expect(mockReportError).not.toHaveBeenCalled();
+    expect(mockTrackEsqlQueryFailure).not.toHaveBeenCalled();
+    expect(result.current.status).toBe('loading');
+
+    await act(async () => {
+      slowB.reject(failureB);
+    });
+
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+
+    expect(mockReportError).toHaveBeenCalledTimes(1);
+    expect(mockReportError).toHaveBeenCalledWith({
+      error: expect.any(AggregateError),
+      source: 'useFetchHistogramBounds',
+      labels: {
+        page: 'metrics_fetch_histogram_bounds',
+        profile_id: 'test-profile-id',
+      },
+    });
+    expect(mockReportError.mock.calls[0][0].labels).not.toHaveProperty('chart_id');
+    expect(mockTrackEsqlQueryFailure).toHaveBeenCalledTimes(1);
+    expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
+      status: 'error',
+      error: failureA,
+    });
+    expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({
+      status: 'error',
+      error: failureB,
+    });
+  });
+
+  it('sends no request when the heatmaps feature flag is off', () => {
+    mockUseFeatureFlag.mockReturnValue(false);
+
+    const { result } = renderBoundsHook(createProps());
+
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    expect(result.current).toEqual({ status: 'idle', bounds: new Map() });
   });
 
   it('sends no request when disabled, and fetches once enabled', async () => {

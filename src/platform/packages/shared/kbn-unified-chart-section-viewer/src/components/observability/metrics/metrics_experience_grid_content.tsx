@@ -21,8 +21,7 @@ import {
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { getEsqlQuery } from './utils/get_esql_query';
-import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS, PAGE_SIZE } from '../../../common/constants';
-import { useFeatureFlag } from '../../../hooks';
+import { PAGE_SIZE } from '../../../common/constants';
 import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
 import { LEGACY_HISTOGRAM_USER_MESSAGES } from '../../../common/utils/user_messages';
 import { MetricsGrid } from './metrics_grid';
@@ -86,13 +85,8 @@ export const MetricsExperienceGridContent = ({
     currentPage,
   }) ?? {};
 
-  const isHeatmapsEnabled = useFeatureFlag(
-    FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
-    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
-  );
-
   useFetchHistogramBounds({
-    enabled: isHeatmapsEnabled && isComponentVisible,
+    enabled: isComponentVisible && !isDiscoverLoading,
     metricItems: currentPageFields,
     fetchParams,
     services,
