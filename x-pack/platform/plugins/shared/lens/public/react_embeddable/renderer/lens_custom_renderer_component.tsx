@@ -88,6 +88,7 @@ export function LensRenderer({
   const hideTitle$ = useObservableVariable(hidePanelTitles);
   const esqlVariables$ = useObservableVariable(props.esqlVariables);
   const isApproximate$ = useObservableVariable(props.isApproximate);
+  const disableTriggers$ = useObservableVariable(props.disableTriggers ?? false);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
@@ -186,6 +187,7 @@ export function LensRenderer({
           disabledActionIds$,
           setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
           viewMode$,
+          disableTriggers$,
           // pass the sync* settings with the unified settings interface
           settings,
           // make sure to provide the initial state (useful for the comparison check)

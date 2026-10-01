@@ -284,7 +284,7 @@ export class MapContainer extends Component<Props, State> {
               showTimesliderButton={this.state.showTimesliderButton}
             />
           )}
-          {isInteractive && <RightSideControls />}
+          <RightSideControls isInteractive={isInteractive} />
           {this.props.isTimesliderOpen && (
             <Timeslider waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$} />
           )}

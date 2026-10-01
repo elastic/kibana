@@ -57,7 +57,7 @@ jest.mock('../connected_components/map_container', () => ({
     return (
       <div>
         MockMapContainer
-        {/* Mirror the real MapContainer: ToolbarOverlay and RightSideControls are hidden when not interactive */}
+        {/* Mirror the real MapContainer: ToolbarOverlay and RightSideControls' interactive controls are hidden when not interactive (AttributionControl still renders) */}
         {Boolean(props.isInteractive) && <div data-test-subj="mapToolbarOverlay">Toolbar</div>}
         {Boolean(props.isInteractive) && <div data-test-subj="mapRightSideControls">Controls</div>}
       </div>
