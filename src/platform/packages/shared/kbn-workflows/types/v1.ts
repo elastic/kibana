@@ -594,10 +594,13 @@ export interface ConnectorInstance {
   isPreconfigured: boolean;
   isDeprecated: boolean;
   config?: ConnectorInstanceConfig;
+  connectorType?: string;
+  isInferenceEndpoint?: boolean;
 }
 
 export interface ConnectorInstanceConfig {
   taskType?: string;
+  selectedActions?: string[];
 }
 
 export interface ConnectorTypeInfo {
@@ -866,6 +869,10 @@ export interface ConnectorIdSelectionHandler {
    * If true, creation from the connector ID selection will be enabled for the first type in the `connectorTypes` list.
    */
   enableCreation?: boolean;
+  /**
+   * Feature ID used to resolve inference endpoints for this selection.
+   */
+  inferenceFeatureId?: string;
 }
 
 export interface ConnectorExamples {

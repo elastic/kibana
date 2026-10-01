@@ -43,6 +43,13 @@ export const hasPriorityExtractionGate = (type: EntityType): boolean =>
   getRegisteredDefinition(type).priorityExtractionGate !== undefined;
 
 /**
+ * Whether this type's non-priority process applies sampling. Requires the priority gate, since
+ * sampling only exists where a non-priority process does.
+ */
+export const supportsNonPrioritySampling = (type: EntityType): boolean =>
+  hasPriorityExtractionGate(type) && getRegisteredDefinition(type).nonPrioritySampling === true;
+
+/**
  * 'nonPriority' is excluded: the non-priority task hardcodes its own mode directly.
  *
  * Enabling the flag for a type sends it down the priority mode, which scans only the documents its

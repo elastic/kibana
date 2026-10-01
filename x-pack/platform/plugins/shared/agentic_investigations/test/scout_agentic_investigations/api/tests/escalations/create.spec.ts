@@ -26,6 +26,7 @@ apiTest.describe(
     let cookieHeader: Record<string, string>;
     let viewerCookieHeader: Record<string, string>;
     let investigationId: string;
+    let adminProfileUid: string;
     // Tracks all conversations created during the suite so afterAll can clean them up.
     const createdIds: string[] = [];
 
@@ -35,7 +36,8 @@ apiTest.describe(
 
       // Create a real investigation conversation through the Agent Builder API so the
       // .chat-conversations index is managed by Kibana (direct esClient writes are
-      // rejected on restricted indices).
+      // rejected on restricted indices). The response also carries user.id — the admin's
+      // profile uid used as the default assignee in subsequent escalation create calls.
       const result = await apiClient.post(AB_CONVERSATIONS_PATH, {
         headers: { ...PUBLIC_HEADERS, ...cookieHeader },
         body: {
@@ -53,6 +55,10 @@ apiTest.describe(
         responseType: 'json',
       });
       investigationId = expectCreated(result, 'investigation');
+      adminProfileUid = result.body.user?.id as string;
+      if (!adminProfileUid) {
+        throw new Error('admin profile uid not found in investigation creation response');
+      }
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
@@ -65,6 +71,7 @@ apiTest.describe(
         body: {
           linked_investigation_id: investigationId,
           visibility: 'public',
+          assignees: [adminProfileUid],
         },
         responseType: 'json',
       });
@@ -72,6 +79,8 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
       expect(response.body.template_id).toBe(ESCALATION_TEMPLATE_ID);
       expect(response.body.title).toBe('Scout test investigation');
+      // Verify the assignee was stored — a handler that silently drops the field would still return 200.
+      expect(response.body.metadata?.assignees).toStrictEqual([adminProfileUid]);
       if (response.body.id) createdIds.push(response.body.id);
     });
 
@@ -83,6 +92,7 @@ apiTest.describe(
           body: {
             linked_investigation_id: investigationId,
             visibility: 'public',
+            assignees: [adminProfileUid],
           },
           responseType: 'json',
         });
@@ -103,6 +113,7 @@ apiTest.describe(
           body: {
             linked_investigation_id: investigationId,
             visibility: 'public',
+            assignees: [adminProfileUid],
           },
           responseType: 'json',
         });
@@ -121,6 +132,7 @@ apiTest.describe(
           body: {
             linked_investigation_id: investigationId,
             visibility: 'public',
+            assignees: [adminProfileUid],
           },
           responseType: 'json',
         });
@@ -141,6 +153,7 @@ apiTest.describe(
           body: {
             linked_investigation_id: investigationId,
             visibility: 'public',
+            assignees: [adminProfileUid],
           },
           responseType: 'json',
         });
@@ -157,6 +170,7 @@ apiTest.describe(
         body: {
           linked_investigation_id: investigationId,
           visibility: 'public',
+          assignees: [adminProfileUid],
         },
         responseType: 'json',
       });
@@ -166,13 +180,13 @@ apiTest.describe(
       if (response.body.id) createdIds.push(response.body.id);
     });
 
-    apiTest('returns 400 when public + collaborators is provided', async ({ apiClient }) => {
+    apiTest('returns 400 when assignees is empty', async ({ apiClient }) => {
       const response = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: {
           linked_investigation_id: investigationId,
           visibility: 'public',
-          collaborators: ['u_someone'],
+          assignees: [],
         },
         responseType: 'json',
       });
@@ -180,13 +194,12 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest('returns 400 when private + no collaborators', async ({ apiClient }) => {
+    apiTest('returns 400 when assignees is missing', async ({ apiClient }) => {
       const response = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: {
           linked_investigation_id: investigationId,
-          visibility: 'private',
-          collaborators: [],
+          visibility: 'public',
         },
         responseType: 'json',
       });
@@ -218,6 +231,7 @@ apiTest.describe(
           body: {
             linked_investigation_id: wrongId,
             visibility: 'public',
+            assignees: [adminProfileUid],
           },
           responseType: 'json',
         });
@@ -234,6 +248,7 @@ apiTest.describe(
           body: {
             linked_investigation_id: investigationId,
             visibility: 'public',
+            assignees: [adminProfileUid],
           },
           responseType: 'json',
         });
@@ -249,6 +264,7 @@ apiTest.describe(
         body: {
           linked_investigation_id: 'nonexistent-id-00000000',
           visibility: 'public',
+          assignees: [adminProfileUid],
         },
         responseType: 'json',
       });

@@ -9,15 +9,22 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import { VIEWS_BULK_DELETE_ROUTE, VIEWS_ROUTE } from '@kbn/esql-types';
-import { createEsqlViewsManagementClient, EsqlViewsClientError } from './esql_views_client';
+import {
+  createEsqlViewsManagementClient,
+  ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
+  EsqlViewsClientError,
+} from './esql_views_client';
 
-const createHttpError = (status: number, message: string) => {
+const createHttpError = (status: number, message: string, errorType?: string) => {
   const error = new Error(message);
   Object.assign(error, {
     name: 'HttpFetchError',
     request: {},
     response: { status },
-    body: { message },
+    body: {
+      message,
+      ...(errorType === undefined ? {} : { attributes: { errorType } }),
+    },
   });
   return error;
 };
@@ -103,8 +110,32 @@ describe('createEsqlViewsManagementClient', () => {
     ).rejects.toMatchObject({
       name: 'EsqlViewsClientError',
       statusCode: 409,
+      errorType: ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
     });
     expect(put).not.toHaveBeenCalled();
+  });
+
+  it('preserves the structured Elasticsearch error type and exact message', async () => {
+    const { http, get, put } = createHttpMock();
+    get.mockRejectedValue(createHttpError(404, 'Not found'));
+    put.mockRejectedValue(
+      createHttpError(
+        400,
+        'an index or data stream exists with the same name',
+        'resource_already_exists_exception'
+      )
+    );
+
+    await expect(
+      createEsqlViewsManagementClient(http).createView({
+        name: 'my-view',
+        query: 'FROM logs-*',
+      })
+    ).rejects.toMatchObject({
+      message: 'an index or data stream exists with the same name',
+      statusCode: 400,
+      errorType: 'resource_already_exists_exception',
+    });
   });
 
   it('preserves a non-404 preflight error', async () => {
