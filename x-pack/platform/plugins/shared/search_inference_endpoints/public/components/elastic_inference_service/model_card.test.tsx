@@ -106,7 +106,7 @@ describe('ModelCard', () => {
       jest.useRealTimers();
     });
 
-    it('shows the release date when the model is not nearing or past end of life', async () => {
+    it('does not show a date when the model is not nearing or past end of life', () => {
       const model: GroupedModel = {
         ...baseModel,
         modelMetadata: {
@@ -116,36 +116,10 @@ describe('ModelCard', () => {
           },
         },
       };
-      const { getByTestId, queryByTestId } = render(
-        <ModelCard model={model} onClick={jest.fn()} />
-      );
-      const row = getByTestId('eisModelCardMeta-my-model');
-      expect(row).toHaveTextContent('2025-01-10');
-      expect(row).not.toHaveTextContent('2026-06-01');
-      expect(getByTestId('eisModelCardMetaIcon-my-model')).toHaveAttribute(
-        'data-euiicon-type',
-        'calendar'
-      );
-      fireEvent.mouseOver(getByTestId('eisModelCardMetaDate-my-model'));
-      await waitFor(() => {
-        expect(getByTestId('eisModelCardReleaseDateTooltip-my-model')).toHaveTextContent(
-          'Release date: 2025-01-10'
-        );
-      });
-      expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
-    });
-
-    it('does not show a release date when the model has no release date', () => {
-      const model: GroupedModel = {
-        ...baseModel,
-        modelMetadata: {
-          heuristics: {
-            end_of_life_date: '2026-06-01',
-          },
-        },
-      };
       const { queryByTestId } = render(<ModelCard model={model} onClick={jest.fn()} />);
       expect(queryByTestId('eisModelCardMeta-my-model')).not.toBeInTheDocument();
+      expect(queryByTestId('eisModelCardReleaseDateTooltip-my-model')).not.toBeInTheDocument();
+      expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
     });
 
     it('shows nearing end-of-life for a deprecated model', async () => {

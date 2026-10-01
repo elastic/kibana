@@ -24,7 +24,6 @@ import type { GroupedModel } from '../../utils/eis_utils';
 import {
   getModelDeprecatedMessage,
   getModelEOLDate,
-  getModelReleaseDate,
   getProviderKeyForCreator,
   isModelEndOfLifeReached,
   isModelNearingEndOfLife,
@@ -56,11 +55,8 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
   const providerKey = getProviderKeyForCreator(modelCreator);
   const provider = providerKey ? SERVICE_PROVIDERS[providerKey] : undefined;
   const endOfLifeDate = getModelEOLDate(model.modelMetadata)?.format('YYYY-MM-DD');
-  const releaseDate = getModelReleaseDate(model.modelMetadata)?.format('YYYY-MM-DD');
   const endOfLifeReached = isModelEndOfLifeReached(model.modelMetadata);
   const nearingEndOfLife = isModelNearingEndOfLife(model.modelMetadata);
-  const beforeEndOfLifeWarning = !endOfLifeReached && !nearingEndOfLife;
-  const showReleaseDate = releaseDate !== undefined && beforeEndOfLifeWarning;
 
   return (
     <EuiCard
@@ -166,23 +162,6 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
               )}
               tooltip={getModelDeprecatedMessage(endOfLifeDate)}
               tooltipTestSubj={`eisModelCardNearingEndOfLifeTooltip-${modelName}`}
-            />
-          </EuiFlexItem>
-        )}
-        {showReleaseDate && releaseDate && (
-          <EuiFlexItem grow={false}>
-            <ModelCardMetaRow
-              modelName={modelName}
-              iconType="calendar"
-              message={releaseDate}
-              tooltip={i18n.translate(
-                'xpack.searchInferenceEndpoints.eisModelCard.releaseDateTooltip',
-                {
-                  defaultMessage: 'Release date: {date}',
-                  values: { date: releaseDate },
-                }
-              )}
-              tooltipTestSubj={`eisModelCardReleaseDateTooltip-${modelName}`}
             />
           </EuiFlexItem>
         )}
