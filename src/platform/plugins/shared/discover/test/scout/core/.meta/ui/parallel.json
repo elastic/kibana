@@ -1,5 +1,5 @@
 {
-  "sha1": "630c2fcab8765a26ff9d3ba001e9af55a6b2f169",
+  "sha1": "4fdd2308df5d9d9a80d5e9c926a186474caa2c22",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1207,6 +1207,159 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/saved_searches.spec.ts",
         "line": 75,
         "column": 9
+      }
+    },
+    {
+      "id": "1fdc29104a88cee-486ca7221335a36",
+      "title": "Discover app - search source alert data view should not overwrite current data view with alert data view when starting or saving a Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_data_view.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "1fdc29104a88cee-d156a9404608439",
+      "title": "Discover app - search source alert data view should preserve snapshot data view state while View in Discover uses current state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_data_view.spec.ts",
+        "line": 77,
+        "column": 26
+      }
+    },
+    {
+      "id": "1fdc29104a88cee-664fc133c5e1bbd",
+      "title": "Discover app - search source alert data view should navigate to ad-hoc alert results via snapshot and current links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_data_view.spec.ts",
+        "line": 158,
+        "column": 27
+      }
+    },
+    {
+      "id": "1fdc29104a88cee-173c1aa8adc8bfb",
+      "title": "Discover app - search source alert data view should preserve snapshot results but reject current results after data view removal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_data_view.spec.ts",
+        "line": 203,
+        "column": 56
+      }
+    },
+    {
+      "id": "2053671c9e50145-1b6525042764f02",
+      "title": "Discover app - search source alert privileges allows a Discover alert user to view a rule's results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_privileges.spec.ts",
+        "line": 57,
+        "column": 56
+      }
+    },
+    {
+      "id": "96f8a9ef7d9f67d-87576156180cd96",
+      "title": "Discover app - search source alert rule should validate the time field and create an alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_rule.spec.ts",
+        "line": 47,
+        "column": 56
+      }
+    },
+    {
+      "id": "96f8a9ef7d9f67d-d05d147bd8378c8",
+      "title": "Discover app - search source alert rule should preserve snapshot rule state while View in Discover uses updated params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_rule.spec.ts",
+        "line": 79,
+        "column": 24
+      }
+    },
+    {
+      "id": "96f8a9ef7d9f67d-6340e52d4c341f9",
+      "title": "Discover app - search source alert rule should display results after rule removal on following generated link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_source_alert_rule.spec.ts",
+        "line": 117,
+        "column": 88
       }
     },
     {
