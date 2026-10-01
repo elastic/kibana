@@ -30,6 +30,7 @@ import { ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID } from './detectio
 import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_rule_tuning';
 import { ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID } from './find_or_create_investigation';
 import { ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID } from './floor_alert_triage';
+import { ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID } from './floor_alert_triage_review';
 import { ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID } from './floor_attack_discovery';
 import { ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_endpoint_analysis';
 import { ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_run_endpoint_analysis';
@@ -147,6 +148,10 @@ export {
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
 } from './floor_alert_triage';
 export {
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
+} from './floor_alert_triage_review';
+export {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
 } from './floor_attack_discovery';
@@ -199,6 +204,14 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS = [
  */
 export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
+] as const;
+
+/**
+ * The closure review the per-space Alert Triage worker starts for each batch. Installed globally
+ * so every space's worker shares one copy; it inherits the starting worker's space at run time.
+ */
+export const ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS = [
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
 ] as const;
 
 /**
