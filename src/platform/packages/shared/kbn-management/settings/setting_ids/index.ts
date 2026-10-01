@@ -143,6 +143,7 @@ export const OBSERVABILITY_APM_DEFAULT_SERVICE_ENVIRONMENT_ID =
 export const OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID = 'observability:apmProgressiveLoading';
 export const OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVICE_ID =
   'observability:apmServiceGroupMaxNumberOfServices';
+export const OBSERVABILITY_APM_MAX_NUMBER_OF_SERVICES_ID = 'observability:apmMaxNumberOfServices';
 export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
 export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID =
@@ -175,10 +176,6 @@ export const OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS =
   'observability:streamsEnableWiredStreamViews';
 export const OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS = 'observability:streamsEnableDraftStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CANVAS = 'observability:streamsEnableCanvas';
-export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED =
-  'observability:streamsContinuousKiExtractionEnabled';
-export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS =
-  'observability:streamsContinuousKiExtractionIntervalHours';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS =
   'observability:streamsSigEventsIndexPatterns';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG =
@@ -206,6 +203,10 @@ export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE =
   'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore';
 export const OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE = 'observability:nightshiftDeveloperMode';
+export const OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED =
+  'observability:nightshiftContinuousOnboardingEnabled';
+export const OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS =
+  'observability:nightshiftContinuousOnboardingIntervalHours';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings

@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
+  BaseConnectorStepSchema,
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
   DataSetStepSchema,
@@ -1268,6 +1269,41 @@ describe('`if` condition on step schemas', () => {
   });
 });
 
+describe('`on-failure` on step schemas', () => {
+  const onFailure = {
+    retry: { 'max-attempts': 2, delay: '1s' },
+    continue: true,
+    fallback: [{ name: 'handle', type: 'console' }],
+  };
+  const cases = [
+    {
+      name: 'waitForInput',
+      schema: WaitForInputStepSchema,
+      step: { name: 's', type: 'waitForInput', with: { message: 'input?' } },
+    },
+    {
+      name: 'waitForApproval',
+      schema: WaitForApprovalStepSchema,
+      step: { name: 's', type: 'waitForApproval', with: { message: 'approve?' } },
+    },
+    {
+      name: 'workflow.execute',
+      schema: WorkflowExecuteStepSchema,
+      step: { name: 's', type: 'workflow.execute', with: { 'workflow-id': 'child' } },
+    },
+    {
+      name: 'workflow.executeAsync',
+      schema: WorkflowExecuteAsyncStepSchema,
+      step: { name: 's', type: 'workflow.executeAsync', with: { 'workflow-id': 'child' } },
+    },
+  ];
+
+  it.each(cases)('keeps `on-failure` on the $name step', ({ schema, step }) => {
+    expect(getShape(schema)).toHaveProperty('on-failure');
+    expect(schema.parse({ ...step, 'on-failure': onFailure })['on-failure']).toEqual(onFailure);
+  });
+});
+
 describe('DurationSchema', () => {
   it.each(['1ms', '30s', '5m', '2h', '1d', '1w', '1h30m', '1w2d3h4m5s6ms', '1h500ms'])(
     'accepts %s',
@@ -1328,10 +1364,33 @@ describe('dynamic timeout schema', () => {
     expect(WaitForInputStepSchema.safeParse({ ...input, timeout: overLimit }).success).toBe(false);
   });
 
-  it('does not accept templates on connector TimeoutPropSchema', () => {
+  it('accepts a duration or a Liquid template as a connector/action step timeout', () => {
+    const step = { name: 's', type: 'slack' };
+    expect(BaseConnectorStepSchema.safeParse({ ...step, timeout: '5m' }).success).toBe(true);
+    expect(BaseConnectorStepSchema.safeParse({ ...step, timeout: templated }).success).toBe(true);
+    expect(BaseConnectorStepSchema.safeParse({ ...step, timeout: 'soon' }).success).toBe(false);
+  });
+
+  it('does not accept templates on flow-control TimeoutPropSchema', () => {
     expect(TimeoutPropSchema.safeParse({ timeout: templated }).success).toBe(false);
     expect(TimeoutPropSchema.safeParse({ timeout: '5m' }).success).toBe(true);
     expect(TimeoutPropSchema.safeParse({ timeout: '1h30m' }).success).toBe(true);
+  });
+
+  it('accepts a duration or a Liquid template on the wait step duration', () => {
+    const wait = { name: 's', type: 'wait' as const };
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: '5s' } }).success).toBe(true);
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: '1h30m' } }).success).toBe(true);
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: templated } }).success).toBe(true);
+  });
+
+  it('rejects a non-duration, non-template wait step duration', () => {
+    const wait = { name: 's', type: 'wait' as const };
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: 'soon' } }).success).toBe(false);
+    expect(WaitStepSchema.safeParse({ ...wait, with: { duration: '{{ open' } }).success).toBe(
+      false
+    );
+    expect(WaitStepSchema.safeParse({ ...wait, with: {} }).success).toBe(false);
   });
 
   it('emits duration and Liquid patterns in JSON Schema for Monaco', () => {

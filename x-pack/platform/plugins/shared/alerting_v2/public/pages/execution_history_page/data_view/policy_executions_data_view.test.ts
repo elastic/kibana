@@ -19,11 +19,12 @@ const buildItem = (
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
   total_rule_count: 1,
-  outcome: 'dispatched',
+  outcome: 'success',
   episode_count: 3,
   episodes: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
+  error: null,
   ...overrides,
 });
 
@@ -45,7 +46,7 @@ describe('policyExecutionToDataTableRecord', () => {
   it('flattens the structured columns and the renderer-only extras', () => {
     const item = buildItem({
       failure_reason: 'workflow_not_found',
-      error: { message: 'Workflow not found' },
+      error: { message: 'Workflow not found', stack_trace: null },
     });
     const record = policyExecutionToDataTableRecord(item, 0);
 

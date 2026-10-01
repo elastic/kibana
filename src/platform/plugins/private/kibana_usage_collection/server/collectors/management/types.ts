@@ -179,6 +179,7 @@ export interface UsageStats {
   'observability:enableLegacyUptimeApp': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
+  'observability:apmMaxNumberOfServices': number;
   'observability:profilingShowErrorFrames': boolean;
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
@@ -212,6 +213,8 @@ export interface UsageStats {
   'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsEnableCanvas': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
+  'observability:nightshiftContinuousOnboardingEnabled': boolean;
+  'observability:nightshiftContinuousOnboardingIntervalHours': number;
   'observability:streamsSigEventsScheduledDiscoveryEnabled': boolean;
   'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': number;
   'observability:streamsSigEventsScheduledDiscoveryDetectionBucketIntervalMinutes': number;

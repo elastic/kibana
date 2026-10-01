@@ -22,7 +22,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
-import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
+import { pagePathGetters, useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import type { EsAssetReference, KibanaAssetReference } from '@kbn/fleet-plugin/common';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import {
@@ -46,7 +46,7 @@ interface DetectAndReviewStepProps {
 }
 
 export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepProps) {
-  useKibana<CoreStart & { cloud?: CloudStart }>();
+  const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
 
   const { servicesStep, awsServicesMap, deploymentMethod } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
@@ -80,6 +80,12 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
 
   // Resolve the href to [Metrics AWS] Overview for the "Take me to my data" button.
   const overviewHref = useAwsOverviewDashboardUrl(installationInfo);
+
+  // Versionless pkgkey: Fleet's detail page resolves it to the installed version.
+  const [policiesAppPath, policiesDetailPath] = pagePathGetters.integration_details_policies({
+    pkgkey: 'aws',
+  });
+  const policiesHref = services.http.basePath.prepend(`${policiesAppPath}${policiesDetailPath}`);
 
   const hasDeployedServices = selectedServiceIds.length > 0;
 
@@ -150,19 +156,35 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="sortRight"
-            iconSide="right"
-            href={overviewHref}
-            onClick={onContinue}
-            data-test-subj="detectAndReviewStep-continueButton"
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.detectAndReviewStep.continueButton"
-              defaultMessage="Take me to my data"
-            />
-          </EuiButton>
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={policiesHref}
+                onClick={onContinue}
+                data-test-subj="detectAndReviewStep-finishButton"
+              >
+                <FormattedMessage
+                  id="xpack.ingestHub.detectAndReviewStep.finishButton"
+                  defaultMessage="Finish"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                iconType="sortRight"
+                iconSide="right"
+                href={overviewHref}
+                onClick={onContinue}
+                data-test-subj="detectAndReviewStep-continueButton"
+              >
+                <FormattedMessage
+                  id="xpack.ingestHub.detectAndReviewStep.continueButton"
+                  defaultMessage="Take me to my data"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

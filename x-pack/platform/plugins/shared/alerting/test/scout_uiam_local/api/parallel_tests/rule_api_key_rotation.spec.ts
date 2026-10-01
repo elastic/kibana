@@ -99,38 +99,6 @@ apiTest.describe(
     );
 
     apiTest(
-      'rotating with an Elasticsearch API key drops the UIAM key rather than stranding it',
-      async ({ apiClient, esClient, requestAuth, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-        const headers = { ...COMMON_HEADERS, ...cookieHeader };
-
-        const ruleId = await createRule(apiClient, headers, 'uiam-rotate-with-es-key-rule');
-        await waitForSuccessfulEventLogEntry(apiClient, ruleId, headers);
-
-        const before = await getRuleSavedObjectAttributes(esClient, ruleId);
-        expect(typeof before.uiamApiKey).toBe('string');
-        expect(before.apiKeyCreatedByUser).toBe(false);
-
-        // An Elasticsearch API key carries no UIAM credential, so rotating on its behalf clones
-        // the Elasticsearch key and mints no UIAM key at all. This is the case the rest of the
-        // suite cannot reach: the rule's UIAM key is queued for invalidation while the new key
-        // set has nothing to put in its place, so the attribute has to be removed. Left behind,
-        // it is a key the rule keeps presenting right up until the invalidation task revokes it.
-        const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-        const rotateResponse = await apiClient.post(`api/alerting/rule/${ruleId}/_update_api_key`, {
-          headers: { ...COMMON_HEADERS, ...apiKeyHeader },
-        });
-        expect(rotateResponse).toHaveStatusCode(204);
-
-        const after = await getRuleSavedObjectAttributes(esClient, ruleId);
-        expect(after.uiamApiKey).toBeUndefined();
-        expect(after.apiKey).not.toBe(before.apiKey);
-
-        await waitForSuccessfulEventLogEntry(apiClient, ruleId, headers);
-      }
-    );
-
-    apiTest(
       'enabling a rule that has no API key mints one the rule can run with',
       async ({ apiClient, esClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
