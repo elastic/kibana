@@ -39,8 +39,9 @@ jest.mock('./use_create_rule', () => ({
 jest.mock('./use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateMutate, isLoading: false }),
 }));
-jest.mock('./use_is_action_policies_license_valid', () => ({
-  useIsActionPoliciesLicenseValid: () => true,
+let mockCreateActionPolicyDisabledReason: string | undefined;
+jest.mock('./use_create_action_policy_disabled_reason', () => ({
+  useCreateActionPolicyDisabledReason: () => mockCreateActionPolicyDisabledReason,
 }));
 
 const mockNavigateToUrl = jest.fn();
@@ -121,6 +122,10 @@ const callOnUpdateRule = () => {
   });
 };
 
+beforeEach(() => {
+  mockCreateActionPolicyDisabledReason = undefined;
+});
+
 describe('useComposeDiscoverFlyout — create submission wiring', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -147,6 +152,26 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
       expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('useComposeDiscoverFlyout — action policy creation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+  });
+
+  it('passes why action policy creation is disabled to the rule form services', async () => {
+    const disabledReason = 'Action policy creation is disabled';
+    mockCreateActionPolicyDisabledReason = disabledReason;
+
+    await renderAndOpenCreate();
+
+    expect(capturedFlyoutProps.services).toHaveProperty(
+      'createActionPolicyDisabledReason',
+      disabledReason
+    );
   });
 });
 
