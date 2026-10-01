@@ -21,10 +21,6 @@ export const MARKDOWN_BLOCK_SPACER_CLASS_NAME = 'agentBuilderMarkdownBlockSpacer
 
 const BlockSpacer = () => <EuiSpacer size="m" className={MARKDOWN_BLOCK_SPACER_CLASS_NAME} />;
 
-interface CodeNodeProps {
-  value: string;
-}
-
 interface CreateConversationMarkdownComponentsArgs {
   onLinkClick: (href: string, e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
@@ -47,13 +43,13 @@ export const createConversationMarkdownComponents = ({
       {children}
     </EuiLink>
   ),
-  codeBlock: ({ value }: CodeNodeProps) => (
+  codeBlock: ({ value }: { value: string }) => (
     <>
       <EuiCodeBlock>{value}</EuiCodeBlock>
       <BlockSpacer />
     </>
   ),
-  esql: ({ value }: CodeNodeProps) => (
+  esql: ({ value }: { value: string }) => (
     <>
       <EuiCodeBlock language="esql" isCopyable>
         {value}
