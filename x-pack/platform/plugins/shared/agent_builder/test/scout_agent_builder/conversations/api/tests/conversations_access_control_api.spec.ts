@@ -13,6 +13,7 @@ import {
   ConversationAccessControlRole,
   type Conversation,
   type ConversationWithoutRounds,
+  type VersionedAttachment,
 } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -573,34 +574,6 @@ apiTest.describe(
         );
 
         await apiTest.step(
-          'Bob can create, update and delete attachments on a public conversation',
-          async () => {
-            const createResponse = await createAttachmentAs(
-              apiClient,
-              bob,
-              publicConversation.conversation_id
-            );
-            expect(createResponse).toHaveStatusCode(200);
-
-            const { attachment } = createResponse.body as { attachment: { id: string } };
-            const url = attachmentUrl(publicConversation.conversation_id, attachment.id);
-
-            const updateResponse = await apiClient.put(url, {
-              headers: headersFor(bob),
-              body: { data: { content: 'Bob updated content' } },
-              responseType: 'json',
-            });
-            expect(updateResponse).toHaveStatusCode(200);
-
-            const deleteResponse = await apiClient.delete(url, {
-              headers: headersFor(bob),
-              responseType: 'json',
-            });
-            expect(deleteResponse).toHaveStatusCode(200);
-          }
-        );
-
-        await apiTest.step(
           'conversation rounds are attributed to the Kibana user who sent them',
           async () => {
             expect(publicConversation.author?.username).toBe(alice.username);
@@ -855,18 +828,6 @@ apiTest.describe(
         });
 
         await apiTest.step(
-          'Bob cannot add attachments to Alice private conversations',
-          async () => {
-            const createResponse = await createAttachmentAs(
-              apiClient,
-              bob,
-              privateConversation.conversation_id
-            );
-            expect(createResponse).toHaveStatusCode(404);
-          }
-        );
-
-        await apiTest.step(
           'Bob cannot continue or mark read Alice private conversations',
           async () => {
             const continuePrivateResponse = await apiClient.post(
@@ -911,13 +872,6 @@ apiTest.describe(
               { headers: headersFor(bob), responseType: 'json' }
             );
             expect(getPublicResponse).toHaveStatusCode(404);
-
-            const createAttachmentResponse = await createAttachmentAs(
-              apiClient,
-              bob,
-              publicConversation.conversation_id
-            );
-            expect(createAttachmentResponse).toHaveStatusCode(404);
 
             const getOwnPublicResponse = await apiClient.get(
               `${accessControlApiBase}/conversations/${encodeURIComponent(
@@ -1241,6 +1195,121 @@ apiTest.describe(
     );
 
     // ── cluster admin management ────────────────────────────────────────────
+
+    apiTest(
+      'non-owners can manage attachments on public conversations, but not private ones',
+      async ({ apiClient }) => {
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-attachments-agent-${testRunId.slice(0, 8)}`;
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Shared));
+
+        const publicConversation = await createConversationAs({
+          apiClient,
+          user: alice,
+          agentId,
+          input: 'Public attachments access test',
+          title: 'Public Attachments Access Test',
+          accessMode: ConversationAccessControlMode.Public,
+        });
+
+        const privateConversation = await createConversationAs({
+          apiClient,
+          user: alice,
+          agentId,
+          input: 'Private attachments access test',
+          title: 'Private Attachments Access Test',
+        });
+
+        const conversationId = publicConversation.conversation_id;
+        let attachmentId = '';
+
+        const getAttachment = async (): Promise<VersionedAttachment> => {
+          const response = await apiClient.get(attachmentUrl(conversationId, attachmentId), {
+            headers: headersFor(bob),
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+          return (response.body as { attachment: VersionedAttachment }).attachment;
+        };
+
+        const currentContent = (attachment: VersionedAttachment) =>
+          attachment.versions.find(({ version }) => version === attachment.current_version)?.data;
+
+        await apiTest.step('Bob creates an attachment', async () => {
+          const response = await createAttachmentAs(apiClient, bob, conversationId);
+          expect(response).toHaveStatusCode(200);
+
+          const { attachment } = response.body as { attachment: VersionedAttachment };
+          attachmentId = attachment.id;
+
+          const stored = await getAttachment();
+          expect(stored.current_version).toBe(1);
+          expect(currentContent(stored)).toStrictEqual({ content: 'Attachment access test' });
+        });
+
+        await apiTest.step('Bob updates the attachment content', async () => {
+          const response = await apiClient.put(attachmentUrl(conversationId, attachmentId), {
+            headers: headersFor(bob),
+            body: { data: { content: 'Bob updated content' } },
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+          expect(response.body).toMatchObject({ new_version: 2 });
+
+          const stored = await getAttachment();
+          expect(stored.current_version).toBe(2);
+          expect(currentContent(stored)).toStrictEqual({ content: 'Bob updated content' });
+        });
+
+        await apiTest.step('Bob deletes and restores the attachment', async () => {
+          const deleteResponse = await apiClient.delete(
+            attachmentUrl(conversationId, attachmentId),
+            { headers: headersFor(bob), responseType: 'json' }
+          );
+          expect(deleteResponse).toHaveStatusCode(200);
+          expect(deleteResponse.body).toStrictEqual({ success: true, permanent: false });
+          expect((await getAttachment()).active).toBe(false);
+
+          const restoreResponse = await apiClient.post(
+            `${attachmentUrl(conversationId, attachmentId)}/_restore`,
+            { headers: headersFor(bob), responseType: 'json' }
+          );
+          expect(restoreResponse).toHaveStatusCode(200);
+          expect((await getAttachment()).active).not.toBe(false);
+        });
+
+        await apiTest.step('Bob renames the attachment', async () => {
+          const response = await apiClient.patch(attachmentUrl(conversationId, attachmentId), {
+            headers: headersFor(bob),
+            body: { description: 'Renamed by Bob' },
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+
+          const stored = await getAttachment();
+          expect(stored.description).toBe('Renamed by Bob');
+          expect(stored.current_version).toBe(2);
+        });
+
+        await apiTest.step('Bob cannot add attachments to a private conversation', async () => {
+          const response = await createAttachmentAs(
+            apiClient,
+            bob,
+            privateConversation.conversation_id
+          );
+          expect(response).toHaveStatusCode(404);
+        });
+
+        await apiTest.step(
+          'Bob cannot add attachments once the agent becomes private',
+          async () => {
+            await setAgentAccessModeAs(apiClient, alice, agentId, AgentAccessControlMode.Private);
+
+            const response = await createAttachmentAs(apiClient, bob, conversationId);
+            expect(response).toHaveStatusCode(404);
+          }
+        );
+      }
+    );
 
     apiTest(
       'cluster admin can rename and delete a public conversation they do not own',
