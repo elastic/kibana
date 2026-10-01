@@ -8,18 +8,31 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
 import { InvestigationList } from './investigation_list';
 
-const investigation: ListInvestigationItem = {
-  investigation_id: 'investigation-1',
+jest.mock('../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      agenticInvestigations: {
+        InvestigationCard: ({ investigation: item }: { investigation: InvestigationSummary }) => (
+          <div data-test-subj="investigationCard">{item.title}</div>
+        ),
+      },
+    },
+  }),
+}));
+
+const investigation: InvestigationSummary = {
+  id: 'investigation-1',
   title: 'Checkout errors',
-  status: 'completed',
   created_at: '2026-09-11T09:00:00.000Z',
-  subject: { type: 'significant_event', id: 'event-1', summary: 'Investigate checkout errors' },
-  summary: 'Checkout errors are elevated',
-  severity: '80-critical',
+  updated_at: '2026-09-11T09:00:00.000Z',
+  agent_id: 'nightshift.investigation',
+  metadata: { status: 'open', severity: 'critical', summary: 'Checkout errors are elevated' },
+  in_progress: false,
+  subjects: [],
 };
 
 const makeSection = (
@@ -94,14 +107,20 @@ describe('InvestigationList', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('renders in progress first and failed last', () => {
+  it('renders in progress first and not rated last', () => {
     renderSections([
       makeSection('in-progress', { investigations: [investigation], total: 1 }),
       makeSection('80-critical', { investigations: [investigation], total: 1 }),
-      makeSection('failed', { investigations: [investigation], total: 1 }),
+      makeSection('not-rated', { investigations: [investigation], total: 1 }),
     ]);
 
     const titles = screen.getAllByRole('heading').map((heading) => heading.textContent);
-    expect(titles).toEqual(['In progress', 'Critical', 'Failed & cancelled']);
+    expect(titles).toEqual(['In progress', 'Critical', 'Not rated']);
+  });
+
+  it('renders each investigation as the shared investigation card', () => {
+    renderSections([makeSection('80-critical', { investigations: [investigation], total: 1 })]);
+
+    expect(screen.getByTestId('investigationCard')).toHaveTextContent('Checkout errors');
   });
 });

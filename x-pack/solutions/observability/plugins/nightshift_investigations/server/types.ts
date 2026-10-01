@@ -49,7 +49,10 @@ export interface NightshiftInvestigationsServerSetup {
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
   isInvestigationAvailable: (request: KibanaRequest) => Promise<boolean>;
-  /** Deletes investigations in every space; callers must authorize this destructive operation. */
+  /**
+   * Deletes investigations in every space (saved objects and the shared investigation data, not
+   * the Agent Builder conversations); callers must authorize this destructive operation.
+   */
   deleteAllInvestigations: () => Promise<DeleteAllInvestigationsResult>;
 }
 
