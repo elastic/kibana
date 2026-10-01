@@ -622,18 +622,27 @@ describe('aiIndexAutomationsSkill', () => {
         /\*\*Pilot a document or unit-profile install before its full run\.\*\*/
       );
       expect(prose).toMatch(/`run_automation` with `pilotSize: 3`/);
-      expect(prose).toMatch(/returns `status` and `durationMs`/);
+      expect(prose).toMatch(/`run_automation` with `pilotSize: 3` first/);
     });
 
     it('projects the full run from the pilot, states it, then starts the full run', () => {
       expect(prose).toMatch(
-        /project the full run from `durationMs` and the pilot size as the time estimate above lays out/
+        /project the full run from `durationMs` and `kisWritten` as the time estimate above lays out/
       );
       expect(prose).toMatch(/Then call `run_automation` again without `pilotSize`/);
       expect(prose).toMatch(/The full run replaces the pilot's indicators/);
       expect(prose).toMatch(
         /If the user declines it, the pilot's indicators stay in the index: say so/
       );
+    });
+
+    it('projects only from a pilot whose every item wrote a KI, and reports a partial one', () => {
+      expect(prose).toMatch(/returns `status`, `durationMs` and `kisWritten`/);
+      expect(prose).toMatch(/Project only when `kisWritten` equals the pilot size/);
+      expect(prose).toMatch(
+        /When it is lower, say how many of the pilot's items wrote a KI and stop/
+      );
+      expect(prose).not.toMatch(/the pilot wrote three units;/);
     });
 
     it('puts the over-an-hour warning and the cheaper option before the full-run dialog', () => {

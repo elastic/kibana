@@ -717,9 +717,11 @@ call returns. Tell the user it has started and that they can ask for a progress 
 anything, so nothing has measured the automation, and the full-run dialog needs a time estimate.
 Call `run_automation` with `pilotSize: 3` first. It runs the automation over the first three
 documents, or the three most active units, of the same discovery the full run uses, waits for it,
-and returns `status` and `durationMs`. Then project the full run from `durationMs` and the pilot size
-as the time estimate above lays out — the pilot wrote three units; the full run writes the unit
-count or the automation's `maxUnits` or `maxDocuments`, whichever is lower — and state it. When it
+and returns `status`, `durationMs` and `kisWritten`. Project only when `kisWritten` equals the pilot
+size. When it is lower, say how many of the pilot's items wrote a KI and stop: the others failed or
+did not pass verification, and the full run would lose the same share. Then project the full run
+from `durationMs` and `kisWritten` as the time estimate above lays out — the full run writes the
+unit count or the automation's `maxUnits` or `maxDocuments`, whichever is lower — and state it. When it
 exceeds an hour, give the 🚨 warning and the cheaper option you would take in the same message. Then
 call `run_automation` again without `pilotSize`; its dialog asks for the full run. The full run
 replaces the pilot's indicators, since they share ids. If the user declines it, the pilot's

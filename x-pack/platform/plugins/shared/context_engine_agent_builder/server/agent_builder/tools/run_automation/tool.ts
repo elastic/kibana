@@ -72,7 +72,8 @@ export const createRunAutomationTool = ({
     documents or units with pilotSize.
     A full run starts asynchronously and returns an execution id — the run continues after this
     call returns. Use platform.core.get_workflow_execution_status to check progress. A pilot waits
-    for the run and returns its status and durationMs, or an execution id to poll if it is slow.
+    for the run and returns its status, durationMs and kisWritten, or an execution id to poll if it
+    is slow.
     A disabled workflow is enabled in order to run, and stays enabled afterwards.
     Call this with the workflowId that install_automation_template or save_automation returned.
     Its confirmation dialog is where the user decides whether to run; do not ask in chat first.

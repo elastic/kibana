@@ -34,6 +34,7 @@ describe('runAutomationHandler', () => {
 
   const getWorkflowMock = jest.fn();
   const updateWorkflowMock = jest.fn();
+  const getWorkflowExecutionMock = jest.fn();
 
   const getCoreStart = jest.fn().mockResolvedValue({
     http: { basePath: { serverBasePath: '' } },
@@ -50,6 +51,7 @@ describe('runAutomationHandler', () => {
       ({
         getWorkflow: getWorkflowMock,
         updateWorkflow: updateWorkflowMock,
+        getWorkflowExecution: getWorkflowExecutionMock,
       } as never),
   });
 
@@ -247,6 +249,75 @@ describe('runAutomationHandler', () => {
         })
       );
       expect(result.statusCheckHint).toBeUndefined();
+    });
+
+    describe('counting the KIs a pilot wrote', () => {
+      const createKi = (output: Record<string, unknown>, status = 'completed') => ({
+        stepId: 'create_ki',
+        stepType: 'context-engine.createKi',
+        status,
+        output,
+      });
+
+      beforeEach(() => {
+        getWorkflowMock.mockResolvedValue(pilotWorkflow);
+        executeWorkflow.mockResolvedValue({
+          success: true,
+          execution: {
+            execution_id: 'exec-pilot',
+            status: 'completed',
+            started_at: '2026-10-01T10:00:00.000Z',
+            finished_at: '2026-10-01T10:01:30.000Z',
+          },
+        });
+      });
+
+      it('counts only completed createKi steps that returned an id', async () => {
+        getWorkflowExecutionMock.mockResolvedValue({
+          stepExecutions: [
+            createKi({ id: 'pilot/a' }),
+            createKi({ id: 'pilot/b' }),
+            // Failed verification: the step completes but writes nothing.
+            createKi({ verification: { passed: false } }),
+            createKi({}, 'failed'),
+            {
+              stepId: 'summarize',
+              stepType: 'ai.prompt',
+              status: 'completed',
+              output: { id: 'x' },
+            },
+          ],
+        });
+
+        const result = await runAutomationHandler(buildPilotDeps());
+
+        expect(getWorkflowExecutionMock).toHaveBeenCalledWith(
+          'exec-pilot',
+          spaceId,
+          expect.objectContaining({ includeOutput: true, request })
+        );
+        expect(result.kisWritten).toBe(2);
+      });
+
+      it('omits the count rather than failing when the execution cannot be read', async () => {
+        getWorkflowExecutionMock.mockRejectedValue(new Error('index unavailable'));
+
+        const result = await runAutomationHandler(buildPilotDeps());
+
+        expect(result.started).toBe(true);
+        expect(result.durationMs).toBe(90000);
+        expect(result.kisWritten).toBeUndefined();
+      });
+
+      it('does not read the execution for a full run', async () => {
+        getWorkflowMock.mockResolvedValue({ id: workflowId, enabled: true });
+        executeWorkflow.mockResolvedValue({ success: true, execution: { execution_id: 'e' } });
+
+        const result = await runAutomationHandler(buildDeps());
+
+        expect(getWorkflowExecutionMock).not.toHaveBeenCalled();
+        expect(result.kisWritten).toBeUndefined();
+      });
     });
 
     it('reports the failure message when the pilot run fails', async () => {
