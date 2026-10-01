@@ -29,3 +29,11 @@ The footer's primary slot takes either a `PrimaryAction` or a `PrimaryActionMenu
 Every flyout carries a root `data-test-subj` (`flyoutComponent<Session>` and
 `flyoutOverlays<Session>`, plus `…Child<A|B>`). The Scout suite under
 `test/scout_examples/ui` uses these to scope accessibility scans to one flyout at a time, preventing errors when a child flyout is open over its parent.
+
+A third section, **Push padding scenarios**, mixes standalone `type="push"` flyouts with system
+push and overlay sessions and shows the inline push padding on `#app-main-scroll` live. Use it to
+reproduce stale or missing push padding depending on open/close order (see elastic/eui#9788).
+
+A fourth section, **Persisted width scenarios**, opens two system push flyouts that share one
+stored resized width, like Security alert flyouts. Use it to reproduce the second flyout opening
+narrower than the stored width (see elastic/eui#10075).
