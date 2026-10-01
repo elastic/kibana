@@ -52,6 +52,13 @@ export const ESCALATIONS_UI_CAPABILITY_SHOW = 'showEscalations' as const;
 export const ESCALATIONS_UI_CAPABILITY_MANAGE = 'manageEscalations' as const;
 
 /**
+ * Access level used when writing attachments onto an escalation. Mirrors the `'converse'` access
+ * that `EscalationsService.update` passes to `patchMetadata` — collaborators (and any user on
+ * public escalations) can add attachments, not just the owner.
+ */
+export const ESCALATION_ATTACHMENT_WRITE_ACCESS = 'converse' as const;
+
+/**
  * Pagination bounds for the list endpoint.
  *
  * These mirror agent_builder's MAX_CONVERSATION_SEARCH_PER_PAGE (50) and

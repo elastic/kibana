@@ -8,6 +8,14 @@
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 
 /**
+ * Controls who may perform the attachment write. Mirrors the same option on `patchMetadata`.
+ * - `'owner'` (default): only the conversation owner may write.
+ * - `'converse'`: any user with converse access (collaborators on private conversations,
+ *   any authenticated user on public ones) may write.
+ */
+export type AttachmentWriteAccess = 'owner' | 'converse';
+
+/**
  * Arguments for {@link AttachmentPublicClient.create}.
  */
 export interface CreateAttachmentArgs {
@@ -26,6 +34,11 @@ export interface CreateAttachmentArgs {
   hidden?: boolean;
   /** When true, the UI renders the attachment inline when the conversation is opened. Defaults to false. */
   render_inline?: boolean;
+  /**
+   * Who may perform this write. Defaults to `'owner'`.
+   * Pass `'converse'` to let collaborators (or any user on public conversations) write.
+   */
+  access?: AttachmentWriteAccess;
 }
 
 /**
@@ -48,6 +61,11 @@ export interface UpdateAttachmentArgs {
   description?: string;
   /** When true, the UI renders the attachment inline when the conversation is opened. Defaults to false. */
   render_inline?: boolean;
+  /**
+   * Who may perform this write. Defaults to `'owner'`.
+   * Pass `'converse'` to let collaborators (or any user on public conversations) write.
+   */
+  access?: AttachmentWriteAccess;
 }
 
 /**
@@ -58,6 +76,11 @@ export interface DeleteAttachmentArgs {
   attachmentId: string;
   /** Permanently remove the attachment (only when unreferenced and no client_id). */
   permanent?: boolean;
+  /**
+   * Who may perform this write. Defaults to `'owner'`.
+   * Pass `'converse'` to let collaborators (or any user on public conversations) write.
+   */
+  access?: AttachmentWriteAccess;
 }
 
 /**
@@ -78,6 +101,49 @@ export interface ListAttachmentsResult {
 }
 
 /**
+ * Per-attachment input for {@link BulkCreateAttachmentsArgs}.
+ * Same as the individual fields from `CreateAttachmentArgs`, without `conversationId`,
+ * `access`, or `render_inline` (those are specified once at the bulk level).
+ */
+export type BulkCreateAttachmentInput = Omit<CreateAttachmentArgs, 'conversationId' | 'access' | 'render_inline'>;
+
+/**
+ * Error reported when one attachment in a `bulkCreate` call fails.
+ */
+export interface BulkCreateAttachmentError {
+  /** The custom id supplied by the caller, or undefined when the id was server-generated. */
+  id?: string;
+  type: string;
+  message: string;
+}
+
+/**
+ * Result of {@link AttachmentPublicClient.bulkCreate}.
+ */
+export interface BulkCreateAttachmentsResult {
+  created: VersionedAttachment[];
+  errors: BulkCreateAttachmentError[];
+}
+
+/**
+ * Arguments for {@link AttachmentPublicClient.bulkCreate}.
+ */
+export interface BulkCreateAttachmentsArgs {
+  conversationId: string;
+  attachments: BulkCreateAttachmentInput[];
+  /**
+   * Who may perform this write. Defaults to `'owner'`.
+   * Pass `'converse'` to let collaborators (or any user on public conversations) write.
+   */
+  access?: AttachmentWriteAccess;
+  /**
+   * When true, the UI renders every added attachment inline when the conversation is opened.
+   * Applies to the whole batch. Defaults to false.
+   */
+  render_inline?: boolean;
+}
+
+/**
  * A per-request client exposing the AgentBuilder attachment CRUD operations
  * without going through HTTP.
  *
@@ -94,4 +160,10 @@ export interface AttachmentPublicClient {
   update(args: UpdateAttachmentArgs): Promise<VersionedAttachment>;
   delete(args: DeleteAttachmentArgs): Promise<void>;
   list(args: ListAttachmentsArgs): Promise<ListAttachmentsResult>;
+  /**
+   * Creates multiple attachments in a single write. Per-attachment failures are collected in
+   * `errors` rather than thrown, so the successfully created attachments are always persisted.
+   * Ids that already exist on the conversation are counted as errors.
+   */
+  bulkCreate(args: BulkCreateAttachmentsArgs): Promise<BulkCreateAttachmentsResult>;
 }

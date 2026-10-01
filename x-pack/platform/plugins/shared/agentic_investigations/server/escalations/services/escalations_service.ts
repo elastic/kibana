@@ -14,6 +14,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type {
+  AttachmentPublicClient,
   ConversationPublicClient,
   ConversationTemplatesStart,
 } from '@kbn/agent-builder-server';
@@ -51,6 +52,7 @@ import {
   TooManyLinkedInvestigationsError,
 } from './errors';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
+import { copyInvestigationAttachments } from './copy_investigation_attachments';
 
 /**
  * Builds the Elasticsearch filter clause for the list endpoint.
@@ -96,6 +98,7 @@ const ESCALATIONS_LIST_SORT: ConversationSearchSort = { field: 'updated_at', ord
 export interface EscalationsServiceDeps {
   logger: Logger;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
+  getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
   conversationTemplates: ConversationTemplatesStart;
   getInvestigationStatusService: () => InvestigationStatusService;
 }
@@ -105,17 +108,20 @@ export class EscalationsService {
   private readonly getConversationClient: (
     request: KibanaRequest
   ) => Promise<ConversationPublicClient>;
+  private readonly getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
   private readonly conversationTemplates: ConversationTemplatesStart;
   private readonly getInvestigationStatusService: () => InvestigationStatusService;
 
   constructor({
     logger,
     getConversationClient,
+    getAttachmentsClient,
     conversationTemplates,
     getInvestigationStatusService,
   }: EscalationsServiceDeps) {
     this.logger = logger;
     this.getConversationClient = getConversationClient;
+    this.getAttachmentsClient = getAttachmentsClient;
     this.conversationTemplates = conversationTemplates;
     this.getInvestigationStatusService = getInvestigationStatusService;
   }
@@ -244,6 +250,56 @@ export class EscalationsService {
     }
 
     return result;
+  }
+
+  /**
+   * Copies all active, non-screen_context attachments from each of the given investigations to
+   * the escalation. Intended to be called from route handlers after `create` or `update` so that
+   * the metadata write and the attachment copy are separate concerns.
+   *
+   * The method is best-effort: individual attachment failures are logged and counted but never
+   * thrown. Calling it again for the same investigation is idempotent — already-copied attachments
+   * (identified by their deterministic ids) are silently skipped.
+   *
+   * @returns Total counts of successfully copied and failed attachments across all investigations.
+   */
+  async addAttachments(
+    request: KibanaRequest,
+    escalationId: string,
+    investigationIds: string[]
+  ): Promise<{ copied: number; failed: number }> {
+    const client = await this.getConversationClient(request);
+    const escalation = await client.get(escalationId);
+    if (escalation.template_id !== ESCALATION_TEMPLATE_ID) {
+      throw new NotAnEscalationError(escalationId);
+    }
+
+    const attachmentsClient = await this.getAttachmentsClient(request);
+    let totalCopied = 0;
+    let totalFailed = 0;
+
+    // Run sequentially to avoid OCC conflicts: all copies target the same escalation document.
+    for (const investigationId of investigationIds) {
+      const investigation = await client.get(investigationId);
+      if (investigation.template_id !== INVESTIGATION_TEMPLATE_ID) {
+        this.logger.warn(
+          `[escalations] Skipping attachment copy from non-investigation. escalationId=${escalationId} conversationId=${investigationId} template=${investigation.template_id}`
+        );
+        continue;
+      }
+
+      const { copied, failed } = await copyInvestigationAttachments({
+        attachmentsClient,
+        escalation,
+        investigation,
+        logger: this.logger,
+      });
+
+      totalCopied += copied;
+      totalFailed += failed;
+    }
+
+    return { copied: totalCopied, failed: totalFailed };
   }
 
   async getClosePreview(

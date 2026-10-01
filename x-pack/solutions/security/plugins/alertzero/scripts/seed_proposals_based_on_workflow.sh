@@ -575,6 +575,7 @@ steps:
       inputs:
         conversationId: "{{ variables.conversation_id }}"
         origin: alertzero
+        title: "{{ inputs.conversationTitle }}"
         comment: "{{ variables.comment }}"
         actionWorkflowId: "{{ variables.action_workflow_id }}"
         actionInput: "${{ variables.action_input }}"
