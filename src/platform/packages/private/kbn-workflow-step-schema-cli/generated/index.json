@@ -106,6 +106,7 @@
     "ai.attachment.update",
     "ai.classify",
     "ai.conversation.add_event",
+    "ai.conversation.add_user_message",
     "ai.conversation.create",
     "ai.conversation.metadata.patch",
     "ai.conversation.metadata.read",
@@ -982,11 +983,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "fca1c69b855d962dd241495e129c72a9932ddebf9085547f63f93d290b784d91"
+      "sha256": "6771210358338d30fc1f24f0174b9795a963a067f96f2419fc6237a30a9fb436"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "50fb3cca457a8a3bcf2db9546bca8f0fdf72b4c530cb74ef26bda68bb4e3edae"
+      "sha256": "c83bf9b37a26a226aabe5c019cc05c8f4e685a8df3d55cbd580dc2de075bc375"
     }
   }
 }

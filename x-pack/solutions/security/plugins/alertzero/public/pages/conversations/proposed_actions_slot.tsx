@@ -21,13 +21,13 @@ import {
   useIsApprovingProposal,
   useIsDecliningProposal,
 } from '@kbn/proposals-plugin/public';
+import { PROPOSALS_UI_CAPABILITY_DECIDE } from '@kbn/proposals-common';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton } from '@kbn/agentic-investigations-common';
-import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { decisionErrorMessage } from './decision_errors';
 import {
   PROPOSED_ACTIONS_EMPTY_LABEL,
@@ -59,6 +59,10 @@ const ProposedActionRow = ({
   approve,
   dismiss,
 }: ProposedActionRowProps) => {
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+  const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
   const isApproving = useIsApprovingProposal(proposal.id);
   const isDeclining = useIsDecliningProposal(proposal.id);
 
@@ -66,6 +70,7 @@ const ProposedActionRow = ({
     <EuiFlexItem>
       <ProposedActionButton
         proposal={proposal}
+        readOnly={!canDecide}
         isSubmitting={isApproving ? 'applying' : isDeclining ? 'declining' : undefined}
         onConfirm={async () => {
           try {
@@ -89,9 +94,6 @@ const ProposedActionRow = ({
             throw err;
           }
         }}
-        renderDismissModal={({ onClose, onConfirm }) => (
-          <DismissProposalModal proposalId={proposal.id} onClose={onClose} onConfirm={onConfirm} />
-        )}
         currentActorName={currentActorName}
         data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
       />
@@ -103,9 +105,9 @@ const ProposedActionRow = ({
  * `renderProposedActions` content for the investigation flyout's overview tab. Shows the whole
  * proposal history for this conversation, decided or not, so an already-applied action still
  * shows the closed record `ProposedActionButton` renders — rather than `usePendingProposals`,
- * which drops a proposal the moment it stops awaiting a human. Each row owns its own dismiss
- * modal (via `renderDismissModal`) rather than this slot sharing one, so its own "Declining"
- * badge and the modal's own submit button track the exact same mutation.
+ * which drops a proposal the moment it stops awaiting a human. Each row's `isSubmitting` is
+ * scoped to its own proposal id, so its badge and its approval modal's decline form track the
+ * exact same mutation rather than one row's submission lighting up every other row too.
  */
 export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps) => {
   const {

@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
+import { isSchemaValuedAdditionalProperties } from './schema/common/json_model_shape_schema';
 import { TriggerSchema } from './schema/triggers';
 import { AlertEventSchema } from './schema/triggers/alert_trigger_schema';
 import {
@@ -385,7 +386,9 @@ export const WaitForInputStepInputSchema = z
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
-}).merge(DynamicTimeoutPropSchema);
+})
+  .merge(DynamicTimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const WaitForApprovalStepInputSchema = z
@@ -414,7 +417,9 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
     .literal('waitForApproval')
     .describe('Pause execution until approval or rejection is received'),
   with: WaitForApprovalStepInputSchema,
-}).merge(DynamicTimeoutPropSchema);
+})
+  .merge(DynamicTimeoutPropSchema)
+  .merge(StepWithOnFailureSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
 export const DataSetStepInputSchema = z
@@ -429,7 +434,14 @@ export const DataSetStepSchema = BaseStepSchema.extend({
 export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
 // Fetcher configuration for HTTP request customization (shared across formats)
-export const FetcherConfigSchema = z
+export const IGNORED_KIBANA_FETCHER_SETTING_MESSAGE =
+  'The "fetcher" setting is deprecated and some options are already ignored. Please remove this setting. Configure self HTTP routing, TLS, and redirects with `server.selfHttp`. Use `max-step-size` for response limits.';
+
+/** Editor schema copy. Unlike the warning above, this is shown while the self client is still off. */
+const KIBANA_FETCHER_SCHEMA_DESCRIPTION =
+  'Deprecated. Still applied unless Kibana steps use the Core self HTTP client. When that client is in use, these options are ignored: configure routing, TLS, and redirects with `server.selfHttp`, and use `max-step-size` for response limits.';
+
+const FetcherConfigObjectSchema = z
   .object({
     skip_ssl_verification: z
       .boolean()
@@ -448,8 +460,15 @@ export const FetcherConfigSchema = z
       .optional()
       .describe('Maximum response body size in bytes. Aborts the request mid-stream if exceeded.'),
   })
-  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
-  .optional();
+  .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' });
+
+export const FetcherConfigSchema = FetcherConfigObjectSchema.optional();
+
+export const KibanaFetcherConfigSchema = FetcherConfigObjectSchema.meta({
+  $id: 'kibanaFetcher',
+  deprecated: true,
+  description: KIBANA_FETCHER_SCHEMA_DESCRIPTION,
+}).optional();
 
 // Single source of truth for the kibana.request HTTP method enum (mirrors the `http` step's
 // valid values). Reused by the connector schema (editor + validation) and the runtime guard so
@@ -517,7 +536,7 @@ export const KibanaStepInputSchema = z.union([
       body: z.any().optional(),
       headers: z.record(z.string(), z.string()).optional(),
     }),
-    fetcher: FetcherConfigSchema,
+    fetcher: KibanaFetcherConfigSchema,
     ...KibanaStepMetaSchema,
   }),
   // Sugar syntax for common Kibana operations
@@ -539,7 +558,7 @@ export const KibanaStepInputSchema = z.union([
       page: z.number().optional(),
       perPage: z.number().optional(),
       status: z.string().optional(),
-      fetcher: FetcherConfigSchema,
+      fetcher: KibanaFetcherConfigSchema,
       ...KibanaStepMetaSchema,
     })
     .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
@@ -961,7 +980,7 @@ export const WorkflowExecuteStepInputSchema = z.object({
 
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
   with: WorkflowExecuteStepInputSchema,
-});
+}).merge(StepWithOnFailureSchema);
 
 export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.execute'),
@@ -1085,6 +1104,16 @@ const WorkflowSchemaBase = z.object({
 function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSchema> | undefined {
   if (!value) return undefined;
   if (typeof value === 'object' && !Array.isArray(value) && 'properties' in value) {
+    return value as z.infer<typeof JsonModelSchema>;
+  }
+  if (
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    'additionalProperties' in value &&
+    isSchemaValuedAdditionalProperties(
+      (value as { additionalProperties?: unknown }).additionalProperties
+    )
+  ) {
     return value as z.infer<typeof JsonModelSchema>;
   }
   if (Array.isArray(value)) {

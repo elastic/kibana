@@ -200,7 +200,7 @@ export class SignificantEventsPlugin
       rulesClientOptions?: RulesClientCreateOptions;
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
-      const isServerless = plugins.cloud?.isServerlessEnabled ?? false;
+      const cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
 
       const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
@@ -213,7 +213,7 @@ export class SignificantEventsPlugin
       // they model all data available to a stream - so extraction must always read across every
       // linked project.
       //
-      // Detection matches that all-projects scope on serverless via `withAllProjectsRouting`.
+      // Detection matches that all-projects scope when CPS is enabled via `withAllProjectsRouting`.
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
       const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
         projectRouting: 'expression',
@@ -284,7 +284,7 @@ export class SignificantEventsPlugin
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
           getAlertingV2RulesClient,
-          isServerless,
+          cpsEnabled,
         });
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
@@ -353,6 +353,13 @@ export class SignificantEventsPlugin
                 licensing: pluginsStart.licensing,
               })
             : false;
+        },
+        getUseRuleEventsRead: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.featureFlags.getBooleanValue(
+            SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
+            false
+          );
         },
       });
     }
@@ -567,6 +574,7 @@ export class SignificantEventsPlugin
       this.managedWorkflowsInstaller = createManagedWorkflowsInstaller({
         getClient: () =>
           workflowsExtensions.initManagedWorkflowsClient(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER),
+        dataStreams: core.dataStreams,
         isAvailable,
         logger: this.logger,
       });
