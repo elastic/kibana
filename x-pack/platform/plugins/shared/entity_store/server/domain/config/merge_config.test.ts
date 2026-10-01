@@ -255,6 +255,55 @@ describe('getMergedConfig', () => {
       expect(merged.excludedIndexPatterns).toEqual(['exclude-*']);
     });
 
+    it('logExtractionConfig non-exclusive fields reach non-priority', () => {
+      const merged = getMergedConfig(
+        'user',
+        {},
+        { frequency: '7m', lookbackPeriod: '6h', delay: '2m' },
+        'nonPriority'
+      );
+
+      expect(merged.frequency).toBe('7m');
+      expect(merged.lookbackPeriod).toBe('6h');
+      expect(merged.delay).toBe('2m');
+    });
+
+    it('logExtractionConfig exclusive fields still do not reach non-priority', () => {
+      const merged = getMergedConfig(
+        'user',
+        {},
+        { maxLogsPerWindow: 999, maxLogsPerPage: 999, docsLimit: 999, maxTimeWindowSize: '99m' },
+        'nonPriority'
+      );
+
+      expect(merged.maxLogsPerWindow).not.toBe(999);
+      expect(merged.maxLogsPerPage).not.toBe(999);
+      expect(merged.docsLimit).not.toBe(999);
+      expect(merged.maxTimeWindowSize).not.toBe('99m');
+    });
+
+    it('nonPriorityOverride wins over the same field set on logExtractionConfig', () => {
+      const merged = getMergedConfig('user', {}, { frequency: '7m' }, 'nonPriority', {
+        frequency: '3m',
+      });
+
+      expect(merged.frequency).toBe('3m');
+    });
+
+    it('null in nonPriorityOverride falls through to logExtractionConfig', () => {
+      const merged = getMergedConfig('user', {}, { frequency: '7m' }, 'nonPriority', {
+        frequency: null,
+      });
+
+      expect(merged.frequency).toBe('7m');
+    });
+
+    it('timeout is not exclusive, so a global override reaches non-priority', () => {
+      const merged = getMergedConfig('user', { timeout: '45s' }, undefined, 'nonPriority');
+
+      expect(merged.timeout).toBe('45s');
+    });
+
     it('global override of non-exclusive fields (frequency) still reaches non-priority', () => {
       const merged = getMergedConfig('user', { frequency: '5m' }, undefined, 'nonPriority');
 

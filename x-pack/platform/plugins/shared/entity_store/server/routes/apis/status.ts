@@ -15,9 +15,10 @@ import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import type { EntityStoreStatus, GetStatusSuccessResult } from '../../domain/types';
-import type { LogExtractionConfig } from '../../domain/saved_objects';
+import type { EngineError, EngineStatus, LogExtractionConfig } from '../../domain/saved_objects';
 import { capAtMaxLogsPerWindow } from '../../domain/logs_extraction/effective_page_limits';
 import { ENTITY_STORE_STATUS } from '../../domain/constants';
+import { hasPriorityExtractionGate } from '../../../common/domain/definitions/registry';
 
 /**
  * Legacy engine descriptor from V1. will be removed in a future version.
@@ -41,6 +42,18 @@ interface LegacyEngineDescriptorV1 {
   lastExecutionTimestamp: string | undefined;
 }
 
+/** Operational state of the non-priority extraction process, for types that run one. */
+interface NonPriorityEngineStatus {
+  status: EngineStatus | null;
+  error: EngineError | null;
+  lastExecutionTimestamp: string | undefined;
+  /**
+   * Fixed non-priority sampling rate, `null` when unset. Unset is the normal case: the process
+   * then computes a rate per slice from the remaining volume budget.
+   */
+  samplingRate: number | null;
+}
+
 type StatusEngine = Omit<
   GetStatusSuccessResult['engines'][number],
   | 'versionState'
@@ -48,8 +61,10 @@ type StatusEngine = Omit<
   | 'logExtractionConfig'
   | 'nonPriorityLogExtractionConfig'
   | 'nonPriorityLogExtractionState'
+  | 'nonPriorityStatus'
+  | 'nonPriorityError'
 > &
-  LegacyEngineDescriptorV1;
+  LegacyEngineDescriptorV1 & { nonPriority?: NonPriorityEngineStatus };
 
 export interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
@@ -73,6 +88,8 @@ function toPublicEngine(
     logExtractionConfig,
     nonPriorityLogExtractionConfig,
     nonPriorityLogExtractionState,
+    nonPriorityStatus,
+    nonPriorityError,
     ...rest
   } = engine;
   const {
@@ -106,6 +123,20 @@ function toPublicEngine(
     timestampField: '@timestamp',
     maxPageSearchSize: 10000,
     lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp ?? undefined,
+    // Only types with a priority gate run a second process; for the rest there is nothing to report.
+    ...(hasPriorityExtractionGate(engine.type)
+      ? {
+          nonPriority: {
+            status: nonPriorityStatus ?? null,
+            error: nonPriorityError ?? null,
+            lastExecutionTimestamp:
+              nonPriorityLogExtractionState?.lastExecutionTimestamp ?? undefined,
+            // Read off the descriptor: this reports what was configured, not the rate
+            // getMergedConfig resolves for a run.
+            samplingRate: nonPriorityLogExtractionConfig?.samplingRate ?? null,
+          },
+        }
+      : {}),
   };
 }
 

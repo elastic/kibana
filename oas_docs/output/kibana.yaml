@@ -80805,6 +80805,11 @@ paths:
                         maxLogsPerWindowCapBehavior: defer
                         maxPageSearchSize: 10000
                         maxTimeWindowSize: 15m
+                        nonPriority:
+                          error: null
+                          lastExecutionTimestamp: '2026-04-10T08:26:00.000Z'
+                          samplingRate: null
+                          status: started
                         status: started
                         timeout: 25s
                         timestampField: '@timestamp'

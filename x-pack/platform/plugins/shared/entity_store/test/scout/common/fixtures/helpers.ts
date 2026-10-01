@@ -493,12 +493,14 @@ export const forceLogExtraction = async (
   headers: Record<string, string>,
   entityType: EntityType,
   fromDateISO: string,
-  toDateISO: string
+  toDateISO: string,
+  /** Omitted lets the server pick the process this deployment runs. */
+  process?: 'single' | 'priority' | 'nonPriority'
 ) =>
   await apiClient.post(ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION(entityType), {
     headers,
     responseType: 'json',
-    body: { fromDateISO, toDateISO },
+    body: { fromDateISO, toDateISO, ...(process ? { process } : {}) },
   });
 
 export const installAllEntityTypes = (
