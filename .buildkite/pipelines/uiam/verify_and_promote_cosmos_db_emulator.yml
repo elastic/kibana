@@ -52,6 +52,13 @@ steps:
           limit: 1
 
   - wait: ~
+    continue_on_failure: true
+
+  - label: 'Post-Build'
+    command: .buildkite/scripts/lifecycle/post_build.sh
+    timeout_in_minutes: 10
+
+  - wait: ~
 
   - label: ':arrow_up::key::arrow_up: Promote UIAM Cosmos DB Emulator docker image'
     command: .buildkite/scripts/steps/uiam/promote_image_cosmos_db_emulator.sh $UIAM_COSMOSDB_IMAGE
@@ -61,9 +68,3 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 1
-
-  - wait: ~
-
-  - label: 'Post-Build'
-    command: .buildkite/scripts/lifecycle/post_build.sh
-    timeout_in_minutes: 10

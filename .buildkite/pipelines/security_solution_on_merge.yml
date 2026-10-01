@@ -491,3 +491,15 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+
+  - wait: ~
+    continue_on_failure: true
+
+  - label: 'Post-Build'
+    command: .buildkite/scripts/lifecycle/post_build.sh
+    agents:
+      provider: gcp
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      machineType: n2-standard-2
+    timeout_in_minutes: 10
