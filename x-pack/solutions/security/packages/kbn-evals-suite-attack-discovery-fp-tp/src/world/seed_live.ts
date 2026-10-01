@@ -449,18 +449,28 @@ export const seedFixture = async ({
   world,
   now = new Date(),
   onCleanupFailure,
+  requireAttackDataStream = true,
 }: {
   esClient: EsClient;
   kbnRequest: FpTpLiveKbnRequest;
   world: FpTpWorld;
   now?: Date;
   onCleanupFailure?: (cleanup: () => Promise<void>) => void;
+  /**
+   * Skip the Attack Discovery data-stream preflight. Only for the eval suite,
+   * whose `beforeAll` starts no Attack Discovery worker; the first `create`
+   * bootstraps the stream via the template (running the worker first would
+   * overwrite later seeds' documents, so the guard must not run there).
+   */
+  requireAttackDataStream?: boolean;
 }): Promise<FpTpSeededFixture> => {
   const plan = buildLiveSeedPlan(world, now);
   const cleanup = () => cleanupLiveSeedPlan({ esClient, kbnRequest, plan });
 
   try {
-    await assertAttackDataStreamExists(esClient, plan.attackIndex);
+    if (requireAttackDataStream) {
+      await assertAttackDataStreamExists(esClient, plan.attackIndex);
+    }
     if (plan.alertOperations.length > 0) {
       assertBulkOk(
         'alerts',

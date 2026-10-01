@@ -178,6 +178,7 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
               kbnRequest,
               world,
               onCleanupFailure: (cleanup) => pendingCleanups.add(cleanup),
+              requireAttackDataStream: false,
             });
             const investigationId = await createInvestigation(
               fetch,

@@ -185,6 +185,20 @@ describe('seedFixture', () => {
     kbnRequest = jest.fn().mockResolvedValue({ statusCode: 200, body: {} });
   });
 
+  it('skips the data-stream preflight for the eval suite', async () => {
+    esClient.indices.getDataStream.mockRejectedValueOnce(new Error('should not be called'));
+
+    await seedFixture({
+      esClient: esClient as unknown as EsClient,
+      kbnRequest,
+      world,
+      requireAttackDataStream: false,
+    });
+
+    expect(esClient.indices.getDataStream).not.toHaveBeenCalled();
+    expect(esClient.create).toHaveBeenCalled();
+  });
+
   it('refuses to seed when the Attack Discovery data stream does not exist', async () => {
     esClient.indices.getDataStream.mockResolvedValueOnce({ data_streams: [] });
 
