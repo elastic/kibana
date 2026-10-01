@@ -42,7 +42,6 @@ import type {
   ProposalWithMetadata,
 } from '@kbn/proposals-common';
 import type { ReviseProposalRequest } from '@kbn/proposals-common';
-import { isExpired } from '@kbn/proposals-common';
 import {
   anchorQuery,
   bucketedEventQuery,
@@ -54,7 +53,6 @@ import type { ProposalDocument, ProposalsStorageClient } from '../storage/propos
 import { CONFIDENCE_RANK_FIELD, IMPACT_RANK_FIELD, toSortRanks } from '../storage/sort_ranks';
 import {
   ProposalConflictError,
-  ProposalExpiredError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
 } from './errors';
@@ -185,7 +183,7 @@ export class ProposalsService {
     await this.attachToConversation(id, params.conversationId, document.title, request);
 
     const proposal = toProposal(id, document);
-    return { ...proposal, action: metadata, expired: isExpired(proposal) };
+    return { ...proposal, action: metadata };
   }
 
   /**
@@ -655,12 +653,6 @@ export class ProposalsService {
         `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
       );
     }
-    // Mirrors `assertDecidable`, for the same lag: a deadline can pass before the
-    // workflow settles the record, so a revision cut here would be born expired.
-    if (isExpired(proposal)) {
-      throw new ProposalExpiredError(id);
-    }
-
     const { id: _id, ...original } = proposal;
 
     // The override is merged over the predecessor's input and the merged object is
@@ -1019,10 +1011,11 @@ export class ProposalsService {
    * stays at `pending` for as long as the gate workflow's post-gate steps take
    * to run, so a status check alone would let a second approver through.
    *
-   * The status catches what the decision cannot: the workflow settles an
-   * unanswered proposal as `expired` on attempt exhaustion or a failure before
-   * anyone decided, which leaves no decision behind and can happen well before
-   * the wall-clock deadline. The date check below would still read it as live.
+   * The `status` catches what the decision cannot: the workflow settles an
+   * undecided proposal as `expired` on attempt exhaustion or a failure before
+   * anyone decided, which leaves no decision behind. A deadline that has
+   * passed but not yet been swept to `expired` still reads `pending` here
+   * which is accepted lag, rather than a second check against `expiresAt`.
    *
    * `pending` is the only status that is valid while undecided, so anything
    * else is already settled.
@@ -1037,12 +1030,6 @@ export class ProposalsService {
       throw new ProposalConflictError(
         `Proposal [${proposal.id}] has settled as ${proposal.status}`
       );
-    }
-    // Kept alongside the status check for the lag between a deadline passing
-    // and the workflow settling the record, during which it still reads
-    // `pending`.
-    if (isExpired(proposal)) {
-      throw new ProposalExpiredError(proposal.id);
     }
   }
 
@@ -1124,7 +1111,7 @@ export class ProposalsService {
       ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId, request)
       : undefined;
 
-    return { ...proposal, action, expired: isExpired(proposal) };
+    return { ...proposal, action };
   }
 
   /**
@@ -1158,7 +1145,6 @@ export class ProposalsService {
         proposal.actionWorkflowId !== undefined
           ? metaMap.get(proposal.actionWorkflowId)
           : undefined,
-      expired: isExpired(proposal),
     }));
   }
 }

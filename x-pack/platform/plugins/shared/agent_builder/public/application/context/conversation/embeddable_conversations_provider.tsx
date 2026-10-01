@@ -159,6 +159,14 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     [persistedConversationId, updatePersistedConversationId]
   );
 
+  const resetInitialMessage = useCallback(() => {
+    setCurrentProps((prevProps) => ({
+      ...prevProps,
+      initialMessage: undefined,
+      autoSendInitialMessage: false,
+    }));
+  }, []);
+
   const validateAndSetConversationId = useCallback(
     async (id: string) => {
       try {
@@ -207,21 +215,18 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     return persistedConversationId;
   }, [currentProps, persistedConversationId]);
 
+  useEffect(() => {
+    if (conversationId && currentProps.initialMessage) {
+      resetInitialMessage();
+    }
+  }, [conversationId, currentProps.initialMessage, resetInitialMessage]);
+
   const conversationActions = useConversationActions({
     conversationId,
     queryClient,
     conversationsService: services.conversationsService,
     onDeleteConversation,
   });
-
-  // Resets the {initialMessage} and {autoSendInitialMessage} flags after an initial message has been sent or set in the {ConversationInput} component
-  const resetInitialMessage = useCallback(() => {
-    setCurrentProps((prevProps) => ({
-      ...prevProps,
-      initialMessage: undefined,
-      autoSendInitialMessage: false,
-    }));
-  }, []);
 
   // Resets the {attachments} array after attachment(s) have been sent as part of a Conversation Round.
   const resetAttachments = useCallback(() => {
