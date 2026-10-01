@@ -218,4 +218,64 @@ describe('generateYamlSchemaFromConnectors', () => {
       expect(elapsed).toBeLessThan(500);
     });
   });
+
+  describe('on-failure on built-in steps', () => {
+    const onFailure = {
+      continue: true,
+      fallback: [
+        {
+          name: 'record_expiry',
+          type: 'console',
+          with: { message: 'expired' },
+        },
+      ],
+    };
+    const schema = generateYamlSchemaFromConnectors([
+      {
+        summary: 'Console',
+        description: 'Console',
+        type: 'console',
+        paramsSchema: z.object({
+          message: z.string(),
+        }),
+        outputSchema: z.object({
+          message: z.string(),
+        }),
+      },
+    ]);
+
+    it.each([
+      {
+        name: 'gate',
+        type: 'waitForApproval',
+        with: { message: 'approve?' },
+      },
+      {
+        name: 'ask',
+        type: 'waitForInput',
+        with: { message: 'input?' },
+      },
+      {
+        name: 'run_child',
+        type: 'workflow.execute',
+        with: { 'workflow-id': 'child' },
+      },
+      {
+        name: 'start_child',
+        type: 'workflow.executeAsync',
+        with: { 'workflow-id': 'child' },
+      },
+    ])('keeps fallback `with` on $type', (step) => {
+      const result = schema.safeParse({
+        ...BASE_WORKFLOW,
+        steps: [{ ...step, 'on-failure': onFailure }],
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.success).toBe(true);
+      expect(
+        (result.data as { steps: Array<{ 'on-failure': unknown }> }).steps[0]['on-failure']
+      ).toEqual(onFailure);
+    });
+  });
 });
