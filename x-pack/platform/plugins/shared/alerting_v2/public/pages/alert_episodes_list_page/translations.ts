@@ -21,7 +21,7 @@ export const EPISODES_LIST_MANAGE_RULES = i18n.translate(
 export const EPISODES_LIST_TABLE_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2.episodes.tableAriaLabel',
   {
-    defaultMessage: 'Alerting episodes table',
+    defaultMessage: 'Alerts table',
   }
 );
 
@@ -100,14 +100,14 @@ export const EPISODES_FILTER_BAR_RESET_FILTERS = i18n.translate(
 export const EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.alertingV2.episodes.filterBar.searchPlaceholder',
   {
-    defaultMessage: 'Search episodes…',
+    defaultMessage: 'Search alerts...',
   }
 );
 
 export const EPISODES_FILTER_BAR_SEARCH_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2.episodes.filterBar.searchAriaLabel',
   {
-    defaultMessage: 'Filter alert episodes',
+    defaultMessage: 'Filter alerts',
   }
 );
 
@@ -142,26 +142,26 @@ export const BULK_EDIT_TAGS = i18n.translate('xpack.alertingV2.episodes.bulkActi
 });
 
 export const BULK_ERROR_TOAST = i18n.translate('xpack.alertingV2.episodes.bulkActions.errorToast', {
-  defaultMessage: 'Failed to update episodes',
+  defaultMessage: 'Failed to update alerts',
 });
 
 export const getBulkSuccessToast = (count: number) =>
   i18n.translate('xpack.alertingV2.episodes.bulkActions.successToast', {
-    defaultMessage: '{count} {count, plural, one {episode} other {episodes}} updated',
+    defaultMessage: '{count} {count, plural, one {alert} other {alerts}} updated',
     values: { count },
   });
 
 export const getBulkPartialSuccessToast = (processed: number, total: number) =>
   i18n.translate('xpack.alertingV2.episodes.bulkActions.partialSuccessToast', {
     defaultMessage:
-      '{processed} of {total} {total, plural, one {episode} other {episodes}} updated',
+      '{processed} of {total} {total, plural, one {alert} other {alerts}} updated',
     values: { processed, total },
   });
 
 export const EPISODES_HISTOGRAM_CAP_WARNING = i18n.translate(
   'xpack.alertingV2.alertEpisodesListPage.episodesHistogram.capWarning',
   {
-    defaultMessage: 'Results may be incomplete — too many episodes in this time range.',
+    defaultMessage: 'Results may be incomplete — too many alerts in this time range.',
   }
 );
 

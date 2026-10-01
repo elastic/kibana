@@ -134,9 +134,9 @@ const formatDurationUs = (value: unknown): string => {
 };
 
 /**
- * Classic alert details flyout. Chrome (push size, header/footer/tabs) matches
- * the v2 episode flyout so rows in the unified table feel consistent; content stays
- * classic-alert specific (overview fields + fields table).
+ * Classic alert details flyout. Overlay + resizable to match the episode
+ * details chrome on the same inbox page; content stays classic-alert specific
+ * (overview fields + fields table).
  */
 export const ClassicAlertDetailsFlyout = ({
   alertId,
@@ -234,11 +234,12 @@ export const ClassicAlertDetailsFlyout = ({
 
   const flyout = (
     <EuiFlyout
-      type="push"
+      type="overlay"
+      resizable
+      ownFocus={false}
       hasAnimation
       hideCloseButton
       onClose={onClose}
-      pushMinBreakpoint="m"
       paddingSize="none"
       size="35%"
       aria-labelledby={flyoutTitleId}

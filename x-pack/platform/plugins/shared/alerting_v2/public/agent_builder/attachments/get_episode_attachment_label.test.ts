@@ -29,6 +29,6 @@ describe('getEpisodeAttachmentLabel', () => {
   });
 
   it('does not use the episode UUID when no label is available', () => {
-    expect(getEpisodeAttachmentLabel({ data: baseData })).toBe('Alert episode');
+    expect(getEpisodeAttachmentLabel({ data: baseData })).toBe('Alert');
   });
 });

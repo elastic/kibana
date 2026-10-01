@@ -6,13 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import {
   ContentList,
   ContentListFooter,
@@ -23,10 +17,10 @@ import {
 import type { ContentListItem, ContentListItemConfig } from '@kbn/content-list';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { RULE_TEMPLATES_CONTENT_LIST_ID } from '../../constants';
 import { useInstallRuleTemplate } from '../../hooks/use_install_rule_template';
 import { UserCapabilities } from '../../services/user_capabilities';
+import { RuleLibraryEmptyState } from './rule_library_empty_state';
 import {
   useRuleTemplatesDataSource,
   type RuleTemplateContentListItem,
@@ -74,29 +68,6 @@ export const RuleLibraryList = () => {
     [canWrite, installTemplate]
   );
 
-  const emptyState = (
-    <EuiEmptyPrompt
-      data-test-subj="ruleLibraryEmptyPrompt"
-      iconType="indexOpen"
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.alertingV2.ruleLibrary.emptyTitle"
-            defaultMessage="No rule templates"
-          />
-        </h2>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.alertingV2.ruleLibrary.emptyBody"
-            defaultMessage="Rule templates are provided by Fleet integrations. Update or install integrations to view available rule templates."
-          />
-        </p>
-      }
-    />
-  );
-
   return (
     <ContentListProvider
       id={RULE_TEMPLATES_CONTENT_LIST_ID}
@@ -137,7 +108,7 @@ export const RuleLibraryList = () => {
         selection: false,
       }}
     >
-      <ContentList emptyState={emptyState} data-test-subj="ruleLibraryList">
+      <ContentList emptyState={<RuleLibraryEmptyState />} data-test-subj="ruleLibraryList">
         <ContentListToolbar />
         <ContentListTable
           title={RULE_LIBRARY_LIST_TITLE}

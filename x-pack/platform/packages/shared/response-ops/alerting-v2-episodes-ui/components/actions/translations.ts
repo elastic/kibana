@@ -71,7 +71,7 @@ export const RESOLVE_ACTION_DEACTIVATE = i18n.translate(
 export const RESOLVE_ACTION_REASON = i18n.translate(
   'xpack.alertingV2.episodesUi.resolveAction.reason',
   {
-    defaultMessage: 'Updated from episodes actions UI',
+    defaultMessage: 'Updated from alerts actions UI',
   }
 );
 
@@ -177,7 +177,7 @@ export const TAGS_ACTION_TOO_MANY_TAGS_TITLE = i18n.translate(
 
 export const getTagsActionTooManyTagsBody = (maxTags: number) =>
   i18n.translate('xpack.alertingV2.episodesUi.tagsAction.tooManyTagsBody', {
-    defaultMessage: 'You can save at most {maxTags} tags per episode.',
+    defaultMessage: 'You can save at most {maxTags} tags per alert.',
     values: { maxTags },
   });
 
@@ -219,7 +219,7 @@ export const TAGS_ACTION_SELECT_NONE = i18n.translate(
 export const BULK_SNOOZE_MODAL_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.bulkSnoozeModal.title',
   {
-    defaultMessage: 'Snooze selected episodes',
+    defaultMessage: 'Snooze selected alerts',
   }
 );
 
@@ -227,7 +227,7 @@ export const BULK_SNOOZE_MODAL_TITLE = i18n.translate(
 export const BULK_TAGS_MODAL_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.bulkTagsModal.title',
   {
-    defaultMessage: 'Set alert tags for selected episodes',
+    defaultMessage: 'Set alert tags for selected alerts',
   }
 );
 
@@ -235,7 +235,7 @@ export const BULK_TAGS_MODAL_REPLACE_WARNING = i18n.translate(
   'xpack.alertingV2.episodesUi.bulkTagsModal.replaceWarning',
   {
     defaultMessage:
-      'These alert tags will replace any existing alert tags on all selected episodes.',
+      'These alert tags will replace any existing alert tags on all selected alerts.',
   }
 );
 
@@ -264,7 +264,7 @@ export const BULK_TAGS_MODAL_SAVE = i18n.translate(
 export const ASSIGNEE_PANEL_EMPTY_LIST_TITLE = (totalEpisodes: number) =>
   i18n.translate('xpack.alertingV2.episodes.assignees.panel.emptyListTitle', {
     defaultMessage:
-      'The selected {totalEpisodes, plural, =1 {episode does} other {episodes do}} not have any assigned users',
+      'The selected {totalEpisodes, plural, =1 {alert does} other {alerts do}} not have any assigned users',
     values: { totalEpisodes },
   });
 
@@ -340,7 +340,7 @@ export const ASSIGNEE_PANEL_APPLY = i18n.translate(
 
 export const ASSIGNEE_PANEL_MODAL_ARIA_LABEL = (totalEpisodes: number) =>
   i18n.translate('xpack.alertingV2.episodes.assignees.panel.modalAriaLabel', {
-    defaultMessage: 'Edit assignee of {totalEpisodes, plural, =1 {# episode} other {# episodes}}',
+    defaultMessage: 'Edit assignee of {totalEpisodes, plural, =1 {# alert} other {# alerts}}',
     values: { totalEpisodes },
   });
 

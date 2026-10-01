@@ -31,13 +31,13 @@ describe('getDispatchSummary', () => {
   describe('per_episode mode', () => {
     it('describes the status change strategy', () => {
       expect(summary({ throttleStrategy: 'on_status_change' })).toBe(
-        'Sends one notification when an episode opens and one when it recovers.'
+        'Sends one notification when an alert opens and one when it recovers.'
       );
     });
 
     it('describes status change + repeat with an interval', () => {
       expect(summary({ throttleStrategy: 'per_status_interval', throttleInterval: '5m' })).toBe(
-        'Sends a notification on status change and repeats every 5 minutes while the episode remains active.'
+        'Sends a notification on status change and repeats every 5 minutes while the alert remains active.'
       );
     });
 
@@ -102,25 +102,25 @@ describe('getDispatchSummary', () => {
     it('describes the throttle strategy with an interval', () => {
       expect(
         summary({ groupingMode: 'all', throttleStrategy: 'time_interval', throttleInterval: '1h' })
-      ).toBe('Combines all matching episodes into one notification at most every 1 hour.');
+      ).toBe('Combines all matching alerts into one notification at most every 1 hour.');
     });
 
     it('describes the throttle strategy without an interval', () => {
       expect(
         summary({ groupingMode: 'all', throttleStrategy: 'time_interval', throttleInterval: '' })
-      ).toBe('Combines all matching episodes into one notification.');
+      ).toBe('Combines all matching alerts into one notification.');
     });
 
     it('describes the every-evaluation strategy', () => {
       expect(summary({ groupingMode: 'all', throttleStrategy: 'every_time' })).toBe(
-        'Combines all matching episodes into one notification on every rule evaluation. No limit on notification frequency.'
+        'Combines all matching alerts into one notification on every rule evaluation. No limit on notification frequency.'
       );
     });
   });
 
   it('formats different duration units', () => {
     expect(summary({ throttleStrategy: 'per_status_interval', throttleInterval: '30s' })).toBe(
-      'Sends a notification on status change and repeats every 30 seconds while the episode remains active.'
+      'Sends a notification on status change and repeats every 30 seconds while the alert remains active.'
     );
   });
 });
@@ -149,10 +149,10 @@ describe('NotificationSummary', () => {
 
     expect(screen.getByText('Notification summary')).toBeInTheDocument();
     expect(screen.getByTestId('notificationSummaryModeText')).toHaveTextContent(
-      'Each matching episode triggers its own notification'
+      'Each matching alert triggers its own notification'
     );
     expect(screen.getByTestId('notificationSummaryOutcomeText')).toHaveTextContent(
-      'Sends one notification when an episode opens and one when it recovers.'
+      'Sends one notification when an alert opens and one when it recovers.'
     );
   });
 
@@ -160,7 +160,7 @@ describe('NotificationSummary', () => {
     renderSummary({ groupingMode: 'per_field', groupBy: [], throttleStrategy: 'time_interval' });
 
     expect(screen.getByTestId('notificationSummaryModeText')).toHaveTextContent(
-      'Bundles episodes that share the same field value'
+      'Bundles alerts that share the same field value'
     );
     expect(screen.getByTestId('notificationSummaryOutcomeText')).toHaveTextContent(
       'Select a field in Group by to configure group notifications.'

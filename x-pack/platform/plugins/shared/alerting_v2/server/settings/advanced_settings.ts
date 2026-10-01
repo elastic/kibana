@@ -43,9 +43,9 @@ export const alertingGlobalAdvancedSettings = {
     experimental: true,
   },
   [ALERTING_V1_ENABLED_SETTING_ID]: {
-    category: [ALERTING_V2_CATEGORY],
+    category: [ALERTING_CATEGORY],
     name: i18n.translate('xpack.alertingVTwo.v1EnabledSettingName', {
-      defaultMessage: 'Alerts v1 classic experience',
+      defaultMessage: 'Standard alerts experience',
     }),
     type: 'boolean',
     value: false,

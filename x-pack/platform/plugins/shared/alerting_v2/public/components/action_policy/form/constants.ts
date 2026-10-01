@@ -15,7 +15,7 @@ export const GROUPING_MODE_OPTIONS: Array<{ id: GroupingMode; label: string }> =
     label: i18n.translate(
       'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perEpisode',
       {
-        defaultMessage: 'Episode',
+        defaultMessage: 'Alert',
       }
     ),
   },
@@ -38,19 +38,19 @@ export const GROUPING_MODE_HELP_TEXT: Record<GroupingMode, string> = {
     'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perEpisode.help',
     {
       defaultMessage:
-        'Each matching episode triggers its own notification. Best for when you need individual visibility into each issue.',
+        'Each matching alert triggers its own notification. Best for when you need individual visibility into each issue.',
     }
   ),
   per_field: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perGroup.help',
     {
       defaultMessage:
-        'Bundles episodes that share the same field value into one notification per unique value. Best for reducing noise when a rule produces many related episodes, such as one per service or host.',
+        'Bundles alerts that share the same field value into one notification per unique value. Best for reducing noise when a rule produces many related alerts, such as one per service or host.',
     }
   ),
   all: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.digest.help', {
     defaultMessage:
-      "Combines all matching episodes into one notification on a set schedule. Best for periodic summaries when individual alerts aren't necessary.",
+      "Combines all matching alerts into one notification on a set schedule. Best for periodic summaries when individual alerts aren't necessary.",
   }),
 };
 
@@ -114,21 +114,21 @@ export const PER_EPISODE_STRATEGY_HELP_TEXT: Partial<Record<ThrottleStrategy, st
     'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.onStatusChange.help',
     {
       defaultMessage:
-        'Notifies once when an episode opens and once when it recovers. No repeat notifications while it remains active.',
+        'Notifies once when an alert opens and once when it recovers. No repeat notifications while it remains active.',
     }
   ),
   per_status_interval: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.perStatusInterval.help',
     {
       defaultMessage:
-        'Notifies on status change, then resends at a regular interval while the episode remains active. Use this when issues can stay open for long periods and you want ongoing notifications until they resolve.',
+        'Notifies on status change, then resends at a regular interval while the alert remains active. Use this when issues can stay open for long periods and you want ongoing notifications until they resolve.',
     }
   ),
   every_time: i18n.translate(
     'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.everyTime.help',
     {
       defaultMessage:
-        'Sends a notification on every rule evaluation per episode. Use only for infrequent rule schedules or when you need a full audit trail.',
+        'Sends a notification on every rule evaluation per alert. Use only for infrequent rule schedules or when you need a full audit trail.',
     }
   ),
 };
@@ -185,7 +185,7 @@ export const EPISODE_STATUS_FILTER_OPTIONS: EpisodeStatusFilterOption[] = [
     badgeColor: 'danger',
     description: i18n.translate(
       'xpack.alertingV2.actionPolicy.form.quickFilters.status.active.description',
-      { defaultMessage: 'Episode is confirmed and ongoing' }
+      { defaultMessage: 'Alert is confirmed and ongoing' }
     ),
   },
   {
@@ -219,7 +219,7 @@ export const EPISODE_STATUS_FILTER_OPTIONS: EpisodeStatusFilterOption[] = [
     badgeColor: 'default',
     description: i18n.translate(
       'xpack.alertingV2.actionPolicy.form.quickFilters.status.inactive.description',
-      { defaultMessage: 'Episode is fully resolved' }
+      { defaultMessage: 'Alert is fully resolved' }
     ),
   },
 ];

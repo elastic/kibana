@@ -117,7 +117,7 @@ describe('NotificationControlsSection', () => {
     expect(screen.getByTestId('frequencyHelpButton')).toBeInTheDocument();
     expect(
       screen.queryByText(
-        'Notifies once when an episode opens and once when it recovers. No repeat notifications while it remains active.'
+        'Notifies once when an alert opens and once when it recovers. No repeat notifications while it remains active.'
       )
     ).not.toBeInTheDocument();
   });

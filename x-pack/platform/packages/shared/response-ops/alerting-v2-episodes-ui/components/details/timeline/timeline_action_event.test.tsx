@@ -50,11 +50,11 @@ describe('AlertEpisodeTimelineActionEvent', () => {
   });
 
   it.each([
-    ['ack', 'acknowledged the episode'],
-    ['unack', 'unacknowledged the episode'],
-    ['unsnooze', 'unsnoozed the episode'],
-    ['deactivate', 'resolved the episode'],
-    ['activate', 'reopened the episode'],
+    ['ack', 'acknowledged the alert'],
+    ['unack', 'unacknowledged the alert'],
+    ['unsnooze', 'unsnoozed the alert'],
+    ['deactivate', 'resolved the alert'],
+    ['activate', 'reopened the alert'],
   ])('renders a complete sentence for the %s action', (actionType, sentence) => {
     renderEvent(makeEntry({ action_type: actionType }));
 
@@ -71,7 +71,7 @@ describe('AlertEpisodeTimelineActionEvent', () => {
     renderEvent(makeEntry({ action_type: 'assign', assignee_uid: 'user-2' }));
 
     expect(screen.getByTestId('alertingV2TimelineActionAssignee')).toHaveTextContent(
-      'assigned the episode to user-2'
+      'assigned the alert to user-2'
     );
   });
 
@@ -80,7 +80,7 @@ describe('AlertEpisodeTimelineActionEvent', () => {
 
     // The avatar renders the assignee's initials next to their name
     expect(screen.getByTestId('alertingV2TimelineActionAssignee')).toHaveTextContent(
-      'assigned the episode to JDJane Doe'
+      'assigned the alert to JDJane Doe'
     );
   });
 
@@ -117,7 +117,7 @@ describe('AlertEpisodeTimelineActionEvent', () => {
   it('renders the snoozed-indefinitely sentence when snoozing without an expiry', () => {
     renderEvent(makeEntry({ action_type: 'snooze', expiry: null }));
 
-    expect(screen.getByText('snoozed the episode indefinitely')).toBeInTheDocument();
+    expect(screen.getByText('snoozed the alert indefinitely')).toBeInTheDocument();
   });
 
   it('renders the snooze duration and expiry when snoozing with an expiry', () => {
@@ -147,7 +147,7 @@ describe('AlertEpisodeTimelineActionEvent', () => {
   it('renders the reason as a suffix separated from the sentence', () => {
     renderEvent(makeEntry({ action_type: 'deactivate', reason: 'Handled by on-call' }));
 
-    expect(screen.getByText('resolved the episode')).toBeInTheDocument();
+    expect(screen.getByText('resolved the alert')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2TimelineActionReason')).toHaveTextContent(
       '· Handled by on-call'
     );

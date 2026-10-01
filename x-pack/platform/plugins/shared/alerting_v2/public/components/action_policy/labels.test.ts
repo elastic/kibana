@@ -9,7 +9,7 @@ import { getFrequencyLabel, getGroupingModeLabel } from './labels';
 
 describe('getGroupingModeLabel', () => {
   it('returns the Episode label for per_episode', () => {
-    expect(getGroupingModeLabel('per_episode')).toBe('Episode');
+    expect(getGroupingModeLabel('per_episode')).toBe('Alert');
   });
 
   it('returns the Group label for per_field', () => {

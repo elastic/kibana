@@ -13,5 +13,5 @@ export const getEpisodeAttachmentLabel = (
 ): string =>
   attachment.data?.['episode.label'] ??
   i18n.translate('xpack.alertingV2.episodeAttachment.fallbackLabel', {
-    defaultMessage: 'Alert episode',
+    defaultMessage: 'Alert',
   });

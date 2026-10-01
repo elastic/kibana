@@ -735,13 +735,13 @@ describe('AlertEpisodesListPage fetch errors', () => {
     await waitFor(() => {
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'classic alerts failed' }),
-        expect.objectContaining({ title: 'Failed to fetch alert episodes for v1 alerts' })
+        expect.objectContaining({ title: 'Failed to fetch alerts for v1 alerts' })
       );
     });
     expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertingV2EpisodesListFetchError')).not.toBeInTheDocument();
     expect(
-      screen.queryByText('Failed to fetch alert episodes for v1 alerts')
+      screen.queryByText('Failed to fetch alerts for v1 alerts')
     ).not.toBeInTheDocument();
   });
 
@@ -772,7 +772,7 @@ describe('AlertEpisodesListPage fetch errors', () => {
     await waitFor(() => {
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'v2 episodes failed' }),
-        expect.objectContaining({ title: 'Failed to fetch alert episodes for v2 alerts' })
+        expect.objectContaining({ title: 'Failed to fetch alerts for v2 alerts' })
       );
     });
     expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();

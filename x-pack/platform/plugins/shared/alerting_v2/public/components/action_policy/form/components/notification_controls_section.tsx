@@ -120,7 +120,7 @@ export const NotificationControlsSection = () => {
               error={error?.message}
               helpText={i18n.translate('xpack.alertingV2.actionPolicy.form.groupBy.helpText', {
                 defaultMessage:
-                  'Episodes that share these field values are grouped into a single notification.',
+                  'Alerts that share these field values are grouped into a single notification.',
               })}
             >
               <EuiComboBox

@@ -42,7 +42,7 @@ export const getDispatchSummary = ({
           'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.statusChange',
           {
             defaultMessage:
-              'Sends one notification when an episode opens and one when it recovers.',
+              'Sends one notification when an alert opens and one when it recovers.',
           }
         );
       case 'per_status_interval':
@@ -58,7 +58,7 @@ export const getDispatchSummary = ({
           'xpack.alertingV2.actionPolicy.form.notificationSummary.episode.statusChangeRepeat',
           {
             defaultMessage:
-              'Sends a notification on status change and repeats every {interval} while the episode remains active.',
+              'Sends a notification on status change and repeats every {interval} while the alert remains active.',
             values: { interval },
           }
         );
@@ -120,7 +120,7 @@ export const getDispatchSummary = ({
           return i18n.translate(
             'xpack.alertingV2.actionPolicy.form.notificationSummary.digest.throttleNoInterval',
             {
-              defaultMessage: 'Combines all matching episodes into one notification.',
+              defaultMessage: 'Combines all matching alerts into one notification.',
             }
           );
         }
@@ -128,7 +128,7 @@ export const getDispatchSummary = ({
           'xpack.alertingV2.actionPolicy.form.notificationSummary.digest.throttle',
           {
             defaultMessage:
-              'Combines all matching episodes into one notification at most every {interval}.',
+              'Combines all matching alerts into one notification at most every {interval}.',
             values: { interval },
           }
         );
@@ -137,7 +137,7 @@ export const getDispatchSummary = ({
           'xpack.alertingV2.actionPolicy.form.notificationSummary.digest.everyEvaluation',
           {
             defaultMessage:
-              'Combines all matching episodes into one notification on every rule evaluation. No limit on notification frequency.',
+              'Combines all matching alerts into one notification on every rule evaluation. No limit on notification frequency.',
           }
         );
     }

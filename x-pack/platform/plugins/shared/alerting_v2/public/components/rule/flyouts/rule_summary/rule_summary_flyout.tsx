@@ -49,6 +49,7 @@ export interface RuleSummaryFlyoutProps {
   canWrite?: boolean;
   isToggleLoading?: boolean;
   session?: EuiFlyoutProps['session'];
+  ownFocus?: EuiFlyoutProps['ownFocus'];
 }
 
 export const RuleSummaryFlyout = ({
@@ -64,6 +65,7 @@ export const RuleSummaryFlyout = ({
   canWrite = true,
   isToggleLoading = false,
   session,
+  ownFocus = false,
 }: RuleSummaryFlyoutProps) => {
   const chrome = useService(CoreStart('chrome'));
   const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
@@ -132,6 +134,7 @@ export const RuleSummaryFlyout = ({
         type="overlay"
         size="m"
         resizable
+        ownFocus={ownFocus}
         session={session}
         onClose={onClose}
         data-test-subj="ruleSummaryFlyout"

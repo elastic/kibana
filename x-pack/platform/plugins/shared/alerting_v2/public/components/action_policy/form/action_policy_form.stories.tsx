@@ -87,7 +87,7 @@ export const DigestMode: Story = {
   args: {
     defaultValues: {
       name: 'Digest summary',
-      description: 'Bundles all episodes into a single digest',
+      description: 'Bundles all alerts into a single digest',
       matcher: null,
       groupingMode: 'all',
       groupBy: [],

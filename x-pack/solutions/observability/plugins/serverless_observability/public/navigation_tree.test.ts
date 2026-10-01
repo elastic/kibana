@@ -224,8 +224,7 @@ describe('Navigation Tree', () => {
       expect.objectContaining({ link: 'management:episodes', title: 'Alerts' }),
       expect.objectContaining({
         link: 'observability-overview:alerts',
-        title: 'Alerts',
-        badgeType: 'v1Only',
+        title: 'Alerts (Standard)',
       }),
     ]);
   });

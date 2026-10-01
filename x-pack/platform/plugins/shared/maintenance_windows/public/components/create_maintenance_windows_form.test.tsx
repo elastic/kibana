@@ -236,19 +236,17 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(timezoneInput).toHaveValue('America/Los_Angeles');
   });
 
-  it('should show Kibana standard and ES|QL alerting scope options', async () => {
+  it('should show "Filter alerts" toggle', async () => {
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-    expect(await screen.findByTestId('maintenanceWindowScopeSection')).toBeInTheDocument();
-    expect(screen.getByTestId('maintenanceWindowScopeStandardAlerting')).toBeInTheDocument();
-    expect(screen.getByTestId('maintenanceWindowScopeEsqlAlerting')).toBeInTheDocument();
+    expect(await screen.findByTestId('maintenanceWindowScopedQuerySwitch')).toBeInTheDocument();
   });
 
-  it('should show scope options even when no rule types', async () => {
+  it('should show "Filter alerts" toggle even when no rule types', async () => {
     getRuleTypes.mockResolvedValue([]);
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-    expect(await screen.findByTestId('maintenanceWindowScopeSection')).toBeInTheDocument();
+    expect(await screen.findByTestId('maintenanceWindowScopedQuerySwitch')).toBeInTheDocument();
   });
 
   it('should show warning correctly when scoped query filter is on and scope query is set', async () => {
@@ -377,7 +375,7 @@ describe('CreateMaintenanceWindowForm', () => {
       body: { statusCode: 400, message },
     });
 
-    it('shows "Invalid episode filter." under the Episodes field (v2) when attributes name alertingV2', async () => {
+    it('shows "Invalid alert filter." under the ES|QL alerting field (v2) when attributes name alertingV2', async () => {
       appMockRenderer.render(
         <CreateMaintenanceWindowForm
           {...formProps}
@@ -400,7 +398,7 @@ describe('CreateMaintenanceWindowForm', () => {
       capturedOnError!(buildError([{ scope: 'alertingV2', message: 'parse error' }]));
 
       await waitFor(() => {
-        expect(screen.getByText('Invalid episode filter.')).toBeInTheDocument();
+        expect(screen.getByText('Invalid alert filter.')).toBeInTheDocument();
       });
       // v1 field must NOT show an error.
       expect(screen.queryByText('Invalid scoped query.')).not.toBeInTheDocument();
@@ -415,7 +413,7 @@ describe('CreateMaintenanceWindowForm', () => {
       await waitFor(() => {
         expect(screen.getByText('Invalid scoped query.')).toBeInTheDocument();
       });
-      expect(screen.queryByText('Invalid episode filter.')).not.toBeInTheDocument();
+      expect(screen.queryByText('Invalid alert filter.')).not.toBeInTheDocument();
     });
 
     it('does not show any inline error when attributes are absent', async () => {
@@ -428,7 +426,7 @@ describe('CreateMaintenanceWindowForm', () => {
       // Give React a tick to settle; neither error string should be rendered.
       await waitFor(() => {
         expect(screen.queryByText('Invalid scoped query.')).not.toBeInTheDocument();
-        expect(screen.queryByText('Invalid episode filter.')).not.toBeInTheDocument();
+        expect(screen.queryByText('Invalid alert filter.')).not.toBeInTheDocument();
       });
     });
   });

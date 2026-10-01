@@ -15,23 +15,23 @@ const decodeAppState = (url: string): unknown => {
   return (decodeRison(raw) as Record<string, unknown>)?.episodesList;
 };
 
-describe('paths.alertEpisodesListHref', () => {
-  it('returns the base episodes path when called with no options', () => {
+describe('paths.alertAlertsListHref', () => {
+  it('returns the base alerts path when called with no options', () => {
     expect(paths.alertEpisodesListHref()).toBe(ALERTING_V2_EPISODES_BASE_PATH);
   });
 
-  it('returns the base episodes path when all filter fields are empty', () => {
+  it('returns the base alerts path when all filter fields are empty', () => {
     expect(paths.alertEpisodesListHref({ filters: {}, timeRange: undefined })).toBe(
       ALERTING_V2_EPISODES_BASE_PATH
     );
   });
 
-  it('encodes ruleId into _a.episodesList', () => {
+  it('encodes ruleId into _a.alertsList', () => {
     const url = paths.alertEpisodesListHref({ filters: { ruleId: 'rule-1' } });
     expect(decodeAppState(url)).toMatchObject({ ruleId: 'rule-1' });
   });
 
-  it('encodes groupHash and groupingValues into _a.episodesList', () => {
+  it('encodes groupHash and groupingValues into _a.alertsList', () => {
     const url = paths.alertEpisodesListHref({
       filters: {
         groupHash: 'abc123',
@@ -44,7 +44,7 @@ describe('paths.alertEpisodesListHref', () => {
     });
   });
 
-  it('encodes timeRange as timeFrom/timeTo inside _a.episodesList, not in _g', () => {
+  it('encodes timeRange as timeFrom/timeTo inside _a.alertsList, not in _g', () => {
     const url = paths.alertEpisodesListHref({
       filters: { ruleId: 'r1' },
       timeRange: { from: 'now-7d', to: 'now' },

@@ -39,7 +39,7 @@ describe('disableAlertingManagementUi', () => {
     const section = createSectionWithApps([
       'rules',
       'rule_library',
-      'episodes',
+      'alerts',
       'action_policies',
       'execution_history',
     ]);

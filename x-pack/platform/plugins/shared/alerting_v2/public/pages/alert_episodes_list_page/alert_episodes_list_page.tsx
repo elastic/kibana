@@ -63,7 +63,6 @@ import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/component
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
-import { experimentalBadge } from '../../components/experimental_badge';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useAlertingLocators } from '../../application/locator_context';
@@ -87,6 +86,7 @@ import {
 } from '../../utils/filter_episode_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useManageRulesHref } from '../../application/manage_rules_href_context';
+import { InboxAnnouncementBanner } from './inbox_announcement_banner';
 
 const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
   primaryActionItem: {
@@ -600,11 +600,11 @@ const AlertEpisodesListPageContent = () => {
       <AppHeader
         sticky={false}
         title={i18n.EPISODES_LIST_PAGE_TITLE}
-        badges={[experimentalBadge]}
         spacing="bleed"
         menu={episodesMenu}
       />
       <EuiSpacer size="m" />
+      <InboxAnnouncementBanner />
 
       <EuiFlexGroup
         direction="column"

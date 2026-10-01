@@ -168,7 +168,7 @@ describe('AlertEpisodeMetadataSection', () => {
       expect(screen.getByTestId('alertingV2EpisodeMetadataTabEmpty')).toBeInTheDocument()
     );
     expect(
-      screen.getByText('No evaluation data is available for this episode.')
+      screen.getByText('No evaluation data is available for this alert.')
     ).toBeInTheDocument();
   });
 

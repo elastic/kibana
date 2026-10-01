@@ -202,7 +202,7 @@ export const AlertTimelineSection: React.FC = () => {
             title={
               <h4>
                 {i18n.translate('xpack.alertingV2.alertTimeline.errorTitle', {
-                  defaultMessage: 'Could not load episodes',
+                  defaultMessage: 'Could not load alerts',
                 })}
               </h4>
             }
@@ -226,14 +226,14 @@ export const AlertTimelineSection: React.FC = () => {
             title={
               <h4>
                 {i18n.translate('xpack.alertingV2.alertTimeline.emptyTitle', {
-                  defaultMessage: 'No episodes in this window',
+                  defaultMessage: 'No alerts in this window',
                 })}
               </h4>
             }
             body={
               <EuiText size="s">
                 {i18n.translate('xpack.alertingV2.alertTimeline.emptyBody', {
-                  defaultMessage: 'Episodes appear here once the rule fires.',
+                  defaultMessage: 'Alerts appear here once the rule fires.',
                 })}
               </EuiText>
             }

@@ -137,13 +137,13 @@ export const SCOPE_DESCRIPTION = i18n.translate('xpack.maintenanceWindows.scope.
 });
 
 export const ALERTS_SCOPE_TITLE = i18n.translate('xpack.maintenanceWindows.scope.alerts.title', {
-  defaultMessage: 'Alerts',
+  defaultMessage: 'Standard alerting',
 });
 
 export const ALERTS_SCOPE_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.scope.alerts.description',
   {
-    defaultMessage: 'Suppress alert notifications during maintenance',
+    defaultMessage: 'Suppress standard alerts notifications during maintenance',
   }
 );
 
@@ -157,35 +157,35 @@ export const FILTER_ALERTS_SUBTITLE = i18n.translate(
 export const ALERTING_V2_SCOPE_TITLE = i18n.translate(
   'xpack.maintenanceWindows.scope.alertingV2.title',
   {
-    defaultMessage: 'Episodes',
+    defaultMessage: 'ES|QL alerting',
   }
 );
 
 export const ALERTING_V2_SCOPE_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.scope.alertingV2.description',
   {
-    defaultMessage: 'Suppress alert episode notifications during maintenance',
+    defaultMessage: 'Suppress ESQL alerts notifications during maintenance',
   }
 );
 
 export const FILTER_ALERTING_V2_SUBTITLE = i18n.translate(
   'xpack.maintenanceWindows.scope.alertingV2.filterEpisodesSubtitle',
   {
-    defaultMessage: 'Filter episodes',
+    defaultMessage: 'Filter alerts',
   }
 );
 
 export const CREATE_FORM_ALERTING_V2_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
   'xpack.maintenanceWindows.createForm.alertingV2Query.emptyErrorMessage',
   {
-    defaultMessage: 'Episode filter is required.',
+    defaultMessage: 'Alert filter is required.',
   }
 );
 
 export const CREATE_FORM_ALERTING_V2_QUERY_INVALID_ERROR_MESSAGE = i18n.translate(
   'xpack.maintenanceWindows.createForm.alertingV2Query.invalidErrorMessage',
   {
-    defaultMessage: 'Invalid episode filter.',
+    defaultMessage: 'Invalid alert filter.',
   }
 );
 
@@ -199,7 +199,7 @@ export const TECHNICAL_PREVIEW_LABEL = i18n.translate(
 export const CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER = i18n.translate(
   'xpack.maintenanceWindows.createForm.alertingV2FiltersPlaceholder',
   {
-    defaultMessage: 'Episode filters (e.g. data.host.name:"my-host" or data.severity:"low")',
+    defaultMessage: 'Alert filters (e.g. data.host.name:"my-host" or data.severity:"low")',
   }
 );
 
@@ -251,70 +251,6 @@ export const CREATE_FORM_SOLUTION_STACK_RULES = i18n.translate(
   'xpack.maintenanceWindows.createForm.solutionIds.stackRules',
   {
     defaultMessage: 'Stack rules',
-  }
-);
-
-export const CREATE_FORM_SCOPE_TITLE = i18n.translate(
-  'xpack.maintenanceWindows.createForm.scope.title',
-  {
-    defaultMessage: 'Scope',
-  }
-);
-
-export const CREATE_FORM_SCOPE_DESCRIPTION = i18n.translate(
-  'xpack.maintenanceWindows.createForm.scope.description',
-  {
-    defaultMessage:
-      'Select the scope of this maintenance window by choosing what to suppress during maintenance',
-  }
-);
-
-export const CREATE_FORM_SCOPE_STANDARD_ALERTING_TITLE = i18n.translate(
-  'xpack.maintenanceWindows.createForm.scope.standardAlerting.title',
-  {
-    defaultMessage: 'Kibana standard alerting',
-  }
-);
-
-export const CREATE_FORM_SCOPE_STANDARD_ALERTING_DESCRIPTION = i18n.translate(
-  'xpack.maintenanceWindows.createForm.scope.standardAlerting.description',
-  {
-    defaultMessage: 'Suppress notifications from Kibana standard alerting during maintenance',
-  }
-);
-
-export const CREATE_FORM_SCOPE_STANDARD_ALERTING_FILTER_LABEL = i18n.translate(
-  'xpack.maintenanceWindows.createForm.scope.standardAlerting.filterLabel',
-  {
-    defaultMessage: 'Filter alerts',
-  }
-);
-
-export const CREATE_FORM_SCOPE_ESQL_ALERTING_TITLE = i18n.translate(
-  'xpack.maintenanceWindows.createForm.scope.esqlAlerting.title',
-  {
-    defaultMessage: 'Kibana ES|QL alerting',
-  }
-);
-
-export const CREATE_FORM_SCOPE_ESQL_ALERTING_DESCRIPTION = i18n.translate(
-  'xpack.maintenanceWindows.createForm.scope.esqlAlerting.description',
-  {
-    defaultMessage: 'Suppress notifications from Kibana ES|QL alerting during maintenance',
-  }
-);
-
-export const CREATE_FORM_SCOPE_ESQL_ALERTING_FILTER_LABEL = i18n.translate(
-  'xpack.maintenanceWindows.createForm.scope.esqlAlerting.filterLabel',
-  {
-    defaultMessage: 'Filter alerts',
-  }
-);
-
-export const CREATE_FORM_SCOPE_ESQL_ALERTING_FILTER_PLACEHOLDER = i18n.translate(
-  'xpack.maintenanceWindows.createForm.scope.esqlAlerting.filterPlaceholder',
-  {
-    defaultMessage: 'Search alerts (e.g. data.host.name:"my-host" or data.severity:"low")',
   }
 );
 
@@ -601,7 +537,7 @@ export const SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE = i18n.translate(
   'xpack.maintenanceWindows.saveWithoutFiltersModal.subtitle',
   {
     defaultMessage:
-      'No scope is selected, so this maintenance window will not suppress any notifications. Enable at least one scope to start suppressing alerts or episodes.',
+      'No scope is selected, so this maintenance window will not suppress any notifications. Enable at least one scope to start suppressing alerts.',
   }
 );
 
@@ -632,10 +568,10 @@ export const TABLE_SCOPE = i18n.translate('xpack.maintenanceWindows.table.scope'
 
 export const TABLE_SCOPE_BADGE_ALERTS = i18n.translate(
   'xpack.maintenanceWindows.table.scopeBadgeAlerts',
-  { defaultMessage: 'Alerts' }
+  { defaultMessage: 'Standard alerting' }
 );
 
 export const TABLE_SCOPE_BADGE_EPISODES = i18n.translate(
   'xpack.maintenanceWindows.table.scopeBadgeEpisodes',
-  { defaultMessage: 'Episodes' }
+  { defaultMessage: 'ES|QL alerting' }
 );
