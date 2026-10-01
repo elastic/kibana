@@ -223,7 +223,6 @@ export const WorkspaceLayoutComponent = ({
           </div>
 
           <ControlPanel
-            runtimeGraph={runtimeGraph}
             control={control}
             selectedNodeId={selectedNodeId.current}
             colors={colorChoices}
