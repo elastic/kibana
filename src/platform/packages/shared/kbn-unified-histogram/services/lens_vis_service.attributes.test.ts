@@ -17,6 +17,7 @@ import {
 } from '../__mocks__/data_view_with_timefield';
 import { currentSuggestionMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
+import { UnifiedHistogramExternalVisContextStatus, UnifiedHistogramSuggestionType } from '../types';
 
 describe('LensVisService attributes', () => {
   const dataView: DataView = dataViewWithTimefieldMock;
@@ -813,6 +814,58 @@ describe('LensVisService attributes', () => {
       isPlainRecord: true,
     });
     expect(lensVis.visContext?.attributes.title).toBe(currentSuggestionMock.title);
+  });
+
+  it('should reuse an unchanged ES|QL histogram whose query is stored only in Lens layers', async () => {
+    const timeRange = {
+      from: '2022-11-17T00:00:00.000Z',
+      to: '2022-11-17T12:00:00.000Z',
+    };
+    const { lensService, visContext } = await getLensVisMock({
+      filters: [],
+      query: queryEsql,
+      dataView: dataViewWithAtTimefieldMock,
+      timeInterval,
+      timeRange,
+      breakdownField: undefined,
+      columns: [],
+      isPlainRecord: true,
+      allSuggestions: [],
+    });
+
+    expect(visContext?.suggestionType).toBe(UnifiedHistogramSuggestionType.histogramForESQL);
+    expect(visContext?.attributes.state.query).toBeUndefined();
+    expect(getRepresentativeQuery(visContext?.attributes)).toStrictEqual({
+      esql: `from logstash-* | limit 10
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)`,
+    });
+    expect(visContext?.requestData).toStrictEqual({
+      dataViewId: dataViewWithAtTimefieldMock.id,
+      timeField: '@timestamp',
+      timeInterval: undefined,
+      breakdownField: undefined,
+    });
+
+    const onVisContextChanged = jest.fn();
+    lensService.update({
+      queryParams: {
+        dataView: dataViewWithAtTimefieldMock,
+        query: queryEsql,
+        filters: [],
+        timeRange,
+        columns: [],
+        isPlainRecord: true,
+      },
+      timeInterval,
+      breakdownField: undefined,
+      externalVisContext: visContext,
+      onVisContextChanged,
+    });
+
+    expect(onVisContextChanged).toHaveBeenCalledWith(
+      visContext,
+      UnifiedHistogramExternalVisContextStatus.applied
+    );
   });
 
   it('should use the correct histogram query when no suggestion passed', async () => {
