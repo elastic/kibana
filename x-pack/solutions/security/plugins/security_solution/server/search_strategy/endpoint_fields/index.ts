@@ -9,7 +9,7 @@ import { from } from 'rxjs';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 
-import { requestIndexFieldSearch } from '@kbn/timelines-plugin/server/search_strategy/index_fields';
+import { requestIndexFieldSearch } from '../../lib/timelines_server/search_strategy/index_fields';
 
 import { eventsIndexPattern, METADATA_UNITED_INDEX } from '../../../common/endpoint/constants';
 import type {
@@ -36,7 +36,7 @@ export const endpointFieldsProvider = (
   // them to createFieldItem to reduce the amount of work done as much as possible
   const beatFields: BeatFields =
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('@kbn/timelines-plugin/server/utils/beat_schema/fields.json').fieldsBeat;
+    require('../../lib/timelines_server/utils/beat_schema/fields.json').fieldsBeat;
 
   return {
     search: (request, _, deps) =>
