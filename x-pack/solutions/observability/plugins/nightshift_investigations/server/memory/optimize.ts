@@ -71,23 +71,15 @@ Extract a fact only if a tool result in the investigation shows it. The final an
 - Information only relevant to this specific request (e.g. the single alert fingerprint being investigated).
 - Ids from this run (trace, span, request, alert, or document ids).
 
-**TIME OF OBSERVATION** — the environment changes, so a memory must say when each changeable claim was true:
-- Any claim that can change over time (counts, rates, latencies, percentiles, error levels, versions, config values, which component is slowest) states when it was observed: the absolute UTC time or window of the data, with dates (e.g. "observed 2026-09-29T18:46–2026-09-30T18:46 UTC"). Take it from the tool calls and results; if they do not show it, use the run time given below.
-- Never write relative times such as "current window", "prior 21 hours", "now", or "recently".
-- A problem that has stopped is written in the past tense, with when it was observed and when it stopped.
-- Lead with the lasting pattern the measurements show, then the dated measurements that support it. Keep only the numbers that support the pattern; a table of every measurement is not a memory.
-- Structural facts that do not change from run to run (ownership, dependencies, naming, topology) need no time.
-
-**NEW OR REPLACE** — every entry has a title (its topic), content, replaces, and note. A writer turns each entry into the stored memory, and every memory in replaces is archived once it is written.
-- New topic: replaces is empty, content holds the facts, note is empty.
-- This run corrects or extends a recalled memory: replaces lists its id. content holds only what this run adds or corrects; the writer keeps what is still right in the replaced memory. note says what this run showed and what in the replaced memory is wrong or outdated. Read the replaced memory sentence by sentence: a claim written as ongoing ("the clock runs 1 s behind", "errors occur") is outdated when this run shows the problem has stopped, even if it was true when written, and note must say so.
-- Several recalled memories cover the same topic: replaces lists all of them. content holds anything this run adds, or is empty. note says what they share and anything that conflicts.
-- Replace a memory only when this run's evidence justifies it. A recalled memory that is still right and complete needs no entry. A memory is not still right if it states as ongoing a problem this run shows has stopped, or states as current a value this run measured differently: replace it. If note would say the memory needs no change, propose no entry for it.
-- The time-of-observation rules apply to replacing entries too: content dates this run's observations, and note says which replaced claims they supersede. The writer keeps earlier observations only as one-line summaries; note never asks to keep them in full. Compare observations from different windows only if they measure the same thing the same way.
-- When two recalled memories cover the same topic or the same data, replace both with one entry instead of leaving them side by side.
+**NEW OR REPLACE** — you choose the topics; you do not write the memories. Every entry has a title (its topic), keywords, and replaces. A writer then writes each entry's content from the transcript and the memories it replaces, and every memory in replaces is archived once it is written.
+- New topic: replaces is empty.
+- This run corrects or extends a recalled memory: replaces lists its id. Read the recalled memory sentence by sentence: it is outdated if it states as ongoing a problem this run shows has stopped ("the clock runs 1 s behind", "errors occur"), or states as current a value this run measured differently, even if it was true when written.
+- Several recalled memories cover the same topic or the same data: replaces lists all of them, so they become one memory instead of sitting side by side.
+- Propose an entry only when this run's evidence adds to, corrects, or combines the topic. A recalled memory that is still right and complete needs no entry.
 - The title names the topic. When the entry replaces one memory and the topic is unchanged, copy that memory's title exactly, word for word; change it only when this run shows the topic itself was named wrongly.
+- keywords are a few short terms for the topic: the services, components, signals, or data streams it is about.
 
-Keep entries concise. Return an empty list if the conversation produced no reusable environment knowledge.`;
+Return an empty list if the conversation produced no reusable environment knowledge.`;
 
 export interface MemoryLabelProposal {
   useful: string[];
@@ -97,14 +89,10 @@ export interface MemoryLabelProposal {
 export interface MemoryExtractProposal {
   slug: string;
   title: string;
-  /** What this run adds or corrects. Empty when the entry only combines the replaced memories. */
-  content: string;
+  /** Keywords for the topic, stored as tags. */
   tags: string[];
-  categories: string[];
   /** Recalled memory ids this entry supersedes; they are archived once it is written. */
   replaces: string[];
-  /** For the writer: what this run showed and what in the replaced memories is wrong or outdated. */
-  note: string;
 }
 
 export type ProposeMemoryLabels = (input: {
@@ -118,7 +106,6 @@ export interface MemoryExtractionBatch {
 
 export interface MemoryMergeSynthesis {
   content: string;
-  context: string;
 }
 
 export interface MemoryEditSummary {
@@ -160,7 +147,6 @@ export type ProposeMemoryExtractions = (input: {
 export type SynthesizeMemoryGroup = (input: {
   sources: MemoryPage[];
   extract: MemoryExtractProposal;
-  task?: string;
   transcript?: string;
   /** Titles of the other entries proposed this round. */
   otherTopics?: string[];
@@ -372,25 +358,18 @@ Investigation transcript:\n${transcript}`,
                     'Short, specific name for the fact. It becomes the memory file name ' +
                     '(lower-cased, hyphenated), e.g. "Checkout Redis evictions".',
                 },
-                content: {
-                  type: 'string',
-                  description: 'What this run adds or corrects. May be empty only when replacing.',
+                keywords: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'A few short terms for the topic.',
                 },
                 replaces: {
                   type: 'array',
                   items: { type: 'string' },
                   description: 'Recalled memory ids (the id= value) this entry supersedes.',
                 },
-                note: {
-                  type: 'string',
-                  description:
-                    'For the writer when replacing: what this run showed and what in the replaced ' +
-                    'memories is wrong or outdated.',
-                },
-                tags: { type: 'array', items: { type: 'string' } },
-                categories: { type: 'array', items: { type: 'string' } },
               },
-              required: ['title', 'content', 'replaces'],
+              required: ['title', 'keywords', 'replaces'],
             },
           },
         },
@@ -415,21 +394,15 @@ Investigation transcript:\n${transcript}`,
           return {
             slug: canonicalizeSlug(title),
             title,
-            content: String(candidate.content ?? '').trim(),
-            tags: Array.isArray(candidate.tags) ? candidate.tags.map(String) : [],
-            categories: Array.isArray(candidate.categories) ? candidate.categories.map(String) : [],
+            tags: Array.isArray(candidate.keywords) ? candidate.keywords.map(String) : [],
             replaces: Array.isArray(candidate.replaces)
               ? canonicalizeMemoryLabelIds(candidate.replaces.map(String))
               : [],
-            note: String(candidate.note ?? '').trim(),
           };
         })
         .filter(
           (entry): entry is MemoryExtractProposal =>
-            entry !== undefined &&
-            entry.slug.length > 0 &&
-            entry.title.length > 0 &&
-            (entry.content.length > 0 || entry.replaces.length > 0)
+            entry !== undefined && entry.slug.length > 0 && entry.title.length > 0
         )
         .slice(0, MAX_EXTRACTIONS),
     };
@@ -438,12 +411,14 @@ Investigation transcript:\n${transcript}`,
 
 export const MEMORY_WRITER_SYSTEM_PROMPT = `You write one semantic memory for an AI SRE assistant: durable facts about one topic in the customer's environment.
 
-You get the run time, the topic, a note on why the entry is being written, the new information from this run, the stored memories it replaces, and this round's investigation transcript. The replaced memories are archived once your entry is written, so anything worth keeping from them must be in your content.
+You get the run time, the topic and its keywords, the stored memories the entry replaces (often none), the other entries written this round, and this round's investigation transcript. The replaced memories are archived once your entry is written, so anything worth keeping from them must be in your content.
 
-The transcript is the evidence. It has the user task; the investigation, in order (the agent's notes and every tool call with an excerpt of its result, where "ERROR" marks a failed call); and the final answer. Use it to check the new information and the replaced memories, and to recover a detail the entry needs. A claim is observed only if a tool result shows it. The final answer can include the agent's inferences, so it is not evidence by itself. Calls that read memories (/workspace/memories/), Cortex pages (/workspace/cortex/), or decision trees (/workspace/decision-trees/) return stored knowledge, not new evidence. If results are unavailable (the transcript says so), the final answer is the only source for what this run observed.
-- Rewrite, do not patch. Check every sentence you keep from a replaced memory against the rules below, even when the note calls the memory correct: a fact can be right and still need a date, or the past tense because the problem has stopped.
+The transcript is the evidence. It has the user task; the investigation, in order (the agent's notes and every tool call with an excerpt of its result, where "ERROR" marks a failed call); and the final answer. Write what this run's tool results show about the topic, and check the replaced memories against them. A claim is observed only if a tool result shows it. The final answer can include the agent's inferences, hypotheses, and recommendations, so it is not evidence by itself. A failed call shows nothing about the environment. Calls that read memories (/workspace/memories/), Cortex pages (/workspace/cortex/), decision trees (/workspace/decision-trees/), or environment docs (/workspace/elastic.md, /workspace/connectors.md) return stored knowledge, not new evidence: never restate it, even when the final answer repeats it. If results are unavailable (the transcript says so), the final answer is the only source for what this run observed: keep only what it says was observed in this environment through queries the tool calls show were run.
+
+Write durable knowledge about the customer's environment: ownership, naming, topology, what a component does, its dependencies, its typical behavior, and its known failure modes. Never write connector or tool mechanics (hosts, auth, endpoints, query syntax), generic knowledge that applies to any customer, how the investigation was done, tool errors or workarounds, absence ("no doc found"), container internals, or credentials.
+- Rewrite, do not patch. Check every sentence you keep from a replaced memory against the rules below: a fact can be right and still need a date, or the past tense because the problem has stopped.
 - Keep the facts from the replaced memories that are still correct and useful.
-- Where this run's evidence, the new information, or the note contradicts a replaced memory, drop the contradicted claim. Keep a replaced memory's inference or explanation only if the evidence supports it.
+- Where this run's evidence contradicts a replaced memory, drop the contradicted claim. A claim written as ongoing is outdated when this run shows the problem has stopped; a value is outdated when this run measured it differently. Keep a replaced memory's inference or explanation only if the evidence supports it.
 - Stay on the entry's topic as its title names it. The transcript covers other topics too; add a fact from it only if it is about this topic. Facts about the other entries written this round (listed in the input) belong to those entries, never to this one.
 - Drop what is not useful and ids from one run (trace, span, request, alert, or document ids).
 - Every claim that can change over time (counts, rates, latencies, percentiles, error levels, versions, config values, which component is slowest) states when it was observed, as an absolute UTC time or window with dates. Keep the times given in the inputs. A replaced memory's claim with no time was observed by that memory's updated date: say "as of <date>".
@@ -456,15 +431,10 @@ The transcript is the evidence. It has the user task; the investigation, in orde
 - Before returning, reread the content: rewrite any present-tense sentence about a problem that has stopped, and replace every table except the newest observation's with one dated line per earlier observation. This applies however much room is left.
 - Compare observations from different times only when they measure the same thing the same way; otherwise state each on its own.
 - Lead with the lasting conclusion, then the dated observations that support it.
-- These rules apply to the new information as well as to the replaced memories. The note explains what changed; the rules still apply where it suggests otherwise.
-- State each fact once. Add nothing that is not in the new information, the replaced memories, or this run's tool results: no fixes or recommendations.
+- State each fact once. Add nothing that is not in the replaced memories or this run's tool results: no fixes or recommendations.
 - Be concise: at most 4,000 characters. Cut earlier observations and detail before cutting the conclusion or the newest observation.
 
-Return markdown content and context.
-context is the recall key: compact, semantically rich phrases covering the union of the replaced memories' contexts and this round's task goal. Not verbatim sentences. Not a concatenation of full prompts. Not one task copied when the others differ.
-If you cannot write a non-empty context that covers that union, return an empty context string.`;
-
-export const MAX_MERGE_TASK_TOKENS = 4_096;
+Return the markdown content. If neither this run's evidence nor the replaced memories hold a durable fact about the topic, return empty content.`;
 
 export const formatMemoryMergeSources = ({
   sources,
@@ -480,17 +450,16 @@ export const formatMemoryMergeSources = ({
       ...(extract
         ? [
             {
-              prefix:
-                `Topic: ${extract.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` +
-                `Note: ${extract.note || '(none)'}\n` +
-                `New information from this run:\n`,
-              content: extract.content || '(none)',
+              prefix: `Topic: ${extract.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` + `Keywords: `,
+              content:
+                `${extract.tags.join(', ') || '(none)'}\n\n` +
+                `Memories this entry replaces:${sources.length > 0 ? '' : ' (none)'}`,
             },
           ]
         : []),
       ...sources.map((page, index) => ({
         prefix:
-          `${index === 0 ? (extract ? '\n\nMemories this entry replaces:\n' : '') : '\n'}` +
+          `${index === 0 && !extract ? '' : '\n'}` +
           `- id=${page.id}\n` +
           `  updated: ${page.updated_at}\n` +
           `  context: ${(page.context ?? '').slice(0, MAX_RECALLED_CONTEXT_CHARS)}\n` +
@@ -508,11 +477,7 @@ export const createLlmSynthesizeMemoryGroup = ({
   inferenceClient: BoundInferenceClient;
   signal?: AbortSignal;
 }): SynthesizeMemoryGroup => {
-  return async ({ sources, extract, task, transcript, otherTopics = [] }) => {
-    const taskText = task ? truncateTokens(task, MAX_MERGE_TASK_TOKENS) : '';
-    const taskBlock = taskText
-      ? `\n\nThis round's original task (cover its goal in context; do not copy it verbatim): ${taskText}`
-      : '';
+  return async ({ sources, extract, transcript, otherTopics = [] }) => {
     const transcriptBlock = transcript
       ? `\n\nInvestigation transcript:\n${transcript}`
       : '\n\nInvestigation transcript: (unavailable)';
@@ -521,8 +486,7 @@ export const createLlmSynthesizeMemoryGroup = ({
         ? otherTopics.map((topic) => `\n- ${topic.slice(0, MAX_RECALLED_TITLE_CHARS)}`).join('')
         : '(none)'
     }`;
-    const framingTokens =
-      estimateTokens(taskBlock) + estimateTokens(transcriptBlock) + estimateTokens(othersBlock);
+    const framingTokens = estimateTokens(transcriptBlock) + estimateTokens(othersBlock);
     const entryBlock = formatMemoryMergeSources({
       sources,
       extract,
@@ -532,159 +496,23 @@ export const createLlmSynthesizeMemoryGroup = ({
       id: 'nightshift_memory_write',
       abortSignal: signal,
       system: MEMORY_WRITER_SYSTEM_PROMPT,
-      input: `Run time: ${new Date().toISOString()}\n\n${entryBlock}${othersBlock}${transcriptBlock}${taskBlock}`,
+      input: `Run time: ${new Date().toISOString()}\n\n${entryBlock}${othersBlock}${transcriptBlock}`,
       schema: {
         type: 'object',
         properties: {
           content: { type: 'string' },
-          context: { type: 'string' },
         },
-        required: ['content', 'context'],
+        required: ['content'],
       },
     });
     return {
       content: String(response.output?.content ?? '').trim(),
-      context: String(response.output?.context ?? '').trim(),
     };
   };
 };
 
 const extractionSafetyText = (extra: MemoryExtractProposal, task: string): string =>
-  [extra.title, extra.content, extra.tags.join('\n'), extra.categories.join('\n'), task].join('\n');
-
-export const EXTRACTION_OVERLAP_THRESHOLD = 0.8;
-
-export const normalizeMemoryTitle = (title: string): string =>
-  title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim();
-
-const tokens = (text: string): Set<string> =>
-  new Set(
-    normalizeMemoryTitle(text)
-      .split(' ')
-      .filter((token) => token.length > 2)
-  );
-
-/** Fraction of the smaller token set shared by both strings. */
-export const contentOverlap = (left: string, right: string): number => {
-  const leftTokens = tokens(left);
-  const rightTokens = tokens(right);
-  if (leftTokens.size === 0 || rightTokens.size === 0) {
-    return 0;
-  }
-  let intersection = 0;
-  for (const token of leftTokens) {
-    if (rightTokens.has(token)) {
-      intersection += 1;
-    }
-  }
-  return intersection / Math.min(leftTokens.size, rightTokens.size);
-};
-
-type ExtractionPage = Pick<MemoryPage, 'id' | 'slug' | 'title' | 'content'>;
-
-export const isDuplicateExtraction = ({
-  extra,
-  recalledIds,
-  recalledMemories,
-  catalogHits,
-}: {
-  extra: MemoryExtractProposal;
-  recalledIds: readonly string[];
-  recalledMemories: readonly ExtractionPage[];
-  catalogHits: readonly ExtractionPage[];
-}): boolean => {
-  const extraId = toMemoryKiId(extra.slug);
-  const extraSlug = canonicalizeSlug(extra.slug);
-  const extraTitle = normalizeMemoryTitle(extra.title);
-  const extraText = `${extra.title}\n${extra.content}`;
-
-  const recalled = new Set(recalledIds);
-  if (
-    recalled.has(extraId) ||
-    [...recalled].some((id) => id.replace(/^memory_/, '') === extraSlug)
-  ) {
-    return true;
-  }
-
-  const matches = (page: ExtractionPage): boolean => {
-    const samePage = page.id === extraId || page.slug === extraSlug;
-    if (samePage) {
-      return true;
-    }
-    if (extraTitle.length > 0 && normalizeMemoryTitle(page.title) === extraTitle) {
-      return true;
-    }
-    return (
-      contentOverlap(extraText, `${page.title}\n${page.content}`) >= EXTRACTION_OVERLAP_THRESHOLD
-    );
-  };
-
-  return (
-    recalledMemories.some((page) => matches(page)) || catalogHits.some((page) => matches(page))
-  );
-};
-
-const liveOverlapPages = ({
-  extra,
-  recalledIds,
-  recalledMemories,
-  catalogHits,
-}: {
-  extra: MemoryExtractProposal;
-  recalledIds: readonly string[];
-  recalledMemories: readonly MemoryPage[];
-  catalogHits: readonly MemoryPage[];
-}): MemoryPage[] => {
-  const extraId = toMemoryKiId(extra.slug);
-  const extraSlug = canonicalizeSlug(extra.slug);
-  const seen = new Set<string>();
-  const out: MemoryPage[] = [];
-  const push = (page: MemoryPage | undefined) => {
-    if (!page || page.status === 'archived' || seen.has(page.id)) {
-      return;
-    }
-    seen.add(page.id);
-    out.push(page);
-  };
-
-  const recalled = new Set(recalledIds);
-  if (
-    recalled.has(extraId) ||
-    [...recalled].some((id) => id.replace(/^memory_/, '') === extraSlug)
-  ) {
-    push(recalledMemories.find((page) => page.id === extraId || page.slug === extraSlug));
-  }
-
-  const extraTitle = normalizeMemoryTitle(extra.title);
-  const extraText = `${extra.title}\n${extra.content}`;
-  const matches = (page: ExtractionPage): boolean => {
-    const samePage = page.id === extraId || page.slug === extraSlug;
-    if (samePage) {
-      return true;
-    }
-    if (extraTitle.length > 0 && normalizeMemoryTitle(page.title) === extraTitle) {
-      return true;
-    }
-    return (
-      contentOverlap(extraText, `${page.title}\n${page.content}`) >= EXTRACTION_OVERLAP_THRESHOLD
-    );
-  };
-
-  for (const page of recalledMemories) {
-    if (matches(page)) {
-      push(page);
-    }
-  }
-  for (const page of catalogHits) {
-    if (matches(page)) {
-      push(page);
-    }
-  }
-  return out;
-};
+  [extra.title, extra.tags.join('\n'), task].join('\n');
 
 const unionStrings = (...groups: Array<readonly string[] | undefined>): string[] => {
   const out: string[] = [];
@@ -802,43 +630,29 @@ export const applyMemoryEdits = async ({
 
   const task = unwrapUserTask(context);
   const consumedIds = new Set<string>();
-  const consumedExtracts = new Set<number>();
-  const archivedExactIds = new Set<string>();
   const otherTopicsOf = (extract: MemoryExtractProposal): string[] =>
     extractions.filter((other) => other !== extract).map((other) => other.title);
 
-  interface MergeGroup {
+  interface MemoryEntryGroup {
     sourceIds: string[];
     extract: MemoryExtractProposal;
     canonicalId?: string;
   }
-  const groups: MergeGroup[] = [];
+  const groups: MemoryEntryGroup[] = [];
 
-  for (let index = 0; index < extractions.length; index++) {
-    const extra = extractions[index];
+  for (const extra of extractions) {
     logger.debug(
       `Memory extraction candidate slug=${extra.slug} title=${JSON.stringify(
         previewText(extra.title, 80)
-      )} content=${JSON.stringify(previewText(extra.content))} ` +
-        `tags=${extra.tags.join(',') || '(none)'} replaces=[${extra.replaces.join(', ')}]`
+      )} tags=${extra.tags.join(',') || '(none)'} replaces=[${extra.replaces.join(', ')}]`
     );
     if (looksLikeSecret(extractionSafetyText(extra, task))) {
       logger.warn('Skipped a memory extraction because proposed content looks secret');
       logger.debug(`Memory extraction safety skip slug=${extra.slug}`);
       summary.safetySkipCount += 1;
-      consumedExtracts.add(index);
       continue;
     }
 
-    const exactId = toMemoryKiId(extra.slug);
-    const exactStored = await store.get(exactId);
-    const exactPage = exactStored?.status === 'archived' ? undefined : exactStored;
-    if (exactStored && !exactPage) {
-      archivedExactIds.add(exactId);
-      logger.debug(`Extraction "${extra.slug}" reuses the id of an archived memory`);
-    }
-    const catalogHits =
-      (await store.retrieve({ query: extra.title, size: 5, match: 'content' })) ?? [];
     const named = recalledMemories.filter(
       (page) =>
         extra.replaces.includes(page.id) && page.status !== 'archived' && !harmful.has(page.id)
@@ -859,51 +673,40 @@ export const applyMemoryEdits = async ({
           `live recalled memories: [${unknownReplaces.join(', ')}]`
       );
     }
-    // Lexical overlap still catches a near-duplicate the model did not name, e.g. a page
-    // that was not recalled this round.
-    const unnamedOverlaps = liveOverlapPages({
-      extra,
-      recalledIds,
-      recalledMemories,
-      catalogHits: exactPage ? [exactPage, ...catalogHits] : catalogHits,
-    }).filter((page) => !extra.replaces.includes(page.id) && !harmful.has(page.id));
-    const live = [...named, ...unnamedOverlaps];
-    if (live.some((page) => consumedIds.has(page.id))) {
-      // A prior entry already replaces this source. Consuming later proposals avoids
-      // publishing another live page for the same fact.
+    // The extractor only sees recalled memories, so a live memory already at this entry's id
+    // joins the entry even when it is not named.
+    const exactId = toMemoryKiId(extra.slug);
+    const exactStored = await store.get(exactId);
+    const exactPage = exactStored && exactStored.status !== 'archived' ? exactStored : undefined;
+    const sources = exactPage ? [...named.filter((page) => page.id !== exactId), exactPage] : named;
+    if (sources.some((page) => consumedIds.has(page.id))) {
       logger.debug(`Skipped extraction "${extra.slug}" — a source already belongs to an entry`);
-      consumedExtracts.add(index);
       continue;
     }
-    if (live.length === 0) {
-      if (extra.content.length === 0) {
-        logger.debug(`Skipped extraction "${extra.slug}" — no content and nothing to replace`);
-        consumedExtracts.add(index);
-      }
-      continue;
-    }
-    for (const page of live) {
+    for (const page of sources) {
       consumedIds.add(page.id);
     }
-    consumedExtracts.add(index);
     groups.push({
-      sourceIds: live.map((page) => page.id),
+      sourceIds: sources.map((page) => page.id),
       extract: extra,
       ...(exactPage ? { canonicalId: exactId } : {}),
     });
     logger.debug(
       `Memory entry "${extra.slug}" replaces named=${formatPageRefs(named)} ` +
-        `overlap=${formatPageRefs(unnamedOverlaps)} (catalog=${formatPageRefs(catalogHits)})`
+        `exact=${exactPage ? exactId : '(none)'}`
     );
   }
 
   for (const group of groups) {
     if (!synthesizeMemoryGroup) {
-      logger.warn('Memory merge skipped — no synthesizer configured');
+      logger.warn('Memory write skipped — no writer configured');
       continue;
     }
-    summary.mergeAttemptCount += 1;
-    const mergeResult = await mergeMemoryGroup({
+    const replacing = group.sourceIds.length > 0;
+    if (replacing) {
+      summary.mergeAttemptCount += 1;
+    }
+    const result = await mergeMemoryGroup({
       store,
       sourceIds: group.sourceIds,
       extract: group.extract,
@@ -915,74 +718,15 @@ export const applyMemoryEdits = async ({
       now,
       logger,
     });
-    if (mergeResult.writtenId) {
+    if (result.writtenId && result.sourceCount === 0) {
+      summary.standaloneUpsertCount += 1;
+    } else if (result.writtenId) {
+      // A new entry whose create lost a race was merged into the page that won it.
+      summary.mergeAttemptCount += replacing ? 0 : 1;
       summary.mergeSuccessCount += 1;
     }
-    summary.mergedSourceArchiveCount += mergeResult.archivedSourceCount;
-    summary.writeFailureCount += mergeResult.writeFailureCount;
-  }
-
-  for (let index = 0; index < extractions.length; index++) {
-    if (consumedExtracts.has(index)) {
-      continue;
-    }
-    const extra = extractions[index];
-    const write: MemoryPageWrite = {
-      slug: extra.slug,
-      title: extra.title,
-      content: extra.content,
-      context: task,
-      tags: extra.tags,
-      categories: extra.categories,
-      references: [],
-      status: 'tentative',
-      user: 'nightshift-optimizer',
-    };
-    try {
-      const id = toMemoryKiId(extra.slug);
-      const existing = archivedExactIds.has(id) ? await store.getVersioned(id) : undefined;
-      if (existing?.page.status === 'archived') {
-        await writeOverArchived(store, existing, write, now());
-      } else {
-        await store.create(write);
-      }
-      summary.standaloneUpsertCount += 1;
-      logger.debug(
-        `Memory extract upserted ${toMemoryKiId(extra.slug)} contextChars=${task.length}`
-      );
-    } catch (err) {
-      if (isElasticsearchWriteConflict(err)) {
-        const winner = await store.get(toMemoryKiId(extra.slug));
-        if (winner?.status === 'archived') {
-          logger.debug(`Skipped extraction "${extra.slug}" — its archived id changed during write`);
-          continue;
-        }
-        if (winner && synthesizeMemoryGroup) {
-          summary.mergeAttemptCount += 1;
-          const mergeResult = await mergeMemoryGroup({
-            store,
-            sourceIds: [winner.id],
-            extract: extra,
-            canonicalId: winner.id,
-            task,
-            transcript,
-            otherTopics: otherTopicsOf(extra),
-            synthesizeMemoryGroup,
-            now,
-            logger,
-          });
-          if (mergeResult.writtenId) {
-            summary.mergeSuccessCount += 1;
-          }
-          summary.mergedSourceArchiveCount += mergeResult.archivedSourceCount;
-          summary.writeFailureCount += mergeResult.writeFailureCount;
-          continue;
-        }
-      }
-      summary.writeFailureCount += 1;
-      logger.warn('Failed to extract a memory page');
-      logger.debug(`Memory extraction write failed slug=${extra.slug}: ${(err as Error).message}`);
-    }
+    summary.mergedSourceArchiveCount += result.archivedSourceCount;
+    summary.writeFailureCount += result.writeFailureCount;
   }
   logger.info(
     `Memory edits completed: standalone=${summary.standaloneUpsertCount}, ` +
@@ -997,6 +741,8 @@ export const applyMemoryEdits = async ({
 interface MergeMemoryGroupResult {
   /** The page the entry was written to; unset when nothing was written. */
   writtenId?: string;
+  /** Stored memories the written entry incorporates, the canonical page included. */
+  sourceCount: number;
   archivedSourceCount: number;
   writeFailureCount: number;
 }
@@ -1045,7 +791,7 @@ const mergeMemoryGroup = async ({
       logger.debug(
         `Memory merge aborted — required source ${requiredSourceIds[unavailableIndex]} is missing or archived`
       );
-      return { archivedSourceCount: 0, writeFailureCount: 0 };
+      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
     }
     const versionedSources = sourceSnapshots as VersionedMemoryPage[];
     const currentSources = versionedSources.map(({ page }) => page);
@@ -1061,14 +807,13 @@ const mergeMemoryGroup = async ({
       synthesis = await synthesizeMemoryGroup({
         sources: currentSources,
         extract,
-        task,
         transcript,
         otherTopics,
       });
     } catch (err) {
       logger.warn('Memory merge synthesis failed');
       logger.debug(`Memory merge synthesis error: ${(err as Error).message}`);
-      return { archivedSourceCount: 0, writeFailureCount: 1 };
+      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
     }
 
     const content = capMergedContent(synthesis.content);
@@ -1076,28 +821,12 @@ const mergeMemoryGroup = async ({
     // keeps both, and only a newly minted canonical page takes the entry's topic.
     const title = versionedCanonical?.page.title ?? extract.title;
     if (title.length === 0 || content.trim().length === 0) {
-      logger.warn('Memory merge aborted — synthesis returned an empty title or content');
-      return { archivedSourceCount: 0, writeFailureCount: 0 };
+      logger.info(`Memory write skipped for "${extract.slug}" — the writer returned no content`);
+      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
     }
-    if (
-      looksLikeSecret(
-        [
-          title,
-          content,
-          synthesis.context,
-          extract.tags.join('\n'),
-          extract.categories.join('\n'),
-        ].join('\n')
-      )
-    ) {
+    if (looksLikeSecret([title, content, extract.tags.join('\n')].join('\n'))) {
       logger.warn('Memory merge aborted — synthesised content looks like a secret');
-      return { archivedSourceCount: 0, writeFailureCount: 0 };
-    }
-    const hadRecallKey =
-      currentSources.some((page) => (page.context ?? '').trim().length > 0) || task.length > 0;
-    if (synthesis.context.length === 0 && hadRecallKey) {
-      logger.warn('Memory merge aborted — synthesis returned an empty recall context');
-      return { archivedSourceCount: 0, writeFailureCount: 0 };
+      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
     }
 
     let slug = versionedCanonical?.page.slug;
@@ -1127,14 +856,10 @@ const mergeMemoryGroup = async ({
       }
       if (!slug || !canonicalId) {
         logger.warn('Memory merge aborted — no free canonical slug found');
-        return { archivedSourceCount: 0, writeFailureCount: 0 };
+        return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
       }
     }
 
-    const mergedFrom = unionStrings(
-      currentSources.flatMap((page) => [page.id, ...(page.merged_from ?? [])]),
-      [toMemoryKiId(extract.slug)]
-    );
     let impressions = 0;
     let conversions = 0;
     for (const page of currentSources) {
@@ -1142,35 +867,44 @@ const mergeMemoryGroup = async ({
       impressions += display.impressions;
       conversions += display.conversions;
     }
-    const write = {
+    const mergedFrom =
+      currentSources.length > 0
+        ? unionStrings(
+            currentSources.flatMap((page) => [page.id, ...(page.merged_from ?? [])]),
+            [toMemoryKiId(extract.slug)]
+          )
+        : [];
+    const write: MemoryPageWrite = {
       slug,
       title,
       content,
-      context: synthesis.context,
+      // Recall matches the next round's task against this key, so it is this round's task.
+      context: task || (versionedCanonical?.page.context ?? ''),
       tags: unionStrings(
         currentSources.flatMap((page) => page.tags),
         extract.tags
       ).filter((tag) => tag !== 'memory'),
-      categories: unionStrings(
-        currentSources.flatMap((page) => page.categories),
-        extract.categories
-      ),
+      categories: unionStrings(currentSources.flatMap((page) => page.categories)),
       references: unionStrings(currentSources.flatMap((page) => page.references)),
       status: currentSources.some((page) => page.status === 'established')
-        ? ('established' as const)
-        : ('tentative' as const),
-      source: `Merged from memories: ${mergedFrom.join(', ')}`,
-      merged_from: mergedFrom,
-      telemetry: {
-        impressions,
-        conversions,
-        last_impression_time: epochSecondsToIso(nowSec),
-      },
+        ? 'established'
+        : 'tentative',
       user: 'nightshift-optimizer',
+      ...(currentSources.length > 0
+        ? {
+            source: `Merged from memories: ${mergedFrom.join(', ')}`,
+            merged_from: mergedFrom,
+            telemetry: {
+              impressions,
+              conversions,
+              last_impression_time: epochSecondsToIso(nowSec),
+            },
+          }
+        : {}),
     };
     const targetCanonicalId = canonicalId;
     if (!targetCanonicalId) {
-      return { archivedSourceCount: 0, writeFailureCount: 1 };
+      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
     }
 
     const validatedSources = await Promise.all(
@@ -1183,7 +917,7 @@ const mergeMemoryGroup = async ({
       logger.debug(
         `Memory merge aborted after synthesis — required source ${requiredSourceIds[unavailableAfterSynthesisIndex]} is missing or archived`
       );
-      return { archivedSourceCount: 0, writeFailureCount: 0 };
+      return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 0 };
     }
     const revalidatedSources = validatedSources as VersionedMemoryPage[];
     const sourceChanged = versionedSources.some((source, index) => {
@@ -1193,7 +927,7 @@ const mergeMemoryGroup = async ({
     if (sourceChanged) {
       if (attempt === 2) {
         logger.warn('Memory merge exhausted source changes; sources preserved');
-        return { archivedSourceCount: 0, writeFailureCount: 1 };
+        return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
       }
       continue;
     }
@@ -1213,19 +947,19 @@ const mergeMemoryGroup = async ({
       if (!isElasticsearchWriteConflict(err)) {
         logger.warn('Memory merge failed to write its canonical page');
         logger.debug(`Memory merge canonical write error: ${(err as Error).message}`);
-        return { archivedSourceCount: 0, writeFailureCount: 1 };
+        return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
       }
       if (attempt === 2) {
         logger.warn('Memory merge exhausted version conflicts; sources preserved');
         logger.debug(`Memory merge conflict exhaustion canonical=${targetCanonicalId}`);
-        return { archivedSourceCount: 0, writeFailureCount: 1 };
+        return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
       }
       canonicalIsSource = true;
     }
   }
 
   if (!writtenCanonicalId) {
-    return { archivedSourceCount: 0, writeFailureCount: 1 };
+    return { sourceCount: 0, archivedSourceCount: 0, writeFailureCount: 1 };
   }
 
   let archivedSourceCount = 0;
@@ -1252,6 +986,7 @@ const mergeMemoryGroup = async ({
   );
   return {
     writtenId: writtenCanonicalId,
+    sourceCount: committedSources.length,
     archivedSourceCount,
     writeFailureCount,
   };
