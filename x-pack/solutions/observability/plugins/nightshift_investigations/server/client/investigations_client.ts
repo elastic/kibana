@@ -281,6 +281,8 @@ export interface NightshiftInvestigationsClientDeps {
   agentBuilder?: AgentBuilderPluginStart;
   /** Stores investigations: subjects, claims, and the open-investigation lookup. */
   agenticInvestigations?: AgenticInvestigationsPluginStart;
+  /** The username the request authenticates as, when security is enabled. */
+  getCallerUsername?: () => string | undefined;
   /** Passed through to `agents.ensure` so a pre-installed agent is hidden while unavailable. */
   agentAvailability: AgentAvailabilityConfig;
   investigationQuotaCallback?: InvestigationQuotaCallback;
@@ -300,6 +302,7 @@ export class NightshiftInvestigationsClient {
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
   private readonly agenticInvestigations?: AgenticInvestigationsPluginStart;
+  private readonly getCallerUsername: () => string | undefined;
   private readonly agentAvailability: AgentAvailabilityConfig;
   private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly investigationRepository: InvestigationRepository;
@@ -317,6 +320,7 @@ export class NightshiftInvestigationsClient {
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
     this.agenticInvestigations = deps.agenticInvestigations;
+    this.getCallerUsername = deps.getCallerUsername ?? (() => undefined);
     this.agentAvailability = deps.agentAvailability;
     this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.investigationRepository = deps.investigationRepository;
@@ -546,9 +550,11 @@ export class NightshiftInvestigationsClient {
     const open = await agenticInvestigations
       .getInvestigationsClient(this.request)
       .findOpenBySubjects(keys);
+    const callerUsername = this.getCallerUsername();
     const candidates = await findInvestigationConversations(
       conversations,
-      open.map(({ id }) => id)
+      open.map(({ id }) => id),
+      callerUsername
     );
     const owned = candidates.find(({ isOwner, status }) => isOwner && status === 'open');
     if (owned) {
@@ -577,12 +583,16 @@ export class NightshiftInvestigationsClient {
     // The holder may not have its conversation yet: a concurrent start claimed the subjects and
     // its workflow creates the conversation. Continuing it then is right, since that workflow
     // runs before this one on the investigation's queue.
-    const [holder] = await findInvestigationConversations(conversations, [claim.heldBy]);
+    const [holder] = await findInvestigationConversations(
+      conversations,
+      [claim.heldBy],
+      callerUsername
+    );
     if (!holder || (holder.isOwner && holder.status === 'open')) {
       return claim.heldBy;
     }
     this.logger.warn(
-      `Investigation "${claim.heldBy}" holds a subject of this start but cannot be continued by this identity; starting a new one`
+      `Investigation "${claim.heldBy}" holds a subject of this start but is closed or owned by another identity; starting a new one`
     );
     return newInvestigationId;
   }
