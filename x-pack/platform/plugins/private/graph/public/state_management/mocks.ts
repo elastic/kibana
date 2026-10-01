@@ -95,6 +95,7 @@ export function createMockGraphStore({
     handleSearchQueryError: jest.fn(),
     exploreGraph: jest.fn(),
     searchGraph: jest.fn(),
+    mergeRuntimeGraph: jest.fn(),
     ...mockedDepsOverwrites,
   };
   const listenerMiddleware = createListenerMiddleware<GraphState, GraphStore['dispatch']>();

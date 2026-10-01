@@ -534,6 +534,7 @@ export const registerWorkspaceListeners = (
     handleSearchQueryError,
     exploreGraph,
     searchGraph,
+    mergeRuntimeGraph,
   }: GraphStoreDependencies
 ) => {
   startListening({
@@ -569,7 +570,7 @@ export const registerWorkspaceListeners = (
           listenerApi.throwIfCancelled();
           const graph = transformExpandResponse(response, action.payload);
           listenerApi.dispatch(workspaceGraphMerged(graph));
-          workspace.mergeGraph(graph);
+          mergeRuntimeGraph(workspace, graph);
         } catch (error) {
           if (!listenerApi.signal.aborted) {
             handleSearchQueryError(error as Error);
@@ -609,7 +610,7 @@ export const registerWorkspaceListeners = (
             edge.doc_count = Math.max(edge.doc_count ?? 0, docCount);
           });
           listenerApi.dispatch(workspaceGraphMerged(graph));
-          workspace.mergeGraph(graph);
+          mergeRuntimeGraph(workspace, graph);
         } catch (error) {
           if (!listenerApi.signal.aborted) {
             handleSearchQueryError(error as Error);
@@ -696,7 +697,7 @@ export const registerWorkspaceListeners = (
           fields
         );
         listenerApi.throwIfCancelled();
-        workspace.mergeGraph({ nodes: topTermNodes, edges: [] });
+        mergeRuntimeGraph(workspace, { nodes: topTermNodes, edges: [] });
         listenerApi.dispatch(initializeWorkspace());
         notifyReact();
         listenerApi.dispatch(fillWorkspaceConnections(fields.length * 10));
@@ -755,7 +756,7 @@ export const registerWorkspaceListeners = (
         listenerApi.throwIfCancelled();
         const graph = transformSearchResponse(response, vertexFields);
         listenerApi.dispatch(workspaceGraphMerged(graph));
-        workspace.mergeGraph(graph);
+        mergeRuntimeGraph(workspace, graph);
       } catch (error) {
         if (listenerApi.signal.aborted) return;
         handleSearchQueryError(error as Error);

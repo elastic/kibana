@@ -27,6 +27,7 @@ import {
 } from '../state_management';
 import { createWorkspace } from '../services/workspace/graph_client_workspace';
 import { GraphLayoutController } from '../services/workspace/graph_layout_controller';
+import { mergeRuntimeGraph as applyRuntimeGraphMerge } from '../services/workspace/runtime_graph_merge';
 import { ReduxLayoutTopology } from '../services/workspace/redux_layout_topology';
 import {
   buildIntersectionRequest,
@@ -69,6 +70,7 @@ export const WorkspaceRoute = ({
   // Callbacks retained during store initialization need access to the completed store.
   // This ref is a temporary bridge until further workspace state optimizations remove that dependency.
   const storeRef = useRef<GraphStore>();
+  const runtimeSequenceRef = useRef(0);
   const history = useHistory();
 
   const indexPatternProvider = useMemo(
@@ -123,6 +125,17 @@ export const WorkspaceRoute = ({
     return transformIntersectionResponse(response, topLevelNodes);
   };
 
+  const mergeRuntimeGraph = (
+    workspace: Workspace,
+    graph: Parameters<typeof applyRuntimeGraphMerge>[1]
+  ) => {
+    runtimeSequenceRef.current = applyRuntimeGraphMerge(
+      workspace,
+      graph,
+      runtimeSequenceRef.current
+    );
+  };
+
   const notifyWorkspaceChanged = () => {
     const workspace = workspaceRef.current;
     if (workspace) {
@@ -137,6 +150,7 @@ export const WorkspaceRoute = ({
       indexPatternProvider,
       createWorkspace: (indexPattern, exploreControls) => {
         workspaceRef.current?.stopLayout();
+        runtimeSequenceRef.current = 0;
         const layoutTopology = new ReduxLayoutTopology({
           getState: () => storeRef.current?.getState(),
           getWorkspace: () => workspaceRef.current,
@@ -171,6 +185,7 @@ export const WorkspaceRoute = ({
       handleSearchQueryError,
       exploreGraph,
       searchGraph,
+      mergeRuntimeGraph,
       ...coreStart,
     })
   );
