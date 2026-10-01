@@ -78,8 +78,9 @@ export function useSourcesApi() {
     },
     onSuccess: (source) => {
       toasts.addSuccess({ title: getSourceSavedToastTitle(source.title) });
-      return invalidateSources();
     },
+    // A changed query retires the source's knowledge, so what is cached for it goes stale too.
+    onSettled: () => Promise.all([invalidateSources(), markKnowledgeStale()]),
   });
 
   const setSourceEnabled = useMutation<
@@ -100,7 +101,8 @@ export function useSourcesApi() {
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: SET_ENABLED_ERROR_TOAST_TITLE });
     },
-    onSettled: invalidateSources,
+    // Enabling or disabling flips the source's rules, which the knowledge views show.
+    onSettled: () => Promise.all([invalidateSources(), markKnowledgeStale()]),
   });
 
   const deleteSource = useMutation<void, Error, NightshiftSource>({
