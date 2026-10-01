@@ -20,15 +20,15 @@ import { mainTranslations } from './main_i18n';
 const translations = mainTranslations.columns.dataSets;
 
 export interface DatasetRowActionsProps {
-  discoverUrl?: string;
   disabled?: boolean;
+  onOpenInDiscover?: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
 
 export const DatasetRowActions: FunctionComponent<DatasetRowActionsProps> = ({
-  discoverUrl,
   disabled = false,
+  onOpenInDiscover,
   onEdit,
   onDelete,
 }) => {
@@ -37,12 +37,13 @@ export const DatasetRowActions: FunctionComponent<DatasetRowActionsProps> = ({
 
   return (
     <>
-      {discoverUrl && (
+      {onOpenInDiscover && (
         <EuiToolTip content={translations.discoverAction} disableScreenReaderOutput>
           <EuiButtonIcon
-            href={discoverUrl}
+            onClick={onOpenInDiscover}
             isDisabled={disabled}
             iconType="productDiscover"
+            color="text"
             aria-label={translations.discoverAction}
             data-test-subj="dataSetsSetsDiscoverButton"
           />

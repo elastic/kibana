@@ -49,7 +49,7 @@ const createDataSetRow = ({
   } as DataSetWithName);
 
 interface DiscoverLocatorMock {
-  getRedirectUrl: jest.Mock;
+  navigateSync: jest.Mock;
 }
 
 describe('DatasetsTable', () => {
@@ -183,28 +183,25 @@ describe('DatasetsTable', () => {
     expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ name: 'set2' }));
   });
 
-  it('links each row to Discover with an ES|QL query for the dataset', async () => {
-    const getRedirectUrl = jest.fn(
-      ({ query }: { query: { esql: string } }) => `/discover?esql=${query.esql}`
-    );
-    const { getByTestId } = renderTable({}, { getRedirectUrl });
+  it('opens Discover with an ES|QL query for the dataset', async () => {
+    const navigateSync = jest.fn();
+    const { getByTestId } = renderTable({}, { navigateSync });
 
-    expect(getRedirectUrl).toHaveBeenCalledWith({ query: { esql: 'FROM "set1"' } });
-    expect(getByTestId('dataSetsSetsDiscoverButton')).toHaveAttribute(
-      'href',
-      '/discover?esql=FROM "set1"'
-    );
+    fireEvent.click(getByTestId('dataSetsSetsDiscoverButton'));
+    expect(navigateSync).toHaveBeenCalledTimes(1);
+    expect(navigateSync).toHaveBeenCalledWith({ query: { esql: 'FROM "set1"' } });
   });
 
   it('disables the row actions while rows are selected', async () => {
+    const navigateSync = jest.fn();
     const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
-    const { getByTestId } = renderTable(
-      { items: selectedItems, selectedItems },
-      { getRedirectUrl: jest.fn(() => '/discover') }
-    );
+    const { getByTestId } = renderTable({ items: selectedItems, selectedItems }, { navigateSync });
 
     expect(getByTestId('dataSetsSetsActionsButton')).toBeDisabled();
-    expect(getByTestId('dataSetsSetsDiscoverButton')).toBeDisabled();
+    const discoverButton = getByTestId('dataSetsSetsDiscoverButton');
+    expect(discoverButton).toBeDisabled();
+    fireEvent.click(discoverButton);
+    expect(navigateSync).not.toHaveBeenCalled();
   });
 
   it('hides the Discover link when Discover is unavailable', async () => {

@@ -116,9 +116,11 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
             render: (item, enabled) => (
               <DatasetRowActions
                 disabled={!enabled}
-                discoverUrl={discoverLocator?.getRedirectUrl({
-                  query: { esql: `FROM "${item.name}"` },
-                })}
+                onOpenInDiscover={
+                  discoverLocator
+                    ? () => discoverLocator.navigateSync({ query: { esql: `FROM "${item.name}"` } })
+                    : undefined
+                }
                 onEdit={() => history.push(getEditDatasetPath(item.name))}
                 onDelete={() => onDelete(item)}
               />
