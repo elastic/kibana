@@ -68,5 +68,35 @@ describe('useFetchV1RuleTemplateTags', () => {
     expect(mockFindRuleTemplates).toHaveBeenCalledWith(
       expect.objectContaining({ page: 1, perPage: 100, search: 'pro' })
     );
+    expect(mockFindRuleTemplates).toHaveBeenCalledTimes(1);
+  });
+
+  it('includes a tag that only appears after the first page', async () => {
+    mockFindRuleTemplates.mockImplementation(async ({ page }) => {
+      if (page === 1) {
+        return {
+          data: [{ id: '1', name: 'CPU usage', ruleTypeId: '.es-query', tags: ['alpha'] }],
+          total: 101,
+          page: 1,
+          perPage: 100,
+        };
+      }
+      return {
+        data: [{ id: '2', name: 'Disk usage', ruleTypeId: '.es-query', tags: ['zeta'] }],
+        total: 101,
+        page: 2,
+        perPage: 100,
+      };
+    });
+    const { result } = renderHook(() => useFetchV1RuleTemplateTags(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.data).toEqual(['alpha', 'zeta']));
+    expect(mockFindRuleTemplates).toHaveBeenCalledTimes(2);
+    expect(mockFindRuleTemplates).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ page: 2, perPage: 100 })
+    );
   });
 });

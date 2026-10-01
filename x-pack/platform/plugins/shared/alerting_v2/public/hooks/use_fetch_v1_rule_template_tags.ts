@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
+import type { HttpStart } from '@kbn/core-http-browser';
 import {
   findRuleTemplates,
   type RuleTemplate,
@@ -32,6 +33,35 @@ export const collectV1RuleTemplateTags = (templates: RuleTemplate[], search?: st
   return [...tags].sort((left, right) => left.localeCompare(right)).slice(0, TAGS_RESPONSE_LIMIT);
 };
 
+/** Loads every page of classic templates. Find accepts at most 100 per page. */
+export const findAllV1RuleTemplates = async (
+  http: HttpStart,
+  search?: string
+): Promise<RuleTemplate[]> => {
+  const templates: RuleTemplate[] = [];
+  let page = 1;
+  let pageCount = 1;
+
+  while (page <= pageCount) {
+    const response = await findRuleTemplates({
+      http,
+      page,
+      perPage: V1_TEMPLATE_TAG_PAGE_SIZE,
+      search: search || undefined,
+    });
+    if (page === 1) {
+      pageCount = Math.max(1, Math.ceil(response.total / V1_TEMPLATE_TAG_PAGE_SIZE));
+    }
+    templates.push(...response.data);
+    if (response.data.length === 0) {
+      break;
+    }
+    page += 1;
+  }
+
+  return templates;
+};
+
 /** Loads classic rule-template tags through the existing find API. */
 export const useFetchV1RuleTemplateTags = ({
   search,
@@ -42,13 +72,8 @@ export const useFetchV1RuleTemplateTags = ({
   return useQuery({
     queryKey: ruleTemplateKeys.v1Tags(search),
     queryFn: async () => {
-      const response = await findRuleTemplates({
-        http,
-        page: 1,
-        perPage: V1_TEMPLATE_TAG_PAGE_SIZE,
-        search: search || undefined,
-      });
-      return collectV1RuleTemplateTags(response.data, search);
+      const templates = await findAllV1RuleTemplates(http, search);
+      return collectV1RuleTemplateTags(templates, search);
     },
     enabled,
     staleTime: TAGS_STALE_TIME,
