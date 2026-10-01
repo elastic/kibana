@@ -32,7 +32,7 @@ import {
   transformSearchResponse,
 } from '../services/workspace/graph_response_transformers';
 import { syncRuntimeTopology } from '../services/workspace/sync_runtime_topology';
-import { unpackGroupedNodes } from '../services/workspace/runtime_grouping';
+import { isTopLevelNode, unpackGroupedNodes } from '../services/workspace/runtime_grouping';
 import type { GraphData, RuntimeGraph, WorkspaceField, WorkspaceNode } from '../types';
 import type { ServerResultNode } from '../types';
 import type { MatchedAction } from './helpers';
@@ -580,9 +580,8 @@ export const registerWorkspaceListeners = (
           selectedNodes.length > 0
             ? unpackGroupedNodes(selectedNodes, runtimeGraph.edges)
             : runtimeGraph.nodes;
-        const nodes = limitNodesForConnectionSearch(
-          unpackedNodes.filter((node) => node.parent === undefined)
-        );
+        const nodes = limitNodesForConnectionSearch(unpackedNodes.filter(isTopLevelNode));
+        if (nodes.length === 0) return;
         const request = buildFillConnectionsRequest(
           nodes.map((node) => buildNodeQuery(unpackGroupedNodes([node], runtimeGraph.edges)))
         );
