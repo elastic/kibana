@@ -19,7 +19,8 @@ import { createEsqlSource } from './create_esql_source';
  * and registers it with `DataSourceService` and the DataViews cache shim.
  *
  * Call this whenever the ES|QL query identity changes — tab init, app-state
- * subscribe, or embeddable fetch — then let consumers read the registered source.
+ * subscribe, a control-value change, or embeddable fetch — then let consumers
+ * read the registered source.
  */
 export async function resolveEsqlSource({
   esql,
