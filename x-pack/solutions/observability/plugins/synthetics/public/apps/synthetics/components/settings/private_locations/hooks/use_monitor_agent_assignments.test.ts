@@ -25,6 +25,7 @@ const assignment = (agentId: string): MonitorLocationAssignment => ({
   isAgentSharding: true,
   agentPolicyId: 'policy-1',
   agentPolicyName: 'Policy One',
+  hasCompleteAgent: true,
   agents: [{ agentId, host: agentId, healthy: true, agentVersion: '9.6.0', enrolled: true }],
 });
 
