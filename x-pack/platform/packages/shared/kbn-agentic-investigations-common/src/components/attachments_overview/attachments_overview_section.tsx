@@ -15,13 +15,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { extractAttachmentTargets } from './extract_attachment_targets';
-import {
-  buildAlertsPageUrl,
-  buildAttacksPageUrl,
-  buildEntityAnalyticsPageUrl,
-  buildRulesPageUrl,
-} from './build_security_urls';
+import { getAlertRow } from './types/alert';
+import { getAttackRow } from './types/attack';
+import { getEntityRow } from './types/entity';
+import { getRuleRow } from './types/rule';
 import { ATTACHMENTS_OVERVIEW_LABELS } from './translations';
 
 export interface AttachmentsOverviewSectionProps {
@@ -30,67 +27,20 @@ export interface AttachmentsOverviewSectionProps {
   getSecurityAppUrl: (path: string) => string;
 }
 
-interface AttachmentRow {
-  label: string;
-  href: string;
-}
-
 /** Renders the "Attachments" subsection inside the investigation Overview tab.
  *  Rows appear only for types that have at least one item and a resolvable URL. */
 export const AttachmentsOverviewSection = memo<AttachmentsOverviewSectionProps>(
   ({ attachments, getSecurityAppUrl }) => {
-    const targets = useMemo(() => extractAttachmentTargets(attachments), [attachments]);
-
-    const rows = useMemo((): AttachmentRow[] => {
-      const result: AttachmentRow[] = [];
-
-      if (targets.alertIds.length > 0 && targets.alertsCreatedAt && targets.alertsUpdatedAt) {
-        const href = buildAlertsPageUrl(
-          getSecurityAppUrl,
-          targets.alertIds,
-          targets.alertsCreatedAt,
-          targets.alertsUpdatedAt
-        );
-        if (href)
-          result.push({ label: ATTACHMENTS_OVERVIEW_LABELS.alerts(targets.alertIds.length), href });
-      }
-
-      if (targets.attackIds.length > 0 && targets.attacksCreatedAt && targets.attacksUpdatedAt) {
-        const href = buildAttacksPageUrl(
-          getSecurityAppUrl,
-          targets.attackIds,
-          targets.attacksCreatedAt,
-          targets.attacksUpdatedAt
-        );
-        if (href)
-          result.push({
-            label: ATTACHMENTS_OVERVIEW_LABELS.attacks(targets.attackIds.length),
-            href,
-          });
-      }
-
-      if (targets.entityKeys.length > 0) {
-        const href = buildEntityAnalyticsPageUrl(getSecurityAppUrl, targets.entityTerms);
-        if (href)
-          result.push({
-            label: ATTACHMENTS_OVERVIEW_LABELS.entities(targets.entityKeys.length),
-            href,
-          });
-      }
-
-      if (targets.ruleOrigins.length > 0) {
-        result.push({
-          label: ATTACHMENTS_OVERVIEW_LABELS.rules(targets.ruleOrigins.length),
-          href: buildRulesPageUrl(
-            getSecurityAppUrl,
-            targets.ruleOrigins.length,
-            targets.firstRuleLabel
-          ),
-        });
-      }
-
-      return result;
-    }, [targets, getSecurityAppUrl]);
+    const rows = useMemo(
+      () =>
+        [
+          getAlertRow(attachments, getSecurityAppUrl),
+          getAttackRow(attachments, getSecurityAppUrl),
+          getEntityRow(attachments, getSecurityAppUrl),
+          getRuleRow(attachments, getSecurityAppUrl),
+        ].filter((row): row is { label: string; href: string } => row !== undefined),
+      [attachments, getSecurityAppUrl]
+    );
 
     if (rows.length === 0) return null;
 
