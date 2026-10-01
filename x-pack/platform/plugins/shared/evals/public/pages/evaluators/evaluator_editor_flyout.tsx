@@ -369,6 +369,10 @@ export const EvaluatorEditorFlyout: React.FC<EvaluatorEditorFlyoutProps> = ({
       for (let attempt = 0; attempt < PROFILE_PROBE_ATTEMPTS && !resolvedProfile; attempt++) {
         if (attempt > 0) {
           await new Promise((resolve) => setTimeout(resolve, PROFILE_PROBE_DELAY_MS));
+          // An edit or a close during the pause abandons the run, so spend no request on it.
+          if (isStaleRun()) {
+            return;
+          }
         }
 
         try {

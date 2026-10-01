@@ -683,13 +683,15 @@ describe('EvaluatorEditorFlyout', () => {
       await waitFor(() => expect(resolveMutateAsync).toHaveBeenCalled());
 
       setField('evalsEvaluatorPrompt', 'Rate {{{agent_response}}} strictly.');
-      resolveProbe({
-        recommended_instrumentation: { profile: 'elastic-inference' },
-        profiles: [],
+      await act(async () => {
+        resolveProbe({
+          recommended_instrumentation: { profile: 'elastic-inference' },
+          profiles: [],
+        });
       });
 
       // No judge is invoked for a draft that is no longer on screen.
-      await waitFor(() => expect(resolveMutateAsync).toHaveBeenCalledTimes(1));
+      expect(resolveMutateAsync).toHaveBeenCalledTimes(1);
       expect(testMutateAsync).not.toHaveBeenCalled();
     });
 
