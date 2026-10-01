@@ -6,7 +6,6 @@
  */
 
 import {
-  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
@@ -33,10 +32,7 @@ export type EscalationConversation = Conversation;
 const conversationIdSchema = z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH);
 
 /** A user profile uid, bounded to the length the conversation ACL enforces. */
-const collaboratorIdSchema = z
-  .string()
-  .min(1)
-  .max(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH);
+const assigneeIdSchema = z.string().min(1).max(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH);
 
 export const escalationVisibilitySchema = z.enum(['private', 'public']);
 export type EscalationVisibility = z.infer<typeof escalationVisibilitySchema>;
@@ -49,49 +45,23 @@ export type EscalationVisibility = z.infer<typeof escalationVisibilitySchema>;
 export const escalationStatusSchema = z.enum(['open', 'closed']);
 export type EscalationStatus = z.infer<typeof escalationStatusSchema>;
 
-export const createEscalationRequestSchema = z
-  .object({
-    /**
-     * The investigation to escalate. A single id, not an array: an escalation is opened
-     * *from* one investigation. Further investigations are attached through the update
-     * route afterwards.
-     */
-    linked_investigation_id: conversationIdSchema,
-    /** Escalation title. Defaults to the linked investigation's title if omitted. */
-    title: z.string().min(1).max(CONVERSATION_TITLE_MAX_LENGTH).optional(),
-    visibility: escalationVisibilitySchema,
-    /**
-     * List of user profile uids to add as collaborators. Required when
-     * visibility is "private"; must be omitted (or empty) when "public".
-     */
-    collaborators: z
-      .array(collaboratorIdSchema)
-      .max(CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES)
-      .default([]),
-    /**
-     * User profile uids to assign to the escalation. Stored in `metadata.assignees`.
-     * Defaults to empty — callers that know the current user's uid should include it
-     * so the creator is automatically listed as a responsible party.
-     */
-    assignees: z.array(collaboratorIdSchema).max(MAX_ESCALATION_ASSIGNEES).optional(),
-  })
-  .superRefine((value, ctx) => {
-    if (value.visibility === 'private' && value.collaborators.length === 0) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['collaborators'],
-        message: 'collaborators is required when visibility is "private"',
-      });
-    }
-
-    if (value.visibility === 'public' && value.collaborators.length > 0) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['collaborators'],
-        message: 'collaborators must not be set when visibility is "public"',
-      });
-    }
-  });
+export const createEscalationRequestSchema = z.object({
+  /**
+   * The investigation to escalate. A single id, not an array: an escalation is opened
+   * *from* one investigation. Further investigations are attached through the update
+   * route afterwards.
+   */
+  linked_investigation_id: conversationIdSchema,
+  /** Escalation title. Defaults to the linked investigation's title if omitted. */
+  title: z.string().min(1).max(CONVERSATION_TITLE_MAX_LENGTH).optional(),
+  visibility: escalationVisibilitySchema,
+  /**
+   * User profile uids to assign to the escalation. At least one is required (typically
+   * the creator). Stored in `metadata.assignees`. For private escalations, these uids
+   * are also used as the ACL entries so assignees can see the escalation.
+   */
+  assignees: z.array(assigneeIdSchema).min(1).max(MAX_ESCALATION_ASSIGNEES),
+});
 
 export type CreateEscalationRequest = z.infer<typeof createEscalationRequestSchema>;
 
@@ -154,6 +124,13 @@ export const listEscalationsQuerySchema = z
       .default(MAX_ESCALATIONS_PAGE_SIZE),
     status: z.enum(['open', 'closed', 'all']).default('open'),
     search: z.string().max(256).optional(),
+    /**
+     * When set, only escalations that have this investigation id in their
+     * `metadata.linked_investigations` array are returned. Useful for checking
+     * whether an investigation is already part of one or more escalations before
+     * opening the escalation creation modal.
+     */
+    linked_investigation_id: conversationIdSchema.optional(),
   })
   .refine(({ page, per_page: perPage }) => page * perPage <= MAX_ESCALATIONS_RESULT_WINDOW, {
     message: `page * per_page must not exceed ${MAX_ESCALATIONS_RESULT_WINDOW}; escalations beyond that are not reachable through this API`,

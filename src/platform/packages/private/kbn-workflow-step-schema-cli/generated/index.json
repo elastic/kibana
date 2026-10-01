@@ -106,6 +106,7 @@
     "ai.attachment.update",
     "ai.classify",
     "ai.conversation.add_event",
+    "ai.conversation.add_user_message",
     "ai.conversation.create",
     "ai.conversation.metadata.patch",
     "ai.conversation.metadata.read",
@@ -604,6 +605,7 @@
     "nightshift.cortexHydrate",
     "nightshift.cortexOptimize",
     "nightshift.ensureInvestigationAgent",
+    "nightshift.resolveModel",
     "nightshift.triggerInvestigation",
     "notion.getDataSource",
     "notion.getPage",
@@ -795,6 +797,7 @@
     "shodan.getHostInfo",
     "shodan.getServices",
     "shodan.searchHosts",
+    "significantEvents.resolveModel",
     "slack",
     "slack2.createConversation",
     "slack2.getConversationHistory",
@@ -982,11 +985,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "722ef6ac46c1bbddd6a3b0de80268741acdc01f24a66473fb280b5a47add5cdf"
+      "sha256": "60dc2b3e3644fab1321276e4ab56e69e290d5e5a9c5279be4e3f29f3f299ad5c"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "839edb52ecf94e32457e4b104940dd291ae5d57aca9d3a5ed2ece43f566090d4"
+      "sha256": "d1b29627dbd9ed479d3eebfa2a5b1f55d72e318a8c415a23eb1369cf5fa742db"
     }
   }
 }
