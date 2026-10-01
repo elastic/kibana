@@ -363,6 +363,17 @@ All API endpoints require authentication. The plugin integrates with Kibana's se
 
 Workflows are space-aware and respect Kibana Spaces boundaries.
 
+### Queryable execution data
+
+The managed data views for `.workflows-executions*` and `.workflows-step-executions*` use the Workflows feature privileges to provide space-scoped access with DLS and FLS.
+
+Elasticsearch index privileges are additive. A role or API key with unrestricted `read` or `all` on `*` or either execution index pattern is not limited by the Workflows DLS and FLS grant:
+
+- `read` can access execution documents from all spaces and all fields.
+- `all` can also modify or delete execution data.
+
+For least-privilege access, grant the Workflows feature privilege for the required spaces without a direct Elasticsearch index privilege on `*` or `.workflows-*`.
+
 ---
 
 ## Additional Resources

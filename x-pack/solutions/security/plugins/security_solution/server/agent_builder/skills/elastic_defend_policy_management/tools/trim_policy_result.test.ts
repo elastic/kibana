@@ -261,6 +261,20 @@ describe('trimPolicyResultWithMeta', () => {
     });
   });
 
+  it('bounds creationPreset with the shared 512 cap and truncation flag when supplied', () => {
+    const creationPresetFlag = `${'creationPreset'}_string_truncated`;
+    expect(
+      presentBoundedIdentityStrings({
+        id: 'policy-1',
+        creationPreset: 'C'.repeat(600),
+      })
+    ).toEqual({
+      id: 'policy-1',
+      creationPreset: 'C'.repeat(512),
+      [creationPresetFlag]: true,
+    });
+  });
+
   it('presents trimmed from/to values with sided out-of-band summaries only', () => {
     const over = 'Y'.repeat(600);
     expect(presentFromTo({ from: over, to: { label: over } }, DEFAULT_TRIM_LIMITS)).toEqual({

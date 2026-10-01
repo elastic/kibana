@@ -29,7 +29,6 @@ export function buildPanels(
         css: {
           fontWeight: 700,
           color: euiTheme.colors.textParagraph,
-          borderBottom: euiTheme.border.thin as string,
           marginTop: groupIndex > 0 ? euiTheme.size.m : 0,
         },
         'data-test-subj': `${dataTestSubjPrefix}Group-${group.id}`,

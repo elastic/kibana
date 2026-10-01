@@ -47,7 +47,7 @@ const UTILITY_ROUTES = ['/delete_data_instructions', '/profiling-not-enabled'];
 
 // Build a valid ProfilingSetupStatus, overriding only what each test case needs.
 const makeStatus = (overrides: Partial<ProfilingSetupStatus>): ProfilingSetupStatus => ({
-  type: 'cloud',
+  profiling_enabled: true,
   has_setup: true,
   has_data: true,
   pre_8_9_1_data: false,
