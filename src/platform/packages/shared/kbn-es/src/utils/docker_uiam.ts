@@ -53,6 +53,10 @@ const UIAM_DOCKER_PROMOTED_REPO = `${UIAM_DOCKER_REGISTRY}/kibana-ci/uiam`;
  * and PR builds reuse it instead of pulling, so a promotion would not reach CI until the agents are
  * rebuilt. To move to a newer promoted image, replace the digest with the one that
  * `docker buildx imagetools inspect docker.elastic.co/kibana-ci/uiam:latest-verified` reports.
+ *
+ * Bump the same reference in `vm-images/kibana/warmup_docker_cache.sh` in `elastic/ci-agent-images`
+ * as well. Agents only have the pinned image cached when the two match, and without the cache every
+ * agent pulls the full image.
  */
 const UIAM_DEFAULT_IMAGE_DIGEST =
   'sha256:3b2d0890339815fd947a2e31f560befa3081119197275eb32e7d8d9cebc99885';
