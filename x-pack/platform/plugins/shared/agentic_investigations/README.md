@@ -4,6 +4,8 @@ Solution-agnostic base layer for the entities an agent and a human collaborate o
 
 Today it holds two entities: **impact** and **escalations**. **Investigations** are next, which is why the plugin is an umbrella rather than one plugin per entity. **Proposals** started here and now live in their own `proposals` plugin, which this one may depend on but which does not depend on this one.
 
+It also owns the browser UI of the `investigation` and `escalation` conversation templates: the Agent Builder conversation details flyout, its tabs, and the connected components behind them. See [Template UI and gating](#template-ui-and-gating).
+
 Consumed by AlertZero (Security) and intended for Nightshift (Observability). Nothing in this plugin is solution-specific.
 
 ## What belongs here, and what does not
@@ -32,6 +34,9 @@ public/
   impact/                browser step definitions and flyout attachment UI
   escalations/           browser hooks
   user_profiles/         browser hooks
+  template_ui/           investigation and escalation conversation template UI registration
+  components/            connected components the template UI renders (assignees, status, modals, proposed actions)
+  hooks/                 capability and open-in-chat hooks
 ```
 
 Adding an entity means adding a directory in each of the three, an entity barrel, its privileges in `features.ts`, and a getter on the start contract. It should not require restructuring the umbrella itself.
@@ -68,6 +73,28 @@ An **Impact** record is the set of entities (users, hosts, services) an investig
 - Workflow steps: `investigations.attachImpact` and `investigations.getImpact` both require `manage_investigations` and fail the step when it is missing. `getImpact` also fails if none is attached. Same fail-closed privilege check as proposal steps.
 - Agent Builder attachment type `investigation_impact` (`isReadonly: true`) is registered for the investigation flyout (and allow-listed in `@kbn/agent-builder-server`). Attach HTTP and `investigations.attachImpact` call `attachImpactToInvestigation`, which checks conversation owner access, writes the impact document, then puts a by-reference attachment (`origin` = Impact document id). A failed attachment write reverts that index write. `resolve()` loads the current document through `ImpactService`, so a later merge does not leave the flyout on a stale snapshot.
 - `scripts/seed_impact_attachment.sh` creates an investigation conversation, attaches entities through the internal API, and checks that the conversation has one `investigation_impact` attachment.
+
+## Template UI and gating
+
+The public plugin registers the conversation template UI for `investigation` and `escalation` once in `start`, in `public/template_ui/register_template_ui.ts`. Solutions do not register these templates themselves; Agent Builder throws on a second registration.
+
+- **Registration** depends only on Agent Builder being available. It does not read any solution setting or capability, so a user who reaches an investigation through any solution (for example Nightshift) gets the same flyout.
+- **Write actions** are gated on this plugin's UI capabilities, read once at start:
+
+  | Action | Needs |
+  | ------ | ----- |
+  | Investigation status toggle, close modal | `agenticInvestigations.manageInvestigations` |
+  | Escalation modal | `agenticInvestigations.manageEscalations` |
+  | Escalation status toggle | `manageEscalations` and `manageInvestigations` |
+  | Linked investigations on an escalation | `agenticInvestigations.showEscalations` |
+  | Assignee pickers | rendered always; editable per the matching manage capability |
+  | Proposed actions | the optional `proposals` plugin; read-only without `proposals.decideProposals`, and deciding is authorized by the proposals API |
+
+- **No solution gates.** A solution's license or tier, its feature privileges and its settings do not gate the flyout. For example AlertZero's subscription check, its `alertzero` Read/All privileges and `securitySolution:enableAlertZero` gate AlertZero's own pages, routes and attachment renderers, not this flyout. A solution that needs stricter rules on its own pages narrows the capabilities there (AlertZero's queue also requires AlertZero All for manage actions).
+- **No fallback to API privileges yet.** UI capabilities belong to the feature that declares them, so a role that only grants `manage_investigations` through another feature (Nightshift `all` does) does not get `manageInvestigations`. Those users see a read-only flyout even though the API would accept their writes. Nightshift work (NS-1619 s5) has to either add a fallback or grant these capabilities to Nightshift users.
+- **Icons.** The investigation template uses `securitySignalDetected` and the escalation template `warning`, kept from AlertZero.
+
+The status and assignee signals and the shared query client in `public/` are module-level singletons. Solution pages must import them from `@kbn/agentic-investigations-plugin/public` so a change in the flyout reaches their queue views.
 
 ## Index naming
 

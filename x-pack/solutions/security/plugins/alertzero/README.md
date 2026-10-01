@@ -25,14 +25,15 @@ uiSettings.overrides:
   securitySolution:enableAlertZero: true
 ```
 
-It controls four things. Enabling takes effect live, but **disabling takes full effect only after a page reload** — the setting is registered with `requiresPageReload: true`, so Advanced Settings prompts for one. Dismiss that prompt and the Agent Builder surfaces in the last row stay in place until the page is reloaded:
+It controls three things, and both enabling and disabling take effect live. The setting is still registered with `requiresPageReload: true`, so Advanced Settings prompts for a reload, but none of the surfaces below needs one:
 
 | Surface | When off |
 |---------|----------|
 | Browser app `/app/alertzero` | Registered but `AppStatus.inaccessible`; every page renders core's "Application unavailable" |
 | Security solution navigation | AlertZero nodes disappear — core empties `visibleIn` and `deepLinks` for an inaccessible app, and chrome drops nav nodes whose link has no nav link. The navigation trees hold no check of their own |
 | HTTP `/internal/alertzero/*` | `404`, via the `withAlertZeroEnabled` wrapper on every route |
-| Agent Builder Investigation template and its tabs | Absent from the next page load. Agent Builder's conversation template contract has no deregistration counterpart, so a session that already registered them keeps them until it reloads; in that window AlertZero-provided content shows the disabled gate instead of loading feature data |
+
+The Agent Builder conversation template UI for investigations and escalations (the details flyout and its tabs) is **not** gated by this setting. The `agenticInvestigations` plugin registers it whenever Agent Builder is available, so the flyout is the same in every space and every solution. See the agentic investigations README, "Template UI and gating".
 
 ### `xpack.alertzero.enabled` — the deployment kill switch
 
@@ -61,7 +62,9 @@ An insufficient subscription or missing AlertZero Read access removes AlertZero 
 
 Every AlertZero HTTP route uses `withAlertZeroEnabled` to check the per-space setting and subscription before running its handler, alongside declarative read/write authorization. Setting-off requests return 404 for otherwise authorized callers; subscription and authorization failures return 403.
 
-The proposed-actions panel and both AlertZero attachment renderers in Agent Builder also observe availability after registration. Losing eligibility unmounts their content and stops active query observers; restoring eligibility shows the content again. Stored attachments and the authorization of their underlying shared APIs are unchanged.
+Both AlertZero attachment renderers in Agent Builder also observe availability after registration. Losing eligibility unmounts their content and stops active query observers; restoring eligibility shows the content again. Stored attachments and the authorization of their underlying shared APIs are unchanged.
+
+None of this gates the investigation and escalation details flyout. The `agenticInvestigations` plugin registers that flyout regardless of the subscription, the AlertZero privileges and the setting; its write actions follow the Agentic Investigations privileges and its proposed actions the Proposed Actions privileges. AlertZero's own queue and escalations pages still require AlertZero **All** on top of the Agentic Investigations privileges for assign, status, close and escalate actions.
 
 These availability checks gate **UI and API access only**. They do not stop, disable, or unschedule background work when a subscription changes.
 
@@ -148,7 +151,9 @@ AlertZero is a **standalone Security-category app** (`/app/alertzero`) that **us
 
 An investigation has no route of its own: it is a templated Agent Builder conversation, so its
 details open in Agent Builder's conversation flyout (`?selectedConversationId=` on the queue) and
-its chat opens at `/app/agent_builder/agents/{agentId}/conversations/{id}`.
+its chat opens at `/app/agent_builder/agents/{agentId}/conversations/{id}`. The flyout UI is
+registered by the `agenticInvestigations` plugin; AlertZero's queue pages import its shared hooks,
+signals, query client and modals from `@kbn/agentic-investigations-plugin/public`.
 
 ### Security left-rail order (when `securitySolution:enableAlertZero` is on)
 
