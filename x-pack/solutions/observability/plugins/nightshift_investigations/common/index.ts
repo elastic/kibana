@@ -6,7 +6,6 @@
  */
 
 import type {
-  InvestigationBlindSpot,
   InvestigationHypothesis,
   InvestigationImpact,
   InvestigationRecommendation,
@@ -120,7 +119,6 @@ export interface InvestigationStructuredOutput {
   severity?: Severity;
   hypotheses?: InvestigationHypothesis[];
   recommendations?: InvestigationRecommendation[];
-  blind_spots?: InvestigationBlindSpot[];
   impact?: InvestigationImpact;
 }
 
