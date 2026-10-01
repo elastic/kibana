@@ -19,16 +19,18 @@ interface EntityEntry {
 
 const extractEntitiesFromData = (data: Record<string, unknown>): EntityEntry[] => {
   if (data.entities != null && Array.isArray(data.entities)) {
-    return (data.entities as Array<Record<string, unknown>>).map((entity) => {
-      const key =
-        (entity.entityStoreId as string | undefined) ??
-        `${entity.identifierType}:${entity.identifier}`;
-      const term =
-        (entity.entityStoreId as string | undefined) ??
-        (entity.identifier as string | undefined) ??
-        key;
-      return { key, term };
-    });
+    return (data.entities as Array<unknown>)
+      .filter((e): e is Record<string, unknown> => e != null && typeof e === 'object')
+      .map((entity) => {
+        const key =
+          (entity.entityStoreId as string | undefined) ??
+          `${entity.identifierType}:${entity.identifier}`;
+        const term =
+          (entity.entityStoreId as string | undefined) ??
+          (entity.identifier as string | undefined) ??
+          key;
+        return { key, term };
+      });
   }
   if (data.identifierType != null) {
     const key =
