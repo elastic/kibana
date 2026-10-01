@@ -19,10 +19,6 @@ export const s3FederatedIdentitySetupStrings = {
   roleArnLabel: i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleArn', {
     defaultMessage: 'Role ARN',
   }),
-
-  roleArnHelp: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.roleArnHelp.manual', {
-    defaultMessage: 'Paste the ARN returned by step 3 above.',
-  }),
 };
 
 /** Quotes a value so the shell exports it verbatim instead of expanding it. */
