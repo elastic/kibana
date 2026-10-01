@@ -58,7 +58,7 @@ const compareToSchemaShared = z
   .object({
     palette: z.string().default(DEFAULT_SECONDARY_COMPARE_TO_PALETTE).optional().meta({
       description:
-        "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
+        "Color palette name. Accepted values: 'default', 'elastic_line_optimized_extended', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
     }),
     icon: z
       .boolean()

@@ -28,6 +28,6 @@ export const DEFAULT_AREAS_FILL_OPACITY = 0.3;
 export const DEFAULT_AREAS_FILL = 'solid' as const;
 export const DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = {
   mode: 'categorical',
-  palette: 'elastic_line_optimized',
+  palette: 'elastic_line_optimized_extended',
   mapping: [],
 };

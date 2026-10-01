@@ -1212,7 +1212,7 @@ describe('XY', () => {
       );
     });
 
-    it('should emit elastic_line_optimized palette on breakdown_by for line charts', () => {
+    it('should emit elastic_line_optimized_extended palette on breakdown_by for line charts', () => {
       const config = {
         type: 'xy',
         title: 'Line breakdown color default test',
