@@ -31,8 +31,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Elastic Agent Builder**:
 * Fix Agent Builder tools hanging or timing out on data streams that span the frozen tier. Tools now skip frozen tier indices [#292349]({{kib-pull}}292349).
 * Fix Agent Builder tracing applying the default space's GenAI privacy settings in every space. Each conversation now uses the privacy settings of its own space [#290750]({{kib-pull}}290750).
-* Add an Agent Builder tool that finds case templates by name so you don't need the template ID to create a case from a template [#287744]({{kib-pull}}287744).
-* Teach the Agent Builder cases-management skill to use `set_extended_fields` when case templates are enabled [#287638]({{kib-pull}}287638).
 * Add the case template ID and version fields to the Agent Builder cases-analytics skill so agents can filter and group cases by template [#291716]({{kib-pull}}291716).
 
 **Alerting and cases**:
@@ -42,7 +40,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fix Jira Service Management and Opsgenie connector actions failing when the rendered alert message exceeds 130 characters. The connectors now truncate the message instead [#291698]({{kib-pull}}291698).
 * Fix the email connector HTTP test sending caller-supplied subject and message content. The test now sends fixed content [#288664]({{kib-pull}}288664).
 * Fix the **Auto-push case to connected external system** option missing from the Cases rule action when case templates are enabled [#292187]({{kib-pull}}292187).
-* Fix the **Create case** button in the **Add to case** selector staying enabled when you can attach to cases but can't create them [#292761]({{kib-pull}}292761).
 % !!DEFERRED!! Not on the 9.5 branch (backport failed with merge conflicts, as of 2026-10-01). Re-verify against the next BC before publishing.
 % * Fix the **Read only** badge appearing on case template pages when you have Cases **Read** access and the privilege to manage case templates [#291719]({{kib-pull}}291719).
 
