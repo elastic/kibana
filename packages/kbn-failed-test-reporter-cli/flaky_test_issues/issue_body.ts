@@ -60,6 +60,16 @@ export interface FlakySuiteIssueMetadata {
   'suite.title'?: string;
   'suite.framework': string;
   'suite.testIds': string[];
+  /**
+   * Branches in the report scope that a test of the suite failed on, most failed builds first and
+   * pull requests left out: the branches `/skip` (elastic/kibana-operations `triage/`) skips it on.
+   */
+  'suite.branches': string[];
+  /**
+   * Pipelines in the report scope that the suite's file failed on, latest failure last, the order
+   * the Slack notifications of `triage/` read them in.
+   */
+  'suite.pipelines': string[];
   /** Newest report that found the suite flaky. */
   'report.generatedAt': string;
   /** Reports that found the suite flaky, including the one that filed the issue. */
@@ -78,6 +88,11 @@ const isSnapshot = (value: unknown): value is FlakySuiteReportSnapshot =>
   typeof (value as FlakySuiteReportSnapshot).builds === 'number' &&
   typeof (value as FlakySuiteReportSnapshot).failedBuilds === 'number';
 
+const stringsOf = (value: unknown): string[] | undefined =>
+  Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : undefined;
+
 /** Suite metadata recorded in an issue body, if the body was written by this reporter. */
 export const readFlakySuiteIssueMetadata = (
   body: string
@@ -91,7 +106,6 @@ export const readFlakySuiteIssueMetadata = (
   }
   const title = metadataValue(body, 'suite.title');
   const framework = metadataValue(body, 'suite.framework');
-  const testIds = metadataValue(body, 'suite.testIds');
   const generatedAt = metadataValue(body, 'report.generatedAt');
   const count = metadataValue(body, 'report.count');
   const history = metadataValue(body, 'report.history');
@@ -99,9 +113,9 @@ export const readFlakySuiteIssueMetadata = (
     'suite.filePath': filePath,
     'suite.title': typeof title === 'string' ? title : undefined,
     'suite.framework': typeof framework === 'string' ? framework : undefined,
-    'suite.testIds': Array.isArray(testIds)
-      ? testIds.filter((id): id is string => typeof id === 'string')
-      : undefined,
+    'suite.testIds': stringsOf(metadataValue(body, 'suite.testIds')),
+    'suite.branches': stringsOf(metadataValue(body, 'suite.branches')),
+    'suite.pipelines': stringsOf(metadataValue(body, 'suite.pipelines')),
     'report.generatedAt': typeof generatedAt === 'string' ? generatedAt : undefined,
     'report.count': typeof count === 'number' ? count : undefined,
     'report.history': Array.isArray(history) ? history.filter(isSnapshot) : [],
@@ -114,6 +128,38 @@ const snapshot = (suite: FlakySuite, report: FlakyTestReport): FlakySuiteReportS
   failedBuilds: suite.tests[0].failedBuilds,
 });
 
+/**
+ * Branches a test of the suite failed on, by the worst test's failed builds on each; a pull request
+ * has no branch of `elastic/kibana` to skip the suite on.
+ */
+const failedBranches = (suite: FlakySuite): string[] => {
+  const failedBuilds = new Map<string, number>();
+  for (const test of suite.tests) {
+    for (const { branch, failedBuilds: failed } of test.byBranch) {
+      if (failed > 0 && !isPullRequestRef(branch)) {
+        failedBuilds.set(branch, Math.max(failedBuilds.get(branch) ?? 0, failed));
+      }
+    }
+  }
+  return [...failedBuilds.entries()]
+    .sort(([branchA, a], [branchB, b]) => b - a || branchA.localeCompare(branchB))
+    .map(([branch]) => branch);
+};
+
+/** Pipelines of the report scope the suite's file failed on, the most recent failure last. */
+const failedPipelines = (suite: FlakySuite, { scope }: FlakyTestReport): string[] =>
+  suite.byPipeline
+    .filter(
+      ({ pipeline, failedBuilds }) =>
+        failedBuilds > 0 && (scope.pipelines.length === 0 || scope.pipelines.includes(pipeline))
+    )
+    .sort(
+      (a, b) =>
+        (a.lastFailedAt?.getTime() ?? 0) - (b.lastFailedAt?.getTime() ?? 0) ||
+        a.pipeline.localeCompare(b.pipeline)
+    )
+    .map(({ pipeline }) => pipeline);
+
 /** Metadata of a freshly filed issue. */
 export const flakySuiteIssueMetadata = (
   suite: FlakySuite,
@@ -123,6 +169,8 @@ export const flakySuiteIssueMetadata = (
   ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
   'suite.framework': suite.framework,
   'suite.testIds': suite.tests.map((test) => test.testId),
+  'suite.branches': failedBranches(suite),
+  'suite.pipelines': failedPipelines(suite, report),
   'report.generatedAt': report.generatedAt.toISOString(),
   'report.count': 1,
   'report.history': [snapshot(suite, report)],

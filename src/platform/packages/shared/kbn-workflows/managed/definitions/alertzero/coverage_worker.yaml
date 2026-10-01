@@ -41,6 +41,11 @@ triggers:
           minimum: 1
           maximum: 90
           description: "How many days back the sweep looks for indicators, counted from their creation time. Default: 14. A manual run can raise or lower it."
+        autonomy_level:
+          type: string
+          enum: [manual, assisted]
+          maxLength: 16
+          description: "Detection Watch autonomy level of the dispatching worker, forwarded to every review it starts. Default: manual."
       additionalProperties: false
 outputs:
   - name: pending
@@ -202,6 +207,7 @@ steps:
           inputs:
             ki_id: "{{ foreach.item._id }}"
             ai_index_id: "{{ inputs.ai_index_id | default: consts.ai_index_id }}"
+            autonomy_level: "{{ inputs.autonomy_level | default: 'manual' }}"
 
   - name: emit_result
     type: workflow.output

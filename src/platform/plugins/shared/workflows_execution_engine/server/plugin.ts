@@ -76,6 +76,7 @@ import {
 } from './lib/workflow_task_run_event_fields';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
+import { LogsRepository } from './repositories/logs_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -106,7 +107,7 @@ import {
   type WorkflowExecutionForInputRendering,
 } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
-import { WorkflowEventLoggerService } from './workflow_event_logger';
+import { WorkflowLogsQueryService } from './workflow_event_logger';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
@@ -1962,11 +1963,8 @@ export class WorkflowsExecutionEnginePlugin
 
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;
 
-    const workflowEventLoggerService = new WorkflowEventLoggerService(
-      coreStart.dataStreams,
-      this.logger,
-      this.config.logging.console
-    );
+    const logsRepository = new LogsRepository(coreStart.dataStreams, this.logger);
+    const workflowEventLoggerService = new WorkflowLogsQueryService(logsRepository, this.logger);
 
     const triggerEventsClientPromise = initializeTriggerEventsClient(coreStart.dataStreams);
 
