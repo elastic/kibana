@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { badRequest, conflict, notFound, serverUnavailable, tooManyRequests } from '@hapi/boom';
+import {
+  badRequest,
+  conflict,
+  forbidden,
+  notFound,
+  serverUnavailable,
+  tooManyRequests,
+} from '@hapi/boom';
 import {
   NightshiftModelBlockedError,
   NightshiftModelNotFoundError,
@@ -19,12 +26,21 @@ import {
   InvalidInvestigationContextError,
 } from '../client/errors';
 
+/**
+ * Agentic investigations rejects a caller without the investigations privileges with this error.
+ * Only its type is part of that plugin's contract, so it is recognised by name.
+ */
+const INVESTIGATIONS_FORBIDDEN_ERROR_NAME = 'InvestigationsForbiddenError';
+
 export function rethrowInvestigationClientError(error: unknown): never {
   if (
     error instanceof NightshiftModelNotFoundError ||
     error instanceof NightshiftModelBlockedError
   ) {
     throw badRequest(error.message);
+  }
+  if (error instanceof Error && error.name === INVESTIGATIONS_FORBIDDEN_ERROR_NAME) {
+    throw forbidden(error.message);
   }
   if (error instanceof InvestigationNotFoundError) {
     throw notFound(error.message);

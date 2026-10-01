@@ -32,5 +32,8 @@ export const streamsInvestigationManagementSkill = defineSkillType({
     // Records the completed investigation back onto the significant event so the UI can
     // surface investigation history and link to the full RCA result.
     SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID,
+    // Reads the investigation's recorded findings. Registered by the agentic investigations
+    // plugin, whose id is not exported for server consumers outside it.
+    'investigations.get',
   ],
 });

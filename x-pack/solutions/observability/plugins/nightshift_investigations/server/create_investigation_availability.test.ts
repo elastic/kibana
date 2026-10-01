@@ -18,6 +18,8 @@ it('keeps the agent available when infrastructure exists without probing a model
         getBooleanValue$: jest.fn().mockReturnValue(of(true)),
       } as never,
       agentBuilder: {} as never,
+      agenticInvestigations: {} as never,
+      proposals: {} as never,
       inference: { getClient } as never,
       logger: { warn: jest.fn() } as never,
       workflowsExtensions: {} as never,

@@ -158,7 +158,8 @@ export const useInvestigateAlert = ({
       await investigationsClient.fetch('POST /internal/nightshift/investigations', {
         signal: null,
         params: {
-          body: { subject: { type: 'alert', id: alertId }, concurrency_key: alertId },
+          // TODO(ns-1619 s5): look the alert's investigation up by subject on the shared API.
+          body: { subject: { type: 'alert', id: alertId } },
         },
       });
       services?.notifications?.toasts?.addSuccess({

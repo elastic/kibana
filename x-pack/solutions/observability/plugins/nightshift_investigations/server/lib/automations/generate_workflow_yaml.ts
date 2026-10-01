@@ -68,7 +68,6 @@ export function generateWorkflowYaml(
           title: isAlertTrigger ? '{{ trigger.rule.name }}' : automation.name,
           summary: automation.name,
           trigger_type: 'automatic',
-          concurrency_key: automationId,
           ...(automation.execution.promptTemplate
             ? { message: automation.execution.promptTemplate }
             : {}),

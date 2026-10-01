@@ -32,7 +32,9 @@ const subjectSchema = z.object({
 });
 
 const baseInvestigationSchema = z.object({
-  investigation_id: z.string().describe('ID of the investigation (the workflow execution ID).'),
+  investigation_id: z
+    .string()
+    .describe('ID of the investigation, which is the id of its Agent Builder conversation.'),
   status: z
     .enum(EMITTED_INVESTIGATION_STATUSES)
     .describe('Lifecycle status of the investigation at emit time.'),

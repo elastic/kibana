@@ -53,7 +53,6 @@ const startInvestigationBodySchema = z.union([
     }),
     // Optional here only: the handler derives it from the alert's rule name when omitted.
     title: titleSchema.optional(),
-    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     ...startInvestigationMessage,
     ...startInvestigationModel,
   }),
@@ -71,7 +70,6 @@ const startInvestigationBodySchema = z.union([
       summary: z.string().max(MAX_TEXT_LENGTH).optional(),
     }),
     title: titleSchema.optional(),
-    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     context: freeFormContextSchema.optional(),
     message: z.string().min(1).max(MAX_TEXT_LENGTH),
     ...startInvestigationModel,
@@ -88,7 +86,10 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
   options: {
     access: 'internal',
     summary: 'Start an investigation',
-    description: 'Triggers an investigation workflow for a given subject.',
+    description:
+      'Starts an investigation for a given subject, or continues the open investigation that ' +
+      'already holds it, and returns the investigation (Agent Builder conversation) id. The ' +
+      'investigation workflow creates the conversation, so it can take a few seconds to resolve.',
   },
   security: {
     // agentBuilder:write is used as a proxy for "this user is authorized to spend AI tokens."
@@ -119,7 +120,6 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         return await client.start({
           subject: body.subject,
           title: body.title ?? snapshot.rule_name,
-          concurrency_key: body.concurrency_key ?? snapshot.id,
           context: { alerts: [snapshot] },
           trigger_type: 'manual',
           message: body.message,

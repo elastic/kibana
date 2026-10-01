@@ -25,3 +25,43 @@ The `agenticInvestigations` and `proposals` routes require the `read_investigati
 These API privileges are not scoped to Nightshift: they cover every agentic investigation and proposal in the space, including those created by other solutions, plus the investigation routes that share `manage_investigations` (status, assignment, impact, user profile suggestions).
 
 `read_investigations` lets a user with Nightshift `read` get, list, and count investigations through the shared query API; every write still needs `manage_investigations`. UI capabilities are scoped to the feature that owns them, so capabilities like `agenticInvestigations.showInvestigations` and `proposals.showProposals` still need the `agenticInvestigations` and `proposals` features. Opening the investigation conversation in Agent Builder still needs the Agent Builder feature privileges.
+
+## How investigations are stored and run
+
+An investigation is an Agent Builder conversation with the `investigation` template. The investigation id is the conversation id. The `agenticInvestigations` plugin owns everything around it:
+
+- **Subjects.** What is investigated: alerts (with their snapshot), significant events, questions, and Slack threads. Each subject has its own document and attachment.
+- **Impact, hypotheses, and proposed actions.** The agent records these.
+- **The query API.** `GET /internal/investigations/investigations[/{id}]`, used for reads.
+
+The legacy `nightshift-investigation` saved object type is still registered, but nothing writes it anymore.
+
+### Starting an investigation
+
+The start route, the `nightshift.triggerInvestigation` workflow step, and `client.start` work out which subjects the start covers. For an alert, that is one subject per alert in `context.alerts`.
+
+If any of those subjects is part of an open investigation that the caller owns, the start continues that investigation. When several match, the most recently updated one wins. The new subjects are added to it, and the agent gets a follow-up brief describing the new alerts.
+
+If none match, the start claims the subjects for a new investigation id. That way, of two concurrent starts for one subject, the second continues the first. Closed investigations never match. One start always lands on exactly one investigation.
+
+The start then runs the `system-nightshift-investigation` workflow with `investigation_id` and the new subjects, and returns `{ investigation_id }`. It does not write to the investigation itself. The workflow's `_ensure` step does all of that:
+
+- creates the conversation;
+- records the subjects;
+- reopens a closed investigation.
+
+Until `_ensure` has run, the shared GET for a new investigation returns 404. That gap is usually a few seconds.
+
+The workflow's concurrency key is `investigation:<id>` with a `queue` strategy, so runs of one investigation never overlap. The key also registers the workflow as a driver workflow, so the investigation reads as in progress while a run is queued or running.
+
+### One identity per investigation
+
+Agent Builder lets only the conversation owner write subjects, metadata, and attachments. So one identity must create and continue an investigation. Use a service account for the investigation workflow, its automations, and the Slack thread workflow.
+
+A start will not continue an investigation it does not own. It opens a new one instead and logs a warning. If a run reaches an investigation it does not own anyway, the agent still works in the conversation, but subjects and the reopen are skipped. Cross-identity follow-ups need converse-access writes in Agent Builder.
+
+### Slack threads
+
+`POST /internal/nightshift/investigations/_slack_thread` finds a thread's investigation by the conversation origin `team:<T>/channel:<C>/thread:<ts>`, which is the key Agent Builder uses for Slack. If that origin belongs to another conversation, it falls back to the thread's `slack_thread` subject.
+
+With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation gets that origin and has the thread as its subject. The thread's status message is recorded on that subject as `slack.status_message_ts`.

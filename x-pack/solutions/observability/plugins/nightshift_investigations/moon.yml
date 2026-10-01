@@ -63,6 +63,9 @@ dependsOn:
   - '@kbn/occ'
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/security-plugin'
+  - '@kbn/agentic-investigations-plugin'
+  - '@kbn/proposals-plugin'
+  - '@kbn/proposals-common'
 tags:
   - plugin
   - prod

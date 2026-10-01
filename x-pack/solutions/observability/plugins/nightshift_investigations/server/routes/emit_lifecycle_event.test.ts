@@ -14,12 +14,10 @@ const { handler } = nightshiftInvestigationsRouteRepository[endpoint];
 const mockRequest = {} as KibanaRequest;
 
 const makeClient = (overrides: Record<string, unknown> = {}) => ({
-  get: jest.fn().mockResolvedValue({
-    investigation_id: 'exec-1',
+  getLifecycleSubject: jest.fn().mockResolvedValue({
     subject: { type: 'alert', id: 'alert-1' },
-    trigger_type: 'manual',
-    started_at: '2024-01-01T00:00:00Z',
-    status: 'running',
+    triggerType: 'manual',
+    startedAt: '2024-01-01T00:00:00Z',
     ...overrides,
   }),
 });
@@ -35,10 +33,10 @@ const makeResources = (
   getTriggerEmitter: jest.fn().mockReturnValue(emitter),
 });
 
-it('emits the started trigger with identity taken from the execution', async () => {
+it('emits the started trigger with identity taken from the recorded subjects', async () => {
   const emitter = jest.fn();
   const resources = makeResources(emitter, {
-    path: { id: 'exec-1' },
+    path: { id: 'inv-1' },
     body: { status: 'running' },
   });
 
@@ -46,7 +44,7 @@ it('emits the started trigger with identity taken from the execution', async () 
 
   expect(result).toEqual({ accepted: true });
   expect(emitter).toHaveBeenCalledWith('nightshift-investigations.started', {
-    investigation_id: 'exec-1',
+    investigation_id: 'inv-1',
     subject: { type: 'alert', id: 'alert-1' },
     trigger_type: 'manual',
     started_at: '2024-01-01T00:00:00Z',
@@ -54,13 +52,13 @@ it('emits the started trigger with identity taken from the execution', async () 
   });
 });
 
-it('defaults trigger_type to manual for executions started before it was tracked', async () => {
+it('attributes the event to the trigger type recorded on the subject', async () => {
   const emitter = jest.fn();
-  const client = makeClient({ trigger_type: undefined });
+  const client = makeClient({ triggerType: 'automatic' });
   const resources = makeResources(
     emitter,
     {
-      path: { id: 'exec-1' },
+      path: { id: 'inv-1' },
       body: { status: 'running' },
     },
     client
@@ -68,16 +66,17 @@ it('defaults trigger_type to manual for executions started before it was tracked
 
   await handler(resources as never);
 
+  expect(client.getLifecycleSubject).toHaveBeenCalledWith('inv-1');
   expect(emitter).toHaveBeenCalledWith(
     'nightshift-investigations.started',
-    expect.objectContaining({ trigger_type: 'manual' })
+    expect.objectContaining({ trigger_type: 'automatic' })
   );
 });
 
 it('emits the completed trigger with a completed_at timestamp', async () => {
   const emitter = jest.fn();
   const resources = makeResources(emitter, {
-    path: { id: 'exec-1' },
+    path: { id: 'inv-1' },
     body: { status: 'completed' },
   });
 
@@ -93,7 +92,7 @@ it('emits the completed trigger with a completed_at timestamp', async () => {
 it('emits the failed trigger when status is failed', async () => {
   const emitter = jest.fn();
   const resources = makeResources(emitter, {
-    path: { id: 'exec-1' },
+    path: { id: 'inv-1' },
     body: { status: 'failed' },
   });
 
@@ -106,19 +105,14 @@ it('emits the failed trigger when status is failed', async () => {
   );
 });
 
-it('does not emit when the execution has no subject (bare manual run)', async () => {
+it('does not emit when the investigation has no subject (bare workflow run)', async () => {
   const emitter = jest.fn();
   const client = makeClient();
-  client.get.mockResolvedValue({
-    investigation_id: 'exec-1',
-    subject: undefined,
-    started_at: '2024-01-01T00:00:00Z',
-    status: 'running',
-  });
+  client.getLifecycleSubject.mockResolvedValue(undefined);
   const resources = makeResources(
     emitter,
     {
-      path: { id: 'exec-1' },
+      path: { id: 'inv-1' },
       body: { status: 'completed' },
     },
     client
@@ -130,9 +124,9 @@ it('does not emit when the execution has no subject (bare manual run)', async ()
   expect(emitter).not.toHaveBeenCalled();
 });
 
-it('rejects with 404 when the execution is not an investigation', async () => {
+it('maps a missing investigation to 404', async () => {
   const client = makeClient();
-  client.get.mockRejectedValue(new InvestigationNotFoundError('nope'));
+  client.getLifecycleSubject.mockRejectedValue(new InvestigationNotFoundError('nope'));
   const resources = makeResources(
     jest.fn(),
     {
@@ -149,7 +143,7 @@ it('rejects with 404 when the execution is not an investigation', async () => {
 
 it('is a no-op when no trigger emitter is available', async () => {
   const resources = makeResources(undefined, {
-    path: { id: 'exec-1' },
+    path: { id: 'inv-1' },
     body: { status: 'completed' },
   });
 

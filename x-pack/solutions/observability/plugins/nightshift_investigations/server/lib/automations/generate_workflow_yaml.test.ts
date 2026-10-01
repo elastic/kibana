@@ -161,9 +161,9 @@ describe('generateWorkflowYaml', () => {
       expect(yaml.steps[0].with.title).toBe('{{ trigger.rule.name }}');
     });
 
-    it('uses automationId as concurrency_key in the step', () => {
+    it('passes no concurrency_key to the step, which matches investigations by subject', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', baseAutomation()));
-      expect(yaml.steps[0].with.concurrency_key).toBe('auto-123');
+      expect(yaml.steps[0].with).not.toHaveProperty('concurrency_key');
     });
 
     it('includes message when promptTemplate is set', () => {
