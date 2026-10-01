@@ -14,6 +14,20 @@ export type CatalogSignalType = (typeof CATALOG_SIGNAL_TYPES)[number];
 export const CATALOG_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
 export type CatalogSeverity = (typeof CATALOG_SEVERITIES)[number];
 
+/** `default` orders by relevance when searching and by most recently updated otherwise. */
+export const CATALOG_SORTS = ['default', 'severity_desc', 'severity_asc'] as const;
+export type CatalogSort = (typeof CATALOG_SORTS)[number];
+
+/** Most repositories the catalog summary reports. */
+export const MAX_CATALOG_SUMMARY_REPOSITORIES = 1000;
+
+/** Catalog entry counts for 1 repository; entries without a score count only toward `total`. */
+export interface CatalogRepositorySummary {
+  readonly repository: string;
+  readonly total: number;
+  readonly severities: Readonly<Record<CatalogSeverity, number>>;
+}
+
 /**
  * Inclusive `severity_score` ranges for each level. Log levels score 20-30 for debug and info,
  * 50 for warn, 70 for error, and 80 for fatal, so each level lands in its own bucket.

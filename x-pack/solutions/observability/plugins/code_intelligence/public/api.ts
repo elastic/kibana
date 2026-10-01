@@ -7,12 +7,18 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 
-import type { CatalogSeverity, CatalogSignalType } from '../common/catalog_filters';
+import type {
+  CatalogRepositorySummary,
+  CatalogSeverity,
+  CatalogSignalType,
+  CatalogSort,
+} from '../common/catalog_filters';
 import type { BatchRepositoryRequest, ExtractionBatchStatus } from '../common/extraction_batch';
 import type { RepositorySettings, RepositorySettingsInput } from '../common/repository_settings';
 
 export type { ExtractionBatchStatus, RepositoryExtractionStatus } from '../common/extraction_batch';
 export type { RepositorySettings, RepositorySettingsInput } from '../common/repository_settings';
+export type { CatalogRepositorySummary } from '../common/catalog_filters';
 
 /** A repository row from the settings index. */
 export type Repository = RepositorySettings;
@@ -86,6 +92,7 @@ export const getCatalog = (
     repositories: readonly string[];
     kinds: readonly CatalogSignalType[];
     severities: readonly CatalogSeverity[];
+    sort: CatalogSort;
     q?: string;
     page: number;
   }
@@ -95,8 +102,16 @@ export const getCatalog = (
       ...(query.repositories.length === 0 ? {} : { repository: [...query.repositories] }),
       ...(query.kinds.length === 0 ? {} : { kind: [...query.kinds] }),
       ...(query.severities.length === 0 ? {} : { severity: [...query.severities] }),
+      ...(query.sort === 'default' ? {} : { sort: query.sort }),
       ...(query.q === undefined ? {} : { q: query.q }),
       page: query.page,
       perPage: 25,
     },
   });
+
+export const getCatalogSummary = async (http: HttpSetup): Promise<CatalogRepositorySummary[]> => {
+  const response = await http.get<{ repositories?: CatalogRepositorySummary[] }>(
+    '/internal/code_intelligence/catalog_summary'
+  );
+  return response.repositories ?? [];
+};

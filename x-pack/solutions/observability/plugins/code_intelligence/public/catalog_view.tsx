@@ -16,6 +16,7 @@ import {
   EuiPagination,
   EuiPanel,
   EuiProgress,
+  EuiSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -26,8 +27,10 @@ import React, { useEffect, useState } from 'react';
 import {
   CATALOG_SEVERITIES,
   CATALOG_SIGNAL_TYPES,
+  CATALOG_SORTS,
   type CatalogSeverity,
   type CatalogSignalType,
+  type CatalogSort,
 } from '../common/catalog_filters';
 import type { CatalogItem, CatalogResponse, Repository } from './api';
 import { getCatalog } from './api';
@@ -42,6 +45,8 @@ interface Props {
   repositoriesLoading: boolean;
   repositoriesError?: string;
   reloadRepositories: () => void;
+  initialRepositories?: string[];
+  initialSeverities?: CatalogSeverity[];
 }
 
 const CatalogRow = ({ item, onOpen }: { item: CatalogItem; onOpen: () => void }) => (
@@ -93,10 +98,13 @@ export const CatalogView = ({
   repositoriesLoading,
   repositoriesError,
   reloadRepositories,
+  initialRepositories = [],
+  initialSeverities = [],
 }: Props) => {
-  const [selectedRepositories, setSelectedRepositories] = useState<string[]>([]);
+  const [selectedRepositories, setSelectedRepositories] = useState<string[]>(initialRepositories);
   const [kinds, setKinds] = useState<CatalogSignalType[]>([]);
-  const [severities, setSeverities] = useState<CatalogSeverity[]>([]);
+  const [severities, setSeverities] = useState<CatalogSeverity[]>(initialSeverities);
+  const [sort, setSort] = useState<CatalogSort>('default');
   const [queryInput, setQueryInput] = useState('');
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -115,6 +123,7 @@ export const CatalogView = ({
       repositories: selectedRepositories,
       kinds,
       severities,
+      sort,
       ...(query === '' ? {} : { q: query.slice(0, 512) }),
       page: Math.min(Math.max(page, 1), 100),
     })
@@ -147,6 +156,7 @@ export const CatalogView = ({
     requestSequence,
     selectedRepositories,
     severities,
+    sort,
   ]);
 
   if (!repositoriesLoading && repositoriesError !== undefined) {
@@ -275,6 +285,49 @@ export const CatalogView = ({
               }}
             />
           </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSelect
+            data-test-subj="codeIntelligenceCatalogSort"
+            prepend={i18n.translate('xpack.codeIntelligence.catalog.sortLabel', {
+              defaultMessage: 'Sort by',
+            })}
+            aria-label={i18n.translate('xpack.codeIntelligence.catalog.sortAriaLabel', {
+              defaultMessage: 'Sort catalog entries',
+            })}
+            options={[
+              {
+                value: 'default',
+                text:
+                  query === ''
+                    ? i18n.translate('xpack.codeIntelligence.catalog.sortRecent', {
+                        defaultMessage: 'Recently updated',
+                      })
+                    : i18n.translate('xpack.codeIntelligence.catalog.sortRelevance', {
+                        defaultMessage: 'Best match',
+                      }),
+              },
+              {
+                value: 'severity_desc',
+                text: i18n.translate('xpack.codeIntelligence.catalog.sortSeverityDesc', {
+                  defaultMessage: 'Severity: highest first',
+                }),
+              },
+              {
+                value: 'severity_asc',
+                text: i18n.translate('xpack.codeIntelligence.catalog.sortSeverityAsc', {
+                  defaultMessage: 'Severity: lowest first',
+                }),
+              },
+            ]}
+            value={sort}
+            onChange={(event) => {
+              const next = CATALOG_SORTS.find((value) => value === event.target.value);
+              if (next === undefined) return;
+              setSort(next);
+              setPage(1);
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

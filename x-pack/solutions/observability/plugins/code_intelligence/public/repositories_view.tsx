@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -25,10 +26,17 @@ import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { ExtractionBatchStatus, Repository, RepositoryExtractionStatus } from './api';
-import { deleteRepository, getBatch, startBatch } from './api';
+import { CATALOG_SEVERITIES, type CatalogSeverity } from '../common/catalog_filters';
+import type {
+  CatalogRepositorySummary,
+  ExtractionBatchStatus,
+  Repository,
+  RepositoryExtractionStatus,
+} from './api';
+import { deleteRepository, getBatch, getCatalogSummary, startBatch } from './api';
 import { describeStartError, type StartErrorDescription } from './describe_start_error';
 import { RepositoryFlyout } from './repository_flyout';
+import { severityLabels, useSeverityColors } from './severity_badge';
 
 interface Props {
   http: HttpSetup;
@@ -36,7 +44,11 @@ interface Props {
   loading: boolean;
   error?: string;
   reload: () => void;
+  onViewCatalog: (repository: string, severity?: CatalogSeverity) => void;
 }
+
+/** Longer than the catalog index refresh interval (1 second by default). */
+const SUMMARY_SETTLE_DELAY_MS = 3000;
 
 type HealthColor = 'success' | 'danger' | 'warning' | 'primary' | 'subdued';
 
@@ -83,9 +95,19 @@ const statusColor = (
     ? 'subdued'
     : 'primary';
 
-export const RepositoriesView = ({ http, repositories, loading, error, reload }: Props) => {
+export const RepositoriesView = ({
+  http,
+  repositories,
+  loading,
+  error,
+  reload,
+  onViewCatalog,
+}: Props) => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [batch, setBatch] = useState<ExtractionBatchStatus>();
+  /** Absent until loaded, or when the counts could not be loaded. */
+  const [summaries, setSummaries] = useState<Map<string, CatalogRepositorySummary>>();
+  const severityColors = useSeverityColors();
   const [starting, setStarting] = useState(false);
   const [actionError, setActionError] = useState<StartErrorDescription>();
   const [following, setFollowing] = useState(false);
@@ -108,6 +130,29 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
     }, 2000);
     return () => window.clearInterval(interval);
   }, [http, runningBatchId]);
+
+  const settledBatchId = batch !== undefined && batch.status !== 'running' ? batch.id : undefined;
+
+  useEffect(() => {
+    let active = true;
+    const load = () =>
+      void getCatalogSummary(http).then(
+        (result) => {
+          if (active) setSummaries(new Map(result.map((entry) => [entry.repository, entry])));
+        },
+        () => {
+          if (active) setSummaries(undefined);
+        }
+      );
+    load();
+    // Catalog writes do not wait for a refresh, so a batch can settle before its entries are searchable.
+    const timeout =
+      settledBatchId === undefined ? undefined : window.setTimeout(load, SUMMARY_SETTLE_DELAY_MS);
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
+  }, [http, repositories, settledBatchId]);
 
   const selected = useMemo(
     () => repositories.filter(({ repository }) => selectedIds.includes(repository)),
@@ -178,19 +223,81 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
         name: i18n.translate('xpack.codeIntelligence.repositories.repositoryColumn', {
           defaultMessage: 'Repository',
         }),
+        width: '28%',
       },
       {
-        field: 'remoteUrl',
-        name: i18n.translate('xpack.codeIntelligence.repositories.remoteUrlColumn', {
-          defaultMessage: 'Remote URL',
+        name: i18n.translate('xpack.codeIntelligence.repositories.catalogColumn', {
+          defaultMessage: 'Catalog entries',
         }),
-        truncateText: true,
+        width: '28%',
+        render: ({ repository }: Repository) => {
+          if (summaries === undefined) return <EuiText size="s">—</EuiText>;
+          const counts = summaries.get(repository);
+          if (counts === undefined || counts.total === 0) {
+            return (
+              <EuiText size="s" color="subdued">
+                {i18n.translate('xpack.codeIntelligence.repositories.noCatalogEntries', {
+                  defaultMessage: 'None',
+                })}
+              </EuiText>
+            );
+          }
+          return (
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj={`codeIntelligenceViewCatalog-${repository}`}
+                  onClick={() => onViewCatalog(repository)}
+                >
+                  {i18n.translate('xpack.codeIntelligence.repositories.catalogEntryCount', {
+                    defaultMessage: '{count, plural, one {# entry} other {# entries}}',
+                    values: { count: counts.total },
+                  })}
+                </EuiLink>
+              </EuiFlexItem>
+              {[...CATALOG_SEVERITIES]
+                .reverse()
+                .filter((level) => counts.severities[level] > 0)
+                .map((level) => (
+                  <EuiFlexItem grow={false} key={level}>
+                    <EuiBadge
+                      color={severityColors[level]}
+                      data-test-subj={`codeIntelligenceSeverityCount-${repository}-${level}`}
+                      onClick={() => onViewCatalog(repository, level)}
+                      onClickAriaLabel={i18n.translate(
+                        'xpack.codeIntelligence.repositories.severityCountAriaLabel',
+                        {
+                          defaultMessage: 'View {severity} entries for {repository} in the catalog',
+                          values: { severity: severityLabels[level], repository },
+                        }
+                      )}
+                    >
+                      {i18n.translate('xpack.codeIntelligence.repositories.severityCount', {
+                        defaultMessage: '{severity} {count}',
+                        values: {
+                          severity: severityLabels[level],
+                          count: counts.severities[level],
+                        },
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
+            </EuiFlexGroup>
+          );
+        },
       },
       {
         field: 'enabled',
         name: i18n.translate('xpack.codeIntelligence.repositories.enabledColumn', {
           defaultMessage: 'In run all',
         }),
+        width: '110px',
+        nameTooltip: {
+          content: i18n.translate('xpack.codeIntelligence.repositories.enabledColumnTooltip', {
+            defaultMessage:
+              'Whether Run all enabled repositories includes this repository. Change it with Edit.',
+          }),
+        },
         render: (enabled: boolean) =>
           enabled
             ? i18n.translate('xpack.codeIntelligence.repositories.enabledYes', {
@@ -204,6 +311,7 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
         name: i18n.translate('xpack.codeIntelligence.repositories.revisionColumn', {
           defaultMessage: 'Revision',
         }),
+        width: '120px',
         render: ({ repository, defaultRef }: Repository) => (
           <EuiBadge color="hollow" data-test-subj={`codeIntelligenceRevision-${repository}`}>
             {defaultRef}
@@ -295,7 +403,7 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
         ],
       },
     ],
-    [batch]
+    [batch, onViewCatalog, severityColors, summaries]
   );
 
   if (loading) return <EuiLoadingSpinner size="xl" />;
