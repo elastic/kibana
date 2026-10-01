@@ -185,7 +185,7 @@ export class InspectorPage {
   async getResponse(): Promise<Record<string, any>> {
     await this.page.testSubj.locator('inspectorRequestDetailResponse').click();
     await this.codeEditor.waitCodeEditorReady('inspectorRequestCodeViewerContainer');
-    const responseString = await this.codeEditor.getCodeEditorValue();
+    const responseString = await this.codeEditor.getCodeEditorValueByTestSubj('inspectorRequestCodeViewerContainer');
     return JSON.parse(responseString);
   }
 }

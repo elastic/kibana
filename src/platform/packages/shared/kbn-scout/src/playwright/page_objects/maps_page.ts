@@ -287,7 +287,11 @@ export class MapsPage {
 
     const rows = await this.inspector.getTableData();
     const hitsRow = rows.find((row) => row[0] === 'Hits');
-    const hits = hitsRow?.[1] ?? '0';
+    const hits = hitsRow?.[1];
+
+    if (!hits) {
+      throw new Error(`Unable to find "Hits" in table data: ${JSON.stringify(rows, null, '')}`);
+    }
 
     await this.inspector.close();
     return hits;
