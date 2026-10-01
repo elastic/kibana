@@ -135,6 +135,8 @@ export const reportFailedTestIssues = async (): Promise<void> => {
           reporter,
           `--build-url=${build.web_url}#${job.id}`,
           '--no-index-errors',
+          '--no-github-update',
+          '--verbose',
           ...new Set(attempts.flatMap(({ patterns }) => patterns)),
         ],
         {
