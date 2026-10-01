@@ -322,18 +322,14 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                       onCellsSelection={
                         viewMode === 'non-interactive' ? undefined : onCellsSelection
                       }
-                      onPaginationChange={
-                        viewMode === 'non-interactive'
-                          ? undefined
-                          : (update) => {
-                              if (update.fromPage) {
-                                api.updatePagination({ fromPage: update.fromPage });
-                              }
-                              if (update.perPage) {
-                                api.updatePagination({ perPage: update.perPage, fromPage: 1 });
-                              }
-                            }
-                      }
+                      onPaginationChange={(update) => {
+                        if (update.fromPage) {
+                          api.updatePagination({ fromPage: update.fromPage });
+                        }
+                        if (update.perPage) {
+                          api.updatePagination({ perPage: update.perPage, fromPage: 1 });
+                        }
+                      }}
                       isLoading={isLoading!}
                       yAxisWidth={{ max: Y_AXIS_LABEL_WIDTH }}
                       noDataWarning={
@@ -356,6 +352,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                           rendered$.next(true);
                         }
                       }}
+                      isInteractive={viewMode !== 'non-interactive'}
                     />
                   )}
                 </div>

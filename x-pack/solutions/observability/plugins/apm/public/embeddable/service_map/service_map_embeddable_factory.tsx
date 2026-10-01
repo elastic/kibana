@@ -315,7 +315,9 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           );
 
           const [showEmbeddedControls, setShowEmbeddedControls] = useState(
-            () => expandedPanelIdSubject.getValue() === uuid && viewMode !== 'edit'
+            () =>
+              expandedPanelIdSubject.getValue() === uuid &&
+              !(viewMode === 'edit' || viewMode === 'non-interactive')
           );
 
           useEffect(() => {

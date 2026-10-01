@@ -50,7 +50,12 @@ export function SlosView({ sloList, loading, error, view, isInteractive = true }
   if (view === 'compactView') {
     return (
       <Wrapper sloList={sloList}>
-        <SloListCompactView sloList={sloList} loading={loading} error={error} />
+        <SloListCompactView
+          sloList={sloList}
+          loading={loading}
+          error={error}
+          isInteractive={isInteractive}
+        />
       </Wrapper>
     );
   }
