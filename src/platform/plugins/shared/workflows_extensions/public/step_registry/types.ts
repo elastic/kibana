@@ -17,7 +17,7 @@ export interface StepLogsApi {
   fetchLogs: () => Promise<WorkflowExecutionLogEntry[]>;
 }
 
-/** A single entry rendered in the Logs tab. */
+/** A single entry rendered in the Logs section. */
 export interface StepLogEntry {
   message: string;
   timestamp?: string;
@@ -27,12 +27,12 @@ export interface StepLogEntry {
 export interface StepLogsConfig {
   enabled: boolean;
   /**
-   * How to render log entries in the Logs tab.
+   * How to render log entries in the Logs section.
    * Currently only `'terminal'` is supported: entries in chronological order, ANSI colors preserved.
    */
   renderer?: 'terminal';
   /**
-   * Custom log resolver. When omitted, the Logs tab shows all engine-level log entries
+   * Custom log resolver. When omitted, the Logs section shows all engine-level log entries
    * for this step via `logsApi.fetchLogs()`. When defined, the step author decides what
    * to show — extract from `output`, call `logsApi`, or combine both.
    */
@@ -81,9 +81,10 @@ export interface PublicStepDefinition<
   editorHandlers?: EditorHandlers<Input, Output, Config>;
 
   /**
-   * Opt-in logs configuration. When `enabled` is true a Logs tab appears in the
-   * step execution detail panel. Provide `getLogs` to customise what is shown;
-   * omit it to display all engine-level log entries for this step.
+   * Opt-in logs configuration. When `enabled` is true a Logs section appears
+   * next to Input and Output in the step execution detail. Provide `getLogs`
+   * to customise what is shown; omit it to display all engine-level log entries
+   * for this step.
    */
   logs?: StepLogsConfig;
 }

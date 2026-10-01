@@ -99,6 +99,10 @@ jest.mock('./execution_take_action_split_button', () => ({
   ExecutionTakeActionSplitButton: () => <div data-test-subj="take-action" />,
 }));
 
+jest.mock('./step_logs_view', () => ({
+  StepLogsView: () => <div data-test-subj="step-logs-view" />,
+}));
+
 const mockPollingResult = {
   workflowExecution: undefined as ReturnType<typeof createMockWorkflowExecutionDto> | undefined,
   error: null as Error | null,
@@ -322,5 +326,72 @@ describe('WorkflowExecutionFlyout child workflow steps', () => {
       'href',
       '/app/workflows/flyout-test-child?executionId=child-exec-1'
     );
+  });
+});
+
+describe('WorkflowExecutionFlyout step logs', () => {
+  const services = createStartServicesMock();
+
+  const execution = createMockWorkflowExecutionDto({
+    id: 'exec-1',
+    workflowId: 'wf-1',
+    status: ExecutionStatus.COMPLETED,
+    stepExecutions: [
+      createMockStepExecutionDto({
+        id: 'step-wait',
+        stepId: 'request_approval',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.COMPLETED,
+      }),
+    ],
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockWaitingStepResume.waitingStepExecutionId = undefined;
+    mockWaitingStepResume.waitingStepStartedAt = undefined;
+    mockWaitingStepResume.resumeMessage = undefined;
+    mockPollingResult.workflowExecution = execution;
+    mockPollingResult.error = null;
+    mockChildExecutions.clear();
+    mockUseStepExecution.mockReturnValue({
+      data: {
+        id: 'step-wait',
+        stepId: 'request_approval',
+        stepType: 'waitForInput',
+        status: ExecutionStatus.COMPLETED,
+        input: { message: 'Approve this' },
+        output: { approved: true },
+      },
+      isLoading: false,
+    });
+    (services.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue(undefined);
+  });
+
+  const renderFlyout = () =>
+    render(<WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />, {
+      wrapper: getTestProvider({ services }),
+    });
+
+  it('hides Logs when the step does not support them', () => {
+    renderFlyout();
+    fireEvent.click(screen.getByTestId('select-waiting-step'));
+
+    expect(screen.queryByTestId('workflowExecutionStepLogs')).not.toBeInTheDocument();
+  });
+
+  it('shows a Logs section beside Input and Output when the step supports logs', () => {
+    (services.workflowsExtensions.getStepDefinition as jest.Mock).mockImplementation(
+      (stepType: string) => (stepType === 'waitForInput' ? { logs: { enabled: true } } : undefined)
+    );
+
+    renderFlyout();
+    fireEvent.click(screen.getByTestId('select-waiting-step'));
+
+    expect(screen.getByTestId('workflowExecutionStepLogs')).toBeInTheDocument();
+    expect(screen.getByText('Logs')).toBeInTheDocument();
+    expect(screen.getByTestId('step-logs-view')).toBeInTheDocument();
+    expect(screen.getByText('Input')).toBeInTheDocument();
+    expect(screen.getByText('Output')).toBeInTheDocument();
   });
 });

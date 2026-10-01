@@ -54,6 +54,7 @@ import { ResumeUnavailableCallout } from './resume_unavailable_callout';
 import { StepDataValueCell } from './step_data_value_cell';
 import { StepDetailAccordionSection } from './step_detail_accordion_section';
 import { StepExecutionsTruncatedCallout } from './step_executions_truncated_callout';
+import { StepLogsSection } from './step_logs_section';
 import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
@@ -1137,6 +1138,13 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                           fieldPathPrefix={stepOutputFieldPathPrefix}
                         />
                       ) : null)}
+                    {!isPseudoStep && activeStepExecution && (
+                      <StepLogsSection
+                        key={`logs-${selectedStepExecutionId}`}
+                        stepExecution={activeStepExecution}
+                        workflowExecutionId={resolvedExecutionId}
+                      />
+                    )}
                   </>
                 )}
               </div>
