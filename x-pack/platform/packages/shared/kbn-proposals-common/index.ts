@@ -43,6 +43,7 @@ export {
   MAX_PROPOSALS_PAGE_OFFSET,
   MAX_PROPOSALS_PAGE_SIZE,
   DEFAULT_PROPOSAL_TITLE,
+  MAX_COMMENT_LENGTH,
   MAX_TITLE_LENGTH,
   proposalFiltersSchema,
   proposalCategorySchema,
