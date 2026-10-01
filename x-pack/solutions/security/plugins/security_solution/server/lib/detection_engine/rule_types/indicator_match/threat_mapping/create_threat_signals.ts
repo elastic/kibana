@@ -183,7 +183,9 @@ export const createThreatSignals = async ({
 
   ruleExecutionLogger.info(`Found threat indicators: ${threatListCount}`);
 
-  await reportIndicatorMatchTelemetry({
+  // Fire-and-forget: migration-sizing telemetry must never add latency to or block the rule run.
+  // The reporter is fully self-contained and best-effort (swallows its own errors).
+  void reportIndicatorMatchTelemetry({
     analytics,
     logger: ruleExecutionLogger,
     esClient: services.scopedClusterClient.asCurrentUser,
