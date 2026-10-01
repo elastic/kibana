@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import {
   getFieldNameForTopNType,
@@ -14,13 +15,13 @@ import {
   TopNType,
 } from '@kbn/profiling-utils';
 import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
+import type { ProfilingESClient } from '@kbn/profiling-data-access-plugin/server';
 import type { RouteRegisterParameters } from '.';
 import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths, INDEX_EVENTS, MAX_KUERY_LENGTH } from '../../common';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';
 import type { TopNResponse } from '../../common/topn';
 import { createTopNSamples, getTopNAggregationRequest } from '../../common/topn';
-import type { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
@@ -201,7 +202,10 @@ export function queryTopNCommon({
       try {
         return response.ok({
           body: await topNElasticSearchQuery({
-            client: createProfilingEsClient({ request, esClient: client }),
+            client: createProfilingEsClient({
+              esClient: client,
+              abortSignal: getRequestAbortedSignal(request.events.aborted$),
+            }),
             logger,
             timeFrom,
             timeTo,

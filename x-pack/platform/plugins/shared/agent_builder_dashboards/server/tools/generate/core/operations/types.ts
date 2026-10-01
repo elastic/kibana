@@ -10,7 +10,7 @@ import type { ResolvedCustomContentTemplate } from '@kbn/custom-content-server';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { z } from '@kbn/zod/v4';
 import type { ResolvePanelContent } from './panels';
-import type { PanelFailure } from '../utils';
+import type { OperationFailure } from '../utils';
 import type {
   InlinePanelOperationType,
   PanelAuthoringNote,
@@ -35,15 +35,35 @@ export type ResolveAttachmentPanel = (
   operationType: InlinePanelOperationType
 ) => PanelContentAttempt;
 
+/** Whether a mapped field can back a `STATS BY` across the whole index, and why not. */
+export type ControlFieldCapability =
+  | { status: 'usable'; type: string }
+  | { status: 'conflicting' }
+  | { status: 'not_aggregatable' };
+
+/** Field capabilities keyed by name. Fields not mapped on the index are absent. */
+export type ControlFieldCapabilities = Map<string, ControlFieldCapability>;
+
+/**
+ * Loads the capabilities of the given fields on an index. Injected like the other resolvers; the
+ * default implementation lives in `resolvers/control_field_capabilities_resolver.ts`.
+ */
+export type ResolveControlFieldCapabilities = (params: {
+  index: string;
+  fieldNames: readonly string[];
+  projectRouting?: string;
+}) => Promise<ControlFieldCapabilities>;
+
 export interface OperationExecutionContext {
   logger: Logger;
-  failures: PanelFailure[];
+  failures: OperationFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   sectionIdsByKey: Map<string, string>;
   resolvePanelContent?: ResolvePanelContent;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
+  resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
 }
 
 export interface OperationHandlerParams<TOperation> {

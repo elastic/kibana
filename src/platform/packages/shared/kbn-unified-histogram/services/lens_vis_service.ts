@@ -39,6 +39,7 @@ import {
   computeInterval,
 } from '@kbn/visualization-utils';
 import type { LegendSize } from '@kbn/chart-expressions-common';
+import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { XYVisualizationState as XYConfiguration } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -777,8 +778,12 @@ export class LensVisService {
     let visContext: UnifiedHistogramVisContext | undefined;
 
     if (externalVisContext?.attributes) {
+      const savedQuery = isTextBased
+        ? getRepresentativeQuery(externalVisContext.attributes)
+        : externalVisContext.attributes.state.query;
+
       if (
-        isEqual(currentQuery, externalVisContext.attributes?.state?.query) &&
+        isEqual(currentQuery, savedQuery) &&
         areSuggestionAndVisContextAndQueryParamsStillCompatible({
           suggestionType,
           suggestion,
