@@ -28,6 +28,10 @@ export interface SecondaryMenuProps {
    */
   iconType?: IconType;
   isNew?: boolean;
+  /**
+   * When true, secondary menu is in the side panel (tall header for App Header baseline).
+   * When false/omitted, it is in a popover (compact header).
+   */
   isPanel?: boolean;
   title: string;
 }
@@ -39,8 +43,8 @@ interface SecondaryMenuComponent
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
-  ({ badgeType, children, footer, iconType, title, isNew = false }, ref) => {
-    const headerStyle = useMenuHeaderStyle();
+  ({ badgeType, children, footer, iconType, title, isNew = false, isPanel = false }, ref) => {
+    const headerStyle = useMenuHeaderStyle(isPanel);
     const scrollStyles = useScroll(true);
     const showBadge = Boolean(badgeType && (badgeType !== 'new' || isNew));
 

@@ -13,17 +13,20 @@ import { useScroll } from './use_scroll';
 
 jest.mock('@elastic/eui', () => ({
   useEuiOverflowScroll: jest.fn(),
+  useEuiYScrollWithShadows: jest.fn(),
 }));
 
-const { useEuiOverflowScroll } = jest.requireMock('@elastic/eui');
+const { useEuiOverflowScroll, useEuiYScrollWithShadows } = jest.requireMock('@elastic/eui');
 
 describe('useScroll', () => {
   beforeEach(() => {
     useEuiOverflowScroll.mockReturnValue('overflow: auto;');
+    useEuiYScrollWithShadows.mockReturnValue('overflow: auto; mask: animated;');
   });
 
   afterEach(() => {
     useEuiOverflowScroll.mockReset();
+    useEuiYScrollWithShadows.mockReset();
   });
 
   it('provides vertical overflow styles by default', () => {
@@ -31,12 +34,13 @@ describe('useScroll', () => {
 
     expect(typeof result.current).toBe('object');
     expect(useEuiOverflowScroll).toHaveBeenCalledWith('y', false);
+    expect(useEuiYScrollWithShadows).toHaveBeenCalledWith({ hasAnimatedOverflowShadow: true });
   });
 
-  it('passes the mask flag through to the overflow helper', () => {
+  it('uses animated overflow shadows when masking', () => {
     const { result } = renderHook(() => useScroll(true));
 
     expect(typeof result.current).toBe('object');
-    expect(useEuiOverflowScroll).toHaveBeenCalledWith('y', true);
+    expect(useEuiYScrollWithShadows).toHaveBeenCalledWith({ hasAnimatedOverflowShadow: true });
   });
 });

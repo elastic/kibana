@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiOverflowScroll } from '@elastic/eui';
+import { useEuiOverflowScroll, useEuiYScrollWithShadows } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 /**
@@ -17,15 +17,18 @@ import { css } from '@emotion/react';
  * @returns the scroll styles.
  */
 export const useScroll = (withMask: boolean = false) => {
-  // Meant for the menu body between a non-scrolling header and footer, so the EUI mask fades
-  // content at those boundaries. `min-height: 0` lets the body shrink inside a height-bounded flex column.
-  const scrollStyles = css`
-    ${useEuiOverflowScroll('y', withMask)}
+  // Animated shadows: top/bottom fades appear only while scrolled away from that edge.
+  // Static `useEuiOverflowScroll(..., true)` always fades and eats into first-item padding at rest.
+  const maskedScroll = useEuiYScrollWithShadows({ hasAnimatedOverflowShadow: true });
+  const plainScroll = useEuiOverflowScroll('y', false);
+
+  // Meant for the menu body between a non-scrolling header and footer.
+  // `min-height: 0` lets the body shrink inside a height-bounded flex column.
+  return css`
+    ${withMask ? maskedScroll : plainScroll}
     flex: 1 1 auto;
     min-height: 0;
   `;
-
-  return scrollStyles;
 };
 
 /**

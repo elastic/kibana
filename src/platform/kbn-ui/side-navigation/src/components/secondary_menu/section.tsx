@@ -30,6 +30,11 @@ export const SecondaryMenuSectionComponent = ({
     padding: ${euiTheme.size.m};
     position: relative;
 
+    // Tighter gap under the fixed header; safe once scroll fades only appear on scroll.
+    &:first-child {
+      padding-top: ${euiTheme.size.xs};
+    }
+
     &:not(:last-child) {
       ${highContrastMode
         ? `

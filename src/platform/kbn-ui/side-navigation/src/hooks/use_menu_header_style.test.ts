@@ -45,13 +45,22 @@ describe('useMenuHeaderStyle', () => {
     expect(typeof renderHook(() => useMenuHeaderStyle()).result.current).toBe('object');
   });
 
-  it('matches App Header standard shell height and inset', () => {
-    const { result } = renderHook(() => useMenuHeaderStyle());
+  it('matches App Header standard shell height when rendered in the side panel', () => {
+    const { result } = renderHook(() => useMenuHeaderStyle(true));
     const { styles } = result.current;
 
     expect(styles).toContain('padding:16px');
     expect(styles).toContain('min-height:calc(64px + 1px)');
     expect(styles).toContain('display:flex');
+    expect(styles).toContain('align-items:center');
+  });
+
+  it('uses a compact header height in popovers', () => {
+    const { result } = renderHook(() => useMenuHeaderStyle(false));
+    const { styles } = result.current;
+
+    expect(styles).toContain('padding:8px');
+    expect(styles).toContain('min-height:calc(48px + 1px)');
     expect(styles).toContain('align-items:center');
   });
 });

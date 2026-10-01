@@ -38,7 +38,8 @@ export const Header: FC<HeaderProps> = ({
   iconType,
 }) => {
   const { goBack } = useNestedMenu();
-  const headerStyle = useMenuHeaderStyle();
+  // Nested headers only appear inside the More popover — always compact.
+  const headerStyle = useMenuHeaderStyle(false);
 
   return (
     <EuiFlexGroup css={headerStyle} alignItems="center" gutterSize="s" responsive={false}>

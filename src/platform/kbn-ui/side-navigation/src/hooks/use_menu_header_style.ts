@@ -12,10 +12,11 @@ import { css } from '@emotion/react';
 
 /**
  * Menu header rendered above the scrolling menu body, so it stays in view.
- * Matches the App Header standard shell outer height (64px + thin border).
- * Content is flex-centered for baseline alignment.
+ *
+ * @param isPanel - When true (side panel), matches the App Header standard shell
+ *   height for baseline alignment. When false (popover), uses a compact height.
  */
-export function useMenuHeaderStyle() {
+export function useMenuHeaderStyle(isPanel: boolean = false) {
   const { euiTheme } = useEuiTheme();
 
   return css`
@@ -26,9 +27,9 @@ export function useMenuHeaderStyle() {
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    padding: ${euiTheme.size.base} var(--horizontal-padding);
-    // Match App Header standard shell outer height (65): content floor + thin border, no hairline.
-    min-height: calc(64px + ${euiTheme.border.width.thin});
+    padding: ${isPanel ? euiTheme.size.base : euiTheme.size.s} var(--horizontal-padding);
+    // Panel: App Header standard shell (65). Popover: compact shell (49).
+    min-height: calc(${isPanel ? '64px' : '48px'} + ${euiTheme.border.width.thin});
 
     & h4 {
       margin-block: 0;
