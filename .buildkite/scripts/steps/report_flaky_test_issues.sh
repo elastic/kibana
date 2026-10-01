@@ -15,7 +15,8 @@ set -euo pipefail
 # FLAKY_TESTS_MAX_NEW_ISSUES issues are created per run. FLAKY_TESTS_OMIT_SKIPPED_TESTS leaves
 # out flaky tests that were skipped since. Unless FLAKY_TESTS_UPDATE_ISSUES is 'false', a suite
 # that has an issue of its own gets it refreshed with the report's numbers, a comment when it
-# failed since the last report, and a reopen when it failed after the close.
+# failed since the owners were last notified (at most every FLAKY_TESTS_COMMENT_INTERVAL_DAYS
+# days), and a reopen when it failed after the close.
 # GITHUB_TOKEN (kibanamachine) comes from Vault via .buildkite/scripts/common/setup_job_env.sh.
 
 source .buildkite/scripts/common/util.sh
@@ -28,6 +29,7 @@ FLAKY_TESTS_CLOSED_ISSUES_DAYS="${FLAKY_TESTS_CLOSED_ISSUES_DAYS:-365}"
 FLAKY_TESTS_MAX_NEW_ISSUES="${FLAKY_TESTS_MAX_NEW_ISSUES:-10}"
 FLAKY_TESTS_OMIT_SKIPPED_TESTS="${FLAKY_TESTS_OMIT_SKIPPED_TESTS:-true}"
 FLAKY_TESTS_UPDATE_ISSUES="${FLAKY_TESTS_UPDATE_ISSUES:-true}"
+FLAKY_TESTS_COMMENT_INTERVAL_DAYS="${FLAKY_TESTS_COMMENT_INTERVAL_DAYS:-3}"
 FLAKY_TESTS_TRACKING_REPO="${FLAKY_TESTS_TRACKING_REPO-elastic/kibana}"
 
 REPORT_DIR="target/flaky_tests"
@@ -62,7 +64,7 @@ echo "    Repository          : $GITHUB_REPO"
 echo "    Closed issues since : $FLAKY_TESTS_CLOSED_ISSUES_DAYS days ago"
 echo "    Max new issues      : $FLAKY_TESTS_MAX_NEW_ISSUES"
 echo "    Omit skipped tests  : $FLAKY_TESTS_OMIT_SKIPPED_TESTS"
-echo "    Update issues       : $FLAKY_TESTS_UPDATE_ISSUES"
+echo "    Update issues       : $FLAKY_TESTS_UPDATE_ISSUES (comments every $FLAKY_TESTS_COMMENT_INTERVAL_DAYS days at most)"
 if [[ -n "$FLAKY_TESTS_TRACKING_REPO" && "$FLAKY_TESTS_TRACKING_REPO" != "$GITHUB_REPO" ]]; then
   echo "    Also tracked in     : $FLAKY_TESTS_TRACKING_REPO (suites whose every test has an issue there get none)"
 fi
@@ -74,6 +76,7 @@ args=(
   --closed-since-days "$FLAKY_TESTS_CLOSED_ISSUES_DAYS"
   --max-new-issues "$FLAKY_TESTS_MAX_NEW_ISSUES"
   --tracking-repo "$FLAKY_TESTS_TRACKING_REPO"
+  --comment-interval-days "$FLAKY_TESTS_COMMENT_INTERVAL_DAYS"
 )
 if [[ ${#DRY_RUN_ARGS[@]} -gt 0 ]]; then
   args+=("${DRY_RUN_ARGS[@]}")

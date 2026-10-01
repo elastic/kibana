@@ -512,6 +512,8 @@ describe('renderFlakySuiteIssueBody', () => {
       'report.history': [
         { generatedAt: '2026-09-09T09:04:41.000Z', builds: 509, failedBuilds: 49 },
       ],
+      // filing the issue notifies the owners: its team label gets them pinged
+      'report.notifiedAt': '2026-09-09T09:04:41.000Z',
     });
     expect(readFlakySuiteIssueMetadata('no metadata here')).toBeUndefined();
   });
@@ -610,6 +612,8 @@ describe('refreshing a suite issue', () => {
         ...previous['report.history'],
         { generatedAt: '2026-09-09T09:04:41.000Z', builds: 509, failedBuilds: 49 },
       ],
+      // not recorded before, so the oldest report kept stands in for the one that filed it
+      'report.notifiedAt': '2026-09-07T09:04:41.000Z',
     });
   });
 

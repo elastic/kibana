@@ -18,6 +18,7 @@ import {
 } from '../failed_tests_reporter/github_api';
 import {
   flakySuiteIssueTitle,
+  lastNotifiedAt,
   readFlakySuiteIssueMetadata,
   renderFlakySuiteIssueBody,
   renderFlakySuiteIssueComment,
@@ -78,6 +79,11 @@ export interface ReportFlakySuiteIssuesOptions {
    * report, and an issue closed before such a failure reopened. Off, they are skipped as tracked.
    */
   updateIssues: boolean;
+  /**
+   * Days between two comments on the same issue, counted from the report that last notified the
+   * owners (the one that filed it, or commented). Failures in between are covered by the next one.
+   */
+  commentIntervalDays: number;
   dryRun: boolean;
 }
 
@@ -191,9 +197,22 @@ const lastFailedAt = (suite: FlakySuite): Date | undefined => {
   return newest;
 };
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/** Calendar days between two times, so a report a few minutes earlier in the day still counts. */
+const daysBetween = (from: Date, to: Date): number =>
+  Math.round(
+    (Date.UTC(to.getUTCFullYear(), to.getUTCMonth(), to.getUTCDate()) -
+      Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate())) /
+      MS_PER_DAY
+  );
+
 interface Refresh {
   previous: RecordedFlakySuiteIssueMetadata;
-  /** The suite failed since the last report, or since the issue was closed. */
+  /**
+   * The issue is reopened, or the suite failed since the owners were last notified and that was
+   * at least `commentIntervalDays` ago.
+   */
   comment: boolean;
   reopen: boolean;
 }
@@ -206,7 +225,8 @@ interface Refresh {
 const planRefresh = (
   suite: FlakySuite,
   issue: GithubIssue,
-  report: FlakyTestReport
+  report: FlakyTestReport,
+  commentIntervalDays: number
 ): Refresh | undefined => {
   const previous = readFlakySuiteIssueMetadata(issue.body);
   const recordedAt = previous?.['report.generatedAt'];
@@ -221,11 +241,12 @@ const planRefresh = (
       ? { previous, comment: true, reopen: true }
       : undefined;
   }
-  return {
-    previous,
-    comment: failedAt !== undefined && (!recordedAt || failedAt > new Date(recordedAt)),
-    reopen: false,
-  };
+  const notifiedAt = lastNotifiedAt(previous);
+  const failedSinceNotified =
+    failedAt !== undefined && (!notifiedAt || failedAt > new Date(notifiedAt));
+  const due =
+    !notifiedAt || daysBetween(new Date(notifiedAt), report.generatedAt) >= commentIntervalDays;
+  return { previous, comment: failedSinceNotified && due, reopen: false };
 };
 
 const suiteRef = ({ filePath, suiteTitle }: FlakySuite): SuiteRef => ({
@@ -314,6 +335,7 @@ export const reportFlakySuiteIssues = async (
     maxNewIssues,
     omitSkippedTests,
     updateIssues,
+    commentIntervalDays,
     dryRun,
   } = options;
   const omitted = omitSkippedTests ? report.flaky.filter(isSkippedTest) : [];
@@ -410,6 +432,7 @@ export const reportFlakySuiteIssues = async (
         .filter((matched) => matched.issue.number !== issue.number)
         .map((matched) => matched.issue.number),
       previous,
+      notifies: comment,
     });
     try {
       await github.editIssue(issue.number, { body, ...(reopen ? { state: 'open' } : {}) });
@@ -450,7 +473,7 @@ export const reportFlakySuiteIssues = async (
     const tracked = coveringIssue(suite, index);
     const refresh =
       updateIssues && tracked && isOwnSuiteIssue(tracked, suite)
-        ? planRefresh(suite, tracked.issue, report)
+        ? planRefresh(suite, tracked.issue, report, commentIntervalDays)
         : undefined;
     if (tracked && refresh) {
       await update(suite, tracked.issue, matches, refresh);
