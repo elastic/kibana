@@ -17,6 +17,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { ImpactReadClient } from './impact/services/impact_client';
 import type { SubjectsClient } from './subjects/services/subjects_client';
 import type { EscalationsService } from './escalations/services/escalations_service';
+import type { DeleteInvestigationDataAcrossSpacesResult } from './investigations/services/delete_investigation_data_across_spaces';
 import type { InvestigationsClient } from './investigations/services/investigations_client';
 
 export interface AgenticInvestigationsSetupDependencies {
@@ -80,6 +81,13 @@ export interface AgenticInvestigationsPluginStart {
    * privilege; space comes from the request.
    */
   getInvestigationsClient: (request: KibanaRequest) => InvestigationsClient;
+  /**
+   * Maintenance, in every space: removes the subjects, subject claims, impact, and hypotheses of
+   * every investigation that has subjects. Runs as the internal user with no request, so the
+   * caller must authorize this destructive operation. Agent Builder conversations are not
+   * deleted.
+   */
+  deleteSubjectInvestigationDataAcrossSpaces: () => Promise<DeleteInvestigationDataAcrossSpacesResult>;
   getEscalationsService: () => EscalationsService;
 }
 

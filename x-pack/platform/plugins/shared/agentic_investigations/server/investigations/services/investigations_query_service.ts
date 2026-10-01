@@ -23,6 +23,7 @@ import type { InvestigationHypotheses } from '../../../common/hypotheses/hypothe
 import type { Impact } from '../../../common/impact/impact';
 import {
   INVESTIGATION_SEVERITIES,
+  INVESTIGATION_SEVERITY_NONE,
   MAX_INVESTIGATION_CANDIDATES,
   MAX_INVESTIGATIONS_PAGE_SIZE,
 } from '../../../common/investigations/constants';
@@ -149,6 +150,7 @@ export class InvestigationsQueryService {
 
     const start = (page - 1) * perPage;
     const results = await this.hydrate({
+      request,
       client,
       spaceId,
       conversations: candidates.slice(start, start + perPage),
@@ -220,7 +222,13 @@ export class InvestigationsQueryService {
 
     const inProgressIds = await this.deps.inProgress.findInProgressIds(request, spaceId);
     const wanted = new Set(subjects.map(subjectKey));
-    const hydrated = await this.hydrate({ client, spaceId, conversations: open, inProgressIds });
+    const hydrated = await this.hydrate({
+      request,
+      client,
+      spaceId,
+      conversations: open,
+      inProgressIds,
+    });
     return hydrated.filter((investigation) =>
       investigation.subjects.some((subject) => wanted.has(subjectKey(subject)))
     );
@@ -274,6 +282,10 @@ export class InvestigationsQueryService {
     inProgressIds: Set<string>
   ): Promise<string[] | undefined> {
     const sets: string[][] = [];
+
+    if (filters.id) {
+      sets.push(filters.id);
+    }
 
     const subjectFilter: QueryDslQueryContainer[] = [
       ...(filters.subject_type ? [{ terms: { subjectType: filters.subject_type } }] : []),
@@ -333,11 +345,13 @@ export class InvestigationsQueryService {
   }
 
   private async hydrate({
+    request,
     client,
     spaceId,
     conversations,
     inProgressIds,
   }: {
+    request: KibanaRequest;
     client: ConversationPublicClient;
     spaceId: string;
     conversations: ConversationSummary[];
@@ -347,9 +361,10 @@ export class InvestigationsQueryService {
       return [];
     }
     const ids = conversations.map(({ id }) => id);
-    const [subjects, impacts] = await Promise.all([
+    const [subjects, impacts, pendingProposalCounts] = await Promise.all([
       this.deps.getSubjectsService().listByConversationIds(ids, spaceId),
       this.deps.getImpactService().listByConversationIds(ids, spaceId),
+      this.countPendingProposals(request, ids, spaceId),
     ]);
     const subjectsByConversation = groupBy(subjects, ({ conversationId }) => conversationId);
     const impactByConversation = new Map(impacts.map((impact) => [impact.conversationId, impact]));
@@ -370,7 +385,7 @@ export class InvestigationsQueryService {
 
     return conversations.map((conversation) => {
       const impact = impactByConversation.get(conversation.id);
-      return toSummary({
+      const summary = toSummary({
         conversation,
         inProgress: inProgressIds.has(conversation.id),
         subjects: (subjectsByConversation.get(conversation.id) ?? []).filter(
@@ -378,6 +393,9 @@ export class InvestigationsQueryService {
         ),
         impact: impact && !removed.has(impact.id) ? impact : undefined,
       });
+      return pendingProposalCounts
+        ? { ...summary, pending_proposal_count: pendingProposalCounts.get(conversation.id) ?? 0 }
+        : summary;
     });
   }
 
@@ -448,6 +466,34 @@ export class InvestigationsQueryService {
   }
 
   /**
+   * Pending proposals per conversation, in one aggregation. Undefined when the proposals plugin
+   * is absent or the caller may not read proposals, so a list does not need that privilege.
+   */
+  private async countPendingProposals(
+    request: KibanaRequest,
+    conversationIds: string[],
+    spaceId: string
+  ): Promise<Map<string, number> | undefined> {
+    const proposals = this.deps.getProposals();
+    if (!proposals) {
+      return undefined;
+    }
+    try {
+      await proposals.getProposalPrivileges().assertCanRead(request);
+    } catch {
+      return undefined;
+    }
+    try {
+      return await proposals
+        .getProposalsService()
+        .countPendingByConversationIds(conversationIds, spaceId);
+    } catch (error) {
+      this.deps.logger.debug(`Could not count pending proposals: ${errorMessage(error)}`);
+      return undefined;
+    }
+  }
+
+  /**
    * The investigation's live proposals. Empty when the proposals plugin is absent or the caller
    * may not read proposals, so an investigation read does not need the proposals privilege.
    */
@@ -489,7 +535,8 @@ const buildSearchFilter = (filters: InvestigationFilters): KueryNode => {
     const closed = nodeBuilder.is('metadata.status', 'closed');
     clauses.push(statuses[0] === 'closed' ? closed : nodeTypes.function.buildNode('not', closed));
   }
-  if (filters.severity) {
+  // `none` (no severity yet) is matched in memory, so the search must not narrow by severity.
+  if (filters.severity && !filters.severity.includes(INVESTIGATION_SEVERITY_NONE)) {
     clauses.push(
       nodeBuilder.or(
         [...new Set(filters.severity)].map((severity) =>
@@ -521,7 +568,10 @@ const matchesFilters = (
   if (filters.status && !filters.status.includes(metadata.status)) {
     return false;
   }
-  if (filters.severity && (!metadata.severity || !filters.severity.includes(metadata.severity))) {
+  if (
+    filters.severity &&
+    !filters.severity.includes(metadata.severity ?? INVESTIGATION_SEVERITY_NONE)
+  ) {
     return false;
   }
   const createdAt = Date.parse(conversation.created_at);

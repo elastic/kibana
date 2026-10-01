@@ -459,6 +459,68 @@ describe('InvestigationsQueryService', () => {
       expect(notBusy.results.map(({ id }) => id)).toEqual(['idle']);
     });
 
+    it('reads the requested ids as the caller', async () => {
+      const { service, client } = setup({
+        bulkGetResults: [conversation('conv-1'), conversation('conv-2')],
+      });
+
+      const response = await service.list(request, parseQuery({ id: ['conv-1', 'conv-2'] }));
+
+      expect(client.bulkGet).toHaveBeenCalledWith(['conv-1', 'conv-2']);
+      expect(client.search).not.toHaveBeenCalled();
+      expect(response.results.map(({ id }) => id).sort()).toEqual(['conv-1', 'conv-2']);
+    });
+
+    it('matches investigations without a severity for severity=none, in memory', async () => {
+      const { service, client } = setup({
+        searchResults: [
+          conversation('rated', { metadata: { status: 'open', severity: 'high' } }),
+          conversation('unrated'),
+        ],
+      });
+
+      const response = await service.list(request, parseQuery({ severity: 'none' }));
+
+      expect(response.results.map(({ id }) => id)).toEqual(['unrated']);
+      expect(searchFilter(client)).not.toContain('metadata.severity');
+    });
+
+    it('counts pending proposals per investigation when the caller may read them', async () => {
+      const countPendingByConversationIds = jest.fn().mockResolvedValue(new Map([['conv-1', 2]]));
+      const proposals = {
+        getProposalsService: () => ({ countPendingByConversationIds }),
+        getProposalPrivileges: () => ({ assertCanRead: jest.fn().mockResolvedValue(undefined) }),
+      } as unknown as ProposalsPluginStart;
+      const { service } = setup({
+        searchResults: [conversation('conv-1'), conversation('conv-2')],
+        proposals,
+      });
+
+      const { results } = await service.list(request, parseQuery());
+
+      expect(countPendingByConversationIds).toHaveBeenCalledWith(['conv-1', 'conv-2'], SPACE_ID);
+      expect(results.map((item) => [item.id, item.pending_proposal_count])).toEqual([
+        ['conv-1', 2],
+        ['conv-2', 0],
+      ]);
+    });
+
+    it('leaves the pending proposal count out when the caller may not read proposals', async () => {
+      const countPendingByConversationIds = jest.fn();
+      const proposals = {
+        getProposalsService: () => ({ countPendingByConversationIds }),
+        getProposalPrivileges: () => ({
+          assertCanRead: jest.fn().mockRejectedValue(new Error('forbidden')),
+        }),
+      } as unknown as ProposalsPluginStart;
+      const { service } = setup({ searchResults: [conversation('conv-1')], proposals });
+
+      const { results } = await service.list(request, parseQuery());
+
+      expect(countPendingByConversationIds).not.toHaveBeenCalled();
+      expect(results[0]).not.toHaveProperty('pending_proposal_count');
+    });
+
     it('matches free text against the title, summary, and verdict', async () => {
       const { service } = setup({
         searchResults: [

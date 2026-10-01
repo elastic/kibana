@@ -218,7 +218,10 @@ describe('investigation routes', () => {
 
 interface QueryRoute {
   method: 'get' | 'post' | 'put';
-  config: { path: string; security?: { authz?: { requiredPrivileges?: unknown[] } } };
+  config: {
+    path: string;
+    security?: { authz?: { requiredPrivileges?: unknown[]; enabled?: boolean } };
+  };
   handler: Handler;
 }
 
@@ -244,6 +247,7 @@ const register = ({
     getAssignmentsService: jest.fn(),
     getInvestigationStatusService: jest.fn(),
     getInvestigationsQueryService: () => queryService as unknown as InvestigationsQueryService,
+    privileges: { getPrivileges: jest.fn() },
   } as InvestigationRouteDependencies);
 
   const find = (method: QueryRoute['method'], path: string) => {

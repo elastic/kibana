@@ -373,6 +373,18 @@ describe('InvestigationAttachmentDocService', () => {
     }
   });
 
+  it('finds the conversations holding documents across spaces, once each', async () => {
+    const { storage, service } = setup();
+    storage.put('a', body({ conversationId: 'conv-1' }));
+    storage.put('b', body({ conversationId: 'conv-1' }));
+    storage.put('c', body({ conversationId: 'conv-1', spaceId: 'other' }));
+
+    await expect(service.findConversationsAcrossSpaces()).resolves.toEqual([
+      { spaceId: SPACE_ID, conversationId: 'conv-1' },
+      { spaceId: 'other', conversationId: 'conv-1' },
+    ]);
+  });
+
   it('deletes by conversation and by space for maintenance', async () => {
     const { storage, service } = setup();
     storage.put('a', body({ conversationId: 'conv-1' }));
