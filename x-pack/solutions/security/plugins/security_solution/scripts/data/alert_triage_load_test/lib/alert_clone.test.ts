@@ -21,6 +21,7 @@ const buildTemplate = (): AlertSource => ({
   'kibana.alert.rule.rule_id': 'template-rule-id',
   'kibana.alert.rule.name': 'Okta session hijack',
   'kibana.alert.rule.tags': ['data-generator', 'data-generator-fp', 'pack:okta'],
+  tags: ['data-generator', 'data-generator-fp', 'pack:okta', 'forwarded'],
   'kibana.alert.rule.rule_type_id': 'siem.queryRule',
   'kibana.alert.workflow_tags': ['az:true_positive'],
   'kibana.alert.workflow_status': 'closed',
@@ -71,6 +72,29 @@ describe('cloneAlert', () => {
     const clone = cloneAlert(cloneParams());
 
     expect(clone['kibana.alert.rule.tags']).toEqual([LOAD_TEST_TAG, loadTestRunTag('run-1')]);
+  });
+
+  it('removes generator tags from the top-level tags, where the false-positive label also lives', () => {
+    const clone = cloneAlert(cloneParams());
+
+    expect(clone.tags).toEqual(['forwarded']);
+  });
+
+  it('removes a top-level tags value that is a single generator tag', () => {
+    const clone = cloneAlert(
+      cloneParams({ template: { ...buildTemplate(), tags: 'data-generator-fp' } })
+    );
+
+    expect(clone).not.toHaveProperty('tags');
+  });
+
+  it('leaves a template without top-level tags without them', () => {
+    const template = buildTemplate();
+    delete template.tags;
+
+    const clone = cloneAlert(cloneParams({ template }));
+
+    expect(clone).not.toHaveProperty('tags');
   });
 
   it('drops state that belongs to the template alert', () => {

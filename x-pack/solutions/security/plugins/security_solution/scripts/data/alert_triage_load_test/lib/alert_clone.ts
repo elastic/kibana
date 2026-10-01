@@ -26,6 +26,16 @@ const FIELDS_TO_DROP = [
   'kibana.alert.suppression.terms',
 ] as const;
 
+/**
+ * Tags `generate.ts` puts on its source events. An alert copies the event's top-level `tags`, so
+ * they travel onto the template alerts next to the rule tags.
+ */
+const GENERATOR_TAGS: ReadonlySet<string> = new Set(['data-generator', 'data-generator-fp']);
+const GENERATOR_PACK_TAG_PREFIX = 'pack:';
+
+const isGeneratorTag = (tag: unknown): boolean =>
+  typeof tag === 'string' && (GENERATOR_TAGS.has(tag) || tag.startsWith(GENERATOR_PACK_TAG_PREFIX));
+
 /** Stable UUID-shaped id for synthetic rule `ruleIndex` of a run. */
 export const buildRuleUuid = (runId: string, ruleIndex: number): string => {
   const hex = createHash('sha256')
@@ -56,8 +66,9 @@ export interface CloneAlertParams {
 /**
  * Clones a template alert into a fresh, open alert of a synthetic rule.
  *
- * Generator tags (`data-generator`, `data-generator-fp`, `pack:*`) are replaced, because the agent
- * reads the rule's tags and they would give away the ground truth. The label travels in the
+ * Generator tags (`data-generator`, `data-generator-fp`, `pack:*`) are removed from both the rule
+ * tags, which are replaced, and the alert's top-level `tags`, because the agent reads them and they
+ * would give away the ground truth. Other top-level tags are kept. The label travels in the
  * manifest instead.
  */
 export const cloneAlert = ({
@@ -93,6 +104,13 @@ export const cloneAlert = ({
   clone['kibana.alert.rule.rule_id'] = ruleUuid;
   clone['kibana.alert.rule.tags'] = [LOAD_TEST_TAG, loadTestRunTag(runId)];
   clone['kibana.alert.rule.execution.uuid'] = executionUuid;
+
+  const { tags } = clone;
+  if (Array.isArray(tags)) {
+    clone.tags = tags.filter((tag) => !isGeneratorTag(tag));
+  } else if (isGeneratorTag(tags)) {
+    delete clone.tags;
+  }
 
   return clone;
 };
