@@ -53,10 +53,13 @@ import {
   sendRuleRestoreTelemetryEvent,
   sendRuleRestoreErrorTelemetryEvent,
 } from './restore_telemetry';
-import { sendRuleLifecycleTelemetryEvent } from './rule_lifecycle_telemetry';
+import {
+  sendRuleLifecycleTelemetryEvent,
+  sendRuleInstallTelemetryEvents,
+  sendRuleImportTelemetryEvents,
+} from './rule_lifecycle_telemetry';
 import {
   DETECTION_RULE_REVERT_EVENT,
-  DETECTION_RULE_IMPORT_EVENT,
   DETECTION_RULE_INSTALL_EVENT,
 } from '../../../../telemetry/event_based/events';
 
@@ -151,7 +154,17 @@ export const createDetectionRulesClient = ({
 
     async bulkCreatePrebuiltRules(args: BulkCreatePrebuiltRulesArgs) {
       return withSecuritySpan('DetectionRulesClient.bulkCreatePrebuiltRules', async () => {
-        return bulkCreatePrebuiltRules({ actionsClient, rulesClient, mlAuthz, args });
+        const result = await bulkCreatePrebuiltRules({ actionsClient, rulesClient, mlAuthz, args });
+
+        if (analytics) {
+          sendRuleInstallTelemetryEvents(
+            analytics,
+            { rules: args.rules, results: result.results },
+            logger
+          );
+        }
+
+        return result;
       });
     },
 
@@ -258,14 +271,11 @@ export const createDetectionRulesClient = ({
         });
 
         if (analytics) {
-          for (const { telemetry } of result.successes) {
-            sendRuleLifecycleTelemetryEvent(
-              analytics,
-              DETECTION_RULE_IMPORT_EVENT,
-              telemetry,
-              logger
-            );
-          }
+          sendRuleImportTelemetryEvents(
+            analytics,
+            result.successes.map(({ telemetry }) => telemetry),
+            logger
+          );
         }
 
         return result;

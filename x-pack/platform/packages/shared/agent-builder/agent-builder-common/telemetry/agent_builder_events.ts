@@ -18,6 +18,7 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   UiClick: `${TELEMETRY_PREFIX}_ui_click`,
   AddToChatClicked: `${TELEMETRY_PREFIX}_add_to_chat_clicked`,
   ImageUploadRejected: `${TELEMETRY_PREFIX}_image_upload_rejected`,
+  ImageUploadSucceeded: `${TELEMETRY_PREFIX}_image_upload_succeeded`,
   AgentCreated: `${TELEMETRY_PREFIX}_agent_created`,
   AgentUpdated: `${TELEMETRY_PREFIX}_agent_updated`,
   ToolCreated: `${TELEMETRY_PREFIX}_tool_created`,
@@ -80,6 +81,11 @@ export interface ReportImageUploadRejectedParams {
   reason: 'too_large' | 'invalid_type' | 'too_many';
   mime_type?: string;
   file_size?: number;
+}
+
+export interface ReportImageUploadSucceededParams {
+  mime_type: string;
+  file_size: number;
 }
 
 export type AgentBuilderUiClickElementKind =
@@ -423,6 +429,7 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.UiClick]: ReportUiClickParams;
   [AGENT_BUILDER_EVENT_TYPES.AddToChatClicked]: ReportAddToChatClickedParams;
   [AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected]: ReportImageUploadRejectedParams;
+  [AGENT_BUILDER_EVENT_TYPES.ImageUploadSucceeded]: ReportImageUploadSucceededParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentCreated]: ReportAgentCreatedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentUpdated]: ReportAgentUpdatedParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCreated]: ReportToolCreatedParams;
@@ -458,6 +465,7 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportUiClickParams>
   | EventTypeOpts<ReportAddToChatClickedParams>
   | EventTypeOpts<ReportImageUploadRejectedParams>
+  | EventTypeOpts<ReportImageUploadSucceededParams>
   | EventTypeOpts<ReportAgentCreatedParams>
   | EventTypeOpts<ReportAgentUpdatedParams>
   | EventTypeOpts<ReportToolCreatedParams>
@@ -487,6 +495,7 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.UiClick
   | typeof AGENT_BUILDER_EVENT_TYPES.AddToChatClicked
   | typeof AGENT_BUILDER_EVENT_TYPES.ImageUploadRejected
+  | typeof AGENT_BUILDER_EVENT_TYPES.ImageUploadSucceeded
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentCreated
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentUpdated
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCreated
@@ -665,6 +674,26 @@ const IMAGE_UPLOAD_REJECTED_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description: 'Size in bytes of the rejected file',
         optional: true,
+      },
+    },
+  },
+};
+
+const IMAGE_UPLOAD_SUCCEEDED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ImageUploadSucceeded,
+  schema: {
+    mime_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'MIME type of the successfully uploaded image',
+        optional: false,
+      },
+    },
+    file_size: {
+      type: 'integer',
+      _meta: {
+        description: 'Size in bytes of the successfully uploaded image',
+        optional: false,
       },
     },
   },
@@ -1849,6 +1878,7 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   UI_CLICK_EVENT,
   ADD_TO_CHAT_CLICKED_EVENT,
   IMAGE_UPLOAD_REJECTED_EVENT,
+  IMAGE_UPLOAD_SUCCEEDED_EVENT,
   MANAGE_ENTITY_LIST_VIEW_EVENT,
   USED_BY_WARNING_SHOWN_EVENT,
   USED_BY_WARNING_PROCEEDED_EVENT,

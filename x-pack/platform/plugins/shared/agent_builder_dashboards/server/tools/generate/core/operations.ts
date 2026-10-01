@@ -8,8 +8,12 @@
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
 import type { ResolvePanelContent } from './operations/panels';
-import type { ResolveAttachmentPanel, ResolveCustomContentTemplate } from './operations/types';
-import type { PanelFailure } from './utils';
+import type {
+  ResolveAttachmentPanel,
+  ResolveControlFieldCapabilities,
+  ResolveCustomContentTemplate,
+} from './operations/types';
+import type { OperationFailure } from './utils';
 import type { PanelAuthoringNote } from './resolve_panel';
 import {
   dashboardOperationSchema,
@@ -28,6 +32,7 @@ interface ExecuteDashboardOperationsParams {
   resolvePanelContent?: ResolvePanelContent;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
+  resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
 }
 
 /**
@@ -35,7 +40,8 @@ interface ExecuteDashboardOperationsParams {
  * an empty one) plus an ordered list of operations into a new payload. Identity,
  * persistence, and result shape belong to the calling tool. Inline panel content
  * is resolved via the injected `resolvePanelContent` callback, so the core never
- * reads any store.
+ * reads any store. Control fields are validated against index mappings when
+ * the host provides `resolveControlFieldCapabilities`.
  */
 export const executeDashboardOperations = async ({
   dashboardData,
@@ -44,9 +50,10 @@ export const executeDashboardOperations = async ({
   resolvePanelContent,
   resolveCustomContentTemplate,
   resolveAttachmentPanel,
+  resolveControlFieldCapabilities,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
-  failures: PanelFailure[];
+  failures: OperationFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
 }> => {
   let nextDashboardData = structuredClone(
@@ -56,7 +63,7 @@ export const executeDashboardOperations = async ({
       panels: [],
     }
   );
-  const failures: PanelFailure[] = [];
+  const failures: OperationFailure[] = [];
   const panelAuthoringNotes: PanelAuthoringNote[] = [];
 
   const context = await prepareOperationExecution({
@@ -65,6 +72,7 @@ export const executeDashboardOperations = async ({
     resolvePanelContent,
     resolveCustomContentTemplate,
     resolveAttachmentPanel,
+    resolveControlFieldCapabilities,
     failures,
     panelAuthoringNotes,
   });

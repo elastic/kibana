@@ -9,6 +9,11 @@
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Creating a data view from an index alias and
+ * deleting it exercises the editor, index privileges, and saved-object persistence together.
+ * No Scout or Jest test covers this alias-specific UI flow.
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
