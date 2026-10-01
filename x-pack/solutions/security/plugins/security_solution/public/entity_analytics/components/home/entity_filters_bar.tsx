@@ -33,7 +33,7 @@ import {
   EntitySourceValue,
   toEntitySourceArray,
 } from '../../../flyout/entity_details/shared/components/entity_source_value';
-import type { EntityFilters } from './use_entity_filters_param';
+import type { EntityFilters } from './new_entities_table';
 import { useEntityFilterBarCounts } from './use_entity_filter_bar_counts';
 export { toBucketMap } from './use_entity_filter_bar_counts';
 
