@@ -152,6 +152,22 @@ describe('configure', () => {
       });
     });
 
+    it('has expected attributes in request with externalSync', () => {
+      const request = {
+        ...defaultRequest,
+        externalSync: { autoPush: true, conflictStrategy: 'external' },
+      };
+      const query = ConfigurationAttributesRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          ...request,
+          customFields: [textCustomField, toggleCustomField, numberCustomField],
+        },
+      });
+    });
+
     it('removes foo:bar attributes from request', () => {
       const query = ConfigurationAttributesRt.decode({ ...defaultRequest, foo: 'bar' });
 

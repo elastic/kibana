@@ -64,6 +64,8 @@ extractObservables:
     Indicates whether observables (for example, IPs, hashes, and URLs) are
     automatically extracted from case comments and events.
   example: true
+externalSync:
+  $ref: 'external_sync_settings.yaml'
 owner:
   $ref: 'owner.yaml'
 templates:

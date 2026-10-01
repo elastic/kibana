@@ -20,7 +20,12 @@ import {
   findCaseUserActions,
   updateCase,
   getCase,
+  createCase,
+  createConfiguration,
+  getConfiguration,
+  getConfigurationRequest,
 } from '../../../../common/lib/api';
+import { postCaseReq } from '../../../../common/lib/mock';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -77,6 +82,25 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
+      expect(theCase.settings.externalSync).to.eql(externalSync);
+    });
+
+    it('applies the configuration external sync defaults to a new case', async () => {
+      const externalSync = { autoPush: true, conflictStrategy: 'kibana' as const };
+      await createConfiguration(
+        supertestWithoutAuth,
+        getConfigurationRequest({ overrides: { externalSync } }),
+        200,
+        authSpace1
+      );
+
+      const [configuration] = await getConfiguration({
+        supertest: supertestWithoutAuth,
+        auth: authSpace1,
+      });
+      const theCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+
+      expect(configuration.externalSync).to.eql(externalSync);
       expect(theCase.settings.externalSync).to.eql(externalSync);
     });
 

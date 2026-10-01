@@ -369,6 +369,8 @@ paths:
                       description: |
                         Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
                       example: true
+                    externalSync:
+                      $ref: '#/components/schemas/external_sync_settings'
                     owner:
                       $ref: '#/components/schemas/owner'
                     templates:
@@ -559,6 +561,8 @@ paths:
                     description: |
                       Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
                     example: true
+                  externalSync:
+                    $ref: '#/components/schemas/external_sync_settings'
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -751,6 +755,8 @@ paths:
                     description: |
                       Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
                     example: true
+                  externalSync:
+                    $ref: '#/components/schemas/external_sync_settings'
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -2781,6 +2787,23 @@ components:
         - observability
         - securitySolution
       example: cases
+    external_sync_settings:
+      type: object
+      description: |
+        Technical preview. Controls automatic synchronization between the case and the external incident created by its connector. When `autoPush` is true, changes to the case are pushed to the external system without a manual push. `conflictStrategy` decides which side wins when a field changed on both sides since the last push: `external` applies the external value, `kibana` keeps the case value.
+      required:
+        - autoPush
+        - conflictStrategy
+      properties:
+        autoPush:
+          type: boolean
+          example: true
+        conflictStrategy:
+          type: string
+          enum:
+            - external
+            - kibana
+          example: external
     settings:
       type: object
       description: An object that contains the case settings.
@@ -2797,22 +2820,7 @@ components:
           type: boolean
           example: true
         externalSync:
-          description: |
-            Technical preview. Controls automatic synchronization between the case and the external incident created by its connector. When `autoPush` is true, changes to the case are pushed to the external system without a manual push. `conflictStrategy` decides which side wins when a field changed on both sides since the last push: `external` applies the external value, `kibana` keeps the case value.
-          type: object
-          required:
-            - autoPush
-            - conflictStrategy
-          properties:
-            autoPush:
-              type: boolean
-              example: true
-            conflictStrategy:
-              type: string
-              enum:
-                - external
-                - kibana
-              example: external
+          $ref: '#/components/schemas/external_sync_settings'
     case_severity:
       type: string
       description: The severity of the case.
@@ -3875,6 +3883,8 @@ components:
           type: boolean
           description: |
             Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
+        externalSync:
+          $ref: '#/components/schemas/external_sync_settings'
         owner:
           $ref: '#/components/schemas/owner'
         templates:
@@ -3954,6 +3964,8 @@ components:
           type: boolean
           description: |
             Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+        externalSync:
+          $ref: '#/components/schemas/external_sync_settings'
         templates:
           $ref: '#/components/schemas/templates'
         version:

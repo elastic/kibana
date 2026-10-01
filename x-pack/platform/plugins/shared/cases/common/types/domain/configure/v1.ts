@@ -13,7 +13,7 @@ import {
   CustomFieldToggleTypeRt,
   CustomFieldNumberTypeRt,
 } from '../custom_field/v1';
-import { CaseBaseOptionalFieldsRt } from '../case/v1';
+import { CaseBaseOptionalFieldsRt, ExternalSyncSettingsRt } from '../case/v1';
 import { CaseObservableTypeRt } from '../observable/v1';
 
 export const ClosureTypeRt = rt.union([
@@ -134,6 +134,15 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
   extractObservables: rt.boolean,
 });
 
+export const ConfigurationOptionalFieldsRt = rt.exact(
+  rt.partial({
+    /**
+     * Default external sync settings for new cases (technical preview)
+     */
+    externalSync: ExternalSyncSettingsRt,
+  })
+);
+
 export const CasesConfigureBasicRt = rt.intersection([
   ConfigurationBasicWithoutOwnerRt,
   rt.strict({
@@ -142,6 +151,7 @@ export const CasesConfigureBasicRt = rt.intersection([
      */
     owner: rt.string,
   }),
+  ConfigurationOptionalFieldsRt,
 ]);
 
 export const ConfigurationActivityFieldsRt = rt.strict({

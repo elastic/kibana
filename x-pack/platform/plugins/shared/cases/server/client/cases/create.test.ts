@@ -2435,4 +2435,50 @@ describe('create', () => {
       expect(createCaseCall.settings.extractObservables).toBe(true);
     });
   });
+
+  describe('externalSync defaulting from space configuration', () => {
+    const externalSyncCasesClient = createCasesClientMock();
+    const externalSync = { autoPush: true, conflictStrategy: 'kibana' as const };
+
+    const createClientArgsWithConfig = (configuration: Record<string, unknown>) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      externalSyncCasesClient.configure.get = jest
+        .fn()
+        .mockResolvedValue([{ owner: theCase.owner, customFields: [], ...configuration }]);
+      return clientArgs;
+    };
+
+    it('inherits externalSync from the space configuration when omitted', async () => {
+      const clientArgs = createClientArgsWithConfig({ externalSync });
+
+      await create(theCase, clientArgs, externalSyncCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.externalSync).toEqual(externalSync);
+    });
+
+    it('uses explicit externalSync over space configuration', async () => {
+      const clientArgs = createClientArgsWithConfig({ externalSync });
+      const explicit = { autoPush: false, conflictStrategy: 'external' as const };
+
+      await create(
+        { ...theCase, settings: { ...theCase.settings, externalSync: explicit } },
+        clientArgs,
+        externalSyncCasesClient
+      );
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.externalSync).toEqual(explicit);
+    });
+
+    it('leaves externalSync unset when the space configuration has none', async () => {
+      const clientArgs = createClientArgsWithConfig({});
+
+      await create(theCase, clientArgs, externalSyncCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.externalSync).toBeUndefined();
+    });
+  });
 });

@@ -178,6 +178,12 @@ export const create = async (
       };
     }
 
+    // Precedence: caller > template > space configuration. Left unset when no side defines it.
+    const defaultExternalSync = configurations[0]?.externalSync;
+    if (query.settings.externalSync === undefined && defaultExternalSync != null) {
+      query = { ...query, settings: { ...query.settings, externalSync: defaultExternalSync } };
+    }
+
     // Global (isGlobal) field-definition defaults are applied client-side by the create-case UI
     // before submission, so UI-created cases persist them — but API and workflow-step callers
     // only send the fields they know about, which left every global field empty on non-UI cases.

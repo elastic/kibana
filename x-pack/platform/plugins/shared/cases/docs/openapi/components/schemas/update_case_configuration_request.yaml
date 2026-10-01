@@ -33,6 +33,8 @@ properties:
     type: boolean
     description: >
       Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+  externalSync:
+    $ref: 'external_sync_settings.yaml'
   templates:
     $ref: 'templates.yaml'
   version:
