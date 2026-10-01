@@ -10,7 +10,7 @@
 import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import type { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs';
 import { PlayButton } from './play_button';
@@ -67,6 +67,12 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
       setTimeoutId(undefined);
     }
   }, [props, subscription, timeoutId]);
+
+  useEffect(() => {
+    if (previewMode) {
+      onPause();
+    }
+  }, [previewMode, onPause]);
 
   return (
     <>
