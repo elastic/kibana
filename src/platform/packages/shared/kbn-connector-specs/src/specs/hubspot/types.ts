@@ -9,6 +9,9 @@
 
 import { z } from '@kbn/zod/v4';
 
+// HubSpot documents no limit on requested properties, and an object can have hundreds of them.
+const MAX_PROPERTIES = 1000;
+
 // =============================================================================
 // Action input schemas & inferred types
 // =============================================================================
@@ -39,7 +42,7 @@ export const SearchCrmObjectsInputSchema = z.object({
     ),
   properties: z
     .array(z.string().max(200))
-    .max(100)
+    .max(MAX_PROPERTIES)
     .optional()
     .describe(
       'Property internal names to return (e.g. ["firstname","email","phone"]). Omit to let HubSpot return default properties.'
@@ -76,7 +79,7 @@ export const GetCrmObjectInputSchema = z.object({
   objectId: z.string().max(200).describe('HubSpot internal object ID for the record.'),
   properties: z
     .array(z.string().max(200))
-    .max(100)
+    .max(MAX_PROPERTIES)
     .optional()
     .describe(
       'Property internal names to return (e.g. ["firstname","lastname","email"]). Omit for default properties.'

@@ -10,6 +10,8 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 const MAX_STRING_LENGTH = 2048;
+// The API server rejects a JSON Patch with more operations than this (`maxJSONPatchOperations`).
+const MAX_JSON_PATCH_OPERATIONS = 10_000;
 
 // =============================================================================
 // Shared field descriptions
@@ -258,7 +260,7 @@ export const PatchResourceInputSchema = lazySchema(() =>
     patch: z
       .union([
         z.record(z.string().max(MAX_STRING_LENGTH), z.unknown()),
-        z.array(z.unknown()).max(100),
+        z.array(z.unknown()).max(MAX_JSON_PATCH_OPERATIONS),
       ])
       .describe(
         'The patch body. A JSON object for strategic-merge/merge patches, or a JSON array of operations ' +

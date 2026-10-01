@@ -468,13 +468,17 @@ Report documentation issues alongside code issues.
 - **Unbounded collection *sizes* in Zod schemas — a distinct bound from string length**: Bounding the
   strings inside a `z.array()`/`z.record()` is not enough; the collection itself also needs a cap on how
   many elements/entries it can hold. Flag any `z.array(...)` used as connector-execute input with no
-  `.max(N)` on the array (a sensible default is `.max(50)` for ID/name lists — tighten or loosen based on
-  what the vendor's own API accepts), and any `z.record(...)` with no cap on entry count (Zod has no
+  `.max(N)` on the array, and any `z.record(...)` with no cap on entry count (Zod has no
   built-in entry-count bound — use `.refine((obj) => Object.keys(obj).length <= N, { message: ... })`).
   This is easy to miss because the string-length bound on the *elements* looks like sufficient hardening
   at a glance, but an array of 100,000 short, individually-valid strings is still an unbounded-input DoS
   vector — especially if the array is later joined into a URL query string, since that also risks an
   oversized upstream request.
+  Also flag the opposite: a cap *below* what the vendor accepts. `N` must come from the vendor's
+  documented limit (an OpenAPI `maxItems`, an API reference limit, a server constant). When the vendor
+  documents none, `N` must sit above any realistic valid request, with a comment saying so. A round
+  number such as `.max(100)` on a list the vendor takes 250 of, or on a JSON Patch the Kubernetes API
+  server accepts 10,000 operations of, rejects valid requests.
 - **Unbounded free-form JSON bodies**: A field typed `z.unknown()`/`z.any()` — a request body forwarded
   verbatim to the service — has no shape to constrain but is still allocated and serialized on the Kibana
   server before being sent. Flag one with no `.refine()` bounding its serialized size. The refine should

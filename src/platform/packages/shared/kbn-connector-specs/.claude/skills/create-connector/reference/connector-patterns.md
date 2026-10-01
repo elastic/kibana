@@ -806,12 +806,16 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
   `z.string()`. Apply the same `.max(200)`-style bound to the key type: `z.record(z.string().max(200), z.unknown())`.
   This also applies to string keys inside `z.array(z.record(...))`.
 - **Bound the collection size too, not just the string lengths inside it** — a `z.array()` needs `.max(N)`
-  on the array itself (e.g. `z.array(z.string().max(64)).max(50)` for a list of IDs), and a `z.record()`
+  on the array itself, and a `z.record()`
   needs an entry-count cap via `.refine()` since Zod has no built-in one:
   `z.record(z.string().max(100), z.string().max(200)).refine((v) => Object.keys(v).length <= 50, { message: '...' })`.
   Bounding only the elements' string length still leaves an unbounded *number* of elements/entries as a DoS
   vector, and if the array is later joined into a query string, an oversized array also risks an oversized
   upstream request.
+  Take `N` from the vendor's documented limit (an OpenAPI `maxItems`, an API reference limit, a server
+  constant) and name the constant after it. When the vendor documents none, pick a bound above any
+  realistic valid request and say so in a comment. Do not pick a round number below what the vendor
+  accepts: a `.max(100)` on a list the API takes 250 of rejects valid requests.
 - **Bound a free-form JSON body by its serialized size** — a field typed `z.unknown()`/`z.any()` (a
   request body forwarded verbatim to the service) has no shape to constrain, but it still gets allocated
   and serialized on the Kibana server. Bound it in a `.refine()` that serializes the value, and reject a

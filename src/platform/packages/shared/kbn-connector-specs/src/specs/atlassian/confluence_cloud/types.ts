@@ -12,7 +12,9 @@ import { z, lazySchema } from '@kbn/zod/v4';
 const MAX_ID_LENGTH = 200;
 const MAX_CURSOR_LENGTH = 2048;
 const MAX_TOKEN_LENGTH = 100;
+// Confluence v2 accepts up to 100 `space-id` values on GET /pages, and up to 250 `ids` or `keys` on GET /spaces.
 const MAX_FILTER_VALUES = 100;
+const MAX_SPACE_LOOKUP_VALUES = 250;
 
 // =============================================================================
 // Action input schemas & inferred types
@@ -102,7 +104,7 @@ export const ListSpacesInputSchema = lazySchema(() =>
     ids: z
       .union([
         z.string().max(MAX_ID_LENGTH),
-        z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_FILTER_VALUES),
+        z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_SPACE_LOOKUP_VALUES),
       ])
       .optional()
       .describe(
@@ -111,7 +113,7 @@ export const ListSpacesInputSchema = lazySchema(() =>
     keys: z
       .union([
         z.string().max(MAX_ID_LENGTH),
-        z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_FILTER_VALUES),
+        z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_SPACE_LOOKUP_VALUES),
       ])
       .optional()
       .describe(
