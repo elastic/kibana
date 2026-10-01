@@ -9,7 +9,7 @@
 
 import { readdirSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
-import type { CodeOwnersEntry } from '@kbn/code-owners';
+import type { CodeOwnersEntry, Team } from '@kbn/code-owners';
 import { loadKibanaModule } from '../../../pipeline-utils/load_kibana_module.ts';
 
 const { getCodeOwnersEntries, getTeams } =
@@ -73,6 +73,18 @@ export function findUnrecognizedTeams(
   return [...codeownersTeams].filter((team) => !registryTeams.has(team)).sort();
 }
 
+/**
+ * Return the registry teams that own nothing in CODEOWNERS, sorted for stable output.
+ * Tooling only resolves teams through CODEOWNERS, so these entries are unreachable and
+ * their operational data in the private overlay goes stale.
+ */
+export function findUnusedRegistryTeams(registry: Team[], codeownersTeams: Set<string>): string[] {
+  return registry
+    .filter((team) => !team.github.team || !codeownersTeams.has(team.github.team))
+    .map((team) => `${team.id} (${team.github.team ?? 'no github team'})`)
+    .sort();
+}
+
 export function findConnectorSpecsOwnershipIssues(
   rootEntries: ConnectorSpecsRootEntry[],
   codeownersEntries: CodeOwnersEntry[]
@@ -123,6 +135,21 @@ function main(): void {
       '\nTo fix: add the team to teams.jsonc in\n' +
         'src/platform/packages/private/kbn-code-owners,\n' +
         'or remove the invalid owner from CODEOWNERS.\n'
+    );
+  }
+
+  const unusedTeams = findUnusedRegistryTeams(getTeams(), codeownersTeams);
+
+  if (unusedTeams.length > 0) {
+    hasErrors = true;
+    console.error('\nERROR: The following teams in teams.jsonc own nothing in CODEOWNERS:\n');
+    for (const team of unusedTeams) {
+      console.error(`  - ${team}`);
+    }
+    console.error(
+      '\nTo fix: remove the team from teams.jsonc in\n' +
+        'src/platform/packages/private/kbn-code-owners,\n' +
+        'or assign it paths in CODEOWNERS.\n'
     );
   }
 

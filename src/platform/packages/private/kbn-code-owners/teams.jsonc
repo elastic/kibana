@@ -12,34 +12,6 @@
 // "areas" entries must each be one of @kbn/code-owners CODE_OWNER_AREAS.
 [
   {
-    "id": "actionable-obs",
-    "name": "Obs UX: Actionable Obs",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/actionable-obs-team",
-      "label": "Team:actionable-obs"
-    },
-    "responsibilities": [
-      "Observability Alerts",
-      "SLOs",
-      "Observability Cases",
-      "Exploratory view",
-      "Synthetics",
-      "Uptime",
-      "User Experience Dashboard"
-    ]
-  },
-  {
-    "id": "apm-ui",
-    "name": "Apm Ui",
-    "github": {
-      "team": "elastic/apm-ui",
-      "label": "Team:obs-ux-infra_services"
-    }
-  },
-  {
     "id": "apm-agent-approvers",
     "name": "APM Agent Approvers",
     "areas": [
@@ -122,17 +94,6 @@
     }
   },
   {
-    "id": "security-core-analysis",
-    "name": "Core Analysis",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/core-analysis",
-      "label": "Team:Core Analysis"
-    }
-  },
-  {
     "id": "docs",
     "name": "Docs",
     "areas": [
@@ -140,13 +101,6 @@
     ],
     "github": {
       "team": "elastic/docs"
-    }
-  },
-  {
-    "id": "eui",
-    "name": "Eui",
-    "github": {
-      "team": "elastic/eui"
     }
   },
   {
@@ -158,25 +112,6 @@
     "github": {
       "team": "elastic/eui-team",
       "label": "EUI"
-    }
-  },
-  {
-    "id": "experience-docs",
-    "name": "Experience Docs",
-    "github": {
-      "team": "elastic/experience-docs",
-      "label": "Team:Docs"
-    }
-  },
-  {
-    "id": "fleet",
-    "name": "Fleet",
-    "areas": [
-      "platform"
-    ],
-    "github": {
-      "team": "elastic/fleet",
-      "label": "Team:Fleet"
     }
   },
   {
@@ -195,30 +130,6 @@
     "github": {
       "team": "elastic/kibana-accessibility",
       "label": "Project:Accessibility"
-    }
-  },
-  {
-    "id": "cases",
-    "name": "Cases",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/kibana-cases",
-      "label": "Team:Cases"
-    },
-    "responsibilities": [
-      "Security Solution specific connectors",
-      "Security Solution Cases"
-    ]
-  },
-  {
-    "id": "kibana-cloud-security-posture",
-    "name": "Contextual Security Apps Team",
-    "areas": [],
-    "github": {
-      "team": "elastic/kibana-cloud-security-posture",
-      "label": "Team:Cloud Security"
     }
   },
   {
@@ -281,29 +192,6 @@
       "Discover",
       "Graph App"
     ]
-  },
-  {
-    "id": "design",
-    "name": "Design",
-    "areas": [
-      "platform"
-    ],
-    "description": "UI/UX design for Kibana Analytics and Stack Management (incl. Platform) areas of Kibana",
-    "github": {
-      "team": "elastic/kibana-design",
-      "label": "Team:Platform-Design"
-    }
-  },
-  {
-    "id": "kibana-esql",
-    "name": "Kibana ES|QL Team",
-    "areas": [
-      "platform"
-    ],
-    "github": {
-      "team": "elastic/kibana-esql",
-      "label": "Team:ESQL"
-    }
   },
   {
     "id": "localization",
@@ -390,22 +278,6 @@
     ]
   },
   {
-    "id": "presentation",
-    "name": "Presentation",
-    "areas": [
-      "platform"
-    ],
-    "github": {
-      "team": "elastic/kibana-presentation",
-      "label": "Team:Presentation"
-    },
-    "responsibilities": [
-      "Canvas application",
-      "Dashboards (incl. Dashboard only mode)",
-      "Input Controls"
-    ]
-  },
-  {
     "id": "reporting-services",
     "name": "Reporting Services",
     "areas": [
@@ -455,35 +327,6 @@
       "team": "elastic/kibana-telemetry",
       "label": "Team:Core"
     }
-  },
-  {
-    "id": "kibana-visualization",
-    "name": "Kibana Visualization",
-    "github": {
-      "team": "elastic/kibana-visualization"
-    }
-  },
-  {
-    "id": "visualizations",
-    "name": "AnalystXP Visualization Team",
-    "areas": [
-      "platform"
-    ],
-    "github": {
-      "team": "elastic/kibana-visualizations",
-      "label": "Team:Visualizations"
-    },
-    "responsibilities": [
-      "Visualize (overall app & individual editors)",
-      "Visualizations (incl. Timelion, TSVB, Vega, ...; excl. map visualization)",
-      "Lens",
-      "Advanced Settings UI  ",
-      "Lens/Saved Search embeddable implementation",
-      "Visualize embeddable implementation",
-      "AppState (legacy)",
-      "Vislib",
-      "Embedding via iFrame"
-    ]
   },
   {
     "id": "logstash",
@@ -541,66 +384,6 @@
     "github": {
       "team": "elastic/obs-cloudnative-monitoring"
     }
-  },
-  {
-    "id": "obs-docs",
-    "name": "Obs Docs",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-docs"
-    }
-  },
-  {
-    "id": "obs-elastic-brain-team",
-    "name": "Observability Brain Team",
-    "github": {
-      "team": "elastic/obs-elastic-brain-team",
-      "label": "Team:obs-elastic-brain-team"
-    }
-  },
-  {
-    "id": "obs-exploration-team",
-    "name": "Obs UX: Obs Exploration",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-exploration-team",
-      "label": "Team:obs-exploration"
-    },
-    "responsibilities": [
-      "Metrics Explorer",
-      "Logs Explorer",
-      "Logs UI",
-      "Log stream embeddable"
-    ]
-  },
-  {
-    "id": "obs-knowledge-team",
-    "name": "Obs Knowledge Team",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-knowledge-team"
-    }
-  },
-  {
-    "id": "obs-onboarding",
-    "name": "Obs UX: Obs Onboarding",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-onboarding-team",
-      "label": "Team:obs-onboarding"
-    },
-    "responsibilities": [
-      "Observability onboarding",
-      "Streams"
-    ]
   },
   {
     "id": "obs-signals-metrics",
@@ -830,17 +613,6 @@
     }
   },
   {
-    "id": "security-detection-engine",
-    "name": "Security Detection Engine",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-detection-engine",
-      "label": "Team:Detection Engine"
-    }
-  },
-  {
     "id": "security-detection-engineering",
     "name": "Security Detection Engineering",
     "areas": [
@@ -859,17 +631,6 @@
     ],
     "github": {
       "team": "elastic/security-detection-platform"
-    }
-  },
-  {
-    "id": "security-detection-rule-management",
-    "name": "Security Detection Rule Management",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-detection-rule-management",
-      "label": "Team:Detection Rule Management"
     }
   },
   {
@@ -908,33 +669,6 @@
     }
   },
   {
-    "id": "security-ml",
-    "name": "Security Ml",
-    "github": {
-      "team": "elastic/security-ml"
-    }
-  },
-  {
-    "id": "security-pds-deployment",
-    "name": "Security Pds Deployment",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-pds-deployment"
-    }
-  },
-  {
-    "id": "security-service-integrations",
-    "name": "Security Service Integrations",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-service-integrations"
-    }
-  },
-  {
     "id": "security-solution",
     "name": "Security Solution",
     "areas": [
@@ -954,17 +688,6 @@
     "github": {
       "team": "elastic/security-threat-hunting",
       "label": "Team:Threat Hunting"
-    }
-  },
-  {
-    "id": "security-threat-hunting-investigations",
-    "name": "Security Threat Hunting Investigations",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-threat-hunting-investigations",
-      "label": "Team:Threat Hunting:Investigations"
     }
   },
   {
@@ -1033,114 +756,6 @@
     "github": {
       "team": "elastic/workflows-eng",
       "label": "Team:One Workflow"
-    }
-  },
-  {
-    "id": "data-vis",
-    "name": "DataVis",
-    "github": {
-      "label": "Team:DataVis"
-    },
-    "responsibilities": [
-      "Elastic Charts library"
-    ]
-  },
-  {
-    "id": "maps",
-    "name": "Maps",
-    "github": {
-      "team": "elastic/kibana-gis",
-      "label": "Team:Geo"
-    },
-    "responsibilities": [
-      "EMS (Elastic Map Service)",
-      "Map data",
-      "Maps (Visualize)",
-      "Region Maps",
-      "Tile Map visualization"
-    ]
-  },
-  {
-    "id": "ingest-management",
-    "name": "Ingest - Logstash",
-    "description": "Logstash Pipeline UI (under Management)",
-    "github": {
-      "team": "elastic/ingest-management",
-      "label": "logstash"
-    }
-  },
-  {
-    "id": "beats",
-    "name": "Ingest - Beats Central Management",
-    "description": "Beats central management UI app",
-    "github": {
-      "team": "elastic/beats",
-      "label": "Beats"
-    }
-  },
-  {
-    "id": "security-threat-hunting-explore",
-    "name": "Security Threat Hunting Explore",
-    "github": {
-      "team": "elastic/security-threat-hunting-explore",
-      "label": "Team:Threat Hunting:Explore"
-    }
-  },
-  {
-    "id": "opex",
-    "name": "Operational Experience",
-    "github": {
-      "team": "elastic/opex",
-      "label": "Team:OpEx"
-    },
-    "responsibilities": [
-      "Operational Experience"
-    ]
-  },
-  {
-    "id": "opex-back",
-    "name": "Operational Experience Backend",
-    "github": {
-      "team": "elastic/opex-back",
-      "label": "Team:OpEx Backend"
-    },
-    "responsibilities": [
-      "Operational Experience Backend"
-    ]
-  },
-  {
-    "id": "opex-front",
-    "name": "Operational Experience Frontend",
-    "github": {
-      "team": "elastic/opex-front",
-      "label": "Team:OpEx Frontend"
-    },
-    "responsibilities": [
-      "Operational Experience Frontend"
-    ]
-  },
-  {
-    "id": "security-scalability",
-    "name": "Security Integrations Scalability Team",
-    "github": {
-      "team": "elastic/security-scalability",
-      "label": "Team:Security-Scalability"
-    }
-  },
-  {
-    "id": "cloud-ui",
-    "name": "Cloud UI",
-    "github": {
-      "team": "elastic/cloud-ui",
-      "label": "Team:CloudUI"
-    }
-  },
-  {
-    "id": "platform-analytics",
-    "name": "Platform Analytics Team",
-    "github": {
-      "team": "elastic/platform-analytics",
-      "label": "Team:Platform Analytics"
     }
   },
   {
