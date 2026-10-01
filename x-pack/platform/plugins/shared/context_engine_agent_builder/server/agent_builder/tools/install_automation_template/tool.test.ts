@@ -194,7 +194,10 @@ describe('install_automation_template schema', () => {
   });
 
   it('rejects targeted_ki_writer without kis', () => {
-    const parsed = schema.safeParse({ template: 'targeted_ki_writer', name: 'loyalty-constraints' });
+    const parsed = schema.safeParse({
+      template: 'targeted_ki_writer',
+      name: 'loyalty-constraints',
+    });
 
     expect(parsed.success).toBe(false);
   });
