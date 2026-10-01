@@ -318,21 +318,23 @@ bundle:
   # description: |
   #   This release includes new features and bug fixes.
   use_local_changelogs: false
+  releases:
+    products:
+      kibana: kibana-release
+      cloud-serverless: serverless-release
+      observability: observability-release
+      security: security-release
 
   # Named bundle profiles for different release scenarios
   profiles:
     kibana-release:
-      output_products: 'kibana {version} {lifecycle}'
-      output_directory: docs/releases/kibana
+      product: kibana
     observability-release:
-      output_products: 'observability {version} {lifecycle}'
-      output_directory: docs/releases/observability
+      product: observability
     security-release:
-      output_products: 'security {version} {lifecycle}'
-      output_directory: docs/releases/security
+      product: security
     serverless-release:
-      output_products: 'cloud-serverless {version} {lifecycle}'
-      output_directory: docs/releases/cloud-serverless
+      product: cloud-serverless
       # Feature IDs to hide when bundling with this profile (accepts string or list)
       hide_features:
         - data-federation

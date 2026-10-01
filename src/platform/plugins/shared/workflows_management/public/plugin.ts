@@ -314,6 +314,7 @@ export class WorkflowsPlugin
     return {
       ...coreStart,
       ...depsStart,
+      security: coreStart.security,
       ...additionalServices,
     };
   }

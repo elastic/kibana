@@ -5,26 +5,45 @@
  * 2.0.
  */
 
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { AppStatus, type AppUpdater } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { getInvestigationTabIds } from '@kbn/agentic-investigations-common';
-import { BehaviorSubject, filter, firstValueFrom, map, type Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  EMPTY,
+  Subject,
+  filter,
+  firstValueFrom,
+  map,
+  type Observable,
+} from 'rxjs';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import type { AlertZeroClientConfig } from './types';
 import { AlertZeroPublicPlugin } from './plugin';
+
+const createLicensing = () => ({
+  ...licensingMock.createStart(),
+  license$: new BehaviorSubject(
+    licensingMock.createLicense({ license: { type: 'enterprise', status: 'active' } })
+  ),
+});
 
 const createConfig = (overrides: Partial<AlertZeroClientConfig> = {}): AlertZeroClientConfig => ({
   enabled: false,
   ...overrides,
 });
 
-const createContext = (config: AlertZeroClientConfig) =>
-  coreMock.createPluginInitializerContext(config) as unknown as ConstructorParameters<
-    typeof AlertZeroPublicPlugin
-  >[0];
+const createContext = (
+  config: AlertZeroClientConfig,
+  buildFlavor: 'traditional' | 'serverless' = 'traditional'
+) =>
+  coreMock.createPluginInitializerContext(config, {
+    buildFlavor,
+  }) as unknown as ConstructorParameters<typeof AlertZeroPublicPlugin>[0];
 
 /** `coreMock` returns a plain jest mock for `get$`; wire it to the setting under test. */
 const withSetting = (
@@ -37,12 +56,20 @@ const withSetting = (
     }
     return setting$;
   });
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    alertzero: { show: true, write: true },
+  };
   return core;
 };
 
 describe('AlertZeroPublicPlugin app registration', () => {
-  const setupPlugin = (setting$: Observable<boolean>, enabled = true) => {
-    const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled })));
+  const setupPlugin = (
+    setting$: Observable<boolean>,
+    enabled = true,
+    buildFlavor: 'traditional' | 'serverless' = 'traditional'
+  ) => {
+    const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled }), buildFlavor));
     const coreSetup = coreMock.createSetup();
     const coreStart = withSetting(coreMock.createStart(), setting$);
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}] as never);
@@ -83,7 +110,15 @@ describe('AlertZeroPublicPlugin app registration', () => {
       updater$: Observable<AppUpdater>;
     };
     const firstStatus = firstValueFrom(statusUpdates$(updater$));
-    plugin.start(coreStart as never, { agentBuilder: agentBuilderMocks.createStart() } as never);
+    plugin.start(
+      coreStart as never,
+      {
+        licensing: createLicensing(),
+        agenticInvestigations: {},
+        proposals: {},
+        agentBuilder: agentBuilderMocks.createStart(),
+      } as never
+    );
     return firstStatus;
   };
 
@@ -95,6 +130,96 @@ describe('AlertZeroPublicPlugin app registration', () => {
     expect(await nextStatus(new BehaviorSubject(false))).toBe(AppStatus.inaccessible);
   });
 
+  it.each([true, false])(
+    'updates navigation for read access = %s without removing the URL gate',
+    async (canRead) => {
+      const { coreSetup, plugin, coreStart } = setupPlugin(new BehaviorSubject(true));
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        alertzero: { show: canRead, write: false },
+        proposals: { showProposals: false },
+      };
+      const { updater$ } = coreSetup.application.register.mock.calls[0][0];
+      if (!updater$) throw new Error('Missing application updater');
+      const nextUpdate = firstValueFrom(updater$.pipe(map((update) => update({} as never))));
+      plugin.start(coreStart, { licensing: createLicensing() });
+      const update = await nextUpdate;
+      expect(update?.status).toBe(AppStatus.accessible);
+      expect(update?.visibleIn).toEqual(
+        canRead ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : []
+      );
+      expect(update?.deepLinks?.length).toBe(canRead ? 6 : 0);
+      plugin.stop();
+    }
+  );
+
+  it('hides navigation until a valid Enterprise license arrives and on later downgrades', () => {
+    const { coreSetup, plugin, coreStart } = setupPlugin(new BehaviorSubject(true));
+    const { updater$ } = coreSetup.application.register.mock.calls[0][0];
+    if (!updater$) throw new Error('Missing application updater');
+    const onUpdate = jest.fn();
+    const subscription = updater$.pipe(map((update) => update({} as never))).subscribe(onUpdate);
+    const license$ = new Subject<ReturnType<typeof licensingMock.createLicense>>();
+    plugin.start(coreStart, { licensing: { ...createLicensing(), license$ } });
+
+    expect(onUpdate).toHaveBeenLastCalledWith({
+      status: AppStatus.accessible,
+      visibleIn: [],
+      deepLinks: [],
+    });
+
+    for (const license of [
+      { type: 'basic', status: 'active', visible: false },
+      { type: 'enterprise', status: 'active', visible: true },
+      { type: 'enterprise', status: 'expired', visible: false },
+      { type: 'enterprise', status: 'active', visible: true },
+    ] as const) {
+      license$.next(licensingMock.createLicense({ license }));
+      expect(onUpdate).toHaveBeenLastCalledWith({
+        status: AppStatus.accessible,
+        visibleIn: license.visible ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
+        deepLinks: license.visible ? expect.any(Array) : [],
+      });
+      if (license.visible) expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(6);
+    }
+    subscription.unsubscribe();
+    plugin.stop();
+  });
+
+  it('updates navigation when Serverless tier eligibility changes while preserving direct URLs', () => {
+    const { coreSetup, plugin, coreStart } = setupPlugin(
+      new BehaviorSubject(true),
+      true,
+      'serverless'
+    );
+    const { updater$ } = coreSetup.application.register.mock.calls[0][0];
+    if (!updater$) throw new Error('Missing application updater');
+    const onUpdate = jest.fn();
+    const subscription = updater$.pipe(map((update) => update({} as never))).subscribe(onUpdate);
+    const contract = plugin.start(coreStart, { licensing: createLicensing() });
+
+    expect(onUpdate).toHaveBeenLastCalledWith({
+      status: AppStatus.accessible,
+      visibleIn: [],
+      deepLinks: [],
+    });
+    contract.setServerlessTierAvailable(true);
+    expect(onUpdate).toHaveBeenLastCalledWith({
+      status: AppStatus.accessible,
+      visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+      deepLinks: expect.any(Array),
+    });
+    expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(6);
+    contract.setServerlessTierAvailable(false);
+    expect(onUpdate).toHaveBeenLastCalledWith({
+      status: AppStatus.accessible,
+      visibleIn: [],
+      deepLinks: [],
+    });
+    subscription.unsubscribe();
+    plugin.stop();
+  });
+
   it('tracks later changes to the setting without a page reload', async () => {
     const setting$ = new BehaviorSubject(false);
     const { coreSetup, plugin, coreStart } = setupPlugin(setting$);
@@ -104,7 +229,15 @@ describe('AlertZeroPublicPlugin app registration', () => {
 
     const statuses: AppStatus[] = [];
     const subscription = statusUpdates$(updater$).subscribe((s) => statuses.push(s));
-    plugin.start(coreStart as never, { agentBuilder: agentBuilderMocks.createStart() } as never);
+    plugin.start(
+      coreStart as never,
+      {
+        licensing: createLicensing(),
+        agenticInvestigations: {},
+        proposals: {},
+        agentBuilder: agentBuilderMocks.createStart(),
+      } as never
+    );
     setting$.next(true);
     subscription.unsubscribe();
 
@@ -117,7 +250,12 @@ describe('AlertZeroPublicPlugin conversation template UI registration', () => {
     const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled })));
     const agentBuilder = agentBuilderMocks.createStart();
 
-    plugin.start(withSetting(coreMock.createStart(), setting$), { agentBuilder } as never);
+    plugin.start(withSetting(coreMock.createStart(), setting$), {
+      licensing: createLicensing(),
+      agenticInvestigations: {},
+      proposals: {},
+      agentBuilder,
+    } as never);
 
     return { agentBuilder, plugin };
   };
@@ -164,6 +302,32 @@ describe('AlertZeroPublicPlugin conversation template UI registration', () => {
   });
 });
 
+describe('AlertZeroPublicPlugin Serverless entitlement', () => {
+  it.each([true, false])(
+    'uses tier entitlement independently of license availability (%s)',
+    (hasLicense) => {
+      const context = coreMock.createPluginInitializerContext(createConfig({ enabled: true }), {
+        buildFlavor: 'serverless',
+      });
+      const plugin = new AlertZeroPublicPlugin(context);
+      const core = withSetting(coreMock.createStart(), new BehaviorSubject(true));
+      const agentBuilder = agentBuilderMocks.createStart();
+      const contract = plugin.start(core, {
+        licensing: hasLicense ? createLicensing() : { ...createLicensing(), license$: EMPTY },
+        agentBuilder,
+        agenticInvestigations: {},
+        proposals: {},
+      });
+      expect(
+        agentBuilder.conversationTemplates.registerTemplateUIDefinition
+      ).not.toHaveBeenCalled();
+      contract.setServerlessTierAvailable(true);
+      expect(agentBuilder.conversationTemplates.registerTemplateUIDefinition).toHaveBeenCalled();
+      plugin.stop();
+    }
+  );
+});
+
 describe('AlertZeroPublicPlugin attachment UI registration', () => {
   // The registrars use `await import(...)` to keep these renderers out of the initial
   // bundle, so registration is still a floating promise; let it settle before asserting.
@@ -180,7 +344,7 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
   } = {}) => {
     const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled })));
     const agentBuilder = agentBuilderMocks.createStart();
-    const core = coreMock.createStart();
+    const core = withSetting(coreMock.createStart(), new BehaviorSubject(true));
     if (basePath !== undefined) {
       // `getSpaceIdFromPath` reads the space from what follows `serverBasePath`, so the two
       // must differ the way they do in a real non-default space.
@@ -191,7 +355,13 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
       core.http.basePath = mockBasePath as unknown as typeof core.http.basePath;
     }
 
-    plugin.start(core, { agentBuilder, share } as never);
+    plugin.start(core, {
+      licensing: createLicensing(),
+      agenticInvestigations: {},
+      proposals: {},
+      agentBuilder,
+      share,
+    } as never);
 
     return agentBuilder;
   };
@@ -200,8 +370,9 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
     const { attachments } = startPlugin();
     await flushRegistration();
 
-    expect(attachments.addAttachmentType).toHaveBeenCalledTimes(1);
+    expect(attachments.addAttachmentType).toHaveBeenCalledTimes(2);
     expect(attachments.addAttachmentType.mock.calls.map(([type]) => type).sort()).toEqual([
+      'security.significant_security_event',
       'security.threat',
     ]);
   });

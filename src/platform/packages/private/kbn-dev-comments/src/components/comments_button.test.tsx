@@ -68,6 +68,39 @@ describe('CommentsButton', () => {
     ]);
   });
 
+  it('lets a click made with Alt held act on the page in comment mode, recording it for the trail, and says so', async () => {
+    const api = createInMemoryCommentsApi();
+    render(
+      <EuiThemeProvider>
+        <div id="toolbar">
+          <CommentsButton services={createHostServices({ api, ignoreSelectors: ['#toolbar'] })} />
+        </div>
+      </EuiThemeProvider>
+    );
+    await act(flush);
+    const button = screen.getByTestId('devCommentsButton');
+    fireEvent.mouseOver(button);
+    const hint = 'Hold Alt to click through to the page';
+    expect(await screen.findByText(hint)).toBeInTheDocument();
+    expect(button).toHaveAccessibleDescription(new RegExp(hint));
+
+    fireEvent.click(button);
+    await screen.findByTestId('devCommentsPanel');
+    fireEvent.click(query('#open'), { altKey: true });
+    await act(flush);
+    expect(query('#details').hidden).toBe(false);
+    expect(screen.queryByTestId('devCommentsComposerInput')).toBeNull();
+
+    fireEvent.keyDown(query('#target'), { key: 'Enter' });
+    await screen.findByTestId('devCommentsComposerInput');
+    fireEvent.change(editorText('devCommentsComposerInput'), { target: { value: 'Revealed' } });
+    fireEvent.click(screen.getByTestId('devCommentsComposerSubmit'));
+
+    await waitFor(async () => expect(await api.list()).toHaveLength(1));
+    const [saved] = await api.list();
+    expect(saved.trail).toEqual([expect.objectContaining({ label: 'Open details' })]);
+  });
+
   it('leaves comment mode from its own button without the host listing it in `ignoreSelectors`', async () => {
     render(
       <EuiThemeProvider>

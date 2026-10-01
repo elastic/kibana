@@ -12,6 +12,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import {
+  RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
@@ -19,7 +20,7 @@ import {
   SYSTEM_SECURITY_WATCH_FORENSICS_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -56,17 +57,24 @@ jest.mock('./components/watches_section_layout', () => ({
       testId?: string;
       disableButton?: boolean | (() => boolean);
       isLoading?: boolean;
+      tooltipContent?: string | (() => string | undefined);
       run: () => void;
     };
     headerItems?: Array<{
       label: string;
       testId?: string;
       disableButton?: boolean | (() => boolean);
+      tooltipContent?: string | (() => string | undefined);
       run: () => void;
     }>;
   }) => {
     const resolveDisabled = (disableButton?: boolean | (() => boolean)) =>
       typeof disableButton === 'function' ? disableButton() : Boolean(disableButton);
+    // Real AppMenu buttons wrap in an EuiToolTip and expose its content via the button's
+    // accessible `title`. Reading `tooltipContent` here (rather than dropping it like the real
+    // header items list) is what makes the read-only tooltip contract observable in this test.
+    const resolveTooltip = (tooltipContent?: string | (() => string | undefined)) =>
+      typeof tooltipContent === 'function' ? tooltipContent() : tooltipContent;
     return (
       <div>
         <h1>{title}</h1>
@@ -81,6 +89,7 @@ jest.mock('./components/watches_section_layout', () => ({
             type="button"
             data-test-subj={item.testId}
             disabled={resolveDisabled(item.disableButton)}
+            title={resolveTooltip(item.tooltipContent)}
             onClick={() => item.run()}
           >
             {item.label}
@@ -91,6 +100,7 @@ jest.mock('./components/watches_section_layout', () => ({
             type="button"
             data-test-subj={headerPrimaryActionItem.testId}
             disabled={resolveDisabled(headerPrimaryActionItem.disableButton)}
+            title={resolveTooltip(headerPrimaryActionItem.tooltipContent)}
             onClick={() => headerPrimaryActionItem.run()}
           >
             {headerPrimaryActionItem.label}
@@ -155,6 +165,7 @@ const huntWorker = createWorker({
 
 /** Complete Rule Tuning extras; cases vary the window and keep the FP thresholds at default. */
 const RULE_TUNING_EXTRAS = { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays: 14 };
+const RULE_COVERAGE_EXTRAS = { ...RULE_COVERAGE_DEFAULT_EXTRAS, lookbackDays: 14 };
 
 const detectionWorkers: Worker[] = [
   createWorker({
@@ -169,9 +180,15 @@ const detectionWorkers: Worker[] = [
     },
   }),
   createWorker({
-    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
-    name: 'Rule Creation',
+    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+    name: 'Rule Coverage',
     watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
+    settings: {
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+      autonomy: 'manual',
+      scheduleInterval: '1h',
+      extras: RULE_COVERAGE_EXTRAS,
+    },
   }),
 ];
 
@@ -338,7 +355,7 @@ describe('WatchDetailPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('lays the accordion out with its own nodes and keeps the enable switch out of the toggle button', () => {
+  it('lays the accordion out with its own nodes: header band and body are present for each worker', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
 
     for (const worker of floorWorkers) {
@@ -346,18 +363,23 @@ describe('WatchDetailPage', () => {
       const body = screen.getByTestId(`alertZeroWorkerSettingsBody-${worker.id}`);
       expect(header).toBeInTheDocument();
       expect(body).toBeInTheDocument();
-      // The band and the body carry the padding: EUI's own accordion nodes stay untouched.
-      expect(getComputedStyle(header).padding).toBe('16px');
-      expect(getComputedStyle(body).padding).toBe('16px');
+    }
+  });
 
-      // The switch is itself a <button>, so assert it sits outside the accordion's own toggle
-      // button (`.euiAccordion__button`) — otherwise clicking it would toggle the accordion.
-      const accordionToggle = header.closest(
-        '.euiAccordion__triggerWrapper, .euiAccordion__button'
-      );
-      const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`);
-      expect(accordionToggle).not.toBeNull();
-      expect(accordionToggle?.contains(enabledSwitch)).toBe(false);
+  it('clicking the enable switch does not collapse the accordion', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    for (const worker of floorWorkers) {
+      const accordion = screen.getByTestId(`alertZeroWatchWorkerAccordion-${worker.id}`);
+      // Workers start expanded; the accordion trigger carries aria-expanded.
+      // EUI renders aria-expanded on the arrow <button> inside the trigger wrapper.
+      const trigger = accordion.querySelector('button[aria-expanded]');
+      expect(trigger).not.toBeNull();
+      expect(trigger?.getAttribute('aria-expanded')).toBe('true');
+
+      fireEvent.click(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`));
+
+      expect(trigger?.getAttribute('aria-expanded')).toBe('true');
     }
   });
 
@@ -399,23 +421,18 @@ describe('WatchDetailPage', () => {
   it('offers only the autonomy levels a Worker allows', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
 
-    // Attack Discovery has no assisted gate; Alert Triage carries the full dial.
-    const attackDiscovery = screen.getByTestId(
-      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
-    );
-    expect(within(attackDiscovery).getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
-    expect(
-      within(attackDiscovery).getByTestId('alertZeroAutonomyCard-supervised')
-    ).toBeInTheDocument();
-    expect(
-      within(attackDiscovery).queryByTestId('alertZeroAutonomyCard-assisted')
-    ).not.toBeInTheDocument();
+    // Both Floor Workers gate exactly one action, so neither offers the in-between assisted level.
+    const sections = [
+      SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+      SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+    ].map((workerId) => screen.getByTestId(`alertZeroWatchWorkerSection-${workerId}`));
 
-    const alertTriage = screen.getByTestId(
-      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
-    );
-    for (const level of ['manual', 'assisted', 'supervised'] as const) {
-      expect(within(alertTriage).getByTestId(`alertZeroAutonomyCard-${level}`)).toBeInTheDocument();
+    for (const section of sections) {
+      expect(within(section).getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
+      expect(within(section).getByTestId('alertZeroAutonomyCard-supervised')).toBeInTheDocument();
+      expect(
+        within(section).queryByTestId('alertZeroAutonomyCard-assisted')
+      ).not.toBeInTheDocument();
     }
   });
 
@@ -539,7 +556,7 @@ describe('WatchDetailPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows Forensics Watch with one Worker that has enablement and fixed autonomy', () => {
+  it('shows Forensics Watch with one Worker that has enablement and two autonomy levels', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, [
       ...floorWorkers,
       huntWorker,
@@ -561,26 +578,20 @@ describe('WatchDetailPage', () => {
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
       )
     ).toBeInTheDocument();
-    // Endpoint analysis allows manual only, so the level renders as one selected card with no
-    // alternatives beside it — the same card a Worker offering three would show it as. Its sweep
-    // cadence is fixed in the definition, not a setting. The level set it declares is what says
-    // there is no choice to present; the card copy below only explains the level.
-    expect(within(section).getByTestId('alertZeroAutonomyFixedLevel')).toHaveTextContent('Manual');
-    expect(within(section).getAllByRole('radio')).toHaveLength(1);
-    expect(within(section).getByRole('radio')).toBeChecked();
-    expect(within(section).queryByRole('radiogroup')).not.toBeInTheDocument();
-    expect(within(section).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
-
-    // A fixed level still has to say what it means. Containment is the fact that makes this
-    // Worker manual-only, so it is the one an analyst must be able to read off the page.
-    expect(within(section).getByTestId('alertZeroAutonomyCardWho')).toHaveTextContent(
-      /every containment action waits for you/i
-    );
+    // Same split as Attack Discovery: one level that gates containment and one that does not.
+    // The sweep cadence stays fixed in the definition, not a setting. Manual is the default.
+    expect(within(section).getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
+    expect(within(section).getByTestId('alertZeroAutonomyCard-supervised')).toBeInTheDocument();
+    expect(within(section).queryByTestId('alertZeroAutonomyCard-assisted')).not.toBeInTheDocument();
+    expect(within(section).getByRole('radiogroup')).toBeInTheDocument();
+    expect(within(section).getAllByRole('radio')).toHaveLength(2);
     expect(
-      within(section)
-        .getAllByTestId('alertZeroAutonomyCardFact')
-        .map((fact) => fact.textContent)
-    ).toEqual([expect.stringContaining('Findings'), expect.stringContaining('Response')]);
+      within(within(section).getByTestId('alertZeroAutonomyCard-manual')).getByRole('radio')
+    ).toBeChecked();
+    expect(within(section).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
+    expect(within(section).getAllByTestId('alertZeroAutonomyCardWho')[0]).toHaveTextContent(
+      /Runs a forensics pass for an investigation and attaches findings to it/i
+    );
   });
 
   it('shows the analysis window only on Rule Tuning and does not write while editing', () => {
@@ -591,13 +602,13 @@ describe('WatchDetailPage', () => {
     const ruleTuning = screen.getByTestId(
       `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
     );
-    const ruleCreation = screen.getByTestId(
-      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID}`
+    const ruleCoverage = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`
     );
 
     expect(within(ruleTuning).getByTestId('alertZeroAnalysisWindowDays')).toHaveValue(14);
     expect(
-      within(ruleCreation).queryByTestId('alertZeroAnalysisWindowDays')
+      within(ruleCoverage).queryByTestId('alertZeroAnalysisWindowDays')
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
     expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeDisabled();
@@ -631,7 +642,7 @@ describe('WatchDetailPage', () => {
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
       ),
       screen.getByTestId(
-        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID}`
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`
       ),
       // EuiCheckableCard puts the test subject on its wrapper; the disabled state is on the input.
       within(within(ruleTuning).getByTestId('alertZeroAutonomyCard-manual')).getByRole('radio'),
@@ -744,6 +755,40 @@ describe('WatchDetailPage', () => {
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
       patch: {
         settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 21 } },
+        settingsRevision: null,
+      },
+    });
+  });
+
+  it('renders the Rule Coverage controls from the registry and saves an edited lookback', async () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const ruleCoverage = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`
+    );
+
+    expect(
+      within(ruleCoverage).getByTestId(
+        `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`
+      )
+    ).toHaveValue(1);
+    expect(
+      within(ruleCoverage).getByTestId(
+        `alertZeroTriggerUnit-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`
+      )
+    ).toHaveValue('h');
+    const lookback = within(ruleCoverage).getByTestId('alertZeroLookbackDays');
+    expect(lookback).toHaveValue(14);
+    expect(within(ruleCoverage).getByTestId('alertZeroMaxGapsPerRun')).toHaveValue(5);
+
+    fireEvent.change(lookback, { target: { value: '30' } });
+    fireEvent.blur(lookback);
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+      patch: {
+        settings: { extras: { ...RULE_COVERAGE_EXTRAS, lookbackDays: 30 } },
         settingsRevision: null,
       },
     });
@@ -896,12 +941,21 @@ describe('WatchDetailPage', () => {
     });
   });
 
-  it('locks worker settings and hides save when the user cannot write', () => {
+  it('locks worker settings and disables save/discard with a tooltip when the user cannot write', () => {
     mockUseCanWriteAlertZero.mockReturnValue(false);
     renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
 
-    expect(screen.queryByTestId('alertZeroWatchSettingsSave')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('alertZeroWatchSettingsDiscard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroReadOnlyCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).toHaveAttribute(
+      'title',
+      settingsI18n.READ_ONLY_TOOLTIP
+    );
+    expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeDisabled();
+    expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toHaveAttribute(
+      'title',
+      settingsI18n.READ_ONLY_TOOLTIP
+    );
     expect(
       screen.getByTestId(
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`

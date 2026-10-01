@@ -11,7 +11,9 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runCortexOptimize } from '../cortex/register_cortex';
+import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
@@ -21,6 +23,23 @@ const MAX_ROUND_TEXT_LENGTH = 65_536;
  * investigation, but it should not leave a task hanging on a stuck inference call either.
  */
 const OPTIMIZE_TIMEOUT_MS = 120_000;
+
+/** Attaches each call's results, matched on `tool_call_id`, so the optimizer sees what it returned. */
+export const withToolResults = (
+  toolCalls: InvestigationToolCall[],
+  toolResults: Array<{ tool_call_id: string; results: unknown[] }>
+): InvestigationToolCall[] => {
+  if (toolResults.length === 0) {
+    return toolCalls;
+  }
+  const resultsById = new Map(
+    toolResults.map(({ tool_call_id: toolCallId, results }) => [toolCallId, results])
+  );
+  return toolCalls.map((call) => {
+    const results = call.tool_call_id ? resultsById.get(call.tool_call_id) : undefined;
+    return results ? { ...call, results } : call;
+  });
+};
 
 export const cortexOptimizeStepDefinition = ({
   getInference,
@@ -60,11 +79,18 @@ export const cortexOptimizeStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Id of the completed round. Recorded on the edit telemetry events.'),
+      tool_calls: toolCallsSchema.describe(
+        'Investigator tool calls from this round. Shows the optimizer what the investigator queried.'
+      ),
+      tool_results: toolResultsSchema.describe(
+        'Results of the investigator tool calls, keyed by tool_call_id. Shows the optimizer what each query returned.'
+      ),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
     }),
     handler: async (context) => {
+      const { workflow, execution } = context.contextManager.getContext();
       await withTimeout(
         (signal) =>
           runCortexOptimize({
@@ -72,8 +98,13 @@ export const cortexOptimizeStepDefinition = ({
             agentId: context.input.agent_id,
             userMessage: context.input.prompt,
             assistantMessage: context.input.response,
+            toolCalls: withToolResults(
+              (context.input.tool_calls ?? []) as InvestigationToolCall[],
+              context.input.tool_results ?? []
+            ),
             esClient: context.contextManager.getScopedEsClient(),
-            spaceId: context.contextManager.getContext().workflow.spaceId,
+            spaceId: workflow.spaceId,
+            interactionId: execution.id,
             signal,
             analytics,
             conversationId: context.input.conversation_id,
