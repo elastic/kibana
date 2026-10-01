@@ -1,5 +1,5 @@
 {
-  "sha1": "8270eb5ea097feda6c91893881cd6e25c8b3e2a2",
+  "sha1": "096753cf48ffa8a097c96acabaedff4020721a86",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -58,6 +58,20 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_editor.spec.ts",
         "line": 59,
         "column": 21
+      }
+    },
+    {
+      "id": "064f4c74e143ef0-652e23c15960113",
+      "title": "Service account picker for a workflow-only user explains missing security privileges without management actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_restricted.spec.ts",
+        "line": 34,
+        "column": 11
       }
     },
     {
@@ -127,20 +141,6 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
         "line": 70,
-        "column": 18
-      }
-    },
-    {
-      "id": "beb9bedc7d0a68d-0328d22bb5affaa",
-      "title": "Service account picker states shows the actual workflow-only user flow without security privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
-        "line": 136,
         "column": 18
       }
     },

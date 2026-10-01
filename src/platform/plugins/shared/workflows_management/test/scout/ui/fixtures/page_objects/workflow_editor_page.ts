@@ -411,6 +411,9 @@ export class WorkflowEditorPage {
 
   async submitServiceAccount(): Promise<void> {
     await this.page.testSubj.locator('createServiceAccountSubmit').click();
+  }
+
+  async waitForCreateServiceAccountClosed(): Promise<void> {
     await this.page.testSubj.locator('createServiceAccountFlyout').waitFor({ state: 'hidden' });
   }
 

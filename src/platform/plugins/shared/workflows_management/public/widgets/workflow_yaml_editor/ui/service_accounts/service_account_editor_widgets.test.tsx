@@ -354,6 +354,27 @@ describe('ServiceAccountEditorWidgets', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('keeps loaded accounts and reports a failed next page', async () => {
+    const { directory, action, services } = setup();
+    directory.list.mockImplementation(async (after?: string) =>
+      after ? { error: 'unavailable' } : { serviceAccounts: [account], nextPage: 'page-two' }
+    );
+    await screen.findByRole('option', { name: 'Load more service accounts' });
+    await action('next');
+    await action('accept');
+    await waitFor(() =>
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        'Unable to load more service accounts.'
+      )
+    );
+    expect(screen.getByRole('option', { name: 'Investigation reader viewer' })).toBeVisible();
+    expect(screen.getByRole('option', { name: 'Load more service accounts' })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    expect(screen.queryByText('Unable to load service accounts.')).not.toBeInTheDocument();
+  });
+
   it('opens details from the keyboard and dismisses them with Escape', async () => {
     const { action } = setup(true, 'settings:\n  run_as: opaque-id');
     await screen.findByRole('listbox');

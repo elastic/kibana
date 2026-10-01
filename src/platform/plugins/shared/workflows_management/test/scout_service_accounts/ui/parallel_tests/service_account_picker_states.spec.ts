@@ -138,6 +138,7 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     expect(response.status()).toBe(200);
     const account = await response.json();
     createdAccountIds.push(account.id);
+    await editor.waitForCreateServiceAccountClosed();
     expect(account.description).toBe(description);
     expect(parse(await editor.getYamlEditorValue()).settings.run_as).toBe(account.id);
     await expect(page.getByText('No validation errors', { exact: true })).toBeVisible();
@@ -156,33 +157,5 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     await expect(
       editor.yamlEditor.getByText('Select service account', { exact: true })
     ).toBeHidden();
-  });
-
-  test('shows the actual workflow-only user flow without security privileges', async ({
-    browserAuth,
-    pageObjects,
-    workflowId,
-  }) => {
-    await browserAuth.loginWithCustomRole({
-      elasticsearch: { cluster: [], indices: [] },
-      kibana: [
-        {
-          base: [],
-          feature: { workflowsManagement: ['all'], agentBuilder: ['read'] },
-          spaces: ['*'],
-        },
-      ],
-    });
-    const editor = pageObjects.workflowEditor;
-    await editor.gotoWorkflow(workflowId);
-    await editor.focusServiceAccountSetting(workflowYaml);
-    await expect(editor.serviceAccountPopup).toContainText('Ask your administrator for access.');
-    await expect(editor.serviceAccountPopup.getByRole('link', { name: /Manage/ })).toBeHidden();
-    await expect(
-      editor.serviceAccountPopup.getByRole('button', { name: 'Create account' })
-    ).toBeHidden();
-    await expect(
-      editor.serviceAccountPopup.getByRole('link', { name: /Learn more about permissions/ })
-    ).toBeVisible();
   });
 });
