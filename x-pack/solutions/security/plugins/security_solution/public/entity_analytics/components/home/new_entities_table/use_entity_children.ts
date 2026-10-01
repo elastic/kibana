@@ -22,11 +22,12 @@ import {
   RESOLVED_TO_FIELD,
   RISK_SCORE_NORM_FIELD,
   buildKeepClause,
+  enrichEntityRows,
   esqlResponseToRows,
   esc,
 } from './common';
 import type { QueryArgs, EsqlRunner, Row } from './common';
-import { enrichEntityRows } from './enrich_entity_rows';
+import { ENRICH_FNS } from './columns/registry';
 
 const ENTITY_CHILDREN_QUERY_KEY = 'entity-children';
 const ENTITY_CHILDREN_ENRICH_QUERY_KEY = 'entity-children-enrich';
@@ -94,7 +95,13 @@ const enrichEntityChildren = async (
     concreteEntityIndexName,
   };
 
-  return enrichEntityRows(rows, args, new Set<string>([GROUP_SIZE_FIELD]), { runQuery, http });
+  return enrichEntityRows(
+    rows,
+    args,
+    new Set<string>([GROUP_SIZE_FIELD]),
+    { runQuery, http },
+    ENRICH_FNS
+  );
 };
 
 export interface UseEntityChildrenOptions {
