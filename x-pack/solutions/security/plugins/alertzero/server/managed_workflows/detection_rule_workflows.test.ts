@@ -938,12 +938,22 @@ describe('detection rule workflows', () => {
           string,
           Record<string, string> | string
         >;
-        expect((previewInputs.preview_body as Record<string, string>).query).toBe(
-          '{{ steps.fetch_rule.output.query }}'
+        const previewBody = previewInputs.preview_body as Record<string, string>;
+        const proposedBody = previewInputs.proposed_body as Record<string, string>;
+        expect(previewBody.query).toBe('{{ steps.fetch_rule.output.query }}');
+        expect(previewBody.filters).toBe(
+          '${{ steps.fetch_rule.output.filters | default: consts.no_items }}'
         );
-        expect((previewInputs.proposed_body as Record<string, string>).query).toBe(
-          '{{ steps.diagnose_rule.output.structured_output.proposed_query }}'
+        // The query arm previews the proposed query; the exception arm keeps the rule's
+        // own query and differs only in the filters the exception step built.
+        expect(proposedBody.query).toContain(
+          "{% if steps.diagnose_rule.output.structured_output.change_type == 'exception' %}{{ steps.fetch_rule.output.query }}"
         );
+        expect(proposedBody.query).toContain(
+          '{% else %}{{ steps.diagnose_rule.output.structured_output.proposed_query }}{% endif %}'
+        );
+        expect(proposedBody.filters).toContain('steps.compute_proposed_filters.output.filters');
+        expect(proposedBody.filters).toContain('| default: steps.fetch_rule.output.filters');
       });
 
       // The backtest informs the analyst but never decides whether the edit-rule
@@ -959,7 +969,7 @@ describe('detection rule workflows', () => {
         // The unbacktested branch must not promise a manual handoff. The query arm
         // carries the edit-rule action whether or not the preview ran, so approving
         // applies the change and the alerts are tagged applied, not acknowledged.
-        expect(comment).toContain('Approving still applies the proposed query');
+        expect(comment).toContain('Approving still applies the proposed change');
         expect(comment).not.toContain('not previewed or applied automatically');
         expect(comment).not.toContain('marks these alerts acknowledged');
       });
