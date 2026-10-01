@@ -49,7 +49,7 @@ const ruleEventSource = (overrides: Record<string, unknown> = {}) => ({
   type: 'alert',
   source: 'elastic.significant_events',
   severity: 'medium',
-  episode: { status: 'active' },
+  alert: { status: 'active' },
   data: dataDoc,
   ...overrides,
 });
@@ -144,7 +144,7 @@ describe('RuleEventsClient', () => {
   });
 
   describe('findLatestByCurrentStatePaginated', () => {
-    it('filters status on episode.status (not top-level alert_status), translated from SIGNIFICANT_EVENTS_STATUS_MAP', async () => {
+    it('filters status on alert.status (not top-level alert_status), translated from SIGNIFICANT_EVENTS_STATUS_MAP', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
@@ -152,8 +152,23 @@ describe('RuleEventsClient', () => {
       await client.findLatestByCurrentStatePaginated({ status: ['open'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
-      expect(q).toContain('`episode.status` IN ("active")');
+      expect(q).toContain('`alert.status` IN ("active")');
       expect(q).not.toContain('alert_status');
+    });
+
+    it('decodes the persisted alert.status of each row rather than defaulting to open', async () => {
+      const row: MockRow = {
+        source: ruleEventSource({ alert: { status: 'inactive' } }),
+        dataJson: JSON.stringify(dataDoc),
+        createdAt: '2026-01-01T00:00:00.000Z',
+      };
+      const { client } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(1) : sourceResponse([row])
+      );
+
+      const { hits } = await client.findLatestByCurrentStatePaginated({});
+
+      expect(hits[0].status).toBe('closed');
     });
 
     it('filters severity on top-level severity, translated from SIGNIFICANT_EVENTS_SEVERITY_MAP', async () => {
@@ -238,7 +253,7 @@ describe('RuleEventsClient', () => {
       const timeRangeIdx = q.indexOf('@timestamp >= TO_DATETIME');
       const freeTextIdx = q.indexOf('FIELD_EXTRACT');
       const latestPerGroupIdx = q.indexOf('INLINE STATS latest_ts');
-      const statusIdx = q.indexOf('`episode.status` IN');
+      const statusIdx = q.indexOf('`alert.status` IN');
 
       expect(createdAtIdx).toBeGreaterThanOrEqual(0);
       expect(timeRangeIdx).toBeGreaterThan(createdAtIdx);
@@ -292,13 +307,13 @@ describe('RuleEventsClient', () => {
   });
 
   describe('findLatestActive', () => {
-    it('filters episode.status to the active mapping, not the top-level status', async () => {
+    it('filters alert.status to the active mapping, not the top-level status', async () => {
       const { client, query } = createClient(async () => sourceResponse([]));
 
       await client.findLatestActive({});
 
       const q = lastQuery(query);
-      expect(q).toContain('`episode.status` IN ("active")');
+      expect(q).toContain('`alert.status` IN ("active")');
       expect(q).not.toContain('status IN ("open")');
     });
 
