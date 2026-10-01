@@ -24,15 +24,111 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
+## 9.5.5 [kibana-9.5.5-release-notes]
+
+### Fixes [kibana-9.5.5-fixes]
+
+**Elastic Agent Builder**:
+* Fix Agent Builder tools hanging or timing out on data streams that span the frozen tier. Tools now skip frozen tier indices [#292349]({{kib-pull}}292349).
+* Fix Agent Builder tracing applying the default space's GenAI privacy settings in every space. Each conversation now uses the privacy settings of its own space [#290750]({{kib-pull}}290750).
+* Add an Agent Builder tool that finds case templates by name so you don't need the template ID to create a case from a template [#287744]({{kib-pull}}287744).
+* Teach the Agent Builder cases-management skill to use `set_extended_fields` when case templates are enabled [#287638]({{kib-pull}}287638).
+* Add the case template ID and version fields to the Agent Builder cases-analytics skill so agents can filter and group cases by template [#291716]({{kib-pull}}291716).
+
+**Alerting and cases**:
+* Fix forced rule runs and schedule changes being silently dropped when you request them while the rule is finishing a run [#293492]({{kib-pull}}293492).
+* Fix bulk alert tag updates also changing matching alerts in other {{kib}} spaces [#285874]({{kib-pull}}285874).
+* Fix Jira Service Management and Opsgenie connector actions failing when the rendered alert message exceeds 130 characters. The connectors now truncate the message instead [#291698]({{kib-pull}}291698).
+* Fix the email connector HTTP test sending caller-supplied subject and message content. The test now sends fixed content [#288664]({{kib-pull}}288664).
+* Fix the **Auto-push case to connected external system** option missing from the Cases rule action when case templates are enabled [#292187]({{kib-pull}}292187).
+* Fix the **Create case** button in the **Add to case** selector staying enabled when you can attach to cases but can't create them [#292761]({{kib-pull}}292761).
+* Fix the cases API accepting {{elastic-sec}} event attachments on closed cases [#291173]({{kib-pull}}291173).
+% !!DEFERRED!! Not on the 9.5 branch (backport failed with merge conflicts, as of 2026-10-01). Re-verify against the next BC before publishing.
+% * Fix the **Read only** badge appearing on case template pages when you have Cases **Read** access and the privilege to manage case templates [#291719]({{kib-pull}}291719).
+
+**Dashboards and Visualizations**:
+* Increase the TinyMath expression length limit so longer visualization formulas no longer fail [#290314]({{kib-pull}}290314).
+* Fix Go to URL drilldowns leaving Mustache tokens such as `event.values.[0]` unreplaced in the drilldown name [#290363]({{kib-pull}}290363).
+* Fix {{esql}} metric chart background trendlines failing for queries that use `FORK` [#287819]({{kib-pull}}287819).
+* Fix new **Last value** columns being exported with **Show array values** turned on even when the option is off, which caused {{es}} errors when you imported them [#292864]({{kib-pull}}292864).
+* Fix filter pills showing **filter value is invalid or incomplete** when the filter value is an empty string [#290383]({{kib-pull}}290383).
+* Fix clicking the unsaved changes indicator on the dashboard save button opening two save dialogs [#293087]({{kib-pull}}293087).
+
+**Data ingestion and {{fleet}}**:
+* Fix deleting a managed integration policy leaving the agent listed as active [#290181]({{kib-pull}}290181).
+* Fix agentless agents enrolled in other {{kib}} spaces appearing in the {{fleet}} **Agents** list [#293142]({{kib-pull}}293142).
+* Fix version-specific agent policy assignment failing repeatedly for agent policies in non-default {{kib}} spaces [#293010]({{kib-pull}}293010).
+* Fix the {{fleet}} output edit flyout freezing or showing no counts when thousands of agent policies use the output [#291972]({{kib-pull}}291972).
+* Fix Elastic Agent upgrade and agent policy requests hanging for up to two minutes when {{kib}} can't retrieve the list of available Elastic Agent versions [#292788]({{kib-pull}}292788).
+* Fix integration upgrades failing when a custom analyzer or normalizer was added to a `@custom` component template after the write index was created. {{fleet}} now rolls over the data stream instead [#291813]({{kib-pull}}291813).
+* Fix {{fleet}} installing only the first trained model when an integration package includes several [#290145]({{kib-pull}}290145).
+* Fix `ambiguous_conflict` errors on dashboard assets when you install an integration in multiple {{kib}} spaces [#291648]({{kib-pull}}291648).
+* Fix integration policy upgrades and edits failing when a package policy condition is stored as a boolean [#290497]({{kib-pull}}290497).
+* Fix {{fleet}} showing an error when you delete an OpenTelemetry input integration policy that shares a dataset with another policy [#291679]({{kib-pull}}291679).
+* Fix the **Edit pipeline** button in the ingest pipeline details flyout moving off-screen when a processor contains a long value [#291000]({{kib-pull}}291000).
+% !!DEFERRED!! Not yet confirmed in build candidate 9.5.5-9aaf1433 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
+% * Fix installed integration icons rendering as black shapes [#293176]({{kib-pull}}293176).
+
+**Data management**:
+* Fix Index Management moving component templates listed in `ignore_missing_component_templates` to the end of `composed_of` when you edit or clone an index template [#290171]({{kib-pull}}290171).
+* Fix Index Management showing **Standard** as the index mode of time series data streams instead of the mode {{es}} reports [#290169]({{kib-pull}}290169).
+* Fix the document trends chart and its URL getting out of sync on the data set quality details page when you select a quality card while the page loads [#291004]({{kib-pull}}291004).
+
+**Developer tools**:
+* Fix Console reporting {{es}} request timeouts as connection failures. Console now explains that the request might still be running and suggests checking its status before you retry [#289481]({{kib-pull}}289481).
+
+**Discover**:
+* Fix Discover {{esql}} breakdowns failing when a second `STATS` groups by an aggregate from the first `STATS` [#290259]({{kib-pull}}290259).
+% !!DEFERRED!! Not on the 9.5 branch (backport missing as of 2026-10-01). Re-verify against the next BC before publishing.
+% * Fix Discover showing an invalid time range from the URL instead of falling back to the default time range [#290358]({{kib-pull}}290358).
+% * Fix Discover session panels on dashboards getting stuck in inline editing mode when the search returns an error [#289918]({{kib-pull}}289918).
+% * Fix the Base64 Decode transform failing to decode on the server and mangling multi-byte UTF-8 characters in the browser [#281366]({{kib-pull}}281366).
+
+**{{es}} solution**:
+* Add an **Expand site group members** toggle to SharePoint Online connectors for compact document-level security [#288070]({{kib-pull}}288070).
+* Add a **Sync all mail folders** option to the Outlook connector [#291396]({{kib-pull}}291396).
+* Add an **Index full raw email (including headers)** option to the Gmail and Outlook connectors, which by default index only the message body and minimal headers [#291419]({{kib-pull}}291419).
+* Fix deleted content connectors remaining in the connectors list [#290859]({{kib-pull}}290859).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.5.5 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{elastic-sec}} solution**:
+For the {{elastic-sec}} 9.5.5 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**{{kib}} platform**:
+* Hide the **Activate user** action on deactivated users when you have read-only access [#289801]({{kib-pull}}289801).
+* Fix a failed audit log write after startup crashing {{kib}}. {{kib}} now reports a degraded state and turns the audit logger off instead [#287360]({{kib-pull}}287360).
+* Fix {{kib}} shutting down when the product documentation installer downloads a corrupt or incomplete artifact [#291142]({{kib-pull}}291142).
+* Fix PDF and PNG reports using too much memory, and failing on memory-constrained instances, when you generate them from a wide browser window [#289062]({{kib-pull}}289062).
+* Fix duplicate user profile activations when {{kib}} renders a page for a request that uses basic authentication, which logged `version_conflict_engine_exception` errors [#291066]({{kib-pull}}291066).
+
+**Machine learning and {{infer}}**:
+* Fix streaming {{infer}} requests returning no content when `elasticsearch.compression` is enabled, which made Agent Builder report an empty response [#290381]({{kib-pull}}290381).
+* Fix LLM feature settings listing every connector when you lack inference privileges, instead of only the allowed connectors [#290457]({{kib-pull}}290457).
+* Fix LLM resolution failing when you lack the Actions privilege and an {{infer}} endpoint is configured in model settings [#290533]({{kib-pull}}290533).
+* Add support for list fields, such as OAuth2 scopes for OpenAI and Azure OpenAI, when you create an {{infer}} endpoint [#290352]({{kib-pull}}290352).
+* Fix the anomaly detection bucket span estimation API accepting an unlimited number of detectors, which could exhaust {{kib}} server resources [#291203]({{kib-pull}}291203).
+* Fix the field statistics flyout in the anomaly detection job wizard closing on its own while the wizard validates the job [#292297]({{kib-pull}}292297).
+% !!DEFERRED!! Not on the 9.5 branch (backport PR #294550 still open as of 2026-10-01). Re-verify against the next BC before publishing.
+% * Fix legacy AI connectors failing the default LLM check when their underlying {{infer}} endpoint matches the requested LLM [#293855]({{kib-pull}}293855).
+
+**Workflows**:
+* Fix the `elasticsearch.indices.exists` workflow step crashing the workflow or returning an output you can't use in conditions [#289580]({{kib-pull}}289580).
+% !!DEFERRED!! Not on the 9.5 branch (backport missing as of 2026-10-01). Re-verify against the next BC before publishing.
+% * Fix unsaved workflow test runs appearing in the execution history of a saved workflow with the same ID [#293652]({{kib-pull}}293652).
+% * Add a `cases.extendedFieldsUpdated` workflow trigger that fires when extended-field values change on a case, including changes from a linked custom-field patch [#287043]({{kib-pull}}287043).
+% * Fix workflow custom steps failing with HTTP 404 when Kibana is configured with a base path [#283101]({{kib-pull}}283101).
+% * Fix a crash when opening the trigger tab in workflow step execution details [#282920]({{kib-pull}}282920).
+% * Fix the execution highlight in the workflow graph view for branching steps such as `if`, `switch`, and `parallel` [#281696]({{kib-pull}}281696).
+% * Fix overlapping nodes in the workflow graph layout for branching scenarios [#281304]({{kib-pull}}281304).
+
 ## 9.5.4 [kibana-9.5.4-release-notes]
 
 ### Fixes [kibana-9.5.4-fixes]
 
 **Elastic Agent Builder**:
 * Fix MCP tools dropping extra arguments that the schema allows through `additionalProperties` before execution [#287815]({{kib-pull}}287815).
-% !!DEFERRED!! Not on the 9.5 branch (backport missing as of 2026-09-11). Re-verify against the next BC before publishing.
-% * Teach the Agent Builder cases-management skill to use `set_extended_fields` when case templates are enabled [#287638]({{kib-pull}}287638).
-% * Add an Agent Builder tool that finds case templates by name so you don't need the template ID to create a case from a template [#287744]({{kib-pull}}287744).
 
 **Alerting and cases**:
 * Relabel the top-level **Alerting** privilege as **Alerting V2** in the Roles UI and mark it experimental [#288163]({{kib-pull}}288163).
@@ -45,9 +141,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fix sibling dashboard panels not dimming during inline editing on dashboards that have no controls [#288939]({{kib-pull}}288939).
 * Fix {{esql}} visualizations dropping field variable controls (`??field`) after you save them through the Visualizations API [#288785]({{kib-pull}}288785).
 * Fix Options list filters stopping after you delete a collapsible dashboard section [#287923]({{kib-pull}}287923).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.5.4-a5c2bed4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Fix Go to URL drilldowns leaving Mustache tokens such as `event.values.[0]` unreplaced in the drilldown name [#290363]({{kib-pull}}290363).
-% * Increase the TinyMath expression length limit so longer visualization formulas no longer fail [#290314]({{kib-pull}}290314).
 
 **Data ingestion and {{fleet}}**:
 * Fix {{fleet}} blocking a package policy save when every enrolled agent is incompatible with the package version, including agents that report a pre-release version. {{fleet}} shows a warning instead of blocking the save [#289596]({{kib-pull}}289596).
@@ -55,8 +148,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fix package policy space assignments becoming stale after you move an agent policy to another {{kib}} space [#288966]({{kib-pull}}288966).
 * Fix Elastic Defend metadata transforms accumulating as duplicates in {{es}} across stack upgrades [#288379]({{kib-pull}}288379) [#288902]({{kib-pull}}288902).
 * Fix comment-only values in {{fleet}} agent policy advanced YAML settings leaving agents stuck on an outdated policy [#288430]({{kib-pull}}288430).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.5.4-a5c2bed4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Fix deleting a managed integration policy leaving the agent listed as active [#290181]({{kib-pull}}290181).
 
 **Data management**:
 * Fix classic streams leaving a stale {{es}} data stream mappings override after you remove all field overrides [#288788]({{kib-pull}}288788).
@@ -67,10 +158,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Discover**:
 * Cancel in-progress async searches in Discover and on dashboards when you navigate away in the browser, so {{es}} does not keep running them [#287949]({{kib-pull}}287949).
 * Fix custom time-range presets from the **Time filter quick ranges** advanced setting showing raw time values instead of their labels, and add a **(rounded)** suffix to rounded relative ranges [#289066]({{kib-pull}}289066).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.5.4-a5c2bed4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Fix Discover {{esql}} breakdowns failing when a second `STATS` groups by an aggregate from the first `STATS` [#290259]({{kib-pull}}290259).
-% !!DEFERRED!! Not on the 9.5 branch (backport missing as of 2026-09-11). Re-verify against the next BC before publishing.
-% * Fix the Base64 Decode transform failing to decode on the server and mangling multi-byte UTF-8 characters in the browser [#281366]({{kib-pull}}281366).
 
 **{{es}} solution**:
 * Add an **Expand role members** toggle to {{sn}} connectors for compact document-level security [#288071]({{kib-pull}}288071).
@@ -85,20 +172,9 @@ For the {{elastic-sec}} 9.5.4 release information, refer to [{{elastic-sec}} Sol
 **{{kib}} platform**:
 * Fix unexpected logouts after an access token is refreshed during a search or dashboard refresh [#286038]({{kib-pull}}286038).
 * Fix user profile rows using the wrong height in user pickers [#288451]({{kib-pull}}288451).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.5.4-a5c2bed4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Hide the **Activate user** action on deactivated users when you have read-only access [#289801]({{kib-pull}}289801).
 
 **Machine learning and {{infer}}**:
 * Fix Anomaly Explorer hanging when you add a geo job chart to a case [#289363]({{kib-pull}}289363).
-% !!DEFERRED!! Not on the 9.5 branch (backport missing as of 2026-09-11). Re-verify against the next BC before publishing.
-% * Fix LLM feature settings listing every connector when you lack inference privileges, instead of only the allowed connectors [#290457]({{kib-pull}}290457).
-
-% !!DEFERRED!! Workflows. Not on the 9.5 branch (backport missing as of 2026-09-11). Re-verify against the next BC before publishing.
-% * Add a `cases.extendedFieldsUpdated` workflow trigger that fires when extended-field values change on a case, including changes from a linked custom-field patch [#287043]({{kib-pull}}287043).
-% * Fix workflow custom steps failing with HTTP 404 when Kibana is configured with a base path [#283101]({{kib-pull}}283101).
-% * Fix a crash when opening the trigger tab in workflow step execution details [#282920]({{kib-pull}}282920).
-% * Fix the execution highlight in the workflow graph view for branching steps such as `if`, `switch`, and `parallel` [#281696]({{kib-pull}}281696).
-% * Fix overlapping nodes in the workflow graph layout for branching scenarios [#281304]({{kib-pull}}281304).
 
 ## 9.5.3 [kibana-9.5.3-release-notes]
 
