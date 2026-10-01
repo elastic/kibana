@@ -83,20 +83,20 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
     closureSummary: z.string(),
     expectedProposalCount: z.number().int().min(0),
     /**
-     * True when this run found something mint-worthy but `proposals` was forced empty rather than
-     * minting a second, unrelated chain for what may be the same finding. A conservative guard
-     * until the Proposals service owns real dedup keyed on `subjectKey` -- see that field's own
-     * comment on `packageReportMintPayloadSchema` above. Temporary contract surface: removed once
-     * that lands and the mint path dedupes for real instead of suppressing wholesale.
+     * `none` unless this run found something mint-worthy and `proposals` was forced empty rather
+     * than minting a second, unrelated chain for what may be the same finding -- a conservative
+     * guard until the Proposals service owns real dedup keyed on `subjectKey` (see that field's own
+     * comment on `packageReportMintPayloadSchema` above). The two non-`none` values both fail
+     * closed (never risk a duplicate mint), but for different reasons the run conclusion has to
+     * tell apart: `existing_proposals` means the lookup found one and the analyst should go review
+     * it; `check_failed` means the lookup itself failed, so there may be nothing to review at all.
+     * A single enum rather than two booleans so a reader (and the Liquid prose branching on it)
+     * cannot see the unrepresentable "check failed but nothing was skipped" combination.
+     *
+     * Temporary contract surface: removed once `deduplicationKey` lands and the mint path dedupes
+     * for real instead of suppressing wholesale.
      */
-    existingProposalsSkipped: z.boolean(),
-    /**
-     * True when `existingProposalsSkipped` fired because the existing-Proposals lookup itself
-     * failed, not because proposals were actually found (fails closed either way, to never risk a
-     * duplicate mint) -- kept distinguishable so the run conclusion never tells the analyst to
-     * review a Proposal that may not exist.
-     */
-    existingProposalsCheckFailed: z.boolean(),
+    mintSuppression: z.enum(['none', 'existing_proposals', 'check_failed']),
   }),
   z.object({
     status: z.literal('run_incomplete'),

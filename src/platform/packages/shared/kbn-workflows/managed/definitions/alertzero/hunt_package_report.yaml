@@ -26,9 +26,12 @@ settings:
   # enter the serialized section while the first run's Proposal is still being created, see
   # zero Proposals, and mint its own. Closing that window for good is the Proposals service's
   # job once it owns atomic dedup; `queue`, not `drop`, at least means a racing run still
-  # packages (just after the first), rather than being silently lost. A literal input value
-  # resolves in a concurrency key, unlike a templated one; investigationConversationId arrives
-  # already rendered the same way attack_discovery_review.yaml's attack_discovery_id does.
+  # packages (just after the first), rather than being silently lost. The key itself is a
+  # template and does resolve (ConcurrencyManager renders it with Liquid against the workflow
+  # context, same as every other concurrency key here): the point is only that
+  # investigationConversationId arrives as an already-rendered, concrete conversation id by the
+  # time this workflow runs, not as a nested template this engine would not re-render -- the same
+  # precedent attack_discovery_review.yaml's attack_discovery_id sets.
   concurrency:
     key: "hunt-package-report-{{ inputs.investigationConversationId }}"
     strategy: queue
@@ -163,6 +166,8 @@ steps:
         run_incomplete
         {%- elsif steps.decide_and_package.output.status != 'packaged' -%}
         run_incomplete
+        {%- elsif steps.decide_and_package.output.mintSuppression == 'check_failed' -%}
+        run_incomplete
         {%- elsif variables.dispatch_failed_count > 0 -%}
         run_incomplete
         {%- else -%}
@@ -173,6 +178,8 @@ steps:
         no Investigation available (find_or_create failed upstream; packaging was not called)
         {%- elsif steps.decide_and_package.output.status == 'run_incomplete' -%}
         {{ steps.decide_and_package.output.reason }}
+        {%- elsif steps.decide_and_package.output.mintSuppression == 'check_failed' -%}
+        could not verify whether the Investigation already has a Proposal, so no Proposal was minted
         {%- elsif steps.decide_and_package.error.message != nil and steps.decide_and_package.error.message != empty -%}
         {{ steps.decide_and_package.error.message }}
         {%- elsif variables.dispatch_failed_count > 0 -%}
@@ -201,9 +208,9 @@ steps:
         Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open for a retry.
         {% elsif packaged.dismiss == true -%}
         No confirmed hits, so packaging closed this Investigation as benign{% if packaged.coverage.written != nil and packaged.coverage.written != empty %} and recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
-        {% elsif packaged.existingProposalsSkipped == true and packaged.existingProposalsCheckFailed == true -%}
-        This run found something mint-worthy, but packaging could not verify whether the Investigation already has a Proposal, so no new one was created this time. Retry the sweep for this report.
-        {% elsif packaged.existingProposalsSkipped == true -%}
+        {% elsif packaged.mintSuppression == 'check_failed' -%}
+        This run found something mint-worthy, but packaging could not verify whether the Investigation already has a Proposal, so no new one was created this time{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}. The next scheduled sweep will not retry this report on its own -- this run's hunt already marked it hunted -- so a manual run targeting this reportId is what actually retries it.
+        {% elsif packaged.mintSuppression == 'existing_proposals' -%}
         This run found something mint-worthy, but the Investigation already has a Proposal from an earlier run, so no new one was created. Review the existing Proposal{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; also recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% else -%}
         Packaging prepared {{ packaged.proposals | size }} proposal{% if packaged.proposals.size != 1 %}s{% endif %} for analyst review and launched an approval gate for each; the gate is what creates the Proposal.{% if variables.dispatch_failed_count > 0 %} {{ variables.dispatch_failed_count }} of the approval gates failed to launch.{% else %} The Investigation stays open until every gate is decided.{% endif %}

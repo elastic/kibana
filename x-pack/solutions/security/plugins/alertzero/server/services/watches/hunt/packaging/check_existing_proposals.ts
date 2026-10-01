@@ -13,10 +13,10 @@ import type { RunPackageReportDeps } from './run_package_report';
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 
 /**
- * True when the Investigation already carries at least one Proposal, any status including
- * settled or superseded (`excludeSuperseded`/`excludeExpired` are explicit `false`, not the
- * schema's own default, since the mint guard this backs wants every Proposal counted — an
- * "existing" Proposal here does not mean an open one). Scoped by `origin` so another solution's
+ * Implements {@link RunPackageReportDeps.hasExistingProposals} -- see that type's own doc comment
+ * for the invariant this backs (any status counts, including settled). `excludeSuperseded` /
+ * `excludeExpired` are passed explicit `false` here rather than left to the schema's own default,
+ * which is how "any status" is actually achieved. Scoped by `origin` so another solution's
  * Proposal on the same conversation, however unlikely, never false-positives the guard.
  *
  * Logs and rethrows on a lookup failure rather than swallowing it: the caller

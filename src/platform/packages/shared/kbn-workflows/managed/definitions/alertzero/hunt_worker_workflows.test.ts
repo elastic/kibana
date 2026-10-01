@@ -96,9 +96,9 @@ describe('Hunt Watch worker chain', () => {
     expect(yaml.tags ?? []).not.toContain('watch-hunt');
   });
 
-  // The existing-Proposals guard's lookup (decide_and_package) is only race-safe once two
-  // runs against the same Investigation cannot execute concurrently — queued, not dropped,
-  // so a racing run still packages rather than being silently lost.
+  // Narrows, but does not close, the existing-Proposals guard's race window (see the YAML's own
+  // concurrency comment for why) — queued, not dropped, so a racing run still packages rather
+  // than being silently lost.
   it('hunt_package_report serializes per Investigation via a queued concurrency key', () => {
     expect(packageReport.settings?.concurrency).toEqual({
       key: 'hunt-package-report-{{ inputs.investigationConversationId }}',

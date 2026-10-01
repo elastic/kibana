@@ -32,13 +32,16 @@ export type ListRespondActions = (
 
 export type WriteCoverageKis = (subjects: CoverageSubject[]) => Promise<CoverageWriteResult>;
 
+type MintSuppression = Extract<PackageReportOutput, { status: 'packaged' }>['mintSuppression'];
+
 /**
- * True when the Investigation already carries at least one Proposal, any status including
- * settled. A rerun that reaches the same Investigation (reopened, or re-hunted after the hunt-once
- * gate clears) would otherwise mint a second, independent chain for what may be the very same
- * finding: `decidePackageReport`'s `subjectKey` is deterministic per finding, but nothing
- * downstream of this step dedupes on it yet, so the guard here is coarse -- it suppresses every
- * new Proposal this run would mint, not only ones that collide with an existing `subjectKey`.
+ * True when the Investigation already carries at least one Proposal. A rerun that reaches the same
+ * Investigation (reopened, or re-hunted after the hunt-once gate clears) would otherwise mint a
+ * second, independent chain for what may be the very same finding: `decidePackageReport`'s
+ * `subjectKey` is deterministic per finding, but nothing downstream of this step dedupes on it
+ * yet, so the guard here is coarse -- it suppresses every new Proposal this run would mint, not
+ * only ones that collide with an existing `subjectKey`. See the implementation
+ * (`check_existing_proposals.ts`) for which statuses count as "existing" and why.
  */
 export type HasExistingProposals = (investigationConversationId: string) => Promise<boolean>;
 
@@ -111,8 +114,7 @@ export const runPackageReport = async ({
         dismiss: true,
         closureSummary: `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`,
         expectedProposalCount: 0,
-        existingProposalsSkipped: false,
-        existingProposalsCheckFailed: false,
+        mintSuppression: 'none',
       };
     }
     return {
@@ -140,21 +142,20 @@ export const runPackageReport = async ({
   // Only a run that would otherwise mint something needs the lookup: a dismissal (no confirmed
   // hit) has no proposals to suppress, and `decidePackageReport` never returns `dismiss: false`
   // with an empty `proposals` (the analyst-recommendation fallback always fills it).
-  let existingProposalsSkipped = false;
-  let existingProposalsCheckFailed = false;
+  let mintSuppression: MintSuppression = 'none';
   if (!decided.dismiss) {
     try {
-      existingProposalsSkipped = await deps.hasExistingProposals(investigationConversationId);
+      const alreadyExists = await deps.hasExistingProposals(investigationConversationId);
+      mintSuppression = alreadyExists ? 'existing_proposals' : 'none';
     } catch {
       // Fails closed: the guard's job is to never let a duplicate mint through, so the one case
       // it must not mishandle is the one where it cannot tell. But a lookup failure is not "a
       // Proposal already exists" -- kept distinguishable so the summary below never asserts a
       // cause it never actually observed.
-      existingProposalsSkipped = true;
-      existingProposalsCheckFailed = true;
+      mintSuppression = 'check_failed';
     }
   }
-  const proposals = existingProposalsSkipped ? [] : decided.proposals;
+  const proposals = mintSuppression === 'none' ? decided.proposals : [];
 
   // Threaded through to the packaging workflow's per-Proposal gate fan-out as a plain
   // workflow input (`hunt_package_report.yaml`'s `dispatch_gate` step) — the settlement
@@ -180,7 +181,6 @@ export const runPackageReport = async ({
     dismiss: decided.dismiss,
     closureSummary: decided.closureSummary,
     expectedProposalCount,
-    existingProposalsSkipped,
-    existingProposalsCheckFailed,
+    mintSuppression,
   };
 };

@@ -197,8 +197,7 @@ describe('runPackageReport', () => {
     expect(result.proposals).toEqual([]);
     expect(result.expectedProposalCount).toBe(0);
     expect(result.closureSummary).toContain('no confirmed hits');
-    expect(result.existingProposalsSkipped).toBe(false);
-    expect(result.existingProposalsCheckFailed).toBe(false);
+    expect(result.mintSuppression).toBe('none');
   });
 
   // A hunt that did not complete may leave its report eligible, in which case a later sweep
@@ -284,7 +283,7 @@ describe('runPackageReport', () => {
     expect(result.proposals.length).toBe(1);
     expect(result.proposals[0].actionWorkflowId).toBe(isolateHost.workflowId);
     expect(result.expectedProposalCount).toBe(1);
-    expect(result.existingProposalsSkipped).toBe(false);
+    expect(result.mintSuppression).toBe('none');
   });
 
   it('mints only a recommendation when Fleet is unavailable (no host resolves as enrolled)', async () => {
@@ -366,8 +365,7 @@ describe('runPackageReport', () => {
       }
       expect(result.proposals).toEqual([]);
       expect(result.expectedProposalCount).toBe(0);
-      expect(result.existingProposalsSkipped).toBe(true);
-      expect(result.existingProposalsCheckFailed).toBe(false);
+      expect(result.mintSuppression).toBe('existing_proposals');
       // Not a benign dismissal: this run found a real hit, so the Investigation has to stay
       // open for the analyst the summary tells to go review the existing Proposal.
       expect(result.dismiss).toBe(false);
@@ -396,8 +394,7 @@ describe('runPackageReport', () => {
       }
       expect(result.proposals).toEqual([]);
       expect(result.expectedProposalCount).toBe(0);
-      expect(result.existingProposalsSkipped).toBe(true);
-      expect(result.existingProposalsCheckFailed).toBe(true);
+      expect(result.mintSuppression).toBe('check_failed');
       expect(result.dismiss).toBe(false);
     });
 
@@ -418,7 +415,7 @@ describe('runPackageReport', () => {
         return;
       }
       expect(result.dismiss).toBe(true);
-      expect(result.existingProposalsSkipped).toBe(false);
+      expect(result.mintSuppression).toBe('none');
       expect(hasExistingProposals).not.toHaveBeenCalled();
     });
   });
