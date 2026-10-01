@@ -171,6 +171,40 @@ export interface ExperimentalFeatures {
   apiDiscovery: boolean;
 }
 
+/**
+ * Kind of environment the Kibana instance runs in.
+ * - `serverless`: Elastic Cloud Serverless
+ * - `ech`: Elastic Cloud Hosted
+ * - `ece`: Elastic Cloud Enterprise
+ * - `self_managed`: on-prem / self-managed
+ */
+export type DeploymentEnvironment = 'serverless' | 'ech' | 'ece' | 'self_managed';
+
+/**
+ * Information about the deployment the agent runs in, surfaced to the agent in its system prompt.
+ */
+export interface DeploymentContext {
+  environment: DeploymentEnvironment;
+  /** Stack version. Not set on serverless. */
+  version?: string;
+  /** Whether Kibana is configured to run without access to the public internet. */
+  airgapped: boolean;
+  /** Serverless project details. Only set on serverless. */
+  serverless?: {
+    /** Project type, e.g. `observability` or `search`. */
+    projectType: string;
+    /** Product tier, for project types that have tiers, e.g. `complete`. */
+    productTier?: string;
+  };
+  /** Solution view of the active space, e.g. `oblt` or `classic`. Not set on serverless. */
+  solution?: string;
+  /** License of the deployment. Not set on serverless. */
+  license?: {
+    type?: string;
+    status?: string;
+  };
+}
+
 export interface AgentHandlerContext {
   /**
    * The request that was provided when initiating that tool execution.
@@ -181,6 +215,10 @@ export interface AgentHandlerContext {
    * Id of the space associated with the request
    */
   spaceId: string;
+  /**
+   * Information about the deployment (environment, version, license...) the agent runs in.
+   */
+  deployment: DeploymentContext;
   /**
    * The resolved connector ID for this execution, if any.
    */
