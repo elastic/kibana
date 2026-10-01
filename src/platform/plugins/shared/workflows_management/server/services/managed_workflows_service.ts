@@ -8,6 +8,7 @@
  */
 
 import { createHash } from 'node:crypto';
+import pMap from 'p-map';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
@@ -38,6 +39,7 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
+const ORPHAN_DELETE_CONCURRENCY = 10;
 
 const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
@@ -675,41 +677,52 @@ export class ManagedWorkflowsService {
     spaceId: string,
     reason: 'orphan_cleanup' | 'ready_reconciliation'
   ): Promise<void> {
-    for (const { id: workflowId, source } of orphanWorkflows) {
-      let deleted = false;
-      try {
-        const result = await this.deps.crudService.deleteWorkflows([workflowId], spaceId, {
-          force: true,
-        });
-        deleted = result.successfulIds?.includes(workflowId) ?? false;
-        if (!deleted) {
-          const failure = result.failures.find((item) => item.id === workflowId);
-          this.logger.error(
-            `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}': ${
-              failure?.error ?? 'not deleted'
-            }`
-          );
-        }
-      } catch (error) {
+    await pMap(
+      orphanWorkflows,
+      ({ id: workflowId, source }) => this.forceDeleteOrphan(workflowId, source, spaceId, reason),
+      { concurrency: ORPHAN_DELETE_CONCURRENCY }
+    );
+  }
+
+  private async forceDeleteOrphan(
+    workflowId: string,
+    source: WorkflowProperties,
+    spaceId: string,
+    reason: 'orphan_cleanup' | 'ready_reconciliation'
+  ): Promise<void> {
+    let deleted = false;
+    try {
+      const result = await this.deps.crudService.deleteWorkflows([workflowId], spaceId, {
+        force: true,
+      });
+      deleted = result.successfulIds?.includes(workflowId) ?? false;
+      if (!deleted) {
+        const failure = result.failures.find((item) => item.id === workflowId);
         this.logger.error(
-          `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}'`,
-          { error }
+          `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}': ${
+            failure?.error ?? 'not deleted'
+          }`
         );
       }
+    } catch (error) {
+      this.logger.error(
+        `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}'`,
+        { error }
+      );
+    }
 
-      if (deleted) {
-        this.deps.audit?.logWorkflowDeleted(undefined, {
-          id: workflowId,
-          force: true,
-          managed: true,
-          originalWorkflowId: source.originManagedWorkflowId,
-          ownerPlugin: source.managedBy,
-          spaceId,
-          reason,
-        });
-      } else {
-        await this.disableUndeletedOrphan(workflowId, spaceId);
-      }
+    if (deleted) {
+      this.deps.audit?.logWorkflowDeleted(undefined, {
+        id: workflowId,
+        force: true,
+        managed: true,
+        originalWorkflowId: source.originManagedWorkflowId,
+        ownerPlugin: source.managedBy,
+        spaceId,
+        reason,
+      });
+    } else {
+      await this.disableUndeletedOrphan(workflowId, spaceId);
     }
   }
 
