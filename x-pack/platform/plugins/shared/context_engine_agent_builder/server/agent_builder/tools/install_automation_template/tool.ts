@@ -33,17 +33,13 @@ const MAX_INDEX_METADATA_SOURCES = 100;
  * rather than ignored, so a wrong argument surfaces instead of silently taking a default.
  */
 const TEMPLATE_FIELDS = {
-  document_orchestration: [
-    'titleField',
-    'bodyField',
-    'corpusFilter',
-    'maxDocuments',
-    'bodyMaxChars',
-  ],
+  document_orchestration: ['titleField', 'bodyField', 'maxDocuments', 'bodyMaxChars'],
   index_metadata: ['categoryField', 'sources'],
-  unit_profile: ['unitKey', 'activityField', 'breakdownField', 'maxUnits'],
+  unit_profile: ['unitKey', 'activityField', 'breakdownField', 'metricFields', 'maxUnits'],
   targeted_ki_writer: ['kis'],
 } as const;
+
+const MAX_METRIC_FIELDS = 10;
 
 /** index_metadata takes either `sources` or `sourceIndex` + `categoryField`; checked separately. */
 const REQUIRED_TEMPLATE_FIELDS = {
@@ -140,6 +136,13 @@ const installAutomationTemplateSchema = z
       .describe(
         'REQUIRED for unit_profile. Second field whose per-unit distribution characterises the unit.'
       ),
+    metricFields: z
+      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+      .max(MAX_METRIC_FIELDS)
+      .optional()
+      .describe(
+        'Optional. unit_profile only. Numeric fields in sourceIndex averaged per unit and written into each profile, so sibling profiles carry the numbers that tell them apart. Defaults to none.'
+      ),
     kis: z
       .string()
       .min(1)
@@ -160,7 +163,7 @@ const installAutomationTemplateSchema = z
       .max(MAX_CORPUS_FILTER_LENGTH)
       .optional()
       .describe(
-        'Optional. ES|QL clause inserted after FROM, such as "| WHERE published_at >= NOW() - 365 days". A WHERE line may omit the leading pipe. Empty reads the whole index. document_orchestration only. Defaults to empty.'
+        'Optional. ES|QL clause inserted after FROM, such as "| WHERE published_at >= NOW() - 365 days". A WHERE line may omit the leading pipe. Empty reads the whole index. document_orchestration and unit_profile; for unit_profile it bounds both which units are found and which rows each profile counts. Defaults to empty.'
       ),
     maxDocuments: z
       .number()
@@ -214,6 +217,18 @@ const installAutomationTemplateSchema = z
           });
         }
       }
+    }
+
+    if (
+      value.corpusFilter !== undefined &&
+      value.template !== 'document_orchestration' &&
+      value.template !== 'unit_profile'
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'corpusFilter is only valid for document_orchestration and unit_profile.',
+        path: ['corpusFilter'],
+      });
     }
 
     if (value.template === 'index_metadata') {
@@ -291,7 +306,8 @@ const toInstallParams = (
       unitKey: input.unitKey,
       activityField: input.activityField,
       breakdownField: input.breakdownField,
-      corpusFilter: '',
+      corpusFilter: input.corpusFilter ?? '',
+      metricFields: input.metricFields ?? [],
       maxUnits: input.maxUnits ?? 100,
       name,
     };
@@ -359,7 +375,8 @@ export const createInstallAutomationTemplateTool = ({
     patterns.
     index_metadata writes one KI per source index, each profiling that whole index grouped by its
     categoryField. Pass every source of the AI index in sources so one install covers them all.
-    unit_profile writes one KI per distinct unitKey value, grounded in per-unit aggregations.
+    unit_profile writes one KI per distinct unitKey value in one index, grounded in per-unit
+    aggregations plus the averages of any metricFields.
     targeted_ki_writer takes no dynamic parameters beyond name and kis. It writes KIs verbatim from
     the kis YAML you supply, then the workflow can be run with platform.core.execute_workflow.
   `,

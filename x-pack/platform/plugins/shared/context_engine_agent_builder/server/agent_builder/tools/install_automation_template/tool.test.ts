@@ -312,6 +312,47 @@ describe('install_automation_template schema', () => {
   });
 });
 
+describe('install_automation_template unit profile arguments', () => {
+  const schema = createTool().schema;
+  const base = {
+    template: 'unit_profile',
+    name: 'loyalty-province-profile',
+    sourceIndex: 'loyalty-history',
+    unitKey: 'Province',
+    activityField: 'Enrollment Date',
+    breakdownField: 'Loyalty Card',
+  };
+
+  it('takes a corpus filter and metric fields', () => {
+    expect(
+      schema.safeParse({
+        ...base,
+        corpusFilter: 'WHERE Country == "Canada"',
+        metricFields: ['Points Accumulated'],
+      }).success
+    ).toBe(true);
+  });
+
+  it('bounds the metric fields', () => {
+    const eleven = Array.from({ length: 11 }, (_, i) => `metric_${i}`);
+    expect(schema.safeParse({ ...base, metricFields: eleven }).success).toBe(false);
+    expect(schema.safeParse({ ...base, metricFields: ['x'.repeat(257)] }).success).toBe(false);
+  });
+
+  it('rejects metric fields on another template', () => {
+    expect(
+      schema.safeParse({
+        template: 'document_orchestration',
+        name: 'flight-activity-docs',
+        sourceIndex: 'loyalty-docs',
+        titleField: 'title',
+        bodyField: 'body',
+        metricFields: ['Points Accumulated'],
+      }).success
+    ).toBe(false);
+  });
+});
+
 describe('install_automation_template handler arguments', () => {
   const runTool = (params: Record<string, unknown>) =>
     createTool().handler(
@@ -346,6 +387,42 @@ describe('install_automation_template handler arguments', () => {
         { index: 'flight-activity', categoryField: 'Loyalty Card' },
       ],
     });
+  });
+
+  it('passes the corpus filter and metric fields through for unit profile', async () => {
+    await runTool({
+      template: 'unit_profile',
+      name: 'loyalty-province-profile',
+      sourceIndex: 'loyalty-history',
+      unitKey: 'Province',
+      activityField: 'Enrollment Date',
+      breakdownField: 'Loyalty Card',
+      corpusFilter: 'WHERE Country == "Canada"',
+      metricFields: ['Points Accumulated'],
+    });
+
+    expect(installHandlerMock.mock.calls[0][0].params).toEqual(
+      expect.objectContaining({
+        template: 'unit_profile',
+        corpusFilter: 'WHERE Country == "Canada"',
+        metricFields: ['Points Accumulated'],
+      })
+    );
+  });
+
+  it('defaults unit profile to no filter and no metric fields', async () => {
+    await runTool({
+      template: 'unit_profile',
+      name: 'loyalty-province-profile',
+      sourceIndex: 'loyalty-history',
+      unitKey: 'Province',
+      activityField: 'Enrollment Date',
+      breakdownField: 'Loyalty Card',
+    });
+
+    expect(installHandlerMock.mock.calls[0][0].params).toEqual(
+      expect.objectContaining({ corpusFilter: '', metricFields: [] })
+    );
   });
 
   it('turns a single sourceIndex and categoryField into a one-source list', async () => {

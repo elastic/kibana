@@ -46,6 +46,8 @@ export interface UnitProfileTemplateValues {
   breakdownField: string;
   /** A complete ES|QL line beginning with `| WHERE`, or empty to take every unit. */
   corpusFilter: string;
+  /** Numeric fields averaged per unit, appended after the fixed `unit_totals` columns. */
+  metricFields: readonly string[];
   maxUnits: number;
 }
 
@@ -120,6 +122,9 @@ export const renderUnitProfileTemplate = (values: UnitProfileTemplateValues): st
   assertSafeIdentifier('unitKey', values.unitKey);
   assertSafeIdentifier('activityField', values.activityField);
   assertSafeIdentifier('breakdownField', values.breakdownField);
+  for (const field of values.metricFields) {
+    assertSafeIdentifier('metricFields', field);
+  }
 
   return replaceTokens(CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
@@ -128,6 +133,7 @@ export const renderUnitProfileTemplate = (values: UnitProfileTemplateValues): st
     __UNIT_KEY__: yamlString(values.unitKey),
     __ACTIVITY_FIELD__: yamlString(values.activityField),
     __BREAKDOWN_FIELD__: yamlString(values.breakdownField),
+    __METRIC_FIELDS__: JSON.stringify(values.metricFields),
     __CORPUS_FILTER__: yamlString(corpusFilterLine(values.corpusFilter)),
     __MAX_UNITS__: String(values.maxUnits),
   });

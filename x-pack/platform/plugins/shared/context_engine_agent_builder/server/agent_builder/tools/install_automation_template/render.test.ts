@@ -8,6 +8,7 @@
 import CONTEXT_ENGINE_DOCUMENT_TEMPLATE from './document_template.yaml.text';
 import CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE from './index_metadata_template.yaml.text';
 import CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE from './unit_profile_template.yaml.text';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { WorkflowSchemaBase } from '@kbn/workflows/spec/schema';
 import { parse } from 'yaml';
 import {
@@ -26,7 +27,37 @@ const unitValues = {
   activityField: 'Enrollment Date',
   breakdownField: 'Loyalty Card',
   corpusFilter: '',
+  metricFields: [] as string[],
   maxUnits: 25,
+};
+
+interface TemplateStep {
+  name: string;
+  with?: { query?: string };
+  steps?: TemplateStep[];
+}
+
+const findStep = (steps: TemplateStep[], name: string): TemplateStep | undefined => {
+  for (const step of steps) {
+    if (step.name === name) {
+      return step;
+    }
+    const nested = step.steps ? findStep(step.steps, name) : undefined;
+    if (nested) {
+      return nested;
+    }
+  }
+  return undefined;
+};
+
+/** Renders one step's ES|QL the way the workflow engine would, for a unit named "ON". */
+const renderUnitQuery = (yaml: string, stepName: string): string => {
+  const definition = parse(yaml);
+  const query = findStep(definition.steps, stepName)?.with?.query ?? '';
+  return createWorkflowLiquidEngine().parseAndRenderSync(query, {
+    consts: definition.consts,
+    steps: { unit_context: { output: { unit: 'ON', unit_escaped: 'ON' } } },
+  });
 };
 
 describe('automation template rendering', () => {
@@ -149,6 +180,49 @@ describe('automation template rendering', () => {
     expect(yaml).toContain('ki_id: "{{ consts.automation_name }}/{{ foreach.item[0] }}"');
   });
 
+  describe('unit profile metrics and filter', () => {
+    it('averages each metric field per unit, after the columns the attributes read by position', () => {
+      const yaml = renderUnitProfileTemplate({
+        ...unitValues,
+        metricFields: ['Points Accumulated', 'Dollar Cost Points Redeemed'],
+      });
+
+      expect(parse(yaml).consts.metric_fields).toEqual([
+        'Points Accumulated',
+        'Dollar Cost Points Redeemed',
+      ]);
+      const query = renderUnitQuery(yaml, 'unit_totals');
+      expect(query).toMatch(
+        /`last Enrollment Date` = MAX\(`Enrollment Date`\),\s*`avg Points Accumulated` = AVG\(`Points Accumulated`\),\s*`avg Dollar Cost Points Redeemed` = AVG\(`Dollar Cost Points Redeemed`\)\s*$/
+      );
+      expect(query.indexOf('records = COUNT(*)')).toBeLessThan(query.indexOf('distinct Loyalty'));
+    });
+
+    it('leaves the totals query as it was when no metric fields are given', () => {
+      const query = renderUnitQuery(renderUnitProfileTemplate(unitValues), 'unit_totals');
+
+      expect(query).toMatch(/`last Enrollment Date` = MAX\(`Enrollment Date`\)\s*$/);
+      expect(query).not.toContain('AVG(');
+    });
+
+    it('applies the corpus filter to discovery and to every per-unit query', () => {
+      const yaml = renderUnitProfileTemplate({
+        ...unitValues,
+        corpusFilter: 'WHERE `Enrollment Year` >= 2018',
+      });
+
+      for (const step of ['discover_units', 'unit_totals', 'unit_breakdown']) {
+        expect(renderUnitQuery(yaml, step)).toContain('| WHERE `Enrollment Year` >= 2018');
+      }
+    });
+
+    it('rejects a metric field that would break out of its backticks', () => {
+      expect(() =>
+        renderUnitProfileTemplate({ ...unitValues, metricFields: ['Points` | DROP x'] })
+      ).toThrow(/metricFields/);
+    });
+  });
+
   it('produces valid YAML for the unit profile', () => {
     const yaml = renderUnitProfileTemplate(unitValues);
 
@@ -193,6 +267,15 @@ describe('automation template rendering', () => {
         }),
     ],
     ['unit_profile', () => renderUnitProfileTemplate(unitValues)],
+    [
+      'unit_profile with metrics and a filter',
+      () =>
+        renderUnitProfileTemplate({
+          ...unitValues,
+          corpusFilter: 'WHERE Country == "Canada"',
+          metricFields: ['Points Accumulated'],
+        }),
+    ],
     [
       'index_metadata',
       () =>

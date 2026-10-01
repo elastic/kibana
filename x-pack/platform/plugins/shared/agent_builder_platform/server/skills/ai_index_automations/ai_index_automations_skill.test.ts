@@ -450,7 +450,9 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('points the pilot bound at the install tool arguments and custom workflow consts', () => {
-      expect(content).toMatch(/`maxUnits`, `maxDocuments`,\n`corpusFilter` and `discoveryFilter`/);
+      expect(content).toMatch(
+        /`maxUnits`, `maxDocuments` and\n`corpusFilter` are arguments to the install tool/
+      );
     });
 
     it('saves the piloted definition rather than a regenerated one', () => {
@@ -609,6 +611,45 @@ describe('aiIndexAutomationsSkill', () => {
       expect(prose).toMatch(/Pass `sources`, one `\{ index, categoryField \}` per source/);
       expect(prose).toMatch(/one install and one run write one KI per source/);
       expect(prose).not.toMatch(/Pass `sourceIndex` and `categoryField`, a keyword field/);
+    });
+  });
+
+  describe('the unit profile template', () => {
+    const content = aiIndexAutomationsSkill.content;
+    const prose = content.replace(/\s+/g, ' ');
+    const catalog =
+      (aiIndexAutomationsSkill.referencedContent ?? []).find(
+        ({ name }) => name === STRATEGY_CATALOG_REFERENCE_NAME
+      )?.content ?? '';
+
+    it('describes only the arguments the install tool accepts', () => {
+      for (const dropped of ['catalogIndex', 'catalogKey', 'discoveryFilter']) {
+        expect(content).not.toContain(dropped);
+      }
+      expect(prose).toMatch(/Pass `corpusFilter`, a `WHERE` line, to profile only some units/);
+      expect(prose).toMatch(/\*\*Pass `metricFields`\.\*\*/);
+    });
+
+    it('describes the single ranked discovery query rather than a cursor it does not have', () => {
+      expect(prose).not.toMatch(/pages through the units on a keyword cursor/);
+      expect(prose).not.toMatch(/`unit-profile-template` pages with a `while`/);
+      expect(prose).toMatch(/one ranked query capped at `maxUnits`/);
+    });
+
+    it('sends a unit that needs a second index to a custom workflow', () => {
+      expect(prose).toMatch(
+        /The template reads one index\. A unit that needs data from a second index .* is a custom workflow built through a subagent/
+      );
+      expect(catalog).toMatch(
+        /one index for the `unit_profile` template; a unit drawn from several\s+indices is a custom workflow/
+      );
+      expect(catalog).not.toMatch(/from one or several indices/);
+    });
+
+    it('prefers a readable unit key over an opaque id', () => {
+      expect(prose).toMatch(
+        /prefer a human-readable field such as `product_name` over `product_id`/
+      );
     });
   });
 

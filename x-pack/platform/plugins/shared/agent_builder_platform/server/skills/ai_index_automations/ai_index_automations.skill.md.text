@@ -327,18 +327,22 @@ summary writes one indicator per document, and clustering them is a custom workf
 `activityField`, a date field whose per-unit range bounds the unit's activity, and
 `breakdownField`, a second field whose per-unit distribution characterises it. The AI index is the
 one attached to the conversation. Do not write the YAML and do not start a subagent.
+The unit key is what each indicator is titled by, so when the index carries both an id and a name
+for the unit and they map one to one, prefer a human-readable field such as `product_name` over
+`product_id`: an indicator titled by an opaque id is one no question will find.
 **Pass `metricFields`.** Sibling unit indicators are near-identical to a retriever unless their
 descriptions carry numbers that separate them, and `metricFields` is what puts those numbers
-there: each one is averaged per unit and named in the prompt. Choose the numeric fields an analyst
-would compare these units on.
-Pass `catalogIndex` and `catalogKey` when a second index holds one record per unit, such as a
-catalog row or a case header; they default to `sourceIndex` and `unitKey`, which means there is no
-separate record. Pass `discoveryFilter`, a complete ES|QL line beginning with `| WHERE`, to
-re-profile only some units; it defaults to taking every unit.
+there: each one is averaged per unit and written into the profile. Choose up to ten numeric fields
+an analyst would compare these units on.
+Pass `corpusFilter`, a `WHERE` line, to profile only some units: it bounds both which units are
+found and which of their rows the figures describe. It defaults to taking every row.
 `maxUnits` bounds the run: one KI and one model call per unit. It defaults to 100, the KI budget;
 keep it within that budget (`strategy_catalog`, "The KI budget").
-The installed workflow pages through the units on a keyword cursor, so a corpus above the row cap
-is walked rather than truncated, and a re-run regenerates every unit and replaces its indicator.
+Units are found by one ranked query capped at `maxUnits`, most active first, and
+a re-run regenerates every unit and replaces its indicator.
+The template reads one index. A unit that needs data from a second index — a customer's profile
+plus what they bought from a products index, a case header plus its events — is a custom workflow
+built through a subagent from the template's shape, not this install.
 To accumulate across runs rather than replace, read the stored indicator and merge through
 `context-engine.updateKi` — that is a custom workflow, not this template.
 
@@ -563,9 +567,8 @@ stream, and the cleanup below would then remove the user's indicator rather than
 `ki_id` on `context-engine.createKi` with the same `ce-pilot-<runId>-`, so every id the pilot writes
 is its own. The tag and the prefix are the only handles you will have on what the pilot wrote.
 
-Bound the run to a handful of documents while you are iterating. `maxUnits`, `maxDocuments`,
-`corpusFilter` and `discoveryFilter` are arguments to the install tool on the automations it
-installs, so narrowing a run is a re-install rather than an edit, and you do not edit those
+Bound the run to a handful of documents while you are iterating. `maxUnits`, `maxDocuments` and
+`corpusFilter` are arguments to the install tool on the automations it installs, so narrowing a run is a re-install rather than an edit, and you do not edit those
 workflows by hand. A custom workflow should put its own bound in `consts` the same way, rather
 than threading the limit through every query. The targeted KI writer needs no bound: its `kis`
 list is the whole corpus.
@@ -707,9 +710,10 @@ Tell the user it has started and that they can ask for a progress update at any 
 
 ## Corpora larger than 10,000 documents
 
-ES|QL caps at 10,000 rows per query. An automation over a larger corpus needs cursor pagination —
-the `unit-profile-template` pages with a `while` over a keyword cursor, and the same `while` and
-`advance_cursor` pair transplants into the document template around its `discover_documents` and
-`foreach` — or a parent workflow dispatching per-item children with `workflow.executeAsync`. Note
+ES|QL caps at 10,000 rows per query. The templates stay under it by design: each discovery query
+keeps the top `max_units` or `max_documents`, well within the cap. A custom automation that must
+walk a larger corpus needs cursor pagination — a `while` over a keyword cursor around its discovery
+query and `foreach` — or a parent workflow dispatching per-item children with
+`workflow.executeAsync`. Note
 the cap rather than drafting a workflow that silently truncates — this fails quietly, and the index
 looks under-covered for reasons no one will connect back to here.
