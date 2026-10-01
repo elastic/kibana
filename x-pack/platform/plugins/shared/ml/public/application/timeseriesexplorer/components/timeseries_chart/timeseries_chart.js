@@ -547,7 +547,7 @@ class TimeseriesChartIntl extends Component {
       .attr('width', fcsWidth)
       .attr('height', focusZoomPanelHeight)
       .attr('class', 'chart-border');
-    if (this.props.isInteractive) this.createZoomInfoElements(zoomGroup, fcsWidth);
+    if (this.props.isInteractive !== false) this.createZoomInfoElements(zoomGroup, fcsWidth);
 
     // Create the elements for annotations
     const annotateBrush = this.annotateBrush.bind(this);
@@ -655,7 +655,7 @@ class TimeseriesChartIntl extends Component {
       focusChartData,
       focusForecastData,
       modelPlotEnabled,
-      isInteractive,
+      isInteractive = true,
       selectedJob,
       showAnnotations,
       showForecast,

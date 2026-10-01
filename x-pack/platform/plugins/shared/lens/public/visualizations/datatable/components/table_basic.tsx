@@ -514,6 +514,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       isDarkMode,
       getCellColor,
       props.paletteService,
+      isInteractive,
       props.args.fitRowToContent,
       props.args.density
     );
@@ -521,6 +522,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     formatters,
     columnConfig,
     isDarkMode,
+    isInteractive,
     props.args.fitRowToContent,
     props.args.density,
     props.paletteService,

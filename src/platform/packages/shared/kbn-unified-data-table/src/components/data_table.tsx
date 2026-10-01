@@ -477,6 +477,13 @@ interface InternalUnifiedDataTableProps {
    */
   disableColumnActions?: boolean;
   /**
+   * Whether the table is rendered in an interactive context. When `false`, cell value rendering
+   * suppresses live, user-navigable content (e.g. links from a URL field formatter), in addition
+   * to the cell/column actions already gated by `disableCellActions`/`disableColumnActions`.
+   * Defaults to `true`.
+   */
+  isInteractive?: boolean;
+  /**
    * An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering.
    */
   externalCustomRenderers?: CustomCellRenderer;
@@ -664,6 +671,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       disableCellActions = false,
       disableCellPopover = false,
       disableColumnActions = false,
+      isInteractive = true,
       customBulkActions,
       hideDefaultBulkActions,
       shouldKeepAdHocDataViewImmutable,
@@ -1015,6 +1023,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           documentsDisplayMode,
           jsonModeSettings,
           selectedColumns: columns,
+          isInteractive,
         }),
       [
         dataView,
@@ -1029,6 +1038,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         documentsDisplayMode,
         jsonModeSettings,
         columns,
+        isInteractive,
       ]
     );
 

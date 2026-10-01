@@ -157,7 +157,7 @@ export class UrlFormat extends FieldFormat {
     // After the missing value check, rawValue is guaranteed to be a valid string or number
     const value = rawValue as string | number;
 
-    const { field, hit } = options;
+    const { field, hit, isInteractive = true } = options;
     const { parsedUrl } = this._params;
     const { basePath, pathname, origin } = parsedUrl || {};
 
@@ -232,6 +232,12 @@ export class UrlFormat extends FieldFormat {
         const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
         const fieldName = field?.name;
         const linkContent = getHighlightReact(label, fieldName, hit);
+
+        // Non-interactive contexts (e.g. a non-interactive dashboard panel) must not expose a
+        // live navigation control, so render the same content without the anchor.
+        if (!isInteractive) {
+          return linkContent;
+        }
 
         return (
           <a href={`${prefix}${url}`} target={linkTarget} rel="noopener noreferrer">

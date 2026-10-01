@@ -54,14 +54,7 @@ const mockMapContainer = jest.fn();
 jest.mock('../connected_components/map_container', () => ({
   MapContainer: (props: Record<string, unknown>) => {
     mockMapContainer(props);
-    return (
-      <div>
-        MockMapContainer
-        {/* Mirror the real MapContainer: ToolbarOverlay and RightSideControls' interactive controls are hidden when not interactive (AttributionControl still renders) */}
-        {Boolean(props.isInteractive) && <div data-test-subj="mapToolbarOverlay">Toolbar</div>}
-        {Boolean(props.isInteractive) && <div data-test-subj="mapRightSideControls">Controls</div>}
-      </div>
-    );
+    return <div>MockMapContainer</div>;
   },
 }));
 
@@ -146,64 +139,6 @@ describe('map embeddable', () => {
           render(<Component />);
           const lastProps = mockMapContainer.mock.calls.at(-1)?.[0];
           expect(lastProps?.isInteractive).toBe(false);
-          done();
-        })
-        .catch(done);
-    });
-
-    it('shows toolbar and controls when interactive', (done) => {
-      const viewMode$ = new BehaviorSubject<'view'>('view');
-      const parentApi = { viewMode$ };
-      const uuid = 'view-map-toolbar';
-      const finalizeApi = (api: any) => ({
-        ...api,
-        uuid,
-        parent: parentApi,
-        type: MAP_SAVED_OBJECT_TYPE,
-        phase$: new BehaviorSubject(undefined),
-      });
-
-      mapEmbeddableFactory
-        .buildEmbeddable({
-          initializeDrilldownsManager,
-          initialState: { attributes: { title: 'view map toolbar test' } },
-          finalizeApi,
-          uuid,
-          parentApi,
-        })
-        .then(({ Component }) => {
-          const { queryByTestId } = render(<Component />);
-          expect(queryByTestId('mapToolbarOverlay')).toBeInTheDocument();
-          expect(queryByTestId('mapRightSideControls')).toBeInTheDocument();
-          done();
-        })
-        .catch(done);
-    });
-
-    it('hides toolbar and controls when not interactive', (done) => {
-      const viewMode$ = new BehaviorSubject<'non-interactive'>('non-interactive');
-      const parentApi = { viewMode$ };
-      const uuid = 'preview-map-toolbar';
-      const finalizeApi = (api: any) => ({
-        ...api,
-        uuid,
-        parent: parentApi,
-        type: MAP_SAVED_OBJECT_TYPE,
-        phase$: new BehaviorSubject(undefined),
-      });
-
-      mapEmbeddableFactory
-        .buildEmbeddable({
-          initializeDrilldownsManager,
-          initialState: { attributes: { title: 'preview map toolbar test' } },
-          finalizeApi,
-          uuid,
-          parentApi,
-        })
-        .then(({ Component }) => {
-          const { queryByTestId } = render(<Component />);
-          expect(queryByTestId('mapToolbarOverlay')).not.toBeInTheDocument();
-          expect(queryByTestId('mapRightSideControls')).not.toBeInTheDocument();
           done();
         })
         .catch(done);

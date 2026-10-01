@@ -52,8 +52,14 @@ export const TableVisBasic = memo(
 
     // renderCellValue is a component which renders a cell based on column and row indexes
     const renderCellValue = useMemo(
-      () => createTableVisCell(sortedRows, formattedColumns, visConfig.autoFitRowToContent),
-      [formattedColumns, sortedRows, visConfig.autoFitRowToContent]
+      () =>
+        createTableVisCell(
+          sortedRows,
+          formattedColumns,
+          visConfig.autoFitRowToContent,
+          isInteractive
+        ),
+      [formattedColumns, sortedRows, visConfig.autoFitRowToContent, isInteractive]
     );
 
     const rowHeightsOptions = useMemo(

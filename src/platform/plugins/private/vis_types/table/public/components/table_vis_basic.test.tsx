@@ -99,7 +99,12 @@ describe('TableVisBasic', () => {
         visConfig={{ ...props.visConfig, showToolbar: true }}
       />
     );
-    expect(createTableVisCell).toHaveBeenCalledWith(sortedRows, table.formattedColumns, undefined);
+    expect(createTableVisCell).toHaveBeenCalledWith(
+      sortedRows,
+      table.formattedColumns,
+      undefined,
+      true
+    );
     expect(createGridColumns).toHaveBeenCalledWith(
       table.columns,
       sortedRows,

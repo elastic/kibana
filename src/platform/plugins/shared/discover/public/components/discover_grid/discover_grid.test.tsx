@@ -76,6 +76,7 @@ describe('DiscoverGrid isInteractive', () => {
     expect(lastProps?.enableInTableSearch).toBe(true);
     expect(lastProps?.isSortEnabled).not.toBe(false);
     expect(lastProps?.disableCellActions).not.toBe(true);
+    expect(lastProps?.isInteractive).toBe(true);
   });
 
   it('passes disabled props to UnifiedDataTable when isInteractive is false', () => {
@@ -91,6 +92,7 @@ describe('DiscoverGrid isInteractive', () => {
     expect(lastProps?.actions).toBe(false);
     expect(lastProps?.isResizable).toBe(false);
     expect(lastProps?.canDragAndDropColumns).toBeUndefined();
+    expect(lastProps?.isInteractive).toBe(false);
   });
 
   it('defaults to interactive mode when isInteractive is not set', () => {

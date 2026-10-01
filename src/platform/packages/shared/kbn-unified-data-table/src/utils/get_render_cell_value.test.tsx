@@ -218,6 +218,40 @@ describe('Unified data table cell rendering', () => {
     expect(element).toHaveClass('unifiedDataTable__cellValue');
   });
 
+  it('passes isInteractive through to formatFieldValueReact so links can be suppressed when false', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+
+    const DataTableCellValue = getRenderCellValueFn({
+      documentsDisplayMode: 'table',
+      closePopover: jest.fn(),
+      columnsMeta: undefined,
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      rows: rowsSource.map(build),
+      shouldShowFieldHandler: () => false,
+      isInteractive: false,
+    });
+
+    renderWithI18n(
+      <DataTableCellValue
+        colIndex={0}
+        columnId="bytes"
+        isDetails={false}
+        isExpandable={true}
+        isExpanded={false}
+        rowIndex={0}
+        setCellProps={jest.fn()}
+      />
+    );
+
+    expect(formatFieldValueReactSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ options: { isInteractive: false } })
+    );
+
+    formatFieldValueReactSpy.mockRestore();
+  });
+
   it('renders bytes column correctly using _source when details is true', () => {
     const DataTableCellValue = getRenderCellValueFn({
       documentsDisplayMode: 'table',
