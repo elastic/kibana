@@ -47,11 +47,19 @@ interface WithName {
 export type InstallAutomationTemplateParams =
   | ({ template: 'document_orchestration' } & Omit<
       DocumentOrchestrationTemplateValues,
-      'aiIndexId'
+      'aiIndexId' | 'automationName'
     > &
       WithName)
-  | ({ template: 'index_metadata' } & Omit<IndexMetadataTemplateValues, 'aiIndexId'> & WithName)
-  | ({ template: 'unit_profile' } & Omit<UnitProfileTemplateValues, 'aiIndexId'> & WithName)
+  | ({ template: 'index_metadata' } & Omit<
+      IndexMetadataTemplateValues,
+      'aiIndexId' | 'automationName'
+    > &
+      WithName)
+  | ({ template: 'unit_profile' } & Omit<
+      UnitProfileTemplateValues,
+      'aiIndexId' | 'automationName'
+    > &
+      WithName)
   | ({ template: 'targeted_ki_writer' } & Omit<TargetedKiWriterTemplateValues, 'aiIndexId'> &
       WithName);
 
