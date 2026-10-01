@@ -45,12 +45,24 @@ describe('CaseStatusesSection', () => {
     renderWithTestingProviders(<CaseStatusesSection {...props} />);
 
     const inProgress = screen.getByTestId('case-statuses-group-in-progress');
+    expect(within(inProgress).getByRole('heading', { name: 'In progress' })).toBeInTheDocument();
+    expect(within(inProgress).getByText(i18n.IN_PROGRESS_CATEGORY_HELP)).toBeInTheDocument();
     expect(within(inProgress).getByText('Awaiting customer')).toBeInTheDocument();
     expect(within(inProgress).getByText(i18n.ENABLED_COUNT(2))).toBeInTheDocument();
     expect(screen.getAllByTestId(/^case-status-row-/)).toHaveLength(4);
+    expect(screen.queryByTestId(/^case-statuses-disabled-/)).not.toBeInTheDocument();
   });
 
-  it('marks the default and disabled statuses', () => {
+  it('names the category the default applies to', () => {
+    renderWithTestingProviders(<CaseStatusesSection {...props} />);
+
+    expect(screen.getByTestId('case-status-in-progress-default-badge')).toHaveTextContent(
+      i18n.DEFAULT_FOR('In progress')
+    );
+    expect(screen.queryByTestId('case-status-awaiting_customer-default-badge')).toBeNull();
+  });
+
+  it('groups disabled statuses under a collapsed toggle at the end of their category', () => {
     renderWithTestingProviders(
       <CaseStatusesSection
         {...props}
@@ -58,11 +70,17 @@ describe('CaseStatusesSection', () => {
       />
     );
 
-    expect(screen.getByTestId('case-status-in-progress-default-badge')).toBeInTheDocument();
-    expect(screen.getByTestId('case-status-awaiting_customer-disabled-badge')).toBeInTheDocument();
+    const group = screen.getByTestId('case-statuses-group-in-progress');
+    expect(within(group).getByText(i18n.ENABLED_COUNT(1))).toBeInTheDocument();
     expect(
-      within(screen.getByTestId('case-statuses-group-in-progress')).getByText(i18n.ENABLED_COUNT(1))
+      within(group).getByTestId('case-statuses-disabled-in-progress-toggle')
+    ).toHaveTextContent(i18n.DISABLED_COUNT(1));
+    expect(
+      within(screen.getByTestId('case-statuses-disabled-in-progress')).getByTestId(
+        'case-status-row-awaiting_customer'
+      )
     ).toBeInTheDocument();
+    expect(screen.queryByTestId('case-statuses-disabled-open')).not.toBeInTheDocument();
   });
 
   it('adds a status under the group whose button was clicked', async () => {
@@ -132,7 +150,9 @@ describe('CaseStatusesSection', () => {
         />
       );
 
+      await userEvent.click(screen.getByTestId('case-statuses-disabled-in-progress-toggle'));
       await userEvent.click(screen.getByTestId('case-status-awaiting_customer-actions'));
+      expect(screen.queryByTestId('case-status-awaiting_customer-move-up')).not.toBeInTheDocument();
       await userEvent.click(screen.getByTestId('case-status-awaiting_customer-enable'));
 
       expect(props.onToggleStatusDisabled).toHaveBeenCalledWith('awaiting_customer');

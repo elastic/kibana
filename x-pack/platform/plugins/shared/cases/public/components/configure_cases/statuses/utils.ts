@@ -67,7 +67,8 @@ export const moveStatus = (
   const step = direction === 'up' ? -1 : 1;
   let neighbor = index + step;
   while (neighbor >= 0 && neighbor < current.length) {
-    if (current[neighbor].category === current[index].category) {
+    // Disabled statuses are listed apart from the enabled ones, so skip over them.
+    if (current[neighbor].category === current[index].category && !current[neighbor].disabled) {
       const reordered = [...current];
       [reordered[index], reordered[neighbor]] = [reordered[neighbor], reordered[index]];
       return reindex(reordered);

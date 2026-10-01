@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiAccordion,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,7 +15,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Status } from '@kbn/cases-components';
 import { MAX_CASE_STATUSES_PER_CATEGORY } from '../../../../common/constants';
 import type { CaseStatuses, CaseStatusesConfiguration } from '../../../../common/types/domain';
 import { CASE_STATUS_CATEGORIES, getBuiltInStatuses } from '../../../../common/utils/statuses';
@@ -60,24 +60,38 @@ const CaseStatusesSectionComponent: React.FC<CaseStatusesSectionProps> = ({
     <div data-test-subj="case-statuses">
       {CASE_STATUS_CATEGORIES.map((category) => {
         const inCategory = statuses.filter((status) => status.category === category);
-        const enabledCount = inCategory.filter((status) => !status.disabled).length;
+        const enabled = inCategory.filter((status) => !status.disabled);
+        const disabledStatuses = inCategory.filter((status) => status.disabled);
         const categoryLabel =
           getBuiltInStatuses().find((status) => status.category === category)?.label ?? category;
+        const renderRow = (status: CaseStatusesConfiguration[number], index: number) => (
+          <StatusRow
+            key={status.key}
+            status={status}
+            statuses={statuses}
+            disabled={!canModify}
+            isFirstInCategory={index === 0}
+            isLastInCategory={index === enabled.length - 1}
+            categoryLabel={categoryLabel}
+            onEdit={onEditStatus}
+            onMove={onMoveStatus}
+            onSetDefault={onSetDefaultStatus}
+            onToggleDisabled={onToggleStatusDisabled}
+          />
+        );
 
         return (
           <div key={category} data-test-subj={`case-statuses-group-${category}`}>
             <EuiSpacer size="m" />
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <h3>
-                    <Status status={category} />
-                  </h3>
+                <EuiTitle size="xs">
+                  <h3>{categoryLabel}</h3>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  {i18n.ENABLED_COUNT(enabledCount)}
+                  {i18n.ENABLED_COUNT(enabled.length)}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -86,21 +100,24 @@ const CaseStatusesSectionComponent: React.FC<CaseStatusesSectionProps> = ({
               {CATEGORY_HELP[category]}
             </EuiText>
             <EuiSpacer size="s" />
-            {inCategory.map((status, index) => (
-              <StatusRow
-                key={status.key}
-                status={status}
-                statuses={statuses}
-                disabled={!canModify}
-                isFirstInCategory={index === 0}
-                isLastInCategory={index === inCategory.length - 1}
-                categoryLabel={categoryLabel}
-                onEdit={onEditStatus}
-                onMove={onMoveStatus}
-                onSetDefault={onSetDefaultStatus}
-                onToggleDisabled={onToggleStatusDisabled}
-              />
-            ))}
+            {enabled.map(renderRow)}
+            {disabledStatuses.length > 0 && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiAccordion
+                  id={`case-statuses-disabled-${category}`}
+                  buttonContent={
+                    <EuiText size="s" color="subdued">
+                      {i18n.DISABLED_COUNT(disabledStatuses.length)}
+                    </EuiText>
+                  }
+                  buttonProps={{ 'data-test-subj': `case-statuses-disabled-${category}-toggle` }}
+                  data-test-subj={`case-statuses-disabled-${category}`}
+                >
+                  {disabledStatuses.map(renderRow)}
+                </EuiAccordion>
+              </>
+            )}
             <EuiFlexGroup justifyContent="center">
               <EuiFlexItem grow={false}>
                 {inCategory.length < MAX_CASE_STATUSES_PER_CATEGORY ? (

@@ -82,7 +82,8 @@ const StatusRowComponent: React.FC<StatusRowProps> = ({
       >
         {i18n.SET_AS_DEFAULT}
       </EuiContextMenuItem>,
-      ...(isFirstInCategory
+      // Disabled statuses are grouped at the end of their category, so order is meaningless there.
+      ...(isFirstInCategory || status.disabled
         ? []
         : [
             <EuiContextMenuItem
@@ -94,7 +95,7 @@ const StatusRowComponent: React.FC<StatusRowProps> = ({
               {i18n.MOVE_UP}
             </EuiContextMenuItem>,
           ]),
-      ...(isLastInCategory
+      ...(isLastInCategory || status.disabled
         ? []
         : [
             <EuiContextMenuItem
@@ -166,16 +167,9 @@ const StatusRowComponent: React.FC<StatusRowProps> = ({
                 tabIndex={0}
                 data-test-subj={`case-status-${status.key}-default-badge`}
               >
-                {i18n.DEFAULT_BADGE}
+                {i18n.DEFAULT_FOR(categoryLabel)}
               </EuiBadge>
             </EuiToolTip>
-          </EuiFlexItem>
-        )}
-        {status.disabled && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" data-test-subj={`case-status-${status.key}-disabled-badge`}>
-              {i18n.DISABLED_BADGE}
-            </EuiBadge>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={true} />

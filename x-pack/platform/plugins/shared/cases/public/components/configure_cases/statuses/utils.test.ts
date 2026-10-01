@@ -100,6 +100,15 @@ describe('statuses utils', () => {
       expect(keys(moveStatus(statuses, 'on_hold', 'down'))).toEqual(keys(statuses));
       expect(keys(moveStatus(statuses, 'open', 'up'))).toEqual(keys(statuses));
     });
+
+    it('skips disabled statuses, which are listed apart', () => {
+      // With "in-progress" disabled, "awaiting_customer" has no enabled neighbor above it.
+      const withDisabled = statuses.map((status) =>
+        status.key === 'in-progress' ? { ...status, disabled: true } : status
+      );
+
+      expect(keys(moveStatus(withDisabled, 'awaiting_customer', 'up'))).toEqual(keys(statuses));
+    });
   });
 
   describe('setDefaultStatus', () => {

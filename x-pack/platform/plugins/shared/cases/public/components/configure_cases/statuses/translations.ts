@@ -62,13 +62,17 @@ export const MAX_STATUSES = (max: number, category: string) =>
     defaultMessage: 'You can have up to {max} statuses under {category}.',
   });
 
-export const DEFAULT_BADGE = i18n.translate('xpack.cases.configureCases.statuses.defaultBadge', {
-  defaultMessage: 'Default',
-});
+export const DEFAULT_FOR = (category: string) =>
+  i18n.translate('xpack.cases.configureCases.statuses.defaultFor', {
+    values: { category },
+    defaultMessage: 'Default for {category} cases',
+  });
 
-export const DISABLED_BADGE = i18n.translate('xpack.cases.configureCases.statuses.disabledBadge', {
-  defaultMessage: 'Disabled',
-});
+export const DISABLED_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.configureCases.statuses.disabledCount', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# disabled status} other {# disabled statuses}}',
+  });
 
 export const ACTIONS_FOR = (label: string) =>
   i18n.translate('xpack.cases.configureCases.statuses.actionsFor', {
