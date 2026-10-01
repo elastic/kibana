@@ -17,6 +17,7 @@ import { loadFields, selectedFieldsSelector } from './fields';
 import { fillWorkspace } from './persistence';
 import { createMockGraphStore } from './mocks';
 import { reduxStateToSavedWorkspace } from '../services/persistence/serialize';
+import { makeNodeId } from '../services/workspace/graph_merge_planner';
 import {
   blocklistSelectedNodes,
   clearNodeSelection,
@@ -101,7 +102,8 @@ const createRuntimeGraphListenerEnvironment = () => {
       mergeRuntimeGraph: jest.fn((_workspace, graph) => {
         workspace.mergeGraph(graph);
         graph.nodes.forEach((node, index) => {
-          const id = node.id ?? `node-${index}`;
+          const id =
+            node.id ?? makeNodeId(node.field ?? 'field-name', node.term ?? `node-${index}`);
           const runtimeNode = {
             id,
             parent: null,
@@ -131,6 +133,18 @@ const createRuntimeGraphListenerEnvironment = () => {
   );
 
   return { ...environment, workspace };
+};
+
+const expectRuntimeTopologyToMatchRedux = (
+  environment: ReturnType<typeof createRuntimeGraphListenerEnvironment>
+) => {
+  const { workspace: workspaceState } = environment.store.getState();
+  expect(new Set(Object.keys(environment.workspace.nodesMap))).toEqual(
+    new Set(workspaceState.nodeIds)
+  );
+  expect(new Set(Object.keys(environment.workspace.edgesMap))).toEqual(
+    new Set(workspaceState.edgeIds)
+  );
 };
 
 describe('workspace state', () => {
@@ -481,7 +495,7 @@ describe('workspace listeners', () => {
   describe('fill workspace', () => {
     it('merges fetched nodes and initializes the workspace', async () => {
       const environment = createRuntimeGraphListenerEnvironment();
-      const nodes = [{ id: 'node-id' }];
+      const nodes = [{ field: 'field-name', term: 'top-term' }];
       (fetchTopNodes as jest.Mock).mockResolvedValue(nodes);
 
       environment.store.dispatch(fillWorkspace());
@@ -496,6 +510,7 @@ describe('workspace listeners', () => {
       expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
       expect(environment.mockedDeps.notifyReact).toHaveBeenCalled();
       expect(environment.mockedDeps.searchGraph).toHaveBeenCalled();
+      expectRuntimeTopologyToMatchRedux(environment);
     });
 
     it('keeps fetched top-term nodes in Redux when connection filling fails', async () => {
@@ -516,6 +531,7 @@ describe('workspace listeners', () => {
       expect(environment.mockedDeps.handleSearchQueryError).toHaveBeenCalledWith(
         new Error('connection failure')
       );
+      expectRuntimeTopologyToMatchRedux(environment);
 
       const savedWorkspace = { wsState: '' } as GraphWorkspaceSavedObject;
       const selectedIndex = environment.store.getState().datasource.current;
@@ -603,6 +619,7 @@ describe('workspace listeners', () => {
         expect.objectContaining({ connections: { vertices: expect.any(Array) } })
       );
       expect(environment.workspace.mergeGraph).toHaveBeenCalledWith({ nodes: [], edges: [] });
+      expectRuntimeTopologyToMatchRedux(environment);
     });
 
     it('fills existing connections through the listener transport', async () => {
@@ -710,6 +727,7 @@ describe('workspace listeners', () => {
           edges: [],
         })
       );
+      expectRuntimeTopologyToMatchRedux(environment);
     });
 
     it('submits a query DSL search through the listener transport', async () => {
