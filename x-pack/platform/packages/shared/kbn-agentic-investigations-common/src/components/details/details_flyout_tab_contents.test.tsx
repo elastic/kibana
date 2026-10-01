@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import { OverviewTab } from './details_flyout_tab_contents';
@@ -23,7 +22,6 @@ const investigation = {
   pendingProposalCount: 0,
   assignees: [],
   summary: 'A second sign-in replayed the same session cookie.',
-  // Both fed the removed Impact table; neither should surface here any more.
   affectedSurface: 'cfo@corp',
   severity: 'high',
   events: [],
@@ -36,26 +34,20 @@ const attachment: VersionedAttachment = {
   current_version: 1,
 };
 
-const attachmentsService = {
-  getAttachmentUiDefinition: () => ({
-    getLabel: () => 'Session cookie replayed',
-    getIcon: () => 'bell',
-    renderConversationDetailsContent: () => <div>Session cookie replayed</div>,
-  }),
-} as unknown as AttachmentServiceStartContract;
-
 const renderTab = ({
   attachments,
+  renderAttachmentsOverview,
   investigationOverrides,
 }: {
   attachments?: VersionedAttachment[];
+  renderAttachmentsOverview?: (a: VersionedAttachment[]) => React.ReactNode;
   investigationOverrides?: Partial<Investigation>;
 } = {}) =>
   render(
     <OverviewTab
       investigation={{ ...investigation, ...investigationOverrides }}
       attachments={attachments}
-      attachmentsService={attachmentsService}
+      renderAttachmentsOverview={renderAttachmentsOverview}
     />
   );
 
@@ -69,26 +61,31 @@ describe('OverviewTab', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
-  it('puts the attachment summary under the narrative', () => {
+  it('does not render attachment summary when no renderAttachmentsOverview is provided', () => {
     renderTab({ attachments: [attachment] });
 
-    const headings = screen.getAllByRole('heading').map(({ textContent }) => textContent);
-
-    expect(headings).toEqual(["What's happened", 'Attachment summary']);
-    expect(screen.getByText('Session cookie replayed')).toBeInTheDocument();
-  });
-
-  it('omits the attachment summary when nothing is attached', () => {
-    renderTab({ attachments: [] });
-
     expect(screen.queryByText('Attachment summary')).not.toBeInTheDocument();
-    expect(screen.getByText("What's happened")).toBeInTheDocument();
   });
 
-  it('renders the attachment summary on its own when there is no narrative', () => {
-    renderTab({ attachments: [attachment], investigationOverrides: { summary: undefined } });
+  it('calls renderAttachmentsOverview when attachments are present', () => {
+    const renderAttachmentsOverview = jest.fn().mockReturnValue(<div>12 alerts</div>);
+    renderTab({ attachments: [attachment], renderAttachmentsOverview });
 
-    expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
-    expect(screen.getByText('Attachment summary')).toBeInTheDocument();
+    expect(renderAttachmentsOverview).toHaveBeenCalledWith([attachment]);
+    expect(screen.getByText('12 alerts')).toBeInTheDocument();
+  });
+
+  it('does not call renderAttachmentsOverview when attachments is empty', () => {
+    const renderAttachmentsOverview = jest.fn().mockReturnValue(<div>12 alerts</div>);
+    renderTab({ attachments: [], renderAttachmentsOverview });
+
+    expect(renderAttachmentsOverview).not.toHaveBeenCalled();
+  });
+
+  it('does not call renderAttachmentsOverview when attachments is undefined', () => {
+    const renderAttachmentsOverview = jest.fn().mockReturnValue(<div>12 alerts</div>);
+    renderTab({ attachments: undefined, renderAttachmentsOverview });
+
+    expect(renderAttachmentsOverview).not.toHaveBeenCalled();
   });
 });
