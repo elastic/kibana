@@ -145,24 +145,22 @@ export const findInstalledTemplateWorkflowId = async ({
     }
 
     // When a name is provided (always the case now that name is mandatory) use exact name
-    // matching only. A tag match without a name match would overwrite a differently-named
-    // automation of the same template type, which is the opposite of the multi-instance intent.
-    // The tag path is retained only for callers that supply no name (pre-name backwards compat).
-    // Return immediately on match so later unrelated workflow reads cannot block an already-found
-    // replacement target.
-    if (templateName) {
-      if (workflow.name === templateName) {
-        // Guard against cross-template name collisions: a workflow carrying a different
-        // template's tag cannot be a valid replacement target for this template type.
-        const hasOtherTemplateTag = Object.values(AUTOMATION_TEMPLATE_TAGS).some(
-          (tag) => tag !== templateTag && workflow.tags?.includes(tag)
-        );
-        if (!hasOtherTemplateTag) {
-          return workflow.id ?? automation.value;
-        }
+    // Name is mandatory and always injected into the YAML, so templateName is always defined.
+    // Matching is by exact name only. A workflow carrying a different template's tag is skipped
+    // to prevent cross-template overwrites. Return immediately on match so later unrelated
+    // workflow reads cannot block an already-found replacement target.
+    //
+    // NOTE: automations installed before the name requirement existed (e.g. the default
+    // "Document KI automation") will NOT be matched by a caller-supplied name and will remain
+    // as separate attached workflows. Users upgrading from pre-name installations should delete
+    // the old automation manually and reinstall with the new named API.
+    if (workflow.name === templateName) {
+      const hasOtherTemplateTag = Object.values(AUTOMATION_TEMPLATE_TAGS).some(
+        (tag) => tag !== templateTag && workflow.tags?.includes(tag)
+      );
+      if (!hasOtherTemplateTag) {
+        return workflow.id ?? automation.value;
       }
-    } else if (workflow.tags?.includes(templateTag)) {
-      return workflow.id ?? automation.value;
     }
   }
 

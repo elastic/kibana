@@ -308,6 +308,9 @@ export const createInstallAutomationTemplateTool = ({
 
     name is always required. It identifies this automation within the AI index. Same name → replaces
     the existing automation in-place. Different name → installs an additional copy.
+    If the AI index has a pre-name automation (installed before this tool required a name, e.g.
+    named "Document KI automation"), it will NOT be replaced automatically. Delete it manually
+    first, then reinstall with a descriptive name.
 
     document_orchestration summarises each document into its own KI with verified ES|QL access
     patterns.

@@ -48,6 +48,9 @@ describe('automation template rendering', () => {
     expect(yaml).toContain('body_max_chars: 12000');
     expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.document_orchestration);
     expect(yaml).not.toMatch(/__[A-Z0-9_]+__/);
+    expect(yaml).toContain(
+      'ki_id: "{{ consts.automation_name }}/{{ steps.document_context.output.doc_id }}"'
+    );
   });
 
   it('keeps a corpus filter that itself contains underscores', () => {
@@ -76,6 +79,7 @@ describe('automation template rendering', () => {
     expect(yaml).toContain('category_field: "tier"');
     expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.index_metadata);
     expect(yaml).not.toMatch(/__[A-Z0-9_]+__/);
+    expect(yaml).toContain('ki_id: "{{ consts.automation_name }}"');
   });
 
   it('fills the unit profile consts', () => {
@@ -88,6 +92,7 @@ describe('automation template rendering', () => {
     expect(yaml).toContain('max_units: 25');
     expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.unit_profile);
     expect(yaml).not.toMatch(/__[A-Z0-9_]+__/);
+    expect(yaml).toContain('ki_id: "{{ consts.automation_name }}/{{ foreach.item[0] }}"');
   });
 
   it('produces valid YAML for the unit profile', () => {
