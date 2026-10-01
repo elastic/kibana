@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { experimentalBadge } from '../../components/experimental_badge';
 import { esqlRulesOnlyBadge } from '../../components/esql_rules_only_badge';
 import { EsqlRulesOnlyCallout } from '../../components/esql_rules_only_callout';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -31,7 +30,7 @@ export const RuleLibraryPage = () => {
       <AppHeader
         sticky={false}
         title={RULE_LIBRARY_PAGE_TITLE}
-        badges={[esqlRulesOnlyBadge, experimentalBadge]}
+        badges={[esqlRulesOnlyBadge]}
         spacing="bleed"
       />
       <EuiSpacer size="m" />

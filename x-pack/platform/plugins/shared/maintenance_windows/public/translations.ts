@@ -538,7 +538,7 @@ export const SAVE_WITHOUT_FILTERS_MODAL_SUBTITLE = i18n.translate(
   'xpack.maintenanceWindows.saveWithoutFiltersModal.subtitle',
   {
     defaultMessage:
-      'No scope is selected, so this maintenance window will not suppress any notifications. Enable at least one scope to start suppressing alerts or episodes.',
+      'No scope is selected, so this maintenance window will not suppress any notifications. Enable at least one scope to start suppressing alerts.',
   }
 );
 

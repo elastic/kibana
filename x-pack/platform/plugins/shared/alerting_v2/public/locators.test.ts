@@ -112,7 +112,7 @@ describe('AlertingV2RuleLibraryLocatorDefinition', () => {
   });
 });
 
-describe('AlertingV2EpisodesLocatorDefinition', () => {
+describe('AlertingV2AlertsLocatorDefinition', () => {
   it('has the correct id', () => {
     expect(AlertingV2EpisodesLocatorDefinition.id).toBe(ALERTING_V2_EPISODES_LOCATOR);
   });
@@ -127,7 +127,7 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
       });
     });
 
-    it('resolves episode details', async () => {
+    it('resolves alert details', async () => {
       expect(
         await locator.getLocation({ episodeId: 'ep-1', host: OBSERVABILITY_HOST.alerts })
       ).toMatchObject({

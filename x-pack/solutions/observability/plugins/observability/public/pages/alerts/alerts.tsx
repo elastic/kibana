@@ -56,6 +56,8 @@ import { renderRuleStats } from './components/rule_stats';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { AlertsLoader } from './components/alerts_loader';
+import { NewAlertsExperienceBanner } from './components/new_alerts_experience_banner';
+import { StandardRulesOnlyCallout } from './components/standard_rules_only_callout';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -306,11 +308,11 @@ function InternalAlertsPage() {
           title={i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}
           badges={[
             {
-              label: i18n.translate('xpack.observability.alertsV1OnlyBadge', {
-                defaultMessage: 'v1 only',
+              label: i18n.translate('xpack.observability.alertsStandardBadge', {
+                defaultMessage: 'Standard',
               }),
               color: 'hollow',
-              'data-test-subj': 'observabilityAlertsV1OnlyBadge',
+              'data-test-subj': 'observabilityAlertsStandardBadge',
             },
           ]}
           menu={appMenu}
@@ -319,6 +321,12 @@ function InternalAlertsPage() {
         />
         <EuiPageSection paddingSize="m" restrictWidth={false}>
           <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <NewAlertsExperienceBanner />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <StandardRulesOnlyCallout />
+            </EuiFlexItem>
             {authorizedToReadAnyRules && (
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="l" responsive={false} alignItems="center" wrap>
