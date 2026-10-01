@@ -12,17 +12,14 @@ import {
   createRootStreamViews,
   deleteQueryStream,
   deleteRootStreamViews,
-  disableQueryStreams,
-  enableQueryStreams,
 } from '../fixtures/query_stream_helpers';
 
 const ROOT_STREAM_NAMES = ['logs.ecs', 'logs.otel'];
 const STREAM_NAMES_CREATED_BY_SPEC = ['logs.ecs.host-1', 'test-query-stream'];
 
 test.describe('Query streams - Create query stream', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient, apiServices }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects, esClient, apiServices }) => {
     await browserAuth.loginAsAdmin();
-    await enableQueryStreams(kbnClient);
     for (const rootStreamName of ROOT_STREAM_NAMES) {
       await apiServices.streams.restoreDataStream(rootStreamName);
     }
@@ -30,13 +27,12 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
     await pageObjects.streams.gotoStreamMainPage();
   });
 
-  test.afterAll(async ({ kbnClient, apiServices, esClient, log }) => {
+  test.afterAll(async ({ apiServices, esClient, log }) => {
     await deleteRootStreamViews(esClient);
     for (const streamName of STREAM_NAMES_CREATED_BY_SPEC) {
       const esqlViewName = `$.${streamName}`;
       await deleteQueryStream(apiServices, esClient, streamName, esqlViewName, log);
     }
-    await disableQueryStreams(kbnClient);
   });
 
   test('should properly handle errors for invalid query streams', async ({ pageObjects }) => {

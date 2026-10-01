@@ -6,8 +6,11 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
+import { enableQueryStreams } from '../fixtures/query_stream_helpers';
 
-globalSetupHook('Setup environment for streams tests', async ({ apiServices, log }) => {
+globalSetupHook('Setup environment for streams tests', async ({ apiServices, kbnClient, log }) => {
   log.debug('[setup] Enabling streams...');
   await apiServices.streams.enable();
+  log.debug('[setup] Enabling query streams...');
+  await enableQueryStreams(kbnClient);
 });
