@@ -1089,6 +1089,24 @@ describe('TaskClaiming', () => {
                     bool: {
                       must: [
                         {
+                          term: {
+                            'task.status': 'waiting',
+                          },
+                        },
+                        {
+                          range: {
+                            'task.runAt': {
+                              lte: 'now',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        {
                           bool: {
                             should: [
                               {
@@ -2090,6 +2108,24 @@ describe('TaskClaiming', () => {
                       "bool": Object {
                         "must": Array [
                           Object {
+                            "term": Object {
+                              "task.status": "waiting",
+                            },
+                          },
+                          Object {
+                            "range": Object {
+                              "task.runAt": Object {
+                                "lte": "now",
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
                             "bool": Object {
                               "should": Array [
                                 Object {
@@ -2239,6 +2275,24 @@ describe('TaskClaiming', () => {
                           Object {
                             "term": Object {
                               "task.status": "idle",
+                            },
+                          },
+                          Object {
+                            "range": Object {
+                              "task.runAt": Object {
+                                "lte": "now",
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "task.status": "waiting",
                             },
                           },
                           Object {

@@ -391,6 +391,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       store: this.bufferedStore,
       definitions: this.definitions,
       beforeRun: this.middleware.beforeRun,
+      beforeSave: this.middleware.beforeSave,
       onTaskEvent: this.emitEvent,
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,

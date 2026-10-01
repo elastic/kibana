@@ -12,6 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   IdleTaskWithExpiredRunAt,
+  WaitingTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
 } from './mark_available_tasks_as_claimed';
 
@@ -33,7 +34,11 @@ export function aggregateTaskOverduePercentilesForType(type: string): {
           },
           {
             bool: {
-              should: [IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt],
+              should: [
+                IdleTaskWithExpiredRunAt,
+                WaitingTaskWithExpiredRunAt,
+                RunningOrClaimingTaskWithExpiredRetryAt,
+              ],
             },
           },
         ],

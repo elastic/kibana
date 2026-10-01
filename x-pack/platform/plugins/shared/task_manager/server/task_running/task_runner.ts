@@ -127,7 +127,7 @@ type Opts = {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
-} & Pick<Middleware, 'beforeRun'>;
+} & Pick<Middleware, 'beforeRun' | 'beforeSave'>;
 
 export enum TaskRunResult {
   // Task completed successfully
@@ -170,6 +170,7 @@ export class TaskManagerRunner implements TaskRunner {
   private logger: Logger;
   private bufferedTaskStore: Updatable;
   private beforeRun: Middleware['beforeRun'];
+  private beforeSave: Middleware['beforeSave'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
@@ -201,6 +202,7 @@ export class TaskManagerRunner implements TaskRunner {
     logger,
     store,
     beforeRun,
+    beforeSave,
     defaultMaxAttempts,
     onTaskEvent = identity,
     executionContext,
@@ -217,6 +219,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.logger = logger;
     this.bufferedTaskStore = store;
     this.beforeRun = beforeRun;
+    this.beforeSave = beforeSave;
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
@@ -601,11 +604,39 @@ export class TaskManagerRunner implements TaskRunner {
   private validateResult(
     result?: SuccessfulRunResult | FailedRunResult | void
   ): Result<SuccessfulRunResult, FailedRunResult> {
-    return isFailedRunResult(result)
-      ? asErr({ ...result, error: result.error })
-      : asOk({
-          ...(result || EMPTY_RUN_RESULT),
-        });
+    if (isFailedRunResult(result)) {
+      return asErr({ ...result, error: result.error });
+    }
+
+    const successful: SuccessfulRunResult = { ...(result || EMPTY_RUN_RESULT) };
+
+    // A recurring task must not yield: fail the run (keeping the task on its
+    // schedule) instead of persisting an ambiguous yield/schedule combination.
+    if (successful.shouldYieldTask && this.instance.task.schedule) {
+      const error = new Error(
+        `Task ${this} returned a yield result but yield is only supported for ad-hoc tasks. The run is treated as failed and the task stays on its schedule.`
+      );
+      this.logger.error(error.message, { tags: [this.taskType, this.id, 'task:yield'] });
+      return asErr({ error, state: successful.state });
+    }
+
+    return asOk(successful);
+  }
+
+  private async applyBeforeSaveToYieldedParams(
+    result: Result<SuccessfulRunResult, FailedRunResult>
+  ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
+    if (!isOk(result)) {
+      return result;
+    }
+    const { value } = result;
+    if (!value.shouldYieldTask || value.params === undefined) {
+      return result;
+    }
+    const { taskInstance } = await this.beforeSave({
+      taskInstance: { ...this.instance.task, params: value.params },
+    });
+    return asOk({ ...value, params: taskInstance.params });
   }
 
   private shouldTryToScheduleRetry(): boolean {
@@ -675,6 +706,9 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<TaskRunResult> {
     const hasTaskRunFailed = isOk(result);
     let shouldTaskBeDisabled = false;
+    // Params handed off by a yield are persisted by the framework, so run them through
+    // the same `beforeSave` middleware that `schedule` applies to params.
+    const resultToPersist = await this.applyBeforeSaveToYieldedParams(result);
     const fieldUpdates: Partial<ConcreteTaskInstance> & Pick<ConcreteTaskInstance, 'status'> = flow(
       // if running the task has failed ,try to correct by scheduling a retry in the near future
       mapErr(this.rescheduleFailedRun),
@@ -684,6 +718,8 @@ export class TaskManagerRunner implements TaskRunner {
           runAt,
           schedule: reschedule,
           state,
+          params,
+          shouldYieldTask,
           attempts = 0,
           shouldDeleteTask,
           shouldDisableTask,
@@ -712,14 +748,17 @@ export class TaskManagerRunner implements TaskRunner {
                 this.logger
               ),
             state,
+            ...(params !== undefined ? { params } : {}),
             schedule: updatedTaskSchedule,
             attempts,
-            status: TaskStatus.Idle,
+            // A yielded ad-hoc task parks in 'waiting' until its runAt arrives or
+            // `runSoon` resumes it; everything else reschedules as 'idle'.
+            status: shouldYieldTask ? TaskStatus.Waiting : TaskStatus.Idle,
           });
         }
       ),
       unwrap
-    )(result);
+    )(resultToPersist);
 
     if (
       fieldUpdates.status === TaskStatus.Failed ||
@@ -855,7 +894,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     await eitherAsync(
       result,
-      async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
+      async ({ runAt, schedule, taskRunError, shouldYieldTask }: SuccessfulRunResult) => {
         const taskPersistence =
           schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
 
@@ -905,8 +944,23 @@ export class TaskManagerRunner implements TaskRunner {
               task,
               taskTiming,
               EventLogOutcomes.success,
-              `Task ${this.taskType} "${this.id}" completed successfully.`
+              shouldYieldTask
+                ? `Task ${this.taskType} "${this.id}" yielded.`
+                : `Task ${this.taskType} "${this.id}" completed successfully.`
             );
+
+            if (shouldYieldTask) {
+              this.logTaskYieldEvent(task, runAt ?? new Date());
+              this.logger.debug(
+                `Task ${this} yielded and will resume at ${(runAt ?? new Date()).toISOString()}.`,
+                { tags: [this.taskType, this.id, 'task:yield'] }
+              );
+              this.usageCounter?.incrementCounter({
+                counterName: 'taskManagerTaskYielded',
+                counterType: 'taskManagerTaskRunner',
+                incrementBy: 1,
+              });
+            }
           }
         } catch (err) {
           this.onTaskEvent(
@@ -1068,6 +1122,26 @@ export class TaskManagerRunner implements TaskRunner {
         },
       },
       message: `Task ${this.taskType} "${this.id}" started.`,
+    });
+  }
+
+  // The next task-run-start for this task id is the resume; a start before the deadline
+  // means it was woken by `runSoon`.
+  private logTaskYieldEvent(task: ConcreteTaskInstance, deadline: Date): void {
+    this.eventLogger.logEvent({
+      event: {
+        action: EVENT_LOG_ACTIONS.taskYield,
+      },
+      kibana: {
+        task: {
+          id: this.id,
+          type: this.taskType,
+          scheduled: task.scheduledAt.toISOString(),
+          execution: { uuid: this.uuid },
+          yield: { deadline: deadline.toISOString() },
+        },
+      },
+      message: `Task ${this.taskType} "${this.id}" yielded until ${deadline.toISOString()}.`,
     });
   }
 

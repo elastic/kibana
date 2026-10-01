@@ -9,6 +9,7 @@
     "server/**/*.json",
     "common/**/*",
     "test/scout/**/*",
+    "test/scout_sample_tasks/**/*",
     "test/scout_uiam_local/**/*"
   ],
   "kbn_references": [

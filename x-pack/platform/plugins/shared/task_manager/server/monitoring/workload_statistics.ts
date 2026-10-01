@@ -159,7 +159,8 @@ export function createWorkloadAggregator({
             },
           },
           idleTasks: {
-            filter: { term: { 'task.status': 'idle' } },
+            // 'waiting' (yielded) tasks are included so due-but-unclaimed yields count as overdue
+            filter: { terms: { 'task.status': ['idle', 'waiting'] } },
             aggs: {
               scheduleDensity: {
                 // create a window of upcoming tasks

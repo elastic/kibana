@@ -266,6 +266,13 @@
                         },
                         "data": {
                             "type": "flattened"
+                        },
+                        "yield": {
+                            "properties": {
+                                "deadline": {
+                                    "type": "date"
+                                }
+                            }
                         }
                     }
                 },

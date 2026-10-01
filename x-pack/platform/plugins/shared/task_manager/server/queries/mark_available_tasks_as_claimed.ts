@@ -45,6 +45,13 @@ export const IdleTaskWithExpiredRunAt: MustCondition = {
   },
 };
 
+// A yielded ad-hoc task whose resume time has arrived
+export const WaitingTaskWithExpiredRunAt: MustCondition = {
+  bool: {
+    must: [{ term: { 'task.status': 'waiting' } }, { range: { 'task.runAt': { lte: 'now' } } }],
+  },
+};
+
 export const InactiveTasks: MustNotCondition = {
   bool: {
     must_not: [
