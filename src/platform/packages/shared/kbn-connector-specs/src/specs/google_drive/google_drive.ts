@@ -23,7 +23,7 @@ const DEFAULT_FOLDER_ID = 'root';
 const ID_MAX_LENGTH = 200;
 const QUERY_MAX_LENGTH = 2000;
 const PAGE_TOKEN_MAX_LENGTH = 2048;
-const MAX_FILE_IDS = 100;
+const MAX_FILE_IDS = 250;
 const GOOGLE_WORKSPACE_MIME_PREFIX = 'application/vnd.google-apps.';
 const DEFAULT_EXPORT_MIME_TYPE = 'application/pdf';
 // XLSX preserves tabular structure better than PDF for spreadsheets
