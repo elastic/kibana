@@ -21,8 +21,9 @@ import {
   fitsQueueReach,
 } from '../../../common/proposals/list';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
-// PROPOSALS_API_PRIVILEGE_READ cannot be imported from agentic_investigations/server (cross-plugin
+// PROPOSALS_API_PRIVILEGE_READ cannot be imported from proposals/server (cross-plugin
 // server import is forbidden), so we derive the identical value here. It is load-bearing: the
 // ProposalsService reads as asInternalUser, so authz is enforced only at this layer.
 const PROPOSALS_API_PRIVILEGE_READ = ApiPrivileges.read('proposals');
@@ -64,7 +65,7 @@ export const registerGetClosedProposalsRoute = ({
           },
         },
       },
-      async (_context, request, response) => {
+      withAlertZeroEnabled(async (_context, request, response) => {
         try {
           const { size, from } = request.query;
 
@@ -82,6 +83,6 @@ export const registerGetClosedProposalsRoute = ({
             body: { message: 'Failed to get closed proposals' },
           });
         }
-      }
+      })
     );
 };

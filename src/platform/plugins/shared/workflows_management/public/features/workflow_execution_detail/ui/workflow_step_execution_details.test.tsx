@@ -24,8 +24,13 @@ jest.mock('./foreach_iterations_section', () => ({
   ForeachIterationsSection: () => <div data-test-subj="workflowExecutionIterationsSection" />,
 }));
 
+const mockOverviewProps: { current: Record<string, unknown> } = { current: {} };
+
 jest.mock('./workflow_execution_overview', () => ({
-  WorkflowExecutionOverview: () => <div data-test-subj="workflow-execution-overview" />,
+  WorkflowExecutionOverview: (props: Record<string, unknown>) => {
+    mockOverviewProps.current = props;
+    return <div data-test-subj="workflow-execution-overview" />;
+  },
 }));
 
 jest.mock('../../../hooks/navigation/use_navigate_to_execution', () => ({
@@ -69,6 +74,10 @@ const createRegularStep = (
 });
 
 describe('WorkflowStepExecutionDetails', () => {
+  beforeEach(() => {
+    mockOverviewProps.current = {};
+  });
+
   it('renders Input and Output sections for a trigger with both payloads', () => {
     const stepExecution = createTriggerStep({
       input: { foo: 'bar' },
@@ -193,5 +202,38 @@ describe('WorkflowStepExecutionDetails', () => {
     expect(
       container.querySelector('[data-test-subj="workflowStepExecutionDetails"]')
     ).toBeInTheDocument();
+  });
+
+  it('does not show resume UI on overview until waitingStepExecutionId is ready', () => {
+    const overviewStep = createRegularStep({
+      id: '__overview',
+      stepId: 'Overview',
+      stepType: '__overview',
+    });
+
+    const { rerender } = render(
+      <TestWrapper>
+        <WorkflowStepExecutionDetails
+          workflowExecutionId="exec-1"
+          stepExecution={overviewStep}
+          workflowExecutionStatus={ExecutionStatus.WAITING_FOR_INPUT}
+        />
+      </TestWrapper>
+    );
+
+    expect(mockOverviewProps.current.showResumeUI).toBe(false);
+
+    rerender(
+      <TestWrapper>
+        <WorkflowStepExecutionDetails
+          workflowExecutionId="exec-1"
+          stepExecution={overviewStep}
+          workflowExecutionStatus={ExecutionStatus.WAITING_FOR_INPUT}
+          waitingStepExecutionId="step-wait"
+        />
+      </TestWrapper>
+    );
+
+    expect(mockOverviewProps.current.showResumeUI).toBe(true);
   });
 });

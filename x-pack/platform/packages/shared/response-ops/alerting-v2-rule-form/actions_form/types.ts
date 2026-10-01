@@ -9,6 +9,9 @@ import { parse } from 'yaml';
 
 export type InlineActionStepType = 'slack2.sendMessage' | 'email';
 export type ActionSource = 'existing' | 'inline';
+export type ConnectorCreationConfig =
+  | { readonly mode: 'flyout' }
+  | { readonly mode: 'new-tab'; readonly href: string };
 
 export interface ExistingWorkflowActionDraft {
   id: string;

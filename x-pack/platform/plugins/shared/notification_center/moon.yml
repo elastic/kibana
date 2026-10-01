@@ -18,6 +18,8 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/notification_center
 dependsOn:
   - '@kbn/core'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/dev-cli-runner'
   - '@kbn/config-schema'
   - '@kbn/zod'
   - '@kbn/zod-helpers'
@@ -43,8 +45,10 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - scripts/**/*
     - server/**/*
     - '!target/**/*'
+    - '!scripts/*.js'
   jest-config:
     - jest.config.js
 tasks: {}

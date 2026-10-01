@@ -169,7 +169,7 @@ describe('SubmitErrorCallout', () => {
                 class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  class="euiButton emotion-euiButtonDisplay-m-base-primary"
                   type="button"
                 >
                   <span
@@ -299,7 +299,7 @@ describe('SubmitErrorCallout', () => {
                 class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  class="euiButton emotion-euiButtonDisplay-m-base-primary"
                   type="button"
                 >
                   <span
@@ -544,7 +544,7 @@ describe('SubmitErrorCallout', () => {
                 class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  class="euiButton emotion-euiButtonDisplay-m-base-primary"
                   type="button"
                 >
                   <span

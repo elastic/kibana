@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 
 export const queryKeys = {
   /**
@@ -39,5 +39,9 @@ export const queryKeys = {
   skills: {
     all: ['alertzero', 'skills'] as const,
     list: () => [...queryKeys.skills.all, 'list'] as const,
+  },
+  currentUser: {
+    all: ['alertzero', 'current-user'] as const,
+    get: () => [...queryKeys.currentUser.all, 'get'] as const,
   },
 };

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec, isKibanaManagedAuthTypeId } from '../../..';
+import type { ActionContext } from '../../connector_spec';
+import { SPECS_ALLOWED_EVENTS } from '../../specs_allowed_events';
 import { Slack } from './slack';
 import { slackRelay } from './relay';
 import {
@@ -46,6 +47,12 @@ describe('Slack', () => {
     expect(spec).toBe(Slack);
     expect(spec?.actions.listChannels).toBeDefined();
     expect(spec?.actions.listChannels.isTool).toBe(true);
+  });
+
+  it('is allowlisted to declare inbound events', () => {
+    expect(SPECS_ALLOWED_EVENTS.has(Slack.metadata.id)).toBe(true);
+    expect(Slack.events).toBeDefined();
+    expect(Slack.events?.definitions.any).toBeUndefined();
   });
 
   it('should have correct metadata', () => {
@@ -1519,20 +1526,47 @@ describe('Slack', () => {
     } as unknown as ActionContext;
 
     it('sendMessage posts through the relay and never touches the Slack client', async () => {
-      relayTrigger.mockResolvedValue({ ref: '1234567890.123456', tenantKey: 'team-A' });
+      relayTrigger.mockResolvedValue({
+        ref: '1234567890.123456',
+        tenantKey: 'team-A',
+        channel: 'C0123456789',
+      });
 
       const result = await Slack.actions.sendMessage.handler(relayContext, {
-        channel: 'C123',
+        channel: 'C0123456789',
         text: 'Hello from Kibana',
       });
 
       expect(relayTrigger).toHaveBeenCalledWith({
         tenantKey: 'team-A',
-        channel: 'C123',
+        channel: 'C0123456789',
         message: 'Hello from Kibana',
       });
+      expect(relayListBindings).not.toHaveBeenCalled();
       expect(mockClient.post).not.toHaveBeenCalled();
-      expect(result).toEqual({ ok: true, channel: 'C123', ts: '1234567890.123456' });
+      expect(result).toEqual({ ok: true, channel: 'C0123456789', ts: '1234567890.123456' });
+    });
+
+    it('sendMessage forwards a channel name to the relay and returns the resolved id', async () => {
+      relayTrigger.mockResolvedValue({
+        ref: '1234567890.123456',
+        tenantKey: 'team-A',
+        channel: 'C0123456789',
+      });
+
+      const result = await Slack.actions.sendMessage.handler(relayContext, {
+        channel: '#general',
+        text: 'Hello from Kibana',
+      });
+
+      expect(relayTrigger).toHaveBeenCalledWith({
+        tenantKey: 'team-A',
+        channel: '#general',
+        message: 'Hello from Kibana',
+      });
+      expect(relayListBindings).not.toHaveBeenCalled();
+      expect(mockClient.post).not.toHaveBeenCalled();
+      expect(result).toEqual({ ok: true, channel: 'C0123456789', ts: '1234567890.123456' });
     });
 
     it('listChannels returns the connected channels and never touches the Slack client', async () => {

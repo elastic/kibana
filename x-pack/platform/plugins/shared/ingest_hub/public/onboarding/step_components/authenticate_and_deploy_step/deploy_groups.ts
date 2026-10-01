@@ -14,7 +14,11 @@ import type {
 } from '../../onboarding_flow_context';
 import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
-import { reconcileInstances, groupByPackage } from './deploy_group_helpers';
+import {
+  reconcileInstances,
+  groupByPackage,
+  buildGroupPolicyNameStem,
+} from './deploy_group_helpers';
 export { collectDeployResults } from './deploy_group_helpers';
 
 /**
@@ -27,12 +31,19 @@ export { collectDeployResults } from './deploy_group_helpers';
  *   collide inside `buildPackageInputs` (stream keys map on dataset name, which is shared).
  */
 export interface DeployGroup {
-  /** Package name — used for bundled originals. InstanceId — used for duplicates. */
+  /**
+   * Package name (suffixed with `__<namespace>` when one is set) — used for bundled originals.
+   * InstanceId — used for duplicates.
+   */
   groupId: string;
   /** All instanceIds whose status, policyId, and error this call resolves. */
   instanceIds: string[];
   members: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>;
   isDuplicateGroup: boolean;
+  /** Namespace shared by every member. Empty means the policy inherits the agent policy's. */
+  namespace: string;
+  /** Sanitized policy name prefix for bundled originals, unique within one deploy. */
+  policyNameStem?: string;
 }
 
 export interface GroupDeployOutcome {
@@ -52,7 +63,8 @@ export interface GroupDeployOutcome {
 export function buildDeployGroups(
   instances: ServiceInstance[],
   selectedServiceIds: string[],
-  servicesMap: Map<string, AwsServiceMatrixEntry>
+  servicesMap: Map<string, AwsServiceMatrixEntry>,
+  storedServiceVars: Record<string, ServiceVars> = {}
 ): DeployGroup[] {
   // Reconcile persisted instances against the current selectedServiceIds — the same logic
   // use_service_settings applies in-memory. Without this, a user who goes back to step 1 and
@@ -84,7 +96,7 @@ export function buildDeployGroups(
     }
   }
 
-  return groupByPackage(originals, duplicates);
+  return groupByPackage(originals, duplicates, storedServiceVars);
 }
 
 function buildAgentlessPolicyName(group: DeployGroup): string {
@@ -98,8 +110,7 @@ function buildAgentlessPolicyName(group: DeployGroup): string {
     return `${safe}-${name}-${Date.now()}`;
   }
   // Bundled originals — named after the package.
-  const pkg = group.groupId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
-  return `${pkg}-${Date.now()}`;
+  return `${buildGroupPolicyNameStem(group)}-${Date.now()}`;
 }
 
 export async function deployGroup(
@@ -166,7 +177,7 @@ export async function deployGroup(
 
   const response = await sendCreateAgentlessPolicy({
     name: buildAgentlessPolicyName(group),
-    namespace,
+    namespace: group.namespace || namespace,
     package: { name: firstService.packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,

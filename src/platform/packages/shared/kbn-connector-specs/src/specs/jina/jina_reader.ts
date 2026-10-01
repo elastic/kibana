@@ -32,6 +32,11 @@ enum RETURN_FORMAT {
 const JINA_READER_BROWSE_URL = 'https://r.jina.ai' as const;
 const JINA_READER_SEARCH_URL = 'https://s.jina.ai' as const;
 
+const MAX_URL_LENGTH = 2048;
+const MAX_OPTION_KEY_LENGTH = 200;
+const MAX_FILENAME_LENGTH = 255;
+const MAX_FILE_BASE64_LENGTH = 4 * Math.ceil((10 * 1024 * 1024) / 3);
+
 function mapPluginReturnFormatToReaderReturnFormat(returnFormat?: RETURN_FORMAT): string {
   switch (returnFormat) {
     case RETURN_FORMAT.HTML:
@@ -120,7 +125,7 @@ export const JinaReaderConnector: ConnectorSpec = {
       description: 'Turn any URL to markdown for LLM consumption',
       input: lazySchema(() =>
         z.object({
-          url: z.string().min(3).describe('URL to browse'),
+          url: z.string().min(3).max(MAX_URL_LENGTH).describe('URL to browse'),
           returnFormat: z
             .enum([
               RETURN_FORMAT.MARKDOWN,
@@ -132,7 +137,10 @@ export const JinaReaderConnector: ConnectorSpec = {
             ])
             .optional()
             .describe('Desired return format'),
-          options: z.record(z.string(), z.any()).optional().describe('Additional advanced options'),
+          options: z
+            .record(z.string().max(MAX_OPTION_KEY_LENGTH), z.any())
+            .optional()
+            .describe('Additional advanced options'),
         })
       ),
       handler: async (ctx, input) => {
@@ -166,12 +174,15 @@ export const JinaReaderConnector: ConnectorSpec = {
       description: 'Web search to find relevant context for LLMs',
       input: lazySchema(() =>
         z.object({
-          query: z.string().min(1).describe('Search query'),
+          query: z.string().min(1).max(2000).describe('Search query'),
           returnFormat: z
             .enum([RETURN_FORMAT.MARKDOWN, RETURN_FORMAT.FULL_MARKDOWN, RETURN_FORMAT.PLAIN_TEXT])
             .optional()
             .describe('Desired return format'),
-          options: z.record(z.string(), z.any()).optional().describe('Additional advanced options'),
+          options: z
+            .record(z.string().max(MAX_OPTION_KEY_LENGTH), z.any())
+            .optional()
+            .describe('Additional advanced options'),
         })
       ),
       handler: async (ctx, input) => {
@@ -206,9 +217,12 @@ export const JinaReaderConnector: ConnectorSpec = {
       description: 'Convert a file to markdown for LLM consumption',
       input: lazySchema(() =>
         z.object({
-          file: z.string().describe('Base64-encoded file content'),
-          filename: z.string().optional().describe('Original filename'),
-          options: z.record(z.string(), z.any()).optional().describe('Additional advanced options'),
+          file: z.string().max(MAX_FILE_BASE64_LENGTH).describe('Base64-encoded file content'),
+          filename: z.string().max(MAX_FILENAME_LENGTH).optional().describe('Original filename'),
+          options: z
+            .record(z.string().max(MAX_OPTION_KEY_LENGTH), z.any())
+            .optional()
+            .describe('Additional advanced options'),
         })
       ),
       handler: async (ctx, input) => {
@@ -243,10 +257,13 @@ export const JinaReaderConnector: ConnectorSpec = {
       description: 'Render a document file to image. Office and PDF files supported.',
       input: lazySchema(() =>
         z.object({
-          file: z.string().describe('Base64-encoded file content'),
-          filename: z.string().optional().describe('Original filename'),
+          file: z.string().max(MAX_FILE_BASE64_LENGTH).describe('Base64-encoded file content'),
+          filename: z.string().max(MAX_FILENAME_LENGTH).optional().describe('Original filename'),
           pageNumber: z.number().optional().describe('Page number to render (starting from 1)'),
-          options: z.record(z.string(), z.any()).optional().describe('Additional advanced options'),
+          options: z
+            .record(z.string().max(MAX_OPTION_KEY_LENGTH), z.any())
+            .optional()
+            .describe('Additional advanced options'),
         })
       ),
       handler: async (ctx, input) => {
