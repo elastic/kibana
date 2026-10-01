@@ -20,7 +20,7 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery } from '../../../common/utils';
-import { openAfterDismissingOtherFlyouts } from '@kbn/discover-utils';
+import { dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import {
   MetricsExperienceStateProvider,
   useMetricsExperienceState,
@@ -38,7 +38,7 @@ jest.mock('@kbn/discover-utils', () => {
 
   return {
     DiscoverFlyouts: { metricInsights: 'metricInsights' },
-    openAfterDismissingOtherFlyouts: jest.fn((_flyout: string, open: () => void) => open()),
+    dismissAllFlyoutsExceptFor: jest.fn(),
     METRICS_GRID_HISTOGRAM_PERCENTILES,
     METRICS_GRID_SETTINGS_DEFAULTS,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
@@ -616,9 +616,9 @@ describe('MetricsGrid', () => {
     });
   });
 
-  describe('flyout dismissal before opening', () => {
-    it('should open the insights flyout through the other flyouts being dismissed first', () => {
-      renderMetricsGrid();
+  describe('flyout dismissal on open', () => {
+    it('dismisses the other flyouts when View details opens the insights flyout', () => {
+      const { queryByTestId } = renderMetricsGrid();
 
       // Get the onViewDetails callback passed to the first Chart
       const chartCalls = (Chart as jest.Mock).mock.calls;
@@ -627,29 +627,20 @@ describe('MetricsGrid', () => {
       const firstChartProps = chartCalls[0][0];
       expect(firstChartProps.onViewDetails).toBeDefined();
 
-      (openAfterDismissingOtherFlyouts as jest.Mock).mockClear();
+      (dismissAllFlyoutsExceptFor as jest.Mock).mockClear();
 
       // Trigger the onViewDetails callback
       act(() => {
         firstChartProps.onViewDetails();
       });
 
-      // The flyout must only be opened by the sequencing helper, so it never mounts while
-      // another push flyout still owns the shared offset.
-      expect(openAfterDismissingOtherFlyouts).toHaveBeenCalledTimes(1);
-      expect(openAfterDismissingOtherFlyouts).toHaveBeenCalledWith(
-        'metricInsights',
-        expect.any(Function)
-      );
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledTimes(1);
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
+      expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
     });
 
-    it('keeps a restored flyout unmounted until the other flyouts have been dismissed', () => {
-      let openFlyout: (() => void) | undefined;
-      (openAfterDismissingOtherFlyouts as jest.Mock).mockImplementationOnce(
-        (_flyout: string, open: () => void) => {
-          openFlyout = open;
-        }
-      );
+    it('dismisses the other flyouts when a tab restores its insights flyout', () => {
+      (dismissAllFlyoutsExceptFor as jest.Mock).mockClear();
 
       const initialFlyoutState: FlyoutState = {
         gridPosition: 1,
@@ -668,7 +659,8 @@ describe('MetricsGrid', () => {
         />
       );
 
-      expect(openAfterDismissingOtherFlyouts).not.toHaveBeenCalled();
+      expect(dismissAllFlyoutsExceptFor).not.toHaveBeenCalled();
+      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
 
       rerender(
         <MetricsGridWithRestorableState
@@ -680,14 +672,7 @@ describe('MetricsGrid', () => {
         />
       );
 
-      expect(openAfterDismissingOtherFlyouts).toHaveBeenCalledWith(
-        'metricInsights',
-        expect.any(Function)
-      );
-      expect(queryByTestId('metricsExperienceFlyout')).not.toBeInTheDocument();
-
-      act(() => openFlyout?.());
-
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
       expect(queryByTestId('metricsExperienceFlyout')).toBeInTheDocument();
     });
   });
