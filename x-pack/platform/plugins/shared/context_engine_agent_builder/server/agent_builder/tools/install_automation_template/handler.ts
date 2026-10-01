@@ -117,7 +117,6 @@ export const findInstalledTemplateWorkflowId = async ({
   const workflowsManagement = getWorkflowsManagement();
   const templateTag = AUTOMATION_TEMPLATE_TAGS[template];
   const templateName = parseWorkflowNameFromYaml(workflowYaml);
-  let nameMatch: string | undefined;
 
   for (const automation of aiIndex.automations) {
     if (automation.type !== 'workflow') {
@@ -145,6 +144,8 @@ export const findInstalledTemplateWorkflowId = async ({
     // matching only. A tag match without a name match would overwrite a differently-named
     // automation of the same template type, which is the opposite of the multi-instance intent.
     // The tag path is retained only for callers that supply no name (pre-name backwards compat).
+    // Return immediately on match so later unrelated workflow reads cannot block an already-found
+    // replacement target.
     if (templateName) {
       if (workflow.name === templateName) {
         // Guard against cross-template name collisions: a workflow carrying a different
@@ -152,16 +153,16 @@ export const findInstalledTemplateWorkflowId = async ({
         const hasOtherTemplateTag = Object.values(AUTOMATION_TEMPLATE_TAGS).some(
           (tag) => tag !== templateTag && workflow.tags?.includes(tag)
         );
-        if (!hasOtherTemplateTag && nameMatch === undefined) {
-          nameMatch = workflow.id ?? automation.value;
+        if (!hasOtherTemplateTag) {
+          return workflow.id ?? automation.value;
         }
       }
-    } else if (workflow.tags?.includes(templateTag) && nameMatch === undefined) {
-      nameMatch = workflow.id ?? automation.value;
+    } else if (workflow.tags?.includes(templateTag)) {
+      return workflow.id ?? automation.value;
     }
   }
 
-  return nameMatch;
+  return undefined;
 };
 
 export const installAutomationTemplateHandler = async ({
