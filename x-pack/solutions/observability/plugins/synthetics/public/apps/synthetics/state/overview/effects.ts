@@ -6,6 +6,7 @@
  */
 
 import { call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
+import type { Action } from 'redux-actions';
 import type { OverviewStatusStateReducer } from '../overview_status';
 import { selectOverviewStatus } from '../overview_status';
 import type { OverviewTrend, TrendTable } from '../../../../../common/types';
@@ -17,7 +18,7 @@ import type { RequestCancellationManager } from '../request_cancellation_manager
 export const TRENDS_CHUNK_SIZE = 250;
 
 export function* fetchTrendEffect(
-  action: ReturnType<typeof trendStatsBatch.get>,
+  action: Action<TrendRequest[]>,
   requestCancellationManager?: RequestCancellationManager
 ): Generator<unknown, void, TrendTable> {
   let requestSignal: AbortSignal | undefined;
@@ -41,7 +42,9 @@ export function* fetchTrendEffect(
 }
 
 export function* fetchOverviewTrendStats(requestCancellationManager?: RequestCancellationManager) {
-  yield takeEvery(trendStatsBatch.get, fetchTrendEffect, requestCancellationManager);
+  yield takeEvery(String(trendStatsBatch.get), function* (action: Action<TrendRequest[]>): Generator {
+    yield call(fetchTrendEffect, action, requestCancellationManager);
+  });
 }
 
 export function* refreshTrends(
@@ -92,5 +95,7 @@ export function* refreshTrends(
 export function* refreshOverviewTrendStats(
   requestCancellationManager?: RequestCancellationManager
 ) {
-  yield takeLeading(refreshOverviewTrends.get, refreshTrends, requestCancellationManager);
+  yield takeLeading(String(refreshOverviewTrends.get), function* (): Generator {
+    yield call(refreshTrends, requestCancellationManager);
+  });
 }
