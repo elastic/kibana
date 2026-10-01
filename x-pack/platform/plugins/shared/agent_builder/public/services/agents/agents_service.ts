@@ -42,7 +42,9 @@ export class AgentService {
    * List all agents
    */
   async list(options?: AgentListOptions): Promise<ListAgentResponseItem[]> {
-    const res = await this.http.get<ListAgentResponse>(`${publicApiPath}/agents`);
+    const res = await this.http.get<ListAgentResponse>(`${publicApiPath}/agents`, {
+      query: { include_hidden: options?.includeHidden ?? false },
+    });
     return res.results;
   }
 

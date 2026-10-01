@@ -11,13 +11,7 @@ import type {
   AgentDefinition,
 } from '@kbn/agent-builder-common';
 
-export interface AgentListOptions {
-  /**
-   * When true, agents of a managed (non-chat) type are included in the results.
-   * Defaults to false
-   */
-  includeManaged?: boolean;
-}
+export type { AgentListOptions } from '@kbn/agent-builder-common';
 
 export type AgentCreateRequest = Omit<
   AgentDefinition,

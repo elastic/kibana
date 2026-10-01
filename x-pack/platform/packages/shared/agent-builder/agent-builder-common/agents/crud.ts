@@ -10,15 +10,15 @@ import type { AgentAccessControl } from './access_control';
 
 export interface AgentListOptions {
   /**
-   * When true, agents of a managed (non-chat) type are included in the results.
+   * When true, agents marked as hidden are included in the results.
    * Defaults to false.
    */
-  includeManaged?: boolean;
+  includeHidden?: boolean;
 }
 
 export type AgentCreateRequest = Omit<
   AgentDefinition,
-  'type' | 'readonly' | 'created_by' | 'access_control'
+  'type' | 'readonly' | 'created_by' | 'access_control' | 'hidden'
 > & {
   /**
    * Id of a registered agent type. Defaults to the chat type (empty base).

@@ -22,6 +22,7 @@ import {
   EuiLink,
   EuiSkeletonText,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTextBlockTruncate,
   EuiToolTip,
@@ -164,7 +165,8 @@ const spaceDefaultBadgeTooltip = i18n.translate(
 );
 
 export const AgentsList: React.FC = () => {
-  const { agents, isLoading, error } = useAgentBuilderAgents();
+  const [includeHidden, setIncludeHidden] = React.useState(false);
+  const { agents, isLoading, error } = useAgentBuilderAgents({ includeHidden });
   const profileMap = useOwnerProfiles(agents ?? []);
   const isContextEngineEnabled = useIsContextEngineEnabled();
   const {
@@ -509,6 +511,19 @@ export const AgentsList: React.FC = () => {
           <EuiSpacer size="m" />
         </>
       )}
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label={i18n.translate('xpack.agentBuilder.agents.includeHiddenToggle', {
+              defaultMessage: 'Show hidden agents',
+            })}
+            checked={includeHidden}
+            onChange={(e) => setIncludeHidden(e.target.checked)}
+            data-test-subj="agentBuilderAgentsListIncludeHiddenToggle"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiInMemoryTable
         tableCaption={i18n.translate('xpack.agentBuilder.agents.tableCaption', {
           defaultMessage: 'Agents',

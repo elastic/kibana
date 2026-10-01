@@ -257,7 +257,13 @@ export function registerAgentRoutes({
     .addVersion(
       {
         version: '2023-10-31',
-        validate: false,
+        validate: {
+          request: {
+            query: schema.object({
+              include_hidden: schema.boolean({ defaultValue: false }),
+            }),
+          },
+        },
         options: {
           oasOperationObject: () => path.join(__dirname, 'examples/agents_list.yaml'),
         },
@@ -265,7 +271,8 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents: agentsService } = getInternalServices();
         const service = await agentsService.getRegistry({ request });
-        const agents = await service.list();
+        const includeHidden = request.query.include_hidden;
+        const agents = await service.list({ includeHidden });
         const contextEngineEnabled = await isContextEngineEnabled(ctx);
         return response.ok<ListAgentResponse>({
           body: { results: agents.map((agent) => withAiIndices(agent, contextEngineEnabled)) },

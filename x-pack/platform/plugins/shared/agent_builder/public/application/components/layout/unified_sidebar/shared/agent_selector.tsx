@@ -12,6 +12,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 
 import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
+import { useAgentBuilderAgentById } from '../../../../hooks/agents/use_agent_by_id';
 import { storageKeys } from '../../../../storage_keys';
 import { useActiveSpaceId } from '../../../../context/active_space_context';
 import { AgentSelectorDropdown } from '../../../common/agent_selector/agent_selector_dropdown';
@@ -31,7 +32,13 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ agentId, getNaviga
   const spaceId = useActiveSpaceId();
   const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
 
-  const currentAgent = agents.find((a) => a.id === agentId);
+  const currentAgentFromList = agents.find((a) => a.id === agentId);
+  // If the agent isn't in the visible list (e.g. it's hidden), fetch it directly so the
+  // selector still shows its name instead of "(Deleted agent)".
+  const { agent: currentAgentById } = useAgentBuilderAgentById(
+    !isLoading && !currentAgentFromList ? agentId : undefined
+  );
+  const currentAgent = currentAgentFromList ?? currentAgentById ?? undefined;
 
   const handleAgentChange = useCallback(
     (newAgentId: string) => {

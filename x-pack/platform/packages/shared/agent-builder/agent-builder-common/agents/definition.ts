@@ -59,6 +59,12 @@ export interface AgentDefinition {
    */
   readonly: boolean;
   /**
+   * When true, the agent is hidden from UI listings (agent picker, management page) by default.
+   * For built-in agents, set explicitly at registration time.
+   * For persisted agents, derived automatically: system-created non-chat agents are hidden.
+   */
+  hidden?: boolean;
+  /**
    * Access control controls who can read, run, write, delete, and manage this agent.
    */
   access_control?: AgentAccessControl;
