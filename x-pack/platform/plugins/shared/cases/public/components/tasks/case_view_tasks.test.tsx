@@ -69,7 +69,7 @@ const refetch = jest.fn();
 
 const mockTasksQuery = (overrides: Partial<ReturnType<typeof hooks.useGetCaseTasks>> = {}) =>
   mockedHooks.useGetCaseTasks.mockReturnValue({
-    data: { tasks },
+    data: { tasks, comment_counts: { 'root-1': 2 } },
     isLoading: false,
     isError: false,
     refetch,
@@ -114,7 +114,7 @@ describe('CaseViewTasks', () => {
   });
 
   it('shows the empty prompt with actions for users who can update', () => {
-    mockTasksQuery({ data: { tasks: [] } });
+    mockTasksQuery({ data: { tasks: [], comment_counts: {} } });
     renderWithTestingProviders(<CaseViewTasks caseId="case-1" />, {
       wrapperProps: { permissions: allCasesPermissions() },
     });
@@ -125,7 +125,7 @@ describe('CaseViewTasks', () => {
   });
 
   it('shows the empty prompt without actions for read-only users', () => {
-    mockTasksQuery({ data: { tasks: [] } });
+    mockTasksQuery({ data: { tasks: [], comment_counts: {} } });
     renderWithTestingProviders(<CaseViewTasks caseId="case-1" />, {
       wrapperProps: { permissions: readCasesPermissions() },
     });

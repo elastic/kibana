@@ -16,6 +16,7 @@ import {
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
   CASE_TASK_SAVED_OBJECT,
   CASE_TASK_TEMPLATE_SAVED_OBJECT,
+  CASE_TASK_COMMENT_SAVED_OBJECT,
 } from '../constants';
 
 interface CasesConfigType {
@@ -48,7 +49,11 @@ export const getSavedObjectsTypes = (config?: Partial<CasesConfigType>): string[
   }
 
   if (config?.tasks?.enabled) {
-    experimentalSOs.push(CASE_TASK_SAVED_OBJECT, CASE_TASK_TEMPLATE_SAVED_OBJECT);
+    experimentalSOs.push(
+      CASE_TASK_SAVED_OBJECT,
+      CASE_TASK_TEMPLATE_SAVED_OBJECT,
+      CASE_TASK_COMMENT_SAVED_OBJECT
+    );
   }
 
   return [...baseSavedObjects, ...experimentalSOs];

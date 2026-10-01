@@ -223,7 +223,7 @@ describe('CaseTaskService', () => {
         ])
       );
 
-      await expect(service.deleteTask('task-1')).resolves.toBe(2);
+      await expect(service.deleteTask('task-1')).resolves.toEqual(['task-1', 'child-1', 'child-2']);
 
       expect(soClient.find.mock.calls[0][0].filter).toMatchObject({
         arguments: [{ value: 'cases-tasks.attributes.parent_task_id' }, { value: 'task-1' }],

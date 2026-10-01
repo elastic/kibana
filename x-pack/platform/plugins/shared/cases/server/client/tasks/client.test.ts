@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_TASKS_PER_CASE } from '../../../common/constants';
+import { MAX_COMMENTS_PER_TASK, MAX_TASKS_PER_CASE } from '../../../common/constants';
 import type { CaseTask } from '../../../common/types/domain/task/v1';
 import { Operations } from '../../authorization';
 import { mockCases } from '../../mocks';
@@ -38,8 +38,14 @@ const task: CaseTask = {
 
 describe('TasksSubClient', () => {
   const clientArgs = createCasesClientMockArgs();
-  const { taskService, taskTemplateService, caseService, userActionService, licensingService } =
-    clientArgs.services;
+  const {
+    taskService,
+    taskTemplateService,
+    taskCommentService,
+    caseService,
+    userActionService,
+    licensingService,
+  } = clientArgs.services;
   const client = createTasksSubClient(clientArgs);
 
   beforeEach(() => {
@@ -51,7 +57,9 @@ describe('TasksSubClient', () => {
     taskService.getTasksByCase.mockResolvedValue([task]);
     taskService.createTask.mockResolvedValue(task);
     taskService.updateTask.mockResolvedValue({ ...task, status: 'completed' });
-    taskService.deleteTask.mockResolvedValue(2);
+    taskService.deleteTask.mockResolvedValue(['task-1', 'child-1', 'child-2']);
+    taskCommentService.countByCase.mockResolvedValue({});
+    taskCommentService.getByTask.mockResolvedValue({ comments: [], total: 0 });
     taskService.bulkCreateTasks.mockResolvedValue([task]);
   });
 
@@ -177,6 +185,80 @@ describe('TasksSubClient', () => {
           type: 'delete_task',
           payload: { task_id: 'task-1', task_title: 'Block sender', subtasks_deleted: 2 },
         }),
+      });
+    });
+  });
+
+  describe('comments', () => {
+    const comment = {
+      id: 'c-1',
+      version: 'v1',
+      task_id: 'task-1',
+      case_id: theCase.id,
+      comment: 'Checked the logs.',
+      owner: theCase.attributes.owner,
+      created_at: '2026-01-01T00:00:00.000Z',
+      created_by: task.created_by,
+    };
+
+    it('returns tasks with their comment counts', async () => {
+      taskCommentService.countByCase.mockResolvedValue({ 'task-1': 2 });
+      await expect(client.getByCase(theCase.id)).resolves.toEqual({
+        tasks: [task],
+        comment_counts: { 'task-1': 2 },
+      });
+    });
+
+    it('adds a comment with the comment privilege and the task owner, without a case user action', async () => {
+      taskCommentService.create.mockResolvedValue(comment);
+
+      await expect(client.addComment('task-1', { comment: 'Checked the logs.' })).resolves.toEqual(
+        comment
+      );
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: Operations.createTaskComment,
+        entities: [{ id: theCase.id, owner: theCase.attributes.owner }],
+      });
+      expect(taskCommentService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskId: 'task-1',
+          caseId: theCase.id,
+          comment: 'Checked the logs.',
+        })
+      );
+      expect(userActionService.creator.createUserAction).not.toHaveBeenCalled();
+    });
+
+    it('rejects an empty comment and enforces the per-task limit', async () => {
+      await expect(client.addComment('task-1', { comment: '   ' })).rejects.toThrow(
+        'The comment field cannot be an empty string.'
+      );
+
+      taskCommentService.getByTask.mockResolvedValue({
+        comments: [],
+        total: MAX_COMMENTS_PER_TASK,
+      });
+      await expect(client.addComment('task-1', { comment: 'one more' })).rejects.toThrow(
+        `at most ${MAX_COMMENTS_PER_TASK} comments`
+      );
+    });
+
+    it('deletes a comment only when it belongs to the task', async () => {
+      taskCommentService.get.mockResolvedValue({ ...comment, task_id: 'other' });
+      await expect(client.deleteComment('task-1', 'c-1')).rejects.toThrow(
+        'does not belong to task'
+      );
+      expect(taskCommentService.delete).not.toHaveBeenCalled();
+
+      taskCommentService.get.mockResolvedValue(comment);
+      await client.deleteComment('task-1', 'c-1');
+      expect(taskCommentService.delete).toHaveBeenCalledWith('c-1', { refresh: 'wait_for' });
+    });
+
+    it('removes the comments of a deleted task and its sub-tasks', async () => {
+      await client.delete('task-1');
+      expect(taskCommentService.deleteBy).toHaveBeenCalledWith({
+        taskIds: ['task-1', 'child-1', 'child-2'],
       });
     });
   });

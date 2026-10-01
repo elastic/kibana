@@ -28,6 +28,7 @@ import type {
   FieldDefinitionsService,
   CaseTaskService,
   CaseTaskTemplateService,
+  CaseTaskCommentService,
 } from '../services';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { LicensingService } from '../services/licensing';
@@ -51,6 +52,7 @@ export interface CasesServices {
   fieldDefinitionsService: FieldDefinitionsService;
   taskService: CaseTaskService;
   taskTemplateService: CaseTaskTemplateService;
+  taskCommentService: CaseTaskCommentService;
 }
 
 /**

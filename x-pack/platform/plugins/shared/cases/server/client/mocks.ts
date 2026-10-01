@@ -60,6 +60,7 @@ import {
   createFieldDefinitionsServiceMock,
   createCaseTaskServiceMock,
   createCaseTaskTemplateServiceMock,
+  createCaseTaskCommentServiceMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
 import {
@@ -207,6 +208,9 @@ const createTasksSubClientMock = (): TasksSubClientMock => {
     delete: jest.fn(),
     reorder: jest.fn(),
     applyTemplate: jest.fn(),
+    getComments: jest.fn(),
+    addComment: jest.fn(),
+    deleteComment: jest.fn(),
   });
 };
 
@@ -308,6 +312,7 @@ export const createCasesClientMockArgs = () => {
       fieldDefinitionsService: createFieldDefinitionsServiceMock(),
       taskService: createCaseTaskServiceMock(),
       taskTemplateService: createCaseTaskTemplateServiceMock(),
+      taskCommentService: createCaseTaskCommentServiceMock(),
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),

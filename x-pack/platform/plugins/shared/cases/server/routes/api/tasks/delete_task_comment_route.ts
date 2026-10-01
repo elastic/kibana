@@ -6,32 +6,34 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CASE_TASKS_URL } from '../../../../common/constants';
+import { CASE_TASK_COMMENT_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
-export const getCaseTasksRoute = createCasesRoute({
-  method: 'get',
-  path: CASE_TASKS_URL,
+export const deleteTaskCommentRoute = createCasesRoute({
+  method: 'delete',
+  path: CASE_TASK_COMMENT_DETAILS_URL,
   security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'internal',
-    summary: 'Get the tasks of a case',
+    summary: 'Delete a task comment',
   },
   params: {
     params: schema.object({
       case_id: schema.string(),
+      task_id: schema.string(),
+      comment_id: schema.string(),
     }),
   },
   handler: async ({ context, request, response }) => {
     try {
       const casesClient = await (await context.cases).getCasesClient();
-      const body = await casesClient.tasks.getByCase(request.params.case_id);
-      return response.ok({ body });
+      await casesClient.tasks.deleteComment(request.params.task_id, request.params.comment_id);
+      return response.noContent();
     } catch (error) {
       throw createCaseError({
-        message: `Failed to get the tasks of a case in route: ${error}`,
+        message: `Failed to delete a task comment in route: ${error}`,
         error,
       });
     }

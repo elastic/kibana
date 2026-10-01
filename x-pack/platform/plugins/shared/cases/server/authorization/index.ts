@@ -17,6 +17,7 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_TASK_SAVED_OBJECT,
   CASE_TASK_TEMPLATE_SAVED_OBJECT,
+  CASE_TASK_COMMENT_SAVED_OBJECT,
 } from '../../common/constants';
 import type { Verbs, OperationDetails } from './types';
 import { ReadOperations, WriteOperations } from './types';
@@ -421,6 +422,33 @@ const TaskOperations = {
   },
 };
 
+const TaskCommentOperations = {
+  [ReadOperations.GetTaskComments]: {
+    ecsType: EVENT_TYPES.access,
+    name: ReadOperations.GetComment as const,
+    action: 'case_task_comment_get',
+    verbs: accessVerbs,
+    docType: 'task comments',
+    savedObjectType: CASE_TASK_COMMENT_SAVED_OBJECT,
+  },
+  [WriteOperations.CreateTaskComment]: {
+    ecsType: EVENT_TYPES.creation,
+    name: WriteOperations.CreateComment as const,
+    action: 'case_task_comment_create',
+    verbs: createVerbs,
+    docType: 'task comment',
+    savedObjectType: CASE_TASK_COMMENT_SAVED_OBJECT,
+  },
+  [WriteOperations.DeleteTaskComment]: {
+    ecsType: EVENT_TYPES.deletion,
+    name: WriteOperations.DeleteComment as const,
+    action: 'case_task_comment_delete',
+    verbs: deleteVerbs,
+    docType: 'task comment',
+    savedObjectType: CASE_TASK_COMMENT_SAVED_OBJECT,
+  },
+};
+
 const TaskTemplateOperations = {
   [ReadOperations.GetTaskTemplate]: {
     ecsType: EVENT_TYPES.access,
@@ -473,6 +501,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   ...ConfigurationOperations,
   ...AttachmentOperations,
   ...TaskOperations,
+  ...TaskCommentOperations,
   ...TaskTemplateOperations,
   [ReadOperations.GetTags]: {
     ecsType: EVENT_TYPES.access,

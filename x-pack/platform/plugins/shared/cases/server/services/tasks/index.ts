@@ -237,11 +237,11 @@ export class CaseTaskService {
     }
   }
 
-  /** Deletes a task and its sub-tasks. Returns the number of sub-tasks removed. */
+  /** Deletes a task and its sub-tasks. Returns every deleted id, the task itself first. */
   public async deleteTask(
     taskId: string,
     { refresh }: { refresh?: boolean } = {}
-  ): Promise<number> {
+  ): Promise<string[]> {
     try {
       const { tasks: children } = await this.findTasks({ parentTaskId: taskId });
       const ids = [taskId, ...children.map((t) => t.id)];
@@ -249,7 +249,7 @@ export class CaseTaskService {
         ids.map((id) => ({ type: CASE_TASK_SAVED_OBJECT, id })),
         { refresh }
       );
-      return children.length;
+      return ids;
     } catch (error) {
       throw createCaseError({
         message: `Failed to delete task ${taskId}: ${error}`,

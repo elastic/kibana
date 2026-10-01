@@ -53,6 +53,7 @@ export enum ReadOperations {
   GetTask = 'getTask',
   FindTasks = 'findTasks',
   GetTaskTemplate = 'getTaskTemplate',
+  GetTaskComments = 'getTaskComments',
   FindTaskTemplates = 'findTaskTemplates',
 }
 
@@ -83,6 +84,8 @@ export enum WriteOperations {
   CreateTaskTemplate = 'createTaskTemplate',
   UpdateTaskTemplate = 'updateTaskTemplate',
   DeleteTaskTemplate = 'deleteTaskTemplate',
+  CreateTaskComment = 'createTaskComment',
+  DeleteTaskComment = 'deleteTaskComment',
 }
 
 /**

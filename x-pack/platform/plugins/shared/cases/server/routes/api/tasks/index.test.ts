@@ -15,7 +15,7 @@ describe('task routes', () => {
     const disabled = ConfigSchema.validate({ tasks: { enabled: false } });
 
     const routes = [...getTaskRoutes(enabled), ...getTaskTemplateRoutes(enabled)];
-    expect(routes).toHaveLength(13);
+    expect(routes).toHaveLength(16);
     expect(routes.every((route) => route.routerOptions?.access === 'internal')).toBe(true);
 
     expect(getTaskRoutes(disabled)).toEqual([]);

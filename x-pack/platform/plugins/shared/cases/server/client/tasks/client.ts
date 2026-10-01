@@ -6,19 +6,24 @@
  */
 
 import Boom from '@hapi/boom';
-import { MAX_TASKS_PER_CASE } from '../../../common/constants';
+import { MAX_COMMENTS_PER_TASK, MAX_TASKS_PER_CASE } from '../../../common/constants';
 import type {
+  TaskCommentCreateRequest,
+  TaskCommentsResponse,
   TaskCreateRequest,
   TaskPatchRequest,
   TasksFindRequest,
   TasksFindResponse,
+  TasksResponse,
 } from '../../../common/types/api/task/v1';
 import {
+  TaskCommentCreateRequestRt,
   TaskCreateRequestRt,
   TaskPatchRequestRt,
   TasksFindRequestRt,
 } from '../../../common/types/api/task/v1';
 import type { CaseTask } from '../../../common/types/domain/task/v1';
+import type { CaseTaskComment } from '../../../common/types/domain/task_comment/v1';
 import { UserActionTypes } from '../../../common/types/domain/user_action/action/v1';
 import { Operations, ReadOperations, WriteOperations } from '../../authorization';
 import { LICENSING_CASE_TASKS_FEATURE } from '../../common/constants';
@@ -30,7 +35,7 @@ import { applyTaskListToCase, ensureTaskCapacity } from './apply_task_list';
 export interface TasksSubClient {
   create(caseId: string, params: TaskCreateRequest): Promise<CaseTask>;
   get(taskId: string): Promise<CaseTask>;
-  getByCase(caseId: string): Promise<CaseTask[]>;
+  getByCase(caseId: string): Promise<TasksResponse>;
   /** Cross-case search, e.g. the tasks assigned to the current user. */
   find(params: TasksFindRequest): Promise<TasksFindResponse>;
   update(taskId: string, params: TaskPatchRequest): Promise<CaseTask>;
@@ -38,6 +43,10 @@ export interface TasksSubClient {
   reorder(caseId: string, orderedTaskIds: string[]): Promise<void>;
   /** Adds every task of a task list to the case. */
   applyTemplate(caseId: string, templateId: string): Promise<CaseTask[]>;
+  /** Task threads stay apart from the case activity; they never write case user actions. */
+  getComments(taskId: string): Promise<TaskCommentsResponse>;
+  addComment(taskId: string, params: TaskCommentCreateRequest): Promise<CaseTaskComment>;
+  deleteComment(taskId: string, commentId: string): Promise<void>;
 }
 
 const asArray = <T>(value: T | T[] | undefined): T[] | undefined =>
@@ -49,6 +58,7 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
       caseService,
       taskService,
       taskTemplateService,
+      taskCommentService,
       userActionService,
       licensingService,
     },
@@ -154,7 +164,11 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
       try {
         await ensureEnabled();
         await getAuthorizedCase(caseId, ReadOperations.FindTasks);
-        return await taskService.getTasksByCase(caseId);
+        const [tasks, commentCounts] = await Promise.all([
+          taskService.getTasksByCase(caseId),
+          taskCommentService.countByCase(caseId),
+        ]);
+        return { tasks, comment_counts: commentCounts };
       } catch (error) {
         throw createCaseError({
           message: `Failed to get tasks for case ${caseId}: ${error}`,
@@ -247,7 +261,9 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
       try {
         await ensureEnabled();
         const task = await getAuthorizedTask(taskId, WriteOperations.DeleteTask);
-        const subtasksDeleted = await taskService.deleteTask(taskId, { refresh: true });
+        const deletedIds = await taskService.deleteTask(taskId, { refresh: true });
+        await taskCommentService.deleteBy({ taskIds: deletedIds });
+        const subtasksDeleted = deletedIds.length - 1;
 
         await userActionService.creator.createUserAction({
           userAction: {
@@ -309,6 +325,64 @@ export const createTasksSubClient = (clientArgs: CasesClientArgs): TasksSubClien
       } catch (error) {
         throw createCaseError({
           message: `Failed to apply task list ${templateId} to case ${caseId}: ${error}`,
+          error,
+          logger,
+        });
+      }
+    },
+
+    async getComments(taskId) {
+      try {
+        await ensureEnabled();
+        await getAuthorizedTask(taskId, ReadOperations.GetTaskComments);
+        return await taskCommentService.getByTask(taskId);
+      } catch (error) {
+        throw createCaseError({
+          message: `Failed to get comments for task ${taskId}: ${error}`,
+          error,
+          logger,
+        });
+      }
+    },
+
+    async addComment(taskId, params) {
+      try {
+        await ensureEnabled();
+        const { comment } = decodeWithExcessOrThrow(TaskCommentCreateRequestRt)(params);
+        const task = await getAuthorizedTask(taskId, WriteOperations.CreateTaskComment);
+        const { total } = await taskCommentService.getByTask(taskId);
+        if (total >= MAX_COMMENTS_PER_TASK) {
+          throw Boom.badRequest(`A task can have at most ${MAX_COMMENTS_PER_TASK} comments`);
+        }
+        return await taskCommentService.create({
+          caseId: task.case_id,
+          taskId,
+          comment,
+          owner: task.owner,
+          user,
+          refresh: 'wait_for',
+        });
+      } catch (error) {
+        throw createCaseError({
+          message: `Failed to add a comment to task ${taskId}: ${error}`,
+          error,
+          logger,
+        });
+      }
+    },
+
+    async deleteComment(taskId, commentId) {
+      try {
+        await ensureEnabled();
+        const task = await getAuthorizedTask(taskId, WriteOperations.DeleteTaskComment);
+        const comment = await taskCommentService.get(commentId);
+        if (comment.task_id !== task.id) {
+          throw Boom.notFound(`Comment ${commentId} does not belong to task ${taskId}`);
+        }
+        await taskCommentService.delete(commentId, { refresh: 'wait_for' });
+      } catch (error) {
+        throw createCaseError({
+          message: `Failed to delete comment ${commentId} from task ${taskId}: ${error}`,
           error,
           logger,
         });

@@ -6,32 +6,37 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CASE_TASKS_URL } from '../../../../common/constants';
+import { CASE_TASK_COMMENTS_URL } from '../../../../common/constants';
+import type { taskApiV1 } from '../../../../common/types/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
-export const getCaseTasksRoute = createCasesRoute({
-  method: 'get',
-  path: CASE_TASKS_URL,
+export const postTaskCommentRoute = createCasesRoute({
+  method: 'post',
+  path: CASE_TASK_COMMENTS_URL,
   security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'internal',
-    summary: 'Get the tasks of a case',
+    summary: 'Add a comment to a task',
   },
   params: {
     params: schema.object({
       case_id: schema.string(),
+      task_id: schema.string(),
     }),
   },
   handler: async ({ context, request, response }) => {
     try {
       const casesClient = await (await context.cases).getCasesClient();
-      const body = await casesClient.tasks.getByCase(request.params.case_id);
-      return response.ok({ body });
+      const comment = await casesClient.tasks.addComment(
+        request.params.task_id,
+        request.body as taskApiV1.TaskCommentCreateRequest
+      );
+      return response.ok({ body: comment });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to get the tasks of a case in route: ${error}`,
+        message: `Failed to add a comment to a task in route: ${error}`,
         error,
       });
     }

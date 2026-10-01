@@ -8,6 +8,7 @@
 import * as rt from 'io-ts';
 import {
   MAX_ASSIGNEES_PER_CASE,
+  MAX_COMMENT_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
@@ -22,6 +23,7 @@ import {
   CaseTaskStatusRt,
 } from '../../domain/task/v1';
 import { CaseTaskTemplateTaskRt, CaseTaskTemplateRt } from '../../domain/task_template/v1';
+import { CaseTaskCommentRt } from '../../domain/task_comment/v1';
 
 const TitleRt = limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH });
 const DescriptionRt = limitedStringSchema({
@@ -87,7 +89,20 @@ export const TasksReorderRequestRt = rt.strict({
   }),
 });
 
-export const TasksResponseRt = rt.strict({ tasks: rt.array(CaseTaskRt) });
+export const TasksResponseRt = rt.strict({
+  tasks: rt.array(CaseTaskRt),
+  /** Comment count per task id; tasks without comments are absent. */
+  comment_counts: rt.record(rt.string, rt.number),
+});
+
+export const TaskCommentCreateRequestRt = rt.strict({
+  comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+});
+
+export const TaskCommentsResponseRt = rt.strict({
+  comments: rt.array(CaseTaskCommentRt),
+  total: rt.number,
+});
 export const TasksFindResponseRt = rt.strict({
   tasks: rt.array(CaseTaskRt),
   page: rt.number,
@@ -161,6 +176,8 @@ export type TaskPatchRequest = rt.TypeOf<typeof TaskPatchRequestRt>;
 export type TasksFindRequest = rt.TypeOf<typeof TasksFindRequestRt>;
 export type TasksReorderRequest = rt.TypeOf<typeof TasksReorderRequestRt>;
 export type TasksResponse = rt.TypeOf<typeof TasksResponseRt>;
+export type TaskCommentCreateRequest = rt.TypeOf<typeof TaskCommentCreateRequestRt>;
+export type TaskCommentsResponse = rt.TypeOf<typeof TaskCommentsResponseRt>;
 export type TasksFindResponse = rt.TypeOf<typeof TasksFindResponseRt>;
 export type TaskTemplateCreateRequest = rt.TypeOf<typeof TaskTemplateCreateRequestRt>;
 export type TaskTemplatePatchRequest = rt.TypeOf<typeof TaskTemplatePatchRequestRt>;
