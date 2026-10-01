@@ -47,7 +47,7 @@ export interface RulesAdapterV2Params {
     | 'getTags'
     | 'ruleExists'
   >;
-  isServerless: boolean;
+  cpsEnabled: boolean;
 }
 
 /**
@@ -67,17 +67,17 @@ const OWNED_STREAM_TAGS_SIZE = 10000;
  */
 export class RulesAdapterV2 implements IRulesManagementClient {
   private readonly rulesClient: RulesAdapterV2Params['rulesClient'];
-  private readonly isServerless: boolean;
+  private readonly cpsEnabled: boolean;
 
-  constructor({ rulesClient, isServerless }: RulesAdapterV2Params) {
+  constructor({ rulesClient, cpsEnabled }: RulesAdapterV2Params) {
     this.rulesClient = rulesClient;
-    this.isServerless = isServerless;
+    this.cpsEnabled = cpsEnabled;
   }
 
   async createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
     await this.rulesClient
       .createRule({
-        data: toV2CreateBody({ definition, isServerless: this.isServerless }),
+        data: toV2CreateBody({ definition, cpsEnabled: this.cpsEnabled }),
         options: { id },
       })
       .catch((error) => {
@@ -199,7 +199,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
         ? { items: [], errors: [] }
         : await this.rulesClient.bulkCreateRules({
             rules: rulesToCreate.map(({ id, definition }) => ({
-              ...toV2CreateBody({ definition, isServerless: this.isServerless }),
+              ...toV2CreateBody({ definition, cpsEnabled: this.cpsEnabled }),
               id,
               enabled: true,
             })),
@@ -270,7 +270,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   ): Promise<void> {
     await this.rulesClient.updateRule({
       id,
-      data: toV2UpdateBody({ definition, isServerless: this.isServerless }),
+      data: toV2UpdateBody({ definition, cpsEnabled: this.cpsEnabled }),
     });
   }
 
@@ -286,7 +286,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   ): Promise<void> {
     await this.rulesClient
       .createRule({
-        data: toV2CreateBody({ definition, isServerless: this.isServerless }),
+        data: toV2CreateBody({ definition, cpsEnabled: this.cpsEnabled }),
         options: { id },
       })
       .catch((error) => {
@@ -300,23 +300,23 @@ export class RulesAdapterV2 implements IRulesManagementClient {
 
 interface ToV2BodyParams {
   definition: SignificantEventsRuleDefinition;
-  isServerless: boolean;
+  cpsEnabled: boolean;
 }
 
 function toV2BreachQuery({
   esqlQuery,
   timestampField,
-  isServerless,
+  cpsEnabled,
 }: {
   esqlQuery: string;
   timestampField: string;
-  isServerless: boolean;
+  cpsEnabled: boolean;
 }): string {
   const compiled = compileMatchCountBreachQuery(esqlQuery, timestampField);
-  return isServerless ? withAllProjectsRouting(compiled) : compiled;
+  return cpsEnabled ? withAllProjectsRouting(compiled) : compiled;
 }
 
-function toV2CommonBody({ definition, isServerless }: ToV2BodyParams) {
+function toV2CommonBody({ definition, cpsEnabled }: ToV2BodyParams) {
   const { every, lookback } = getMetricSeriesRuleSchedule();
   return {
     metadata: {
@@ -330,22 +330,19 @@ function toV2CommonBody({ definition, isServerless }: ToV2BodyParams) {
     },
     grouping: { fields: [...METRIC_SERIES_GROUPING_FIELDS] },
     query: {
-      format: 'standalone' as const,
-      breach: {
-        query: toV2BreachQuery({
-          esqlQuery: definition.esqlQuery,
-          timestampField: definition.timestampField,
-          isServerless,
-        }),
-      },
+      base: toV2BreachQuery({
+        esqlQuery: definition.esqlQuery,
+        timestampField: definition.timestampField,
+        cpsEnabled,
+      }),
     },
   };
 }
 
-function toV2CreateBody({ definition, isServerless }: ToV2BodyParams) {
+function toV2CreateBody({ definition, cpsEnabled }: ToV2BodyParams) {
   return {
     kind: 'signal' as const,
-    ...toV2CommonBody({ definition, isServerless }),
+    ...toV2CommonBody({ definition, cpsEnabled }),
   };
 }
 

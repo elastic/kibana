@@ -293,6 +293,64 @@ describe('resolveResource', () => {
       });
     });
 
+    it('falls back to an ES|QL view when resolveIndex throws not_found', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({ statusCode: 404 } as any)
+      );
+      esClient.esql.getView.mockResolvedValue({
+        views: [
+          {
+            name: 'logs-proxy-parsed',
+            query: 'FROM logs-* | KEEP status',
+            description: 'Parsed proxy logs',
+          },
+        ],
+      } as never);
+      esClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'status', type: 'integer' },
+          { name: 'host.name', type: 'keyword' },
+        ],
+        values: [],
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'logs-proxy-parsed',
+        esClient,
+        includeViews: true,
+      });
+
+      expect(esClient.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({ query: 'FROM logs-proxy-parsed | LIMIT 0' }),
+        expect.anything()
+      );
+      expect(result).toEqual({
+        name: 'logs-proxy-parsed',
+        type: EsResourceType.view,
+        fields: [
+          { path: 'status', type: 'integer', meta: {} },
+          { path: 'host.name', type: 'keyword', meta: {} },
+        ],
+        description: 'Parsed proxy logs',
+        query: 'FROM logs-* | KEEP status',
+        isTsdb: false,
+      });
+    });
+
+    it('does not resolve views when includeViews is not set', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({ statusCode: 404 } as any)
+      );
+      esClient.esql.getView.mockResolvedValue({
+        views: [{ name: 'logs-proxy-parsed', query: 'FROM logs-*' }],
+      } as never);
+
+      await expect(
+        resolveResourceForEsql({ resourceName: 'logs-proxy-parsed', esClient })
+      ).rejects.toThrow("No resource found for 'logs-proxy-parsed'");
+      expect(esClient.esql.getView).not.toHaveBeenCalled();
+    });
+
     it('falls back to an external ES|QL dataset when resolveIndex finds no resources', async () => {
       esClient.indices.resolveIndex.mockResolvedValue({
         indices: [],

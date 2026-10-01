@@ -14,6 +14,7 @@ import { spaceTest } from '../fixtures';
 
 const ESQL_LIMIT_QUERY = 'from logstash-* | limit 10';
 const ESQL_STATS_QUERY = 'from logstash-* | stats averageB = avg(bytes) by extension';
+const ESQL_CONTROL_QUERY_PREFIX = 'from logstash-* | where extension == ';
 
 spaceTest.describe(
   'Discover ES|QL visualization persistence',
@@ -67,6 +68,42 @@ spaceTest.describe(
           'data-time-range',
           initialTimeRange
         );
+      }
+    );
+
+    spaceTest(
+      'preserves the chart data view ID after reload with a selected ES|QL control',
+      async ({ page, pageObjects, scoutSpace }) => {
+        const { controls, discover } = pageObjects;
+        const sessionName = `ESQL control chart ${scoutSpace.id}`;
+        const getDataViewId = async (): Promise<string | undefined> =>
+          JSON.parse((await discover.getHistogramChart().getAttribute('data-request-data')) ?? '{}')
+            .dataViewId;
+
+        await discover.createEsqlControl(ESQL_CONTROL_QUERY_PREFIX, {
+          variableName: '?extension',
+          values: ['png'],
+        });
+
+        const controlId = await controls.getOnlyControlId();
+        await controls.optionsList.openPopover(controlId);
+        await controls.optionsList.selectOption('png');
+        await controls.optionsList.ensurePopoverIsClosed();
+        await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText('png');
+        await discover.waitUntilSearchingHasFinished();
+        const savedQuery = await discover.getEsqlQueryValue();
+        await discover.changeVisualizationShape('Line');
+
+        await expect.poll(getDataViewId).toMatch(/\S/);
+        const savedDataViewId = await getDataViewId();
+        await discover.saveSearch(sessionName);
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+
+        await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText('png');
+        expect(await discover.getEsqlQueryValue()).toBe(savedQuery);
+        await expect.poll(getDataViewId).toBe(savedDataViewId);
+        expect(await discover.getVisualizationTitle()).toBe('Line');
       }
     );
 

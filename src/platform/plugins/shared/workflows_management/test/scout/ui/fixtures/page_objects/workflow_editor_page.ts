@@ -26,6 +26,8 @@ export class WorkflowEditorPage {
   public actionsMenuSearch: Locator;
   public readOnlyBadge: Locator;
   public readonly accessMode: Locator;
+  public readonly serviceAccountBadges: Locator;
+  public readonly serviceAccountPopup: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
@@ -46,6 +48,10 @@ export class WorkflowEditorPage {
     this.actionsMenuButton = this.page.testSubj.locator('workflowBottomBarActionsMenu');
     this.actionsMenuSearch = this.page.locator('#actions-menu-search');
     this.readOnlyBadge = this.page.testSubj.locator('workflowEditorReadOnlyBadge');
+    this.serviceAccountBadges = this.yamlEditor.locator(
+      '.service-account-name-badge, .service-account-name-badge-unavailable'
+    );
+    this.serviceAccountPopup = this.page.testSubj.locator('serviceAccountEditorPopup');
     this.accessMode = this.page.testSubj.locator('entityAccessControlMode');
   }
 
@@ -342,6 +348,75 @@ export class WorkflowEditorPage {
       null,
       { timeout: 15_000 }
     );
+  }
+
+  async acceptYamlSuggestion(name: string): Promise<void> {
+    await this.getYamlEditorSuggestWidget().getByRole('option', { name, exact: true }).dblclick();
+  }
+
+  async dismissYamlSuggestions(): Promise<void> {
+    await this.page.keyboard.press('Escape');
+  }
+
+  serviceAccountOption(name: string): Locator {
+    return this.serviceAccountPopup.getByRole('option', { name, exact: true });
+  }
+
+  async openServiceAccountPicker(
+    yaml: string,
+    format: 'block' | 'inline' = 'block'
+  ): Promise<void> {
+    if (format === 'inline') {
+      await this.setYamlEditorValue(`${yaml}\nsettings: { run_as: , timezone: UTC }`);
+      await this.setCursorToText(', timezone:');
+    } else {
+      await this.setYamlEditorValue(`${yaml}\nsettings:\n  run_as: `);
+      await this.setCursorToText('run_as: ');
+      await this.page.keyboard.press('End');
+    }
+    await this.page.keyboard.press('Control+Space');
+    await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
+  }
+
+  async openExistingServiceAccountPicker(id: string): Promise<void> {
+    await this.setCursorToText(id);
+    await this.page.keyboard.press('Control+Space');
+    await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
+  }
+
+  async typeServiceAccountSearch(query: string): Promise<void> {
+    await this.page.keyboard.type(query);
+  }
+
+  async selectServiceAccount(name: string): Promise<void> {
+    await this.serviceAccountOption(name).click();
+  }
+
+  async highlightNextServiceAccount(): Promise<void> {
+    await this.page.keyboard.press('ArrowDown');
+  }
+
+  async acceptSelectedServiceAccount(): Promise<void> {
+    await this.page.keyboard.press('Enter');
+  }
+
+  async getServiceAccountBadgeText(): Promise<string> {
+    return (await this.serviceAccountBadges.allTextContents()).join('').replaceAll('\u00a0', ' ');
+  }
+
+  async hoverServiceAccountBadge(): Promise<void> {
+    await this.serviceAccountBadges.filter({ hasText: /^[✓○]/ }).hover();
+  }
+
+  async hoverServiceAccountId(id: string): Promise<void> {
+    const activateEditor = this.yamlEditor.getByRole('button', {
+      name: 'Code Editor, activate edit mode',
+    });
+    if (await activateEditor.isVisible()) {
+      await activateEditor.focus();
+      await this.page.keyboard.press('Enter');
+    }
+    await this.yamlEditor.getByText(id, { exact: true }).hover();
   }
 
   public getYamlEditorSuggestWidget() {
