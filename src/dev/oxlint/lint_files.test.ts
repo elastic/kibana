@@ -16,7 +16,7 @@ import { lintFiles } from './lint_files';
 jest.mock('execa', () => jest.fn());
 jest.mock('./constants', () => ({
   LINT_LOG_PREFIX: '[oxlint]',
-  OXLINT_CONFIG_PATH: '.oxlintrc.json',
+  OXLINT_CONFIG_PATH: 'oxlint.config.mts',
   oxlintBinPath: '/bin/oxlint',
 }));
 jest.mock('fs/promises', () => ({ ...jest.requireActual('fs/promises'), readFile: jest.fn() }));
@@ -71,7 +71,7 @@ describe('oxlint lintFiles', () => {
     expect(passedArgs(0)).toEqual([
       '/bin/oxlint',
       '--config',
-      '.oxlintrc.json',
+      'oxlint.config.mts',
       '--format',
       'json',
       'src/a.ts',
@@ -96,7 +96,7 @@ describe('oxlint lintFiles', () => {
     expect(passedArgs(0)).toEqual([
       '/bin/oxlint',
       '--config',
-      '.oxlintrc.json',
+      'oxlint.config.mts',
       '--format',
       'json',
       'src/dev/file.ts',
@@ -111,7 +111,7 @@ describe('oxlint lintFiles', () => {
     expect(passedArgs(0)).toEqual([
       '/bin/oxlint',
       '--config',
-      '.oxlintrc.json',
+      'oxlint.config.mts',
       '--format',
       'json',
       '--fix',
@@ -198,7 +198,7 @@ describe('oxlint lintFiles', () => {
     expect(passedArgs(1)).toEqual([
       '/bin/oxlint',
       '--config',
-      '.oxlintrc.json',
+      'oxlint.config.mts',
       '--format',
       'json',
       'src/f4000.ts',
@@ -237,7 +237,7 @@ describe('oxlint lintFiles', () => {
     expect(passedArgs(1)).toEqual([
       '/bin/oxlint',
       '--config',
-      '.oxlintrc.json',
+      'oxlint.config.mts',
       '--format',
       'json',
       '--fix',

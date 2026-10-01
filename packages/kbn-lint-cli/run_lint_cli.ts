@@ -67,7 +67,7 @@ async function lintFiles({
       ...(options.fix ? ['--fix'] : []),
       ...(options.quiet ? ['--quiet'] : []),
       '--config',
-      '.oxlintrc.json',
+      'oxlint.config.mts',
       ...options.paths,
     ],
     cwd: REPO_ROOT,

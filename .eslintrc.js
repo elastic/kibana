@@ -2670,7 +2670,7 @@ module.exports = {
       // currently import any path matching `*legacy*`. The workflows_management
       // overlap is gone, and this entry can be dropped entirely once the
       // remaining security_solution consumers migrate. The js-yaml freeze is
-      // handled separately via @kbn/eslint/module_migration in .oxlintrc.json
+      // handled separately via @kbn/eslint/module_migration in .oxlint/module_migration.mts
       // so it does not interact with this override.
       files: AXIOS_LEGACY_CONSUMERS,
       rules: {
