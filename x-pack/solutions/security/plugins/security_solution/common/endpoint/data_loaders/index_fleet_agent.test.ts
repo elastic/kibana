@@ -83,4 +83,24 @@ describe('deleteIndexedFleetAgents', () => {
     expect(refresh).toHaveBeenCalledTimes(5);
     expect(refresh).toHaveBeenCalledWith({ index: '.fleet-agents-*' });
   });
+
+  it('keeps deleting when a refresh fails', async () => {
+    const deleteByQuery = jest.fn().mockResolvedValue({ version_conflicts: 1 });
+    const refresh = jest
+      .fn()
+      .mockResolvedValueOnce({})
+      .mockRejectedValueOnce(new Error('refresh failed'))
+      .mockResolvedValue({});
+
+    const pending = deleteIndexedFleetAgents(
+      createEsClient({ deleteByQuery, refresh }),
+      indexedData
+    );
+    const assertion = expect(pending).rejects.toThrow(EndpointDataLoadingError);
+    await jest.runAllTimersAsync();
+    await assertion;
+
+    expect(deleteByQuery).toHaveBeenCalledTimes(5);
+    expect(refresh).toHaveBeenCalledTimes(5);
+  });
 });

@@ -435,7 +435,7 @@ export const seedAlertFlyoutResponseAction = async ({
       refresh: 'wait_for',
     });
 
-    await detectionRule.createCustomQueryRule({
+    const { id: createdRuleId } = await detectionRule.createCustomQueryRule({
       index: [sourceIndex],
       enabled: true,
       name: ruleName,
@@ -451,6 +451,10 @@ export const seedAlertFlyoutResponseAction = async ({
     ruleCreated = true;
 
     const alertId = await waitForSpaceAlertId(esClient, spaceId, ruleName);
+    // The alert id is stable for this source document. Disable the rule so a
+    // later run cannot write that alert back after cleanup deletes it.
+    // deleteAll does not cancel an execution that has already started.
+    await detectionRule.disable(createdRuleId);
 
     host = await indexResponseActionHost({
       esClient: systemEsClient,

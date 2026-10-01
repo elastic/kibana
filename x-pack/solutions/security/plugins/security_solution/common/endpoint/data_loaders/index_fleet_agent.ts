@@ -235,9 +235,11 @@ export const deleteIndexedFleetAgents = async (
         break;
       }
 
+      // The refresh only lets the next delete see a new version. A failed
+      // refresh must not end the retry or replace the conflict error.
       await esClient.indices
         .refresh({ index: `${indexedData.fleetAgentsIndex}-*` })
-        .catch(wrapErrorAndRejectPromise);
+        .catch(() => undefined);
       await new Promise((resolve) => setTimeout(resolve, 250));
     }
 
