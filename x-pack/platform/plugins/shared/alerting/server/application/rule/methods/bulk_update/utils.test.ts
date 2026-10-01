@@ -189,7 +189,6 @@ describe('bulkUpdate utils', () => {
         context,
         actionsClient: {} as never,
         username: 'elastic',
-        profileUid: null,
         item: { id: 'id-1', data: { name: 'broken' } as never },
         original: so('id-1'),
         apiKeys: new Map(),
