@@ -16,7 +16,7 @@ import { VEGA_SANDBOX_EXAMPLE_FRAME_PATH } from '../common';
  * Demo-only CSP for this example frame.
  * Production visTypeVega owns img-src / externalUrl.policy; do not copy this policy.
  */
-const createExampleFrameCsp = (nonce: string): string =>
+const createExampleFrameCsp = (nonce: string, disableEmbedding: boolean): string =>
   [
     "default-src 'none'",
     `script-src 'nonce-${nonce}' 'strict-dynamic'`,
@@ -25,7 +25,9 @@ const createExampleFrameCsp = (nonce: string): string =>
     // Server-enforced containment — opaque origin and embedding restrictions independent of
     // the iframe sandbox attribute. Production visTypeVega must include the same directives.
     'sandbox allow-scripts',
-    "frame-ancestors 'self'",
+    // Follow core's embedding policy: only restrict ancestors when embedding is disabled,
+    // otherwise Kibana embedded in a third-party page could not load the sandbox frame.
+    ...(disableEmbedding ? ["frame-ancestors 'self'"] : []),
     "base-uri 'none'",
     "form-action 'none'",
     "object-src 'none'",
@@ -124,7 +126,8 @@ export const registerFrameRoute = (core: CoreSetup): void => {
     },
     async (_context, request, response) => {
       const nonce = randomBytes(16).toString('base64');
-      responseCspByRequestId.set(request.uuid, createExampleFrameCsp(nonce));
+      const { disableEmbedding } = core.http.csp;
+      responseCspByRequestId.set(request.uuid, createExampleFrameCsp(nonce, disableEmbedding));
 
       return response.ok({
         body: renderFrameDocument(nonce, bundleSrc),
