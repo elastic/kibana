@@ -453,28 +453,37 @@ describe('DatastreamInitializer', () => {
       });
     });
 
-    it('deletes the data stream when the current template mappings cannot be applied to its write index', async () => {
-      // Read by the reset check, then by DataStreamClient.initializeTemplate.
-      mockExistingDataStream({ version: 7, managed: true });
-      mockExistingDataStream({ version: 7, managed: true });
-      esClient.indices.simulateIndexTemplate.mockResolvedValue({
-        template: { aliases: {}, mappings: {}, settings: {} },
-      });
-      esClient.indices.putMapping.mockRejectedValueOnce(
-        new errors.ResponseError({ statusCode: 400, body: {} } as DiagnosticResult)
-      );
+    it.each([400, 500])(
+      'deletes the data stream and warns when applying the current template to its write index fails with a %i, since the installed template is current',
+      async (statusCode) => {
+        // Read by the reset check, then by DataStreamClient.initializeTemplate.
+        mockExistingDataStream({ version: 7, managed: true });
+        mockExistingDataStream({ version: 7, managed: true });
+        esClient.indices.simulateIndexTemplate.mockResolvedValue({
+          template: { aliases: {}, mappings: {}, settings: {} },
+        });
+        esClient.indices.putMapping.mockRejectedValueOnce(
+          new errors.ResponseError({
+            statusCode,
+            body: { error: { reason: 'mapper merge failed' } },
+          } as DiagnosticResult)
+        );
 
-      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+        const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
 
-      await expect(initializer.initialize()).resolves.toBeUndefined();
-      expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
-      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({
-        name: forceResetDefinition.dataStreamName,
-      });
-      expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
-        name: forceResetDefinition.dataStreamName,
-      });
-    });
+        await expect(initializer.initialize()).resolves.toBeUndefined();
+        expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
+        expect(mockLogger.warn).toHaveBeenCalled();
+
+        expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({
+          name: forceResetDefinition.dataStreamName,
+        });
+
+        expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
+          name: forceResetDefinition.dataStreamName,
+        });
+      }
+    );
 
     it('fails initialization without deleting the data stream when the current template is not installed', async () => {
       mockExistingDataStream({ version: 7, managed: true });

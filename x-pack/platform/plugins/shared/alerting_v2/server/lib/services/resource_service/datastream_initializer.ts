@@ -164,7 +164,7 @@ export class DatastreamInitializer implements IResourceInitializer {
     }
 
     if (installError) {
-      this.logger.debug(
+      this.logger.warn(
         `Index template ${dataStreamName} v${installedVersion} is installed; ignoring the failure to update the existing data stream: ${installError.message}`
       );
     }
