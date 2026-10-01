@@ -244,24 +244,23 @@ steps:
     type: if
     condition: "${{ variables.proposal_outcome == 'dismissed' }}"
     steps:
-      # get_proposal is allowed to fail-and-continue (retried above first). Deriving the
-      # retag from a missing dismissReason would default every candidate to
-      # az:inconclusive — including one an analyst actually contradicted as `wrong`
-      # (which maps to az:true_positive) — and then close the Investigation as if that
-      # mapped decision had been applied. Gate the whole re-tag/close on the read having
+      # get_proposal is allowed to fail-and-continue (retried above first). The retag does
+      # not depend on its content, but the outcome comment and the decision itself do:
+      # without a successful read there is no decider or reason to report, and closing the
+      # Investigation would hide that. Gate the whole re-tag/close on the read having
       # actually succeeded; a failed read leaves tags and the Investigation untouched.
       - name: guard_get_proposal_readable
         type: if
         condition: "${{ steps.get_proposal.error == blank }}"
         steps:
-          # Map the dismiss reason to the correct re-tag:
-          #   wrong → az:true_positive (analyst contradicts the classification itself)
-          #   any other reason → az:inconclusive (analyst rejects the *action*, not the verdict)
+          # Every dismissal re-tags as az:inconclusive: the decline reasons the proposal API
+          # offers (no_reason, duplicate, false_positive, handled_elsewhere, risk_accepted,
+          # other) reject the *action*, and none says the classification itself was wrong,
+          # so none can justify az:true_positive. The reason is reported in the comment below.
           - name: map_dismiss_reason_to_tag
             type: data.set
             with:
-              dismissed_tag: >-
-                {% if steps.get_proposal.output.dismissReason == 'wrong' %}az:true_positive{% else %}az:inconclusive{% endif %}
+              dismissed_tag: az:inconclusive
               failed_retag_count: 0
 
           # Two calls per alert: kibana.SetAlertTags rejects combining add+remove of the

@@ -196,16 +196,12 @@ const evaluateDismissedTag = (dismissReason: string | undefined): string => {
 };
 
 describe('floor_alert_triage_review — dismiss mapping', () => {
-  it('maps dismissReason "wrong" to az:true_positive', () => {
-    expect(evaluateDismissedTag('wrong')).toBe('az:true_positive');
-  });
-
   it.each([
+    'no_reason',
     'duplicate',
-    'insufficient_evidence',
-    'low_value',
-    'out_of_scope',
-    'already_handled',
+    'false_positive',
+    'handled_elsewhere',
+    'risk_accepted',
     'other',
   ])('maps dismissReason "%s" to az:inconclusive', (reason) => {
     expect(evaluateDismissedTag(reason)).toBe('az:inconclusive');
@@ -289,10 +285,10 @@ const dismissedInputTemplate = (dismissedComment?.with as Record<string, unknown
   ?.message as string;
 
 const renderDismissedComment = ({
-  dismissReason = 'wrong',
+  dismissReason = 'no_reason',
   rationale,
   decidedBy,
-  dismissedTag = 'az:true_positive',
+  dismissedTag = 'az:inconclusive',
   fpCandidateCount = 2,
   failedRetagCount = 0,
 }: {
@@ -319,8 +315,8 @@ const renderDismissedComment = ({
 
 describe('floor_alert_triage_review — post_comment_outcome_dismissed', () => {
   it('includes the dismiss reason', () => {
-    const comment = renderDismissedComment({ dismissReason: 'wrong' });
-    expect(comment).toContain('wrong');
+    const comment = renderDismissedComment({ dismissReason: 'handled_elsewhere' });
+    expect(comment).toContain('handled_elsewhere');
   });
 
   it('truncates a long rationale to 500 characters', () => {
