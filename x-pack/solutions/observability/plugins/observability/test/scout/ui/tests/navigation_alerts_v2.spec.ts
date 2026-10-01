@@ -542,7 +542,9 @@ test.describe(
           { showV1AlertsTable: true }
         );
       } finally {
-        await scoutSpace.uiSettings.unset(ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID);
+        await scoutSpace.uiSettings.unset(
+          ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID
+        );
         await kbnClient.uiSettings.waitForEventualCacheRefresh();
       }
     });
