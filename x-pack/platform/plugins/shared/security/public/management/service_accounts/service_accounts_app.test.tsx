@@ -68,13 +68,13 @@ const renderApp = ({
 };
 
 const fillForm = async () => {
-  await waitFor(() => expect(screen.getByRole('button', { name: 'Set privileges' })).toBeEnabled());
+  await waitFor(() => expect(screen.getByTestId('serviceAccountRolesSelector')).toBeEnabled());
   fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
     target: { value: account.name },
   });
-  await user.click(screen.getByRole('button', { name: 'Set privileges' }));
-  await user.click(await screen.findByTestId('roleOption-workflow_reader'));
-  await user.click(screen.getByTestId('serviceAccountNameInput'));
+  fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
+  fireEvent.click(await screen.findByTestId('roleOption-workflow_reader'));
+  fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
 };
 
 describe('ServiceAccountsApp', () => {
@@ -341,10 +341,9 @@ describe('ServiceAccountsApp', () => {
     expect(await screen.findByText(/Remove roles that are no longer available/)).toBeVisible();
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeDisabled();
     expect(create).not.toHaveBeenCalled();
-    await user.click(screen.getByRole('button', { name: 'Set privileges' }));
-    await user.click(screen.getByTestId('roleOption-workflow_reader'));
-    await user.click(screen.getByTestId('roleOption-viewer'));
-    await user.click(screen.getByTestId('serviceAccountNameInput'));
+    fireEvent.click(screen.getByTestId('serviceAccountRolesSelector'));
+    fireEvent.click(await screen.findByTestId('roleOption-workflow_reader'));
+    fireEvent.click(screen.getByTestId('roleOption-viewer'));
     expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled();
   });
 
