@@ -21,7 +21,7 @@ import moment from 'moment';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import pRetry from 'p-retry';
 import { isEmpty } from 'lodash';
-import { registerCleanUpTask } from './private_location/clean_up_task';
+import { registerCleanUpTask } from '../tasks/clean_up_package_policies_task';
 import type { SyntheticsServerSetup } from '../types';
 import {
   legacySyntheticsMonitorTypeSingle,
@@ -30,7 +30,11 @@ import {
 } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
-import { getAPIKeyForSyntheticsService } from './get_api_key';
+import {
+  getAPIKeyForSyntheticsService,
+  getApiKeyInvalidTelemetryPayload,
+  type ApiKeyInvalidReason,
+} from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
 import type { ServiceConfig } from '../config';
 import type { ServiceData } from './service_api_client';
@@ -353,8 +357,14 @@ export class SyntheticsService {
     return this.server.coreStart?.elasticsearch.client.asInternalUser;
   }
 
-  async getOutput({ inspect }: { inspect: boolean } = { inspect: false }) {
-    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({
+  async getOutput({ inspect }: { inspect: boolean } = { inspect: false }): Promise<{
+    output: ServiceData['output'] | null;
+    invalidDetails?: {
+      reason: ApiKeyInvalidReason;
+      missingPrivileges?: string[];
+    };
+  }> {
+    const { apiKey, isValid, reason, missingPrivileges } = await getAPIKeyForSyntheticsService({
       server: this.server,
     });
     // do not check for api key validity if inspecting
@@ -363,12 +373,20 @@ export class SyntheticsService {
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
       this.invalidApiKeyError = true;
-      return null;
+      return {
+        output: null,
+        invalidDetails: {
+          reason: reason ?? 'invalid',
+          missingPrivileges,
+        },
+      };
     }
 
     return {
-      hosts: this.esHosts,
-      api_key: `${apiKey?.id}:${apiKey?.apiKey}`,
+      output: {
+        hosts: this.esHosts,
+        api_key: `${apiKey?.id}:${apiKey?.apiKey}`,
+      },
     };
   }
 
@@ -379,7 +397,7 @@ export class SyntheticsService {
     const monitors = this.formatConfigs(config, mws);
     const license = await this.getLicense();
 
-    const output = await this.getOutput({ inspect: true });
+    const { output } = await this.getOutput({ inspect: true });
     if (output) {
       return await this.apiClient.inspect({
         monitors,
@@ -399,7 +417,7 @@ export class SyntheticsService {
       const monitors = this.formatConfigs(configs, mws);
       const license = await this.getLicense();
 
-      const output = await this.getOutput();
+      const { output } = await this.getOutput();
       if (output) {
         this.logger.debug(`1 monitor will be pushed to synthetics service.`);
 
@@ -430,7 +448,7 @@ export class SyntheticsService {
       const license = await this.getLicense();
       const monitors = this.formatConfigs(monitorConfig, mws);
 
-      const output = await this.getOutput();
+      const { output } = await this.getOutput();
       if (output) {
         const data = {
           monitors,
@@ -496,12 +514,18 @@ export class SyntheticsService {
       if (result.saved_objects.length > 0) {
         try {
           if (!output) {
-            output = await this.getOutput();
+            const outputResult = await this.getOutput();
+            output = outputResult.output;
             if (!output) {
+              const { code, reason, message } = getApiKeyInvalidTelemetryPayload({
+                reason: outputResult.invalidDetails?.reason ?? 'invalid',
+                missingPrivileges: outputResult.invalidDetails?.missingPrivileges,
+              });
               sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-                reason: 'API key is not valid.',
-                message: 'Failed to push configs. API key is not valid.',
                 type: 'invalidApiKey',
+                code,
+                reason,
+                message,
                 stackVersion: service.server.stackVersion,
               });
               return;
@@ -561,7 +585,7 @@ export class SyntheticsService {
     }
     const license = await this.getLicense();
 
-    const output = await this.getOutput();
+    const { output } = await this.getOutput();
     if (!output) {
       return;
     }
@@ -589,7 +613,7 @@ export class SyntheticsService {
       );
 
       if (hasPublicLocations) {
-        const output = await this.getOutput();
+        const { output } = await this.getOutput();
         if (!output) {
           return;
         }
@@ -609,7 +633,7 @@ export class SyntheticsService {
   async deleteAllConfigs() {
     const license = await this.getLicense();
     const finder = await this.getSOClientFinder({ pageSize: 100 });
-    const output = await this.getOutput();
+    const { output } = await this.getOutput();
     if (!output) {
       return;
     }

@@ -26,7 +26,6 @@ import {
   bulkGetRulesResponseSchema,
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
-  updateRuleBodySchema,
   ruleTagsParamsSchema,
   findRulesRequestSchema,
 } from './rule_data_schema';
@@ -1596,38 +1595,9 @@ describe('getRootEsqlQuery', () => {
   });
 });
 
-describe('updateRuleBodySchema', () => {
-  it('accepts a payload without version', () => {
-    const result = updateRuleBodySchema.parse({});
-    expect(result).toEqual({});
-  });
-
-  it('accepts a payload with version', () => {
-    const result = updateRuleBodySchema.parse({ version: 'WzEsMV0=' });
-    expect(result.version).toBe('WzEsMV0=');
-  });
-
-  it('accepts version alongside data fields', () => {
-    const result = updateRuleBodySchema.parse({
-      version: 'WzEsMV0=',
-      metadata: { name: 'updated name' },
-    });
-    expect(result).toEqual({
-      version: 'WzEsMV0=',
-      metadata: { name: 'updated name' },
-    });
-  });
-
-  it('rejects an empty string version', () => {
-    expect(() => updateRuleBodySchema.parse({ version: '' })).toThrow();
-  });
-
-  it('rejects a version longer than 256 characters', () => {
-    expect(() => updateRuleBodySchema.parse({ version: 'x'.repeat(257) })).toThrow();
-  });
-
+describe('updateRuleDataSchema OpenAPI descriptions', () => {
   it('documents PATCH omission for time_field and the recovery/no_data contracts', () => {
-    const json = z.toJSONSchema(updateRuleBodySchema, {
+    const json = z.toJSONSchema(updateRuleDataSchema, {
       target: 'draft-7',
       unrepresentable: 'any',
     }) as {
@@ -1832,8 +1802,9 @@ describe('findRulesRequestSchema', () => {
 describe('bulkGetRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
+    version: 1,
     kind: 'alert' as const,
-    metadata: { name: 'r', version: 1 },
+    metadata: { name: 'r' },
     time_field: '@timestamp',
     schedule: { every: '5m' },
     query: { base: 'FROM logs-* | LIMIT 1' },
@@ -1929,8 +1900,9 @@ describe('bulkCreateRulesRequestSchema', () => {
 describe('bulkCreateRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
+    version: 1,
     kind: 'alert' as const,
-    metadata: { name: 'r', version: 1 },
+    metadata: { name: 'r' },
     time_field: '@timestamp',
     schedule: { every: '5m' },
     query: { base: 'FROM logs-* | LIMIT 1' },

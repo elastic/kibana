@@ -29,6 +29,14 @@ const FILTER_FIELDS = [
   'dataSources',
 ] as const satisfies ReadonlyArray<keyof EntityFilters>;
 
+const FILTER_ES_FIELDS: Record<keyof EntityFilters, string> = {
+  entityTypes: 'entity.EngineMetadata.Type',
+  riskLevels: 'entity.risk.calculated_level',
+  assetCriticality: 'asset.criticality',
+  watchlists: 'entity.attributes.watchlists',
+  dataSources: 'entity.source',
+};
+
 const VALID_ENTITY_TYPES = new Set<string>(getEntityAnalyticsEntityTypes());
 const VALID_RISK_LEVELS = new Set<string>(SEVERITY_UI_SORT_ORDER);
 const VALID_CRITICALITY = new Set<string>(ValidCriticalityLevels);
@@ -37,6 +45,40 @@ const parseArray = (params: URLSearchParams, key: keyof EntityFilters): string[]
   const val = params.get(key);
   return val ? val.split(',').filter(Boolean) : [];
 };
+
+export const EMPTY_ENTITY_FILTERS: EntityFilters = {
+  entityTypes: [],
+  riskLevels: [],
+  assetCriticality: [],
+  watchlists: [],
+  dataSources: [],
+};
+
+export interface EntityFilterTerm {
+  terms: Record<string, string[]>;
+}
+
+export const getEntityFilterTerms = (filters: EntityFilters): EntityFilterTerm[] =>
+  FILTER_FIELDS.filter((key) => filters[key].length).map((key) => ({
+    terms: { [FILTER_ES_FIELDS[key]]: filters[key] as string[] },
+  }));
+
+const MV_CONTAINS_FIELDS = new Set<keyof EntityFilters>(['watchlists', 'dataSources']);
+
+export const getEntityFilterESQL = (filters: EntityFilters): string[] =>
+  FILTER_FIELDS.filter((key) => filters[key].length).map((key) => {
+    const field = FILTER_ES_FIELDS[key];
+    const values = filters[key] as string[];
+    const quoted = values.map((v) => `"${v.replace(/["\\]/g, '\\$&')}"`).join(', ');
+    if (MV_CONTAINS_FIELDS.has(key)) {
+      return values.length === 1
+        ? `| WHERE MV_CONTAINS(${field}, ${quoted})`
+        : `| WHERE ${values
+            .map((v) => `MV_CONTAINS(${field}, "${v.replace(/["\\]/g, '\\$&')}")`)
+            .join(' OR ')}`;
+    }
+    return `| WHERE ${field} IN (${quoted})`;
+  });
 
 interface EntityFiltersResult {
   entityFilters: EntityFilters;

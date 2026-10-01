@@ -66,5 +66,4 @@ export interface FindRulesArgs {
 export interface UpdateRuleParams {
   id: string;
   data: UpdateRuleData;
-  options?: { version?: string };
 }

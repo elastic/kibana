@@ -109,6 +109,7 @@ paths:
                   - status
                   - run_id
                   - technologies
+                  - index_patterns
                   - tier1
                   - message
                   - next_step
@@ -129,6 +130,15 @@ paths:
                       the scope was blocked.
                     items:
                       $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
+                  index_patterns:
+                    type: array
+                    description: >-
+                      Index patterns the hunt ran against: the resolved required
+                      patterns. Populated whether the scope came from a pinned or
+                      environment-resolved technology or from discovered datasets;
+                      empty when the scope was blocked or resolution failed.
+                    items:
+                      type: string
                   tier1:
                     allOf:
                       - $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatResult'
