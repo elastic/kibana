@@ -208,7 +208,7 @@ export const deleteIndexedFleetAgents = async (
     // in place. Fleet then rejects the agent policy delete while any active agent
     // remains. A concurrent Fleet update can also skip a document (`conflicts:
     // proceed`), so repeat the delete until the count is zero.
-    const query = {
+    const query: QueryDslQueryContainer = {
       bool: {
         should: [
           { terms: { 'local_metadata.elastic.agent.id': agentIds } },
