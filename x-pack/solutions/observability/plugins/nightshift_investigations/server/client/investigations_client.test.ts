@@ -976,7 +976,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
-    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
   });
 
   it('throws InvestigationUnavailableError when the workflow is not installed', async () => {
@@ -1409,6 +1408,40 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     expect(inputs.message).toContain('This continues the investigation');
     expect(inputs.message).toContain('Latency is 2.5s for alert-3');
     expect(inputs.message).not.toContain('Latency is 2.5s for alert-1');
+  });
+
+  it('does not charge the automatic quota for a start that continues an open investigation', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+    withConversations(makeConversation({ id: 'inv-1' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([makeStoredSubject()]);
+    // Exhausted: a new investigation would be denied, a follow-up is not.
+    investigationQuotaCallback.mockResolvedValue({ allowed: false });
+
+    await expect(startAlerts('alert-1', 'alert-2')).resolves.toEqual({ investigation_id: 'inv-1' });
+
+    expect(investigationQuotaCallback).not.toHaveBeenCalled();
+    expect(runInputs().subjects).toEqual([expect.objectContaining({ id: 'alert-2' })]);
+  });
+
+  it('charges the automatic quota after matching and before claiming a new investigation', async () => {
+    await startAlerts('alert-1');
+
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
+    expect(agenticInvestigationsClient.findOpenBySubjects.mock.invocationCallOrder[0]).toBeLessThan(
+      investigationQuotaCallback.mock.invocationCallOrder[0]
+    );
+    expect(investigationQuotaCallback.mock.invocationCallOrder[0]).toBeLessThan(
+      subjectsClient.claimSubjects.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('denies a new automatic investigation over quota without claiming its subjects', async () => {
+    investigationQuotaCallback.mockResolvedValue({ allowed: false });
+
+    await expect(startAlerts('alert-1')).rejects.toThrow(InvestigationQuotaDeniedError);
+
+    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('describes the alerts again when every alert is already part of the investigation', async () => {
