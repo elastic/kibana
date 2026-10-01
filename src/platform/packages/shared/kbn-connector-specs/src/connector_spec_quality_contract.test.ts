@@ -32,7 +32,7 @@ const AVAILABILITY_STATEMENTS = {
 type Availability = keyof typeof AVAILABILITY_STATEMENTS;
 const NOT_YET_AVAILABLE_MARKER = '_(not yet available)_';
 const WORKFLOW_USE_CLAIM =
-  /\b(workflow[- ]only|reserved for workflows|available to workflows|(?:from|in|for|by) (?:a |your )?workflows?|workflows? or agents?|workflows and agents|workflow authors?)\b/gi;
+  /\b(workflow[- ]only|workflow steps?|reserved for workflows|available to workflows|(?:from|in|for|by) (?:a |your )?workflows?|workflows? or agents?|workflows and agents|workflow authors?)\b/gi;
 const INTERNAL_VOCABULARY =
   /\b(custom connectors?|MCP-native|connector specs?|stack connectors?)\b/gi;
 const UNION_KEYS = ['anyOf', 'oneOf', 'allOf'] as const;
@@ -77,14 +77,45 @@ interface InputSchemaViolations {
   undescribedParams: string[];
 }
 
-const collectInputViolations = (
-  schema: JsonSchema,
+interface WalkContext {
+  root: JsonSchema;
+  violations: InputSchemaViolations;
+  /** `$ref`s already expanded on the current path, so recursive schemas terminate. */
+  seenRefs: ReadonlySet<string>;
+}
+
+const resolveRef = (ref: string, root: JsonSchema): JsonSchema => {
+  if (ref === '#') {
+    return root;
+  }
+  const [, defsKey, name] = /^#\/(\$defs|definitions)\/(.+)$/.exec(ref) ?? [];
+  const defs = defsKey === undefined ? undefined : root[defsKey];
+  const target = isJsonSchema(defs) ? defs[name] : undefined;
+  if (!isJsonSchema(target)) {
+    throw new Error(`Cannot resolve input schema $ref "${ref}"`);
+  }
+  return target;
+};
+
+const walkInputSchema = (
+  node: JsonSchema,
   schemaPath: string,
-  violations: InputSchemaViolations,
-  isParam: boolean
+  isParam: boolean,
+  context: WalkContext
 ): void => {
+  const { violations } = context;
+  const { $ref, ...siblings } = node;
+  const schema =
+    typeof $ref === 'string' ? { ...resolveRef($ref, context.root), ...siblings } : node;
+
   if (isParam && typeof schema.description !== 'string') {
     violations.undescribedParams.push(schemaPath);
+  }
+  if (typeof $ref === 'string') {
+    if (context.seenRefs.has($ref)) {
+      return;
+    }
+    context = { ...context, seenRefs: new Set([...context.seenRefs, $ref]) };
   }
   if (
     schema.type === 'string' &&
@@ -101,29 +132,41 @@ const collectInputViolations = (
   if (isJsonSchema(schema.properties)) {
     for (const [name, property] of Object.entries(schema.properties)) {
       if (isJsonSchema(property)) {
-        collectInputViolations(property, `${schemaPath}.${name}`, violations, true);
+        walkInputSchema(property, `${schemaPath}.${name}`, true, context);
       }
     }
   }
   if (isJsonSchema(schema.items)) {
-    collectInputViolations(schema.items, `${schemaPath}[]`, violations, false);
+    walkInputSchema(schema.items, `${schemaPath}[]`, false, context);
   }
   if (isJsonSchema(schema.propertyNames)) {
-    collectInputViolations(schema.propertyNames, `${schemaPath}{key}`, violations, false);
+    walkInputSchema(schema.propertyNames, `${schemaPath}{key}`, false, context);
   }
   if (isJsonSchema(schema.additionalProperties)) {
-    collectInputViolations(schema.additionalProperties, `${schemaPath}{value}`, violations, false);
+    walkInputSchema(schema.additionalProperties, `${schemaPath}{value}`, false, context);
   }
   for (const unionKey of UNION_KEYS) {
     const branches = schema[unionKey];
     if (Array.isArray(branches)) {
       branches.forEach((branch, index) => {
         if (isJsonSchema(branch)) {
-          collectInputViolations(branch, `${schemaPath}.${unionKey}[${index}]`, violations, false);
+          walkInputSchema(branch, `${schemaPath}.${unionKey}[${index}]`, false, context);
         }
       });
     }
   }
+};
+
+/** Walks an action input schema, following `$ref`s, and reports unbounded and undescribed fields. */
+const collectInputViolations = (schema: z.ZodType, actionName: string): InputSchemaViolations => {
+  const root = toInputJsonSchema(schema);
+  const violations: InputSchemaViolations = {
+    unboundedStrings: [],
+    unboundedArrays: [],
+    undescribedParams: [],
+  };
+  walkInputSchema(root, actionName, false, { root, violations, seenRefs: new Set(['#']) });
+  return violations;
 };
 
 const getInputViolations = (spec: ConnectorSpec): InputSchemaViolations => {
@@ -133,7 +176,10 @@ const getInputViolations = (spec: ConnectorSpec): InputSchemaViolations => {
     undescribedParams: [],
   };
   for (const [actionName, action] of Object.entries(spec.actions)) {
-    collectInputViolations(toInputJsonSchema(action.input), actionName, violations, false);
+    const actionViolations = collectInputViolations(action.input, actionName);
+    violations.unboundedStrings.push(...actionViolations.unboundedStrings);
+    violations.unboundedArrays.push(...actionViolations.unboundedArrays);
+    violations.undescribedParams.push(...actionViolations.undescribedParams);
   }
   return violations;
 };
@@ -299,11 +345,6 @@ describe('connector spec quality contracts', () => {
 
   describe('input schema walker', () => {
     it('reports unbounded, undescribed, nested, record, and union fields', () => {
-      const violations: InputSchemaViolations = {
-        unboundedStrings: [],
-        unboundedArrays: [],
-        undescribedParams: [],
-      };
       const schema = z.object({
         bounded: z.string().max(10).describe('bounded'),
         choice: z.enum(['a', 'b']).describe('enum'),
@@ -318,9 +359,7 @@ describe('connector spec quality contracts', () => {
           .describe('preprocessed'),
       });
 
-      collectInputViolations(toInputJsonSchema(schema), 'action', violations, false);
-
-      expect(violations).toEqual({
+      expect(collectInputViolations(schema, 'action')).toEqual({
         unboundedStrings: [
           'action.free',
           'action.labels{key}',
@@ -330,6 +369,56 @@ describe('connector spec quality contracts', () => {
         unboundedArrays: ['action.tags'],
         undescribedParams: ['action.free', 'action.nested.id'],
       });
+    });
+
+    it('follows $ref into shared and recursive definitions', () => {
+      const shared = z.object({ code: z.string() }).meta({ id: 'QualityContractSharedRef' });
+      const node = z.object({
+        name: z.string(),
+        get children() {
+          return z.array(node).describe('children');
+        },
+      });
+      const schema = z.object({
+        first: shared.describe('first'),
+        second: shared.describe('second'),
+        tree: node.describe('tree'),
+      });
+
+      expect(collectInputViolations(schema, 'action')).toEqual({
+        unboundedStrings: [
+          'action.first.code',
+          'action.second.code',
+          'action.tree.name',
+          'action.tree.children[].name',
+        ],
+        unboundedArrays: ['action.tree.children'],
+        undescribedParams: [
+          'action.first.code',
+          'action.second.code',
+          'action.tree.name',
+          'action.tree.children[].name',
+        ],
+      });
+    });
+  });
+
+  describe('workflow use claim matcher', () => {
+    it.each([
+      'Workflow steps only.',
+      'so the calling agent turn or workflow step does not time out',
+      'This action is workflow-only.',
+      'Call it from a workflow.',
+    ])('matches %s', (text) => {
+      expect(text.match(WORKFLOW_USE_CLAIM)).not.toBeNull();
+    });
+
+    it('does not match the planned-support note', () => {
+      expect(
+        'This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.'.match(
+          WORKFLOW_USE_CLAIM
+        )
+      ).toBeNull();
     });
   });
 });
