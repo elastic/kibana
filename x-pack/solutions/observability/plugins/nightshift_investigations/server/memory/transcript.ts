@@ -95,6 +95,15 @@ export const readsSeededKnowledge = (toolId: string, params: Record<string, unkn
 export const isEvidenceCall = (toolId: string, params: Record<string, unknown>): boolean =>
   !NON_EVIDENCE_TOOL_IDS.has(toolId) && !readsSeededKnowledge(toolId, params);
 
+/** Whether at least one evidence call in the investigation returned output. */
+export const hasToolEvidence = (investigation: readonly TranscriptStep[] | undefined): boolean =>
+  (investigation ?? []).some(
+    (step) =>
+      step.kind === 'tool' &&
+      (step.resultText?.trim().length ?? 0) > 0 &&
+      isEvidenceCall(step.toolId, step.params)
+  );
+
 const clip = (text: string, max: number): string =>
   text.length <= max ? text : `${text.slice(0, max)}… (+${text.length - max} chars)`;
 

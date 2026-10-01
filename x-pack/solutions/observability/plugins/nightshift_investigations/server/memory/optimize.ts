@@ -14,7 +14,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { formatPageRefs, previewText } from './log_format';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
-import { renderMemoryTranscript, type TranscriptStep } from './transcript';
+import { hasToolEvidence, renderMemoryTranscript, type TranscriptStep } from './transcript';
 import type { MemoryPageStore, MemoryPageWrite, VersionedMemoryPage } from './page_store';
 import {
   canonicalizeSlug,
@@ -1067,8 +1067,8 @@ export const optimizeMemory = async ({
   let extractions: MemoryExtractProposal[] = [];
   if (assistantMessage.trim().length === 0) {
     logger.debug('Memory extract skipped — empty assistant message');
-  } else if (investigation === undefined) {
-    logger.debug('Memory extract skipped — no tool results to extract from');
+  } else if (!hasToolEvidence(investigation)) {
+    logger.debug('Memory extract skipped — no evidence tool results to extract from');
   } else {
     const extractStarted = Date.now();
     logger.debug(

@@ -1744,6 +1744,60 @@ describe('optimizeMemory', () => {
     expect(proposeExtractions).not.toHaveBeenCalled();
   });
 
+  it.each<[string, TranscriptStep[]]>([
+    ['an empty round', []],
+    ['a reasoning-only round', [{ kind: 'reasoning', text: 'Checking Redis.' }]],
+    [
+      'tool calls with empty results',
+      [
+        {
+          kind: 'tool',
+          toolId: 'nightshift_sandbox_bash',
+          params: { command: 'esql "FROM metrics-redis*"' },
+          resultText: '  ',
+          isError: false,
+        },
+        { kind: 'tool', toolId: 'observability.get_traces', params: {}, isError: false },
+      ],
+    ],
+    [
+      'results only from seeded reads and process tools',
+      [
+        {
+          kind: 'tool',
+          toolId: 'nightshift_sandbox_view_file',
+          params: { file_path: '/workspace/cortex/INDEX.md' },
+          resultText: 'Checkout runbook',
+          isError: false,
+        },
+        {
+          kind: 'tool',
+          toolId: 'write_todos',
+          params: {},
+          resultText: 'todos saved',
+          isError: false,
+        },
+      ],
+    ],
+  ])('does not extract from %s', async (_, investigation) => {
+    const proposeLabels = jest.fn().mockResolvedValue({ useful: [], harmful: [] });
+    const proposeExtractions = jest.fn().mockResolvedValue({ extractions: [] });
+
+    await optimizeMemory({
+      store: createStore(),
+      recalledIds: [],
+      proposeLabels,
+      proposeExtractions,
+      userMessage: 'why is checkout slow?',
+      assistantMessage: 'Redis evictions on checkout.',
+      toolCalls: [],
+      investigation,
+      logger: loggerMock.create(),
+    });
+
+    expect(proposeExtractions).not.toHaveBeenCalled();
+  });
+
   it('gives both LLM calls the tool results when the round could be read', async () => {
     const store = createStore({
       get: jest.fn().mockImplementation(async (id: string) => page(id)),
