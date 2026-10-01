@@ -10,6 +10,7 @@ import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../mock';
 import type { EnrollmentAPIKey } from '../../../types';
+import { useGetEnrollmentAPIKeysQuery } from '../../../hooks';
 
 import { EnrollmentTokenListPage } from '.';
 
@@ -80,8 +81,7 @@ jest.mock('../components', () => ({
   ),
 }));
 
-const mockUseGetEnrollmentAPIKeysQuery = require('../../../hooks')
-  .useGetEnrollmentAPIKeysQuery as jest.Mock;
+const mockUseGetEnrollmentAPIKeysQuery = useGetEnrollmentAPIKeysQuery as jest.Mock;
 
 const ACTIVE_TOKEN: EnrollmentAPIKey = {
   id: 'tok-active',
