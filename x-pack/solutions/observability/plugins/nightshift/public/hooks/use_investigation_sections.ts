@@ -6,13 +6,23 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useQuery } from '@kbn/react-query';
+import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-plugin/common';
 import type {
-  InvestigationStatus,
-  ListInvestigationItem,
-  Severity,
-  SeverityCounts,
-} from '@kbn/nightshift-investigations-plugin/common';
-import { useFetchInvestigations, type FetchInvestigationsResult } from './use_fetch_investigations';
+  InvestigationSeverityCounts,
+  InvestigationSummary,
+} from '@kbn/agentic-investigations-plugin/common';
+import {
+  SEVERITY_TIER_TO_INVESTIGATION_SEVERITY,
+  SHARED_INVESTIGATIONS_API_VERSION,
+  SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL,
+} from '../common/shared_investigations_api';
+import { useKibana } from './use_kibana';
+import {
+  NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
+  useFetchInvestigations,
+  type FetchInvestigationsResult,
+} from './use_fetch_investigations';
 
 /**
  * Only the in-progress section polls. It is the one section that changes on its own, and the
@@ -22,13 +32,11 @@ import { useFetchInvestigations, type FetchInvestigationsResult } from './use_fe
  */
 const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
 
-const IN_PROGRESS_INVESTIGATION_STATUSES: InvestigationStatus[] = ['pending', 'running'];
-
-const COMPLETED_INVESTIGATION_STATUSES: InvestigationStatus[] = ['completed'];
-
-const FAILED_INVESTIGATION_STATUSES: InvestigationStatus[] = ['failed', 'cancelled'];
-
-export type InvestigationSectionId = 'in-progress' | Severity | 'failed';
+/**
+ * `not-rated` holds the investigations nothing works on that have no severity: the agent did not
+ * record one, for example because its run ended early. There is no failed state.
+ */
+export type InvestigationSectionId = 'in-progress' | Severity | 'not-rated';
 
 export interface InvestigationSectionState extends FetchInvestigationsResult {
   id: InvestigationSectionId;
@@ -45,8 +53,20 @@ export interface InvestigationSectionsResult {
   refetchAll: () => void;
 }
 
-const toInvestigationIds = (investigations: ListInvestigationItem[]): Set<string> =>
-  new Set(investigations.map(({ investigation_id: investigationId }) => investigationId));
+const toInvestigationIds = (investigations: InvestigationSummary[]): Set<string> =>
+  new Set(investigations.map(({ id }) => id));
+
+const tierSection = (severity: Severity) => ({
+  inProgress: false,
+  severities: [SEVERITY_TIER_TO_INVESTIGATION_SEVERITY[severity]],
+});
+
+const toSeverityCounts = (counts: InvestigationSeverityCounts | undefined): SeverityCounts => ({
+  '80-critical': counts?.critical ?? 0,
+  '60-high': counts?.high ?? 0,
+  '40-medium': counts?.medium ?? 0,
+  '20-low': counts?.low ?? 0,
+});
 
 const toSectionState = ({
   id,
@@ -64,45 +84,42 @@ export const useInvestigationSections = ({
 }: {
   query?: string;
 } = {}): InvestigationSectionsResult => {
+  const { http, agenticInvestigations } = useKibana().services;
+
   const inProgress = useFetchInvestigations({
-    statuses: IN_PROGRESS_INVESTIGATION_STATUSES,
+    inProgress: true,
     query,
     refetchInterval: IN_PROGRESS_REFETCH_INTERVAL_MS,
   });
 
-  // Every item in the in-progress section is pending or running by construction.
+  // Every item in the in-progress section is being worked on by construction.
   const hasActiveInvestigations = inProgress.total > 0;
 
-  const critical = useFetchInvestigations({
-    statuses: COMPLETED_INVESTIGATION_STATUSES,
-    severities: ['critical'],
-    query,
-  });
-  const high = useFetchInvestigations({
-    statuses: COMPLETED_INVESTIGATION_STATUSES,
-    severities: ['high'],
-    query,
-  });
-  const medium = useFetchInvestigations({
-    statuses: COMPLETED_INVESTIGATION_STATUSES,
-    severities: ['medium'],
-    query,
-  });
-  const low = useFetchInvestigations({
-    statuses: COMPLETED_INVESTIGATION_STATUSES,
-    severities: ['low'],
-    query,
-  });
-  const failed = useFetchInvestigations({
-    statuses: FAILED_INVESTIGATION_STATUSES,
-    query,
+  const critical = useFetchInvestigations({ ...tierSection('80-critical'), query });
+  const high = useFetchInvestigations({ ...tierSection('60-high'), query });
+  const medium = useFetchInvestigations({ ...tierSection('40-medium'), query });
+  const low = useFetchInvestigations({ ...tierSection('20-low'), query });
+  const notRated = useFetchInvestigations({ inProgress: false, severities: ['none'], query });
+
+  // The tiles count the same investigations as the severity sections.
+  const severityCountsQuery = useQuery({
+    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'severityCounts', query],
+    enabled: agenticInvestigations != null,
+    queryFn: ({ signal }) =>
+      http.get<InvestigationSeverityCounts>(SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL, {
+        version: SHARED_INVESTIGATIONS_API_VERSION,
+        query: { in_progress: false, ...(query ? { query } : {}) },
+        signal,
+      }),
+    keepPreviousData: true,
   });
 
   const { refetch: refetchCritical } = critical;
   const { refetch: refetchHigh } = high;
   const { refetch: refetchMedium } = medium;
   const { refetch: refetchLow } = low;
-  const { refetch: refetchFailed } = failed;
+  const { refetch: refetchNotRated } = notRated;
+  const { refetch: refetchSeverityCounts } = severityCountsQuery;
 
   // An investigation leaving the in-progress section landed in one of the others, so the rest are
   // stale the moment one finishes. Two signals are needed to see that: a loaded id disappearing
@@ -139,7 +156,8 @@ export const useInvestigationSections = ({
     refetchHigh();
     refetchMedium();
     refetchLow();
-    refetchFailed();
+    refetchNotRated();
+    void refetchSeverityCounts();
   }, [
     query,
     inProgress.total,
@@ -149,36 +167,33 @@ export const useInvestigationSections = ({
     refetchHigh,
     refetchMedium,
     refetchLow,
-    refetchFailed,
+    refetchNotRated,
+    refetchSeverityCounts,
   ]);
 
   const sections = useMemo(
     () => [
       toSectionState({ id: 'in-progress', queryResult: inProgress }),
-      toSectionState({ id: 'critical', queryResult: critical }),
-      toSectionState({ id: 'high', queryResult: high }),
-      toSectionState({ id: 'medium', queryResult: medium }),
-      toSectionState({ id: 'low', queryResult: low }),
-      toSectionState({ id: 'failed', queryResult: failed }),
+      toSectionState({ id: '80-critical', queryResult: critical }),
+      toSectionState({ id: '60-high', queryResult: high }),
+      toSectionState({ id: '40-medium', queryResult: medium }),
+      toSectionState({ id: '20-low', queryResult: low }),
+      toSectionState({ id: 'not-rated', queryResult: notRated }),
     ],
-    [inProgress, critical, high, medium, low, failed]
+    [inProgress, critical, high, medium, low, notRated]
   );
 
   const severityCounts = useMemo(
-    (): SeverityCounts => ({
-      critical: critical.total,
-      high: high.total,
-      medium: medium.total,
-      low: low.total,
-    }),
-    [critical.total, high.total, medium.total, low.total]
+    () => toSeverityCounts(severityCountsQuery.data),
+    [severityCountsQuery.data]
   );
 
   const refetchAll = useCallback(() => {
     for (const section of sections) {
       section.refetch();
     }
-  }, [sections]);
+    void refetchSeverityCounts();
+  }, [sections, refetchSeverityCounts]);
 
   return {
     sections,

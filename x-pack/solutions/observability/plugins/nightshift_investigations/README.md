@@ -46,6 +46,8 @@ If any of those subjects is part of an open investigation that the caller owns, 
 
 If none match, the start claims the subjects for a new investigation id. That way, of two concurrent starts for one subject, the second continues the first. Closed investigations never match. One start always lands on exactly one investigation.
 
+The daily quota for automatic starts (`trigger_type: automatic`) only counts starts that open a new investigation. It is checked after the subject matching and before the claim, so a follow-up on an open investigation is never denied, and a denied start claims nothing.
+
 The start then runs the `system-nightshift-investigation` workflow with `investigation_id` and the new subjects, and returns `{ investigation_id }`. It does not write to the investigation itself. The workflow's `_ensure` step does all of that:
 
 - creates the conversation;
@@ -61,6 +63,12 @@ Agent Builder titles the investigation. `_ensure` creates the conversation witho
 The `title` of the start route, the `nightshift.triggerInvestigation` step, and the investigation workflow is still accepted for compatibility, but it is not stored as the title. The start passes it on as the workflow's `title` input only. The `_slack_thread` route's `title` is the generated title, or until then a headline from the thread's question.
 
 The workflow's concurrency key is `investigation:<id>` with a `queue` strategy, so runs of one investigation never overlap. The key also registers the workflow as a driver workflow, so the investigation reads as in progress while a run is queued or running.
+
+### Reading and deleting investigations
+
+Readers use the shared query API: the Nightshift landing page (list, severity counts, cards from `agenticInvestigations.InvestigationCard`, Agent Builder's conversation details flyout for one investigation), the significant-event flyout (`@kbn/investigation-output`), the alert "Investigate" action (list by `subject_id=<alert id>`), and significant events' investigation status route.
+
+`deleteAllInvestigations()` on the start contract deletes the legacy saved objects in every space and, through `agenticInvestigations.deleteSubjectInvestigationDataAcrossSpaces()`, the subjects, claims, impact, and hypotheses of every investigation with subjects. The Agent Builder conversations stay; Agent Builder has no cross-space delete.
 
 ### One identity per investigation
 

@@ -8,17 +8,30 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { InvestigationSection } from './investigation_section';
 
-const investigation: ListInvestigationItem = {
-  investigation_id: 'investigation-1',
+jest.mock('../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      agenticInvestigations: {
+        InvestigationCard: ({ investigation: item }: { investigation: InvestigationSummary }) => (
+          <div data-test-subj="investigationCard">{item.title}</div>
+        ),
+      },
+    },
+  }),
+}));
+
+const investigation: InvestigationSummary = {
+  id: 'investigation-1',
   title: 'Checkout errors',
-  status: 'completed',
   created_at: '2026-09-11T09:00:00.000Z',
-  subject: { type: 'significant_event', id: 'event-1', summary: 'Investigate checkout errors' },
-  summary: 'Checkout errors are elevated',
-  severity: 'critical',
+  updated_at: '2026-09-11T09:00:00.000Z',
+  agent_id: 'nightshift.investigation',
+  metadata: { status: 'open', severity: 'critical', summary: 'Checkout errors are elevated' },
+  in_progress: false,
+  subjects: [],
 };
 
 const renderSection = ({
@@ -31,7 +44,7 @@ const renderSection = ({
   onRetry = jest.fn(),
 }: {
   isInitialLoading?: boolean;
-  investigations?: ListInvestigationItem[];
+  investigations?: InvestigationSummary[];
   total?: number;
   hasMore?: boolean;
   error?: Error | null;
@@ -41,7 +54,7 @@ const renderSection = ({
   render(
     <I18nProvider>
       <InvestigationSection
-        id="critical"
+        id="80-critical"
         investigations={investigations}
         total={total}
         hasMore={hasMore}
@@ -58,10 +71,10 @@ describe('InvestigationSection', () => {
     renderSection({ isInitialLoading: true });
 
     expect(
-      screen.getByTestId('nightshiftInvestigationSectionSkeleton-critical')
+      screen.getByTestId('nightshiftInvestigationSectionSkeleton-80-critical')
     ).toBeInTheDocument();
     expect(
-      screen.queryByTestId('nightshiftInvestigationSectionCount-critical')
+      screen.queryByTestId('nightshiftInvestigationSectionCount-80-critical')
     ).not.toBeInTheDocument();
   });
 
@@ -75,7 +88,7 @@ describe('InvestigationSection', () => {
     const { rerender } = render(
       <I18nProvider>
         <InvestigationSection
-          id="critical"
+          id="80-critical"
           investigations={[investigation]}
           total={1}
           hasMore={false}
@@ -86,13 +99,13 @@ describe('InvestigationSection', () => {
     );
 
     expect(
-      screen.queryByTestId('nightshiftInvestigationSectionShowMore-critical')
+      screen.queryByTestId('nightshiftInvestigationSectionShowMore-80-critical')
     ).not.toBeInTheDocument();
 
     rerender(
       <I18nProvider>
         <InvestigationSection
-          id="critical"
+          id="80-critical"
           investigations={[investigation]}
           total={11}
           hasMore={true}
@@ -103,7 +116,7 @@ describe('InvestigationSection', () => {
     );
 
     expect(
-      screen.getByTestId('nightshiftInvestigationSectionShowMore-critical')
+      screen.getByTestId('nightshiftInvestigationSectionShowMore-80-critical')
     ).toBeInTheDocument();
   });
 
@@ -111,7 +124,7 @@ describe('InvestigationSection', () => {
     const onShowMore = jest.fn();
     renderSection({ investigations: [investigation], total: 11, hasMore: true, onShowMore });
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionShowMore-critical'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionShowMore-80-critical'));
     expect(onShowMore).toHaveBeenCalledTimes(1);
   });
 
@@ -119,7 +132,7 @@ describe('InvestigationSection', () => {
     const onRetry = jest.fn();
     renderSection({ error: new Error('Network unavailable'), onRetry });
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionRetry-critical'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionRetry-80-critical'));
     expect(onRetry).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
   });

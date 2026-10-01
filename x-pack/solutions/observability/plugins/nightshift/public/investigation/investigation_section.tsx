@@ -21,7 +21,8 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { getSeverityLabel } from '@kbn/significant-events-schema';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
@@ -31,11 +32,11 @@ import type {
   InvestigationSectionId,
   InvestigationSectionState,
 } from '../hooks/use_investigation_sections';
-import { InvestigationListItem } from './investigation_list_item';
+import { useKibana } from '../hooks/use_kibana';
 
 export interface InvestigationSectionProps {
   id: InvestigationSectionId;
-  investigations: ListInvestigationItem[];
+  investigations: InvestigationSummary[];
   total: number;
   hasMore: boolean;
   isInitialLoading?: boolean;
@@ -44,7 +45,7 @@ export interface InvestigationSectionProps {
   onShowMore: () => void;
   onRetry: () => void;
   selectedInvestigationId?: string;
-  onInvestigationClick?: (investigation: ListInvestigationItem) => void;
+  onInvestigationClick?: (investigation: InvestigationSummary) => void;
 }
 
 /** The scroll anchor a severity tile and a `?severity=` deep link both target. */
@@ -72,11 +73,11 @@ const getSectionPresentation = (id: InvestigationSectionId): SectionPresentation
           defaultMessage: 'In progress',
         }),
       };
-    case 'failed':
+    case 'not-rated':
       return {
         ...anchors,
-        title: i18n.translate('xpack.nightshift.investigations.failedSectionTitle', {
-          defaultMessage: 'Failed & cancelled',
+        title: i18n.translate('xpack.nightshift.investigations.notRatedSectionTitle', {
+          defaultMessage: 'Not rated',
         }),
       };
     case 'critical':
@@ -248,6 +249,7 @@ const SectionRows = ({
   'investigations' | 'selectedInvestigationId' | 'onInvestigationClick'
 >): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+  const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
 
   return (
     <SectionPanel paddingSize="none">
@@ -264,12 +266,26 @@ const SectionRows = ({
         `}
       >
         {investigations.map((investigation) => (
-          <EuiFlexItem role="listitem" key={investigation.investigation_id} grow={false}>
-            <InvestigationListItem
-              investigation={investigation}
-              isSelected={investigation.investigation_id === selectedInvestigationId}
-              onClick={onInvestigationClick}
-            />
+          <EuiFlexItem
+            role="listitem"
+            key={investigation.id}
+            grow={false}
+            data-test-subj="nightshiftInvestigationListItem"
+            {...(onInvestigationClick
+              ? getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
+                  detail: investigation.in_progress ? 'running' : 'complete',
+                })
+              : {})}
+          >
+            {InvestigationCard && (
+              <InvestigationCard
+                investigation={investigation}
+                isSelected={investigation.id === selectedInvestigationId}
+                onClick={onInvestigationClick}
+              />
+            )}
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
