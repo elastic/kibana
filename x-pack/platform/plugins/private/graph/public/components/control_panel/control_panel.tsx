@@ -16,7 +16,6 @@ import type {
   UrlTemplate,
   RuntimeGraph,
   WorkspaceField,
-  WorkspaceNode,
 } from '../../types';
 import { urlTemplateRegex } from '../../helpers/url_template';
 import { SelectionToolBar } from './selection_tool_bar';
@@ -34,7 +33,8 @@ import {
   templatesSelector,
   workspaceSelector,
 } from '../../state_management';
-import { SelectedNodeItem } from './selected_node_item';
+import { SelectedNodeItem, type SelectedNodeView } from './selected_node_item';
+import { getIcon } from '../../helpers/style_choices';
 import { gphSidebarHeaderStyles } from '../../styles';
 
 export interface TargetOptions {
@@ -68,12 +68,22 @@ const ControlPanelComponent = ({
   selectSelected,
 }: ControlPanelProps & ControlPanelStateProps) => {
   const dispatch = useDispatch<GraphDispatch>();
-  const { selectedNodeIds } = useSelector(workspaceSelector);
-  const selectedNodes = selectedNodeIds
-    .map((nodeId) => runtimeGraph.nodesMap[nodeId])
-    .filter((node): node is WorkspaceNode => node !== undefined);
-  const hasNodes = runtimeGraph.nodes.length === 0;
-  const selectedNode = selectedNodeId ? runtimeGraph.nodesMap[selectedNodeId] : undefined;
+  const { nodeIds, nodesById, selectedNodeIds } = useSelector(workspaceSelector);
+  const childCounts = nodeIds.reduce<Record<string, number>>((counts, nodeId) => {
+    const parentId = nodesById[nodeId].parentId;
+    if (parentId) counts[parentId] = (counts[parentId] ?? 0) + 1;
+    return counts;
+  }, {});
+  const selectedNodes = selectedNodeIds.map((nodeId): SelectedNodeView => {
+    const node = nodesById[nodeId];
+    return {
+      ...node,
+      icon: getIcon(node.icon ?? ''),
+      numChildren: childCounts[nodeId] ?? 0,
+    };
+  });
+  const hasNodes = nodeIds.length === 0;
+  const selectedNode = selectedNodes.find(({ id }) => id === selectedNodeId);
 
   const openUrlTemplate = (template: UrlTemplate) => {
     const url = template.url;
@@ -84,11 +94,11 @@ const ControlPanelComponent = ({
     window.open(newUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const onSelectedFieldClick = (node: WorkspaceNode) => {
+  const onSelectedFieldClick = (node: SelectedNodeView) => {
     selectSelected(node.id);
   };
 
-  const onDeselectNode = (node: WorkspaceNode) => {
+  const onDeselectNode = (node: SelectedNodeView) => {
     dispatch(deselectNode(node.id));
     onSetControl('none');
   };
