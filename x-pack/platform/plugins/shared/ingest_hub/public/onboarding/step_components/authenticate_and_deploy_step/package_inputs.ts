@@ -61,7 +61,11 @@ export function buildStreamVars(
     const meta = resolveFieldMeta(service, activeInput, key);
     if (!meta) continue;
     const typed = toTyped(undefined, meta);
-    if (meta.isBool || (typeof typed === 'string' && typed !== '')) {
+    if (
+      meta.isBool ||
+      (typeof typed === 'string' && typed !== '') ||
+      (Array.isArray(typed) && typed.length > 0)
+    ) {
       result[key] = typed;
     }
   }
@@ -113,13 +117,15 @@ function resolveServiceVars(
   service: AwsServiceMatrixEntry,
   instanceId: string = service.id
 ): ServiceVars {
-  return (
-    storedServiceVars[instanceId] ??
-    storedServiceVars[service.id] ?? {
-      enabledDataStreams: service.dataStreams,
-      varsByDataStream: {},
-    }
-  );
+  const rawVars = storedServiceVars[instanceId] ?? storedServiceVars[service.id];
+  if (!rawVars) return { enabledDataStreams: service.dataStreams, varsByDataStream: {} };
+  // Guard against stale session state: filter out dsIds the current service no longer has.
+  // If filtering removes every ID from a non-empty original the user hadn't explicitly cleared,
+  // fall back to service defaults — an empty list is the "intentional opt-out" sentinel.
+  const filtered = rawVars.enabledDataStreams.filter((dsId) => service.dataStreams.includes(dsId));
+  return filtered.length === rawVars.enabledDataStreams.length
+    ? rawVars
+    : { ...rawVars, enabledDataStreams: filtered };
 }
 
 const EMPTY_DS_VARS: Readonly<ServiceDataStreamVars> = { enabledInputs: [], varsByInput: {} };
