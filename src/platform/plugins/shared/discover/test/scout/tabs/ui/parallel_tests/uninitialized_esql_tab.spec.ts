@@ -63,26 +63,23 @@ spaceTest.describe(
       }
     );
 
-    spaceTest(
-      'opens query history on a new ES|QL tab and closes it after searching',
-      async ({ pageObjects }) => {
-        const { discover, unifiedTabs } = pageObjects;
-        const historyPanel = discover.getEsqlHistoryPanel();
+    spaceTest('does not open query history on a new ES|QL tab', async ({ pageObjects }) => {
+      const { discover, unifiedTabs } = pageObjects;
+      const historyPanel = discover.getEsqlHistoryPanel();
 
-        await discover.goto({ queryMode: 'esql' });
-        await discover.waitUntilSearchingHasFinished();
+      await discover.goto({ queryMode: 'esql' });
+      await discover.waitUntilSearchingHasFinished();
 
-        await unifiedTabs.createNewTab();
+      await unifiedTabs.createNewTab();
 
-        await expect(historyPanel).toBeVisible();
+      await expect(historyPanel).toBeHidden();
 
-        await discover.codeEditor.setCodeEditorValue(QUERY);
-        await discover.submitQuery();
+      await discover.codeEditor.setCodeEditorValue(QUERY);
+      await discover.submitQuery();
+      await discover.waitUntilSearchingHasFinished();
 
-        await expect(historyPanel).toBeHidden();
-        await discover.waitUntilSearchingHasFinished();
-      }
-    );
+      await expect(historyPanel).toBeHidden();
+    });
 
     spaceTest(
       'keeps manually opened query history open across searches',
@@ -116,11 +113,11 @@ spaceTest.describe(
       await discover.getQueryInEsqlButton().click();
 
       expect(await discover.getCurrentQueryMode()).toBe('esql');
-      await expect(discover.getUninitializedKeyboardShortcuts()).toBeVisible();
+      await expect(discover.getRecommendedQueries()).toBeVisible();
     });
 
     spaceTest(
-      'shows keyboard shortcuts and disables search on an empty ES|QL tab until a query is entered',
+      'shows recommended queries and disables search on an empty ES|QL tab until a query is entered and submitted',
       async ({ pageObjects }) => {
         const { discover, unifiedTabs } = pageObjects;
 
@@ -128,14 +125,34 @@ spaceTest.describe(
         await discover.waitUntilSearchingHasFinished();
         await unifiedTabs.createNewTab();
 
-        await expect(discover.getUninitializedKeyboardShortcuts()).toBeVisible();
+        await expect(discover.getRecommendedQueries()).toBeVisible();
         await expect(discover.getQuerySubmitButton()).toBeDisabled();
 
         await discover.codeEditor.setCodeEditorValue(QUERY);
 
         await expect(discover.getQuerySubmitButton()).toBeEnabled();
-        await expect(discover.getUninitializedKeyboardShortcuts()).toBeVisible();
+        await expect(discover.getRecommendedQueries()).toBeVisible();
+
+        await discover.submitQuery();
+        await discover.waitUntilSearchingHasFinished();
+        await expect(discover.getRecommendedQueries()).toBeHidden();
       }
     );
+
+    spaceTest('runs a recommended query on a new ES|QL tab', async ({ pageObjects }) => {
+      const { discover, unifiedTabs } = pageObjects;
+
+      await discover.goto({ queryMode: 'esql' });
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedTabs.createNewTab();
+
+      const runButton = discover.getRecommendedQueryRunButton('Search all fields');
+      await runButton.hover();
+      await expect(runButton).toHaveCSS('opacity', '1');
+      await runButton.click();
+      await discover.waitUntilSearchingHasFinished();
+
+      await expect(discover.getRecommendedQueries()).toBeHidden();
+    });
   }
 );

@@ -18,7 +18,7 @@ export interface EditorExtensions {
   recommendedFields: RecommendedField[];
 }
 
-interface QueryTemplate {
+export interface QueryTemplate {
   label: string;
   description: string;
   queryString: string;

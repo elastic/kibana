@@ -1394,6 +1394,7 @@ export const QueryBarTopRow = React.memo(
             enableResourceBrowser={props.enableResourceBrowser}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             onVisorNlResultReady={onVisorNlResultReady}
+            hasExternalVisor
           />
         )
       );
