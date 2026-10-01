@@ -104,7 +104,9 @@ const createWithConflictRetry = async (
         typeof error === 'object' &&
         error !== null &&
         ((error as { statusCode?: number }).statusCode === 409 ||
-          String((error as { meta?: { body?: { error?: { type?: string } } } }).meta?.body?.error?.type).includes('version_conflict'));
+          String(
+            (error as { meta?: { body?: { error?: { type?: string } } } }).meta?.body?.error?.type
+          ).includes('version_conflict'));
       if (!isConflict || attempt >= attempts) {
         throw error;
       }
