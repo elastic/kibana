@@ -160,6 +160,7 @@ export type {
   InvestigationProposalSummary,
   InvestigationSeverity,
   InvestigationSeverityCounts,
+  InvestigationSeverityFilterValue,
   InvestigationsSortField,
   InvestigationSubjectResponse,
   InvestigationSummary,

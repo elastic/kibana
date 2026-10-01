@@ -41,6 +41,7 @@ import { AssignmentsService } from './assignments/assignments_service';
 import { InvestigationStatusService } from './investigations/services/investigation_status_service';
 import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import { createInvestigationsPrivilegesReader } from './investigations/services/check_investigations_privileges';
+import { deleteInvestigationDataAcrossSpaces } from './investigations/services/delete_investigation_data_across_spaces';
 import { InvestigationDriverWorkflowRegistry } from './investigations/services/driver_workflows';
 import { InProgressResolver } from './investigations/services/in_progress';
 import { InvestigationsQueryService } from './investigations/services/investigations_query_service';
@@ -319,6 +320,15 @@ export class AgenticInvestigationsPlugin
       getImpactClient,
       getSubjectsClient,
       getInvestigationsClient,
+      deleteSubjectInvestigationDataAcrossSpaces: () => {
+        const subjects = this.requireSubjectsService();
+        return deleteInvestigationDataAcrossSpaces({
+          subjects: subjects.getDocumentService(),
+          impact: this.requireImpactService().getDocumentService(),
+          hypotheses: this.requireHypothesesService().getDocumentService(),
+          deleteAllClaims: () => subjects.deleteAllClaimsAcrossSpaces(),
+        });
+      },
       getEscalationsService: () => this.requireEscalationsService(),
     };
   }
