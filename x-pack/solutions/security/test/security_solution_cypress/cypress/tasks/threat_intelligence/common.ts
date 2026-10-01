@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { recurse } from 'cypress-recurse';
 import {
   MANAGE_NAVIGATION_ITEMS,
   SECURITY_SOLUTION_NAVBAR_MANAGE_ITEM,
