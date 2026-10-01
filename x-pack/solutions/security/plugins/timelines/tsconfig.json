@@ -23,6 +23,7 @@
     "@kbn/securitysolution-ecs",
     "@kbn/securitysolution-t-grid",
     "@kbn/securitysolution-timeline-common",
+    "@kbn/securitysolution-timeline-components",
     "@kbn/rule-data-utils",
     "@kbn/rule-registry-plugin",
     "@kbn/data-views-plugin",

@@ -1466,6 +1466,8 @@ x-pack/solutions/security/packages/side-nav @elastic/security-investigations
 x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/storybook/config @elastic/security-investigations
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
+x-pack/solutions/security/packages/timeline-common @elastic/security-threat-hunting
+x-pack/solutions/security/packages/timeline-components @elastic/security-threat-hunting
 x-pack/solutions/security/packages/upselling @elastic/security-investigations
 x-pack/solutions/security/plugins/alertzero @elastic/security-solution
 x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps

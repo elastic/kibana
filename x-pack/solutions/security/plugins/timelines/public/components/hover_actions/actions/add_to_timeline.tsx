@@ -13,17 +13,20 @@ import { isEmpty } from 'lodash';
 
 import { useDispatch } from 'react-redux-v7';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import {
+  ADD_TO_TIMELINE,
+  ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE,
+  TooltipWithKeyboardShortcut,
+  getAdditionalScreenReaderOnlyContext,
+  useAppToasts,
+} from '@kbn/securitysolution-timeline-components';
+import type { HoverActionComponentProps } from '@kbn/securitysolution-timeline-components';
 import type { TimelinesStartServices } from '../../..';
 import { TimelineId } from '../../../store/timeline';
 import { addProviderToTimeline } from '../../../store/timeline/actions';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import type { DataProvider } from '../../../../common/types';
-import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
-import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
-import type { HoverActionComponentProps } from './types';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
-import * as i18n from './translations';
 
 export const ADD_TO_TIMELINE_KEYBOARD_SHORTCUT = 'a';
 
@@ -103,7 +106,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
             addSuccess({
               title: toMountPoint(
                 <AddSuccessMessage>
-                  {i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(
+                  {ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(
                     provider.name,
                     timelineType === 'default'
                   )}
@@ -147,12 +150,12 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
               field,
               value,
             })}
-            content={i18n.ADD_TO_TIMELINE}
+            content={ADD_TO_TIMELINE}
             shortcut={ADD_TO_TIMELINE_KEYBOARD_SHORTCUT}
             showShortcut={ownFocus}
           />
         ) : (
-          i18n.ADD_TO_TIMELINE
+          ADD_TO_TIMELINE
         ),
       [field, ownFocus, showTooltip, value]
     );
@@ -161,20 +164,20 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
       () =>
         Component ? (
           <Component
-            aria-label={i18n.ADD_TO_TIMELINE}
+            aria-label={ADD_TO_TIMELINE}
             buttonRef={defaultFocusedButtonRef}
             data-test-subj="add-to-timeline"
             icon="timeline"
             iconType="timeline"
             onClick={handleStartDragToTimeline}
-            title={i18n.ADD_TO_TIMELINE}
+            title={ADD_TO_TIMELINE}
           >
-            {i18n.ADD_TO_TIMELINE}
+            {ADD_TO_TIMELINE}
           </Component>
         ) : (
           // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap -- wrapped with EuiToolTip below
           <EuiButtonIcon
-            aria-label={i18n.ADD_TO_TIMELINE}
+            aria-label={ADD_TO_TIMELINE}
             buttonRef={defaultFocusedButtonRef}
             className="timelines__hoverActionButton"
             data-test-subj="add-to-timeline"

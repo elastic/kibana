@@ -2449,6 +2449,8 @@
       "@kbn/securitysolution-t-grid/*": ["./x-pack/solutions/security/packages/kbn-securitysolution-t-grid/*"],
       "@kbn/securitysolution-timeline-common": ["./x-pack/solutions/security/packages/timeline-common"],
       "@kbn/securitysolution-timeline-common/*": ["./x-pack/solutions/security/packages/timeline-common/*"],
+      "@kbn/securitysolution-timeline-components": ["./x-pack/solutions/security/packages/timeline-components"],
+      "@kbn/securitysolution-timeline-components/*": ["./x-pack/solutions/security/packages/timeline-components/*"],
       "@kbn/securitysolution-utils": ["./x-pack/solutions/security/packages/kbn-securitysolution-utils"],
       "@kbn/securitysolution-utils/*": ["./x-pack/solutions/security/packages/kbn-securitysolution-utils/*"],
       "@kbn/server-http-tools": ["./src/platform/packages/shared/kbn-server-http-tools"],
