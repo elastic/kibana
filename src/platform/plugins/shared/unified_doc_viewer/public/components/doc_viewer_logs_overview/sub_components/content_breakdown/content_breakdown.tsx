@@ -68,8 +68,24 @@ export const ContentBreakdown = ({
   );
   const hasMessageField = field && value;
 
+  const badges = (
+    <Badges
+      dataView={dataView}
+      hasMessageField={Boolean(hasMessageField)}
+      hit={hit}
+      formattedDoc={formattedDoc}
+      renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+      cpsHasLinkedProjects={cpsHasLinkedProjects}
+    />
+  );
+
   if (!hasMessageField) {
-    return null;
+    return (
+      <>
+        {badges}
+        <EuiSpacer size="s" />
+      </>
+    );
   }
 
   return (
@@ -89,16 +105,7 @@ export const ContentBreakdown = ({
             <EuiText color="subdued" size="xs">
               {field}
             </EuiText>
-            <EuiFlexItem grow={false}>
-              <Badges
-                dataView={dataView}
-                hasMessageField={Boolean(hasMessageField)}
-                hit={hit}
-                formattedDoc={formattedDoc}
-                renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
-                cpsHasLinkedProjects={cpsHasLinkedProjects}
-              />
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{badges}</EuiFlexItem>
           </EuiFlexGroup>
           {hasMessageField && (
             <HoverActionPopover

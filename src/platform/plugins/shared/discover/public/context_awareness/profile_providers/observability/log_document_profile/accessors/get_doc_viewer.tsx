@@ -15,7 +15,7 @@ import type {
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
-import { getStacktraceFields } from '@kbn/discover-utils/src';
+import { getFieldValueWithFallback, getStacktraceFields } from '@kbn/discover-utils/src';
 import { PROJECT_ROUTING, type ICPSManager } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
 import {
@@ -42,7 +42,9 @@ const hasLogOverviewContent = (record: DataTableRecord) => {
   const hasMessage = Boolean(getMessageFieldWithFallbacks(flattened).value);
   const hasStacktrace = Object.values(getStacktraceFields(record as LogDocument)).some(Boolean);
   const hasQualityIssues = fieldConstants.DEGRADED_DOCS_FIELDS.some((field) => raw[field] != null);
-  const hasTrace = Boolean(flattened[fieldConstants.TRACE_ID_FIELD]);
+  const hasTrace = Boolean(
+    getFieldValueWithFallback(flattened, fieldConstants.TRACE_ID_FIELD).value
+  );
 
   return hasMessage || hasStacktrace || hasQualityIssues || hasTrace;
 };

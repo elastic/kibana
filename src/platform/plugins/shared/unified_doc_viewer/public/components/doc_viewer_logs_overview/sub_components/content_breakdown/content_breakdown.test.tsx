@@ -97,15 +97,27 @@ describe('ContentBreakdown', () => {
   });
 
   describe('Without a message field', () => {
-    it('renders nothing instead of an empty message panel', () => {
+    it('does not render the empty message panel', () => {
       const hit = buildHit({ 'service.name': 'payments' });
       const formattedDoc = { 'service.name': 'payments' } as any;
 
-      const { container } = render(
-        <ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />
-      );
+      render(<ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />);
 
-      expect(container).toBeEmptyDOMElement();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewMessage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewTimestamp')).not.toBeInTheDocument();
+    });
+
+    it('keeps the timestamp badge without the empty message panel', () => {
+      const hit = buildHit({ 'service.name': 'payments' });
+      const formattedDoc = {
+        '@timestamp': '2026-10-01T10:00:00.000Z',
+        'service.name': 'payments',
+      } as any;
+
+      render(<ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />);
+
+      expect(screen.getByTestId('unifiedDocViewLogsOverviewTimestamp')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewMessage')).not.toBeInTheDocument();
     });
   });
 

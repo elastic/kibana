@@ -120,6 +120,14 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
         record: buildRecord('doc-1', { 'trace.id': ['abc123'] }),
       },
       {
+        name: 'an OTel attributes trace id',
+        record: buildRecord('doc-1', { 'attributes.trace.id': ['abc123'] }),
+      },
+      {
+        name: 'an OTel resource attributes trace id',
+        record: buildRecord('doc-1', { 'resource.attributes.trace.id': ['abc123'] }),
+      },
+      {
         name: 'degraded fields',
         record: buildDataTableRecord(
           {
