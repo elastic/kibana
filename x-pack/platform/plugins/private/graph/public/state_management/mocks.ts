@@ -46,7 +46,11 @@ export function createMockGraphStore({
 }): MockedGraphEnvironment {
   const coreStart = coreMock.createStart();
   const workspaceMock = {
-    runLayout: jest.fn(),
+    layoutController: {
+      start: jest.fn(),
+      stop: jest.fn(),
+      isRunning: jest.fn(() => false),
+    },
     simpleSearch: jest.fn(),
     nodes: [],
     edges: [],

@@ -150,7 +150,7 @@ export const WorkspaceRoute = ({
       addBasePath,
       indexPatternProvider,
       createWorkspace: (indexPattern, exploreControls) => {
-        workspaceRef.current?.stopLayout();
+        workspaceRef.current?.layoutController.stop();
         runtimeSequenceRef.current = 0;
         const layoutTopology = new ReduxLayoutTopology({
           getState: () => storeRef.current?.getState(),
@@ -161,7 +161,7 @@ export const WorkspaceRoute = ({
           getEdges: () => layoutTopology.getEdges(),
           onTick: () =>
             storeRef.current?.dispatch(
-              workspaceLayoutChanged(Boolean(workspaceRef.current?.isLayoutRunning()))
+              workspaceLayoutChanged(Boolean(workspaceRef.current?.layoutController.isRunning()))
             ),
         });
         const options = {

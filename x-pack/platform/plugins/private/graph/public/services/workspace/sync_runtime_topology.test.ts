@@ -11,7 +11,7 @@ import { syncRuntimeTopology } from './sync_runtime_topology';
 
 it('rebuilds mutable runtime references from normalized Redux topology', () => {
   const workspace = {
-    runLayout: jest.fn(),
+    layoutController: { start: jest.fn() },
   } as unknown as RuntimeWorkspace;
   const state: WorkspaceState = {
     isInitialized: true,
@@ -64,5 +64,5 @@ it('rebuilds mutable runtime references from normalized Redux topology', () => {
   expect(workspace.nodesMap.child.parent).toBe(workspace.nodesMap.parent);
   expect(workspace.edgesMap.edge.source).toBe(workspace.nodesMap.parent);
   expect(workspace.edgesMap.edge.target).toBe(workspace.nodesMap.child);
-  expect(workspace.runLayout).toHaveBeenCalled();
+  expect(workspace.layoutController.start).toHaveBeenCalled();
 });

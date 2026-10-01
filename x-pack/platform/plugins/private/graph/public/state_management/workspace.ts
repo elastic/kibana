@@ -470,7 +470,7 @@ export const createWorkspaceState = (workspace: RuntimeWorkspace): WorkspaceSnap
   );
 
   return {
-    isLayoutRunning: Boolean(workspace.isLayoutRunning?.()),
+    isLayoutRunning: workspace.layoutController.isRunning(),
     nodesById,
     // IDs use field + '..' + term; repeated nodes or delimiter collisions can produce the same ID.
     // Derive IDs from the map so duplicates cannot make the normalized collections inconsistent.
@@ -630,9 +630,9 @@ export const registerWorkspaceListeners = (
       }
 
       if (startWorkspaceLayout.match(action)) {
-        workspace.runLayout();
+        workspace.layoutController.start();
       } else {
-        workspace.stopLayout();
+        workspace.layoutController.stop();
         notifyReact();
       }
     },

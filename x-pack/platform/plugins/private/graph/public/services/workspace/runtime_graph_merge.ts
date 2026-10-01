@@ -18,7 +18,7 @@ export const mergeRuntimeGraph = (
   graph: GraphData,
   initialSequence: number
 ): number => {
-  workspace.stopLayout();
+  workspace.layoutController.stop();
   const { normalizedNodes, newNodes } = prepareIncomingNodes(
     graph.nodes,
     new Set(Object.keys(workspace.nodesMap))
@@ -51,7 +51,7 @@ export const mergeRuntimeGraph = (
   });
 
   workspace.options.topologyChangeHandler?.();
-  workspace.runLayout();
+  workspace.layoutController.start();
   workspace.options.topologyChangeHandler?.();
   return sequence;
 };
