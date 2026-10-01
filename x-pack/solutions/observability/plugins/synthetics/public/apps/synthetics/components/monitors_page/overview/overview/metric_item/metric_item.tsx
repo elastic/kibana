@@ -300,6 +300,7 @@ export const MetricItem = ({
                     >
                       <MetricItemBody
                         monitor={monitor}
+                        isInteractive={isInteractive}
                         onLocationClick={(locId, locLabel) => {
                           onClick({
                             locationId: locId,

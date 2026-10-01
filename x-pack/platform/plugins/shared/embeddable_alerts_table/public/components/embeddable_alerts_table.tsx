@@ -175,6 +175,7 @@ export const EmbeddableAlertsTable = ({
           showKeyboardShortcuts: false,
           showDisplaySelector: false,
         }}
+        hideBulkActions={viewMode === 'non-interactive'}
         emptyState={{
           height: 'flex',
           variant: 'transparent',

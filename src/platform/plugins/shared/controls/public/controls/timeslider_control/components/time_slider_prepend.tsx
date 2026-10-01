@@ -55,22 +55,25 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
     playNextFrame();
   }, [props, playNextFrame]);
 
-  const onPause = useCallback(() => {
-    props.setIsPopoverOpen(true);
-    setIsPaused(true);
-    if (subscription) {
-      subscription.unsubscribe();
-      setSubscription(undefined);
-    }
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      setTimeoutId(undefined);
-    }
-  }, [props, subscription, timeoutId]);
+  const onPause = useCallback(
+    (openPopover: boolean = true) => {
+      if (openPopover) props.setIsPopoverOpen(true);
+      setIsPaused(true);
+      if (subscription) {
+        subscription.unsubscribe();
+        setSubscription(undefined);
+      }
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        setTimeoutId(undefined);
+      }
+    },
+    [props, subscription, timeoutId]
+  );
 
   useEffect(() => {
     if (!isInteractive) {
-      onPause();
+      onPause(false);
     }
   }, [isInteractive, onPause]);
 

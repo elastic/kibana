@@ -75,7 +75,7 @@ const EmbeddableFieldStatsTableWrapper = (
               item={item}
               dataView={props.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
-              onAddFilter={props.isInteractive ? onAddFilter : undefined}
+              onAddFilter={props.isInteractive ?? true ? onAddFilter : undefined}
               totalDocuments={props.totalDocuments}
             />
           );

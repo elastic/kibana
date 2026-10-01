@@ -113,6 +113,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
           searchQuery={searchQuery}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
+          parentApi={parentApi}
         />
       );
     }
@@ -255,11 +256,9 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     },
   ];
 
-  const isInteractive = useIsInteractive(parentApi);
-
   const columns = useColumns(
     LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.GROUPS,
-    isInteractive ? skippedColumns : [...skippedColumns, 'Actions'],
+    effectiveSkippedColumns,
     searchQuery,
     barColorOverride,
     barHighlightColorOverride
@@ -368,7 +367,10 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
           if (Object.hasOwn(itemIdToExpandedRowMapValues, itemId)) {
             const component = itemIdToExpandedRowMapValues[itemId];
             itemIdToExpandedRowMapValues[itemId] = (
-              <LogRateAnalysisResultsTable {...component.props} skippedColumns={skippedColumns} />
+              <LogRateAnalysisResultsTable
+                {...component.props}
+                skippedColumns={effectiveSkippedColumns}
+              />
             );
           }
         }
