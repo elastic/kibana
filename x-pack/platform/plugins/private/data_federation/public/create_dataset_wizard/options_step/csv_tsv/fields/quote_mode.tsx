@@ -5,31 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
-import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
+import React from 'react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import type { DatasetModeFormValue } from '../../../create_dataset_form_state';
-import { DescribedOptionDisplay } from '../../../components/described_option_display';
+import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
+import {
+  EuiComboBoxNoCustomOption,
+  type EuiComboBoxNoCustomOptionOption,
+} from '../../../components/eui_combo_box_no_custom_option';
 
-type QuoteModeOption = EuiComboBoxOptionOption<string> & {
-  value: DatasetModeFormValue;
-  description: string;
-  'data-test-subj': string;
-};
-
-const renderQuoteModeOption = (option: EuiComboBoxOptionOption<string>) => {
-  const opt = option as QuoteModeOption;
-  return <DescribedOptionDisplay title={opt.label} description={opt.description} />;
-};
-
-export interface QuoteModeChange {
-  value: DatasetModeFormValue;
-  /** False while the input holds typed text that has not been resolved to an option. */
-  isValid: boolean;
-}
-
-const OPTIONS: QuoteModeOption[] = [
+const OPTIONS: Array<EuiComboBoxNoCustomOptionOption<Exclude<DatasetModeFormValue, ''>>> = [
   {
     value: 'quoted',
     label: createDatasetWizardStrings.settingsModeQuoted,
@@ -58,66 +44,23 @@ export function QuoteMode({
   defaultValue,
 }: {
   value: DatasetModeFormValue;
-  onChange: (next: QuoteModeChange) => void;
+  onChange: (next: ComboBoxChange<DatasetModeFormValue>) => void;
   onBlur: () => void;
   isInvalid: boolean;
   /** Format-specific default: quoted for CSV, plain for TSV. */
   defaultValue?: DatasetModeFormValue;
 }) {
-  // EuiComboBox clears its search text right after reporting a selection, before the new `value` prop
-  // arrives; the search handler reads this ref so that report cannot revert the selection.
-  const latestValue = useRef(value);
-  useEffect(() => {
-    latestValue.current = value;
-  }, [value]);
-
-  const options = useMemo(
-    (): QuoteModeOption[] =>
-      OPTIONS.map((option) => ({
-        ...option,
-        append:
-          defaultValue && option.value === defaultValue ? (
-            <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>
-          ) : undefined,
-      })),
-    [defaultValue]
-  );
-
-  const selectedOptions = useMemo(() => {
-    if (!value) return [];
-    const option = options.find((o) => o.value === value);
-    return option
-      ? ([
-          {
-            value: option.value,
-            label: option.label,
-          },
-        ] as QuoteModeOption[])
-      : ([{ value, label: value } as QuoteModeOption] as QuoteModeOption[]);
-  }, [options, value]);
-
   return (
-    <EuiComboBox
-      placeholder={createDatasetWizardStrings.settingsModePlaceholder}
-      options={options}
-      data-test-subj="createDatasetSettingsMode"
-      fullWidth
-      aria-label={createDatasetWizardStrings.settingsModeLabel}
-      singleSelection={{ asPlainText: true }}
-      isClearable
-      rowHeight="auto"
-      renderOption={renderQuoteModeOption}
-      selectedOptions={selectedOptions}
-      isInvalid={isInvalid}
-      onSearchChange={(searchValue) => {
-        onChange({ value: latestValue.current, isValid: !searchValue });
-      }}
-      onChange={(nextSelectedOptions) => {
-        const next = nextSelectedOptions?.[0] as QuoteModeOption | undefined;
-        latestValue.current = next?.value ?? '';
-        onChange({ value: latestValue.current, isValid: true });
-      }}
+    <EuiComboBoxNoCustomOption
+      value={value}
+      onChange={onChange}
       onBlur={onBlur}
+      options={OPTIONS}
+      defaultValue={defaultValue}
+      isInvalid={isInvalid}
+      placeholder={createDatasetWizardStrings.settingsModePlaceholder}
+      aria-label={createDatasetWizardStrings.settingsModeLabel}
+      data-test-subj="createDatasetSettingsMode"
     />
   );
 }

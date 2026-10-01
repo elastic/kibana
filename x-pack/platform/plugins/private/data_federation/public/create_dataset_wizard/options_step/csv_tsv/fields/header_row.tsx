@@ -5,37 +5,22 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
-import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
+import React from 'react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import type { DatasetBooleanFormValue } from '../../../create_dataset_form_state';
-import { DescribedOptionDisplay } from '../../../components/described_option_display';
+import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
+import {
+  EuiComboBoxNoCustomOption,
+  type EuiComboBoxNoCustomOptionOption,
+} from '../../../components/eui_combo_box_no_custom_option';
 
-type HeaderRowOption = EuiComboBoxOptionOption<string> & {
-  value: DatasetBooleanFormValue;
-  description: string;
-  'data-test-subj': string;
-};
-
-const renderHeaderRowOption = (option: EuiComboBoxOptionOption<string>) => {
-  const opt = option as HeaderRowOption;
-  return <DescribedOptionDisplay title={opt.label} description={opt.description} />;
-};
-
-export interface HeaderRowChange {
-  value: DatasetBooleanFormValue;
-  /** False while the input holds typed text that has not been resolved to an option. */
-  isValid: boolean;
-}
-
-const OPTIONS: HeaderRowOption[] = [
+const OPTIONS: Array<EuiComboBoxNoCustomOptionOption<Exclude<DatasetBooleanFormValue, ''>>> = [
   {
     value: 'true',
     label: createDatasetWizardStrings.trueLabel,
     description: createDatasetWizardStrings.settingsHeaderRowTrueDescription,
     'data-test-subj': 'createDatasetSettingsHeaderRowOption-true',
-    append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
   },
   {
     value: 'false',
@@ -52,44 +37,21 @@ export function HeaderRow({
   isInvalid,
 }: {
   value: DatasetBooleanFormValue;
-  onChange: (next: HeaderRowChange) => void;
+  onChange: (next: ComboBoxChange<DatasetBooleanFormValue>) => void;
   onBlur: () => void;
   isInvalid: boolean;
 }) {
-  // EuiComboBox clears its search text right after reporting a selection, before the new `value` prop
-  // arrives; the search handler reads this ref so that report cannot revert the selection.
-  const latestValue = useRef(value);
-  useEffect(() => {
-    latestValue.current = value;
-  }, [value]);
-
-  const selectedOptions = useMemo(() => {
-    const option = OPTIONS.find((o) => o.value === value);
-    return option ? [{ value: option.value, label: option.label }] : [];
-  }, [value]);
-
   return (
-    <EuiComboBox
-      placeholder={createDatasetWizardStrings.settingsHeaderRowPlaceholder}
-      options={OPTIONS}
-      data-test-subj="createDatasetSettingsHeaderRow"
-      fullWidth
-      aria-label={createDatasetWizardStrings.settingsHeaderRowLabel}
-      singleSelection={{ asPlainText: true }}
-      isClearable
-      rowHeight="auto"
-      renderOption={renderHeaderRowOption}
-      selectedOptions={selectedOptions}
-      isInvalid={isInvalid}
-      onSearchChange={(searchValue) => {
-        onChange({ value: latestValue.current, isValid: !searchValue });
-      }}
-      onChange={(nextSelectedOptions) => {
-        const next = nextSelectedOptions?.[0] as HeaderRowOption | undefined;
-        latestValue.current = next?.value ?? '';
-        onChange({ value: latestValue.current, isValid: true });
-      }}
+    <EuiComboBoxNoCustomOption
+      value={value}
+      onChange={onChange}
       onBlur={onBlur}
+      options={OPTIONS}
+      defaultValue="true"
+      isInvalid={isInvalid}
+      placeholder={createDatasetWizardStrings.settingsHeaderRowPlaceholder}
+      aria-label={createDatasetWizardStrings.settingsHeaderRowLabel}
+      data-test-subj="createDatasetSettingsHeaderRow"
     />
   );
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiCode,
@@ -16,31 +16,22 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { useController, useFormContext } from 'react-hook-form';
-
-import type { CreateDatasetFormValues } from '../../create_dataset_form_state';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
+import { useComboBoxSelectionValidity } from '../combo_box_selection_validity';
 import { DEFAULT_SCHEMA_RESOLUTION, SchemaResolutionSelect } from './schema_resolution_select';
 
 export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: boolean }) => {
-  const { control } = useFormContext<CreateDatasetFormValues>();
-  const { field: schemaResolutionField, fieldState: schemaResolutionState } = useController({
-    name: 'settings.schema_resolution',
-    control,
-    rules: {
-      // The combo box is disabled outside infer schema mode, where typed text cannot be corrected.
-      validate: (_value, { ui, mappings }) =>
-        ui.schemaResolutionIsValid === false && mappings.dynamic
-          ? createDatasetWizardStrings.comboBoxSelectValidOption
-          : true,
-    },
-  });
   const {
-    field: { onChange: setSchemaResolutionIsValid },
-  } = useController({ name: 'ui.schemaResolutionIsValid', control });
-
-  // The combo box's typed text does not survive unmounting, so neither should the flag that reflects it.
-  useEffect(() => () => setSchemaResolutionIsValid(true), [setSchemaResolutionIsValid]);
+    field: schemaResolutionField,
+    fieldState: schemaResolutionState,
+    onChange: onSchemaResolutionChange,
+    reset: resetSchemaResolutionValidity,
+  } = useComboBoxSelectionValidity({
+    name: 'settings.schema_resolution',
+    flag: 'schemaResolutionIsValid',
+    // The combo box is disabled outside infer schema mode, where typed text cannot be corrected.
+    isEnforced: ({ mappings }) => mappings.dynamic,
+  });
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -65,7 +56,7 @@ export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: 
         onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
           e.stopPropagation();
           // Collapsing unmounts the combo box, discarding any typed text.
-          if (isOpen) setSchemaResolutionIsValid(true);
+          if (isOpen) resetSchemaResolutionValidity();
           setIsOpen(!isOpen);
         }}
         data-test-subj="createDatasetWizardSchemaResolutionToggle"
@@ -85,10 +76,7 @@ export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: 
               >
                 <SchemaResolutionSelect
                   value={schemaResolutionField.value}
-                  onChange={({ value, isValid }) => {
-                    schemaResolutionField.onChange(value);
-                    setSchemaResolutionIsValid(isValid);
-                  }}
+                  onChange={onSchemaResolutionChange}
                   onBlur={schemaResolutionField.onBlur}
                   isInvalid={Boolean(schemaResolutionState.error)}
                   isDisabled={isDisabled}

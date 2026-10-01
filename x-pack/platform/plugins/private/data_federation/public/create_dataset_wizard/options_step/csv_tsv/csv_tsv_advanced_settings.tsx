@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
@@ -22,6 +22,7 @@ import {
   type DatasetFormatFormValue,
 } from '../../create_dataset_form_state';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
+import { useComboBoxSelectionValidity } from '../../components/combo_box_selection_validity';
 import { TrimSpaces } from './fields/trim_spaces';
 
 export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
@@ -46,22 +47,11 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
     },
   });
   const { field: columnPrefixField } = useController({ name: 'settings.column_prefix', control });
-  const { field: trimSpacesField, fieldState: trimSpacesState } = useController({
-    name: 'settings.trim_spaces',
-    control,
-    rules: {
-      validate: (_value, { ui }) =>
-        ui.trimSpacesIsValid === false
-          ? createDatasetWizardStrings.comboBoxSelectValidOption
-          : true,
-    },
-  });
   const {
-    field: { onChange: setTrimSpacesIsValid },
-  } = useController({ name: 'ui.trimSpacesIsValid', control });
-
-  // The combo box's typed text does not survive unmounting, so neither should the flag that reflects it.
-  useEffect(() => () => setTrimSpacesIsValid(true), [setTrimSpacesIsValid]);
+    field: trimSpacesField,
+    fieldState: trimSpacesState,
+    onChange: onTrimSpacesChange,
+  } = useComboBoxSelectionValidity({ name: 'settings.trim_spaces', flag: 'trimSpacesIsValid' });
 
   return (
     <div data-test-subj="createDatasetCsvTsvAdvancedSettings">
@@ -211,10 +201,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
       >
         <TrimSpaces
           value={trimSpacesField.value}
-          onChange={({ value, isValid }) => {
-            trimSpacesField.onChange(value);
-            setTrimSpacesIsValid(isValid);
-          }}
+          onChange={onTrimSpacesChange}
           onBlur={trimSpacesField.onBlur}
           isInvalid={Boolean(trimSpacesState.error)}
         />

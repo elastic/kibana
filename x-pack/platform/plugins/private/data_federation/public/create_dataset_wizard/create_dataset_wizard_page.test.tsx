@@ -1257,6 +1257,43 @@ describe('CreateDatasetWizardPage', () => {
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
   });
 
+  it('discards the combo box selection error when its typed text is discarded by leaving the step', async () => {
+    const { getByTestId, findByTestId, findByText, queryByText } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    const input = getByTestId('createDatasetSettingsHeaderRow').querySelector('input');
+    if (!input) throw new Error('header row input not found');
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'bogus' } });
+      fireEvent.blur(input);
+    });
+    await clickNext(getByTestId);
+    expect(
+      await findByText(createDatasetWizardStrings.comboBoxSelectValidOption)
+    ).toBeInTheDocument();
+
+    await clickBack(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardDatasetStep'))).toBeInTheDocument();
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    expect(getByTestId('createDatasetSettingsHeaderRow').querySelector('input')).toHaveValue('');
+    expect(queryByText(createDatasetWizardStrings.comboBoxSelectValidOption)).toBeNull();
+    expect(getByTestId('nextButton')).toBeEnabled();
+  });
+
   it('allows navigation once an invalid additional setting is fixed', async () => {
     const { getByTestId, findByTestId, queryByTestId } = renderWizard();
 

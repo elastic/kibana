@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
@@ -21,28 +21,21 @@ import { ErrorConfig } from './fields/error_config';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
 import { FileExclusionsSelect } from './fields/file_exclusions_select';
 import { PartitionDetectionSelect } from '../../components/fields/partition_detection_select';
+import { useComboBoxSelectionValidity } from '../../components/combo_box_selection_validity';
 
 const DEFAULT_FILE_EXCLUSIONS_DISPLAY = `[${DEFAULT_FILE_EXCLUSIONS.map(
   (pattern) => `"${pattern}"`
 ).join(', ')}]`;
 
 export function SharedAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const { field: partitionDetectionField, fieldState: partitionDetectionState } = useController({
-    name: 'settings.partition_detection',
-    control,
-    rules: {
-      validate: (_value, { ui }) =>
-        ui.partitionDetectionIsValid === false
-          ? createDatasetWizardStrings.comboBoxSelectValidOption
-          : true,
-    },
-  });
   const {
-    field: { onChange: setPartitionDetectionIsValid },
-  } = useController({ name: 'ui.partitionDetectionIsValid', control });
-
-  // The combo box's typed text does not survive unmounting, so neither should the flag that reflects it.
-  useEffect(() => () => setPartitionDetectionIsValid(true), [setPartitionDetectionIsValid]);
+    field: partitionDetectionField,
+    fieldState: partitionDetectionState,
+    onChange: onPartitionDetectionChange,
+  } = useComboBoxSelectionValidity({
+    name: 'settings.partition_detection',
+    flag: 'partitionDetectionIsValid',
+  });
 
   const { field: partitionPathField, fieldState: partitionPathState } = useController({
     name: 'settings.partition_path',
@@ -90,10 +83,7 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
       >
         <PartitionDetectionSelect
           value={partitionDetectionField.value}
-          onChange={({ value, isValid }) => {
-            partitionDetectionField.onChange(value);
-            setPartitionDetectionIsValid(isValid);
-          }}
+          onChange={onPartitionDetectionChange}
           onBlur={partitionDetectionField.onBlur}
           isInvalid={Boolean(partitionDetectionState.error)}
         />

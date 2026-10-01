@@ -5,36 +5,23 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
-import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
+import React from 'react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import type { DatasetErrorModeFormValue } from '../../../create_dataset_form_state';
-import { DescribedOptionDisplay } from '../../../components/described_option_display';
+import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
+import {
+  EuiComboBoxNoCustomOption,
+  type EuiComboBoxNoCustomOptionOption,
+} from '../../../components/eui_combo_box_no_custom_option';
 
-type ErrorModeOption = EuiComboBoxOptionOption<DatasetErrorModeFormValue> & {
-  value: DatasetErrorModeFormValue;
-  description: string;
-  'data-test-subj': string;
-};
-
-export interface ErrorModeChange {
-  value: DatasetErrorModeFormValue;
-  /** False while the input holds typed text that has not been resolved to an option. */
-  isValid: boolean;
-}
-
-const renderErrorModeOption = (option: EuiComboBoxOptionOption<DatasetErrorModeFormValue>) => {
-  const opt = option as ErrorModeOption;
-  return <DescribedOptionDisplay title={opt.label} description={opt.description} />;
-};
-
-const ERROR_MODE_OPTIONS: ErrorModeOption[] = [
+const ERROR_MODE_OPTIONS: Array<
+  EuiComboBoxNoCustomOptionOption<Exclude<DatasetErrorModeFormValue, ''>>
+> = [
   {
     value: 'fail_fast',
     label: createDatasetWizardStrings.settingsErrorModeFailFast,
     description: createDatasetWizardStrings.settingsErrorModeFailFastDescription,
-    append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
     'data-test-subj': 'createDatasetSettingsErrorModeOption-fail_fast',
   },
   {
@@ -58,49 +45,21 @@ export function ErrorModeSelect({
   isInvalid,
 }: {
   value: DatasetErrorModeFormValue;
-  onChange: (next: ErrorModeChange) => void;
+  onChange: (next: ComboBoxChange<DatasetErrorModeFormValue>) => void;
   onBlur: () => void;
   isInvalid: boolean;
 }) {
-  // EuiComboBox clears its search text right after reporting a selection, before the new `value` prop
-  // arrives; the search handler reads this ref so that report cannot revert the selection.
-  const latestValue = useRef(value);
-  useEffect(() => {
-    latestValue.current = value;
-  }, [value]);
-
-  const selectedOption = ERROR_MODE_OPTIONS.find((o) => o.value === value);
   return (
-    <EuiComboBox
-      placeholder={createDatasetWizardStrings.settingsErrorModePlaceholder}
-      options={ERROR_MODE_OPTIONS}
-      data-test-subj="createDatasetSettingsErrorMode"
-      fullWidth
-      aria-label={createDatasetWizardStrings.settingsErrorModeLabel}
-      singleSelection={{ asPlainText: true }}
-      isClearable
-      rowHeight="auto"
-      renderOption={renderErrorModeOption}
-      selectedOptions={
-        selectedOption
-          ? [
-              {
-                value: selectedOption.value,
-                label: selectedOption.label,
-              },
-            ]
-          : []
-      }
-      isInvalid={isInvalid}
-      onSearchChange={(searchValue) => {
-        onChange({ value: latestValue.current, isValid: !searchValue });
-      }}
-      onChange={(nextSelectedOptions) => {
-        const next = nextSelectedOptions?.[0] as ErrorModeOption | undefined;
-        latestValue.current = next?.value ?? '';
-        onChange({ value: latestValue.current, isValid: true });
-      }}
+    <EuiComboBoxNoCustomOption
+      value={value}
+      onChange={onChange}
       onBlur={onBlur}
+      options={ERROR_MODE_OPTIONS}
+      defaultValue="fail_fast"
+      isInvalid={isInvalid}
+      placeholder={createDatasetWizardStrings.settingsErrorModePlaceholder}
+      aria-label={createDatasetWizardStrings.settingsErrorModeLabel}
+      data-test-subj="createDatasetSettingsErrorMode"
     />
   );
 }

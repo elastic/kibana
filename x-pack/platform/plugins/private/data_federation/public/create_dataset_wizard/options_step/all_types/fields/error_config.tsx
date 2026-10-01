@@ -5,45 +5,40 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiCode, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import {
   errorModeAllowsBudget,
   type CreateDatasetFormValues,
+  type DatasetErrorModeFormValue,
 } from '../../../create_dataset_form_state';
 import { FormRowLabelWithInfo } from '../../../components/form_row_label_with_info';
-import { ErrorModeSelect, type ErrorModeChange } from './error_mode_select';
+import {
+  useComboBoxSelectionValidity,
+  type ComboBoxChange,
+} from '../../../components/combo_box_selection_validity';
+import { ErrorModeSelect } from './error_mode_select';
 import { MaxErrorRatioField } from './max_error_ratio_field';
 import { MaxErrorsField } from './max_errors_field';
 
 export function ErrorConfig({ control }: { control: Control<CreateDatasetFormValues> }) {
   const { setValue } = useFormContext<CreateDatasetFormValues>();
-  const { field: errorModeField, fieldState: errorModeState } = useController({
-    name: 'settings.error_mode',
-    control,
-    rules: {
-      validate: (_value, { ui }) =>
-        ui.errorModeIsValid === false ? createDatasetWizardStrings.comboBoxSelectValidOption : true,
-    },
-  });
   const {
-    field: { onChange: setErrorModeIsValid },
-  } = useController({ name: 'ui.errorModeIsValid', control });
-
-  // The combo box's typed text does not survive unmounting, so neither should the flag that reflects it.
-  useEffect(() => () => setErrorModeIsValid(true), [setErrorModeIsValid]);
+    field: errorModeField,
+    fieldState: errorModeState,
+    onChange: setErrorMode,
+  } = useComboBoxSelectionValidity({ name: 'settings.error_mode', flag: 'errorModeIsValid' });
 
   const allowsBudget = errorModeAllowsBudget(errorModeField.value);
 
-  const onErrorModeChange = ({ value: errorMode, isValid }: ErrorModeChange) => {
-    errorModeField.onChange(errorMode);
-    setErrorModeIsValid(isValid);
-    if (errorModeAllowsBudget(errorMode)) return;
+  const onErrorModeChange = (change: ComboBoxChange<DatasetErrorModeFormValue>) => {
+    setErrorMode(change);
+    if (errorModeAllowsBudget(change.value)) return;
     setValue('settings.max_errors', '');
     setValue('settings.max_error_ratio', '');
   };

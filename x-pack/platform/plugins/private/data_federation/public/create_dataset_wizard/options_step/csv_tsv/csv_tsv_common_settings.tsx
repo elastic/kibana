@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
@@ -24,6 +24,7 @@ import { DelimiterSelect } from './fields/delimiter_select';
 import { EncodingSelect } from './fields/encoding_select';
 import { HeaderRow } from './fields/header_row';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
+import { useComboBoxSelectionValidity } from '../../components/combo_box_selection_validity';
 import { QuoteMode } from './fields/quote_mode';
 import { SkipRowsField } from './fields/skip_rows_field';
 
@@ -37,39 +38,20 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
       deps: ['settings.quote', 'settings.escape'],
     },
   });
-  const { field: modeField, fieldState: modeState } = useController({
+  const {
+    field: modeField,
+    fieldState: modeState,
+    onChange: onModeChange,
+  } = useComboBoxSelectionValidity({
     name: 'settings.mode',
-    control,
-    rules: {
-      validate: (_value, { ui }) =>
-        ui.modeIsValid === false ? createDatasetWizardStrings.comboBoxSelectValidOption : true,
-      deps: ['settings.delimiter', 'settings.quote', 'settings.escape'],
-    },
+    flag: 'modeIsValid',
+    deps: ['settings.delimiter', 'settings.quote', 'settings.escape'],
   });
   const {
-    field: { onChange: setModeIsValid },
-  } = useController({ name: 'ui.modeIsValid', control });
-
-  const { field: headerRowField, fieldState: headerRowState } = useController({
-    name: 'settings.header_row',
-    control,
-    rules: {
-      validate: (_value, { ui }) =>
-        ui.headerRowIsValid === false ? createDatasetWizardStrings.comboBoxSelectValidOption : true,
-    },
-  });
-  const {
-    field: { onChange: setHeaderRowIsValid },
-  } = useController({ name: 'ui.headerRowIsValid', control });
-
-  // The combo boxes' typed text does not survive unmounting, so neither should the flags that reflect it.
-  useEffect(
-    () => () => {
-      setModeIsValid(true);
-      setHeaderRowIsValid(true);
-    },
-    [setModeIsValid, setHeaderRowIsValid]
-  );
+    field: headerRowField,
+    fieldState: headerRowState,
+    onChange: onHeaderRowChange,
+  } = useComboBoxSelectionValidity({ name: 'settings.header_row', flag: 'headerRowIsValid' });
   const { field: nullValueField } = useController({ name: 'settings.null_value', control });
 
   return (
@@ -119,10 +101,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
       >
         <QuoteMode
           value={modeField.value}
-          onChange={({ value, isValid }) => {
-            modeField.onChange(value);
-            setModeIsValid(isValid);
-          }}
+          onChange={onModeChange}
           onBlur={modeField.onBlur}
           isInvalid={Boolean(modeState.error)}
           defaultValue={format === 'tsv' ? 'plain' : 'quoted'}
@@ -148,10 +127,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
       >
         <HeaderRow
           value={headerRowField.value}
-          onChange={({ value, isValid }) => {
-            headerRowField.onChange(value);
-            setHeaderRowIsValid(isValid);
-          }}
+          onChange={onHeaderRowChange}
           onBlur={headerRowField.onBlur}
           isInvalid={Boolean(headerRowState.error)}
         />

@@ -5,45 +5,26 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
-import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eui';
+import React from 'react';
 
 import type { DatasetSchemaResolutionFormValue } from '../../create_dataset_form_state';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
-import { DescribedOptionDisplay } from '../described_option_display';
+import type { ComboBoxChange } from '../combo_box_selection_validity';
+import {
+  EuiComboBoxNoCustomOption,
+  type EuiComboBoxNoCustomOptionOption,
+} from '../eui_combo_box_no_custom_option';
 
 export const DEFAULT_SCHEMA_RESOLUTION: Exclude<DatasetSchemaResolutionFormValue, ''> =
   'first_file_wins';
 
-type SchemaResolutionOption = EuiComboBoxOptionOption<string> & {
-  value: Exclude<DatasetSchemaResolutionFormValue, ''>;
-  description: string;
-  'data-test-subj': string;
-};
-
-export interface SchemaResolutionChange {
-  value: DatasetSchemaResolutionFormValue;
-  /** False while the input holds typed text that has not been resolved to an option. */
-  isValid: boolean;
-}
-
-const renderSchemaResolutionOption = (option: EuiComboBoxOptionOption<string>) => {
-  const opt = option as SchemaResolutionOption;
-  return (
-    <DescribedOptionDisplay
-      title={opt.label}
-      description={opt.description}
-      testSubj={opt['data-test-subj']}
-    />
-  );
-};
-
-const SCHEMA_RESOLUTION_OPTIONS: SchemaResolutionOption[] = [
+const SCHEMA_RESOLUTION_OPTIONS: Array<
+  EuiComboBoxNoCustomOptionOption<Exclude<DatasetSchemaResolutionFormValue, ''>>
+> = [
   {
     value: DEFAULT_SCHEMA_RESOLUTION,
     label: createDatasetWizardStrings.settingsSchemaResolutionFirstFileWins,
     description: createDatasetWizardStrings.settingsSchemaResolutionFirstFileWinsDescription,
-    append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
     'data-test-subj': 'createDatasetWizardSchemaResolutionOption-first_file_wins',
   },
   {
@@ -60,6 +41,7 @@ const SCHEMA_RESOLUTION_OPTIONS: SchemaResolutionOption[] = [
   },
 ];
 
+/** An empty value means unset, so the request uses the API default. */
 export function SchemaResolutionSelect({
   value,
   onChange,
@@ -68,46 +50,23 @@ export function SchemaResolutionSelect({
   isDisabled,
 }: {
   value: DatasetSchemaResolutionFormValue;
-  onChange: (next: SchemaResolutionChange) => void;
+  onChange: (next: ComboBoxChange<DatasetSchemaResolutionFormValue>) => void;
   onBlur: () => void;
   isInvalid: boolean;
   isDisabled?: boolean;
 }) {
-  // EuiComboBox clears its search text right after reporting a selection, before the new `value` prop
-  // arrives; the search handler reads this ref so that report cannot revert the selection.
-  const latestValue = useRef(value);
-  useEffect(() => {
-    latestValue.current = value;
-  }, [value]);
-
-  const selectedOption = SCHEMA_RESOLUTION_OPTIONS.find((o) => o.value === value);
-
   return (
-    <EuiComboBox
-      aria-label={createDatasetWizardStrings.settingsSchemaResolutionLabel}
-      placeholder={createDatasetWizardStrings.settingsSchemaResolutionPlaceholder}
-      singleSelection={{ asPlainText: true }}
-      isClearable
-      isDisabled={isDisabled}
-      rowHeight="auto"
-      fullWidth
-      compressed
-      options={SCHEMA_RESOLUTION_OPTIONS}
-      renderOption={renderSchemaResolutionOption}
-      selectedOptions={
-        selectedOption ? [{ value: selectedOption.value, label: selectedOption.label }] : []
-      }
-      isInvalid={isInvalid}
-      onSearchChange={(searchValue) => {
-        onChange({ value: latestValue.current, isValid: !searchValue });
-      }}
-      onChange={(nextSelectedOptions) => {
-        const next = nextSelectedOptions?.[0] as SchemaResolutionOption | undefined;
-        // Empty selection means "unset" so the request uses the API default.
-        latestValue.current = next?.value ?? '';
-        onChange({ value: latestValue.current, isValid: true });
-      }}
+    <EuiComboBoxNoCustomOption
+      value={value}
+      onChange={onChange}
       onBlur={onBlur}
+      options={SCHEMA_RESOLUTION_OPTIONS}
+      defaultValue={DEFAULT_SCHEMA_RESOLUTION}
+      isInvalid={isInvalid}
+      isDisabled={isDisabled}
+      compressed
+      placeholder={createDatasetWizardStrings.settingsSchemaResolutionPlaceholder}
+      aria-label={createDatasetWizardStrings.settingsSchemaResolutionLabel}
       data-test-subj="createDatasetWizardSchemaResolution"
     />
   );
