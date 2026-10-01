@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import { ConversationInput } from './conversation_input';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -16,6 +17,7 @@ import {
   useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
+  useIsSharedConversation,
 } from '../../../hooks/use_conversation';
 import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
@@ -25,7 +27,7 @@ import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useInputDraft } from '../../../hooks/use_input_draft';
 
 jest.mock('../../../hooks/use_conversation_stream', () => ({
@@ -42,6 +44,7 @@ jest.mock('../../../hooks/use_conversation', () => ({
   useConversationReadOnly: jest.fn(),
   useConversationTitle: jest.fn(),
   useHasActiveConversation: jest.fn(),
+  useIsSharedConversation: jest.fn(),
 }));
 jest.mock('../../../hooks/use_is_awaiting_prompt', () => ({
   useIsAwaitingPrompt: jest.fn(),
@@ -70,23 +73,29 @@ jest.mock('./message_editor', () => ({
   ),
   CommandBadgeSerializationError: class extends Error {},
 }));
+jest.mock('./input_actions/connector_selector', () => ({
+  ConnectorSelector: () => <div data-test-subj="mockConnectorSelector" />,
+}));
+jest.mock('@kbn/ebt-click', () => ({ getEbtProps: () => ({}) }));
 jest.mock('./input_actions', () => ({
   InputActions: ({
-    showTriggerModeToggle,
+    showTriggerModeSelector,
     triggerMode,
     onTriggerModeChange,
   }: {
-    showTriggerModeToggle: boolean;
+    showTriggerModeSelector: boolean;
     triggerMode: string;
     onTriggerModeChange: (mode: string) => void;
   }) =>
-    showTriggerModeToggle ? (
-      <input
-        data-test-subj="mock-agent-toggle"
-        type="checkbox"
-        checked={triggerMode === 'always'}
-        onChange={(event) => onTriggerModeChange(event.target.checked ? 'always' : 'never')}
-      />
+    showTriggerModeSelector ? (
+      <select
+        data-test-subj="mock-trigger-mode-selector"
+        value={triggerMode}
+        onChange={(event) => onTriggerModeChange(event.target.value)}
+      >
+        <option value="always">Include agent</option>
+        <option value="never">Skip agent</option>
+      </select>
     ) : null,
 }));
 jest.mock('./attachment_pill', () => ({
@@ -110,9 +119,6 @@ jest.mock('./attachment_group_pill', () => ({
 jest.mock('../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: jest.fn(),
 }));
-jest.mock('../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: jest.fn(),
-}));
 jest.mock('../../../hooks/use_current_user', () => ({
   useCurrentUser: jest
     .fn()
@@ -127,6 +133,7 @@ jest.mock('../../../context/active_space_context', () => ({
   useActiveSpaceId: jest.fn().mockReturnValue('default'),
 }));
 jest.mock('@kbn/agent-builder-browser', () => ({
+  CONVERSATION_INPUT_SHELL_RADIUS: 16,
   ConversationInputShell: ({
     children,
     isDisabled,
@@ -150,6 +157,7 @@ const mockedUseAgentId = jest.mocked(useAgentId);
 const mockedUseConversationReadOnly = jest.mocked(useConversationReadOnly);
 const mockedUseConversationTitle = jest.mocked(useConversationTitle);
 const mockedUseHasActiveConversation = jest.mocked(useHasActiveConversation);
+const mockedUseIsSharedConversation = jest.mocked(useIsSharedConversation);
 const mockedUseIsAwaitingPrompt = jest.mocked(useIsAwaitingPrompt);
 const mockedUseConversationId = jest.mocked(useConversationId);
 const mockedUseConversationContext = jest.mocked(useConversationContext);
@@ -158,7 +166,6 @@ const mockedUseSendUserMessage = jest.mocked(useSendUserMessage);
 const mockedUseToasts = jest.mocked(useToasts);
 const mockedUseMessageEditor = jest.mocked(useMessageEditor);
 const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
-const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 const mockedUseInputDraft = jest.mocked(useInputDraft);
 
 const submitMessage = jest.fn();
@@ -173,6 +180,11 @@ const editorController = {
   getPlaceholderNames: jest.fn(() => []),
   removePlaceholderByName: jest.fn(),
 };
+
+const renderInput = (ui: React.ReactElement) => render(ui, { wrapper: EuiProvider });
+
+// ConversationInput replaces this bar with a fake selector. These cases render the real one.
+const { InputActions } = jest.requireActual('./input_actions') as typeof import('./input_actions');
 
 describe('ConversationInput', () => {
   beforeEach(() => {
@@ -192,6 +204,7 @@ describe('ConversationInput', () => {
     mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: false });
     mockedUseConversationTitle.mockReturnValue({ title: '', isLoading: false } as never);
     mockedUseHasActiveConversation.mockReturnValue(false);
+    mockedUseIsSharedConversation.mockReturnValue(false);
     mockedUseIsAwaitingPrompt.mockReturnValue(false);
     mockedUseConversationId.mockReturnValue(undefined);
     mockedUseConversationContext.mockReturnValue({
@@ -208,7 +221,6 @@ describe('ConversationInput', () => {
         upload: jest.fn().mockResolvedValue(undefined),
       },
     } as never);
-    mockedUseExperimentalFeatures.mockReturnValue(true);
     mockedUseSubmitMessage.mockReturnValue({ submitMessage, isCreatingConversation: false });
     sendUserMessage.mockResolvedValue({ id: 'conv-1' });
     mockedUseSendUserMessage.mockReturnValue({
@@ -228,7 +240,7 @@ describe('ConversationInput', () => {
   it('calls onSubmitOverride with editor content and skips submitMessage when override is provided', () => {
     const onSubmitOverride = jest.fn();
 
-    render(<ConversationInput onSubmitOverride={onSubmitOverride} />);
+    renderInput(<ConversationInput onSubmitOverride={onSubmitOverride} />);
 
     fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
@@ -239,7 +251,7 @@ describe('ConversationInput', () => {
   });
 
   it('routes to submitMessage when no override is provided', () => {
-    render(<ConversationInput />);
+    renderInput(<ConversationInput />);
 
     fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
@@ -248,29 +260,89 @@ describe('ConversationInput', () => {
     expect(editorController.clear).toHaveBeenCalledTimes(1);
   });
 
-  describe('run agent toggle', () => {
-    it('is not offered for a new conversation', () => {
-      render(<ConversationInput />);
+  describe('trigger mode selector', () => {
+    const selectTalkToUsers = () =>
+      fireEvent.change(screen.getByTestId('mock-trigger-mode-selector'), {
+        target: { value: 'never' },
+      });
 
-      expect(screen.queryByTestId('mock-agent-toggle')).not.toBeInTheDocument();
+    beforeEach(() => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+      mockedUseIsSharedConversation.mockReturnValue(true);
     });
 
-    it('is not offered when experimental features are off', () => {
-      mockedUseConversationId.mockReturnValue('conv-1');
-      mockedUseExperimentalFeatures.mockReturnValue(false);
+    it('is not offered for a conversation that is not shared', () => {
+      mockedUseIsSharedConversation.mockReturnValue(false);
 
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
-      expect(screen.queryByTestId('mock-agent-toggle')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-trigger-mode-selector')).not.toBeInTheDocument();
     });
 
-    it('sends without running the agent when switched off and clears the editor on success', async () => {
-      mockedUseConversationId.mockReturnValue('conv-1');
+    it('is offered for a shared conversation', () => {
+      renderInput(<ConversationInput />);
+
+      expect(screen.getByTestId('mock-trigger-mode-selector')).toBeInTheDocument();
+    });
+
+    it('shows the post to team header only when talking to users', () => {
+      renderInput(<ConversationInput />);
+
+      const header = screen.getByTestId('agentBuilderConversationInputPostToTeamHeader');
+      expect(header).toHaveAttribute('aria-hidden', 'true');
+
+      selectTalkToUsers();
+
+      expect(header).toHaveAttribute('aria-hidden', 'false');
+      expect(header).toHaveTextContent('Leaving a post to the team');
+    });
+
+    it('falls back to running the agent once the conversation is no longer shared', () => {
+      const { rerender } = renderInput(<ConversationInput />);
+
+      selectTalkToUsers();
+      mockedUseIsSharedConversation.mockReturnValue(false);
+      rerender(<ConversationInput />);
+
+      expect(screen.getByTestId('agentBuilderConversationInputPostToTeamHeader')).toHaveAttribute(
+        'aria-hidden',
+        'true'
+      );
+
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(submitMessage).toHaveBeenCalledWith('hello agent');
+      expect(sendUserMessage).not.toHaveBeenCalled();
+    });
+
+    it('does not carry the choice over to another shared conversation', () => {
+      const { rerender } = renderInput(<ConversationInput />);
+
+      selectTalkToUsers();
+      mockedUseConversationId.mockReturnValue('conv-2');
+      rerender(<ConversationInput />);
+
+      expect(screen.getByTestId('mock-trigger-mode-selector')).toHaveValue('always');
+    });
+
+    it('does not restore the choice once the conversation is shared again', () => {
+      const { rerender } = renderInput(<ConversationInput />);
+
+      selectTalkToUsers();
+      mockedUseIsSharedConversation.mockReturnValue(false);
+      rerender(<ConversationInput />);
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      rerender(<ConversationInput />);
+
+      expect(screen.getByTestId('mock-trigger-mode-selector')).toHaveValue('always');
+    });
+
+    it('sends without running the agent when talking to users and clears the editor on success', async () => {
       const onSubmit = jest.fn();
 
-      render(<ConversationInput onSubmit={onSubmit} />);
+      renderInput(<ConversationInput onSubmit={onSubmit} />);
 
-      fireEvent.click(screen.getByTestId('mock-agent-toggle'));
+      selectTalkToUsers();
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
       expect(sendUserMessage).toHaveBeenCalledWith('hello agent');
@@ -280,22 +352,19 @@ describe('ConversationInput', () => {
     });
 
     it('keeps the editor content and shows a toast when the send fails', async () => {
-      mockedUseConversationId.mockReturnValue('conv-1');
       sendUserMessage.mockRejectedValue(new Error('boom'));
 
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
-      fireEvent.click(screen.getByTestId('mock-agent-toggle'));
+      selectTalkToUsers();
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
       await waitFor(() => expect(addErrorToast).toHaveBeenCalledWith({ title: 'boom' }));
       expect(editorController.clear).not.toHaveBeenCalled();
     });
 
-    it('runs the agent when switched on', () => {
-      mockedUseConversationId.mockReturnValue('conv-1');
-
-      render(<ConversationInput />);
+    it('runs the agent when talking to agent and users', () => {
+      renderInput(<ConversationInput />);
 
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
@@ -307,7 +376,7 @@ describe('ConversationInput', () => {
   it('hides the message input for read-only conversations', () => {
     mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: true, isLoading: false });
 
-    render(<ConversationInput />);
+    renderInput(<ConversationInput />);
 
     expect(screen.queryByTestId('mock-message-editor-submit')).not.toBeInTheDocument();
   });
@@ -315,7 +384,7 @@ describe('ConversationInput', () => {
   it('hides the message input while the conversation is loading', () => {
     mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: true });
 
-    render(<ConversationInput />);
+    renderInput(<ConversationInput />);
 
     expect(screen.queryByTestId('mock-message-editor-submit')).not.toBeInTheDocument();
   });
@@ -323,7 +392,7 @@ describe('ConversationInput', () => {
   describe('auto-focus', () => {
     it('focuses the editor shortly after mount', () => {
       jest.useFakeTimers();
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       jest.advanceTimersByTime(200);
       expect(editorController.focus).toHaveBeenCalled();
@@ -333,7 +402,7 @@ describe('ConversationInput', () => {
     it('does not steal focus from an open HITL prompt', () => {
       jest.useFakeTimers();
       mockedUseIsAwaitingPrompt.mockReturnValue(true);
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       jest.advanceTimersByTime(200);
       expect(editorController.focus).not.toHaveBeenCalled();
@@ -348,7 +417,7 @@ describe('ConversationInput', () => {
         isLoading: true,
       } as never);
 
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       // The shell paints the disabled background off this attribute; the editor is mocked here.
       expect(screen.getByTestId('agentBuilderConversationInputForm')).toHaveAttribute(
@@ -361,9 +430,8 @@ describe('ConversationInput', () => {
   describe('attachment removal', () => {
     const attachment = { id: 'a1', type: 'text', data: {} };
 
-    it('removes a normal attachment via context when image upload is enabled', () => {
+    it('removes a normal attachment via context', () => {
       const removeAttachment = jest.fn();
-      mockedUseExperimentalFeatures.mockReturnValue(true);
       mockedUseConversationContext.mockReturnValue({
         attachments: [attachment],
         upsertAttachments: jest.fn(),
@@ -373,25 +441,7 @@ describe('ConversationInput', () => {
         conversationActions: {} as never,
       } as never);
 
-      render(<ConversationInput />);
-      fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
-
-      expect(removeAttachment).toHaveBeenCalledWith(0);
-    });
-
-    it('still removes a normal attachment via context when image upload is disabled', () => {
-      const removeAttachment = jest.fn();
-      mockedUseExperimentalFeatures.mockReturnValue(false);
-      mockedUseConversationContext.mockReturnValue({
-        attachments: [attachment],
-        upsertAttachments: jest.fn(),
-        removeAttachment,
-        resetAttachments: jest.fn(),
-        isEmbeddedContext: false,
-        conversationActions: {} as never,
-      } as never);
-
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
       fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
 
       expect(removeAttachment).toHaveBeenCalledWith(0);
@@ -406,7 +456,7 @@ describe('ConversationInput', () => {
         clearDraft: jest.fn(),
       });
 
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       expect(editorController.setContent).toHaveBeenCalledWith('saved draft text');
     });
@@ -428,7 +478,7 @@ describe('ConversationInput', () => {
         autoSendInitialMessage: false,
       } as never);
 
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
 
       expect(editorController.setContent).not.toHaveBeenCalledWith('stale draft');
     });
@@ -437,7 +487,7 @@ describe('ConversationInput', () => {
       const clearDraft = jest.fn();
       mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft });
 
-      render(<ConversationInput />);
+      renderInput(<ConversationInput />);
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
       expect(clearDraft).toHaveBeenCalledTimes(1);
@@ -446,10 +496,13 @@ describe('ConversationInput', () => {
     it('clears the draft on submit with trigger mode Never', async () => {
       const clearDraft = jest.fn();
       mockedUseConversationId.mockReturnValue('conv-1');
+      mockedUseIsSharedConversation.mockReturnValue(true);
       mockedUseInputDraft.mockReturnValue({ draft: null, saveDraft: jest.fn(), clearDraft });
 
-      render(<ConversationInput />);
-      fireEvent.click(screen.getByTestId('mock-agent-toggle'));
+      renderInput(<ConversationInput />);
+      fireEvent.change(screen.getByTestId('mock-trigger-mode-selector'), {
+        target: { value: 'never' },
+      });
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
       await waitFor(() => expect(clearDraft).toHaveBeenCalledTimes(1));
@@ -462,7 +515,7 @@ describe('ConversationInput', () => {
         clearDraft: jest.fn(),
       });
 
-      const { rerender } = render(<ConversationInput />);
+      const { rerender } = renderInput(<ConversationInput />);
       editorController.clear.mockClear();
 
       mockedUseConversationId.mockReturnValue('conv-2');
@@ -470,5 +523,49 @@ describe('ConversationInput', () => {
 
       expect(editorController.clear).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe('InputActions', () => {
+  beforeEach(() => {
+    mockedUseConversationStream.mockReturnValue({
+      canCancel: false,
+      cancel: jest.fn(),
+      isCancelling: false,
+      pendingMessage: undefined,
+      isResuming: false,
+      isResponseLoading: false,
+      sendMessage: jest.fn(),
+    } as never);
+  });
+
+  it('shows the connector selector when the agent is included', () => {
+    renderInput(
+      <InputActions
+        onSubmit={jest.fn()}
+        isSubmitDisabled={false}
+        isSubmitting={false}
+        showTriggerModeSelector
+        triggerMode={ChatTriggerMode.Always}
+        onTriggerModeChange={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('mockConnectorSelector')).toBeInTheDocument();
+  });
+
+  it('hides the connector selector when the agent is skipped', () => {
+    renderInput(
+      <InputActions
+        onSubmit={jest.fn()}
+        isSubmitDisabled={false}
+        isSubmitting={false}
+        showTriggerModeSelector
+        triggerMode={ChatTriggerMode.Never}
+        onTriggerModeChange={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId('mockConnectorSelector')).not.toBeInTheDocument();
   });
 });
