@@ -9,7 +9,8 @@ import CONTEXT_ENGINE_DOCUMENT_TEMPLATE from './document_template.yaml.text';
 import CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE from './index_metadata_template.yaml.text';
 import CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE from './unit_profile_template.yaml.text';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
-import { WorkflowSchemaBase } from '@kbn/workflows/spec/schema';
+import { convertToWorkflowGraph } from '@kbn/workflows/graph';
+import { WorkflowSchema } from '@kbn/workflows/spec/schema';
 import { parse } from 'yaml';
 import {
   AUTOMATION_TEMPLATE_TAGS,
@@ -307,7 +308,7 @@ describe('automation template rendering', () => {
     expect(() => parse(yaml)).not.toThrow();
   });
 
-  it('divides the KI budget by the claims per document for a per-claim variant', () => {
+  it('tells a per-claim variant, in the template comment, to divide the KI budget by the claims', () => {
     expect(CONTEXT_ENGINE_DOCUMENT_TEMPLATE).not.toMatch(
       /multiplies it by the claims per document/
     );
@@ -374,13 +375,17 @@ describe('automation template rendering', () => {
           kis: '- ki_id: test\n  ki:\n    type: constraint\n    title: "T"\n    content: "c"',
         }),
     ],
-  ])('renders %s into a definition the workflow schema accepts', (_template, render) => {
-    const parsed = WorkflowSchemaBase.safeParse(parse(render()));
+  ])(
+    'renders %s into a definition the workflow schema accepts and the engine can build',
+    (_template, render) => {
+      const parsed = WorkflowSchema.safeParse(parse(render()));
 
-    if (!parsed.success) {
-      throw new Error(JSON.stringify(parsed.error.issues, null, 2));
+      if (!parsed.success) {
+        throw new Error(JSON.stringify(parsed.error.issues, null, 2));
+      }
+      expect(() => convertToWorkflowGraph(parsed.data)).not.toThrow();
     }
-  });
+  );
 
   it('rejects an identifier that would break out of its backticks', () => {
     expect(() =>

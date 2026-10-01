@@ -287,6 +287,24 @@ describe('install_automation_template schema', () => {
       expect(schema.safeParse(base).success).toBe(false);
     });
 
+    it('names both forms in one issue when neither is given', () => {
+      const result = schema.safeParse(base);
+
+      expect(result.error?.issues.map(({ message }) => message)).toEqual([
+        'index_metadata needs sources, or both sourceIndex and categoryField.',
+      ]);
+    });
+
+    it('rejects the same index twice, naming it', () => {
+      const result = schema.safeParse({
+        ...base,
+        sources: [...sources, { index: 'loyalty-docs', categoryField: 'status' }],
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0].message).toMatch(/loyalty-docs/);
+    });
+
     it('bounds the list: at least one source, at most the KI budget', () => {
       expect(schema.safeParse({ ...base, sources: [] }).success).toBe(false);
       const tooMany = Array.from({ length: 101 }, (_, i) => ({
@@ -337,6 +355,16 @@ describe('install_automation_template unit profile arguments', () => {
     const eleven = Array.from({ length: 11 }, (_, i) => `metric_${i}`);
     expect(schema.safeParse({ ...base, metricFields: eleven }).success).toBe(false);
     expect(schema.safeParse({ ...base, metricFields: ['x'.repeat(257)] }).success).toBe(false);
+  });
+
+  it('rejects a metric field listed twice, which would produce two identical columns', () => {
+    const result = schema.safeParse({
+      ...base,
+      metricFields: ['Points Accumulated', 'Points Accumulated'],
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].message).toMatch(/Points Accumulated/);
   });
 
   it('rejects metric fields on another template', () => {

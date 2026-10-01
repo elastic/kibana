@@ -14,9 +14,8 @@ version: "1"
 # this shape, not this template.
 #
 # To adapt it:
-#   1. Set every value in `consts`. Field names that contain spaces or capitals go in backticks
-#      inside the const value itself, e.g. unit_key: "`Product Key`", because the value is pasted
-#      into ES|QL as written.
+#   1. Set every value in `consts`. Field names go in as written, without backticks: every query
+#      below already wraps them, so "Product Key" works as it is.
 #   2. List the numeric fields that distinguish one unit from another in `metric_fields`; each
 #      becomes an average column in `unit_totals`. A custom draft can add other STATS columns
 #      there directly: column names are derived from field names, so a new metric is one edit.

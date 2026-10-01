@@ -35,13 +35,13 @@ triggers:
   - type: manual
 
 steps:
-  # One profile per source. The sources are profiled independently, so five run at a time, and
-  # `settled` lets every other source finish when one fails.
+  # One profile per source, one source at a time. Not `parallel`: a parallel branch cannot hold the
+  # verification `if` or the model call's retry below. A failed source does not stop the rest.
   - name: loop_sources
-    type: parallel
+    type: foreach
     foreach: "{{ consts.sources | json }}"
-    concurrency: 5
-    mode: settled
+    iteration-on-failure:
+      continue: true
     steps:
       - name: source_context
         type: data.set

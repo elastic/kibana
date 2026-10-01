@@ -49,6 +49,9 @@ const REQUIRED_TEMPLATE_FIELDS = {
   targeted_ki_writer: ['kis'],
 } as const;
 
+const findDuplicate = (values: readonly string[]): string | undefined =>
+  values.find((item, position) => values.indexOf(item) !== position);
+
 const installAutomationTemplateSchema = z
   .object({
     template: z
@@ -240,17 +243,34 @@ const installAutomationTemplateSchema = z
             'Pass either sources or sourceIndex + categoryField for index_metadata, not both.',
           path: ['sources'],
         });
-      } else if (value.sources === undefined) {
-        for (const field of ['sourceIndex', 'categoryField'] as const) {
-          if (value[field] === undefined) {
-            ctx.addIssue({
-              code: 'custom',
-              message: `index_metadata needs sources, or ${field} alongside the other single-index field.`,
-              path: [field],
-            });
-          }
-        }
+      } else if (
+        value.sources === undefined &&
+        (value.sourceIndex === undefined || value.categoryField === undefined)
+      ) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'index_metadata needs sources, or both sourceIndex and categoryField.',
+          path: ['sources'],
+        });
       }
+
+      const duplicateIndex = findDuplicate((value.sources ?? []).map(({ index }) => index));
+      if (duplicateIndex !== undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `sources lists '${duplicateIndex}' twice; its two KIs would overwrite each other.`,
+          path: ['sources'],
+        });
+      }
+    }
+
+    const duplicateMetric = findDuplicate(value.metricFields ?? []);
+    if (duplicateMetric !== undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `metricFields lists '${duplicateMetric}' twice.`,
+        path: ['metricFields'],
+      });
     }
 
     if (value.template === 'targeted_ki_writer' && value.sourceIndex !== undefined) {
@@ -365,8 +385,8 @@ export const createInstallAutomationTemplateTool = ({
       unit_profile           → name, sourceIndex, unitKey, activityField, breakdownField
       targeted_ki_writer     → name, kis  (no sourceIndex)
 
-    name is always required. It identifies this automation within the AI index. Same name → replaces
-    the existing automation in-place. Different name → installs an additional copy.
+    name is always required. It identifies this automation within the AI index. Same template and
+    name → replaces the existing automation in-place. Different name → installs an additional copy.
     If the AI index has a pre-name automation (installed before this tool required a name, e.g.
     named "Document KI automation"), it will NOT be replaced automatically. Delete it manually
     first, then reinstall with a descriptive name.

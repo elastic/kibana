@@ -653,6 +653,19 @@ describe('aiIndexAutomationsSkill', () => {
     });
   });
 
+  describe('template argument caveats', () => {
+    const prose = aiIndexAutomationsSkill.content.replace(/\s+/g, ' ');
+
+    it('requires numeric metric fields, since AVG fails the query on any other type', () => {
+      expect(prose).toMatch(/each numeric in the mapping: `AVG` over any other type fails/);
+    });
+
+    it('warns that reinstalling a single-index metadata automation leaves its old KI behind', () => {
+      expect(prose).toMatch(/Each KI's id is `<name>\/<index>`/);
+      expect(prose).toMatch(/leaves that old KI in place: tell the user it is now stale/);
+    });
+  });
+
   describe('the unit profile template', () => {
     const content = aiIndexAutomationsSkill.content;
     const prose = content.replace(/\s+/g, ' ');
@@ -705,8 +718,14 @@ describe('aiIndexAutomationsSkill', () => {
     it('states the name rule wherever the install tool is introduced', () => {
       const prose = content.replace(/\s+/g, ' ');
       const nameRule =
-        /the same `name` replaces that automation in place.{0,80}a different `name` adds another/g;
+        /the same template with the same `name` replaces that automation in place.{0,80}a different `name` adds another/gi;
       expect((prose.match(nameRule) ?? []).length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('warns that an automation installed before names were required is never replaced', () => {
+      expect(content.replace(/\s+/g, ' ')).toMatch(
+        /An automation installed before names were required, such as "Document KI automation", is never replaced: delete it first/
+      );
     });
   });
 });

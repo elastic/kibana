@@ -70,8 +70,10 @@ Whatever the strategy, a generated workflow has to:
 
 Index metadata, bottom-up document, unit profile and targeted-ki-writer automations are all
 installed by `platform.context_engine.install_automation_template`. Every install takes a `name`:
-installing again with the same `name` replaces that automation in place, and a different `name` adds
-another automation to the AI index. `targeted-ki-writer` is installed with
+installing the same template with the same `name` replaces that automation in place, and a
+different `name` adds another automation to the AI index. An automation installed before names were
+required, such as "Document KI automation", is never replaced: delete it first, then install with a
+descriptive name. `targeted-ki-writer` is installed with
 `template: targeted_ki_writer` — the same tool, same pattern as the others.
 
 Two more references are attached and shared with `analyze-and-improve`: `ki_shapes`, the KI
@@ -284,8 +286,8 @@ in `strategy_catalog` as worked examples. These are what each one becomes as a w
 
 Index metadata, bottom-up document and unit profile automations are installed by
 `platform.context_engine.install_automation_template`. Do not write their YAML and do not start a
-subagent for them. Installing with the same `name` replaces that automation in place; a different
-`name` adds another.
+subagent for them. Installing the same template with the same `name` replaces that automation in
+place; a different `name` adds another.
 Outlier, atomic facts, detection and connector automations have no template of their own. Do not
 look for one and do not invent a name; start from the shape of `unit-profile-template`, which is
 the YAML the install tool provides for the Cumulative strategy. It is a
@@ -306,7 +308,9 @@ install arguments almost one for one.
 keyword field an analyst would group that index by. List every source the profile should cover:
 one install and one run write one KI per source, so do not install the template once per index.
 The AI index is the one attached to the conversation. The tool fills the consts and attaches the
-workflow. Do not write the YAML and do not start a subagent.
+workflow. Do not write the YAML and do not start a subagent. Each KI's id is `<name>/<index>`, so
+reinstalling an index-metadata automation from before `sources` existed, whose single KI has the id
+`<name>`, leaves that old KI in place: tell the user it is now stale.
 
 **Bottom-Up** (`type: document`) — call `platform.context_engine.install_automation_template` with
 `template: document_orchestration`. Pass `sourceIndex`, `titleField` and `bodyField`. The AI index
@@ -332,8 +336,9 @@ for the unit and they map one to one, prefer a human-readable field such as `pro
 `product_id`: an indicator titled by an opaque id is one no question will find.
 **Pass `metricFields`.** Sibling unit indicators are near-identical to a retriever unless their
 descriptions carry numbers that separate them, and `metricFields` is what puts those numbers
-there: each one is averaged per unit and written into the profile. Choose up to ten numeric fields
-an analyst would compare these units on.
+there: each one is averaged per unit and written into the profile. Choose up to ten fields an
+analyst would compare these units on, each numeric in the mapping: `AVG` over any other type fails
+the query for every unit.
 Pass `corpusFilter`, a `WHERE` line, to profile only some units: it bounds both which units are
 found and which of their rows the figures describe. It defaults to taking every row.
 `maxUnits` bounds the run: one KI and one model call per unit. It defaults to 100, the KI budget;
@@ -695,8 +700,8 @@ is neither: it does not confirm and it does not start a run.
 `platform.context_engine.install_automation_template` once. Pass `template: index_metadata`,
 `template: document_orchestration` or `template: unit_profile` and the consts it asks for. Do not
 write the YAML and do not call
-`platform.context_engine.save_automation` for these. Installing with the same `name` replaces that
-automation in place and keeps its workflow id, and the result says `replaced: true`; a different
+`platform.context_engine.save_automation` for these. Installing the same template with the same
+`name` replaces that automation in place and keeps its workflow id, and the result says `replaced: true`; a different
 `name` adds another automation. The install does not start a run. The document summary workflow is
 `system-context-engine-document-summary`. It is not attached to the AI index.
 
