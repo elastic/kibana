@@ -44,7 +44,13 @@ spaceTest.describe('Create data view from index alias', { tag: tags.deploymentAg
         'navigate to data views and create a data view from the alias',
         async () => {
           await pageObjects.dataViewsManagement.goto();
-          await pageObjects.dataViewsManagement.openCreateWizard();
+          // The click can land before the empty-state prompt settles and be lost, so retry it.
+          await expect(async () => {
+            if (!(await pageObjects.dataViewEditorFlyout.flyout.isVisible())) {
+              await pageObjects.dataViewsManagement.createButton.click();
+            }
+            await expect(pageObjects.dataViewEditorFlyout.flyout).toBeVisible({ timeout: 5_000 });
+          }).toPass({ timeout: 30_000 });
           await pageObjects.dataViewEditorFlyout.setTitle(aliasName(scoutSpace.id));
           await pageObjects.dataViewEditorFlyout.save();
         }

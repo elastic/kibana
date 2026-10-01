@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export class DataViewEditorFlyoutPage {
   readonly flyout;
@@ -32,12 +33,18 @@ export class DataViewEditorFlyoutPage {
     this.advancedToggle = page.testSubj.locator('toggleAdvancedSetting');
   }
 
-  /** Fills the title (index pattern) field and waits until it validates as a matching pattern. */
+  /**
+   * Fills the title (index pattern) field and waits until it validates as a matching pattern.
+   * Retries: the editor validates the title against its previous, debounced index lookup, so the
+   * field can get stuck on a stale "must match" error. Clearing it forces a real value change that
+   * re-validates against the settled pattern.
+   */
   async setTitle(title: string): Promise<void> {
-    await this.fillTitle(title);
-    await this.form
-      .and(this.page.locator('[data-validation-error="0"]'))
-      .waitFor({ state: 'attached' });
+    await expect(async () => {
+      await this.titleInput.fill('');
+      await this.fillTitle(title);
+      await expect(this.form).toHaveAttribute('data-validation-error', '0', { timeout: 5_000 });
+    }).toPass({ timeout: 30_000 });
   }
 
   /** Fills the title field and waits for validation to settle, without requiring it to pass. */

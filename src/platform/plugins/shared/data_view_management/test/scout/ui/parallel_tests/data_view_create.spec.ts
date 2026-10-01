@@ -139,11 +139,7 @@ spaceTest.describe('Data view editor — create flows', { tag: tags.deploymentAg
         await pageObjects.dataViewsManagement.goto();
         await pageObjects.dataViewsManagement.openCreateWizard();
         await dataViewEditorFlyout.enableAllowHidden();
-        // The title field validates against the previous index pattern until the editor's debounced
-        // lookup catches up, so it can keep a stale "must match" error. Wait for the matching sources
-        // instead of the field validation; saving re-validates the form against the settled pattern.
-        await dataViewEditorFlyout.fillTitle(index);
-        await expect(dataViewEditorFlyout.statusMessage).toContainText('matches 1 source');
+        await dataViewEditorFlyout.setTitle(index);
         await dataViewEditorFlyout.selectTimestampField('@timestamp');
         await dataViewEditorFlyout.save();
         await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toContainText(index);
