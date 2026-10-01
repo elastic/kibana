@@ -225,8 +225,6 @@ export function savedWorkspaceToAppState(
     indexPattern,
     persistedWorkspaceState.selectedFields
   );
-  const selectedFields = allFields.filter((field) => field.selected);
-  workspaceInstance.options.vertex_fields = selectedFields;
 
   // ================== advanced settings =============================
   const advancedSettings = Object.assign(
@@ -242,8 +240,6 @@ export function savedWorkspaceToAppState(
       (field) => field.name === serializedField.name
     );
   }
-
-  workspaceInstance.options.exploreControls = advancedSettings;
 
   // ================== nodes and edges =============================
   const graph = getNodesAndEdges(persistedWorkspaceState, allFields);

@@ -7,9 +7,8 @@
 
 import type { MockedGraphEnvironment } from './mocks';
 import { createMockGraphStore } from './mocks';
-import { registerAdvancedSettingsListeners, updateSettings } from './advanced_settings';
-import { registerFieldsListeners, selectField, updateFieldProperties } from './fields';
-import type { AdvancedSettings, WorkspaceField, WorkspaceNode } from '../types';
+import { registerFieldsListeners, updateFieldProperties } from './fields';
+import type { WorkspaceField, WorkspaceNode } from '../types';
 import { loadTemplates, registerUrlTemplatesListeners } from './url_templates';
 
 /**
@@ -22,11 +21,7 @@ describe('legacy sync listeners', () => {
 
   beforeEach(() => {
     env = createMockGraphStore({
-      listeners: [
-        registerAdvancedSettingsListeners,
-        registerFieldsListeners,
-        registerUrlTemplatesListeners,
-      ],
+      listeners: [registerFieldsListeners, registerUrlTemplatesListeners],
       initialStateOverwrites: {
         fields: {
           field1: {
@@ -64,35 +59,9 @@ describe('legacy sync listeners', () => {
     } as WorkspaceNode);
   });
 
-  it('syncs settings with workspace', () => {
-    const newSettings = {} as AdvancedSettings;
-    env.store.dispatch(updateSettings(newSettings));
-    expect(env.mockedDeps.getWorkspace()!.options.exploreControls).toBe(newSettings);
-  });
-
   it('syncs templates with workspace', () => {
     env.store.dispatch(loadTemplates([]));
     expect(env.mockedDeps.notifyReact).toHaveBeenCalled();
-  });
-
-  it('notifies react when fields are selected', () => {
-    env.store.dispatch(selectField('field1'));
-    expect(env.mockedDeps.notifyReact).toHaveBeenCalled();
-  });
-
-  it('syncs field list with workspace', () => {
-    env.store.dispatch(selectField('field1'));
-    env.store.dispatch(
-      updateFieldProperties({
-        fieldName: 'field1',
-        fieldProperties: {
-          hopSize: 22,
-        },
-      })
-    );
-    const workspace = env.mockedDeps.getWorkspace()!;
-    expect(workspace.options.vertex_fields![0].name).toEqual('field1');
-    expect(workspace.options.vertex_fields![0].hopSize).toEqual(22);
   });
 
   it('syncs styles with nodes', () => {

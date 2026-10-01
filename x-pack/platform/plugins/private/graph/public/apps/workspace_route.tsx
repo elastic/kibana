@@ -116,8 +116,9 @@ export const WorkspaceRoute = ({
 
   const getMergeCandidates = async (nodes: WorkspaceNode[]): Promise<TermIntersect[]> => {
     const workspace = workspaceRef.current;
-    const indexName = workspace?.options.indexName;
-    if (!workspace || !indexName) return [];
+    const datasource = storeRef.current?.getState().datasource.current;
+    if (!workspace || !datasource || datasource.type === 'none') return [];
+    const indexName = datasource.title;
     const topLevelNodes = nodes.filter((node) => node.parent === undefined);
     const request = buildIntersectionRequest(
       topLevelNodes.map((node) => buildNodeQuery(unpackGroupedNodes([node], workspace.edges)))
@@ -164,18 +165,10 @@ export const WorkspaceRoute = ({
               workspaceLayoutChanged(Boolean(workspaceRef.current?.layoutController.isRunning()))
             ),
         });
-        const options = {
-          indexName: indexPattern,
-          vertex_fields: [],
-          // Here we have the opportunity to look up labels for nodes...
-          nodeLabeller() {
-            // console.log(newNodes);
-          },
-          topologyChangeHandler: notifyWorkspaceChanged,
-          exploreControls,
+        const createdWorkspace = (workspaceRef.current = createWorkspace({
           layoutController,
-        };
-        const createdWorkspace = (workspaceRef.current = createWorkspace(options));
+          topologyChangeHandler: notifyWorkspaceChanged,
+        }));
         return createdWorkspace;
       },
       getWorkspace: () => workspaceRef.current,

@@ -24,7 +24,6 @@ export const mergeRuntimeGraph = (
     new Set(Object.keys(workspace.nodesMap))
   );
   graph.nodes = normalizedNodes;
-  workspace.options.nodeLabeller?.(newNodes);
 
   let sequence = initialSequence;
   newNodes.forEach((incomingNode) => {
@@ -50,8 +49,8 @@ export const mergeRuntimeGraph = (
     workspace.edges.push(edge);
   });
 
-  workspace.options.topologyChangeHandler?.();
+  workspace.topologyChangeHandler?.();
   workspace.layoutController.start();
-  workspace.options.topologyChangeHandler?.();
+  workspace.topologyChangeHandler?.();
   return sequence;
 };

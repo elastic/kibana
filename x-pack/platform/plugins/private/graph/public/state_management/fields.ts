@@ -79,22 +79,6 @@ export const registerFieldsListeners = (
   });
 
   /**
-   * Listener making sure the fields in the store are always synced with the fields
-   * known to the workspace.
-   *
-   * Won't be necessary once the workspace is moved to redux
-   */
-  startListening({
-    predicate: matchesOne(loadFields, selectField, deselectField, updateFieldProperties),
-    effect: (_action, listenerApi) => {
-      const workspace = getWorkspace();
-      if (workspace) {
-        workspace.options.vertex_fields = selectedFieldsSelector(listenerApi.getState());
-      }
-    },
-  });
-
-  /**
    * Listener making sure the field styles (icons and colors) are applied to nodes currently active
    * in the workspace.
    *
@@ -122,7 +106,6 @@ export const registerFieldsListeners = (
         }
       });
       notifyReact();
-      workspace.options.vertex_fields = selectedFieldsSelector(listenerApi.getState());
     },
   });
 };
