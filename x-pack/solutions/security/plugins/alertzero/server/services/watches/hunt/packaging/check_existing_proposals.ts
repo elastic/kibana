@@ -8,13 +8,13 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../../../common/proposals/origin';
-import type { RunPackageReportDeps } from './run_package_report';
+import type { HasExistingProposals } from './run_package_report';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 
 /**
- * Implements {@link RunPackageReportDeps.hasExistingProposals} -- see that type's own doc comment
- * for the invariant this backs (any status counts, including settled). `excludeSuperseded` /
+ * Implements {@link HasExistingProposals} -- see that type's own doc comment for the invariant
+ * this backs (any status counts, including settled). `excludeSuperseded` /
  * `excludeExpired` are passed explicit `false` here rather than left to the schema's own default,
  * which is how "any status" is actually achieved. Scoped by `origin` so another solution's
  * Proposal on the same conversation, however unlikely, never false-positives the guard.
@@ -33,7 +33,7 @@ export const createExistingProposalsChecker = ({
   spaceId: string;
   request: KibanaRequest;
   logger?: Logger;
-}): RunPackageReportDeps['hasExistingProposals'] => {
+}): HasExistingProposals => {
   return async (conversationId) => {
     try {
       const { total } = await proposalsService.list(
