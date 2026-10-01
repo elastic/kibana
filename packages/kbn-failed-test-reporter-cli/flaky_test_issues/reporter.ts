@@ -416,7 +416,7 @@ export const reportFlakySuiteIssues = async (
       if (comment) {
         await github.addIssueComment(
           issue.number,
-          renderFlakySuiteIssueComment(suite, { reopened: reopen })
+          renderFlakySuiteIssueComment({ reopened: reopen })
         );
       }
       log.info(
