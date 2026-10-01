@@ -379,6 +379,10 @@ describe('workspace state', () => {
 
     expect(environment.store.getState().workspace.nodeIds).toEqual(['remaining']);
     expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual(['selected']);
+
+    environment.store.dispatch(undoWorkspace());
+    expect(environment.store.getState().workspace.nodeIds).toEqual(['selected', 'remaining']);
+    expect(environment.store.getState().workspace.blocklistedNodeIds).toEqual([]);
   });
 
   it('keeps blocklisted IDs consistent with their map when blocking an existing ID', () => {

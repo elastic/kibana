@@ -238,11 +238,11 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
     for (const nodeId of nodeIds) {
       blocklistedNodesById[nodeId] = state.nodesById[nodeId];
     }
-    return {
+    return recordUndo(state, {
       ...removeNodes(state, nodeIds),
       blocklistedNodesById,
       blocklistedNodeIds: Object.keys(blocklistedNodesById),
-    };
+    });
   })
   .case(groupSelectedNodes, (state, parentId) => {
     if (!state.nodesById[parentId]) {
@@ -288,17 +288,19 @@ export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
   .case(unblockNode, (state, nodeId) => {
     const blocklistedNodesById = { ...state.blocklistedNodesById };
     delete blocklistedNodesById[nodeId];
-    return {
+    return recordUndo(state, {
       ...state,
       blocklistedNodesById,
       blocklistedNodeIds: state.blocklistedNodeIds.filter((id) => id !== nodeId),
-    };
+    });
   })
-  .case(unblockAllNodes, (state) => ({
-    ...state,
-    blocklistedNodesById: {},
-    blocklistedNodeIds: [],
-  }))
+  .case(unblockAllNodes, (state) =>
+    recordUndo(state, {
+      ...state,
+      blocklistedNodesById: {},
+      blocklistedNodeIds: [],
+    })
+  )
   .case(undoWorkspace, (state) => applyUndo(state))
   .case(redoWorkspace, (state) => applyRedo(state))
   .case(setNodeLabel, (state, { nodeId, label }) => {
