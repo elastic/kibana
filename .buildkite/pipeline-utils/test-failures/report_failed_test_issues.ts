@@ -8,7 +8,7 @@
  */
 
 import { execFileSync } from 'child_process';
-import { cpSync, mkdtempSync, readFileSync } from 'fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync } from 'fs';
 import Os from 'os';
 import Path from 'path';
 import { globby } from 'globby';
@@ -92,6 +92,7 @@ export const reportFailedTestIssues = async (): Promise<void> => {
     let stepFailureCount = 0;
     for (const { job, patterns } of attempts) {
       const attemptDirectory = Path.join(root, 'attempts', job.id);
+      mkdirSync(attemptDirectory, { recursive: true });
       for (const pattern of patterns) {
         execFileSync(
           '.buildkite/scripts/common/download_artifact.sh',
