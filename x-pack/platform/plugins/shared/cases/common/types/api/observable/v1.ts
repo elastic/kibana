@@ -5,35 +5,31 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { CaseObservableBaseRt } from '../../domain/observable/v1';
+import { z } from '@kbn/zod/v4';
+import { CaseObservableBaseSchema } from '../../domain/observable/v1';
 
-/**
- * Observables
- */
-export const ObservablePostRt = CaseObservableBaseRt;
+export const ObservablePostSchema = CaseObservableBaseSchema;
 
-export const ObservablePatchRt = rt.strict({
-  value: rt.string,
-  description: rt.union([rt.string, rt.null]),
+export const ObservablePatchSchema = z.object({
+  value: z.string(),
+  description: z.string().nullable(),
 });
 
-export type ObservablePatch = rt.TypeOf<typeof ObservablePatchRt>;
-export type ObservablePost = rt.TypeOf<typeof ObservablePostRt>;
-
-export const AddObservableRequestRt = rt.strict({
-  observable: ObservablePostRt,
+export const AddObservableRequestSchema = z.object({
+  observable: ObservablePostSchema,
 });
 
-export const UpdateObservableRequestRt = rt.strict({
-  observable: ObservablePatchRt,
+export const UpdateObservableRequestSchema = z.object({
+  observable: ObservablePatchSchema,
 });
 
-export const BulkAddObservablesRequestRt = rt.strict({
-  caseId: rt.string,
-  observables: rt.array(ObservablePostRt),
+export const BulkAddObservablesRequestSchema = z.object({
+  caseId: z.string(),
+  observables: z.array(ObservablePostSchema),
 });
 
-export type AddObservableRequest = rt.TypeOf<typeof AddObservableRequestRt>;
-export type UpdateObservableRequest = rt.TypeOf<typeof UpdateObservableRequestRt>;
-export type BulkAddObservablesRequest = rt.TypeOf<typeof BulkAddObservablesRequestRt>;
+export type ObservablePost = z.infer<typeof ObservablePostSchema>;
+export type ObservablePatch = z.infer<typeof ObservablePatchSchema>;
+export type AddObservableRequest = z.infer<typeof AddObservableRequestSchema>;
+export type UpdateObservableRequest = z.infer<typeof UpdateObservableRequestSchema>;
+export type BulkAddObservablesRequest = z.infer<typeof BulkAddObservablesRequestSchema>;

@@ -1021,7 +1021,7 @@ describe('CaseConfigureService', () => {
             attributes,
             id: '1',
           })
-        ).rejects.toThrow(`Invalid value "undefined" supplied to "closure_type"`);
+        ).rejects.toThrow(`Invalid input: expected "close-by-user"`);
       });
 
       it('strips out excess attributes', async () => {

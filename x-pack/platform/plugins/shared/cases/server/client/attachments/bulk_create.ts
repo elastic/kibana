@@ -7,10 +7,10 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import { BulkCreateUnifiedAttachmentsRequestRt } from '../../../common/types/api/attachment/v2';
+import { BulkCreateUnifiedAttachmentsRequestSchema } from '../../../common/types/api/attachment/v2';
 import type { Case } from '../../../common/types/domain';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
@@ -38,9 +38,9 @@ export const bulkCreate = async (
   } = clientArgs;
 
   try {
-    const decodedAttachments = decodeWithExcessOrThrow(BulkCreateUnifiedAttachmentsRequestRt)(
-      attachments
-    );
+    const decodedAttachments = decodeWithExcessOrThrowZod(
+      BulkCreateUnifiedAttachmentsRequestSchema
+    )(attachments);
 
     await validateMaxUserActions({
       caseId,

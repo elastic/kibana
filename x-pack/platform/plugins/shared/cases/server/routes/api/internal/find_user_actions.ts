@@ -10,10 +10,10 @@ import { schema } from '@kbn/config-schema';
 
 import { isCommentUserAction } from '../../../../common/utils/user_actions';
 import type { attachmentApiV2Union, userActionApiV1 } from '../../../../common/types/api';
-import { UserActionInternalFindRequestRt } from '../../../../common/types/api';
+import { UserActionInternalFindRequestSchema } from '../../../../common/types/api';
 import { INTERNAL_CASE_FIND_USER_ACTIONS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
-import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
+import { decodeWithExcessOrThrowZod } from '../../../common/runtime_types';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
@@ -38,7 +38,7 @@ export const findUserActionsRoute = createCasesRoute({
       const caseId = request.params.case_id;
       const query = request.query as Record<string, unknown>;
       const { types, authors, sources, ...restQuery } = query;
-      const options = decodeWithExcessOrThrow(UserActionInternalFindRequestRt)({
+      const options = decodeWithExcessOrThrowZod(UserActionInternalFindRequestSchema)({
         ...restQuery,
         ...(types != null ? { types: castArray(types) } : {}),
         ...(authors != null ? { authors: castArray(authors) } : {}),

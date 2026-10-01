@@ -7,13 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
+import { decodeWithExcessOrThrowZod } from '../../../common/runtime_types';
 import { INTERNAL_DELETE_FILE_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
 import { escapeHatch } from '../utils';
 import type { attachmentApiV1 } from '../../../../common/types/api';
-import { BulkDeleteFileAttachmentsRequestRt } from '../../../../common/types/api/attachment/v1';
+import { BulkDeleteFileAttachmentsRequestSchema } from '../../../../common/types/api';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const bulkDeleteFileAttachments = createCasesRoute({
@@ -33,9 +33,8 @@ export const bulkDeleteFileAttachments = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const requestBody: attachmentApiV1.BulkDeleteFileAttachmentsRequest = decodeWithExcessOrThrow(
-        BulkDeleteFileAttachmentsRequestRt
-      )(request.body);
+      const requestBody: attachmentApiV1.BulkDeleteFileAttachmentsRequest =
+        decodeWithExcessOrThrowZod(BulkDeleteFileAttachmentsRequestSchema)(request.body);
 
       await client.attachments.bulkDeleteFileAttachments({
         caseId: request.params.case_id,

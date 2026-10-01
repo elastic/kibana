@@ -6,15 +6,10 @@
  */
 
 import { MAX_SUGGESTED_PROFILES } from '../../../constants';
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { GetCaseUsersResponseRt, SuggestUserProfilesRequestRt } from './v1';
-import {
-  GetCaseUsersResponseSchema,
-  SuggestUserProfilesRequestSchema,
-} from '../../api_zod/user/v1';
+import { GetCaseUsersResponseSchema, SuggestUserProfilesRequestSchema } from './v1';
 
 describe('User', () => {
-  describe('GetCaseUsersResponseRt', () => {
+  describe('GetCaseUsersResponseSchema', () => {
     const defaultRequest = {
       assignees: [
         {
@@ -78,84 +73,12 @@ describe('User', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = GetCaseUsersResponseRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = GetCaseUsersResponseRt.decode({
-        ...defaultRequest,
-        foo: 'bar',
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from assigned users', () => {
-      const query = GetCaseUsersResponseRt.decode({
-        ...defaultRequest,
-        assignees: [{ ...defaultRequest.assignees[0], foo: 'bar' }],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, assignees: [{ ...defaultRequest.assignees[0] }] },
-      });
-    });
-
-    it('removes foo:bar attributes from unassigned users', () => {
-      const query = GetCaseUsersResponseRt.decode({
-        ...defaultRequest,
-        unassignedUsers: [{ ...defaultRequest.unassignedUsers[1], foo: 'bar' }],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, unassignedUsers: [{ ...defaultRequest.unassignedUsers[1] }] },
-      });
-    });
-
-    it('removes foo:bar attributes from participants', () => {
-      const query = GetCaseUsersResponseRt.decode({
-        ...defaultRequest,
-        participants: [{ ...defaultRequest.participants[0], foo: 'bar' }],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ...defaultRequest, participants: [{ ...defaultRequest.participants[0] }] },
-      });
-    });
-
-    it('removes foo:bar attributes from reporter', () => {
-      const query = GetCaseUsersResponseRt.decode({
-        ...defaultRequest,
-        reporter: {
-          ...defaultRequest.reporter,
-          foo: 'bar',
-        },
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
       const result = GetCaseUsersResponseSchema.safeParse(defaultRequest);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('zod: strips unknown fields', () => {
+    it('strips unknown fields', () => {
       const result = GetCaseUsersResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
@@ -163,7 +86,7 @@ describe('User', () => {
   });
 
   describe('UserProfile', () => {
-    describe('SuggestUserProfilesRequestRt', () => {
+    describe('SuggestUserProfilesRequestSchema', () => {
       const defaultRequest = {
         name: 'damaged_raccoon',
         owners: ['cases'],
@@ -171,93 +94,34 @@ describe('User', () => {
       };
 
       it('has expected attributes in request', () => {
-        const query = SuggestUserProfilesRequestRt.decode(defaultRequest);
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: {
-            name: 'damaged_raccoon',
-            owners: ['cases'],
-            size: 5,
-          },
-        });
-      });
-
-      it('has only name and owner in request', () => {
-        const query = SuggestUserProfilesRequestRt.decode({
-          name: 'damaged_raccoon',
-          owners: ['cases'],
-          foo: 'bar',
-        });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: {
-            name: 'damaged_raccoon',
-            owners: ['cases'],
-          },
-        });
-      });
-
-      it('missing size parameter works correctly', () => {
-        const query = SuggestUserProfilesRequestRt.decode({
-          name: 'di maria',
-          owners: ['benfica'],
-        });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: {
-            name: 'di maria',
-            owners: ['benfica'],
-          },
-        });
-      });
-
-      it('removes foo:bar attributes from request', () => {
-        const query = SuggestUserProfilesRequestRt.decode({ ...defaultRequest, foo: 'bar' });
-
-        expect(query).toStrictEqual({
-          _tag: 'Right',
-          right: {
-            name: 'damaged_raccoon',
-            owners: ['cases'],
-            size: 5,
-          },
-        });
-      });
-
-      it(`does not accept size param bigger than ${MAX_SUGGESTED_PROFILES}`, () => {
-        const query = SuggestUserProfilesRequestRt.decode({
-          ...defaultRequest,
-          size: MAX_SUGGESTED_PROFILES + 1,
-        });
-
-        expect(PathReporter.report(query)).toContain('The size field cannot be more than 10.');
-      });
-
-      it('does not accept size param lower than 1', () => {
-        const query = SuggestUserProfilesRequestRt.decode({
-          ...defaultRequest,
-          size: 0,
-        });
-
-        expect(PathReporter.report(query)).toContain('The size field cannot be less than 1.');
-      });
-
-      it('zod: has expected attributes in request', () => {
         const result = SuggestUserProfilesRequestSchema.safeParse(defaultRequest);
         expect(result.success).toBe(true);
         expect(result.data).toStrictEqual(defaultRequest);
       });
 
-      it('zod: strips unknown fields', () => {
+      it('strips unknown fields', () => {
         const result = SuggestUserProfilesRequestSchema.safeParse({
           ...defaultRequest,
           foo: 'bar',
         });
         expect(result.success).toBe(true);
         expect(result.data).toStrictEqual(defaultRequest);
+      });
+
+      it(`does not accept size param bigger than ${MAX_SUGGESTED_PROFILES}`, () => {
+        const result = SuggestUserProfilesRequestSchema.safeParse({
+          ...defaultRequest,
+          size: MAX_SUGGESTED_PROFILES + 1,
+        });
+        expect(result.success).toBe(false);
+      });
+
+      it('does not accept size param lower than 1', () => {
+        const result = SuggestUserProfilesRequestSchema.safeParse({
+          ...defaultRequest,
+          size: 0,
+        });
+        expect(result.success).toBe(false);
       });
     });
   });

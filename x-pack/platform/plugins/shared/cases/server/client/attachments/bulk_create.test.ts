@@ -53,7 +53,7 @@ describe('bulkCreate', () => {
     await expect(
       // @ts-expect-error: excess attribute
       bulkCreate({ attachments: [{ ...comment, foo: 'bar' }], caseId }, clientArgs)
-    ).rejects.toThrow('invalid keys "foo"');
+    ).rejects.toThrow('Excess keys are not allowed');
   });
 
   it('rejects a legacy v1 body', async () => {
@@ -100,7 +100,7 @@ describe('bulkCreate', () => {
           { attachments: [{ ...comment, data: { content: longComment } }], caseId },
           clientArgs
         )
-      ).rejects.toThrow(/Comment content exceeds maximum length/);
+      ).rejects.toThrow(`Too big: expected string to have <=${MAX_COMMENT_LENGTH} characters`);
     });
 
     it('should throw an error if the comment is an empty string', async () => {

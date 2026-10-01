@@ -10,19 +10,21 @@ import Boom from '@hapi/boom';
 
 import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import type { Observable } from '../../../common/types/domain';
-import { CaseRt, UserActionTypes } from '../../../common/types/domain';
+import { UserActionTypes, CaseSchema } from '../../../common/types/domain';
 import {
-  AddObservableRequestRt,
   type AddObservableRequest,
   type UpdateObservableRequest,
-  UpdateObservableRequestRt,
   type BulkAddObservablesRequest,
-  BulkAddObservablesRequestRt,
   type ObservablePost,
+} from '../../../common/types/api';
+import {
+  AddObservableRequestSchema,
+  UpdateObservableRequestSchema,
+  BulkAddObservablesRequestSchema,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import type { Authorization } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -170,7 +172,7 @@ export const addObservable = async (
 
   // Extract into an inner function so the emit can run outside the error-wrapping
   // boundary. A throw from the event bus must not turn a fully-committed write into
-  // a 400 — and a decode failure (CaseRt) must not silently skip the emit for a
+  // a 400 — and a decode failure (CaseSchema) must not silently skip the emit for a
   // write that the API reports as failed. Both invariants require the emit to sit
   // after the try/catch, which `.catch` makes possible without `let` variables.
   const {
@@ -178,7 +180,7 @@ export const addObservable = async (
     caseForEmit,
     observablesForEmit,
   } = await (async () => {
-    const paramArgs = decodeWithExcessOrThrow(AddObservableRequestRt)(params);
+    const paramArgs = decodeWithExcessOrThrowZod(AddObservableRequestSchema)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
@@ -207,10 +209,10 @@ export const addObservable = async (
 
     const res = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });
 
-    // Decode before emitting — if the SO fails CaseRt validation, we must not fire
+    // Decode before emitting — if the SO fails CaseSchema validation, we must not fire
     // the trigger for a request the API will report as failed. Matches the precedent
     // in create.ts where decodeOrThrow runs before the emit.
-    const result = decodeOrThrow(CaseRt)(res);
+    const result = decodeOrThrowZod(CaseSchema)(res);
     return {
       result,
       caseForEmit: applied.caseWithPatch,
@@ -248,7 +250,7 @@ export const updateObservable = async (
   licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   try {
-    const paramArgs = decodeWithExcessOrThrow(UpdateObservableRequestRt)(params);
+    const paramArgs = decodeWithExcessOrThrowZod(UpdateObservableRequestSchema)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
@@ -308,7 +310,7 @@ export const updateObservable = async (
       },
     });
 
-    return decodeOrThrow(CaseRt)(res);
+    return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
     throw Boom.badRequest(`Failed to update observable: ${error}`);
   }
@@ -395,14 +397,14 @@ export const bulkAddObservables = async (
 
   // Same inner-function pattern as addObservable: emit must run outside the
   // error-wrapping boundary so bus errors cannot turn a committed write into a 400,
-  // and the decode must precede the emit so a CaseRt failure does not fire the
+  // and the decode must precede the emit so a CaseSchema failure does not fire the
   // trigger for a request the API will report as failed.
   const {
     result: decodedCase,
     caseForEmit,
     observablesForEmit,
   } = await (async () => {
-    const paramArgs = decodeWithExcessOrThrow(BulkAddObservablesRequestRt)(params);
+    const paramArgs = decodeWithExcessOrThrowZod(BulkAddObservablesRequestSchema)(params);
     const retrievedCase = await caseService.getCase({ id: paramArgs.caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
@@ -425,7 +427,7 @@ export const bulkAddObservables = async (
       throw Boom.badRequest(`Failed to add observable`);
     }
     const res = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });
-    const result = decodeOrThrow(CaseRt)(res);
+    const result = decodeOrThrowZod(CaseSchema)(res);
     return {
       result,
       caseForEmit: applied.caseWithPatch,

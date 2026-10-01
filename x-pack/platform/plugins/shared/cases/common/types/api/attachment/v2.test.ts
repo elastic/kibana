@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import { UnifiedAttachmentsFindQueryParamsRt } from './v2';
+import { UnifiedAttachmentsFindQueryParamsSchema } from './v2';
 
-describe('UnifiedAttachmentsFindQueryParamsRt', () => {
+describe('UnifiedAttachmentsFindQueryParamsSchema', () => {
   it('accepts an omitted type (every attachment type)', () => {
-    expect(UnifiedAttachmentsFindQueryParamsRt.decode({})._tag).toBe('Right');
+    expect(UnifiedAttachmentsFindQueryParamsSchema.safeParse({}).success).toBe(true);
   });
 
   it('accepts a single type string', () => {
-    expect(UnifiedAttachmentsFindQueryParamsRt.decode({ type: 'comment' })._tag).toBe('Right');
+    expect(UnifiedAttachmentsFindQueryParamsSchema.safeParse({ type: 'comment' }).success).toBe(
+      true
+    );
   });
 
   it('accepts a non-empty type array', () => {
     expect(
-      UnifiedAttachmentsFindQueryParamsRt.decode({ type: ['comment', 'security.alert'] })._tag
-    ).toBe('Right');
+      UnifiedAttachmentsFindQueryParamsSchema.safeParse({ type: ['comment', 'security.alert'] })
+        .success
+    ).toBe(true);
   });
 
   it('rejects an empty type array', () => {
-    expect(UnifiedAttachmentsFindQueryParamsRt.decode({ type: [] })._tag).toBe('Left');
+    expect(UnifiedAttachmentsFindQueryParamsSchema.safeParse({ type: [] }).success).toBe(false);
   });
 });

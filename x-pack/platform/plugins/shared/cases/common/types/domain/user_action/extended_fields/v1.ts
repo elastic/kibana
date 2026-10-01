@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const ExtendedFieldsRt = rt.record(rt.string, rt.string);
+export const ExtendedFieldsSchema = z.record(z.string(), z.string());
 
-export const ExtendedFieldsUserActionPayloadRt = rt.strict({
-  extended_fields: ExtendedFieldsRt,
+export const ExtendedFieldsUserActionPayloadSchema = z.object({
+  extended_fields: ExtendedFieldsSchema,
 });
 
-export const ExtendedFieldsUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.extended_fields),
-  payload: ExtendedFieldsUserActionPayloadRt,
+export const ExtendedFieldsUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.extended_fields),
+  payload: ExtendedFieldsUserActionPayloadSchema,
 });

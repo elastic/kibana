@@ -6,7 +6,7 @@
  */
 
 import { isPlainObject } from 'lodash';
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { MAX_ACTION_SOURCE_NAME_LENGTH } from '../../../../constants';
 
 export const ActionSourceTypes = {
@@ -18,8 +18,15 @@ export const ActionSourceTypes = {
   user: 'user',
 } as const;
 
-export const ActionSourceTypeRt = rt.keyof(ActionSourceTypes);
-export type ActionSourceType = rt.TypeOf<typeof ActionSourceTypeRt>;
+export const ActionSourceTypeSchema = z.enum([
+  ActionSourceTypes.agent,
+  ActionSourceTypes.workflow,
+  ActionSourceTypes.rule,
+  ActionSourceTypes.attack,
+  ActionSourceTypes.api,
+  ActionSourceTypes.user,
+]);
+export type ActionSourceType = z.infer<typeof ActionSourceTypeSchema>;
 
 /** Source types shown as "via …" on the activity header. `user` is filter-only. */
 export const ACTION_SOURCE_HEADER_TYPES: ReadonlySet<ActionSourceType> = new Set([
@@ -30,20 +37,14 @@ export const ACTION_SOURCE_HEADER_TYPES: ReadonlySet<ActionSourceType> = new Set
   ActionSourceTypes.api,
 ]);
 
-export const ActionSourceRt = rt.intersection([
-  rt.strict({
-    type: ActionSourceTypeRt,
-    id: rt.string,
-  }),
-  rt.exact(
-    rt.partial({
-      name: rt.string,
-      run_id: rt.string,
-    })
-  ),
-]);
+export const ActionSourceSchema = z.object({
+  type: ActionSourceTypeSchema,
+  id: z.string(),
+  name: z.string().optional(),
+  run_id: z.string().optional(),
+});
 
-export type ActionSource = rt.TypeOf<typeof ActionSourceRt>;
+export type ActionSource = z.infer<typeof ActionSourceSchema>;
 
 export const isActionSource = (value: unknown): value is ActionSource => {
   if (!isPlainObject(value)) {
@@ -54,7 +55,7 @@ export const isActionSource = (value: unknown): value is ActionSource => {
   return (
     typeof candidate.id === 'string' &&
     candidate.id.length > 0 &&
-    ActionSourceTypeRt.is(candidate.type) &&
+    ActionSourceTypeSchema.safeParse(candidate.type).success &&
     (candidate.name === undefined || typeof candidate.name === 'string') &&
     (candidate.run_id === undefined || typeof candidate.run_id === 'string')
   );

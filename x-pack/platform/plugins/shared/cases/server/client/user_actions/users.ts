@@ -8,8 +8,8 @@
 import { isEmpty, isString } from 'lodash';
 import type { UserProfileAvatarData, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { GetCaseUsersResponse } from '../../../common/types/api';
-import { GetCaseUsersResponseRt } from '../../../common/types/api';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { GetCaseUsersResponseSchema } from '../../../common/types/api';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -106,7 +106,7 @@ export const getUsers = async (
       reporter: reporterResponse[0],
     };
 
-    return decodeOrThrow(GetCaseUsersResponseRt)(results);
+    return decodeOrThrowZod(GetCaseUsersResponseSchema)(results);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve the case users case id: ${caseId}: ${error}`,

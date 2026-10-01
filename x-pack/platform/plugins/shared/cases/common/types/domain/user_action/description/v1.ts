@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const DescriptionUserActionPayloadRt = rt.strict({ description: rt.string });
+export const DescriptionUserActionPayloadSchema = z.object({ description: z.string() });
 
-export const DescriptionUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.description),
-  payload: DescriptionUserActionPayloadRt,
+export const DescriptionUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.description),
+  payload: DescriptionUserActionPayloadSchema,
 });

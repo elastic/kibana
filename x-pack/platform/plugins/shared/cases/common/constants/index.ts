@@ -188,6 +188,7 @@ export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
  */
 
 export const MAX_TITLE_LENGTH = 160 as const;
+export const MAX_INDEX_NAME_LENGTH = 255 as const; // ES index name upper bound
 export const MAX_OWNER_LENGTH = 30 as const;
 export const MAX_ISO_DATE_LENGTH = 30 as const;
 export const MAX_ATTACHMENT_ID_LENGTH = 512 as const; // ES `_id` upper bound

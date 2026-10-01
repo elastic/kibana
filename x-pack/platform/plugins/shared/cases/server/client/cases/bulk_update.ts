@@ -32,7 +32,7 @@ import type {
   CasesPatchResponse,
   CaseWithUpdateSummary,
 } from '../../../common/types/api';
-import { PatchCasesResponseRt, CasesPatchRequestRt } from '../../../common/types/api';
+import { PatchCasesResponseSchema, CasesPatchRequestSchema } from '../../../common/types/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_ATTACHMENT_SAVED_OBJECT,
@@ -62,7 +62,7 @@ import {
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 import type {
   CaseAttributes,
   User,
@@ -557,7 +557,7 @@ export const bulkUpdate = async (
   } = clientArgs;
 
   try {
-    const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
+    const rawQuery = decodeWithExcessOrThrowZod(CasesPatchRequestSchema)(cases);
     const query = emptyCasesAssigneesSanitizer(rawQuery);
     const caseIds = query.cases.map((q) => q.id);
     const myCases = await caseService.getCases({
@@ -987,7 +987,7 @@ export const bulkUpdate = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    const updatedCasesResponse = decodeOrThrow(PatchCasesResponseRt)(returnUpdatedCase);
+    const updatedCasesResponse = decodeOrThrowZod(PatchCasesResponseSchema)(returnUpdatedCase);
 
     const { appliedCases, clearedCases, casesPerTemplateId } = countTemplateChanges(
       casesToUpdate,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import {
   MAX_BULK_CREATE_ATTACHMENTS,
   MAX_COMMENTS_PER_PAGE,
@@ -13,59 +13,62 @@ import {
   MAX_ATTACHMENT_TYPES_PER_QUERY,
 } from '../../../constants';
 import type { BulkGetAttachmentsRequest } from './v1';
-import { UnifiedAttachmentRt, UnifiedAttachmentPayloadRt } from '../../domain/attachment/v2';
+import {
+  UnifiedAttachmentSchema,
+  UnifiedAttachmentPayloadSchema,
+  UnifiedReferenceAttachmentPayloadSchema,
+  UnifiedValueAttachmentPayloadSchema,
+} from '../../domain/attachment/v2';
 import { limitedArraySchema, limitedStringSchema, paginationSchema } from '../../../schema';
+
 export type { BulkGetAttachmentsRequest as BulkGetAttachmentsRequestV2 };
 
-export const UnifiedAttachmentPutRequestRt = rt.intersection([
-  UnifiedAttachmentPayloadRt,
-  rt.strict({ version: rt.string }),
+export const UnifiedAttachmentPutRequestSchema = z.union([
+  UnifiedReferenceAttachmentPayloadSchema.extend({ version: z.string().max(512) }),
+  UnifiedValueAttachmentPayloadSchema.extend({ version: z.string().max(512) }),
 ]);
 
-export const BulkCreateUnifiedAttachmentsRequestRt = limitedArraySchema({
-  codec: UnifiedAttachmentPayloadRt,
+export const BulkCreateUnifiedAttachmentsRequestSchema = limitedArraySchema({
+  codec: UnifiedAttachmentPayloadSchema,
   min: 0,
   max: MAX_BULK_CREATE_ATTACHMENTS,
   fieldName: 'attachments',
 });
 
-const AttachmentTypeStringRt = limitedStringSchema({
+const AttachmentTypeStringSchema = limitedStringSchema({
   fieldName: 'type',
   min: 1,
   max: MAX_ATTACHMENT_TYPE_LENGTH,
 });
-const AttachmentTypeQueryParamRt = rt.union([
-  AttachmentTypeStringRt,
+const AttachmentTypeQueryParamSchema = z.union([
+  AttachmentTypeStringSchema,
   limitedArraySchema({
-    codec: AttachmentTypeStringRt,
+    codec: AttachmentTypeStringSchema,
     min: 1,
     max: MAX_ATTACHMENT_TYPES_PER_QUERY,
     fieldName: 'type',
   }),
 ]);
 
-export const UnifiedAttachmentsFindQueryParamsRt = rt.intersection([
-  rt.exact(
-    rt.partial({
-      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-      type: AttachmentTypeQueryParamRt,
-    })
-  ),
-  paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
-]);
-
-export const UnifiedAttachmentsFindResponseRt = rt.strict({
-  data: rt.array(UnifiedAttachmentRt),
-  page: rt.number,
-  per_page: rt.number,
-  total: rt.number,
+export const UnifiedAttachmentsFindQueryParamsSchema = paginationSchema({
+  maxPerPage: MAX_COMMENTS_PER_PAGE,
+}).extend({
+  sortOrder: z.enum(['desc', 'asc']).optional(),
+  type: AttachmentTypeQueryParamSchema.optional(),
 });
 
-export type UnifiedAttachmentPutRequest = rt.TypeOf<typeof UnifiedAttachmentPutRequestRt>;
-export type BulkCreateUnifiedAttachmentsRequest = rt.TypeOf<
-  typeof BulkCreateUnifiedAttachmentsRequestRt
+export const UnifiedAttachmentsFindResponseSchema = z.object({
+  data: z.array(UnifiedAttachmentSchema),
+  page: z.number(),
+  per_page: z.number(),
+  total: z.number(),
+});
+
+export type UnifiedAttachmentPutRequest = z.infer<typeof UnifiedAttachmentPutRequestSchema>;
+export type BulkCreateUnifiedAttachmentsRequest = z.infer<
+  typeof BulkCreateUnifiedAttachmentsRequestSchema
 >;
-export type UnifiedAttachmentsFindQueryParams = rt.TypeOf<
-  typeof UnifiedAttachmentsFindQueryParamsRt
+export type UnifiedAttachmentsFindQueryParams = z.infer<
+  typeof UnifiedAttachmentsFindQueryParamsSchema
 >;
-export type UnifiedAttachmentsFindResponse = rt.TypeOf<typeof UnifiedAttachmentsFindResponseRt>;
+export type UnifiedAttachmentsFindResponse = z.infer<typeof UnifiedAttachmentsFindResponseSchema>;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { decodeOrThrow } from '../runtime_types';
-import { ConnectorMappingsAttributesPartialRt } from './connector_mappings';
+import { decodeOrThrowZod } from '../runtime_types';
+import { ConnectorMappingsAttributesPartialSchema } from './connector_mappings';
 
 describe('mappings', () => {
-  describe('ConnectorMappingsAttributesPartialRt', () => {
+  describe('ConnectorMappingsAttributesPartialSchema', () => {
     it('strips excess fields from the object', () => {
-      const res = decodeOrThrow(ConnectorMappingsAttributesPartialRt)({
+      const res = decodeOrThrowZod(ConnectorMappingsAttributesPartialSchema)({
         bananas: 'yes',
         owner: 'hi',
       });
@@ -21,7 +21,7 @@ describe('mappings', () => {
     });
 
     it('does not throw when the object is empty', () => {
-      expect(() => decodeOrThrow(ConnectorMappingsAttributesPartialRt)({})).not.toThrow();
+      expect(() => decodeOrThrowZod(ConnectorMappingsAttributesPartialSchema)({})).not.toThrow();
     });
   });
 });

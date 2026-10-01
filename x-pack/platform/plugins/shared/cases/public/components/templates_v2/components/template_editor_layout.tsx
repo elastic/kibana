@@ -22,7 +22,7 @@ import {
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain/connector/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
 import type { TemplateMetadata, TemplateMetadataErrors } from '../utils/template_metadata';
 import type { OnCaseDefaultChange } from '../case_default_fields';

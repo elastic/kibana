@@ -15,8 +15,8 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 import { FieldSchema, isRefField } from './fields';
-import { CaseConnectorWithoutNameSchema } from '../../domain_zod/connector/v1';
-import { CaseUserProfilesSchema } from '../../domain_zod/user/v1';
+import { CaseConnectorWithoutNameSchema } from '../connector/v1';
+import { CaseUserProfilesSchema } from '../user/v1';
 
 /** Template tag: non-empty and length-bounded, mirroring the client-side metadata validation. */
 const TemplateTagSchema = z.string().min(1).max(MAX_TEMPLATE_TAG_LENGTH);

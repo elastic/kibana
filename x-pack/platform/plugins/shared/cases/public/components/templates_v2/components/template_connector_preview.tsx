@@ -10,7 +10,7 @@ import type { FC } from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 
 import type { ConnectorTypeFields } from '../../../../common/types/domain';
-import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain/connector/v1';
 import { getConnectorById } from '../../utils';
 import { ConnectorFieldsPreviewForm } from '../../connectors/fields_preview_form';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';

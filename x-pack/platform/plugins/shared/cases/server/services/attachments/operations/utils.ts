@@ -7,14 +7,14 @@
 
 import Boom from '@hapi/boom';
 import { passThroughTransformer } from '../../../common/attachments/base';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { decodeOrThrowZod } from '../../../common/runtime_types';
 import type { AttachmentPersistedAttributes } from '../../../common/types/attachments_v1';
 import type { UnifiedAttachmentAttributes } from '../../../common/types/attachments_v2';
 import type { AttachmentV2, UnifiedAttachment } from '../../../../common/types/domain';
+import type { AttachmentPatchAttributesV2 } from '../../../../common/types/domain/attachment/v2';
 import {
-  type AttachmentPatchAttributesV2,
-  UnifiedAttachmentAttributesRt,
-  UnifiedAttachmentRt,
+  UnifiedAttachmentAttributesSchema,
+  UnifiedAttachmentSchema,
 } from '../../../../common/types/domain/attachment/v2';
 import { isMigratedAttachmentType } from '../../../../common/utils/attachments';
 import {
@@ -45,7 +45,9 @@ export function toUnifiedAttributes({
 
   if (isMigratedAttachmentType(attachmentType, owner)) {
     const unifiedAttrs = transformer.toUnifiedSchema(attributes);
-    const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(unifiedAttrs);
+    const validatedAttributes = decodeOrThrowZod(UnifiedAttachmentAttributesSchema)(
+      unifiedAttrs
+    ) as UnifiedAttachmentAttributes;
     return { isUnified: true, attributes: validatedAttributes };
   }
 
@@ -56,11 +58,11 @@ export function toUnifiedAttributes({
 export const toUnifiedAttachment = (attachment: AttachmentV2): UnifiedAttachment => {
   const { id, version, ...attributes } = attachment;
   const { attributes: folded } = toUnifiedAttributes({ attributes });
-  return decodeOrThrow(UnifiedAttachmentRt)({
+  return decodeOrThrowZod(UnifiedAttachmentSchema)({
     id,
     version,
     ...folded,
-  });
+  }) as UnifiedAttachment;
 };
 
 /**

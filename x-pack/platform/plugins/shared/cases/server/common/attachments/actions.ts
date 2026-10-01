@@ -13,7 +13,7 @@ import type {
   UnifiedAttachmentPayload,
 } from '../../../common/types/domain/attachment/v2';
 import type { ActionsAttachmentPayload } from '../../../common/types/domain';
-import { ActionsAttachmentPayloadRt } from '../../../common/types/domain/attachment/v1';
+import { ActionsAttachmentPayloadSchema } from '../../../common/types/domain/attachment/v1';
 import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type {
   AttachmentPersistedAttributes,
@@ -66,7 +66,7 @@ type LegacyActionsAttributes = ActionsAttachmentPayload;
 function isLegacyActionsShape(attributes: unknown): attributes is LegacyActionsAttributes {
   if (!isPlainObject(attributes) || attributes === null) return false;
   const { type, comment, actions, owner } = attributes as Record<string, unknown>;
-  return ActionsAttachmentPayloadRt.is({ type, comment, actions, owner });
+  return ActionsAttachmentPayloadSchema.safeParse({ type, comment, actions, owner }).success;
 }
 
 function hasConvertibleTargets(attributes: LegacyActionsAttributes): boolean {

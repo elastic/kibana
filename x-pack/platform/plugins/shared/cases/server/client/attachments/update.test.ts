@@ -138,6 +138,6 @@ describe('update', () => {
         },
         clientArgs
       )
-    ).rejects.toThrow(`Comment content exceeds maximum length of ${MAX_COMMENT_LENGTH} characters`);
+    ).rejects.toThrow(`Too big: expected string to have <=${MAX_COMMENT_LENGTH} characters`);
   });
 });

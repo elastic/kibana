@@ -5,33 +5,23 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { MAX_SUGGESTED_PROFILES } from '../../../constants';
 import { limitedNumberSchema } from '../../../schema';
-import { UserWithProfileInfoRt } from '../../domain/user/v1';
+import { UserWithProfileInfoSchema } from '../../domain/user/v1';
 
-export const GetCaseUsersResponseRt = rt.strict({
-  assignees: rt.array(UserWithProfileInfoRt),
-  unassignedUsers: rt.array(UserWithProfileInfoRt),
-  participants: rt.array(UserWithProfileInfoRt),
-  reporter: UserWithProfileInfoRt,
+export const GetCaseUsersResponseSchema = z.object({
+  assignees: z.array(UserWithProfileInfoSchema),
+  unassignedUsers: z.array(UserWithProfileInfoSchema),
+  participants: z.array(UserWithProfileInfoSchema),
+  reporter: UserWithProfileInfoSchema,
 });
 
-export type GetCaseUsersResponse = rt.TypeOf<typeof GetCaseUsersResponseRt>;
+export const SuggestUserProfilesRequestSchema = z.object({
+  name: z.string(),
+  owners: z.array(z.string()),
+  size: limitedNumberSchema({ fieldName: 'size', min: 1, max: MAX_SUGGESTED_PROFILES }).optional(),
+});
 
-/**
- * User Profiles
- */
-export const SuggestUserProfilesRequestRt = rt.intersection([
-  rt.strict({
-    name: rt.string,
-    owners: rt.array(rt.string),
-  }),
-  rt.exact(
-    rt.partial({
-      size: limitedNumberSchema({ fieldName: 'size', min: 1, max: MAX_SUGGESTED_PROFILES }),
-    })
-  ),
-]);
-
-export type SuggestUserProfilesRequest = rt.TypeOf<typeof SuggestUserProfilesRequestRt>;
+export type GetCaseUsersResponse = z.infer<typeof GetCaseUsersResponseSchema>;
+export type SuggestUserProfilesRequest = z.infer<typeof SuggestUserProfilesRequestSchema>;

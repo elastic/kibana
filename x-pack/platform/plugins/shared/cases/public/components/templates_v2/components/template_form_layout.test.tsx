@@ -14,7 +14,7 @@ import type { YamlEditorFormValues } from './template_form';
 import { TemplateFormLayout, getTemplateEditorBodyOffset } from './template_form_layout';
 import type { TemplateMetadata } from '../utils/template_metadata';
 import { MAX_TEMPLATE_NAME_LENGTH } from '../../../../common/constants';
-import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
+import type { CaseAssignees } from '../../../../common/types/domain/user/v1';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { renderWithTestingProviders } from '../../../common/mock';
