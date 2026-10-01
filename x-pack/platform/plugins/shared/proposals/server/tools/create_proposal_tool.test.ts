@@ -49,6 +49,7 @@ const setup = ({
   const workflowsApi = {
     isWorkflowsAvailable,
     executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: EXECUTION_ID }),
+    assertWorkflowAccess: jest.fn().mockResolvedValue(undefined),
   };
   const privileges: ProposalPrivilegesChecker = {
     assertCanManage,
@@ -157,6 +158,21 @@ describe('proposals.create', () => {
 
     expect(result.type).toBe(ToolResultType.error);
     expect(workflowsApi.executeWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('is unavailable without execute access to the gate workflow', async () => {
+    const { tool, request, workflowsApi } = setup();
+    workflowsApi.assertWorkflowAccess.mockRejectedValue(new Error('Forbidden'));
+
+    await expect(
+      tool.availability?.handler({ request, spaceId: SPACE_ID } as never)
+    ).resolves.toMatchObject({ status: 'unavailable', reason: 'Forbidden' });
+    expect(workflowsApi.assertWorkflowAccess).toHaveBeenCalledWith(
+      CREATE_PROPOSAL_WORKFLOW_ID,
+      SPACE_ID,
+      'execute',
+      request
+    );
   });
 
   it('is unavailable without the privilege or without workflows', async () => {

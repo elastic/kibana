@@ -91,9 +91,12 @@ export class SubjectClaimsService {
   /**
    * Claims every subject for the investigation, or none. Subjects are claimed in a fixed order,
    * so two starts with overlapping subjects contend for the same subject first. When a subject is
-   * held by another open (or still pending) investigation, the claims this call made are
-   * released and that investigation is returned; it may not have its conversation yet, so a
-   * follow-up has to get or create it.
+   * held by another open (or still pending) investigation, that investigation is returned and the
+   * claims this call made are handed over to it, since the caller follows up on it with all of
+   * its subjects. Handing over rather than deleting keeps a concurrent start that already read
+   * one of those claims from opening the investigation this call abandons; the remaining window
+   * is between this call's claim and its hand-over. The holder may not have its conversation
+   * yet, so a follow-up has to get or create it.
    */
   async claim({
     spaceId,
@@ -108,7 +111,7 @@ export class SubjectClaimsService {
     for (const [id, subject] of ordered) {
       const outcome = await this.claimOne({ id, spaceId, conversationId, subject, isHolderOpen });
       if ('heldBy' in outcome) {
-        await this.release(spaceId, conversationId, taken);
+        await this.handOver({ spaceId, from: conversationId, to: outcome.heldBy, ids: taken });
         return { claimed: false, heldBy: outcome.heldBy };
       }
       if (outcome.taken) {
@@ -202,20 +205,39 @@ export class SubjectClaimsService {
     return isHolderOpen(conversationId);
   }
 
-  /** Deletes the given claims while this investigation still holds them. */
-  private async release(spaceId: string, conversationId: string, ids: string[]): Promise<void> {
+  /**
+   * Moves the given claims to the investigation the caller follows up on, while `from` still
+   * holds them. A fresh `claimedAt` restarts the pending window, as that investigation may not
+   * have its conversation yet.
+   */
+  private async handOver({
+    spaceId,
+    from,
+    to,
+    ids,
+  }: {
+    spaceId: string;
+    from: string;
+    to: string;
+    ids: string[];
+  }): Promise<void> {
     for (const id of ids) {
       const existing = await this.findVersioned(id);
       if (
         !existing ||
         existing.claim.spaceId !== spaceId ||
-        existing.claim.conversationId !== conversationId
+        existing.claim.conversationId !== from
       ) {
         continue;
       }
       try {
-        await this.deps.storage.delete({
+        await this.deps.storage.index({
           id,
+          document: {
+            ...existing.claim,
+            conversationId: to,
+            claimedAt: new Date(this.now()).toISOString(),
+          },
           if_seq_no: existing.seqNo,
           if_primary_term: existing.primaryTerm,
         });

@@ -351,7 +351,8 @@ The builtin Agent Builder tool `proposals.create` (`server/tools/create_proposal
 - **The card is attached by the gate's create step**, through the public attachment client (`render_inline: true`), not through the run's attachment state. That write needs the caller to own the conversation, which holds for an investigation run started by its owner; otherwise the proposal is still created and only the card is missing, as for any Worker. Because the attachment is written out of band, the agent does not see its id in the same turn; the card is shown to the analyst all the same.
 - **It waits briefly for the proposal.** It polls `findByWorkflowExecutionId` for up to 5 seconds and returns `{ acknowledged, proposal_id, title, status, workflow_execution_id }`. If the create step has not run by then, it returns `{ acknowledged, workflow_execution_id, note }` and tells the agent not to create the proposal again.
 - **Cost:** each call leaves one gate execution parked (52-week sentinel timeout) until the analyst decides or the proposal expires (72h default), the same as every Worker proposal.
-- **Availability:** unavailable unless workflows are available and the principal holds `manage_proposals`; the handler checks again on every call. Starting the gate also needs the caller to be allowed to execute the managed workflow.
+- **Availability:** unavailable unless workflows are available, the principal holds `manage_proposals`, and it may execute `system-create-proposal` (`assertWorkflowAccess(..., 'execute')`). The handler re-checks `manage_proposals` on every call, and `executeWorkflow` re-checks execute access.
+- **`origin` comes from the agent.** Any agent with the tool can file into any feature's queue (for example `alertzero`), including one steered by injected content. Binding an origin per agent is a possible follow-up.
 
 ### Authoring an action workflow
 

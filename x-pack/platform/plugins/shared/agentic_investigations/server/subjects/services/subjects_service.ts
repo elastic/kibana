@@ -25,6 +25,7 @@ import {
   InvestigationAttachmentInvalidRequestError,
   type InvestigationAttachmentDocService,
 } from '../../investigation_attachments';
+import { assertBoundedId } from '../../investigation_attachments/attachment_doc_service';
 import { sameInvestigationAttachmentDocument } from '../../investigation_attachments/same_document';
 import { subjectAttachment } from '../attachments/subject_attachment_type';
 import type { SubjectDocument } from '../storage/subject_storage';
@@ -215,6 +216,8 @@ export class SubjectsService {
    * created. See {@link SubjectClaimsService.claim}.
    */
   async claimSubjects(params: ClaimSubjectsParams): Promise<ClaimSubjectsResult> {
+    assertBoundedId(params.spaceId, 'spaceId');
+    assertBoundedId(params.conversationId, 'conversationId');
     const subjects = parseOrThrow(subjectKeysSchema.min(1), params.subjects);
     return this.deps.claims.claim({ ...params, subjects });
   }
