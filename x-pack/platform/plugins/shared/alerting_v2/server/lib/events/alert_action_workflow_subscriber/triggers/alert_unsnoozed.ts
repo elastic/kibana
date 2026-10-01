@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { episodeUnsnoozedPayloadSchema } from '../../../../../common/workflows/triggers';
+import type { alertUnsnoozedPayloadSchema } from '../../../../../common/workflows/triggers';
 import {
-  EPISODE_UNSNOOZED_TRIGGER_ID,
-  episodeUnsnoozedTriggerCommonDefinition,
+  ALERT_UNSNOOZED_TRIGGER_ID,
+  alertUnsnoozedTriggerCommonDefinition,
 } from '../../../../../common/workflows/triggers';
 import {
   EPISODE_UNSNOOZED_EVENT_TYPE,
@@ -17,18 +17,18 @@ import {
 import type { AlertActionWorkflowTriggerBinding } from './types';
 import { toEnvelopePayload } from './to_envelope_payload';
 
-export { EPISODE_UNSNOOZED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
+export { ALERT_UNSNOOZED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
 
 /**
  * Binding from the bus `episode.unsnoozed` event to the
- * `alerting.episodeUnsnoozed` workflow trigger.
+ * `alerting.userActions.alertUnsnoozed` workflow trigger.
  */
-export const episodeUnsnoozedTrigger: AlertActionWorkflowTriggerBinding<
+export const alertUnsnoozedTrigger: AlertActionWorkflowTriggerBinding<
   EpisodeUnsnoozedEvent,
-  typeof episodeUnsnoozedPayloadSchema
+  typeof alertUnsnoozedPayloadSchema
 > = {
   eventType: EPISODE_UNSNOOZED_EVENT_TYPE,
-  triggerId: EPISODE_UNSNOOZED_TRIGGER_ID,
-  definition: episodeUnsnoozedTriggerCommonDefinition,
+  triggerId: ALERT_UNSNOOZED_TRIGGER_ID,
+  definition: alertUnsnoozedTriggerCommonDefinition,
   toPayload: toEnvelopePayload,
 };

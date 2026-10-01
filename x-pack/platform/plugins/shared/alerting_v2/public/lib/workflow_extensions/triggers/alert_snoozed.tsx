@@ -6,10 +6,10 @@
  */
 
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
-import { episodeActivatedTriggerCommonDefinition } from '../../../../common/workflows/triggers';
+import { alertSnoozedTriggerCommonDefinition } from '../../../../common/workflows/triggers';
 import { AlertingTriggerIcon } from './alerting_trigger_icon';
 
-export const episodeActivatedTriggerPublicDefinition: PublicTriggerDefinition = {
-  ...episodeActivatedTriggerCommonDefinition,
+export const alertSnoozedTriggerPublicDefinition: PublicTriggerDefinition = {
+  ...alertSnoozedTriggerCommonDefinition,
   icon: AlertingTriggerIcon,
 };

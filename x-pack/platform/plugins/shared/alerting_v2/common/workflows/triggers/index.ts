@@ -9,67 +9,67 @@ export { episodeActionEnvelopeSchema } from './episode_action_envelope';
 export type { EpisodeActionEnvelopePayload } from './episode_action_envelope';
 
 export {
-  EPISODE_ASSIGNED_TRIGGER_ID,
-  episodeAssignedPayloadSchema,
-  episodeAssignedTriggerCommonDefinition,
-} from './episode_assigned';
-export type { EpisodeAssignedPayload } from './episode_assigned';
+  ALERT_ASSIGNED_TRIGGER_ID,
+  alertAssignedPayloadSchema,
+  alertAssignedTriggerCommonDefinition,
+} from './alert_assigned';
+export type { AlertAssignedPayload } from './alert_assigned';
 
 export {
-  EPISODE_UNASSIGNED_TRIGGER_ID,
-  episodeUnassignedPayloadSchema,
-  episodeUnassignedTriggerCommonDefinition,
-} from './episode_unassigned';
-export type { EpisodeUnassignedPayload } from './episode_unassigned';
+  ALERT_UNASSIGNED_TRIGGER_ID,
+  alertUnassignedPayloadSchema,
+  alertUnassignedTriggerCommonDefinition,
+} from './alert_unassigned';
+export type { AlertUnassignedPayload } from './alert_unassigned';
 
 export {
-  EPISODE_ACKED_TRIGGER_ID,
-  episodeAckedPayloadSchema,
-  episodeAckedTriggerCommonDefinition,
-} from './episode_acked';
-export type { EpisodeAckedPayload } from './episode_acked';
+  ALERT_ACKED_TRIGGER_ID,
+  alertAckedPayloadSchema,
+  alertAckedTriggerCommonDefinition,
+} from './alert_acked';
+export type { AlertAckedPayload } from './alert_acked';
 
 export {
-  EPISODE_UNACKED_TRIGGER_ID,
-  episodeUnackedPayloadSchema,
-  episodeUnackedTriggerCommonDefinition,
-} from './episode_unacked';
-export type { EpisodeUnackedPayload } from './episode_unacked';
+  ALERT_UNACKED_TRIGGER_ID,
+  alertUnackedPayloadSchema,
+  alertUnackedTriggerCommonDefinition,
+} from './alert_unacked';
+export type { AlertUnackedPayload } from './alert_unacked';
 
 export {
-  EPISODE_TAGGED_TRIGGER_ID,
-  episodeTaggedPayloadSchema,
-  episodeTaggedTriggerCommonDefinition,
-} from './episode_tagged';
-export type { EpisodeTaggedPayload } from './episode_tagged';
+  ALERT_TAGGED_TRIGGER_ID,
+  alertTaggedPayloadSchema,
+  alertTaggedTriggerCommonDefinition,
+} from './alert_tagged';
+export type { AlertTaggedPayload } from './alert_tagged';
 
 export {
-  EPISODE_SNOOZED_TRIGGER_ID,
-  episodeSnoozedPayloadSchema,
-  episodeSnoozedTriggerCommonDefinition,
-} from './episode_snoozed';
-export type { EpisodeSnoozedPayload } from './episode_snoozed';
+  ALERT_SNOOZED_TRIGGER_ID,
+  alertSnoozedPayloadSchema,
+  alertSnoozedTriggerCommonDefinition,
+} from './alert_snoozed';
+export type { AlertSnoozedPayload } from './alert_snoozed';
 
 export {
-  EPISODE_UNSNOOZED_TRIGGER_ID,
-  episodeUnsnoozedPayloadSchema,
-  episodeUnsnoozedTriggerCommonDefinition,
-} from './episode_unsnoozed';
-export type { EpisodeUnsnoozedPayload } from './episode_unsnoozed';
+  ALERT_UNSNOOZED_TRIGGER_ID,
+  alertUnsnoozedPayloadSchema,
+  alertUnsnoozedTriggerCommonDefinition,
+} from './alert_unsnoozed';
+export type { AlertUnsnoozedPayload } from './alert_unsnoozed';
 
 export {
-  EPISODE_ACTIVATED_TRIGGER_ID,
-  episodeActivatedPayloadSchema,
-  episodeActivatedTriggerCommonDefinition,
-} from './episode_activated';
-export type { EpisodeActivatedPayload } from './episode_activated';
+  ALERT_ACTIVATED_TRIGGER_ID,
+  alertActivatedPayloadSchema,
+  alertActivatedTriggerCommonDefinition,
+} from './alert_activated';
+export type { AlertActivatedPayload } from './alert_activated';
 
 export {
-  EPISODE_DEACTIVATED_TRIGGER_ID,
-  episodeDeactivatedPayloadSchema,
-  episodeDeactivatedTriggerCommonDefinition,
-} from './episode_deactivated';
-export type { EpisodeDeactivatedPayload } from './episode_deactivated';
+  ALERT_DEACTIVATED_TRIGGER_ID,
+  alertDeactivatedPayloadSchema,
+  alertDeactivatedTriggerCommonDefinition,
+} from './alert_deactivated';
+export type { AlertDeactivatedPayload } from './alert_deactivated';
 
 export { RuleCreatedTriggerId, ruleCreatedTriggerCommonDefinition } from './rule_created';
 export { RuleUpdatedTriggerId, ruleUpdatedTriggerCommonDefinition } from './rule_updated';

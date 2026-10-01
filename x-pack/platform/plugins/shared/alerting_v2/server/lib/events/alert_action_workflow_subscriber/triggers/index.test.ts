@@ -24,9 +24,9 @@ describe('ALERT_ACTION_WORKFLOW_TRIGGERS', () => {
     }
   });
 
-  it('namespaces every trigger id under `alerting_v2.`', () => {
+  it('namespaces every trigger id under `alerting.userActions.`', () => {
     for (const binding of ALERT_ACTION_WORKFLOW_TRIGGERS) {
-      expect(binding.triggerId.startsWith('alerting.')).toBe(true);
+      expect(binding.triggerId.startsWith('alerting.userActions.')).toBe(true);
     }
   });
 });

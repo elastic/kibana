@@ -258,11 +258,11 @@ describe('getCompletionItemProvider', () => {
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([
         {
-          label: 'Alerting - Episode acknowledged',
-          insertText: 'alerting.episodeAcked snippet',
+          label: 'Alerting - Alert acknowledged',
+          insertText: 'alerting.userActions.alertAcked snippet',
           insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          filterText: 'alerting.episodeAcked',
-          detail: 'alerting.episodeAcked',
+          filterText: 'alerting.userActions.alertAcked',
+          detail: 'alerting.userActions.alertAcked',
         },
       ]);
 
@@ -270,9 +270,9 @@ describe('getCompletionItemProvider', () => {
         provideCompletionItems: jest.fn().mockResolvedValue({
           suggestions: [
             {
-              label: 'alerting.episodeAcked',
-              insertText: 'alerting.episodeAcked',
-              filterText: 'alerting.episodeAcked',
+              label: 'alerting.userActions.alertAcked',
+              insertText: 'alerting.userActions.alertAcked',
+              filterText: 'alerting.userActions.alertAcked',
             },
           ],
           incomplete: false,
@@ -291,9 +291,9 @@ describe('getCompletionItemProvider', () => {
 
       expect(result?.suggestions).toHaveLength(1);
       expect(result?.suggestions?.[0]).toMatchObject({
-        label: 'Alerting - Episode acknowledged',
-        detail: 'alerting.episodeAcked',
-        filterText: 'alerting.episodeAcked',
+        label: 'Alerting - Alert acknowledged',
+        detail: 'alerting.userActions.alertAcked',
+        filterText: 'alerting.userActions.alertAcked',
       });
     });
 

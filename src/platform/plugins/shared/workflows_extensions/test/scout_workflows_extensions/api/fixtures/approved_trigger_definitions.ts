@@ -55,42 +55,6 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '3ddfb053989618f32071989376a39b001b3ed1bead0e81bf9f48c20253a53c57',
   },
   {
-    id: 'alerting.episodeAcked',
-    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
-  },
-  {
-    id: 'alerting.episodeActivated',
-    schemaHash: 'c5a55a218565c7d084269021a9d6252d9ea972a8a9ce496082da5c6e76d09a01',
-  },
-  {
-    id: 'alerting.episodeAssigned',
-    schemaHash: 'b99211de1fdabb5e2a2942031495b8c34d317a3feccd7efaa81bf997c0412439',
-  },
-  {
-    id: 'alerting.episodeDeactivated',
-    schemaHash: '623ec35bd18482cc9a3bc7a9ecaf3b3de4f203c8cacc207e102b8a5b14fa554a',
-  },
-  {
-    id: 'alerting.episodeSnoozed',
-    schemaHash: 'f0517884b4e0560f86a62515c0d84420fed367ef2cfdda501cfedad010f22914',
-  },
-  {
-    id: 'alerting.episodeTagged',
-    schemaHash: 'd6ad1872b85995d8088dfacbad85f775236ceb61a3982b077c7a00902c84bf95',
-  },
-  {
-    id: 'alerting.episodeUnacked',
-    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
-  },
-  {
-    id: 'alerting.episodeUnassigned',
-    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
-  },
-  {
-    id: 'alerting.episodeUnsnoozed',
-    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
-  },
-  {
     id: 'alerting.ruleCreated',
     schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
@@ -117,6 +81,42 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   {
     id: 'alerting.ruleUpdated',
     schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
+  },
+  {
+    id: 'alerting.userActions.alertAcked',
+    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
+  },
+  {
+    id: 'alerting.userActions.alertActivated',
+    schemaHash: 'c5a55a218565c7d084269021a9d6252d9ea972a8a9ce496082da5c6e76d09a01',
+  },
+  {
+    id: 'alerting.userActions.alertAssigned',
+    schemaHash: 'b99211de1fdabb5e2a2942031495b8c34d317a3feccd7efaa81bf997c0412439',
+  },
+  {
+    id: 'alerting.userActions.alertDeactivated',
+    schemaHash: '623ec35bd18482cc9a3bc7a9ecaf3b3de4f203c8cacc207e102b8a5b14fa554a',
+  },
+  {
+    id: 'alerting.userActions.alertSnoozed',
+    schemaHash: 'f0517884b4e0560f86a62515c0d84420fed367ef2cfdda501cfedad010f22914',
+  },
+  {
+    id: 'alerting.userActions.alertTagged',
+    schemaHash: 'd6ad1872b85995d8088dfacbad85f775236ceb61a3982b077c7a00902c84bf95',
+  },
+  {
+    id: 'alerting.userActions.alertUnacked',
+    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
+  },
+  {
+    id: 'alerting.userActions.alertUnassigned',
+    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
+  },
+  {
+    id: 'alerting.userActions.alertUnsnoozed',
+    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
   },
   {
     id: 'cases.attachmentsAdded',

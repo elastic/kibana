@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { episodeAssignedPayloadSchema } from '../../../../../common/workflows/triggers';
+import type { alertAssignedPayloadSchema } from '../../../../../common/workflows/triggers';
 import {
-  EPISODE_ASSIGNED_TRIGGER_ID,
-  episodeAssignedTriggerCommonDefinition,
+  ALERT_ASSIGNED_TRIGGER_ID,
+  alertAssignedTriggerCommonDefinition,
 } from '../../../../../common/workflows/triggers';
 import {
   EPISODE_ASSIGNED_EVENT_TYPE,
@@ -17,22 +17,22 @@ import {
 import type { AlertActionWorkflowTriggerBinding } from './types';
 import { toEnvelopePayload } from './to_envelope_payload';
 
-export { EPISODE_ASSIGNED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
+export { ALERT_ASSIGNED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
 
 /**
  * Binding from the bus `episode.assigned` event to the
- * `alerting.episodeAssigned` workflow trigger.
+ * `alerting.userActions.alertAssigned` workflow trigger.
  *
  * Adding a new field to either side requires updating
- * {@link episodeAssignedPayloadSchema} and {@link episodeAssignedTrigger.toPayload}
+ * {@link alertAssignedPayloadSchema} and {@link alertAssignedTrigger.toPayload}
  * together so the registered schema and the runtime payload stay in lockstep.
  */
-export const episodeAssignedTrigger: AlertActionWorkflowTriggerBinding<
+export const alertAssignedTrigger: AlertActionWorkflowTriggerBinding<
   EpisodeAssignedEvent,
-  typeof episodeAssignedPayloadSchema
+  typeof alertAssignedPayloadSchema
 > = {
   eventType: EPISODE_ASSIGNED_EVENT_TYPE,
-  triggerId: EPISODE_ASSIGNED_TRIGGER_ID,
-  definition: episodeAssignedTriggerCommonDefinition,
+  triggerId: ALERT_ASSIGNED_TRIGGER_ID,
+  definition: alertAssignedTriggerCommonDefinition,
   toPayload: (event) => ({ ...toEnvelopePayload(event), assigneeUid: event.payload.assigneeUid }),
 };

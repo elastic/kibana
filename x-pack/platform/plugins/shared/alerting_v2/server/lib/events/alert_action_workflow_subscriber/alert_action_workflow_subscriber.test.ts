@@ -17,7 +17,7 @@ import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_ev
 import type { EventBus, Subscription } from '../event_bus';
 import { createWorkflowSubscriberMocks, handlerFor } from '../test_utils';
 import { AlertActionWorkflowSubscriber } from './alert_action_workflow_subscriber';
-import { ALERT_ACTION_WORKFLOW_TRIGGERS, EPISODE_ASSIGNED_TRIGGER_ID } from './triggers';
+import { ALERT_ACTION_WORKFLOW_TRIGGERS, ALERT_ASSIGNED_TRIGGER_ID } from './triggers';
 
 const episodeAssignedEvent: EpisodeAssignedEvent = {
   type: EPISODE_ASSIGNED_EVENT_TYPE,
@@ -72,7 +72,7 @@ describe('AlertActionWorkflowSubscriber', () => {
       await handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, { request });
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
-      expect(mockEmitEvent).toHaveBeenCalledWith(EPISODE_ASSIGNED_TRIGGER_ID, {
+      expect(mockEmitEvent).toHaveBeenCalledWith(ALERT_ASSIGNED_TRIGGER_ID, {
         occurredAt: episodeAssignedEvent.occurredAt,
         groupHash: episodeAssignedEvent.groupHash,
         episodeId: episodeAssignedEvent.episodeId,

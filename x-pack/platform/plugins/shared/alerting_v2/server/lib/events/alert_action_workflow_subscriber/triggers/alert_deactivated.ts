@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { episodeDeactivatedPayloadSchema } from '../../../../../common/workflows/triggers';
+import type { alertDeactivatedPayloadSchema } from '../../../../../common/workflows/triggers';
 import {
-  EPISODE_DEACTIVATED_TRIGGER_ID,
-  episodeDeactivatedTriggerCommonDefinition,
+  ALERT_DEACTIVATED_TRIGGER_ID,
+  alertDeactivatedTriggerCommonDefinition,
 } from '../../../../../common/workflows/triggers';
 import {
   EPISODE_DEACTIVATED_EVENT_TYPE,
@@ -17,18 +17,18 @@ import {
 import type { AlertActionWorkflowTriggerBinding } from './types';
 import { toEnvelopePayload } from './to_envelope_payload';
 
-export { EPISODE_DEACTIVATED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
+export { ALERT_DEACTIVATED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
 
 /**
  * Binding from the bus `episode.deactivated` event to the
- * `alerting.episodeDeactivated` workflow trigger.
+ * `alerting.userActions.alertDeactivated` workflow trigger.
  */
-export const episodeDeactivatedTrigger: AlertActionWorkflowTriggerBinding<
+export const alertDeactivatedTrigger: AlertActionWorkflowTriggerBinding<
   EpisodeDeactivatedEvent,
-  typeof episodeDeactivatedPayloadSchema
+  typeof alertDeactivatedPayloadSchema
 > = {
   eventType: EPISODE_DEACTIVATED_EVENT_TYPE,
-  triggerId: EPISODE_DEACTIVATED_TRIGGER_ID,
-  definition: episodeDeactivatedTriggerCommonDefinition,
+  triggerId: ALERT_DEACTIVATED_TRIGGER_ID,
+  definition: alertDeactivatedTriggerCommonDefinition,
   toPayload: (event) => ({ ...toEnvelopePayload(event), reason: event.payload.reason }),
 };

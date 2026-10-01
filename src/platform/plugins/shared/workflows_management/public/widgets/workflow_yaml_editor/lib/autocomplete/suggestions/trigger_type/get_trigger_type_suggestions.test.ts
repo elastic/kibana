@@ -129,9 +129,9 @@ describe('get_trigger_type_suggestions', () => {
       beforeEach(() => {
         mockGetTriggerDefinitions.mockReturnValue([
           mockTrigger({
-            id: 'alerting.episodeAcked',
-            title: 'Alerting - Episode acknowledged',
-            description: 'Emitted when acknowledgement is removed from an alerting episode.',
+            id: 'alerting.userActions.alertAcked',
+            title: 'Alerting - Alert acknowledged',
+            description: 'Emitted when an alert is acknowledged.',
             stability: 'tech_preview',
           }),
           mockTrigger({
@@ -146,11 +146,13 @@ describe('get_trigger_type_suggestions', () => {
       it('should show technical ids as label with human-readable titles as detail', () => {
         const result = getTriggerTypeSuggestions('', mockRange);
 
-        const alertingSuggestion = result.find((s) => s.label === 'alerting.episodeAcked');
+        const alertingSuggestion = result.find(
+          (s) => s.label === 'alerting.userActions.alertAcked'
+        );
         expect(alertingSuggestion).toMatchObject({
-          label: 'alerting.episodeAcked',
-          detail: 'Alerting - Episode acknowledged',
-          filterText: 'alerting.episodeAcked',
+          label: 'alerting.userActions.alertAcked',
+          detail: 'Alerting - Alert acknowledged',
+          filterText: 'alerting.userActions.alertAcked',
         });
 
         const casesSuggestion = result.find((s) => s.label === 'cases.caseCreated');
@@ -163,7 +165,7 @@ describe('get_trigger_type_suggestions', () => {
       it('should filter registered triggers by namespace prefix', () => {
         const result = getTriggerTypeSuggestions('alerting.', mockRange);
 
-        expect(result.map((s) => s.label)).toEqual(['alerting.episodeAcked']);
+        expect(result.map((s) => s.label)).toEqual(['alerting.userActions.alertAcked']);
       });
 
       it('should filter registered triggers by title prefix', () => {
