@@ -11,8 +11,6 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
-// Migrated from: src/platform/test/functional/apps/management/group1/_create_index_pattern_wizard.ts
-
 const blogsIndex = (spaceId: string) => `dvm-blogs-${spaceId}`;
 const aliasName = (spaceId: string) => `dvm-alias-${spaceId}`;
 

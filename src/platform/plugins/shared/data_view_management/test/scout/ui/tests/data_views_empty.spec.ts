@@ -13,11 +13,8 @@ import { test } from '../fixtures';
 import { ES_ARCHIVE_LOGSTASH_FUNCTIONAL } from '../fixtures/constants';
 import { mockNoEsData, unmockNoEsData } from '../fixtures/mocks';
 
-// Migrated from: src/platform/test/functional/apps/management/group1/_index_patterns_empty.ts
 // The "no ES data" state is simulated by stubbing the has-data route instead of deleting
 // cluster indices. Prompt rendering details are covered by empty_index_list_prompt.test.tsx.
-// The second FTR test ("doesn't show read-only badge") is dropped — already covered by
-// data_views_feature_controls_security.spec.ts for an all-privileges admin user.
 
 test.describe('Data views empty state', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {

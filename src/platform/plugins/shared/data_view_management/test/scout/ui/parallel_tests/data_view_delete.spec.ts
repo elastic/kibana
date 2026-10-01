@@ -11,10 +11,6 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
-// Migrated from: src/platform/test/functional/apps/management/group1/_data_view_create_delete.ts
-// Serverless mirror: x-pack/platform/test/serverless/functional/test_suites/management/data_views/_data_view_create_delete.ts
-// ES archives are loaded once in parallel_tests/global.setup.ts.
-
 spaceTest.describe('Data view editor — delete flow', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeEach(async ({ scoutSpace, browserAuth }) => {
     await scoutSpace.savedObjects.cleanStandardList();

@@ -11,10 +11,6 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
-// Migrated from: src/platform/test/functional/apps/management/group1/_index_pattern_popularity.ts
-// The input-update and cancel tests moved to Jest (field_editor_flyout_content.test.ts).
-// ES archives are loaded once in parallel_tests/global.setup.ts.
-
 spaceTest.describe(
   'Data view field popularity persistence',
   { tag: tags.deploymentAgnostic },

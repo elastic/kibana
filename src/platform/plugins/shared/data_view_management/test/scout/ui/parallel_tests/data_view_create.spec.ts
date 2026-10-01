@@ -12,12 +12,6 @@ import { expect } from '@kbn/scout/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { spaceTest } from '../fixtures';
 
-// Migrated from: src/platform/test/functional/apps/management/group1/_data_view_create_delete.ts
-// Serverless mirror: x-pack/platform/test/serverless/functional/test_suites/management/data_views/_data_view_create_delete.ts
-// ES archives are loaded once in parallel_tests/global.setup.ts.
-// Also includes: field count assertion from _index_pattern_results_sort.ts
-// Table headers and sort tests moved to Jest (indexed_fields_table/components/table/table.test.tsx).
-
 const hiddenIndex = (spaceId: string) => `dvm-hidden-${spaceId}`;
 
 spaceTest.describe('Data view editor — create flows', { tag: tags.deploymentAgnostic }, () => {
@@ -145,7 +139,11 @@ spaceTest.describe('Data view editor — create flows', { tag: tags.deploymentAg
         await pageObjects.dataViewsManagement.goto();
         await pageObjects.dataViewsManagement.openCreateWizard();
         await dataViewEditorFlyout.enableAllowHidden();
-        await dataViewEditorFlyout.setTitle(index);
+        // The title field validates against the previous index pattern until the editor's debounced
+        // lookup catches up, so it can keep a stale "must match" error. Wait for the matching sources
+        // instead of the field validation; saving re-validates the form against the settled pattern.
+        await dataViewEditorFlyout.fillTitle(index);
+        await expect(dataViewEditorFlyout.statusMessage).toContainText('matches 1 source');
         await dataViewEditorFlyout.selectTimestampField('@timestamp');
         await dataViewEditorFlyout.save();
         await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toContainText(index);

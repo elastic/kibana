@@ -11,11 +11,6 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
-// Migrated from: src/platform/test/functional/apps/management/group1/_index_pattern_filter.ts
-// Serverless mirror: x-pack/platform/test/serverless/functional/test_suites/management/data_views/_index_pattern_filter.ts
-// Type filter and text search control tests moved to Jest (tabs/tabs.test.tsx).
-// ES archives (logstash_functional) are loaded once in parallel_tests/global.setup.ts.
-
 // Named so it matches no other suite's pattern (e.g. `logstash-*`) while it exists.
 const conflictIndex = (spaceId: string) => `dvm-conflict-${spaceId}`;
 

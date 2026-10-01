@@ -11,9 +11,6 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
-// Migrated from: src/platform/test/functional/apps/management/group1/_exclude_index_pattern.ts
-// Serverless mirror: x-pack/platform/test/serverless/functional/test_suites/management/data_views/_exclude_index_pattern.ts
-
 spaceTest.describe(
   'Data view creation with exclusion expression',
   { tag: tags.deploymentAgnostic },
