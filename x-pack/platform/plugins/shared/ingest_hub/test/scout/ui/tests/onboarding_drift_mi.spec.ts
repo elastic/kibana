@@ -610,10 +610,10 @@ test.describe(
       // Seed detectAndReview so the MI section renders in deployed state (serviceStatuses keeps
       // the instance visible and isAlreadyDeployed=true so isDirty blocks Next - 4123190774).
       // isDirty: true triggers the drift callout on mount.
-      // Note: page.reload() is intentionally avoided here. Reloading with ?deploymentId= in the URL
-      // re-runs hydrateOnboardingSession, which calls clearOnboardingSession first and then rewrites
-      // all session keys from the SO — overwriting the init-script session data before React mounts.
-      // Navigating without ?deploymentId skips hydration, so the init scripts take effect.
+      // Note: page.reload() is intentionally avoided here. The hydration guard writes
+      // hydratedDeploymentId to session on the first load; the second gotoApp (same deploymentId)
+      // skips hydrateOnboardingSession, so init scripts take effect instead of being overwritten.
+      // ?deploymentId= is preserved so ManagedIntegrationsSection keeps isStaticKeysEditMode true.
       await page.addInitScript(
         ({ key, depId }) => {
           sessionStorage.setItem(
@@ -631,7 +631,10 @@ test.describe(
         { key: DETECT_AND_REVIEW_SESSION_KEY, depId: DEP_ID }
       );
 
-      await page.gotoApp('onboarding/aws', { hash: 'authenticate-and-deploy' });
+      await page.gotoApp('onboarding/aws', {
+        params: { deploymentId: DEP_ID },
+        hash: 'authenticate-and-deploy',
+      });
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
 
