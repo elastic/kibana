@@ -22,7 +22,6 @@ const mockProposal: ApprovalProposal = {
   comment: 'This action suppresses qualys-scan on the DMZ scan pool only.',
   impact: 'low',
   status: 'pending',
-  expired: false,
   actionWorkflowId: 'system-alertzero-action-edit-rule',
   // What the server stores when the caller names nothing itself.
   title: 'Apply monitored exception',

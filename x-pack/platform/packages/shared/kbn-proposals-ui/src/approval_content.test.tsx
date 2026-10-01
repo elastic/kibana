@@ -23,7 +23,6 @@ const baseProposal: ApprovalProposal = {
   impact: 'critical',
   comment: 'Isolate the compromised host.',
   status: 'pending',
-  expired: false,
 };
 
 const baseProps: ApprovalContentProps = {
@@ -99,7 +98,7 @@ describe('ApprovalContent', () => {
 
   it('shows Expired in the caption instead of the deadline once it has passed', () => {
     renderContent({
-      proposal: { ...baseProposal, expired: true, expiresAt: '2024-01-05T17:00:00.000Z' },
+      proposal: { ...baseProposal, status: 'expired', expiresAt: '2024-01-05T17:00:00.000Z' },
     });
     expect(screen.getByText('Critical impact • Expired')).toBeInTheDocument();
   });
@@ -218,8 +217,8 @@ describe('ApprovalContent', () => {
     expect(screen.queryByText('A previous attempt at this action failed')).not.toBeInTheDocument();
   });
 
-  it('renders an expiry explanation when the deadline has passed', () => {
-    renderContent({ proposal: { ...baseProposal, expired: true } });
+  it('renders an expiry explanation once the workflow settles the proposal as expired', () => {
+    renderContent({ proposal: { ...baseProposal, status: 'expired' } });
     expect(
       screen.getByText(
         'This proposal expired before a decision was made and can no longer be actioned.'
@@ -394,22 +393,14 @@ describe('ApprovalContent', () => {
       expect(screen.queryByTestId('approvalContent-dismiss')).not.toBeInTheDocument();
     });
 
-    it('shows the Expired badge instead of Needs review, hiding the actions, once the deadline has passed', () => {
+    it('shows the Expired badge instead of Needs review, hiding the actions, once the workflow settles it as expired', () => {
       // Expiry resolves to a real (actor-less) decision via `getProposalDecision`, so the footer
       // — Approve alongside it — is gone the same way it is for any other decided proposal.
-      renderContent({ onDismiss: jest.fn(), proposal: { ...baseProposal, expired: true } });
+      renderContent({ onDismiss: jest.fn(), proposal: { ...baseProposal, status: 'expired' } });
       expect(screen.getByText('Expired')).toBeInTheDocument();
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
       expect(screen.queryByTestId('approvalContent-dismiss')).not.toBeInTheDocument();
-    });
-
-    it('shows Expired for a proposal the workflow settled as expired before its deadline', () => {
-      renderContent({ proposal: { ...baseProposal, expired: false, status: 'expired' } });
-      expect(screen.getByText('Expired')).toBeInTheDocument();
-      expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
-      // The callout's wording must hold for this cause too, not just a deadline that passed —
-      // `isProposalExpired` reports both the same way, so the explanation cannot claim one.
       expect(
         screen.getByText(
           'This proposal expired before a decision was made and can no longer be actioned.'
@@ -432,7 +423,7 @@ describe('ApprovalContent', () => {
     it('hides the Decline trigger too, once the proposal has expired', () => {
       renderContent({
         onDismiss: jest.fn(),
-        proposal: { ...baseProposal, expired: true },
+        proposal: { ...baseProposal, status: 'expired' },
         'data-test-subj': 'card',
       });
       expect(screen.queryByTestId('card-dismiss')).not.toBeInTheDocument();

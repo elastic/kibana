@@ -48,7 +48,7 @@ async function classifyReleaseGateError(
       id: string,
       spaceId: string,
       request: KibanaRequest
-    ) => Promise<{ decision?: unknown; status: string; expired: boolean }>;
+    ) => Promise<{ decision?: unknown; status: string }>;
   },
   spaceId: string,
   request: KibanaRequest
@@ -61,7 +61,7 @@ async function classifyReleaseGateError(
 
   if (err.name === 'ProposalConflictError') {
     // Re-read the proposal to determine its actual state.
-    let proposal: { decision?: unknown; status: string; expired: boolean };
+    let proposal: { decision?: unknown; status: string };
     try {
       proposal = await proposalsService.get(proposalId, spaceId, request);
     } catch (readErr) {
@@ -70,8 +70,8 @@ async function classifyReleaseGateError(
       }
       return 'failed';
     }
-    const isSettled =
-      proposal.decision !== undefined || proposal.status !== 'pending' || proposal.expired;
+    // `expired` is itself a non-`pending` status, so the status check alone already covers it.
+    const isSettled = proposal.decision !== undefined || proposal.status !== 'pending';
     return isSettled ? 'skipped' : 'retry';
   }
 

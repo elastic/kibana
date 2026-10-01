@@ -22,7 +22,7 @@ interface ApprovalStatusCalloutsProps {
    * already says "Expired"; this adds the explanation the badge alone has no room for, worded to
    * hold for either cause since this flag does not distinguish them.
    */
-  isExpired?: boolean;
+  isExpired: boolean;
   'data-test-subj'?: string;
 }
 

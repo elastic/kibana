@@ -66,7 +66,6 @@ export type ApprovalProposal = Pick<
   | 'comment'
   | 'impact'
   | 'status'
-  | 'expired'
   | 'category'
   | 'expiresAt'
   | 'actionWorkflowId'

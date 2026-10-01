@@ -152,9 +152,10 @@ export const getProposalTone = (proposal: ApprovalProposal): 'primary' | 'danger
 };
 
 /**
- * `expired` is the computed flag for a deadline that has passed; `status: 'expired'` is the
- * durable settlement, which the workflow can write before the deadline when no decision was
- * reached. Without both, a proposal settled early still offers a decision that would be refused.
+ * `status: 'expired'` is the workflow's reliable settlement for an unanswered proposal (on
+ * attempt exhaustion, or a failure) before the deadline itself passes. A deadline that has passed
+ * but not yet been swept to this status still reads `pending` here; that lag is accepted rather
+ * than compared against `expiresAt` directly.
  */
 export const isProposalExpired = (proposal: ApprovalProposal): boolean =>
-  proposal.expired || proposal.status === 'expired';
+  proposal.status === 'expired';

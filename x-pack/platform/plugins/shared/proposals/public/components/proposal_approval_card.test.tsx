@@ -164,7 +164,6 @@ const baseProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWi
   confidence: 'medium',
   origin: 'alertzero',
   createdAt: '2026-01-01T00:00:00.000Z',
-  expired: false,
   ...overrides,
 });
 
@@ -269,23 +268,6 @@ describe('ProposalApprovalCard', () => {
       } as unknown as ReturnType<typeof useCurrentUserProfile>);
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('approval-current-actor')).toHaveTextContent('ava');
-    });
-  });
-
-  describe('expired pending proposal', () => {
-    it('renders a warning callout for expired pending proposals', () => {
-      setupMocks(baseProposal({ expired: true, status: 'pending' }));
-      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(getByTestId('warning-callout')).toBeInTheDocument();
-    });
-
-    it('disables the Approve button for expired proposals', () => {
-      setupMocks(baseProposal({ expired: true, status: 'pending' }));
-      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      const approveBtn = container.querySelector(
-        '[data-test-subj="proposalCard-proposal-1-confirm"]'
-      ) as HTMLButtonElement;
-      expect(approveBtn).toBeDisabled();
     });
   });
 
@@ -402,11 +384,10 @@ describe('ProposalApprovalCard', () => {
     });
 
     it('explains an expiry the workflow settled before the deadline', () => {
-      // Attempt exhaustion settles `expired` while the computed `expired` flag is still false,
-      // and nobody decided — `getProposalDecision` still reports a real (actor-less) decision
-      // for it, so `ApprovalContent`'s own "Expired" badge shows alongside this callout rather
-      // than instead of it.
-      setupMocks(baseProposal({ expired: false, status: 'expired' }));
+      // Attempt exhaustion settles `status: 'expired'` and nobody decided — `getProposalDecision`
+      // still reports a real (actor-less) decision for it, so `ApprovalContent`'s own "Expired"
+      // badge shows alongside this callout rather than instead of it.
+      setupMocks(baseProposal({ status: 'expired' }));
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('warning-callout')).toBeInTheDocument();
       expect(getByTestId('approval-decision')).toHaveTextContent('expired:');

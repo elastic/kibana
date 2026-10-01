@@ -207,7 +207,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     /** First call outcome: 'success' | Error to throw */
     releaseGateSideEffect: 'success' | Error;
     /** What proposalsService.get returns (for the conflict re-read path) */
-    getProposalResult?: { decision?: string; status: string; expired: boolean } | Error;
+    getProposalResult?: { decision?: string; status: string } | Error;
   }) => {
     const releaseGate = jest
       .fn()
@@ -221,7 +221,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
 
     const get = jest.fn().mockImplementation(() => {
       if (!getProposalResult)
-        return Promise.resolve({ decision: 'dismissed', status: 'decided', expired: false });
+        return Promise.resolve({ decision: 'dismissed', status: 'decided' });
       if (getProposalResult instanceof Error) return Promise.reject(getProposalResult);
       return Promise.resolve(getProposalResult);
     });
@@ -257,7 +257,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     });
     const { service, releaseGate, patchMetadata } = makeDismissService({
       releaseGateSideEffect: conflictErr,
-      getProposalResult: { decision: 'approved', status: 'decided', expired: false },
+      getProposalResult: { decision: 'approved', status: 'decided' },
     });
 
     const result = await service.setStatus(request, 'conv-1', {
@@ -277,7 +277,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     const { service, releaseGate, get, patchMetadata } = makeDismissService({
       releaseGateSideEffect: conflictErr,
       // Re-read: still pending.
-      getProposalResult: { decision: undefined, status: 'pending', expired: false },
+      getProposalResult: { decision: undefined, status: 'pending' },
     });
 
     const result = await service.setStatus(request, 'conv-1', {
@@ -299,7 +299,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     const proposalsService = {
       list: jest.fn().mockResolvedValue({ proposals: [{ id: 'p-1' }], total: 1 }),
       releaseGate: jest.fn().mockRejectedValueOnce(conflictErr).mockRejectedValueOnce(retryErr),
-      get: jest.fn().mockResolvedValue({ decision: undefined, status: 'pending', expired: false }),
+      get: jest.fn().mockResolvedValue({ decision: undefined, status: 'pending' }),
     };
     const proposals = {
       getProposalsService: () => proposalsService,

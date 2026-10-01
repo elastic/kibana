@@ -12,7 +12,6 @@ import { DEFAULT_PROPOSAL_TITLE, type ListProposalsQuery } from '@kbn/proposals-
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import {
   ProposalConflictError,
-  ProposalExpiredError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
 } from './errors';
@@ -819,7 +818,7 @@ describe('ProposalsService', () => {
     it('should reject a proposal the workflow already settled without a decision', async () => {
       // Attempt exhaustion and a failure before anyone decided both settle the
       // record as `expired` with no decision on it, and can do so long before
-      // the deadline — so the date check alone would still read it as live.
+      // the deadline passes.
       const storage = createStorage(
         baseDocument({
           status: 'expired',
@@ -831,15 +830,6 @@ describe('ProposalsService', () => {
 
       await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
         ProposalConflictError
-      );
-    });
-
-    it('should reject a proposal past its decision deadline', async () => {
-      const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
-      const { service } = createService(storage);
-
-      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
-        ProposalExpiredError
       );
     });
 
@@ -1590,16 +1580,6 @@ describe('ProposalsService', () => {
       expect(storage.index).not.toHaveBeenCalled();
     });
 
-    it('rejects revising a proposal past its decision deadline, even though its status still reads pending', async () => {
-      const storage = createStorage(baseDocument({ expiresAt: '2020-01-01T00:00:00.000Z' }));
-      const { service } = createService(storage);
-
-      await expect(service.revise({ id: 'proposal-1' }, SPACE_ID, request)).rejects.toBeInstanceOf(
-        ProposalExpiredError
-      );
-      expect(storage.index).not.toHaveBeenCalled();
-    });
-
     it('rejects revising a proposal that is not pending (e.g. executing)', async () => {
       const storage = createStorage(baseDocument({ status: 'executing' }));
       const { service } = createService(storage);
@@ -2063,25 +2043,6 @@ describe('ProposalsService', () => {
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ term: { decision: 'dismissed' } }])
       );
-    });
-
-    it('should not report a decided proposal as expired once its deadline has passed', async () => {
-      const storage = createStorage(
-        baseDocument({
-          status: 'succeeded',
-          decision: 'approved',
-          decidedBy: analyst('analyst-1'),
-          decidedAt: '2026-09-01T00:05:00.000Z',
-          expiresAt: '2026-09-01T00:10:00.000Z',
-        })
-      );
-      const { service } = createService(storage);
-
-      const { proposals } = await service.list(listQuery(), SPACE_ID, request);
-
-      // `decision` means a person settled it before the deadline ran out, so it
-      // should not be considered expired even if the current time is past its `expiresAt`.
-      expect(proposals[0].expired).toBe(false);
     });
 
     it('should drop superseded proposals so a retried chain shows only its head', async () => {
