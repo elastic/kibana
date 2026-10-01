@@ -21,7 +21,7 @@ import type {
   StorageHostDetailsAPIResponse,
 } from '../common/storage_explorer';
 import type { TopNResponse } from '../common/topn';
-import type { SetupDataCollectionInstructions } from '../server/routes/setup/get_cloud_setup_instructions';
+import type { SetupDataCollectionInstructions } from '../server/routes/universal_profiling/setup/get_cloud_setup_instructions';
 import type { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 
 export interface APMTransactionsPerService {
