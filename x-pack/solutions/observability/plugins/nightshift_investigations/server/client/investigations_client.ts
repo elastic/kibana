@@ -541,18 +541,7 @@ export class NightshiftInvestigationsClient {
     return { investigation_id: investigationId };
   }
 
-  /**
-   * The investigation a start lands on. Any overlap with an open investigation the caller can
-   * write continues the most recently updated one; otherwise the subjects are claimed for a new
-   * investigation, so that of two concurrent starts for one subject the second continues the
-   * first. Closed investigations never match.
-   *
-   * Only the conversation owner can record subjects or reopen an investigation, which the
-   * workflow does as the identity it runs as (the caller's). An investigation the caller does not
-   * own is therefore treated as no match and the start opens a new investigation; a claim held by
-   * such an investigation does not block it. Deployments run starts under one service identity
-   * so this does not happen there.
-   */
+  /** Charges the daily automatic quota for a start that opens a new investigation. */
   private async assertQuotaForNewInvestigation(
     triggerType: StartInvestigationRequest['trigger_type']
   ): Promise<void> {
@@ -574,6 +563,18 @@ export class NightshiftInvestigationsClient {
     }
   }
 
+  /**
+   * The investigation a start lands on. Any overlap with an open investigation the caller can
+   * write continues the most recently updated one; otherwise the subjects are claimed for a new
+   * investigation, so that of two concurrent starts for one subject the second continues the
+   * first. Closed investigations never match.
+   *
+   * Only the conversation owner can record subjects or reopen an investigation, which the
+   * workflow does as the identity it runs as (the caller's). An investigation the caller does not
+   * own is therefore treated as no match and the start opens a new investigation; a claim held by
+   * such an investigation does not block it. Deployments run starts under one service identity
+   * so this does not happen there.
+   */
   private async resolveInvestigation({
     conversations,
     agenticInvestigations,
@@ -638,6 +639,9 @@ export class NightshiftInvestigationsClient {
       );
     }
 
+    // Charged before the claim, so a denied start claims nothing. A start that then loses the
+    // claim to a concurrent one becomes a follow-up but stays charged; the quota callback has no
+    // refund, and the race needs two starts for the same new subject within moments.
     await assertCanOpenNew();
     const claim = await subjectsClient.claimSubjects({
       conversationId: newInvestigationId,
