@@ -116,7 +116,7 @@ export const registerPersistenceListeners = (
       if (urlQuery) {
         listenerApi.dispatch(submitSearch(urlQuery));
       }
-      createdWorkspace.runLayout();
+      createdWorkspace.layoutController.start();
     },
   });
 

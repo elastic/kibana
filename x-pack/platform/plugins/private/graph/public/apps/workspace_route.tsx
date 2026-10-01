@@ -147,7 +147,7 @@ export const WorkspaceRoute = ({
       addBasePath,
       indexPatternProvider,
       createWorkspace: (indexPattern, exploreControls) => {
-        workspaceRef.current?.stopLayout();
+        workspaceRef.current?.layoutController.stop();
         runtimeSequenceRef.current = 0;
         const layoutTopology = new ReduxLayoutTopology({
           getState: () => storeRef.current?.getState(),

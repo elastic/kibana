@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import type { RuntimeWorkspace, WorkspaceOptions } from '../../types/workspace_state';
+import type { RuntimeWorkspace, RuntimeWorkspaceOptions } from '../../types/workspace_state';
 
-export const createWorkspace = (options: WorkspaceOptions): RuntimeWorkspace => {
-  const layoutController = options.layoutController;
-
+export const createWorkspace = ({
+  layoutController,
+  ...options
+}: RuntimeWorkspaceOptions): RuntimeWorkspace => {
   return {
     blocklistedNodes: [],
     options,
+    layoutController,
     nodesMap: {},
     edgesMap: {},
     nodes: [],
     edges: [],
-    stopLayout: () => layoutController.stop(),
-    runLayout: () => layoutController.start(),
-    isLayoutRunning: () => layoutController.isRunning(),
   };
 };

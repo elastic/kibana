@@ -51,8 +51,11 @@ const flushPromises = () => new Promise((resolve) => setTimeout(resolve));
 const createWorkspaceMock = () =>
   ({
     mergeGraph: jest.fn(),
-    runLayout: jest.fn(),
-    stopLayout: jest.fn(),
+    layoutController: {
+      start: jest.fn(),
+      stop: jest.fn(),
+      isRunning: jest.fn(() => false),
+    },
     nodes: [],
     nodesMap: {},
     edges: [],
@@ -133,6 +136,7 @@ describe('workspace state', () => {
     const workspace = {
       nodes: [parent, child],
       edges: [edge],
+      layoutController: { isRunning: () => false },
       selectedNodes: [parent],
       getEdgeSelection: () => [edge],
     } as unknown as RuntimeWorkspace;
@@ -508,7 +512,7 @@ describe('workspace listeners', () => {
 
       environment.store.dispatch(deleteSelectedNodes());
 
-      expect(environment.workspace.runLayout).toHaveBeenCalled();
+      expect(environment.workspace.layoutController.start).toHaveBeenCalled();
     });
   });
 
@@ -598,8 +602,8 @@ describe('workspace listeners', () => {
       environment.store.dispatch(startWorkspaceLayout());
       environment.store.dispatch(stopWorkspaceLayout());
 
-      expect(environment.workspace.runLayout).toHaveBeenCalled();
-      expect(environment.workspace.stopLayout).toHaveBeenCalled();
+      expect(environment.workspace.layoutController.start).toHaveBeenCalled();
+      expect(environment.workspace.layoutController.stop).toHaveBeenCalled();
       expect(environment.mockedDeps.notifyReact).toHaveBeenCalled();
     });
   });
