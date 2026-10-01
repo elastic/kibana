@@ -50,7 +50,7 @@ jest.mock('../../hooks/use_open_in_chat', () => ({
 
 jest.mock('@kbn/user-profile-components', () => ({
   getUserDisplayName: (user: { username?: string }) => user?.username ?? '',
-  UserProfilesSelectable: () => <div data-test-subj="escalationModalCollaboratorPicker" />,
+  UserProfilesSelectable: () => <div data-test-subj="escalationModalAssigneePicker" />,
 }));
 
 jest.mock('@kbn/core-http-browser', () => ({
@@ -143,6 +143,8 @@ beforeEach(() => {
   mockUseCurrentUserProfile.mockReturnValue({
     data: { uid: 'user-1', user: { username: 'alice' } },
     isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
   } as unknown as ReturnType<typeof useCurrentUserProfile>);
 
   mockUseSuggestUserProfiles.mockReturnValue({
@@ -290,6 +292,54 @@ describe('ConnectedEscalationModal', () => {
 
     const radio = document.getElementById('incident-esc-2') as HTMLInputElement;
     expect(radio).toBeDisabled();
+  });
+
+  it('shows a loading spinner in create mode while the user profile is loading', () => {
+    mockUseCurrentUserProfile.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useCurrentUserProfile>);
+
+    renderModal({ mode: 'create' });
+
+    // The create form must not render yet; a spinner is shown instead.
+    expect(screen.queryByTestId('escalationModalCreateEscalation')).not.toBeInTheDocument();
+  });
+
+  it('shows an error callout with retry in create mode when the profile fetch fails', () => {
+    const refetch = jest.fn();
+    mockUseCurrentUserProfile.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch,
+    } as unknown as ReturnType<typeof useCurrentUserProfile>);
+
+    renderModal({ mode: 'create' });
+
+    expect(screen.queryByTestId('escalationModalCreateEscalation')).not.toBeInTheDocument();
+    // The error callout must contain a retry button that calls refetch.
+    expect(screen.getByText('Failed to load your profile. Try again.')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Retry'));
+    expect(refetch).toHaveBeenCalled();
+  });
+
+  it('shows an unavailable callout in create mode when the profile is null', () => {
+    mockUseCurrentUserProfile.mockReturnValue({
+      data: null,
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useCurrentUserProfile>);
+
+    renderModal({ mode: 'create' });
+
+    expect(screen.queryByTestId('escalationModalCreateEscalation')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Your user profile is unavailable. Private escalations cannot be created.')
+    ).toBeInTheDocument();
   });
 
   it('shows an error callout when the escalations query fails', () => {

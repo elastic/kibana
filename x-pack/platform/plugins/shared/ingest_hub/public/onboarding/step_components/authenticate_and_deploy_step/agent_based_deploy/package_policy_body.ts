@@ -202,13 +202,25 @@ export async function buildGroupPackagePolicy(
 
   // Build serviceVarsMap for all members. Key by service.id for buildPackageInputs.
   // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
+  // Guard enabledDataStreams against stale session state: package updates can remove data streams,
+  // so only keep dsIds the current service matrix actually recognises.
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
-    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
-      storedServiceVars[instance.serviceId] ?? {
+    const rawVars = storedServiceVars[instance.instanceId] ?? storedServiceVars[instance.serviceId];
+    if (!rawVars) {
+      serviceVarsMap[service.id] = {
         enabledDataStreams: service.dataStreams,
         varsByDataStream: {},
       };
+    } else {
+      const filtered = rawVars.enabledDataStreams.filter((dsId) =>
+        service.dataStreams.includes(dsId)
+      );
+      serviceVarsMap[service.id] =
+        filtered.length === rawVars.enabledDataStreams.length
+          ? rawVars
+          : { ...rawVars, enabledDataStreams: filtered };
+    }
   }
 
   const services = members.map(({ service }) => service);
