@@ -21,24 +21,27 @@ jest.mock('./hooks/use_agentic_investigations_capabilities', () => ({
 }));
 
 describe('AlertZeroRoutes', () => {
-  it.each(['/alerts', '/settings', '/does/not/exist', '/watches/some-watch/extra'])(
-    'redirects %s to the root route',
-    (path) => {
-      let pathname = path;
-      render(
-        <MemoryRouter initialEntries={[path]}>
-          <AlertZeroRoutes />
-          <Route
-            render={({ location }) => {
-              pathname = location.pathname;
-              return null;
-            }}
-          />
-        </MemoryRouter>
-      );
+  it.each([
+    '/alerts',
+    '/settings',
+    '/does/not/exist',
+    '/watches/some-watch/extra',
+    '/escalations/anything',
+  ])('redirects %s to the root route', (path) => {
+    let pathname = path;
+    render(
+      <MemoryRouter initialEntries={[path]}>
+        <AlertZeroRoutes />
+        <Route
+          render={({ location }) => {
+            pathname = location.pathname;
+            return null;
+          }}
+        />
+      </MemoryRouter>
+    );
 
-      expect(pathname).toBe('/');
-      expect(screen.getByTestId('landing')).toBeInTheDocument();
-    }
-  );
+    expect(pathname).toBe('/');
+    expect(screen.getByTestId('landing')).toBeInTheDocument();
+  });
 });
