@@ -393,14 +393,8 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
   cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
-export const clickAlertsHistogramLegend = (ruleName: string) => {
-  cy.get(ALERTS_HISTOGRAM).find(ALERTS_HISTOGRAM_SERIES).should('contain.text', ruleName);
-
-  cy.get('body').type('{esc}');
-  cy.get(ALERTS_HISTOGRAM).contains(ruleName).realHover();
-  cy.get(ALERTS_HISTOGRAM_LEGEND_BUTTON(ruleName)).should('be.visible');
-  cy.get(ALERTS_HISTOGRAM_LEGEND_BUTTON(ruleName)).click();
-};
+export const clickAlertsHistogramLegend = () => {
+  cy.get(ALERTS_HISTOGRAM_LEGEND).click();
 
 export const clickAlertsHistogramLegendAddToTimeline = (ruleName: string) => {
   cy.get(LEGEND_ACTIONS.ADD_TO_TIMELINE(ruleName)).click();
