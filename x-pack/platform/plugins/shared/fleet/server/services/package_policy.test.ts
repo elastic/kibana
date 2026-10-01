@@ -1996,13 +1996,18 @@ describe('Package policy service', () => {
 
     const createPackagePolicy = (
       soClient: ReturnType<typeof createSavedObjectClientMock>,
-      options: { force?: boolean } = {}
+      options: { force?: boolean } = {},
+      packagePolicy: NewPackagePolicy = newPackagePolicy
     ) =>
       packagePolicyService.create(
         soClient,
         elasticsearchServiceMock.createClusterClient().asInternalUser,
-        newPackagePolicy,
-        { id: 'test-package-policy', skipUniqueNameVerification: true, ...options }
+        packagePolicy,
+        {
+          id: 'test-package-policy',
+          skipUniqueNameVerification: true,
+          ...options,
+        }
       );
 
     const mockCreateSuccess = (soClient: ReturnType<typeof createSavedObjectClientMock>) => {
@@ -2058,6 +2063,78 @@ describe('Package policy service', () => {
       mockCreateSuccess(soClient);
 
       await expect(createPackagePolicy(soClient)).resolves.toBeDefined();
+    });
+
+    describe('package with a mix of FIPS compatible and non FIPS policy templates', () => {
+      const policyWithInput = (policyTemplate: string, enabled = true): NewPackagePolicy => ({
+        ...newPackagePolicy,
+        inputs: [{ type: 'logfile', policy_template: policyTemplate, enabled, streams: [] }],
+      });
+
+      beforeEach(() => {
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          ...nonFipsPkgInfo,
+          policy_templates: [
+            { name: 'bad', inputs: [], fips_compatible: false },
+            { name: 'good', inputs: [] },
+          ],
+        });
+      });
+
+      it('create should reject an enabled input of the non FIPS policy template', async () => {
+        const soClient = createSavedObjectClientMock();
+        mockAgentPolicyGet();
+
+        const promise = createPackagePolicy(soClient, {}, policyWithInput('bad'));
+
+        await expect(promise).rejects.toBeInstanceOf(PackageFipsIncompatibleError);
+        await expect(promise).rejects.toThrow(
+          'Cannot create a package policy for test: the policy template bad is not FIPS compatible'
+        );
+        expect(soClient.create).not.toHaveBeenCalled();
+      });
+
+      it('create should allow the non FIPS policy template when using the force flag', async () => {
+        const soClient = createSavedObjectClientMock();
+        mockCreateSuccess(soClient);
+
+        await expect(
+          createPackagePolicy(soClient, { force: true }, policyWithInput('bad'))
+        ).resolves.toBeDefined();
+      });
+
+      it('create should allow the FIPS compatible policy template', async () => {
+        const soClient = createSavedObjectClientMock();
+        mockCreateSuccess(soClient);
+
+        await expect(
+          createPackagePolicy(soClient, {}, policyWithInput('good'))
+        ).resolves.toBeDefined();
+      });
+
+      it('create should ignore a disabled input of the non FIPS policy template', async () => {
+        const soClient = createSavedObjectClientMock();
+        mockCreateSuccess(soClient);
+
+        await expect(
+          createPackagePolicy(soClient, {}, policyWithInput('bad', false))
+        ).resolves.toBeDefined();
+      });
+
+      it('bulkCreate should report an input of the non FIPS policy template as failed', async () => {
+        const soClient = createSavedObjectClientMock();
+        soClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+        mockAgentPolicyGet();
+
+        const result = await packagePolicyService.bulkCreate(
+          soClient,
+          elasticsearchServiceMock.createClusterClient().asInternalUser,
+          [{ id: 'test-package-policy-1', ...policyWithInput('bad') }]
+        );
+
+        expect(result.failed).toHaveLength(1);
+        expect(result.failed[0].error).toBeInstanceOf(PackageFipsIncompatibleError);
+      });
     });
 
     it('bulkCreate should report a non FIPS package as failed when FIPS is enabled', async () => {
