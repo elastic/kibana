@@ -23,7 +23,7 @@ All routes require: `kbn-xsrf: true`, `x-elastic-internal-origin: kibana`.
 | POST | `/api/security/entity_store/stop` | Stop extraction tasks |
 | POST | `/api/security/entity_store/uninstall` | Uninstall entity store |
 | GET | `/api/security/entity_store/status` | Status (`?include_components=true`) |
-| PUT | `/api/security/entity_store` | Update `logExtraction` and/or `historySnapshot` (`frequency`, `retentionDays`) without reinstall |
+| PUT | `/api/security/entity_store` | Update `logExtraction` and/or `historySnapshot` (`frequency`, `retentionDays`) config without reinstall |
 | POST | `/api/security/entity_store/check_privileges` | Check security privileges |
 
 ### CRUD
