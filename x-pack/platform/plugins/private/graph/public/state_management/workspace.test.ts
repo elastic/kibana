@@ -79,6 +79,7 @@ const createWorkspaceListenerEnvironment = () => {
       getWorkspace: jest.fn(() => workspace),
       exploreGraph: jest.fn().mockResolvedValue({ vertices: [], connections: [] }),
       searchGraph: jest.fn((_index: string, _request: object) => new Promise(() => {})),
+      mergeRuntimeGraph: jest.fn((_workspace, graph) => workspace.mergeGraph(graph)),
     },
   });
 

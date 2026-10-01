@@ -26,6 +26,7 @@ import { registerDatasourceListeners } from './datasource_listeners';
 import type {
   AdvancedSettings,
   ExploreRequest,
+  GraphData,
   ExploreResults,
   GraphSavePolicy,
   SearchRequest,
@@ -65,6 +66,7 @@ export interface GraphStoreDependencies
   handleSearchQueryError: (err: Error | string) => void;
   exploreGraph: (index: string, request: ExploreRequest) => Promise<ExploreResults>;
   searchGraph: (index: string, request: SearchRequest) => Promise<SearchResults>;
+  mergeRuntimeGraph: (workspace: Workspace, graph: GraphData) => void;
 }
 
 export type StartGraphListening = TypedStartListening<GraphState, GraphDispatch>;
