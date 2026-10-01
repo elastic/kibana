@@ -5,15 +5,29 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  AnalyticsServiceSetup,
+  CoreStart,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
+import {
+  NightshiftModelBlockedError,
+  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+} from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID, SANDBOX_TOOL_IDS } from '../agents/investigation';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { createCortexPageStore, type CortexPageStore } from './page_store';
@@ -51,21 +65,52 @@ export const registerCortexAiIndex = (
   });
 };
 
+/** Rounds with fewer tool calls rarely establish anything durable, e.g. chat replies or smoke tests. */
+const MIN_OPTIMIZE_TOOL_CALLS = 3;
+
+// Only sandbox calls carry the queries and files the optimizer learns from; the rest (e.g.
+// progress reports) would spend its transcript budget and count towards the minimum.
+const OPTIMIZER_TOOL_IDS: ReadonlySet<string> = new Set(SANDBOX_TOOL_IDS);
+
+/** gRPC status the sandbox session rethrows when its pod refuses or drops the connection. */
+const GRPC_UNAVAILABLE = 14;
+
+const isSandboxUnavailable = (err: unknown): err is Error & { code: number } =>
+  err instanceof Error && (err as Error & { code?: number }).code === GRPC_UNAVAILABLE;
+
 export const hydrateCortexWorkspace = async ({
   session,
   esClient,
   spaceId,
   signal,
+  analytics,
+  conversationId,
   logger,
 }: {
   session: SandboxSession;
   esClient: ElasticsearchClient;
   spaceId: string;
   signal?: AbortSignal;
+  analytics: AnalyticsServiceSetup;
+  conversationId?: string;
   logger: Logger;
 }): Promise<void> => {
   const store = createCortexStore({ esClient, logger, spaceId, signal });
-  await materializeCortex({ session, store, logger });
+  const telemetry = createCortexTelemetry({ analytics, conversationId, logger });
+  const materialize = () => materializeCortex({ session, store, telemetry, logger });
+
+  try {
+    await materialize();
+  } catch (err) {
+    if (!isSandboxUnavailable(err) || signal?.aborted) throw err;
+
+    // Hydrate is usually the conversation's first sandbox call, so it is the one that reaches a
+    // freshly allocated pod before that pod accepts connections. The sandbox drops the session on
+    // UNAVAILABLE and allocates a new pod for the next call, so a single retry lands on a pod
+    // that is ready. Without it the run continues with no wiki, because nothing else seeds it.
+    logger.warn(`Cortex hydrate reached an unavailable sandbox, retrying once: ${err.message}`);
+    await materialize();
+  }
 };
 
 export const runCortexOptimize = async ({
@@ -73,22 +118,38 @@ export const runCortexOptimize = async ({
   agentId,
   userMessage,
   assistantMessage,
+  toolCalls,
   esClient,
   spaceId,
+  interactionId,
   signal,
+  analytics,
+  conversationId,
+  roundId,
+  requestedConnectorId,
+  roundConnectorId,
   getInference,
-  getSearchInferenceEndpoints,
+  getSavedObjects,
+  getUiSettings,
   logger,
 }: {
   request: KibanaRequest;
   agentId?: string;
   userMessage: string;
   assistantMessage: string;
+  toolCalls: InvestigationToolCall[];
   esClient: ElasticsearchClient;
   spaceId: string;
+  interactionId: string;
   signal?: AbortSignal;
+  analytics: AnalyticsServiceSetup;
+  conversationId?: string;
+  roundId?: string;
+  requestedConnectorId?: string;
+  roundConnectorId?: string;
   getInference: () => InferenceServerStart | undefined;
-  getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
+  getSavedObjects: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
 }): Promise<void> => {
   /**
@@ -103,30 +164,72 @@ export const runCortexOptimize = async ({
     return;
   }
 
-  const inference = getInference();
-  const searchInferenceEndpoints = getSearchInferenceEndpoints();
-  if (!inference || !searchInferenceEndpoints) {
-    logger.debug('Cortex optimizer skipped — inference or connectors unavailable');
+  const sandboxToolCalls = toolCalls.filter(
+    ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
+  );
+  if (sandboxToolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {
+    logger.debug(
+      `Cortex optimizer skipped — round made ${sandboxToolCalls.length} sandbox tool calls, below ${MIN_OPTIMIZE_TOOL_CALLS}`
+    );
     return;
   }
 
-  const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-    SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-    request
-  );
-  const connectorId = endpoints[0]?.connectorId;
-  if (!connectorId) {
-    logger.debug('Cortex optimizer skipped — no investigation inference connector');
+  const inference = getInference();
+  const savedObjects = getSavedObjects();
+  const uiSettings = getUiSettings();
+  if (!inference || !savedObjects || !uiSettings) {
+    logger.debug('Cortex optimizer skipped — model resolution is unavailable');
     return;
+  }
+
+  let connectorId: string;
+  try {
+    connectorId = await resolveNightshiftModelForRequest({
+      request,
+      inference,
+      savedObjects,
+      uiSettings,
+      step: 'investigation',
+      requestedId: requestedConnectorId,
+      roundConnectorId,
+      onFallback: (reason) =>
+        logger.warn(`Cortex round model is unavailable, using the default: ${reason.message}`),
+    });
+  } catch (error) {
+    if (error instanceof NightshiftModelBlockedError) {
+      logger.error(error);
+    }
+    throw error;
   }
 
   const store = createCortexStore({ esClient, logger, spaceId, signal });
-  const inferenceClient = inference.getClient({ request });
+  const inferenceClient = inference.getClient({
+    request,
+    bindTo: {
+      connectorId,
+      metadata: {
+        connectorTelemetry: {
+          pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+          aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+          productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+          productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+          interactionId,
+        },
+      },
+    },
+  });
   await optimizeCortex({
     store,
-    proposeEdits: createLlmProposeCortexEdits({ inferenceClient, connectorId }),
+    proposeEdits: createLlmProposeCortexEdits({ inferenceClient }),
     userMessage,
     assistantMessage,
+    toolCalls: sandboxToolCalls,
+    telemetry: createCortexTelemetry({
+      analytics,
+      conversationId,
+      roundId,
+      logger,
+    }),
     logger,
   });
 };

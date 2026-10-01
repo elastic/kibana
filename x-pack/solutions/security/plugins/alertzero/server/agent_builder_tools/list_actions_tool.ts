@@ -14,6 +14,8 @@ import { actionCategorySchema } from '@kbn/workflows/managed';
 import { ALERTZERO_ACTIONS_LIST_TOOL_ID } from '@kbn/alertzero-common';
 import type { ActionsService } from '../services/actions/actions_service';
 
+import type { AssertAlertZeroAccess } from './assert_alertzero_access';
+
 const listByCategorySchema = z.object({
   categories: z
     .array(actionCategorySchema)
@@ -33,7 +35,8 @@ const listByCategorySchema = z.object({
  * and the API can never drift.
  */
 export const listActionsTool = (
-  getActionsService: () => Pick<ActionsService, 'list'>
+  getActionsService: () => Pick<ActionsService, 'list'>,
+  assertAlertZeroAccess: AssertAlertZeroAccess
 ): BuiltinToolDefinition<typeof listByCategorySchema> => ({
   id: ALERTZERO_ACTIONS_LIST_TOOL_ID,
   type: ToolType.builtin,
@@ -48,9 +51,10 @@ export const listActionsTool = (
   },
   schema: listByCategorySchema,
   tags: ['alertzero'],
-  handler: async ({ categories }, { logger }) => {
+  handler: async ({ categories }, { logger, request, spaceId }) => {
     try {
-      const { actions, total } = await getActionsService().list('default', categories);
+      await assertAlertZeroAccess(request, 'read');
+      const { actions, total } = await getActionsService().list(spaceId, request, categories);
       const message =
         total === 0
           ? categories

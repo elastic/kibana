@@ -98,14 +98,12 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'My Rule', description: 'A rule description', version: 1 },
+  version: 1,
+  metadata: { name: 'My Rule', description: 'A rule description' },
   artifacts: [],
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM logs-* | LIMIT 1' },
-  },
+  query: { base: 'FROM logs-* | LIMIT 1' },
   created_by: { profile_uid: 'alice@example.com' },
   created_at: '2026-03-01T12:00:00.000Z',
   updated_by: { profile_uid: 'bob@example.com' },
@@ -152,6 +150,8 @@ describe('RuleSummaryFlyout', () => {
     renderFlyout();
 
     expect(screen.getByTestId('ruleSummaryFlyout')).toBeInTheDocument();
+    // ownFocus={false} omits the overlay mask so the rules list stays visible behind the flyout.
+    expect(document.querySelector('.euiOverlayMask')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryFlyoutHeader')).toHaveTextContent('My Rule');
     expect(screen.getByTestId('ruleSummaryAbout')).toBeInTheDocument();
     expect(screen.getByTestId('ruleSummaryAboutCard')).toBeInTheDocument();

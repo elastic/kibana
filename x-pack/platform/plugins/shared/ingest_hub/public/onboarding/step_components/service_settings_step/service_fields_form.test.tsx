@@ -58,6 +58,9 @@ describe('ServiceFieldsForm — multi-DS flat input-toggle rendering', () => {
     defaultEnabled: true,
     defaultEnabledInputs: ['aws-s3'],
     showInUI: true,
+    isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
     varDefsByDataStream: {
       ds_a: {
         title: 'DS A Logs',
@@ -149,6 +152,9 @@ describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
     defaultEnabled: true,
     defaultEnabledInputs: ['aws-s3', 'aws-cloudwatch'],
     showInUI: true,
+    isManifestLoaded: true,
+    isManifestError: false,
+    isStaticAgentBasedOnly: false,
     varDefsByDataStream: {
       cloudtrail: {
         title: 'CloudTrail',

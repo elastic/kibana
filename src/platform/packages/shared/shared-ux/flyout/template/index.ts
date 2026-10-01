@@ -22,6 +22,8 @@ export type {
   FlyoutHeaderMetaBlockProps,
   FlyoutTabProps,
   FlyoutBodyProps,
+  FlyoutBodyCalloutLevel,
+  FlyoutBodyCalloutProps,
   FlyoutBodyTabPanelProps,
   FlyoutBodySectionProps,
   FlyoutBodySectionAction,

@@ -16,7 +16,7 @@ import type { ScoutServerConfig } from '../../../../types';
 // to fail if it is renamed again without this config set following (see #292333).
 const NIGHTSHIFT_ENABLED_FLAG = /NIGHTSHIFT_ENABLED_FLAG = '([^']+)'/.exec(
   readFileSync(
-    join(REPO_ROOT, 'x-pack/platform/packages/shared/kbn-nightshift-shared/index.ts'),
+    join(REPO_ROOT, 'x-pack/solutions/observability/packages/kbn-nightshift-shared/index.ts'),
     'utf8'
   )
 )?.[1];

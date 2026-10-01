@@ -151,11 +151,10 @@ function normalizeEvaluationConnectorId(raw: string): string {
 }
 
 /**
- * Boot disk for eval agents. Eval steps bootstrap the workspace, unpack the Kibana distributable
- * and run a local ES + Kibana; on the image default ES ends up under its merge disk watermark and
- * stops merging segments. These steps spell out their own agent block, so the repo-wide default
- * has to be requested explicitly. `eval_agent_disk_size.test.ts` pins the copies in
- * `steps/evals/run_suite.sh` and `llm_evals.yml`, which cannot import it, to this value.
+ * Boot disk (GB) for eval agents. These steps spell out their own agent block, so they do not
+ * inherit the repo-wide agent defaults. `undefined` uses the agent image default; set a number
+ * (here or in `DEFAULT_AGENT_IMAGE_CONFIG`) to override it. Keep `EVAL_AGENT_DISK_SIZE_GB` in
+ * `steps/evals/run_suite.sh` and `llm_evals.yml` in sync.
  */
 const EVAL_AGENT_DISK_SIZE_GB = DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb;
 
@@ -236,7 +235,7 @@ function buildEvalsYaml({
         `          imageProject: elastic-images-prod`,
         `          provider: gcp`,
         `          machineType: n2-standard-8`,
-        `          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}`,
+        ...(EVAL_AGENT_DISK_SIZE_GB ? [`          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}`] : []),
         ...(preemptible ? [`          preemptible: true`] : []),
         `        retry:`,
         `          automatic:`,

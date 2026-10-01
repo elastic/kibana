@@ -13,12 +13,13 @@ import {
 } from '@kbn/agent-builder-common';
 import {
   ESCALATIONS_INTERNAL_URL,
-  ESCALATIONS_SUGGEST_USERS_URL,
   ESCALATION_ASSIGN_URL,
   ESCALATION_BY_ID_URL,
   ESCALATION_LINKED_INVESTIGATIONS_URL,
 } from '../../../common/escalations/constants';
+import { SUGGEST_USER_PROFILES_URL } from '../../../common/constants';
 import { ESCALATIONS_API_PRIVILEGE_MANAGE, ESCALATIONS_API_PRIVILEGE_READ } from '../constants';
+import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from '../../investigations/constants';
 import type { AssignmentsService } from '../../assignments/assignments_service';
 import type { EscalationsService } from '../services/escalations_service';
 import { InvalidLinkedInvestigationError, NotAnEscalationError } from '../services/errors';
@@ -124,16 +125,16 @@ describe('escalation routes', () => {
       expect(byPath(posts, ESCALATIONS_INTERNAL_URL).config.access).toBe('internal');
       expect(byPath(patches, ESCALATION_BY_ID_URL).config.access).toBe('internal');
       expect(byPath(puts, ESCALATION_ASSIGN_URL).config.access).toBe('internal');
-      expect(byPath(plainPosts, ESCALATIONS_SUGGEST_USERS_URL).config.options?.access).toBe(
-        'internal'
-      );
+      expect(byPath(plainPosts, SUGGEST_USER_PROFILES_URL).config.options?.access).toBe('internal');
     });
 
-    it('gates suggest-users on ESCALATIONS_API_PRIVILEGE_MANAGE', () => {
+    it('gates suggest-users on either ESCALATIONS_API_PRIVILEGE_MANAGE or INVESTIGATIONS_API_PRIVILEGE_MANAGE', () => {
       const { byPath, plainPosts } = registerAndCollect({});
       expect(
-        byPath(plainPosts, ESCALATIONS_SUGGEST_USERS_URL).config.security?.authz?.requiredPrivileges
-      ).toEqual([ESCALATIONS_API_PRIVILEGE_MANAGE]);
+        byPath(plainPosts, SUGGEST_USER_PROFILES_URL).config.security?.authz?.requiredPrivileges
+      ).toEqual([
+        { anyRequired: [ESCALATIONS_API_PRIVILEGE_MANAGE, INVESTIGATIONS_API_PRIVILEGE_MANAGE] },
+      ]);
     });
 
     it('gates list-linked-investigations on ESCALATIONS_API_PRIVILEGE_READ', () => {
@@ -174,7 +175,7 @@ describe('escalation routes', () => {
           body: {
             linked_investigation_id: 'inv-1',
             visibility: 'private',
-            collaborators: ['user-1'],
+            assignees: ['user-1'],
           },
         }),
         response
@@ -293,6 +294,131 @@ describe('escalation routes', () => {
 
       expect(response.customError).toHaveBeenCalledWith(
         expect.objectContaining({ statusCode: 404 })
+      );
+    });
+  });
+
+  describe('assign escalation handler', () => {
+    const buildAssignService = (assignFn: jest.Mock) =>
+      ({
+        assign: assignFn,
+      } as unknown as AssignmentsService);
+
+    it('calls service.assign with the escalation id and assignees and returns 200', async () => {
+      const assign = jest.fn().mockResolvedValue(MOCK_ESCALATION);
+      const router = httpServiceMock.createRouter();
+      const puts: RegisteredRoute[] = [];
+      (router.versioned.get as jest.Mock).mockReturnValue({
+        addVersion: jest.fn(),
+      });
+      (router.versioned.post as jest.Mock).mockReturnValue({
+        addVersion: jest.fn(),
+      });
+      (router.versioned.patch as jest.Mock).mockReturnValue({
+        addVersion: jest.fn(),
+      });
+      (router.versioned.put as jest.Mock).mockImplementation((config) => ({
+        addVersion: (_version: unknown, handler: Handler) => puts.push({ config, handler }),
+      }));
+      (router.post as jest.Mock).mockReturnValue(undefined);
+
+      registerEscalationRoutes({
+        router,
+        logger: loggingSystemMock.createLogger(),
+        getEscalationsService: () => ({} as EscalationsService),
+        getAssignmentsService: () => buildAssignService(assign),
+        getSpaceId: () => 'default',
+        getSecurity: jest.fn(),
+      } as unknown as EscalationRouteDependencies);
+
+      const response = httpServerMock.createResponseFactory();
+      const route = puts.find(({ config }) => config.path === ESCALATION_ASSIGN_URL)!;
+
+      await route.handler(
+        {},
+        httpServerMock.createKibanaRequest({
+          params: { id: 'escalation-1' },
+          body: { assignees: ['user-1', 'user-2'] },
+        }),
+        response
+      );
+
+      expect(assign).toHaveBeenCalledTimes(1);
+      expect(response.ok).toHaveBeenCalledWith({ body: MOCK_ESCALATION });
+    });
+
+    it('maps WrongTemplateError to 404', async () => {
+      const { WrongTemplateError: WTE } = await import('../../assignments/assignments_service');
+      const assign = jest.fn().mockRejectedValue(new WTE('escalation-1', 'escalation'));
+      const router = httpServiceMock.createRouter();
+      const puts: RegisteredRoute[] = [];
+      (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+      (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+      (router.versioned.patch as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+      (router.versioned.put as jest.Mock).mockImplementation((config) => ({
+        addVersion: (_version: unknown, handler: Handler) => puts.push({ config, handler }),
+      }));
+      (router.post as jest.Mock).mockReturnValue(undefined);
+
+      registerEscalationRoutes({
+        router,
+        logger: loggingSystemMock.createLogger(),
+        getEscalationsService: () => ({} as EscalationsService),
+        getAssignmentsService: () => buildAssignService(assign),
+        getSpaceId: () => 'default',
+        getSecurity: jest.fn(),
+      } as unknown as EscalationRouteDependencies);
+
+      const response = httpServerMock.createResponseFactory();
+      const route = puts.find(({ config }) => config.path === ESCALATION_ASSIGN_URL)!;
+
+      await route.handler(
+        {},
+        httpServerMock.createKibanaRequest({
+          params: { id: 'escalation-1' },
+          body: { assignees: [] },
+        }),
+        response
+      );
+
+      expect(response.notFound).toHaveBeenCalled();
+    });
+
+    it('maps an unknown error to 500', async () => {
+      const assign = jest.fn().mockRejectedValue(new Error('unexpected'));
+      const router = httpServiceMock.createRouter();
+      const puts: RegisteredRoute[] = [];
+      (router.versioned.get as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+      (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+      (router.versioned.patch as jest.Mock).mockReturnValue({ addVersion: jest.fn() });
+      (router.versioned.put as jest.Mock).mockImplementation((config) => ({
+        addVersion: (_version: unknown, handler: Handler) => puts.push({ config, handler }),
+      }));
+      (router.post as jest.Mock).mockReturnValue(undefined);
+
+      registerEscalationRoutes({
+        router,
+        logger: loggingSystemMock.createLogger(),
+        getEscalationsService: () => ({} as EscalationsService),
+        getAssignmentsService: () => buildAssignService(assign),
+        getSpaceId: () => 'default',
+        getSecurity: jest.fn(),
+      } as unknown as EscalationRouteDependencies);
+
+      const response = httpServerMock.createResponseFactory();
+      const route = puts.find(({ config }) => config.path === ESCALATION_ASSIGN_URL)!;
+
+      await route.handler(
+        {},
+        httpServerMock.createKibanaRequest({
+          params: { id: 'escalation-1' },
+          body: { assignees: [] },
+        }),
+        response
+      );
+
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 500 })
       );
     });
   });
