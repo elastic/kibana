@@ -74,6 +74,15 @@ const buildConnector = (tenantKey: string): InMemoryConnector => ({
   isInboundEventsEnabled: true,
 });
 
+interface MintedRelayCredential {
+  installAuth: { kibana_api_key: string } | { uiam_service_account_id: string };
+  stored:
+    | { apiKeyId: string; serviceAccountId: null }
+    | { apiKeyId: null; serviceAccountId: string };
+  resolveAgentId(): Promise<string | undefined>;
+  revoke(context: string): Promise<void>;
+}
+
 /** Pagination options for a single page of connected channels. */
 export interface ListBindingsOptions {
   /** Opaque cursor from a previous page's `nextCursor`; omit for the first page. */
@@ -238,6 +247,122 @@ export class SlackAppService {
       });
   }
 
+  private async revokeStoredCredentials(
+    request: KibanaRequest,
+    connection: RelayAppConnectionAttributes | undefined,
+    context: string
+  ): Promise<void> {
+    if (connection?.apiKeyId) {
+      await this.invalidateApiKey(connection.apiKeyId, context);
+    }
+    if (connection?.serviceAccountId) {
+      await this.revokeServiceAccount(request, connection.serviceAccountId, context);
+    }
+  }
+
+  private async mintApiKeyCredential(request: KibanaRequest): Promise<MintedRelayCredential> {
+    // Mint a managed, read-only, least-privilege ES API key for the agent. The key
+    // is granted on behalf of the connecting user but survives their deletion (ES keys
+    // outlive their owner). Because the grant intersects with the owner's privileges, the
+    // connecting user must themselves hold every privilege below or the key is silently
+    // under-privileged.
+    //
+    // - Observability signals get direct ES read: the obs agent tools query them as this key
+    //   (asCurrentUser). Broad conventional patterns cover APM/OTel logs, metrics and traces
+    //   without regenerating the key when new data is onboarded.
+    // - Nightshift data is reached through the `nightshift` Kibana feature (read includes
+    //   every engine via includeIn), Streams data through `streams` (read), and
+    //   connectors/LLM through `actions` (read). Those go via the internal Kibana client,
+    //   so no grants on system/dot indices (unsupported in serverless) are needed.
+    const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
+      name: 'nightshift-relay-agent-builder',
+      metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
+      kibana_role_descriptors: {
+        nightshift_relay_agent_builder: {
+          elasticsearch: {
+            cluster: ['monitor_inference'],
+            indices: [
+              {
+                names: ['traces-*', 'logs-*', 'metrics-*', 'apm-*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [
+            {
+              spaces: ['*'],
+              feature: {
+                nightshift: ['read'],
+                streams: ['read'],
+                agentBuilder: ['read'],
+                actions: ['read'],
+                workflowsManagement: ['read'],
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    if (!apiKeyResult) {
+      throw new Error('Unable to create an API key (API keys are disabled)');
+    }
+
+    const encodedApiKey = Buffer.from(`${apiKeyResult.id}:${apiKeyResult.api_key}`).toString(
+      'base64'
+    );
+
+    return {
+      installAuth: { kibana_api_key: encodedApiKey },
+      stored: { apiKeyId: apiKeyResult.id, serviceAccountId: null },
+      resolveAgentId: () => this.resolveSlackAgentId(encodedApiKey),
+      revoke: (context) => this.invalidateApiKey(apiKeyResult.id, context),
+    };
+  }
+
+  private async mintServiceAccountCredential(
+    request: KibanaRequest
+  ): Promise<MintedRelayCredential> {
+    if (!this.server.isServerless) {
+      throw new SlackAppUnavailableError(
+        'Relay UIAM install is not supported on this distribution. `xpack.actions.relay.uiam.enabled` is Serverless-only.'
+      );
+    }
+
+    const serviceAccounts = this.server.core.security.serviceAccounts;
+
+    if (!serviceAccounts.isEnabled()) {
+      throw new SlackAppUnavailableError(
+        'Relay UIAM install requires UIAM service accounts. Enable `xpack.security.serviceAccounts` and configure `xpack.security.uiam`.'
+      );
+    }
+
+    const { id: serviceAccountId } = await serviceAccounts.create(request, {
+      name: `${RELAY_SERVICE_ACCOUNT_NAME_PREFIX}-${randomUUID()}`, // Add an uuid as name could collide even after a deletion
+      roles: RELAY_SERVICE_ACCOUNT_ROLES,
+      trustedPlatformAssumers: RELAY_PLATFORM_ASSUMERS,
+    });
+
+    return {
+      installAuth: { uiam_service_account_id: serviceAccountId },
+      stored: { apiKeyId: null, serviceAccountId },
+      // TODO: use resolveSlackAgentId once Relay is space aware
+      resolveAgentId: async () =>
+        this.server.agentBuilder ? NIGHTSHIFT_INVESTIGATION_AGENT_ID : undefined,
+      revoke: (context) => this.revokeServiceAccount(request, serviceAccountId, context),
+    };
+  }
+
+  private mintCredential(
+    request: KibanaRequest,
+    relayClient: RelayClientContract
+  ): Promise<MintedRelayCredential> {
+    return relayClient.uiamEnabled
+      ? this.mintServiceAccountCredential(request)
+      : this.mintApiKeyCredential(request);
+  }
+
   private toErrorMessage(error: unknown): string {
     if (error instanceof RelayRequestError) {
       return error.relayMessage ?? error.message;
@@ -296,77 +421,8 @@ export class SlackAppService {
 
     const soClient = this.getSoClient(request);
     const now = new Date().toISOString();
-
-    // A prior connection (connected, or a still-in-progress install) may already
-    // hold a live managed key. It's invalidated only once the new install
-    // succeeds (below), not here — invalidating it up front would brick a
-    // working connection if startInstall then failed, since the SO write also
-    // only happens on success.
     const existingConnection = await this.readConnection(soClient);
-
-    // M2: a UIAM service-account id, and only that. The flag is Serverless-only
-    // and default-off, so ECH and flag-off installs stay on the API key below.
-    if (relayClient.uiamEnabled) {
-      return this.connectWithServiceAccount(
-        request,
-        relayClient,
-        soClient,
-        existingConnection,
-        now
-      );
-    }
-
-    // Mint a managed, read-only, least-privilege ES API key for the agent. The key
-    // is granted on behalf of the connecting user but survives their deletion (ES keys
-    // outlive their owner). Because the grant intersects with the owner's privileges, the
-    // connecting user must themselves hold every privilege below or the key is silently
-    // under-privileged.
-    //
-    // - Observability signals get direct ES read: the obs agent tools query them as this key
-    //   (asCurrentUser). Broad conventional patterns cover APM/OTel logs, metrics and traces
-    //   without regenerating the key when new data is onboarded.
-    // - Nightshift data is reached through the `nightshift` Kibana feature (read includes
-    //   every engine via includeIn), Streams data through `streams` (read), and
-    //   connectors/LLM through `actions` (read). Those go via the internal Kibana client,
-    //   so no grants on system/dot indices (unsupported in serverless) are needed.
-    const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
-      name: 'nightshift-relay-agent-builder',
-      metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
-      kibana_role_descriptors: {
-        nightshift_relay_agent_builder: {
-          elasticsearch: {
-            cluster: ['monitor_inference'],
-            indices: [
-              {
-                names: ['traces-*', 'logs-*', 'metrics-*', 'apm-*'],
-                privileges: ['read', 'view_index_metadata'],
-              },
-            ],
-            run_as: [],
-          },
-          kibana: [
-            {
-              spaces: ['*'],
-              feature: {
-                nightshift: ['read'],
-                streams: ['read'],
-                agentBuilder: ['read'],
-                actions: ['read'],
-                workflowsManagement: ['read'],
-              },
-            },
-          ],
-        },
-      },
-    });
-
-    if (!apiKeyResult) {
-      throw new Error('Unable to create an API key (API keys are disabled)');
-    }
-
-    const encodedApiKey = Buffer.from(`${apiKeyResult.id}:${apiKeyResult.api_key}`).toString(
-      'base64'
-    );
+    const credential = await this.mintCredential(request, relayClient);
 
     const username = this.server.security.authc.getCurrentUser(request)?.username;
 
@@ -374,16 +430,12 @@ export class SlackAppService {
     // license doc exists on the cluster at all, so the required field always
     // has a valid LicenseType value.
     const license = await this.server.licensing.getLicense();
+    const agentId = await credential.resolveAgentId();
 
-    const agentId = await this.resolveSlackAgentId(encodedApiKey);
-
-    // The key is the caller-supplied `kibana_api_key` (relay-service#78): the Relay
-    // stores it encrypted against the binding and presents it to Agent Builder. It is
-    // never returned by any Relay endpoint, so Kibana stores no secret at all.
     let installResponse;
     try {
       installResponse = await relayClient.startInstall({
-        kibana_api_key: encodedApiKey,
+        ...credential.installAuth,
         kibana_url: getKibanaUrl(this.server.core, this.server.cloud),
         kibana_version: this.server.kibanaVersion,
         license_info: license.type ?? 'basic',
@@ -392,18 +444,18 @@ export class SlackAppService {
       });
     } catch (error) {
       this.logger.error(`Slack app install failed: ${this.toErrorMessage(error)}`);
-      // Do not leak an orphaned key if the Relay never took ownership of it.
-      await this.invalidateApiKey(apiKeyResult.id, 'after Relay install error');
+      await credential.revoke('after Relay install error');
       throw error;
     }
 
-    if (existingConnection?.apiKeyId) {
-      await this.invalidateApiKey(existingConnection.apiKeyId, 'after successful reconnect');
-    }
+    // A prior connection may already hold a live credential. Revoke it only after
+    // startInstall succeeds — revoking up front would brick a working connection
+    // if startInstall then failed, since the SO write also only happens on success.
+    await this.revokeStoredCredentials(request, existingConnection, 'after successful reconnect');
 
     await this.writeConnection(soClient, {
       status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
-      apiKeyId: apiKeyResult.id,
+      ...credential.stored,
       claimId: installResponse.claim_id,
       tenantKey: null,
       surface: 'slack',
@@ -418,88 +470,13 @@ export class SlackAppService {
     return { authorizeUrl: installResponse.authorize_url };
   }
 
-  private async connectWithServiceAccount(
-    request: KibanaRequest,
-    relayClient: RelayClientContract,
-    soClient: SavedObjectsClientContract,
-    existingConnection: RelayAppConnectionAttributes | undefined,
-    now: string
-  ): Promise<SlackAppConnectResponse> {
-    if (!this.server.isServerless) {
-      throw new SlackAppUnavailableError(
-        'Relay UIAM install is not supported on this distribution. `xpack.actions.relay.uiam.enabled` is Serverless-only.'
-      );
-    }
-
-    const serviceAccounts = this.server.core.security.serviceAccounts;
-
-    if (!serviceAccounts.isEnabled()) {
-      throw new SlackAppUnavailableError(
-        'Relay UIAM install requires UIAM service accounts. Enable `xpack.security.serviceAccounts` and configure `xpack.security.uiam`.'
-      );
-    }
-
-    const username = this.server.security.authc.getCurrentUser(request)?.username;
-    const license = await this.server.licensing.getLicense();
-
-    const { id: serviceAccountId } = await serviceAccounts.create(request, {
-      name: `${RELAY_SERVICE_ACCOUNT_NAME_PREFIX}-${randomUUID()}`, // Add an uuid as name could collide even after a deletion
-      roles: RELAY_SERVICE_ACCOUNT_ROLES,
-      trustedPlatformAssumers: RELAY_PLATFORM_ASSUMERS,
-    });
-
-    let installResponse;
-    try {
-      installResponse = await relayClient.startInstall({
-        uiam_service_account_id: serviceAccountId,
-        kibana_url: getKibanaUrl(this.server.core, this.server.cloud),
-        kibana_version: this.server.kibanaVersion,
-        license_info: license.type ?? 'basic',
-        ...(username ? { created_by_user_key: username } : {}),
-        // TODO: use resolveSlackAgentId once Relay is space aware
-        ...(this.server.agentBuilder ? { agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID } : {}),
-      });
-    } catch (error) {
-      this.logger.error(`Slack app install failed: ${this.toErrorMessage(error)}`);
-      await this.revokeServiceAccount(request, serviceAccountId, 'after Relay install error');
-      throw error;
-    }
-
-    if (existingConnection?.apiKeyId) {
-      await this.invalidateApiKey(existingConnection.apiKeyId, 'after successful reconnect');
-    }
-    if (existingConnection?.serviceAccountId) {
-      await this.revokeServiceAccount(
-        request,
-        existingConnection.serviceAccountId,
-        'after successful reconnect'
-      );
-    }
-
-    await this.writeConnection(soClient, {
-      status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
-      apiKeyId: null,
-      serviceAccountId,
-      claimId: installResponse.claim_id,
-      tenantKey: null,
-      surface: 'slack',
-      createdBy: username,
-      createdAt: now,
-    });
-
-    this.withdrawConnector();
-
-    return { authorizeUrl: installResponse.authorize_url };
-  }
-
   private async failInProgressInstall(
+    request: KibanaRequest,
     soClient: SavedObjectsClientContract,
     connection: RelayAppConnectionAttributes,
     error: RelayRequestError
   ): Promise<SlackAppStatusResponse> {
-    if (connection.apiKeyId) {
-      await this.invalidateApiKey(connection.apiKeyId, 'after install failure');
-    }
+    await this.revokeStoredCredentials(request, connection, 'after install failure');
 
     const message = this.toErrorMessage(error);
     this.logger.warn(`Slack app install failed terminally: ${message}`);
@@ -507,6 +484,7 @@ export class SlackAppService {
       ...connection,
       status: RELAY_APP_CONNECTION_STATUS.error,
       apiKeyId: null,
+      serviceAccountId: null,
       error: message,
     });
     this.withdrawConnector();
@@ -532,6 +510,7 @@ export class SlackAppService {
     if (connection.status === RELAY_APP_CONNECTION_STATUS.oauthInProgress) {
       if (!connection.claimId) {
         return this.failInProgressInstall(
+          request,
           soClient,
           connection,
           new RelayRequestError('/v1/slack/install/claim', 400, 'missing claim id')
@@ -542,6 +521,7 @@ export class SlackAppService {
         if (claim.status === 'complete') {
           if (!claim.tenant_key) {
             return this.failInProgressInstall(
+              request,
               soClient,
               connection,
               new RelayRequestError(
@@ -561,7 +541,7 @@ export class SlackAppService {
         }
       } catch (error) {
         if (error instanceof RelayRequestError && error.isTerminal) {
-          return this.failInProgressInstall(soClient, connection, error);
+          return this.failInProgressInstall(request, soClient, connection, error);
         }
         this.logger.warn(`Failed to poll Relay install claim: ${this.toErrorMessage(error)}`);
       }
@@ -667,12 +647,7 @@ export class SlackAppService {
     // the user to retry, and rules must not keep posting through a connection being torn down.
     this.withdrawConnector();
 
-    if (connection.apiKeyId) {
-      await this.invalidateApiKey(connection.apiKeyId, 'on disconnect');
-    }
-    if (connection.serviceAccountId) {
-      await this.revokeServiceAccount(request, connection.serviceAccountId, 'on disconnect');
-    }
+    await this.revokeStoredCredentials(request, connection, 'on disconnect');
 
     if (relayClient && connection.tenantKey) {
       try {

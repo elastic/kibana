@@ -362,6 +362,44 @@ describe('SlackAppService', () => {
       expect(soClient.create).not.toHaveBeenCalled();
     });
 
+    it('revokes a leftover service account after a successful API-key reconnect', async () => {
+      const {
+        server,
+        soClient,
+        invalidateAsInternalUser,
+        deleteServiceAccount,
+        grantAsInternalUser,
+      } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'old-key',
+          serviceAccountId: 'sa-leftover',
+          tenantKey: 'tenant-A',
+          surface: 'slack',
+        },
+      });
+      grantAsInternalUser.mockResolvedValue({ id: 'new-key', name: 'k', api_key: 'secret' });
+      startInstall.mockResolvedValue({ authorize_url: 'https://slack/oauth', claim_id: 'claim-2' });
+
+      await new SlackAppService(server).connect(request);
+
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['old-key'] });
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-leftover');
+      expect(deleteServiceAccount.mock.invocationCallOrder[0]).toBeGreaterThan(
+        startInstall.mock.invocationCallOrder[0]
+      );
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({
+          apiKeyId: 'new-key',
+          serviceAccountId: null,
+          claimId: 'claim-2',
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+    });
+
     it('sends only the service-account id when Relay UIAM is enabled', async () => {
       const { server, soClient, grantAsInternalUser, createServiceAccount } = createHarness({
         uiamEnabled: true,
@@ -695,6 +733,45 @@ describe('SlackAppService', () => {
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.error,
         error: 'missing claim id',
+      });
+    });
+
+    it('revokes the service account when an in-progress UIAM install fails terminally', async () => {
+      const { server, soClient, deleteServiceAccount, invalidateAsInternalUser } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+      });
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: null,
+          serviceAccountId: 'sa-1',
+          claimId: 'claim-1',
+        },
+      });
+      fetchClaim.mockRejectedValue(
+        new RelayRequestError('/v1/slack/install/claim', 400, 'claim expired')
+      );
+
+      const result = await new SlackAppService(server).getStatus(request);
+
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-1');
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.error,
+          apiKeyId: null,
+          serviceAccountId: null,
+          error: 'claim expired',
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+      expect(result).toMatchObject({
+        available: true,
+        status: RELAY_APP_CONNECTION_STATUS.error,
+        error: 'claim expired',
       });
     });
 
