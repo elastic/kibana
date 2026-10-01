@@ -12,8 +12,9 @@ import { renderHook } from '@testing-library/react';
 import type { monaco } from '@kbn/code-editor';
 import { ReviewActionsWidget } from './review_actions_widget';
 
-const buildEditor = () =>
+const buildEditor = (editorFocus: jest.Mock = jest.fn()) =>
   ({
+    focus: editorFocus,
     changeViewZones: jest.fn((cb: (accessor: monaco.editor.IViewZoneChangeAccessor) => void) => {
       cb({
         addZone: jest.fn(() => 'zone-id'),
@@ -46,6 +47,110 @@ describe('ReviewActionsWidget', () => {
     acceptBtn.click();
     expect(onAccept).toHaveBeenCalledTimes(1);
     expect(onReject).toHaveBeenCalledTimes(1);
+  });
+
+  describe('keyboard focus', () => {
+    const tab = (target: HTMLElement, shiftKey = false) =>
+      target.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Tab', shiftKey, bubbles: true, cancelable: true })
+      );
+
+    const setup = (editorFocus: jest.Mock = jest.fn()) => {
+      const widget = new ReviewActionsWidget(euiTheme, buildEditor(editorFocus), 1, {
+        onAccept: jest.fn(),
+        onReject: jest.fn(),
+      });
+      const dom = widget.getDomNode();
+      document.body.appendChild(dom);
+      const [undoButton, replaceButton] = Array.from(dom.querySelectorAll('button'));
+      return { widget, dom, undoButton, replaceButton };
+    };
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('moves focus from Undo to Replace on Tab and back on Shift+Tab', () => {
+      const { widget, dom, undoButton, replaceButton } = setup();
+
+      undoButton.focus();
+      tab(undoButton);
+      expect(document.activeElement).toBe(replaceButton);
+
+      tab(replaceButton, true);
+      expect(document.activeElement).toBe(undoButton);
+
+      dom.remove();
+      widget.dispose();
+    });
+
+    it('hands focus back to the editor when tabbing out of either end of the toolbar', () => {
+      const editorFocus = jest.fn();
+      const { widget, dom, undoButton, replaceButton } = setup(editorFocus);
+
+      tab(replaceButton);
+      expect(editorFocus).toHaveBeenCalledTimes(1);
+
+      tab(undoButton, true);
+      expect(editorFocus).toHaveBeenCalledTimes(2);
+
+      dom.remove();
+      widget.dispose();
+    });
+
+    it('focuses the Undo button', () => {
+      const { widget, dom, undoButton } = setup();
+
+      widget.focus();
+
+      expect(document.activeElement).toBe(undoButton);
+
+      dom.remove();
+      widget.dispose();
+    });
+
+    it('retries focusing until the widget is rendered', () => {
+      jest.useFakeTimers();
+      const frames: FrameRequestCallback[] = [];
+      jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        frames.push(cb);
+        return frames.length;
+      });
+      const { widget, dom, undoButton } = setup();
+      const focus = jest
+        .spyOn(undoButton, 'focus')
+        .mockImplementationOnce(() => {})
+        .mockImplementationOnce(() => {})
+        .mockImplementation(HTMLElement.prototype.focus);
+
+      widget.focus();
+      expect(document.activeElement).not.toBe(undoButton);
+
+      frames.shift()?.(0);
+      expect(document.activeElement).not.toBe(undoButton);
+
+      frames.shift()?.(0);
+      expect(document.activeElement).toBe(undoButton);
+      expect(focus).toHaveBeenCalledTimes(3);
+      expect(frames).toHaveLength(0);
+
+      dom.remove();
+      widget.dispose();
+      jest.useRealTimers();
+    });
+
+    it('stops retrying once disposed', () => {
+      const cancel = jest.spyOn(window, 'cancelAnimationFrame');
+      jest.spyOn(window, 'requestAnimationFrame').mockReturnValue(42);
+      const { widget, dom, undoButton } = setup();
+      jest.spyOn(undoButton, 'focus').mockImplementation(() => {});
+
+      widget.focus();
+      widget.dispose();
+
+      expect(cancel).toHaveBeenCalledWith(42);
+      dom.remove();
+    });
   });
 
   it('labels the accept button "Replace" when isReplaceMode is true and "Keep" otherwise', () => {
