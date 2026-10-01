@@ -691,8 +691,9 @@ export class SlackAppService {
       }
     }
 
+    const { error: _staleError, ...retainedConnection } = connection;
     await this.writeConnection(soClient, {
-      ...connection,
+      ...retainedConnection,
       status: RELAY_APP_CONNECTION_STATUS.notConnected,
       apiKeyId: null,
       serviceAccountId: null,

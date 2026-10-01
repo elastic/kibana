@@ -936,6 +936,37 @@ describe('SlackAppService', () => {
       );
     });
 
+    it('clears a stale error when a failed unbind is retried successfully', async () => {
+      const { server, soClient } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.error,
+          apiKeyId: null,
+          serviceAccountId: null,
+          tenantKey: 'tenant-A',
+          surface: 'slack',
+          error: 'teardown incomplete: 1 workspace(s) failed and remain bound; retry to finish',
+        },
+      });
+      unbind.mockResolvedValue(undefined);
+
+      await expect(new SlackAppService(server).disconnect(request)).resolves.toEqual({
+        status: 'disconnected',
+      });
+
+      expect(unbind).toHaveBeenCalledWith('tenant-A');
+      const [, attributes] = soClient.create.mock.calls[0];
+      expect(attributes).toEqual(
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.notConnected,
+          apiKeyId: null,
+          serviceAccountId: null,
+          tenantKey: null,
+        })
+      );
+      expect(attributes).not.toHaveProperty('error');
+    });
+
     it('is a no-op when the connection does not exist', async () => {
       const { server, soClient, invalidateAsInternalUser } = createHarness();
       soClient.get.mockRejectedValue(
