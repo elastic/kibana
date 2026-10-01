@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { lazyImmutableGCableObject, z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { CONNECTOR_ID_MAX_LENGTH } from '../../common/constants';
 import type { ConnectorContractUnion } from '../../types/v1';
 import { getDeprecatedStepMessage, getStepDeprecationInfo } from '../deprecated_step_metadata';
@@ -170,25 +170,18 @@ function createRecursiveStepSchema(
   return stepSchema;
 }
 
-function zodTypeName(schema: object): string | undefined {
-  return (schema as { _zod?: { def?: { type?: string } } })._zod?.def?.type;
-}
-
 /**
  * Returns true when a step's params schema has no required fields, meaning `with` can be omitted.
  * This covers steps like `data.parseJson` whose inputs are all optional or entirely absent.
- * Structural checks are used because spec schemas are lazy proxies, and `instanceof` is false
- * for those proxies.
  */
 function hasNoRequiredFields(schema: z.ZodType): boolean {
-  if (zodTypeName(schema) !== 'object') return false;
-  return Object.values((schema as z.ZodObject).shape).every((field) => {
-    const typeName = zodTypeName(field);
-    return typeName === 'optional' || typeName === 'default';
-  });
+  if (!(schema instanceof z.ZodObject)) return false;
+  return Object.values(schema.shape).every(
+    (field) => field instanceof z.ZodOptional || field instanceof z.ZodDefault
+  );
 }
 
-function buildConnectorStepSchema(
+function generateStepSchemaForConnector(
   connector: ConnectorContractUnion,
   stepSchema: z.ZodType,
   loose: boolean = false
@@ -219,19 +212,6 @@ function buildConnectorStepSchema(
 }
 
 /**
- * The step union caches every option for the life of the workflow schema.
- * `.optional()` and `BaseConnectorStepSchema.extend` build real Zod graphs, so each
- * connector option stays behind a weak reference and can be collected after validation.
- */
-function generateStepSchemaForConnector(
-  connector: ConnectorContractUnion,
-  stepSchema: z.ZodType,
-  loose: boolean = false
-): ReturnType<typeof buildConnectorStepSchema> {
-  return lazyImmutableGCableObject(() => buildConnectorStepSchema(connector, stepSchema, loose));
-}
-
-/**
  * Generate schemas for backward-compatible type aliases.
  * These schemas use the old type names but reference the same connector definition.
  * They are included in validation but not shown in autocomplete suggestions.
@@ -247,17 +227,17 @@ function generateAliasSchemas(
     // Find the connector with the new type name
     const connector = connectors.find((c) => c.type === newType);
     if (connector) {
+      // Create a schema with the old type name but same params/output
+      const newSchema = generateStepSchemaForConnector(connector, stepSchema, loose);
       const deprecation = getStepDeprecationInfo(oldType);
       const description = deprecation
         ? getDeprecatedStepMessage(oldType, deprecation)
         : `Deprecated: Use ${newType} instead`;
       aliasSchemas.push(
-        lazyImmutableGCableObject(() =>
-          buildConnectorStepSchema(connector, stepSchema, loose).extend({
-            // Mark as deprecated in description so it's clear this is a legacy alias
-            type: z.literal(oldType).describe(description),
-          })
-        )
+        newSchema.extend({
+          // Mark as deprecated in description so it's clear this is a legacy alias
+          type: z.literal(oldType).describe(description),
+        })
       );
     }
   }

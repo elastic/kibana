@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import {
   CONNECTOR_ID_MAX_LENGTH,
   type ConnectorContractUnion,
@@ -18,9 +18,6 @@ const BASE_WORKFLOW = {
   name: 'test',
   triggers: [{ type: 'manual' }],
 };
-
-const isLazyBoundary = (value: object): boolean =>
-  Object.getPrototypeOf(value) === Object.prototype;
 
 describe('generateYamlSchemaFromConnectors', () => {
   describe('strict mode', () => {
@@ -147,44 +144,6 @@ describe('generateYamlSchemaFromConnectors', () => {
       ).toBe(true);
     });
 
-    it('does not require `with` when a lazy params schema has only optional fields', () => {
-      const connectors: ConnectorContractUnion[] = [
-        {
-          summary: 'Lazy optional step',
-          description: null,
-          type: 'my.lazyOptional',
-          paramsSchema: lazySchema(() => z.object({ message: z.string().optional() })),
-          outputSchema: z.unknown(),
-        },
-      ];
-      const schema = generateYamlSchemaFromConnectors(connectors);
-      expect(() =>
-        schema.parse({
-          ...BASE_WORKFLOW,
-          steps: [{ name: 'step', type: 'my.lazyOptional' }],
-        })
-      ).not.toThrow();
-    });
-
-    it('requires `with` when a lazy params schema has a required field', () => {
-      const connectors: ConnectorContractUnion[] = [
-        {
-          summary: 'Lazy required step',
-          description: null,
-          type: 'my.lazyRequired',
-          paramsSchema: lazySchema(() => z.object({ message: z.string() })),
-          outputSchema: z.unknown(),
-        },
-      ];
-      const schema = generateYamlSchemaFromConnectors(connectors);
-      expect(() =>
-        schema.parse({
-          ...BASE_WORKFLOW,
-          steps: [{ name: 'step', type: 'my.lazyRequired' }],
-        })
-      ).toThrow();
-    });
-
     it('requires `with` for a step that has required params', () => {
       const connectors: ConnectorContractUnion[] = [
         {
@@ -257,73 +216,6 @@ describe('generateYamlSchemaFromConnectors', () => {
 
       expect(result.success).toBe(false);
       expect(elapsed).toBeLessThan(500);
-    });
-
-    it('caches connector step schemas as proxies and parses again after they are released', () => {
-      const RealWeakRef = globalThis.WeakRef;
-      const refs: Array<{ evict: () => void }> = [];
-
-      class EvictableWeakRef<T extends object> {
-        private target: T | undefined;
-
-        constructor(target: T) {
-          this.target = target;
-          refs.push(this);
-        }
-
-        deref(): T | undefined {
-          return this.target;
-        }
-
-        evict(): void {
-          this.target = undefined;
-        }
-      }
-
-      (globalThis as { WeakRef: typeof WeakRef }).WeakRef =
-        EvictableWeakRef as unknown as typeof WeakRef;
-
-      try {
-        const schema = generateYamlSchemaFromConnectors([
-          {
-            summary: 'Get case',
-            description: null,
-            type: 'kibana.getCase',
-            paramsSchema: lazySchema(() => z.object({})),
-            outputSchema: z.unknown(),
-          },
-        ]);
-        const stepsArray = (schema as z.ZodObject).shape.steps as z.ZodArray<z.ZodLazy<z.ZodType>>;
-        const lazy = stepsArray.def.element as z.ZodLazy<z.ZodType>;
-        const getter = (lazy as unknown as { _def: { getter: () => { options: object[] } } })._def
-          .getter;
-        const options = getter().options;
-        const proxies = options.filter((option) => isLazyBoundary(option));
-
-        expect(proxies.length).toBeGreaterThanOrEqual(2);
-        expect(getter()).toBe(getter());
-
-        const current = {
-          ...BASE_WORKFLOW,
-          steps: [{ name: 'load', type: 'kibana.getCase' }],
-        };
-        const legacy = {
-          ...BASE_WORKFLOW,
-          steps: [{ name: 'load', type: 'kibana.getCaseDefaultSpace' }],
-        };
-
-        expect(schema.safeParse(current).success).toBe(true);
-        expect(schema.safeParse(legacy).success).toBe(true);
-
-        for (const ref of refs) {
-          ref.evict();
-        }
-
-        expect(schema.safeParse(current).success).toBe(true);
-        expect(schema.safeParse(legacy).success).toBe(true);
-      } finally {
-        (globalThis as { WeakRef: typeof WeakRef }).WeakRef = RealWeakRef;
-      }
     });
   });
 
