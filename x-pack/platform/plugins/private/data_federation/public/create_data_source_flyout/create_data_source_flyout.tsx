@@ -48,7 +48,6 @@ import {
 import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source_flyout_authentication_fields';
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
-import { CreateDataSourceFlyoutTypeSettingsS3Region } from './create_data_source_flyout_type_settings_s3';
 import { FlyoutErrorBanner } from './flyout_error_banner';
 import {
   authenticationModeFromDataSource,
@@ -297,6 +296,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           </EuiFormRow>
           <EuiFormRow
             label={createDataSourceFlyoutStrings.nameLabel()}
+            helpText={createDataSourceFlyoutStrings.nameDescription()}
             isInvalid={Boolean(errors.name)}
             error={errors.name?.message}
             fullWidth
@@ -313,7 +313,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               readOnly={isEditMode}
             />
           </EuiFormRow>
-          <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>
+          <EuiFormRow
+            label={createDataSourceFlyoutStrings.descriptionLabel()}
+            helpText={createDataSourceFlyoutStrings.descriptionDescription()}
+            fullWidth
+          >
             <EuiTextArea
               data-test-subj="createDataSourceFlyoutDescription"
               fullWidth
@@ -324,18 +328,13 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               inputRef={descriptionField.ref}
             />
           </EuiFormRow>
-          {dataSourceType === 's3' && (
-            <CreateDataSourceFlyoutTypeSettingsS3Region
+          {dataSourceType !== 's3' && (
+            <CreateDataSourceFlyoutTypeSettingsBlock
               control={control}
+              dataSourceType={dataSourceType}
               unregister={unregister}
-              isRequired={!isEditMode}
             />
           )}
-          <CreateDataSourceFlyoutTypeSettingsBlock
-            control={control}
-            dataSourceType={dataSourceType}
-            unregister={unregister}
-          />
           <EuiHorizontalRule margin="m" />
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}

@@ -135,12 +135,30 @@ export const entityStoreMetrics = {
   ),
 
   extractionLogsProcessed: histogram<ExtractionAttributes>(m('extraction.logs.processed'), {
-    description: 'Total raw log documents processed per task run across all sub-windows',
+    description:
+      'Total log documents processed per task run across all sub-windows. Raw, unless dual-process sampling (FF on) is active, in which case sampled/processed volume',
     unit: '{document}',
     valueType: ValueType.INT,
   }),
 
+  extractionSampleEligibleRuns: counter<ExtractionAttributes & { sampled: boolean }>(
+    m('extraction.sample.eligible_runs'),
+    {
+      description:
+        'Scheduled runs of a sampling-capable non-priority process, labeled by whether any slice sampled. sampled:true / total = sampling adoption share',
+      unit: '{run}',
+      valueType: ValueType.INT,
+    }
+  ),
+
   // --- Slice + entity-page loops (runMainExtractionLoop / ingestEntityPagesWithinCurrentLogPage) ---
+
+  extractionSampleProbability: histogram<ExtractionAttributes>(m('extraction.sample.probability'), {
+    description:
+      'Sampling rate applied to one raw-log slice, in [0.1, 1). Recorded only when the slice samples, so the distribution reflects applied rates only',
+    unit: '1',
+    valueType: ValueType.DOUBLE,
+  }),
 
   extractionLogsPerPageDropped: counter<ExtractionAttributes>(
     m('extraction.logs_per_page.dropped'),

@@ -16,6 +16,7 @@ import type { DataSourcesClient } from '../data_sources_client';
 import type { DatasetsClient } from '../datasets_client';
 import type { DataSource, S3DataSourceWithSecrets } from '../../common/datasource_types';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
+import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
 import type { DataFederationKibanaServices } from '../types';
 
 const createToastsMock = (): ToastsStart =>
@@ -121,7 +122,6 @@ describe('CreateDataSourceFlyout', () => {
       name: 'ds',
       description: '',
       settings: {
-        region: '',
         endpoint: '',
         access_key: '',
         secret_key: '',
@@ -155,7 +155,7 @@ describe('CreateDataSourceFlyout', () => {
     });
   });
 
-  it('shows the S3 region field without expanding connection settings, and requires it on create', async () => {
+  it('does not show the S3 region field', async () => {
     const toasts = createToastsMock();
     const client = createClientMock();
     const services: DataFederationKibanaServices = {
@@ -167,7 +167,7 @@ describe('CreateDataSourceFlyout', () => {
     };
     const onSave = jest.fn().mockResolvedValue(null);
 
-    const { getByTestId, queryByText } = render(
+    const { getByTestId, queryByTestId, findByText, queryByText } = render(
       <EuiProvider>
         <KibanaContextProvider services={services}>
           <CreateDataSourceFlyout
@@ -179,24 +179,25 @@ describe('CreateDataSourceFlyout', () => {
       </EuiProvider>
     );
 
-    // Region is visible up front, without expanding "Show connection settings".
-    expect(getByTestId('createDataSourceFlyoutS3Region')).toBeInTheDocument();
+    expect(queryByTestId('createDataSourceFlyoutS3Region')).not.toBeInTheDocument();
+    expect(
+      queryByText(
+        'Unique name for use in datasets. All lowercase, dash, underscore, and numbers are supported.'
+      )
+    ).toBeInTheDocument();
+    expect(queryByText('Description (optional)')).toBeInTheDocument();
+    expect(queryByText('A brief description to identify this data source.')).toBeInTheDocument();
+    expect(queryByTestId('createDataSourceFlyoutConnectionSettingsToggle')).not.toBeInTheDocument();
 
     fireEvent.change(getByTestId('createDataSourceFlyoutName'), { target: { value: 'my-ds' } });
+    fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
+    fireEvent.click(await findByText(authenticationStrings.anonymousLabel));
     fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
 
     await waitFor(() => {
-      expect(queryByText('Region is required.')).toBeInTheDocument();
+      expect(onSave).toHaveBeenCalledTimes(1);
     });
-    expect(onSave).not.toHaveBeenCalled();
-
-    fireEvent.change(getByTestId('createDataSourceFlyoutS3Region'), {
-      target: { value: 'us-east-1' },
-    });
-
-    await waitFor(() => {
-      expect(queryByText('Region is required.')).not.toBeInTheDocument();
-    });
+    expect(queryByText('Region is required.')).not.toBeInTheDocument();
   });
 
   it('shows an error', async () => {
@@ -237,6 +238,49 @@ describe('CreateDataSourceFlyout', () => {
     expect(banner).toHaveTextContent('Could not save the data source');
     expect(banner).toHaveTextContent('validation_exception: something went wrong');
     expect(await findByTestId('createDataSourceFlyoutFooter')).toContainElement(banner);
+  });
+
+  it('creates an S3 data source with anonymous auth when no settings fields are registered', async () => {
+    const services: DataFederationKibanaServices = {
+      dataSourcesClient: createClientMock(),
+      datasetsClient: createDatasetsClientMock(),
+      toasts: createToastsMock(),
+      docLinks: createDocLinksMock(),
+      featureFlags: {},
+    };
+    const onSave = jest.fn().mockResolvedValue(null);
+
+    const { getByTestId, findByText } = render(
+      <EuiProvider>
+        <KibanaContextProvider services={services}>
+          <CreateDataSourceFlyout
+            onClose={jest.fn()}
+            onSave={onSave}
+            existingDataSourceNames={[]}
+          />
+        </KibanaContextProvider>
+      </EuiProvider>
+    );
+
+    fireEvent.change(getByTestId('createDataSourceFlyoutName'), {
+      target: { value: 'public-bucket' },
+    });
+    fireEvent.click(getByTestId('createDataSourceFlyoutAuthentication'));
+    fireEvent.click(await findByText(authenticationStrings.anonymousLabel));
+    fireEvent.click(getByTestId('createDataSourceFlyoutSubmit'));
+
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledTimes(1);
+    });
+
+    const saved = onSave.mock.calls[0][0] as S3DataSourceWithSecrets;
+    expect(saved).toEqual(
+      expect.objectContaining({
+        type: 's3',
+        name: 'public-bucket',
+        settings: { auth: 'anonymous' },
+      })
+    );
   });
 
   describe('form submitter', () => {

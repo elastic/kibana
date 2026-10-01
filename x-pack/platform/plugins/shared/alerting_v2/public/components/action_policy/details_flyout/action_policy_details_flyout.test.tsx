@@ -65,7 +65,6 @@ const futureIso = (): string => new Date(Date.now() + 1000 * 60 * 60).toISOStrin
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',
-  version: 'v1',
   name: 'Critical alerts policy',
   description: 'Routes critical alerts to the oncall workflow',
   enabled: true,
@@ -96,6 +95,7 @@ interface RenderProps {
   policy?: ActionPolicyResponse;
   canWrite?: boolean;
   isStateLoading?: boolean;
+  size?: 's' | 'm';
   onClose?: jest.Mock;
   onEdit?: jest.Mock;
   onClone?: jest.Mock;
@@ -128,6 +128,7 @@ const renderFlyout = (props: RenderProps = {}) => {
           policy={policy}
           canWrite={props.canWrite ?? true}
           isStateLoading={props.isStateLoading}
+          size={props.size}
           {...handlers}
         />
       </I18nProvider>
@@ -153,6 +154,16 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByTestId(TEST_SUBJ.flyout)).toBeInTheDocument();
       expect(screen.getByText('Critical alerts policy')).toBeInTheDocument();
       expect(screen.getByTestId('actionPolicyDetailsFlyoutEnabledBadge')).toBeInTheDocument();
+    });
+
+    it('accepts a "s" size override (used when nested inside another flyout)', () => {
+      // Regression test: this flyout is rendered nested inside the rule summary
+      // flyout (which uses size "m"). EUI's managed-flyout validation throws
+      // "Parent and child flyouts cannot both be size 'm'" if both resolve to
+      // the same size, so this flyout must stay able to render at size "s".
+      renderFlyout({ size: 's' });
+
+      expect(screen.getByTestId(TEST_SUBJ.flyout)).toBeInTheDocument();
     });
 
     it('renders a disabled state badge when the policy is disabled', () => {

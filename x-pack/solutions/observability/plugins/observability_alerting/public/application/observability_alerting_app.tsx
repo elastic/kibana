@@ -30,7 +30,10 @@ import {
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
+import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
 import { hasObservabilityAlertingCapabilities } from './has_observability_alerting_privilege';
+
+const createObservabilityEpisodeActions = () => [createInvestigateEpisodeAction()];
 
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
@@ -186,6 +189,7 @@ export const ObservabilityAlertingApp = ({
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
             privilegeCheck={privilegeCheck}
+            createActions={createObservabilityEpisodeActions}
             manageRulesHref={manageRulesHref}
           />
         </EuiPageSection>

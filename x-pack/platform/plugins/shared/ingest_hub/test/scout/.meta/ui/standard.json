@@ -1,5 +1,5 @@
 {
-  "sha1": "09390f72a79f07483d924ccfa15f671502541086",
+  "sha1": "5694f83dfb6848b49e83362cb2c90570107bec19",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 109,
-        "column": 11
+        "line": 118,
+        "column": 20
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 196,
-        "column": 24
+        "line": 215,
+        "column": 23
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
-        "line": 337,
-        "column": 11
+        "line": 369,
+        "column": 8
       }
     },
     {

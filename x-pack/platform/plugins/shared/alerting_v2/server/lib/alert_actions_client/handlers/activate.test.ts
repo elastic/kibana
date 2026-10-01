@@ -53,7 +53,6 @@ describe('activateHandler', () => {
       const prepared = activateHandler.prepare(buildItem(alertEvent));
 
       expect(prepared.ruleEvent).toMatchObject({
-        '@timestamp': FIXED_NOW,
         rule: { id: alertEvent.rule_id, version: alertEvent.rule_version },
         group_hash: alertEvent.group_hash,
         data: alertEvent.data_json,
@@ -96,7 +95,7 @@ describe('activateHandler', () => {
   });
 
   describe('precondition: rejects only when the episode is already active', () => {
-    it('rejects activate with INVALID_EPISODE_STATE_TRANSITION (409) when episode_status is active', () => {
+    it('rejects activate with INVALID_ALERT_STATE_TRANSITION (409) when episode_status is active', () => {
       try {
         activateHandler.prepare(
           buildItem(buildAlertEvent({ episode_status: alertEpisodeStatus.active }))
@@ -109,8 +108,8 @@ describe('activateHandler', () => {
           code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
           details: {
             group_hash: 'group-1',
-            episode_id: 'episode-1',
-            episode_status: alertEpisodeStatus.active,
+            alert_id: 'episode-1',
+            alert_status: alertEpisodeStatus.active,
             action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
           },
         });

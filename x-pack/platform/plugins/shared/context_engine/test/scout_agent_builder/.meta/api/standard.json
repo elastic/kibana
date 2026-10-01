@@ -1,5 +1,5 @@
 {
-  "sha1": "977cc1ef3c5dcbf50d66d061172d0f720a9dfd36",
+  "sha1": "0e906c6ec6ceabbf11a32cb6c91508beab4e4cea",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 252,
-        "column": 12
+        "line": 275,
+        "column": 5
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 272,
-        "column": 21
+        "line": 295,
+        "column": 9
       }
     },
     {
@@ -42,13 +42,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 287,
-        "column": 58
+        "line": 312,
+        "column": 12
       }
     },
     {
-      "id": "720459cc95e188a-76fe8eb6bba0c12",
-      "title": "context engine AI index describe API counts types and tags for KIs visible in the current space",
+      "id": "720459cc95e188a-d8d9d60acb48f6b",
+      "title": "context engine AI index describe API counts types and tags for active KIs visible in the current space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 300,
-        "column": 24
+        "line": 328,
+        "column": 60
       }
     },
     {
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 312,
+        "line": 343,
         "column": 12
       }
     },
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 362,
-        "column": 14
+        "line": 390,
+        "column": 23
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 373,
-        "column": 11
+        "line": 401,
+        "column": 16
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 381,
-        "column": 17
+        "line": 486,
+        "column": 27
       }
     },
     {
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 461,
+        "line": 498,
         "column": 27
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_index_describe.spec.ts",
-        "line": 472,
+        "line": 509,
         "column": 27
       }
     },
@@ -560,7 +560,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 484,
+        "line": 486,
         "column": 21
       }
     },
@@ -574,7 +574,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 497,
+        "line": 501,
         "column": 13
       }
     },
@@ -588,7 +588,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 545,
+        "line": 549,
         "column": 76
       }
     },
@@ -602,7 +602,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 572,
+        "line": 576,
         "column": 65
       }
     },
@@ -616,7 +616,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 600,
+        "line": 604,
         "column": 4
       }
     },
@@ -630,7 +630,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 629,
+        "line": 633,
         "column": 14
       }
     },
@@ -644,7 +644,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 660,
+        "line": 664,
         "column": 13
       }
     },
@@ -658,7 +658,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 680,
+        "line": 684,
         "column": 13
       }
     },
@@ -672,7 +672,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 700,
+        "line": 704,
         "column": 84
       }
     },
@@ -686,7 +686,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 716,
+        "line": 720,
         "column": 30
       }
     },
@@ -700,7 +700,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 734,
+        "line": 738,
         "column": 30
       }
     },
@@ -714,36 +714,78 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
-        "line": 785,
+        "line": 789,
         "column": 38
       }
     },
     {
-      "id": "f32413f123c0cf8-adc956e4684e1c3",
-      "title": "context engine KI retrieval view exposes only current, active, unexpired KIs through the view",
+      "id": "01ef9b7d0fce753-b030cc73eecac6a",
+      "title": "context engine KI lifecycle filter returns only active, unexpired KIs from a registered index",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_view.spec.ts",
-        "line": 76,
-        "column": 5
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 160,
+        "column": 12
       }
     },
     {
-      "id": "f32413f123c0cf8-cda51273874ac7e",
-      "title": "context engine KI retrieval view exposes only the latest revision of each KI through a data stream view",
+      "id": "01ef9b7d0fce753-d407f8d092e7a99",
+      "title": "context engine KI lifecycle filter drops governance unless the query names it",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_view.spec.ts",
-        "line": 180,
-        "column": 17
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 169,
+        "column": 19
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-142793d74c5389b",
+      "title": "context engine KI lifecycle filter applies the filter through a pattern and keeps the score",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 304,
+        "column": 27
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-789005564fe7037",
+      "title": "context engine KI lifecycle filter returns only the latest revision of each KI from a data stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 311,
+        "column": 27
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-54b821a6f31f7ed",
+      "title": "context engine KI lifecycle filter reads an unregistered index as-is",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 328,
+        "column": 27
       }
     }
   ]

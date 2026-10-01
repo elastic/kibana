@@ -179,7 +179,7 @@ const fetchRuleResult = {
     enabled: true,
     metadata: { name: 'Rule A', description: 'Rule description' },
     grouping: { fields: ['host.name'] },
-    query: { format: 'standalone', breach: 'from index-*' },
+    query: { base: 'from index-*' },
     artifacts: [],
   },
   isLoading: false,
@@ -271,6 +271,27 @@ beforeEach(() => {
 });
 
 describe('EpisodeDetailsPage', () => {
+  it('makes only the loaded episode rule available to episode actions', () => {
+    renderPage();
+
+    const isRuleAvailable = mockCreateEpisodeActions.mock.calls.at(-1)?.[0].isRuleAvailable;
+    expect(isRuleAvailable?.('rule-1')).toBe(true);
+    expect(isRuleAvailable?.('another-rule')).toBe(false);
+  });
+
+  it('does not make an unavailable episode rule available to episode actions', () => {
+    mockUseFetchRule.mockReturnValue({
+      ...fetchRuleResult,
+      data: undefined,
+      ruleState: { status: RuleStateStatus.not_found, ruleId: 'rule-1' },
+    } as unknown as FetchRuleResult);
+
+    renderPage();
+
+    const isRuleAvailable = mockCreateEpisodeActions.mock.calls.at(-1)?.[0].isRuleAvailable;
+    expect(isRuleAvailable?.('rule-1')).toBe(false);
+  });
+
   it('renders the page structure once the episode loads', () => {
     renderPage();
 

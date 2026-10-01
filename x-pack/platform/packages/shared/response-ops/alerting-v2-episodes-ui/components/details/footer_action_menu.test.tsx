@@ -143,6 +143,25 @@ describe('EpisodeFooterActionMenu', () => {
     ]);
   });
 
+  it('groups custom actions with isWorkflowAction in the workflow section', () => {
+    renderMenu([
+      makeAction('CUSTOM_NON_WORKFLOW'),
+      makeAction('CUSTOM_WORKFLOW', { isWorkflowAction: true }),
+    ]);
+
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
+
+    const itemTestSubjects = screen
+      .getAllByRole('menuitem')
+      .map((item) => item.getAttribute('data-test-subj'));
+
+    expect(itemTestSubjects).toEqual([
+      'alertingV2EpisodeTakeAction-viewDetails',
+      'alertingV2EpisodeTakeAction-CUSTOM_WORKFLOW',
+      'alertingV2EpisodeTakeAction-CUSTOM_NON_WORKFLOW',
+    ]);
+  });
+
   it('renders view details with the given href', () => {
     renderMenu([]);
 
@@ -185,7 +204,11 @@ describe('EpisodeFooterActionMenu', () => {
 
     const ownEntry = await screen.findByTestId('ownEntry');
     expect(renderMenuItem).toHaveBeenCalledWith(
-      expect.objectContaining({ episodes: mockEpisodes, onSuccess: mockOnSuccess })
+      expect.objectContaining({
+        episodes: mockEpisodes,
+        onSuccess: mockOnSuccess,
+        surface: 'details_flyout',
+      })
     );
     // The default descriptor item is bypassed, so `execute` never fires on click.
     expect(

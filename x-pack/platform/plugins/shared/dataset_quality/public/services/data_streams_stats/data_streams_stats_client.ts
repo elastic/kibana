@@ -6,6 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import rison from '@kbn/rison';
 import type {
@@ -229,7 +230,9 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   }): Promise<UpdateFailureStoreResponse> {
     const response = await this.http
       .put<UpdateFailureStoreResponse>(
-        `/internal/dataset_quality/data_streams/${dataStream}/update_failure_store`,
+        buildPath('/internal/dataset_quality/data_streams/{dataStream}/update_failure_store', {
+          dataStream,
+        }),
         {
           body: JSON.stringify({
             failureStoreEnabled,
