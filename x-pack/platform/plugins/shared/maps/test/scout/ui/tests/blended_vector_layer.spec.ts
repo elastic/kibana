@@ -70,7 +70,7 @@ test.describe(
         const { rawResponse: response } = await pageObjects.maps.getResponse(
           LOAD_DOCUMENTS_REQUEST_NAME
         );
-        expect(response.hits.hits).toBeGreaterThanOrEqual(75);
+        expect(response.hits.hits.length).toBeGreaterThanOrEqual(75);
       });
     });
   }

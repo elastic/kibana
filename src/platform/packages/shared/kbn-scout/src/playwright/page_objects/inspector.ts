@@ -59,9 +59,6 @@ export class InspectorPage {
    *   Defaults to `'openInspectorButton'`.
    */
   async open(openButtonTestSubj: string = 'openInspectorButton') {
-    if (await this.panel.isVisible()) {
-      return;
-    }
     await this.appMenu.clickItem(openButtonTestSubj);
     await this.panel.waitFor({ state: 'visible' });
   }
@@ -87,9 +84,6 @@ export class InspectorPage {
    * Closes the inspector panel. No-ops if already closed.
    */
   async close() {
-    if (!(await this.panel.isVisible())) {
-      return;
-    }
     await this.closeButton.click();
     await this.panel.waitFor({ state: 'hidden' });
   }
