@@ -89,13 +89,11 @@ const normalizeSlugText = (slug: string): string =>
     .replace(/[^a-z0-9-]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
-export const canonicalizeSlug = (slug: string): string => {
-  let normalized = normalizeSlugText(slug);
-  if (normalized.startsWith('memory-')) {
-    normalized = normalized.slice('memory-'.length);
-  }
-  return normalized.replace(/^-+/, '').slice(0, 80).replace(/-+$/, '');
-};
+export const canonicalizeSlug = (slug: string): string =>
+  normalizeSlugText(slug)
+    .replace(/^(?:memory-|-)+/, '')
+    .slice(0, 80)
+    .replace(/-+$/, '');
 
 export const toMemoryKiId = (slug: string): string => {
   const normalizedSlug = canonicalizeSlug(slug);

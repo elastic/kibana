@@ -55,6 +55,17 @@ describe('canonicalizeSlug / toMemoryKiId', () => {
     expect(id).toBe(`memory_${'a'.repeat(79)}`);
     expect(isCanonicalMemoryId(id)).toBe(true);
   });
+
+  it.each([
+    'Memory Memory Memory Pressure',
+    'memory--memory-x',
+    `${'a'.repeat(79)} b`,
+    'Kafka Lag',
+  ])('is idempotent, so the id written for %p is canonical', (title) => {
+    const slug = canonicalizeSlug(title);
+    expect(canonicalizeSlug(slug)).toBe(slug);
+    expect(isCanonicalMemoryId(toMemoryKiId(slug))).toBe(true);
+  });
 });
 
 describe('createMemoryPageStore', () => {
