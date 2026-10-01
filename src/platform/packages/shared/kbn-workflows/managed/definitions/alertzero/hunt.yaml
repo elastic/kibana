@@ -137,8 +137,8 @@ steps:
         # also stop the conflict, but by abandoning that idempotency.
         #
         # A failure for any other reason (validation, a conversation that vanished)
-        # also lands here, and the update fails in turn, which `continue` then
-        # swallows exactly as before. That is not silent, though: the coordinator
+        # also lands here, and the update fails in turn, which `continue`
+        # swallows. That is not silent, though: the coordinator
         # only prepares an attachment for a confirmed hit, so packaging finds no
         # current-run state and returns `run_incomplete`, which the Worker reports
         # as a partial sweep. A genuinely broken attachment is visible there.
@@ -155,27 +155,19 @@ steps:
                 continue: true
 
   # Hunt results write-back: every completed hunt (hit or clean) gets exactly
-  # one message here. The narrative
-  # itself is built server-side by the coordinator (`build_hunt_narrative.ts`,
-  # returned as `narrative`) so it is deterministic, unit-tested, and identical
-  # for every caller: it names the report, what was searched for
-  # (resolved_iocs/resolved_techniques), where (required and optional index
-  # patterns) and when (the window), what Tier 1 matched per index and which
-  # entities were involved, what Tier 2 derived, executed, and confirmed
-  # (per behavior, with rows and entities), and why a tier did not run. It is
-  # honest about degraded cases (optional-only matches, no searchable terms,
-  # blocked scope) rather than always claiming a clean search happened, and it
-  # is self-sufficient because the SSE attachment may not render everywhere
-  # yet: the user must be able to read the whole story of the hunt from the
-  # messages alone. Markdown, as every Investigation
-  # message is (Agent Builder conversations render it); literal block scalar so
-  # the narrative's own line breaks survive. The SSE count appended here is
-  # what the coordinator prepared; whether each attachment landed is not
-  # observable from a foreach's output, and packaging's conclusion reports that.
+  # one message here. The narrative is built server-side by the coordinator
+  # (`build_hunt_narrative.ts`, returned as `narrative`) so it is deterministic,
+  # unit-tested, and identical for every caller; it has to be self-sufficient
+  # because the SSE attachment does not render everywhere yet, so the analyst
+  # must be able to read the whole hunt from the messages alone. Markdown, as
+  # every Investigation message is; literal block scalar so the narrative's own
+  # line breaks survive. The SSE count appended here is what the coordinator
+  # prepared -- whether each attachment landed is not observable from a
+  # foreach's output, and packaging's conclusion reports that.
+  #
   # Gated on the coordinator having answered at all, not on
-  # `completed_successfully`: under main's completeness model that flag is false
-  # for an `incomplete_retryable` run too, which still has findings (and a
-  # coverage section in the narrative) the analyst must see. Only the evidence
+  # `completed_successfully`: that flag is false for an `incomplete_retryable`
+  # run too, which still has findings the analyst must see. Only the evidence
   # write below keys off `completed_successfully`, so a retryable run keeps the
   # report eligible without hiding what it found.
   - name: write_hunt_results_message
@@ -202,16 +194,12 @@ steps:
   # Attribute Alerts task, which sets a disjoint set of keys (`alert_hits*`)
   # on the same per-space element. A blind replace here would erase that
   # space's alert-attribution fields. `corroborated_rank_score` is a reserved
-  # mapping field (`index_templates.ts:311-313`) with no writer yet: the one
-  # writer that used to compute it (`write_hunt_feedback.ts`) has since been
-  # deleted and this step deliberately does not resurrect it, so it never sets
-  # that key. `last_hunt_event_hit_count` *is* written as `0` on a run that
-  # matched nothing: Liquid's `default` filter only substitutes nil, false and
-  # empty, and `0` is none of those, so it passes through and the script's
-  # null check lets it land. That is the useful behaviour -- `0` says this run
-  # searched and found nothing, which a missing key cannot -- and nothing reads
-  # the field yet, so there is no convention to preserve. The `| default: null`
-  # remains as the guard for a genuinely absent count.
+  # mapping field with no writer, and this step is not it.
+  # `last_hunt_event_hit_count` *is* written as `0` on a run that matched
+  # nothing, because `0` says this run searched and found nothing where a
+  # missing key cannot: Liquid's `default` filter only substitutes nil, false
+  # and empty, so `0` passes through and the script's null check lets it land.
+  # The `| default: null` guards a genuinely absent count.
   - name: set_evidence_script
     type: data.set
     if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"
@@ -250,18 +238,13 @@ steps:
   # cover more, which is not the same as the run having searched; that
   # function's doc comment tells callers recording an outcome to read
   # `completeness` instead. Those runs are stamped `incomplete` so a report
-  # whose telemetry was never searched is not read back as clean. This is a
-  # deliberate third value beyond the two the deleted `write_hunt_feedback.ts`
-  # produced via `collapseHuntStatus`.
+  # whose telemetry was never searched is not read back as clean.
   #
   # `has_confirmed_hit` is read at the top level, not `tier1.has_confirmed_hit`
   # alone: that field's own doc comment is explicit, because Tier 2 can confirm
-  # a hit Tier 1 did not. Field names below are the coordinator's real
-  # snake_case wire shape (`hunt_coordinator.ts`), not the camelCase this step
-  # read before (verified live, 2026-09-25: the mismatch made
-  # `completed_successfully` and this collapse both always resolve nil/false, so
-  # no run -- hit or clean -- ever reached the SSE attach, results message, or
-  # evidence write).
+  # a hit Tier 1 did not. Field names below are the coordinator's snake_case
+  # wire shape (`hunt_coordinator.ts`); reading them in camelCase resolves nil,
+  # which this step's `if` then reads as a run that did not complete.
   - name: resolve_evidence_values
     type: data.set
     if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"
@@ -350,8 +333,8 @@ steps:
         {%- endif -%}
       result_hit: "${{ steps.run_hunt_coordinator.output.has_confirmed_hit == true }}"
       # `size` of a nil `sse` is 0 in this engine, and the `${{ }}` form keeps the
-      # native number: a `{% if %}` text block here rendered "0" as a string and
-      # failed the `sse_count: number` output validation (verified live).
+      # native number; a `{% if %}` text block would render it as a string and
+      # fail the `sse_count: number` output validation.
       result_sse_count: "${{ steps.run_hunt_coordinator.output.sse | size }}"
 
   - name: emit_result

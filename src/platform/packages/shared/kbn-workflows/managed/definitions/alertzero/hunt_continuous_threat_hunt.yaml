@@ -106,8 +106,8 @@ steps:
   # `if:` gates the whole parallel step, not just its `foreach` source: a
   # filter's `| default: []` does not produce a usable array for a skipped or
   # nil predecessor in this engine (bracket array literals are not valid filter
-  # arguments here — verified live; the key is silently dropped rather than
-  # substituted), and `foreach` itself hard-fails ("must evaluate to an array")
+  # arguments here, and the key is silently dropped rather than substituted),
+  # and `foreach` itself hard-fails ("must evaluate to an array")
   # rather than treating a missing predecessor as empty. Skipping the whole
   # step when the candidates call was blocked or itself failed sidesteps that
   # entirely: index_scope_blocked covers the gate above; the `!= nil` check
@@ -117,12 +117,11 @@ steps:
     if: "${{ steps.resolve_index_scope_gate.output.index_scope_blocked != true and steps.select_candidate_reports.output.ids != nil }}"
     foreach: "${{ steps.select_candidate_reports.output.ids }}"
     mode: settled
-    # Throttles branches within one sweep, rendered from the fixed fanOutMax constant; the
-    # engine scopes steps.<name> per branch since kibana#293651 (security-team#19670
-    # fixed), so this no longer needs the concurrency.max: 1 mitigation. foreach
-    # still processes every selected candidate regardless of this value (the
-    # engine's own "fan-out larger than the concurrency window" regression test
-    # proves it), so candidateLimit is unaffected; only wall-clock per sweep changes.
+    # Throttles branches within one sweep, rendered from the fixed fanOutMax
+    # constant. Safe above 1 because the engine scopes steps.<name> per branch
+    # (kibana#293651). foreach still processes every selected candidate
+    # regardless of this value, so candidateLimit is unaffected; only wall-clock
+    # per sweep changes.
     concurrency:
       max: __WORKER_FAN_OUT_MAX__
     # Straight-line branch body, atomic steps only: no on-failure/if/foreach on

@@ -167,8 +167,8 @@ steps:
   # existing idiom for that (forensics_run_endpoint_analysis.yaml's host_name
   # chains two step outputs and a literal the same way).
   #
-  # `where`/`size` on a nil `.proposals` (both requeries failed) resolve to 0,
-  # not a hard-fail -- verified live, unlike `foreach` on a nil source, so the
+  # `where`/`size` on a nil `.proposals` (both requeries failed) resolve to 0
+  # rather than hard-failing the way `foreach` on a nil source does, so the
   # trailing literal guard is only needed on the scalar. `total` rather than the
   # array length is the created count, so this never assumes one page is
   # complete.
@@ -179,11 +179,11 @@ steps:
       pending_count: "${{ steps.requery_proposals_retry.output.proposals | default: steps.requery_proposals.output.proposals | where: 'status', 'pending' | size }}"
       executing_count: "${{ steps.requery_proposals_retry.output.proposals | default: steps.requery_proposals.output.proposals | where: 'status', 'executing' | size }}"
 
-  # Three-term `and` chain, no `or` mixed in -- verified live this associates
-  # left-to-right without the mixed and/or precedence hazard create_proposal.yaml
-  # warns about (that warning is specifically about mixing and/or, not chaining
-  # multiple ands). This is the full settlement predicate: enough Proposals
-  # created, none still pending, none still executing.
+  # Three-term `and` chain with no `or` mixed in, which associates left-to-right
+  # and so avoids the mixed and/or precedence hazard create_proposal.yaml warns
+  # about (that warning is about mixing and/or, not chaining multiple ands).
+  # This is the full settlement predicate: enough Proposals created, none still
+  # pending, none still executing.
   - name: resolve_settled
     type: data.set
     with:
