@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { AlertingRetryService } from './alerting_retry_service';
-export { EsConcurrentModificationError } from './es_concurrent_modification_error';
-export { EsUnacknowledgedError } from './es_unacknowledged_error';
+module.exports = {
+  preset: '@kbn/test/jest_integration_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/alerting_v2'],
+};

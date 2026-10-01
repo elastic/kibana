@@ -50,7 +50,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           group_hash: groupHash,
           status: 'recovered',
           type: 'alert',
-          episode: { id: episodeId, status: 'inactive' },
+          alert: { id: episodeId, status: 'inactive' },
         }),
       ]);
 
@@ -97,7 +97,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           type: 'alert',
           data: { 'host.name': 'host-a' },
           severity: 'high',
-          episode: { id: episodeId, status: 'inactive' },
+          alert: { id: episodeId, status: 'inactive' },
         }),
       ]);
 
@@ -122,7 +122,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
         group_hash: groupHash,
         status: 'breached',
         type: 'alert',
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
         data: { 'host.name': 'host-a' },
         severity: 'high',
         space_id: 'default',
@@ -203,13 +203,13 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           status: 'recovered',
-          episode: { id: olderEpisodeId, status: 'inactive' },
+          alert: { id: olderEpisodeId, status: 'inactive' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
 
@@ -246,7 +246,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           group_hash: groupHash,
           status: 'breached',
           type: 'alert',
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
 
@@ -282,7 +282,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           group_hash: groupHash,
           status: 'recovered',
           type: 'alert',
-          episode: { id: episodeId, status: 'recovering', status_count: 2 },
+          alert: { id: episodeId, status: 'recovering', status_count: 2 },
         }),
       ]);
 
@@ -295,7 +295,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
       expect(latestStates.get(groupHash)).toMatchObject({
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
         status: 'breached',
       });
     }
@@ -314,7 +314,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           group_hash: groupHash,
           status: 'breached',
           type: 'alert',
-          episode: { id: episodeId, status: 'pending', status_count: 1 },
+          alert: { id: episodeId, status: 'pending', status_count: 1 },
         }),
       ]);
 
@@ -327,7 +327,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
       expect(latestStates.get(groupHash)).toMatchObject({
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
         status: 'breached',
       });
     }
@@ -352,7 +352,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
           group_hash: groupHash,
           status: 'recovered',
           type: 'alert',
-          episode: { id: episodeId, status: 'inactive' },
+          alert: { id: episodeId, status: 'inactive' },
         }),
       ]);
 
@@ -375,7 +375,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(ruleId);
       expect(latestStates.get(groupHash)).toMatchObject({
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
         status: 'breached',
       });
     }

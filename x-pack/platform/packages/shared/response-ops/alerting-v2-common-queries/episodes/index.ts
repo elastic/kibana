@@ -46,8 +46,12 @@ export type { EpisodeEventDataRow } from './episode_event_data_query';
 export { buildEpisodeActionsQuery } from './episode_actions_query';
 export type { EpisodeActionRow } from './episode_actions_query';
 
-export { buildEpisodeActionsHistoryQuery } from './episode_actions_history_query';
+export {
+  buildEpisodeActionsHistoryQuery,
+  toEpisodeActionActor,
+} from './episode_actions_history_query';
 export type {
+  EpisodeActionActor,
   EpisodeActionHistoryEntry,
   RawEpisodeActionHistoryEntry,
   BuildEpisodeActionsHistoryQueryOptions,
