@@ -105,7 +105,8 @@ describe('datasource listener', () => {
     dispatchRequest();
     await waitForPromise();
 
-    expect(workspaceSelector(env.store.getState())).toEqual({
+    const workspaceState = workspaceSelector(env.store.getState());
+    expect(workspaceState).toEqual({
       isInitialized: true,
       isLayoutRunning: false,
       nodesById: {},
@@ -119,6 +120,13 @@ describe('datasource listener', () => {
       undoHistory: [],
       redoHistory: [],
     });
+    const runtimeGraph = env.mockedDeps.getRuntimeGraph();
+    expect(new Set(Object.keys(runtimeGraph?.nodesMap ?? {}))).toEqual(
+      new Set(workspaceState.nodeIds)
+    );
+    expect(new Set(Object.keys(runtimeGraph?.edgesMap ?? {}))).toEqual(
+      new Set(workspaceState.edgeIds)
+    );
   });
 
   it('should initialize workspace with the current advanced settings', async () => {
