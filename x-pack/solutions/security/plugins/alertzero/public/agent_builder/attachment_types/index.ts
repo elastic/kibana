@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type React from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
 import type { AttachmentNavigationDeps } from './navigation';
+import { withAccessBoundary } from './with_access_boundary';
+
+type AttachmentAccessBoundary = React.ComponentType<React.PropsWithChildren>;
 
 /**
  * Registers the `security.threat` attachment UI definition. Uses a dynamic `import()` with its
@@ -20,9 +24,11 @@ const registerThreatAttachmentUI = async (
   {
     http,
     navigation,
+    AccessBoundary,
   }: {
     http: HttpStart;
     navigation: AttachmentNavigationDeps;
+    AccessBoundary: AttachmentAccessBoundary;
   }
 ): Promise<void> => {
   const { createThreatAttachmentDefinition } = await import(
@@ -31,7 +37,7 @@ const registerThreatAttachmentUI = async (
   );
   attachments.addAttachmentType(
     ALERTZERO_ATTACHMENT_TYPES.threat,
-    createThreatAttachmentDefinition({ http, navigation })
+    withAccessBoundary(createThreatAttachmentDefinition({ http, navigation }), AccessBoundary)
   );
 };
 
@@ -44,8 +50,10 @@ const registerSignificantSecurityEventAttachmentUI = async (
   attachments: AttachmentServiceStartContract,
   {
     navigation,
+    AccessBoundary,
   }: {
     navigation: AttachmentNavigationDeps;
+    AccessBoundary: AttachmentAccessBoundary;
   }
 ): Promise<void> => {
   const { createSignificantSecurityEventAttachmentDefinition } = await import(
@@ -54,7 +62,10 @@ const registerSignificantSecurityEventAttachmentUI = async (
   );
   attachments.addAttachmentType(
     ALERTZERO_ATTACHMENT_TYPES.significantSecurityEvent,
-    createSignificantSecurityEventAttachmentDefinition({ navigation })
+    withAccessBoundary(
+      createSignificantSecurityEventAttachmentDefinition({ navigation }),
+      AccessBoundary
+    )
   );
 };
 
@@ -64,13 +75,15 @@ export const registerAlertZeroAttachmentTypesUI = async (
   {
     http,
     navigation,
+    AccessBoundary,
   }: {
     http: HttpStart;
     navigation: AttachmentNavigationDeps;
+    AccessBoundary: AttachmentAccessBoundary;
   }
 ): Promise<void> => {
   await Promise.all([
-    registerThreatAttachmentUI(attachments, { http, navigation }),
-    registerSignificantSecurityEventAttachmentUI(attachments, { navigation }),
+    registerThreatAttachmentUI(attachments, { http, navigation, AccessBoundary }),
+    registerSignificantSecurityEventAttachmentUI(attachments, { navigation, AccessBoundary }),
   ]);
 };

@@ -54,6 +54,12 @@ export interface ApprovalContentProps {
   currentActorName?: string;
   alwaysAllow?: AlwaysAllowOption;
   /**
+   * Disables the Approve/Decline actions without hiding them, so a host that only lacks
+   * permission right now (rather than always) still shows the analyst what would otherwise be
+   * offered.
+   */
+  readOnly?: boolean;
+  /**
    * Approves the proposal. Rendered as a filled `EuiButton` labeled "Approve", disabled once the
    * proposal has expired — both derived here rather than supplied by the caller, so every host's
    * Approve button behaves and reads identically. Omit for a host that cannot record an approval,
@@ -102,6 +108,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     isSubmitting,
     currentActorName,
     alwaysAllow,
+    readOnly,
     onApprove,
     secondaryActions,
     onDismiss,
@@ -131,7 +138,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       ? {
           label: APPROVAL_MODAL_TRANSLATIONS.approve,
           onClick: onApprove,
-          isDisabled: isExpired,
+          isDisabled: isExpired || readOnly,
           'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
         }
       : undefined;
@@ -169,7 +176,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             color: 'danger',
             iconType: 'cross',
             onClick: declineConfirmAction,
-            isDisabled: isDeclineDisabled,
+            isDisabled: isDeclineDisabled || primaryAction?.isDisabled,
             'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm-decline` : undefined,
           }
         : primaryAction;

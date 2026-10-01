@@ -12,6 +12,8 @@ import { ApprovalContent } from './approval_content';
 import type { DeclineParams, AlwaysAllowOption, ApprovalProposal } from './types';
 
 export interface ApprovalModalProps {
+  /** Disables the Approve/Decline actions without hiding them, so a reopened decided-or-expired-looking proposal still reads the same. */
+  readOnly?: boolean;
   alwaysAllow?: AlwaysAllowOption;
   proposal: ApprovalProposal;
   onConfirm: () => Promise<void>;
@@ -51,6 +53,7 @@ export interface ApprovalModalProps {
  */
 export const ApprovalModal = memo<ApprovalModalProps>(
   ({
+    readOnly = false,
     alwaysAllow,
     proposal,
     onConfirm,
@@ -76,6 +79,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           isSubmitting={isSubmitting}
           currentActorName={currentActorName}
           alwaysAllow={alwaysAllow}
+          readOnly={readOnly}
           data-test-subj={dataTestSubj}
           onApprove={onConfirm}
           onDismiss={onDismiss}
