@@ -50115,8 +50115,6 @@
     "xpack.significantEvents.scheduledSigEventsDiscoveryMaxReviewPassesName": "Aprovações da revisão de eventos significativos agendados",
     "xpack.significantEvents.scheduledSigEventsDiscoveryReviewIntervalMinutesDescription": "A frequência com que a descoberta e triagem de eventos significativos é agendada neste espaço do Kibana.",
     "xpack.significantEvents.scheduledSigEventsDiscoveryReviewIntervalMinutesName": "Intervalo de revisão de eventos significativos programados (minutos)",
-    "xpack.significantEvents.sigEventsIndexPatternsSettingsDescription": "Lista separada por vírgulas de padrões de indexação, usados para filtragem e análise do fluxo de eventos significativos.",
-    "xpack.significantEvents.sigEventsIndexPatternsSettingsName": "Padrões de indexação de eventos significativos",
     "xpack.significantEvents.sigEventsTuningConfigDescription": "Configuração JSON para parâmetros de ajuste de eventos significativos, incluindo tamanhos de amostra, proporções, TTLs e limiares de busca.",
     "xpack.significantEvents.sigEventsTuningConfigName": "Ajuste de eventos significativos",
     "xpack.slo.add.flyoutTitle": "Criar SLO",

@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
@@ -27,7 +26,6 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
   OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE,
 } from '@kbn/management-settings-ids';
-import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
@@ -102,30 +100,6 @@ export function registerFeatureFlags(
     .isFeatureAvailable(SIGNIFICANT_EVENTS_TIERED_FEATURE.id)
     .then((isSignificantEventsAvailable) => {
       if (isSignificantEventsAvailable) {
-        core.uiSettings.register({
-          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS]: {
-            category: ['observability'],
-            name: i18n.translate('xpack.significantEvents.sigEventsIndexPatternsSettingsName', {
-              defaultMessage: 'Significant Events index patterns',
-            }) as string,
-            value: DEFAULT_INDEX_PATTERNS,
-            description: i18n.translate(
-              'xpack.significantEvents.sigEventsIndexPatternsSettingsDescription',
-              {
-                defaultMessage:
-                  'Comma-separated list of index patterns used for Significant Events stream filtering and analysis.',
-              }
-            ),
-            type: 'string',
-            schema: schema.string(),
-            requiresPageReload: false,
-            solutionViews: ['classic', 'oblt'],
-            technicalPreview: true,
-            readonly: true,
-            readonlyMode: 'ui',
-          },
-        });
-
         core.uiSettings.register({
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: {
             category: ['observability'],
