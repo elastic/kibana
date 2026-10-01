@@ -22,6 +22,7 @@ export { scopeConsumerName } from './src/consumer_name';
 export type {
   PubSubEvent,
   PubSubHandler,
+  PubSubHandlerContext,
   PubSubSetup,
   PubSubStart,
   PublishInput,

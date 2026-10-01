@@ -17,6 +17,7 @@
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { defineTopic, scopeConsumerName } from '@kbn/core-pubsub-server';
 import type { PubSubStart } from '@kbn/core-pubsub-server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -256,6 +257,72 @@ describe('PubSubService dispatch', () => {
     await flushDispatch();
 
     expect(seen).toEqual([delivered.id]);
+  });
+
+  it('delivers every namespace to a subscriber of "*"', async () => {
+    const { service, setup, topic } = createHarness();
+    const seenByAll: string[] = [];
+    const seenByMixed: string[] = [];
+    const seenByEu: string[] = [];
+
+    setup.subscribe(topic, 'ordersPlugin.all', ['*'], (event) => {
+      seenByAll.push(event.id);
+    });
+    setup.subscribe(topic, 'ordersPlugin.mixed', ['*', 'eu'], (event) => {
+      seenByMixed.push(event.id);
+    });
+    setup.subscribe(topic, 'ordersPlugin.eu', ['eu'], (event) => {
+      seenByEu.push(event.id);
+    });
+
+    const { publish } = start(service);
+    const published = await publish(topic, { namespaces: ['us'], payload: { secret: 'wide' } });
+    await flushDispatch();
+
+    expect(seenByAll).toEqual([published.id]);
+    expect(seenByMixed).toEqual([published.id]);
+    expect(seenByEu).toEqual([]);
+  });
+
+  it('rejects "*" as a published namespace', async () => {
+    const { service, setup, topic } = createHarness();
+    setup.subscribe(topic, 'ordersPlugin.all', ['*'], () => {});
+    const { publish } = start(service);
+
+    await expect(
+      publish(topic, { namespaces: ['*'], payload: { secret: 'nope' } })
+    ).rejects.toThrow(/concrete scope/);
+  });
+
+  it('forwards the publisher request to every handler and leaves it off the event', async () => {
+    const { service, setup, topic } = createHarness();
+    const request = kibanaRequestFactory({
+      headers: { authorization: 'Bearer publisher' },
+    });
+    const seenByLeft: Array<typeof request | undefined> = [];
+    const seenByRight: Array<typeof request | undefined> = [];
+    const events: object[] = [];
+
+    setup.subscribe(topic, 'ordersPlugin.left', ['default'], (event, context) => {
+      events.push(event);
+      seenByLeft.push(context.request);
+    });
+    setup.subscribe(topic, 'ordersPlugin.right', ['default'], (_event, context) => {
+      seenByRight.push(context.request);
+    });
+
+    const { publish } = start(service);
+    await publish(
+      topic,
+      { namespaces: ['default'], payload: { secret: 'with-request' } },
+      { request }
+    );
+    await publish(topic, { namespaces: ['default'], payload: { secret: 'without-request' } });
+    await flushDispatch();
+
+    expect(seenByLeft).toEqual([request, undefined]);
+    expect(seenByRight).toEqual([request, undefined]);
+    expect(events.every((event) => !Object.hasOwn(event, 'request'))).toBe(true);
   });
 
   it('throws for missing namespaces, an unknown topic, an oversized payload, and publish before start', async () => {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Topic } from './topic';
 
 /**
@@ -32,9 +33,23 @@ export interface PublishInput<TPayload> {
 }
 
 /**
+ * Caller identity for one delivery. Not part of the event.
+ * Phase 1 forwards the publisher's KibanaRequest, shared by every handler of that delivery.
+ * A durable phase fills the same field with a request rebuilt from stored credentials, which does not carry the original headers or symbols.
+ *
  * @public
  */
-export type PubSubHandler<TPayload> = (event: PubSubEvent<TPayload>) => void | Promise<void>;
+export interface PubSubHandlerContext {
+  readonly request?: KibanaRequest;
+}
+
+/**
+ * @public
+ */
+export type PubSubHandler<TPayload> = (
+  event: PubSubEvent<TPayload>,
+  context: PubSubHandlerContext
+) => void | Promise<void>;
 
 /**
  * @public
@@ -49,7 +64,7 @@ export interface PubSubSetup {
   /**
    * Subscribes during plugin setup.
    * `consumer` is the plugin-local name; the plugin facade prefixes it with the plugin id.
-   * `namespaces` must be non-empty. The handler is called only for events whose namespaces intersect.
+   * `namespaces` must be non-empty. `*` matches every namespace; otherwise the handler runs only when the sets intersect.
    */
   subscribe<TPayload>(
     topic: Topic<TPayload>,
@@ -65,10 +80,11 @@ export interface PubSubSetup {
 export interface PubSubStart {
   /**
    * Accepts an event and returns once it is queued.
-   * Does not wait for handlers.
+   * Does not wait for handlers. `context` is forwarded to handlers and is not stored on the event.
    */
   publish<TPayload>(
     topic: Topic<TPayload>,
-    input: PublishInput<TPayload>
+    input: PublishInput<TPayload>,
+    context?: PubSubHandlerContext
   ): Promise<PubSubEvent<TPayload>>;
 }

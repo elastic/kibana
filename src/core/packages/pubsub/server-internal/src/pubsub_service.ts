@@ -22,6 +22,7 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type {
   PubSubEvent,
   PubSubHandler,
+  PubSubHandlerContext,
   PubSubSetup,
   PubSubStart,
   PublishInput,
@@ -30,16 +31,26 @@ import type {
 
 type Phase = 'created' | 'setup' | 'started' | 'stopped';
 
-type SubscriptionHandler = (event: PubSubEvent<unknown>) => void | Promise<void>;
+type SubscriptionHandler = (
+  event: PubSubEvent<unknown>,
+  context: PubSubHandlerContext
+) => void | Promise<void>;
+
+interface QueuedDelivery {
+  readonly event: PubSubEvent<unknown>;
+  readonly request: PubSubHandlerContext['request'];
+}
 
 interface Subscription {
   readonly topic: string;
   readonly consumer: string;
   readonly namespaces: ReadonlySet<string>;
   readonly handler: SubscriptionHandler;
-  readonly queue: Array<PubSubEvent<unknown>>;
+  readonly queue: QueuedDelivery[];
   running: boolean;
 }
+
+const ALL_NAMESPACES = '*';
 
 /** Pending events per consumer, not counting the one already in flight. */
 export const PUBSUB_MAX_PENDING_EVENTS = 1000;
@@ -93,7 +104,7 @@ export class PubSubService implements CoreService<PubSubSetup, PubSubStart> {
     this.phase = 'started';
 
     return {
-      publish: (topic, input) => this.publish(topic, input),
+      publish: (topic, input, context) => this.publish(topic, input, context),
     };
   }
 
@@ -103,7 +114,8 @@ export class PubSubService implements CoreService<PubSubSetup, PubSubStart> {
 
   public async publish<TPayload>(
     topic: Topic<TPayload>,
-    input: PublishInput<TPayload>
+    input: PublishInput<TPayload>,
+    context?: PubSubHandlerContext
   ): Promise<PubSubEvent<TPayload>> {
     if (this.phase !== 'started') {
       throw new Error('Pubsub publish is only available after start.');
@@ -113,7 +125,7 @@ export class PubSubService implements CoreService<PubSubSetup, PubSubStart> {
       throw new Error(`Topic "${topic.name}" is not registered.`);
     }
 
-    const namespaces = this.copyNamespaces(input.namespaces);
+    const namespaces = this.copyNamespaces(input.namespaces, { allowWildcard: false });
     this.assertPayloadSize(input.payload);
 
     const event: PubSubEvent<TPayload> = Object.freeze({
@@ -124,7 +136,7 @@ export class PubSubService implements CoreService<PubSubSetup, PubSubStart> {
       acceptedAt: new Date().toISOString(),
     });
 
-    this.enqueue(event);
+    this.enqueue(event, context?.request);
 
     return event;
   }
@@ -162,25 +174,30 @@ export class PubSubService implements CoreService<PubSubSetup, PubSubStart> {
       throw new Error(`Consumer "${consumer}" is already subscribed to topic "${topic.name}".`);
     }
 
-    const namespaceSet = new Set(this.copyNamespaces(namespaces));
+    const namespaceSet = new Set(this.copyNamespaces(namespaces, { allowWildcard: true }));
     this.subscriptionKeys.add(key);
     this.subscriptions.push({
       topic: topic.name,
       consumer,
       namespaces: namespaceSet,
-      handler: (event) => handler(event as PubSubEvent<TPayload>),
+      handler: (event, context) => handler(event as PubSubEvent<TPayload>, context),
       queue: [],
       running: false,
     });
   }
 
-  private enqueue<TPayload>(event: PubSubEvent<TPayload>): void {
+  private enqueue<TPayload>(
+    event: PubSubEvent<TPayload>,
+    request: PubSubHandlerContext['request']
+  ): void {
     this.subscriptions.forEach((subscription) => {
       if (subscription.topic !== event.topic) {
         return;
       }
 
-      const matches = event.namespaces.some((namespace) => subscription.namespaces.has(namespace));
+      const matches =
+        subscription.namespaces.has(ALL_NAMESPACES) ||
+        event.namespaces.some((namespace) => subscription.namespaces.has(namespace));
       if (!matches) {
         return;
       }
@@ -192,7 +209,7 @@ export class PubSubService implements CoreService<PubSubSetup, PubSubStart> {
         return;
       }
 
-      subscription.queue.push(event);
+      subscription.queue.push({ event, request });
       this.schedule(subscription);
     });
   }
@@ -210,17 +227,17 @@ export class PubSubService implements CoreService<PubSubSetup, PubSubStart> {
 
   private async drain(subscription: Subscription): Promise<void> {
     while (this.phase === 'started' && subscription.queue.length > 0) {
-      const event = subscription.queue.shift();
-      if (!event) {
+      const delivery = subscription.queue.shift();
+      if (!delivery) {
         break;
       }
 
       try {
-        await subscription.handler(event);
+        await subscription.handler(delivery.event, { request: delivery.request });
       } catch (error) {
         const detail = error instanceof Error ? error.message : 'unknown failure';
         this.logger.error(
-          `Pubsub consumer "${subscription.consumer}" failed handling topic "${event.topic}" event "${event.id}": ${detail}`
+          `Pubsub consumer "${subscription.consumer}" failed handling topic "${delivery.event.topic}" event "${delivery.event.id}": ${detail}`
         );
       }
     }
@@ -232,13 +249,22 @@ export class PubSubService implements CoreService<PubSubSetup, PubSubStart> {
     }
   }
 
-  private copyNamespaces(namespaces: readonly string[]): readonly string[] {
+  private copyNamespaces(
+    namespaces: readonly string[],
+    { allowWildcard }: { allowWildcard: boolean }
+  ): readonly string[] {
     if (!Array.isArray(namespaces) || namespaces.length === 0) {
       throw new Error('Pubsub namespaces must be a non-empty array.');
     }
 
     if (namespaces.some((namespace) => typeof namespace !== 'string' || namespace.length === 0)) {
       throw new Error('Pubsub namespaces must be non-empty strings.');
+    }
+
+    if (!allowWildcard && namespaces.includes(ALL_NAMESPACES)) {
+      throw new Error(
+        'Pubsub publish namespaces must name a concrete scope. "*" is only valid on subscribe.'
+      );
     }
 
     return Object.freeze([...namespaces]);

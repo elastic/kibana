@@ -444,7 +444,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
     },
     pubsub: {
-      publish: (topic, input) => deps.pubsub.publish(topic, input),
+      publish: (topic, input, context) => deps.pubsub.publish(topic, input, context),
     },
     userStorage: {
       asScoped: deps.userStorage.asScoped,
