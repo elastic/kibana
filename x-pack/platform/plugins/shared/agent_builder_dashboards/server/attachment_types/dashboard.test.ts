@@ -18,6 +18,7 @@ import {
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { createDashboardAttachmentType } from './dashboard';
 
 const dashboardAttachmentData: DashboardAttachmentData = {
@@ -162,6 +163,13 @@ describe('createDashboardAttachmentType', () => {
   });
 
   it('treats legacy wrapped Lens configs as equal when checking staleness', async () => {
+    const metricApiConfig = {
+      type: 'metric' as const,
+      data_source: { type: 'esql' as const, query: 'FROM logs | STATS count = COUNT(*)' },
+      metrics: [{ type: 'primary' as const, column: 'count' }],
+      sampling: 1,
+      ignore_global_filters: false,
+    };
     const dashboardClient = {
       read: jest.fn().mockResolvedValue({
         id: 'dashboard-1',
@@ -173,10 +181,7 @@ describe('createDashboardAttachmentType', () => {
               type: LENS_EMBEDDABLE_TYPE,
               id: 'panel-1',
               grid: { x: 0, y: 0, w: 24, h: 15 },
-              config: {
-                type: 'lnsXY',
-                title: 'CPU Usage',
-              },
+              config: { ...metricApiConfig, title: 'CPU Usage' },
             },
           ],
         },
@@ -203,9 +208,7 @@ describe('createDashboardAttachmentType', () => {
             grid: { x: 0, y: 0, w: 24, h: 15 },
             config: {
               title: 'CPU Usage',
-              attributes: {
-                type: 'lnsXY',
-              },
+              attributes: new LensConfigBuilder().fromAPIFormat(metricApiConfig),
             },
           },
         ],

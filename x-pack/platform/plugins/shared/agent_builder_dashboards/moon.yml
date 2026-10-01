@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/ml-server-schemas'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/lens-common'
+  - '@kbn/lens-embeddable-utils'
   - '@kbn/esql-utils'
   - '@kbn/field-types'
   - '@kbn/core-saved-objects-api-server'

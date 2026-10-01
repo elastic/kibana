@@ -17,9 +17,12 @@ import {
   dashboardAttachmentDataSchema,
   dashboardStateToAttachmentData,
   isSection,
+  type AttachmentPanel,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { isLensAPIFormat, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { Logger } from '@kbn/core/server';
 
 interface CreateDashboardAttachmentTypeOptions {
@@ -27,10 +30,32 @@ interface CreateDashboardAttachmentTypeOptions {
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
 }
 
+const withLensAttributes = (panel: AttachmentPanel): AttachmentPanel =>
+  panel.type === LENS_EMBEDDABLE_TYPE &&
+  isLensAPIFormat(panel.config) &&
+  !('attributes' in panel.config)
+    ? {
+        ...panel,
+        config: {
+          ...panel.config,
+          attributes: new LensConfigBuilder().fromAPIFormat(panel.config),
+        },
+      }
+    : panel;
+
+/**
+ * Canonical form for staleness checks. Lens panels round-trip API → attributes → API,
+ * so an API config and a legacy `attributes`-wrapped config of the same chart compare equal.
+ */
 const normalizeDashboardAttachmentData = (
   data: DashboardAttachmentData
 ): DashboardAttachmentData => {
-  return dashboardStateToAttachmentData(attachmentDataToDashboardState(data));
+  const panels = data.panels.map((widget) =>
+    isSection(widget)
+      ? { ...widget, panels: widget.panels.map(withLensAttributes) }
+      : withLensAttributes(widget)
+  );
+  return dashboardStateToAttachmentData(attachmentDataToDashboardState({ ...data, panels }));
 };
 
 /**

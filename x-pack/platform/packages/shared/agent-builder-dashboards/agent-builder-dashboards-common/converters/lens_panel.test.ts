@@ -28,21 +28,33 @@ const buildLensAttributes = (): LensAttributes =>
   new LensConfigBuilder().fromAPIFormat(metricApiConfig);
 
 describe('Lens dashboard panel conversion — panel-level settings', () => {
-  it('to_attachment preserves panel-level settings over attributes title/description', () => {
+  const panelSettings = {
+    title: 'Panel title edited',
+    description: 'Panel description edited',
+    hide_title: true,
+    hide_border: true,
+    drilldowns: [{ id: 'd1' }],
+  };
+
+  it.each([
+    [
+      'prefers panel-level settings over attributes title/description',
+      panelSettings,
+      panelSettings,
+    ],
+    [
+      'falls back to attributes title/description when panel-level ones are absent',
+      {},
+      { title: 'Attributes title', description: 'Attributes description' },
+    ],
+  ])('to_attachment %s', (_, settings, expected) => {
     const state = {
       panels: [
         {
           type: LENS_EMBEDDABLE_TYPE,
           id: 'p1',
           grid,
-          config: {
-            title: 'Panel title edited',
-            description: 'Panel description edited',
-            hide_title: true,
-            hide_border: true,
-            drilldowns: [{ id: 'd1' }],
-            attributes: buildLensAttributes(),
-          },
+          config: { ...settings, attributes: buildLensAttributes() },
         },
       ],
     } as unknown as DashboardState;
@@ -58,38 +70,8 @@ describe('Lens dashboard panel conversion — panel-level settings', () => {
     expect(panel.type).toBe(LENS_EMBEDDABLE_TYPE);
     expect(panel.id).toBe('p1');
     expect(panel.grid).toEqual(grid);
-    expect(panel.config).toEqual(
-      expect.objectContaining({
-        title: 'Panel title edited',
-        description: 'Panel description edited',
-        hide_title: true,
-        hide_border: true,
-        drilldowns: [{ id: 'd1' }],
-        type: 'metric',
-      })
-    );
+    expect(panel.config).toEqual(expect.objectContaining({ ...expected, type: 'metric' }));
     expect(panel.config).not.toHaveProperty('attributes');
-  });
-
-  it('to_attachment falls back to attributes title/description when panel-level ones are absent', () => {
-    const state = {
-      panels: [
-        {
-          type: LENS_EMBEDDABLE_TYPE,
-          id: 'p1',
-          grid,
-          config: {
-            attributes: buildLensAttributes(),
-          },
-        },
-      ],
-    } as unknown as DashboardState;
-
-    const attachmentData = dashboardStateToAttachmentData(state);
-    const panel = attachmentData.panels[0] as { config: Record<string, unknown> };
-
-    expect(panel.config.title).toBe('Attributes title');
-    expect(panel.config.description).toBe('Attributes description');
   });
 
   it('round-trips panel-level settings through dashboard state', () => {
@@ -118,31 +100,11 @@ describe('Lens dashboard panel conversion — panel-level settings', () => {
     };
 
     expect(dashboardPanel.type).toBe(LENS_EMBEDDABLE_TYPE);
-    expect(dashboardPanel.config).toEqual(
-      expect.objectContaining({
-        title: 'Panel title edited',
-        description: 'Panel description edited',
-        hide_title: true,
-        hide_border: true,
-        drilldowns: [{ id: 'd1' }],
-        attributes: expect.objectContaining({
-          visualizationType: expect.any(String),
-        }),
-      })
-    );
+    expect(dashboardPanel.config).toEqual(attachmentPanel.config);
 
     const roundTripped = dashboardStateToAttachmentData(dashboardState);
     const roundTrippedPanel = roundTripped.panels[0] as { config: Record<string, unknown> };
 
-    expect(roundTrippedPanel.config).toEqual(
-      expect.objectContaining({
-        title: 'Panel title edited',
-        description: 'Panel description edited',
-        hide_title: true,
-        hide_border: true,
-        drilldowns: [{ id: 'd1' }],
-        type: 'metric',
-      })
-    );
+    expect(roundTrippedPanel.config).toEqual(attachmentPanel.config);
   });
 });

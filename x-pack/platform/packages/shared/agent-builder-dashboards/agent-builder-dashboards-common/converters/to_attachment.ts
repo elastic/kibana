@@ -143,7 +143,8 @@ export const toAttachmentWidget = (
 
 /**
  * Converts a DashboardState to DashboardAttachmentData.
- * Preserves all dashboard state fields for full round-trip support.
+ * Preserves all dashboard state fields for full round-trip support. Lens panels
+ * serialized with saved-object `attributes` are converted back to API format.
  */
 export const dashboardStateToAttachmentData = (state: DashboardState): DashboardAttachmentData => {
   return {

@@ -10,8 +10,6 @@ import type {
   DashboardSection,
   DashboardState,
 } from '@kbn/as-code-dashboard-schema';
-import { isLensAPIFormat, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import { buildVegaSavedVis, VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import type {
@@ -24,7 +22,8 @@ import { EMPTY_DASHBOARD_STATE } from '../dashboard_state_helpers';
 
 /**
  * Converts an AttachmentPanel to a DashboardPanel.
- * - Lens panels with API-format attributes are converted to internal format.
+ * - Lens panels pass through in API format; the Lens embeddable converts them
+ *   itself, so no saved-object `attributes` are added.
  * - `vega` panels (the future native API shape, `config.spec`) are expanded to a
  *   by-value legacy-vis (`visualization`) embeddable for rendering. This is a
  *   temporary bridge: once the native `vega` embeddable API ships, the panel can
@@ -57,20 +56,7 @@ const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): Dash
     };
   }
 
-  let configObject = config;
-  if (type === LENS_EMBEDDABLE_TYPE && isLensAPIFormat(config)) {
-    const lensAttributes = new LensConfigBuilder().fromAPIFormat(config);
-    configObject = {
-      ...config,
-      attributes: lensAttributes,
-    };
-  }
-  return {
-    type,
-    id,
-    grid,
-    config: configObject,
-  };
+  return { type, id, grid, config };
 };
 
 type AgentWidget = AttachmentPanel | AgentDashboardSection;
@@ -98,6 +84,7 @@ const normalizeWidgets = (widgets: AgentWidget[]): DashboardWidget[] =>
 /**
  * Converts a DashboardAttachment to a DashboardState.
  * Uses provided values from the attachment, falling back to defaults for missing fields.
+ * Lens panels stay in API format; the attachment never carries saved-object state.
  */
 export const attachmentDataToDashboardState = ({
   panels = [],

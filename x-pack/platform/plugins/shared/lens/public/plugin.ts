@@ -387,6 +387,8 @@ export class LensPlugin {
         const [deps, { createLensEmbeddableFactory }] = await Promise.all([
           getStartServicesForEmbeddable(),
           import('./async_services'),
+          // Deserializing API-format panels needs the feature flags and builder set up
+          ...this.setupPendingTasks,
         ]);
         return createLensEmbeddableFactory(deps);
       });
