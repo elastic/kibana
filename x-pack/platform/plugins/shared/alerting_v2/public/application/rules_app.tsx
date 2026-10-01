@@ -33,7 +33,9 @@ export const RulesApp = () => {
   return (
     <RequireAlertingPrivilege
       features={['rules']}
-      pageName={i18n.translate('xpack.alertingV2.rulesApp.pageName', { defaultMessage: 'Rules' })}
+      pageName={i18n.translate('xpack.alertingV2.rulesApp.pageName', {
+        defaultMessage: 'ES|QL rules',
+      })}
     >
       <Routes>
         <Route exact path={`${base}/sequence/create`}>

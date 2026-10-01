@@ -114,6 +114,8 @@ describe('RulesListHeader', () => {
 
     expect(v1Tab).toHaveAttribute('aria-selected', 'false');
     expect(v2Tab).toHaveAttribute('aria-selected', 'true');
+    expect(v1Tab).toHaveTextContent('Standard rules');
+    expect(v2Tab).toHaveTextContent('ES|QL rules');
     expect(await screen.findAllByRole('tab')).toHaveLength(2);
   });
 

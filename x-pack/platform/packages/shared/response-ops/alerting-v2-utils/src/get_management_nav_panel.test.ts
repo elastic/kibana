@@ -23,7 +23,7 @@ describe('getAlertingV2ManagementNavPanel', () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
       id: 'alerting_v2_panel',
-      title: 'Alerting V2 Preview',
+      title: 'Kibana ES|QL alerting',
       children: [
         { link: 'management:rules' },
         { link: 'management:episodes' },

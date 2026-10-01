@@ -246,7 +246,7 @@ describe('RuleDetailPage', () => {
     expect(kindBadge.querySelector('[data-euiicon-type="chartBarVertical"]')).toBeInTheDocument();
     expect(screen.getByTestId('enabledBadge')).toHaveTextContent('Enabled');
     expect(screen.queryByTestId('disabledBadge')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText('+2'));
+    fireEvent.click(screen.getByText('+3'));
     expect(screen.getByText('prod')).toBeInTheDocument();
     expect(screen.getByText('infra')).toBeInTheDocument();
   });

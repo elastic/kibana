@@ -10,8 +10,10 @@ import { EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
+import { ALERTING_V2_EXECUTION_HISTORY_APP_ID } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
 import { experimentalBadge } from '../../components/experimental_badge';
+import { EsqlRulesOnlyCallout, esqlRulesOnlyBadge } from '../../components/esql_rules_only_notice';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -63,6 +65,13 @@ const getExecutionHistoryTabs = ({
   },
 ];
 
+const ESQL_RULES_ONLY_CALLOUT_BODY = i18n.translate(
+  'xpack.alertingV2.executionHistory.esqlRulesOnlyCalloutBody',
+  {
+    defaultMessage: 'Review past runs for ES|QL rules and action policies.',
+  }
+);
+
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
 
@@ -96,11 +105,15 @@ export const ExecutionHistoryPage = () => {
       <AppHeader
         sticky={false}
         title={EXECUTION_HISTORY_PAGE_TITLE}
-        badges={[experimentalBadge]}
+        badges={[esqlRulesOnlyBadge, experimentalBadge]}
         spacing="bleed"
         tabs={tabs}
       />
       <EuiSpacer size="m" />
+      <EsqlRulesOnlyCallout
+        appId={ALERTING_V2_EXECUTION_HISTORY_APP_ID}
+        description={ESQL_RULES_ONLY_CALLOUT_BODY}
+      />
       {selectedTabId === RULES_TAB_ID ? (
         <RulesTabContent onRuleClick={handleRuleClick} />
       ) : (

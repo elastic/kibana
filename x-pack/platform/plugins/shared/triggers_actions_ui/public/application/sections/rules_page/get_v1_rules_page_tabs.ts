@@ -6,6 +6,7 @@
  */
 
 import type { AppHeaderTab } from '@kbn/app-header';
+import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
 
 export interface GetV1RulesPageTabsParams {
@@ -27,9 +28,9 @@ export const getV1RulesPageTabs = ({
   v2Href,
 }: GetV1RulesPageTabsParams): AppHeaderTab[] => [
   {
-    id: 'v2Rules',
+    id: ALERTING_V2_RULES_TAB_ID,
     label: i18n.translate('xpack.triggersActionsUI.rulesPage.v2RulesTabTitle', {
-      defaultMessage: 'V2 rules',
+      defaultMessage: 'ES|QL rules',
     }),
     isSelected: false,
     href: v2Href,
@@ -44,7 +45,7 @@ export const getV1RulesPageTabs = ({
   {
     id: 'v1Rules',
     label: i18n.translate('xpack.triggersActionsUI.rulesPage.v1RulesTabTitle', {
-      defaultMessage: 'V1 rules',
+      defaultMessage: 'Standard rules',
     }),
     isSelected: true,
     href: v1Href,

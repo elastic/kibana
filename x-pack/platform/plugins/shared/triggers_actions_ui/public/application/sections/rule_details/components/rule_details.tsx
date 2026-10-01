@@ -364,6 +364,13 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       color: rule.enabled ? 'success' : 'default',
       'data-test-subj': 'ruleEnabledBadge',
     },
+    {
+      label: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.standardRulesBadge', {
+        defaultMessage: 'Standard rules',
+      }),
+      color: 'hollow',
+      'data-test-subj': 'standardRulesBadge',
+    },
     ...rule.tags.map((tag): AppHeaderBadge => ({ label: tag, color: 'hollow' })),
   ];
 

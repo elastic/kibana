@@ -43,8 +43,8 @@ export const getAlertingV2ManagementNavPanel = (core: CoreStart): StandardNodeDe
   return [
     {
       id: PANEL_ID,
-      title: i18n.translate('xpack.alertingV2.nav.title', {
-        defaultMessage: 'Alerting V2 Preview',
+      title: i18n.translate('xpack.alertingV2.nav.kibanaEsqlAlertingTitle', {
+        defaultMessage: 'Kibana ES|QL alerting',
       }),
       children: [
         { link: 'management:rules' },
