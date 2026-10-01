@@ -401,7 +401,7 @@ describe('reportFlakySuiteIssues', () => {
       // The comment's Slack notification reads the metadata, so the body goes first
       expect(github.addIssueComment).toHaveBeenCalledWith(
         42,
-        expect.stringContaining('**Still flaky**')
+        expect.stringContaining('This test suite still appears to be flaky.')
       );
       expect(github.editIssue.mock.invocationCallOrder[0]).toBeLessThan(
         github.addIssueComment.mock.invocationCallOrder[0]
@@ -451,7 +451,7 @@ describe('reportFlakySuiteIssues', () => {
       });
       expect(github.addIssueComment).toHaveBeenCalledWith(
         42,
-        expect.stringContaining('**Failed again after this issue was closed**')
+        expect.stringContaining('appears to be flaky again after this issue was closed')
       );
       expect(summary.actions[0]).toMatchObject({
         action: 'updated',

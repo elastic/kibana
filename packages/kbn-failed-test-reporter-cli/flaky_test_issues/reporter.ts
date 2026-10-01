@@ -18,7 +18,6 @@ import {
 } from '../failed_tests_reporter/github_api';
 import {
   flakySuiteIssueTitle,
-  newestFailure,
   readFlakySuiteIssueMetadata,
   renderFlakySuiteIssueBody,
   renderFlakySuiteIssueComment,
@@ -35,6 +34,7 @@ import {
   type IssueMatch,
   type MatchedIssue,
 } from './match_issues';
+import { isPullRequestRef } from './markdown';
 import { groupIntoSuites, type FlakySuite } from './suites';
 
 /**
@@ -168,6 +168,19 @@ const isOwnSuiteIssue = ({ issue, match }: MatchedIssue, suite: FlakySuite): boo
   match === 'suite' &&
   readFlakySuiteIssueMetadata(issue.body)?.['suite.title'] === suite.suiteTitle;
 
+/** The suite's newest failure on a branch of the report scope, pull requests left out. */
+const lastFailedAt = (suite: FlakySuite): Date | undefined => {
+  let newest: Date | undefined;
+  for (const test of suite.tests) {
+    for (const { branch, lastFailedAt: failedAt } of test.byBranch) {
+      if (failedAt && !isPullRequestRef(branch) && (!newest || failedAt > newest)) {
+        newest = failedAt;
+      }
+    }
+  }
+  return newest;
+};
+
 interface Refresh {
   previous: RecordedFlakySuiteIssueMetadata;
   /** The suite failed since the last report, or since the issue was closed. */
@@ -190,7 +203,7 @@ const planRefresh = (
   if (!previous || (recordedAt && new Date(recordedAt) >= report.generatedAt)) {
     return undefined;
   }
-  const failedAt = newestFailure(suite)?.at;
+  const failedAt = lastFailedAt(suite);
   if (issue.state === 'closed') {
     const closedAt = issue.closed_at ? new Date(issue.closed_at) : undefined;
     const failedSinceClosed = failedAt && closedAt && failedAt > closedAt;
@@ -363,7 +376,7 @@ export const reportFlakySuiteIssues = async (
       if (comment) {
         await github.addIssueComment(
           issue.number,
-          renderFlakySuiteIssueComment(suite, { report, previous, reopened: reopen })
+          renderFlakySuiteIssueComment(suite, { reopened: reopen })
         );
       }
       log.info(

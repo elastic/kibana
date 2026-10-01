@@ -12,14 +12,12 @@ import type { FlakyTestReport, TestFramework } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   BUILDKITE_ORG_URL,
-  buildkiteJobUrl,
   CATEGORY_LABELS,
   codeBlock,
   collapsed,
   formatBuildLink,
   formatFailedBranches,
   formatDateRange,
-  formatDateTime,
   formatFailedBuilds,
   formatFullFailureMessage,
   formatPercent,
@@ -28,6 +26,7 @@ import {
   isPullRequestRef,
   KIBANA_BLOB_URL,
   plural,
+  suiteDashboardUrl,
   table,
   targetEnvironment,
   testsTable,
@@ -207,26 +206,6 @@ export const flakySuiteIssueMetadata = (
       : 1,
     'report.history': history.slice(-MAX_REPORT_HISTORY),
   };
-};
-
-/** The suite's newest failure on a branch of the report scope, pull requests left out. */
-export interface SuiteFailure {
-  at: Date;
-  branch: string;
-  buildUrl?: string;
-  jobId?: string;
-}
-
-export const newestFailure = (suite: FlakySuite): SuiteFailure | undefined => {
-  let newest: SuiteFailure | undefined;
-  for (const test of suite.tests) {
-    for (const { branch, lastFailedAt, lastFailedBuildUrl, lastFailedJobId } of test.byBranch) {
-      if (lastFailedAt && !isPullRequestRef(branch) && (!newest || lastFailedAt > newest.at)) {
-        newest = { at: lastFailedAt, branch, buildUrl: lastFailedBuildUrl, jobId: lastFailedJobId };
-      }
-    }
-  }
-  return newest;
 };
 
 /**
@@ -664,57 +643,21 @@ export const renderFlakySuiteIssueBody = (
   );
 };
 
-/** `kibana-on-merge` from `https://buildkite.com/elastic/kibana-on-merge/builds/12345`. */
-const pipelineOfBuild = (buildUrl: string | undefined): string | undefined =>
-  buildUrl?.match(/^https:\/\/buildkite\.com\/[^/]+\/([^/]+)\/builds\//)?.[1];
-
 /**
- * `[kibana-on-merge - main](…#job) · 2026-09-09 06:12 UTC`, the link spelled like the ones
- * `report_failed_tests` posts so people and `triage/` read both alike.
- */
-const failureLink = ({ at, branch, buildUrl, jobId }: SuiteFailure): string => {
-  const label = `${pipelineOfBuild(buildUrl) ?? 'CI Build'} - ${branch}`;
-  const link = buildUrl ? `[${label}](${buildkiteJobUrl(buildUrl, jobId)})` : label;
-  return `${link} · ${formatDateTime(at)}`;
-};
-
-export interface FlakySuiteIssueCommentContext {
-  report: FlakyTestReport;
-  /** Metadata of the issue before the refresh, for the tests that are flaky for the first time. */
-  previous?: RecordedFlakySuiteIssueMetadata;
-  /** The issue is being reopened: the suite failed again after it was closed. */
-  reopened: boolean;
-}
-
-/**
- * The comment of a refresh that found new failures: what the worst test did over the report
- * window, its newest failure and the tests flaky for the first time. A `kibanamachine` comment
- * is what turns into a Slack notification (elastic/kibana-operations `triage/`), so the body
- * has to be updated first: the notification reads its metadata.
+ * The comment of a refresh that found new failures, pointing at the suite's failures and at how to
+ * skip it; the numbers are in the body. A `kibanamachine` comment is what turns into a Slack
+ * notification (elastic/kibana-operations `triage/`), so the body has to be updated first: the
+ * notification reads its metadata.
  */
 export const renderFlakySuiteIssueComment = (
-  suite: FlakySuite,
-  { report, previous, reopened }: FlakySuiteIssueCommentContext
-): string => {
-  const [worst] = suite.tests;
-  const subject = suite.tests.length > 1 ? 'Its worst test' : 'The test';
-  const lead = reopened
-    ? '**Failed again after this issue was closed**, reopening it.'
-    : '**Still flaky**, with new failures since the last report.';
-  const known = new Set(previous?.['suite.testIds'] ?? []);
-  const newlyFlaky = previous ? suite.tests.filter(({ testId }) => !known.has(testId)) : [];
-  const failure = newestFailure(suite);
-  return [
-    `${lead} ${subject} failed in ${formatFailedBuilds(worst)} builds over ` +
-      `${formatDateRange(report.window.from, report.window.to)}.`,
-    [
-      ...(failure ? [`- Newest failure: ${failureLink(failure)}`] : []),
-      ...(newlyFlaky.length > 0
-        ? [`- Newly flaky: ${newlyFlaky.map(({ title }) => `*${title}*`).join(', ')}`]
-        : []),
-    ].join('\n'),
-    'The issue description has the numbers of this report.',
-  ]
-    .filter((section) => section !== '')
-    .join('\n\n');
-};
+  suite: Pick<FlakySuite, 'filePath' | 'suiteTitle'>,
+  { reopened }: { reopened: boolean }
+): string =>
+  [
+    reopened
+      ? 'This test suite appears to be flaky again after this issue was closed.'
+      : 'This test suite still appears to be flaky.',
+    '> [!TIP]\n' +
+      `> [Review the failures](${suiteDashboardUrl(suite)}). If you'd like to skip the test, ` +
+      'ask the #kibana-operations team to `/skip` it, or skip the test case manually.',
+  ].join('\n\n');

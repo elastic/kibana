@@ -18,6 +18,7 @@ import {
   formatFailureMessage,
   formatBranchRates,
   formatPercent,
+  suiteDashboardUrl,
   testDashboardUrl,
   testsTable,
 } from './markdown';
@@ -92,6 +93,23 @@ describe('testDashboardUrl', () => {
     );
     // quotes and bangs are rison-escaped, spaces URL-encoded
     expect(testDashboardUrl("it's a test!")).toContain("test.id:'it!'s%20a%20test!!'");
+  });
+});
+
+describe('suiteDashboardUrl', () => {
+  it('filters the Scout dashboard on the exact file and describe block of the suite', () => {
+    const url = suiteDashboardUrl({ filePath: 'a/b.spec.ts', suiteTitle: "it's a suite!" });
+
+    expect(url).toContain(
+      "(match_phrase:(test.file.path:'a/b.spec.ts')),(match_phrase:(suite.title.keyword:'it!'s%20a%20suite!!'))"
+    );
+  });
+
+  it('filters on the file alone for a suite without a title', () => {
+    const url = suiteDashboardUrl({ filePath: 'a/b.test.ts' });
+
+    expect(url).toContain("query:(bool:(must:!((match_phrase:(test.file.path:'a/b.test.ts'))))))");
+    expect(url).not.toContain('suite.title');
   });
 });
 

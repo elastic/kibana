@@ -584,52 +584,22 @@ describe('refreshing a suite issue', () => {
     expect(metadata?.['report.history'][29].generatedAt).toBe('2026-09-09T09:04:41.000Z');
   });
 
-  it("comments with the worst test's numbers, the newest failure and the tests newly flaky", () => {
-    const tests = [
-      flakyTest({ testId: 'no-longer-flaky' }),
-      flakyTest({ testId: 'new', title: 'another test', failedBuilds: 3 }),
-    ];
-    const report = flakyReport(tests);
-    const [suite] = groupIntoSuites(report.flaky);
+  it('comments that the suite still appears to be flaky, linking its failures and how to skip it', () => {
+    const { suite } = singleTestReport();
 
-    expect(renderFlakySuiteIssueComment(suite, { report, previous, reopened: false }))
-      .toMatchInlineSnapshot(`
-      "**Still flaky**, with new failures since the last report. Its worst test failed in 49 / 509 (**10%**) builds over 2–9 Sep 2026.
+    expect(renderFlakySuiteIssueComment(suite, { reopened: false })).toMatchInlineSnapshot(`
+      "This test suite still appears to be flaky.
 
-      - Newest failure: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC
-      - Newly flaky: *another test*
-
-      The issue description has the numbers of this report."
+      > [!TIP]
+      > [Review the failures](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20suite',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.file.path:'x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts')),(match_phrase:(suite.title.keyword:'Default%20status%20alert'))))))))). If you'd like to skip the test, ask the #kibana-operations team to \`/skip\` it, or skip the test case manually."
     `);
   });
 
-  it('says the issue is reopened and leaves pull request failures out of the newest one', () => {
-    const report = flakyReport([
-      flakyTest({
-        byBranch: [
-          {
-            branch: 'someone:fix-it',
-            builds: 3,
-            failedBuilds: 1,
-            buildFailRate: 1 / 3,
-            lastFailedAt: new Date('2026-09-09T08:00:00.000Z'),
-            lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-pull-request/builds/1',
-          },
-          ...flakyTest().byBranch,
-        ],
-      }),
-    ]);
-    const [suite] = groupIntoSuites(report.flaky);
+  it('says why the issue is reopened', () => {
+    const { suite } = singleTestReport();
 
-    const known = { ...previous, 'suite.testIds': [suite.tests[0].testId] };
-
-    expect(renderFlakySuiteIssueComment(suite, { report, previous: known, reopened: true }))
-      .toMatchInlineSnapshot(`
-      "**Failed again after this issue was closed**, reopening it. The test failed in 49 / 509 (**10%**) builds over 2–9 Sep 2026.
-
-      - Newest failure: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC
-
-      The issue description has the numbers of this report."
-    `);
+    expect(renderFlakySuiteIssueComment(suite, { reopened: true })).toMatch(
+      /^This test suite appears to be flaky again after this issue was closed\.\n\n> \[!TIP\]/
+    );
   });
 });
