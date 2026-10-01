@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InvestigationStructuredOutput } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationReport } from '../types';
 import {
   clampDecisionTreeHelpfulnessScore,
   clampGoalScore,
@@ -131,7 +131,7 @@ describe('extractReferenceAnswer', () => {
 });
 
 describe('composeAnswerText', () => {
-  const report: InvestigationStructuredOutput = {
+  const report: InvestigationReport = {
     summary: 'Kafka lag grew.',
     conclusion: 'Index throttling caused consumer lag.',
     severity: 'high',
@@ -155,7 +155,7 @@ describe('composeAnswerText', () => {
 });
 
 describe('composeEvidenceText', () => {
-  it('renders hypothesis evidence and recommendations, tagged with their hypothesis', () => {
+  it('renders hypothesis evidence, impact, and proposed actions, tagged with their hypothesis', () => {
     const report = {
       hypotheses: [
         {
@@ -164,14 +164,8 @@ describe('composeEvidenceText', () => {
           status: 'confirmed',
           evidence: [
             {
-              description: 'ES rejected bulk writes',
-              chart: {
-                type: 'line',
-                title: 'Rejected bulk writes',
-                x_axis: { type: 'time' },
-                y_axis: {},
-                series: [{ name: 'rejections', points: [{ x: '2024-01-01T00:00:00Z', y: 12 }] }],
-              },
+              description: 'ES rejected bulk writes: `FROM logs-*`',
+              chart: { title: 'Rejected writes' },
             },
           ],
         },
@@ -182,13 +176,15 @@ describe('composeEvidenceText', () => {
           evidence: [{ description: 'packet loss briefly spiked' }],
         },
       ],
-      recommendations: [{ title: 'Raise write queue size', confidence: 0.8 }],
-    } as unknown as InvestigationStructuredOutput;
+      impact: { summary: 'Indexing stalled', entities: [], created_at: '2026-01-01' },
+      proposals: [{ title: 'Raise write queue size', comment: 'More room', status: 'pending' }],
+    } as unknown as InvestigationReport;
     const text = composeEvidenceText(report);
-    expect(text).toContain('[confirmed] throttling: ES rejected bulk writes');
-    expect(text).toContain('chart: Rejected bulk writes');
+    expect(text).toContain('[confirmed] throttling: ES rejected bulk writes: `FROM logs-*`');
+    expect(text).toContain('[chart: Rejected writes]');
     expect(text).toContain('[rejected] network: packet loss briefly spiked');
-    expect(text).toContain('recommendation: Raise write queue size');
+    expect(text).toContain('impact: Indexing stalled');
+    expect(text).toContain('proposed action: Raise write queue size');
   });
 });
 

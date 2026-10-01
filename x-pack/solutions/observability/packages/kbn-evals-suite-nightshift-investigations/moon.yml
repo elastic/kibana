@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/nightshift-decision-trees'
   - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/agentic-investigations-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/workflows'
   - '@kbn/zod'
