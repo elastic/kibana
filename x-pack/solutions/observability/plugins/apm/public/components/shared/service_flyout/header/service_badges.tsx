@@ -148,6 +148,7 @@ export function useServiceBadges(): ReactElement[] {
           id="slo"
           color={descriptor.color}
           data-test-subj="serviceFlyoutSloBadge"
+          data-slo-status={sloData.sloStatus}
           toolTipContent={descriptor.toolTipContent}
           toolTipPosition="bottom"
           onClick={(event) => {
@@ -168,6 +169,7 @@ export function useServiceBadges(): ReactElement[] {
           id="slo"
           color={descriptor.color}
           data-test-subj="serviceFlyoutSloBadge"
+          data-slo-status={sloData.sloStatus}
           toolTipContent={descriptor.toolTipContent}
           toolTipPosition="bottom"
           aria-label={descriptor.ariaLabel}
