@@ -155,9 +155,7 @@ describe('AlertStatusChangedWorkflowSubscriber', () => {
       await expect(capturedHandler(event, makeContext())).resolves.toBeUndefined();
 
       expect(loggingSystemMock.collect(logger).error).toEqual(
-        expect.arrayContaining([
-          expect.arrayContaining([expect.stringContaining('emit failed')]),
-        ])
+        expect.arrayContaining([expect.arrayContaining([expect.stringContaining('emit failed')])])
       );
     });
 

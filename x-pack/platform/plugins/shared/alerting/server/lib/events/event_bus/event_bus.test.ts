@@ -63,9 +63,7 @@ describe('AsyncDomainEventBus', () => {
         expect(handler).not.toHaveBeenCalled();
         expect(loggingSystemMock.collect(logger).warn).toEqual(
           expect.arrayContaining([
-            expect.arrayContaining([
-              expect.stringContaining(`reserved type: ${reservedType}`),
-            ]),
+            expect.arrayContaining([expect.stringContaining(`reserved type: ${reservedType}`)]),
           ])
         );
       }
