@@ -5,21 +5,12 @@
  * 2.0.
  */
 
-import { css } from '@emotion/css';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import {
-  EuiCodeBlock,
-  EuiTable,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiTableHeaderCell,
   EuiMarkdownFormat,
-  EuiSpacer,
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
-  useEuiTheme,
-  EuiLink,
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
@@ -44,10 +35,12 @@ import {
   createRenderAttachmentRenderer,
   renderTagParser,
   createRenderRenderer,
+  createConversationMarkdownComponents,
 } from './markdown_plugins';
+import { useMarkdownContainerStyles } from './use_markdown_container_styles';
 import { useStepsFromSavedTurns } from '../../../../hooks/use_steps_from_saved_turns';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
-import { ExternalLinkModal } from './external_link_modal';
+import { useMarkdownLinkClick } from './use_markdown_link_click';
 
 interface Props {
   content: string;
@@ -70,25 +63,7 @@ export function ChatMessageText({
   conversationId,
   isStreaming = false,
 }: Props) {
-  const { euiTheme } = useEuiTheme();
-
-  const containerClassName = css`
-    overflow-wrap: anywhere;
-
-    /* Standardize spacing between numbered list items */
-    ol > li:not(:first-child) {
-      margin-top: ${euiTheme.size.s};
-    }
-
-    ol > li > p {
-      margin-bottom: ${euiTheme.size.s};
-    }
-
-    .euiMarkdownFormat > ul > li,
-    .euiMarkdownFormat > ol > li {
-      line-height: ${euiTheme.size.l};
-    }
-  `;
+  const markdownContainerStyles = useMarkdownContainerStyles();
 
   const { attachmentsService, renderersService, conversationsService, startDependencies } =
     useAgentBuilderServices();
@@ -98,24 +73,7 @@ export function ChatMessageText({
     services: { http, application, uiSettings },
   } = useKibana();
 
-  const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
-
-  const handleLinkClick = useCallback(
-    (href: string, e: React.MouseEvent) => {
-      const internal = http?.externalUrl?.isInternalUrl(href);
-      if (!internal) {
-        // External links always show the confirmation modal
-        e.preventDefault();
-        setPendingExternalUrl(href);
-      } else if (isSidebar) {
-        // Internal link in flyout: navigate in current window
-        e.preventDefault();
-        application.navigateToUrl(new URL(href, window.location.href).toString());
-      }
-      // Internal link in full page: target="_blank" handles navigation
-    },
-    [isSidebar, http?.externalUrl, application]
-  );
+  const { handleLinkClick, externalLinkModal } = useMarkdownLinkClick();
 
   const visualizationRenderer = useMemo(
     () =>
@@ -175,71 +133,8 @@ export function ChatMessageText({
 
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
-      a: (props) => (
-        <EuiLink
-          {...props}
-          target="_blank"
-          rel="noreferrer"
-          external={false}
-          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-            if (props.href) handleLinkClick(props.href, e);
-          }}
-        />
-      ),
+      ...createConversationMarkdownComponents({ onLinkClick: handleLinkClick }),
       cursor: Cursor,
-      codeBlock: (props) => {
-        return (
-          <>
-            <EuiCodeBlock>{props.value}</EuiCodeBlock>
-            <EuiSpacer size="m" />
-          </>
-        );
-      },
-      esql: (props) => {
-        return (
-          <>
-            <EuiCodeBlock language="esql" isCopyable>
-              {props.value}
-            </EuiCodeBlock>
-            <EuiSpacer size="m" />
-          </>
-        );
-      },
-      table: (props) => (
-        <>
-          <EuiTable {...props} tableLayout="auto" scrollableInline responsiveBreakpoint={false} />
-          <EuiSpacer size="m" />
-        </>
-      ),
-      th: (props) => {
-        const { children, ...rest } = props;
-        return (
-          <EuiTableHeaderCell
-            minWidth="10em"
-            // This is just a recommendation and will be ignored if there aren't
-            // enough columns to fill the entire container's width.
-            maxWidth="30em"
-            {...rest}
-          >
-            {children}
-          </EuiTableHeaderCell>
-        );
-      },
-      tr: (props) => <EuiTableRow {...props} />,
-      td: (props) => {
-        const { children, ...rest } = props;
-        return (
-          <EuiTableRowCell
-            minWidth="10em"
-            // This is just a recommendation and will be ignored if there aren't
-            // enough columns to fill the entire container's width.
-            maxWidth="30em"
-            {...rest}
-          >
-            {children}
-          </EuiTableRowCell>
-        );
-      },
       [visualizationElement.tagName]: visualizationRenderer,
       [renderAttachmentElement.tagName]: renderAttachmentRenderer,
       [renderElement.tagName]: renderRenderer,
@@ -260,7 +155,7 @@ export function ChatMessageText({
 
   return (
     <>
-      <EuiText size="s" className={containerClassName}>
+      <EuiText size="s" css={markdownContainerStyles}>
         <EuiMarkdownFormat
           textSize="s"
           parsingPluginList={parsingPluginList}
@@ -269,7 +164,7 @@ export function ChatMessageText({
           {content}
         </EuiMarkdownFormat>
       </EuiText>
-      <ExternalLinkModal url={pendingExternalUrl} onClose={() => setPendingExternalUrl(null)} />
+      {externalLinkModal}
     </>
   );
 }

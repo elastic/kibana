@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/292088
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+title: Add delete endpoint to the unified attachments API
