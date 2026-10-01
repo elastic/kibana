@@ -130,7 +130,7 @@ test.describe(
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
 
       // Seed detectAndReview: policyIdsByInstance makes isAlreadyDeployed=true.
-      await page.evaluate(
+      await page.addInitScript(
         ({ key, depId }) => {
           sessionStorage.setItem(
             key,
@@ -147,7 +147,7 @@ test.describe(
       );
 
       // Simulate changing bucket_arn in Step 2 — session serviceVars now has a new value.
-      await page.evaluate(
+      await page.addInitScript(
         ({ key }) => {
           sessionStorage.setItem(
             key,
@@ -174,7 +174,7 @@ test.describe(
       );
 
       // Set auth step to agent-based existing-policy mode with assume_role credentials.
-      await page.evaluate(
+      await page.addInitScript(
         ({ key }) => {
           sessionStorage.setItem(
             key,
@@ -239,7 +239,7 @@ test.describe(
               body: JSON.stringify({ item: { id: AB_PKG_POLICY_ID } }),
             });
           } else {
-            await route.continue();
+            await route.fallback();
           }
         }
       );
@@ -271,7 +271,7 @@ test.describe(
               body: JSON.stringify({ item: { id: DEP_ID } }),
             });
           } else {
-            await route.continue();
+            await route.fallback();
           }
         }
       );
@@ -373,7 +373,7 @@ test.describe(
       // - authenticateAndDeployStep has agentCredentialMethod but NOT authMethod (as real hydration writes).
       // - serviceSettingsStep has globalRegion + serviceVars but NOT instances (hydration skips them).
       // - detectAndReviewStep has policyIdsByInstance matching the SO.
-      await page.evaluate(
+      await page.addInitScript(
         ({ authKey, svcKey, detectKey, depId, agentPolicyId, pkgPolicyId }) => {
           sessionStorage.setItem(
             authKey,
@@ -423,7 +423,7 @@ test.describe(
         (url) => /\/api\/fleet\/package_policies\//.test(url.pathname),
         async (route) => {
           if (route.request().method() === 'PUT') pkgPuts.push(route.request().url());
-          await route.continue();
+          await route.fallback();
         }
       );
 
@@ -518,7 +518,7 @@ test.describe(
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
 
       // Seed detectAndReview so isAlreadyDeployed=true after drift settles.
-      await page.evaluate(
+      await page.addInitScript(
         ({ key, depId }) => {
           sessionStorage.setItem(
             key,
@@ -535,7 +535,7 @@ test.describe(
       );
 
       // Seed auth step with the NEW policy selection — different from SO's agentPolicyIds.
-      await page.evaluate(
+      await page.addInitScript(
         ({ key, newId }) => {
           sessionStorage.setItem(
             key,
@@ -553,7 +553,7 @@ test.describe(
 
       // Seed instances so buildAgentBasedTargets returns a non-empty targets list; without it
       // showAgentSection stays false and the drift callout never renders.
-      await page.evaluate(
+      await page.addInitScript(
         ({ key }) => {
           sessionStorage.setItem(
             key,
@@ -614,7 +614,7 @@ test.describe(
               body: JSON.stringify({ item: { id: AB_PKG_POLICY_ID } }),
             });
           } else {
-            await route.continue();
+            await route.fallback();
           }
         }
       );
@@ -645,7 +645,7 @@ test.describe(
               body: JSON.stringify({ item: { id: DEP_ID } }),
             });
           } else {
-            await route.continue();
+            await route.fallback();
           }
         }
       );

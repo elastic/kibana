@@ -127,7 +127,7 @@ test.describe(
       // Wait for the page to finish hydrating (the step root must be visible).
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
 
-      await page.evaluate(
+      await page.addInitScript(
         ({ key, depId }) => {
           sessionStorage.setItem(
             key,
@@ -145,7 +145,7 @@ test.describe(
 
       // Step 2: Change bucket_arn via the Step 2 form so the session serviceVars differ from the SO.
       // First seed instances so the Step 2 list shows the ELB service with its edit button.
-      await page.evaluate(
+      await page.addInitScript(
         ({ key }) => {
           sessionStorage.setItem(
             key,
@@ -237,7 +237,7 @@ test.describe(
               body: JSON.stringify({ item: makeSoItem(DEP_ID) }),
             });
           } else {
-            await route.continue();
+            await route.fallback();
           }
         }
       );
@@ -288,7 +288,7 @@ test.describe(
 
       // Hydration wrote session from SO. Inject serviceStatuses so isAlreadyDeployed becomes true
       // (the SO does not store serviceStatuses — those come from the Detect & Review step).
-      await page.evaluate(
+      await page.addInitScript(
         ({ key, depId }) => {
           sessionStorage.setItem(
             key,
@@ -304,7 +304,7 @@ test.describe(
 
       // Seed instances so buildDeployGroups returns a non-empty list; without it isAlreadyDeployed
       // stays false (deployGroups.length === 0) and isMiDone never becomes true.
-      await page.evaluate(
+      await page.addInitScript(
         ({ key }) => {
           sessionStorage.setItem(
             key,
@@ -412,7 +412,7 @@ test.describe(
 
       // Seed instances so applyDirtyPolicyUpdates finds an active instance in deployGroups and
       // builds a non-empty byPolicy map, which triggers the Fleet MI policy PUT on deploy.
-      await page.evaluate(
+      await page.addInitScript(
         ({ key }) => {
           sessionStorage.setItem(
             key,
@@ -453,7 +453,7 @@ test.describe(
               }),
             });
           } else {
-            await route.continue();
+            await route.fallback();
           }
         }
       );
@@ -535,7 +535,7 @@ test.describe(
               }),
             });
           } else {
-            await route.continue();
+            await route.fallback();
           }
         }
       );
@@ -581,7 +581,7 @@ test.describe(
       });
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
 
-      await page.evaluate(
+      await page.addInitScript(
         ({ key }) => {
           sessionStorage.setItem(
             key,
@@ -609,7 +609,7 @@ test.describe(
 
       // Seed detectAndReview so the MI section renders in deployed state (serviceStatuses keeps
       // the instance visible and isAlreadyDeployed=true so isDirty blocks Next - 4123190774).
-      await page.evaluate(
+      await page.addInitScript(
         ({ key, depId }) => {
           sessionStorage.setItem(
             key,
@@ -654,7 +654,7 @@ test.describe(
               body: JSON.stringify({ message: 'simulated policy update failure' }),
             });
           } else {
-            await route.continue();
+            await route.fallback();
           }
         }
       );
@@ -693,7 +693,7 @@ test.describe(
               body: JSON.stringify({ item: MI_POLICY_ITEM }),
             });
           } else {
-            await route.continue();
+            await route.fallback();
           }
         }
       );
@@ -711,7 +711,7 @@ test.describe(
               }),
             });
           } else {
-            await route.continue();
+            await route.fallback();
           }
         }
       );

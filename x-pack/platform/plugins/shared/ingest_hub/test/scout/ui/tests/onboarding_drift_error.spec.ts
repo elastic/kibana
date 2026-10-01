@@ -130,7 +130,7 @@ test.describe(
       // Seed detectAndReview so isAlreadyDeployed=true once drift settles after retry.
       // Seed must happen after the first gotoApp so hydration (call #1) has already run and set
       // hydratedDeploymentId; the subsequent reload skips hydration and React reads our seeds.
-      await page.evaluate(
+      await page.addInitScript(
         ({ key, depId }) => {
           sessionStorage.setItem(
             key,
@@ -147,7 +147,7 @@ test.describe(
       );
       // Seed instances so deployGroups is non-empty and isAlreadyDeployed evaluates against the
       // seeded serviceStatuses rather than always returning false (deployGroups.length === 0).
-      await page.evaluate(
+      await page.addInitScript(
         ({ key }) => {
           sessionStorage.setItem(
             key,
