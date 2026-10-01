@@ -417,4 +417,55 @@ describe('DatastreamInitializer forceReset for .alert-actions (integration)', ()
       })
     ).rejects.toThrow(/object mapping for \[actor\]/);
   });
+
+  it('reads actor.type and actor.profile_uid through ES|QL like the actions history and attribution queries', async () => {
+    await initialize(currentActionsDefinition);
+
+    // Explicit timestamps so LAST(..., @timestamp) is deterministic.
+    await writeDocument('user-ack', {
+      '@timestamp': '2026-01-01T00:00:00.000Z',
+      actor: { type: 'user', profile_uid: 'u_profile_1' },
+      action_type: 'ack',
+      episode_id: 'episode-1',
+      space_id: 'default',
+    });
+
+    await writeDocument('internal-suppress', {
+      '@timestamp': '2026-01-01T00:01:00.000Z',
+      actor: { type: 'internal' },
+      action_type: 'suppress',
+      episode_id: 'episode-1',
+      space_id: 'default',
+    });
+
+    const esClient = esServer.getClient();
+
+    // Projection used by the actions history query.
+    const history = await esClient.esql.query({
+      query: `FROM ${TEST_ACTIONS_DATA_STREAM}
+        | KEEP @timestamp, action_type, actor.type, actor.profile_uid
+        | SORT @timestamp ASC`,
+    });
+
+    expect(history.columns.map(({ name }) => name)).toEqual([
+      '@timestamp',
+      'action_type',
+      'actor.type',
+      'actor.profile_uid',
+    ]);
+
+    expect(history.values).toEqual([
+      ['2026-01-01T00:00:00.000Z', 'ack', 'user', 'u_profile_1'],
+      ['2026-01-01T00:01:00.000Z', 'suppress', 'internal', null],
+    ]);
+
+    const attribution = await esClient.esql.query({
+      query: `FROM ${TEST_ACTIONS_DATA_STREAM}
+        | STATS last_ack_actor = LAST(actor.profile_uid, @timestamp) WHERE action_type == "ack",
+                internal_actions = COUNT(*) WHERE actor.type == "internal"
+          BY episode_id`,
+    });
+
+    expect(attribution.values).toEqual([['u_profile_1', 1, 'episode-1']]);
+  });
 });
