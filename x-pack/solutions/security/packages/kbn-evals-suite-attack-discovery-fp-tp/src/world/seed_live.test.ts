@@ -286,6 +286,37 @@ describe('seedFixture', () => {
     expect(esClient.bulk).toHaveBeenCalledTimes(3);
   });
 
+  // Serverless makes a delete visible on a refresh, not immediately, so every
+  // retry fired inside that window conflicts as well. The mock only clears the
+  // conflict after a wall-clock window, so the seed survives only if the helper
+  // waits between attempts — back-to-back retries exhaust the budget and fail a
+  // seed a short wait would have settled.
+  it('waits between bulk conflict retries so a slow serverless refresh can settle', async () => {
+    const startedAt = Date.now();
+    const conflictWindowMs = 400;
+    const bulkCallTimesMs: number[] = [];
+    esClient.bulk.mockImplementation(async () => {
+      bulkCallTimesMs.push(Date.now() - startedAt);
+      if (Date.now() - startedAt < conflictWindowMs) {
+        return {
+          errors: true,
+          items: [
+            { create: { status: 409, error: { type: 'version_conflict_engine_exception' } } },
+          ],
+        };
+      }
+      return { errors: false };
+    });
+
+    await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
+
+    // The first attempt is inside the window; the retry has to land after it.
+    expect(bulkCallTimesMs[0]).toBeLessThan(conflictWindowMs);
+    expect(bulkCallTimesMs[1]).toBeGreaterThanOrEqual(conflictWindowMs);
+    // alert retry + the events bulk: the seed completed rather than exhausting
+    expect(esClient.bulk).toHaveBeenCalledTimes(3);
+  });
+
   it('retries a 409 version conflict once before failing the seed', async () => {
     esClient.create
       .mockRejectedValueOnce(Object.assign(new Error('version conflict'), { statusCode: 409 }))

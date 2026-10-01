@@ -203,9 +203,13 @@ const bulkWithConflictRetry = async (
     if (retry.length === 0 || nonConflict) {
       throw new Error(`${label} bulk had item errors: ${JSON.stringify(items)}`);
     }
+    // Wait before the retry. A serverless delete/refresh is not visible
+    // immediately, so retries fired back-to-back land in the same refresh window
+    // and exhaust the budget on a conflict a short wait would have settled.
+    await sleep(delayMs);
     return bulkWithConflictRetry(esClient, label, retry, {
       attempts: attempts - attempt,
-      delayMs: delayMs * attempt,
+      delayMs,
     });
   }
   throw new Error(`${label} bulk retry exhausted: conflicts did not settle`);
