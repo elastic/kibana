@@ -72,6 +72,10 @@ const CHARACTER_SEQUENCES: Readonly<Record<string, string>> = {
 
 const LINE_TERMINATORS: readonly string[] = ['\n', '\r'];
 
+/** Turns a typed `\t` or `\\` into the character Elasticsearch uses. */
+export const decodeCsvCharacterSequence = (value: string): string =>
+  CHARACTER_SEQUENCES[value] ?? value;
+
 /** Whether `value` is a single non-line-terminator character or a supported escape sequence. */
 export const isValidDelimiter = (value: string): boolean =>
   (value.length === 1 && !LINE_TERMINATORS.includes(value)) ||
@@ -117,7 +121,7 @@ const resolveActiveCharacter = (
 ): string | undefined => {
   if (!value) return isOnByDefault ? defaultCharacter : undefined;
   if (value.toLowerCase() === CSV_CHARACTER_NONE) return undefined;
-  return CHARACTER_SEQUENCES[value] ?? value;
+  return decodeCsvCharacterSequence(value);
 };
 
 export type CsvQuotingSettings = Partial<

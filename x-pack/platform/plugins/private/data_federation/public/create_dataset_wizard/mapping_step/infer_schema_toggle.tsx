@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SchemaResolutionField } from '../components/fields/schema_resolution_field';
+import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 
 export interface InferSchemaToggleProps {
   dynamicMode: boolean;
@@ -31,11 +32,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
             id="createDatasetWizardInferSchema"
             label={
               <EuiText size="s">
-                <strong>
-                  {i18n.translate('xpack.dataFederation.createDatasetWizard.inferSchemaLabel', {
-                    defaultMessage: 'Infer schema',
-                  })}
-                </strong>
+                <strong>{createDatasetWizardStrings.inferSchemaLabel}</strong>
               </EuiText>
             }
             checked={dynamicMode}
@@ -58,11 +55,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
             id="createDatasetWizardDefineSchema"
             label={
               <EuiText size="s">
-                <strong>
-                  {i18n.translate('xpack.dataFederation.createDatasetWizard.defineSchemaLabel', {
-                    defaultMessage: 'Define schema',
-                  })}
-                </strong>
+                <strong>{createDatasetWizardStrings.defineSchemaLabel}</strong>
               </EuiText>
             }
             checked={!dynamicMode}

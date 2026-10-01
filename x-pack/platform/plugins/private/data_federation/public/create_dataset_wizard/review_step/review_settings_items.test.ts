@@ -47,8 +47,8 @@ const allSettingsForFormat = (format: CreateDatasetSettingsFormValues['format'])
     max_error_ratio: '0.5',
   };
 
-  // API-supported settings not managed by the wizard UI. These should still
-  // be supported and included in the review output.
+  // API-supported settings the form doesn't manage: kept in the request on edit,
+  // but intentionally left out of the review.
   const unmanagedSettings: DatasetSettings = {
     schema_sample_size: 100,
     comment: '#',
@@ -59,22 +59,28 @@ const allSettingsForFormat = (format: CreateDatasetSettingsFormValues['format'])
   return { settings, unmanagedSettings };
 };
 
+const allReviewItems = (settings: DatasetSettings | undefined) =>
+  Object.values(getSettingsReviewItems(settings)).flat();
+
 /** Reviews the settings the way the wizard does: from the payload, not the form values. */
 const reviewItemsFor = (values: ReturnType<typeof allSettingsForFormat>) =>
-  getSettingsReviewItems(mergedSettingsFromForm(values.settings, values.unmanagedSettings));
+  allReviewItems(mergedSettingsFromForm(values.settings, values.unmanagedSettings));
 
 describe('getSettingsReviewItems', () => {
-  it('labels every setting that reaches the request payload', () => {
+  it('labels every setting the form sends and leaves the rest out', () => {
     for (const format of ['csv', 'tsv', 'ndjson', 'parquet'] as const) {
       const values = allSettingsForFormat(format);
-      const applied = mergedSettingsFromForm(values.settings, values.unmanagedSettings) ?? {};
+      const formSettings = buildDatasetSettingsFromFormValues(values.settings) ?? {};
       const items = reviewItemsFor(values);
 
-      for (const key of Object.keys(applied)) {
+      for (const key of Object.keys(formSettings)) {
         const item = items.find((candidate) => candidate.key === key);
         expect(item).toBeDefined();
         expect(item?.label).not.toBe(key);
         expect(item?.value).not.toBe('');
+      }
+      for (const key of Object.keys(values.unmanagedSettings)) {
+        expect(items.find((candidate) => candidate.key === key)).toBeUndefined();
       }
     }
   });
@@ -86,6 +92,8 @@ describe('getSettingsReviewItems', () => {
     expect(valueOf('format')).toBe('CSV');
     expect(valueOf('schema_resolution')).toBe('Union by name');
     expect(valueOf('header_row')).toBe('No');
+    expect(valueOf('trim_spaces')).toBe('True');
+    expect(valueOf('delimiter')).toBe('Semicolon (;)');
     expect(valueOf('file_exclusions')).toBe('**/skip/*');
     expect(valueOf('max_errors')).toBe('5');
   });
@@ -97,7 +105,7 @@ describe('getSettingsReviewItems', () => {
     ['none', createDatasetWizardStrings.settingsPartitionDetectionNone],
   ] as const)('translates the %s partition detection value', (partitionDetection, label) => {
     const { settings, unmanagedSettings } = allSettingsForFormat('csv');
-    const items = getSettingsReviewItems(
+    const items = allReviewItems(
       mergedSettingsFromForm(
         { ...settings, partition_detection: partitionDetection },
         unmanagedSettings
@@ -118,7 +126,7 @@ describe('getSettingsReviewItems', () => {
 
   it('renders non-printable escape characters using escape sequences', () => {
     const { settings, unmanagedSettings } = allSettingsForFormat('tsv');
-    const items = getSettingsReviewItems(
+    const items = allReviewItems(
       mergedSettingsFromForm({ ...settings, escape: '\\t' }, unmanagedSettings)
     );
     expect(items.find((item) => item.key === 'escape')?.value).toBe('\\t');
@@ -128,35 +136,132 @@ describe('getSettingsReviewItems', () => {
     'renders a backslash escape entered as %s as a single backslash',
     (escape) => {
       const { settings, unmanagedSettings } = allSettingsForFormat('tsv');
-      const items = getSettingsReviewItems(
+      const items = allReviewItems(
         mergedSettingsFromForm({ ...settings, escape }, unmanagedSettings)
       );
       expect(items.find((item) => item.key === 'escape')?.value).toBe('\\');
     }
   );
 
-  it('falls back to the documented default when a setting is untouched', () => {
-    const items = reviewItemsFor({
-      settings: {
-        ...emptyCreateDatasetSettingsFormValues(),
-        format: 'parquet',
+  it('groups the settings by the step that sets them', () => {
+    const { settings, unmanagedSettings } = allSettingsForFormat('csv');
+    const { dataset, mapping } = getSettingsReviewItems(
+      mergedSettingsFromForm(settings, unmanagedSettings)
+    );
+
+    expect(dataset.map(({ key }) => key)).toEqual(['format']);
+    expect(mapping).toEqual([
+      {
+        key: 'schema_resolution',
+        label: 'Schema resolution',
+        value: 'Union by name',
+        origin: 'custom',
       },
+    ]);
+  });
+
+  it('marks a picked schema resolution as custom, even the one applied by default', () => {
+    const { mapping } = getSettingsReviewItems({
+      format: 'parquet',
+      schema_resolution: 'first_file_wins',
+    });
+
+    expect(mapping[0]?.origin).toBe('custom');
+  });
+
+  it('lists the additional settings in the order the form asks for them', () => {
+    const { settings, unmanagedSettings } = allSettingsForFormat('csv');
+    const keys = getSettingsReviewItems(
+      mergedSettingsFromForm(settings, unmanagedSettings)
+    ).additional.map(({ key }) => key);
+
+    expect(keys).toEqual([
+      'delimiter',
+      'mode',
+      'header_row',
+      'skip_rows',
+      'datetime_format',
+      'null_value',
+      'encoding',
+      'quote',
+      'escape',
+      'column_prefix',
+      'trim_spaces',
+      'file_exclusions',
+      'partition_detection',
+      'error_mode',
+      'max_errors',
+      'max_error_ratio',
+    ]);
+  });
+
+  it('omits the settings the user left unset', () => {
+    const items = reviewItemsFor({
+      settings: { ...emptyCreateDatasetSettingsFormValues(), format: 'csv' },
       unmanagedSettings: {},
     });
 
-    expect(items.find((item) => item.key === 'error_mode')).toEqual({
-      key: 'error_mode',
-      label: 'Error mode',
-      value: 'Fail fast',
-      origin: 'default',
-    });
-    expect(items.find((item) => item.key === 'schema_resolution')).toBeUndefined();
+    expect(items).toEqual([{ key: 'format', label: 'Format', value: 'CSV' }]);
+    expect(allReviewItems(undefined)).toEqual([]);
   });
 
-  it('still reports the documented defaults when no settings are sent', () => {
-    const items = getSettingsReviewItems(undefined);
+  it.each([
+    ['a tab picked from the presets', '\t', 'Tab (\\t)'],
+    ['a tab typed as an escape sequence', '\\t', 'Tab (\\t)'],
+    ['a backslash typed as an escape sequence', '\\\\', '\\'],
+    ['a space', ' ', '" "'],
+    ['a custom character', '#', '#'],
+  ])('shows the delimiter itself for %s', (_, delimiter, expected) => {
+    const items = allReviewItems({ format: 'tsv', delimiter });
 
-    expect(items.find((item) => item.key === 'error_mode')?.origin).toBe('default');
-    expect(items.find((item) => item.key === 'format')).toBeUndefined();
+    expect(items.find((item) => item.key === 'delimiter')?.value).toBe(expected);
+  });
+
+  it.each([
+    ['null_value', ' '],
+    ['null_value', 'NA '],
+    ['column_prefix', ' col'],
+    ['partition_path', 'year=*/ '],
+    ['quote', ' '],
+  ] as const)('keeps surrounding spaces visible in %s %j', (key, value) => {
+    const items = allReviewItems({ format: 'csv', [key]: value });
+
+    expect(items.find((item) => item.key === key)?.value).toBe(`"${value}"`);
+  });
+
+  it.each([
+    ['quote', '\t'],
+    ['null_value', '\t'],
+  ] as const)('shows a tab in %s as \\t', (key, value) => {
+    const items = allReviewItems({ format: 'csv', [key]: value });
+
+    expect(items.find((item) => item.key === key)?.value).toBe('\\t');
+  });
+
+  it('keeps invisible characters visible in list items', () => {
+    const items = allReviewItems({
+      format: 'csv',
+      file_exclusions: ['**/tmp ', '**/\t*', '**/_*'],
+    });
+
+    expect(items.find((item) => item.key === 'file_exclusions')?.value).toBe(
+      '"**/tmp ", **/\\t*, **/_*'
+    );
+  });
+
+  it('shows an unchecked trim whitespace as False, like the form', () => {
+    const items = allReviewItems({ format: 'csv', trim_spaces: false });
+
+    expect(items.find((item) => item.key === 'trim_spaces')?.value).toBe('False');
+  });
+
+  it('leaves settings the form does not manage out of the review', () => {
+    const items = allReviewItems({
+      format: 'parquet',
+      comment: '#',
+      ...({ target_split_size: '64mb', file_sort_by: 'name' } as DatasetSettings),
+    });
+
+    expect(items.map(({ key }) => key)).toEqual(['format']);
   });
 });
