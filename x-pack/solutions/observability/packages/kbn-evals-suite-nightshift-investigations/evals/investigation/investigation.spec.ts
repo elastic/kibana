@@ -36,6 +36,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
       evalsClient,
       traceEsClient,
       repetitions,
+      concurrency: requestedConcurrency,
       log,
       inferenceClient,
       evaluationConnector,
@@ -47,7 +48,8 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
         evaluationConnector,
         log,
       });
-      const concurrency = 16;
+      // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
+      const concurrency = Math.min(16, requestedConcurrency);
       evaluate.setTimeout(
         Math.ceil((dataset.examples.length * repetitions) / concurrency) *
           (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +

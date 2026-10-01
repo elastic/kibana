@@ -36,6 +36,7 @@ export const startCmd: Command<void> = {
     node scripts/evals start --suite agent-builder --grep "product documentation"
     node scripts/evals start --suite agent-builder --skip-server
     node scripts/evals start --suite nightshift-investigations --scout-arch stateful
+    node scripts/evals start --suite agent-builder --concurrency 8
     node scripts/evals stop
 
   The Scout arch/domain comes from the suite's scoutArch/scoutDomain in evals.suites.json
