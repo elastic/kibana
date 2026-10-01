@@ -28,6 +28,7 @@ import {
   SlackResolveChannelIdInputSchema,
   SlackSearchMessagesInputSchema,
   SlackSendMessageInputSchema,
+  SlackUpdateMessageInputSchema,
   SlackWhoAmIInputSchema,
   SLACK_SEARCH_DEFAULT_COUNT,
   type SlackAssistantSearchContextResponse,
@@ -52,6 +53,7 @@ import {
   type SlackResolveChannelIdInput,
   type SlackSearchMessagesInput,
   type SlackSendMessageInput,
+  type SlackUpdateMessageInput,
   type SlackWhoAmIInput,
 } from './types';
 
@@ -1116,9 +1118,7 @@ export const Slack: ConnectorSpec = {
           text: typedInput.text,
         };
 
-        if (typedInput.messageTs) {
-          payload.ts = typedInput.messageTs;
-        } else if (typedInput.threadTs) {
+        if (typedInput.threadTs) {
           payload.thread_ts = typedInput.threadTs;
         }
         if (typedInput.unfurlLinks !== undefined) {
@@ -1128,8 +1128,6 @@ export const Slack: ConnectorSpec = {
           payload.unfurl_media = typedInput.unfurlMedia;
         }
 
-        const method = typedInput.messageTs ? 'chat.update' : 'chat.postMessage';
-
         try {
           ctx.log.debug(`Slack sendMessage request: channel=${typedInput.channel}`);
           const response = await slackRequestWithRateLimitRetry({
@@ -1137,7 +1135,7 @@ export const Slack: ConnectorSpec = {
             action: 'sendMessage',
             maxRetries: SLACK_MAX_RETRIES,
             request: () =>
-              ctx.client.post(`${SLACK_API_BASE}/${method}`, payload, {
+              ctx.client.post(`${SLACK_API_BASE}/chat.postMessage`, payload, {
                 headers: {
                   'Content-Type': 'application/json; charset=utf-8',
                 },
@@ -1159,6 +1157,64 @@ export const Slack: ConnectorSpec = {
           const err = error as AxiosError<unknown>;
           ctx.log.error(
             `Slack sendMessage failed: ${err.message}, Status: ${
+              err.response?.status
+            }, Data: ${JSON.stringify(err.response?.data)}`
+          );
+          throw error;
+        }
+      },
+    },
+
+    // https://api.slack.com/methods/chat.update
+    updateMessage: {
+      isTool: true,
+      scope: 'destroy',
+      description:
+        'Edit a message this app posted earlier, replacing its text. Identify it by channel and the ts that sendMessage returned (messageTs). With a bot token the channel must be a conversation ID, not a name. This overwrites the existing message, so confirm with the user before editing unless they have already made their intent explicit. To add to a conversation instead, use sendMessage.',
+      input: SlackUpdateMessageInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackUpdateMessageInput = SlackUpdateMessageInputSchema.parse(input);
+
+        const relayConnection = slackRelay.getConnection(ctx);
+        if (relayConnection) {
+          return slackRelay.actions.updateMessage(relayConnection, ctx, typedInput);
+        }
+
+        const payload = {
+          channel: typedInput.channel,
+          ts: typedInput.messageTs,
+          text: typedInput.text,
+        };
+
+        try {
+          ctx.log.debug(`Slack updateMessage request: channel=${typedInput.channel}`);
+          const response = await slackRequestWithRateLimitRetry({
+            ctx,
+            action: 'updateMessage',
+            maxRetries: SLACK_MAX_RETRIES,
+            request: () =>
+              ctx.client.post(`${SLACK_API_BASE}/chat.update`, payload, {
+                headers: {
+                  'Content-Type': 'application/json; charset=utf-8',
+                },
+              }),
+          });
+
+          if (!response.data.ok) {
+            throw new Error(
+              formatSlackApiErrorMessage({
+                action: 'updateMessage',
+                responseData: response.data,
+                responseHeaders: response.headers,
+              })
+            );
+          }
+
+          return response.data;
+        } catch (error) {
+          const err = error as AxiosError<unknown>;
+          ctx.log.error(
+            `Slack updateMessage failed: ${err.message}, Status: ${
               err.response?.status
             }, Data: ${JSON.stringify(err.response?.data)}`
           );
@@ -1203,6 +1259,7 @@ export const Slack: ConnectorSpec = {
     'searchMessages requires a user token (EARS or OAuth). If this connector uses a bot token, searchMessages will fail — use getConversationHistory with a specific channel ID to read recent messages instead.',
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
+    'sendMessage always posts a new message. To change a message this app already posted, call updateMessage with its channel ID and the ts sendMessage returned as messageTs; it overwrites the text, so confirm with the user first.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',
     'To read messages from a channel or DM, use getConversationHistory with a channel ID. Returns messages newest-first; pass nextCursor from the previous response (or use oldest/latest timestamps) to walk further back in time.',
     'getConversationInfo returns metadata (name, privacy, topic, purpose) for a single channel/DM by ID. Prefer it over listChannels when you already have the ID and only need that conversation’s details.',

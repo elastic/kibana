@@ -13,6 +13,7 @@ import type {
   SlackListChannelsInput,
   SlackResolveChannelIdInput,
   SlackSendMessageInput,
+  SlackUpdateMessageInput,
 } from './types';
 
 const getRelaySupportedActions = () => Object.keys(slackRelay.actions);
@@ -110,12 +111,39 @@ export async function relaySendMessage(
       channel,
       message: input.text,
       ...(input.threadTs ? { threadTs: input.threadTs } : {}),
-      ...(input.messageTs ? { messageTs: input.messageTs } : {}),
     });
 
     return { ok: true, channel: resolvedChannel, ts: ref };
   } catch (error) {
     ctx.log.error(`Slack sendMessage through relay failed: ${(error as Error).message}`);
+    throw toUserFacingError(error, channel);
+  }
+}
+
+/** Edits a message this app posted through the Relay, returning its timestamp as `ts`. */
+export async function relayUpdateMessage(
+  connection: SlackRelayConnection,
+  ctx: ActionContext,
+  input: SlackUpdateMessageInput
+): Promise<{ ok: true; channel: string; ts: string }> {
+  const channel = input.channel.trim();
+  if (channel.length === 0 || channel === '#') {
+    throw new Error('Channel is required.');
+  }
+
+  ctx.log.debug(`Slack updateMessage request through relay: channel=${channel}`);
+
+  try {
+    const { ref, channel: resolvedChannel } = await connection.client.trigger({
+      tenantKey: connection.tenantKey,
+      channel,
+      message: input.text,
+      messageTs: input.messageTs,
+    });
+
+    return { ok: true, channel: resolvedChannel, ts: ref };
+  } catch (error) {
+    ctx.log.error(`Slack updateMessage through relay failed: ${(error as Error).message}`);
     throw toUserFacingError(error, channel);
   }
 }
@@ -274,6 +302,7 @@ export const slackRelay = {
   test: relayTest,
   actions: {
     sendMessage: relaySendMessage,
+    updateMessage: relayUpdateMessage,
     listChannels: relayListChannels,
     resolveChannelId: relayResolveChannelId,
   },

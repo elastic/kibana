@@ -668,12 +668,6 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
       .optional()
       .describe('Timestamp of another message to reply to (creates a threaded reply)'),
-    messageTs: z
-      .string()
-      .optional()
-      .describe(
-        'Timestamp of a message this app posted earlier. When set, that message is edited in place instead of posting a new one.'
-      ),
     unfurlLinks: z
       .boolean()
       .optional()
@@ -682,3 +676,28 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
   })
 );
 export type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;
+
+export const SlackUpdateMessageInputSchema = lazySchema(() =>
+  z.object({
+    channel: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_NAME_LENGTH)
+      .describe(
+        'Conversation ID (C.../G.../D...) holding the message. Slack rejects channel names here when the connector uses a bot token; only the Elastic Slack app also accepts a connected channel name (e.g. "#general").'
+      ),
+    messageTs: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .describe(
+        'Timestamp of the message to edit, as returned in ts by sendMessage. Must be a message this app posted.'
+      ),
+    text: z
+      .string()
+      .min(1)
+      .max(SLACK_MAX_MESSAGE_TEXT_LENGTH)
+      .describe('The new message text. It replaces the current text of the message.'),
+  })
+);
+export type SlackUpdateMessageInput = z.infer<typeof SlackUpdateMessageInputSchema>;

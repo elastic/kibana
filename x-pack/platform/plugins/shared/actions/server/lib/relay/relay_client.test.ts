@@ -385,7 +385,7 @@ describe('RelayClient', () => {
       );
     });
 
-    it('includes message_ts only when editing a posted message', async () => {
+    it('sends message_ts and drops thread_ts when editing a posted message', async () => {
       requestMock.mockResolvedValue({
         status: 200,
         data: { ref: '1700000000.000200', tenant_key: 'team-A' },
@@ -395,12 +395,18 @@ describe('RelayClient', () => {
         tenantKey: 'team-A',
         channel: 'C123',
         message: 'edited',
+        threadTs: '1700000000.000100',
         messageTs: '1700000000.000200',
       });
 
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ message_ts: '1700000000.000200' }),
+          data: {
+            tenant_key: 'team-A',
+            channel: 'C123',
+            message: 'edited',
+            message_ts: '1700000000.000200',
+          },
         })
       );
     });
