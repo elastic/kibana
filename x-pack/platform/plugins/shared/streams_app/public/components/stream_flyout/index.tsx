@@ -235,6 +235,9 @@ function StreamFlyoutContent({
     if (definition && !loading && !isProcessingEnabled && selectedTab === 'processing') {
       selectTab('overview');
     }
+    if (definition && !loading && isProcessingEnabled) {
+      setShowProcessing(true);
+    }
   }, [definition, loading, isProcessingEnabled, selectedTab, selectTab]);
 
   const deleteStream = useCallback(async () => {
