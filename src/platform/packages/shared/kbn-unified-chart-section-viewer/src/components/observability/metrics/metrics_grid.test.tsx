@@ -368,8 +368,8 @@ describe('MetricsGrid', () => {
     );
   });
 
-  // Regression coverage for issue #262360: the user-typed source must be threaded
-  // from `fetchParams.query` through `MetricsGrid` into `createESQLQuery` as
+  // Regression coverage for issue #262360: the user-typed source, computed once
+  // by the parent and passed as `userSource`, must reach `createESQLQuery` as
   // `originalSource`, so backing-index queries stay at the same scope METRICS_INFO
   // scanned (avoiding cross-backing-index field-type conflicts being re-introduced
   // when the chart query widens back to the parent data stream).
@@ -398,7 +398,7 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the user-typed backing index as originalSource', () => {
-      renderMetricsGrid({ fetchParams: backingIndexFetchParams });
+      renderMetricsGrid({ fetchParams: backingIndexFetchParams, userSource: backingIndex });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: backingIndex })
@@ -406,7 +406,10 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the user-typed data stream as originalSource', () => {
-      renderMetricsGrid({ fetchParams: sourceFetchParams });
+      renderMetricsGrid({
+        fetchParams: sourceFetchParams,
+        userSource: 'edge-case-gauge-to-counter',
+      });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: 'edge-case-gauge-to-counter' })
@@ -414,7 +417,7 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the raw glob pattern as originalSource (createESQLQuery falls back to indexName)', () => {
-      renderMetricsGrid({ fetchParams: globFetchParams });
+      renderMetricsGrid({ fetchParams: globFetchParams, userSource: 'edge-case-*' });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: 'edge-case-*' })

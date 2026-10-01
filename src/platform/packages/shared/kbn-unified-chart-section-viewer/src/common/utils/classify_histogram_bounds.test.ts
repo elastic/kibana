@@ -7,39 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { classifyHistogramBounds } from './classify_histogram_bounds';
+import { parseHistogramBounds } from './classify_histogram_bounds';
 
-describe('classifyHistogramBounds', () => {
-  it('returns empty when there is no data', () => {
-    expect(classifyHistogramBounds(null, null)).toEqual({ status: 'empty' });
-    expect(classifyHistogramBounds(undefined, undefined)).toEqual({ status: 'empty' });
+describe('parseHistogramBounds', () => {
+  it('returns undefined when there is no data', () => {
+    expect(parseHistogramBounds(null, null)).toBeUndefined();
+    expect(parseHistogramBounds(undefined, undefined)).toBeUndefined();
   });
 
-  it('returns empty when only one bound is present', () => {
-    expect(classifyHistogramBounds(1, null)).toEqual({ status: 'empty' });
+  it('returns undefined when only one bound is present', () => {
+    expect(parseHistogramBounds(1, null)).toBeUndefined();
   });
 
-  it('returns empty for non-finite bounds', () => {
-    expect(classifyHistogramBounds(NaN, 1)).toEqual({ status: 'empty' });
-    expect(classifyHistogramBounds(0, Infinity)).toEqual({ status: 'empty' });
+  it('returns undefined for non-finite bounds', () => {
+    expect(parseHistogramBounds(NaN, 1)).toBeUndefined();
+    expect(parseHistogramBounds(0, Infinity)).toBeUndefined();
   });
 
-  it('returns empty when min is greater than max', () => {
-    expect(classifyHistogramBounds(10, 1)).toEqual({ status: 'empty' });
+  it('returns undefined when min is greater than max', () => {
+    expect(parseHistogramBounds(10, 1)).toBeUndefined();
   });
 
-  it('returns point when min equals max', () => {
-    expect(classifyHistogramBounds(4.2, 4.2)).toEqual({ status: 'point', value: 4.2 });
-    expect(classifyHistogramBounds(0, 0)).toEqual({ status: 'point', value: 0 });
+  it('returns undefined when min equals max', () => {
+    expect(parseHistogramBounds(4.2, 4.2)).toBeUndefined();
+    expect(parseHistogramBounds(0, 0)).toBeUndefined();
   });
 
-  it('returns range when min and max differ', () => {
-    expect(classifyHistogramBounds(-1, 250)).toEqual({ status: 'range', min: -1, max: 250 });
+  it('returns min and max when min is less than max', () => {
+    expect(parseHistogramBounds(-1, 250)).toEqual({ min: -1, max: 250 });
   });
 
-  it('coerces numeric strings and treats other strings as empty', () => {
-    expect(classifyHistogramBounds('1.5', '8')).toEqual({ status: 'range', min: 1.5, max: 8 });
-    expect(classifyHistogramBounds('', '8')).toEqual({ status: 'empty' });
-    expect(classifyHistogramBounds('abc', '8')).toEqual({ status: 'empty' });
+  it('coerces numeric strings and treats other strings as undefined', () => {
+    expect(parseHistogramBounds('1.5', '8')).toEqual({ min: 1.5, max: 8 });
+    expect(parseHistogramBounds('', '8')).toBeUndefined();
+    expect(parseHistogramBounds('abc', '8')).toBeUndefined();
   });
 });

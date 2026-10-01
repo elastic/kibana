@@ -145,7 +145,7 @@ describe('MetricsExperienceGridContent', () => {
       totalCount: 1,
     });
 
-    useFetchHistogramBoundsMock.mockReturnValue({ status: 'idle', bounds: new Map() });
+    useFetchHistogramBoundsMock.mockReturnValue({ loading: false, bounds: new Map() });
   });
 
   afterEach(() => {

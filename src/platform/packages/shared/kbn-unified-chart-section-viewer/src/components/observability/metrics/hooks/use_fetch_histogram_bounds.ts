@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import type {
   HistogramBoundsQuery,
   HistogramBoundsResult,
@@ -21,7 +22,7 @@ import {
   HISTOGRAM_BOUNDS_MIN_COLUMN,
 } from '../../../../common/utils/esql/create_histogram_bounds_query';
 import {
-  classifyHistogramBounds,
+  parseHistogramBounds,
   type RawHistogramBound,
 } from '../../../../common/utils/classify_histogram_bounds';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../../common/constants';
@@ -37,33 +38,19 @@ import { useReportChartSectionError } from '../../../chart/hooks/use_report_char
 
 export type HistogramBoundsByMetricKey = ReadonlyMap<string, HistogramBoundsResult>;
 
-/**
- * `idle`: nothing to fetch. `loading`: requests in flight; `bounds` keeps the previous
- * result until the new one arrives. `ready`: every chart on the page has settled,
- * including per-chart errors.
- */
-export interface HistogramBoundsState {
-  readonly status: 'idle' | 'loading' | 'ready';
-  readonly bounds: HistogramBoundsByMetricKey;
-}
-
 type BoundsRow = Record<string, RawHistogramBound>;
 
 const EMPTY_BOUNDS: HistogramBoundsByMetricKey = new Map();
-const IDLE_STATE: HistogramBoundsState = { status: 'idle', bounds: EMPTY_BOUNDS };
-
-const getLoadingState = (bounds: HistogramBoundsByMetricKey): HistogramBoundsState => ({
-  status: 'loading',
-  bounds,
-});
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
+const isBoundsEntry = (
+  entry: readonly [string, HistogramBoundsResult] | undefined
+): entry is readonly [string, HistogramBoundsResult] => entry !== undefined;
+
 /**
- * Fetches raw MIN/MAX bounds for each histogram chart on the visible page, one request per chart.
- * Results are keyed by `getMetricUniqueKey` and published together once every request settles.
- * Sends nothing when `enabled` is false or the heatmaps feature flag is off.
+ * Fetches one MIN/MAX request per visible histogram chart and keeps only finite ranges where min < max.
  */
 export const useFetchHistogramBounds = ({
   enabled,
@@ -81,7 +68,7 @@ export const useFetchHistogramBounds = ({
   whereStatements: readonly string[];
   originalSource?: string;
   profileId: string;
-}): HistogramBoundsState => {
+}): { readonly loading: boolean; readonly bounds: HistogramBoundsByMetricKey } => {
   const reportError = useReportChartSectionError();
   const { trackEsqlQueryFailure } = useTelemetry();
   const isHeatmapsEnabled = useFeatureFlag(
@@ -89,8 +76,6 @@ export const useFetchHistogramBounds = ({
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
   );
   const fetchEnabled = enabled && isHeatmapsEnabled;
-  const [histogramBoundsState, setHistogramBoundsState] =
-    useState<HistogramBoundsState>(IDLE_STATE);
 
   const queries = useMemo(
     () =>
@@ -139,113 +124,106 @@ export const useFetchHistogramBounds = ({
   const reportErrorRef = useLatest(reportError);
   const trackEsqlQueryFailureRef = useLatest(trackEsqlQueryFailure);
 
-  useEffect(() => {
-    const currentQueries = queriesRef.current;
-    const currentDataView = dataViewRef.current;
-    if (!enabledRef.current || currentQueries.length === 0 || !currentDataView) {
-      setHistogramBoundsState(IDLE_STATE);
-      return;
-    }
-
-    setHistogramBoundsState((previous) => getLoadingState(previous.bounds));
-
-    const controller = new AbortController();
-    const { signal } = controller;
-    const failures: Array<{ error: unknown; boundsQuery: HistogramBoundsQuery }> = [];
-
-    const reportBatchFailure = (
-      batch: ReadonlyArray<{ error: unknown; boundsQuery: HistogramBoundsQuery }>
-    ) => {
-      const [first] = batch;
-      const error =
-        batch.length === 1
-          ? first.error
-          : new AggregateError(
-              batch.map(({ error: failure }) => toError(failure)),
-              `Histogram bounds failed for ${batch.length} charts: ${batch
-                .map(({ boundsQuery }) => boundsQuery.metricKey)
-                .join(', ')}`
-            );
-
-      reportErrorRef.current({
-        error,
-        source: 'useFetchHistogramBounds',
-        labels: {
-          page: `metrics_${MetricsExecutionContextAction.FETCH}_${MetricsExecutionContextName.HISTOGRAM_BOUNDS}`,
-          profile_id: profileIdRef.current,
-          ...(batch.length === 1 ? { chart_id: first.boundsQuery.metricKey } : {}),
-        },
-      });
-
-      const failureEvent = buildEsqlQueryFailureEvent({
-        error: first.error,
-        esqlQuery: first.boundsQuery.esqlQuery,
-      });
-      if (failureEvent) {
-        trackEsqlQueryFailureRef.current(failureEvent);
+  const { loading, value } = useAbortableAsync(
+    ({ signal }) => {
+      const currentQueries = queriesRef.current;
+      const currentDataView = dataViewRef.current;
+      if (!enabledRef.current || currentQueries.length === 0 || !currentDataView) {
+        return EMPTY_BOUNDS;
       }
-    };
 
-    const fetchBounds = async (
-      boundsQuery: HistogramBoundsQuery
-    ): Promise<readonly [string, HistogramBoundsResult]> => {
-      try {
-        const {
-          documents: [row],
-        } = await executeEsqlQuery<BoundsRow>({
-          esqlQuery: boundsQuery.esqlQuery,
-          search: searchRef.current,
-          signal,
-          dataView: currentDataView,
-          timeRange: relativeTimeRangeRef.current,
-          filters: filtersRef.current ?? [],
-          variables: esqlVariablesRef.current,
-          uiSettings: uiSettingsRef.current,
-          profileId: profileIdRef.current,
-          executionContextName: MetricsExecutionContextName.HISTOGRAM_BOUNDS,
+      const failures: Array<{ error: unknown; boundsQuery: HistogramBoundsQuery }> = [];
+
+      const reportBatchFailure = (
+        batch: ReadonlyArray<{ error: unknown; boundsQuery: HistogramBoundsQuery }>
+      ) => {
+        const [first] = batch;
+        const error =
+          batch.length === 1
+            ? first.error
+            : new AggregateError(
+                batch.map(({ error: failure }) => toError(failure)),
+                `Histogram bounds failed for ${batch.length} charts: ${batch
+                  .map(({ boundsQuery }) => boundsQuery.metricKey)
+                  .join(', ')}`
+              );
+
+        reportErrorRef.current({
+          error,
+          source: 'useFetchHistogramBounds',
+          labels: {
+            page: `metrics_${MetricsExecutionContextAction.FETCH}_${MetricsExecutionContextName.HISTOGRAM_BOUNDS}`,
+            profile_id: profileIdRef.current,
+            ...(batch.length === 1 ? { chart_id: first.boundsQuery.metricKey } : {}),
+          },
         });
-        return [
-          boundsQuery.metricKey,
-          classifyHistogramBounds(
+
+        const failureEvent = buildEsqlQueryFailureEvent({
+          error: first.error,
+          esqlQuery: first.boundsQuery.esqlQuery,
+        });
+        if (failureEvent) {
+          trackEsqlQueryFailureRef.current(failureEvent);
+        }
+      };
+
+      const fetchBounds = async (
+        boundsQuery: HistogramBoundsQuery
+      ): Promise<readonly [string, HistogramBoundsResult] | undefined> => {
+        try {
+          const {
+            documents: [row],
+          } = await executeEsqlQuery<BoundsRow>({
+            esqlQuery: boundsQuery.esqlQuery,
+            search: searchRef.current,
+            signal,
+            dataView: currentDataView,
+            timeRange: relativeTimeRangeRef.current,
+            filters: filtersRef.current ?? [],
+            variables: esqlVariablesRef.current,
+            uiSettings: uiSettingsRef.current,
+            profileId: profileIdRef.current,
+            executionContextName: MetricsExecutionContextName.HISTOGRAM_BOUNDS,
+          });
+          const bounds = parseHistogramBounds(
             row?.[HISTOGRAM_BOUNDS_MIN_COLUMN],
             row?.[HISTOGRAM_BOUNDS_MAX_COLUMN]
-          ),
-        ];
-      } catch (error) {
-        if (!signal.aborted) {
+          );
+          return bounds ? [boundsQuery.metricKey, bounds] : undefined;
+        } catch (error) {
+          if (signal.aborted) {
+            return undefined;
+          }
           failures.push({ error, boundsQuery });
+          return [boundsQuery.metricKey, { error: toError(error) }];
         }
-        return [boundsQuery.metricKey, { status: 'error', error: toError(error) }];
-      }
-    };
+      };
 
-    Promise.all(currentQueries.map(fetchBounds)).then((entries) => {
-      if (signal.aborted) {
-        return;
-      }
-      if (failures.length > 0) {
-        reportBatchFailure(failures);
-      }
-      setHistogramBoundsState({ status: 'ready', bounds: new Map(entries) });
-    });
+      return Promise.all(currentQueries.map(fetchBounds)).then((entries) => {
+        if (signal.aborted) {
+          return EMPTY_BOUNDS;
+        }
+        if (failures.length > 0) {
+          reportBatchFailure(failures);
+        }
+        return new Map(entries.filter(isBoundsEntry));
+      });
+    },
+    [
+      requestKey,
+      queriesRef,
+      enabledRef,
+      dataViewRef,
+      relativeTimeRangeRef,
+      filtersRef,
+      esqlVariablesRef,
+      searchRef,
+      uiSettingsRef,
+      profileIdRef,
+      reportErrorRef,
+      trackEsqlQueryFailureRef,
+    ]
+  );
 
-    return () => {
-      controller.abort();
-    };
-  }, [
-    requestKey,
-    queriesRef,
-    enabledRef,
-    dataViewRef,
-    relativeTimeRangeRef,
-    filtersRef,
-    esqlVariablesRef,
-    searchRef,
-    uiSettingsRef,
-    profileIdRef,
-    reportErrorRef,
-    trackEsqlQueryFailureRef,
-  ]);
-
-  return histogramBoundsState;
+  return { loading, bounds: value ?? EMPTY_BOUNDS };
 };

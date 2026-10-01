@@ -112,7 +112,9 @@ const renderBoundsHook = (initialProps: HookProps) =>
   renderHook((props: HookProps) => useFetchHistogramBounds(props), { initialProps });
 
 const getQueriedSources = () =>
-  mockExecuteEsqlQuery.mock.calls.map(([{ esqlQuery }]) => esqlQuery.split('\n')[1]);
+  mockExecuteEsqlQuery.mock.calls.map(([{ esqlQuery }]) =>
+    esqlQuery.split('\n').find((line) => line.startsWith('TS '))
+  );
 
 describe('useFetchHistogramBounds', () => {
   beforeEach(() => {
@@ -121,25 +123,20 @@ describe('useFetchHistogramBounds', () => {
     mockExecuteEsqlQuery.mockImplementation(() => resolved([{ min_value: 1, max_value: 5 }]));
   });
 
-  it('runs one request per chart in parallel and classifies each result', async () => {
+  it('runs one request per chart in parallel and keeps only min < max', async () => {
     mockExecuteEsqlQuery
       .mockImplementationOnce(() => resolved([{ min_value: 1, max_value: 5 }]))
       .mockImplementationOnce(() => resolved([{ min_value: 3, max_value: 3 }]));
 
     const { result } = renderBoundsHook(createProps());
 
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+    await waitFor(() =>
+      expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({ min: 1, max: 5 })
+    );
 
     expect(getQueriedSources()).toEqual(['TS metrics-a', 'TS metrics-b']);
-    expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
-      status: 'range',
-      min: 1,
-      max: 5,
-    });
-    expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({
-      status: 'point',
-      value: 3,
-    });
+    expect(result.current.bounds.has('metrics-b::latency.exp')).toBe(false);
+    expect(result.current.loading).toBe(false);
   });
 
   it('stays loading with no bounds until every chart settles', async () => {
@@ -150,15 +147,15 @@ describe('useFetchHistogramBounds', () => {
 
     const { result } = renderBoundsHook(createProps());
 
-    expect(result.current.status).toBe('loading');
+    expect(result.current.loading).toBe(true);
     await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2));
-    expect(result.current).toEqual({ status: 'loading', bounds: new Map() });
+    expect(result.current).toEqual({ loading: true, bounds: new Map() });
 
     await act(async () => {
       slow.resolve([{ min_value: 2, max_value: 4 }]);
     });
 
-    expect(result.current.status).toBe('ready');
+    expect(result.current.loading).toBe(false);
     expect(result.current.bounds.size).toBe(2);
   });
 
@@ -170,7 +167,7 @@ describe('useFetchHistogramBounds', () => {
     });
     const { result } = renderBoundsHook(createProps({ metricItems: [histogramA, tdigestA] }));
 
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+    await waitFor(() => expect(result.current.bounds.size).toBe(2));
 
     expect(getQueriedSources()).toEqual(['TS metrics-a', 'TS metrics-a']);
     expect(mockExecuteEsqlQuery.mock.calls.map(([{ esqlQuery }]) => esqlQuery)).toEqual([
@@ -207,17 +204,18 @@ describe('useFetchHistogramBounds', () => {
     expect(params).not.toHaveProperty('isApproximate');
   });
 
-  it('marks a field empty when the response has no row or null bounds', async () => {
+  it('omits a chart when the response has no row or null bounds', async () => {
     mockExecuteEsqlQuery
       .mockImplementationOnce(() => resolved([]))
       .mockImplementationOnce(() => resolved([{ min_value: null, max_value: null }]));
 
     const { result } = renderBoundsHook(createProps());
 
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+    await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({ status: 'empty' });
-    expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({ status: 'empty' });
+    expect(result.current.bounds.has('metrics-a::latency.exp')).toBe(false);
+    expect(result.current.bounds.has('metrics-b::latency.exp')).toBe(false);
   });
 
   it('keeps the other chart bounds when one chart request fails, reports it, and does not retry', async () => {
@@ -228,16 +226,12 @@ describe('useFetchHistogramBounds', () => {
 
     const { result } = renderBoundsHook(createProps());
 
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+    await waitFor(() =>
+      expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({ min: 2, max: 8 })
+    );
 
     expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
-      status: 'error',
       error: failure,
-    });
-    expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({
-      status: 'range',
-      min: 2,
-      max: 8,
     });
     expect(mockReportError).toHaveBeenCalledTimes(1);
     expect(mockReportError).toHaveBeenCalledWith({
@@ -270,7 +264,9 @@ describe('useFetchHistogramBounds', () => {
     const { result, rerender } = renderBoundsHook(initialProps);
 
     rerender({ ...initialProps, metricItems: [histogramB] });
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+    await waitFor(() =>
+      expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({ min: 1, max: 5 })
+    );
 
     expect(mockReportError).not.toHaveBeenCalled();
     expect(mockTrackEsqlQueryFailure).not.toHaveBeenCalled();
@@ -280,7 +276,9 @@ describe('useFetchHistogramBounds', () => {
     const initialProps = createProps({ metricItems: [histogramA] });
     const { result, rerender } = renderBoundsHook(initialProps);
 
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+    await waitFor(() =>
+      expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({ min: 1, max: 5 })
+    );
     const previousBounds = result.current.bounds;
 
     const slow = deferred();
@@ -293,16 +291,15 @@ describe('useFetchHistogramBounds', () => {
       },
     });
 
-    await waitFor(() => expect(result.current.status).toBe('loading'));
+    await waitFor(() => expect(result.current.loading).toBe(true));
     expect(result.current.bounds).toBe(previousBounds);
 
     await act(async () => {
       slow.resolve([{ min_value: 9, max_value: 11 }]);
     });
 
-    expect(result.current.status).toBe('ready');
+    expect(result.current.loading).toBe(false);
     expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
-      status: 'range',
       min: 9,
       max: 11,
     });
@@ -325,13 +322,13 @@ describe('useFetchHistogramBounds', () => {
     });
     expect(mockReportError).not.toHaveBeenCalled();
     expect(mockTrackEsqlQueryFailure).not.toHaveBeenCalled();
-    expect(result.current.status).toBe('loading');
+    expect(result.current.loading).toBe(true);
 
     await act(async () => {
       slowB.reject(failureB);
     });
 
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(mockReportError).toHaveBeenCalledTimes(1);
     expect(mockReportError).toHaveBeenCalledWith({
@@ -345,11 +342,9 @@ describe('useFetchHistogramBounds', () => {
     expect(mockReportError.mock.calls[0][0].labels).not.toHaveProperty('chart_id');
     expect(mockTrackEsqlQueryFailure).toHaveBeenCalledTimes(1);
     expect(result.current.bounds.get('metrics-a::latency.exp')).toEqual({
-      status: 'error',
       error: failureA,
     });
     expect(result.current.bounds.get('metrics-b::latency.exp')).toEqual({
-      status: 'error',
       error: failureB,
     });
   });
@@ -360,7 +355,7 @@ describe('useFetchHistogramBounds', () => {
     const { result } = renderBoundsHook(createProps());
 
     expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    expect(result.current).toEqual({ status: 'idle', bounds: new Map() });
+    expect(result.current).toEqual({ loading: false, bounds: new Map() });
   });
 
   it('sends no request when disabled, and fetches once enabled', async () => {
@@ -368,32 +363,32 @@ describe('useFetchHistogramBounds', () => {
     const { result, rerender } = renderBoundsHook(initialProps);
 
     expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    expect(result.current).toEqual({ status: 'idle', bounds: new Map() });
+    expect(result.current).toEqual({ loading: false, bounds: new Map() });
 
     rerender({ ...initialProps, enabled: true });
 
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+    await waitFor(() => expect(result.current.bounds.size).toBe(2));
     expect(result.current.bounds.size).toBe(2);
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
   });
 
-  it('clears the bounds and goes idle when disabled after a fetch', async () => {
+  it('clears the bounds when disabled after a fetch', async () => {
     const initialProps = createProps();
     const { result, rerender } = renderBoundsHook(initialProps);
 
-    await waitFor(() => expect(result.current.status).toBe('ready'));
+    await waitFor(() => expect(result.current.bounds.size).toBe(2));
 
     rerender({ ...initialProps, enabled: false });
 
-    expect(result.current).toEqual({ status: 'idle', bounds: new Map() });
+    expect(result.current).toEqual({ loading: false, bounds: new Map() });
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
   });
 
-  it('sends no request and stays idle when the page has only gauges', () => {
+  it('sends no request when the page has only gauges', () => {
     const { result } = renderBoundsHook(createProps({ metricItems: [gauge] }));
 
     expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-    expect(result.current.status).toBe('idle');
+    expect(result.current).toEqual({ loading: false, bounds: new Map() });
   });
 
   it('does not refetch when metric items are re-created with the same content', async () => {

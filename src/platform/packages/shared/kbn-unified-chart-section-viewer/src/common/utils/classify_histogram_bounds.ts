@@ -20,21 +20,17 @@ const toFiniteNumber = (value: RawHistogramBound): number | undefined => {
 };
 
 /**
- * Classifies a raw MIN/MAX pair as `empty` (no usable data), `point` (min equals max), or `range`.
+ * Returns MIN/MAX when both values are finite and min is less than max.
  */
-export const classifyHistogramBounds = (
+export const parseHistogramBounds = (
   rawMin: RawHistogramBound,
   rawMax: RawHistogramBound
-): HistogramBounds => {
+): HistogramBounds | undefined => {
   const min = toFiniteNumber(rawMin);
   const max = toFiniteNumber(rawMax);
-  if (min === undefined || max === undefined || min > max) {
-    return { status: 'empty' };
+  if (min === undefined || max === undefined || min >= max) {
+    return undefined;
   }
 
-  if (min === max) {
-    return { status: 'point', value: min };
-  }
-
-  return { status: 'range', min, max };
+  return { min, max };
 };

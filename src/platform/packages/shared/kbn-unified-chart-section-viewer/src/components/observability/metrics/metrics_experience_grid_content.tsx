@@ -164,6 +164,7 @@ export const MetricsExperienceGridContent = ({
           fetchParams={fetchParams}
           searchTerm={searchTerm}
           whereStatements={whereStatements}
+          userSource={userSource}
           getUserMessages={getUserMessages}
           getDescription={getDescription}
           isTabSelected={isTabSelected}

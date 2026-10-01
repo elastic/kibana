@@ -117,14 +117,12 @@ export interface ParsedMetricItem {
   readonly dimensionFields: Dimension[];
 }
 
-export type HistogramBounds =
-  | { readonly status: 'empty' }
-  | { readonly status: 'point'; readonly value: number }
-  | { readonly status: 'range'; readonly min: number; readonly max: number };
+export interface HistogramBounds {
+  readonly min: number;
+  readonly max: number;
+}
 
-export type HistogramBoundsResult =
-  | HistogramBounds
-  | { readonly status: 'error'; readonly error: Error };
+export type HistogramBoundsResult = HistogramBounds | { readonly error: Error };
 
 export interface HistogramBoundsQuery {
   readonly metricKey: string;

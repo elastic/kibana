@@ -58,13 +58,18 @@ export const createHistogramBoundsQuery = ({
 
   const source = isSingleSource(originalSource) ? originalSource : metricItem.indexName;
   const query = esql.ts(source);
-  query.addSetCommand('unmapped_fields', 'NULLIFY');
+  const trimmedWhere = whereStatements
+    .map((statement) => statement.trim())
+    .filter((statement) => statement.length > 0);
 
-  for (const statement of whereStatements) {
-    const trimmed = statement.trim();
-    if (trimmed.length > 0) {
-      query.pipe(`WHERE ${trimmed}`);
-    }
+  // `metrics_info` guarantees the metric field is mapped. WHERE can reference
+  // other fields that are missing on this index.
+  if (trimmedWhere.length > 0) {
+    query.addSetCommand('unmapped_fields', 'NULLIFY');
+  }
+
+  for (const statement of trimmedWhere) {
+    query.pipe(`WHERE ${statement}`);
   }
 
   query.pipe(
