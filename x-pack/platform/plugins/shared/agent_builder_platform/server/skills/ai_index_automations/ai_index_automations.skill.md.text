@@ -202,6 +202,34 @@ indicator per document, where the alternative is losing every indicator after th
     continue: true
 ```
 
+**`parallel` is that same loop with its items run concurrently**, and it is what the per-record
+templates use: a model call per record run end to end is the slowest thing these workflows do. It
+takes the same `foreach` expression and the same `steps` body, and swaps `iteration-on-failure` for
+`mode: settled`, which likewise runs every branch to a terminal state instead of stopping at the
+first failure. `concurrency` defaults to 5 and is capped at 20; the fan-out is capped at 100 items,
+so corpora larger than 100 records must be split into batches with `chunk: 100` before entering
+`parallel`. The per-record templates do this with an outer `foreach` over the chunks, so they
+handle any corpus size up to the ES|QL row cap:
+
+```yaml
+- name: loop_batches
+  type: foreach
+  foreach: '{{ steps.discover_documents.output.values | chunk: 100 | json }}'
+  iteration-on-failure:
+    continue: true
+  steps:
+    - name: loop_documents
+      type: parallel
+      foreach: '{{ foreach.item | json }}'
+      concurrency: 5
+      mode: settled
+      steps: [] # ...
+```
+
+A branch reads `{{ foreach.item }}` and its own earlier steps exactly as a sequential iteration
+does. Two things a branch still cannot hold: a step-level `timeout:`, and a step that waits on a
+human. Both are compile-time errors rather than surprises at runtime.
+
 ```yaml
 on-failure:
   retry:
@@ -502,12 +530,12 @@ than that and it returns bare ids and labels with no parameters at all — so a 
 you nothing and buys a chain of follow-up calls. Pass `stepType` with an exact id.
 
 The types these automations use are a closed set: `elasticsearch.esql.query`,
-`elasticsearch.search`, `elasticsearch.request`, `ai.prompt`, `foreach`, `while`, `parallel`,
-`workflow.execute`, `if`, `data.set` and `console`, alongside the `context-engine` steps written out
-above, which no lookup can return at all. `unit-profile-template` wires most of them up correctly
-already, so a lookup is worth a call only for a step type it does not use. `parallel` and
-`workflow.execute` are the two it does not: look those up with `stepType` when a custom workflow
-needs them, and do not skip the lookup because an older template used to show them.
+`elasticsearch.search`, `elasticsearch.request`, `ai.prompt`, `parallel`, `foreach`, `if`,
+`data.set`, `console` and `workflow.execute`, alongside the `context-engine` steps written out
+above, which no lookup can return at all. All but `workflow.execute` appear in the templates
+already wired up correctly. Look up `workflow.execute` with `stepType` when a custom workflow
+needs it — the Selective / Outlier strategy's parallel branch is a `workflow.execute` — and do
+not skip the lookup because an older template used to show it.
 
 `platform.workflows.get_examples` is one call for the example library rather than one per step, and
 `platform.workflows.get_trigger_definitions` gives the event context a trigger provides.

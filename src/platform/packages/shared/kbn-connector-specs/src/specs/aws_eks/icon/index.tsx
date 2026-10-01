@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  rules: {
-    '@kbn/eslint/scout_require_api_client_in_api_test': 'off', // Workflows API tests use WorkflowsApiService (wrapping kbnClient/API) for workflow operations.
-  },
+import React from 'react';
+import { EuiIcon } from '@elastic/eui';
+import type { ConnectorIconProps } from '../../../types';
+
+import awsEksIcon from './aws_eks.svg';
+
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={awsEksIcon} {...props} />;
 };
