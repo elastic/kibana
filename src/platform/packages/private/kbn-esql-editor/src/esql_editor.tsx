@@ -669,6 +669,10 @@ const ESQLEditorInternal = function ESQLEditor({
     onAfterInsert: expandToFitContent,
   });
 
+  const focusEditorAfterVisorSubmit = useCallback(() => {
+    setTimeout(() => editorRef.current?.focus(), 0);
+  }, []);
+
   const visorNlOnSubmit = useCallback(
     (generatedQuery: string) => onUpdateAndSubmitQuery(generatedQuery, QuerySource.QUICK_SEARCH),
     [onUpdateAndSubmitQuery]
@@ -969,6 +973,7 @@ const ESQLEditorInternal = function ESQLEditor({
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
           isDisabled={Boolean(isDisabled || disableSubmitAction)}
+          onKqlSubmitted={focusEditorAfterVisorSubmit}
         />
       )}
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (

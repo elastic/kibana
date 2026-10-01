@@ -55,6 +55,8 @@ export interface QuickSearchVisorProps {
   onUpdateAndSubmitQuery: (query: string) => void;
   // When true, visor submit is a no-op (matches the query bar Search button)
   isDisabled?: boolean;
+  // Called after a KQL filter is submitted so the parent can move focus back to the editor
+  onKqlSubmitted?: () => void;
 }
 
 export function QuickSearchVisor({
@@ -64,6 +66,7 @@ export function QuickSearchVisor({
   onNlResult,
   onUpdateAndSubmitQuery,
   isDisabled = false,
+  onKqlSubmitted,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, data, core } = kibana.services;
@@ -102,9 +105,10 @@ export function QuickSearchVisor({
         const newQuery = `${sourceCommand} ${sourcesKey} | WHERE KQL("""${kqlQuery.trim()}""")`;
         onUpdateAndSubmitQuery(newQuery);
         setSearchValue('');
+        onKqlSubmitted?.();
       }
     },
-    [isDisabled, sourcesKey, query, onUpdateAndSubmitQuery]
+    [isDisabled, sourcesKey, query, onUpdateAndSubmitQuery, onKqlSubmitted]
   );
 
   const onNlSubmit = useCallback(() => {

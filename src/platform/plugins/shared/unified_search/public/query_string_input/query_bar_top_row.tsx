@@ -371,6 +371,14 @@ export const QueryBarTopRow = React.memo(
 
     const esqlEditorRef = useRef<RestorableStateProviderApi>(null);
 
+    const focusEsqlEditor = useCallback(() => {
+      setTimeout(() => {
+        document
+          .querySelector<HTMLTextAreaElement>('[data-test-subj="ESQLEditor"] textarea.inputarea')
+          ?.focus();
+      }, 0);
+    }, []);
+
     // Temporary, the empty page will change and we wont need to control it
     useEffect(() => {
       esqlEditorRef.current?.refreshInitialState();
@@ -1439,6 +1447,7 @@ export const QueryBarTopRow = React.memo(
                     onNlResult={visorNlResultHandlerReady ? onVisorNlResult : undefined}
                     onUpdateAndSubmitQuery={onVisorUpdateAndSubmit}
                     isDisabled={isSubmitDisabled}
+                    onKqlSubmitted={focusEsqlEditor}
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}

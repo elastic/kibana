@@ -96,6 +96,30 @@ describe('Quick search visor', () => {
     );
   });
 
+  it('should notify the parent after a KQL filter is submitted so it can focus the editor', async () => {
+    const onKqlSubmitted = jest.fn();
+    renderWithI18n(renderESQLVisor({ ...props, onKqlSubmitted }));
+
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onKqlSubmitted).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not notify the parent when the KQL submit is ignored', async () => {
+    const onKqlSubmitted = jest.fn();
+    renderWithI18n(renderESQLVisor({ ...props, isDisabled: true, onKqlSubmitted }));
+
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onKqlSubmitted).not.toHaveBeenCalled();
+  });
+
   it('should not submit a KQL filter when the editor query has no source', async () => {
     const onUpdateAndSubmitQuery = jest.fn();
     renderWithI18n(renderESQLVisor({ ...props, query: 'ROW x = 1', onUpdateAndSubmitQuery }));
