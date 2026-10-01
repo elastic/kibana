@@ -539,6 +539,9 @@ describe('ProposalApprovalCard', () => {
       await expect(latestOnApprove!()).rejects.toThrow('Network failure');
     });
 
+    // A 409 covers every way `assertDecidable` can refuse a non-`pending` proposal — already
+    // decided, settled as expired, or otherwise superseded — so the message stays generic rather
+    // than naming one cause.
     it('rejects with a conflict-specific message for a 409', async () => {
       const conflictError = { _isHttpFetchError: true, response: { status: 409 } };
       const mutateAsync = jest.fn().mockRejectedValue(conflictError);
@@ -549,20 +552,7 @@ describe('ProposalApprovalCard', () => {
       } as unknown as ReturnType<typeof useApproveProposal>);
       render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
 
-      await expect(latestOnApprove!()).rejects.toThrow(/already been decided/);
-    });
-
-    it('rejects with an expiry-specific message for a 410', async () => {
-      const expiredError = { _isHttpFetchError: true, response: { status: 410 } };
-      const mutateAsync = jest.fn().mockRejectedValue(expiredError);
-      setupMocks();
-      useApproveProposalMock.mockReturnValue({
-        ...noopMutation,
-        mutateAsync,
-      } as unknown as ReturnType<typeof useApproveProposal>);
-      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-
-      await expect(latestOnApprove!()).rejects.toThrow(/deadline has passed/);
+      await expect(latestOnApprove!()).rejects.toThrow(/no longer available to decide/);
     });
   });
 

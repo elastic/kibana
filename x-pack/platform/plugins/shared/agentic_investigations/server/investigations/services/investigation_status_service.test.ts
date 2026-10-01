@@ -325,23 +325,6 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     expect(client.patchMetadata).not.toHaveBeenCalled();
   });
 
-  it('skips ProposalExpiredError directly without re-reading', async () => {
-    const expiredErr = Object.assign(new Error('expired'), { name: 'ProposalExpiredError' });
-    const { service, releaseGate, patchMetadata } = makeDismissService({
-      releaseGateSideEffect: expiredErr,
-    });
-
-    const result = await service.setStatus(request, 'conv-1', {
-      status: 'closed',
-      dismiss_reason: 'no_reason',
-    });
-
-    expect(releaseGate).toHaveBeenCalledTimes(1);
-    expect(patchMetadata).toHaveBeenCalled();
-    expect(result.dismissed_proposal_ids).toHaveLength(0);
-    expect(result.failed_proposal_ids).toHaveLength(0);
-  });
-
   it('skips ProposalNotFoundError directly without re-reading', async () => {
     const notFoundErr = Object.assign(new Error('not found'), { name: 'ProposalNotFoundError' });
     const { service, releaseGate, patchMetadata } = makeDismissService({

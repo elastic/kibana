@@ -26,10 +26,10 @@ export { MissingDismissReasonError, CloseTargetsChangedError, ProposalDismissFai
 /**
  * Determines how to classify a `releaseGate` failure for a single proposal.
  *
- * - `ProposalExpiredError` or `ProposalNotFoundError` → the proposal is gone; skip it.
- * - `ProposalConflictError` → ambiguous: could be "already decided" (skippable) or an OCC /
- *   execution race where the proposal is still `pending` (retry-able). We re-read the proposal
- *   to find out.
+ * - `ProposalNotFoundError` → the proposal is gone; skip it.
+ * - `ProposalConflictError` → ambiguous: could be "already decided or expired" (skippable) or an
+ *   Optimistic Concurrency Control (OCC) / execution race where the proposal is still `pending` (retry-able).
+ *   We re-read the proposal to find out.
  * - Anything else → treat as a real failure.
  *
  * We match by `error.name` because cross-plugin class imports are forbidden and the proposals
@@ -55,7 +55,7 @@ async function classifyReleaseGateError(
 ): Promise<'skipped' | 'retry' | 'failed'> {
   if (!(err instanceof Error)) return 'failed';
 
-  if (err.name === 'ProposalExpiredError' || err.name === 'ProposalNotFoundError') {
+  if (err.name === 'ProposalNotFoundError') {
     return 'skipped';
   }
 

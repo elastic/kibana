@@ -26,8 +26,11 @@ import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 
 /**
  * Turns a decision mutation's rejection into the friendly text `ApprovalContent` shows in its own
- * error banner — the HTTP-status nuance (already decided, deadline passed) belongs here, where
- * the plugin can read `isHttpFetchError`; the shared package only ever sees the resulting message.
+ * error banner — the HTTP-status nuance (already decided, settled as expired, superseded) belongs
+ * here, where the plugin can read `isHttpFetchError`; the shared package only ever sees the
+ * resulting message. A 409 covers all of those: `assertDecidable` rejects a non-`pending` proposal
+ * (decided, expired, or otherwise settled) with the same conflict, so the message stays deliberately
+ * generic rather than naming one cause.
  */
 const toFriendlyError = (error: unknown): Error => {
   if (isHttpFetchError(error)) {
@@ -35,15 +38,7 @@ const toFriendlyError = (error: unknown): Error => {
       return new Error(
         i18n.translate('xpack.proposals.proposalCard.conflictError', {
           defaultMessage:
-            'This proposal has already been decided. Refresh the page to see its status.',
-        })
-      );
-    }
-    if (error.response?.status === 410) {
-      return new Error(
-        i18n.translate('xpack.proposals.proposalCard.expiredError', {
-          defaultMessage:
-            'The decision deadline has passed and this proposal can no longer be decided.',
+            'This proposal is no longer available to decide. Refresh the page to see its current status.',
         })
       );
     }
