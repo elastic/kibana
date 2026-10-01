@@ -477,12 +477,16 @@ export class MbMap extends Component<Props> {
         ref={this._setContainerRef}
         data-test-subj="mapContainer"
       >
-        {drawFilterControl}
-        {drawFeatureControl}
-        {keydownScrollZoomControl}
-        {scaleControl}
-        {tooltipControl}
-        {tileStatusTrackerControl}
+        {this.props.isInteractive && (
+          <>
+            {drawFilterControl}
+            {drawFeatureControl}
+            {keydownScrollZoomControl}
+            {scaleControl}
+            {tooltipControl}
+            {tileStatusTrackerControl}
+          </>
+        )}
       </div>
     );
   }

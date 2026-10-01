@@ -467,13 +467,17 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr(
           'class',
           (d) => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`
-        )
-        .on('click', function (d) {
+        );
+
+      if (isInteractive) {
+        multiBucketMarkers.on('click', function (d) {
           d3.event.preventDefault();
           if (d.anomalyScore === undefined) return;
           showAnomalyPopover(d, this);
-        })
-        // Don't use an arrow function since we need access to `this`.
+        });
+      }
+      // Don't use an arrow function since we need access to `this`.
+      multiBucketMarkers
         .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
         })
