@@ -245,8 +245,10 @@ The `page_objects` directory contains all the Page Objects that represent Platfo
 `@kbn/scout` is a critical package for Scout: any change to it triggers a full Scout test run. To keep CI fast, only add Page Objects here when they are shared across plugins. Use the following guidance to decide where a Page Object belongs:
 
 - If it is used by a single plugin, keep it in that plugin under `test/scout/ui/fixtures/page_objects/` and register it locally (see ["Registering a plugin-local Page Object"](#registering-a-plugin-local-page-object)). Changes are then scoped to that plugin's tests instead of the whole suite.
-- If it is used by a few plugins that already depend on the owning plugin, keep it in the owning plugin and import it from the others as a test helper (see ["Reusing a Page Object from another plugin"](#reusing-a-page-object-from-another-plugin)).
+- If it is used by a few plugins that already depend on the owning plugin, keep it in the owning plugin and import it from the others as a test helper (see ["Reusing a Page Object from another plugin"](#reusing-a-page-object-from-another-plugin)). This applies to a screen or feature a single plugin owns. A shared Kibana **component** (rendered by two or more plugins, such as the search bar's saved query menu) is different: it belongs in `@kbn/scout` even with only one consumer today, per the placement policy linked below, because moving it into the first consuming plugin makes that plugin the de facto owner and the next consumer copies it.
 - If it represents a core Platform surface with no natural owner (Discover, Dashboard, etc.), add it here so other teams can reuse it.
+
+For the full rules (three tiers, shared vs solution vs plugin-local, frozen fixture keys) see the [placement policy](../../../../../docs/extend/testing/page-objects.md#scout-page-objects-placement).
 
 Page Objects must be registered with the `createLazyPageObject` function, which guarantees its instance is lazy-initialized. This way, we can have all the page objects available in the test context, but only the ones that are called will be actually initialized:
 
@@ -341,6 +343,16 @@ Here we have logic to start Kibana and Elasticsearch servers using `kbn-test` fu
 ### Test Types and Directory Structure
 
 Scout supports two distinct types of tests: UI and API, each with their own directory structure and import patterns:
+
+##### Auditing page object usage
+
+`node scripts/scout audit` prints, for every `pageObjects.<key>` in this package, how many files and which modules use it. It walks each `.ts` file under `test/scout*` and the solution Scout packages with the TypeScript compiler, so it counts property access and destructuring and ignores comments and strings. Import graph tools cannot do this because page objects are Proxy fixtures, not imports.
+
+It also reports exported class names that appear in more than one Scout module (the FTR duplication pattern), and compares every custom server config set against the default: sets with identical or subset differences could be merged, and sets whose only differences are runtime updatable settings (`feature_flags.overrides`, or keys a plugin declares in `dynamicConfig`) could use `apiServices.core.settings()` instead of booting their own servers. `--format text` prints only the findings with the reason for each, in a form that reads well in Slack. The default JSON is for tooling.
+
+Run it by hand when you add, move, or remove a page object or a config set. A scheduled Buildkite pipeline (`kibana / scout / quality-audit`) also runs it on the 1st and 15th of each month and posts a summary to `#kibana-scout-stats`, with the full report in the build annotation. Read the output against the placement policy above. The command reports facts only, it does not decide.
+
+The audit is a set of small functions in `src/cli/audit.ts` and `src/cli/audit_config_sets.ts` so the same facts can feed a scheduled run and the `scout-best-practices-reviewer` skill on every PR. To add a check, add a function that returns facts, include it in the report, and give it a section in `formatAuditReportForSlack`.
 
 #### Setting up Test Directory
 

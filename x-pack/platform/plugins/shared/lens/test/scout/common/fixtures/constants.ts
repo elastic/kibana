@@ -16,6 +16,7 @@ export const ES_ARCHIVE_PATHS = {
     'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights',
   KIBANA_SAMPLE_DATA_LOGS_TSDB:
     'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb',
+  ML_ECOMMERCE: 'x-pack/platform/test/fixtures/es_archives/ml/ecommerce',
 } as const;
 
 export const DATA_VIEW_ID = {
@@ -76,6 +77,7 @@ const PLATFORM_KBN_ARCHIVER_DIR = 'src/platform/test/functional/fixtures/kbn_arc
 
 export const KBN_ARCHIVE_PATHS = {
   ESQL_CONVERSION_DASHBOARD: `${LENS_SCOUT_FIXTURES_DIR}/esql_conversion_dashboard.json`,
+  ESQL_MULTI_LAYER_DASHBOARD: `${LENS_SCOUT_FIXTURES_DIR}/esql_multi_layer_dashboard.json`,
   /** Saved Lens objects including `lnsXYvis` (group5 formula transition). */
   LONG_WINDOW_LOGSTASH_INDEX_PATTERN: `${PLATFORM_KBN_ARCHIVER_DIR}/long_window_logstash_index_pattern.json`,
   KIBANA_SAMPLE_DATA_FLIGHTS_INDEX_PATTERN: `${PLATFORM_KBN_ARCHIVER_DIR}/kibana_sample_data_flights_index_pattern.json`,
@@ -84,6 +86,12 @@ export const KBN_ARCHIVE_PATHS = {
    * {@link LENS_BASIC_TITLES}.
    */
   LENS_BASIC: `${LENS_KBN_ARCHIVES_DIR}/lens_basic.json`,
+  /**
+   * Ships a `logstash-*` data view, the `library annotation group` event-annotation-group,
+   * the `first visualization` XY chart whose annotation layer links to that group, and the
+   * `annotation sync test dashboard` holding that chart by reference plus a by-value clone.
+   */
+  ANNOTATION_LIBRARY: `${LENS_KBN_ARCHIVES_DIR}/annotation_library.json`,
   OPEN_IN_LENS: {
     TSVB: {
       METRIC: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/tsvb/metric.json`,
@@ -154,4 +162,11 @@ export const ESQL_CONVERSION_DASHBOARD_ID = '3cda479c-8797-4492-99f4-2259e1377f8
 export const ESQL_CONVERSION_PANEL_IDS = {
   INLINE_METRIC: 'fb4626b8-d8ce-42d3-913a-081af94cfb51',
   SAVED_METRIC: '3aef33a1-bcbc-4cd7-b2d9-fa678b2fefa5',
+  MULTI_LAYER: 'esql-conversion-multi-panel',
+  PARTIAL_MULTI_LAYER: 'esql-conversion-partial-panel',
+} as const;
+
+export const ESQL_MULTI_LAYER_PANEL_IDS = {
+  DATA: 'esql-multi-data-panel',
+  COMPARISON_DATA: 'esql-multi-comparison-panel',
 } as const;

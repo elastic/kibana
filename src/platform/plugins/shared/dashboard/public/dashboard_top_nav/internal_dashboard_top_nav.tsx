@@ -68,7 +68,7 @@ import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
-import { usePrettifyDashboardAction } from '../dashboard_app/prettify/use_prettify_dashboard_action';
+import { useEnhanceDashboardAction } from '../dashboard_app/enhance/use_enhance_dashboard_action';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -80,7 +80,7 @@ export interface InternalDashboardTopNavProps {
   showResetChange?: boolean;
 }
 
-interface DashboardChromeNextHeaderProps {
+interface DashboardAppHeaderProps {
   headerMode: 'inline' | 'registered';
   title: string;
   back: AppHeaderBack;
@@ -93,9 +93,9 @@ interface DashboardChromeNextHeaderProps {
 }
 
 /**
- * Chrome Next header path. Must render inside `DashboardFavoritesProvider`.
+ * App header path. Must render inside `DashboardFavoritesProvider`.
  */
-const DashboardChromeNextHeader = ({
+const DashboardAppHeader = ({
   headerMode,
   title,
   back,
@@ -105,7 +105,7 @@ const DashboardChromeNextHeader = ({
   viewMode,
   share,
   experimentalDashboardAiAction,
-}: DashboardChromeNextHeaderProps) => {
+}: DashboardAppHeaderProps) => {
   const favorite = useFavorite({ id: dashboardId });
 
   if (headerMode === 'inline') {
@@ -376,22 +376,28 @@ export function InternalDashboardTopNav({
       return false;
     }
     const disabled =
-      (allDataViews?.length ?? 0) > 0 && !allDataViews?.some((dv) => dv.isTimeBased());
+      (allDataViews?.length ?? 0) > 0 &&
+      !allDataViews?.some(
+        (dv) => (dv.type !== 'esql' && dv.isTimeBased()) || (dv.type === 'esql' && dv.timeFieldName)
+      );
     return { disabled };
   }, [visibilityProps.showDatePicker, allDataViews]);
 
   const shareAction = useDashboardShareAction({ redirectTo });
-  const prettifyAction = usePrettifyDashboardAction(dashboardApi);
+  const enhanceAction = useEnhanceDashboardAction(dashboardApi);
   const experimentalDashboardAiAction = useMemo(
     () =>
-      viewMode === 'edit' && prettifyAction
+      viewMode === 'edit' && enhanceAction
         ? {
             onClick: () => {
-              void prettifyAction.execute();
+              void enhanceAction.execute();
             },
+            tooltip: i18n.translate('dashboard.topNav.enhanceButtonTooltip', {
+              defaultMessage: 'Improve the content and style of your dashboard using AI',
+            }),
           }
         : undefined,
-    [viewMode, prettifyAction]
+    [viewMode, enhanceAction]
   );
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
@@ -471,7 +477,7 @@ export function InternalDashboardTopNav({
     return viewMode === 'edit' ? editModeTopNavConfig : viewModeTopNavConfig;
   }, [visibilityProps.showTopNavMenu, viewMode, editModeTopNavConfig, viewModeTopNavConfig]);
 
-  // Chrome Next hides the classic breadcrumbs, so the header carries its own back button that leads to the dashboard listing page.
+  // Project chrome hides the classic breadcrumbs, so the header carries its own back button that leads to the dashboard listing page.
   const backToListing = useMemo<AppHeaderBack>(
     () => ({
       href: coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
@@ -492,7 +498,7 @@ export function InternalDashboardTopNav({
       </EuiScreenReaderOnly>
       {(headerMode === 'inline' || headerMode === 'registered') && (
         <DashboardFavoritesProvider>
-          <DashboardChromeNextHeader
+          <DashboardAppHeader
             headerMode={headerMode}
             title={dashboardTitle}
             back={backToListing}

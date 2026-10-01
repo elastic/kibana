@@ -94,3 +94,8 @@ export const hasConnectorEventIdentity = (
   identity: ConnectorEventIdentity | undefined
 ): identity is ConnectorEventIdentity =>
   identity !== undefined && Boolean(identity.apiKey || identity.uiamApiKey);
+
+/** Unencrypted saved-object flag. A normal get strips `apiKey` / `uiamApiKey`. */
+export const hasInboundEventIdentityAttributes = (attributes: {
+  hasInboundEventIdentity?: boolean | null;
+}): boolean => attributes.hasInboundEventIdentity === true;

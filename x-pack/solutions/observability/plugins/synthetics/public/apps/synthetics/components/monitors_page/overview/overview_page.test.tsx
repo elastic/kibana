@@ -49,6 +49,11 @@ jest.mock('../hooks/use_monitor_list', () => ({
   useMonitorList: () => mockUseMonitorList(),
 }));
 
+jest.mock('../../common/app_header', () => ({
+  MonitorsListingPage: ({ children }: { children: React.ReactNode }) => children,
+  SyntheticsHeaderToolbar: () => null,
+}));
+
 jest.mock('../../../hooks', () => ({
   useEnablement: jest.fn(() => ({
     isEnabled: true,
@@ -89,6 +94,10 @@ jest.mock('../common/monitor_filters/filter_group', () => ({
   FilterGroup: () => null,
 }));
 
+jest.mock('../common/monitor_filters/selected_filter_pills', () => ({
+  SelectedFilterPills: () => null,
+}));
+
 jest.mock('../common/search_field', () => ({
   SearchField: () => null,
 }));
@@ -105,12 +114,9 @@ jest.mock('./overview/overview_status', () => ({
   OverviewStatus: () => null,
 }));
 
-jest.mock('./overview/overview_errors/overview_errors', () => ({
-  OverviewErrors: () => null,
-}));
-
-jest.mock('./overview/overview_alerts', () => ({
-  OverviewAlerts: () => null,
+jest.mock('./overview/overview_activity_chart', () => ({
+  OverviewActivityChart: () => null,
+  useOverviewActivityStats: () => [],
 }));
 
 jest.mock('../common/no_monitors_found', () => ({

@@ -10,7 +10,6 @@ import {
   bulkByQuerySchema,
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
-  bulkGetRulesParamsSchema,
   bulkGetRulesResponseSchema,
   bulkResponseSchema,
   createRuleDataSchema,
@@ -18,9 +17,9 @@ import {
   findRulesResponseSchema,
   ruleResponseSchema,
   ruleTagsResponseSchema,
-  updateRuleBodySchema,
+  updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
-import { BULK_GET_RULES_REQUEST, BULK_GET_RULES_RESPONSE } from './bulk_get_rules_oas_example';
+import { BULK_GET_RULES_RESPONSE } from './bulk_get_rules_oas_example';
 import { RULE_TAGS_RESPONSE } from './get_rule_tags_oas_example';
 import { LIST_RULES_RESPONSE } from './list_rules_oas_example';
 import {
@@ -40,12 +39,8 @@ describe('rule OAS example payloads', () => {
     expect(createRuleDataSchema.safeParse(CREATE_RULE_REQUEST).success).toBe(true);
   });
 
-  it('keeps update request example valid against updateRuleBodySchema', () => {
-    expect(updateRuleBodySchema.safeParse(UPDATE_RULE_REQUEST).success).toBe(true);
-  });
-
-  it('keeps bulk-get request example valid against bulkGetRulesParamsSchema', () => {
-    expect(bulkGetRulesParamsSchema.safeParse(BULK_GET_RULES_REQUEST).success).toBe(true);
+  it('keeps update request example valid against updateRuleDataSchema', () => {
+    expect(updateRuleDataSchema.safeParse(UPDATE_RULE_REQUEST).success).toBe(true);
   });
 
   it('keeps bulk-operation request examples valid against bulkByIdsSchema', () => {

@@ -22,6 +22,17 @@ import {
   editMarkdownPanelConfigInputSchema,
 } from './markdown';
 import {
+  anomalyChartsPanelConfigInputSchema,
+  anomalyChartsPanelDefinition,
+  anomalySwimlaneConfigInputSchema,
+  anomalySwimlaneDefinition,
+  editAnomalyChartsPanelConfigInputSchema,
+  editAnomalySwimlaneConfigInputSchema,
+  editSingleMetricViewerConfigInputSchema,
+  singleMetricViewerConfigInputSchema,
+  singleMetricViewerPanelDefinition,
+} from './ml_panels';
+import {
   customContentPanelConfigInputSchema,
   customContentPanelDefinition,
   editCustomContentPanelConfigInputSchema,
@@ -39,8 +50,9 @@ import { attachmentPanelInputSchema } from './attachment_source';
  * panel type means adding its module plus an entry here.
  *
  * Panel inputs have two orthogonal axes, each carrying a `type`:
- * - `source`: `'config'` (resolved, passed by value) or `'request'` (resolved
- *   asynchronously from a query).
+ * - `source`: `'config'` (resolved, passed by value), `'request'` (resolved
+ *   asynchronously from a query), or `'attachment'` (built from an existing
+ *   visualization attachment; carries no `type`).
  * - `type`: which panel type — `'vis'`, `'markdown'`, … (maps to an embeddable).
  *
  * Today `source: 'request'` only resolves `type: 'vis'`; adding another
@@ -55,12 +67,14 @@ export type { CustomContentPanelConfig } from './custom_content';
 /**
  * A `source: 'config'` panel adds a panel from an already-resolved config passed
  * by value, discriminated by `type` (each panel type owns its `config` shape).
- * The tool never reads a store, so the config must be supplied directly rather
- * than as an attachment ID.
+ * Existing visualization attachments should use `source: 'attachment'` instead.
  */
 const configPanelInputSchema = z.discriminatedUnion('type', [
   visPanelConfigInputSchema,
   markdownPanelConfigInputSchema,
+  anomalyChartsPanelConfigInputSchema,
+  anomalySwimlaneConfigInputSchema,
+  singleMetricViewerConfigInputSchema,
   customContentPanelConfigInputSchema,
 ]);
 
@@ -71,6 +85,9 @@ export type PanelType = ConfigPanelInput['type'];
 export const PANEL_TYPE_DEFINITIONS: Record<PanelType, PanelTypeDefinition> = {
   vis: visPanelDefinition,
   markdown: markdownPanelDefinition,
+  ml_anomaly_charts: anomalyChartsPanelDefinition,
+  ml_anomaly_swimlane: anomalySwimlaneDefinition,
+  ml_single_metric_viewer: singleMetricViewerPanelDefinition,
   custom_content: customContentPanelDefinition,
 };
 
@@ -79,7 +96,7 @@ const sectionIdField = z
   .max(256)
   .optional()
   .describe(
-    'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+    'Existing section id or the key of an add_section earlier in this call. If omitted, panel is added at the top level.'
   );
 
 /** A single panel item accepted by `add_panels` (any panel type, optionally targeting a section). */
@@ -87,6 +104,9 @@ export const addPanelsItemSchema = z.discriminatedUnion('source', [
   z.discriminatedUnion('type', [
     visPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
     markdownPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
+    anomalyChartsPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
+    anomalySwimlaneConfigInputSchema.extend({ sectionId: sectionIdField }),
+    singleMetricViewerConfigInputSchema.extend({ sectionId: sectionIdField }),
     customContentPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
   ]),
   z.discriminatedUnion('renderer', [
@@ -106,8 +126,9 @@ export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
 ]);
 
 /**
- * A "create a new panel" input — either an already-resolved `source: 'config'`
- * panel or a `source: 'request'` to resolve. The common shape that `add_panels`
+ * A "create a new panel" input — an already-resolved `source: 'config'` panel,
+ * a `source: 'request'` to resolve, or a `source: 'attachment'` reference to an
+ * existing visualization attachment. The common shape that `add_panels`
  * and `add_section` materialize into panel content (`add_panels` items also carry
  * a `sectionId`, which is assignable to this base).
  */
@@ -119,6 +140,9 @@ export const editPanelItemSchema = z.discriminatedUnion('source', [
   z.discriminatedUnion('type', [
     editMarkdownPanelConfigInputSchema,
     editCustomContentPanelConfigInputSchema,
+    editAnomalyChartsPanelConfigInputSchema,
+    editAnomalySwimlaneConfigInputSchema,
+    editSingleMetricViewerConfigInputSchema,
   ]),
 ]);
 

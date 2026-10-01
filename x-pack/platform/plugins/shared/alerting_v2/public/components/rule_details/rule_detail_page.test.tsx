@@ -22,12 +22,6 @@ import { AlertingV2RulesLocatorDefinition } from '../../locators';
 
 const mockLocators = createMockLocators();
 
-const mockHistoryPush = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: mockHistoryPush }),
-}));
-
 let mockCanWriteRules = true;
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
@@ -138,21 +132,18 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
+  version: 1,
   metadata: {
     name: 'Test Events Rule',
-    version: 1,
     description: 'Test rule description',
     tags: ['prod', 'infra'],
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM logs-* | STATS count() BY host.name' },
-  },
-  created_by: 'alice@example.com',
+  query: { base: 'FROM logs-* | STATS count() BY host.name' },
+  created_by: { profile_uid: 'alice@example.com' },
   created_at: '2026-03-01T12:00:00.000Z',
-  updated_by: 'bob@example.com',
+  updated_by: { profile_uid: 'bob@example.com' },
   updated_at: '2026-03-04T12:00:00.000Z',
 };
 
@@ -347,7 +338,7 @@ describe('RuleDetailPage', () => {
 
     const [, options] = mockDeleteRule.mock.calls[0];
     options.onSuccess();
-    expect(mockHistoryPush).toHaveBeenCalledWith('/');
+    expect(mockLocators.rulesLocators.navigateSync).toHaveBeenCalledWith({});
   });
 
   it('closes delete modal when cancel is clicked', async () => {

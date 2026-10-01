@@ -82,6 +82,20 @@ export const platformSignificantEventsTools = {
   reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
 } as const;
 
+/** AI-index tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineAiIndexTools = {
+  listAiIndices: `${internalNamespaces.platformContextEngine}.list_ai_indices`,
+  describeAiIndex: `${internalNamespaces.platformContextEngine}.describe_ai_index`,
+  queryAiIndices: `${internalNamespaces.platformContextEngine}.query_ai_indices`,
+} as const;
+
+/** AI-index automation tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineAutomationTools = {
+  installAutomationTemplate: `${internalNamespaces.platformContextEngine}.install_automation_template`,
+  saveAutomation: `${internalNamespaces.platformContextEngine}.save_automation`,
+  runAutomation: `${internalNamespaces.platformContextEngine}.run_automation`,
+} as const;
+
 export const attachmentTools = {
   read: `${internalNamespaces.attachments}.read`,
   update: `${internalNamespaces.attachments}.update`,

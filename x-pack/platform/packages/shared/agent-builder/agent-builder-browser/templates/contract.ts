@@ -6,7 +6,7 @@
  */
 
 import type { ComponentType } from 'react';
-import type { IconType } from '@elastic/eui';
+import type { EuiFlyoutMenuAction, IconType } from '@elastic/eui';
 import type {
   Conversation,
   ConversationWithoutRoundsWithPermissions,
@@ -21,6 +21,13 @@ export interface ConversationTemplateDetailsFlyoutRenderProps {
   conversation: Conversation;
   /** Whether the flyout was opened by the chat's details button rather than the public API. */
   isOpenedFromChat: boolean;
+  /**
+   * Forces a refetch of the conversation this flyout is showing. Stable across renders, so it is
+   * safe in a dependency array. Only provided when the flyout was opened through the public API
+   * (`isOpenedFromChat === false`); the in-chat flyout's conversation is already kept live by the
+   * chat's own cache, so it is `undefined` there.
+   */
+  refetchConversation?: () => Promise<void>;
 }
 
 /**
@@ -54,6 +61,7 @@ export interface ConversationTemplateUIContext {
   openFullscreenConversation: (options: {
     conversationId: string;
     agentId: string;
+    openDetails?: boolean;
   }) => Promise<void>;
 }
 
@@ -76,6 +84,13 @@ export interface ConversationTemplateUIDefinition {
     header?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
     /** Rendered inside Agent Builder's EuiFlyoutFooter when provided. */
     footer?: ComponentType<ConversationTemplateDetailsFlyoutRenderProps>;
+    /**
+     * Icon buttons rendered in the in-chat flyout's menu bar, before the close button. Flyouts opened
+     * with `openConversationDetails` take their actions from its `trailingActions` option instead.
+     */
+    trailingActions?: (
+      props: Pick<ConversationTemplateDetailsFlyoutRenderProps, 'conversation'>
+    ) => EuiFlyoutMenuAction[];
   };
 }
 

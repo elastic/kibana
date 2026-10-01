@@ -24,6 +24,10 @@ import { TestRunSteps } from './test_run_steps';
 import { useGetUrlParams } from '../../hooks';
 import { useTestRunDetailsBreadcrumbs } from './hooks/use_test_run_details_breadcrumbs';
 import { MonitorTypeEnum } from '../../../../../common/runtime_types';
+import { MonitorBackPage, SyntheticsHeaderToolbar, TEST_RUN_TITLE } from '../common/app_header';
+import { TestRunDate } from './components/test_run_date';
+import { TestRunDetailsStatus } from './components/test_run_details_status';
+import { MonitorDetailsLocation } from '../monitor_details/monitor_details_location';
 
 export const TestRunDetails = () => {
   // Step index from starts at 1 in synthetics
@@ -58,7 +62,16 @@ export const TestRunDetails = () => {
   const hasNoSteps = stepsData?.steps.length === 0 && !stepsLoading;
 
   return (
-    <>
+    <MonitorBackPage
+      title={TEST_RUN_TITLE}
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <TestRunDate />
+          <TestRunDetailsStatus />
+          <MonitorDetailsLocation />
+        </SyntheticsHeaderToolbar>
+      }
+    >
       <TestRunErrorInfo journeyDetails={stepsData?.details} hasNoSteps={hasNoSteps} />
       {!hasNoSteps && (
         <EuiFlexGroup gutterSize="m" wrap={true}>
@@ -130,6 +143,6 @@ export const TestRunDetails = () => {
         locationId={selectedLocation?.id}
         remoteName={remoteName}
       />
-    </>
+    </MonitorBackPage>
   );
 };

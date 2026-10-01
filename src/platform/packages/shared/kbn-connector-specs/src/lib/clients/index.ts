@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Pool as Mysql2Pool } from 'mysql2/promise';
-import type { ClientTypeSpec } from './client_type_spec';
+import { createMcpClientType } from '../mcp/client/client_type';
+import type { ClientTypeSpecs } from './client_registry';
+import { mongodbClientType } from './mongodb_client_type';
 import { mysqlClientType } from './mysql';
 
 export type {
@@ -17,18 +18,14 @@ export type {
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+  HostTarget,
+  PlatformServices,
 } from './client_type_spec';
 
-export interface ClientRegistry {
-  mysql: Mysql2Pool;
-}
-
-export type ClientTypeId = keyof ClientRegistry;
-
-export type ClientTypeSpecs = Readonly<{
-  [K in ClientTypeId]: ClientTypeSpec<ClientRegistry[K]>;
-}>;
+export type { ClientRegistry, ClientTypeId, ClientTypeSpecs } from './client_registry';
 
 export const clientTypes: ClientTypeSpecs = {
+  mcp: createMcpClientType(),
+  mongodb: mongodbClientType,
   mysql: mysqlClientType,
 };

@@ -33,7 +33,7 @@ const generateWorkflowSchema = z.object({
     .string()
     .optional()
     .describe(
-      '(optional) Additional context that could be useful to generate the workflow (e.g. related conversation, environment hints).'
+      '(optional) Specific grounding facts needed to generate the workflow — e.g. index names, field names/mappings, connector IDs, space IDs, alert field paths, time ranges, logical flow and/or filter requirements, etc.'
     ),
   instructions: z
     .string()
@@ -79,9 +79,9 @@ The workflow agent has innate knowledge of (meaning you don't need to gather inf
 — The list of connectors available on the current Kibana instance
 — When the 'attachmentId' parameter is specified, the corresponding workflow definition
 
-The workflow agent has **no** knowledge of (meaning you need to provide or eventually gather info about):
-— The current conversation (meaning that if information useful for the workflow generation is present in the conversation, you should explicitly summarize those and mention then as context when calling the tool)
-— Any info related to the state of the Elasticsearch cluster (available indices, their mappings...)
+The workflow agent has **no** knowledge of (meaning you may need to gather and pass additional context):
+— Specific semantics referenced in the conversation: index names, field names/mappings, connector IDs, space IDs, alert field paths, time ranges, logical flow and/or filter requirements, etc, that the workflow needs. Pass only the relevant context as \`context\`.
+— Elasticsearch cluster state: index names and their mappings when relevant to the workflow.
 
 E.g., if the user message is "Ok now that we've identified that log index, now generate a workflow checking every 30mins for error in it and post a summary to slack in the foo channel", you should
 1. Specify which index the workflow should be targeted (inferred from the conversation / previous messages)

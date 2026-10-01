@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiCode, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { MatchedActionPolicyCategory, PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -51,10 +60,22 @@ interface Props {
 }
 
 export const MatchedPolicyReason = ({ category, matcher, ruleTags }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const trimmedExpression = matcher?.expression?.trim() || null;
   const matcherTags = matcher?.tags?.length ? matcher.tags : null;
 
-  const isCatchAll = category === 'catch-all';
+  const tagCircleStyles = css`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: ${euiTheme.size.l};
+    block-size: ${euiTheme.size.l};
+    border: ${euiTheme.border.thin};
+    border-radius: 50%;
+    color: ${euiTheme.colors.textSubdued};
+  `;
+
+  const isCatchAll = category === 'catch_all';
 
   if (isCatchAll) {
     return (
@@ -67,38 +88,18 @@ export const MatchedPolicyReason = ({ category, matcher, ruleTags }: Props) => {
   }
 
   const matchedTags = matcherTags ? getMatchedTags(matcherTags, ruleTags) : null;
+  const tagsTooltipContent = matchedTags
+    ? i18n.translate(
+        'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.tagsTooltip',
+        {
+          defaultMessage: 'Matching rule tags: {tags}',
+          values: { tags: matchedTags.join(', ') },
+        }
+      )
+    : '';
 
   return (
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-      {matchedTags && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.tagsTooltip',
-              {
-                defaultMessage: 'Matching rule tags: {tags}',
-                values: { tags: matchedTags.join(', ') },
-              }
-            )}
-          >
-            <EuiBadge
-              color="hollow"
-              iconType="tag"
-              title=""
-              tabIndex={0}
-              data-test-subj="matchedPolicyReasonTags"
-            >
-              {i18n.translate(
-                'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.tagsBadge',
-                {
-                  defaultMessage: 'Tags ({count})',
-                  values: { count: matchedTags.length },
-                }
-              )}
-            </EuiBadge>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+    <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
       {trimmedExpression && (
         <EuiFlexItem grow={false}>
           <EuiToolTip
@@ -119,6 +120,20 @@ export const MatchedPolicyReason = ({ category, matcher, ruleTags }: Props) => {
             >
               {expressionBadgeLabel}
             </EuiBadge>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {matchedTags && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={tagsTooltipContent}>
+            <span
+              css={tagCircleStyles}
+              tabIndex={0}
+              aria-label={tagsTooltipContent}
+              data-test-subj="matchedPolicyReasonTags"
+            >
+              <EuiIcon type="tag" size="s" aria-hidden />
+            </span>
           </EuiToolTip>
         </EuiFlexItem>
       )}

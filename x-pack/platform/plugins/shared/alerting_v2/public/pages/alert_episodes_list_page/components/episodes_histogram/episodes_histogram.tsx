@@ -94,6 +94,9 @@ export const EpisodesHistogram = ({
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId(services.spaces);
   const histogramSessionId = useMemo(() => `alerting_v2_histogram_${Date.now()}`, []);
+  // Lens treats a present `abortController` prop as owned. Unified histogram always
+  // forwards the prop, so an undefined value crashes the embeddable before it draws.
+  const abortController = useMemo(() => new AbortController(), []);
   const [bucketInterval, setBucketInterval] = useState(() => autoInterval(timeRange));
   const prevTimeRange = useRef(timeRange);
 
@@ -171,6 +174,7 @@ export const EpisodesHistogram = ({
     isChartLoading: isDataLoading || !dataView,
     onBrushEnd,
     onTimeIntervalChange,
+    withLensActions: false,
   });
 
   const esqlQuery = useMemo<AggregateQuery>(
@@ -193,6 +197,7 @@ export const EpisodesHistogram = ({
     if (!table || !dataView) return;
     api.fetch({
       requestAdapter: undefined,
+      abortController,
       searchSessionId: histogramSessionId,
       dataView,
       query: esqlQuery,
@@ -205,6 +210,7 @@ export const EpisodesHistogram = ({
       getModifiedVisAttributes,
     });
   }, [
+    abortController,
     api,
     dataView,
     esqlQuery,
@@ -284,13 +290,6 @@ export const EpisodesHistogram = ({
             gutterSize="none"
             css={css`
               height: 192px;
-              /*
-               * TODO: Replace these selectors with a proper prop on UnifiedHistogramChart (e.g. withLensActions={false})
-               */
-              [data-test-subj='unifiedHistogramEditFlyoutVisualization'],
-              [data-test-subj='unifiedHistogramSaveVisualization'] {
-                display: none;
-              }
             `}
           >
             <EuiFlexItem>

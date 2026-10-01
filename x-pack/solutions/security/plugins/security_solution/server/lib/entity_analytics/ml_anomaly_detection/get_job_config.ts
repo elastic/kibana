@@ -8,12 +8,9 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlDetector, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import {
-  tactics as mitreTactics,
-  techniques as mitreTechniques,
-  subtechniques as mitreSubtechniques,
-} from '../../../../common/detection_engine/mitre/mitre_tactics_techniques';
+import { resolveMitreBuckets } from '../../detection_engine/mitre/resolve_mitre_buckets';
 
 export interface JobConfig {
   sourceIndex: string[];
@@ -38,12 +35,8 @@ interface GetJobConfigOpts {
   ml: MlPluginSetup;
   request: KibanaRequest;
   soClient: SavedObjectsClientContract;
+  mitreDataClient?: MitreAttackDataClient;
 }
-
-const tacticNameById = new Map(mitreTactics.map(({ id, name }) => [id, name]));
-const techniqueNameById = new Map(
-  [...mitreTechniques, ...mitreSubtechniques].map(({ id, name }) => [id, name])
-);
 
 /**
  * Live jobs keep whatever custom_settings they were created with, since job setup
@@ -88,6 +81,7 @@ export const getJobConfig = async ({
   ml,
   request,
   soClient,
+  mitreDataClient,
 }: GetJobConfigOpts): Promise<Map<string, JobConfig>> => {
   const result = new Map<string, JobConfig>();
   if (!jobIds.length) return result;
@@ -101,6 +95,24 @@ export const getJobConfig = async ({
           .then((resp) => resp.jobs ?? [])
       )
     );
+    let tacticNameById = new Map<string, string>();
+    let techniqueNameById = new Map<string, string>();
+    try {
+      const mitreBuckets = await resolveMitreBuckets(mitreDataClient);
+      tacticNameById = new Map(mitreBuckets.tactics.map(({ id, name }) => [id, name]));
+      techniqueNameById = new Map(
+        [...mitreBuckets.techniques, ...mitreBuckets.subtechniques].map(({ id, name }) => [
+          id,
+          name,
+        ])
+      );
+    } catch (mitreErr) {
+      logger.debug(
+        `Failed to resolve MITRE buckets; job names will fall back to raw IDs: ${
+          mitreErr instanceof Error ? mitreErr.message : String(mitreErr)
+        }`
+      );
+    }
 
     const jobs = jobsSettled.flatMap((r) => {
       if (r.status === 'rejected') {

@@ -13,6 +13,12 @@ import type { UMRestApiRouteFactory } from '.';
 import { savedObjectsAdapter } from '../lib/saved_objects/saved_objects';
 import { VALUE_MUST_BE_AN_INTEGER } from '../../../common/translations';
 import { API_URLS } from '../../../common/constants';
+import {
+  MAX_INDEX_PATTERN_LENGTH,
+  MAX_SETTINGS_LIST_SIZE,
+  MAX_SETTINGS_STRING_LENGTH,
+  boundedStringArray,
+} from './schema_limits';
 
 export const createGetDynamicSettingsRoute: UMRestApiRouteFactory<DynamicSettings> = (
   _libs: UMServerLibs
@@ -33,16 +39,20 @@ export const validateInteger = (value: number): string | undefined => {
   }
 };
 
+const settingsStringList = boundedStringArray(MAX_SETTINGS_STRING_LENGTH, MAX_SETTINGS_LIST_SIZE);
+
 export const DynamicSettingsSchema = schema.object({
-  heartbeatIndices: schema.maybe(schema.string({ minLength: 1 })),
+  heartbeatIndices: schema.maybe(
+    schema.string({ minLength: 1, maxLength: MAX_INDEX_PATTERN_LENGTH })
+  ),
   certAgeThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
   certExpirationThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
-  defaultConnectors: schema.maybe(schema.arrayOf(schema.string())),
+  defaultConnectors: schema.maybe(settingsStringList),
   defaultEmail: schema.maybe(
     schema.object({
-      to: schema.arrayOf(schema.string()),
-      cc: schema.maybe(schema.arrayOf(schema.string())),
-      bcc: schema.maybe(schema.arrayOf(schema.string())),
+      to: settingsStringList,
+      cc: schema.maybe(settingsStringList),
+      bcc: schema.maybe(settingsStringList),
     })
   ),
 });

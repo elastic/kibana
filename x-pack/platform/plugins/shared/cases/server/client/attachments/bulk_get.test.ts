@@ -12,10 +12,9 @@ import { createCasesClientMockArgs, createCasesClientMock } from '../mocks';
 import { bulkGet } from './bulk_get';
 
 describe('bulkGet', () => {
-  // The getter is mixed until every attachment type is migrated (see
-  // `toUnifiedAttributes`), so the response tolerates a leftover legacy shape too.
-  // Use a unified fixture for the error-construction tests below, which don't
-  // exercise attachment shape.
+  // The getter still accepts leftover cases-comments documents (legacy-shaped
+  // unknown persistable-state subtype ids). Use a unified fixture for the
+  // error-construction tests below, which don't exercise attachment shape.
   const attachmentSO = mockCaseUnifiedAttachments[0];
   const unifiedAttachmentSO = mockCaseUnifiedAttachments[0];
   const legacyAttachmentSO = mockCaseComments[0];
