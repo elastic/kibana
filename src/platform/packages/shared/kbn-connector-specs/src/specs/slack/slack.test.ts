@@ -13,13 +13,19 @@ import { SPECS_ALLOWED_EVENTS } from '../../specs_allowed_events';
 import { Slack } from './slack';
 import { slackRelay } from './relay';
 import {
+  SlackAddReactionInputSchema,
   SlackGetConversationHistoryInputSchema,
+  SlackGetConversationRepliesInputSchema,
   SlackGetFileInfoInputSchema,
   SlackListChannelsInputSchema,
   SlackListFilesInputSchema,
   SlackListUserConversationsInputSchema,
   SlackListUsersInputSchema,
   SlackResolveChannelIdInputSchema,
+  SlackSendBlockKitMessageInputSchema,
+  SlackUpdateMessageInputSchema,
+  SlackSendMessageInputSchema,
+  SlackUploadFileInputSchema,
   SlackWhoAmIInputSchema,
 } from './types';
 
@@ -90,7 +96,7 @@ describe('Slack', () => {
         authorizationUrl: 'https://slack.com/oauth/v2/authorize',
         tokenUrl: 'https://slack.com/api/oauth.v2.access',
         scope:
-          'channels:read channels:history chat:write files:read groups:read groups:history im:read im:history mpim:read mpim:history search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read users:read.email',
+          'channels:manage channels:read channels:history chat:write files:read files:write groups:read groups:history groups:write im:read im:history mpim:read mpim:history reactions:write search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read users:read.email',
       },
     });
   });
@@ -112,7 +118,7 @@ describe('Slack', () => {
       defaults: {
         provider: 'slack',
         scope:
-          'channels:read channels:history chat:write files:read groups:read groups:history im:read im:history mpim:read mpim:history search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read users:read.email',
+          'channels:manage channels:read channels:history chat:write files:read files:write groups:read groups:history groups:write im:read im:history mpim:read mpim:history reactions:write search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read users:read.email',
       },
       overrides: {
         meta: { scope: { disabled: true } },
@@ -1403,7 +1409,7 @@ describe('Slack', () => {
   });
 
   describe('sendMessage action', () => {
-    it('should send message with required parameters', async () => {
+    it('should send message with required parameters and return the Slack response plus { timestamp }', async () => {
       const mockResponse = {
         data: {
           ok: true,
@@ -1435,7 +1441,14 @@ describe('Slack', () => {
           },
         }
       );
-      expect(result).toEqual(mockResponse.data);
+      // The Slack envelope is preserved for existing callers; `timestamp` aliases `ts` for threading.
+      expect(result).toEqual({ ...mockResponse.data, timestamp: '1234567890.123456' });
+    });
+
+    it('should accept message text longer than 2,000 characters', () => {
+      expect(() =>
+        SlackSendMessageInputSchema.parse({ channel: 'C123', text: 'x'.repeat(10_000) })
+      ).not.toThrow();
     });
 
     it('should send threaded reply', async () => {
@@ -1516,6 +1529,135 @@ describe('Slack', () => {
     });
   });
 
+  describe('sendBlockKitMessage action', () => {
+    it('should post a Block Kit message and return normalized { timestamp }', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          channel: 'C123',
+          ts: '1700000001.000001',
+          message: { type: 'message' },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: '*Alert*: CPU high' } }];
+      const result = await Slack.actions.sendBlockKitMessage.handler(
+        mockContext,
+        SlackSendBlockKitMessageInputSchema.parse({ channel: 'C123', blocks })
+      );
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/chat.postMessage',
+        expect.objectContaining({ channel: 'C123', blocks }),
+        expect.objectContaining({ headers: { 'Content-Type': 'application/json; charset=utf-8' } })
+      );
+      expect(result).toEqual({ timestamp: '1700000001.000001' });
+    });
+
+    it('should forward text, threadTs, unfurl options', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { ok: true, ts: '1.0', channel: 'C1' },
+      });
+
+      await Slack.actions.sendBlockKitMessage.handler(
+        mockContext,
+        SlackSendBlockKitMessageInputSchema.parse({
+          channel: 'C1',
+          blocks: [{ type: 'section', text: { type: 'plain_text', text: 'Hi' } }],
+          text: 'Fallback text',
+          threadTs: '1700000000.000000',
+          unfurlLinks: false,
+          unfurlMedia: false,
+        })
+      );
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/chat.postMessage',
+        expect.objectContaining({
+          text: 'Fallback text',
+          thread_ts: '1700000000.000000',
+          unfurl_links: false,
+          unfurl_media: false,
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      mockClient.post.mockResolvedValue({ data: { ok: false, error: 'channel_not_found' } });
+
+      await expect(
+        Slack.actions.sendBlockKitMessage.handler(
+          mockContext,
+          SlackSendBlockKitMessageInputSchema.parse({
+            channel: 'INVALID',
+            blocks: [{ type: 'section', text: { type: 'plain_text', text: 'Hi' } }],
+          })
+        )
+      ).rejects.toThrow('Slack sendBlockKitMessage error: channel_not_found');
+    });
+  });
+
+  describe('getConversationReplies action', () => {
+    it('should fetch thread replies with required params', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          messages: [
+            { type: 'message', user: 'U1', text: 'parent', ts: '1.0', thread_ts: '1.0' },
+            { type: 'message', user: 'U2', text: 'reply', ts: '1.1', thread_ts: '1.0' },
+          ],
+          has_more: false,
+          response_metadata: { next_cursor: '' },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.getConversationReplies.handler(
+        mockContext,
+        SlackGetConversationRepliesInputSchema.parse({ channel: 'C1', ts: '1.0' })
+      );
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.replies', {
+        params: { channel: 'C1', ts: '1.0', limit: 100 },
+      });
+      expect(result).toMatchObject({
+        ok: true,
+        channel: 'C1',
+        ts: '1.0',
+        messages: expect.arrayContaining([
+          expect.objectContaining({ ts: '1.0', text: 'parent' }),
+          expect.objectContaining({ ts: '1.1', text: 'reply' }),
+        ]),
+        hasMore: false,
+      });
+    });
+
+    it('should return raw response when raw=true', async () => {
+      const mockResponse = { data: { ok: true, messages: [] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.getConversationReplies.handler(
+        mockContext,
+        SlackGetConversationRepliesInputSchema.parse({ channel: 'C1', ts: '1.0', raw: true })
+      );
+
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      mockClient.get.mockResolvedValue({ data: { ok: false, error: 'thread_not_found' } });
+
+      await expect(
+        Slack.actions.getConversationReplies.handler(
+          mockContext,
+          SlackGetConversationRepliesInputSchema.parse({ channel: 'C1', ts: '1.0' })
+        )
+      ).rejects.toThrow('Slack getConversationReplies error: thread_not_found');
+    });
+  });
+
   describe('relay auth', () => {
     const relayTrigger = jest.fn();
     const relayListBindings = jest.fn();
@@ -1544,7 +1686,12 @@ describe('Slack', () => {
       });
       expect(relayListBindings).not.toHaveBeenCalled();
       expect(mockClient.post).not.toHaveBeenCalled();
-      expect(result).toEqual({ ok: true, channel: 'C0123456789', ts: '1234567890.123456' });
+      expect(result).toEqual({
+        ok: true,
+        channel: 'C0123456789',
+        ts: '1234567890.123456',
+        timestamp: '1234567890.123456',
+      });
     });
 
     it('sendMessage forwards a channel name to the relay and returns the resolved id', async () => {
@@ -1566,7 +1713,12 @@ describe('Slack', () => {
       });
       expect(relayListBindings).not.toHaveBeenCalled();
       expect(mockClient.post).not.toHaveBeenCalled();
-      expect(result).toEqual({ ok: true, channel: 'C0123456789', ts: '1234567890.123456' });
+      expect(result).toEqual({
+        ok: true,
+        channel: 'C0123456789',
+        ts: '1234567890.123456',
+        timestamp: '1234567890.123456',
+      });
     });
 
     it('listChannels returns the connected channels and never touches the Slack client', async () => {
@@ -1645,6 +1797,316 @@ describe('Slack', () => {
           `${name} is not available through the Elastic Slack app`
         );
       }
+    });
+  });
+
+  describe('updateMessage action', () => {
+    it('should update a message and return normalized shape', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { ok: true, channel: 'C1', ts: '1.0', text: 'Updated!' },
+      });
+
+      const result = await Slack.actions.updateMessage.handler(
+        mockContext,
+        SlackUpdateMessageInputSchema.parse({ channel: 'C1', ts: '1.0', text: 'Updated!' })
+      );
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/chat.update',
+        { channel: 'C1', ts: '1.0', text: 'Updated!', blocks: [] },
+        expect.objectContaining({ headers: { 'Content-Type': 'application/json; charset=utf-8' } })
+      );
+      expect(result).toEqual({ ok: true, channel: 'C1', ts: '1.0', text: 'Updated!' });
+    });
+
+    it('should clear existing blocks when only text is provided', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { ok: true, channel: 'C1', ts: '1.0', text: 'Done' },
+      });
+
+      await Slack.actions.updateMessage.handler(
+        mockContext,
+        SlackUpdateMessageInputSchema.parse({ channel: 'C1', ts: '1.0', text: 'Done' })
+      );
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/chat.update',
+        { channel: 'C1', ts: '1.0', text: 'Done', blocks: [] },
+        expect.any(Object)
+      );
+    });
+
+    it('should be classified as a destroy-scope action', () => {
+      expect(Slack.actions.updateMessage.scope).toBe('destroy');
+    });
+
+    it('should reject oversized serialized blocks', () => {
+      const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: 'x'.repeat(100_001) } }];
+
+      expect(() =>
+        SlackUpdateMessageInputSchema.parse({ channel: 'C1', ts: '1.0', blocks })
+      ).toThrow('Serialized blocks must not exceed');
+    });
+
+    it('should accept blocks instead of text', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { ok: true, channel: 'C1', ts: '2.0', text: '' },
+      });
+      const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: 'Resolved' } }];
+
+      await Slack.actions.updateMessage.handler(
+        mockContext,
+        SlackUpdateMessageInputSchema.parse({ channel: 'C1', ts: '2.0', blocks })
+      );
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/chat.update',
+        expect.objectContaining({ blocks }),
+        expect.any(Object)
+      );
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      mockClient.post.mockResolvedValue({ data: { ok: false, error: 'message_not_found' } });
+
+      await expect(
+        Slack.actions.updateMessage.handler(
+          mockContext,
+          SlackUpdateMessageInputSchema.parse({ channel: 'C1', ts: '1.0', text: 'x' })
+        )
+      ).rejects.toThrow('Slack updateMessage error: message_not_found');
+    });
+  });
+
+  describe('addReaction action', () => {
+    it('should add an emoji reaction to a message', async () => {
+      mockClient.post.mockResolvedValue({ data: { ok: true } });
+
+      const result = await Slack.actions.addReaction.handler(
+        mockContext,
+        SlackAddReactionInputSchema.parse({
+          channel: 'C1',
+          timestamp: '1700000001.000001',
+          name: 'white_check_mark',
+        })
+      );
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/reactions.add',
+        { channel: 'C1', timestamp: '1700000001.000001', name: 'white_check_mark' },
+        expect.objectContaining({ headers: { 'Content-Type': 'application/json; charset=utf-8' } })
+      );
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      mockClient.post.mockResolvedValue({ data: { ok: false, error: 'already_reacted' } });
+
+      await expect(
+        Slack.actions.addReaction.handler(
+          mockContext,
+          SlackAddReactionInputSchema.parse({ channel: 'C1', timestamp: '1.0', name: 'eyes' })
+        )
+      ).rejects.toThrow('Slack addReaction error: already_reacted');
+    });
+  });
+
+  describe('uploadFile action', () => {
+    it('should upload a text file via the v2 flow (3-step)', async () => {
+      mockClient.post
+        .mockResolvedValueOnce({
+          // Step 1: getUploadURLExternal
+          data: { ok: true, upload_url: 'https://files.slack.com/upload/v1/abc', file_id: 'F001' },
+          headers: {},
+        })
+        .mockResolvedValueOnce({
+          // Step 2: POST to upload URL
+          status: 200,
+        })
+        .mockResolvedValueOnce({
+          // Step 3: completeUploadExternal
+          data: { ok: true, files: [{ id: 'F001', title: 'report.txt' }] },
+          headers: {},
+        });
+      const result = await Slack.actions.uploadFile.handler(
+        mockContext,
+        SlackUploadFileInputSchema.parse({
+          filename: 'report.txt',
+          content: 'Incident summary: resolved.',
+          channel: 'C1',
+          title: 'report.txt',
+          initialComment: 'Incident closed.',
+        })
+      );
+
+      // Step 1 — getUploadURLExternal
+      expect(mockClient.post).toHaveBeenNthCalledWith(
+        1,
+        'https://slack.com/api/files.getUploadURLExternal',
+        expect.objectContaining({ filename: 'report.txt' }),
+        expect.any(Object)
+      );
+      // Step 2 — POST content
+      expect(mockClient.post).toHaveBeenNthCalledWith(
+        2,
+        'https://files.slack.com/upload/v1/abc',
+        expect.any(Buffer),
+        expect.objectContaining({ headers: { 'Content-Type': 'application/octet-stream' } })
+      );
+      // Step 3 — completeUploadExternal
+      expect(mockClient.post).toHaveBeenNthCalledWith(
+        3,
+        'https://slack.com/api/files.completeUploadExternal',
+        expect.objectContaining({ channel_id: 'C1', initial_comment: 'Incident closed.' }),
+        expect.any(Object)
+      );
+      expect(result).toEqual({ ok: true, fileId: 'F001', title: 'report.txt' });
+    });
+
+    it('should decode base64 content, stripping a data-URI prefix', async () => {
+      mockClient.post
+        .mockResolvedValueOnce({
+          data: { ok: true, upload_url: 'https://files.slack.com/upload/v1/abc', file_id: 'F002' },
+          headers: {},
+        })
+        .mockResolvedValueOnce({ status: 200 })
+        .mockResolvedValueOnce({ data: { ok: true, files: [{ id: 'F002' }] }, headers: {} });
+
+      await Slack.actions.uploadFile.handler(
+        mockContext,
+        SlackUploadFileInputSchema.parse({
+          filename: 'hello.txt',
+          content: 'data:text/plain;base64,aGVsbG8=',
+          encoding: 'base64',
+        })
+      );
+
+      expect(mockClient.post).toHaveBeenNthCalledWith(
+        1,
+        'https://slack.com/api/files.getUploadURLExternal',
+        { filename: 'hello.txt', length: 5 },
+        expect.any(Object)
+      );
+      expect(mockClient.post).toHaveBeenNthCalledWith(
+        2,
+        'https://files.slack.com/upload/v1/abc',
+        Buffer.from('hello'),
+        expect.any(Object)
+      );
+    });
+
+    it('should reject invalid base64 content', () => {
+      expect(() =>
+        SlackUploadFileInputSchema.parse({
+          filename: 'x.bin',
+          content: 'not*valid*base64!',
+          encoding: 'base64',
+        })
+      ).toThrow('content is not valid base64');
+    });
+
+    it('should throw when getUploadURLExternal fails', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { ok: false, error: 'missing_scope' },
+        headers: {},
+      });
+
+      await expect(
+        Slack.actions.uploadFile.handler(
+          mockContext,
+          SlackUploadFileInputSchema.parse({ filename: 'x.txt', content: 'hello' })
+        )
+      ).rejects.toThrow('Slack uploadFile/getUploadURLExternal error: missing_scope');
+    });
+  });
+
+  describe('askQuestion action', () => {
+    it('should not be exposed as an agent tool', () => {
+      expect(Slack.actions.askQuestion.isTool).toBe(false);
+    });
+
+    it('should post an interactive Block Kit question with buttons', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { ok: true, ts: '1700000099.000001', channel: 'C1' },
+      });
+
+      const result = await Slack.actions.askQuestion.handler(mockContext, {
+        channel: 'C1',
+        question: 'Should we roll back?',
+        buttons: [
+          { text: 'Yes', value: 'yes', style: 'danger' },
+          { text: 'No', value: 'no' },
+        ],
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/chat.postMessage',
+        expect.objectContaining({
+          channel: 'C1',
+          text: 'Should we roll back?',
+          blocks: expect.arrayContaining([
+            expect.objectContaining({ type: 'section' }),
+            expect.objectContaining({
+              type: 'actions',
+              elements: expect.arrayContaining([
+                expect.objectContaining({ type: 'button', value: 'yes', style: 'danger' }),
+                expect.objectContaining({ type: 'button', value: 'no' }),
+              ]),
+            }),
+          ]),
+        }),
+        expect.any(Object)
+      );
+      expect(result).toEqual({
+        ok: true,
+        timestamp: '1700000099.000001',
+        channelId: 'C1',
+      });
+    });
+
+    it('should give each button a unique action_id even when values share a prefix', async () => {
+      mockClient.post.mockResolvedValue({ data: { ok: true, ts: '1.0', channel: 'C1' } });
+      const prefix = 'a'.repeat(60);
+
+      await Slack.actions.askQuestion.handler(mockContext, {
+        channel: 'C1',
+        question: 'Pick one',
+        buttons: [
+          { text: 'One', value: `${prefix}1` },
+          { text: 'Two', value: `${prefix}2` },
+        ],
+      });
+
+      const [, payload] = mockClient.post.mock.calls[0];
+      const { elements } = payload.blocks[1];
+      expect(elements.map((e: { action_id: string }) => e.action_id)).toEqual([
+        'ask_question_0',
+        'ask_question_1',
+      ]);
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      mockClient.post.mockResolvedValue({ data: { ok: false, error: 'not_in_channel' } });
+
+      await expect(
+        Slack.actions.askQuestion.handler(mockContext, {
+          channel: 'C1',
+          question: 'Hello?',
+          buttons: [{ text: 'OK', value: 'ok' }],
+        })
+      ).rejects.toThrow('Slack askQuestion error: not_in_channel');
+    });
+  });
+
+  describe('createConversation tool exposure', () => {
+    it('should be exposed as a tool (promoted from isTool:false)', () => {
+      expect(Slack.actions.createConversation.isTool).toBe(true);
+    });
+  });
+
+  describe('inviteToConversation tool exposure', () => {
+    it('should be exposed as a tool (promoted from isTool:false)', () => {
+      expect(Slack.actions.inviteToConversation.isTool).toBe(true);
     });
   });
 
