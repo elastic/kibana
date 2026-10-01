@@ -61,7 +61,7 @@ export interface AlertEpisodesListLinkOptions {
      */
     groupingValues?: Record<string, string | null>;
   };
-  /** Time range embedded in `_a.episodesList.{timeFrom,timeTo}`. */
+  /** Time range embedded in `_a.alertsList.{timeFrom,timeTo}`. */
   timeRange?: { from: string; to: string };
 }
 

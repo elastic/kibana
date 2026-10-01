@@ -146,7 +146,7 @@ export class ObservabilityAlertingPage {
 
   async gotoInboxFilteredByRule(ruleId: string): Promise<void> {
     const search = new URLSearchParams({
-      _a: `(episodesList:(ruleId:'${ruleId}'))`,
+      _a: `(alertsList:(ruleId:'${ruleId}'))`,
     });
     await this.goto(`${OBSERVABILITY_ALERTING_INBOX_PATH}?${search.toString()}`);
     await this.inboxPage.waitFor({ state: 'visible' });

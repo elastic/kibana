@@ -17,7 +17,7 @@ import { useEpisodesListUrlState } from './use_episodes_list_url_state';
 const createMockTimefilter = () => dataPluginMock.createStartContract().query.timefilter.timefilter;
 
 describe('useEpisodesListUrlState', () => {
-  it('gets filter state from _a episodesList in the URL', async () => {
+  it('gets filter state from _a alertsList in the URL', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     const urlStateStorage = createKbnUrlStateStorage({
       history,
