@@ -24,9 +24,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { QueryState } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { COMPARE_ALL_OPTIONS, compareFilters, isOfQueryType, type Query } from '@kbn/es-query';
+import {
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
+  isCombinedFilter,
+  isOfQueryType,
+  type Filter,
+  type Query,
+} from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import type { VegaByValueState } from '../../server';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { getData } from '../services';
@@ -51,6 +58,24 @@ const flyoutBodyCss = css`
 const sameSearch = (left: PanelSearch, right: PanelSearch): boolean =>
   isEqual(left.query, right.query) &&
   compareFilters(left.filters ?? [], right.filters ?? [], COMPARE_ALL_OPTIONS);
+
+const omitDataViewId = (filters: Filter[], dataViewId: string | undefined): Filter[] =>
+  filters.map((filter) =>
+    dataViewId !== undefined && filter.meta.index === dataViewId
+      ? { ...filter, meta: omit(filter.meta, 'index') }
+      : filter
+  );
+
+const bindDataViewId = (filter: Filter, dataViewId: string): Filter => ({
+  ...filter,
+  meta: {
+    ...filter.meta,
+    ...(filter.meta.index === undefined && { index: dataViewId }),
+    ...(isCombinedFilter(filter) && {
+      params: filter.meta.params.map((child) => bindDataViewId(child, dataViewId)),
+    }),
+  },
+});
 
 const VegaSpecEditor = lazy(() =>
   import('../components/vega_vis_editor').then((module) => ({ default: module.VegaSpecEditor }))
@@ -109,6 +134,11 @@ export const VegaEditorFlyout = ({
     : defaultDataView
     ? [defaultDataView]
     : [];
+  // Filters on the panel's only ad-hoc data view are stored without its id, because the id isn't a
+  // saved object and a reference to it fails import. The search bar gets the id back, because the
+  // filter editor opens an empty filter when it can't match one.
+  const adHocDataViews = dataViews.filter((dataView) => !dataView.isPersisted());
+  const implicitDataViewId = adHocDataViews.length === 1 ? adHocDataViews[0].id : undefined;
   const search = useMemo<PanelSearch>(
     () => ({
       query: isOfQueryType(publishedQuery) ? publishedQuery : undefined,
@@ -122,6 +152,13 @@ export const VegaEditorFlyout = ({
       filters: api.filters$.getValue(),
     }),
     [api]
+  );
+  const searchBarFilters = useMemo(
+    () =>
+      (search.filters ?? []).map((filter) =>
+        implicitDataViewId ? bindDataViewId(filter, implicitDataViewId) : filter
+      ),
+    [implicitDataViewId, search.filters]
   );
   const canPreview = spec !== previewedSpec;
   const canSave = isNewPanel || spec !== initialEditorValue || !sameSearch(search, initialSearch);
@@ -174,7 +211,7 @@ export const VegaEditorFlyout = ({
                   ? search.query
                   : getData().query.queryString.getDefaultQuery()
               }
-              filters={search.filters ?? []}
+              filters={searchBarFilters}
               indexPatterns={dataViews}
               showQueryInput
               showFilterBar
@@ -190,7 +227,9 @@ export const VegaEditorFlyout = ({
                 applyQuery(next && isOfQueryType(next) ? next : undefined);
               }}
               onFiltersUpdated={(next) => {
-                api.setFilters(next.length > 0 ? next : undefined);
+                api.setFilters(
+                  next.length > 0 ? omitDataViewId(next, implicitDataViewId) : undefined
+                );
               }}
               displayStyle="inPage"
               dataTestSubj="editorFlyoutSearchBar"

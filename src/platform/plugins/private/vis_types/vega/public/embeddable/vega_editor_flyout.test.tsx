@@ -12,7 +12,13 @@ import { BehaviorSubject } from 'rxjs';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
+import {
+  BooleanRelation,
+  FILTERS,
+  type CombinedFilter,
+  type Filter,
+  type Query,
+} from '@kbn/es-query';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { setData } from '../services';
@@ -39,6 +45,9 @@ jest.mock('../components/vega_vis_editor', () => ({
     </div>
   ),
 }));
+
+const createDataView = (id: string, persisted = true): DataView =>
+  ({ id, isPersisted: () => persisted } as DataView);
 
 const renderFlyout = ({
   initialQuery,
@@ -226,19 +235,90 @@ describe('VegaEditorFlyout', () => {
   });
 
   it('gives the search bar the default data view when the spec names none', () => {
-    const { getSearchBarProps } = renderFlyout({
-      defaultDataView: { id: 'default-view' } as DataView,
-    });
+    const defaultDataView = createDataView('default-view');
+    const { getSearchBarProps } = renderFlyout({ defaultDataView });
 
-    expect(getSearchBarProps().indexPatterns).toEqual([{ id: 'default-view' }]);
+    expect(getSearchBarProps().indexPatterns).toEqual([defaultDataView]);
   });
 
   it('gives the search bar the data views named by the spec', () => {
+    const specDataView = createDataView('spec-view');
     const { getSearchBarProps } = renderFlyout({
-      initialDataViews: [{ id: 'spec-view' } as DataView],
-      defaultDataView: { id: 'default-view' } as DataView,
+      initialDataViews: [specDataView],
+      defaultDataView: createDataView('default-view'),
     });
 
-    expect(getSearchBarProps().indexPatterns).toEqual([{ id: 'spec-view' }]);
+    expect(getSearchBarProps().indexPatterns).toEqual([specDataView]);
+  });
+
+  describe('with a single ad-hoc data view', () => {
+    const initialDataViews = [createDataView('ad-hoc-view', false), createDataView('saved-view')];
+
+    it('stores filters on the ad-hoc data view without its id', () => {
+      const { api, getSearchBarProps } = renderFlyout({ initialDataViews });
+
+      act(() => {
+        getSearchBarProps().onFiltersUpdated?.([
+          { meta: { index: 'ad-hoc-view' }, query: { match: { status: 200 } } },
+          { meta: { index: 'saved-view' }, query: { match: { status: 404 } } },
+        ]);
+      });
+
+      expect(api.setFilters).toHaveBeenCalledWith([
+        { meta: {}, query: { match: { status: 200 } } },
+        { meta: { index: 'saved-view' }, query: { match: { status: 404 } } },
+      ]);
+    });
+
+    it('binds filters without a data view to the ad-hoc data view for the search bar', () => {
+      const combinedFilter: CombinedFilter = {
+        meta: {
+          type: FILTERS.COMBINED,
+          relation: BooleanRelation.AND,
+          params: [{ meta: {}, query: { match: { status: 500 } } }],
+        },
+        query: {},
+      };
+      const { getSearchBarProps } = renderFlyout({
+        initialDataViews,
+        initialFilters: [
+          { meta: {}, query: { match: { status: 200 } } },
+          { meta: { index: 'saved-view' }, query: { match: { status: 404 } } },
+          combinedFilter,
+        ],
+      });
+
+      const [unbound, saved, combined] = getSearchBarProps().filters ?? [];
+      expect(unbound.meta.index).toBe('ad-hoc-view');
+      expect(saved.meta.index).toBe('saved-view');
+      expect(combined.meta.index).toBe('ad-hoc-view');
+      expect(combined.meta.params).toEqual([
+        { meta: { index: 'ad-hoc-view' }, query: { match: { status: 500 } } },
+      ]);
+    });
+  });
+
+  describe('with more than one ad-hoc data view', () => {
+    const initialDataViews = [createDataView('ad-hoc-a', false), createDataView('ad-hoc-b', false)];
+
+    it('stores filters with their data view id', () => {
+      const { api, getSearchBarProps } = renderFlyout({ initialDataViews });
+      const filters = [{ meta: { index: 'ad-hoc-a' }, query: { match: { status: 200 } } }];
+
+      act(() => {
+        getSearchBarProps().onFiltersUpdated?.(filters);
+      });
+
+      expect(api.setFilters).toHaveBeenCalledWith(filters);
+    });
+
+    it('does not bind filters without a data view', () => {
+      const { getSearchBarProps } = renderFlyout({
+        initialDataViews,
+        initialFilters: [{ meta: {}, query: { match: { status: 200 } } }],
+      });
+
+      expect(getSearchBarProps().filters?.[0].meta).not.toHaveProperty('index');
+    });
   });
 });
