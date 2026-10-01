@@ -58,7 +58,8 @@ export const buildExecutionModels = (frameworks: readonly TestFramework[]): Exec
     const reporterFilter = `reporter.type IN (${inList(outcomeFrameworks)})`;
     models.push({
       frameworks: outcomeFrameworks,
-      runFilter: `(event.action == "test-outcome" AND ${reporterFilter})`,
+      // The Scout test run builder lists every test as a skipped outcome with no attempt
+      runFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND (test.attempts IS NULL OR test.attempts > 0))`,
       executionFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND test.outcome IN ("expected", "unexpected", "flaky"))`,
       failureFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND test.outcome IN ("unexpected", "flaky"))`,
       failedExpression: 'CASE(test.outcome IN ("unexpected", "flaky"), 1, 0)',
