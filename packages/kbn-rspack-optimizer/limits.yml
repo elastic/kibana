@@ -189,7 +189,7 @@ pageLoadAssetSize:
   significant_events: 295
   slo: 19531
   snapshotRestore: 16909
-  spaces: 22966
+  spaces: 25351
   stackAlerts: 1717
   stackConnectors: 67445
   streams: 6521
