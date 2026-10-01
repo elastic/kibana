@@ -11,6 +11,7 @@ import { DataStreamClient, type DataStreamDefinition } from '@kbn/data-streams';
 import type { Logger } from '@kbn/logging';
 import { isResponseError } from '@kbn/es-errors';
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
+import { EsConcurrentModificationError } from '../retry_service/es_concurrent_modification_error';
 import { EsUnacknowledgedError } from '../retry_service/es_unacknowledged_error';
 import type { IResourceInitializer } from './resource_manager';
 
@@ -70,6 +71,27 @@ export class DatastreamInitializer implements IResourceInitializer {
     await this.resetOutdatedDataStream(dataStreamDefinition);
 
     try {
+      await this.initializeDataStream(dataStreamDefinition);
+      await this.updateExistingIndicesFinalPipeline();
+    } catch (error) {
+      // Another node that read the data stream before we recreated it may still delete it for
+      // its own reset. Retrying re-runs initialization against the data stream it recreates.
+      if (isResponseError(error) && error.statusCode === 404) {
+        throw new EsConcurrentModificationError(
+          `data stream ${this.resourceDefinition.dataStreamName} was deleted during initialization`,
+          { cause: error }
+        );
+      }
+      throw error;
+    }
+
+    await this.updateExistingIndicesReplicaSettings();
+  }
+
+  private async initializeDataStream(
+    dataStreamDefinition: DataStreamDefinition<ResourceDefinition['mappings']>
+  ): Promise<void> {
+    try {
       await DataStreamClient.initialize({
         logger: this.logger,
         dataStream: dataStreamDefinition,
@@ -82,9 +104,6 @@ export class DatastreamInitializer implements IResourceInitializer {
 
       this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
     }
-
-    await this.updateExistingIndicesFinalPipeline();
-    await this.updateExistingIndicesReplicaSettings();
   }
 
   /**

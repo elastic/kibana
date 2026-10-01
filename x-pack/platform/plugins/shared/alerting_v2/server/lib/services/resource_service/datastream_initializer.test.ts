@@ -12,6 +12,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
+import { EsConcurrentModificationError } from '../retry_service/es_concurrent_modification_error';
 import { EsUnacknowledgedError } from '../retry_service/es_unacknowledged_error';
 import { DatastreamInitializer } from './datastream_initializer';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -484,6 +485,36 @@ describe('DatastreamInitializer', () => {
         });
       }
     );
+
+    it('fails with a retryable error when another node deletes the data stream before index.final_pipeline is applied', async () => {
+      mockExistingDataStream({ version: 7, managed: true });
+      esClient.indices.putSettings.mockImplementation(async ({ settings }) => {
+        if (settings && 'index.final_pipeline' in settings) {
+          throw notFound();
+        }
+        return { acknowledged: true };
+      });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+
+      await expect(initializer.initialize()).rejects.toThrow(EsConcurrentModificationError);
+      await expect(initializer.initialize()).rejects.toThrow(forceResetDefinition.dataStreamName);
+    });
+
+    it('fails with a retryable error when another node deletes the data stream while its write index mappings are updated', async () => {
+      // Created from the current version: read by the reset check, then by DataStreamClient.
+      mockExistingDataStream({ version: 8, managed: true });
+      mockExistingDataStream({ version: 8, managed: true });
+      esClient.indices.simulateIndexTemplate.mockResolvedValue({
+        template: { aliases: {}, mappings: {}, settings: {} },
+      });
+      esClient.indices.putMapping.mockRejectedValueOnce(notFound());
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, forceResetDefinition);
+
+      await expect(initializer.initialize()).rejects.toThrow(EsConcurrentModificationError);
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
 
     it('fails initialization without deleting the data stream when the current template is not installed', async () => {
       mockExistingDataStream({ version: 7, managed: true });
