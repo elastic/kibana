@@ -287,8 +287,8 @@ describe.each([
     it('should be registered and return colors', () => {
       const palette = palettes.elastic_line_optimized;
       expect(palette).toBeDefined();
-      const colors = palette.getCategoricalColors(12);
-      expect(colors).toHaveLength(12);
+      const colors = palette.getCategoricalColors(10);
+      expect(colors).toHaveLength(10);
     });
 
     it('should return different colors based on rank at current series', () => {
@@ -331,6 +331,30 @@ describe.each([
           },
         ],
       });
+    });
+
+    it('should not be selectable for new charts', () => {
+      expect(palettes.elastic_line_optimized.internal).toBe(true);
+    });
+  });
+
+  describe('elastic_line_optimized_extended palette', () => {
+    it('should be registered and selectable', () => {
+      const palette = palettes.elastic_line_optimized_extended;
+      expect(palette).toBeDefined();
+      expect(palette.internal).toBeFalsy();
+      expect(palette.getCategoricalColors(12)).toHaveLength(12);
+    });
+
+    it('should keep the legacy line optimized colors for the first 5 series', () => {
+      const legacyColors = palettes.elastic_line_optimized.getCategoricalColors(5);
+      const extendedColors = palettes.elastic_line_optimized_extended.getCategoricalColors(5);
+      expect(extendedColors).toEqual(legacyColors);
+    });
+
+    it('should generate a system_palette expression', () => {
+      const expression = palettes.elastic_line_optimized_extended.toExpression({});
+      expect(expression.chain[0].arguments.name).toEqual(['elastic_line_optimized_extended']);
     });
   });
 

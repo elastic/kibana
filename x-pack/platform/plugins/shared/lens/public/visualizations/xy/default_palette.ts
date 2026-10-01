@@ -17,3 +17,10 @@ import { isLineSeries } from './state_helpers';
 export const getDefaultPalette = (seriesType: LensSeriesType): KbnPaletteId => {
   return isLineSeries(seriesType) ? KbnPalette.ElasticLineOptimized : KbnPalette.Default;
 };
+
+/**
+ * Returns whether the palette is one of the line optimized palettes
+ */
+export const isLineOptimizedPalette = (paletteId: string): boolean =>
+  paletteId === KbnPalette.ElasticLineOptimized ||
+  paletteId === KbnPalette.ElasticLineOptimizedLegacy;

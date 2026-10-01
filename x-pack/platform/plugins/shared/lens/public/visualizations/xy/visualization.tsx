@@ -79,7 +79,7 @@ import {
   getColorAssignments,
   getLayerPaletteName,
 } from './color_assignment';
-import { getDefaultPalette } from './default_palette';
+import { getDefaultPalette, isLineOptimizedPalette } from './default_palette';
 import {
   AREA_SERIES,
   getAnnotationLayerErrors,
@@ -1369,8 +1369,8 @@ export const applyChartDefaultsIfNeeded = (
 /**
  * Resolves the default palette when switching between series types.
  * Uses direction-specific matching so that user-chosen palettes are preserved:
- *  - Switching TO line: only replaces 'default' with 'elastic_line_optimized'
- *  - Switching FROM line: only replaces 'elastic_line_optimized' with 'default'
+ *  - Switching TO line: only replaces 'default' with 'elastic_line_optimized_extended'
+ *  - Switching FROM line: only replaces a line optimized palette (including the legacy one) with 'default'
  */
 function resolveDefaultPaletteForSeriesType(
   colorMapping: NonNullable<XYDataLayerConfig['colorMapping']>,
@@ -1384,7 +1384,7 @@ function resolveDefaultPaletteForSeriesType(
   if (isLineSeries(toSeriesType) && colorMapping.paletteId === KbnPalette.Default) {
     return { ...colorMapping, paletteId: KbnPalette.ElasticLineOptimized };
   }
-  if (isLineSeries(fromSeriesType) && colorMapping.paletteId === KbnPalette.ElasticLineOptimized) {
+  if (isLineSeries(fromSeriesType) && isLineOptimizedPalette(colorMapping.paletteId)) {
     return { ...colorMapping, paletteId: KbnPalette.Default };
   }
 

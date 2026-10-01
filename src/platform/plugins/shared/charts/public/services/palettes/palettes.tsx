@@ -234,6 +234,15 @@ export const buildPalettes = (theme: CoreTheme): Record<string, PaletteDefinitio
         kbnPalettes.query(KbnPalette.Kibana7BehindText)?.colors()
       ),
     },
+    [KbnPalette.ElasticLineOptimizedLegacy]: {
+      title: kbnPalettes.get(KbnPalette.ElasticLineOptimizedLegacy).name,
+      internal: true,
+      ...buildRoundRobinCategoricalWithMappedColors(
+        KbnPalette.ElasticLineOptimizedLegacy,
+        kbnPalettes.get(KbnPalette.ElasticLineOptimizedLegacy).colors(),
+        kbnPalettes.query(KbnPalette.Kibana7BehindText)?.colors()
+      ),
+    },
     status: buildGradient('status', kbnPalettes.get('status')),
     temperature: buildGradient('temperature', kbnPalettes.get('temperature')),
     complementary: buildGradient('complementary', kbnPalettes.get('complementary')),

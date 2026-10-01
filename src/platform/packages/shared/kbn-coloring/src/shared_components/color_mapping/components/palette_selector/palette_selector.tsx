@@ -87,10 +87,18 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
       </EuiConfirmModal>
     ) : null;
 
-  const currentPaletteId = useMemo(
-    () => palettes.get(model.paletteId).id, // need to resolve aliased id
+  const currentPalette = useMemo(
+    () => palettes.get(model.paletteId), // need to resolve aliased id
     [model.paletteId, palettes]
   );
+
+  // standalone palettes are only listed when already in use
+  const selectablePalettes = useMemo(() => {
+    const categoricalPalettes = palettes.getAll().filter((d) => d.type === 'categorical');
+    return currentPalette?.standalone
+      ? [...categoricalPalettes, currentPalette]
+      : categoricalPalettes;
+  }, [currentPalette, palettes]);
 
   return (
     <>
@@ -104,19 +112,16 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
         <EuiColorPalettePicker
           data-test-subj="kbnColoring_ColorMapping_PalettePicker"
           fullWidth
-          palettes={palettes
-            .getAll()
-            .filter((d) => d.type === 'categorical')
-            .map((palette) => ({
-              'data-test-subj': `kbnColoring_ColorMapping_Palette-${palette.id}`,
-              value: palette.id,
-              title: palette.name,
-              append: getAppendedTag(palette.tag),
-              palette: Array.from({ length: palette.colorCount }, (_, i) => {
-                return palette.getColor(i);
-              }),
-              type: 'fixed',
-            }))}
+          palettes={selectablePalettes.map((palette) => ({
+            'data-test-subj': `kbnColoring_ColorMapping_Palette-${palette.id}`,
+            value: palette.id,
+            title: palette.name,
+            append: getAppendedTag(palette.tag),
+            palette: Array.from({ length: palette.colorCount }, (_, i) => {
+              return palette.getColor(i);
+            }),
+            type: 'fixed',
+          }))}
           onChange={(selectedPaletteId) => {
             const paletteId = selectedPaletteId as KbnPaletteId;
             const hasChanges = model.assignments.some((a) => a.touched);
@@ -128,7 +133,7 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
               switchPaletteFn(paletteId, false);
             }
           }}
-          valueOfSelected={currentPaletteId}
+          valueOfSelected={currentPalette.id}
           selectionDisplay={'palette'}
           compressed={true}
         />
