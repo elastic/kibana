@@ -17,7 +17,7 @@ import {
   observableTypesMock,
   templatesConfigurationMock,
 } from '../../containers/mock';
-import { renderWithTestingProviders } from '../../common/mock';
+import { noCasesSettingsPermission, renderWithTestingProviders } from '../../common/mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
@@ -102,7 +102,7 @@ describe('ConfigureCasesRedesign', () => {
     });
   });
 
-  it('renders the redesigned settings page with the app header title', async () => {
+  it('renders the settings page with the app header title', async () => {
     renderWithTestingProviders(<ConfigureCasesRedesign />);
 
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
@@ -113,12 +113,10 @@ describe('ConfigureCasesRedesign', () => {
   it('renders the three settings sections in a single panel', async () => {
     renderWithTestingProviders(<ConfigureCasesRedesign />);
 
-    expect(await screen.findByTestId('cases-redesign-settings-panel')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('cases-redesign-external-incident-management-section')
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('cases-redesign-case-closures-section')).toBeInTheDocument();
-    expect(screen.getByTestId('cases-redesign-observable-types-section')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-settings-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-external-incident-management-section')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-case-closures-section')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-observable-types-section')).toBeInTheDocument();
   });
 
   describe('when templates v2 is disabled', () => {
@@ -129,9 +127,7 @@ describe('ConfigureCasesRedesign', () => {
     it('renders the custom fields and templates section always expanded, without the show-legacy switch', async () => {
       renderWithTestingProviders(<ConfigureCasesRedesign />);
 
-      expect(
-        await screen.findByTestId('cases-redesign-legacy-custom-fields-section')
-      ).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-legacy-custom-fields-section')).toBeInTheDocument();
       expect(screen.getByTestId('custom-fields-list')).toBeInTheDocument();
       expect(screen.getByTestId('templates-list')).toBeInTheDocument();
       expect(screen.queryByTestId('show-legacy-custom-fields-switch')).not.toBeInTheDocument();
@@ -140,7 +136,7 @@ describe('ConfigureCasesRedesign', () => {
     it('does not render migration copy, v2-page links, or deprecated badges', async () => {
       renderWithTestingProviders(<ConfigureCasesRedesign />);
 
-      await screen.findByTestId('cases-redesign-legacy-custom-fields-section');
+      await screen.findByTestId('cases-legacy-custom-fields-section');
 
       expect(screen.queryByTestId('legacy-templates-view-new-link')).not.toBeInTheDocument();
       expect(screen.queryByTestId('legacy-custom-fields-view-new-link')).not.toBeInTheDocument();
@@ -197,9 +193,7 @@ describe('ConfigureCasesRedesign', () => {
 
     renderWithTestingProviders(<ConfigureCasesRedesign />);
 
-    expect(
-      await screen.findByTestId('cases-redesign-legacy-custom-fields-section')
-    ).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-legacy-custom-fields-section')).toBeInTheDocument();
     expect(screen.getByTestId('show-legacy-custom-fields-switch')).not.toBeChecked();
     expect(screen.queryByTestId('custom-fields-list')).not.toBeInTheDocument();
     expect(screen.queryByTestId('templates-list')).not.toBeInTheDocument();
@@ -271,9 +265,7 @@ describe('ConfigureCasesRedesign', () => {
 
     renderWithTestingProviders(<ConfigureCasesRedesign />);
 
-    expect(
-      await screen.findByTestId('cases-redesign-legacy-custom-fields-section')
-    ).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-legacy-custom-fields-section')).toBeInTheDocument();
 
     await userEvent.click(await screen.findByTestId('show-legacy-custom-fields-switch'));
 
@@ -390,6 +382,121 @@ describe('ConfigureCasesRedesign', () => {
     );
   });
 
+  describe('extract observables default switch', () => {
+    it('renders the extract observables section and switch checked by default', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('cases-extract-observables-section')).toBeInTheDocument();
+      expect(screen.getByTestId('extract-observables-default-switch')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+    });
+
+    it('persists extractObservables false when the switch is toggled off', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await userEvent.click(await screen.findByTestId('extract-observables-default-switch'));
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          extractObservables: false,
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+        })
+      );
+    });
+
+    it('persists extractObservables true when the switch is toggled on', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+          extractObservables: false,
+        },
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      await userEvent.click(await screen.findByTestId('extract-observables-default-switch'));
+
+      expect(persistCaseConfigure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          extractObservables: true,
+          customFields: customFieldsConfigurationMock,
+          templates: templatesConfigurationMock,
+        })
+      );
+    });
+
+    it('disables the switch when the configuration is being fetched', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        isLoading: false,
+        isFetching: true,
+        data: {
+          ...useCaseConfigureResponse.data,
+          id: '',
+          version: '',
+        },
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('extract-observables-default-switch')).toBeDisabled();
+    });
+
+    it('disables the switch when the configuration GET fails', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        isLoading: false,
+        isFetching: false,
+        isError: true,
+        data: {
+          ...useCaseConfigureResponse.data,
+          id: '',
+          version: '',
+        },
+      }));
+
+      renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+      expect(await screen.findByTestId('extract-observables-default-switch')).toBeDisabled();
+    });
+
+    it('disables the switch when the user lacks settings permissions', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />, {
+        wrapperProps: { permissions: noCasesSettingsPermission() },
+      });
+
+      expect(await screen.findByTestId('extract-observables-default-switch')).toBeDisabled();
+    });
+
+    it('does not render the extract observables section when observables are disabled', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />, {
+        wrapperProps: { owner: ['observability'] },
+      });
+
+      await screen.findByTestId('cases-settings-panel');
+
+      expect(screen.queryByTestId('cases-extract-observables-section')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('extract-observables-default-switch')).not.toBeInTheDocument();
+    });
+
+    it('does not render the extract observables section for the Stack owner', async () => {
+      renderWithTestingProviders(<ConfigureCasesRedesign />, {
+        wrapperProps: { owner: ['cases'] },
+      });
+
+      await screen.findByTestId('cases-settings-panel');
+
+      expect(screen.queryByTestId('cases-extract-observables-section')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('extract-observables-default-switch')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders observable types as line-separated rows without a subdued panel', async () => {
     useGetCaseConfigurationMock.mockImplementation(() => ({
       ...useCaseConfigureResponse,
@@ -443,9 +550,9 @@ describe('ConfigureCasesRedesign', () => {
       wrapperProps: { owner: ['observability'] },
     });
 
-    await screen.findByTestId('cases-redesign-settings-panel');
+    await screen.findByTestId('cases-settings-panel');
 
-    expect(screen.queryByTestId('cases-redesign-observable-types-section')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cases-observable-types-section')).not.toBeInTheDocument();
     expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();
   });
 });
