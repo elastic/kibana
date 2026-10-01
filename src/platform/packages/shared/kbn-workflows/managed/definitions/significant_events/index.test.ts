@@ -11,6 +11,7 @@ import { parse } from 'yaml';
 import {
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
+  SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW,
 } from '.';
 import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
@@ -21,6 +22,8 @@ interface WorkflowStep {
   condition?: string;
   'product-solution'?: string;
   'product-feature'?: string;
+  'connector-id'?: string;
+  'connector-id-by-feature'?: string;
   'on-failure'?: { continue?: boolean };
   steps?: WorkflowStep[];
   with?: {
@@ -32,12 +35,18 @@ interface WorkflowStep {
     message?: string;
     stream_names?: string;
     written_rule_uuids?: string;
+    inputs?: Record<string, string>;
   };
   foreach?: string;
 }
 
 interface ParsedWorkflow {
   steps: WorkflowStep[];
+  triggers?: Array<{
+    inputs?: {
+      properties?: Record<string, { type?: string; maxLength?: number }>;
+    };
+  }>;
 }
 
 const findStep = (steps: WorkflowStep[], name: string): WorkflowStep | undefined => {
@@ -55,6 +64,7 @@ const requireStep = (workflow: ParsedWorkflow, name: string): WorkflowStep => {
 };
 
 const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWorkflow;
+const orchestrator = parse(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.yaml) as ParsedWorkflow;
 const queriesGeneration = parse(
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
 ) as ParsedWorkflow;
@@ -66,6 +76,34 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
     expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(22);
+    expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
+  });
+
+  it('bounds and forwards discovery model overrides', () => {
+    expect(discovery.triggers?.[0].inputs?.properties?.connector_id).toEqual(
+      expect.objectContaining({ type: 'string', maxLength: 255 })
+    );
+    expect(orchestrator.triggers?.[0].inputs?.properties?.connector_id).toEqual(
+      expect.objectContaining({ type: 'string', maxLength: 255 })
+    );
+    expect(requireStep(orchestrator, 'discover').with?.inputs).toEqual({
+      connector_id: '{{ inputs.connector_id }}',
+    });
+  });
+
+  it('resolves the discovery model without the inference feature registry', () => {
+    expect(requireStep(discovery, 'resolve_model')).toMatchObject({
+      type: 'significantEvents.resolveModel',
+      with: {
+        connector_id: '{{ inputs.connector_id }}',
+      },
+    });
+    expect(requireStep(discovery, 'run_discovery_agent')).toMatchObject({
+      'connector-id': '{{ steps.resolve_model.output.connector_id }}',
+    });
+    expect(
+      requireStep(discovery, 'run_discovery_agent')['connector-id-by-feature']
+    ).toBeUndefined();
   });
 
   it('bootstraps per-space cleanup before discovery work', () => {

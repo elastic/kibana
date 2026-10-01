@@ -11,6 +11,8 @@ applies_to:
 
 The Google Calendar connector enables searching and accessing events and calendars in Google Calendar.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-google-calendar-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

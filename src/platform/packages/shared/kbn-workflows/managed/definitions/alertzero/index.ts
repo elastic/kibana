@@ -8,9 +8,12 @@
  */
 
 import { ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID } from './actions/action_add_rule_exception';
+import { ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID } from './actions/action_close_alerts_false_positive';
 import { ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
 import { ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID } from './actions/action_edit_detection_rule';
+import { ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID } from './actions/action_enable_detection_rule';
 import { ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID } from './actions/action_handoff_to_forensics';
+import { ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID } from './actions/action_install_prebuilt_rule';
 import {
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
@@ -23,9 +26,10 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
 } from './attack_discovery_workflows';
 import { ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID } from './create_proposal';
-import { ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID } from './detection_rule_creation';
+import { ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID } from './detection_rule_coverage';
 import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_rule_tuning';
 import { ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID } from './floor_alert_triage';
+import { ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID } from './floor_alert_triage_review';
 import { ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID } from './floor_attack_discovery';
 import { ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_endpoint_analysis';
 import { ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_run_endpoint_analysis';
@@ -59,6 +63,18 @@ export {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
 } from './actions/action_create_detection_rule';
+export {
+  ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW,
+  ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID,
+} from './actions/action_enable_detection_rule';
+export {
+  ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW,
+  ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID,
+} from './actions/action_install_prebuilt_rule';
+export {
+  ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW,
+  ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
+} from './actions/action_close_alerts_false_positive';
 export {
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
@@ -103,9 +119,9 @@ export {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
 } from './hunt_continuous_threat_hunt';
 export {
-  ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW,
-  ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
-} from './detection_rule_creation';
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW,
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
+} from './detection_rule_coverage';
 export {
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
@@ -114,6 +130,10 @@ export {
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
 } from './floor_alert_triage';
+export {
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
+} from './floor_alert_triage_review';
 export {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
@@ -132,7 +152,7 @@ export const ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS = [
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
-  ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 ] as const;
 
@@ -170,11 +190,22 @@ export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
 ] as const;
 
 /**
+ * The closure review the per-space Alert Triage worker starts for each batch. Installed globally
+ * so every space's worker shares one copy; it inherits the starting worker's space at run time.
+ */
+export const ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS = [
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
+] as const;
+
+/**
  * Action workflows AlertZero may propose. Discovery is normally by the generic
  * `action` tag; this list is the install set and the fallback.
  */
 export const ALERTZERO_ACTION_WORKFLOW_IDS = [
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
+  ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID,
+  ALERTZERO_ACTION_INSTALL_PREBUILT_RULE_WORKFLOW_ID,
+  ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
   ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID,
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,

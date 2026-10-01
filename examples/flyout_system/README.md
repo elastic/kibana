@@ -29,3 +29,8 @@ The footer's primary slot takes either a `PrimaryAction` or a `PrimaryActionMenu
 Every flyout carries a root `data-test-subj` (`flyoutComponent<Session>` and
 `flyoutOverlays<Session>`, plus `…Child<A|B>`). The Scout suite under
 `test/scout_examples/ui` uses these to scope accessibility scans to one flyout at a time, preventing errors when a child flyout is open over its parent.
+
+A third section, **Push flyouts**, mixes standalone push flyouts with system push and overlay
+flyouts and shows the page padding live. The system push flyouts remember their resized width, like
+Security alert flyouts. The Scout suite in `test/scout_examples/ui/tests/push_flyouts.spec.ts` uses
+it to cover the push flyout bugs fixed in EUI, one test per case.

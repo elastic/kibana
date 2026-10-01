@@ -29,8 +29,14 @@ interface ExpectedWorkerSettings {
    * deliberately not offered as a setting.
    */
   every?: string;
-  /** Present only for Workers with Watch-owned settings. */
+  /** Present only for Workers with Watch-owned settings, nested under `extras` in the YAML. */
   extras?: Record<string, unknown>;
+  /**
+   * Watch-owned settings the YAML renders flat into `worker_settings` rather than nesting them
+   * under `extras`. Alert Triage diverges from Rule Tuning's shape here: the settings API uses
+   * `extras` for both, only the rendered YAML differs.
+   */
+  flatSettings?: Record<string, unknown>;
   triggerTypes: string[];
 }
 
@@ -40,7 +46,11 @@ interface ExpectedWorkerSettings {
  * change what already-installed spaces receive.
  */
 const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSettings> = {
-  'system-security-floor-alert-triage': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-floor-alert-triage': {
+    settingsVersion: 1,
+    flatSettings: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+    triggerTypes: ['alert', 'manual'],
+  },
   'system-security-floor-attack-discovery': {
     settingsVersion: 1,
     scheduleInterval: '24h',
@@ -61,7 +71,12 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
     triggerTypes: ['scheduled', 'manual'],
   },
-  'system-security-detection-rule-creation': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-detection-rule-coverage': {
+    settingsVersion: 1,
+    scheduleInterval: '1h',
+    extras: { lookbackDays: 14, maxGapsPerRun: 5 },
+    triggerTypes: ['scheduled', 'manual'],
+  },
 };
 
 const getYamlTemplate = (workerId: RegisteredWorkerId) => {
@@ -104,6 +119,7 @@ describe('workerRegistry', () => {
             ? {}
             : { scheduleInterval: expected.scheduleInterval }),
           ...(expected.extras === undefined ? {} : { extras: expected.extras }),
+          ...(expected.flatSettings ?? {}),
         })
       );
 

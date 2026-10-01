@@ -172,6 +172,7 @@ describe('createRuleChangeHistoryAdapter', () => {
         is_current: true,
         reason: 'renamed',
         snapshot: { name: 'rule' },
+        version: 7,
       });
       const adapter = createRuleChangeHistoryAdapter(api);
 
@@ -183,6 +184,7 @@ describe('createRuleChangeHistoryAdapter', () => {
         isCurrent: true,
         reason: 'renamed',
         snapshot: { name: 'rule' },
+        metadata: { version: 7 },
       });
     });
 
