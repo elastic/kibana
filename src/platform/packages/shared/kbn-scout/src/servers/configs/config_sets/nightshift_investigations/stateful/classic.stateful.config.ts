@@ -11,7 +11,9 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 // The plugin is disabled by default (xpack.nightshift_investigations.enabled),
-// so its API tests run against a config set that turns it on.
+// so its API tests run against a config set that turns it on. Investigations are stored as
+// agentic investigations and propose actions through proposals, both disabled by default too, and
+// they are only available behind the nightshift.enabled feature flag.
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
@@ -19,6 +21,11 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.nightshift_investigations.enabled=true',
+      '--xpack.agenticInvestigations.enabled=true',
+      '--xpack.proposals.enabled=true',
+      '--feature_flags.overrides.nightshift.enabled=true',
+      // Investigation runs are long-running workflow tasks; leave room for the start workflows.
+      '--xpack.task_manager.capacity=20',
     ],
   },
 };
