@@ -233,7 +233,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       path: string;
       body?: unknown;
       rawBody?: BufferedRawBody;
-      query?: Record<string, string | number | boolean | undefined>;
+      // A value may be a single string/number/boolean, or an array (sent as repeated
+      // query-string keys), matching RequestOptions['query'] and CallKibanaApiParams['query'].
+      query?: Record<string, string | number | boolean | string[] | undefined>;
       headers?: Record<string, string>;
     };
 
