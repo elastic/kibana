@@ -9,6 +9,7 @@ export {
   defineInvestigationAttachment,
   type InvestigationAttachmentConfig,
   type InvestigationAttachmentDefinition,
+  type InvestigationAttachmentTypeDeps,
   type InvestigationAttachmentWrite,
 } from './define_investigation_attachment';
 export {

@@ -72,7 +72,11 @@ const setup = ({
   const registerType = jest.fn();
   registerHypothesesAttachment(
     { attachments: { registerType } } as unknown as AgentBuilderPluginSetup,
-    { getHypothesesService: () => service, logger: loggerMock.create() }
+    {
+      getHypothesesService: () => service,
+      privileges: { assertCanManage: jest.fn(), assertCanRead: jest.fn() },
+      logger: loggerMock.create(),
+    }
   );
   const definition = registerType.mock.calls[0][0] as AttachmentTypeDefinition;
   const attachments = createAttachmentStateManager([], {
