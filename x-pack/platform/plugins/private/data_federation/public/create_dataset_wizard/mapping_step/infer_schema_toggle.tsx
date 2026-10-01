@@ -33,7 +33,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
               <EuiText size="s">
                 <strong>
                   {i18n.translate('xpack.dataFederation.createDatasetWizard.inferSchemaLabel', {
-                    defaultMessage: 'Infer schema',
+                    defaultMessage: 'Infer unmapped fields',
                   })}
                 </strong>
               </EuiText>
@@ -45,7 +45,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
             <EuiText size="xs" color="subdued">
               {i18n.translate('xpack.dataFederation.createDatasetWizard.inferSchemaDescription', {
                 defaultMessage:
-                  "Schema will be inferred at query time for any fields that haven't been mapped.",
+                  "Elastic infers any fields you don't map. All fields are available to query.",
               })}
             </EuiText>
 
@@ -60,7 +60,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
               <EuiText size="s">
                 <strong>
                   {i18n.translate('xpack.dataFederation.createDatasetWizard.defineSchemaLabel', {
-                    defaultMessage: 'Define schema',
+                    defaultMessage: 'Use mapped fields only',
                   })}
                 </strong>
               </EuiText>
@@ -71,8 +71,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
           >
             <EuiText size="xs" color="subdued">
               {i18n.translate('xpack.dataFederation.createDatasetWizard.defineSchemaDescription', {
-                defaultMessage:
-                  'No schema will be inferred at query time, only fields defined below will be available.',
+                defaultMessage: 'Only fields you map are available to query.',
               })}
             </EuiText>
           </EuiCheckableCard>

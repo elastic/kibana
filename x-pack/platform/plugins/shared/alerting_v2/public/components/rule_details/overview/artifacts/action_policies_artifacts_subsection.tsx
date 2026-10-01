@@ -89,6 +89,7 @@ export const ActionPoliciesArtifactsSubsection: React.FC<
           policyId={policyToViewId}
           onClose={handleCloseFlyout}
           session={flyoutSession}
+          size={flyoutSession === 'inherit' ? 's' : 'm'}
         />
       ) : null}
     </>

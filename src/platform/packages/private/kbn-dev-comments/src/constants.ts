@@ -14,6 +14,14 @@ export const IGNORE_SELECTOR = `[${IGNORE_ATTR}]`;
 /** Marks the panel's menus, which close themselves on Escape rather than leave comment mode. */
 export const MENU_ATTR = 'data-devtool-menu';
 
+/** Marks the layer's own containers and popover panels, for styles that are the layer's alone. */
+export const LAYER_ATTR = 'data-dev-comments';
+
+/** Marks UI the layer shows at a tooltip (a pin on it, a thread or composer open there); see `createTooltipHold`. */
+export const AT_TOOLTIP_ATTR = 'data-dev-comments-at-tooltip';
+
+export const AT_TOOLTIP_SELECTOR = `[${AT_TOOLTIP_ATTR}]`;
+
 export const DISPLAY_NAME_STORAGE_KEY = 'dev_comments_display_name';
 
 /** Session storage: a guide handed over a page load, see `createCommentsController`. */
