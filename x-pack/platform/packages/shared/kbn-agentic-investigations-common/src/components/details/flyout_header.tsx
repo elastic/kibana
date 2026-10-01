@@ -19,7 +19,7 @@ import {
 import type { EuiBadgeProps } from '@elastic/eui';
 import type { Investigation } from '../../types';
 import { ConversationHeaderBlocks } from './header_blocks';
-import { SEVERITY_LABELS } from './translations';
+import { SEVERITY_LABELS } from './overview_translations';
 
 const SEVERITY_COLORS: Readonly<Record<string, EuiBadgeProps['color']>> = {
   low: 'hollow',

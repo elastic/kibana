@@ -19,6 +19,7 @@ import type { Investigation } from '../../types';
 import { AttachmentSummarySection } from '../attachment_summary';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
+import { OVERVIEW_SECTION_LABELS } from './overview_translations';
 
 const SUMMARY_LIMIT = 120;
 
@@ -65,7 +66,7 @@ export const OverviewTab = memo<OverviewTabProps>(
       <EuiFlexGroup direction="column" gutterSize="m">
         {subjects && (
           <EuiFlexItem data-test-subj="investigationOverviewSubjects">
-            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.subjects}>{subjects}</DetailsBlock>
+            <DetailsBlock title={OVERVIEW_SECTION_LABELS.subjects}>{subjects}</DetailsBlock>
           </EuiFlexItem>
         )}
 
@@ -101,7 +102,7 @@ export const OverviewTab = memo<OverviewTabProps>(
 
         {impact && (
           <EuiFlexItem data-test-subj="investigationOverviewImpact">
-            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.impact}>{impact}</DetailsBlock>
+            <DetailsBlock title={OVERVIEW_SECTION_LABELS.impact}>{impact}</DetailsBlock>
           </EuiFlexItem>
         )}
 
@@ -123,7 +124,7 @@ export const OverviewTab = memo<OverviewTabProps>(
 
         {trace && (
           <EuiFlexItem data-test-subj="investigationOverviewTrace">
-            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.trace}>{trace}</DetailsBlock>
+            <DetailsBlock title={OVERVIEW_SECTION_LABELS.trace}>{trace}</DetailsBlock>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

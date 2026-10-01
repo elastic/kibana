@@ -19,7 +19,6 @@ import { INVESTIGATION_TEMPLATE_ID } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
 import { ProposedActionsBoundary } from '../../shared/proposed_actions/proposed_actions_boundary';
 import { getSharedInvestigationsQueryClient } from '../../../shared_query_client';
-import { createInvestigationCardsLoader } from '../../../investigations/investigation_cards_loader';
 import type { TemplateDefinition } from '../../registry/types';
 
 const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
@@ -71,36 +70,8 @@ export const investigationTemplate: TemplateDefinition = {
     // Shares `getSharedInvestigationsQueryClient()` with a solution's queue page rather than
     // creating its own — see https://github.com/elastic/kibana/pull/292946#discussion_r4092473937.
     // Both read and decide the same proposals; an isolated client here would let a decision made
-    // in one leave the other showing it as still pending.
-    const LazyProposedActionsSlot = React.lazy(async () => {
-      const [
-        { KibanaContextProvider },
-        { QueryClientProvider },
-        { ProposedActionsSlot },
-        queryClient,
-      ] = await Promise.all([
-        import('@kbn/kibana-react-plugin/public'),
-        import('@kbn/react-query'),
-        import('../../shared/proposed_actions/proposed_actions_slot'),
-        getSharedInvestigationsQueryClient(),
-      ]);
-
-      const WrappedSlot: React.FC<React.ComponentProps<typeof ProposedActionsSlot>> = (props) =>
-        React.createElement(
-          KibanaContextProvider,
-          { services },
-          React.createElement(
-            QueryClientProvider,
-            { client: queryClient },
-            React.createElement(ProposedActionsSlot, props)
-          )
-        );
-
-      return { default: WrappedSlot };
-    });
-
-    // The overview, the header's running state, and the brief cards read the same investigation
-    // queries, so they share one QueryClient: a flyout and its header poll once, not twice.
+    // in one leave the other showing it as still pending. The overview, the header's running state,
+    // and the brief cards share it too: a flyout and its header poll one investigation query.
     const makeLazyWithSharedClient = <P extends object>(
       getComponent: () => Promise<React.ComponentType<P>>
     ): React.LazyExoticComponent<React.ComponentType<P>> =>
@@ -127,6 +98,13 @@ export const investigationTemplate: TemplateDefinition = {
         return { default: Wrapped };
       });
 
+    const LazyProposedActionsSlot = makeLazyWithSharedClient(async () => {
+      const { ProposedActionsSlot } = await import(
+        '../../shared/proposed_actions/proposed_actions_slot'
+      );
+      return ProposedActionsSlot;
+    });
+
     const LazyInvestigationOverview = makeLazyWithSharedClient<OverviewSlotRenderProps>(
       async () => {
         const { InvestigationOverview } = await import(
@@ -145,14 +123,16 @@ export const investigationTemplate: TemplateDefinition = {
       }
     );
 
-    const cardsLoader = createInvestigationCardsLoader(core.http);
     const LazyInvestigationBriefCard =
       makeLazyWithSharedClient<ConversationTemplateBriefCardRenderProps>(async () => {
-        const { InvestigationBriefCard } = await import(
-          '../../../investigations/components/investigation_brief_card'
-        );
+        const [{ InvestigationBriefCard }, { createInvestigationCardsLoader }] = await Promise.all([
+          import('../../../investigations/components/investigation_brief_card'),
+          import('../../../investigations/investigation_cards_loader'),
+        ]);
+        // Created once, with the chunk: every card shares it, so one tick of cards is one request.
+        const loader = createInvestigationCardsLoader(core.http);
         const BriefCard: React.FC<ConversationTemplateBriefCardRenderProps> = (props) =>
-          React.createElement(InvestigationBriefCard, { ...props, loader: cardsLoader });
+          React.createElement(InvestigationBriefCard, { ...props, loader });
         return BriefCard;
       });
 
