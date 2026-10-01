@@ -108,7 +108,9 @@ export class EscalationsService {
   private readonly getConversationClient: (
     request: KibanaRequest
   ) => Promise<ConversationPublicClient>;
-  private readonly getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
+  private readonly getAttachmentsClient: (
+    request: KibanaRequest
+  ) => Promise<AttachmentPublicClient>;
   private readonly conversationTemplates: ConversationTemplatesStart;
   private readonly getInvestigationStatusService: () => InvestigationStatusService;
 

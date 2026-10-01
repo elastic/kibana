@@ -52,7 +52,9 @@ export const registerUpdateEscalationRoute = ({
               );
             } catch (attachErr) {
               logger.warn(
-                `[escalations] Attachment copy failed after investigation link; escalation was still updated. escalationId=${request.params.id} error=${(attachErr as Error).message}`
+                `[escalations] Attachment copy failed after investigation link; escalation was still updated. escalationId=${
+                  request.params.id
+                } error=${(attachErr as Error).message}`
               );
             }
           }

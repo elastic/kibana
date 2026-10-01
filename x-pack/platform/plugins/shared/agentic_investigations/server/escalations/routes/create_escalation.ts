@@ -42,7 +42,9 @@ export const registerCreateEscalationRoute = ({
             ]);
           } catch (attachErr) {
             logger.warn(
-              `[escalations] Attachment copy failed after escalation creation; escalation was still created. escalationId=${escalation.id} error=${(attachErr as Error).message}`
+              `[escalations] Attachment copy failed after escalation creation; escalation was still created. escalationId=${
+                escalation.id
+              } error=${(attachErr as Error).message}`
             );
           }
 
