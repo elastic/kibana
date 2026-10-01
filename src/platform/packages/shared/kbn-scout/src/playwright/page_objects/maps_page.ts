@@ -156,11 +156,14 @@ export class MapsPage {
    * (e.g. the action required no re-fetch).
    */
   private async waitForLoadCycleIfNeeded(isLoading: () => Promise<boolean>) {
-    if (await isLoading()) return;
-    await expect
-      .poll(isLoading, { timeout: 500 })
-      .toBe(true)
-      .catch(() => {});
+    const alreadyLoading = await isLoading();
+    if (!alreadyLoading) {
+      // eslint-disable-next-line playwright/no-conditional-expect
+      await expect
+        .poll(isLoading, { timeout: 500 })
+        .toBe(true)
+        .catch(() => {});
+    }
   }
 
   async getLayerTocTooltipMsg(layerName: string): Promise<string> {
