@@ -29,13 +29,13 @@ The per-scenario deploy/teardown + data cleanup is intentional as each snapshot 
 - Local **Elasticsearch** running with access to GCS credentials: `pnpm es snapshot --license trial --secure-files gcs.client.default.credentials_file=/path/to/creds.json`
 - Local **Kibana** running
 - GCS repository access configured in Elasticsearch (so ES can write snapshots to the bucket)
-- An LLM connector configured in `kibana.dev.yml` for feature extraction
+- A chat model connector or inference endpoint available in Kibana
 
 ### Flags
 
 | Flag | Description | Default |
 | --- | --- | --- |
-| `--connector-id` | **Required.** LLM connector ID used for feature extraction. | none |
+| `--connector-id` | **Required.** Chat model connector or inference endpoint ID passed to each KI onboarding request and, with `--with-discovery`, each discovery request. | none |
 | `--run-id` | Run identifier used for the snapshot repo name and GCS base path. | Today's date `YYYY-MM-DD` (local time) |
 | `--scenario` | Limit to specific scenario(s). Can be repeated. Omit to run all scenarios for the selected demo app. | All scenarios |
 | `--demo-app` | Demo app to use. Must be a registered demo type (see `listAvailableDemos()`). | `otel-demo` |

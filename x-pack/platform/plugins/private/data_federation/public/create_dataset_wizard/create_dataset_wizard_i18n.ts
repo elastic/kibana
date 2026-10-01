@@ -720,6 +720,20 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsHeaderRowTrueDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsHeaderRowTrueDescription',
+    {
+      defaultMessage: 'First row holds column names.',
+    }
+  ),
+
+  settingsHeaderRowFalseDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsHeaderRowFalseDescription',
+    {
+      defaultMessage: 'First row has data.',
+    }
+  ),
+
   settingsHeaderRowTrue: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsHeaderRowTrue',
     {

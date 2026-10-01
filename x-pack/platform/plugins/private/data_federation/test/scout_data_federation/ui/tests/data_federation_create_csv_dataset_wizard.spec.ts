@@ -139,7 +139,7 @@ test.describe(
       const settings = {
         delimiter: ';',
         mode: 'Quoted',
-        headerRow: 'No',
+        headerRow: 'False',
         skipRows: '10',
         datetimeFormat: 'yyyy-MM-dd',
         nullValue: 'NULL',
@@ -357,9 +357,7 @@ test.describe(
         await expect(page.getByTestId('createDatasetWizardReview-mode')).toContainText(
           settings.mode
         );
-        await expect(page.getByTestId('createDatasetWizardReview-header_row')).toContainText(
-          settings.headerRow
-        );
+        await expect(page.getByTestId('createDatasetWizardReview-header_row')).toContainText('No');
         await expect(page.getByTestId('createDatasetWizardReview-skip_rows')).toContainText(
           settings.skipRows
         );
