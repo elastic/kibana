@@ -16,6 +16,7 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
   return {
     authc: {
       getCurrentUser: () => null,
+      getPrincipal: () => null,
       apiKeys: {
         areAPIKeysEnabled: () => Promise.resolve(false),
         areCrossClusterAPIKeysEnabled: () => Promise.resolve(false),
