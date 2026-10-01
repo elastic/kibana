@@ -15,6 +15,24 @@ enabled: true
 tags:
   - security
   - continuous-threat-hunt
+settings:
+  # Keyed per Investigation, not per report or globally: the Worker's own per-space
+  # concurrency (hunt-continuous-threat-hunt, max 1) only serializes sweeps against each
+  # other, and does nothing for a manual report_ids bypass or a direct invocation of this
+  # workflow racing one. This narrows, but does not close, decide_and_package's
+  # existing-Proposals lookup race: dispatch_gate below is workflow.executeAsync, so this
+  # workflow (and its concurrency slot) returns, and releases the slot, before any gate child
+  # has actually called system-create-alertzero-proposal -- a second packaging run can still
+  # enter the serialized section while the first run's Proposal is still being created, see
+  # zero Proposals, and mint its own. Closing that window for good is the Proposals service's
+  # job once it owns atomic dedup; `queue`, not `drop`, at least means a racing run still
+  # packages (just after the first), rather than being silently lost. A literal input value
+  # resolves in a concurrency key, unlike a templated one; investigationConversationId arrives
+  # already rendered the same way attack_discovery_review.yaml's attack_discovery_id does.
+  concurrency:
+    key: "hunt-package-report-{{ inputs.investigationConversationId }}"
+    strategy: queue
+    max: 1
 triggers:
   - type: manual
     inputs:
@@ -183,6 +201,10 @@ steps:
         Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open for a retry.
         {% elsif packaged.dismiss == true -%}
         No confirmed hits, so packaging closed this Investigation as benign{% if packaged.coverage.written != nil and packaged.coverage.written != empty %} and recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
+        {% elsif packaged.existingProposalsSkipped == true and packaged.existingProposalsCheckFailed == true -%}
+        This run found something mint-worthy, but packaging could not verify whether the Investigation already has a Proposal, so no new one was created this time. Retry the sweep for this report.
+        {% elsif packaged.existingProposalsSkipped == true -%}
+        This run found something mint-worthy, but the Investigation already has a Proposal from an earlier run, so no new one was created. Review the existing Proposal{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; also recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% else -%}
         Packaging prepared {{ packaged.proposals | size }} proposal{% if packaged.proposals.size != 1 %}s{% endif %} for analyst review and launched an approval gate for each; the gate is what creates the Proposal.{% if variables.dispatch_failed_count > 0 %} {{ variables.dispatch_failed_count }} of the approval gates failed to launch.{% else %} The Investigation stays open until every gate is decided.{% endif %}
         {% for p in packaged.proposals -%}

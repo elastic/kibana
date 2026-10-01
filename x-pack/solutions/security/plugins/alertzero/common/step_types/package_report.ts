@@ -82,6 +82,21 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
     dismiss: z.boolean(),
     closureSummary: z.string(),
     expectedProposalCount: z.number().int().min(0),
+    /**
+     * True when this run found something mint-worthy but `proposals` was forced empty rather than
+     * minting a second, unrelated chain for what may be the same finding. A conservative guard
+     * until the Proposals service owns real dedup keyed on `subjectKey` -- see that field's own
+     * comment on `packageReportMintPayloadSchema` above. Temporary contract surface: removed once
+     * that lands and the mint path dedupes for real instead of suppressing wholesale.
+     */
+    existingProposalsSkipped: z.boolean(),
+    /**
+     * True when `existingProposalsSkipped` fired because the existing-Proposals lookup itself
+     * failed, not because proposals were actually found (fails closed either way, to never risk a
+     * duplicate mint) -- kept distinguishable so the run conclusion never tells the analyst to
+     * review a Proposal that may not exist.
+     */
+    existingProposalsCheckFailed: z.boolean(),
   }),
   z.object({
     status: z.literal('run_incomplete'),

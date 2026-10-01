@@ -32,11 +32,22 @@ export type ListRespondActions = (
 
 export type WriteCoverageKis = (subjects: CoverageSubject[]) => Promise<CoverageWriteResult>;
 
+/**
+ * True when the Investigation already carries at least one Proposal, any status including
+ * settled. A rerun that reaches the same Investigation (reopened, or re-hunted after the hunt-once
+ * gate clears) would otherwise mint a second, independent chain for what may be the very same
+ * finding: `decidePackageReport`'s `subjectKey` is deterministic per finding, but nothing
+ * downstream of this step dedupes on it yet, so the guard here is coarse -- it suppresses every
+ * new Proposal this run would mint, not only ones that collide with an existing `subjectKey`.
+ */
+export type HasExistingProposals = (investigationConversationId: string) => Promise<boolean>;
+
 export interface RunPackageReportDeps {
   listRespondActions: ListRespondActions;
   writeCoverageKis: WriteCoverageKis;
   resolveHostEnrollment: ResolveHostEnrollment;
   rehydrateProcessSelectors: RehydrateProcessSelectors;
+  hasExistingProposals: HasExistingProposals;
 }
 
 /**
@@ -100,6 +111,8 @@ export const runPackageReport = async ({
         dismiss: true,
         closureSummary: `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`,
         expectedProposalCount: 0,
+        existingProposalsSkipped: false,
+        existingProposalsCheckFailed: false,
       };
     }
     return {
@@ -124,19 +137,50 @@ export const runPackageReport = async ({
   });
   const coverage = await deps.writeCoverageKis(subjects);
 
+  // Only a run that would otherwise mint something needs the lookup: a dismissal (no confirmed
+  // hit) has no proposals to suppress, and `decidePackageReport` never returns `dismiss: false`
+  // with an empty `proposals` (the analyst-recommendation fallback always fills it).
+  let existingProposalsSkipped = false;
+  let existingProposalsCheckFailed = false;
+  if (!decided.dismiss) {
+    try {
+      existingProposalsSkipped = await deps.hasExistingProposals(investigationConversationId);
+    } catch {
+      // Fails closed: the guard's job is to never let a duplicate mint through, so the one case
+      // it must not mishandle is the one where it cannot tell. But a lookup failure is not "a
+      // Proposal already exists" -- kept distinguishable so the summary below never asserts a
+      // cause it never actually observed.
+      existingProposalsSkipped = true;
+      existingProposalsCheckFailed = true;
+    }
+  }
+  const proposals = existingProposalsSkipped ? [] : decided.proposals;
+
   // Threaded through to the packaging workflow's per-Proposal gate fan-out as a plain
   // workflow input (`hunt_package_report.yaml`'s `dispatch_gate` step) — the settlement
   // barrier each gate checks before closing the Investigation. Not persisted to
   // conversation metadata: the platform `investigation` template's schema has no room
   // for it.
-  const expectedProposalCount = decided.proposals.length;
+  const expectedProposalCount = proposals.length;
 
   return {
     status: 'packaged',
     coverage,
-    proposals: decided.proposals,
+    proposals,
+    // Not forced to `true`: a confirmed hit the guard suppressed is not benign. Accepted
+    // consequence, not an oversight: `decidePackageReport` could not previously return
+    // `dismiss: false` with an empty `proposals` (it always filled at least the
+    // analyst-recommendation fallback), so every non-dismiss run had a gate that would eventually
+    // close the Investigation. A suppressed run has none -- if the Investigation's only existing
+    // Proposal already settled before this run, nothing here re-closes it, and it stays open until
+    // an analyst does so by hand. That is intentional for this guard, matching "reopen
+    // Investigations on rerun"'s own goal of keeping a possibly-new finding visible rather than
+    // silently closed; elastic/security-team#19822 (phase 3) resolves it as a side effect of real
+    // per-finding dedup, not as a standalone fix.
     dismiss: decided.dismiss,
     closureSummary: decided.closureSummary,
     expectedProposalCount,
+    existingProposalsSkipped,
+    existingProposalsCheckFailed,
   };
 };

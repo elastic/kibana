@@ -155,6 +155,7 @@ const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDe
   }),
   resolveHostEnrollment: async () => ({ enrolled: true, agentId: 'agent-1' }),
   rehydrateProcessSelectors: async () => [],
+  hasExistingProposals: async () => false,
   ...overrides,
 });
 
@@ -196,6 +197,8 @@ describe('runPackageReport', () => {
     expect(result.proposals).toEqual([]);
     expect(result.expectedProposalCount).toBe(0);
     expect(result.closureSummary).toContain('no confirmed hits');
+    expect(result.existingProposalsSkipped).toBe(false);
+    expect(result.existingProposalsCheckFailed).toBe(false);
   });
 
   // A hunt that did not complete may leave its report eligible, in which case a later sweep
@@ -281,6 +284,7 @@ describe('runPackageReport', () => {
     expect(result.proposals.length).toBe(1);
     expect(result.proposals[0].actionWorkflowId).toBe(isolateHost.workflowId);
     expect(result.expectedProposalCount).toBe(1);
+    expect(result.existingProposalsSkipped).toBe(false);
   });
 
   it('mints only a recommendation when Fleet is unavailable (no host resolves as enrolled)', async () => {
@@ -339,5 +343,83 @@ describe('runPackageReport', () => {
       expect(proposal.actionInput?.parameters).toEqual({ entity_id: 'ent-abc' });
       expect(proposal.actionInput?.endpoint_ids).toEqual(['agent-1']);
     }
+  });
+
+  // Phase 1 of the Proposals-side dedup Sergi/Astra raised: a rerun that lands back on an
+  // Investigation that already has a Proposal (any status, including settled) must not mint a
+  // second, independent chain for what may be the same finding.
+  describe('existing-Proposals guard', () => {
+    it('suppresses the mint when the Investigation already has a Proposal, but leaves it open', async () => {
+      const result = await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: true,
+        attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        deps: deps({ hasExistingProposals: async () => true }),
+      });
+      expect(result.status).toBe('packaged');
+      if (result.status !== 'packaged') {
+        return;
+      }
+      expect(result.proposals).toEqual([]);
+      expect(result.expectedProposalCount).toBe(0);
+      expect(result.existingProposalsSkipped).toBe(true);
+      expect(result.existingProposalsCheckFailed).toBe(false);
+      // Not a benign dismissal: this run found a real hit, so the Investigation has to stay
+      // open for the analyst the summary tells to go review the existing Proposal.
+      expect(result.dismiss).toBe(false);
+    });
+
+    // Fails closed: a lookup failure must never risk letting a duplicate mint through. But it
+    // is not "a Proposal already exists" either, so the two stay distinguishable in the output.
+    it('fails closed when the lookup itself throws, and marks it as a check failure', async () => {
+      const result = await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: true,
+        attachments: [sseAttachment({ hit: true, hostName: 'host-a' })],
+        deps: deps({
+          hasExistingProposals: async () => {
+            throw new Error('proposals index unavailable');
+          },
+        }),
+      });
+      expect(result.status).toBe('packaged');
+      if (result.status !== 'packaged') {
+        return;
+      }
+      expect(result.proposals).toEqual([]);
+      expect(result.expectedProposalCount).toBe(0);
+      expect(result.existingProposalsSkipped).toBe(true);
+      expect(result.existingProposalsCheckFailed).toBe(true);
+      expect(result.dismiss).toBe(false);
+    });
+
+    it('never looks up existing Proposals on a clean run: there is nothing to suppress', async () => {
+      const hasExistingProposals = jest.fn(async () => true);
+      const result = await runPackageReport({
+        spaceId: 'default',
+        reportId,
+        investigationConversationId: conversationId,
+        runId,
+        huntStatus: 'success',
+        hasConfirmedHit: false,
+        attachments: [sseAttachment({ hit: false })],
+        deps: deps({ hasExistingProposals }),
+      });
+      expect(result.status).toBe('packaged');
+      if (result.status !== 'packaged') {
+        return;
+      }
+      expect(result.dismiss).toBe(true);
+      expect(result.existingProposalsSkipped).toBe(false);
+      expect(hasExistingProposals).not.toHaveBeenCalled();
+    });
   });
 });

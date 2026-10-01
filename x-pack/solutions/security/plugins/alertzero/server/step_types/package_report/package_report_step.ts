@@ -11,6 +11,8 @@ import { ExecutionError } from '@kbn/workflows/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { packageReportStepCommonDefinition } from '../../../common/step_types/package_report';
 import type { ActionsService } from '../../services/actions/actions_service';
+import type { HuntServices } from '../../services/watches/hunt/types';
+import { createExistingProposalsChecker } from '../../services/watches/hunt/packaging/check_existing_proposals';
 import { makeRehydrateProcessSelectors } from '../../services/watches/hunt/packaging/rehydrate_process_selectors';
 import {
   PackageReportIdentityError,
@@ -25,6 +27,8 @@ import {
 export interface PackageReportStepDependencies {
   getActionsService: () => ActionsService;
   getConversations: () => AgentBuilderPluginStart['conversations'];
+  /** For the existing-Proposals dedup guard; see `RunPackageReportDeps['hasExistingProposals']`. */
+  getHuntServices: () => HuntServices;
   /**
    * Context Engine gate. When false, every coverage subject is skipped with reason `disabled`
    * and proposals still mint. Required rather than defaulted: coverage KIs are written into the
@@ -62,6 +66,7 @@ const defaultResolveHostEnrollment: RunPackageReportDeps['resolveHostEnrollment'
 export const getPackageReportStepDefinition = ({
   getActionsService,
   getConversations,
+  getHuntServices,
   isContextEngineEnabled,
   getResolveHostEnrollment = () => defaultResolveHostEnrollment,
   getRehydrateProcessSelectors = makeRehydrateProcessSelectors,
@@ -107,6 +112,13 @@ export const getPackageReportStepDefinition = ({
           logger
         );
 
+        const hasExistingProposals = createExistingProposalsChecker({
+          proposalsService: getHuntServices().getProposalsService(),
+          spaceId,
+          request,
+          logger,
+        });
+
         const output = await runPackageReport({
           spaceId,
           reportId: input.reportId,
@@ -120,6 +132,7 @@ export const getPackageReportStepDefinition = ({
             writeCoverageKis,
             resolveHostEnrollment: getResolveHostEnrollment(spaceId),
             rehydrateProcessSelectors,
+            hasExistingProposals,
           },
         });
 

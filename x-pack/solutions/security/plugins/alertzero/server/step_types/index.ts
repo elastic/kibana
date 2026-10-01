@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ActionsService } from '../services/actions/actions_service';
+import type { HuntServices } from '../services/watches/hunt/types';
 import { getPackageReportStepDefinition } from './package_report';
 import type { PackageReportStepDependencies } from './package_report/package_report_step';
 
@@ -16,6 +17,7 @@ export const registerStepDefinitions = ({
   workflowsExtensions,
   getActionsService,
   getConversations,
+  getHuntServices,
   getResolveHostEnrollment,
   isContextEngineEnabled,
   logger,
@@ -23,6 +25,7 @@ export const registerStepDefinitions = ({
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getActionsService: () => ActionsService;
   getConversations: () => AgentBuilderPluginStart['conversations'];
+  getHuntServices: () => HuntServices;
   getResolveHostEnrollment?: PackageReportStepDependencies['getResolveHostEnrollment'];
   isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
   logger?: Logger;
@@ -31,6 +34,7 @@ export const registerStepDefinitions = ({
     getPackageReportStepDefinition({
       getActionsService,
       getConversations,
+      getHuntServices,
       getResolveHostEnrollment,
       isContextEngineEnabled,
       logger,

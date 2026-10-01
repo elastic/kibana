@@ -53,6 +53,7 @@ interface YamlWorkflow {
   tags?: string[];
   triggers?: Array<{ type: string; inputs?: TriggerInputSchema }>;
   steps: YamlStep[];
+  settings?: { concurrency?: { key?: string; strategy?: string; max?: number } };
 }
 
 const flatten = (steps: YamlStep[]): YamlStep[] =>
@@ -93,6 +94,17 @@ describe('Hunt Watch worker chain', () => {
   ])('%s carries neither watch nor watch-hunt', (_name, yaml) => {
     expect(yaml.tags ?? []).not.toContain('watch');
     expect(yaml.tags ?? []).not.toContain('watch-hunt');
+  });
+
+  // The existing-Proposals guard's lookup (decide_and_package) is only race-safe once two
+  // runs against the same Investigation cannot execute concurrently — queued, not dropped,
+  // so a racing run still packages rather than being silently lost.
+  it('hunt_package_report serializes per Investigation via a queued concurrency key', () => {
+    expect(packageReport.settings?.concurrency).toEqual({
+      key: 'hunt-package-report-{{ inputs.investigationConversationId }}',
+      strategy: 'queue',
+      max: 1,
+    });
   });
 
   // 1e: each child's own declared trigger input schema is what the caller's payload is
