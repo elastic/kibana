@@ -17,7 +17,16 @@ import { css } from '@emotion/react';
 export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) => {
   const { euiTheme } = euiThemeContext;
   return css`
-    /* Enhanced Monaco hover styling for workflow editor */
+    /**
+     * Enhanced Monaco hover styling for workflow editor
+     * This includes hover widget styling, connector decorations, and autocomplete icons
+     */
+
+    .monaco-editor {
+      --vscode-cornerRadius-large: 6px;
+      --vscode-shadow-lg: ${euiShadow(euiThemeContext, 'm').replace('box-shadow:', '')};
+    }
+
     .monaco-editor .monaco-editor-hover:not([class*='contrib']):not([class*='glyph']),
     .monaco-hover:not([class*='contrib']):not([class*='glyph']) {
       width: 600px;

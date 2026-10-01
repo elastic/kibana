@@ -346,7 +346,7 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
 
     .suggest-widget,
     .suggest-details-container {
-      --vscode-cornerRadius-large: ${theme.euiTheme.border.radius.medium};
+      --vscode-cornerRadius-large: ${theme.euiTheme.border.radius.inline};
       --vscode-shadow-lg: ${euiShadow(theme, 'l').replace('box-shadow:', '')};
       // Suggestions must be rendered above flyouts
       z-index: ${theme.euiTheme.levels.toast} !important;
