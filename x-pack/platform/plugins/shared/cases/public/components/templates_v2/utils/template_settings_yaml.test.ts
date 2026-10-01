@@ -186,6 +186,35 @@ describe('template_settings_yaml', () => {
     });
   });
 
+  describe('externalSync', () => {
+    const externalSync = { autoPush: true, conflictStrategy: 'kibana' as const };
+
+    it('round-trips through merge and parse, and is omitted when unset', () => {
+      const withSync = parseYaml(
+        mergeTemplateDefinition('name: T\nfields: []', { settings: { externalSync } })
+      );
+      expect(withSync.settings).toEqual({
+        syncAlerts: false,
+        extractObservables: false,
+        externalSync,
+      });
+      expect(
+        getTemplateSettingsAndConnectorFromYaml(
+          mergeTemplateDefinition('name: T\nfields: []', { settings: { externalSync } })
+        ).settings
+      ).toEqual({ syncAlerts: false, extractObservables: false, externalSync });
+
+      const withoutSync = parseYaml(
+        mergeTemplateDefinition('name: T\nfields: []', { settings: {} })
+      );
+      expect(withoutSync.settings).not.toHaveProperty('externalSync');
+    });
+
+    it('is kept by normalizeTemplateSettings', () => {
+      expect(normalizeTemplateSettings({ externalSync })).toEqual({ externalSync });
+    });
+  });
+
   describe('normalizeTemplateSettings', () => {
     it('collapses unset / empty settings to undefined', () => {
       expect(normalizeTemplateSettings(undefined)).toBeUndefined();

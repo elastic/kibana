@@ -30,6 +30,14 @@ export const AUTO_PUSH_LABEL = i18n.translate('xpack.cases.editConnector.autoPus
   defaultMessage: 'Push changes automatically',
 });
 
+export const AUTO_PUSH_ON = i18n.translate('xpack.cases.editConnector.autoPushOn', {
+  defaultMessage: 'On',
+});
+
+export const AUTO_PUSH_OFF = i18n.translate('xpack.cases.editConnector.autoPushOff', {
+  defaultMessage: 'Off',
+});
+
 export const CONFLICT_STRATEGY_LABEL = i18n.translate(
   'xpack.cases.editConnector.conflictStrategyLabel',
   {
