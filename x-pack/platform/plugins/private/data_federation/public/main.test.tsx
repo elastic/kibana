@@ -70,7 +70,7 @@ const createServicesMock = ({
 });
 
 describe('Main', () => {
-  it('defaults to the data sources tab when both lists are empty', async () => {
+  it('stays on the datasets tab when both lists are empty', async () => {
     const services = createServicesMock({ dataSources: [], dataSets: [] });
 
     const { getByRole, getByTestId, queryByTestId } = render(
@@ -85,15 +85,14 @@ describe('Main', () => {
       </EuiProvider>
     );
 
-    // Starts on the sets tab, but should switch to sources once both requests complete.
-    expect(getByTestId('datasetsTabContent')).toBeInTheDocument();
-    expect(queryByTestId('dataSourcesTabContent')).toBeNull();
-
     await waitFor(() => {
-      expect(getByTestId('dataSourcesTabContent')).toBeInTheDocument();
+      expect(services.dataSourcesClient.get).toHaveBeenCalled();
+      expect(services.datasetsClient.get).toHaveBeenCalled();
     });
 
-    expect(getByRole('tab', { name: mainTranslations.tabs.sources })).toHaveAttribute(
+    expect(getByTestId('datasetsTabContent')).toBeInTheDocument();
+    expect(queryByTestId('dataSourcesTabContent')).toBeNull();
+    expect(getByRole('tab', { name: mainTranslations.tabs.sets })).toHaveAttribute(
       'aria-selected',
       'true'
     );
