@@ -54,7 +54,8 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule', version: 1, tags: ['prod'] },
+  version: 1,
+  metadata: { name: 'Test Rule', tags: ['prod'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { base: 'FROM logs-*' },
@@ -130,7 +131,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
   it('loads linked policies with an empty tag list when the rule has none', () => {
     renderSubsection({
       ...baseRule,
-      metadata: { name: 'Untagged Rule', version: 1 },
+      metadata: { name: 'Untagged Rule' },
     });
     expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith([]);
   });
