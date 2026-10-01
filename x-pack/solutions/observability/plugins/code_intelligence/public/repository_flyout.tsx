@@ -132,7 +132,7 @@ export const RepositoryFlyout = ({ http, editing, onSaved, onClose }: Props) => 
   return (
     <EuiFlyout
       ownFocus
-      size="s"
+      size="m"
       aria-labelledby={titleId}
       onClose={onClose}
       data-test-subj="codeIntelligenceRepositoryFlyout"
