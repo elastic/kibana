@@ -290,25 +290,30 @@ describe('anchor', () => {
   });
 
   describe('tooltips', () => {
-    it('finds the tooltip showing: the one the trigger describes itself by if showing, else the latest of the rest', () => {
+    it("finds the tooltip showing: the one the trigger describes itself by if showing, else the nearest within a tooltip's reach of it", () => {
       renderPage(`
-        <button id="described" aria-describedby="gone own"><span id="describedText">Go</span></button>
-        <button id="other">Other</button>
+        <button id="described" aria-describedby="gone own" data-rect="0,500,100,30"><span id="describedText">Go</span></button>
+        <button id="other" data-rect="0,110,100,30">Other</button>
+        <button id="far" data-rect="500,500,100,30">Far</button>
+        <button id="layerButton" aria-describedby="hint" ${IGNORE_ATTR}="true">Layer</button>
         <div id="gone" role="tooltip" data-rect="0,0,0,0">Gone</div>
         <div id="own" role="tooltip" data-rect="0,0,100,100">Own</div>
         <div id="first" role="tooltip" data-rect="0,0,100,100"><p id="firstText">First</p></div>
         <div id="second" role="tooltip" data-rect="0,50,100,100">Second</div>
+        <div id="hint" role="tooltip" data-rect="0,100,100,100">Of the layer</div>
         <div id="ignored" role="tooltip" ${IGNORE_ATTR}="true" data-rect="0,0,300,300">Layer</div>
       `);
       expect(isInTooltip(query('#firstText'))).toBe(true);
       expect(isInTooltip(query('#other'))).toBe(false);
 
       expect(tooltipShowing(query('#describedText'))).toBe(query('#own'));
+      // Without the ARIA link: the second overlaps the button, the first is 10px off, the layer's hint over it does not count.
       expect(tooltipShowing(query('#other'))).toBe(query('#second'));
       query('#own').remove();
-      expect(tooltipShowing(query('#described'))).toBe(query('#second'));
+      expect(tooltipShowing(query('#described'))).toBeNull();
       query('#second').setAttribute('data-rect', '0,0,0,0');
       expect(tooltipShowing(query('#other'))).toBe(query('#first'));
+      expect(tooltipShowing(query('#far'))).toBeNull();
       query('#first').remove();
       expect(tooltipShowing(query('#other'))).toBeNull();
     });
@@ -316,9 +321,11 @@ describe('anchor', () => {
     it('finds the tooltip showing at a point, the latest one of several, what of it is there, and the element that shows it', () => {
       renderPage(`
         <button id="target" aria-describedby="second" data-rect="0,0,100,100">Go</button>
+        <button id="layerButton" aria-describedby="hint" ${IGNORE_ATTR}="true">Layer</button>
         <div id="hidden" role="tooltip" data-rect="0,0,0,0">Hidden</div>
         <div id="first" role="tooltip" data-rect="0,0,100,100"><p id="firstText" data-rect="0,0,100,50">First</p></div>
         <div id="second" role="tooltip" data-rect="0,50,100,100"><p id="secondText" data-rect="0,50,100,50">Second</p></div>
+        <div id="hint" role="tooltip" data-rect="0,0,300,300">Of the layer</div>
         <div id="ignored" role="tooltip" ${IGNORE_ATTR}="true" data-rect="0,0,300,300">Layer</div>
         <div role="tooltip" data-rect="0,0,0,0">No id</div>
       `);
@@ -357,7 +364,7 @@ describe('anchor', () => {
       expect(resolveAnchor(anchor)).toEqual({ element: query('[role="tooltip"]'), exact: true });
     });
 
-    it('does not take another tooltip for the one anchored: at its path with other text, or the hint on one of the layer’s own buttons', () => {
+    it("does not take another tooltip for the one anchored: at its path with other text, or the hint on one of the layer's own buttons", () => {
       renderPage(`
         <button id="save" aria-describedby="i5f3a2b1c-7d8e-4f9a-b0c1-d2e3f4a5b6c7">Save</button>
         <div data-euiportal="true">

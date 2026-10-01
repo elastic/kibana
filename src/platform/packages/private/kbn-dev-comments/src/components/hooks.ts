@@ -22,6 +22,8 @@ export interface LayerZIndex {
   panel: number;
   /** Thread and composer popovers, portalled to `body` to stack above the panel. */
   popover: number;
+  /** The same at a tooltip, over the tooltip. */
+  tooltipPopover: number;
 }
 
 /**
@@ -35,7 +37,13 @@ export const useLayerZIndex = (): LayerZIndex => {
   return useMemo(() => {
     const base = overlayOpen ? Number(euiTheme.levels.mask) - 10 : Number(euiTheme.levels.modal);
     const top = overlayOpen ? base : Number(euiTheme.levels.toast);
-    return { pins: base + 2, tooltipPins: top + 2, panel: base + 4, popover: top + 6 };
+    return {
+      pins: base + 2,
+      tooltipPins: top + 2,
+      panel: base + 4,
+      popover: base + 6,
+      tooltipPopover: top + 6,
+    };
   }, [euiTheme.levels, overlayOpen]);
 };
 

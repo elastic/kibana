@@ -142,6 +142,15 @@ export const isExposed = (element: Element, point: Point): boolean => {
 
 const TOOLTIP_SELECTOR = '[role="tooltip"]';
 
+/** Farthest a tooltip is shown from the element that shows it (EUI keeps 16px). */
+export const TOOLTIP_GAP = 32;
+
+export type Box = Pick<DOMRect, 'left' | 'top' | 'right' | 'bottom'>;
+
+/** The distance between two boxes; 0 when they touch or overlap. */
+export const gapBetween = (a: Box, b: Box): number =>
+  Math.max(0, a.left - b.right, b.left - a.right, a.top - b.bottom, b.top - a.bottom);
+
 /** Whether the element is in a tooltip: UI showing only while what it describes is hovered or focused. */
 export const isInTooltip = (element: Element): boolean =>
   element.closest(TOOLTIP_SELECTOR) !== null;
@@ -155,20 +164,6 @@ const tooltipsDescribing = (element: Element): Element[] =>
       return described && matches(described, TOOLTIP_SELECTOR) ? [described] : [];
     });
 
-/** The tooltip showing, if one is: the one describing `trigger` when that is, else whichever is (the last added, of several). */
-export const tooltipShowing = (
-  trigger: Element,
-  ignoreSelectors: readonly string[] = []
-): Element | null => {
-  const showing = (candidate: Element) =>
-    !isIgnored(candidate, ignoreSelectors) && isVisible(candidate);
-  return (
-    tooltipsDescribing(trigger).find(showing) ??
-    queryAll(document, TOOLTIP_SELECTOR).reverse().find(showing) ??
-    null
-  );
-};
-
 /** The element the tooltip describes or labels: the one that shows it. */
 export const triggerOf = (tooltip: Element): Element | null => {
   if (!tooltip.id) {
@@ -178,7 +173,37 @@ export const triggerOf = (tooltip: Element): Element | null => {
   return document.querySelector(`[aria-describedby~="${id}"], [aria-labelledby~="${id}"]`);
 };
 
-const contains = ({ left, top, right, bottom }: DOMRect, { x, y }: Point): boolean =>
+/** The page's tooltips showing, the last added first: not those of UI left out, nor of elements that are (the layer's own hints are portalled out of it). */
+export const tooltipsShowing = (ignoreSelectors: readonly string[] = []): Element[] =>
+  queryAll(document, TOOLTIP_SELECTOR)
+    .reverse()
+    .filter((tooltip) => {
+      if (isIgnored(tooltip, ignoreSelectors) || !isVisible(tooltip)) {
+        return false;
+      }
+      const trigger = triggerOf(tooltip);
+      return trigger === null || !isIgnored(trigger, ignoreSelectors);
+    });
+
+/** The tooltip `trigger` shows, if showing: the one describing it, else (without the ARIA link) the nearest no farther than a tooltip is shown from its element. */
+export const tooltipShowing = (
+  trigger: Element,
+  ignoreSelectors: readonly string[] = []
+): Element | null => {
+  const showing = tooltipsShowing(ignoreSelectors);
+  const described = tooltipsDescribing(trigger).find((tooltip) => showing.includes(tooltip));
+  if (described) {
+    return described;
+  }
+  const box = trigger.getBoundingClientRect();
+  const [nearest] = showing
+    .map((tooltip) => ({ tooltip, gap: gapBetween(box, tooltip.getBoundingClientRect()) }))
+    .filter(({ gap }) => gap <= TOOLTIP_GAP)
+    .sort((a, b) => a.gap - b.gap);
+  return nearest?.tooltip ?? null;
+};
+
+const contains = ({ left, top, right, bottom }: Box, { x, y }: Point): boolean =>
   x >= left && x <= right && y >= top && y <= bottom;
 
 /** The innermost element of `element` at `point`, going by their boxes. */
@@ -195,19 +220,14 @@ export interface TooltipHit {
   hit: Element;
 }
 
-/** The tooltip showing at `point` (the last added, of several), and what of it is there. Hit-testing passes tooltips over: they are found by their boxes. */
+/** The page's tooltip showing at `point` (the last added, of several), and what of it is there. Hit-testing passes tooltips over: they are found by their boxes. */
 export const tooltipAt = (
   point: Point,
   ignoreSelectors: readonly string[] = []
 ): TooltipHit | null => {
-  const tooltip = queryAll(document, TOOLTIP_SELECTOR)
-    .reverse()
-    .find(
-      (candidate) =>
-        !isIgnored(candidate, ignoreSelectors) &&
-        isVisible(candidate) &&
-        contains(candidate.getBoundingClientRect(), point)
-    );
+  const tooltip = tooltipsShowing(ignoreSelectors).find((candidate) =>
+    contains(candidate.getBoundingClientRect(), point)
+  );
   return tooltip ? { tooltip, hit: innermostAt(tooltip, point) } : null;
 };
 

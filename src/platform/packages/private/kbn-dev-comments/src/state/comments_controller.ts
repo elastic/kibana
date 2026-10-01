@@ -30,6 +30,8 @@ export interface PendingComment {
   /** Tells drafts apart: a save only completes the draft it started from. */
   id: number;
   element: Element;
+  /** The element whose hover or focus shows `element`, a tooltip: where focus goes back to after. */
+  revealedBy?: Element;
   anchor: ElementAnchor;
   /** Viewport coordinates of the click, used when `element` leaves the DOM before the comment is saved. */
   point: { x: number; y: number };
@@ -558,6 +560,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       const draft: PendingComment = {
         id: ++draftSequence,
         element,
+        revealedBy,
         anchor: buildAnchor(element, { point, hit }),
         point,
         route: { pageKey: location.getPageKey(), path: location.getPath() },

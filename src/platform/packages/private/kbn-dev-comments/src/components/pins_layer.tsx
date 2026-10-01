@@ -200,7 +200,7 @@ export const PinsLayer = () => {
       <Pin
         key={id}
         pin={pin}
-        zIndex={zIndex.popover}
+        zIndex={pin.inTooltip ? zIndex.tooltipPopover : zIndex.popover}
         isActive={activeThreadId === id}
         takeFocus={focusPinId === id}
         onToggle={() => controller.openThread(activeThreadId === id ? null : id)}

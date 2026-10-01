@@ -519,6 +519,26 @@ describe('CommentsLayer', () => {
     expect(document.activeElement).toBe(query('#other'));
   });
 
+  it('sends the focus back to the element showing the tooltip a draft was on, the tooltip itself taking none', async () => {
+    renderPage(`
+      <button id="save" type="button" aria-describedby="tip" data-rect="0,0,50,20">Save</button>
+      <div id="tip" role="tooltip" data-rect="0,30,120,20">Saves the rule</div>
+    `);
+    const controller = await renderLayer();
+    enter(controller);
+    act(() =>
+      controller.pick(query('#tip'), { x: 60, y: 40 }, query('#tip'), {
+        revealedBy: query('#save'),
+      })
+    );
+    await screen.findByTestId('devCommentsComposerInput');
+    act(() => editorText('devCommentsComposerInput').focus());
+
+    escape();
+    expect(controller.store.getState().pending).toBeNull();
+    expect(document.activeElement).toBe(query('#save'));
+  });
+
   it('keeps the comment being written, text included, when the page changes under a save that then fails', async () => {
     const { location, navigate } = createLocation();
     const create = deferred<Comment>();
@@ -586,6 +606,8 @@ describe('CommentsLayer', () => {
     const panel = await screen.findByRole('dialog', { name: 'Comment thread' });
     const above = Number(panel.style.zIndex);
     expect(above).toBeGreaterThan(Number(levels.modal));
+    // Not over the page's toasts, though: that is for threads at tooltips.
+    expect(above).toBeLessThan(Number(levels.toast));
 
     act(() => controller.setOverlayOpen(true));
     expect(Number(panel.style.zIndex)).toBeLessThan(Number(levels.mask));
@@ -1001,7 +1023,8 @@ describe('CommentsLayer', () => {
     // The click leaves focus, which keeps a tooltip showing, where it is.
     expect(fireEvent.mouseDown(pin)).toBe(false);
     fireEvent.click(pin);
-    await screen.findByRole('dialog', { name: 'Comment thread' });
+    const thread = await screen.findByRole('dialog', { name: 'Comment thread' });
+    expect(Number(thread.style.zIndex)).toBeGreaterThan(Number(levels.toast));
     expect(pin).toHaveAttribute('aria-expanded', 'true');
     expect(controller.store.getState()).toMatchObject({
       activeThreadId: 'onTip',

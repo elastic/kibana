@@ -46,7 +46,8 @@ export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
     'devCommentsComposer',
     inTooltip ? zIndex.tooltipPins : zIndex.pins
   );
-  const panelRef = usePanelZIndex(zIndex.popover);
+  const popoverZIndex = inTooltip ? zIndex.tooltipPopover : zIndex.popover;
+  const panelRef = usePanelZIndex(popoverZIndex);
   const [text, setText] = useState('');
   const [displayName, setDisplayName] = useDisplayName();
   const canCapture = controller.services.captureViewport !== undefined;
@@ -54,9 +55,9 @@ export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
   const { saving } = pending;
   useLayoutTick();
 
-  // On discard or save, focus goes back to the element the comment ended on (a click moves the draft).
-  const elementRef = useRef(pending.element);
-  elementRef.current = pending.element;
+  // On discard or save, focus goes back to the element the comment ended on (a click moves the draft), or to what shows it.
+  const elementRef = useRef(pending.revealedBy ?? pending.element);
+  elementRef.current = pending.revealedBy ?? pending.element;
   useEffect(
     () => () => {
       const element = elementRef.current;
@@ -118,7 +119,7 @@ export const ComposerPopover = ({ pending }: { pending: PendingComment }) => {
           panelProps={inTooltip ? atTooltipPanelProps : popoverPanelProps}
           panelRef={panelRef}
           repositionOnScroll
-          zIndex={zIndex.popover}
+          zIndex={popoverZIndex}
           initialFocus="[data-test-subj='devCommentsComposerInput'] textarea"
         >
           <PopoverBody data-test-subj="devCommentsComposer">

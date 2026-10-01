@@ -22,7 +22,7 @@ import {
 } from '../lib/anchor';
 import type { Point } from '../lib/anchor';
 import { holdsPassThrough, isPassingThrough, passThrough } from '../lib/pass_through';
-import { BOUNDARY_EVENTS, createTooltipHold } from '../lib/tooltip_hold';
+import { BOUNDARY_EVENTS, FOCUS_EVENTS, MOVE_EVENTS, createTooltipHold } from '../lib/tooltip_hold';
 import { useComments } from './comments_context';
 import { useLayerPortal, useLayerZIndex, useLayoutTick } from './hooks';
 
@@ -117,9 +117,10 @@ const TooltipAim = ({ tooltip, onGone }: { tooltip: Element; onGone: () => void 
  * capture phase, so the UI state being commented on does not change. Releasing
  * the pointer on an element starts a comment (or moves the one being written);
  * so do Enter and Space on the focused element. A tooltip stays showing while
- * the pointer heads over to it, to be clicked, the page meanwhile told nothing
- * of the pointer; with the keyboard, an arrow key aims at the tooltip the
- * focused element shows. With Alt held, pointer input goes to the page.
+ * the pointer heads over to it, to be clicked, and while the layer's UI at it
+ * has focus, the page meanwhile told nothing of the pointer or focus; with the
+ * keyboard, an arrow key aims at the tooltip the focused element shows. With
+ * Alt held, pointer input goes to the page.
  */
 export const CommentModeOverlay = () => {
   const controller = useComments();
@@ -200,15 +201,32 @@ export const CommentModeOverlay = () => {
       }
     };
 
+    // With Alt held, the pointer's whereabouts are the page's too: a tooltip held goes, as it would.
     const onBoundary = (event: Event) => {
-      if (event instanceof MouseEvent) {
+      if (!(event instanceof MouseEvent)) {
+        return;
+      }
+      if (holdsPassThrough(event)) {
+        hold.release({ x: event.clientX, y: event.clientY });
+      } else {
         hold.hold(event, ignoreSelectors);
       }
     };
 
     const onMove = (event: Event) => {
-      if (event instanceof MouseEvent) {
-        hold.track({ x: event.clientX, y: event.clientY });
+      if (!(event instanceof MouseEvent)) {
+        return;
+      }
+      if (holdsPassThrough(event)) {
+        hold.release({ x: event.clientX, y: event.clientY });
+      } else {
+        hold.move(event, ignoreSelectors);
+      }
+    };
+
+    const onFocusChange = (event: Event) => {
+      if (event instanceof FocusEvent) {
+        hold.focus(event, ignoreSelectors);
       }
     };
 
@@ -249,7 +267,8 @@ export const CommentModeOverlay = () => {
 
     POINTER_EVENTS.forEach((type) => document.addEventListener(type, onPointer, true));
     BOUNDARY_EVENTS.forEach((type) => document.addEventListener(type, onBoundary, true));
-    document.addEventListener('pointermove', onMove, true);
+    MOVE_EVENTS.forEach((type) => document.addEventListener(type, onMove, true));
+    FOCUS_EVENTS.forEach((type) => document.addEventListener(type, onFocusChange, true));
     INPUT_EVENTS.forEach((type) => document.addEventListener(type, onInput, true));
     document.addEventListener('keydown', onKey, true);
     document.addEventListener('keyup', onKey, true);
@@ -258,12 +277,13 @@ export const CommentModeOverlay = () => {
     return () => {
       POINTER_EVENTS.forEach((type) => document.removeEventListener(type, onPointer, true));
       BOUNDARY_EVENTS.forEach((type) => document.removeEventListener(type, onBoundary, true));
-      document.removeEventListener('pointermove', onMove, true);
+      MOVE_EVENTS.forEach((type) => document.removeEventListener(type, onMove, true));
+      FOCUS_EVENTS.forEach((type) => document.removeEventListener(type, onFocusChange, true));
       INPUT_EVENTS.forEach((type) => document.removeEventListener(type, onInput, true));
       document.removeEventListener('keydown', onKey, true);
       document.removeEventListener('keyup', onKey, true);
       document.removeEventListener('focusin', clearAim, true);
-      hold.release();
+      hold.end();
     };
   }, [controller, ignoreSelectors, hold, clearAim]);
 

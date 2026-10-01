@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
-import { IGNORE_ATTR } from '../constants';
+import { AT_TOOLTIP_ATTR, IGNORE_ATTR } from '../constants';
 import { createCommentsController } from '../state/comments_controller';
 import { createHostServices, flush, mockLayout, query, renderPage } from '../test_helpers';
 import { CommentsProvider } from './comments_context';
@@ -206,6 +206,63 @@ describe('CommentModeOverlay', () => {
     ]);
     leave(save, 'mouseout', 250, 100);
     expect(left).toHaveBeenCalledTimes(4);
+  });
+
+  it('hands the pointer to the page, a tooltip held let go of, while Alt is held', () => {
+    renderOverlay();
+    const save = query('#save');
+    const left = jest.fn((event: MouseEvent) => event.relatedTarget);
+    save.addEventListener('mouseout', left);
+    const moved = jest.fn();
+    document.body.addEventListener('pointermove', moved);
+    const move = (x: number, y: number, altKey = false) =>
+      query('#target').dispatchEvent(
+        new MouseEvent('pointermove', { bubbles: true, clientX: x, clientY: y, altKey })
+      );
+
+    save.dispatchEvent(
+      new MouseEvent('mouseout', { bubbles: true, clientX: 250, clientY: 190, relatedTarget: null })
+    );
+    move(250, 195);
+    expect(left).not.toHaveBeenCalled();
+    expect(moved).not.toHaveBeenCalled();
+
+    // Alt: the page learns of the leave, to the element under the pointer, and gets the move.
+    move(290, 165, true);
+    expect(left.mock.results.map(({ value }) => value)).toEqual([save]);
+    expect(moved).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a tooltip showing while the layer's UI at it has focus, the element learning of the blur once focus is back on the page elsewhere", () => {
+    renderOverlay();
+    const save = query('#save');
+    const composer = document.createElement('div');
+    composer.setAttribute(IGNORE_ATTR, 'true');
+    composer.setAttribute(AT_TOOLTIP_ATTR, 'true');
+    composer.innerHTML = '<textarea id="draft"></textarea>';
+    document.body.append(composer);
+    const draft = query('#draft');
+    const blurred = jest.fn((event: FocusEvent) => [event.type, event.relatedTarget]);
+    save.addEventListener('blur', blurred);
+    save.addEventListener('focusout', blurred);
+    const focus = (type: string, element: Element, relatedTarget: Element | null) =>
+      element.dispatchEvent(
+        new FocusEvent(type, {
+          bubbles: type.endsWith('out') || type.endsWith('in'),
+          relatedTarget,
+        })
+      );
+
+    focus('blur', save, draft);
+    focus('focusout', save, draft);
+    focus('focusin', draft, save);
+    expect(blurred).not.toHaveBeenCalled();
+
+    focus('focusin', query('#target'), draft);
+    expect(blurred.mock.results.map(({ value }) => value)).toEqual([
+      ['blur', query('#target')],
+      ['focusout', query('#target')],
+    ]);
   });
 
   it('starts the comment on a tooltip clicked without the pointer having come from its element, revealed by the element referring to it', () => {
