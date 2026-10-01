@@ -66,16 +66,11 @@ async function cancelOnboardingThen({
   request: KibanaRequest;
   cleanup: () => Promise<void>;
 }): Promise<void> {
-  let cancelError: unknown;
   try {
     // Cancel first: a run left going could write indicators or rules back after the cleanup.
     await onboardingClient?.cancelBySourceSlug({ sourceSlug, request });
-  } catch (error) {
-    cancelError = error;
-  }
-  await cleanup();
-  if (cancelError !== undefined) {
-    throw cancelError;
+  } finally {
+    await cleanup();
   }
 }
 
@@ -219,12 +214,15 @@ export async function reconcileSourceCatalog({
   maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
   request: KibanaRequest;
 }): Promise<{ sources: NightshiftSource[]; reconcileIds: string[] }> {
-  const sources = await listAllSources(sourcesClient);
+  const [sources, ownedRuleIds, maintenanceState, runningSourceSlugs] = await Promise.all([
+    listAllSources(sourcesClient),
+    kiClient.findStreamNamesWithOwnedRules(),
+    maintenanceService.getState({ request }),
+    loadRunningSourceSlugs(onboardingClient, request),
+  ]);
   const catalogIds = new Set(sources.map((source) => source.id));
   const catalogSlugs = new Set(sources.map((source) => source.slug));
-  const ownedRuleSourceIds = new Set(await kiClient.findStreamNamesWithOwnedRules());
-  const maintenanceState = await maintenanceService.getState({ request });
-  const runningSourceSlugs = await loadRunningSourceSlugs(onboardingClient, request);
+  const ownedRuleSourceIds = new Set(ownedRuleIds);
 
   for (const source of sources) {
     await applySourceEnabled({
