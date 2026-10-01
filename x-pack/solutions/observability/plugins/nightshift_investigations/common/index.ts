@@ -6,7 +6,6 @@
  */
 
 import type {
-  InvestigationBlindSpot,
   InvestigationHypothesis,
   InvestigationImpact,
   InvestigationRecommendation,
@@ -79,6 +78,8 @@ export interface StartInvestigationRequest {
    * Stream names the investigation should scope its signal search to.
    */
   stream_names?: string[];
+  /** Optional chat model connector or inference endpoint id for this run. */
+  connector_id?: string;
   /**
    * Caller-supplied key for concurrency control. Passed to the workflow engine as
    * `concurrency_key`, which maps to `concurrencyGroupKey` in the execution index.
@@ -126,7 +127,6 @@ export interface InvestigationStructuredOutput {
   severity?: Severity;
   hypotheses?: InvestigationHypothesis[];
   recommendations?: InvestigationRecommendation[];
-  blind_spots?: InvestigationBlindSpot[];
   impact?: InvestigationImpact;
 }
 
@@ -236,6 +236,23 @@ export {
   type InvestigationLocatorParams,
   type InvestigationLocator,
 } from './locators';
+
+export {
+  SANDBOX_SECRETS_API_PATH,
+  SANDBOX_SECRET_KEY_REGEX,
+  MAX_SANDBOX_SECRET_KEY_LENGTH,
+  MIN_SANDBOX_SECRET_VALUE_LENGTH,
+  MAX_SANDBOX_SECRET_VALUE_LENGTH,
+  MAX_SANDBOX_SECRETS,
+  MAX_SANDBOX_SECRETS_VERSION_LENGTH,
+  validateSandboxSecretKey,
+  validateSandboxSecretValue,
+  hasSandboxSecretValueLineBreak,
+  type SandboxSecretEntry,
+  type GetSandboxSecretsResponse,
+  type PutSandboxSecretsRequest,
+  type PutSandboxSecretsResponse,
+} from './sandbox_secrets';
 
 export {
   DECISION_TREE_AI_INDEX_ID,

@@ -259,18 +259,6 @@ export const completedInvestigationState: InvestigationState = {
       description: 'Block releases when checkout latency exceeds the service baseline.',
     },
   ],
-  blind_spots: [
-    {
-      title: 'Missing database spans',
-      confidence: 0.85,
-      description: 'The slow inventory query is not represented in distributed traces.',
-    },
-    {
-      title: 'Limited deployment metadata',
-      confidence: 0.65,
-      description: 'Commit identifiers are not included in checkout logs.',
-    },
-  ],
 };
 
 export const runningInvestigationState: InvestigationState = {

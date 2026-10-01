@@ -28,15 +28,70 @@ describe('nightshift investigation saved object model version 4', () => {
     SavedObjectsFullModelVersion
   >;
   const modelVersion4 = modelVersions[4];
+  const baseAttributes = {
+    status: 'completed',
+    subject_type: 'manual',
+    subject_id: 'manual',
+    trigger_type: 'manual',
+    created_at: '2026-09-25T10:00:00.000Z',
+    title: 'Checkout errors',
+  };
+
+  it('registers a schema-only model version without data or mapping changes', () => {
+    expect(modelVersion4?.changes).toEqual([]);
+  });
+
+  it('accepts an impact with a top-level summary and evidence and no entities on create', () => {
+    const create = modelVersion4?.schemas?.create;
+    expect(() =>
+      create?.validate({
+        ...baseAttributes,
+        impact: {
+          summary: 'Checkout failed for 30% of requests.',
+          evidence: { description: 'Failed checkout requests per 5 minutes.' },
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('accepts impact entities alongside the summary on create', () => {
+    const create = modelVersion4?.schemas?.create;
+    expect(() =>
+      create?.validate({
+        ...baseAttributes,
+        impact: {
+          summary: 'Checkout failed for 30% of requests.',
+          entities: [{ name: 'checkout' }],
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('no longer accepts blind spots on create', () => {
+    expect(() =>
+      modelVersion4?.schemas?.create?.validate({
+        ...baseAttributes,
+        blind_spots: [{ title: 'No traces', confidence: 0.5, description: 'Missing' }],
+      })
+    ).toThrow();
+  });
+});
+
+describe('nightshift investigation saved object model version 5', () => {
+  const modelVersions = nightshiftInvestigationSavedObjectType.modelVersions as unknown as Record<
+    number,
+    SavedObjectsFullModelVersion
+  >;
+  const modelVersion5 = modelVersions[5];
 
   it('registers a schema-only model version without data changes', () => {
-    expect(modelVersion4?.changes).toEqual([]);
-    expect(modelVersion4?.schemas?.create).toBeDefined();
-    expect(modelVersion4?.schemas?.forwardCompatibility).toBeDefined();
+    expect(modelVersion5?.changes).toEqual([]);
+    expect(modelVersion5?.schemas?.create).toBeDefined();
+    expect(modelVersion5?.schemas?.forwardCompatibility).toBeDefined();
   });
 
   it('accepts Slack notification destinations with delivery results', () => {
-    const create = modelVersion4?.schemas?.create as { validate: (value: unknown) => unknown };
+    const create = modelVersion5?.schemas?.create as { validate: (value: unknown) => unknown };
     expect(() =>
       create.validate({
         title: 'Checkout latency',

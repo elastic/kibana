@@ -40,6 +40,10 @@ triggers:
         concurrency_key:
           type: string
           description: Optional key for concurrency deduplication. Defaults to the workflow execution ID.
+        connector_id:
+          type: string
+          maxLength: 500
+          description: Optional chat model connector or inference endpoint id for this run.
         notifications:
           type: array
           maxItems: 20
@@ -50,30 +54,19 @@ triggers:
             type: object
             additionalProperties: false
             required:
-              - type
-              - connector_id
-              - channel
-            properties:
-              type:
-                type: string
-                enum:
-                  - slack
-              connector_id:
-                type: string
-              channel:
-                type: string
-              thread_ts:
-                type: string
-              automation_id:
-                type: string
-              automation_name:
-                type: string
-      required:
         - message
         - title
       additionalProperties: false
 
 steps:
+  # Resolve before any persisted state or lifecycle event, so a bad or blocked model cannot leave
+  # a stale started investigation.
+  - name: resolve_model
+    type: nightshift.resolveModel
+    with:
+      step: investigation
+      connector_id: '{{ inputs.connector_id }}'
+
   # Investigation agents are per-space documents. Ensuring the agent here covers direct and manual
   # workflow executions as well as client starts; it is idempotent and preserves existing edits.
   # It runs before persistence and lifecycle emission so an unavailable agent leaves no stale run.
@@ -112,10 +105,7 @@ steps:
   - name: investigate
     type: ai.agent
     agent-id: nightshift.investigation
-    # Keep these inference identifiers in sync with @kbn/significant-events-schema
-    # inference_feature_ids.ts (SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID /
-    # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
-    connector-id-by-feature: 'significant_events_investigation'
+    connector-id: '{{ steps.resolve_model.output.connector_id }}'
     plugin-id: 'significant_events_investigation'
     aggregate-by: 'significant_events'
     product-solution: 'observability'
@@ -151,6 +141,10 @@ steps:
           summary:
             type: string
             maxLength: 10000
+            description: >
+              What happened: a short, factual TL;DR of the observed issue and your findings — the
+              symptoms, what you observed, and what you established, in at most two sentences. The
+              root-cause explanation belongs in conclusion.
           hypotheses:
             type: array
             maxItems: 50
@@ -174,9 +168,9 @@ steps:
                   type: array
                   description: >
                     What this hypothesis' verdict rests on — at most 3 entries. Every hypothesis
-                    that ends "confirmed" or "dismissed" must carry at least one. Only cite ES|QL
-                    you actually executed, verbatim, with the absolute window it ran over; never
-                    invent a query.
+                    that ends "confirmed" or "dismissed" must carry at least one. Describe what you
+                    observed in Markdown and add a chart when the observation is a trend or a
+                    comparison; only chart data you actually retrieved.
                   maxItems: 3
                   items:
                     type: object
@@ -184,65 +178,102 @@ steps:
                       description:
                         type: string
                         maxLength: 10000
-                        description: What was observed and why it decided this hypothesis.
-                      esql_query:
-                        type: string
-                        maxLength: 10000
-                        description: The exact ES|QL query executed to gather this evidence, when one was run.
-                      time_range:
+                        description: >
+                          Markdown: what was observed and why it matters. With a chart, only what the chart does not
+                          show; leave it out rather than restate the chart. No images, headings, or HTML.
+                      chart:
                         type: object
                         description: >
-                          Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
-                          esql_query is set — without it the query cannot be opened in Discover.
+                          Optional static chart of the observation. Every value must be copied from query or tool
+                          output you actually have; never estimate, interpolate, or invent data points.
                         properties:
-                          from:
+                          type:
                             type: string
-                            maxLength: 64
-                          to:
+                            enum: [line, bar]
+                            description: Line charts for values over time, bar charts for comparisons or counts.
+                          title:
                             type: string
-                            maxLength: 64
+                            maxLength: 255
+                          x_axis:
+                            type: object
+                            properties:
+                              type:
+                                type: string
+                                enum: [time, category]
+                                description: '"time" when x values are ISO 8601 timestamps, "category" for labels.'
+                              label:
+                                type: string
+                                maxLength: 128
+                            required:
+                              - type
+                          y_axis:
+                            type: object
+                            properties:
+                              label:
+                                type: string
+                                maxLength: 128
+                              unit:
+                                type: string
+                                enum: [number, percent, bytes, ms, s]
+                                description: How y values are formatted. Percent values are on a 0-100 scale.
+                          stacked:
+                            type: boolean
+                            description: Stack the series on top of each other. Only for bar charts.
+                          series:
+                            type: array
+                            minItems: 1
+                            maxItems: 5
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  maxLength: 128
+                                points:
+                                  type: array
+                                  maxItems: 100
+                                  description: Data points in x order. Downsample to at most 100 points per series.
+                                  items:
+                                    type: object
+                                    properties:
+                                      x:
+                                        type: string
+                                        maxLength: 128
+                                        description: ISO 8601 timestamp for a time axis, or the category label.
+                                      y:
+                                        type: number
+                                    required:
+                                      - x
+                                      - y
+                              required:
+                                - name
+                                - points
+                          annotations:
+                            type: array
+                            maxItems: 5
+                            description: Marks key moments such as a deploy or the incident onset.
+                            items:
+                              type: object
+                              properties:
+                                x:
+                                  type: string
+                                  maxLength: 128
+                                x_end:
+                                  type: string
+                                  maxLength: 128
+                                  description: When set, highlights the range from x to x_end instead of a single point.
+                                label:
+                                  type: string
+                                  maxLength: 255
+                              required:
+                                - x
+                                - label
                         required:
-                          - from
-                          - to
-                      code:
-                        type: object
-                        description: The source file backing this evidence, when you read code.
-                        properties:
-                          source:
-                            type: string
-                            enum: [github_connector, code_search]
-                            description: >
-                              How you read this file — not where the code appears to be hosted.
-                              "code_search" if you read it through Semantic Code Search;
-                              "github_connector" if you called a GitHub connector. A repository
-                              named like a GitHub project is not evidence of either.
-                          repo:
-                            type: string
-                            maxLength: 255
-                            description: Repository in owner/name form, for example elastic/kibana.
-                          path:
-                            type: string
-                            maxLength: 512
-                            description: Repository-relative file path.
-                          host:
-                            type: string
-                            maxLength: 255
-                            description: >
-                              Hostname the code can be browsed on, copied from the origin of a URL
-                              the tool returned (for example, github.com). Never guess it from the
-                              repository name — omit it if the tool reported no URL.
-                          ref:
-                            type: string
-                            maxLength: 255
-                            description: >
-                              Commit SHA the file was read at, copied from the tool response. Omit
-                              it rather than substituting a branch name.
-                        required:
-                          - source
-                          - repo
-                          - path
-                    required:
-                      - description
+                          - type
+                          - title
+                          - x_axis
+                          - y_axis
+                          - series
               required:
                 - candidate
                 - confidence
@@ -297,48 +328,131 @@ steps:
               required:
                 - title
                 - confidence
-          blind_spots:
-            type: array
-            description: >
-              Actionable knowledge gaps discovered during this investigation — data sources that were
-              missing or inaccessible and would have helped diagnose the issue. Each item names the
-              missing data source and states why the gap mattered. Do not include incident-specific
-              observations; reduce the finding to what data source is missing and why it matters.
-              Score how strongly closing each gap would materially improve the investigation, sort by
-              confidence descending, and return only the 3 strongest items.
-            maxItems: 3
-            items:
-              type: object
-              properties:
-                title:
-                  type: string
-                  maxLength: 512
-                  description: >
-                    The missing data source or access, named concisely as plain text. Do not use
-                    Markdown or HTML, including links, emphasis, backticks, headings, lists, or code
-                    fences. Put explanations and links in description.
-                confidence:
-                  type: number
-                  minimum: 0
-                  maximum: 1
-                  description: How strongly the findings support that closing this gap would materially improve the investigation.
-                description:
-                  type: string
-                  maxLength: 10000
-                  description: Why this gap mattered to the investigation.
-              required:
-                - title
-                - confidence
-                - description
           impact:
             type: object
             description: >
-              Structured account of affected services or components. Prefer service-level entries.
-              Each entity may carry one evidence artifact; prefer an ES|QL query with an absolute
-              ISO 8601 time window so the UI can render a chart. Omit only when no signals establish impact.
+              The impact: a summary, backed either by one top-level evidence (usually) or, when two
+              or more entities were affected in different ways, by entities. Never both. A confirmed
+              non-issue gets a one-sentence summary; omit only when impact could not be assessed.
             properties:
+              summary:
+                type: string
+                maxLength: 10000
+                description: >
+                  The business consequence in one or two sentences: what was affected, how badly, for
+                  how long, and how broadly (users, requests, regions). Don't restate the summary.
+              evidence:
+                description: >
+                  The usual backing, when the impact sits in one service or no specific component: a
+                  chart of the user-facing failure signal, usually without a description since the
+                  summary explains it. Omit when entities are listed.
+                type: object
+                properties:
+                  description:
+                    type: string
+                    maxLength: 10000
+                    description: >
+                      Markdown: what was observed and why it matters. With a chart, only what the chart does not
+                      show; leave it out rather than restate the chart. No images, headings, or HTML.
+                  chart:
+                    type: object
+                    description: >
+                      Optional static chart of the observation. Every value must be copied from query or tool
+                      output you actually have; never estimate, interpolate, or invent data points.
+                    properties:
+                      type:
+                        type: string
+                        enum: [line, bar]
+                        description: Line charts for values over time, bar charts for comparisons or counts.
+                      title:
+                        type: string
+                        maxLength: 255
+                      x_axis:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum: [time, category]
+                            description: '"time" when x values are ISO 8601 timestamps, "category" for labels.'
+                          label:
+                            type: string
+                            maxLength: 128
+                        required:
+                          - type
+                      y_axis:
+                        type: object
+                        properties:
+                          label:
+                            type: string
+                            maxLength: 128
+                          unit:
+                            type: string
+                            enum: [number, percent, bytes, ms, s]
+                            description: How y values are formatted. Percent values are on a 0-100 scale.
+                      stacked:
+                        type: boolean
+                        description: Stack the series on top of each other. Only for bar charts.
+                      series:
+                        type: array
+                        minItems: 1
+                        maxItems: 5
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              maxLength: 128
+                            points:
+                              type: array
+                              maxItems: 100
+                              description: Data points in x order. Downsample to at most 100 points per series.
+                              items:
+                                type: object
+                                properties:
+                                  x:
+                                    type: string
+                                    maxLength: 128
+                                    description: ISO 8601 timestamp for a time axis, or the category label.
+                                  y:
+                                    type: number
+                                required:
+                                  - x
+                                  - y
+                          required:
+                            - name
+                            - points
+                      annotations:
+                        type: array
+                        maxItems: 5
+                        description: Marks key moments such as a deploy or the incident onset.
+                        items:
+                          type: object
+                          properties:
+                            x:
+                              type: string
+                              maxLength: 128
+                            x_end:
+                              type: string
+                              maxLength: 128
+                              description: When set, highlights the range from x to x_end instead of a single point.
+                            label:
+                              type: string
+                              maxLength: 255
+                          required:
+                            - x
+                            - label
+                    required:
+                      - type
+                      - title
+                      - x_axis
+                      - y_axis
+                      - series
               entities:
                 type: array
+                description: >
+                  Only when two or more services or components were affected in ways worth telling
+                  apart, each with its own evidence. Prefer service-level entries. Omit when using
+                  top-level evidence.
                 maxItems: 10
                 items:
                   type: object
@@ -360,57 +474,112 @@ steps:
                       type: string
                       maxLength: 255
                     evidence:
-                      type: object
                       description: >
-                        One artifact linking this entity to the investigation. Prefer esql_query and
-                        an absolute ISO 8601 time_range so the UI can render a chart; description is a short label.
+                        How this entity was affected: a short description and, when you have the
+                        data, a chart of its failure signal.
+                      type: object
                       properties:
                         description:
                           type: string
                           maxLength: 10000
-                        esql_query:
-                          type: string
-                          maxLength: 10000
-                        time_range:
+                          description: >
+                            Markdown: what was observed and why it matters. With a chart, only what the chart does not
+                            show; leave it out rather than restate the chart. No images, headings, or HTML.
+                        chart:
                           type: object
+                          description: >
+                            Optional static chart of the observation. Every value must be copied from query or tool
+                            output you actually have; never estimate, interpolate, or invent data points.
                           properties:
-                            from:
+                            type:
                               type: string
-                              maxLength: 64
-                            to:
+                              enum: [line, bar]
+                              description: Line charts for values over time, bar charts for comparisons or counts.
+                            title:
                               type: string
-                              maxLength: 64
+                              maxLength: 255
+                            x_axis:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum: [time, category]
+                                  description: '"time" when x values are ISO 8601 timestamps, "category" for labels.'
+                                label:
+                                  type: string
+                                  maxLength: 128
+                              required:
+                                - type
+                            y_axis:
+                              type: object
+                              properties:
+                                label:
+                                  type: string
+                                  maxLength: 128
+                                unit:
+                                  type: string
+                                  enum: [number, percent, bytes, ms, s]
+                                  description: How y values are formatted. Percent values are on a 0-100 scale.
+                            stacked:
+                              type: boolean
+                              description: Stack the series on top of each other. Only for bar charts.
+                            series:
+                              type: array
+                              minItems: 1
+                              maxItems: 5
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    maxLength: 128
+                                  points:
+                                    type: array
+                                    maxItems: 100
+                                    description: Data points in x order. Downsample to at most 100 points per series.
+                                    items:
+                                      type: object
+                                      properties:
+                                        x:
+                                          type: string
+                                          maxLength: 128
+                                          description: ISO 8601 timestamp for a time axis, or the category label.
+                                        y:
+                                          type: number
+                                      required:
+                                        - x
+                                        - y
+                                required:
+                                  - name
+                                  - points
+                            annotations:
+                              type: array
+                              maxItems: 5
+                              description: Marks key moments such as a deploy or the incident onset.
+                              items:
+                                type: object
+                                properties:
+                                  x:
+                                    type: string
+                                    maxLength: 128
+                                  x_end:
+                                    type: string
+                                    maxLength: 128
+                                    description: When set, highlights the range from x to x_end instead of a single point.
+                                  label:
+                                    type: string
+                                    maxLength: 255
+                                required:
+                                  - x
+                                  - label
                           required:
-                            - from
-                            - to
-                        code:
-                          type: object
-                          properties:
-                            source:
-                              type: string
-                              enum: [github_connector, code_search]
-                            repo:
-                              type: string
-                              maxLength: 255
-                            path:
-                              type: string
-                              maxLength: 512
-                            host:
-                              type: string
-                              maxLength: 255
-                            ref:
-                              type: string
-                              maxLength: 255
-                          required:
-                            - source
-                            - repo
-                            - path
-                      required:
-                        - description
+                            - type
+                            - title
+                            - x_axis
+                            - y_axis
+                            - series
                   required:
                     - name
-            required:
-              - entities
         required:
           - summary
           - hypotheses
@@ -435,7 +604,6 @@ steps:
         severity: '${{ steps.investigate.output.structured_output.severity }}'
         hypotheses: ${{ steps.investigate.output.structured_output.hypotheses }}
         recommendations: ${{ steps.investigate.output.structured_output.recommendations }}
-        blind_spots: ${{ steps.investigate.output.structured_output.blind_spots }}
         impact: ${{ steps.investigate.output.structured_output.impact }}
         conversation_id: '${{ steps.investigate.output.conversation_id }}'
     on-failure:
