@@ -161,8 +161,6 @@ export interface ExperimentalFeatures {
   aiIndices: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
-  /** Whether the sub-agent execution feature is enabled */
-  subagents: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
   todos: boolean;
   /** Whether external ES|QL datasets are surfaced to data-source tools */

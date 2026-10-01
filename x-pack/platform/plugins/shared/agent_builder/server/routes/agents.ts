@@ -104,9 +104,9 @@ const SUBAGENT_IDS_SCHEMA = schema.arrayOf(
   {
     maxSize: 50,
     meta: {
-      availability: { stability: 'tech_preview' },
+      availability: { stability: 'stable', since: '9.6.0' },
       description:
-        "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.",
+        "Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.",
     },
   }
 );
