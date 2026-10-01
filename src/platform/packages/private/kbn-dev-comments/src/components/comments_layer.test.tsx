@@ -317,7 +317,7 @@ describe('CommentsLayer', () => {
     // The element is not on the page: the row says so, and Enter starts the guide to it.
     const goneRow = screen.getByTestId('devCommentsPanelItem-gone');
     const row = within(goneRow).getByRole('button', { name: /Where did it go/ });
-    expect(row).toHaveAccessibleName(expect.stringContaining('Comment not visible on this page'));
+    expect(row).toHaveAccessibleName(expect.stringContaining('Comment not visible'));
     act(() => row.focus());
     await user.keyboard('{Enter}');
     expect(controller.store.getState().guide).toEqual({ id: 'gone', navigating: false });

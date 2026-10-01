@@ -10,10 +10,8 @@
 import React, { type MouseEvent } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IGNORE_ATTR } from '../constants';
+import { COMMENTS_BUTTON_TEST_SUBJ, IGNORE_ATTR } from '../constants';
 import { useComments, useCommentsState } from './comments_context';
-
-export const COMMENTS_BUTTON_TEST_SUBJ = 'devCommentsButton';
 
 const ignoreProps = { [IGNORE_ATTR]: true } as Record<string, unknown>;
 
