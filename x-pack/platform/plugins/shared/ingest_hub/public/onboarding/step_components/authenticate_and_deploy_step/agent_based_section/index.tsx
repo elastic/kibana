@@ -330,10 +330,15 @@ export function AgentBasedSection({
   // now managed/Fleet-Server policies (deleted between sessions, or policy type changed).
   // Guard on !isPoliciesError: React Query sets isLoading=false on error while policiesData stays
   // undefined, which would produce an empty policyOptions and incorrectly wipe the selection.
+  // Exempt agentPolicyId: the just-created policy may be absent from a cached list response
+  // while the query refetches. Filtering it out here clears the selection before the fresh list
+  // arrives, disabling Next. Retain it until it appears in the refreshed policyOptions.
   useEffect(() => {
     if (isPoliciesLoading || isPoliciesError || agentHostsMode !== 'existing') return;
     const validIds = new Set(policyOptions.map((o) => o.value));
-    const reconciled = selectedAgentPolicyIds.filter((id) => validIds.has(id));
+    const reconciled = selectedAgentPolicyIds.filter(
+      (id) => validIds.has(id) || id === agentPolicyId
+    );
     if (reconciled.length !== selectedAgentPolicyIds.length) {
       setAgentBasedDeployment({ selectedAgentPolicyIds: reconciled });
     }
@@ -343,6 +348,7 @@ export function AgentBasedSection({
     isPoliciesError,
     agentHostsMode,
     selectedAgentPolicyIds,
+    agentPolicyId,
     setAgentBasedDeployment,
   ]);
 

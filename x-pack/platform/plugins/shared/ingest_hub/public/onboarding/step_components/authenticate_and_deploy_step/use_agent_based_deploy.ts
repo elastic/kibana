@@ -580,7 +580,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             ? { pendingCleanupPolicyIds: { ...remainingPending, ...oldPolicyIdsByInstance } }
             : {}),
         });
-        return { failed: mergedFailed.length > 0 };
+        // Block navigation when the SO write failed: the updated settings are not durable.
+        // isDirty is already kept true by the soOk guard above, so a retry re-runs the SO write.
+        return { failed: mergedFailed.length > 0 || !soOk };
       } catch (err) {
         // Unexpected error — mark all retried instances as failed.
         const msg = extractErrorMessage(err);
