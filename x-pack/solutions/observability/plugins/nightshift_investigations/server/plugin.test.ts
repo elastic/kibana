@@ -51,6 +51,17 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     );
   });
 
+  it('registers the investigation workflow as an agentic investigations driver workflow', () => {
+    const registerInvestigationWorkflow = jest.fn();
+
+    createPlugin().setup(coreMock.createSetup(), {
+      ...createSetupDeps(),
+      agenticInvestigations: { registerInvestigationWorkflow },
+    });
+
+    expect(registerInvestigationWorkflow).toHaveBeenCalledWith('system-nightshift-investigation');
+  });
+
   it('registers model resolution when Cortex and decision trees are disabled', () => {
     const registerStepDefinition = jest.fn();
     const dependencies = {
