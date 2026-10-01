@@ -240,7 +240,7 @@ export class MapContainer extends Component<Props, State> {
       exitFullScreen,
       mapInitError,
       renderTooltipContent,
-      isInteractive,
+      isInteractive = true,
     } = this.props;
 
     if (mapInitError) {
