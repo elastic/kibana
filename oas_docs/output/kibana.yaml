@@ -155561,7 +155561,6 @@ components:
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
         package_agent_version_condition:
-          nullable: true
           type: string
         policy_id:
           deprecated: true
@@ -156463,7 +156462,6 @@ components:
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
         package_agent_version_condition:
-          nullable: true
           type: string
         policy_id:
           deprecated: true
@@ -156898,7 +156896,6 @@ components:
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
         package_agent_version_condition:
-          nullable: true
           type: string
         policy_id:
           deprecated: true
@@ -172163,7 +172160,6 @@ components:
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
         package_agent_version_condition:
-          nullable: true
           type: string
         policy_id:
           deprecated: true
@@ -177045,7 +177041,6 @@ components:
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
         package_agent_version_condition:
-          nullable: true
           type: string
         policy_id:
           deprecated: true
