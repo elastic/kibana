@@ -19,13 +19,17 @@ import AddToTimelineButton, {
 import type { DataProvider } from '../../../../common/types';
 import { IS_OPERATOR } from '../../../../common/types';
 import { TestProviders } from '../../../mock';
-import { PRESS } from '../../tooltip_with_keyboard_shortcut';
-import * as i18n from './translations';
+import {
+  PRESS,
+  ADD_TO_TIMELINE,
+  ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE,
+} from '@kbn/securitysolution-timeline-components';
 
 const coreStart = coreMock.createStart();
 
 const mockAddSuccess = jest.fn();
-jest.mock('../../../hooks/use_app_toasts', () => ({
+jest.mock('@kbn/securitysolution-timeline-components', () => ({
+  ...jest.requireActual('@kbn/securitysolution-timeline-components'),
   useAppToasts: () => ({
     addSuccess: mockAddSuccess,
   }),
@@ -111,7 +115,7 @@ describe('add to timeline', () => {
     });
 
     test('it has the expected aria label', () => {
-      expect(getButton()).toHaveAttribute('aria-label', i18n.ADD_TO_TIMELINE);
+      expect(getButton()).toHaveAttribute('aria-label', ADD_TO_TIMELINE);
     });
   });
 
@@ -134,7 +138,7 @@ describe('add to timeline', () => {
     });
 
     test('it has the expected aria label', () => {
-      expect(getButton()).toHaveAttribute('aria-label', i18n.ADD_TO_TIMELINE);
+      expect(getButton()).toHaveAttribute('aria-label', ADD_TO_TIMELINE);
     });
   });
 
@@ -443,7 +447,7 @@ describe('add to timeline', () => {
       fireEvent.click(getButton());
 
       const message: SuccessMessageProps = {
-        children: i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(providerA.name, true),
+        children: ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(providerA.name, true),
       };
       const wrapper = render(<AddSuccessMessage {...message} />);
       expect(wrapper.container.textContent).toBe('Added a to Timeline');
@@ -465,7 +469,7 @@ describe('add to timeline', () => {
       fireEvent.click(getButton());
 
       const message: SuccessMessageProps = {
-        children: i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(providerA.name, false),
+        children: ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(providerA.name, false),
       };
       const wrapper = render(<AddSuccessMessage {...message} />);
       expect(wrapper.container.textContent).toBe('Added a to template');
