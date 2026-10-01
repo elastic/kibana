@@ -36,5 +36,6 @@ export const AlertZeroRoutes: React.FC = () => (
     <Route path="/" exact component={LandingPage} />
     <Route path="/escalations" component={EscalationsRoute} />
     <Route path="/watches" component={WatchesRoutes} />
+    <Redirect to="/" />
   </Routes>
 );
