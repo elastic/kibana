@@ -34,7 +34,7 @@ describe('config validation', () => {
             "enabled": true,
           },
           "customStatuses": Object {
-            "enabled": false,
+            "enabled": true,
           },
           "enabled": true,
           "files": Object {

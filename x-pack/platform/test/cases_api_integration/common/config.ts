@@ -25,6 +25,8 @@ interface CreateTestConfigOptions {
   kbnServerArgs?: string[];
 }
 
+const CUSTOM_STATUSES_FLAG = '--xpack.cases.customStatuses.enabled';
+
 const enabledActionTypes = [
   '.cases',
   '.cases-webhook',
@@ -126,6 +128,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'entityAttachmentsEnabled',
           ])}`,
+          // Custom statuses write `status_key` on every case, which changes the shape the shared
+          // fixtures expect, so suites run with them off unless their config opts in.
+          ...(options.kbnServerArgs?.some((arg) => arg.startsWith(CUSTOM_STATUSES_FLAG))
+            ? []
+            : [`${CUSTOM_STATUSES_FLAG}=false`]),
           ...(options.kbnServerArgs ?? []),
         ],
       },
