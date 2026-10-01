@@ -20,6 +20,7 @@ import {
   useEscalationsForInvestigation,
 } from '@kbn/agentic-investigations-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { ConnectedEscalationModal } from './connected_escalation_modal';
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
@@ -41,6 +42,10 @@ jest.mock('../../hooks/use_agentic_investigations_capabilities', () => ({
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
+}));
+
+jest.mock('../../hooks/use_open_in_chat', () => ({
+  useOpenInChat: jest.fn(),
 }));
 
 jest.mock('@kbn/user-profile-components', () => ({
@@ -69,6 +74,10 @@ const mockUseEscalationsForInvestigation = useEscalationsForInvestigation as jes
   typeof useEscalationsForInvestigation
 >;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseOpenInChat = useOpenInChat as jest.MockedFunction<typeof useOpenInChat>;
+
+let getChatHref: jest.Mock;
+let openChatMock: jest.Mock;
 
 const createMutate = jest.fn();
 const addMutate = jest.fn();
@@ -105,6 +114,15 @@ const renderModal = (props: Partial<EscalationModalRenderProps> = {}) =>
   );
 
 beforeEach(() => {
+  getChatHref = jest.fn(
+    (id: string, agentId?: string) => `/mock-chat/${agentId ?? 'no-agent'}/${id}`
+  );
+  openChatMock = jest.fn();
+  mockUseOpenInChat.mockReturnValue({
+    getChatHref,
+    openChat: openChatMock,
+  });
+
   mockUseListEscalations.mockReturnValue({
     data: { results: [], pagination: { total: 0, page: 1, per_page: 20 } },
     isLoading: false,
@@ -337,27 +355,28 @@ describe('ConnectedEscalationModal', () => {
     expect(screen.getByTestId('escalationModalLoadError')).toBeInTheDocument();
   });
 
-  it('success toast for create links to the newly created escalation', () => {
+  it('success toast for create links to the newly created escalation in Agent Builder', () => {
     renderModal({ mode: 'create' });
     fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
 
     const [, callbacks] = createMutate.mock.calls[0];
     const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
-    // onSuccess receives the created Conversation; its id is used to build the deep link.
-    callbacks.onSuccess({ id: 'new-esc-1' });
+    // onSuccess receives the created Conversation; id and agent_id are used to deep-link.
+    callbacks.onSuccess({ id: 'new-esc-1', agent_id: 'new-agent-1' });
 
+    expect(getChatHref).toHaveBeenCalledWith('new-esc-1', 'new-agent-1');
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       expect.objectContaining({
         actionProps: expect.objectContaining({
           primary: expect.objectContaining({
-            href: '/base/app/alertzero/escalations?selectedConversationId=new-esc-1',
+            href: '/mock-chat/new-agent-1/new-esc-1',
           }),
         }),
       })
     );
   });
 
-  it('success toast for add-to links to the selected escalation', () => {
+  it('success toast for add-to links to the selected escalation in Agent Builder', () => {
     mockUseListEscalations.mockReturnValue({
       data: {
         results: [
@@ -381,13 +400,15 @@ describe('ConnectedEscalationModal', () => {
 
     const [, callbacks] = addMutate.mock.calls[0];
     const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
-    callbacks.onSuccess();
+    // onSuccess receives the updated Conversation; id and agent_id are used to deep-link.
+    callbacks.onSuccess({ id: 'esc-3', agent_id: 'agent-3' });
 
+    expect(getChatHref).toHaveBeenCalledWith('esc-3', 'agent-3');
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       expect.objectContaining({
         actionProps: expect.objectContaining({
           primary: expect.objectContaining({
-            href: '/base/app/alertzero/escalations?selectedConversationId=esc-3',
+            href: '/mock-chat/agent-3/esc-3',
           }),
         }),
       })
@@ -410,6 +431,7 @@ describe('ConnectedEscalationModal', () => {
           results: [
             {
               id: 'esc-existing-1',
+              agent_id: 'agent-existing-1',
               title: 'P1 security breach',
               metadata: {},
               permissions: { rename: true, delete: true, update_access_control: true },
@@ -427,10 +449,8 @@ describe('ConnectedEscalationModal', () => {
       const link = screen.getByTestId('escalationModalExistingEscalationLink-esc-existing-1');
       expect(link).toBeInTheDocument();
       expect(link).toHaveTextContent('P1 security breach');
-      expect(link).toHaveAttribute(
-        'href',
-        '/base/app/alertzero/escalations?selectedConversationId=esc-existing-1'
-      );
+      // href comes from getChatHref mock: /mock-chat/<agentId>/<id>
+      expect(link).toHaveAttribute('href', '/mock-chat/agent-existing-1/esc-existing-1');
     });
 
     it('renders a callout with multiple links when the investigation is in several escalations', () => {
@@ -439,12 +459,14 @@ describe('ConnectedEscalationModal', () => {
           results: [
             {
               id: 'esc-a',
+              agent_id: 'agent-a',
               title: 'Escalation A',
               metadata: {},
               permissions: { rename: true, delete: true, update_access_control: true },
             },
             {
               id: 'esc-b',
+              agent_id: 'agent-b',
               title: 'Escalation B',
               metadata: {},
               permissions: { rename: true, delete: true, update_access_control: true },
@@ -463,12 +485,13 @@ describe('ConnectedEscalationModal', () => {
       expect(screen.getByTestId('escalationModalExistingEscalationLink-esc-b')).toBeInTheDocument();
     });
 
-    it('clicking a callout link calls navigateToApp and closes the modal', () => {
+    it('clicking a callout link calls openChat with the escalation id and agent id, then closes', () => {
       mockUseEscalationsForInvestigation.mockReturnValue({
         data: {
           results: [
             {
               id: 'esc-nav',
+              agent_id: 'agent-nav',
               title: 'Navigable escalation',
               metadata: {},
               permissions: { rename: true, delete: true, update_access_control: true },
@@ -485,10 +508,7 @@ describe('ConnectedEscalationModal', () => {
       const link = screen.getByTestId('escalationModalExistingEscalationLink-esc-nav');
       fireEvent.click(link);
 
-      const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
-      expect(services.application.navigateToApp).toHaveBeenCalledWith('alertzero', {
-        path: '/escalations?selectedConversationId=esc-nav',
-      });
+      expect(openChatMock).toHaveBeenCalledWith('esc-nav', 'agent-nav');
       expect(onClose).toHaveBeenCalled();
     });
 

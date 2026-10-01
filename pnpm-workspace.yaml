@@ -1262,7 +1262,6 @@ packages:
   - 'x-pack/platform/packages/shared/kbn-agentic-investigations-common'
   - 'x-pack/platform/packages/shared/kbn-ai-assistant'
   - 'x-pack/platform/packages/shared/kbn-ai-tools'
-  - 'x-pack/platform/packages/shared/kbn-ai-tools-cli'
   - 'x-pack/platform/packages/shared/kbn-alerting-comparators'
   - 'x-pack/platform/packages/shared/kbn-apm-api-shared'
   - 'x-pack/platform/packages/shared/kbn-apm-common'
