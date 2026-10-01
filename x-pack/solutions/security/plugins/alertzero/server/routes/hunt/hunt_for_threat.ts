@@ -10,17 +10,18 @@ import { API_VERSIONS, HuntForThreatRequestBody, INTERNAL_API_ACCESS } from '@kb
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
-import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_index_scope';
+import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_index_scope';
 import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
+import { resolveHuntUniverse } from './resolve_hunt_universe';
 
 export const HUNT_FOR_THREAT_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_for_threat` as const;
 
 /**
- * Runs Tier 1's deterministic search against a technology's resolved index
- * scope. A `blocked` scope is refused outright (409) so a missing required
- * index never reads as a clean zero-hit search.
+ * Runs Tier 1's deterministic search over the space's Security Solution default data
+ * view. A `blocked` scope is refused outright (409) so an empty universe never reads as
+ * a clean zero-hit search.
  */
 export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
   router.versioned
@@ -32,7 +33,7 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ],
         },
       },
-      summary: 'Run Tier 1 deterministic hunt for a technology',
+      summary: 'Run Tier 1 deterministic hunt',
     })
     .addVersion(
       {
@@ -45,32 +46,39 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
       },
       withAlertZeroEnabled(async (context, request, response) => {
         try {
-          const { technology, iocs, techniques, time_range, size } = request.body;
+          const { iocs, techniques, time_range, size } = request.body;
           const spaceId = getSpaceId(request);
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const indexPatterns = await resolveHuntUniverse(context, logger);
 
-          const scope = await resolveIndexScope({
+          // `discovered` is the datasets stage 1 parsed for the report matcher; the wire
+          // scope carries what they matched, not the list itself.
+          const { discovered: _discovered, ...scope } = await resolveHuntScope({
             esClient,
-            technology,
             spaceId,
+            indexPatterns,
+            logger,
           });
 
           if (scope.status === 'blocked') {
             return response.customError({
               statusCode: 409,
               body: {
-                message: `Hunt index scope is blocked for ${technology}: missing required pattern(s) ${scope.missing.join(
+                message: `Hunt scope is blocked (${
+                  scope.resolution
+                }): nothing in the default data view is visible to this hunt (checked: ${indexPatterns.join(
                   ', '
-                )}`,
+                )})`,
               },
             });
           }
 
           const result = await huntForThreat(esClient, {
-            // This route checks one technology's own scope, not the merged
-            // hunt scope baseline telemetry joins; it never confirms on
-            // baseline the way the coordinator's Tier 1 call does.
-            scope: { ...scope, baseline: [] },
+            scope: {
+              search_patterns: scope.index_patterns,
+              window: scope.window,
+              row_limit: scope.row_limit,
+            },
             iocs,
             techniques,
             time_range,

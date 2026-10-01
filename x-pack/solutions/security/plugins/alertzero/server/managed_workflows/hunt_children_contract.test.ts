@@ -96,11 +96,9 @@ describe('system-security-hunt-execute', () => {
     workflow = parseChild(ALERTZERO_HUNT_WORKFLOW_ID);
   });
 
-  it('sends the coordinator a snake_case run_id', () => {
+  it('sends the coordinator a snake_case run_id and no technology', () => {
     const body = stepNamed(workflow, 'run_hunt_coordinator').with?.body as Record<string, unknown>;
-    expect(Object.keys(body)).toEqual(
-      expect.arrayContaining(['report_id', 'run_id', 'trigger', 'tier2_when', 'technology'])
-    );
+    expect(Object.keys(body).sort()).toEqual(['report_id', 'run_id', 'tier2_when', 'trigger']);
   });
 
   it('never sends the camelCase runId the coordinator no longer accepts', () => {

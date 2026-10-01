@@ -14,7 +14,7 @@ import type { WorkerSettingsDeclaration } from './types';
 /**
  * Hunt Watch Continuous Threat Hunt has no Worker-specific settings: enabled/disabled
  * (autonomy) and the schedule interval are its only configurable settings. Its tier2When,
- * candidateLimit, fanOutMax, and technology dials are fixed implementation constants, not
+ * candidateLimit, and fanOutMax dials are fixed implementation constants, not
  * user-configurable; see `HUNT_WORKER_DEFAULTS` in `worker_template_values.ts`.
  */
 export const CONTINUOUS_THREAT_HUNT_SETTINGS: WorkerSettingsDeclaration = {

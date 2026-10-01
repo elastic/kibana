@@ -58,13 +58,6 @@ export const HUNT_REPORTS_INDEX = '.kibana-threat-reports' as const;
 export const HUNT_INVESTIGATION_ID_NAMESPACE = 'hunt:report:' as const;
 
 /**
- * Space-derived alerts index pattern every hunt's index scope includes
- * alongside its technology-specific patterns: `.alerts-security.alerts-{spaceId}`.
- * Build with `` `${HUNT_ALERTS_INDEX_PATTERN_PREFIX}${spaceId}` ``.
- */
-export const HUNT_ALERTS_INDEX_PATTERN_PREFIX = '.alerts-security.alerts-' as const;
-
-/**
  * Global-catalog space sentinel on `.kibana-threat-reports`. Reads filter to
  * `{terms: { space_id: [currentSpaceId, HUNT_GLOBAL_SPACE_ID] }}`; feedback
  * writes are always space-scoped to the caller's concrete space, never this sentinel.

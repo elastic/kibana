@@ -167,6 +167,33 @@ describe('Hunt Watch worker chain', () => {
     expect(stepIn(workerSteps, stepName)?.with?.['workflow-id']).toBe(id);
   });
 
+  describe('the sweep gate', () => {
+    const renderedWorker = ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.yamlTemplate({
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '4h',
+    });
+
+    it('renders with no technology placeholder, const, or child input', () => {
+      expect(renderedWorker).not.toMatch(/technolog/i);
+      expect(renderedWorker).not.toMatch(/__WORKER_[A-Z_]+__/);
+      expect(stepIn(workerSteps, 'hunt')?.with?.inputs).not.toHaveProperty('technology');
+      expect(hunt.triggers?.[0]?.inputs?.properties).not.toHaveProperty('technology');
+    });
+
+    it('reads the single scope status, and only ok or degraded lets the sweep proceed', () => {
+      const gate = stepIn(workerSteps, 'resolve_index_scope_gate') as YamlStep & {
+        with: { index_scope_blocked: string };
+      };
+
+      // A missing output (an errored call) matches neither status, so it reads as blocked.
+      expect(gate.with.index_scope_blocked).toBe(
+        "${{ steps.check_index_scope.output.status != 'ok' and steps.check_index_scope.output.status != 'degraded' }}"
+      );
+      expect(stepIn(workerSteps, 'count_index_scope_statuses')).toBeUndefined();
+    });
+  });
+
   it('the packaging child dispatches the gate by its registered id', () => {
     const dispatch = stepIn(
       flatten(stepIn(packageReportSteps, 'start_proposal_gates')?.steps ?? []),

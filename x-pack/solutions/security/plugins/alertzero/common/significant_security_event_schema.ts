@@ -113,14 +113,8 @@ const evidenceItemSchema = z.string().min(1).max(2000);
 const huntResultPerIndexSchema = z.object({
   index: z.string().min(1).max(256),
   hit_count: z.number().int().min(0),
+  /** Always true from a hunt: every searched index counts towards the hit bar. */
   required: z.boolean(),
-  /**
-   * Match against `required ∪ baseline`. This, not `required`, is what sets
-   * `has_confirmed_hit`: a baseline-only match (host telemetry) confirms a
-   * hunt the same way a required-index match does; an alerts-alias-only
-   * match still does not.
-   */
-  confirming: z.boolean(),
 });
 
 const huntResultTier1Schema = z.object({
@@ -242,12 +236,20 @@ export const huntResultSchema = z
     tier1: huntResultTier1Schema,
     tier2: huntResultTier2Schema.optional(),
     /**
-     * `index_patterns` (required) union the present baseline host-telemetry
-     * patterns: what Tier 2 was allowed to read, target, and count as a hit.
-     * A run says what it hunted and what Tier 2 could read separately, since
-     * a baseline-only estate has no required index at all.
+     * What Tier 2 was allowed to read, target, and count as a hit, chosen after the
+     * report was read and Tier 1 ran: the datasets the report's vendor or product
+     * matched, the indices Tier 1 hit, and `actionable_indices` (plus the model's
+     * matches when the first two found nothing), each `*`-suffixed.
      */
     tier2_targets: z.array(z.string().min(1).max(256)).max(64).optional(),
+    /**
+     * Streams and indices in the hunt's universe whose mapping carries
+     * `process.entity_id` or `process.pid`: where a hit can become a Defend response
+     * action. A mapping says a host can report process telemetry, not that it is
+     * enrolled in Fleet; packaging decides that, so an empty list means no evidence
+     * in this run is host-scoped.
+     */
+    actionable_indices: z.array(z.string().min(1).max(256)).max(64).optional(),
   })
   // The Tier 1 status names its own outcome, so a status that disagrees with the counts is a
   // producer bug: the renderer would show both the status and the contradicting counts, and
@@ -384,20 +386,6 @@ export type SignificantSecurityEventAttachmentData = z.infer<
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-/**
- * `confirming` post-dates the first persisted attachments, and it is the field that sets the
- * hit bar. Defaulting it to `false` would relabel an already-recorded required-index hit as
- * non-confirming, turning a real finding into something the renderer and the narrative read
- * as clean, so a payload that predates the field inherits `required` instead -- exactly what
- * the bar meant before baseline host telemetry joined it.
- */
-const migratePerIndex = (value: unknown): unknown => {
-  if (!isRecord(value) || value.confirming !== undefined) {
-    return value;
-  }
-  return { ...value, confirming: value.required };
-};
-
 /** Pre-rename keys for the same two values; see the behavior schema for the current names. */
 const migrateBehavior = (value: unknown): unknown => {
   if (!isRecord(value)) {
@@ -426,14 +414,11 @@ const migratePersistedAttachment = (value: unknown): unknown => {
     return value;
   }
   const huntResult = value.hunt_result;
-  const { tier1, tier2 } = huntResult;
+  const { tier2 } = huntResult;
   return {
     ...value,
     hunt_result: {
       ...huntResult,
-      ...(isRecord(tier1)
-        ? { tier1: { ...tier1, per_index: migrateArray(tier1.per_index, migratePerIndex) } }
-        : {}),
       ...(isRecord(tier2)
         ? { tier2: { ...tier2, behaviors: migrateArray(tier2.behaviors, migrateBehavior) } }
         : {}),

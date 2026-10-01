@@ -18,7 +18,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   HuntIoc,
-  HuntTechnology,
   HuntForThreatResult,
   HuntIncompleteReason,
   HuntForThreatHit,
@@ -48,17 +47,6 @@ export const HuntCoordinatorRequestBody = lazySchema(() =>
         .describe(
           'Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.'
         ),
-      /**
-       * One of the HuntTechnology values to pin the hunt to that technology's index scope. Omit it, or send null or an empty string (a workflow renders an unset input as ""), and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space. Any other value is a 400. Kept a plain string because a workflow caller cannot omit the key.
-       */
-      technology: z
-        .string()
-        .max(64)
-        .nullable()
-        .optional()
-        .describe(
-          'One of the HuntTechnology values to pin the hunt to that technology\'s index scope. Omit it, or send null or an empty string (a workflow renders an unset input as ""), and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space. Any other value is a 400. Kept a plain string because a workflow caller cannot omit the key.'
-        ),
       text: z.string().max(200000).optional(),
       iocs: z.array(HuntIoc).max(100).optional(),
       techniques: z.array(z.string().min(1).max(32)).max(100).optional(),
@@ -86,28 +74,37 @@ export const HuntCoordinatorResponse = lazySchema(() =>
     report_id: z.string().optional(),
     run_id: z.string(),
     /**
-     * Technologies whose indices the hunt ran against. Empty when the scope was blocked.
-     */
-    technologies: z
-      .array(HuntTechnology)
-      .describe(
-        'Technologies whose indices the hunt ran against. Empty when the scope was blocked.'
-      ),
-    /**
-     * Index patterns the hunt ran against: the resolved required patterns. Populated whether the scope came from a pinned or environment-resolved technology or from discovered datasets; empty when the scope was blocked or resolution failed.
+     * What Tier 1 searched: the space's Security Solution default data view patterns, exclusions included, never an alerts index. Empty when the scope was blocked or resolution failed.
      */
     index_patterns: z
       .array(z.string())
       .describe(
-        'Index patterns the hunt ran against: the resolved required patterns. Populated whether the scope came from a pinned or environment-resolved technology or from discovered datasets; empty when the scope was blocked or resolution failed.'
+        "What Tier 1 searched: the space's Security Solution default data view patterns, exclusions included, never an alerts index. Empty when the scope was blocked or resolution failed."
       ),
     /**
-     * `index_patterns` (required) union the present baseline host-local telemetry patterns: Tier 2's allowlist, generation target, and hit bar. A run says what it hunted (`index_patterns`) and what Tier 2 was allowed to read (`tier2_targets`) separately, since a baseline-only scope has an empty `index_patterns` but a non-empty `tier2_targets`. Empty when the scope was blocked or resolution failed.
+     * What Tier 2 was allowed to read, target, and count as a hit, chosen after the report was read and Tier 1 ran: the union of the datasets the report's vendor or product matched, the indices Tier 1 hit, the model's matches (only when neither of those found anything), and `actionable_indices`, each `*`-suffixed. `tier2_target_sources` says which signals contributed. Empty when the scope was blocked, resolution failed, or no signal named a target.
      */
     tier2_targets: z
       .array(z.string())
       .describe(
-        "`index_patterns` (required) union the present baseline host-local telemetry patterns: Tier 2's allowlist, generation target, and hit bar. A run says what it hunted (`index_patterns`) and what Tier 2 was allowed to read (`tier2_targets`) separately, since a baseline-only scope has an empty `index_patterns` but a non-empty `tier2_targets`. Empty when the scope was blocked or resolution failed."
+        "What Tier 2 was allowed to read, target, and count as a hit, chosen after the report was read and Tier 1 ran: the union of the datasets the report's vendor or product matched, the indices Tier 1 hit, the model's matches (only when neither of those found anything), and `actionable_indices`, each `*`-suffixed. `tier2_target_sources` says which signals contributed. Empty when the scope was blocked, resolution failed, or no signal named a target."
+      ),
+    /**
+     * Which signals contributed to `tier2_targets`, in a fixed order. Empty when `tier2_targets` is empty.
+     */
+    tier2_target_sources: z
+      .array(z.enum(['report_match', 'tier1_hits', 'model', 'actionable']))
+      .describe(
+        'Which signals contributed to `tier2_targets`, in a fixed order. Empty when `tier2_targets` is empty.'
+      ),
+    /**
+     * `*`-suffixed streams and indices in the hunt's universe whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. A mapping says a host can report process telemetry, not that it is enrolled; packaging decides that later. Empty when the scope was blocked or no mapping carries either field.
+     */
+    actionable_indices: z
+      .array(z.string().max(256))
+      .max(64)
+      .describe(
+        "`*`-suffixed streams and indices in the hunt's universe whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. A mapping says a host can report process telemetry, not that it is enrolled; packaging decides that later. Empty when the scope was blocked or no mapping carries either field."
       ),
     tier1: HuntForThreatResult.merge(
       z.object({
@@ -249,12 +246,12 @@ export const HuntCoordinatorResponse = lazySchema(() =>
     message: z.string(),
     next_step: z.string(),
     /**
-     * True when Tier 1 confirmed a required-index hit or any Tier 2 behavior executed with a required-index hit. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.
+     * True when Tier 1 confirmed a hit in the searched universe or any Tier 2 behavior executed with a hit in its targets. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.
      */
     has_confirmed_hit: z
       .boolean()
       .describe(
-        'True when Tier 1 confirmed a required-index hit or any Tier 2 behavior executed with a required-index hit. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.'
+        'True when Tier 1 confirmed a hit in the searched universe or any Tier 2 behavior executed with a hit in its targets. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.'
       ),
     /**
      * Whether the run covered what it was asked to. Read this rather than `completed_successfully` when deciding what to record: a run can finish without errors and still have searched almost nothing, and the difference between `complete` and `incomplete_final` is the difference between "the environment is clean" and "we could not look". `tier1.incomplete` and `tier2.incomplete` say which gaps produced it.

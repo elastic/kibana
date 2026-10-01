@@ -224,7 +224,6 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
               index: 'logs-aws.cloudtrail-default',
               hit_count: 3,
               required: true,
-              confirming: true,
             },
           ],
           resolved_iocs: [{ type: 'hash', value: 'abc123' }],
@@ -294,7 +293,6 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
         tier1: {
           status: 'environment_hits_found',
           counts: { total_hits: 4, returned_hits: 4, affected_hosts: 1, affected_users: 1 },
-          // No `confirming`: the field post-dates this payload.
           per_index: [
             { index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true },
             { index: '.alerts-security.alerts-default', hit_count: 1, required: false },
@@ -320,17 +318,6 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
     it('reads a payload written before the renames', () => {
       const result = significantSecurityEventAttachmentReadSchema.safeParse(preRenamePayload);
       expect(result.success).toBe(true);
-    });
-
-    it('carries a pre-rename required-index hit over as confirming', () => {
-      const result = significantSecurityEventAttachmentReadSchema.parse(preRenamePayload);
-
-      // Inheriting `required` rather than defaulting to false is the whole point: `confirming`
-      // sets the hit bar, so a false default would read this recorded hit as a clean run.
-      expect(result.hunt_result?.tier1.per_index).toEqual([
-        expect.objectContaining({ index: 'logs-aws.cloudtrail-default', confirming: true }),
-        expect.objectContaining({ index: '.alerts-security.alerts-default', confirming: false }),
-      ]);
     });
 
     it('maps the retired behavior keys onto their current names', () => {
@@ -520,9 +507,7 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       tier1: {
         status: 'environment_hits_found',
         counts: { total_hits: 3, returned_hits: 3, affected_hosts: 0, affected_users: 0 },
-        per_index: [
-          { index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true, confirming: true },
-        ],
+        per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 3, required: true }],
         resolved_iocs: [],
       },
     };
@@ -551,8 +536,8 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
           tier1: {
             ...confirmedTier1.tier1,
             per_index: [
-              { index: 'logs-a', hit_count: 100, required: true, confirming: true },
-              { index: 'logs-b', hit_count: 100, required: false, confirming: false },
+              { index: 'logs-a', hit_count: 100, required: true },
+              { index: 'logs-b', hit_count: 100, required: false },
             ],
           },
         },
@@ -619,6 +604,38 @@ describe('significantSecurityEventAttachmentDataSchema', () => {
       });
 
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('hunt_result.actionable_indices', () => {
+    const withActionable = (actionable_indices: unknown) =>
+      significantSecurityEventAttachmentDataSchema.safeParse({
+        ...validPayload,
+        hunt_result: {
+          has_confirmed_hit: true,
+          hit_sources: ['tier1'],
+          time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+          tier1: {
+            status: 'environment_hits_found',
+            counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
+            per_index: [{ index: 'logs-aws.cloudtrail-default', hit_count: 1, required: true }],
+            resolved_iocs: [],
+          },
+          actionable_indices,
+        },
+      });
+
+    it('accepts a bounded actionable_indices list', () => {
+      expect(withActionable(['logs-endpoint.events.process-*']).success).toBe(true);
+    });
+
+    it('rejects more than 64 actionable_indices entries', () => {
+      const tooMany = Array.from({ length: 65 }, (_, i) => `logs-endpoint.events.process-${i}-*`);
+      expect(withActionable(tooMany).success).toBe(false);
+    });
+
+    it('rejects an empty-string actionable_indices entry', () => {
+      expect(withActionable(['']).success).toBe(false);
     });
   });
 });

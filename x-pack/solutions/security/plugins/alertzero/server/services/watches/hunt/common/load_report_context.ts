@@ -23,9 +23,9 @@ export interface ReportHuntContext {
   severity?: string;
   /**
    * KEV-shaped vendor and product the report names, when the extraction found them.
-   * Scope resolution matches them against the datasets present in the space, so a report
-   * about a product no known technology covers can still find the indices that hold its
-   * telemetry. Only set when the stored value is a non-empty string.
+   * Scope resolution matches them against the datasets present in the hunt universe, so a
+   * report about any product can find the indices that hold its telemetry. Only set when
+   * the stored value is a non-empty string.
    */
   vendor?: string;
   product?: string;
