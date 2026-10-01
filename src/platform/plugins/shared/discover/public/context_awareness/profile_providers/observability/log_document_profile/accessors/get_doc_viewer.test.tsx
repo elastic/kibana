@@ -100,18 +100,48 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
     ]);
   });
 
-  it('enables the log overview tab only when the record has a message field', () => {
-    const getTabEnabled = (fields: Record<string, string[]>) =>
-      buildDocViewer(
-        new BehaviorSubject<LogOverviewContext | undefined>(undefined),
-        [],
-        buildRecord('doc-1', fields)
-      )
+  describe('log overview tab availability', () => {
+    const getTabEnabled = (record: ReturnType<typeof buildRecord>) =>
+      buildDocViewer(new BehaviorSubject<LogOverviewContext | undefined>(undefined), [], record)
         .registry.getAll()
         .find(({ id }) => id === LOGS_OVERVIEW_TAB_ID)?.enabled;
 
-    expect(getTabEnabled({ message: ['hello'] })).toBe(true);
-    expect(getTabEnabled({ 'service.name': ['payments'] })).toBe(false);
+    const recordsWithContent = [
+      {
+        name: 'a message',
+        record: buildRecord('doc-1', { message: ['hello'] }),
+      },
+      {
+        name: 'a stacktrace',
+        record: buildRecord('doc-1', { 'error.stack_trace': ['Error: boom'] }),
+      },
+      {
+        name: 'a trace id',
+        record: buildRecord('doc-1', { 'trace.id': ['abc123'] }),
+      },
+      {
+        name: 'degraded fields',
+        record: buildDataTableRecord(
+          {
+            _id: 'doc-1',
+            _index: 'logs-synth.docviewer-default',
+            fields: { 'log.level': ['info'] },
+            _ignored: ['log.level'],
+          },
+          dataViewMock
+        ),
+      },
+    ];
+
+    recordsWithContent.forEach(({ name, record }) => {
+      it(`enables the tab when the record has ${name}`, () => {
+        expect(getTabEnabled(record)).toBe(true);
+      });
+    });
+
+    it('disables the tab when the record only has fields the overview has no section for', () => {
+      expect(getTabEnabled(buildRecord('doc-1', { 'service.name': ['payments'] }))).toBe(false);
+    });
   });
 
   it('opens the section queued on the context when the tab mounts', async () => {

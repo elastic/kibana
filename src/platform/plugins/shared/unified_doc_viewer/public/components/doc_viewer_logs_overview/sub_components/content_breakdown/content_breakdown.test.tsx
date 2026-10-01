@@ -96,6 +96,19 @@ describe('ContentBreakdown', () => {
     });
   });
 
+  describe('Without a message field', () => {
+    it('renders nothing instead of an empty message panel', () => {
+      const hit = buildHit({ 'service.name': 'payments' });
+      const formattedDoc = { 'service.name': 'payments' } as any;
+
+      const { container } = render(
+        <ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />
+      );
+
+      expect(container).toBeEmptyDOMElement();
+    });
+  });
+
   describe('Message rendering', () => {
     it('escapes angle brackets so log text is not treated as HTML', () => {
       const hit = buildHit({

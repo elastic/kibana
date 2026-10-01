@@ -12,8 +12,10 @@ import type {
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
-import { getMessageFieldWithFallbacks } from '@kbn/discover-utils';
-import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
+import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
+import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { PROJECT_ROUTING, type ICPSManager } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,6 +30,22 @@ import { EMPTY, filter, map, skip } from 'rxjs';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import type { LogOverviewContext } from '../../logs_data_source_profile/profile';
 import { OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID, type LogDocumentProfileProvider } from '../profile';
+
+/**
+ * Whether the Log overview tab has anything to show for the record. Mirrors what the overview
+ * sections and the row leading controls look at, so every control that requests this tab finds
+ * the section it asked for.
+ */
+const hasLogOverviewContent = (record: DataTableRecord) => {
+  const { flattened, raw } = record;
+
+  const hasMessage = Boolean(getMessageFieldWithFallbacks(flattened).value);
+  const hasStacktrace = Object.values(getStacktraceFields(record as LogDocument)).some(Boolean);
+  const hasQualityIssues = fieldConstants.DEGRADED_DOCS_FIELDS.some((field) => raw[field] != null);
+  const hasTrace = Boolean(flattened[fieldConstants.TRACE_ID_FIELD]);
+
+  return hasMessage || hasStacktrace || hasQualityIssues || hasTrace;
+};
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
@@ -62,7 +80,7 @@ export const createGetDocViewer =
             defaultMessage: 'Log overview',
           }),
           order: 0,
-          enabled: Boolean(getMessageFieldWithFallbacks(params.record.flattened).value),
+          enabled: hasLogOverviewContent(params.record),
           render: (props: DocViewRenderProps) => (
             <LogOverviewTab
               logOverviewContext$={context.logOverviewContext$}

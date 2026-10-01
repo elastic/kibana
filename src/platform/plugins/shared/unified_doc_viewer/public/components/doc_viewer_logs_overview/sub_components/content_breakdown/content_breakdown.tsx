@@ -68,6 +68,10 @@ export const ContentBreakdown = ({
   );
   const hasMessageField = field && value;
 
+  if (!hasMessageField) {
+    return null;
+  }
+
   return (
     <>
       <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
