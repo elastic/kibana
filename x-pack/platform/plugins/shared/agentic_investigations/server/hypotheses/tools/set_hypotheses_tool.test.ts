@@ -75,6 +75,7 @@ const setup = ({
     {
       getHypothesesService: () => service,
       privileges: { assertCanManage: jest.fn(), assertCanRead: jest.fn() },
+      assertCanReadConversation: jest.fn().mockResolvedValue(undefined),
       logger: loggerMock.create(),
     }
   );

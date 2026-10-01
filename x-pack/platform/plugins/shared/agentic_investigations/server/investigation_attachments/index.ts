@@ -21,6 +21,10 @@ export {
 } from './attachment_doc_service';
 export { attachWithPublicClient } from './attach_with_public_client';
 export {
+  createConversationReadCheck,
+  type AssertCanReadConversation,
+} from './assert_can_read_conversation';
+export {
   attachFromTool,
   type AttachedFromTool,
   type ToolAttachmentOutcome,

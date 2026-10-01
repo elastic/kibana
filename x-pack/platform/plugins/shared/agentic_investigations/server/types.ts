@@ -62,15 +62,16 @@ export interface AgenticInvestigationsStartDependencies {
  */
 export interface AgenticInvestigationsPluginStart {
   /**
-   * Request-scoped impact reads. Checks the investigations manage privilege and
-   * derives the space from the request, because in-process callers bypass
-   * route `security.authz`.
+   * Request-scoped impact reads. Reads accept the investigations read or manage
+   * privilege, and the space comes from the request, because in-process callers
+   * bypass route `security.authz`.
    */
   getImpactClient: (request: KibanaRequest) => ImpactReadClient;
   /**
    * Request-scoped investigation subjects: record them when starting or following up on an
    * investigation, find investigations by subject, and claim subjects for a race-safe start.
-   * Checks the investigations manage privilege; space and user come from the request.
+   * Reads accept the investigations read or manage privilege; writes and claims need manage.
+   * Space and user come from the request.
    */
   getSubjectsClient: (request: KibanaRequest) => SubjectsClient;
   /**

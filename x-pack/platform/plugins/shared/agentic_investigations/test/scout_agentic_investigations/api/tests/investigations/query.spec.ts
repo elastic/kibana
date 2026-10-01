@@ -264,6 +264,45 @@ apiTest.describe(
       expect(firstBody.results[0].id).toBe(closedId);
     });
 
+    apiTest('filters by status on the conversation search path', async ({ apiClient }) => {
+      // No subject or entity filter, so candidates come from the Agent Builder search filter.
+      const open = await list(apiClient, `query=${RUN}&status=open`);
+      expect(open).toHaveStatusCode(200);
+      expect((open.body as ListBody).results.map(({ id }) => id).sort()).toStrictEqual(
+        [highId, lowId].sort()
+      );
+
+      const closed = await list(apiClient, `query=${RUN}&status=closed`);
+      expect(closed).toHaveStatusCode(200);
+      expect((closed.body as ListBody).results.map(({ id }) => id)).toStrictEqual([closedId]);
+    });
+
+    apiTest('filters by creation date', async ({ apiClient }) => {
+      const low = await apiClient.get(INVESTIGATION_BY_ID_PATH(lowId), {
+        headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      const lowCreatedAt = (low.body as { created_at: string }).created_at;
+
+      const after = await list(
+        apiClient,
+        `query=${RUN}&created_after=${encodeURIComponent(lowCreatedAt)}`
+      );
+      expect(after).toHaveStatusCode(200);
+      expect((after.body as ListBody).results.map(({ id }) => id).sort()).toStrictEqual(
+        [lowId, closedId].sort()
+      );
+
+      const before = await list(
+        apiClient,
+        `query=${RUN}&created_before=${encodeURIComponent(lowCreatedAt)}`
+      );
+      expect(before).toHaveStatusCode(200);
+      expect((before.body as ListBody).results.map(({ id }) => id).sort()).toStrictEqual(
+        [highId, lowId].sort()
+      );
+    });
+
     apiTest('never returns conversations on another template', async ({ apiClient }) => {
       const response = await list(apiClient, `query=${RUN}&per_page=100`);
 
