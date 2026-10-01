@@ -59,7 +59,7 @@ const setup = (serverless: boolean) => {
     licensing: { ...licensingMock.createStart(), license$ },
     agentBuilder,
     proposals: {},
-    agenticInvestigations: {},
+    agenticInvestigations: { InvestigationCard: () => null },
   });
   if (serverless) contract.setServerlessTierAvailable(true);
   return { plugin, agentBuilder, license$, setting$, contract };

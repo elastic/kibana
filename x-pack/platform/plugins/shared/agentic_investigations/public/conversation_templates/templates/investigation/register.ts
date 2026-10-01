@@ -7,15 +7,19 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { ConversationTemplateBriefCardRenderProps } from '@kbn/agent-builder-browser';
 import {
   registerAgenticInvestigationTemplateUI,
   type CloseInvestigationModalRenderProps,
   type EscalationModalRenderProps,
+  type OverviewSlotRenderProps,
+  type RunningStateSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
 import { ProposedActionsBoundary } from '../../shared/proposed_actions/proposed_actions_boundary';
 import { getSharedInvestigationsQueryClient } from '../../../shared_query_client';
+import { createInvestigationCardsLoader } from '../../../investigations/investigation_cards_loader';
 import type { TemplateDefinition } from '../../registry/types';
 
 const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
@@ -23,11 +27,15 @@ const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
   { defaultMessage: 'Investigation' }
 );
 
-/** The `investigation` template: status, close, escalation, and proposed actions. */
+/**
+ * The `investigation` template: status, close, escalation, proposed actions, and the overview,
+ * running state, and brief card from the query API.
+ */
 export const investigationTemplate: TemplateDefinition = {
   templateId: INVESTIGATION_TEMPLATE_ID,
   register: ({
     templateId,
+    core,
     startDeps,
     services,
     escalationsEnabled,
@@ -91,6 +99,72 @@ export const investigationTemplate: TemplateDefinition = {
       return { default: WrappedSlot };
     });
 
+    // The overview, the header's running state, and the brief cards read the same investigation
+    // queries, so they share one QueryClient: a flyout and its header poll once, not twice.
+    const makeLazyWithSharedClient = <P extends object>(
+      getComponent: () => Promise<React.ComponentType<P>>
+    ): React.LazyExoticComponent<React.ComponentType<P>> =>
+      React.lazy(async () => {
+        const [{ KibanaContextProvider }, { QueryClientProvider }, Component, queryClient] =
+          await Promise.all([
+            import('@kbn/kibana-react-plugin/public'),
+            import('@kbn/react-query'),
+            getComponent(),
+            getSharedInvestigationsQueryClient(),
+          ]);
+
+        const Wrapped: React.FC<P> = (props) =>
+          React.createElement(
+            KibanaContextProvider,
+            { services },
+            React.createElement(
+              QueryClientProvider,
+              { client: queryClient },
+              React.createElement(Component, props)
+            )
+          );
+
+        return { default: Wrapped };
+      });
+
+    const LazyInvestigationOverview = makeLazyWithSharedClient<OverviewSlotRenderProps>(
+      async () => {
+        const { InvestigationOverview } = await import(
+          '../../../investigations/components/investigation_overview'
+        );
+        return InvestigationOverview;
+      }
+    );
+
+    const LazyInvestigationRunningState = makeLazyWithSharedClient<RunningStateSlotRenderProps>(
+      async () => {
+        const { InvestigationRunningState } = await import(
+          '../../../investigations/components/investigation_running_state'
+        );
+        return InvestigationRunningState;
+      }
+    );
+
+    const cardsLoader = createInvestigationCardsLoader(core.http);
+    const LazyInvestigationBriefCard =
+      makeLazyWithSharedClient<ConversationTemplateBriefCardRenderProps>(async () => {
+        const { InvestigationBriefCard } = await import(
+          '../../../investigations/components/investigation_brief_card'
+        );
+        const BriefCard: React.FC<ConversationTemplateBriefCardRenderProps> = (props) =>
+          React.createElement(InvestigationBriefCard, { ...props, loader: cardsLoader });
+        return BriefCard;
+      });
+
+    const InvestigationBriefCardWithFallback: React.FC<ConversationTemplateBriefCardRenderProps> = (
+      props
+    ) =>
+      React.createElement(
+        React.Suspense,
+        { fallback: null },
+        React.createElement(LazyInvestigationBriefCard, props)
+      );
+
     const LazyConnectedCloseInvestigationModal =
       makeLazyWithProviders<CloseInvestigationModalRenderProps>(async () => {
         const [{ ConnectedCloseInvestigationModal }, { PrivilegeGate }] = await Promise.all([
@@ -124,6 +198,19 @@ export const investigationTemplate: TemplateDefinition = {
       // The toggle itself disables when the user may not change the status.
       renderStatus,
       renderCloseInvestigationModal,
+      renderOverview: (props) =>
+        React.createElement(
+          ProposedActionsBoundary,
+          null,
+          React.createElement(LazyInvestigationOverview, props)
+        ),
+      renderRunningState: (props) =>
+        React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(LazyInvestigationRunningState, props)
+        ),
+      briefCard: InvestigationBriefCardWithFallback,
       // Without escalations the footer has no "Open escalation" button.
       renderEscalationModal: escalationsEnabled
         ? (props) =>

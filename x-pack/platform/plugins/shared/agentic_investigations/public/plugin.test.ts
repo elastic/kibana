@@ -73,10 +73,12 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
     ]);
   });
 
-  it('registers nothing without Agent Builder', () => {
+  it('registers nothing without Agent Builder, and still offers the investigation card', () => {
     const plugin = createPlugin();
 
-    expect(() => plugin.start(coreMock.createStart(), {})).not.toThrow();
+    expect(plugin.start(coreMock.createStart(), {}).InvestigationCard).toEqual(
+      expect.any(Function)
+    );
   });
 
   it('registers only the investigation template, without an escalate action, when escalations are disabled', () => {

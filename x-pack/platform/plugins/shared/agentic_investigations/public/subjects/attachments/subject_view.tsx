@@ -17,7 +17,7 @@ import type { InvestigationAttachmentContentProps } from '../../investigation_at
 import { getSubjectTitle, type SubjectRowData } from './subject_title';
 import { OPENS_IN_NEW_TAB, subjectTriggerLabel } from './translations';
 
-const SUBJECT_ICONS: Record<InvestigationSubjectType, IconType> = {
+export const SUBJECT_ICONS: Record<InvestigationSubjectType, IconType> = {
   alert: 'warning',
   significant_event: 'sparkles',
   manual: 'question',
