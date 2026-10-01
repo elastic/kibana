@@ -99,11 +99,13 @@ const ensureAttackDataStreamSafe = async (esClient: EsClient, index: string): Pr
     .then((r) => r.index_templates ?? [])
     .catch((error: { statusCode?: number }) => (error.statusCode === 404 ? [] : Promise.reject(error)));
   const matches = templates.filter((entry) => {
+    // composable index templates put `data_stream` on index_template itself;
+    // the inner `template` holds mappings/settings only
     const tpl = entry.index_template as
-      | { index_patterns?: string[]; template?: { data_stream?: unknown } }
+      | { index_patterns?: string[]; data_stream?: unknown }
       | undefined;
     return (
-      tpl?.template?.data_stream !== undefined &&
+      tpl?.data_stream !== undefined &&
       (tpl.index_patterns ?? []).some((pattern) => new RegExp(`^${pattern.replace(/\*/g, '.*')}$`).test(index))
     );
   });

@@ -192,7 +192,8 @@ describe('seedFixture', () => {
               name: '.alerts-security.alerts',
               index_template: {
                 index_patterns: ['.alerts-security*'],
-                template: { mappings: {}, data_stream: {} },
+                data_stream: {},
+                template: { mappings: {} },
               },
             },
           ],
