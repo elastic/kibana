@@ -57,8 +57,8 @@ function useDateRangeRedirect() {
 }
 
 /**
- * Component that ensures time range params (rangeFrom/rangeTo) are present in the URL.
- * If they are missing, it blocks rendering and redirects to add default values.
+ * Ensures management routes have time range params.
+ * While the URL is being normalized, it blocks rendering to avoid exposing stale route state.
  *
  * When adding defaults, it checks whether the global timefilter has been explicitly
  * set (isTimeTouched). If so, it preserves that value (e.g. a range the user picked
@@ -91,7 +91,7 @@ export function DateRangeRedirect({ children }: { children: React.ReactNode }) {
     }
   }, [rangeFrom, rangeTo, queryService]);
 
-  // Block rendering until time params are set
+  // Block rendering until time params are set.
   if (!isDateRangeSet) {
     return null;
   }

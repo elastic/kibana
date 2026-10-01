@@ -10,6 +10,7 @@ import {
   bulkSnoozeActionPoliciesBodySchema,
   createActionPolicyDataSchema,
   findActionPoliciesRequestSchema,
+  putActionPolicyDataSchema,
   snoozeActionPolicyBodySchema,
   updateActionPolicyDataSchema,
 } from './action_policy_data_schema';
@@ -26,6 +27,12 @@ describe('createActionPolicyDataSchema', () => {
 
       expect(result.grouping_mode).toBeUndefined();
       expect(result.throttle).toBeUndefined();
+    });
+
+    it('trims surrounding whitespace from name', () => {
+      const result = createActionPolicyDataSchema.parse({ ...base, name: '  Test  ' });
+
+      expect(result.name).toBe('Test');
     });
 
     it('accepts per_episode + on_status_change', () => {
@@ -123,6 +130,10 @@ describe('createActionPolicyDataSchema', () => {
   });
 
   describe('invalid payloads', () => {
+    it('rejects whitespace-only name', () => {
+      expect(() => createActionPolicyDataSchema.parse({ ...base, name: '   ' })).toThrow();
+    });
+
     it('rejects per_episode + time_interval', () => {
       expect(() =>
         createActionPolicyDataSchema.parse({
@@ -237,6 +248,35 @@ describe('createActionPolicyDataSchema', () => {
         })
       ).toThrow();
     });
+  });
+});
+
+describe('putActionPolicyDataSchema', () => {
+  const base = { name: 'Test', description: 'Desc', destinations: DESTINATIONS };
+
+  it('leaves enabled undefined when omitted', () => {
+    const result = putActionPolicyDataSchema.parse(base);
+    expect(result.enabled).toBeUndefined();
+  });
+
+  it('accepts an explicit enabled: true', () => {
+    const result = putActionPolicyDataSchema.parse({ ...base, enabled: true });
+    expect(result.enabled).toBe(true);
+  });
+
+  it('accepts an explicit enabled: false', () => {
+    const result = putActionPolicyDataSchema.parse({ ...base, enabled: false });
+    expect(result.enabled).toBe(false);
+  });
+
+  it('rejects a non-boolean enabled', () => {
+    const result = putActionPolicyDataSchema.safeParse({ ...base, enabled: 'true' });
+    expect(result.success).toBe(false);
+  });
+
+  it('does not add enabled to createActionPolicyDataSchema', () => {
+    const result = createActionPolicyDataSchema.safeParse({ ...base, enabled: true });
+    expect(result.success).toBe(false);
   });
 });
 

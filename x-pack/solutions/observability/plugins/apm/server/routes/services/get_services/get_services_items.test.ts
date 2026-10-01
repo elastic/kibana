@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getServicesItems } from './get_services_items';
+import { getServicesItems, MAX_NUMBER_OF_SERVICES } from './get_services_items';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { getServiceAnomalyScores } from './get_service_anomaly_scores';
 import { getServicesAlerts } from './get_service_alerts';
@@ -185,6 +185,20 @@ describe('getServicesItems', () => {
       });
 
       expect(result.serviceOverflowCount).toBe(50);
+    });
+
+    it('uses MAX_NUMBER_OF_SERVICES as default when maxNumServices is not provided', async () => {
+      await getServicesItems({ ...baseParams });
+      expect(mockGetServiceTransactionStats).toHaveBeenCalledWith(
+        expect.objectContaining({ maxNumServices: MAX_NUMBER_OF_SERVICES })
+      );
+    });
+
+    it('forwards a custom maxNumServices to getServiceTransactionStats', async () => {
+      await getServicesItems({ ...baseParams, maxNumServices: 2000 });
+      expect(mockGetServiceTransactionStats).toHaveBeenCalledWith(
+        expect.objectContaining({ maxNumServices: 2000 })
+      );
     });
   });
 });

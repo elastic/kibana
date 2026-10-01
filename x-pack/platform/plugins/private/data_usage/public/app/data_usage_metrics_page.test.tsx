@@ -7,6 +7,8 @@
 import React from 'react';
 import { TestProvider } from '../../common/test_utils';
 import { render, type RenderResult } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { DataUsageMetricsPage } from './data_usage_metrics_page';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
 import { useGetDataUsageMetrics } from '../hooks/use_get_usage_metrics';
@@ -83,7 +85,9 @@ describe('DataUsageMetrics Page', () => {
     renderComponent = () =>
       render(
         <TestProvider>
-          <DataUsageMetricsPage data-test-subj={testId} />
+          <MockAppHeaderProvider>
+            <DataUsageMetricsPage data-test-subj={testId} />
+          </MockAppHeaderProvider>
         </TestProvider>
       );
     mockUseGetDataUsageMetrics.mockReturnValue(getBaseMockedDataUsageMetrics);
@@ -92,19 +96,18 @@ describe('DataUsageMetrics Page', () => {
 
   it('renders', () => {
     const { getByTestId } = renderComponent();
-    expect(getByTestId(`${testId}-page-header`)).toBeTruthy();
+    expect(getByTestId(`${testId}-page`)).toBeTruthy();
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeTruthy();
   });
 
   it('should show page title', () => {
     const { getByTestId } = renderComponent();
-    expect(getByTestId(`${testId}-page-title`)).toBeTruthy();
-    expect(getByTestId(`${testId}-page-title`)).toHaveTextContent('Data Usage');
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Data Usage');
   });
 
   it('should show page description', () => {
     const { getByTestId } = renderComponent();
-    expect(getByTestId(`${testId}-page-description`)).toBeTruthy();
-    expect(getByTestId(`${testId}-page-description`)).toHaveTextContent(
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
       'Monitor data ingested and retained by data streams over the past 10 days.'
     );
   });

@@ -11,6 +11,7 @@ import moment from 'moment';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import type { InputTimeRange } from './types';
 import { PersistedLog } from '../persisted_log';
 
 export class TimeHistory {
@@ -28,7 +29,7 @@ export class TimeHistory {
     this.history = new PersistedLog('kibana.timepicker.timeHistory', historyOptions, storage);
   }
 
-  add(time: TimeRange) {
+  add(time: InputTimeRange) {
     if (!time || !time.from || !time.to) {
       return;
     }

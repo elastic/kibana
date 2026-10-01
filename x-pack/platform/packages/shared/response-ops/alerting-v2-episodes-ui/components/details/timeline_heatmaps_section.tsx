@@ -32,6 +32,8 @@ const HeatmapSkeleton = () => (
 export interface AlertEpisodeTimelineHeatmapsSectionProps {
   episodeId: string;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'spaces'>;
+  /** Renders the timeline titles one step smaller, for narrow hosts like the details flyout. */
+  compressed?: boolean;
 }
 
 /**
@@ -41,6 +43,7 @@ export interface AlertEpisodeTimelineHeatmapsSectionProps {
 export const AlertEpisodeTimelineHeatmapsSection = ({
   episodeId,
   services,
+  compressed,
 }: AlertEpisodeTimelineHeatmapsSectionProps) => {
   const {
     data: eventRows,
@@ -80,13 +83,13 @@ export const AlertEpisodeTimelineHeatmapsSection = ({
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeTimelineHeatmapsSection">
       <React.Suspense fallback={<HeatmapSkeleton />}>
-        <AlertEpisodeLifecycleHeatmap eventRows={eventRows ?? []} />
+        <AlertEpisodeLifecycleHeatmap eventRows={eventRows ?? []} compressed={compressed} />
       </React.Suspense>
       {severityEventRows.length > 0 && (
         <>
           <EuiSpacer size="l" />
           <React.Suspense fallback={<HeatmapSkeleton />}>
-            <AlertEpisodeSeverityHeatmap eventRows={severityEventRows} />
+            <AlertEpisodeSeverityHeatmap eventRows={severityEventRows} compressed={compressed} />
           </React.Suspense>
         </>
       )}

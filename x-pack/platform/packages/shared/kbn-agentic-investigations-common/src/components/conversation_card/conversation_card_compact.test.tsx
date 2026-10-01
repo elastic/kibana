@@ -20,6 +20,7 @@ const investigation: Investigation = {
   watch_id: 'watch-1',
   watch_execution_id: 'exec-1',
   pendingProposalCount: 0,
+  assignees: [],
   recommendedAction: 'closed',
   primaryActionLabel: 'Rotate the Stripe key',
   summary: 'A summary the compact row deliberately leaves out.',
@@ -63,15 +64,9 @@ describe('ConversationCardCompact', () => {
   it('offers no decision, since the row is already decided', () => {
     renderRow();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
-
-    // By role: the row names its action as a label, so text alone proves nothing
-    // about what the menu offers. Assign and Close submit a decision the API refuses.
-    expect(
-      screen.queryByRole('menuitem', { name: 'Rotate the Stripe key' })
-    ).not.toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: 'Assign' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: 'Close' })).not.toBeInTheDocument();
+    // A decided row with no escalation capability has no available actions — the trigger
+    // must not render at all rather than opening an empty popover.
+    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
   });
 
   it('still opens the flyout on click', () => {
@@ -93,7 +88,7 @@ describe('ConversationCardCompact', () => {
   it('leaves the keyboard to the nested controls, which the row would otherwise swallow', () => {
     const { onClickCard } = renderRow();
 
-    fireEvent.keyDown(screen.getByRole('button', { name: 'Open actions menu' }), { key: 'Enter' });
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Open in chat' }), { key: 'Enter' });
 
     expect(onClickCard).not.toHaveBeenCalled();
   });

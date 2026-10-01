@@ -21,10 +21,22 @@ type RegisteredWorkerId = (typeof SYSTEM_SECURITY_WORKER_IDS)[number];
 
 interface ExpectedWorkerSettings {
   settingsVersion: number;
-  /** Present only for schedule-driven Workers. */
+  /** Present only for Workers that expose their interval as a Watch setting. */
   scheduleInterval?: string;
-  /** Present only for Workers with Watch-owned settings. */
+  /**
+   * The interval on the Worker's scheduled trigger. Defaults to `scheduleInterval`;
+   * spell it out only for a Worker whose cadence is fixed in the definition and
+   * deliberately not offered as a setting.
+   */
+  every?: string;
+  /** Present only for Workers with Watch-owned settings, nested under `extras` in the YAML. */
   extras?: Record<string, unknown>;
+  /**
+   * Watch-owned settings the YAML renders flat into `worker_settings` rather than nesting them
+   * under `extras`. Alert Triage diverges from Rule Tuning's shape here: the settings API uses
+   * `extras` for both, only the rendered YAML differs.
+   */
+  flatSettings?: Record<string, unknown>;
   triggerTypes: string[];
 }
 
@@ -34,21 +46,37 @@ interface ExpectedWorkerSettings {
  * change what already-installed spaces receive.
  */
 const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSettings> = {
-  'system-security-floor-alert-triage': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-floor-alert-triage': {
+    settingsVersion: 1,
+    flatSettings: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+    triggerTypes: ['alert', 'manual'],
+  },
   'system-security-floor-attack-discovery': {
     settingsVersion: 1,
     scheduleInterval: '24h',
     triggerTypes: ['scheduled'],
+  },
+  // Sweeps on a fixed 1m cadence that is not a setting, so it has `every` without
+  // `scheduleInterval`. Manual stays alongside it so a sweep can be kicked on demand.
+  'system-security-forensics-endpoint-analysis': {
+    settingsVersion: 1,
+    every: '1m',
+    triggerTypes: ['scheduled', 'manual'],
   },
   'system-security-hunt-continuous-threat-hunt': { settingsVersion: 1, triggerTypes: ['manual'] },
   // Keeps manual alongside the schedule so a sweep can be kicked on demand.
   'system-security-detection-rule-tuning': {
     settingsVersion: 1,
     scheduleInterval: '2h',
-    extras: { analysisWindowDays: 14 },
+    extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
     triggerTypes: ['scheduled', 'manual'],
   },
-  'system-security-detection-rule-creation': { settingsVersion: 1, triggerTypes: ['manual'] },
+  'system-security-detection-rule-coverage': {
+    settingsVersion: 1,
+    scheduleInterval: '1h',
+    extras: { lookbackDays: 14, maxGapsPerRun: 5 },
+    triggerTypes: ['scheduled', 'manual'],
+  },
 };
 
 const getYamlTemplate = (workerId: RegisteredWorkerId) => {
@@ -91,12 +119,15 @@ describe('workerRegistry', () => {
             ? {}
             : { scheduleInterval: expected.scheduleInterval }),
           ...(expected.extras === undefined ? {} : { extras: expected.extras }),
+          ...(expected.flatSettings ?? {}),
         })
       );
 
       // A Worker with no schedule must not gain one by accident, and vice versa.
       expect(parsed.triggers?.map(({ type }) => type)).toEqual(expected.triggerTypes);
-      expect(parsed.triggers?.[0]?.with?.every).toBe(expected.scheduleInterval);
+      expect(parsed.triggers?.[0]?.with?.every).toBe(expected.every ?? expected.scheduleInterval);
+      // A fixed cadence must stay out of the settings contract, or the shared Watch
+      // page would render an interval control the Worker does not accept writes for.
       if (expected.scheduleInterval === undefined) {
         expect(yaml).not.toContain('scheduleInterval');
       }

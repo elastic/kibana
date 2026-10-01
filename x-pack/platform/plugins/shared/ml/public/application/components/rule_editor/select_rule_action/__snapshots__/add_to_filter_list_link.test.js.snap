@@ -2,7 +2,7 @@
 
 exports[`AddToFilterListLink renders the add to filter list link for a value 1`] = `
 <button
-  class="euiLink emotion-euiLink-primary"
+  class="euiLink emotion-euiLink-text"
   data-test-subj="mlAddToFilterListLink"
   type="button"
 >
