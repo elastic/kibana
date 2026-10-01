@@ -2708,8 +2708,6 @@
     "data.search.es_search.documentsProcessedLabel": "Dokumente verarbeitet",
     "data.search.es_search.hitsDescription": "Die Anzahl an Dokumenten, die bei der Abfrage ausgegeben wurden.",
     "data.search.es_search.hitsLabel": "Treffer",
-    "data.search.es_search.hitsTotalDescription": "Die Anzahl an Dokumenten, die mit der Abfrage übereinstimmen.",
-    "data.search.es_search.hitsTotalLabel": "Treffer (gesamt)",
     "data.search.es_search.indexPatternDescription": "Die Datenquelle, die mit den Elasticsearch-Indizes verbunden ist.",
     "data.search.es_search.queryTimeDescription": "Die für die Verarbeitung der Abfrage benötigte Zeit. Enthält nicht die Dauer zum Senden der Anfrage oder zum Analysieren der Anfrage im Browser.",
     "data.search.es_search.queryTimeLabel": "Abfragezeit",

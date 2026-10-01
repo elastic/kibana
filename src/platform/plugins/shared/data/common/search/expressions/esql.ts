@@ -326,34 +326,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         params.filter = buildEsQuery(undefined, inputQuery, filters, esQueryConfigs);
       }
 
-      let startTime = Date.now();
-      const logInspectorRequest = () => {
-        if (!inspectorAdapters.requests) {
-          inspectorAdapters.requests = new RequestAdapter();
-        }
-
-        const request = inspectorAdapters.requests.start(
-          titleForInspector ??
-            i18n.translate('data.search.dataRequest.title', {
-              defaultMessage: 'Data',
-            }),
-          {
-            description:
-              descriptionForInspector ??
-              i18n.translate('data.search.es_search.dataRequest.description', {
-                defaultMessage:
-                  'This request queries Elasticsearch to fetch the data for the visualization.',
-              }),
-          },
-          startTime
-        );
-        startTime = Date.now();
-
-        return request;
-      };
-
       try {
-        const { rawResponse, requestParams, warning } = await searchService.esql(
+        const { rawResponse, warning } = await searchService.esql(
           {
             query: fixedQuery,
             params: params.params,
@@ -370,72 +344,26 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             dropNullColumns: true,
             includeExecutionMetadata: true,
             columnMetadata: true,
+            inspector: {
+              adapter: inspectorAdapters.requests ?? new RequestAdapter(),
+              title:
+                titleForInspector ??
+                i18n.translate('data.search.dataRequest.title', {
+                  defaultMessage: 'Data',
+                }),
+              description:
+                descriptionForInspector ??
+                i18n.translate('data.search.es_search.dataRequest.description', {
+                  defaultMessage:
+                    'This request queries Elasticsearch to fetch the data for the visualization.',
+                }),
+            },
           }
         );
-
-        // Inspector logging on success
-        logInspectorRequest()
-          .stats({
-            hits: {
-              label: i18n.translate('data.search.es_search.hitsLabel', {
-                defaultMessage: 'Hits',
-              }),
-              value: `${rawResponse.values.length}`,
-              description: i18n.translate('data.search.es_search.hitsDescription', {
-                defaultMessage: 'The number of documents returned by the query.',
-              }),
-            },
-            ...(rawResponse?.took && {
-              queryTime: {
-                label: i18n.translate('data.search.es_search.queryTimeLabel', {
-                  defaultMessage: 'Query time',
-                }),
-                value: i18n.translate('data.search.es_search.queryTimeValue', {
-                  defaultMessage: '{queryTime}ms',
-                  values: { queryTime: rawResponse.took },
-                }),
-                description: i18n.translate('data.search.es_search.queryTimeDescription', {
-                  defaultMessage:
-                    'The time it took to process the query. ' +
-                    'Does not include the time to send the request or parse it in the browser.',
-                }),
-              },
-            }),
-            ...(rawResponse &&
-              'documents_found' in rawResponse && {
-                documentsProcessed: {
-                  label: i18n.translate('data.search.es_search.documentsProcessedLabel', {
-                    defaultMessage: 'Documents processed',
-                  }),
-                  value: rawResponse.documents_found,
-                  description: i18n.translate(
-                    'data.search.es_search.documentsProcessedDescription',
-                    {
-                      defaultMessage: 'The number of documents processed by the query.',
-                    }
-                  ),
-                },
-              }),
-          })
-          .json({
-            ...params,
-            ...(input?.isApproximate !== undefined && { approximation: input.isApproximate }),
-          })
-          .ok({ json: { rawResponse }, requestParams });
 
         // Map to Datatable
         return mapResponseToDatatable(rawResponse as any, query, input, warning);
       } catch (error) {
-        // Inspector logging on error
-        logInspectorRequest()
-          .json({
-            ...params,
-            ...(input?.isApproximate !== undefined && { approximation: input.isApproximate }),
-          })
-          .error({
-            json: 'attributes' in error ? error.attributes : { message: error.message },
-          });
-
         // Error formatting
         if (!error.attributes) {
           error.message = `Unexpected error from Elasticsearch: ${error.message}`;

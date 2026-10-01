@@ -36,7 +36,13 @@ import type {
   ESQL_ASYNC_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
   SQL_SEARCH_STRATEGY,
-} from '.';
+} from '..';
+import {
+  getDslRequestInspectorStats,
+  getDslResponseInspectorStats,
+  getEsqlInspectorStats,
+  getSqlInspectorStats,
+} from './inspector_stats';
 
 /**
  * SearchMethodsService provides strategy-specific search methods with type-safe
@@ -53,29 +59,80 @@ export class SearchMethodsService implements ISearchMethods {
    * Execute an ES|QL search
    */
   async esql(params: IEsqlSearchParams, options?: IEsqlSearchOptions): Promise<IEsqlSearchResult> {
-    const request = this.buildESQLRequest(params, options);
-    const response = await this.executeSearch(
-      request,
-      this.mapESQLOptions(options, 'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY)
+    const request = this.buildEsqlRequest(params, options);
+    const searchOptions = this.mapEsqlOptions(
+      options,
+      'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY
     );
-    return {
-      rawResponse: response.rawResponse,
-      requestParams: response.requestParams,
-      warning: response.warning,
-    };
+
+    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
+      description: options.inspector.description,
+      searchSessionId: searchOptions?.sessionId,
+    });
+
+    requestResponder?.json({
+      ...((request.params ?? {}) as Record<string, unknown>),
+      ...(options?.approximation !== undefined && { approximation: options.approximation }),
+    });
+
+    try {
+      const response = await this.executeSearch(request, searchOptions);
+
+      requestResponder?.stats(getEsqlInspectorStats(response.rawResponse));
+      requestResponder?.ok({
+        json: { rawResponse: response.rawResponse },
+        requestParams: response.requestParams,
+      });
+
+      return {
+        rawResponse: response.rawResponse,
+        warning: response.warning,
+      };
+    } catch (error) {
+      requestResponder?.error({
+        json: 'attributes' in error ? error.attributes : { message: error.message },
+      });
+      throw error;
+    }
   }
 
   /**
    * Execute a DSL (Elasticsearch Query DSL) search
    */
   async dsl(params: IDslSearchParams, options?: IDslSearchOptions): Promise<IDslSearchResult> {
-    const request = this.buildDSLRequest(params, options);
-    const response = await this.executeSearch(request, this.mapDSLOptions(options, params));
+    const request = this.buildDslRequest(params, options);
+    const searchOptions = this.mapDslOptions(options, params);
 
-    return {
-      rawResponse: response.rawResponse,
-      requestParams: response.requestParams,
-    };
+    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
+      description: options.inspector.description,
+      searchSessionId: searchOptions?.sessionId,
+    });
+
+    requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
+    if (options?.inspector?.getRequestStats) {
+      requestResponder?.stats(options.inspector.getRequestStats());
+    } else if (params.index && typeof params.index === 'object') {
+      requestResponder?.stats(getDslRequestInspectorStats(params.index));
+    }
+
+    try {
+      const response = await this.executeSearch(request, searchOptions);
+
+      requestResponder?.stats(getDslResponseInspectorStats(response.rawResponse));
+      requestResponder?.ok({
+        json: { rawResponse: response.rawResponse },
+        requestParams: response.requestParams,
+      });
+
+      return {
+        rawResponse: response.rawResponse,
+      };
+    } catch (error) {
+      requestResponder?.error({
+        json: 'attributes' in error ? error.attributes : { message: error.message },
+      });
+      throw error;
+    }
   }
 
   /**
@@ -90,13 +147,12 @@ export class SearchMethodsService implements ISearchMethods {
       // trackTotalHits is required for pagination to determine if there are more pages
       trackTotalHits: true,
     };
-    const request = this.buildDSLRequest(params, options);
-    const response = await this.executeSearch(request, this.mapDSLOptions(options, params));
+    const request = this.buildDslRequest(params, options);
+    const response = await this.executeSearch(request, this.mapDslOptions(options, params));
 
     return {
       rawResponse: response.rawResponse,
-      requestParams: response.requestParams,
-      pagination: this.buildDSLPagination(response.rawResponse, params, options),
+      pagination: this.buildDslPagination(response.rawResponse, params, options),
     };
   }
 
@@ -104,28 +160,74 @@ export class SearchMethodsService implements ISearchMethods {
    * Execute an EQL (Event Query Language) search
    */
   async eql(params: IEqlSearchParams, options?: IEqlSearchOptions): Promise<IEqlSearchResult> {
-    const request = this.buildEQLRequest(params, options);
-    const response = await this.executeSearch(
-      request,
-      this.mapEQLOptions(options, 'eql' as typeof EQL_SEARCH_STRATEGY)
-    );
-    return { rawResponse: response.rawResponse, requestParams: response.requestParams };
+    const request = this.buildEqlRequest(params, options);
+    const searchOptions = this.mapEqlOptions(options, 'eql' as typeof EQL_SEARCH_STRATEGY);
+
+    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
+      description: options.inspector.description,
+      searchSessionId: searchOptions?.sessionId,
+    });
+
+    requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
+    if (options?.inspector?.getRequestStats) {
+      requestResponder?.stats(options.inspector.getRequestStats());
+    }
+
+    try {
+      const response = await this.executeSearch(request, searchOptions);
+
+      requestResponder?.ok({
+        json: { rawResponse: response.rawResponse },
+        requestParams: response.requestParams,
+      });
+
+      return {
+        rawResponse: response.rawResponse,
+      };
+    } catch (error) {
+      requestResponder?.error({
+        json: 'attributes' in error ? error.attributes : { message: error.message },
+      });
+      throw error;
+    }
   }
 
   /**
    * Execute a SQL search
    */
   async sql(params: ISqlSearchParams, options?: ISqlSearchOptions): Promise<ISqlSearchResult> {
-    const request = this.buildSQLRequest(params, options);
-    const response = await this.executeSearch(
-      request,
-      this.mapSQLOptions(options, 'sql' as typeof SQL_SEARCH_STRATEGY)
-    );
-    return {
-      rawResponse: response.rawResponse,
-      took: response.took,
-      requestParams: response.requestParams,
-    };
+    const request = this.buildSqlRequest(params, options);
+    const searchOptions = this.mapSqlOptions(options, 'sql' as typeof SQL_SEARCH_STRATEGY);
+
+    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
+      description: options.inspector.description,
+      searchSessionId: searchOptions?.sessionId,
+    });
+
+    requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
+    if (options?.inspector?.getRequestStats) {
+      requestResponder?.stats(options.inspector.getRequestStats());
+    }
+
+    try {
+      const response = await this.executeSearch(request, searchOptions);
+
+      requestResponder?.stats(getSqlInspectorStats(response.rawResponse, response.took));
+      requestResponder?.ok({
+        json: { rawResponse: response.rawResponse },
+        requestParams: response.requestParams,
+      });
+
+      return {
+        rawResponse: response.rawResponse,
+        took: response.took,
+      };
+    } catch (error) {
+      requestResponder?.error({
+        json: 'attributes' in error ? error.attributes : { message: error.message },
+      });
+      throw error;
+    }
   }
 
   // ============================================================================
@@ -140,20 +242,13 @@ export class SearchMethodsService implements ISearchMethods {
     options: ISearchOptions
   ): Promise<any> {
     const response$ = this.search(request, options);
-
-    // Wait for final result (when isRunning becomes false)
-    const finalResponse = await lastValueFrom(
-      response$.pipe(takeWhile((r) => r.isRunning === true, true))
-    );
-
-    return finalResponse;
+    return lastValueFrom(response$.pipe(takeWhile((r) => r.isRunning === true, true)));
   }
 
   // ============================================================================
   // DSL Search Helpers
   // ============================================================================
-
-  private buildDSLRequest(params: IDslSearchParams, options?: IDslSearchOptions): IEsSearchRequest {
+  private buildDslRequest(params: IDslSearchParams, options?: IDslSearchOptions): IEsSearchRequest {
     const {
       index: _,
       query,
@@ -190,7 +285,7 @@ export class SearchMethodsService implements ISearchMethods {
     };
   }
 
-  private mapDSLOptions(options?: IDslSearchOptions, params?: IDslSearchParams): ISearchOptions {
+  private mapDslOptions(options?: IDslSearchOptions, params?: IDslSearchParams): ISearchOptions {
     return {
       ...this.mapBaseOptions(options),
       strategy: 'ese' as typeof ENHANCED_ES_SEARCH_STRATEGY,
@@ -198,7 +293,7 @@ export class SearchMethodsService implements ISearchMethods {
     };
   }
 
-  private buildDSLPagination(
+  private buildDslPagination(
     rawResponse: any,
     originalParams: IDslSearchParams,
     options?: IDslSearchOptions
@@ -224,17 +319,16 @@ export class SearchMethodsService implements ISearchMethods {
           ...originalParams,
         };
 
-        const request = self.buildDSLRequest(nextParams, options);
+        const request = self.buildDslRequest(nextParams, options);
         if (request.params && typeof request.params !== 'string') {
           (request.params as any).body.search_after = lastHit.sort;
         }
 
-        const nextResponse = await self.executeSearch(request, self.mapDSLOptions(options));
+        const nextResponse = await self.executeSearch(request, self.mapDslOptions(options));
 
         return {
           rawResponse: nextResponse.rawResponse,
-          requestParams: nextResponse.requestParams,
-          pagination: self.buildDSLPagination(nextResponse.rawResponse, nextParams, options),
+          pagination: self.buildDslPagination(nextResponse.rawResponse, nextParams, options),
         };
       },
     };
@@ -244,7 +338,7 @@ export class SearchMethodsService implements ISearchMethods {
   // ES|QL Search Helpers
   // ============================================================================
 
-  private buildESQLRequest(
+  private buildEsqlRequest(
     params: IEsqlSearchParams,
     options?: IEsqlSearchOptions
   ): IKibanaSearchRequest<ESQLSearchParams> {
@@ -262,7 +356,7 @@ export class SearchMethodsService implements ISearchMethods {
     };
   }
 
-  private mapESQLOptions(
+  private mapEsqlOptions(
     options: IEsqlSearchOptions | undefined,
     strategy: typeof ESQL_ASYNC_SEARCH_STRATEGY
   ): ISearchOptions {
@@ -276,7 +370,7 @@ export class SearchMethodsService implements ISearchMethods {
   // EQL Search Helpers
   // ============================================================================
 
-  private buildEQLRequest(params: IEqlSearchParams, options?: IEqlSearchOptions): IEsSearchRequest {
+  private buildEqlRequest(params: IEqlSearchParams, options?: IEqlSearchOptions): IEsSearchRequest {
     return {
       params: {
         index: typeof params.index === 'string' ? params.index : params.index.getIndexPattern(),
@@ -294,7 +388,7 @@ export class SearchMethodsService implements ISearchMethods {
     };
   }
 
-  private mapEQLOptions(
+  private mapEqlOptions(
     options: IEqlSearchOptions | undefined,
     strategy: typeof EQL_SEARCH_STRATEGY
   ): ISearchOptions {
@@ -308,7 +402,7 @@ export class SearchMethodsService implements ISearchMethods {
   // SQL Search Helpers
   // ============================================================================
 
-  private buildSQLRequest(params: ISqlSearchParams, options?: ISqlSearchOptions): IEsSearchRequest {
+  private buildSqlRequest(params: ISqlSearchParams, options?: ISqlSearchOptions): IEsSearchRequest {
     return {
       params: {
         body: {
@@ -322,7 +416,7 @@ export class SearchMethodsService implements ISearchMethods {
     };
   }
 
-  private mapSQLOptions(
+  private mapSqlOptions(
     options: ISqlSearchOptions | undefined,
     strategy: typeof SQL_SEARCH_STRATEGY
   ): ISearchOptions {

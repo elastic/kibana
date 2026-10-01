@@ -2726,8 +2726,6 @@
     "data.search.es_search.documentsProcessedLabel": "已处理的文档",
     "data.search.es_search.hitsDescription": "查询返回的文档数目。",
     "data.search.es_search.hitsLabel": "命中数",
-    "data.search.es_search.hitsTotalDescription": "与查询匹配的文档数目。",
-    "data.search.es_search.hitsTotalLabel": "命中数（总数）",
     "data.search.es_search.indexPatternDescription": "连接到 Elasticsearch 索引的数据视图。",
     "data.search.es_search.queryTimeDescription": "处理查询所花费的时间。不包括发送请求或在浏览器中解析它的时间。",
     "data.search.es_search.queryTimeLabel": "查询时间",

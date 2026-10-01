@@ -2725,8 +2725,6 @@
     "data.search.es_search.documentsProcessedLabel": "処理されたドキュメント",
     "data.search.es_search.hitsDescription": "クエリーにより返されたドキュメントの数です。",
     "data.search.es_search.hitsLabel": "ヒット数",
-    "data.search.es_search.hitsTotalDescription": "クエリーに一致するドキュメントの数です。",
-    "data.search.es_search.hitsTotalLabel": "ヒット数（合計）",
     "data.search.es_search.indexPatternDescription": "Elasticsearchインデックスに接続したデータビューです。",
     "data.search.es_search.queryTimeDescription": "クエリの処理の所要時間です。リクエストの送信やブラウザーでのパースの時間は含まれません。",
     "data.search.es_search.queryTimeLabel": "クエリー時間",

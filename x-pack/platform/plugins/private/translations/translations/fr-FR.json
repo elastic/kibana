@@ -2712,8 +2712,6 @@
     "data.search.es_search.documentsProcessedLabel": "Documents traités",
     "data.search.es_search.hitsDescription": "Le nombre de documents renvoyés par la requête.",
     "data.search.es_search.hitsLabel": "Résultats",
-    "data.search.es_search.hitsTotalDescription": "Le nombre de documents correspondant à la requête.",
-    "data.search.es_search.hitsTotalLabel": "Résultats (total)",
     "data.search.es_search.indexPatternDescription": "La vue de données qui se connecte aux index Elasticsearch.",
     "data.search.es_search.queryTimeDescription": "Le temps qu'il a fallu pour traiter la requête. Ne comprend pas le temps nécessaire pour envoyer la requête ni l'analyser dans le navigateur.",
     "data.search.es_search.queryTimeLabel": "Durée de la requête",
