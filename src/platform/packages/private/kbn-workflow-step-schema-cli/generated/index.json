@@ -605,6 +605,7 @@
     "nightshift.cortexHydrate",
     "nightshift.cortexOptimize",
     "nightshift.ensureInvestigationAgent",
+    "nightshift.resolveModel",
     "nightshift.triggerInvestigation",
     "notion.getDataSource",
     "notion.getPage",
@@ -796,6 +797,7 @@
     "shodan.getHostInfo",
     "shodan.getServices",
     "shodan.searchHosts",
+    "significantEvents.resolveModel",
     "slack",
     "slack2.createConversation",
     "slack2.getConversationHistory",
@@ -983,11 +985,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "f479e651bbf9da0e4facd4e206a81c5f9c565026632c77f4640645d03921e2ce"
+      "sha256": "60dc2b3e3644fab1321276e4ab56e69e290d5e5a9c5279be4e3f29f3f299ad5c"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "fd62da1b024ef1bbe43c9263de38981116652bd2f4516db27101f2693541ef29"
+      "sha256": "d1b29627dbd9ed479d3eebfa2a5b1f55d72e318a8c415a23eb1369cf5fa742db"
     }
   }
 }

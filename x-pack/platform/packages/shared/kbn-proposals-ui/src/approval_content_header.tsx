@@ -21,7 +21,7 @@ import {
   type ProposedActionStatusBadgeProps,
 } from './needs_review_badge';
 
-interface ApprovalModalHeaderProps {
+interface ApprovalContentHeaderProps {
   /**
    * Badge color/icon/label/loading. Omitted for the default "Needs review" pending state — see
    * {@link ProposedActionStatusBadge}'s own defaults.
@@ -33,7 +33,7 @@ interface ApprovalModalHeaderProps {
   titleId: string;
 }
 
-export const ApprovalModalHeader = memo<ApprovalModalHeaderProps>(
+export const ApprovalContentHeader = memo<ApprovalContentHeaderProps>(
   ({ badge, caption, title, titleId }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -66,4 +66,4 @@ export const ApprovalModalHeader = memo<ApprovalModalHeaderProps>(
   }
 );
 
-ApprovalModalHeader.displayName = 'ApprovalModalHeader';
+ApprovalContentHeader.displayName = 'ApprovalContentHeader';
