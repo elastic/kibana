@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -23,7 +23,7 @@ import {
 } from './worker_dependencies';
 
 const HUNT = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
-const RULE_CREATION = SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID;
+const RULE_COVERAGE = SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
 const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const ENDPOINT_ANALYSIS = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
 
@@ -34,7 +34,7 @@ const messages = (reasons: Array<{ message: React.ReactNode }>) =>
 
 describe('getDisableConfirmation', () => {
   it.each([
-    ['Continuous Threat Hunt', HUNT, RULE_CREATION],
+    ['Continuous Threat Hunt', HUNT, RULE_COVERAGE],
     ['Attack Discovery', ATTACK_DISCOVERY, ENDPOINT_ANALYSIS],
   ])('asks before turning off %s while its dependent is enabled', (name, provider, dependent) => {
     const confirmation = getDisableConfirmation(
@@ -49,16 +49,16 @@ describe('getDisableConfirmation', () => {
   it('names the dependent in the dialog body', () => {
     const confirmation = getDisableConfirmation(
       HUNT,
-      enabledById({ [HUNT]: true, [RULE_CREATION]: true })
+      enabledById({ [HUNT]: true, [RULE_COVERAGE]: true })
     );
     render(<I18nProvider>{confirmation?.paragraphs[0].message}</I18nProvider>);
 
-    expect(screen.getByText('Rule Creation', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.getByText('Rule Coverage', { selector: 'strong' })).toBeInTheDocument();
   });
 
   it('does not ask when every dependent is off', () => {
     expect(
-      getDisableConfirmation(HUNT, enabledById({ [HUNT]: true, [RULE_CREATION]: false }))
+      getDisableConfirmation(HUNT, enabledById({ [HUNT]: true, [RULE_COVERAGE]: false }))
     ).toBeUndefined();
   });
 
@@ -80,7 +80,7 @@ describe('getDisableConfirmation', () => {
 
   it('does not treat the dependent as a provider', () => {
     expect(
-      getDisableConfirmation(RULE_CREATION, enabledById({ [HUNT]: true, [RULE_CREATION]: true }))
+      getDisableConfirmation(RULE_COVERAGE, enabledById({ [HUNT]: true, [RULE_COVERAGE]: true }))
     ).toBeUndefined();
   });
 });
@@ -88,8 +88,8 @@ describe('getDisableConfirmation', () => {
 describe('getWorkerWarningReasons', () => {
   it('warns the dependent while its provider is off, whether or not the dependent is on', () => {
     for (const dependentEnabled of [true, false]) {
-      const state = enabledById({ [HUNT]: false, [RULE_CREATION]: dependentEnabled });
-      expect(messages(getWorkerWarningReasons(RULE_CREATION, state))).toEqual([
+      const state = enabledById({ [HUNT]: false, [RULE_COVERAGE]: dependentEnabled });
+      expect(messages(getWorkerWarningReasons(RULE_COVERAGE, state))).toEqual([
         'Continuous Threat Hunt is disabled — no gap signals to act on.',
       ]);
     }
@@ -97,24 +97,24 @@ describe('getWorkerWarningReasons', () => {
 
   it('warns the provider while it is off and its dependent is enabled', () => {
     expect(
-      messages(getWorkerWarningReasons(HUNT, enabledById({ [HUNT]: false, [RULE_CREATION]: true })))
-    ).toEqual(['Rule Creation is enabled but has no gap signals while this Worker is off.']);
+      messages(getWorkerWarningReasons(HUNT, enabledById({ [HUNT]: false, [RULE_COVERAGE]: true })))
+    ).toEqual(['Rule Coverage is enabled but has no gap signals while this Worker is off.']);
   });
 
   it('does not warn the provider when its dependent is off too', () => {
     expect(
-      getWorkerWarningReasons(HUNT, enabledById({ [HUNT]: false, [RULE_CREATION]: false }))
+      getWorkerWarningReasons(HUNT, enabledById({ [HUNT]: false, [RULE_COVERAGE]: false }))
     ).toEqual([]);
   });
 
   it('warns nobody while the provider is on', () => {
-    const state = enabledById({ [HUNT]: true, [RULE_CREATION]: true });
+    const state = enabledById({ [HUNT]: true, [RULE_COVERAGE]: true });
     expect(getWorkerWarningReasons(HUNT, state)).toEqual([]);
-    expect(getWorkerWarningReasons(RULE_CREATION, state)).toEqual([]);
+    expect(getWorkerWarningReasons(RULE_COVERAGE, state)).toEqual([]);
   });
 
   it('does not warn the dependent when the provider is not registered', () => {
-    expect(getWorkerWarningReasons(RULE_CREATION, enabledById({ [RULE_CREATION]: true }))).toEqual(
+    expect(getWorkerWarningReasons(RULE_COVERAGE, enabledById({ [RULE_COVERAGE]: true }))).toEqual(
       []
     );
   });
@@ -132,13 +132,13 @@ describe('getWorkerWarningReasons', () => {
 });
 
 describe('getBlockedAfterSaveNotices', () => {
-  const bothOff = enabledById({ [HUNT]: false, [RULE_CREATION]: false });
-  const huntOffRuleCreationOn = enabledById({ [HUNT]: false, [RULE_CREATION]: true });
+  const bothOff = enabledById({ [HUNT]: false, [RULE_COVERAGE]: false });
+  const huntOffRuleCreationOn = enabledById({ [HUNT]: false, [RULE_COVERAGE]: true });
 
   it('notifies for a Worker the save turned on that is still blocked', () => {
-    const notices = getBlockedAfterSaveNotices(bothOff, huntOffRuleCreationOn, [RULE_CREATION]);
+    const notices = getBlockedAfterSaveNotices(bothOff, huntOffRuleCreationOn, [RULE_COVERAGE]);
 
-    expect(notices.map(({ workerId }) => workerId)).toEqual([RULE_CREATION]);
+    expect(notices.map(({ workerId }) => workerId)).toEqual([RULE_COVERAGE]);
     expect(messages(notices[0].reasons)).toEqual([
       'Continuous Threat Hunt is disabled — no gap signals to act on.',
     ]);
@@ -146,14 +146,14 @@ describe('getBlockedAfterSaveNotices', () => {
 
   it('skips a Worker that was already enabled, so a settings-only save stays quiet', () => {
     expect(
-      getBlockedAfterSaveNotices(huntOffRuleCreationOn, huntOffRuleCreationOn, [RULE_CREATION])
+      getBlockedAfterSaveNotices(huntOffRuleCreationOn, huntOffRuleCreationOn, [RULE_COVERAGE])
     ).toEqual([]);
   });
 
   it('skips a Worker that is off after the save', () => {
     expect(
       getBlockedAfterSaveNotices(
-        enabledById({ [HUNT]: true, [RULE_CREATION]: true }),
+        enabledById({ [HUNT]: true, [RULE_COVERAGE]: true }),
         huntOffRuleCreationOn,
         [HUNT]
       )
@@ -167,9 +167,9 @@ describe('getBlockedAfterSaveNotices', () => {
   it('skips a Worker the save turned on that is not blocked', () => {
     expect(
       getBlockedAfterSaveNotices(
-        enabledById({ [HUNT]: true, [RULE_CREATION]: false }),
-        enabledById({ [HUNT]: true, [RULE_CREATION]: true }),
-        [RULE_CREATION]
+        enabledById({ [HUNT]: true, [RULE_COVERAGE]: false }),
+        enabledById({ [HUNT]: true, [RULE_COVERAGE]: true }),
+        [RULE_COVERAGE]
       )
     ).toEqual([]);
   });

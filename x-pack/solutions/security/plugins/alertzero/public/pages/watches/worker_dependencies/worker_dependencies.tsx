@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
@@ -41,7 +41,7 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
   {
     // Hunt is the only writer of the `security.coverage` records Rule Coverage works on.
     providerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-    dependentId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+    dependentId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
     disableBody: ({ providerName, dependentName }) => (
       <FormattedMessage
         id="xpack.alertzero.watches.workerDependencies.huntToRuleCoverage.disableBody"

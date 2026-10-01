@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
 import { getDisableConfirmation } from './worker_dependencies';
@@ -20,7 +20,7 @@ const renderModal = () => {
     SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
     new Map([
       [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID, true],
-      [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID, true],
+      [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID, true],
     ])
   );
   if (!confirmation) {
@@ -47,7 +47,7 @@ describe('WorkerDisableConfirmModal', () => {
 
     expect(modal).toHaveTextContent('Disable Continuous Threat Hunt?');
     expect(modal).toHaveTextContent(
-      "Rule Creation is enabled and depends on this Worker's findings. While Continuous Threat Hunt is off, Rule Creation has no gap signals to act on."
+      "Rule Coverage is enabled and depends on this Worker's findings. While Continuous Threat Hunt is off, Rule Coverage has no gap signals to act on."
     );
   });
 
