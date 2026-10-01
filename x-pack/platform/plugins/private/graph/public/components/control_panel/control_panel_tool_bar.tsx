@@ -9,7 +9,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import type { ControlType, RuntimeGraph, WorkspaceField } from '../../types';
+import type { ControlType, WorkspaceField } from '../../types';
 import {
   blocklistSelectedNodes,
   deleteSelectedNodes,
@@ -24,20 +24,18 @@ import {
 } from '../../state_management';
 
 interface ControlPanelToolBarProps {
-  workspace: RuntimeGraph;
   liveResponseFields: WorkspaceField[];
   onSetControl: (action: ControlType) => void;
 }
 
 export const ControlPanelToolBar = ({
-  workspace,
   onSetControl,
   liveResponseFields,
 }: ControlPanelToolBarProps) => {
   const dispatch = useDispatch<GraphDispatch>();
-  const { isLayoutRunning, selectedNodeIds, undoHistory, redoHistory } =
+  const { isLayoutRunning, nodeIds, selectedNodeIds, undoHistory, redoHistory } =
     useSelector(workspaceSelector);
-  const haveNodes = workspace.nodes.length === 0;
+  const haveNodes = nodeIds.length === 0;
 
   const undoButtonMsg = i18n.translate('xpack.graph.sidebar.topMenu.undoButtonTooltip', {
     defaultMessage: 'Undo',
@@ -131,7 +129,7 @@ export const ControlPanelToolBar = ({
             iconType="plus"
             size="xs"
             aria-label={expandButtonMsg}
-            isDisabled={liveResponseFields.length === 0 || workspace.nodes.length === 0}
+            isDisabled={liveResponseFields.length === 0 || nodeIds.length === 0}
             onClick={onExpandButtonClick}
           />
         </EuiToolTip>
@@ -198,7 +196,7 @@ export const ControlPanelToolBar = ({
         </EuiToolTip>
       </EuiFlexItem>
 
-      {(workspace.nodes.length === 0 || !isLayoutRunning) && (
+      {(nodeIds.length === 0 || !isLayoutRunning) && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={runLayoutButtonMsg} disableScreenReaderOutput>
             <EuiButtonIcon
@@ -206,14 +204,14 @@ export const ControlPanelToolBar = ({
               iconType="play"
               size="xs"
               aria-label={runLayoutButtonMsg}
-              isDisabled={workspace.nodes.length === 0}
+              isDisabled={nodeIds.length === 0}
               onClick={onRunLayoutClick}
             />
           </EuiToolTip>
         </EuiFlexItem>
       )}
 
-      {isLayoutRunning && workspace.nodes.length > 0 && (
+      {isLayoutRunning && nodeIds.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={pauseLayoutButtonMsg} disableScreenReaderOutput>
             <EuiButtonIcon

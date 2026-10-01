@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ControlType, RuntimeGraph } from '../../types';
+import type { ControlType } from '../../types';
 import {
   clearNodeSelection,
   invertNodeSelection,
@@ -21,14 +21,13 @@ import {
 } from '../../state_management';
 
 interface SelectionToolBarProps {
-  workspace: RuntimeGraph;
   onSetControl: (data: ControlType) => void;
 }
 
-export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarProps) => {
+export const SelectionToolBar = ({ onSetControl }: SelectionToolBarProps) => {
   const dispatch = useDispatch<GraphDispatch>();
-  const { selectedNodeIds } = useSelector(workspaceSelector);
-  const haveNodes = workspace.nodes.length === 0;
+  const { nodeIds, selectedNodeIds } = useSelector(workspaceSelector);
+  const haveNodes = nodeIds.length === 0;
 
   const selectAllButtonMsg = i18n.translate(
     'xpack.graph.sidebar.selections.selectAllButtonTooltip',
