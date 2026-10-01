@@ -85,6 +85,8 @@ node scripts/evals start --suite agent-builder --concurrency 8
 
 `--concurrency` (or `EVAL_CONCURRENCY`) sets how many examples each experiment runs at once. It falls back to the `concurrency` passed to `createPlaywrightEvalsConfig`, then 5. A spec that passes its own `concurrency` to `runExperiment` still wins, and the run logs a warning when that overrides the value you asked for. Server-side limits such as Task Manager capacity stay with the suite's Scout config set.
 
+> **Rate limits:** Concurrent LLM calls are roughly workers × concurrency. Connectors such as EIS and OpenRouter enforce requests-per-minute limits, so a high `--concurrency` can cause 429 (rate limit) errors. If they occur, reduce `--concurrency` or set `KBN_EVALS_HTTP_RETRIES` to retry `fetch` requests (off by default).
+
 #### Advanced options
 
 <details>
