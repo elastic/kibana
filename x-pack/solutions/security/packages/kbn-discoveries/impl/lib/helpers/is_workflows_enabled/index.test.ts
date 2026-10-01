@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
+
 import { ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG, isWorkflowsEnabled } from '.';
 
 describe('isWorkflowsEnabled', () => {
@@ -29,5 +31,15 @@ describe('isWorkflowsEnabled', () => {
     const getBooleanValue = jest.fn().mockResolvedValue(false);
 
     expect(await isWorkflowsEnabled({ getBooleanValue })).toBe(false);
+  });
+
+  it('reads the start-contract observable when it is available', async () => {
+    const getBooleanValue$ = jest.fn().mockReturnValue(of(true));
+
+    expect(await isWorkflowsEnabled({ getBooleanValue$ })).toBe(true);
+    expect(getBooleanValue$).toHaveBeenCalledWith(
+      ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG,
+      true
+    );
   });
 });

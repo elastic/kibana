@@ -1,0 +1,112 @@
+{
+  "sha1": "75f60a70e1a254226819d72ece6f33d39ce24582",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "b055d4cffe6fdbd-c603f027640317c",
+      "title": "POST /internal/proposals/{proposalId}/revisions creates a new pending revision and supersedes the original",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "line": 31,
+        "column": 31
+      }
+    },
+    {
+      "id": "b055d4cffe6fdbd-b26bd3ad73bc520",
+      "title": "POST /internal/proposals/{proposalId}/revisions keeps rootProposalId stable and increments revision across a multi-hop chain",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "line": 66,
+        "column": 16
+      }
+    },
+    {
+      "id": "b055d4cffe6fdbd-c2ee2c8030db4b5",
+      "title": "POST /internal/proposals/{proposalId}/revisions returns 404 for a proposal that does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "line": 87,
+        "column": 37
+      }
+    },
+    {
+      "id": "b055d4cffe6fdbd-643429feb854aca",
+      "title": "POST /internal/proposals/{proposalId}/revisions returns 409 when the proposal is no longer pending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "line": 89,
+        "column": 38
+      }
+    },
+    {
+      "id": "b055d4cffe6fdbd-395c7937beda92b",
+      "title": "POST /internal/proposals/{proposalId}/revisions returns 409 when revising a proposal that is already superseded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "line": 105,
+        "column": 31
+      }
+    },
+    {
+      "id": "b055d4cffe6fdbd-e386a06b9f71e69",
+      "title": "POST /internal/proposals/{proposalId}/revisions returns 403 for a caller without manage_proposals",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "line": 116,
+        "column": 9
+      }
+    },
+    {
+      "id": "b055d4cffe6fdbd-b67f300791e7b97",
+      "title": "POST /internal/proposals/{proposalId}/revisions returns 400 for a comment exceeding the length cap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "line": 126,
+        "column": 9
+      }
+    },
+    {
+      "id": "b055d4cffe6fdbd-3dd91ff0df0399f",
+      "title": "POST /internal/proposals/{proposalId}/revisions does not revise a proposal from another space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/proposals/test/scout_proposals/api/tests/revisions.spec.ts",
+        "line": 135,
+        "column": 7
+      }
+    }
+  ]
+}

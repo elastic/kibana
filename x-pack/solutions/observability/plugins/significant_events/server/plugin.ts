@@ -17,6 +17,7 @@ import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   catchError,
   combineLatest,
@@ -31,7 +32,10 @@ import {
 } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_ENABLED_FLAG,
+  SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
+} from '@kbn/nightshift-shared';
 import {
   getRelayAppConnectionSavedObjectType,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -48,7 +52,7 @@ import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
 } from './lib/maintenance/maintenance_service';
-import { createMaintenanceSystemRequest } from './lib/maintenance/system_request';
+import { whenNightshiftTurnsOff } from './lib/maintenance/when_nightshift_turns_off';
 import {
   createManagedWorkflowsInstaller,
   type ManagedWorkflowsInstaller,
@@ -107,10 +111,15 @@ import {
   installFeatureIdentificationAgent,
   registerSignificantEventsFeatureIdentificationAgentTypes,
 } from './agent_builder/agents/feature_identification';
+import {
+  installKIQueryGenerationAgent,
+  registerSignificantEventsKIQueryGenerationAgentTypes,
+} from './agent_builder/agents/ki_query_generation';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
+import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
@@ -191,7 +200,7 @@ export class SignificantEventsPlugin
       rulesClientOptions?: RulesClientCreateOptions;
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
-      const isServerless = plugins.cloud?.isServerlessEnabled ?? false;
+      const cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
 
       const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
@@ -204,7 +213,7 @@ export class SignificantEventsPlugin
       // they model all data available to a stream - so extraction must always read across every
       // linked project.
       //
-      // Detection matches that all-projects scope on serverless via `withAllProjectsRouting`.
+      // Detection matches that all-projects scope when CPS is enabled via `withAllProjectsRouting`.
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
       const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
         projectRouting: 'expression',
@@ -224,11 +233,17 @@ export class SignificantEventsPlugin
 
       const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
+      const useRuleEventsRead = await coreStart.featureFlags.getBooleanValue(
+        SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
+        false
+      );
+
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
         space,
+        useRuleEventsRead,
         triggerEmitter: createTriggerEmitter({
           workflowsExtensions: pluginsStart.workflowsExtensions,
           request,
@@ -238,6 +253,21 @@ export class SignificantEventsPlugin
 
       const getAlertingV2RulesClient = async () =>
         pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
+
+      let alertEventsClientPromise: Promise<AlertEventsClientApi | undefined> | undefined;
+      const getAlertEventsClient = (): Promise<AlertEventsClientApi | undefined> => {
+        alertEventsClientPromise ??= pluginsStart.alertingVTwo
+          .getAlertEventsClientWithRequest(request)
+          .catch((err) => {
+            this.logger.warn(
+              `Failed to acquire AlertEventsClient; .rule-events dual-write skipped: ${
+                err instanceof Error ? err.message : err
+              }`
+            );
+            return undefined;
+          });
+        return alertEventsClientPromise;
+      };
 
       const deleteLegacyRulesById = async (ruleIds: string[]): Promise<void> => {
         if (ruleIds.length === 0) {
@@ -254,7 +284,7 @@ export class SignificantEventsPlugin
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
           getAlertingV2RulesClient,
-          isServerless,
+          cpsEnabled,
         });
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
@@ -282,6 +312,7 @@ export class SignificantEventsPlugin
         attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
+        getAlertEventsClient,
         deleteLegacyRules: deleteLegacyRulesById,
         ...significantEventsClients,
         inferenceClient,
@@ -323,6 +354,13 @@ export class SignificantEventsPlugin
               })
             : false;
         },
+        getUseRuleEventsRead: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.featureFlags.getBooleanValue(
+            SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
+            false
+          );
+        },
       });
     }
 
@@ -330,6 +368,13 @@ export class SignificantEventsPlugin
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
       registerSignificantEventsFeatureIdentificationAgentTypes({
         agentBuilder: plugins.agentBuilder,
+      });
+      registerSignificantEventsKIQueryGenerationAgentTypes({
+        agentBuilder: plugins.agentBuilder,
+        isSemanticCodeSearchGroundingEnabled: async () =>
+          this.server?.core
+            ? isSignificantEventsSemanticCodeSearchGroundingEnabled(this.server.core.featureFlags)
+            : false,
       });
       void core
         .getStartServices()
@@ -529,6 +574,7 @@ export class SignificantEventsPlugin
       this.managedWorkflowsInstaller = createManagedWorkflowsInstaller({
         getClient: () =>
           workflowsExtensions.initManagedWorkflowsClient(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER),
+        dataStreams: core.dataStreams,
         isAvailable,
         logger: this.logger,
       });
@@ -542,6 +588,19 @@ export class SignificantEventsPlugin
       availabilityEnabled$.subscribe(() => {
         void this.ensureSignificantEventsInstalled(isAvailable).catch((error: unknown) => {
           this.logManagedResourceError('availability flag change', error);
+        });
+      })
+    );
+
+    // Turning Nightshift off at runtime (once the value settles) pauses background activity.
+    // Turning it back on leaves the pause in place (the install above re-asserts it) until a
+    // user resumes.
+    this.subscriptions.push(
+      whenNightshiftTurnsOff(
+        core.featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false)
+      ).subscribe(() => {
+        void this.maintenanceService?.pauseOnFlagOff().catch((error: unknown) => {
+          this.logFlagOffPauseError(error);
         });
       })
     );
@@ -568,6 +627,13 @@ export class SignificantEventsPlugin
         availability,
       }).catch((error: unknown) => {
         this.logManagedResourceError('feature identification agent', error);
+      });
+      void installKIQueryGenerationAgent({
+        agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+        availability,
+      }).catch((error: unknown) => {
+        this.logManagedResourceError('KI query generation agent', error);
       });
     }
 
@@ -640,14 +706,20 @@ export class SignificantEventsPlugin
     }
     // Propagate failures: swallowing them lets install succeed while newly
     // installed workflows stay enabled during a paused deployment.
-    await this.maintenanceService.reassertPausedWorkflows({
-      request: createMaintenanceSystemRequest(),
-    });
+    await this.maintenanceService.reassertPause();
   }
 
   private logManagedResourceError(context: string, error: unknown): void {
     this.logger.error(
       `significantEvents: failed to install managed resources (${context}): ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
+  private logFlagOffPauseError(error: unknown): void {
+    this.logger.error(
+      `significantEvents: failed to pause after Nightshift was turned off: ${
         error instanceof Error ? error.message : String(error)
       }`
     );

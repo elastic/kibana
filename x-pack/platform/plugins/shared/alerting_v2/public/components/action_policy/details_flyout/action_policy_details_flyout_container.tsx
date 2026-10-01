@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
@@ -28,9 +29,15 @@ import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
 interface Props {
   policyId: string;
   onClose: () => void;
+  /** Managed-flyout session. Use `inherit` when this flyout opens on top of another. */
+  session?: EuiFlyoutProps['session'];
 }
 
-export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props) => {
+export const ActionPolicyDetailsFlyoutContainer = ({
+  policyId,
+  onClose,
+  session = 'start',
+}: Props) => {
   const { actionPolicyLocators } = useAlertingLocators();
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
 
@@ -83,12 +90,15 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
   };
 
   if (isLoading) {
-    return <LoadingFlyout onClose={onClose} />;
+    return <LoadingFlyout type="overlay" session={session} ownFocus={false} onClose={onClose} />;
   }
 
   if (isError || !policy) {
     return (
       <EntityNotFoundFlyout
+        type="overlay"
+        session={session}
+        ownFocus={false}
         title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.notFoundTitle', {
           defaultMessage: 'Action policy not found',
         })}
@@ -126,7 +136,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
             (isDisabling && disableVariables === policy.id)
           }
           isSnoozeLoading={isSnoozing || isUnsnoozing}
-          session={'start'}
+          session={session}
           ownFocus={false}
         />
       )}

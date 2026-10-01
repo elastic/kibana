@@ -366,6 +366,13 @@ export const allowedExperimentalValues = Object.freeze({
   mitreAttackUpdatesUIEnabled: true,
 
   /**
+   * Enables the reworked Elastic Defend policy settings form with
+   * per-operating-system protection configuration.
+   * Release: 9.6
+   */
+  perOsPolicySettings: false,
+
+  /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
    * creation policy but has no entity store record, create the entity (with its risk score)
    * instead of silently dropping the score.
@@ -376,16 +383,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
   siemRuleMigrationsAgentBuilderEnabled: false,
-
-  /**
-   * Threat-intel supply pipeline (indices, ingest adapters, create
-   * report, IOC extraction, LLM enrichment, Diamond, promote task). Default
-   * off. Direct index access is not yet cross-space hardened, so this must remain
-   * disabled until that isolation is implemented or the administrator trust model
-   * is explicitly accepted. Enable with:
-   *   xpack.securitySolution.enableExperimental: ['threatIntelSupplyEnabled']
-   */
-  threatIntelSupplyEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

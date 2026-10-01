@@ -13,7 +13,10 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
 import { CONTEXT_ENGINE_SETUP_AGENT_ID } from '../common/agent_builder_agents';
-import { createSuggestAutomationProvider } from './create_suggest_automation_provider';
+import {
+  buildSuggestAutomationSessionTag,
+  createSuggestAutomationProvider,
+} from './create_suggest_automation_provider';
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -137,29 +140,53 @@ describe('createSuggestAutomationProvider', () => {
   it('keeps skill ids out of the message the user reads, since the attachment carries them', () => {
     const { provider, openChat } = createProvider();
 
-    provider.suggestAutomation({ aiIndex, onSaved: jest.fn() });
+    provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
 
     const { initialMessage } = openChat.mock.calls[0][0];
     expect(initialMessage).not.toMatch(/skill:\/\//);
     expect(initialMessage).not.toMatch(/attachment/i);
   });
 
-  it('opens agent builder chat with the AI index attachment', () => {
+  it('uses a short attachment label even when the AI index description is long', () => {
     const { provider, openChat } = createProvider();
+    const longDescription = 'a'.repeat(1500);
 
-    provider.suggestAutomation({ aiIndex, onSaved: jest.fn() });
+    provider.suggestAutomation({
+      aiIndex: { ...aiIndex, description: longDescription },
+      spaceId: 'default',
+      onSaved: jest.fn(),
+    });
 
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
-        newConversation: true,
+        attachments: [
+          expect.objectContaining({
+            description: 'AI index my-ai-index',
+            data: expect.objectContaining({
+              description: longDescription,
+            }),
+          }),
+        ],
+      })
+    );
+  });
+
+  it('opens agent builder chat with the AI index attachment', () => {
+    const { provider, openChat } = createProvider();
+
+    provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
+
+    expect(openChat).toHaveBeenCalledWith(
+      expect.objectContaining({
         autoSendInitialMessage: true,
         agentId: CONTEXT_ENGINE_SETUP_AGENT_ID,
         initialMessage: 'Suggest an automation for this AI index.',
-        sessionTag: 'context-engine-ai-index-my-ai-index',
+        sessionTag: buildSuggestAutomationSessionTag('default', 'my-ai-index'),
         attachments: [
           expect.objectContaining({
             id: 'my-ai-index',
             type: AI_INDEX_ATTACHMENT_TYPE,
+            description: 'AI index my-ai-index',
             data: {
               id: 'my-ai-index',
               description: 'Support tickets',
@@ -171,6 +198,45 @@ describe('createSuggestAutomationProvider', () => {
           }),
         ],
       })
+    );
+  });
+
+  it('does not force a new conversation, so re-opening for the same AI index reuses the session', () => {
+    const { provider, openChat } = createProvider();
+
+    provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
+
+    // `newConversation` must be left unset: `agentBuilder.openChat` restores the
+    // conversation persisted under `sessionTag` when this flag is absent/false.
+    expect(openChat.mock.calls[0][0]).not.toHaveProperty('newConversation');
+  });
+
+  it('uses a distinct sessionTag per AI index, so different AI indexes never share a conversation', () => {
+    const { provider, openChat } = createProvider();
+    const otherAiIndex: GetAiIndexResponse = { ...aiIndex, id: 'other-ai-index' };
+
+    provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
+    provider.suggestAutomation({ aiIndex: otherAiIndex, spaceId: 'default', onSaved: jest.fn() });
+
+    expect(openChat.mock.calls[0][0].sessionTag).toBe(
+      buildSuggestAutomationSessionTag('default', 'my-ai-index')
+    );
+    expect(openChat.mock.calls[1][0].sessionTag).toBe(
+      buildSuggestAutomationSessionTag('default', 'other-ai-index')
+    );
+  });
+
+  it('scopes sessionTag to the given space so the same AI index id in different spaces does not share a conversation', () => {
+    const { provider, openChat } = createProvider();
+
+    provider.suggestAutomation({ aiIndex, spaceId: 'marketing', onSaved: jest.fn() });
+    provider.suggestAutomation({ aiIndex, spaceId: 'sales', onSaved: jest.fn() });
+
+    expect(openChat.mock.calls[0][0].sessionTag).toBe(
+      buildSuggestAutomationSessionTag('marketing', 'my-ai-index')
+    );
+    expect(openChat.mock.calls[1][0].sessionTag).toBe(
+      buildSuggestAutomationSessionTag('sales', 'my-ai-index')
     );
   });
 

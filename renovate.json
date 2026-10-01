@@ -127,7 +127,6 @@
         "openai",
         "@types/json-schema",
         "table",
-        "@huggingface/hub",
         "cache-manager",
         "cache-manager-fs-hash",
         "keyv",
@@ -733,8 +732,8 @@
     {
       "groupName": "LaunchDarkly",
       "matchDepNames": [
-        "launchdarkly-js-client-sdk",
         "@openfeature/launchdarkly-client-provider",
+        "@launchdarkly/js-client-sdk",
         "@launchdarkly/node-server-sdk",
         "@launchdarkly/openfeature-node-server"
       ],
@@ -883,7 +882,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript", "typescript-7"],
+      "matchDepNames": ["typescript", "typescript-7", "oxlint-tsgolint"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1282,29 +1281,11 @@
       "enabled": true
     },
     {
-      "groupName": "search-ui ai dependency",
-      "matchDepNames": ["ai", "@ai-sdk/langchain"],
-      "reviewers": ["team:search-ml-ux"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Search", "Team:Enterprise Search"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "search-ui kea dependency",
       "matchDepNames": ["kea"],
       "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Search", "Team:Enterprise Search", "effort:high", "upgrade-risk:medium"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "search-ui swr dependency",
-      "matchDepNames": ["swr"],
-      "reviewers": ["team:search-ml-ux"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Search", "Team:Enterprise Search"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2410,7 +2391,7 @@
     },
     {
       "groupName": "oxlint",
-      "matchDepNames": ["oxlint"],
+      "matchDepNames": ["oxlint", "@oxlint/plugins"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

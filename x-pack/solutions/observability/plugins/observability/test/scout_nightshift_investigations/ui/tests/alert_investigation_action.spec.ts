@@ -114,6 +114,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
+      await mockInvestigationApi(page, { includeCompletedInvestigation: true });
       await pageObjects.alertsTablePage.gotoWithAppState({
         kuery: `kibana.alert.rule.uuid: "${ruleId}"`,
         rangeFrom: 'now-1h',
@@ -136,6 +137,7 @@ test.describe(
       page,
       pageObjects,
     }) => {
+      await mockInvestigationApi(page, { includeCompletedInvestigation: true });
       await pageObjects.alertPage.goto(alertId);
       await pageObjects.alertPage.openActionsMenu();
 

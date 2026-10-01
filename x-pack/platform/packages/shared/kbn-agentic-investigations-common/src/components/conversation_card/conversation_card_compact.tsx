@@ -67,7 +67,6 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
           borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
           borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
           boxSizing: 'border-box',
-          boxShadow: 'none',
           backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
           '&:hover': {
             backgroundColor: isSelected
