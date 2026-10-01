@@ -396,4 +396,42 @@ describe('Elasticsearch service account token exchange', () => {
       expect(JSON.stringify(logger.error.mock.calls)).not.toContain(credential.token);
     }
   );
+
+  describe('#getFakeRequestPrincipal', () => {
+    it('describes a request this backend minted as an Elasticsearch service account', async () => {
+      const { backend } = setup();
+      const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
+
+      expect(backend.getFakeRequestPrincipal(request)).toEqual({
+        type: 'service_account',
+        serviceAccountId: ACCOUNT_ID,
+        variant: 'stack',
+      });
+    });
+
+    it('returns null for requests this backend did not mint', () => {
+      const { backend } = setup();
+
+      expect(
+        backend.getFakeRequestPrincipal(httpServerMock.createFakeKibanaRequest({}))
+      ).toBeNull();
+      expect(backend.getFakeRequestPrincipal(httpServerMock.createKibanaRequest())).toBeNull();
+    });
+
+    it('returns null once the request has been released', async () => {
+      const { backend } = setup();
+      const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
+      backend.releaseFakeRequest(request);
+
+      expect(backend.getFakeRequestPrincipal(request)).toBeNull();
+    });
+
+    it('returns null once the request carries a credential other than the one it was minted with', async () => {
+      const { backend } = setup();
+      const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
+      (request.headers as Record<string, string>).authorization = 'ApiKey someone-else';
+
+      expect(backend.getFakeRequestPrincipal(request)).toBeNull();
+    });
+  });
 });

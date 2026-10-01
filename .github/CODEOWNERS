@@ -1074,7 +1074,6 @@ x-pack/platform/packages/shared/ingest-pipelines @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/security-solution
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-ml-ux @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/search-ml-ux
-x-pack/platform/packages/shared/kbn-ai-tools-cli @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
 x-pack/platform/packages/shared/kbn-apm-api-shared @elastic/obs-signals-traces-team
 x-pack/platform/packages/shared/kbn-apm-common @elastic/obs-signals-traces-team
@@ -2655,6 +2654,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/azure_blob/** @elasti
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_functions/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_monitor/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/bigquery/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/bitbucket/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/box/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/buildkite/** @elastic/nightshift-context-and-research-team
@@ -2675,6 +2675,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_monitori
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_storage/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_docs/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/google_gke/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_threat_intelligence/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/graphql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
@@ -3544,6 +3545,7 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_security_persona_matrix @elastic/security-generative-ai
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_attack_discovery_agent_builder @elastic/security-generative-ai
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-investigations-team
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/discover_telemetry @elastic/observability-ui
 # /security_solution/common/endpoint/ and /security_solution/server/endpoint/ children overrides
 /x-pack/solutions/security/plugins/security_solution/common/endpoint/schema/resolver.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts @elastic/security-investigations
