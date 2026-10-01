@@ -11,6 +11,8 @@ import {
   ENTITY_ANALYTICS_ALERTS_TO,
 } from '../components/home/constants';
 
+export const ENTITY_ANALYTICS_NEW_HOME_SCOPE_ID = 'entity-analytics-new-entities-table';
+
 /**
  * Maps a scope ID to the alert query time range that should be used when an
  * entity flyout or insights tab is opened from that scope. Components look up
@@ -23,6 +25,10 @@ export const SCOPE_ALERT_TIME_RANGE_OVERRIDES: Readonly<
   Record<string, { from: string; to: string }>
 > = {
   [ENTITY_ANALYTICS_TABLE_ID]: {
+    from: ENTITY_ANALYTICS_ALERTS_FROM,
+    to: ENTITY_ANALYTICS_ALERTS_TO,
+  },
+  [ENTITY_ANALYTICS_NEW_HOME_SCOPE_ID]: {
     from: ENTITY_ANALYTICS_ALERTS_FROM,
     to: ENTITY_ANALYTICS_ALERTS_TO,
   },
