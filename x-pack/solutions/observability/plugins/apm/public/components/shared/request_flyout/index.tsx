@@ -33,6 +33,7 @@ import { RequestFlyoutLatencyDistribution } from './latency_distribution';
 import { RequestFlyoutRedMetrics } from './red_metrics';
 import { RequestFlyoutOperations } from './operations';
 import { RequestFlyoutAffectedEndpoints } from './transactions';
+import { RequestFlyoutFailedCalls } from './failed_calls';
 import { RequestFlyoutNoMetricsMessage } from './no_metrics_message';
 import { RequestFlyoutContextProvider } from './request_flyout_context';
 import type { RequestFlyoutConnection } from './types';
@@ -184,6 +185,10 @@ export function RequestFlyout({
                 {activeTab === 'affectedEndpoints' && connection.targetServiceName && (
                   <RequestFlyoutAffectedEndpoints />
                 )}
+
+                <EuiSpacer size="l" />
+
+                <RequestFlyoutFailedCalls />
               </EuiFlyoutBody>
               <RequestFlyoutFooter />
             </>

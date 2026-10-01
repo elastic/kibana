@@ -23,6 +23,10 @@ export const K8S_NODE_NAME = 'k8s.node.name';
 export const K8S_DEPLOYMENT_NAME = 'k8s.deployment.name';
 export const K8S_CLUSTER_NAME = 'k8s.cluster.name';
 
+// gRPC status codes (OTel-native ingest uses attributes.* prefix, classic APM uses the bare field)
+export const ATTRIBUTE_RPC_GRPC_STATUS_CODE = 'attributes.rpc.grpc.status_code';
+export const RPC_GRPC_STATUS_CODE = 'rpc.grpc.status_code';
+
 // GenAI OTel semantic conventions (EDOT/OTel-native ingest: attributes.* prefix)
 export const ATTRIBUTE_GEN_AI_OPERATION_NAME = 'attributes.gen_ai.operation.name';
 export const ATTRIBUTE_GEN_AI_PROVIDER_NAME = 'attributes.gen_ai.provider.name';

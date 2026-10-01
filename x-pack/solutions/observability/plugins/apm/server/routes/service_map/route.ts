@@ -12,6 +12,7 @@ import {
   type ServiceMapServiceBadgesResponse,
   type ServiceMapServiceDependencyInfoResponse,
   type ConnectionTransactionsResponse,
+  type ConnectionFailedCallsResponse,
 } from '@kbn/apm-api-shared';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
@@ -29,6 +30,7 @@ import { getServiceMap } from './get_service_map';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import { getServiceMapServiceBadges } from './get_service_map_service_badges';
 import { getConnectionTransactions } from './get_connection_transactions';
+import { getConnectionFailedCalls } from './get_connection_failed_calls';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: routeDefinitions.serviceMap.serviceMap.endpoint,
@@ -215,9 +217,50 @@ const serviceMapConnectionTransactionsRoute = createApmServerRoute({
   },
 });
 
+const serviceMapConnectionFailedCallsRoute = createApmServerRoute({
+  endpoint: routeDefinitions.serviceMap.connectionFailedCalls.endpoint,
+  params: routeDefinitions.serviceMap.connectionFailedCalls.params,
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ConnectionFailedCallsResponse> => {
+    const { config, context, params } = resources;
+
+    if (!config.serviceMapEnabled) {
+      throw Boom.notFound();
+    }
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+    const apmEventClient = await getApmEventClient(resources);
+
+    const {
+      query: {
+        sourceServiceName,
+        targetServiceName,
+        dependencies,
+        environment,
+        start,
+        end,
+      },
+    } = params;
+
+    return getConnectionFailedCalls({
+      apmEventClient,
+      sourceServiceName,
+      targetServiceName,
+      dependencies:
+        dependencies === undefined ? [] : Array.isArray(dependencies) ? dependencies : [dependencies],
+      environment,
+      start,
+      end,
+    });
+  },
+});
+
 export const serviceMapRouteRepository = {
   ...serviceMapRoute,
   ...serviceMapDependencyNodeRoute,
   ...serviceMapServiceBadgesRoute,
   ...serviceMapConnectionTransactionsRoute,
+  ...serviceMapConnectionFailedCallsRoute,
 };
