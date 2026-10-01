@@ -23,8 +23,9 @@ spaceTest.describe('Data view runtime fields', { tag: tags.deploymentAgnostic },
     dataViewId = data.id;
   });
 
+  // Admin: the privileged user has no Data Views management in the Security serverless project
   spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsAdmin();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
