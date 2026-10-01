@@ -13,6 +13,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { monaco } from '@kbn/code-editor';
 import { useQueryClient } from '@kbn/react-query';
+import type { ServiceAccountPickerStatus } from '@kbn/security-plugin/public';
 import { ServiceAccountDetails } from './service_account_details';
 import type { WorkflowServiceAccount } from '../../../../entities/service_accounts';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -27,7 +28,7 @@ type Popup =
       suggestions: ServiceAccountSuggestion[];
       selected: number;
       accountId: string;
-      status: 'loading' | 'ready' | 'forbidden' | 'unavailable';
+      status: ServiceAccountPickerStatus;
       filtered: boolean;
     }
   | { kind: 'details'; position: monaco.IPosition; account: WorkflowServiceAccount };
@@ -161,8 +162,11 @@ export const ServiceAccountEditorWidgets = ({
       close();
       editor.focus();
     };
-    const complete = async (refresh = false) => {
+    const complete = async (refresh = false, loadingMore = false) => {
       clearTimeout(completionTimer);
+      const previous = popupRef.current;
+      const keptSelection =
+        loadingMore && previous?.kind === 'suggestions' ? previous.selected : undefined;
       const model = editor.getModel();
       const position = editor.getPosition();
       const value = model && position && getRunAsValue(model, position);
@@ -187,21 +191,19 @@ export const ServiceAccountEditorWidgets = ({
       const version = model.getVersionId();
       const current = ++completionGeneration;
       const query = filterByTypedValue ? value.id.toLocaleLowerCase() : '';
-      pickerVisible.set(false);
-      const popupPosition = {
-        lineNumber: value.range.startLineNumber,
-        column: value.range.startColumn,
-      };
-      popupVisible.set(true);
-      setPopup({
-        kind: 'suggestions',
-        position: popupPosition,
-        suggestions: [],
-        selected: 0,
-        accountId: value.id,
-        status: 'loading',
-        filtered: Boolean(query),
-      });
+      if (keptSelection === undefined) {
+        pickerVisible.set(false);
+        popupVisible.set(true);
+        setPopup({
+          kind: 'suggestions',
+          position: { lineNumber: value.range.startLineNumber, column: value.range.startColumn },
+          suggestions: [],
+          selected: 0,
+          accountId: value.id,
+          status: 'loading',
+          filtered: Boolean(query),
+        });
+      }
       const result = await accounts.completionProvider.provideCompletionItems(
         model,
         position,
@@ -236,9 +238,13 @@ export const ServiceAccountEditorWidgets = ({
         kind: 'suggestions',
         position: { lineNumber: value.range.startLineNumber, column: value.range.startColumn },
         suggestions,
-        selected: Math.max(
-          0,
-          suggestions.findIndex(({ account }) => account?.id === value.id)
+        selected: Math.min(
+          keptSelection ??
+            Math.max(
+              0,
+              suggestions.findIndex(({ account }) => account?.id === value.id)
+            ),
+          Math.max(0, suggestions.length - 1)
         ),
         accountId: value.id,
         status: result.error ?? 'ready',
@@ -259,7 +265,7 @@ export const ServiceAccountEditorWidgets = ({
       if (editor.getOption(monaco.editor.EditorOption.readOnly)) return;
       if (!suggestion.account) {
         accounts.loadMore();
-        void complete();
+        void complete(false, true);
         return;
       }
       dismissed = true;

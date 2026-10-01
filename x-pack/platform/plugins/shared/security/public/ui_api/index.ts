@@ -21,7 +21,10 @@ export type {
   PersonalInfoProps,
   ServiceAccountPickerProps,
 };
-export type { ServiceAccountPickerDirectory } from './service_account_picker';
+export type {
+  ServiceAccountPickerDirectory,
+  ServiceAccountPickerStatus,
+} from './service_account_picker';
 
 interface GetUiApiOptions {
   core: CoreStart;

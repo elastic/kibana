@@ -12,6 +12,7 @@ import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type {
   ServiceAccountDirectory,
+  ServiceAccountDirectoryError,
   WorkflowServiceAccount,
 } from '../../../../entities/service_accounts';
 
@@ -85,7 +86,7 @@ export const createServiceAccountEditor = (directory: ServiceAccountDirectory) =
       refresh = false
     ): Promise<{
       suggestions: ServiceAccountSuggestion[];
-      error?: 'forbidden' | 'unavailable';
+      error?: ServiceAccountDirectoryError['error'];
     } | null> => {
       const value = getRunAsValue(model, position);
       if (!value || !directory.isEnabled()) return null;

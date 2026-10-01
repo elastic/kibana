@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { CreateServiceAccountFlyout } from './create_service_account_flyout';
 import { ServiceAccountPickerPanel } from './service_account_picker_panel';
 import type { ServiceAccountDirectoryEntry } from '../../../common/service_accounts';
+import { SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE } from '../../../common/service_accounts';
 import { ServiceAccountsAPIClient } from '../../service_accounts';
 import type {
   ServiceAccountPickerDirectory,
@@ -62,6 +63,7 @@ export const ServiceAccountPicker = ({
   const [accounts, setAccounts] = useState<ServiceAccountDirectoryEntry[]>([]);
   const [status, setStatus] = useState<ServiceAccountPickerDirectory['status']>('loading');
   const [nextPage, setNextPage] = useState<string>();
+  const [loadingMore, setLoadingMore] = useState(false);
   const [creating, setCreating] = useState(false);
   const [localActiveIndex, setLocalActiveIndex] = useState(0);
   const optionRefs = useRef<Array<HTMLElement | null>>([]);
@@ -69,9 +71,13 @@ export const ServiceAccountPicker = ({
   const load = useCallback(
     async (after?: string) => {
       const current = ++generation.current;
-      setStatus('loading');
+      if (after) setLoadingMore(true);
+      else setStatus('loading');
       try {
-        const result = await client.list({ limit: 100, ...(after ? { after } : {}) });
+        const result = await client.list({
+          limit: SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
+          ...(after ? { after } : {}),
+        });
         if (!isMounted() || current !== generation.current) return;
         setAccounts((previous) =>
           Array.from(
@@ -85,14 +91,24 @@ export const ServiceAccountPicker = ({
         );
         setNextPage(result.nextPage);
         setStatus('ready');
+        setLoadingMore(false);
       } catch (error) {
         if (!isMounted() || current !== generation.current) return;
+        setLoadingMore(false);
+        if (after) {
+          core.notifications.toasts.addDanger(
+            i18n.translate('xpack.security.serviceAccountPicker.loadMoreErrorMessage', {
+              defaultMessage: 'Unable to load more service accounts.',
+            })
+          );
+          return;
+        }
         setStatus(
           isHttpFetchError(error) && error.response?.status === 403 ? 'forbidden' : 'unavailable'
         );
       }
     },
-    [client, isMounted]
+    [client, core.notifications.toasts, isMounted]
   );
 
   const invalidate = useCallback(() => {
@@ -110,7 +126,7 @@ export const ServiceAccountPicker = ({
     hasMore: Boolean(nextPage),
     onRetry: () => void load(),
     onLoadMore: () => {
-      if (nextPage) void load(nextPage);
+      if (nextPage && !loadingMore) void load(nextPage);
     },
   };
   const query = search.toLocaleLowerCase();

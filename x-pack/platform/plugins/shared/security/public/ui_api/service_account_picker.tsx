@@ -11,9 +11,11 @@ import type { CoreStart } from '@kbn/core/public';
 
 import type { ServiceAccountDirectoryEntry } from '../../common/service_accounts';
 
+export type ServiceAccountPickerStatus = 'loading' | 'ready' | 'forbidden' | 'unavailable';
+
 export interface ServiceAccountPickerDirectory {
   accounts: ServiceAccountDirectoryEntry[];
-  status: 'loading' | 'ready' | 'forbidden' | 'unavailable';
+  status: ServiceAccountPickerStatus;
   hasMore?: boolean;
   filtered?: boolean;
   onRetry: () => void;
