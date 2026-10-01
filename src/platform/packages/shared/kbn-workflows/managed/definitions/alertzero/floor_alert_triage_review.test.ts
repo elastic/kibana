@@ -178,6 +178,142 @@ describe('floor_alert_triage_review — proposal comment', () => {
 });
 
 // ---------------------------------------------------------------------------
+// One pending closure proposal per rule: coalesce_fp_close
+// ---------------------------------------------------------------------------
+
+describe('floor_alert_triage_review — coalescing', () => {
+  const branchStepNames = (branchName: string) =>
+    flatten(stepByName(branchName)?.steps ?? []).map((step) => step.name);
+
+  it('tries to join a pending proposal before raising one, and falls back to raising one', () => {
+    const topLevel = parsed.steps.map((step) => step.name);
+    expect(topLevel.indexOf('coalesce_fp_close')).toBeLessThan(
+      topLevel.indexOf('handle_new_proposal')
+    );
+
+    const coalesce = stepByName('coalesce_fp_close');
+    expect(coalesce?.type).toBe('alertzero.coalesceFpCloseProposal');
+    expect(coalesce?.['on-failure']?.continue).toBe(true);
+    expect(coalesce?.with).toEqual(
+      expect.objectContaining({
+        rule_id: '{{ inputs.rule_id }}',
+        conversation_id: '{{ inputs.conversation_id }}',
+        fp_candidate_ids: '${{ inputs.fp_candidate_ids }}',
+      })
+    );
+  });
+
+  const modeTemplate = stepByName('resolve_coalesce_mode')?.with?.coalesce_mode as string;
+  const resolveMode = (coalesce: Record<string, unknown>): string =>
+    renderString(modeTemplate, { steps: { coalesce_fp_close: coalesce } }).trim();
+
+  it.each([
+    [{ output: { mode: 'appended' } }, 'appended'],
+    [{ output: { mode: 'mint' } }, 'mint'],
+    [{ error: { message: 'forbidden' } }, 'mint'],
+    [{}, 'mint'],
+  ])('resolves the coalesce step %j to "%s"', (coalesce, expected) => {
+    expect(resolveMode(coalesce)).toBe(expected);
+  });
+
+  it('raises and waits on a proposal only when the batch did not join one', () => {
+    expect(stepByName('handle_appended')?.condition).toBe(
+      "${{ variables.coalesce_mode == 'appended' }}"
+    );
+    expect(stepByName('handle_new_proposal')?.condition).toBe(
+      "${{ variables.coalesce_mode == 'mint' }}"
+    );
+    expect(branchStepNames('handle_new_proposal')).toContain('create_fp_proposal');
+    expect(branchStepNames('handle_appended')).not.toContain('create_fp_proposal');
+  });
+
+  it('reports the added alerts in the Investigation that holds the proposal', () => {
+    const comment = stepByName('post_comment_appended_standing');
+    expect(comment?.with?.conversation_id).toBe(
+      '{{ steps.coalesce_fp_close.output.standing_conversation_id }}'
+    );
+    const render = (added: number, total: number) =>
+      renderString(comment?.with?.message as string, {
+        inputs: { rule_name: 'Noisy rule' },
+        steps: { coalesce_fp_close: { output: { added_count: added, total_count: total } } },
+        variables: { fp_candidate_count: 3 },
+      });
+
+    expect(render(3, 7)).toContain(
+      '3 more alerts from a new run of rule "Noisy rule" were added to the pending closure proposal, which now covers 7 alerts.'
+    );
+    expect(render(0, 7)).toContain('that the pending closure proposal already covers');
+  });
+
+  it("closes this batch's own Investigation only when the proposal lives in another one", () => {
+    const elsewhere = stepByName('handle_appended_elsewhere');
+    const evaluate = (standing: string) =>
+      evalExpr(elsewhere?.condition as string, {
+        inputs: { conversation_id: 'conv-batch' },
+        steps: { coalesce_fp_close: { output: { standing_conversation_id: standing } } },
+      });
+
+    expect(evaluate('conv-standing')).toBe(true);
+    expect(evaluate('conv-batch')).toBe(false);
+    expect(branchStepNames('handle_appended_elsewhere')).toContain('close_investigation_appended');
+    expect(stepByName('close_investigation_appended')?.with?.conversation_id).toBe(
+      '{{ inputs.conversation_id }}'
+    );
+  });
+
+  it('tells a proposal comment reader that later runs add to it', () => {
+    const comment = (stepByName('create_fp_proposal')?.with?.inputs as Record<string, string>)
+      .comment;
+    expect(comment).toContain('Later runs of the rule add their false positives to this proposal.');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The live revision's alerts: resolve_head / resolve_closure_alerts
+// ---------------------------------------------------------------------------
+
+describe('floor_alert_triage_review — alerts of the live revision', () => {
+  const closureAlerts = stepByName('resolve_closure_alerts')?.with as Record<string, string>;
+  const inputs = { fp_candidate_ids: ['a', 'b'] };
+
+  it('reads the live revision after the gate, retrying before it gives up', () => {
+    const resolveHead = stepByName('resolve_head');
+    expect(resolveHead?.type).toBe('proposals.getLatestRevision');
+    expect(resolveHead?.with?.proposalId).toBe('{{ steps.create_fp_proposal.output.proposalId }}');
+    expect(resolveHead?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(resolveHead?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('acts on every alert later batches added to the proposal', () => {
+    const context = {
+      inputs,
+      steps: { resolve_head: { output: { actionInput: { alertIds: ['a', 'b', 'c', 'd'] } } } },
+    };
+    expect(evalExpr(closureAlerts.closure_alert_ids, context)).toEqual(['a', 'b', 'c', 'd']);
+    expect(evalExpr(closureAlerts.closure_alert_count, context)).toBe(4);
+  });
+
+  it("falls back to this batch's candidates when the live revision could not be read", () => {
+    const context = { inputs, steps: { resolve_head: { error: { message: 'timeout' } } } };
+    expect(evalExpr(closureAlerts.closure_alert_ids, context)).toEqual(['a', 'b']);
+    expect(evalExpr(closureAlerts.closure_alert_count, context)).toBe(2);
+  });
+
+  it('re-tags the alerts of the live revision on a dismissal', () => {
+    expect(stepByName('retag_dismissed_alerts')?.foreach).toBe(
+      '${{ variables.closure_alert_ids }}'
+    );
+  });
+
+  it('counts the live revision in the approval comment', () => {
+    const template = stepByName('post_comment_outcome_approved')?.with?.message as string;
+    expect(
+      renderString(template, { steps: { get_proposal: {} }, variables: { closure_alert_count: 5 } })
+    ).toContain('5 alerts closed as false positive');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Dismiss mapping: map_dismiss_reason_to_tag
 // ---------------------------------------------------------------------------
 
@@ -267,7 +403,7 @@ describe('floor_alert_triage_review — guard_get_proposal_readable', () => {
     const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
     const rendered = renderString(template, {
       steps: { get_proposal: { error: { message: 'timeout after 3 attempts' } } },
-      variables: { fp_candidate_count: 4 },
+      variables: { closure_alert_count: 4 },
     });
 
     expect(rendered).toContain('could not be read after');
@@ -289,14 +425,14 @@ const renderDismissedComment = ({
   rationale,
   decidedBy,
   dismissedTag = 'az:inconclusive',
-  fpCandidateCount = 2,
+  closureAlertCount = 2,
   failedRetagCount = 0,
 }: {
   dismissReason?: string;
   rationale?: string;
   decidedBy?: { username: string };
   dismissedTag?: string;
-  fpCandidateCount?: number;
+  closureAlertCount?: number;
   failedRetagCount?: number;
 }): string => {
   return renderString(dismissedInputTemplate, {
@@ -307,7 +443,7 @@ const renderDismissedComment = ({
     },
     variables: {
       dismissed_tag: dismissedTag,
-      fp_candidate_count: fpCandidateCount,
+      closure_alert_count: closureAlertCount,
       failed_retag_count: failedRetagCount,
     },
   });
@@ -345,19 +481,19 @@ describe('floor_alert_triage_review — post_comment_outcome_dismissed', () => {
   });
 
   it('claims every FP candidate was re-tagged when no per-alert retag failed', () => {
-    const comment = renderDismissedComment({ fpCandidateCount: 3, failedRetagCount: 0 });
+    const comment = renderDismissedComment({ closureAlertCount: 3, failedRetagCount: 0 });
     expect(comment).toContain('3 alerts re-tagged');
     expect(comment).not.toContain('failed after retries');
   });
 
   it('reports the shortfall instead of claiming full success when a retag failed', () => {
-    const comment = renderDismissedComment({ fpCandidateCount: 3, failedRetagCount: 1 });
+    const comment = renderDismissedComment({ closureAlertCount: 3, failedRetagCount: 1 });
     expect(comment).toContain('2 of 3 alerts re-tagged');
     expect(comment).toContain('1 failed after retries and needs manual re-tagging');
   });
 
   it('says "alert" rather than "alerts" for a single FP candidate', () => {
-    const comment = renderDismissedComment({ fpCandidateCount: 1, failedRetagCount: 0 });
+    const comment = renderDismissedComment({ closureAlertCount: 1, failedRetagCount: 0 });
     expect(comment).toContain('1 alert re-tagged');
     expect(comment).not.toContain('alerts');
   });
@@ -437,10 +573,12 @@ describe('floor_alert_triage_review — ai.conversation.metadata.patch failure h
       'close_investigation_after_approval',
       'close_investigation_after_dismissal',
       'close_investigation_after_expiry',
+      'close_investigation_appended',
     ]);
   });
 
   it.each([
+    'close_investigation_appended',
     'close_investigation_after_approval',
     'close_investigation_after_dismissal',
     'close_investigation_after_expiry',
@@ -516,7 +654,7 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
       // candidates already closed, so the comment must not assert they all remain open.
       const comment = stepByName('post_comment_outcome_expired');
       const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
-      const rendered = renderString(template, { variables: { fp_candidate_count: count } });
+      const rendered = renderString(template, { variables: { closure_alert_count: count } });
 
       expect(rendered).toContain(tagged);
       expect(rendered).toContain('may already be closed');
@@ -544,7 +682,7 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
     const rendered = renderString(template, {
       steps: { create_fp_proposal: { output: { status: 'failed' } } },
-      variables: { fp_candidate_count: 2 },
+      variables: { closure_alert_count: 2 },
     });
 
     expect(rendered).not.toContain('2 alert(s) remain open');

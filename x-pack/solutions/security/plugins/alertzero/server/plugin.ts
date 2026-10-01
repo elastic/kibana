@@ -53,6 +53,8 @@ import {
 import { reviseProposalTool } from './agent_builder_tools/revise_proposal_tool';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import { registerRuleDispositionsAiIndex } from './rule_dispositions/register_rule_dispositions_ai_index';
+import { registerStepDefinitions } from './step_definitions/register_step_definitions';
 
 export class AlertZeroPlugin
   implements
@@ -111,6 +113,7 @@ export class AlertZeroPlugin
       agentBuilder,
       proposals,
       agenticInvestigations,
+      contextEngine,
       features,
       searchInferenceEndpoints,
       workflowsExtensions,
@@ -132,6 +135,13 @@ export class AlertZeroPlugin
 
     // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
     registerOwner({ workflowsExtensions });
+    registerStepDefinitions(workflowsExtensions, {
+      getProposals: () => this.requireProposals(),
+      isPointerStoreAvailable: registerRuleDispositionsAiIndex(
+        contextEngine,
+        this.logger.get('rule_dispositions')
+      ),
+    });
     if (agentBuilder && proposals && agenticInvestigations) {
       const assertAlertZeroAccess = createAssertAlertZeroAccess(async () => {
         const [core, { security }] = await coreSetup.getStartServices();

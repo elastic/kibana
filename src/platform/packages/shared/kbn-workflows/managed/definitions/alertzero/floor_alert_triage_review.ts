@@ -19,14 +19,15 @@ export const ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID =
 
 /**
  * The closure proposal of one Alert Triage batch and the handling of its outcome, installed once
- * globally and started per batch by the per-space Alert Triage Worker. The number that may wait for
- * a decision per rule is `settings.concurrency.max` in the YAML.
+ * globally and started per batch by the per-space Alert Triage Worker. A batch whose rule already
+ * has a pending proposal is added to it; the number that may wait for a decision per rule is
+ * `settings.concurrency.max` in the YAML.
  */
 export const ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW = {
   billable: false,
   id: ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: FLOOR_ALERT_TRIAGE_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;

@@ -17,6 +17,7 @@ import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -96,6 +97,11 @@ export interface AlertZeroSetupDependencies {
   agenticInvestigations?: AgenticInvestigationsPluginSetup;
   proposals?: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
+  /**
+   * Optional, matching the plugin manifest. It owns the AI index that holds the Alert Triage
+   * open-proposal pointers; without it closure proposals are not coalesced per rule.
+   */
+  contextEngine?: ContextEnginePluginSetup;
 }
 
 export interface AlertZeroStartDependencies {

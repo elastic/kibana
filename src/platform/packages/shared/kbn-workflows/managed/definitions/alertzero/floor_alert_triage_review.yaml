@@ -2,10 +2,11 @@ version: "1"
 name: Alert Triage closure review
 description: >
   Reviews the false positive closure the Alert Triage Worker proposes for one
-  batch of alerts. Raises the closure proposal, waits for the decision, and
-  applies the outcome: approved closes the Investigation, dismissed re-tags the
-  alerts and closes the Investigation, expired closes the Investigation and
-  leaves the tags alone.
+  batch of alerts. When the rule already has a closure proposal waiting for a
+  decision, adds the batch's alerts to it and finishes. Otherwise raises the
+  closure proposal, waits for the decision, and applies the outcome: approved
+  closes the Investigation, dismissed re-tags the alerts and closes the
+  Investigation, expired closes the Investigation and leaves the tags alone.
 
   Started by the Worker with `workflow.executeAsync` after the batch has been
   classified, tagged and noted, so the Worker never waits for a human. A
@@ -30,9 +31,14 @@ settings:
   # them. One more is SKIPPED at dispatch, before any step runs, and the Worker sees that on the
   # execution record and says so in the Investigation.
   #
+  # Later batches of a rule are added to its pending proposal (coalesce_fp_close) and finish in
+  # seconds, so a rule normally has one parked review and this limit is a ceiling that is rarely
+  # reached: only when coalescing is unavailable (no Context Engine, or the step fails) or a
+  # proposal is full does every batch raise its own.
+  #
   # A slot is held until the proposal is decided or expires (up to 72 h at Manual autonomy), so a
-  # rule that fires faster than analysts decide fills its slots and then raises no further closure
-  # proposals until some are decided. The alerts of a skipped batch are not revisited later.
+  # rule that fills its slots raises no further closure proposals until some are decided. The
+  # alerts of a skipped batch are not revisited later.
   #
   # The limit is a ceiling, not a guarantee. The engine counts first and then starts the run, so
   # concurrent dispatches can overshoot it slightly, and it lets a run start when the count itself
@@ -61,14 +67,16 @@ triggers:
           type: string
           minLength: 1
           maxLength: 512
-          description: Investigation conversation the Worker opened for this batch.
+          description: >-
+            Investigation conversation of this batch. The Worker may have reused the Investigation
+            that holds the rule's pending closure proposal.
         rule_id:
           type: string
           minLength: 1
           maxLength: 512
           description: >-
             Id of the detection rule that produced the batch. Keys the per-rule limit on
-            reviews waiting for a decision.
+            reviews waiting for a decision, and the rule's pending closure proposal.
         rule_name:
           type: string
           maxLength: 1024
@@ -82,7 +90,7 @@ triggers:
             maxLength: 512
           description: >-
             Alert `_id` values classified as false positive at or above the confidence floor.
-            These are the alerts the proposal closes.
+            These are the alerts this batch adds to the closure proposal.
         confidence_floor:
           type: number
           description: Confidence floor the candidates passed, quoted in the proposal and its comment.
@@ -110,9 +118,13 @@ triggers:
 # analyst's verdict, which only works once the first tag exists.
 #
 # Pipeline:
-#   1. count_fp_candidates  — size of the candidate list, used by every comment below
-#   2. gate_fp_close        — post the proposal comment, raise the proposal, wait for the decision
-#   3. one branch per outcome — approved, dismissed, expired, unknown
+#   1. count_fp_candidates  — size of the candidate list, used by the comments below
+#   2. coalesce_fp_close    — add the batch to the rule's pending proposal, or claim the rule for
+#                             a new one
+#   3. handle_appended      — the batch joined a pending proposal: say so and finish
+#   4. handle_new_proposal  — raise the proposal, wait for the decision, one branch per outcome
+#                             (approved, dismissed, expired, unknown), all acting on the alerts of
+#                             the live revision, which includes every batch added while it waited
 
 steps:
   - name: count_fp_candidates
@@ -121,7 +133,86 @@ steps:
       fp_candidate_count: "${{ inputs.fp_candidate_ids | size }}"
 
   # ---------------------------------------------------------------------------
-  # 2. Autonomy gate — create a proposal to close FP alerts.
+  # 2. One pending closure proposal per rule.
+  #
+  #    When the rule's pointer leads to a proposal that is still pending, the step revises it to
+  #    close the union of its alerts and this batch's (`appended`). Otherwise it points the rule at
+  #    this batch's Investigation and answers `mint`, and the proposal raised below is the one later
+  #    batches are added to.
+  #
+  #    A failed step falls back to raising a proposal, which is how every batch was handled before
+  #    coalescing: a noisier queue, never a lost closure.
+  # ---------------------------------------------------------------------------
+  - name: coalesce_fp_close
+    type: alertzero.coalesceFpCloseProposal
+    on-failure:
+      continue: true
+    with:
+      rule_id: "{{ inputs.rule_id }}"
+      conversation_id: "{{ inputs.conversation_id }}"
+      fp_candidate_ids: "${{ inputs.fp_candidate_ids }}"
+      rule_name: "{{ inputs.rule_name }}"
+      confidence_floor: "${{ inputs.confidence_floor }}"
+
+  - name: resolve_coalesce_mode
+    type: data.set
+    with:
+      coalesce_mode: >-
+        {% if steps.coalesce_fp_close.error == blank and steps.coalesce_fp_close.output.mode == 'appended' %}appended{% else %}mint{% endif %}
+
+  # ---------------------------------------------------------------------------
+  # 3. The batch joined the rule's pending proposal. The review that raised that proposal is
+  #    parked on it and applies the outcome to every alert it now holds, so this run is done.
+  # ---------------------------------------------------------------------------
+  - name: handle_appended
+    type: if
+    condition: "${{ variables.coalesce_mode == 'appended' }}"
+    steps:
+      - name: post_comment_appended_standing
+        type: ai.conversation.add_user_message
+        on-failure:
+          continue: true
+        with:
+          conversation_id: "{{ steps.coalesce_fp_close.output.standing_conversation_id }}"
+          message: >-
+            {% if steps.coalesce_fp_close.output.added_count > 0 %}{{ steps.coalesce_fp_close.output.added_count }} more alert{% if steps.coalesce_fp_close.output.added_count != 1 %}s{% endif %} from a new run of rule "{{ inputs.rule_name }}" {% if steps.coalesce_fp_close.output.added_count == 1 %}was{% else %}were{% endif %} added to the pending closure proposal, which now covers {{ steps.coalesce_fp_close.output.total_count }} alert{% if steps.coalesce_fp_close.output.total_count != 1 %}s{% endif %}.{% else %}A new run of rule "{{ inputs.rule_name }}" classified {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} as false positive that the pending closure proposal already covers.{% endif %}
+
+      # The Worker opened a new Investigation for this batch (it found no pending proposal, and one
+      # appeared before this review ran). Close it and point at the Investigation that holds the
+      # proposal, where the outcome is posted.
+      - name: handle_appended_elsewhere
+        type: if
+        condition: "${{ steps.coalesce_fp_close.output.standing_conversation_id != inputs.conversation_id }}"
+        steps:
+          - name: close_investigation_appended
+            type: ai.conversation.metadata.patch
+            on-failure:
+              continue: true
+              fallback:
+                - name: log_appended_close_failed
+                  type: console
+                  with:
+                    message: >-
+                      The alerts were added to the rule's pending closure proposal, but the
+                      Investigation could not be marked closed: {{ error.message }}. Investigation
+                      {{ inputs.conversation_id }} stays open.
+            with:
+              conversation_id: "{{ inputs.conversation_id }}"
+              updates:
+                status: closed
+
+          - name: post_comment_appended_elsewhere
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ inputs.conversation_id }}"
+              message: >-
+                {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} added to the closure proposal already pending for rule "{{ inputs.rule_name }}".
+                The decision and its outcome are recorded in [that Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.coalesce_fp_close.output.standing_conversation_id }}).
+
+  # ---------------------------------------------------------------------------
+  # 4. Autonomy gate — create a proposal to close FP alerts.
   #
   #    Autonomy mapping (two levels — `assisted` from WATCH_AUTONOMY_LEVELS is not offered):
   #      manual     → autoApprove: false  (human gate, 72 h queue row)
@@ -135,195 +226,268 @@ steps:
   #    The gate completes normally on every outcome, including an unanswered
   #    deadline (`status: expired`), so each outcome gets its own branch below.
   # ---------------------------------------------------------------------------
-  - name: post_comment_proposal
-    type: ai.conversation.add_user_message
-    on-failure:
-      continue: true
-    with:
-      conversation_id: "{{ inputs.conversation_id }}"
-      message: >-
-        Proposing closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor.
-        Autonomy level: {{ inputs.autonomy | default: 'manual' }}.
-        {% if inputs.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
-
-  - name: create_fp_proposal
-    type: workflow.execute
-    # Reached only when the proposal workflow itself fails (for example, the proposal could
-    # not be created); gate outcomes, including an expired deadline, complete normally and
-    # are handled by the branches below. The fallback re-throws afterwards, so the run
-    # fails and shows up in execution history.
-    on-failure:
-      fallback:
-        - name: post_comment_proposal_failed
-          type: ai.conversation.add_user_message
-          on-failure:
-            continue: true
-          with:
-            conversation_id: "{{ inputs.conversation_id }}"
-            message: >-
-              ⚠️ The closure proposal could not be completed: {{ error.message }}.
-              {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
-    with:
-      workflow-id: system-create-alertzero-proposal
-      inputs:
-        conversationId: "{{ inputs.conversation_id }}"
-        comment: >-
-          {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} from rule "{{ inputs.rule_name }}" {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} classified as false positives at or above the configured confidence floor ({{ inputs.confidence_floor }}).
-          Approving this proposal will close them with workflow_reason=false_positive.
-        actionWorkflowId: system-alertzero-action-close-alerts-fp
-        actionInput:
-          alertIds: "${{ inputs.fp_candidate_ids }}"
-          reason: "false_positive"
-        impact: high
-        confidence: high
-        # Autonomy → autoApprove mapping. One site: update here if semantics change.
-        autoApprove: "${{ inputs.autonomy == 'supervised' }}"
-
-  # Fetch proposal details for outcome comment attribution (decision, decidedBy,
-  # dismissReason, rationale). handle_dismissed below must not derive the retag from a
-  # failed read, so retry before continue: true takes over.
-  - name: get_proposal
-    type: proposals.getProposal
-    on-failure:
-      retry:
-        max-attempts: 3
-        delay: 5s
-      continue: true
-    with:
-      proposalId: "{{ steps.create_fp_proposal.output.proposalId }}"
-
-  # One value per outcome so every branch below is a single comparison (if-conditions
-  # take no filters, and `and`/`or` have no precedence). `decision` and `status` are
-  # separate axes (D48): an approved close ends `succeeded`, a dismissal ends with
-  # `decision: dismissed`, and an unanswered deadline ends `expired` with no decision.
-  - name: resolve_proposal_outcome
-    type: data.set
-    with:
-      proposal_outcome: >-
-        {% if steps.create_fp_proposal.output.status == 'succeeded' %}approved{% elsif steps.create_fp_proposal.output.decision == 'dismissed' %}dismissed{% elsif steps.create_fp_proposal.output.status == 'expired' %}expired{% else %}unknown{% endif %}
-
-  - name: handle_approved
+  - name: handle_new_proposal
     type: if
-    condition: "${{ variables.proposal_outcome == 'approved' }}"
+    condition: "${{ variables.coalesce_mode == 'mint' }}"
     steps:
-      # Everything the analyst approved has already happened by this point: the alerts are
-      # closed and the proposal is `succeeded`. Failing the run on the bookkeeping patch
-      # would report a successful triage as a failure, so the patch is allowed to fail.
-      # `continue: true` is required for that: fallback alone still re-throws the original
-      # error afterwards (see on_failure/README.md), which would abort the run and skip
-      # the outcome comment below. Also the failure mode `ai.conversation.metadata.patch`
-      # hits when `agentBuilder:experimentalFeatures` is off.
-      - name: close_investigation_after_approval
-        type: ai.conversation.metadata.patch
-        on-failure:
-          continue: true
-          fallback:
-            - name: log_investigation_close_failed
-              type: console
-              with:
-                message: >-
-                  Alerts were closed and the proposal succeeded, but the Investigation
-                  could not be marked closed: {{ error.message }}. Investigation
-                  {{ inputs.conversation_id }} stays open.
-        with:
-          conversation_id: "{{ inputs.conversation_id }}"
-          updates:
-            status: closed
-            close_reason: false_positive
-
-      - name: post_comment_outcome_approved
+      - name: post_comment_proposal
         type: ai.conversation.add_user_message
         on-failure:
           continue: true
         with:
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
-            Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} closed as false positive.
+            Proposing closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor.
+            Autonomy level: {{ inputs.autonomy | default: 'manual' }}.
+            {% if inputs.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required. False positives from later runs of the rule are added to this proposal while it is pending.{% endif %}
 
-  - name: handle_dismissed
-    type: if
-    condition: "${{ variables.proposal_outcome == 'dismissed' }}"
-    steps:
-      # get_proposal is allowed to fail-and-continue (retried above first). The retag does
-      # not depend on its content, but the outcome comment and the decision itself do:
-      # without a successful read there is no decider or reason to report, and closing the
-      # Investigation would hide that. Gate the whole re-tag/close on the read having
-      # actually succeeded; a failed read leaves tags and the Investigation untouched.
-      - name: guard_get_proposal_readable
+      - name: create_fp_proposal
+        type: workflow.execute
+        # Reached only when the proposal workflow itself fails (for example, the proposal could
+        # not be created); gate outcomes, including an expired deadline, complete normally and
+        # are handled by the branches below. The fallback re-throws afterwards, so the run
+        # fails and shows up in execution history.
+        on-failure:
+          fallback:
+            - name: post_comment_proposal_failed
+              type: ai.conversation.add_user_message
+              on-failure:
+                continue: true
+              with:
+                conversation_id: "{{ inputs.conversation_id }}"
+                message: >-
+                  ⚠️ The closure proposal could not be completed: {{ error.message }}.
+                  {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
+        with:
+          workflow-id: system-create-alertzero-proposal
+          inputs:
+            conversationId: "{{ inputs.conversation_id }}"
+            # Keep in sync with buildFpCloseComment in the AlertZero plugin, which rewrites this
+            # comment when a later batch is added to the proposal.
+            comment: >-
+              {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} from rule "{{ inputs.rule_name }}" {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} classified as false positives at or above the configured confidence floor ({{ inputs.confidence_floor }}).
+              Later runs of the rule add their false positives to this proposal.
+              Approving this proposal will close them with workflow_reason=false_positive.
+            actionWorkflowId: system-alertzero-action-close-alerts-fp
+            actionInput:
+              alertIds: "${{ inputs.fp_candidate_ids }}"
+              reason: "false_positive"
+            impact: high
+            confidence: high
+            # Autonomy → autoApprove mapping. One site: update here if semantics change.
+            autoApprove: "${{ inputs.autonomy == 'supervised' }}"
+
+      # Later batches revise the proposal while it waits, so the alerts it closed (or that a
+      # dismissal re-tags) are the live revision's, not this batch's input. A failed read falls
+      # back to this batch's candidates.
+      - name: resolve_head
+        type: proposals.getLatestRevision
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+          continue: true
+        with:
+          proposalId: "{{ steps.create_fp_proposal.output.proposalId }}"
+
+      - name: resolve_closure_alerts
+        type: data.set
+        with:
+          closure_alert_ids: "${{ steps.resolve_head.output.actionInput.alertIds | default: inputs.fp_candidate_ids }}"
+          closure_alert_count: "${{ steps.resolve_head.output.actionInput.alertIds | default: inputs.fp_candidate_ids | size }}"
+
+      # Fetch proposal details for outcome comment attribution (decision, decidedBy,
+      # dismissReason, rationale). handle_dismissed below must not derive the retag from a
+      # failed read, so retry before continue: true takes over.
+      - name: get_proposal
+        type: proposals.getProposal
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+          continue: true
+        with:
+          proposalId: "{{ steps.create_fp_proposal.output.proposalId }}"
+
+      # One value per outcome so every branch below is a single comparison (if-conditions
+      # take no filters, and `and`/`or` have no precedence). `decision` and `status` are
+      # separate axes (D48): an approved close ends `succeeded`, a dismissal ends with
+      # `decision: dismissed`, and an unanswered deadline ends `expired` with no decision.
+      - name: resolve_proposal_outcome
+        type: data.set
+        with:
+          proposal_outcome: >-
+            {% if steps.create_fp_proposal.output.status == 'succeeded' %}approved{% elsif steps.create_fp_proposal.output.decision == 'dismissed' %}dismissed{% elsif steps.create_fp_proposal.output.status == 'expired' %}expired{% else %}unknown{% endif %}
+
+      - name: handle_approved
         type: if
-        condition: "${{ steps.get_proposal.error == blank }}"
+        condition: "${{ variables.proposal_outcome == 'approved' }}"
         steps:
-          # Every dismissal re-tags as az:inconclusive: the decline reasons the proposal API
-          # offers (no_reason, duplicate, false_positive, handled_elsewhere, risk_accepted,
-          # other) reject the *action*, and none says the classification itself was wrong,
-          # so none can justify az:true_positive. The reason is reported in the comment below.
-          - name: map_dismiss_reason_to_tag
-            type: data.set
-            with:
-              dismissed_tag: az:inconclusive
-              failed_retag_count: 0
-
-          # Two calls per alert: kibana.SetAlertTags rejects combining add+remove of the
-          # same tag (e.g. az:false_positive removed and re-added), so keep them separate.
-          # `continue: true` sits on each SetAlertTags step, next to its retry, like
-          # attach_alert_chunk does in the Worker: on the foreach it would leave the whole loop at
-          # the first failure and skip the remaining candidates and record_retag_failure.
-          - name: retag_dismissed_alerts
-            type: foreach
-            foreach: "${{ inputs.fp_candidate_ids }}"
-            steps:
-              - name: remove_fp_tag
-                type: kibana.SetAlertTags
-                on-failure:
-                  retry:
-                    max-attempts: 3
-                    delay: 5s
-                  continue: true
-                with:
-                  ids:
-                    - "{{ foreach.item }}"
-                  tags:
-                    tags_to_remove:
-                      - "az:false_positive"
-                    tags_to_add: []
-              - name: add_dismissed_tag
-                type: kibana.SetAlertTags
-                on-failure:
-                  retry:
-                    max-attempts: 3
-                    delay: 5s
-                  continue: true
-                with:
-                  ids:
-                    - "{{ foreach.item }}"
-                  tags:
-                    tags_to_remove: []
-                    tags_to_add:
-                      - "{{ variables.dismissed_tag }}"
-
-              # Both calls above retry, then continue past a persistent failure, so this
-              # alert's tags may be left partway through the swap and the loop moves on to
-              # the next candidate. Counted (not failed
-              # loudly) so post_comment_outcome_dismissed can report the shortfall instead
-              # of unconditionally claiming every FP candidate was re-tagged.
-              - name: record_retag_failure
-                type: data.set
-                if: "${{ steps.remove_fp_tag.error != blank or steps.add_dismissed_tag.error != blank }}"
-                with:
-                  failed_retag_count: "${{ variables.failed_retag_count | plus: 1 }}"
-
-          # Same failure tolerance as close_investigation_after_approval: the decision has
-          # landed, so a failed bookkeeping patch must not fail the run.
-          - name: close_investigation_after_dismissal
+          # Everything the analyst approved has already happened by this point: the alerts are
+          # closed and the proposal is `succeeded`. Failing the run on the bookkeeping patch
+          # would report a successful triage as a failure, so the patch is allowed to fail.
+          # `continue: true` is required for that: fallback alone still re-throws the original
+          # error afterwards (see on_failure/README.md), which would abort the run and skip
+          # the outcome comment below. Also the failure mode `ai.conversation.metadata.patch`
+          # hits when `agentBuilder:experimentalFeatures` is off.
+          - name: close_investigation_after_approval
             type: ai.conversation.metadata.patch
             on-failure:
               continue: true
               fallback:
-                - name: log_dismissed_close_failed
+                - name: log_investigation_close_failed
                   type: console
                   with:
                     message: >-
-                      The proposal was dismissed, but the Investigation could not be marked
+                      Alerts were closed and the proposal succeeded, but the Investigation
+                      could not be marked closed: {{ error.message }}. Investigation
+                      {{ inputs.conversation_id }} stays open.
+            with:
+              conversation_id: "{{ inputs.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: false_positive
+
+          - name: post_comment_outcome_approved
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ inputs.conversation_id }}"
+              message: >-
+                Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.closure_alert_count }} alert{% if variables.closure_alert_count != 1 %}s{% endif %} closed as false positive.
+
+      - name: handle_dismissed
+        type: if
+        condition: "${{ variables.proposal_outcome == 'dismissed' }}"
+        steps:
+          # get_proposal is allowed to fail-and-continue (retried above first). The retag does
+          # not depend on its content, but the outcome comment and the decision itself do:
+          # without a successful read there is no decider or reason to report, and closing the
+          # Investigation would hide that. Gate the whole re-tag/close on the read having
+          # actually succeeded; a failed read leaves tags and the Investigation untouched.
+          - name: guard_get_proposal_readable
+            type: if
+            condition: "${{ steps.get_proposal.error == blank }}"
+            steps:
+              # Every dismissal re-tags as az:inconclusive: the decline reasons the proposal API
+              # offers (no_reason, duplicate, false_positive, handled_elsewhere, risk_accepted,
+              # other) reject the *action*, and none says the classification itself was wrong,
+              # so none can justify az:true_positive. The reason is reported in the comment below.
+              - name: map_dismiss_reason_to_tag
+                type: data.set
+                with:
+                  dismissed_tag: az:inconclusive
+                  failed_retag_count: 0
+
+              # Two calls per alert: kibana.SetAlertTags rejects combining add+remove of the
+              # same tag (e.g. az:false_positive removed and re-added), so keep them separate.
+              # `continue: true` sits on each SetAlertTags step, next to its retry, like
+              # attach_alert_chunk does in the Worker: on the foreach it would leave the whole loop at
+              # the first failure and skip the remaining candidates and record_retag_failure.
+              - name: retag_dismissed_alerts
+                type: foreach
+                foreach: "${{ variables.closure_alert_ids }}"
+                steps:
+                  - name: remove_fp_tag
+                    type: kibana.SetAlertTags
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
+                      continue: true
+                    with:
+                      ids:
+                        - "{{ foreach.item }}"
+                      tags:
+                        tags_to_remove:
+                          - "az:false_positive"
+                        tags_to_add: []
+                  - name: add_dismissed_tag
+                    type: kibana.SetAlertTags
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
+                      continue: true
+                    with:
+                      ids:
+                        - "{{ foreach.item }}"
+                      tags:
+                        tags_to_remove: []
+                        tags_to_add:
+                          - "{{ variables.dismissed_tag }}"
+
+                  # Both calls above retry, then continue past a persistent failure, so this
+                  # alert's tags may be left partway through the swap and the loop moves on to
+                  # the next candidate. Counted (not failed
+                  # loudly) so post_comment_outcome_dismissed can report the shortfall instead
+                  # of unconditionally claiming every FP candidate was re-tagged.
+                  - name: record_retag_failure
+                    type: data.set
+                    if: "${{ steps.remove_fp_tag.error != blank or steps.add_dismissed_tag.error != blank }}"
+                    with:
+                      failed_retag_count: "${{ variables.failed_retag_count | plus: 1 }}"
+
+              # Same failure tolerance as close_investigation_after_approval: the decision has
+              # landed, so a failed bookkeeping patch must not fail the run.
+              - name: close_investigation_after_dismissal
+                type: ai.conversation.metadata.patch
+                on-failure:
+                  continue: true
+                  fallback:
+                    - name: log_dismissed_close_failed
+                      type: console
+                      with:
+                        message: >-
+                          The proposal was dismissed, but the Investigation could not be marked
+                          closed: {{ error.message }}. Investigation
+                          {{ inputs.conversation_id }} stays open.
+                with:
+                  conversation_id: "{{ inputs.conversation_id }}"
+                  updates:
+                    status: closed
+                    close_reason: other
+
+              - name: post_comment_outcome_dismissed
+                type: ai.conversation.add_user_message
+                on-failure:
+                  continue: true
+                with:
+                  conversation_id: "{{ inputs.conversation_id }}"
+                  message: >-
+                    Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.closure_alert_count | minus: variables.failed_retag_count }} of {{ variables.closure_alert_count }} alert{% if variables.closure_alert_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.closure_alert_count }} alert{% if variables.closure_alert_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
+            else:
+              - name: post_comment_dismissed_read_failed
+                type: ai.conversation.add_user_message
+                on-failure:
+                  continue: true
+                with:
+                  conversation_id: "{{ inputs.conversation_id }}"
+                  message: >-
+                    ⚠️ The proposal was dismissed, but its details could not be read after
+                    retries ({{ steps.get_proposal.error.message }}). {{ variables.closure_alert_count }}
+                    alert{% if variables.closure_alert_count != 1 %}s{% endif %} {% if variables.closure_alert_count == 1 %}remains{% else %}remain{% endif %} tagged az:false_positive and untouched; this Investigation
+                    stays open for manual follow-up.
+
+      # Expiry is not a dismissal: nobody rejected the verdict, so the alerts keep their
+      # az:false_positive tag and are not re-tagged. The gate also settles as expired when an
+      # approved close failed and its re-parked retry ran out of time, and that failed attempt
+      # may have closed some alerts, so the comment below does not claim they are all open.
+      - name: handle_expired
+        type: if
+        condition: "${{ variables.proposal_outcome == 'expired' }}"
+        steps:
+          - name: close_investigation_after_expiry
+            type: ai.conversation.metadata.patch
+            on-failure:
+              continue: true
+              fallback:
+                - name: log_expired_close_failed
+                  type: console
+                  with:
+                    message: >-
+                      The proposal expired, but the Investigation could not be marked
                       closed: {{ error.message }}. Investigation
                       {{ inputs.conversation_id }} stays open.
             with:
@@ -332,82 +496,35 @@ steps:
                 status: closed
                 close_reason: other
 
-          - name: post_comment_outcome_dismissed
+          - name: post_comment_outcome_expired
             type: ai.conversation.add_user_message
             on-failure:
               continue: true
             with:
               conversation_id: "{{ inputs.conversation_id }}"
               message: >-
-                Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and {% if variables.failed_retag_count == 1 %}needs{% else %}need{% endif %} manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
-        else:
-          - name: post_comment_dismissed_read_failed
+                The closure proposal expired before a closure was completed. {{ variables.closure_alert_count }} alert{% if variables.closure_alert_count != 1 %}s{% endif %} {% if variables.closure_alert_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.closure_alert_count == 1 %}it is{% else %}they are{% endif %} still open.
+
+      # Defensive branch. The gate settles as succeeded, dismissed or expired: a failed close
+      # action is recorded `failed`, cloned and re-parked for another decision, and an
+      # exhausted attempt budget settles as `expired`, so this review never sees `failed`.
+      # Anything else means the gate contract changed. Leave the Investigation open so an
+      # analyst looks at it.
+      - name: handle_unknown_outcome
+        type: if
+        condition: "${{ variables.proposal_outcome == 'unknown' }}"
+        steps:
+          - name: post_comment_outcome_unknown
             type: ai.conversation.add_user_message
             on-failure:
               continue: true
             with:
               conversation_id: "{{ inputs.conversation_id }}"
+              # Does not assert every candidate remains open: an earlier close attempt may have
+              # partly succeeded (action_close_alerts_false_positive's fail_incomplete_close
+              # fires after a partial SetAlertsStatus update, since conflicts: proceed lets some
+              # alerts close before the count mismatch throws). The gate's own output carries no
+              # per-alert result, so this reports the ambiguity instead of a specific (possibly
+              # wrong) closed/open count.
               message: >-
-                ⚠️ The proposal was dismissed, but its details could not be read after
-                retries ({{ steps.get_proposal.error.message }}). {{ variables.fp_candidate_count }}
-                alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} tagged az:false_positive and untouched; this Investigation
-                stays open for manual follow-up.
-
-  # Expiry is not a dismissal: nobody rejected the verdict, so the alerts keep their
-  # az:false_positive tag and are not re-tagged. The gate also settles as expired when an
-  # approved close failed and its re-parked retry ran out of time, and that failed attempt
-  # may have closed some alerts, so the comment below does not claim they are all open.
-  - name: handle_expired
-    type: if
-    condition: "${{ variables.proposal_outcome == 'expired' }}"
-    steps:
-      - name: close_investigation_after_expiry
-        type: ai.conversation.metadata.patch
-        on-failure:
-          continue: true
-          fallback:
-            - name: log_expired_close_failed
-              type: console
-              with:
-                message: >-
-                  The proposal expired, but the Investigation could not be marked
-                  closed: {{ error.message }}. Investigation
-                  {{ inputs.conversation_id }} stays open.
-        with:
-          conversation_id: "{{ inputs.conversation_id }}"
-          updates:
-            status: closed
-            close_reason: other
-
-      - name: post_comment_outcome_expired
-        type: ai.conversation.add_user_message
-        on-failure:
-          continue: true
-        with:
-          conversation_id: "{{ inputs.conversation_id }}"
-          message: >-
-            The closure proposal expired before a closure was completed. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. If a closure attempt partially succeeded before the proposal expired, some may already be closed, so check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.
-
-  # Defensive branch. The gate settles as succeeded, dismissed or expired: a failed close
-  # action is recorded `failed`, cloned and re-parked for another decision, and an
-  # exhausted attempt budget settles as `expired`, so this review never sees `failed`.
-  # Anything else means the gate contract changed. Leave the Investigation open so an
-  # analyst looks at it.
-  - name: handle_unknown_outcome
-    type: if
-    condition: "${{ variables.proposal_outcome == 'unknown' }}"
-    steps:
-      - name: post_comment_outcome_unknown
-        type: ai.conversation.add_user_message
-        on-failure:
-          continue: true
-        with:
-          conversation_id: "{{ inputs.conversation_id }}"
-          # Does not assert every candidate remains open: an earlier close attempt may have
-          # partly succeeded (action_close_alerts_false_positive's fail_incomplete_close
-          # fires after a partial SetAlertsStatus update, since conflicts: proceed lets some
-          # alerts close before the count mismatch throws). The gate's own output carries no
-          # per-alert result, so this reports the ambiguity instead of a specific (possibly
-          # wrong) closed/open count.
-          message: >-
-            ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open and tagged az:false_positive. This Investigation stays open for review.
+                ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.closure_alert_count }} candidate alert{% if variables.closure_alert_count != 1 %}s{% endif %} may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open and tagged az:false_positive. This Investigation stays open for review.

@@ -7,28 +7,33 @@
  */
 
 /**
- * Drives one detection rule past the Alert Triage per-rule closure proposal limit.
+ * Checks that a noisy detection rule gets one Alert Triage closure proposal, not one per run.
  *
- * The Worker hands each batch's closure proposal to `system-security-floor-alert-triage-review`,
- * which allows a limited number of reviews to wait for a decision per rule (`settings.concurrency.max`,
- * read from the workflow definition). This script indexes several
- * batches of clear false positives that all carry the SAME rule uuid, runs the Worker once per
- * batch, then reads back what each review did:
+ * The Worker hands each batch's closure proposal to `system-security-floor-alert-triage-review`.
+ * The first review for a rule raises the proposal and parks on it; every later review adds its
+ * batch's alerts to that proposal (`coalesce_fp_close` answers `appended`) and finishes. This
+ * script indexes several batches of clear false positives that all carry the SAME rule uuid, runs
+ * the Worker once per batch, then reads back what each review did and which proposals hold the
+ * alerts:
  *
- *   - the first `max` reviews park on their proposal (`waiting_for_child`)
- *   - every further review is `skipped`, and its Investigation says no proposal was created
+ *   - one review parks on its proposal (`waiting_for_child`), the others complete as `appended`
+ *   - one pending closure proposal holds the false positives of every batch
+ *
+ * Without the Context Engine nothing is coalesced, every batch raises its own proposal, and the
+ * per-rule limit (`settings.concurrency.max`, read from the workflow definition) skips the ones
+ * past it. The script reports that as NOT COALESCED.
  *
  * Needs a running stack with Alert Analysis and the Alert Triage Worker enabled (Manual autonomy,
  * or the proposals resolve on their own), and a connector for the `alertzero_reasoning` tier.
  * Each batch costs one LLM analysis, so keep --runs small.
  *
  * Usage:
- *   node trigger_alert_triage_review_limit.js [options]
+ *   node trigger_alert_triage_coalesce.js [options]
  *
  *   --es          Elasticsearch base URL (default: http://localhost:9200)
  *   --kibana      Kibana base URL (default: http://localhost:5601)
  *   --space       Kibana space id (default: default)
- *   --runs        Worker runs to start (default: the limit plus 2)
+ *   --runs        Worker runs to start (default: 3)
  *   --stagger-ms  Delay between starting runs (default: 1500)
  *   --timeout-s   How long to wait for the Worker runs to finish (default: 900)
  *   --no-wait     Start the runs and print the execution ids without waiting
@@ -66,7 +71,7 @@ const flag = (name, def) => {
 const ES_URL = flag('--es', 'http://localhost:9200');
 const KB_URL = flag('--kibana', 'http://localhost:5601');
 const SPACE = flag('--space', 'default');
-const RUNS = Number(flag('--runs', String(REVIEW_LIMIT + 2)));
+const RUNS = Number(flag('--runs', '3'));
 const STAGGER_MS = Number(flag('--stagger-ms', '1500'));
 const TIMEOUT_S = Number(flag('--timeout-s', '900'));
 const NO_WAIT = args.includes('--no-wait');
@@ -75,7 +80,7 @@ const INDEX = `.alerts-security.alerts-${SPACE}`;
 const AUTH = `${process.env.ES_USERNAME ?? 'elastic'}:${process.env.ES_PASSWORD ?? 'changeme'}`;
 const AUTH_HEADER = 'Basic ' + Buffer.from(AUTH).toString('base64');
 
-const FIXTURE_TAG = 'alert-triage-limit-fixture';
+const FIXTURE_TAG = 'alert-triage-coalesce-fixture';
 // Workers install per space as `${workerId}-${spaceId}`; the bare id 404s.
 const WORKER_ID = `system-security-floor-alert-triage-${SPACE}`;
 // The default space has no `/s/<space>` prefix at all.
@@ -110,6 +115,20 @@ const kbRequest = async (method, path, body) => {
   });
   const json = await res.json();
   if (!res.ok) throw new Error(`${method} ${path} → ${res.status}: ${JSON.stringify(json)}`);
+  return json;
+};
+
+// The proposals list is an internal route with its own API version.
+const kbInternalGet = async (path) => {
+  const res = await fetch(`${KB_URL}${SPACE_PATH_PREFIX}${path}`, {
+    headers: {
+      'elastic-api-version': '1',
+      'x-elastic-internal-origin': 'kibana',
+      Authorization: AUTH_HEADER,
+    },
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(`GET ${path} → ${res.status}: ${JSON.stringify(json)}`);
   return json;
 };
 
@@ -207,8 +226,8 @@ const buildDoc = ({ alertUuid, ruleUuid, ruleId, template }) => {
     'kibana.alert.severity': template.severity,
     'kibana.alert.risk_score': template.riskScore,
     'kibana.alert.reason': `${template.ruleName} triggered`,
-    // One rule for every batch: the review's limit is keyed on this uuid, and the analysis
-    // sub-workflow rejects a batch that spans more than one rule.
+    // One rule for every batch: the pending proposal and the review's limit are keyed on this
+    // uuid, and the analysis sub-workflow rejects a batch that spans more than one rule.
     'kibana.alert.rule.uuid': ruleUuid,
     'kibana.alert.rule.rule_id': ruleId,
     'kibana.alert.rule.name': template.ruleName,
@@ -282,7 +301,11 @@ const startBatch = async ({ batchNumber, ruleUuid, ruleId }) => {
     `  batch ${batchNumber}: Worker run ${workflowExecutionId}\n` +
       `    ${KB_URL}${SPACE_PATH_PREFIX}/app/workflows/executions/${workflowExecutionId}`
   );
-  return { batchNumber, workerExecutionId: workflowExecutionId };
+  return {
+    batchNumber,
+    workerExecutionId: workflowExecutionId,
+    alertIds: alertIds.map(({ _id }) => _id),
+  };
 };
 
 const getExecution = (id) =>
@@ -319,17 +342,35 @@ const workerOutcome = (execution) => {
   return execution.status;
 };
 
-const reviewExecutionId = (execution) =>
-  execution.stepExecutions.find(({ stepId }) => stepId === 'start_fp_review')?.output?.executionId;
+const stepOutput = (execution, name) =>
+  execution?.stepExecutions?.find(({ stepId }) => stepId === name)?.output;
+
+const reviewExecutionId = (execution) => stepOutput(execution, 'start_fp_review')?.executionId;
+
+// `appended`, `mint`, or `-` for a review that never reached the step (skipped by the limit).
+const coalesceMode = (review) => stepOutput(review, 'coalesce_fp_close')?.mode ?? '-';
+
+// Pending closure proposals holding any alert this run indexed. One page is enough: the run adds
+// a handful of alerts, and a coalesced rule has one proposal.
+const readFixtureProposals = async (fixtureAlertIds) => {
+  const { proposals } = await kbInternalGet(
+    '/internal/proposals?status=pending&origin=alertzero&excludeSuperseded=true&size=100'
+  );
+  return proposals.filter(
+    ({ actionWorkflowId, actionInput }) =>
+      actionWorkflowId === 'system-alertzero-action-close-alerts-fp' &&
+      (actionInput?.alertIds ?? []).some((id) => fixtureAlertIds.has(id))
+  );
+};
 
 const run = async () => {
-  if (RUNS < 1) throw new Error('--runs must be at least 1');
+  if (RUNS < 2) throw new Error('--runs must be at least 2: one run has nothing to coalesce into');
   const ruleUuid = randomUUID();
-  const ruleId = `alert-triage-limit-${ruleUuid.slice(0, 8)}`;
+  const ruleId = `alert-triage-coalesce-${ruleUuid.slice(0, 8)}`;
 
   console.log(`Target index: ${INDEX}  (ES: ${ES_URL}, Kibana: ${KB_URL}${SPACE_PATH_PREFIX})`);
   console.log(`Rule uuid shared by every batch: ${ruleUuid}`);
-  console.log(`Starting ${RUNS} Worker runs (limit is ${REVIEW_LIMIT} waiting reviews per rule)\n`);
+  console.log(`Starting ${RUNS} Worker runs\n`);
 
   const started = [];
   for (let batchNumber = 1; batchNumber <= RUNS; batchNumber++) {
@@ -353,50 +394,63 @@ const run = async () => {
       batch: batchNumber,
       worker: worker.status,
       workerOutcome: workerOutcome(worker),
+      joinedInvestigation: stepOutput(worker, 'resolve_standing_investigation')
+        ?.reused_investigation
+        ? 'yes'
+        : 'no',
       review: review?.status ?? '-',
-      concurrencyGroupKey: review?.concurrencyGroupKey ?? '-',
+      coalesce: coalesceMode(review),
       reviewId: reviewId ?? '-',
     });
   }
 
   console.log('');
-  console.table(
-    rows.map(({ batch, worker, workerOutcome: outcome, review, concurrencyGroupKey }) => ({
-      batch,
-      worker,
-      workerOutcome: outcome,
-      review,
-      concurrencyGroupKey,
-    }))
-  );
+  console.table(rows, [
+    'batch',
+    'worker',
+    'workerOutcome',
+    'joinedInvestigation',
+    'review',
+    'coalesce',
+  ]);
 
-  const waiting = rows.filter((row) => row.review === 'waiting_for_child').length;
-  const skipped = rows.filter((row) => row.review === 'skipped').length;
   const withReview = rows.filter((row) => row.reviewId !== '-').length;
-  const sameKey = new Set(
-    rows.filter((row) => row.reviewId !== '-').map((r) => r.concurrencyGroupKey)
+  const waiting = rows.filter((row) => row.review === 'waiting_for_child').length;
+  const appended = rows.filter((row) => row.coalesce === 'appended').length;
+  const skipped = rows.filter((row) => row.review === 'skipped').length;
+  const proposals = await readFixtureProposals(
+    new Set(started.flatMap(({ alertIds }) => alertIds))
   );
   console.log(`Reviews started: ${withReview} of ${RUNS} batches`);
-  console.log(`Waiting on a proposal: ${waiting}   Skipped by the limit: ${skipped}`);
-  console.log(`Concurrency keys seen: ${[...sameKey].join(', ') || '-'}`);
+  console.log(
+    `Waiting on a proposal: ${waiting}   Appended: ${appended}   Skipped by the limit (${REVIEW_LIMIT}): ${skipped}`
+  );
+  proposals.forEach(({ id, actionInput }) =>
+    console.log(`Pending proposal ${id} closes ${actionInput?.alertIds?.length ?? 0} alert(s)`)
+  );
 
-  const expectedSkipped = Math.max(0, withReview - REVIEW_LIMIT);
-  if (withReview <= REVIEW_LIMIT) {
+  if (withReview < 2) {
     console.log(
-      `\nINCONCLUSIVE: only ${withReview} batch(es) produced a review, so the limit of ${REVIEW_LIMIT} ` +
-        'was never reached. Some batches were probably not classified as false positives above the ' +
+      `\nINCONCLUSIVE: only ${withReview} batch(es) produced a review, so there was nothing to ` +
+        'coalesce. Some batches were probably not classified as false positives above the ' +
         'confidence floor (see "no FP candidates" above); run again with more --runs.'
     );
     process.exitCode = 2;
-  } else if (waiting <= REVIEW_LIMIT && skipped === expectedSkipped && sameKey.size === 1) {
-    console.log(`\nPASS: ${waiting} waiting, ${skipped} skipped, one key per rule.`);
+  } else if (appended === 0) {
+    console.log(
+      '\nNOT COALESCED: every batch raised a proposal of its own. Check that the Context Engine ' +
+        'plugin is enabled and read the coalesce_fp_close step of a review for its error.'
+    );
+    process.exitCode = 1;
+  } else if (waiting === 1 && appended === withReview - 1 && proposals.length === 1) {
+    console.log(`\nPASS: ${withReview} batches share one pending closure proposal.`);
   } else {
     console.log(
-      `\nFAIL: expected at most ${REVIEW_LIMIT} waiting and ${expectedSkipped} skipped under one key.`
+      `\nFAIL: expected 1 waiting review, ${withReview - 1} appended and 1 pending proposal.`
     );
     process.exitCode = 1;
   }
-  console.log(`\nCleanup: node ${process.argv[1]} --clean   (then dismiss the pending proposals)`);
+  console.log(`\nCleanup: node ${process.argv[1]} --clean   (then dismiss the pending proposal)`);
 };
 
 (async () => {
