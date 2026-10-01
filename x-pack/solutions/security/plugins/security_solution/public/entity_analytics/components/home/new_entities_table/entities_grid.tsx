@@ -381,7 +381,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
           showToolbar
             ? {
                 showColumnSelector: true,
-                showSortSelector: true,
+                showSortSelector: false,
                 showDisplaySelector: true,
                 showKeyboardShortcuts: true,
                 additionalControls: {
