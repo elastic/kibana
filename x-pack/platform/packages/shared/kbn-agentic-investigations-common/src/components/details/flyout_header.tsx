@@ -8,6 +8,7 @@
 import React from 'react';
 import { FormattedMessage, FormattedRelative, FormattedTime } from '@kbn/i18n-react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -15,8 +16,17 @@ import {
   EuiTextTruncate,
   EuiTitle,
 } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
 import type { Investigation } from '../../types';
 import { ConversationHeaderBlocks } from './header_blocks';
+import { SEVERITY_LABELS } from './translations';
+
+const SEVERITY_COLORS: Readonly<Record<string, EuiBadgeProps['color']>> = {
+  low: 'hollow',
+  medium: 'warning',
+  high: 'danger',
+  critical: 'danger',
+};
 
 export interface ConversationDetailsFlyoutHeaderProps {
   investigation: Investigation;
@@ -27,6 +37,8 @@ export interface ConversationDetailsFlyoutHeaderProps {
    * Falls back to a read-only badge when absent.
    */
   statusNode?: React.ReactNode;
+  /** Optional pre-rendered running state (for example "Investigating…") from the consuming plugin. */
+  runningNode?: React.ReactNode;
 }
 
 /**
@@ -37,8 +49,9 @@ export const ConversationDetailsFlyoutHeader = ({
   investigation,
   assigneesNode,
   statusNode,
+  runningNode,
 }: ConversationDetailsFlyoutHeaderProps) => {
-  const { title, createdAt } = investigation;
+  const { title, createdAt, severity } = investigation;
 
   return (
     <>
@@ -51,16 +64,31 @@ export const ConversationDetailsFlyoutHeader = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.alertzero.detailsFlyout.header.since"
-              defaultMessage="Since {time} ({relative})"
-              values={{
-                time: <FormattedTime value={createdAt} />,
-                relative: <FormattedRelative value={createdAt} />,
-              }}
-            />
-          </EuiText>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+            {severity && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  color={SEVERITY_COLORS[severity] ?? 'hollow'}
+                  data-test-subj="investigationFlyoutSeverity"
+                >
+                  {SEVERITY_LABELS[severity] ?? severity}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.alertzero.detailsFlyout.header.since"
+                  defaultMessage="Since {time} ({relative})"
+                  values={{
+                    time: <FormattedTime value={createdAt} />,
+                    relative: <FormattedRelative value={createdAt} />,
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            {runningNode && <EuiFlexItem grow={false}>{runningNode}</EuiFlexItem>}
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
