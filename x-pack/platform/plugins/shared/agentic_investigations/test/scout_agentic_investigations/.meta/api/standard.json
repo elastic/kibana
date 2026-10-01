@@ -1,5 +1,5 @@
 {
-  "sha1": "70ad38b46464cdfcd1769c3e9b396159e6ad6a2e",
+  "sha1": "1e60b084e0ecc7036dac6265ccd8b1f13fa90f26",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -518,7 +518,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/access_control.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 7
       }
     },
@@ -532,7 +532,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/access_control.spec.ts",
-        "line": 69,
+        "line": 70,
         "column": 9
       }
     },
@@ -546,7 +546,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/access_control.spec.ts",
-        "line": 103,
+        "line": 104,
         "column": 62
       }
     },
@@ -560,8 +560,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/access_control.spec.ts",
-        "line": 145,
+        "line": 146,
         "column": 20
+      }
+    },
+    {
+      "id": "40d12a708ba9237-559dc19eef7fa63",
+      "title": "Investigation query API access control reports the caller's investigation privileges to any signed-in user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/access_control.spec.ts",
+        "line": 161,
+        "column": 25
       }
     },
     {
@@ -803,8 +817,8 @@
       }
     },
     {
-      "id": "ace163ff6b9513e-e660c5571136bd2",
-      "title": "GET /internal/investigations/investigations — investigation query API returns 400 for an out-of-range page size",
+      "id": "ace163ff6b9513e-1fe9701ea727347",
+      "title": "GET /internal/investigations/investigations — investigation query API reads the requested ids",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -814,6 +828,34 @@
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
         "line": 309,
         "column": 14
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-a7d1f78d1a478df",
+      "title": "GET /internal/investigations/investigations — investigation query API matches investigations without a severity for severity=none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 314,
+        "column": 24
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-e660c5571136bd2",
+      "title": "GET /internal/investigations/investigations — investigation query API returns 400 for an out-of-range page size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 337,
+        "column": 21
       }
     },
     {

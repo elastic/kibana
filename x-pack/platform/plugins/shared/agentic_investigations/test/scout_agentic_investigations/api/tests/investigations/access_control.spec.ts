@@ -7,12 +7,14 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import type { InvestigationsPrivilegesResponse } from '../../../../../common';
 import {
   apiTest,
   IMPACT_PATH,
   INTERNAL_HEADERS,
   INVESTIGATION_BY_ID_PATH,
   INVESTIGATIONS_PATH,
+  INVESTIGATIONS_PRIVILEGES_PATH,
   INVESTIGATIONS_READ_ROLE,
   INVESTIGATIONS_SEVERITY_COUNTS_PATH,
   NO_INVESTIGATIONS_ROLE,
@@ -162,6 +164,31 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(403);
+      }
+    );
+
+    apiTest(
+      "reports the caller's investigation privileges to any signed-in user",
+      async ({ samlAuth, apiClient }) => {
+        const privilegesOf = async (role: Parameters<typeof samlAuth.asInteractiveUser>[0]) => {
+          const { cookieHeader } = await samlAuth.asInteractiveUser(role);
+          const response = await apiClient.get(INVESTIGATIONS_PRIVILEGES_PATH, {
+            headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+          return (response.body as InvestigationsPrivilegesResponse).investigations;
+        };
+
+        expect(await privilegesOf('admin')).toStrictEqual({ read: true, manage: true });
+        expect(await privilegesOf(INVESTIGATIONS_READ_ROLE)).toStrictEqual({
+          read: true,
+          manage: false,
+        });
+        expect(await privilegesOf(NO_INVESTIGATIONS_ROLE)).toStrictEqual({
+          read: false,
+          manage: false,
+        });
       }
     );
   }
