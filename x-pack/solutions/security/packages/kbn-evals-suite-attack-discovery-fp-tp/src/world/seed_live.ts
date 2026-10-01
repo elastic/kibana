@@ -69,27 +69,41 @@ const ENTITY_STORE_POLL_INTERVAL_MS = 2_000;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Refuses to seed when the product Attack Discovery data stream does not exist
- * yet: `create` on a non-existent dot-prefixed name would auto-create a plain
- * index under the reserved product stream name and block the product data
- * stream from being created later.
+ * Makes the Attack Discovery write target safe on any stack.
+ *
+ * `esClient.create` on a nonexistent dot-prefixed name auto-creates a plain
+ * index under the reserved product stream name, permanently blocking the
+ * product data stream. So before any write: if the stream exists, pass; if not,
+ * check that a matching composable index template (data_stream kind) is
+ * installed and provision the stream through it; if no template matches, fail
+ * with guidance — seeding that stack is unsafe no matter which path asks.
  */
-const assertAttackDataStreamExists = async (esClient: EsClient, index: string): Promise<void> => {
-  const response = await esClient.indices.getDataStream({ name: index });
-  if (response.data_streams.length === 0) {
+const ensureAttackDataStreamSafe = async (esClient: EsClient, index: string): Promise<void> => {
+  const streamExists = await esClient.indices
+    .getDataStream({ name: index })
+    .then((r) => r.data_streams.length > 0)
+    .catch((error: { statusCode?: number }) =>
+      // an exact name that does not exist rejects with 404 rather than an empty list
+      error.statusCode === 404 ? false : Promise.reject(error)
+    );
+  if (streamExists) {
+    return;
+  }
+  const template = await esClient.indices
+    .getIndexTemplate({ name: '.alerts-security*alert*' })
+    .then((r) => r.index_templates.find((entry) => entry.index_template?.template?.mappings !== undefined))
+    .catch((error: { statusCode?: number }) => (error.statusCode === 404 ? undefined : Promise.reject(error)));
+  if (template === undefined) {
     throw new Error(
-      `Attack Discovery data stream ${index} does not exist on this stack; ` +
-        'run the Attack Discovery worker once so the product creates it before seeding'
+      `Attack Discovery data stream ${index} does not exist and no matching `.concat(
+        'security alerts index template is installed; start the security solution (or run the Attack ',
+        'Discovery worker once) before seeding'
+      )
     );
   }
+  await esClient.indices.createDataStream({ name: index });
 };
 
-/**
- * Retries a create that 409s because a just-deleted document is still visible:
- * serverless ignores the delete refresh, so reseeding the same id immediately
- * can hit a stale version conflict. A short bounded retry lets the delete
- * settle instead of failing the manual seed.
- */
 const createWithConflictRetry = async (
   esClient: EsClient,
   params: { index: string; id: string; document: Record<string, unknown>; refresh?: string },
@@ -113,11 +127,35 @@ const createWithConflictRetry = async (
   }
 };
 
-const assertBulkOk = (label: string, result: { errors?: boolean; items?: unknown[] }): void => {
-  if (result.errors !== true) {
-    return;
+const bulkItemConflicts = (items: unknown[]): boolean =>
+  items.some(
+    (item) =>
+      typeof item === 'object' &&
+      item !== null &&
+      Object.values(item as Record<string, { status?: number }>).some(
+        (op) => op?.status === 409 || op?.error?.type === 'version_conflict_engine_exception'
+      )
+  );
+
+const bulkWithConflictRetry = async (
+  esClient: EsClient,
+  label: string,
+  operations: unknown[],
+  { attempts = 3, delayMs = 750 }: { attempts?: number; delayMs?: number } = {}
+): Promise<void> => {
+  for (let attempt = 1; ; attempt++) {
+    const result = await esClient.bulk({ refresh: 'wait_for', operations });
+    if (result.errors !== true) {
+      return;
+    }
+    const items = result.items ?? [];
+    if (bulkItemConflicts(items) && attempt < attempts) {
+      // serverless ignores the delete refresh: just-deleted ids can 409 on reseed
+      await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
+      continue;
+    }
+    throw new Error(`${label} bulk had item errors: ${JSON.stringify(items)}`);
   }
-  throw new Error(`${label} bulk had item errors: ${JSON.stringify(result.items)}`);
 };
 
 const kbnErrorMessage = (body: unknown): string => {
@@ -478,39 +516,23 @@ export const seedFixture = async ({
   world,
   now = new Date(),
   onCleanupFailure,
-  requireAttackDataStream = true,
 }: {
   esClient: EsClient;
   kbnRequest: FpTpLiveKbnRequest;
   world: FpTpWorld;
   now?: Date;
   onCleanupFailure?: (cleanup: () => Promise<void>) => void;
-  /**
-   * Skip the Attack Discovery data-stream preflight. Only for the eval suite,
-   * whose `beforeAll` starts no Attack Discovery worker; the first `create`
-   * bootstraps the stream via the template (running the worker first would
-   * overwrite later seeds' documents, so the guard must not run there).
-   */
-  requireAttackDataStream?: boolean;
 }): Promise<FpTpSeededFixture> => {
   const plan = buildLiveSeedPlan(world, now);
   const cleanup = () => cleanupLiveSeedPlan({ esClient, kbnRequest, plan });
 
   try {
-    if (requireAttackDataStream) {
-      await assertAttackDataStreamExists(esClient, plan.attackIndex);
-    }
+    await ensureAttackDataStreamSafe(esClient, plan.attackIndex);
     if (plan.alertOperations.length > 0) {
-      assertBulkOk(
-        'alerts',
-        await esClient.bulk({ refresh: 'wait_for', operations: plan.alertOperations })
-      );
+      await bulkWithConflictRetry(esClient, 'alerts', plan.alertOperations);
     }
     if (plan.eventOperations.length > 0) {
-      assertBulkOk(
-        'events',
-        await esClient.bulk({ refresh: 'wait_for', operations: plan.eventOperations })
-      );
+      await bulkWithConflictRetry(esClient, 'events', plan.eventOperations);
     }
     if (plan.attackDocument) {
       await createWithConflictRetry(esClient, {
@@ -549,6 +571,9 @@ export const seedTwinLive = async ({
 }): Promise<FpTpLiveSeedSummary> => {
   const plan = buildLiveSeedPlan(twinToWorld(twin), now);
 
+  // guard before any mutation: a failed seed must not have already stopped
+  // Entity Store extraction or removed the previous manual seed
+  await ensureAttackDataStreamSafe(esClient, plan.attackIndex);
   await ensureFpTpSeedPrerequisites(kbnRequest);
   await cleanupManualSeedLive(esClient, plan.events);
   for (const entity of plan.entities) {

@@ -167,7 +167,11 @@ describe('seedFixture', () => {
     deleteByQuery: jest.Mock;
     search: jest.Mock;
     updateByQuery: jest.Mock;
-    indices: { getDataStream: jest.Mock };
+    indices: {
+      getDataStream: jest.Mock;
+      getIndexTemplate: jest.Mock;
+      createDataStream: jest.Mock;
+    };
   };
   let kbnRequest: jest.MockedFunction<FpTpLiveKbnRequest>;
 
@@ -182,9 +186,28 @@ describe('seedFixture', () => {
         getDataStream: jest
           .fn()
           .mockResolvedValue({ data_streams: [{ name: FP_TP_ATTACK_INDEX }] }),
+        getIndexTemplate: jest.fn().mockResolvedValue({
+          index_templates: [
+            { name: '.alerts-security.alerts', index_template: { template: { mappings: {} } } },
+          ],
+        }),
+        createDataStream: jest.fn().mockResolvedValue({}),
       },
     };
     kbnRequest = jest.fn().mockResolvedValue({ statusCode: 200, body: {} });
+  });
+
+  it('retries alert bulk item 409s after a delete-then-reseed race', async () => {
+    esClient.bulk
+      .mockResolvedValueOnce({
+        errors: true,
+        items: [{ create: { status: 409, error: { type: 'version_conflict_engine_exception' } } }],
+      })
+      .mockResolvedValueOnce({ errors: false });
+
+    await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
+
+    expect(esClient.bulk).toHaveBeenCalledTimes(3);
   });
 
   it('retries a 409 version conflict once before failing the seed', async () => {
@@ -195,34 +218,35 @@ describe('seedFixture', () => {
       esClient: esClient as unknown as EsClient,
       kbnRequest,
       world,
-      requireAttackDataStream: false,
     });
 
     expect(esClient.create).toHaveBeenCalledTimes(2);
   });
 
-  it('skips the data-stream preflight for the eval suite', async () => {
-    esClient.indices.getDataStream.mockRejectedValueOnce(new Error('should not be called'));
-
-    await seedFixture({
-      esClient: esClient as unknown as EsClient,
-      kbnRequest,
-      world,
-      requireAttackDataStream: false,
-    });
-
-    expect(esClient.indices.getDataStream).not.toHaveBeenCalled();
-    expect(esClient.create).toHaveBeenCalled();
-  });
-
-  it('refuses to seed when the Attack Discovery data stream does not exist', async () => {
-    esClient.indices.getDataStream.mockResolvedValueOnce({ data_streams: [] });
+  it('refuses to seed when the stream is absent and no template is installed', async () => {
+    esClient.indices.getDataStream.mockRejectedValueOnce(
+      Object.assign(new Error('not found'), { statusCode: 404 })
+    );
+    esClient.indices.getIndexTemplate.mockRejectedValueOnce(
+      Object.assign(new Error('not found'), { statusCode: 404 })
+    );
 
     await expect(
       seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world })
-    ).rejects.toThrow(/data stream .* does not exist/);
+    ).rejects.toThrow(/no matching/);
     expect(esClient.create).not.toHaveBeenCalled();
     expect(esClient.bulk).not.toHaveBeenCalled();
+  });
+
+  it('provisions the data stream via the installed template when absent', async () => {
+    esClient.indices.getDataStream.mockRejectedValueOnce(
+      Object.assign(new Error('not found'), { statusCode: 404 })
+    );
+
+    await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
+
+    expect(esClient.indices.createDataStream).toHaveBeenCalledWith({ name: FP_TP_ATTACK_INDEX });
+    expect(esClient.create).toHaveBeenCalled();
   });
 
   it('returns a cleanup that deletes the seeded Attack Discovery by id', async () => {
