@@ -142,6 +142,7 @@ export enum SecurityPageName {
    */
   alertZeroThreatHunt = 'threat_hunt',
   alertZeroStreams = 'streams',
+  alertZeroEscalations = 'escalations',
   alertZeroWatches = 'watches',
   alertZeroWatchesWorkers = 'watches_workers',
   alertZeroWatchesSkills = 'watches_skills',
@@ -150,4 +151,5 @@ export enum SecurityPageName {
   alertZeroWatchHunt = 'watch_hunt',
   alertZeroWatchDeep = 'watch_deep',
   alertZeroWatchDetection = 'watch_detection',
+  alertZeroWatchForensics = 'watch_forensics',
 }

@@ -9,6 +9,7 @@ import { isEqual } from 'lodash';
 import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import type {
   ChatAgentEvent,
+  CompactionSummary,
   ConversationRoundStep,
   ToolCallProgress,
 } from '@kbn/agent-builder-common';
@@ -38,13 +39,16 @@ export interface ToolExecutionBuffer {
 /** The part of the graph state persistence reads. */
 export type RunStateSnapshot = Pick<
   StateType,
-  'steps' | 'toolRenderState' | 'currentCycle' | 'errorCount'
->;
+  'steps' | 'toolRenderState' | 'currentCycle' | 'errorCount' | 'pendingToolCallIds'
+> &
+  Partial<Pick<StateType, 'compactionSummary' | 'lastCallUsage'>>;
 
 export interface RunSeed {
   /** The steps the graph starts from (what `Overwrite(steps)` seeds). */
   steps: ConversationRoundStep[];
   toolRenderState?: ToolRenderStateMap;
+  /** The compaction summary the graph starts from. */
+  compactionSummary?: CompactionSummary;
   /**
    * Resume only: the steps inherited from the previous executions of the turn (a prefix of `steps`,
    * todos aside) and the calls that were still pending among them.
@@ -75,12 +79,14 @@ const isRootGraphStateChunk = (
 
 const isStateSnapshot = (chunk: unknown): chunk is RunStateSnapshot => {
   if (typeof chunk !== 'object' || chunk === null) return false;
-  const { steps, toolRenderState, currentCycle, errorCount } = chunk as Partial<RunStateSnapshot>;
+  const { steps, toolRenderState, currentCycle, errorCount, pendingToolCallIds } =
+    chunk as Partial<RunStateSnapshot>;
   return (
     Array.isArray(steps) &&
     typeof toolRenderState === 'object' &&
     typeof currentCycle === 'number' &&
-    typeof errorCount === 'number'
+    typeof errorCount === 'number' &&
+    Array.isArray(pendingToolCallIds)
   );
 };
 
@@ -167,6 +173,7 @@ export class RunTracker implements ToolExecutionBuffer {
     toolRenderState: {},
     currentCycle: 0,
     errorCount: 0,
+    pendingToolCallIds: [],
   };
   private inherited: RunSeed['inherited'];
   private latest: RunStateSnapshot | undefined;
@@ -178,8 +185,17 @@ export class RunTracker implements ToolExecutionBuffer {
     this.graphName = graphName;
   }
 
-  seed({ steps, toolRenderState = {}, inherited }: RunSeed): void {
-    this.seedState = { steps, toolRenderState, currentCycle: 0, errorCount: 0 };
+  seed({ steps, toolRenderState = {}, compactionSummary, inherited }: RunSeed): void {
+    // A HITL resume with pending calls goes straight to `executeTool`: until the first `values`
+    // chunk those calls are the ones in flight, so an interruption there must find them here.
+    this.seedState = {
+      steps,
+      toolRenderState,
+      currentCycle: 0,
+      errorCount: 0,
+      pendingToolCallIds: inherited?.pendingToolCallIds ?? [],
+      compactionSummary,
+    };
     this.inherited = inherited;
     this.latest = undefined;
   }

@@ -12,9 +12,13 @@ import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
 import type { BackgroundAgentCompleteStep, ChatAgentEvent } from '@kbn/agent-builder-common/chat';
 import {
+  ChatEventType,
+  createSubstitutionAppliedEvent,
   isBackgroundAgentCompleteStep,
+  isCompactionStep,
   isReasoningStep,
   isSubagentRosterUpdatedStep,
+  isSubstitutionStep,
 } from '@kbn/agent-builder-common/chat';
 import {
   createBrowserToolCallEvent,
@@ -47,6 +51,11 @@ interface ResearchNodeOutput {
   steps?: RunStepUpdate[];
   toolRenderState?: ToolRenderStateUpdate;
   researchOutcome?: ResearchOutcome;
+}
+
+/** What a `contextManagement` node returns, as seen on its `on_chain_end` event. */
+interface ContextManagementNodeOutput {
+  steps?: RunStepUpdate[];
 }
 
 /** What an `executeTool` node returns, as seen on its `on_chain_end` event. */
@@ -106,13 +115,17 @@ const NODE_NAMES: ReadonlySet<string> = new Set(Object.values(steps));
 
 /**
  * True for the `on_chain_end` of one of *our* nodes running in the *root* graph of this run.
- * Node names are reused by nested graphs (a sub-agent runs this same graph; tool-internal graphs
- * have their own names) and inherited metadata is not enough to tell them apart, so this checks:
+ * Node names are reused by nested graphs (tool-internal graphs have their own names) and inherited
+ * metadata is not enough to tell them apart, so this checks:
  * - `metadata.graphName`,
  * - `event.name === metadata.langgraph_node` (the node's own run, not a runnable inside it — the
  *   same test LangGraph uses in its stream handlers),
- * - a single-segment `langgraph_checkpoint_ns` (LangGraph joins nested namespaces with `|`; any
- *   graph invoked under one of our nodes with an inherited config gets a `parent|child` namespace).
+ * - a single-segment `langgraph_checkpoint_ns`: LangGraph joins nested namespaces with `|`, so a
+ *   graph invoked under one of our nodes whose events reach this stream through inherited callbacks
+ *   shows up as `parent|child`. Our own nodes are always single-segment, including inside a
+ *   sub-agent run (`run_chat_agent` resets the inherited namespace when it streams the graph), so
+ *   this check cannot tell a sub-agent's nodes from the parent's: a sub-agent's events are kept off
+ *   the parent's stream by `callbacks: []`, not by this check.
  */
 const isRootGraphNodeEnd = (event: LangchainStreamEvent, graphName: string): boolean => {
   if (event.event !== 'on_chain_end' || !NODE_NAMES.has(event.name)) return false;
@@ -259,6 +272,32 @@ export const convertGraphEvents = ({
           if (resultEvents.length > 0) {
             return of(...resultEvents);
           }
+        }
+
+        // emit substitution events decided by the context-management node
+        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.contextManagement)) {
+          const output = event.data.output as ContextManagementNodeOutput;
+          const contextEvents: ChatAgentEvent[] = [];
+          for (const update of output.steps ?? []) {
+            if (update.type === 'append' && isSubstitutionStep(update.step)) {
+              const { type, ...data } = update.step;
+              contextEvents.push(createSubstitutionAppliedEvent(data));
+            }
+          }
+          return contextEvents.length > 0 ? of(...contextEvents) : EMPTY;
+        }
+
+        // emit compaction completion events
+        if (isRootGraphNodeEnd(event, graphName) && matchName(event, steps.compactContext)) {
+          const output = event.data.output as { steps?: RunStepUpdate[] };
+          const completed: ChatAgentEvent[] = [];
+          for (const update of output.steps ?? []) {
+            if (update.type === 'append' && isCompactionStep(update.step)) {
+              const { type, ...data } = update.step;
+              completed.push({ type: ChatEventType.compactionCompleted, data });
+            }
+          }
+          return completed.length > 0 ? of(...completed) : EMPTY;
         }
 
         // emit background execution complete events

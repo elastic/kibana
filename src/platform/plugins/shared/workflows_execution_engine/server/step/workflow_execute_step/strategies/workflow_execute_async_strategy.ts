@@ -37,7 +37,7 @@ export class WorkflowExecuteAsyncStrategy {
       const workflowExecution = this.stepExecutionRuntime.workflowExecution;
       const isTestRun = !!workflowExecution.isTestRun;
       const { workflowExecutionId } = await this.workflowsExecutionEngine.executeWorkflow(
-        toWorkflowExecutionEngineModel(workflow, { isTestRun }),
+        toWorkflowExecutionEngineModel(workflow, { isTestRun, isEphemeral: false }),
         {
           spaceId,
           inputs,

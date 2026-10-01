@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-export { updateConnectorParamsSchema, updateConnectorBodySchema } from './schemas/latest';
+export {
+  updateConnectorParamsSchema,
+  updateConnectorBodySchema,
+  getUpdateConnectorBodySchema,
+} from './schemas/latest';
 export type { UpdateConnectorBody, UpdateConnectorParams } from './types/latest';
 
 export {
   updateConnectorParamsSchema as updateConnectorParamsSchemaV1,
   updateConnectorBodySchema as updateConnectorBodySchemaV1,
+  getUpdateConnectorBodySchema as getUpdateConnectorBodySchemaV1,
 } from './schemas/v1';
 
 export type {

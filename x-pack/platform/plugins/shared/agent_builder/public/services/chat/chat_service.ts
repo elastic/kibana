@@ -5,19 +5,26 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { defer } from 'rxjs';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import type { Observable, OperatorFunction } from 'rxjs';
+import { defer, pipe } from 'rxjs';
+import type { HttpResponse, HttpSetup } from '@kbn/core-http-browser';
+import { buildPath } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { type PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { publicApiPath, internalApiPath } from '../../../common/constants';
-import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
+import { chatApiPath, internalApiPath } from '../../../common/constants';
+import type {
+  AbortExecutionResponse,
+  ChatRequestBodyPayload,
+  ChatTriggerMode,
+} from '../../../common/http_api/chat';
+import type { ConversationWithPermissions } from '../../../common/http_api/conversations';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
 import type { EventsService } from '../events';
 import { propagateEvents } from './propagate_events';
+import { streamWithReattach } from './reattach_on_disconnect';
 
 interface BaseConverseParams {
   signal?: AbortSignal;
@@ -46,6 +53,13 @@ type ConversePayload = ChatRequestBodyPayload & {
   conversation_id: string;
   execution_id: string;
 };
+
+const parseChatEvents = (): OperatorFunction<HttpResponse, ChatEvent> =>
+  pipe(
+    // @ts-expect-error SseEvent mixin issue
+    httpResponseIntoObservable<ChatEvent>(),
+    unwrapAgentBuilderErrors()
+  );
 
 export class ChatService {
   private readonly http: HttpSetup;
@@ -84,6 +98,31 @@ export class ChatService {
     });
   }
 
+  /**
+   * Append a user message to an existing conversation without running the agent.
+   */
+  sendUserMessage({
+    conversationId,
+    input,
+    attachments,
+    triggerMode,
+  }: {
+    conversationId: string;
+    input: string;
+    attachments?: AttachmentInput[];
+    triggerMode: ChatTriggerMode;
+  }): Promise<ConversationWithPermissions> {
+    const payload: ChatRequestBodyPayload = {
+      trigger_mode: triggerMode,
+      conversation_id: conversationId,
+      input,
+      attachments,
+    };
+    return this.http.post<ConversationWithPermissions>(`${chatApiPath}/converse`, {
+      body: JSON.stringify(payload),
+    });
+  }
+
   followExecution(executionId: string, signal?: AbortSignal): Observable<ChatEvent> {
     return defer(() => {
       return this.http.get(`${internalApiPath}/executions/${executionId}/follow`, {
@@ -91,29 +130,39 @@ export class ChatService {
         asResponse: true,
         rawResponse: true,
       });
-    }).pipe(
-      // @ts-expect-error SseEvent mixin issue
-      httpResponseIntoObservable<ChatEvent>(),
-      unwrapAgentBuilderErrors()
+    }).pipe(parseChatEvents());
+  }
+
+  abort(executionId: string): Promise<AbortExecutionResponse> {
+    return this.http.post<AbortExecutionResponse>(
+      `${internalApiPath}/executions/${executionId}/abort`
     );
   }
 
-  async abort(executionId: string): Promise<void> {
-    await this.http.post(`${internalApiPath}/executions/${executionId}/abort`);
-  }
-
   private converse(signal: AbortSignal | undefined, payload: ConversePayload) {
-    return defer(() => {
-      return this.http.post(`${publicApiPath}/converse/async`, {
-        signal,
-        asResponse: true,
-        rawResponse: true,
-        body: JSON.stringify(payload),
-      });
+    return streamWithReattach({
+      connect: () =>
+        this.http.post(`${chatApiPath}/converse/async`, {
+          signal,
+          asResponse: true,
+          rawResponse: true,
+          body: JSON.stringify(payload),
+        }),
+      reattach: (offset) =>
+        this.http.get(
+          buildPath(`${internalApiPath}/executions/{executionId}/reattach`, {
+            executionId: payload.execution_id,
+          }),
+          {
+            signal,
+            asResponse: true,
+            rawResponse: true,
+            query: { offset },
+          }
+        ),
+      parse: parseChatEvents(),
+      signal,
     }).pipe(
-      // @ts-expect-error SseEvent mixin issue
-      httpResponseIntoObservable<ChatEvent>(),
-      unwrapAgentBuilderErrors(),
       propagateEvents({
         eventsService: this.events,
         conversationId: payload.conversation_id,

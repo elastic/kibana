@@ -49,8 +49,11 @@ spaceTest.describe(
       );
       await pageObjects.discover.submitQuery();
       await drainInitial;
+      // Mounts with Discover's main panel, so the hidden waits below can't pass on a blank page.
+      await page.testSubj
+        .locator('unifiedHistogramRendered')
+        .waitFor({ state: 'visible', timeout: 30_000 });
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      await page.testSubj.locator('unifiedHistogramRendered').waitFor({ state: 'visible' });
       await progressBarStarted;
       await histogramProgressBar.waitFor({ state: 'hidden', timeout: 30_000 });
     });

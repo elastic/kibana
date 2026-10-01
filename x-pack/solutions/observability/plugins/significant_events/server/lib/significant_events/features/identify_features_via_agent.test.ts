@@ -84,6 +84,7 @@ describe('executeFeatureIdentificationAgent', () => {
         connectorId: 'connector-1',
         streamName: 'logs.test',
         sampleDocuments: [{ _id: 'doc-1', fields: { message: 'hello' } }],
+        interactionId: 'run-1',
         logger: loggerMock.create(),
       })
     ).resolves.toEqual({
@@ -101,7 +102,7 @@ describe('executeFeatureIdentificationAgent', () => {
     expect(createConversation).toHaveBeenCalledWith({
       agentId: FEATURE_IDENTIFICATION_AGENT_ID,
       title: 'Feature identification: logs.test',
-      accessControl: { access_mode: 'private' },
+      accessControl: { access_mode: 'public' },
     });
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -114,6 +115,13 @@ describe('executeFeatureIdentificationAgent', () => {
           storeConversation: true,
           nextInput: {
             message: expect.stringContaining('`sample_documents`:'),
+          },
+          telemetryMetadata: {
+            pluginId: 'significant_events_ki_extraction',
+            aggregateBy: 'significant_events',
+            productSolution: 'observability',
+            productFeature: 'nightshift',
+            interactionId: 'run-1',
           },
         }),
       })

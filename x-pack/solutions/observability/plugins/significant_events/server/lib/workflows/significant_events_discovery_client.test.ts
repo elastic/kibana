@@ -20,20 +20,25 @@ const installDiscoveryAgentsMock = installDiscoveryAgents as jest.MockedFunction
   typeof installDiscoveryAgents
 >;
 
-const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
-  getWorkflow: jest.fn().mockResolvedValue({
-    id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
-    name: 'sigevents-orchestrator',
-    enabled: true,
-    definition: {},
-    yaml: '',
-  }),
-  runWorkflow: jest.fn().mockResolvedValue('execution-id'),
-  getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-  getWorkflowExecution: jest.fn().mockResolvedValue(null),
-  cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-  ...overrides,
-});
+const statusRequest = httpServerMock.createKibanaRequest();
+
+const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
+  const api = {
+    getWorkflow: jest.fn().mockResolvedValue({
+      id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
+      name: 'sigevents-orchestrator',
+      enabled: true,
+      definition: {},
+      yaml: '',
+    }),
+    runWorkflow: jest.fn().mockResolvedValue('execution-id'),
+    getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    getWorkflowExecution: jest.fn().mockResolvedValue(null),
+    cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  };
+  return { ...api, getClient: jest.fn(() => api) };
+};
 
 const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
@@ -135,7 +140,7 @@ describe('SignificantEventsDiscoveryClient', () => {
     it('returns NotStarted with a null executionId when no executions exist', async () => {
       const { client } = createClient();
 
-      const result = await client.getStatus({ spaceId: 'space-a' });
+      const result = await client.getStatus({ request: statusRequest, spaceId: 'space-a' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.NotStarted,
@@ -150,7 +155,7 @@ describe('SignificantEventsDiscoveryClient', () => {
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }] }),
       });
 
-      const result = await client.getStatus({ spaceId: 'space-a' });
+      const result = await client.getStatus({ request: statusRequest, spaceId: 'space-a' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.InProgress,
@@ -165,7 +170,7 @@ describe('SignificantEventsDiscoveryClient', () => {
         }),
       });
 
-      const result = await client.getStatus({ spaceId: 'space-a' });
+      const result = await client.getStatus({ request: statusRequest, spaceId: 'space-a' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Failed,
@@ -181,7 +186,7 @@ describe('SignificantEventsDiscoveryClient', () => {
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.TIMED_OUT }] }),
       });
 
-      const result = await client.getStatus({ spaceId: 'space-a' });
+      const result = await client.getStatus({ request: statusRequest, spaceId: 'space-a' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Failed,

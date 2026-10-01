@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import type { ServiceAccountCredentialAttributes } from './credential_saved_object';
@@ -77,6 +77,55 @@ export class ServiceAccountCredentialStore {
       }
       throw e;
     }
+  }
+
+  /**
+   * Which of the given accounts Kibana holds a credential for. Accounts with none are simply
+   * absent from the result.
+   *
+   * Existence is the whole answer: nothing outside this store reads a credential's attributes,
+   * and what the caller does with the answer is its own business. The documents are read without
+   * decrypting, so this says a credential is on file, not that it still works.
+   *
+   * An account whose credential cannot be read throws rather than resolving absent. Absent means
+   * "Kibana holds nothing for this account", which a caller is entitled to act on, and a document
+   * Kibana failed to read is not that.
+   */
+  async findExisting(serviceAccountIds: string[]): Promise<Set<string>> {
+    const existing = new Set<string>();
+    if (serviceAccountIds.length === 0) {
+      return existing;
+    }
+
+    const { saved_objects: savedObjects } = await this.client.bulkGet<
+      Pick<ServiceAccountCredentialAttributes, 'serviceAccountId'>
+    >(
+      serviceAccountIds.map((serviceAccountId) => ({
+        type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+        id: getCredentialId(serviceAccountId),
+        // Nothing here reads an attribute, but the list cannot be empty: the saved objects client
+        // reads that as "no filtering" and hands back the whole document, ciphertext included.
+        // One cheap field keeps the token out of the response.
+        fields: ['serviceAccountId'],
+      }))
+    );
+
+    savedObjects.forEach((result, index) => {
+      const serviceAccountId = serviceAccountIds[index];
+      if (isSavedObjectErrorResult(result)) {
+        if (result.error.statusCode === 404) {
+          return;
+        }
+        throw new Error(
+          `Failed to read the credential of service account [${serviceAccountId}] ` +
+            `(credential [${result.id}]): ${result.error.message}`
+        );
+      }
+
+      existing.add(serviceAccountId);
+    });
+
+    return existing;
   }
 
   /**

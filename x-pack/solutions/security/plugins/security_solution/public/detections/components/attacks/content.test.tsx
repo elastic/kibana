@@ -87,7 +87,7 @@ describe('AttacksPageContent', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: { capabilities: { advancedSettings: { save: true } } },
-        featureFlags: { getBooleanValue: jest.fn().mockReturnValue(false) },
+        featureFlags: { useBooleanValue: jest.fn().mockReturnValue(false) },
         settings: {
           client: {
             get: jest.fn(),
