@@ -45,6 +45,9 @@ const intervalsOverlap = (aStart: number, aEnd: number, bStart: number, bEnd: nu
  * Invariants produced (all axes use the direction-dependent helpers above):
  * - Every lane head starts one rank below its owner's main-axis end (D3, cascade).
  * - The spine below every owner clears the lane's full subtree main extent (D7).
+ *   The same clearance applies one level in: a parent lane's own successors of a
+ *   nested lane's owner clear that nested lane's full subtree too, so a `continue`
+ *   rejoin out of a nested fallback never runs backward.
  * - Every lane's inner (−cross) edge is ≥ nodeSep past the cross extent of all
  *   spine nodes sharing the lane's main band (D5 — local hugging).
  * - Deeper lanes are always further out than shallower lanes containing their
@@ -200,11 +203,67 @@ export function layoutGraphWithLanes(
       });
     }
 
-    // Recursively cascade nested lanes (depth-first pre-order).
+    // Recursively cascade nested lanes, top-down by owner's current main position
+    // (depth-first pre-order). After each nested lane is cascaded, push THIS lane's
+    // own in-lane successors of the nested owner so they clear the nested lane's
+    // full subtree — the same D7 rule the spine loop applies below (§5), scoped to
+    // lane-internal topology so a sibling branch inside this lane is not pushed
+    // (Fix 6 parity). Without this, a `continue` rejoin out of a nested fallback
+    // can run backward into a sibling step that never moved.
     const laneNodeIdSet = new Set(laneLayout.nodes.map((n) => n.id));
-    for (const nestedLane of sortedLanes) {
-      if (laneNodeIdSet.has(nestedLane.ownerId)) {
-        levelLaneCascade(nestedLane, nestedLane.ownerId);
+    const nestedOwnerIds = [
+      ...new Set(sortedLanes.filter((nl) => laneNodeIdSet.has(nl.ownerId)).map((nl) => nl.ownerId)),
+    ].sort((a, b) => mainOf(laneNodeById.get(a)!, isLR) - mainOf(laneNodeById.get(b)!, isLR));
+
+    for (const nestedOwnerId of nestedOwnerIds) {
+      const ownedNestedLanes = sortedLanes.filter(
+        (nl) => nl.ownerId === nestedOwnerId && laneNodeIdSet.has(nl.ownerId)
+      );
+      for (const nestedLane of ownedNestedLanes) {
+        levelLaneCascade(nestedLane, nestedOwnerId);
+
+        // Measure the nested lane's (and anything nested under it) full extent,
+        // then push this lane's in-lane successors of nestedOwnerId to clear it.
+        const required = subtreeMainEnd(nestedLane) + rankSep;
+        const nestedOwnerSuccessors = getLaneTransitiveSuccessors(nestedOwnerId);
+        const successorsInLane = [...laneNodeIdSet]
+          .filter((id) => nestedOwnerSuccessors.has(id))
+          .map((id) => laneNodeById.get(id)!)
+          .sort((a, b) => mainOf(a, isLR) - mainOf(b, isLR));
+
+        if (successorsInLane.length === 0) continue;
+
+        const deficit = Math.max(0, required - mainOf(successorsInLane[0], isLR));
+        if (deficit === 0) continue;
+
+        for (const id of laneNodeIdSet) {
+          if (nestedOwnerSuccessors.has(id)) {
+            laneNodeById.set(id, shiftMain(laneNodeById.get(id)!, deficit, isLR));
+          }
+        }
+
+        // Translate/clear this lane's internal edges across the push boundary,
+        // mirroring the spine push's edge handling below (§5).
+        const currentLaneLayout = laneLayouts.get(lane)!;
+        laneLayouts.set(lane, {
+          nodes: currentLaneLayout.nodes.map((n) => laneNodeById.get(n.id)!),
+          edges: currentLaneLayout.edges.map((e) => {
+            if (!nestedOwnerSuccessors.has(e.target)) return e;
+            if (e.source === nestedOwnerId) {
+              // Owner → successor is straight (same column), clear waypoints.
+              return { ...e, points: [] };
+            } else if (nestedOwnerSuccessors.has(e.source)) {
+              // Both endpoints were pushed — translate.
+              return {
+                ...e,
+                points: translateEdgePoints(e.points, isLR ? deficit : 0, isLR ? 0 : deficit),
+              };
+            } else {
+              // Edge crosses the push boundary — clear waypoints.
+              return { ...e, points: [] };
+            }
+          }),
+        });
       }
     }
   }
@@ -269,6 +328,39 @@ export function layoutGraphWithLanes(
       }
     }
     successorCache.set(startId, visited);
+    return visited;
+  }
+
+  // Lane-internal adjacency, used by levelLaneCascade's in-lane D7 push: the
+  // successors (within a PARENT lane) of a NESTED lane's owner must clear that
+  // nested lane's subtree. Node ids are unique across the whole graph, so every
+  // lane's internal edges can be merged into one map — reachability from a node
+  // in lane L can only traverse edges internal to L (boundary edges, which leave
+  // L, are excluded from laneInternalEdges), so this naturally stays lane-scoped.
+  const laneAdj = new Map<string, string[]>();
+  for (const [, laneEdges] of laneInternalEdges) {
+    for (const e of laneEdges) {
+      if (!laneAdj.has(e.source)) laneAdj.set(e.source, []);
+      laneAdj.get(e.source)!.push(e.target);
+    }
+  }
+
+  const laneSuccessorCache = new Map<string, Set<string>>();
+  function getLaneTransitiveSuccessors(startId: string): Set<string> {
+    const cached = laneSuccessorCache.get(startId);
+    if (cached) return cached;
+    const visited = new Set<string>();
+    const queue = [startId];
+    while (queue.length > 0) {
+      const id = queue.shift()!;
+      for (const next of laneAdj.get(id) ?? []) {
+        if (!visited.has(next)) {
+          visited.add(next);
+          queue.push(next);
+        }
+      }
+    }
+    laneSuccessorCache.set(startId, visited);
     return visited;
   }
 
