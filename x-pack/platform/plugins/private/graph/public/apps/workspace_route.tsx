@@ -69,7 +69,6 @@ export const WorkspaceRoute = ({
   const runtimeGraphRef = useRef<RuntimeGraph>();
   const [runtimeGraph, setRuntimeGraph] = useState<RuntimeGraph>();
   const layoutControllerRef = useRef<GraphLayoutController>();
-  const storeRef = useRef<GraphStore>();
   const runtimeSequenceRef = useRef(0);
   const history = useHistory();
 
@@ -113,22 +112,6 @@ export const WorkspaceRoute = ({
     [callSearchNodeProxy]
   );
 
-  const getMergeCandidates = async (nodes: WorkspaceNode[]): Promise<TermIntersect[]> => {
-    const currentRuntimeGraph = runtimeGraphRef.current;
-    const datasource = storeRef.current?.getState().datasource.current;
-    if (!currentRuntimeGraph || !datasource || datasource.type === 'none') return [];
-    const indexName = datasource.title;
-    const topLevelNodes = nodes.filter(isTopLevelNode);
-    if (topLevelNodes.length < 2) return [];
-    const request = buildIntersectionRequest(
-      topLevelNodes.map((node) =>
-        buildNodeQuery(unpackGroupedNodes([node], currentRuntimeGraph.edges))
-      )
-    );
-    const response = await searchGraph(indexName, request);
-    return transformIntersectionResponse(response, topLevelNodes);
-  };
-
   const mergeRuntimeGraph = (
     targetRuntimeGraph: RuntimeGraph,
     graph: Parameters<typeof applyRuntimeGraphMerge>[1]
@@ -141,19 +124,26 @@ export const WorkspaceRoute = ({
     );
   };
 
-  const notifyWorkspaceChanged = () => {
-    const currentRuntimeGraph = runtimeGraphRef.current;
-    if (currentRuntimeGraph) {
-      storeRef.current?.dispatch(
-        workspaceRuntimeChanged(
-          createRuntimeGraphState(currentRuntimeGraph, layoutControllerRef.current?.isRunning())
-        )
-      );
-    }
-  };
+  const [store] = useState(() => {
+    const storeAccess = {
+      get: (): GraphStore => {
+        throw new Error('Graph store dependency used before store initialization');
+      },
+    };
+    const notifyWorkspaceChanged = () => {
+      const currentRuntimeGraph = runtimeGraphRef.current;
+      if (currentRuntimeGraph) {
+        storeAccess
+          .get()
+          .dispatch(
+            workspaceRuntimeChanged(
+              createRuntimeGraphState(currentRuntimeGraph, layoutControllerRef.current?.isRunning())
+            )
+          );
+      }
+    };
 
-  const [store] = useState(() =>
-    createGraphStore({
+    const initializedStore = createGraphStore({
       basePath: getBasePath(),
       addBasePath,
       indexPatternProvider,
@@ -161,7 +151,7 @@ export const WorkspaceRoute = ({
         layoutControllerRef.current?.stop();
         runtimeSequenceRef.current = 0;
         const layoutTopology = new ReduxLayoutTopology({
-          getState: () => storeRef.current?.getState(),
+          getState: () => storeAccess.get().getState(),
           getRuntimeGraph: () => runtimeGraphRef.current,
         });
         const layoutController = new GraphLayoutController({
@@ -186,9 +176,25 @@ export const WorkspaceRoute = ({
       searchGraph,
       mergeRuntimeGraph,
       ...coreStart,
-    })
-  );
-  storeRef.current = store;
+    });
+    storeAccess.get = () => initializedStore;
+    return initializedStore;
+  });
+
+  const getMergeCandidates = async (nodes: WorkspaceNode[]): Promise<TermIntersect[]> => {
+    const currentRuntimeGraph = runtimeGraphRef.current;
+    const datasource = store.getState().datasource.current;
+    if (!currentRuntimeGraph || datasource.type === 'none') return [];
+    const topLevelNodes = nodes.filter(isTopLevelNode);
+    if (topLevelNodes.length < 2) return [];
+    const request = buildIntersectionRequest(
+      topLevelNodes.map((node) =>
+        buildNodeQuery(unpackGroupedNodes([node], currentRuntimeGraph.edges))
+      )
+    );
+    const response = await searchGraph(datasource.title, request);
+    return transformIntersectionResponse(response, topLevelNodes);
+  };
 
   const loaded = useWorkspaceLoader({
     runtimeGraphRef,
