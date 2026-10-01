@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getMinimumScheduleInterval } from '../../kibana_services';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -19,6 +18,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { RuleFormProvider } from '@kbn/alerting-v2-rule-form';
 import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
+import { getMinimumScheduleInterval } from '../../kibana_services';
 import { useAlertingLocators } from '../../application/locator_context';
 import { useSequenceBuilderForm, useSequenceBuilderState } from './use_sequence_builder_form';
 import { SequenceBuilderHeader } from './sequence_builder_header';
