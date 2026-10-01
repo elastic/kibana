@@ -162,16 +162,6 @@ const createWithConflictRetry = async (
   }
 };
 
-const bulkItemConflicts = (items: unknown[]): boolean =>
-  items.some(
-    (item) =>
-      typeof item === 'object' &&
-      item !== null &&
-      Object.values(item as Record<string, { status?: number }>).some(
-        (op) => op?.status === 409 || op?.error?.type === 'version_conflict_engine_exception'
-      )
-  );
-
 const isConflictItem = (item: unknown): boolean =>
   typeof item === 'object' &&
   item !== null &&
@@ -200,7 +190,7 @@ const bulkWithConflictRetry = async (
     items.forEach((item, idx) => {
       if (!isConflictItem(item)) {
         if (
-          Object.values(item as Record<string, { status?: number }>).some(
+          Object.values(item as Record<string, { status?: number; error?: { type?: string } }>).some(
             (op) => (op?.status ?? 200) >= 300
           )
         ) {
