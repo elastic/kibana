@@ -176,14 +176,16 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     setValue,
   ]);
 
+  // The one mode this flyout is in, resolved the same way `ScheduleSection`
+  // resolves it (`lockedScheduleType ?? value.scheduleType`, where the locked
+  // type is this pack's). #272441 was three places deriving the mode
+  // differently, so everything mode-dependent here reads this.
+  const effectiveScheduleType = packSchedule?.schedule_type ?? schedule?.scheduleType;
+
   // The serializer strips `timeout` from the wire for any rrule-mode query
   // (beats reads `rrule_schedule.timeout`), so the control must be disabled for
   // ALL rrule queries — inherited and override alike — never just inherited.
-  // Derive from the resolved mode rather than the override flag.
-  const resolvedScheduleType = overridePackSchedule
-    ? schedule?.scheduleType
-    : packSchedule?.schedule_type;
-  const isTimeoutDisabledForRrule = isRruleSchedulingEnabled && resolvedScheduleType === 'rrule';
+  const isTimeoutDisabledForRrule = isRruleSchedulingEnabled && effectiveScheduleType === 'rrule';
   const timeoutFieldProps = useMemo(
     () =>
       isTimeoutDisabledForRrule

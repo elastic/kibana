@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -219,7 +219,7 @@ describe('allowed autonomy levels', () => {
     expect(getAllowedAutonomyLevels(TRIAGE)).toEqual(['manual', 'supervised']);
     // Review-gated throughout, so no unattended level at all.
     expect(getAllowedAutonomyLevels(RULE_TUNING)).toEqual(['manual', 'assisted']);
-    expect(getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID)).toEqual([
+    expect(getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID)).toEqual([
       'manual',
       'assisted',
     ]);

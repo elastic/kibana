@@ -76,3 +76,19 @@ export const renderAlertTriageWorkerYaml = (
     '__WORKER_AUTO_CLOSE_CONFIDENCE_MIN_THRESHOLD__',
     String(values.extras.autoCloseConfidenceScoreMinThreshold)
   );
+
+export interface RuleCoverageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
+  extras: {
+    lookbackDays: number;
+    maxGapsPerRun: number;
+  };
+}
+
+export const renderRuleCoverageWorkerYaml = (
+  yaml: string,
+  values: RuleCoverageWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_EXTRAS__',
+    JSON.stringify(values.extras)
+  );

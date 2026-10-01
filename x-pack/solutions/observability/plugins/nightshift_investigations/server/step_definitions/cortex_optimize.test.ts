@@ -30,6 +30,7 @@ describe('cortexOptimizeStepDefinition', () => {
     conversation_id?: string;
     round_id?: string;
     tool_calls?: unknown;
+    tool_results?: unknown;
   }) =>
     ({
       input,
@@ -102,5 +103,42 @@ describe('cortexOptimizeStepDefinition', () => {
     );
 
     expect(runCortexOptimize).toHaveBeenLastCalledWith(expect.objectContaining({ toolCalls: [] }));
+  });
+
+  it('attaches each tool call its results by tool_call_id', async () => {
+    const definition = cortexOptimizeStepDefinition({
+      getInference,
+      getSearchInferenceEndpoints,
+      analytics,
+      logger: loggerMock.create(),
+    });
+    const results = [{ type: 'other', data: { stdout: 'pool exhausted' } }];
+
+    await definition.handler(
+      createContext({
+        prompt: 'hi',
+        response: 'hello',
+        agent_id: 'nightshift.investigation',
+        tool_calls: [
+          { tool_id: 'nightshift.sandbox_bash', tool_call_id: 'tc-1', params: { command: 'a' } },
+          { tool_id: 'nightshift.sandbox_bash', tool_call_id: 'tc-2', params: { command: 'b' } },
+        ],
+        tool_results: [{ tool_id: 'nightshift.sandbox_bash', tool_call_id: 'tc-1', results }],
+      })
+    );
+
+    expect(runCortexOptimize).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        toolCalls: [
+          {
+            tool_id: 'nightshift.sandbox_bash',
+            tool_call_id: 'tc-1',
+            params: { command: 'a' },
+            results,
+          },
+          { tool_id: 'nightshift.sandbox_bash', tool_call_id: 'tc-2', params: { command: 'b' } },
+        ],
+      })
+    );
   });
 });
