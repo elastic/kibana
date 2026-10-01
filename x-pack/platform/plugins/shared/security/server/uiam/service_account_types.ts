@@ -80,6 +80,7 @@ export interface UiamServiceAccount {
   id: string;
   type: 'project';
   name: string;
+  description?: string;
   organization_id: string;
   role_assignments: UiamRoleAssignments;
   assumable_by: ServiceAccountAssumableBy[];

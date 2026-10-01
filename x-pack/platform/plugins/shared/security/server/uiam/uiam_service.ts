@@ -56,6 +56,8 @@ interface CreateServiceAccountRequestBody {
   organization_id: string;
   /** A descriptive name for the service account. */
   name: string;
+  /** Free text of 1 to 1,000 characters. UIAM refuses an empty string. */
+  description?: string;
   /** The roles asked for; see {@link UiamRoleAssignments}. */
   role_assignments: UiamRoleAssignments;
   /** Principals allowed to exchange the service account's credentials for a token. */

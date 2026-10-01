@@ -122,16 +122,6 @@ describe('UiamServiceAccounts', () => {
   });
 
   describe('#create', () => {
-    it('rejects unsupported descriptions without sending a UIAM request', async () => {
-      await expect(
-        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
-          ...createParams,
-          description: 'description',
-        })
-      ).rejects.toThrow('Service account descriptions are not supported on Serverless.');
-      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
-    });
-
     it('forwards the caller access token, the requested roles as application-only `role_assignments` and the derived `assumable_by`', async () => {
       mockUiam.createServiceAccount.mockResolvedValue(validResponse);
 
@@ -517,6 +507,50 @@ describe('UiamServiceAccounts', () => {
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
       ).rejects.toBe(error);
     });
+
+    it('sends the trimmed description and reports the one UIAM stored', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue({
+        ...validResponse,
+        description: 'Relays the nightshift alerts.',
+      });
+
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          description: ' Relays the nightshift alerts. ',
+        })
+      ).resolves.toEqual({ ...createdAccount, description: 'Relays the nightshift alerts.' });
+
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ description: 'Relays the nightshift alerts.' }),
+        undefined
+      );
+    });
+
+    it('reports no description when UIAM stored none', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+
+      const created = await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+        ...createParams,
+        description: 'Relays the nightshift alerts.',
+      });
+
+      expect(created).not.toHaveProperty('description');
+    });
+
+    // UIAM refuses an empty string, so a blank description never reaches it.
+    it('leaves a blank description out of the request', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+
+      const created = await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+        ...createParams,
+        description: '   ',
+      });
+
+      expect(created).not.toHaveProperty('description');
+      expect(mockUiam.createServiceAccount.mock.calls[0][1]).not.toHaveProperty('description');
+    });
   });
 
   describe('#list', () => {
@@ -675,6 +709,28 @@ describe('UiamServiceAccounts', () => {
         serviceAccounts.list(createMockRequest('Bearer essu_my_token'))
       ).rejects.toMatchObject({ output: { statusCode: 501 } });
     });
+
+    it('reports the description UIAM holds for the account', async () => {
+      mockUiam.listServiceAccounts.mockResolvedValue({
+        service_accounts: [{ ...listedAccount, description: 'Relays the nightshift alerts.' }],
+      });
+
+      const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
+
+      expect(result.serviceAccounts).toEqual([
+        { ...expectedEntry, description: 'Relays the nightshift alerts.' },
+      ]);
+    });
+
+    it.each([undefined, ''])('omits the description when UIAM reports %j', async (description) => {
+      mockUiam.listServiceAccounts.mockResolvedValue({
+        service_accounts: [{ ...listedAccount, description }],
+      });
+
+      const result = await serviceAccounts.list(createMockRequest('Bearer essu_my_token'));
+
+      expect(result.serviceAccounts[0]).not.toHaveProperty('description');
+    });
   });
 
   describe('#get', () => {
@@ -768,6 +824,17 @@ describe('UiamServiceAccounts', () => {
       await expect(
         serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
       ).rejects.toMatchObject({ output: { statusCode: 404 } });
+    });
+
+    it('reports the description UIAM holds for the account', async () => {
+      mockUiam.getServiceAccount.mockResolvedValue({
+        ...retrievedAccount,
+        description: 'Relays the nightshift alerts.',
+      });
+
+      await expect(
+        serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
+      ).resolves.toMatchObject({ description: 'Relays the nightshift alerts.' });
     });
   });
 
