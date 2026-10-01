@@ -84,7 +84,7 @@ export const AttachmentsOverviewSection = memo<AttachmentsOverviewSectionProps>(
           href: buildRulesPageUrl(
             getSecurityAppUrl,
             targets.ruleOrigins.length,
-            targets.ruleOrigins[0]
+            targets.firstRuleLabel
           ),
         });
       }
