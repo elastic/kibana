@@ -72,7 +72,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          diskSizeGb: 130
         key: build_scout_tests
         timeout_in_minutes: 15
         depends_on:
@@ -128,7 +127,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          diskSizeGb: 130
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
@@ -146,7 +144,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
-          diskSizeGb: 130
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
@@ -284,7 +281,6 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-highmem-4
-          diskSizeGb: 130
         depends_on: build
         timeout_in_minutes: 75
         parallelism: 12
@@ -301,7 +297,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-highmem-4
-          diskSizeGb: 130
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
