@@ -149,7 +149,7 @@ export const unwrapUserTask = (prompt: string | undefined): string => {
   return prompt?.trim() ?? '';
 };
 
-export const MERGED_CONTENT_MAX_CHARS = 6000;
+export const MERGED_CONTENT_MAX_CHARS = 4000;
 
 export const capMergedContent = (content: string, maxChars = MERGED_CONTENT_MAX_CHARS): string => {
   if (maxChars <= 0 || content.length <= maxChars) {
@@ -420,7 +420,15 @@ Never write:
 
 Say when a fact that can change was observed, and describe a problem that has stopped in the past tense.
 
-Return concise markdown, or empty content if nothing durable about the topic is established.`;
+Return concise markdown of at most ${MERGED_CONTENT_MAX_CHARS.toLocaleString(
+  'en-US'
+)} characters, or empty content if nothing durable about the topic is established.`;
+
+export const MEMORY_COMPACT_SYSTEM_PROMPT = `You shorten one memory written for the semantic memory of an AI SRE assistant. The memory is over its length budget.
+
+You get the writer's instructions, the input the writer saw, and the memory it wrote. Rewrite the memory in fewer words so it is no longer than the target length you are given: keep the facts that are most useful to know before a similar future task, merge repetition, and drop the least useful details. Follow the writer's instructions and add nothing that is not already in the memory.
+
+Return the shortened markdown.`;
 
 export const formatMemoryMergeSources = ({
   sources,
@@ -457,12 +465,25 @@ export const formatMemoryMergeSources = ({
     maxTokens
   );
 
+// Models miss character targets and overshoot word targets, so compaction aims well below the budget.
+const COMPACT_TARGET_RATIO = 0.6;
+
+const CONTENT_SCHEMA = {
+  type: 'object',
+  properties: {
+    content: { type: 'string' },
+  },
+  required: ['content'],
+} as const;
+
 export const createLlmSynthesizeMemoryGroup = ({
   inferenceClient,
   signal,
+  logger,
 }: {
   inferenceClient: BoundInferenceClient;
   signal?: AbortSignal;
+  logger?: Logger;
 }): SynthesizeMemoryGroup => {
   return async ({ sources, extract, transcript, otherTopics = [] }) => {
     const transcriptBlock = transcript
@@ -479,22 +500,46 @@ export const createLlmSynthesizeMemoryGroup = ({
       extract,
       maxTokens: Math.max(0, OPTIMIZER_EVIDENCE_TOKEN_BUDGET - framingTokens),
     });
+    const writerInput = `Run time: ${new Date().toISOString()}\n\n${entryBlock}${othersBlock}${transcriptBlock}`;
     const response = await inferenceClient.output({
       id: 'nightshift_memory_write',
       abortSignal: signal,
       system: MEMORY_WRITER_SYSTEM_PROMPT,
-      input: `Run time: ${new Date().toISOString()}\n\n${entryBlock}${othersBlock}${transcriptBlock}`,
-      schema: {
-        type: 'object',
-        properties: {
-          content: { type: 'string' },
-        },
-        required: ['content'],
-      },
+      input: writerInput,
+      schema: CONTENT_SCHEMA,
     });
-    return {
-      content: String(response.output?.content ?? '').trim(),
-    };
+    const content = String(response.output?.content ?? '').trim();
+    if (content.length <= MERGED_CONTENT_MAX_CHARS) {
+      return { content };
+    }
+    signal?.throwIfAborted();
+    const overage = content.length - MERGED_CONTENT_MAX_CHARS;
+    const words = content.split(/\s+/).length;
+    const targetWords = Math.floor(
+      (MERGED_CONTENT_MAX_CHARS * COMPACT_TARGET_RATIO * words) / content.length
+    );
+    let compacted;
+    try {
+      compacted = await inferenceClient.output({
+        id: 'nightshift_memory_compact',
+        abortSignal: signal,
+        system: MEMORY_COMPACT_SYSTEM_PROMPT,
+        input:
+          `Budget: ${MERGED_CONTENT_MAX_CHARS} characters. The memory has ${content.length}, ${overage} over. ` +
+          `Target: at most ${targetWords} words; the memory has ${words} words now.\n\n` +
+          `Writer instructions:\n${MEMORY_WRITER_SYSTEM_PROMPT}\n\n` +
+          `Writer input:\n${writerInput}\n\n` +
+          `Memory to shorten:\n${content}`,
+        schema: CONTENT_SCHEMA,
+      });
+    } catch (err) {
+      signal?.throwIfAborted();
+      logger?.warn('Memory compaction failed — storing the truncated memory');
+      logger?.debug(`Memory compaction error: ${(err as Error).message}`);
+      return { content };
+    }
+    const shortened = String(compacted.output?.content ?? '').trim();
+    return { content: shortened.length > 0 ? shortened : content };
   };
 };
 

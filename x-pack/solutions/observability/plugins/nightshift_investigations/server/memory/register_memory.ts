@@ -217,6 +217,7 @@ export const runMemoryOptimize = async ({
     synthesizeMemoryGroup: createLlmSynthesizeMemoryGroup({
       inferenceClient: model.inferenceClient,
       signal,
+      logger,
     }),
     userMessage,
     assistantMessage,

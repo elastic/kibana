@@ -7,6 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  MEMORY_COMPACT_SYSTEM_PROMPT,
   MEMORY_CRITIQUE_SYSTEM_PROMPT,
   MEMORY_EXTRACT_GUIDELINES,
   MEMORY_EXTRACT_SYSTEM_PROMPT,
@@ -18,6 +19,8 @@ import {
   createLlmSynthesizeMemoryGroup,
   formatMemoryMergeSources,
   formatRecalled,
+  MEMORY_WRITER_SYSTEM_PROMPT,
+  MERGED_CONTENT_MAX_CHARS,
   OPTIMIZER_EVIDENCE_CHARACTER_HARD_LIMIT,
   optimizeMemory,
   unwrapUserTask,
@@ -221,6 +224,116 @@ describe('createLlmSynthesizeMemoryGroup', () => {
     expect(input).toContain('FIRST_SIGNAL');
     expect(input).toContain('TRANSCRIPT_SIGNAL');
     expect(Object.keys(schema.properties)).toEqual(['content']);
+  });
+
+  it('keeps a memory within budget without compacting it', async () => {
+    const output = jest.fn().mockResolvedValue({ output: { content: 'a'.repeat(4000) } });
+
+    await createLlmSynthesizeMemoryGroup({ inferenceClient: { output } as never })({
+      sources: [],
+      extract: { slug: 'topic', title: 'Topic', tags: [], replaces: [] },
+      transcript: 'TRANSCRIPT',
+    });
+
+    expect(output).toHaveBeenCalledTimes(1);
+  });
+
+  it('compacts an over-budget memory with the writer goal, its input, and the overage', async () => {
+    const draft = 'word '.repeat(900).trim();
+    const output = jest
+      .fn()
+      .mockResolvedValueOnce({ output: { content: draft } })
+      .mockResolvedValueOnce({ output: { content: 'Shorter memory.' } });
+
+    await expect(
+      createLlmSynthesizeMemoryGroup({ inferenceClient: { output } as never })({
+        sources: [],
+        extract: { slug: 'topic', title: 'Topic', tags: [], replaces: [] },
+        transcript: 'TRANSCRIPT_SIGNAL',
+      })
+    ).resolves.toEqual({ content: 'Shorter memory.' });
+
+    expect(output).toHaveBeenCalledTimes(2);
+    const { id, system, input } = output.mock.calls[1][0];
+    expect(id).toBe('nightshift_memory_compact');
+    expect(system).toBe(MEMORY_COMPACT_SYSTEM_PROMPT);
+    expect(input).toContain(
+      'Budget: 4000 characters. The memory has 4499, 499 over. ' +
+        'Target: at most 480 words; the memory has 900 words now.'
+    );
+    expect(input).toContain(MEMORY_WRITER_SYSTEM_PROMPT);
+    expect(input).toContain(output.mock.calls[0][0].input);
+    expect(input).toContain(draft);
+  });
+
+  it('stores the truncated memory when compaction fails, without retrying', async () => {
+    const output = jest
+      .fn()
+      .mockResolvedValueOnce({ output: { content: `DRAFT${'w'.repeat(5000)}` } })
+      .mockRejectedValueOnce(new Error('model unavailable'));
+    const store = createStore();
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [{ slug: 'topic', title: 'Topic', tags: [], replaces: [] }],
+      synthesizeMemoryGroup: createLlmSynthesizeMemoryGroup({
+        inferenceClient: { output } as never,
+      }),
+      logger: loggerMock.create(),
+    });
+
+    expect(output).toHaveBeenCalledTimes(2);
+    const [{ content }] = (store.create as jest.Mock).mock.calls[0];
+    expect(content.startsWith('DRAFT')).toBe(true);
+    expect(content.length).toBeLessThanOrEqual(MERGED_CONTENT_MAX_CHARS);
+    expect(summary.writeFailureCount).toBe(0);
+  });
+
+  it('stops without writing when compaction is cancelled', async () => {
+    const controller = new AbortController();
+    const output = jest
+      .fn()
+      .mockResolvedValueOnce({ output: { content: 'w'.repeat(5000) } })
+      .mockImplementationOnce(async () => {
+        controller.abort();
+        throw new Error('aborted');
+      });
+
+    await expect(
+      createLlmSynthesizeMemoryGroup({
+        inferenceClient: { output } as never,
+        signal: controller.signal,
+      })({
+        sources: [],
+        extract: { slug: 'topic', title: 'Topic', tags: [], replaces: [] },
+      })
+    ).rejects.toThrow();
+  });
+
+  it('truncates a memory the compactor could not bring within budget', async () => {
+    const output = jest
+      .fn()
+      .mockResolvedValueOnce({ output: { content: 'w'.repeat(5000) } })
+      .mockResolvedValueOnce({ output: { content: `STILL_LONG${'c'.repeat(4500)}` } });
+    const store = createStore();
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [{ slug: 'topic', title: 'Topic', tags: [], replaces: [] }],
+      synthesizeMemoryGroup: createLlmSynthesizeMemoryGroup({
+        inferenceClient: { output } as never,
+      }),
+      logger: loggerMock.create(),
+    });
+
+    const [{ content }] = (store.create as jest.Mock).mock.calls[0];
+    expect(content.startsWith('STILL_LONG')).toBe(true);
+    expect(content.length).toBeLessThanOrEqual(MERGED_CONTENT_MAX_CHARS);
+    expect(content.endsWith('…(truncated)')).toBe(true);
   });
 });
 
