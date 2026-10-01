@@ -28,6 +28,7 @@ import {
 } from '../query_utils';
 import {
   andWhere,
+  applyLifetimeOverlap,
   applyTimeRange,
   executeCountQuery,
   fromIndexForSpace,
@@ -250,6 +251,10 @@ const topologyFeatureFilter = (
   )}, [${values}]) OR MV_INTERSECTS(${esql.col('blast_radius.feature_id')}, [${values}]))`;
 };
 
+const activeStatuses = legacyStatusesFor(SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS) ?? [];
+const activeStatusWhere = (): ESQLAstExpression =>
+  esql.exp`${esql.col('status')} IN (${activeStatuses.map((status) => esql.str(status))})`;
+
 type EventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
 
 export type EventsBatchSearchOptions = EventsCurrentStateSearchOptions & {
@@ -328,20 +333,22 @@ export class EventClient implements SignificantEventsReadClient {
       })
     ).pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(FIELD_EVENT_ID)}`;
 
-    query = applyTimeRange({
-      query,
-      from: options.from,
-      to: options.to,
-    });
+    query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
-    // Free-text search runs pre-latest; current state and continuation-candidate filters run
-    // post-latest so stale versions cannot make a closed episode appear open.
+    // Free-text search, current state and continuation-candidate filters all run post-latest, so
+    // they match the current version and stale versions cannot make a closed episode appear open.
     const searchWhere = this.buildWhere({ search: options.search });
     if (searchWhere) {
       query = query.where`${searchWhere}`;
     }
 
-    query = pickLatestPerGroup(query, FIELD_EVENT_ID);
+    // The time range selects events active during it, always shown in their current state.
+    query = applyLifetimeOverlap({
+      query,
+      from: options.from,
+      to: options.to,
+      activeWhere: activeStatusWhere(),
+    });
 
     const statuses = legacyStatusesFor(options.status);
     if (statuses?.length) {
@@ -487,8 +494,7 @@ export class EventClient implements SignificantEventsReadClient {
 
     query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
-    const activeStatuses = legacyStatusesFor(SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS) ?? [];
-    query = query.where`${esql.col('status')} IN (${activeStatuses.map((s) => esql.str(s))})`;
+    query = query.where`${activeStatusWhere()}`;
 
     const candidateWhere = continuationCandidateFilter({
       streamNames: options.streamNames,

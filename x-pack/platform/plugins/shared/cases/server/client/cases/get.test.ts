@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
-import type { Template } from '../../../common/types/domain';
+import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { Template, AttachmentAttributes } from '../../../common/types/domain';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import { mockCases } from '../../mocks';
+import { mockCases, mockCaseComments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { get, resolve, getCasesByAlertID, getTags, getReporters, getCategories } from './get';
 
@@ -187,6 +187,56 @@ describe('get', () => {
 
         expect(theCase.extended_fields_labels).toEqual({ priority_as_keyword: 'Priority' });
       });
+    });
+  });
+
+  describe('includeComments', () => {
+    // mockCaseComments[0] is a legacy `user`-typed comment, a migrated attachment type: reading
+    // it back should upgrade it to unified shape even though nothing re-saved it since migration.
+    type LegacyCommentAttributes = Extract<
+      (typeof mockCaseComments)[0]['attributes'],
+      { comment: string }
+    >;
+    const legacyComment = mockCaseComments[0].attributes as LegacyCommentAttributes;
+
+    const legacyCommentsFindResponse = (): SavedObjectsFindResponse<AttachmentAttributes> => ({
+      saved_objects: [{ ...mockCaseComments[0], score: 1 }],
+      total: 1,
+      per_page: 10,
+      page: 1,
+    });
+
+    it('get() upgrades a legacy-stored migrated-type comment to unified', async () => {
+      const args = createCasesClientMockArgs();
+      args.services.caseService.getCase.mockResolvedValue(mockCases[0]);
+      args.services.caseService.getAllCaseComments.mockResolvedValue(legacyCommentsFindResponse());
+
+      const result = await get({ id: 'mock-id-1', includeComments: true }, args);
+
+      expect(result.comments).toEqual([
+        expect.objectContaining({
+          type: 'comment',
+          data: { content: legacyComment.comment },
+        }),
+      ]);
+    });
+
+    it('resolve() upgrades a legacy-stored migrated-type comment to unified', async () => {
+      const args = createCasesClientMockArgs();
+      args.services.caseService.getResolveCase.mockResolvedValue({
+        saved_object: mockCases[0],
+        outcome: 'exactMatch',
+      });
+      args.services.caseService.getAllCaseComments.mockResolvedValue(legacyCommentsFindResponse());
+
+      const { case: theCase } = await resolve({ id: 'mock-id-1', includeComments: true }, args);
+
+      expect(theCase.comments).toEqual([
+        expect.objectContaining({
+          type: 'comment',
+          data: { content: legacyComment.comment },
+        }),
+      ]);
     });
   });
 });

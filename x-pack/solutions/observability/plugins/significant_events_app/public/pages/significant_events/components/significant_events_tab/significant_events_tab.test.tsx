@@ -185,6 +185,15 @@ describe('Significant Events timestamp rendering', () => {
     );
   });
 
+  it('shows the latest version timestamp as the Last updated column', () => {
+    const columns = getSignificantEventTableColumns({
+      onToggleEvent: jest.fn(),
+    });
+    expect(columns.find((column) => 'field' in column && column.field === '@timestamp')).toEqual(
+      expect.objectContaining({ field: '@timestamp', name: 'Last updated' })
+    );
+  });
+
   it('renders the lineage creation timestamp in general information', () => {
     render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
 
