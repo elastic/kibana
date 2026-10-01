@@ -202,6 +202,32 @@ describe('investigations.set_impact', () => {
     expect(result.data).toMatchObject({ warning: BOTH_IMPACT_FORMS_WARNING });
   });
 
+  it('clears the warning once the agent removes the evidence it no longer wants', async () => {
+    const { storage, attachments, call } = setup();
+    await call({ summary: 'Checkout failed', evidence: chartEvidence });
+    const stuck = await call({ entities: [{ name: 'checkout' }, { name: 'payments' }] });
+    expect(stuck.data).toMatchObject({ warning: BOTH_IMPACT_FORMS_WARNING });
+
+    const corrected = await call({ evidence: null });
+
+    expect(corrected.data).not.toHaveProperty('warning');
+    expect(storage.entries.get(IMPACT_ID)?.source).not.toHaveProperty('evidence');
+    expect(storage.entries.get(IMPACT_ID)?.source).toMatchObject({ summary: 'Checkout failed' });
+    expect(attachments.getAttachmentRecord(IMPACT_ID)?.versions.at(-1)?.data).not.toHaveProperty(
+      'evidence'
+    );
+  });
+
+  it('removes the summary with null', async () => {
+    const { storage, call } = setup();
+    await call({ summary: 'Checkout failed', entities: [{ name: 'a' }, { name: 'b' }] });
+
+    await call({ summary: null });
+
+    expect(storage.entries.get(IMPACT_ID)?.source).not.toHaveProperty('summary');
+    expect(storage.entries.get(IMPACT_ID)?.source.entities).toHaveLength(2);
+  });
+
   it('does not re-add an attachment the user removed', async () => {
     const { attachments, storage, call } = setup();
     await call({ summary: 'First' });

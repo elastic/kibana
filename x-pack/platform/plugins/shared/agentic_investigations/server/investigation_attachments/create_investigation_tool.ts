@@ -17,15 +17,15 @@ import type {
 import { createErrorResult } from '@kbn/agent-builder-server';
 
 /**
- * Conversation the tool runs in: the innermost agent on the run stack that has one. Undefined
- * for a standalone run, which has no conversation to attach to.
+ * Conversation the tool runs in: that of the innermost agent on the run stack, whose run owns
+ * `context.attachments`. Undefined when that agent runs standalone, even inside an outer
+ * conversation, so the index write never targets a conversation the attachment state is not for.
  */
 export const getToolConversationId = (context: {
   runContext: { stack: RunContextStackEntry[] };
 }): string | undefined =>
   context.runContext.stack.findLast(
-    (entry): entry is Extract<RunContextStackEntry, { type: 'agent' }> =>
-      entry.type === 'agent' && entry.conversationId !== undefined
+    (entry): entry is Extract<RunContextStackEntry, { type: 'agent' }> => entry.type === 'agent'
   )?.conversationId;
 
 export interface InvestigationToolOptions<TSchema extends ZodObject> {

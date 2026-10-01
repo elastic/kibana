@@ -32,12 +32,13 @@ export type WrittenAttach = WrittenInvestigationAttachment<ImpactDocument>;
 
 /**
  * What the agent reports through `investigations.set_impact`. Each field that is present
- * replaces the stored one; an absent field keeps what is stored. `entities: []` clears them.
+ * replaces the stored one; an absent field keeps what is stored. `null` removes `summary` or
+ * `evidence`, and `entities: []` removes the entities.
  */
 export interface SetImpactParams {
   conversationId: string;
-  summary?: string;
-  evidence?: InvestigationEvidence;
+  summary?: string | null;
+  evidence?: InvestigationEvidence | null;
   entities?: ImpactEntity[];
 }
 
@@ -91,8 +92,8 @@ export class ImpactService {
 
   /**
    * Agent write: a partial snapshot. Present fields replace the stored ones (entities as a
-   * whole list, deduped by id); absent fields are kept, so a route attach is not undone by an
-   * agent report that only touches the summary.
+   * whole list, deduped by id) and `null` removes them; absent fields are kept, so a route
+   * attach is not undone by an agent report that only touches the summary.
    */
   async set(
     params: SetImpactParams,
@@ -116,10 +117,14 @@ export class ImpactService {
             createdBy: user,
             updatedAt: now,
           };
-      if (params.summary !== undefined) {
+      if (params.summary === null) {
+        delete next.summary;
+      } else if (params.summary !== undefined) {
         next.summary = params.summary;
       }
-      if (params.evidence !== undefined) {
+      if (params.evidence === null) {
+        delete next.evidence;
+      } else if (params.evidence !== undefined) {
         next.evidence = params.evidence;
       }
       if (entities !== undefined) {
