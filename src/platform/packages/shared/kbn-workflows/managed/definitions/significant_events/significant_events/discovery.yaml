@@ -380,9 +380,8 @@ steps:
                 type: if
                 condition: '${{ foreach.item.event_id != null and consts.INVESTIGATABLE_SEVERITIES contains foreach.item.severity }}'
                 steps:
-                  # Flag-aware read (`getEventSearchClient()`): serves from `.rule-events` when
-                  # SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ is on, `.significant_events-events`
-                  # otherwise. Returns only the latest current-state version per event_id.
+                  # Reads from `.rule-events`. Returns only the latest current-state version per
+                  # event_id.
                   - name: resolve_active_event
                     type: kibana.request
                     with:
