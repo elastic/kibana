@@ -34,7 +34,7 @@ import {
   buildNodeQuery,
 } from '../services/workspace/graph_request_builders';
 import { transformIntersectionResponse } from '../services/workspace/intersections';
-import { unpackGroupedNodes } from '../services/workspace/runtime_grouping';
+import { isTopLevelNode, unpackGroupedNodes } from '../services/workspace/runtime_grouping';
 import { WorkspaceLayout } from '../components/workspace_layout';
 import type { GraphServices } from '../application';
 import { useWorkspaceLoader } from '../helpers/use_workspace_loader';
@@ -68,6 +68,7 @@ export const WorkspaceRoute = ({
 }: WorkspaceRouteProps) => {
   // D3 continues to own a mutable runtime workspace while serializable graph state lives in Redux.
   const runtimeGraphRef = useRef<RuntimeGraph>();
+  const [runtimeGraph, setRuntimeGraph] = useState<RuntimeGraph>();
   const layoutControllerRef = useRef<GraphLayoutController>();
   // Callbacks retained during store initialization need access to the completed store.
   // This ref is a temporary bridge until further workspace state optimizations remove that dependency.
@@ -116,24 +117,27 @@ export const WorkspaceRoute = ({
   );
 
   const getMergeCandidates = async (nodes: WorkspaceNode[]): Promise<TermIntersect[]> => {
-    const runtimeGraph = runtimeGraphRef.current;
+    const currentRuntimeGraph = runtimeGraphRef.current;
     const datasource = storeRef.current?.getState().datasource.current;
-    if (!runtimeGraph || !datasource || datasource.type === 'none') return [];
+    if (!currentRuntimeGraph || !datasource || datasource.type === 'none') return [];
     const indexName = datasource.title;
-    const topLevelNodes = nodes.filter((node) => node.parent === undefined);
+    const topLevelNodes = nodes.filter(isTopLevelNode);
+    if (topLevelNodes.length < 2) return [];
     const request = buildIntersectionRequest(
-      topLevelNodes.map((node) => buildNodeQuery(unpackGroupedNodes([node], runtimeGraph.edges)))
+      topLevelNodes.map((node) =>
+        buildNodeQuery(unpackGroupedNodes([node], currentRuntimeGraph.edges))
+      )
     );
     const response = await searchGraph(indexName, request);
     return transformIntersectionResponse(response, topLevelNodes);
   };
 
   const mergeRuntimeGraph = (
-    runtimeGraph: RuntimeGraph,
+    targetRuntimeGraph: RuntimeGraph,
     graph: Parameters<typeof applyRuntimeGraphMerge>[1]
   ) => {
     runtimeSequenceRef.current = applyRuntimeGraphMerge(
-      runtimeGraph,
+      targetRuntimeGraph,
       graph,
       runtimeSequenceRef.current,
       layoutControllerRef.current!
@@ -141,11 +145,11 @@ export const WorkspaceRoute = ({
   };
 
   const notifyWorkspaceChanged = () => {
-    const runtimeGraph = runtimeGraphRef.current;
-    if (runtimeGraph) {
+    const currentRuntimeGraph = runtimeGraphRef.current;
+    if (currentRuntimeGraph) {
       storeRef.current?.dispatch(
         workspaceRuntimeChanged(
-          createRuntimeGraphState(runtimeGraph, layoutControllerRef.current?.isRunning())
+          createRuntimeGraphState(currentRuntimeGraph, layoutControllerRef.current?.isRunning())
         )
       );
     }
@@ -172,10 +176,12 @@ export const WorkspaceRoute = ({
             ),
         });
         layoutControllerRef.current = layoutController;
-        const createdWorkspace = (runtimeGraphRef.current = createRuntimeGraph({
+        const createdRuntimeGraph = createRuntimeGraph({
           topologyChangeHandler: notifyWorkspaceChanged,
-        }));
-        return createdWorkspace;
+        });
+        runtimeGraphRef.current = createdRuntimeGraph;
+        setRuntimeGraph(createdRuntimeGraph);
+        return createdRuntimeGraph;
       },
       getRuntimeGraph: () => runtimeGraphRef.current,
       getLayoutController: () => layoutControllerRef.current,
@@ -213,7 +219,7 @@ export const WorkspaceRoute = ({
         <WorkspaceLayout
           spaces={spaces}
           sharingSavedObjectProps={sharingSavedObjectProps}
-          runtimeGraph={runtimeGraphRef.current}
+          runtimeGraph={runtimeGraph}
           loading={loading}
           graphSavePolicy={graphSavePolicy}
           capabilities={capabilities}

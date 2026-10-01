@@ -7,6 +7,8 @@
 
 import type { WorkspaceEdge, WorkspaceNode } from '../../types/workspace_state';
 
+export const isTopLevelNode = ({ parent }: WorkspaceNode): boolean => parent == null;
+
 export const unpackGroupedNodes = (
   topLevelNodes: WorkspaceNode[],
   edges: WorkspaceEdge[]
