@@ -114,20 +114,21 @@ cmd_threads() {
                 isOutdated
                 path
                 line
-                comments(first: 100) { nodes { databaseId url body author { login } } }
-                latest: comments(last: 1) { nodes { databaseId body author { login } } }
+                comments(first: 100) { nodes { databaseId url body author { login __typename } } }
+                latest: comments(last: 1) { nodes { databaseId body author { login __typename } } }
               }
             }
           }
         }
       }' \
-    --jq '.data.repository.pullRequest.reviewThreads.nodes[]
+    --jq 'def libra: .author.__typename == "Bot" and .author.login == "infra-vault-gh-plugin-prod";
+      .data.repository.pullRequest.reviewThreads.nodes[]
       | select(.isResolved | not)
       | .comments.nodes as $comments
       | .latest.nodes[0] as $latest
-      | ($comments | map(select(.author.login | test("^infra-vault-gh-plugin-prod") | not)) | length) as $otherReplies
-      | select($comments[0].author.login | test("^infra-vault-gh-plugin-prod"))
-      | select($latest.author.login | test("^infra-vault-gh-plugin-prod"))
+      | ($comments | map(select(libra | not)) | length) as $otherReplies
+      | select($comments[0] | libra)
+      | select($latest | libra)
       | {
           threadId: .id,
           commentId: $comments[0].databaseId,

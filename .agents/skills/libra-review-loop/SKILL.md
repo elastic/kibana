@@ -75,7 +75,7 @@ Libra reads replies to its comments when it reviews a new commit, and may answer
 If `threads` prints nothing:
 
 - After `clean`: stop and write the final report.
-- After `findings`: the findings may be in the review body rather than in threads. Find the latest Libra review with `gh api repos/elastic/kibana/pulls/<pr>/reviews --paginate --jq '.[] | select(.user.login | startswith("infra-vault")) | .id' | tail -n 1`, then read it with `gh api repos/elastic/kibana/pulls/<pr>/reviews/<id> --jq .body`.
+- After `findings`: the findings may be in the review body rather than in threads. Find the latest Libra review with `gh api repos/elastic/kibana/pulls/<pr>/reviews --paginate --jq '.[] | select(.user.login == "infra-vault-gh-plugin-prod[bot]") | .id' | tail -n 1`, then read it with `gh api repos/elastic/kibana/pulls/<pr>/reviews/<id> --jq .body`. Triage and fix these body-only findings like any other; step 8 says how to answer them.
 
 ### 3. Triage
 
@@ -149,11 +149,13 @@ gh api repos/elastic/kibana/pulls/<pr>/comments -F in_reply_to=<commentId> -F bo
 - **False positive**: give the evidence, such as the experiment you ran or the code that shows the claim is wrong. React 👎 so Libra gets the feedback (`gh api repos/elastic/kibana/pulls/comments/<commentId>/reactions -f content=-1`). Leave the thread unresolved so a human reviewer can see it.
 - **Out of scope**: explain why, and say who should decide or where it will be handled. Leave the thread unresolved.
 
+Body-only findings have no thread to reply in. Answer them all in one PR comment that links the review and gives the same per-finding answer as above (`gh pr comment <pr> --body-file <absolute-path>`). There is nothing to resolve; list any that aren't fixed as open items in the final report.
+
 Write the replies for human reviewers: short, plain sentences, with no restatement of Libra's comment.
 
 ### 9. Push and resolve
 
-If step 7 made a commit, `git push` to the branch's upstream. If the push is rejected because kibanamachine pushed in the meantime, run `git pull --rebase`, push again, and edit the replies to quote the new SHA (`gh api -X PATCH repos/elastic/kibana/pulls/comments/<reply-id> -F body=@<file>`). Never force-push. Note the pushed SHA with `git rev-parse HEAD`, then run `libra.sh resolve <threadId>` for each valid finding. Go back to step 1 with `--sha <pushed-sha>`. After round 5, run only `wait` on the pushed SHA so the final report can give Libra's state on it, then stop.
+If step 7 made a commit, `git push` to the branch's upstream. If the push is rejected because kibanamachine pushed in the meantime, run `git pull --rebase`, push again, and edit the replies to quote the new SHA (`gh api -X PATCH repos/elastic/kibana/pulls/comments/<reply-id> -F body=@<file>`). Never force-push. Note the pushed SHA with `git rev-parse HEAD`, then run `libra.sh resolve <threadId>` for each valid finding. Go back to step 1 with `--sha <pushed-sha>`. After round 5, run only `wait` on the pushed SHA and, if it reports findings, `threads` (or the review body lookup in step 2), so the final report can give Libra's state on that commit and link its new findings. Then stop.
 
 If nothing was committed, there's no push and Libra won't review again. Stop and write the final report.
 
