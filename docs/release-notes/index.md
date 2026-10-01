@@ -31,11 +31,11 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Elastic Agent Builder**:
 * Fix Agent Builder tools hanging or timing out on data streams that span the frozen tier. Tools now skip frozen tier indices [#292349]({{kib-pull}}292349).
 * Fix Agent Builder tracing applying the default space's GenAI privacy settings in every space. Each conversation now uses the privacy settings of its own space [#290750]({{kib-pull}}290750).
-* Add the case template ID and version fields to the Agent Builder cases-analytics skill so agents can filter and group cases by template [#291716]({{kib-pull}}291716).
+* Add the case template ID and version fields to the Agent Builder `cases-analytics` skill so agents can filter and group cases by template [#291716]({{kib-pull}}291716).
 
 **Alerting and cases**:
 * Fix forced rule runs and schedule changes being silently dropped when you request them while the rule is finishing a run [#293492]({{kib-pull}}293492).
-* Fix rules that Agent Builder creates or duplicates failing about an hour later because they kept the agent's temporary API key [#291318]({{kib-pull}}291318).
+* Fix Agent Builder rules failing after about an hour because they kept the agent's temporary API key [#291318]({{kib-pull}}291318).
 * Fix bulk alert tag updates also changing matching alerts in other {{kib}} spaces [#285874]({{kib-pull}}285874).
 * Fix Jira Service Management and Opsgenie connector actions failing when the rendered alert message exceeds 130 characters. The connectors now truncate the message instead [#291698]({{kib-pull}}291698).
 * Fix the email connector HTTP test sending caller-supplied subject and message content. The test now sends fixed content [#288664]({{kib-pull}}288664).
@@ -44,8 +44,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % * Fix the **Read only** badge appearing on case template pages when you have Cases **Read** access and the privilege to manage case templates [#291719]({{kib-pull}}291719).
 
 **Dashboards and Visualizations**:
-* Increase the TinyMath expression length limit so longer visualization formulas no longer fail [#290314]({{kib-pull}}290314).
-* Fix Go to URL drilldowns leaving Mustache tokens such as `event.values.[0]` unreplaced in the drilldown name [#290363]({{kib-pull}}290363).
+* Increase the TinyMath expression length limit so longer visualization formulas don't fail [#290314]({{kib-pull}}290314).
+* Fix **Go to URL** drilldowns leaving Mustache tokens such as `event.values.[0]` unreplaced in the drilldown name [#290363]({{kib-pull}}290363).
 * Fix {{esql}} metric chart background trendlines failing for queries that use `FORK` [#287819]({{kib-pull}}287819).
 * Fix new **Last value** columns being exported with **Show array values** turned on even when the option is off, which caused {{es}} errors when you imported them [#292864]({{kib-pull}}292864).
 * Fix filter pills showing **filter value is invalid or incomplete** when the filter value is an empty string [#290383]({{kib-pull}}290383).
@@ -97,7 +97,7 @@ For the {{elastic-sec}} 9.5.5 release information, refer to [{{elastic-sec}} Sol
 * Hide the **Activate user** action on deactivated users when you have read-only access [#289801]({{kib-pull}}289801).
 * Fix a failed audit log write after startup crashing {{kib}}. {{kib}} now reports a degraded state and turns the audit logger off instead [#287360]({{kib-pull}}287360).
 * Fix {{kib}} shutting down when the product documentation installer downloads a corrupt or incomplete artifact [#291142]({{kib-pull}}291142).
-* Fix PDF and PNG reports using too much memory, and failing on memory-constrained instances, when you generate them from a wide browser window [#289062]({{kib-pull}}289062).
+* Fix PDF and PNG reports using too much memory and failing on memory-constrained instances when you generate them from a wide browser window [#289062]({{kib-pull}}289062).
 * Fix duplicate user profile activations when {{kib}} renders a page for a request that uses basic authentication, which logged `version_conflict_engine_exception` errors [#291066]({{kib-pull}}291066).
 
 **Machine learning and {{infer}}**:
