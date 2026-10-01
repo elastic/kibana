@@ -140,6 +140,8 @@ interface EntityMaintainerRunSummarySource {
   qualified: number;
   /** Source outcome: index_missing | empty | partial | producing | error */
   outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error';
+  /** Entity writes that landed in the store for this source */
+  applied?: number;
 }
 
 interface EntityMaintainerRunSummaryBreakdown {
@@ -491,6 +493,13 @@ export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
             type: 'keyword',
             _meta: {
               description: 'Source outcome: index_missing | empty | partial | producing | error',
+            },
+          },
+          applied: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description: 'Entity writes that landed in the store for this source',
             },
           },
         },

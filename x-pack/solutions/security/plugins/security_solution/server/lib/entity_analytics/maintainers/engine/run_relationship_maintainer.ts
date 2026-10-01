@@ -60,6 +60,8 @@ interface EsqlQueryResult {
   values: unknown[][];
 }
 
+type IntegrationStage = 'Fetch actors' | 'Fetch targets' | 'Entity write' | 'Metadata write';
+
 function mergeRelTypeApplied(
   a: Record<string, number>,
   b: Record<string, number>
@@ -101,7 +103,6 @@ async function fetchActorPage(
       logger.info(`${logPrefix} Aborted during composite aggregation`);
       return null;
     }
-    logger.error(`${logPrefix} Composite aggregation failed: ${errMsg(err)}`);
     throw err;
   }
 }
@@ -153,7 +154,6 @@ async function fetchTargetsForActors(
       logger.info(`${logPrefix} Aborted during ES|QL query`);
       return null;
     }
-    logger.error(`${logPrefix} ES|QL query failed: ${errMsg(err)}`);
     throw err;
   }
 }
@@ -239,6 +239,17 @@ async function runIntegration(
     };
   }
 
+  // Labels the catch-block log so operators can tell which step failed.
+  let failingStage: IntegrationStage | undefined;
+  const runStage = async <T>(stage: IntegrationStage, fn: () => Promise<T>): Promise<T> => {
+    try {
+      return await fn();
+    } catch (err) {
+      failingStage = stage;
+      throw err;
+    }
+  };
+
   try {
     do {
       if (signal?.aborted) {
@@ -261,15 +272,17 @@ async function runIntegration(
         break;
       }
 
-      const actorPage = await fetchActorPage(
-        config,
-        esClient,
-        logger,
-        namespace,
-        afterKey,
-        transportOpts,
-        signal,
-        logPrefix
+      const actorPage = await runStage('Fetch actors', () =>
+        fetchActorPage(
+          config,
+          esClient,
+          logger,
+          namespace,
+          afterKey,
+          transportOpts,
+          signal,
+          logPrefix
+        )
       );
       if (actorPage === null) {
         outcome = signal?.aborted ? (totalBuckets === 0 ? 'empty' : 'partial') : 'index_missing';
@@ -284,15 +297,17 @@ async function runIntegration(
         break;
       }
 
-      const esqlResult = await fetchTargetsForActors(
-        config,
-        esClient,
-        logger,
-        namespace,
-        buckets,
-        transportOpts,
-        signal,
-        logPrefix
+      const esqlResult = await runStage('Fetch targets', () =>
+        fetchTargetsForActors(
+          config,
+          esClient,
+          logger,
+          namespace,
+          buckets,
+          transportOpts,
+          signal,
+          logPrefix
+        )
       );
       if (esqlResult === null) {
         outcome = 'partial';
@@ -308,14 +323,18 @@ async function runIntegration(
       // Both writes are inside the loop so any transport failure sets outcome:
       // 'error' and the outer loop continues to other integrations.
       if (pageRecords.length > 0) {
-        const pageWrite: WriteEntityIdsResult & WriteEntityIdsPageState = await writeEntityIds(
-          crudClient,
-          logger,
-          pageRecords,
-          esClient,
-          namespace,
-          config.validateTargetIds,
-          logPrefix
+        const pageWrite: WriteEntityIdsResult & WriteEntityIdsPageState = await runStage(
+          'Entity write',
+          () =>
+            writeEntityIds(
+              crudClient,
+              logger,
+              pageRecords,
+              esClient,
+              namespace,
+              config.validateTargetIds,
+              logPrefix
+            )
         );
         // Accumulate the entity write immediately — BEFORE the metadata write,
         // which can throw. These entities are already durable in the store, so
@@ -351,16 +370,13 @@ async function runIntegration(
                 : [];
             })
           : actorFiltered;
-        const pageMetadata = await writeRelationshipMetadatas(
-          entityMetadataClient,
-          logger,
-          metadataRecords,
-          {
+        const pageMetadata = await runStage('Metadata write', () =>
+          writeRelationshipMetadatas(entityMetadataClient, logger, metadataRecords, {
             scanId: metadataContext.scanId,
             lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
             entitySource: config.id,
             observedAt: metadataContext.observedAt,
-          }
+          })
         );
 
         totalMetadataResult = {
@@ -391,7 +407,7 @@ async function runIntegration(
       truncated,
     };
   } catch (err) {
-    logger.error(`${logPrefix} Integration failed: ${errMsg(err)}`);
+    logger.error(`${logPrefix} ${failingStage ?? 'Integration'} failed: ${errMsg(err)}`);
     // Return the counters accumulated so far, NOT zeros. Writes stream per page,
     // so pages 1..N-1 are already durable in the entity store when a later page
     // throws (e.g. requestTimeoutMs firing during esql.query or writeEntityIds).
@@ -591,6 +607,7 @@ export const runRelationshipMaintainer = async ({
         scanned: buckets,
         qualified: recordsCount,
         outcome,
+        applied: write.updated,
       });
       for (const [relType, count] of Object.entries(write.relationshipTypeApplied)) {
         telemetryCollector.relationshipTypeApplied[relType] =
