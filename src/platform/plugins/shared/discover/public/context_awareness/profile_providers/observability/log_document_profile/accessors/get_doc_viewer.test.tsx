@@ -135,6 +135,7 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
             _index: 'logs-synth.docviewer-default',
             fields: { 'log.level': ['info'] },
             _ignored: ['log.level'],
+            ignored_field_values: { 'log.level': ['x'.repeat(1025)] },
           },
           dataViewMock
         ),
@@ -145,6 +146,20 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
       it(`enables the tab when the record has ${name}`, () => {
         expect(getTabEnabled(record)).toBe(true);
       });
+    });
+
+    it('disables the tab when the record has _ignored but no ignored field values', () => {
+      const record = buildDataTableRecord(
+        {
+          _id: 'doc-1',
+          _index: 'logs-synth.docviewer-default',
+          fields: { 'log.level': ['info'] },
+          _ignored: ['log.level'],
+        },
+        dataViewMock
+      );
+
+      expect(getTabEnabled(record)).toBe(false);
     });
 
     it('disables the tab when the record only has fields the overview has no section for', () => {
