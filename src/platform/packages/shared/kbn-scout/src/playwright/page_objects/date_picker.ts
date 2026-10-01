@@ -246,7 +246,6 @@ export class DatePicker {
     // Dialog elements render as a portal at the page root
     await this.page.testSubj.locator(`dateRangePicker${side}AbsoluteTab`).click();
     const input = this.page.testSubj.locator(`dateRangePicker${side}AbsoluteInput`);
-    await input.clear();
     await input.fill(value);
   }
 

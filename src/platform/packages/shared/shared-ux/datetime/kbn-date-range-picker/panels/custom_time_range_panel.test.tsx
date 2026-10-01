@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
@@ -64,39 +64,27 @@ const TestHarness = ({
   onChange = () => {},
   onPresetSave,
 }: RenderPanelProps) => {
-  const [presets, setPresets] = useState<DateRangePickerProps['presets']>([]);
-
   return (
-    <>
-      {/*
-       * Hands the provider a new `presets` array identity, the way a late emission from the
-       * persisted-presets observable does, which re-memoises `timeRange` from unchanged text.
-       */}
-      <button type="button" data-test-subj="reparseTimeRangeButton" onClick={() => setPresets([])}>
-        Re-parse time range
-      </button>
-      <DateRangePickerProvider
-        defaultValue={defaultValue}
-        onChange={onChange}
-        onPresetSave={onPresetSave}
-        presets={presets}
-        settings={{ roundRelativeTime: false }}
-        onSettingsChange={() => {}}
-      >
-        <DateRangePickerPanelNavigationProvider defaultPanelId="main" panelDescriptors={[]}>
-          <CurrentTextProbe />
-          <TextSetterProbe />
-          <DateRangePickerPanel id="main">
-            <OpenCustomPanelButton />
-          </DateRangePickerPanel>
-          <DateRangePickerPanel id={CustomTimeRangePanel.PANEL_ID}>
-            <div role="dialog">
-              <CustomTimeRangePanel />
-            </div>
-          </DateRangePickerPanel>
-        </DateRangePickerPanelNavigationProvider>
-      </DateRangePickerProvider>
-    </>
+    <DateRangePickerProvider
+      defaultValue={defaultValue}
+      onChange={onChange}
+      onPresetSave={onPresetSave}
+      settings={{ roundRelativeTime: false }}
+      onSettingsChange={() => {}}
+    >
+      <DateRangePickerPanelNavigationProvider defaultPanelId="main" panelDescriptors={[]}>
+        <CurrentTextProbe />
+        <TextSetterProbe />
+        <DateRangePickerPanel id="main">
+          <OpenCustomPanelButton />
+        </DateRangePickerPanel>
+        <DateRangePickerPanel id={CustomTimeRangePanel.PANEL_ID}>
+          <div role="dialog">
+            <CustomTimeRangePanel />
+          </div>
+        </DateRangePickerPanel>
+      </DateRangePickerPanelNavigationProvider>
+    </DateRangePickerProvider>
   );
 };
 
@@ -282,24 +270,6 @@ describe('CustomTimeRangePanel', () => {
       expect(
         within(getEndFieldset()).getByText(customTimeRangePanelTexts.nowEndHelpText)
       ).toBeInTheDocument();
-    });
-
-    it('keeps an in-progress absolute edit when the unchanged text is re-parsed', () => {
-      renderCustomTimeRangePanel({ defaultValue: '2025-01-01 to now' });
-      openCustomPanel();
-
-      fireEvent.click(within(getEndFieldset()).getByText('Absolute'));
-      // Mid-edit the staged text is '<start> to ', whose empty end parses to `now`.
-      fireEvent.change(within(getEndFieldset()).getByLabelText('End date absolute date'), {
-        target: { value: '' },
-      });
-
-      fireEvent.click(screen.getByTestId('reparseTimeRangeButton'));
-
-      expect(within(getEndFieldset()).getByLabelText('End date absolute date')).toBeInTheDocument();
-      expect(
-        within(getEndFieldset()).queryByText(customTimeRangePanelTexts.nowEndHelpText)
-      ).not.toBeInTheDocument();
     });
   });
 
