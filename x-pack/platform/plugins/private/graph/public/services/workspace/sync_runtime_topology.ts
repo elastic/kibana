@@ -56,5 +56,5 @@ export const syncRuntimeTopology = (workspace: RuntimeWorkspace, state: Workspac
   workspace.nodes = state.nodeIds.map((id) => nodesMap[id]);
   workspace.edgesMap = edgesMap;
   workspace.edges = state.edgeIds.map((id) => edgesMap[id]);
-  workspace.runLayout();
+  workspace.layoutController.start();
 };

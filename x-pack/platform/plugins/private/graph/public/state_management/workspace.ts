@@ -448,7 +448,7 @@ export const createWorkspaceState = (workspace: RuntimeWorkspace): WorkspaceStat
 
   return {
     isInitialized: true,
-    isLayoutRunning: Boolean(workspace.isLayoutRunning?.()),
+    isLayoutRunning: workspace.layoutController.isRunning(),
     nodesById,
     nodeIds: workspace.nodes.map(({ id }) => id),
     edgesById,
@@ -607,9 +607,9 @@ export const registerWorkspaceListeners = (
       }
 
       if (startWorkspaceLayout.match(action)) {
-        workspace.runLayout();
+        workspace.layoutController.start();
       } else {
-        workspace.stopLayout();
+        workspace.layoutController.stop();
         notifyReact();
       }
     },
