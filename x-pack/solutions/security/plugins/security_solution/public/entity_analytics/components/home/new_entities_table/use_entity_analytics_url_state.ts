@@ -14,7 +14,7 @@ import { SEVERITY_UI_SORT_ORDER } from '../../../common/utils';
 import { ValidCriticalityLevels } from '../../../../../common/entity_analytics/asset_criticality/constants';
 import { RISK_SCORE_NORM_FIELD, PAGE_SIZE_OPTIONS, TIME_RANGE_OPTIONS } from './common';
 import type { TimeRange } from './common';
-import { isTileCard, type SignalCardId } from '../needs_attention_tiles/data';
+import { isSignalCardId, type SignalCardId } from '../needs_attention_tiles/data';
 
 export { TIME_RANGE_OPTIONS };
 export type { TimeRange };
@@ -180,7 +180,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     }
     // eaActiveTile is omitted when none; strip a present invalid value.
     const rawActiveTile = params.get(PARAM.ACTIVE_TILE);
-    if (rawActiveTile !== null && !isTileCard(rawActiveTile)) {
+    if (rawActiveTile !== null && !isSignalCardId(rawActiveTile)) {
       params.delete(PARAM.ACTIVE_TILE);
       dirty = true;
     }
@@ -246,7 +246,7 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
 
   const rawActiveTile = p.get(PARAM.ACTIVE_TILE);
   const activeTile = useMemo(
-    (): SignalCardId | null => (isTileCard(rawActiveTile) ? rawActiveTile : null),
+    (): SignalCardId | null => (isSignalCardId(rawActiveTile) ? rawActiveTile : null),
     [rawActiveTile]
   );
 

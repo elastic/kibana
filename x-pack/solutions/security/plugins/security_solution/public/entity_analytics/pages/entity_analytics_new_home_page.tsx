@@ -68,15 +68,14 @@ import {
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import {
   EMPTY_ENTITY_IDS,
-  type ActiveFilter,
   type SignalCardData,
   type SignalCardId,
 } from '../components/home/needs_attention_tiles/data';
 
 const ENTITY_TABLE_SCOPE_ID = 'entity-analytics-new-entities-table';
 
-/** Cap card → table IN-list size; ES|QL IN lists and ES terms queries both have practical limits. */
-const MAX_CARD_FILTER_ENTITY_IDS = 1000;
+/** Cap tile → table IN-list size; ES|QL IN lists and ES terms queries both have practical limits. */
+const MAX_TILE_FILTER_ENTITY_IDS = 1000;
 
 const VIEW_BY_OPTIONS = [
   {
@@ -131,7 +130,7 @@ const buildCombinedFilter = (
   esFilter: ESBoolQuery | undefined,
   entityFilters: EntityFilters,
   view: 'resolved' | 'raw',
-  cardFilter?: QueryDslQueryContainer | null
+  tileFilter?: QueryDslQueryContainer | null
 ) => {
   const filterClauses: QueryDslQueryContainer[] = [
     ...(esFilter ? [esFilter] : []),
@@ -150,7 +149,7 @@ const buildCombinedFilter = (
     ...(entityFilters.dataSources.length
       ? [{ terms: { 'entity.source': entityFilters.dataSources } }]
       : []),
-    ...(cardFilter ? [cardFilter] : []),
+    ...(tileFilter ? [tileFilter] : []),
   ];
   const mustNotClauses =
     view === 'resolved'
@@ -162,7 +161,7 @@ const buildCombinedFilter = (
 };
 
 /** DSL counterpart of the tile ES|QL clause (grouping buckets use this path). */
-const buildTileCardFilter = (ids: string[], view: 'resolved' | 'raw'): QueryDslQueryContainer => {
+const buildTileFilter = (ids: string[], view: 'resolved' | 'raw'): QueryDslQueryContainer => {
   if (!ids.length) return { match_none: {} };
   if (view === 'raw') {
     return {
@@ -214,11 +213,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     activeTile,
     setActiveTile,
   } = useEntityAnalyticsUrlState();
-
-  const activeFilter = useMemo((): ActiveFilter | null => {
-    if (!activeTile) return null;
-    return { type: 'card', cardId: activeTile, label: activeTile };
-  }, [activeTile]);
 
   const activeColumns = viewBy === 'raw' ? RAW_VIEW_COLUMNS : RESOLVED_VIEW_COLUMNS;
 
@@ -424,9 +418,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     skip: skipTileQueries,
   });
 
-  const handleFilterForCard = useCallback(
-    (cardId: SignalCardId) => {
-      setActiveTile(activeTile === cardId ? null : cardId);
+  const handleFilterForTile = useCallback(
+    (tileId: SignalCardId) => {
+      setActiveTile(activeTile === tileId ? null : tileId);
     },
     [activeTile, setActiveTile]
   );
@@ -463,14 +457,14 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const cappedTileEntityIds = useMemo(() => {
     if (!activeTile) return null;
-    return selectedEntityIds.length > MAX_CARD_FILTER_ENTITY_IDS
-      ? selectedEntityIds.slice(0, MAX_CARD_FILTER_ENTITY_IDS)
+    return selectedEntityIds.length > MAX_TILE_FILTER_ENTITY_IDS
+      ? selectedEntityIds.slice(0, MAX_TILE_FILTER_ENTITY_IDS)
       : selectedEntityIds;
   }, [activeTile, selectedEntityIds]);
 
-  const cardWhereExpression = useMemo(() => {
+  const tileWhereExpression = useMemo(() => {
     if (cappedTileEntityIds == null) return undefined;
-    // Always constrain when a card is active — empty list matches nothing so the
+    // Always constrain when a tile is active — empty list matches nothing so the
     // table stays consistent with a 0-count tile rather than falling back to all entities.
     if (!cappedTileEntityIds.length) return 'false';
     const list = toList(cappedTileEntityIds);
@@ -481,14 +475,14 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       : `entity.id IN (${list})`;
   }, [cappedTileEntityIds, viewBy]);
 
-  const cardFilter = useMemo((): QueryDslQueryContainer | null => {
+  const tileFilter = useMemo((): QueryDslQueryContainer | null => {
     if (cappedTileEntityIds == null) return null;
-    return buildTileCardFilter(cappedTileEntityIds, viewBy);
+    return buildTileFilter(cappedTileEntityIds, viewBy);
   }, [cappedTileEntityIds, viewBy]);
 
   const combinedFilter = useMemo(
-    () => buildCombinedFilter(esFilter, entityFilters, viewBy, cardFilter),
-    [esFilter, entityFilters, viewBy, cardFilter]
+    () => buildCombinedFilter(esFilter, entityFilters, viewBy, tileFilter),
+    [esFilter, entityFilters, viewBy, tileFilter]
   );
 
   const groupingState = useMemo<EntityURLStateResult>(
@@ -511,9 +505,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   );
 
   const gridWhereExpression = useMemo(() => {
-    const parts = [whereExpression, cardWhereExpression].filter(Boolean);
+    const parts = [whereExpression, tileWhereExpression].filter(Boolean);
     return parts.length ? parts.join(' AND ') : undefined;
-  }, [whereExpression, cardWhereExpression]);
+  }, [whereExpression, tileWhereExpression]);
 
   useUpdateEffect(() => {
     setPage(0);
@@ -521,26 +515,26 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   useUpdateEffect(() => {
     setGroupingPageIndex(0);
-  }, [cardWhereExpression, whereExpression, viewBy]);
+  }, [tileWhereExpression, whereExpression, viewBy]);
 
   useUpdateEffect(() => {
-    if (!activeTile || selectedEntityIds.length <= MAX_CARD_FILTER_ENTITY_IDS) {
+    if (!activeTile || selectedEntityIds.length <= MAX_TILE_FILTER_ENTITY_IDS) {
       return;
     }
     addWarning({
       title: i18n.translate(
-        'xpack.securitySolution.entityAnalytics.home.tiles.cardFilterLimitTitle',
+        'xpack.securitySolution.entityAnalytics.home.tiles.tileFilterLimitTitle',
         {
           defaultMessage: 'Table shows {limit} of {count} entities',
-          values: { limit: MAX_CARD_FILTER_ENTITY_IDS, count: selectedEntityIds.length },
+          values: { limit: MAX_TILE_FILTER_ENTITY_IDS, count: selectedEntityIds.length },
         }
       ),
       text: i18n.translate(
-        'xpack.securitySolution.entityAnalytics.home.tiles.cardFilterLimitDescription',
+        'xpack.securitySolution.entityAnalytics.home.tiles.tileFilterLimitDescription',
         {
           defaultMessage:
             'The table is limited to {limit} entities from this tile. Narrow the time range or filters to see a smaller set.',
-          values: { limit: MAX_CARD_FILTER_ENTITY_IDS },
+          values: { limit: MAX_TILE_FILTER_ENTITY_IDS },
         }
       ),
     });
@@ -872,9 +866,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
             `}
           >
             <SignalCards
-              activeFilter={activeFilter}
+              activeTile={activeTile}
               cards={signalCards}
-              onFilterForCard={handleFilterForCard}
+              onFilterForTile={handleFilterForTile}
             />
           </div>
         </div>
@@ -895,7 +889,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 timeRange={timeRange}
                 watchlistNames={watchlistNames}
                 view={viewBy}
-                cardWhereExpression={cardWhereExpression}
+                tileWhereExpression={tileWhereExpression}
                 groupSelectorComponent={viewControls}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}

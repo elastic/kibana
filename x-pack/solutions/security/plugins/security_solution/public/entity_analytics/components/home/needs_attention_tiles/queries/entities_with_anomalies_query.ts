@@ -58,7 +58,7 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   parts.push(
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
   );
-  // VALUES(effective_id) so card → table IN-filter matches resolved-view entity.id
+  // VALUES(effective_id) so tile → table IN-filter matches resolved-view entity.id
   parts.push(`| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`);
 
   return parts.join('\n');

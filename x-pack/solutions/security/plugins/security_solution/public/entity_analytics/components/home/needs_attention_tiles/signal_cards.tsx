@@ -21,16 +21,16 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import type { ActiveFilter, SignalCardData, SignalCardId } from './data';
+import type { SignalCardData, SignalCardId } from './data';
 
 export interface SignalCardsProps {
-  activeFilter: ActiveFilter | null;
-  /** Card values for the current page filters — see `getSignalCards`. */
+  activeTile: SignalCardId | null;
+  /** Tile values for the current page filters. */
   cards: SignalCardData[];
-  onFilterForCard: (cardId: SignalCardId) => void;
-  /** Kept for MetricChartsPanel wiring; cards are whole-card toggles in v.5. */
-  onFilterOutCard?: (cardId: SignalCardId) => void;
-  onAddCardToTimeline?: (cardId: SignalCardId) => void;
+  onFilterForTile: (tileId: SignalCardId) => void;
+  /** Kept for MetricChartsPanel wiring; tiles are whole-tile toggles in v.5. */
+  onFilterOutTile?: (tileId: SignalCardId) => void;
+  onAddTileToTimeline?: (tileId: SignalCardId) => void;
 }
 
 /** Named container so the grid can step columns from its own width, not the viewport. */
@@ -455,14 +455,10 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
  * Needs-attention metrics in a capped wrapping grid (6 compact, 3 expanded).
  * Each card toggles an in-page table filter; selection stays on the card itself.
  */
-export const SignalCards: React.FC<SignalCardsProps> = ({
-  activeFilter,
-  cards,
-  onFilterForCard,
-}) => {
+export const SignalCards: React.FC<SignalCardsProps> = ({ activeTile, cards, onFilterForTile }) => {
   const { euiTheme } = useEuiTheme();
   const [isExpanded, setIsExpanded] = useState(false);
-  const anySelected = activeFilter?.type === 'card';
+  const anySelected = activeTile != null;
 
   return (
     <>
@@ -503,7 +499,7 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
           })}
         >
           {cards.map((card) => {
-            const selected = activeFilter?.type === 'card' && activeFilter.cardId === card.id;
+            const selected = activeTile === card.id;
             const dimmed = Boolean(anySelected && !selected);
 
             return (
@@ -526,7 +522,7 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
                   selected={selected}
                   dimmed={dimmed}
                   isExpanded={isExpanded}
-                  onToggle={() => onFilterForCard(card.id)}
+                  onToggle={() => onFilterForTile(card.id)}
                 />
               </div>
             );
