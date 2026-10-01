@@ -55,7 +55,8 @@ export interface EntitiesGridProps {
   pageSize: number;
   onPageChange: (index: number) => void;
   onPageSizeChange: (size: number) => void;
-  whereExpression?: string;
+  searchExpression?: string;
+  entityExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
   /** When provided, shows the full toolbar with controls. */
@@ -75,7 +76,8 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   pageSize,
   onPageChange,
   onPageSizeChange,
-  whereExpression,
+  searchExpression,
+  entityExpression,
   cellHandlers,
   rowActions,
   groupSelectorComponent,
@@ -130,7 +132,15 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       clearExpandedIds();
       resetChildren();
     }
-  }, [whereExpression, view, timeRange, resetPagination, clearExpandedIds, resetChildren]);
+  }, [
+    searchExpression,
+    entityExpression,
+    view,
+    timeRange,
+    resetPagination,
+    clearExpandedIds,
+    resetChildren,
+  ]);
 
   // Sync visible columns when the column set changes (e.g. view switch).
   const prevColumnsRef = useRef(columns);
@@ -156,7 +166,8 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     pageSize,
     cursors,
     onNextCursor,
-    whereExpression,
+    searchExpression,
+    entityExpression,
     timeRange,
     view,
   });

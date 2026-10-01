@@ -10,7 +10,7 @@ import {
   buildKeepClause,
   buildCursorClause,
   buildResolvedViewFilter,
-  buildFilterClause,
+  buildCombinedFilterClause,
   ENTITY_TYPE_FILTER,
   ENTITY_ID_FIELD,
 } from '../common';
@@ -22,25 +22,31 @@ const buildNativeEntityDataQuery = ({
   cursor,
   pageSize,
   view,
-  filterExpression,
+  searchExpression,
+  entityExpression,
 }: QueryArgs): string =>
   [
     `FROM ${entityAliasOf(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     ...buildResolvedViewFilter(view),
-    ...buildFilterClause(filterExpression),
+    ...buildCombinedFilterClause(searchExpression, entityExpression),
     buildKeepClause(),
     ...buildCursorClause(cursor),
     `| SORT ${field} ${dir.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
     `| LIMIT ${pageSize + 1}`,
   ].join('\n');
 
-const buildNativeEntityCountQuery = ({ namespace, view, filterExpression }: QueryArgs): string =>
+const buildNativeEntityCountQuery = ({
+  namespace,
+  view,
+  searchExpression,
+  entityExpression,
+}: QueryArgs): string =>
   [
     `FROM ${entityAliasOf(namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     ...buildResolvedViewFilter(view),
-    ...buildFilterClause(filterExpression),
+    ...buildCombinedFilterClause(searchExpression, entityExpression),
     `| STATS total = COUNT(*)`,
   ].join('\n');
 

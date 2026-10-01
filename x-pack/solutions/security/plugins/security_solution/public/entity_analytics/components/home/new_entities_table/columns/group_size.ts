@@ -13,6 +13,7 @@ import {
   entityAliasOf,
   buildKeepClause,
   buildFilterClause,
+  buildLookupJoinClause,
   toList,
   buildSortSuffix,
   buildCursorClause,
@@ -20,6 +21,7 @@ import {
 import type { QueryArgs, RunContext, Row, ColumnDescriptor } from '../common';
 
 // ── query builders: group_size sort ──────────────────────────────────────────
+// Inner FROM is the entity index, so searchFilters can stay in WHERE (KQL legal).
 
 const buildGroupSizeSortDataQuery = ({
   namespace,
@@ -27,12 +29,14 @@ const buildGroupSizeSortDataQuery = ({
   cursor,
   pageSize,
   concreteEntityIndexName,
-  filterExpression,
+  searchExpression,
+  entityExpression,
 }: QueryArgs): string => {
   const entityAlias = entityAliasOf(namespace);
   const inner = [
     `FROM ${entityAlias}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
+    ...buildFilterClause(searchExpression),
     `| EVAL group_key = COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`,
     `| STATS ${GROUP_SIZE_FIELD} = COUNT(*) BY group_key`,
     `| RENAME group_key AS \`entity.id\``,
@@ -40,9 +44,9 @@ const buildGroupSizeSortDataQuery = ({
 
   return [
     `FROM (\n${inner}\n)`,
-    `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``,
+    buildLookupJoinClause(concreteEntityIndexName),
     `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildFilterClause(filterExpression),
+    ...buildFilterClause(entityExpression),
     buildKeepClause(GROUP_SIZE_FIELD),
     ...buildCursorClause(cursor),
     buildSortSuffix(GROUP_SIZE_FIELD, dir, pageSize),
@@ -52,12 +56,14 @@ const buildGroupSizeSortDataQuery = ({
 const buildGroupSizeSortCountQuery = ({
   namespace,
   concreteEntityIndexName,
-  filterExpression,
+  searchExpression,
+  entityExpression,
 }: QueryArgs): string => {
   const entityAlias = entityAliasOf(namespace);
   const inner = [
     `FROM ${entityAlias}`,
     `| WHERE ${ENTITY_TYPE_FILTER}`,
+    ...buildFilterClause(searchExpression),
     `| EVAL group_key = COALESCE(${RESOLVED_TO_FIELD}, ${ENTITY_ID_FIELD})`,
     `| STATS _c = COUNT(*) BY group_key`,
     `| RENAME group_key AS \`entity.id\``,
@@ -65,9 +71,9 @@ const buildGroupSizeSortCountQuery = ({
 
   return [
     `FROM (\n${inner}\n)`,
-    `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``,
+    buildLookupJoinClause(concreteEntityIndexName),
     `| WHERE ${ENTITY_TYPE_FILTER}`,
-    ...buildFilterClause(filterExpression),
+    ...buildFilterClause(entityExpression),
     `| STATS total = COUNT(*)`,
   ].join('\n');
 };

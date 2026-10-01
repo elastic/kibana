@@ -13,6 +13,9 @@ import {
   buildKeepClause,
   buildResolvedViewFilter,
   buildFilterClause,
+  buildLookupJoinClause,
+  buildSearchIdInClause,
+  entityAliasOf,
   toList,
   buildSortSuffix,
   buildCursorClause,
@@ -35,20 +38,23 @@ const buildAnomalyCountSortBaseQuery = (cutoff: string): string =>
   ].join('\n');
 
 const buildAnomalyCountSortDataQuery = ({
+  namespace,
   timeRange,
   sort: { direction: dir },
   cursor,
   pageSize,
   view,
   concreteEntityIndexName,
-  filterExpression,
+  searchExpression,
+  entityExpression,
 }: QueryArgs): string => {
   const inner = [
     buildAnomalyCountSortBaseQuery(alertLookbackCutoff(timeRange)),
-    `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``,
+    ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
+    buildLookupJoinClause(concreteEntityIndexName),
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     ...buildResolvedViewFilter(view),
-    ...buildFilterClause(filterExpression),
+    ...buildFilterClause(entityExpression),
     buildKeepClause(ANOMALY_COUNT_FIELD),
     ...buildCursorClause(cursor),
   ].join('\n');
@@ -63,18 +69,21 @@ const buildAnomalyCountSortDataQuery = ({
 };
 
 const buildAnomalyCountSortCountQuery = ({
+  namespace,
   timeRange,
   view,
   concreteEntityIndexName,
-  filterExpression,
+  searchExpression,
+  entityExpression,
 }: QueryArgs): string =>
   [
     SET_UNMAPPED_NULLIFY,
     buildAnomalyCountSortBaseQuery(alertLookbackCutoff(timeRange)),
-    `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``,
+    ...buildSearchIdInClause(entityAliasOf(namespace), searchExpression),
+    buildLookupJoinClause(concreteEntityIndexName),
     `| WHERE ${ENTITY_TYPE_FILTER}`,
     ...buildResolvedViewFilter(view),
-    ...buildFilterClause(filterExpression),
+    ...buildFilterClause(entityExpression),
     `| KEEP \`${ENTITY_ID_FIELD}\``,
     `| STATS total = COUNT(*)`,
   ].join('\n');

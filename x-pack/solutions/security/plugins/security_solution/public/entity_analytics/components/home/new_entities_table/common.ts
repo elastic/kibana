@@ -78,8 +78,17 @@ export interface QueryArgs {
   view: 'resolved' | 'raw';
   /** Concrete (non-alias) entity store index name — required for ES|QL LOOKUP JOIN from the browser. */
   concreteEntityIndexName: string;
-  /** ES|QL WHERE expression injected into the query at the appropriate position. */
-  filterExpression?: string;
+  /**
+   * Lucene-pushable search bar predicates (KQL / filter pills / group filters).
+   * Native / group_size inner: `| WHERE …`.
+   * Other foreign sorts: `| WHERE entity.id IN (FROM entities | WHERE … | KEEP entity.id)`.
+   */
+  searchExpression?: string;
+  /**
+   * LOOKUP-safe predicates (URL entity filters, tile id IN-lists).
+   * Always applied as `| WHERE …` (after LOOKUP on foreign sorts).
+   */
+  entityExpression?: string;
 }
 
 export interface RunContext {
@@ -133,6 +142,37 @@ export const buildResolvedViewFilter = (view: QueryArgs['view']): string[] =>
 
 export const buildFilterClause = (filterExpression?: string): string[] =>
   filterExpression ? [`| WHERE ${filterExpression}`] : [];
+
+/** AND-join ES|QL boolean fragments; `undefined` when empty. */
+export const joinAnd = (...parts: Array<string | undefined | null | false>): string | undefined => {
+  const filtered = parts.filter((p): p is string => typeof p === 'string' && p.length > 0);
+  return filtered.length ? filtered.join(' AND ') : undefined;
+};
+
+/** `| WHERE search AND entity` for native (entity-index) sorts. */
+export const buildCombinedFilterClause = (
+  searchExpression?: string,
+  entityExpression?: string
+): string[] => buildFilterClause(joinAnd(searchExpression, entityExpression));
+
+/** Simple entity LOOKUP — join key only (no searchFilters in `ON`). */
+export const buildLookupJoinClause = (concreteEntityIndexName: string): string =>
+  `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``;
+
+/**
+ * Constrain foreign-sort rows to entities matching searchFilters.
+ * `KQL` / `:` are illegal after `STATS` (including in `LOOKUP JOIN ON`), so run them in an
+ * independent entities subquery via `IN` (ES|QL IN-subquery, preview since 9.5).
+ */
+export const buildSearchIdInClause = (
+  entityIndexPattern: string,
+  searchExpression?: string
+): string[] =>
+  searchExpression
+    ? [
+        `| WHERE \`entity.id\` IN (FROM ${entityIndexPattern} | WHERE ${searchExpression} | KEEP \`entity.id\`)`,
+      ]
+    : [];
 
 export const toRows = (raw: { columns: Array<{ name: string }>; values: unknown[][] }): Row[] =>
   raw.values.map((row) => Object.fromEntries(raw.columns.map((col, i) => [col.name, row[i]])));

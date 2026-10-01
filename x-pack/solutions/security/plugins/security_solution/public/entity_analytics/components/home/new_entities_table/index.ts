@@ -24,7 +24,7 @@ export { renderEntityCell } from './entities_cell_renderer';
 export type { RowActions, CellHandlers } from './entities_cell_renderer';
 export { RESOLVED_VIEW_COLUMNS, RAW_VIEW_COLUMNS, CHILD_VIEW_COLUMNS } from './columns/registry';
 export type { GridColumnId } from './columns/registry';
-export { RESOLUTION_GROUPING_ID, PAGE_SIZE_OPTIONS, toList } from './common';
+export { RESOLUTION_GROUPING_ID, PAGE_SIZE_OPTIONS, toList, joinAnd } from './common';
 export type { EntityGridResponse } from './common';
 export {
   buildEntityFilterClauses,

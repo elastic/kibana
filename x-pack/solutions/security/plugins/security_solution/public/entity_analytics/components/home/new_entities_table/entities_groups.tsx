@@ -322,19 +322,25 @@ const LeafGrid: React.FC<LeafGridProps> = ({
     setPageIndex(0);
   }, []);
 
-  const { whereExpression: baseWhereExpression } = useEntityGridFilters();
-  const whereExpression = useMemo(() => {
+  const { searchExpression: baseSearchExpression, entityExpression: baseEntityExpression } =
+    useEntityGridFilters();
+  const searchExpression = useMemo(() => {
     const groupFilters = processGroupFilters(mergeFilters(currentGroupFilters, parentGroupFilters));
     const { esqlExpression: groupExpr } = convertFiltersToESQLExpression(groupFilters);
-    const parts = [baseWhereExpression, tileWhereExpression, groupExpr].filter(Boolean);
+    const parts = [baseSearchExpression, groupExpr].filter(Boolean);
     return parts.length ? parts.join(' AND ') : undefined;
-  }, [baseWhereExpression, tileWhereExpression, currentGroupFilters, parentGroupFilters]);
+  }, [baseSearchExpression, currentGroupFilters, parentGroupFilters]);
+  const entityExpression = useMemo(() => {
+    const parts = [baseEntityExpression, tileWhereExpression].filter(Boolean);
+    return parts.length ? parts.join(' AND ') : undefined;
+  }, [baseEntityExpression, tileWhereExpression]);
 
   return (
     <EntitiesGrid
       columns={CHILD_VIEW_COLUMNS}
       pageSizeOptions={[5, 10, 25]}
-      whereExpression={whereExpression}
+      searchExpression={searchExpression}
+      entityExpression={entityExpression}
       timeRange={timeRange}
       watchlistNames={watchlistNames}
       view={view}
