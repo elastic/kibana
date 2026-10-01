@@ -1036,7 +1036,12 @@ export const optimizeMemory = async ({
     investigation,
     toolCalls,
   });
-  const evidenceTranscript = renderMemoryTranscript({ task, investigation, toolCalls });
+  const evidenceTranscript = renderMemoryTranscript({
+    task,
+    investigation,
+    toolCalls,
+    evidenceOnly: true,
+  });
 
   let labels: MemoryLabelProposal;
   if (recalledMemories.length === 0) {

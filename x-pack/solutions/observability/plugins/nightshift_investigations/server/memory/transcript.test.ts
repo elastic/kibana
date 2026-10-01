@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID } from '../tools/investigation_progress_report/tool';
+import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import {
+  readsSeededKnowledge,
   renderMemoryTranscript,
   stepsFromRound,
   stepsFromToolCalls,
@@ -226,5 +229,68 @@ describe('stepsFromToolCalls', () => {
         isError: false,
       },
     ]);
+  });
+});
+
+describe('readsSeededKnowledge', () => {
+  it.each([
+    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '/workspace/cortex/topics/checkout.md' }],
+    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: 'decision-trees/checkout-redis-lag.md' }],
+    ['nightshift_sandbox_bash', { command: 'cat /workspace/cortex/INDEX.md' }],
+    ['nightshift_sandbox_bash', { command: 'grep -r redis cortex/ decision-trees/' }],
+    ['nightshift_sandbox_bash', { command: 'ls /workspace/decision-trees' }],
+  ])('matches %s %j', (toolId, params) => {
+    expect(readsSeededKnowledge(toolId, params)).toBe(true);
+  });
+
+  it.each([
+    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '/workspace/memories/checkout-redis.md' }],
+    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '/workspace/cortex-notes.md' }],
+    [
+      'nightshift_sandbox_bash',
+      { command: 'esql "FROM traces-* | WHERE service.name == \\"cortex\\""' },
+    ],
+    ['nightshift_sandbox_bash', { command: 'cat /workspace/elastic.md' }],
+    ['nightshift_sandbox_write_file', { file_path: '/workspace/cortex/topics/new.md' }],
+  ])('does not match %s %j', (toolId, params) => {
+    expect(readsSeededKnowledge(toolId, params)).toBe(false);
+  });
+});
+
+describe('renderMemoryTranscript with evidenceOnly', () => {
+  const investigation = [
+    tool(
+      SANDBOX_VIEW_FILE_TOOL_ID,
+      { file_path: '/workspace/cortex/topics/checkout.md' },
+      'CORTEX_PAGE'
+    ),
+    tool('nightshift_sandbox_bash', { command: 'cat /workspace/decision-trees/x.md' }, 'TREE_BODY'),
+    tool(
+      SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
+      { summary: 'PROGRESS_SUMMARY' },
+      'ok'
+    ),
+    tool('nightshift_sandbox_bash', { command: 'esql "FROM metrics-redis*"' }, 'evicted_keys=4210'),
+  ];
+
+  it('drops seeded reads and progress reports with their results, keeping the other calls', () => {
+    const text = renderMemoryTranscript({
+      task: 't',
+      investigation,
+      toolCalls: [],
+      evidenceOnly: true,
+    });
+    expect(text).not.toContain('CORTEX_PAGE');
+    expect(text).not.toContain('TREE_BODY');
+    expect(text).not.toContain('PROGRESS_SUMMARY');
+    expect(text).toContain('1. nightshift_sandbox_bash: esql "FROM metrics-redis*"');
+    expect(text).toContain('Result: evicted_keys=4210');
+  });
+
+  it('keeps seeded reads by default', () => {
+    const text = renderMemoryTranscript({ task: 't', investigation, toolCalls: [] });
+    expect(text).toContain('CORTEX_PAGE');
+    expect(text).toContain('TREE_BODY');
+    expect(text).toContain('PROGRESS_SUMMARY');
   });
 });

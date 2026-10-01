@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import Path from 'path';
+import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
+import { SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID } from '../tools/investigation_progress_report/tool';
+import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 
 /**
  * The text the Semantic Memory critique, extraction, and writer calls read.
@@ -18,6 +23,10 @@ import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
  *     for what is new, what to merge, and what was wrong;
  *  3. the final answer last, only when `answer` is given. It is a synthesis and can contain the
  *     agent's inferences, so the calls that write memories omit it.
+ *
+ * With `evidenceOnly`, calls that are not evidence are dropped with their results: reads of the
+ * Cortex and decision-tree files Nightshift seeded into the sandbox, and the agent's progress
+ * reports, which often restate them.
  *
  * When the persisted round cannot be read, the investigation is built from the hook's tool calls
  * and results, or falls back to tool-call parameters when no results were passed.
@@ -41,6 +50,30 @@ const MAX_PARAMS_CHARS = 600;
 const MAX_NOTE_CHARS = 400;
 // Tried in order until the investigation fits its budget.
 const RESULT_EXCERPT_CHARS = [1_500, 800, 400, 0];
+
+const SEEDED_ROOTS = [CORTEX_WORKSPACE_ROOT, DECISION_TREE_WORKSPACE_ROOT];
+// A bash command names a seeded directory by absolute or workspace-relative path.
+const SEEDED_PATH_IN_COMMAND = new RegExp(
+  `(?:^|[\\s'"=(:<])(?:/workspace/|\\./)?(?:${SEEDED_ROOTS.map((root) =>
+    Path.posix.basename(root)
+  ).join('|')})(?:/|[\\s'";|)&>]|$)`
+);
+
+export const readsSeededKnowledge = (toolId: string, params: Record<string, unknown>): boolean => {
+  if (toolId === SANDBOX_VIEW_FILE_TOOL_ID && typeof params.file_path === 'string') {
+    const resolved = Path.posix.resolve('/workspace', params.file_path);
+    return SEEDED_ROOTS.some((root) => resolved === root || resolved.startsWith(`${root}/`));
+  }
+  return (
+    toolId.endsWith('bash') &&
+    typeof params.command === 'string' &&
+    SEEDED_PATH_IN_COMMAND.test(params.command)
+  );
+};
+
+const isEvidenceCall = (toolId: string, params: Record<string, unknown>): boolean =>
+  toolId !== SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID &&
+  !readsSeededKnowledge(toolId, params);
 
 const clip = (text: string, max: number): string =>
   text.length <= max ? text : `${text.slice(0, max)}… (+${text.length - max} chars)`;
@@ -119,22 +152,31 @@ export const renderMemoryTranscript = ({
   answer,
   investigation,
   toolCalls,
+  evidenceOnly = false,
 }: {
   task: string;
   answer?: string;
+  /** Drop seeded Cortex and decision-tree reads and progress reports, with their results. */
+  evidenceOnly?: boolean;
   /** The round's steps, in order, when the persisted round could be read. */
   investigation?: TranscriptStep[];
   /** Parameters-only fallback, used when `investigation` is unavailable. */
   toolCalls: InvestigationToolCall[];
 }): string => {
+  const steps = investigation?.filter(
+    (step) => !evidenceOnly || step.kind !== 'tool' || isEvidenceCall(step.toolId, step.params)
+  );
+  const calls = toolCalls.filter(
+    (call) => !evidenceOnly || isEvidenceCall(call.tool_id ?? 'unknown_tool', call.params ?? {})
+  );
   // The parameters-only fallback lists the same calls, without results.
   const middle =
-    investigation !== undefined
-      ? ['## Investigation', fitInvestigation(investigation)]
+    steps !== undefined
+      ? ['## Investigation', fitInvestigation(steps)]
       : [
           '## Tool calls (parameters only; results unavailable)',
           renderInvestigation(
-            toolCalls.map((call) => ({
+            calls.map((call) => ({
               kind: 'tool' as const,
               toolId: call.tool_id ?? 'unknown_tool',
               params: call.params ?? {},
