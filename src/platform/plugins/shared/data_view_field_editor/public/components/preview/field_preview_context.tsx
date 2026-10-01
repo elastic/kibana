@@ -317,6 +317,20 @@ export const FieldPreviewProvider: FC<
     }
   }, [script?.source, controller]);
 
+  /**
+   * The script validation resolves against the preview response, so the preview has to be
+   * flagged as loading as soon as one of the _execute params changes. Without it, a validation
+   * triggered during the 500ms debounce below resolves against the previous response.
+   */
+  useEffect(() => {
+    if (
+      controller.allParamsDefined(type, script?.source, currentDocIndex) &&
+      controller.hasSomeParamsChanged(type, script?.source, currentDocId)
+    ) {
+      controller.setIsLoadingPreview(true);
+    }
+  }, [controller, type, script?.source, currentDocIndex, currentDocId]);
+
   // Handle the validation state coming from the Painless DiagnosticAdapter
   // (see @kbn-monaco/src/painless/diagnostics_adapter.ts)
   useEffect(() => {
