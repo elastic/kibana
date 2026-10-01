@@ -18,7 +18,6 @@ const HEADING_FONT_SCALES = [
   ['h6', 's'],
 ] as const;
 
-/** Container styles shared by agent responses and user messages rendered as markdown. */
 export const markdownContainerStyles = (euiThemeContext: UseEuiTheme) => {
   const { euiTheme } = euiThemeContext;
 
