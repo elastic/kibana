@@ -374,36 +374,32 @@ export const OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT: Event
       tile_id: {
         type: 'keyword',
         _meta: {
-          description:
-            "Id of the clicked item. Curated and mini tiles use the tile id (e.g. 'linux', 'browse_all'). Search results and collection variants use the Fleet card id (e.g. 'collection:nginx', 'epr:nginx_otel'), so on collection_variant clicks it identifies the picked variant.",
+          description: 'Tile id, or Fleet card id for search results and variants.',
         },
       },
       surface: {
         type: 'keyword',
         _meta: {
-          description:
-            "Where on the Add Data page the click happened: 'tile' (curated grid), 'mini_tile' (More integrations row), 'search_result', or 'collection_variant' (collection chooser flyout).",
+          description: 'tile, mini_tile, search_result or collection_variant.',
         },
       },
       collection_id: {
         type: 'keyword',
         _meta: {
-          description:
-            'Fleet integration group id. Set when the click opens the collection chooser, and on variants picked inside it.',
+          description: 'Fleet group id, set on chooser opens and variant picks.',
           optional: true,
         },
       },
       has_search_term: {
         type: 'boolean',
         _meta: {
-          description: 'Whether the search field held a term when the click happened.',
+          description: 'Whether the search field held a term.',
         },
       },
       is_recommended: {
         type: 'boolean',
         _meta: {
-          description:
-            'Whether the picked variant carried the Recommended badge. Only set on collection_variant clicks.',
+          description: 'Whether the variant had the Recommended badge.',
           optional: true,
         },
       },
