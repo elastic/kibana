@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiBadge,
@@ -13,13 +12,17 @@ import {
   EuiCode,
   EuiCodeBlock,
   EuiCopy,
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiPanel,
   EuiSpacer,
+  EuiTable,
+  EuiTableBody,
+  EuiTableRow,
+  EuiTableRowCell,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -86,7 +89,7 @@ export const CatalogEntryFlyout = ({ item, onClose }: Props) => {
   const evidence = item.evidence ?? [];
   const diagnostics = item.validation?.diagnostics ?? [];
 
-  const details: EuiDescriptionListProps['listItems'] = [
+  const details: Array<{ title: string; description: React.ReactNode }> = [
     {
       title: i18n.translate('xpack.codeIntelligence.catalogEntry.repository', {
         defaultMessage: 'Repository',
@@ -218,7 +221,31 @@ export const CatalogEntryFlyout = ({ item, onClose }: Props) => {
             defaultMessage: 'Details',
           })}
         </SectionTitle>
-        <EuiDescriptionList type="column" compressed listItems={details} />
+        <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+          <EuiTable
+            compressed
+            tableLayout="fixed"
+            responsiveBreakpoint={false}
+            data-test-subj="codeIntelligenceCatalogEntryDetails"
+            css={{
+              'tbody tr:first-of-type > *': { borderTop: 'none' },
+              'tbody tr:last-of-type > *': { borderBottom: 'none' },
+            }}
+          >
+            <EuiTableBody>
+              {details.map(({ title, description }) => (
+                <EuiTableRow key={title}>
+                  <EuiTableRowCell width="30%" textOnly={false} setScopeRow>
+                    <EuiText size="s">
+                      <strong>{title}</strong>
+                    </EuiText>
+                  </EuiTableRowCell>
+                  <EuiTableRowCell textOnly={false}>{description}</EuiTableRowCell>
+                </EuiTableRow>
+              ))}
+            </EuiTableBody>
+          </EuiTable>
+        </EuiPanel>
         <EuiSpacer size="l" />
 
         <SectionTitle>

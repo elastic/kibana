@@ -91,9 +91,13 @@ describe('CatalogView', () => {
     expect(within(flyout).getByTestId('codeIntelligenceCatalogEntryDescription')).toHaveTextContent(
       'cannot reach the inference service'
     );
-    expect(within(flyout).getByTestId('codeIntelligenceCatalogEntryRevision')).toHaveTextContent(
-      item.revision!
-    );
+    const details = within(flyout).getByTestId('codeIntelligenceCatalogEntryDetails');
+    const revisionRow = within(details)
+      .getByRole('rowheader', { name: 'Revision' })
+      .closest('tr') as HTMLElement;
+    expect(
+      within(revisionRow).getByTestId('codeIntelligenceCatalogEntryRevision')
+    ).toHaveTextContent(item.revision!);
     expect(within(flyout).getByTestId('codeIntelligenceCatalogEntryValidation')).toHaveTextContent(
       'valid'
     );
