@@ -79,7 +79,11 @@ const aiIndexIdFromAttachments = (attachments: AttachmentStateManager): string =
 
 const renderTemplate = (params: InstallAutomationTemplateParams, aiIndexId: string): string => {
   if (params.template === 'document_orchestration') {
-    return renderDocumentOrchestrationTemplate({ ...params, aiIndexId, automationName: params.name });
+    return renderDocumentOrchestrationTemplate({
+      ...params,
+      aiIndexId,
+      automationName: params.name,
+    });
   }
   if (params.template === 'unit_profile') {
     return renderUnitProfileTemplate({ ...params, aiIndexId, automationName: params.name });
