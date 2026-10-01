@@ -1269,6 +1269,41 @@ describe('`if` condition on step schemas', () => {
   });
 });
 
+describe('`on-failure` on step schemas', () => {
+  const onFailure = {
+    retry: { 'max-attempts': 2, delay: '1s' },
+    continue: true,
+    fallback: [{ name: 'handle', type: 'console' }],
+  };
+  const cases = [
+    {
+      name: 'waitForInput',
+      schema: WaitForInputStepSchema,
+      step: { name: 's', type: 'waitForInput', with: { message: 'input?' } },
+    },
+    {
+      name: 'waitForApproval',
+      schema: WaitForApprovalStepSchema,
+      step: { name: 's', type: 'waitForApproval', with: { message: 'approve?' } },
+    },
+    {
+      name: 'workflow.execute',
+      schema: WorkflowExecuteStepSchema,
+      step: { name: 's', type: 'workflow.execute', with: { 'workflow-id': 'child' } },
+    },
+    {
+      name: 'workflow.executeAsync',
+      schema: WorkflowExecuteAsyncStepSchema,
+      step: { name: 's', type: 'workflow.executeAsync', with: { 'workflow-id': 'child' } },
+    },
+  ];
+
+  it.each(cases)('keeps `on-failure` on the $name step', ({ schema, step }) => {
+    expect(getShape(schema)).toHaveProperty('on-failure');
+    expect(schema.parse({ ...step, 'on-failure': onFailure })['on-failure']).toEqual(onFailure);
+  });
+});
+
 describe('DurationSchema', () => {
   it.each(['1ms', '30s', '5m', '2h', '1d', '1w', '1h30m', '1w2d3h4m5s6ms', '1h500ms'])(
     'accepts %s',
