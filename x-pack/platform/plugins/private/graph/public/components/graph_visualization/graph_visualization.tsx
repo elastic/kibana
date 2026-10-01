@@ -31,7 +31,7 @@ import {
 export interface GraphVisualizationProps {
   runtimeGraph: RuntimeGraph;
   onSetControl: (control: ControlType) => void;
-  selectSelected: (node: WorkspaceNode) => void;
+  selectSelected: (nodeId: string) => void;
   onSetMergeCandidates: (terms: TermIntersect[]) => void;
   getMergeCandidates?: (nodes: WorkspaceNode[]) => Promise<TermIntersect[]>;
   onToggleNodeSelection: (node: WorkspaceNode, replace: boolean) => boolean;
@@ -85,7 +85,7 @@ export function GraphVisualization({
     // Without the shift key we deselect all prior selections (perhaps not
     // a great idea for touch devices with no concept of shift key)
     if (onToggleNodeSelection(n, !event.shiftKey)) {
-      selectSelected(n);
+      selectSelected(n.id);
     } else {
       onSetControl('none');
     }
