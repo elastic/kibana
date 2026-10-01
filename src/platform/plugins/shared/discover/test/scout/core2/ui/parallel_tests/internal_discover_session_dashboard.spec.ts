@@ -8,7 +8,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { VIEW_MODE } from '@kbn/discover-session-constants';
 import type { StoredDiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionInternalData } from '../../../../../server/api/internal_schema';
 import { spaceTest, tags } from '../fixtures';
 
 spaceTest.describe(
@@ -40,71 +42,54 @@ spaceTest.describe(
         };
         const inlineId = `inline-http-${scoutSpace.id}`;
         const filterRef = 'tab_inline.kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index';
-        const storedSession: StoredDiscoverSession = {
-          attributes: {
-            title: `Internal session ${scoutSpace.id}`,
-            description: '',
-            tabs: [
-              {
-                id: 'inline',
-                label: 'Inline view',
-                attributes: {
-                  columns: ['extension'],
-                  sort: [['@timestamp', 'desc']],
-                  grid: {},
-                  hideChart: false,
-                  hideTable: false,
-                  isTextBasedQuery: false,
-                  usesAdHocDataView: true,
-                  kibanaSavedObjectMeta: {
-                    searchSourceJSON: JSON.stringify({
-                      index: { id: inlineId, title: 'logstash*', timeFieldName: '@timestamp' },
-                      query: { language: 'kuery', query: '' },
-                      filter: [
-                        {
-                          meta: {
-                            indexRefName: filterRef,
-                            key: 'extension.raw',
-                            type: 'phrase',
-                            params: { query: 'css' },
-                            disabled: false,
-                            negate: false,
-                            alias: null,
-                          },
-                          query: { match_phrase: { 'extension.raw': 'css' } },
-                        },
-                      ],
-                    }),
-                  },
-                },
+        const sessionData: DiscoverSessionInternalData = {
+          title: `Internal session ${scoutSpace.id}`,
+          description: '',
+          tags: [],
+          tabs: [
+            {
+              id: 'inline',
+              label: 'Inline view',
+              type: 'default',
+              data_source: {
+                type: 'data_view_spec',
+                id: inlineId,
+                index_pattern: 'logstash*',
+                time_field: '@timestamp',
               },
-            ],
-          },
-          references: [{ name: filterRef, type: 'index-pattern', id: inlineId }],
+              column_order: ['extension'],
+              sort: [{ name: '@timestamp', direction: 'desc' }],
+              query: { language: 'kql', expression: '' },
+              filters: [
+                {
+                  type: 'condition',
+                  condition: { field: 'extension.raw', operator: 'is', value: 'css' },
+                  data_view_id: inlineId,
+                },
+              ],
+              hide_chart: false,
+              hide_table: false,
+              view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+            },
+          ],
         };
         const updatedTitle = `Updated internal session ${scoutSpace.id}`;
         const updatedColumns = ['extension', 'bytes'];
-        const updatedSession: StoredDiscoverSession = {
-          attributes: {
-            ...storedSession.attributes,
-            title: updatedTitle,
-            tabs: storedSession.attributes.tabs.map((tab) => ({
-              ...tab,
-              attributes: { ...tab.attributes, columns: updatedColumns },
-            })),
-          },
-          references: storedSession.references,
+        const updatedSession: DiscoverSessionInternalData = {
+          ...sessionData,
+          title: updatedTitle,
+          tabs: sessionData.tabs.map((tab) => ({ ...tab, column_order: updatedColumns })),
         };
 
         const sessionId = await spaceTest.step('create, read and update through HTTP', async () => {
-          const created = await page.request.post(sessionUrl, { headers, data: storedSession });
+          const created = await page.request.post(sessionUrl, { headers, data: sessionData });
           expect(created.status()).toBe(201);
           const { id }: { id: string } = await created.json();
 
           const loaded = await page.request.get(`${sessionUrl}/${id}`, { headers });
           expect(loaded.status()).toBe(200);
-          const { data }: { data: StoredDiscoverSession } = await loaded.json();
-          expect(data).toStrictEqual(storedSession);
+          const { data }: { data: DiscoverSessionInternalData } = await loaded.json();
+          expect(data).toStrictEqual(sessionData);
 
           const updated = await page.request.put(`${sessionUrl}/${id}`, {
             headers,
@@ -127,7 +112,49 @@ spaceTest.describe(
             const body: { result: { result: { item: StoredDiscoverSession } } } =
               await response.json();
             const { attributes, references } = body.result.result.item;
-            expect({ attributes, references }).toStrictEqual(updatedSession);
+            expect(attributes).toStrictEqual({
+              title: updatedTitle,
+              description: '',
+              tabs: [
+                {
+                  id: 'inline',
+                  label: 'Inline view',
+                  attributes: {
+                    columns: updatedColumns,
+                    sort: [['@timestamp', 'desc']],
+                    grid: {},
+                    hideChart: false,
+                    hideTable: false,
+                    isTextBasedQuery: false,
+                    usesAdHocDataView: true,
+                    viewMode: 'documents',
+                    timeRestore: false,
+                    kibanaSavedObjectMeta: { searchSourceJSON: expect.any(String) },
+                  },
+                },
+              ],
+            });
+            expect(
+              JSON.parse(attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
+            ).toStrictEqual({
+              index: { id: inlineId, title: 'logstash*', timeFieldName: '@timestamp' },
+              query: { language: 'kuery', query: '' },
+              filter: [
+                {
+                  meta: {
+                    indexRefName: filterRef,
+                    key: 'extension.raw',
+                    field: 'extension.raw',
+                    type: 'phrase',
+                    params: { query: 'css' },
+                  },
+                  query: { match_phrase: { 'extension.raw': 'css' } },
+                },
+              ],
+            });
+            expect(references).toStrictEqual([
+              { name: filterRef, type: 'index-pattern', id: inlineId },
+            ]);
           }
         );
 

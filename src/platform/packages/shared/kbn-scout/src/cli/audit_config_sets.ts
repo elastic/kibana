@@ -18,6 +18,15 @@ import { loadRawServerConfig } from '../servers/configs/loader/read_config_file'
 const CONFIG_SETS_DIR = 'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets';
 const DEFAULT_SET = 'default';
 
+/**
+ * Sets that must stay separate on purpose, with the reason. The audit leaves them out of every
+ * merge suggestion. Add a set here only when its owners confirmed the separate server is needed.
+ */
+export const KEEP_SEPARATE: Readonly<Record<string, string>> = {
+  shared_ux_no_data: 'tests need a clean ES and Kibana with no data from other suites',
+  trial_license: 'tests permanently downgrade the license and would break a shared cluster',
+};
+
 /** Config keys core lets tests change at runtime through `/internal/core/_settings`. */
 const CORE_RUNTIME_KEYS = ['feature_flags.overrides'];
 
@@ -243,6 +252,7 @@ export async function auditConfigSets(repoRoot: string): Promise<ConfigSetsRepor
   const sets: ConfigSetOverrides[] = [];
   const failed: ConfigSetsReport['failed'] = [];
   for (const entry of listConfigSetFiles(repoRoot)) {
+    if (entry.name in KEEP_SEPARATE) continue;
     let set: ScoutServerConfig;
     let base: ScoutServerConfig;
     try {
