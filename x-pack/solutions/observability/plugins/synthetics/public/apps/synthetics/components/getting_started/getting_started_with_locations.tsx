@@ -36,7 +36,7 @@ export const GettingStartedWithLocations = ({ footer }: { footer?: ReactNode }) 
       css={contentCss}
       data-test-subj="syntheticsGettingStartedWithLocations"
     >
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiTitle size="m">
           <h2>{CREATE_FIRST_MONITOR_LABEL}</h2>
         </EuiTitle>
@@ -45,7 +45,7 @@ export const GettingStartedWithLocations = ({ footer }: { footer?: ReactNode }) 
           {INTRO_LABEL}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="l" alignItems="flexStart">
           <EuiFlexItem grow={3}>
             <EuiPanel hasBorder paddingSize="l">
@@ -95,7 +95,7 @@ export const GettingStartedWithLocations = ({ footer }: { footer?: ReactNode }) 
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
           {ALERTS_HINT}
         </EuiText>
@@ -110,10 +110,13 @@ export const GettingStartedWithLocations = ({ footer }: { footer?: ReactNode }) 
   );
 };
 
+// 112px = app header + spacer above the page body + bottom page padding.
 const contentCss = css`
   width: 100%;
   max-width: 1100px;
+  min-height: calc(var(--kbn-application--content-height, 100vh) - 112px);
   margin-inline: auto;
+  justify-content: center;
 `;
 
 const CREATE_FIRST_MONITOR_LABEL = i18n.translate(
