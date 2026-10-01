@@ -83,6 +83,7 @@ describe('decision tree reinforce workflow', () => {
     expect(reinforce).toMatchObject({
       'connector-id': '{{ steps.resolve_model.output.connector_id }}',
       'plugin-id': 'nightshift_investigation_memory',
+      'aggregate-by': 'nightshift',
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
