@@ -117,11 +117,6 @@ consts:
   # consts in rule_tuning_worker.yaml.
   analysis_window_days: 7
   preview_invocation_count: 2
-  # How long an AI-created exception lasts before it needs re-approval, so a wrong
-  # diagnosis self-heals instead of permanently muting the rule.
-  # 30 days, in seconds (Liquid filters chain left-to-right, so the offset has to be
-  # a single addable value).
-  exception_expire_seconds: 2592000
   # Written onto every alert that reached a decision, alongside the tag naming the
   # outcome. Filtered out by the sweep's harvest, so a later sweep cannot rediagnose
   # the same alerts into the same review; consts.reviewed_tag in rule_tuning_worker.yaml
@@ -565,15 +560,6 @@ steps:
     on-failure:
       continue: true
 
-  # Adds the expiry offset to the current epoch and formats the result as the ISO 8601
-  # string the exceptions API's expire_time expects.
-  - name: compute_exception_expire_time
-    type: data.set
-    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'exception' }}"
-    with:
-      expire_time: >-
-        {{ "now" | date: "%s" | plus: consts.exception_expire_seconds | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}
-
   # Rules using a data view, timestamp override, or alert suppression need fields
   # the preview API cannot conditionally omit, and a saved-query rule has no inline
   # query to preview, so query and exception auto-apply is restricted the same way
@@ -738,7 +724,7 @@ steps:
         {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
-        Approving adds the exception to the rule's own exception list, expiring automatically on {{ steps.compute_exception_expire_time.output.expire_time }}. It can be removed or extended in the Detection Rules UI.
+        Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
         {% when "risk_score" %}
         Current risk score: {{ steps.fetch_rule.output.risk_score }}
         Current severity: {{ steps.fetch_rule.output.severity }}
@@ -861,7 +847,6 @@ steps:
                   description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
                   # `${{ }}` keeps the entries as objects.
                   entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
-                  expire_time: "{{ steps.compute_exception_expire_time.output.expire_time }}"
                 # Same as a query edit: an exception changes how many alerts the
                 # rule produces, so it can lose a detection. Re-ranking cannot,
                 # which is why the risk score arm is lower.
