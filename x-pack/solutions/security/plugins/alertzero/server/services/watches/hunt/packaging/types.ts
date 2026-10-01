@@ -6,6 +6,7 @@
  */
 
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
+import type { SeverityLevel } from '../../../../../common/attachment_enums';
 import type {
   PackageReportBehavior,
   PackageReportMintPayload,
@@ -148,8 +149,15 @@ export interface CurrentRunState {
    * Empty means kill/suspend cannot be filled.
    */
   processSelectors: ProcessSelector[];
-  /** True when any current-run SSE entity is `user.name` or `service.name`, not a host. */
-  hasNonHostEntity: boolean;
+  /**
+   * Deduped `user.name` entity values across current-run SSEs, in SSE order. Tier 1's
+   * CloudTrail identity-type vote decides whether an identity lands here or in `services`.
+   */
+  users: string[];
+  /** Deduped `service.name` entity values across current-run SSEs (assumed roles, service accounts). */
+  services: string[];
+  /** Max SSE `severity` across current-run SSEs, by `SEVERITY_LEVELS` order. */
+  severity?: SeverityLevel;
   /** True when any current-run SSE security knowledge indicator is IOC-typed. */
   hasIocIndicator: boolean;
   /** False when a current-run SSE event ref's `source_index` falls outside the run's `actionable_indices`. */

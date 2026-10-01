@@ -205,20 +205,36 @@ const buildClosureSummary = (state: CurrentRunState): string => {
     state.hosts.length > 0
       ? ` Hosts: ${state.hosts.map((h) => h.name).join(', ')}.`
       : ' No eligible hosts.';
-  return `${title}. Confirmed hit.${hostPart}${evidence}`;
+  const userPart = state.users.length > 0 ? ` Users: ${state.users.join(', ')}.` : '';
+  const servicePart = state.services.length > 0 ? ` Services: ${state.services.join(', ')}.` : '';
+  return `${title}. Confirmed hit.${hostPart}${userPart}${servicePart}${evidence}`;
 };
+
+/** e.g. `dev-user (user) and escalated-role (service)`; users first, then services. */
+const describeIdentities = ({
+  users,
+  services,
+}: {
+  users: string[];
+  services: string[];
+}): string =>
+  [...users.map((u) => `${u} (user)`), ...services.map((s) => `${s} (service)`)].join(' and ');
 
 /** Why the recommendation fired, one line per reason that actually held. */
 const buildRecommendationReasonLines = ({
   hasExecutable,
   unenrolledHosts,
-  nonHostEvidence,
+  users,
+  services,
+  hasIocIndicator,
   evidenceOutsideActionable,
   processUncovered,
 }: {
   hasExecutable: boolean;
   unenrolledHosts: CurrentRunHost[];
-  nonHostEvidence: boolean;
+  users: string[];
+  services: string[];
+  hasIocIndicator: boolean;
   evidenceOutsideActionable: boolean;
   processUncovered: boolean;
 }): string[] => {
@@ -235,7 +251,18 @@ const buildRecommendationReasonLines = ({
       } not enrolled, so no Defend action reaches ${unenrolledHosts.length === 1 ? 'it' : 'them'}.`
     );
   }
-  if (nonHostEvidence) {
+  const identityCount = users.length + services.length;
+  if (identityCount > 0) {
+    lines.push(
+      `${identityCount === 1 ? 'Identity' : 'Identities'} ${describeIdentities({
+        users,
+        services,
+      })} ${identityCount === 1 ? 'is' : 'are'} implicated; a host action does not reach ${
+        identityCount === 1 ? 'it' : 'them'
+      }.`
+    );
+  }
+  if (hasIocIndicator) {
     lines.push(
       'Part of the evidence for this finding is not host-scoped, so a host action would not close it.'
     );
@@ -379,8 +406,9 @@ export const decidePackageReport = ({
   }
 
   const hasExecutable = proposals.length > 0;
-  const notHostScoped =
-    state.hasNonHostEntity || state.hasIocIndicator || !state.allEventsActionable;
+  const hasIdentity = state.users.length > 0 || state.services.length > 0;
+  const evidenceOutsideActionable = !state.allEventsActionable;
+  const notHostScoped = hasIdentity || state.hasIocIndicator || evidenceOutsideActionable;
   // Covers both "no process selector was found at all" and "a selector was found but only
   // as a bare pid" (no `entityId`): `canFillRespondAction` above refuses to back an
   // executable action with a bare pid, since PID reuse can point it at the wrong process by
@@ -400,8 +428,10 @@ export const decidePackageReport = ({
     const reasonLines = buildRecommendationReasonLines({
       hasExecutable,
       unenrolledHosts: unenrolled,
-      nonHostEvidence: state.hasNonHostEntity || state.hasIocIndicator,
-      evidenceOutsideActionable: !state.allEventsActionable,
+      users: state.users,
+      services: state.services,
+      hasIocIndicator: state.hasIocIndicator,
+      evidenceOutsideActionable,
       processUncovered,
     });
     proposals.push(buildRecommendationProposal({ conversationId, state, reasonLines }));

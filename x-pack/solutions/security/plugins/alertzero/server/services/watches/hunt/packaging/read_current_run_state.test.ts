@@ -26,6 +26,10 @@ const sseAttachment = ({
   tier2Targets,
   severity = 'high',
   corroboratedTechniqueId,
+  entities = [
+    { field: 'host.name', value: 'host-a' },
+    ...userNames.map((value) => ({ field: 'user.name', value })),
+  ],
 }: {
   actionableIndices?: string[];
   events?: Array<{
@@ -37,6 +41,8 @@ const sseAttachment = ({
   title?: string;
   evidenceFor?: string[];
   tier1TotalHits?: number;
+  entities?: Array<{ field: string; value: string }>;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
   tier2Behaviors?: Array<{
     technique_id: string;
     technique_name?: string;
@@ -51,7 +57,6 @@ const sseAttachment = ({
   hypothesis?: string;
   userNames?: string[];
   tier2Targets?: string[];
-  severity?: 'low' | 'medium' | 'high' | 'critical';
   /**
    * Mirrors `sse_mapper`'s `corroborated_technique_id`: set only on an entry scoped to a
    * technique the run actually corroborated, never on the report-scoped fallback entry.
@@ -88,10 +93,7 @@ const sseAttachment = ({
             technique_id: label.split(' ')[0],
           })),
         ],
-        entities: [
-          { field: 'host.name', value: 'host-a' },
-          ...userNames.map((value) => ({ field: 'user.name', value })),
-        ],
+        entities,
         events: events ?? [
           {
             event_id: 'evt-1',
@@ -279,6 +281,74 @@ describe('readCurrentRunState', () => {
     });
 
     expect(state).toBeUndefined();
+  });
+
+  it('extracts and dedupes user.name and service.name entities across current-run SSEs', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          attachmentId: 'sse-1',
+          entities: [
+            { field: 'host.name', value: 'host-a' },
+            { field: 'user.name', value: 'dev-user' },
+            { field: 'service.name', value: 'escalated-role' },
+          ],
+        }),
+        sseAttachment({
+          attachmentId: 'sse-2',
+          entities: [
+            { field: 'user.name', value: 'dev-user' },
+            { field: 'user.name', value: 'ops-user' },
+            { field: 'service.name', value: 'escalated-role' },
+          ],
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.users).toEqual(['dev-user', 'ops-user']);
+    expect(state?.services).toEqual(['escalated-role']);
+    expect(state?.hosts.map((h) => h.name)).toEqual(['host-a']);
+  });
+
+  it('ignores other allowlisted entity fields when extracting identities', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({
+          entities: [
+            { field: 'host.name', value: 'host-a' },
+            { field: 'user.email', value: 'dev@example.com' },
+            { field: 'host.id', value: 'h-1' },
+          ],
+        }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.users).toEqual([]);
+    expect(state?.services).toEqual([]);
+  });
+
+  it('takes the max severity across current-run SSEs', async () => {
+    const state = await readCurrentRunState({
+      attachments: [
+        sseAttachment({ attachmentId: 'sse-1', severity: 'medium' }),
+        sseAttachment({ attachmentId: 'sse-2', severity: 'critical' }),
+        sseAttachment({ attachmentId: 'sse-3', severity: 'low' }),
+      ],
+      reportId,
+      runId,
+      resolveHostEnrollment,
+      rehydrateProcessSelectors,
+    });
+
+    expect(state?.severity).toBe('critical');
   });
 
   it('dedupes identical titles and evidence lines across current-run SSEs', async () => {

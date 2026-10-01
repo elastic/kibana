@@ -6,6 +6,8 @@
  */
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
+import { SEVERITY_LEVELS } from '../../../../../common/attachment_enums';
+import type { SeverityLevel } from '../../../../../common/attachment_enums';
 import type { significantSecurityEventAttachmentDataSchema } from '../../../../../common/significant_security_event_schema';
 import { significantSecurityEventAttachmentReadSchema } from '../../../../../common/significant_security_event_schema';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
@@ -211,15 +213,19 @@ export const readCurrentRunState = async ({
     ),
   ];
 
-  const hostNames = [
+  const entityValues = (matches: (field: string) => boolean): string[] => [
     ...new Set(
-      currentRun.flatMap((sse) =>
-        sse.entities
-          .filter((e) => e.field === 'host.name' || e.field === 'host.hostname')
-          .map((e) => e.value)
-      )
+      currentRun.flatMap((sse) => sse.entities.filter((e) => matches(e.field)).map((e) => e.value))
     ),
   ];
+  const hostNames = entityValues((field) => field === 'host.name' || field === 'host.hostname');
+  // Other allowlisted entity fields (`user.email`, `host.id`, ...) create no subject; the
+  // mapper only ever emits the three `.name` fields.
+  const users = entityValues((field) => field === 'user.name');
+  const services = entityValues((field) => field === 'service.name');
+  const severity: SeverityLevel | undefined = currentRun
+    .map((sse) => sse.severity)
+    .sort((a, b) => SEVERITY_LEVELS.indexOf(b) - SEVERITY_LEVELS.indexOf(a))[0];
 
   const hosts: CurrentRunHost[] = [];
   for (const name of hostNames) {
@@ -242,9 +248,6 @@ export const readCurrentRunState = async ({
     })),
   });
 
-  const hasNonHostEntity = currentRun.some((sse) =>
-    sse.entities.some((e) => e.field !== 'host.name' && e.field !== 'host.hostname')
-  );
   const hasIocIndicator = currentRun.some((sse) =>
     sse.security_knowledge_indicators.some((ski) => ski.type === 'ioc')
   );
@@ -276,13 +279,15 @@ export const readCurrentRunState = async ({
     ...(window ? { window } : {}),
     severity,
     corroboratedTechniques,
-    hasNonHostEntity,
     hasIocIndicator,
     allEventsActionable,
     hasProcessBearingEvent,
     manualRemediation,
     hosts,
     processSelectors,
+    users,
+    services,
+    ...(severity !== undefined && { severity }),
     evidence,
   };
 };
