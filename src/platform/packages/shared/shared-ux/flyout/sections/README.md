@@ -96,8 +96,6 @@ Consecutive sections, or consecutive accordions, space themselves apart with CSS
 
 For accordions, the rule appears only while the accordion before it is **closed**. While that accordion is open, its panel already separates the two.
 
-There is no `showBottomDivider` prop.
-
 ### Content between sections
 
 The selectors only match a section that comes directly after another section. Any other element in between, such as a filter bar, a callout, or a spacer, breaks the match, and the second section loses both its top margin and its rule. Nothing detects this. Put other content before or after the run of sections, not between them.
