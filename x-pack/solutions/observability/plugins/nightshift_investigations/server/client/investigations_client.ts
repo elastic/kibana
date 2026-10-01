@@ -27,7 +27,6 @@ import {
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_SUBJECTS_PER_CONVERSATION,
 } from '@kbn/agentic-investigations-plugin/common';
-import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -36,16 +35,9 @@ import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
   AlertSnapshot,
-  GetInvestigationResponse,
   InvestigationContext,
-  InvestigationStatus,
   InvestigationSubject,
-  InvestigationSubjectType,
   InvestigationTriggerType,
-  ListInvestigationItem,
-  ListInvestigationsRequest,
-  ListInvestigationsResponse,
-  UpdateInvestigationRequest,
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
@@ -54,17 +46,8 @@ import {
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
   freeFormContextSchema,
 } from '../../common';
-import type {
-  InvestigationAttributes,
-  InvestigationPatch,
-  InvestigationRecord,
-  InvestigationRepository,
-  ProjectedInvestigationRecord,
-} from '../storage';
-import { InvestigationStaleWriteError } from '../storage';
 import { buildInvestigationMessage } from './build_investigation_message';
 import {
-  InvestigationConflictError,
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
@@ -92,13 +75,6 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
 }
-
-function isTerminalStatus(status: InvestigationStatus): boolean {
-  return status === 'completed' || status === 'failed' || status === 'cancelled';
-}
-
-/** Used when persist omitted `error`. */
-const FALLBACK_INVESTIGATION_ERROR = 'Investigation failed';
 
 /** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;
@@ -228,87 +204,6 @@ export interface LifecycleSubject {
   startedAt: string;
 }
 
-const toSubject = ({
-  subjectType,
-  subjectId,
-  subjectSummary,
-}: {
-  subjectType: InvestigationSubjectType;
-  subjectId: string;
-  subjectSummary?: string;
-}): InvestigationSubject => {
-  if (subjectSummary) {
-    return { type: subjectType, id: subjectId, summary: subjectSummary };
-  }
-  return { type: subjectType, id: subjectId };
-};
-
-/**
- * Stored attributes each {@link ListInvestigationItem} property needs from `find`. A new list
- * property is a compile error until it is mapped here; `investigation_id` is the SO id and needs
- * none. Flattened values are what `list()` passes as `fields`.
- */
-const LIST_INVESTIGATION_ITEM_FIELDS = {
-  investigation_id: [],
-  title: ['title'],
-  status: ['status'],
-  created_at: ['created_at'],
-  started_at: ['started_at'],
-  completed_at: ['completed_at'],
-  severity: ['severity'],
-  concurrency_key: ['concurrency_key'],
-  executed_by: ['executed_by'],
-  subject: ['subject_type', 'subject_id', 'subject_summary'],
-  summary: ['summary'],
-  impact: ['impact'],
-} as const satisfies Record<
-  keyof ListInvestigationItem,
-  readonly (keyof InvestigationAttributes)[]
->;
-
-const LIST_INVESTIGATION_ATTRIBUTE_FIELDS = Object.values(LIST_INVESTIGATION_ITEM_FIELDS).flat();
-
-type ListInvestigationRecord = ProjectedInvestigationRecord<
-  (typeof LIST_INVESTIGATION_ITEM_FIELDS)[keyof ListInvestigationItem][number]
->;
-
-const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestigationItem => ({
-  investigation_id: record.id,
-  title: record.title,
-  status: record.status,
-  created_at: record.created_at,
-  started_at: record.started_at,
-  completed_at: record.completed_at ?? undefined,
-  severity: record.severity,
-  concurrency_key: record.concurrency_key,
-  executed_by: record.executed_by,
-  subject: toSubject({
-    subjectType: record.subject_type,
-    subjectId: record.subject_id,
-    subjectSummary: record.subject_summary,
-  }),
-  summary: record.summary,
-  impact: record.impact,
-});
-
-const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => {
-  const recommendations = investigationStateSchema.shape.recommendations.safeParse(
-    record.recommendations
-  );
-
-  return {
-    ...toListInvestigationItem(record),
-    trigger_type: record.trigger_type,
-    error: record.error ?? undefined,
-    summary: record.summary,
-    conclusion: record.conclusion,
-    hypotheses: record.hypotheses,
-    recommendations: recommendations.success ? recommendations.data : undefined,
-    conversation_id: record.conversation_id,
-    impact: record.impact,
-  };
-};
-
 export interface NightshiftInvestigationsClientDeps {
   request: KibanaRequest;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -325,7 +220,6 @@ export interface NightshiftInvestigationsClientDeps {
   /** Passed through to `agents.ensure` so a pre-installed agent is hidden while unavailable. */
   agentAvailability: AgentAvailabilityConfig;
   investigationQuotaCallback?: InvestigationQuotaCallback;
-  investigationRepository: InvestigationRepository;
   inference?: InferenceServerStart;
   savedObjects?: CoreStart['savedObjects'];
   uiSettings?: CoreStart['uiSettings'];
@@ -343,7 +237,6 @@ export class NightshiftInvestigationsClient {
   private readonly agenticInvestigations?: AgenticInvestigationsPluginStart;
   private readonly agentAvailability: AgentAvailabilityConfig;
   private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
-  private readonly investigationRepository: InvestigationRepository;
   private readonly inference?: InferenceServerStart;
   private readonly savedObjects?: CoreStart['savedObjects'];
   private readonly uiSettings?: CoreStart['uiSettings'];
@@ -360,7 +253,6 @@ export class NightshiftInvestigationsClient {
     this.agenticInvestigations = deps.agenticInvestigations;
     this.agentAvailability = deps.agentAvailability;
     this.investigationQuotaCallback = deps.investigationQuotaCallback;
-    this.investigationRepository = deps.investigationRepository;
     this.inference = deps.inference;
     this.savedObjects = deps.savedObjects;
     this.uiSettings = deps.uiSettings;
@@ -978,112 +870,6 @@ export class NightshiftInvestigationsClient {
       workflowsManagement: this.workflowsManagement,
       agentBuilder: this.agentBuilder,
       agenticInvestigations: this.agenticInvestigations,
-    };
-  }
-
-  /**
-   * Writes the legacy saved-object record behind PATCH /internal/nightshift/investigations/{id}.
-   * Nothing in the investigation write path calls it anymore: investigations are conversations.
-   * TODO(ns-1619 s6): remove with the saved object type.
-   */
-  async update(investigationId: string, state: UpdateInvestigationRequest): Promise<void> {
-    const existing = await this.investigationRepository.get(investigationId);
-    if (!existing) {
-      throw new InvestigationNotFoundError(investigationId);
-    }
-
-    const { status, error, ...output } = state;
-
-    if (isTerminalStatus(existing.status)) {
-      if (status === existing.status) {
-        return;
-      }
-      throw InvestigationConflictError.settled(investigationId, existing.status);
-    }
-
-    if (status === 'failed' && error) {
-      this.logger.warn(`Investigation "${investigationId}" failed: ${error}`);
-    }
-
-    const patch: InvestigationPatch = {
-      status,
-      ...(isTerminalStatus(status) && { completed_at: new Date().toISOString() }),
-      ...(status === 'failed' && { error: error ?? FALLBACK_INVESTIGATION_ERROR }),
-      ...output,
-    };
-
-    try {
-      await this.investigationRepository.update({
-        id: investigationId,
-        patch,
-        version: existing.version,
-      });
-    } catch (err) {
-      if (err instanceof InvestigationStaleWriteError) {
-        throw InvestigationConflictError.concurrentlyModified(investigationId);
-      }
-      throw err;
-    }
-  }
-
-  /**
-   * Returns the stored investigation. `running` is not checked against the workflow engine, so it
-   * can linger after edge cases where no persist step ran: user cancel, cancel-in-progress that
-   * ensureOrCreate() did not see, timeout, or a worker dying mid-run. Complete/fail still go
-   * through PATCH; a superseded run is cancelled in ensureOrCreate().
-   */
-  async get(investigationId: string): Promise<GetInvestigationResponse> {
-    const record = await this.investigationRepository.get(investigationId);
-
-    if (!record) {
-      throw new InvestigationNotFoundError(investigationId);
-    }
-
-    return toInvestigationResponse(record);
-  }
-
-  async list({
-    statuses,
-    severities,
-    subject_types,
-    query,
-    concurrency_key,
-    created_after,
-    created_before,
-    started_after,
-    started_before,
-    completed_after,
-    completed_before,
-    sort_field,
-    sort_order,
-    page = 1,
-    size = 20,
-  }: ListInvestigationsRequest = {}): Promise<ListInvestigationsResponse> {
-    const result = await this.investigationRepository.find({
-      statuses,
-      severities,
-      subjectTypes: subject_types,
-      query,
-      concurrencyKey: concurrency_key,
-      createdAfter: created_after,
-      createdBefore: created_before,
-      startedAfter: started_after,
-      startedBefore: started_before,
-      completedAfter: completed_after,
-      completedBefore: completed_before,
-      sortField: sort_field,
-      sortOrder: sort_order,
-      page,
-      perPage: size,
-      fields: [...LIST_INVESTIGATION_ATTRIBUTE_FIELDS],
-    });
-
-    // Stored `running` is not reconciled with the engine — same edge cases as get().
-    return {
-      results: result.results.map((record) => toListInvestigationItem(record)),
-      page: result.page,
-      size: result.size,
-      total: result.total,
     };
   }
 }

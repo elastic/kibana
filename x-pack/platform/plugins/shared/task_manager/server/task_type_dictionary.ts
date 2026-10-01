@@ -62,6 +62,10 @@ export const REMOVED_TYPES: string[] = [
 
   // Legacy streams description generation task replaced by the synchronous suggestion API
   'streams_description_generation',
+
+  // Nightshift investigation reconciliation removed with the `nightshift-investigation` saved
+  // object type; investigations are Agent Builder conversations now
+  'nightshift-investigations:reconcile_investigation_statuses',
 ];
 
 export const SHARED_CONCURRENCY_TASKS: string[][] = [

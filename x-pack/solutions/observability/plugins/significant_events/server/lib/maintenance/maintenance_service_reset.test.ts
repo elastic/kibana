@@ -63,7 +63,15 @@ describe('SignificantEventsMaintenanceService', () => {
           [KNOWLEDGE_INDICATORS_DATA_STREAM]: 4,
           [DISCOVERIES_DATA_STREAM]: 4,
         },
-        investigations: { deleted: 2, failures: [] },
+        investigations: {
+          investigationData: {
+            investigations: 2,
+            subjects: 3,
+            subjectClaims: 3,
+            impact: 2,
+            hypotheses: 2,
+          },
+        },
       });
 
       const summary = await service.reset({ request: REQUEST, updatedBy: 'marco' });
@@ -279,6 +287,19 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(summary.partialFailures).toContainEqual({
         target: 'investigations',
         error: 'Investigations plugin is not available',
+      });
+    });
+
+    it('records a partial failure when agentic investigations is unavailable', async () => {
+      const { api } = makeManagementApi();
+      const { service } = makeService({ management: api, investigations: {} });
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(summary.deleted?.investigations).toBe(0);
+      expect(summary.partialFailures).toContainEqual({
+        target: 'investigations',
+        error: 'Agentic investigations plugin is not available',
       });
     });
 

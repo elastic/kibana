@@ -24,15 +24,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { freeFormContextSchema } from '../../common/schemas';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
-import type {
-  FindInvestigationsResult,
-  InvestigationAttributes,
-  InvestigationRecord,
-  InvestigationRepository,
-} from '../storage';
-import { InvestigationStaleWriteError } from '../storage';
 import {
-  InvestigationConflictError,
   InvalidInvestigationContextError,
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
@@ -155,8 +147,6 @@ const mockUiSettings = {
   asScopedToClient: jest.fn().mockReturnValue({ get: getSetting }),
 } as never;
 
-let repository: jest.Mocked<InvestigationRepository>;
-
 const makeClient = (
   overrides: Partial<ConstructorParameters<typeof NightshiftInvestigationsClient>[0]> = {}
 ) =>
@@ -169,7 +159,6 @@ const makeClient = (
     agenticInvestigations: mockAgenticInvestigations,
     agentAvailability: mockAgentAvailability,
     investigationQuotaCallback,
-    investigationRepository: repository,
     inference: mockInference,
     savedObjects: mockSavedObjects,
     uiSettings: mockUiSettings,
@@ -178,54 +167,12 @@ const makeClient = (
     ...overrides,
   });
 
-const makeAttrs = (overrides: Partial<InvestigationAttributes> = {}): InvestigationAttributes => ({
-  title: 'Latency is too high',
-  status: 'completed',
-  subject_type: 'alert',
-  subject_id: 'alert-42',
-  trigger_type: 'automatic',
-  concurrency_key: undefined,
-  executed_by: 'test-user',
-  created_at: '2024-01-01T00:00:00Z',
-  started_at: '2024-01-01T00:00:00Z',
-  completed_at: '2024-01-01T01:00:00Z',
-  summary: 'All clear.',
-  conclusion: 'No issues found.',
-  hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
-  recommendations: [{ title: 'Keep monitoring', confidence: 0.7 }],
-  ...overrides,
-});
-
-const makeRecord = (
-  overrides: Partial<InvestigationAttributes> = {},
-  { id = 'inv-1', version = '1' }: { id?: string; version?: string } = {}
-): InvestigationRecord => ({
-  id,
-  version,
-  ...makeAttrs(overrides),
-});
-
-const findResult = (records: InvestigationRecord[]): FindInvestigationsResult => ({
-  results: records,
-  page: 1,
-  size: 20,
-  total: records.length,
-});
-
-const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
-  create: jest.fn().mockResolvedValue(undefined),
-  get: jest.fn().mockResolvedValue(undefined),
-  update: jest.fn().mockResolvedValue(undefined),
-  find: jest.fn().mockResolvedValue(findResult([])),
-});
-
 beforeEach(() => {
   jest.clearAllMocks();
   installInvestigationAgentMock.mockResolvedValue(undefined);
   investigationQuotaCallback.mockResolvedValue({ allowed: true });
   getSetting.mockResolvedValue(false);
   getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
-  repository = createMockRepository();
   withConversations();
   // Like Agent Builder, a conversation created without a title carries the placeholder.
   conversations.create.mockImplementation(async ({ id, title }: { id: string; title?: string }) =>
@@ -238,247 +185,6 @@ beforeEach(() => {
   subjectsClient.listByConversationIds.mockResolvedValue([]);
   subjectsClient.claimSubjects.mockResolvedValue({ claimed: true });
   agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([]);
-});
-
-describe('NightshiftInvestigationsClient.get()', () => {
-  it('throws InvestigationNotFoundError when the record does not exist', async () => {
-    await expect(makeClient().get('inv-123')).rejects.toThrow(InvestigationNotFoundError);
-  });
-
-  it('returns full structured output from the store', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord({
-        conversation_id: 'conv-1',
-        impact: { entities: [{ name: 'checkout-service' }] },
-      })
-    );
-    const result = await makeClient().get('inv-1');
-
-    expect(result).toEqual({
-      investigation_id: 'inv-1',
-      title: 'Latency is too high',
-      subject: { type: 'alert', id: 'alert-42' },
-      trigger_type: 'automatic',
-      status: 'completed',
-      created_at: '2024-01-01T00:00:00Z',
-      started_at: '2024-01-01T00:00:00Z',
-      completed_at: '2024-01-01T01:00:00Z',
-      concurrency_key: undefined,
-      executed_by: 'test-user',
-      error: undefined,
-      summary: 'All clear.',
-      conclusion: 'No issues found.',
-      severity: undefined,
-      hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
-      recommendations: [{ title: 'Keep monitoring', confidence: 0.7 }],
-      conversation_id: 'conv-1',
-      impact: { entities: [{ name: 'checkout-service' }] },
-    });
-  });
-
-  it('omits historical recommendations without confidence and legacy blind spots', async () => {
-    repository.get.mockResolvedValue({
-      ...makeRecord(),
-      recommendations: [{ title: 'Keep monitoring' }],
-      blind_spots: [{ title: 'Blind spot', confidence: 0.6, description: 'desc' }],
-    } as unknown as InvestigationRecord);
-
-    const result = await makeClient().get('inv-1');
-
-    expect(result.summary).toBe('All clear.');
-    expect(result.recommendations).toBeUndefined();
-    expect(result).not.toHaveProperty('blind_spots');
-  });
-
-  it('returns subject.summary from the stored subject_summary attribute', async () => {
-    const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
-    repository.get.mockResolvedValue(
-      makeRecord({
-        subject_type: 'significant_event',
-        subject_id: 'event-42',
-        subject_summary: long,
-      })
-    );
-
-    const result = await makeClient().get('inv-1');
-
-    expect(result.subject).toEqual({
-      type: 'significant_event',
-      id: 'event-42',
-      summary: long,
-    });
-  });
-
-  it('omits subject.summary when subject_summary is absent', async () => {
-    repository.get.mockResolvedValue(makeRecord());
-    const result = await makeClient().get('inv-1');
-    expect(result.subject).toEqual({ type: 'alert', id: 'alert-42' });
-  });
-
-  it('returns the stored running status without consulting the workflow engine', async () => {
-    repository.get.mockResolvedValue(makeRecord({ status: 'running', completed_at: undefined }));
-
-    const result = await makeClient().get('inv-1');
-
-    expect(result.status).toBe('running');
-    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('returns the stored started_at', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord({ started_at: '2024-01-01T00:05:00Z', created_at: '2024-01-01T00:00:00Z' })
-    );
-
-    const result = await makeClient().get('inv-1');
-
-    expect(result.started_at).toBe('2024-01-01T00:05:00Z');
-  });
-
-  it('returns created_at with started_at unset for a pending record', async () => {
-    repository.get.mockResolvedValue(
-      makeRecord({
-        status: 'pending',
-        started_at: undefined,
-        completed_at: undefined,
-        created_at: '2024-01-01T00:00:00Z',
-      })
-    );
-
-    const result = await makeClient().get('inv-1');
-
-    expect(result.status).toBe('pending');
-    expect(result.created_at).toBe('2024-01-01T00:00:00Z');
-    expect(result.started_at).toBeUndefined();
-  });
-
-  it('returns the stored severity', async () => {
-    repository.get.mockResolvedValue(makeRecord({ severity: '60-high' }));
-    const result = await makeClient().get('inv-1');
-    expect(result.severity).toBe('60-high');
-  });
-
-  it('leaves severity unset when the record has none', async () => {
-    repository.get.mockResolvedValue(makeRecord());
-    const result = await makeClient().get('inv-1');
-    expect(result.severity).toBeUndefined();
-  });
-});
-
-describe('NightshiftInvestigationsClient.list()', () => {
-  it('uses default page=1 and perPage=20', async () => {
-    await makeClient().list();
-    expect(repository.find).toHaveBeenCalledWith(expect.objectContaining({ page: 1, perPage: 20 }));
-  });
-
-  it('passes statuses filter', async () => {
-    await makeClient().list({ statuses: ['running', 'completed'] });
-    expect(repository.find).toHaveBeenCalledWith(
-      expect.objectContaining({ statuses: ['running', 'completed'] })
-    );
-  });
-
-  it('passes sort_field=completed_at through as sortField', async () => {
-    await makeClient().list({ sort_field: 'completed_at' });
-    expect(repository.find).toHaveBeenCalledWith(
-      expect.objectContaining({ sortField: 'completed_at' })
-    );
-  });
-
-  it('maps started_* filters onto started_at, leaving created_at unfiltered', async () => {
-    await makeClient().list({
-      started_after: '2024-01-01T00:00:00Z',
-      started_before: '2024-01-31T00:00:00Z',
-    });
-    expect(repository.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        startedAfter: '2024-01-01T00:00:00Z',
-        startedBefore: '2024-01-31T00:00:00Z',
-        createdAfter: undefined,
-        createdBefore: undefined,
-      })
-    );
-  });
-
-  it('maps created_* filters onto created_at so pending runs are matchable', async () => {
-    await makeClient().list({
-      created_after: '2024-01-01T00:00:00Z',
-      created_before: '2024-01-31T00:00:00Z',
-    });
-    expect(repository.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        createdAfter: '2024-01-01T00:00:00Z',
-        createdBefore: '2024-01-31T00:00:00Z',
-        startedAfter: undefined,
-        startedBefore: undefined,
-      })
-    );
-  });
-
-  it('maps concurrency_key onto the stored investigation filter', async () => {
-    await makeClient().list({ concurrency_key: 'alert-1' });
-    expect(repository.find).toHaveBeenCalledWith(
-      expect.objectContaining({ concurrencyKey: 'alert-1' })
-    );
-  });
-
-  it('omits sortField when sort_field is not given so the store default applies', async () => {
-    await makeClient().list({});
-    expect(repository.find).toHaveBeenCalledWith(expect.objectContaining({ sortField: undefined }));
-  });
-
-  it('returns a slim list item without structured output', async () => {
-    repository.find.mockResolvedValue(
-      findResult([makeRecord({ concurrency_key: 'key-1' }, { id: 'inv-42' })])
-    );
-
-    const result = await makeClient().list({});
-    expect(result.results[0]).toEqual({
-      investigation_id: 'inv-42',
-      title: 'Latency is too high',
-      status: 'completed',
-      created_at: '2024-01-01T00:00:00Z',
-      started_at: '2024-01-01T00:00:00Z',
-      completed_at: '2024-01-01T01:00:00Z',
-      severity: undefined,
-      concurrency_key: 'key-1',
-      executed_by: 'test-user',
-      subject: { type: 'alert', id: 'alert-42' },
-      // Rendered by the list row: the AI headline and the entity chips.
-      summary: 'All clear.',
-      impact: undefined,
-    });
-    expect(result.results[0]).not.toHaveProperty('trigger_type');
-    expect(result.results[0]).not.toHaveProperty('error');
-    expect(result.results[0]).not.toHaveProperty('conclusion');
-    expect(result.results[0]).not.toHaveProperty('hypotheses');
-    expect(result.results[0]).not.toHaveProperty('recommendations');
-    expect(result.results[0]).not.toHaveProperty('blind_spots');
-    expect(result.results[0]).not.toHaveProperty('conversation_id');
-  });
-
-  it('returns stored running items without consulting the workflow engine', async () => {
-    repository.find.mockResolvedValue(
-      findResult([
-        makeRecord({ status: 'running', completed_at: undefined }, { id: 'inv-running' }),
-      ])
-    );
-
-    const result = await makeClient().list({});
-
-    expect(result.results[0].status).toBe('running');
-    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('returns severity on list items when stored', async () => {
-    repository.find.mockResolvedValue(
-      findResult([makeRecord({ severity: '80-critical' }, { id: 'inv-42' })])
-    );
-
-    const result = await makeClient().list({});
-    expect(result.results[0].severity).toBe('80-critical');
-  });
 });
 
 describe('NightshiftInvestigationsClient.start()', () => {
@@ -995,10 +701,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
       logger: mockLogger,
       spaceIdOverride: SPACE_ID,
       agentAvailability: mockAgentAvailability,
-      investigationRepository: repository,
-      inference: mockInference,
-      savedObjects: mockSavedObjects,
-      uiSettings: mockUiSettings,
       isAvailable: jest.fn().mockResolvedValue(true),
       isInfrastructureAvailable: jest.fn().mockResolvedValue(true),
     });
@@ -1199,119 +901,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
       const inputs = mockManagement.runWorkflow.mock.calls[0][2];
       expect(inputs.message).toBe('Checkout latency breach');
-    });
-  });
-});
-
-describe('NightshiftInvestigationsClient.update()', () => {
-  beforeEach(() => {
-    repository.get.mockResolvedValue(makeRecord({ status: 'running', completed_at: undefined }));
-  });
-
-  it('throws InvestigationNotFoundError when the investigation does not exist', async () => {
-    repository.get.mockResolvedValue(undefined);
-
-    await expect(makeClient().update('inv-missing', { status: 'completed' })).rejects.toThrow(
-      InvestigationNotFoundError
-    );
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('is an idempotent no-op when replaying the same terminal status', async () => {
-    repository.get.mockResolvedValue(makeRecord({ status: 'completed' }));
-
-    await expect(
-      makeClient().update('inv-1', { status: 'completed', summary: 'Replayed.' })
-    ).resolves.toBeUndefined();
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('throws InvestigationConflictError when moving a settled investigation back to running', async () => {
-    repository.get.mockResolvedValue(makeRecord({ status: 'completed' }));
-
-    await expect(makeClient().update('inv-1', { status: 'running' })).rejects.toThrow(
-      InvestigationConflictError
-    );
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('throws InvestigationConflictError when changing one terminal status to another', async () => {
-    repository.get.mockResolvedValue(makeRecord({ status: 'cancelled' }));
-
-    await expect(makeClient().update('inv-1', { status: 'failed' })).rejects.toThrow(
-      InvestigationConflictError
-    );
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('persists the provided error when status is failed', async () => {
-    await makeClient().update('inv-1', {
-      status: 'failed',
-      error: 'Agent timed out.',
-    });
-
-    expect(repository.update).toHaveBeenCalledWith({
-      id: 'inv-1',
-      patch: expect.objectContaining({ status: 'failed', error: 'Agent timed out.' }),
-      version: '1',
-    });
-    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Agent timed out.'));
-  });
-
-  it('persists a generic error when status is failed and no error is provided', async () => {
-    await makeClient().update('inv-1', { status: 'failed' });
-
-    expect(repository.update).toHaveBeenCalledWith({
-      id: 'inv-1',
-      patch: expect.objectContaining({ status: 'failed', error: 'Investigation failed' }),
-      version: '1',
-    });
-  });
-
-  it('does not persist an error field when status is completed', async () => {
-    await makeClient().update('inv-1', {
-      status: 'completed',
-      summary: 'All clear.',
-    });
-
-    expect(repository.update).toHaveBeenCalledWith({
-      id: 'inv-1',
-      patch: expect.objectContaining({ status: 'completed', summary: 'All clear.' }),
-      version: '1',
-    });
-    const { patch } = repository.update.mock.calls[0][0];
-    expect(patch).not.toHaveProperty('error');
-  });
-
-  it('persists conversation_id and impact', async () => {
-    await makeClient().update('inv-1', {
-      status: 'completed',
-      conversation_id: 'conv-1',
-      impact: { entities: [{ name: 'checkout-service' }] },
-    });
-
-    expect(repository.update).toHaveBeenCalledWith({
-      id: 'inv-1',
-      patch: expect.objectContaining({
-        status: 'completed',
-        conversation_id: 'conv-1',
-        impact: { entities: [{ name: 'checkout-service' }] },
-      }),
-      version: '1',
-    });
-  });
-
-  it('writes with the version it read and maps a concurrent-write conflict to InvestigationConflictError', async () => {
-    repository.update.mockRejectedValue(new InvestigationStaleWriteError('inv-1'));
-
-    await expect(makeClient().update('inv-1', { status: 'completed' })).rejects.toThrow(
-      InvestigationConflictError
-    );
-    expect(repository.update).toHaveBeenCalledTimes(1);
-    expect(repository.update).toHaveBeenCalledWith({
-      id: 'inv-1',
-      patch: expect.objectContaining({ status: 'completed' }),
-      version: '1',
     });
   });
 });
