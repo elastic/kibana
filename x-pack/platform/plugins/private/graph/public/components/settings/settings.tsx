@@ -14,7 +14,13 @@ import { bindActionCreators } from 'redux';
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlocklistForm } from './blocklist_form';
 import { UrlTemplateList } from './url_template_list';
-import type { AdvancedSettings, BlockListedNode, UrlTemplate, WorkspaceField } from '../../types';
+import type {
+  AdvancedSettings,
+  BlockListedNode,
+  UrlTemplate,
+  WorkspaceField,
+  WorkspaceNode,
+} from '../../types';
 import type { GraphState } from '../../state_management';
 import {
   settingsSelector,
@@ -59,9 +65,12 @@ export interface DispatchProps {
   saveTemplate: (props: { index: number; template: UrlTemplate }) => void;
 }
 
+export type BlocklistedNodeDisplay = Pick<WorkspaceNode, 'id' | 'label' | 'icon'> &
+  Partial<BlockListedNode>;
+
 export interface SettingsWorkspaceProps {
-  blocklistedNodes: BlockListedNode[];
-  unblockNode: (node: BlockListedNode) => void;
+  blocklistedNodes: BlocklistedNodeDisplay[];
+  unblockNode: (node: BlocklistedNodeDisplay) => void;
   unblockAll: () => void;
   canEditDrillDownUrls: boolean;
 }
