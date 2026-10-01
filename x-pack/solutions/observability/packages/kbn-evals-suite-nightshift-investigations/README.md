@@ -125,8 +125,10 @@ ungraded; this fixture-specific execution check does not apply to custom files o
 The default [synthetic file](evals/investigation/synthetic.json) contains two public fictional
 incidents. Their questions contain all evidence and request a sandbox calculation, so no telemetry
 connector, Elasticsearch identity, customer dataset, reference answer or snapshot is required.
-The selected model runs the product manual-investigation route; the runner polls its status and
-reads the saved report and conversation. Scores store the report, execution status, conversation
+The selected model runs the product manual-investigation route; the runner polls the shared
+investigations API (`GET /internal/investigations/investigations/{id}`) until no agent works on the
+investigation, and reads what it recorded (summary, verdict, severity, hypotheses, impact, proposed
+actions) and its conversation. Scores store the report, execution status, conversation
 round count, and investigation/conversation/trace identifiers. Conversation rounds and tool payloads
 stay in the product conversation and full agent traces rather than being duplicated in each score,
 whose ingestion request has a 5 MiB limit. Acceptance fetches the saved conversation separately and
@@ -373,7 +375,8 @@ For seeded evals, follow [`evals/smoke/`](evals/smoke). For file-driven investig
    and an evaluator type bound to your task's output.
 2. **`task.ts`** — call the thing under test and return a typed result. For the investigation
    engine that means `POST /internal/nightshift/investigations` through the `fetch` fixture, passing
-   the eval model as `connector_id`, then following the investigation to a terminal status.
+   the eval model as `connector_id`, then polling the shared investigations API until the
+   investigation is no longer in progress.
 3. **`datasets.ts`** — declare `Dataset` objects with an `id`, a `name` that scores are recorded
    against, a `seedSource`, and an `examples()` call returning ground truth. Export a
    `get<Name>Datasets()` that passes them through `selectDatasets`, which is what makes
