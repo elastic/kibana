@@ -9,7 +9,6 @@
 
 import { execFileSync } from 'child_process';
 import { cpSync, mkdirSync, mkdtempSync, readFileSync } from 'fs';
-import Os from 'os';
 import Path from 'path';
 import { globby } from 'globby';
 import { BuildkiteClient } from '../index.ts';
@@ -86,7 +85,8 @@ export const reportFailedTestIssues = async (): Promise<void> => {
     return;
   }
 
-  const root = mkdtempSync(Path.join(Os.tmpdir(), 'failed-test-issues-'));
+  mkdirSync('target', { recursive: true });
+  const root = mkdtempSync(Path.resolve('target', 'failed-test-issues-'));
   let failureCount = 0;
   for (const attempts of pending) {
     let stepFailureCount = 0;
