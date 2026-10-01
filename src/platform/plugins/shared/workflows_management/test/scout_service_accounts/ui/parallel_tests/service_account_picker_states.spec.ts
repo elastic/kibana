@@ -21,9 +21,8 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
   test('opens from the empty prompt and preserves YAML when focusing Manage', async ({
     pageObjects,
     workflowId,
-    page,
     directoryState,
-  }, testInfo) => {
+  }) => {
     directoryState.set('ready');
     const editor = pageObjects.workflowEditor;
     await editor.gotoWorkflow(workflowId);
@@ -37,7 +36,6 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     await expect(manage).toBeFocused();
     await expect(manage).toHaveAttribute('target', '_blank');
     expect(await editor.getYamlEditorValue()).toBe(yaml);
-    await page.screenshot({ path: testInfo.outputPath('service-account-picker.png') });
     await editor.dismissYamlSuggestions();
     await expect(editor.serviceAccountPopup).toBeHidden();
   });
@@ -46,8 +44,7 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     pageObjects,
     workflowId,
     directoryState,
-    page,
-  }, testInfo) => {
+  }) => {
     directoryState.set('forbidden');
     const editor = pageObjects.workflowEditor;
     await editor.gotoWorkflow(workflowId);
@@ -60,7 +57,6 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     await expect(
       editor.yamlEditor.getByText('Select service account', { exact: true })
     ).toBeVisible();
-    await page.screenshot({ path: testInfo.outputPath('service-account-picker-restricted.png') });
   });
 
   test('retries a temporary failure and selects the recovered account', async ({
@@ -107,7 +103,7 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     page,
     kbnClient,
     createdAccountIds,
-  }, testInfo) => {
+  }) => {
     const editor = pageObjects.workflowEditor;
     const saved = await apiServices.workflows.getWorkflow(workflowId);
     await editor.gotoWorkflow(workflowId);
@@ -123,7 +119,6 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
         })
       ).violations
     ).toStrictEqual([]);
-    await page.screenshot({ path: testInfo.outputPath('service-account-create-role-menu.png') });
     await editor.closeServiceAccountRoles();
     await expect(page.testSubj.locator('createServiceAccountFlyout')).toBeVisible();
     await editor.cancelCreateServiceAccount();
@@ -133,7 +128,6 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     const name = `scout-create-${randomUUID()}`;
     const description = 'Reads events for investigation workflows.';
     await editor.fillServiceAccount(name, description);
-    await page.screenshot({ path: testInfo.outputPath('service-account-create-flyout.png') });
     const responsePromise = page.waitForResponse(
       (response) =>
         response.url().endsWith('/internal/security/service_account') &&
@@ -162,15 +156,13 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     await expect(
       editor.yamlEditor.getByText('Select service account', { exact: true })
     ).toBeHidden();
-    await page.screenshot({ path: testInfo.outputPath('service-account-picker-description.png') });
   });
 
   test('shows the actual workflow-only user flow without security privileges', async ({
     browserAuth,
     pageObjects,
     workflowId,
-    page,
-  }, testInfo) => {
+  }) => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: { cluster: [], indices: [] },
       kibana: [
@@ -192,8 +184,5 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     await expect(
       editor.serviceAccountPopup.getByRole('link', { name: /Learn more about permissions/ })
     ).toBeVisible();
-    await page.screenshot({
-      path: testInfo.outputPath('service-account-real-restricted-user.png'),
-    });
   });
 });

@@ -128,6 +128,35 @@ describe('getServiceAccountPicker UI API', () => {
     });
   });
 
+  it('keeps loaded accounts visible while the next page loads and after it fails', async () => {
+    const { core, render } = setup();
+    let rejectSecondPage: (error: Error) => void = () => {};
+    core.http.get
+      .mockResolvedValueOnce({ serviceAccounts: [account], nextPage: 'cursor' })
+      .mockReturnValueOnce(
+        new Promise((_, reject) => {
+          rejectSecondPage = reject;
+        })
+      )
+      .mockResolvedValueOnce({
+        serviceAccounts: [{ ...account, id: 'second', name: 'Second reader' }],
+      });
+    await render();
+    await user.click(await screen.findByRole('option', { name: 'Load more service accounts' }));
+    expect(screen.getByRole('option', { name: /Investigation reader/ })).toBeVisible();
+    expect(screen.queryByText('Loading service accounts…')).not.toBeInTheDocument();
+    await act(async () => rejectSecondPage(new Error('Unavailable')));
+    expect(core.notifications.toasts.addDanger).toHaveBeenCalledWith(
+      'Unable to load more service accounts.'
+    );
+    expect(screen.getByRole('option', { name: /Investigation reader/ })).toBeVisible();
+    await user.click(screen.getByRole('option', { name: 'Load more service accounts' }));
+    expect(await screen.findByRole('option', { name: /Second reader/ })).toBeVisible();
+    expect(core.http.get).toHaveBeenLastCalledWith('/internal/security/service_account', {
+      query: { limit: 100, after: 'cursor' },
+    });
+  });
+
   it('reports restricted access without exposing management actions', async () => {
     const { core, render } = setup();
     core.http.get.mockRejectedValue(

@@ -23,6 +23,7 @@ export type {
   CreateServiceAccountProps,
   ServiceAccountPickerProps,
   ServiceAccountPickerDirectory,
+  ServiceAccountPickerStatus,
   PersonalInfoProps,
 } from './ui_api';
 

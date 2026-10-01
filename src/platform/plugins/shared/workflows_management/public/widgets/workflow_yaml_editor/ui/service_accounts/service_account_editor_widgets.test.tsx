@@ -320,19 +320,29 @@ describe('ServiceAccountEditorWidgets', () => {
 
   it.each(['keyboard', 'mouse'])('announces and accepts pagination using the %s', async (input) => {
     const { editor, directory, action } = setup();
-    directory.list.mockImplementation(async (after?: string) =>
-      after
-        ? { serviceAccounts: [{ ...account, id: 'second', name: 'Second reader' }] }
-        : { serviceAccounts: [account], nextPage: 'page-two' }
-    );
+    let resolveSecondPage: () => void = () => {};
+    const secondPage = new Promise<void>((resolve) => {
+      resolveSecondPage = resolve;
+    });
+    directory.list.mockImplementation(async (after?: string) => {
+      if (!after) return { serviceAccounts: [account], nextPage: 'page-two' };
+      await secondPage;
+      return { serviceAccounts: [{ ...account, id: 'second', name: 'Second reader' }] };
+    });
     const more = await screen.findByRole('option', { name: 'Load more service accounts' });
     await action('next');
     expect(more).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('status')).toHaveTextContent('Load more service accounts');
     if (input === 'keyboard') await action('accept');
     else fireEvent.click(more);
-    await screen.findByRole('option', { name: 'Second reader viewer' });
-    expect(directory.list).toHaveBeenLastCalledWith('page-two');
+    await waitFor(() => expect(directory.list).toHaveBeenLastCalledWith('page-two'));
+    expect(screen.getByRole('option', { name: /Investigation reader/ })).toBeVisible();
+    expect(screen.queryByText('Loading service accounts…')).not.toBeInTheDocument();
+    await act(async () => resolveSecondPage());
+    expect(await screen.findByRole('option', { name: 'Second reader viewer' })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
     expect(editor.executeEdits).not.toHaveBeenCalled();
     expect(
       screen.queryByRole('option', { name: 'Load more service accounts' })

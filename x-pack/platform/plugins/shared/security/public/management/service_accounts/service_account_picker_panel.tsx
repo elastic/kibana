@@ -21,9 +21,11 @@ import type { PropsWithChildren } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { ServiceAccountPickerStatus } from '../../ui_api/service_account_picker';
+
 interface Props {
   core: CoreStart;
-  status: 'loading' | 'ready' | 'forbidden' | 'unavailable';
+  status: ServiceAccountPickerStatus;
   hasSuggestions: boolean;
   filtered: boolean;
   onRetry: () => void;

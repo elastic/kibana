@@ -10,6 +10,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { QueryClient } from '@kbn/react-query';
+import type { ServiceAccountPickerStatus } from '@kbn/security-plugin/public';
 
 export interface WorkflowServiceAccount {
   id: string;
@@ -26,7 +27,7 @@ export interface ServiceAccountPage {
 }
 
 export interface ServiceAccountDirectoryError {
-  error: 'forbidden' | 'unavailable';
+  error: Exclude<ServiceAccountPickerStatus, 'loading' | 'ready'>;
 }
 
 export const serviceAccountQueryOptions = (http: HttpStart, id: string) => ({
