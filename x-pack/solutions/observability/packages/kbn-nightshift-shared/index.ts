@@ -13,7 +13,7 @@ export const NIGHTSHIFT_FEATURE_ID = 'nightshift';
  * LaunchDarkly-unreachable deployments stay off during Tech Preview; the controlled rollout is
  * driven from the elastic/kibana-feature-flags repository.
  *
- * Scope is per-deployment, not per-space: it is read through `featureFlags.getBooleanValue`, so the
+ * Scope is per-deployment, not per-space: it is read through `featureFlags.getBooleanValue$`, so the
  * feature is on or off for the whole Kibana instance. This flag supersedes
  * `streams.significantEventsAvailable` and replaces the removed space-scoped
  * `observability:streamsEnableSignificantEvents(Discovery)` Advanced Settings, so there is no longer

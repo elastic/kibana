@@ -43,8 +43,7 @@ jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 
-// Only the mutations are stubbed: the module also exports DISMISS_REASON_OPTIONS, which
-// the dismiss modal's select needs for real.
+// Only the mutations are stubbed — everything else this module exports stays real.
 jest.mock('@kbn/proposals-plugin/public', () => ({
   ...jest.requireActual('@kbn/proposals-plugin/public'),
   useApproveProposal: jest.fn(),
@@ -225,22 +224,35 @@ const proposal: ProposalItem = {
   conversationId: 'inv-1',
   conversationTitle: 'Impossible travel — exec account',
   conversationAgentId: 'elastic-ai-agent',
+  title: 'Investigate impossible travel',
   comment: 'MFA satisfied from two countries in 40 minutes.',
   status: 'pending',
   impact: 'high',
   confidence: 'high',
   category: 'investigate',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2024-01-01T00:00:00Z',
-  expired: false,
   conversationAssignees: [],
 };
 
 const renderPage = (
   initialEntry: string,
-  { capabilities = {} }: { capabilities?: Record<string, unknown> } = {}
+  {
+    capabilities = {},
+    proposalsCapabilities = { showProposals: true, decideProposals: true },
+    alertZeroWrite = true,
+  }: {
+    capabilities?: Record<string, unknown>;
+    proposalsCapabilities?: Record<string, boolean>;
+    alertZeroWrite?: boolean;
+  } = {}
 ) => {
   const core = coreMock.createStart();
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    alertzero: { show: true, write: alertZeroWrite },
+    proposals: proposalsCapabilities,
+  };
   // The real service returns a URL; the mock returns undefined, which would silently drop the
   // chat control's href and make the link assertions vacuous.
   core.application.getUrlForApp.mockImplementation(
@@ -298,6 +310,36 @@ beforeEach(() => {
     refetch: jest.fn(),
   });
   mockOpenCount(0);
+});
+
+describe('ConversationsPage proposals access', () => {
+  afterEach(() => jest.clearAllMocks());
+
+  it.each<Record<string, boolean>>([{}, { showProposals: false }])(
+    'names the missing privilege and prevents queue requests with capabilities %s',
+    (proposalsCapabilities) => {
+      renderPage('/', { proposalsCapabilities });
+
+      expect(
+        screen.getByText(
+          'To view the AlertZero queue in this space, you need the Proposed Actions Read privilege.'
+        )
+      ).toBeInTheDocument();
+      expect(mockUseProposalsByCategory).not.toHaveBeenCalled();
+      expect(mockUseProposalsByCategoryCount).not.toHaveBeenCalled();
+      expect(mockUseClosedProposals).not.toHaveBeenCalled();
+      expect(mockUseClosedProposalsCount).not.toHaveBeenCalled();
+      expect(mockUseProposalChartsSummary).not.toHaveBeenCalled();
+    }
+  );
+
+  it('allows the queue with Proposals read access alone', () => {
+    mockProposals({ investigate: [proposal] });
+    renderPage('/', { proposalsCapabilities: { showProposals: true, decideProposals: false } });
+
+    expect(screen.queryByTestId('alertzeroProposalsPrivilegesGate')).not.toBeInTheDocument();
+    expect(mockUseProposalsByCategory).toHaveBeenCalled();
+  });
 });
 
 describe('ConversationsPage scan failures', () => {
@@ -459,6 +501,8 @@ describe('ConversationsPage decisions', () => {
     id: 'prop-1',
     conversationTitle: 'Impossible travel — exec account',
     category: 'respond',
+    // What `create()` stores for a caller that names nothing itself.
+    title: 'Revoke sessions',
     actionWorkflowId: 'system-alertzero-action-revoke-sessions',
     actionInput: { user: 'cfo@corp' },
     action: { name: 'Revoke sessions' },
@@ -477,11 +521,13 @@ describe('ConversationsPage decisions', () => {
   // The recommended action lives in the ⋮ menu, not on the card.
   const openApproval = () => {
     fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
-    fireEvent.click(screen.getByText('Revoke sessions'));
+    // By role: the card's summary carries the same text, because the title the
+    // server stored for this proposal is the action's own name.
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Revoke sessions' }));
   };
 
-  it('submits the action input the analyst was shown, so the API can refuse a stale approval', () => {
-    renderPage('/');
+  it('allows Proposals Manage to approve without AlertZero Write and submits the displayed input', () => {
+    renderPage('/', { alertZeroWrite: false });
     openApproval();
 
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
@@ -490,6 +536,14 @@ describe('ConversationsPage decisions', () => {
       id: 'prop-1',
       body: { actionInput: { user: 'cfo@corp' } },
     });
+  });
+
+  it('does not offer proposal decisions without Proposals Manage even with AlertZero All', () => {
+    renderPage('/', { proposalsCapabilities: { showProposals: true, decideProposals: false } });
+    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+    expect(approveMutateAsync).not.toHaveBeenCalled();
+    expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 
   it('stays open and shows Applying while useIsApprovingProposal reports this proposal in flight', () => {
@@ -506,27 +560,49 @@ describe('ConversationsPage decisions', () => {
     expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
   });
 
-  it('hands Dismiss off to the dismiss modal rather than deciding without a reason', () => {
+  it('shows the reason form in the same modal, not a second one, when Decline is clicked', () => {
     renderPage('/');
     openApproval();
 
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
 
-    // The approval modal closes and the reason form takes over for the same proposal: a
-    // dismissal is a decision with a reason, never a silent close.
-    expect(screen.queryByRole('dialog', { name: 'Revoke sessions' })).not.toBeInTheDocument();
+    // Same dialog, same title — its body swapped to the reason form rather than a second modal
+    // (the old flow's own) opening beside or instead of it.
+    expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Action modal' })).not.toBeInTheDocument();
+    expect(approvalDialog().getByRole('radio', { name: 'Decline without a reason' })).toBeChecked();
+  });
 
-    const dialog = within(screen.getByRole('dialog', { name: 'Action modal' }));
-    fireEvent.change(screen.getByTestId('alertZeroDismissReasonSelect'), {
-      target: { value: 'low_value' },
+  it('submits the selected reason and rationale, and returns to the read-only decided state', () => {
+    renderPage('/');
+    openApproval();
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
+
+    fireEvent.click(
+      approvalDialog().getByRole('radio', {
+        name: 'No actions needed (risk is acceptable)',
+      })
+    );
+    fireEvent.change(approvalDialog().getByRole('textbox'), {
+      target: { value: 'Not worth chasing.' },
     });
-    fireEvent.change(dialog.getByRole('textbox'), { target: { value: 'Not worth chasing.' } });
-    fireEvent.click(dialog.getByRole('button', { name: 'Dismiss' }));
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
 
     expect(dismissMutateAsync).toHaveBeenCalledWith({
       id: 'prop-1',
-      body: { dismissReason: 'low_value', rationale: 'Not worth chasing.' },
+      body: { dismissReason: 'risk_accepted', rationale: 'Not worth chasing.' },
     });
+  });
+
+  it('returns to the approval view without declining when Cancel is clicked', () => {
+    renderPage('/');
+    openApproval();
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
+
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Cancel' }));
+
+    expect(approvalDialog().getByRole('button', { name: 'Approve' })).toBeInTheDocument();
+    expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 
   it('opens the close-investigation modal when the ⋮ Close action is triggered with manage capability', () => {

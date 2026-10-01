@@ -6,7 +6,11 @@
  */
 
 import type SuperTest from 'supertest';
-import { CASES_INTERNAL_URL, CASES_URL } from '@kbn/cases-plugin/common/constants';
+import {
+  CASES_INTERNAL_URL,
+  CASES_URL,
+  COMMENT_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
 import {
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
@@ -27,12 +31,13 @@ import type {
   Attachments,
   Attachment,
   UnifiedAttachment,
+  UnifiedAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
 import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
 import { createCase } from './case';
-import { postCaseReq } from '../mock';
+import { buildUnifiedAlertReq, postCaseReq } from '../mock';
 
 export const bulkGetAttachments = async ({
   supertest,
@@ -151,15 +156,32 @@ export const createCaseAndBulkCreateAttachments = async ({
   expectedHttpCode?: number;
 }): Promise<{ theCase: Case; attachments: BulkCreateAttachmentsRequestV2 }> => {
   const postedCase = await createCase(supertest, postCaseReq);
-  const attachments = getAttachments(numberOfAttachments);
   const patchedCase = await bulkCreateAttachments({
     supertest,
     caseId: postedCase.id,
-    params: attachments,
+    params: getUnifiedAttachments(numberOfAttachments),
+    auth,
+    expectedHttpCode,
   });
 
-  return { theCase: patchedCase, attachments };
+  // Responses are projected to the legacy shape, so callers compare against the legacy form.
+  return { theCase: patchedCase, attachments: getAttachments(numberOfAttachments) };
 };
+
+export const getUnifiedAttachments = (numberOfAttachments: number) =>
+  [...Array(numberOfAttachments)].map((_, index) =>
+    index % 10 === 0
+      ? {
+          type: COMMENT_ATTACHMENT_TYPE,
+          data: { content: `Test ${index + 1}` },
+          owner: 'securitySolutionFixture',
+        }
+      : buildUnifiedAlertReq('securitySolutionFixture', {
+          alertId: [`test-id-${index + 1}`],
+          index: [`test-index-${index + 1}`],
+          rule: { id: `rule-test-id-${index + 1}`, name: `Test ${index + 1}` },
+        })
+  );
 
 export const getAttachments = (numberOfAttachments: number): BulkCreateAttachmentsRequest => {
   return [...Array(numberOfAttachments)].map((_, index) => {
@@ -432,4 +454,66 @@ export const deleteAllAttachmentsV2 = async ({
     .send();
 
   return body;
+};
+
+export const addAttachmentV2 = async ({
+  supertest,
+  caseId,
+  params,
+  auth = { user: superUser, space: null },
+  expectedHttpCode = 201,
+  headers = {},
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  params: UnifiedAttachmentPayload;
+  auth?: { user: User; space: string | null } | null;
+  expectedHttpCode?: number;
+  headers?: Record<string, string | string[]>;
+}): Promise<UnifiedAttachment> => {
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/attachments`
+  );
+
+  void setupAuth({ apiCall, headers, auth });
+
+  const { body: attachment } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set(headers)
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return attachment;
+};
+
+export const updateAttachmentV2 = async ({
+  supertest,
+  caseId,
+  attachmentId,
+  req,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  headers = {},
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  attachmentId: string;
+  req: UnifiedAttachmentPayload & { version: string };
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, string | string[]>;
+}): Promise<UnifiedAttachment> => {
+  const apiCall = supertest.put(
+    `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/attachments/${attachmentId}`
+  );
+
+  void setupAuth({ apiCall, headers, auth });
+
+  const { body: attachment } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set(headers)
+    .send(req)
+    .expect(expectedHttpCode);
+
+  return attachment;
 };

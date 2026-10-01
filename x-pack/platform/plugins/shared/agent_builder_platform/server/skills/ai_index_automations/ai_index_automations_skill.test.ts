@@ -5,113 +5,19 @@
  * 2.0.
  */
 
-import { Liquid } from 'liquidjs';
-import { parse as parseYaml } from 'yaml';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
-import { contextEngineAiIndexTools, platformCoreTools } from '@kbn/agent-builder-common/tools';
+import {
+  contextEngineAiIndexTools,
+  contextEngineAutomationTools,
+  platformCoreTools,
+} from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import {
   KI_SHAPES_REFERENCE_NAME,
   STRATEGY_CATALOG_REFERENCE_NAME,
-  kiShapesReference,
 } from '../context_engine_shared';
 import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
-import {
-  aiIndexAutomationsSkill,
-  DOCUMENT_TEMPLATE_NAME,
-  INDEX_METADATA_TEMPLATE_NAME,
-  TARGETED_KI_WRITER_TEMPLATE_NAME,
-  UNIT_PROFILE_TEMPLATE_NAME,
-} from './ai_index_automations_skill';
-
-const TEMPLATE_NAMES: readonly string[] = [
-  INDEX_METADATA_TEMPLATE_NAME,
-  UNIT_PROFILE_TEMPLATE_NAME,
-  DOCUMENT_TEMPLATE_NAME,
-  TARGETED_KI_WRITER_TEMPLATE_NAME,
-];
-
-const templates = () =>
-  (aiIndexAutomationsSkill.referencedContent ?? []).filter(({ name }) =>
-    TEMPLATE_NAMES.includes(name)
-  );
-
-interface WorkflowStep {
-  name?: string;
-  type?: string;
-  condition?: string;
-  with?: Record<string, unknown>;
-  steps?: WorkflowStep[];
-  else?: WorkflowStep[];
-}
-
-interface ParsedTemplate {
-  consts?: Record<string, unknown>;
-  steps?: WorkflowStep[];
-}
-
-interface TemplateKi {
-  attributes?: Record<string, unknown>;
-  references?: unknown;
-}
-
-const parsedTemplate = (name: string): ParsedTemplate => {
-  const reference = templates().find((template) => template.name === name);
-  if (!reference) {
-    throw new Error(`template ${name} is not attached to the skill`);
-  }
-  return parseYaml(reference.content) as ParsedTemplate;
-};
-
-const allSteps = (steps: WorkflowStep[] = []): WorkflowStep[] =>
-  steps.flatMap((step) => [step, ...allSteps(step.steps), ...allSteps(step.else)]);
-
-const stepNamed = (template: ParsedTemplate, name: string): WorkflowStep => {
-  const step = allSteps(template.steps).find((candidate) => candidate.name === name);
-  if (!step) {
-    throw new Error(`step ${name} not found`);
-  }
-  return step;
-};
-
-// The document each template verifies and writes: the `assemble_ki` step in the three generated
-// templates, and every `kis[].ki` const in the targeted writer.
-const assembledKis = (name: string): TemplateKi[] => {
-  const template = parsedTemplate(name);
-  if (name === TARGETED_KI_WRITER_TEMPLATE_NAME) {
-    const kis = (template.consts?.kis ?? []) as Array<{ ki: TemplateKi }>;
-    return kis.map(({ ki }) => ki);
-  }
-  return [stepNamed(template, 'assemble_ki').with?.ki as TemplateKi];
-};
-
-interface KiReference {
-  uri: string;
-  relation?: string;
-}
-
-const referenceUris = (ki: TemplateKi): string[] =>
-  (ki.references as KiReference[]).map(({ uri }) => uri);
-
-// Splits a template into its `ai.prompt` step blocks: from the step's `- name:` line to the next
-// sibling `- name:` at the same indentation, so a rule about every prompt can be checked per step.
-const aiPromptBlocks = (yaml: string): string[] => {
-  const lines = yaml.split('\n');
-  const blocks: string[] = [];
-  for (let index = 0; index < lines.length; index++) {
-    const nameMatch = lines[index].match(/^(\s*)- name: /);
-    if (!nameMatch || !/^\s*type: ai\.prompt\s*$/.test(lines[index + 1] ?? '')) {
-      continue;
-    }
-    const indent = nameMatch[1];
-    let end = index + 1;
-    while (end < lines.length && !lines[end].startsWith(`${indent}- name: `)) {
-      end++;
-    }
-    blocks.push(lines.slice(index, end).join('\n'));
-  }
-  return blocks;
-};
+import { aiIndexAutomationsSkill } from './ai_index_automations_skill';
 
 describe('aiIndexAutomationsSkill', () => {
   it('registers with stable id, name, and context-engine base path', () => {
@@ -134,102 +40,10 @@ describe('aiIndexAutomationsSkill', () => {
     expect(aiIndexAutomationsSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('carries one workflow template per strategy that ships with one, plus the shared references', () => {
+  it('carries only the shared references', () => {
     const names = (aiIndexAutomationsSkill.referencedContent ?? []).map(({ name }) => name);
 
-    expect(names).toEqual([
-      'index-metadata-template',
-      'unit-profile-template',
-      'document-template',
-      'targeted-ki-writer',
-      KI_SHAPES_REFERENCE_NAME,
-      STRATEGY_CATALOG_REFERENCE_NAME,
-    ]);
-  });
-
-  it('ships each template as a complete workflow rather than a fragment', () => {
-    for (const reference of templates()) {
-      expect(reference.relativePath).toBe('.');
-      // A template is only a starting point if it runs: it needs the sink, the gate that guards
-      // it, and the `consts` block that is the whole of the adaptation.
-      expect(reference.content).toContain('consts:');
-      expect(reference.content).toContain('ai_index_id');
-      expect(reference.content).toContain('context-engine.createKi');
-      expect(reference.content).toContain('verifiers:');
-      expect(reference.content).toContain('esql-valid-runtime');
-    }
-  });
-
-  it('verifies inside create_ki and reports a rejected KI from its verification output', () => {
-    for (const name of TEMPLATE_NAMES) {
-      const template = parsedTemplate(name);
-      const createKi = stepNamed(template, 'create_ki');
-      const gate = stepNamed(template, 'check_verification');
-      const failureLog = stepNamed(template, 'log_verification_failure');
-
-      expect(allSteps(template.steps).map(({ type }) => type)).not.toContain(
-        'context-engine.verifyKi'
-      );
-      expect(createKi.type).toBe('context-engine.createKi');
-      expect(createKi.with?.verifiers).toEqual(['esql-valid-syntax', 'esql-valid-runtime']);
-      expect(createKi.with?.ki).toBeDefined();
-      expect(gate.type).toBe('if');
-      expect(gate.condition).toBe('steps.create_ki.output.verification.passed : false');
-      expect(gate.else).toBeUndefined();
-      expect(gate.steps).toContain(failureLog);
-      expect(failureLog.type).toBe('console');
-      expect(failureLog.with?.message).toContain(
-        '{{ steps.create_ki.output.verification.results | json }}'
-      );
-    }
-  });
-
-  it('pins every ai.prompt to the default connector, which the user can change after the save', () => {
-    const blocks = templates().flatMap(({ content: yaml }) => aiPromptBlocks(yaml));
-
-    expect(blocks.length).toBeGreaterThan(0);
-    for (const block of blocks) {
-      expect(block).toMatch(/^\s*connector-id: \.google-gemini-3\.5-flash-chat_completion\s*$/m);
-    }
-    // The connector belongs on the prompt steps only; nothing else in a template names one.
-    for (const reference of templates()) {
-      const pinned = reference.content.match(/connector-id:/g) ?? [];
-      expect(pinned).toHaveLength(aiPromptBlocks(reference.content).length);
-    }
-  });
-
-  it('retries every ai.prompt, since a transient model failure otherwise costs the unit', () => {
-    const blocks = templates().flatMap(({ content: yaml }) => aiPromptBlocks(yaml));
-
-    expect(blocks.length).toBeGreaterThan(0);
-    for (const block of blocks) {
-      expect(block).toMatch(/on-failure:\n\s+retry:\n\s+max-attempts: 3/);
-      expect(block).toMatch(/strategy: exponential/);
-      expect(block).toMatch(/jitter: true/);
-    }
-  });
-
-  it('lets access_patterns be empty and omits attributes.esql when it is, so the verifiers skip rather than fail', () => {
-    const modelDriven = templates().filter(({ name }) => name !== TARGETED_KI_WRITER_TEMPLATE_NAME);
-    expect(modelDriven).toHaveLength(3);
-
-    for (const { content: yaml } of modelDriven) {
-      // No minimum on the prompt's access_patterns array: an invented query is worse than none.
-      const accessPatternsSchema = yaml.match(/access_patterns:\n\s+type: array\n(\s+)(\w+):/);
-      expect(accessPatternsSchema?.[2]).toBe('items');
-      expect(yaml).toMatch(/Return\s+an\s+empty\s+array\s+rather\s+than\s+an\s+invented\s+query/);
-      // `default: nil` turns an empty list into null, which the createKi schema drops.
-      expect(yaml).toMatch(/esql: "\$\{\{ [^"]*\| map: 'esql_example' \| default: nil \}\}"/);
-      // The content block says so too, instead of rendering an empty heading.
-      expect(yaml).toMatch(/access_patterns\.size > 0/);
-    }
-  });
-
-  it('tells targeted-ki-writer authors to leave the esql key out for a KI with no query', () => {
-    const targeted = templates().find(({ name }) => name === TARGETED_KI_WRITER_TEMPLATE_NAME);
-
-    expect(targeted?.content).toMatch(/leaves the `esql` key out entirely/);
-    expect(targeted?.content).toMatch(/never an empty list/);
+    expect(names).toEqual([KI_SHAPES_REFERENCE_NAME, STRATEGY_CATALOG_REFERENCE_NAME]);
   });
 
   it('documents the null-omits-attribute contract for attributes.esql in the step contract', () => {
@@ -240,312 +54,12 @@ describe('aiIndexAutomationsSkill', () => {
     );
   });
 
-  it('pages the unit template on a cursor', () => {
-    const unitTemplate = templates().find(({ name }) => name === UNIT_PROFILE_TEMPLATE_NAME);
-
-    expect(unitTemplate?.content).toContain('type: while');
-    expect(unitTemplate?.content).toMatch(/variables\.cursor/);
-    expect(unitTemplate?.content).toMatch(/\| last \| first/);
-    // The three strategy answers as consts.
-    for (const constName of [
-      'unit_index:',
-      'unit_key:',
-      'activity_field:',
-      'catalog_index:',
-      'discovery_filter:',
-      'batch_size:',
-    ]) {
-      expect(unitTemplate?.content).toContain(constName);
-    }
-  });
-
-  it('writes targeted KIs without a model call, from consts', () => {
-    const writer = templates().find(({ name }) => name === TARGETED_KI_WRITER_TEMPLATE_NAME);
-
-    expect(writer?.content).not.toContain('ai.prompt');
-    expect(writer?.content).toContain('type: constraint');
-    expect(writer?.content).toMatch(/ki: "\$\{\{ foreach\.item\.ki \}\}"/);
-  });
-
-  describe('unit template re-runs', () => {
-    const template = () => parsedTemplate(UNIT_PROFILE_TEMPLATE_NAME);
-    const stepNames = () => allSteps(template().steps).map(({ name }) => name);
-    const unitTemplateYaml = () =>
-      templates().find(({ name }) => name === UNIT_PROFILE_TEMPLATE_NAME)?.content ?? '';
-
-    it('profiles every unit on every run, with no gate that skips one', () => {
-      for (const removed of [
-        'fingerprint_input',
-        'source_fingerprint',
-        'read_existing_ki',
-        'freshness',
-        'skip_unchanged_unit',
-      ]) {
-        expect(stepNames()).not.toContain(removed);
-      }
-      expect(allSteps(template().steps).map(({ type }) => type)).not.toContain('loop.continue');
-      expect(unitTemplateYaml()).not.toMatch(/freshness|fingerprint|loop\.continue/);
-    });
-
-    it('carries no const or attribute that only a freshness check would read', () => {
-      const [ki] = assembledKis(UNIT_PROFILE_TEMPLATE_NAME);
-
-      for (const removed of ['profile_version', 'destination_index', 'freshness_field']) {
-        expect(template().consts).not.toHaveProperty(removed);
-      }
-      expect(ki.attributes).not.toHaveProperty('source_fingerprint');
-    });
-
-    it('carries the activity range in the text only, not as a separate attribute', () => {
-      const [ki] = assembledKis(UNIT_PROFILE_TEMPLATE_NAME);
-      const discovery = stepNamed(template(), 'discover_units').with?.query as string;
-      const unitContext = stepNamed(template(), 'unit_context').with ?? {};
-
-      expect(ki.attributes).not.toHaveProperty('source_updated_at');
-      expect(unitContext).not.toHaveProperty('unit_last_seen');
-      // Discovery only lists units; the range comes from `unit_totals`.
-      expect(discovery).not.toContain('activity_field');
-      expect(unitTemplateYaml()).toMatch(
-        /Active from \{\{ steps\.unit_metrics\.output\.first_seen \}\} to \{\{ steps\.unit_metrics\.output\.last_seen \}\}/
-      );
-    });
-
-    it('keys each KI on the raw unit key, so keys that differ only in case or punctuation stay apart', async () => {
-      const kiId = stepNamed(template(), 'unit_context').with?.ki_id as string;
-      const keys = ['ABC', 'abc', 'A B', 'a-b', 'a_b'];
-      const ids = await Promise.all(
-        keys.map((key) => new Liquid().parseAndRender(kiId, { foreach: { item: [key] } }))
-      );
-
-      expect(kiId).toBe('unit-{{ foreach.item[0] }}');
-      expect(new Set(ids).size).toBe(keys.length);
-    });
-
-    it('says a re-run regenerates every unit and replaces its KI by ki_id', () => {
-      expect(unitTemplateYaml()).toMatch(/A re-run regenerates every unit/);
-      expect(unitTemplateYaml()).toMatch(/`ki_id` is derived from the unit/);
-    });
-
-    it('reads the catalog record with the other grounding queries, right before the prompt', () => {
-      const order = stepNames();
-
-      expect(order.indexOf('unit_breakdown')).toBeLessThan(order.indexOf('catalog_record'));
-      expect(order.indexOf('catalog_record')).toBe(order.indexOf('profile_unit') - 1);
-      expect(unitTemplateYaml()).toMatch(/# Grounding 3: the unit's own record/);
-    });
-
-    it('lists units in discovery and leaves the counting to unit_totals', () => {
-      const discovery = stepNamed(template(), 'discover_units').with?.query as string;
-
-      expect(discovery).toMatch(/\| STATS BY \{\{ consts\.unit_key \}\}/);
-      expect(discovery).toMatch(/\| KEEP \{\{ consts\.unit_key \}\}\s*$/);
-    });
-  });
-
-  describe('no dead fields in the templates', () => {
-    interface PromptSchema {
-      properties: Record<string, { items?: { properties?: object; required?: string[] } }>;
-    }
-
-    const withoutComments = (yaml: string): string => yaml.replace(/^\s*#.*$/gm, '');
-    const promptSteps = (name: string): WorkflowStep[] =>
-      allSteps(parsedTemplate(name).steps).filter(({ type }) => type === 'ai.prompt');
-
-    it('reads every const it declares', () => {
-      for (const { name, content: yaml } of templates()) {
-        const body = withoutComments(yaml);
-        for (const key of Object.keys(parsedTemplate(name).consts ?? {})) {
-          const read = new RegExp(`consts\\.${key}\\b`).test(body);
-          expect({ name, key, read }).toEqual({ name, key, read: true });
-        }
-      }
-    });
-
-    it('reads every value a data.set step writes', () => {
-      for (const { name, content: yaml } of templates()) {
-        const body = withoutComments(yaml);
-        for (const step of allSteps(parsedTemplate(name).steps)) {
-          if (step.type !== 'data.set') {
-            continue;
-          }
-          for (const key of Object.keys(step.with ?? {})) {
-            const output = `${step.name}.${key}`;
-            const read = new RegExp(
-              `steps\\.${step.name}\\.output\\.${key}\\b|variables\\.${key}\\b`
-            ).test(body);
-            expect({ name, output, read }).toEqual({ name, output, read: true });
-          }
-        }
-      }
-    });
-
-    it('puts every top-level field it asks the model for into the KI', () => {
-      for (const { name, content: yaml } of templates()) {
-        for (const step of promptSteps(name)) {
-          const { properties } = step.with?.schema as PromptSchema;
-          for (const field of Object.keys(properties)) {
-            const read = yaml.includes(`steps.${step.name}.output.content.${field}`);
-            expect({ name, field, read }).toEqual({ name, field, read: true });
-          }
-        }
-      }
-    });
-
-    it('asks each access pattern only for what the KI renders or verifies', () => {
-      const rendered = ['question_type', 'esql_template', 'esql_example', 'returns'];
-
-      for (const { name, content: yaml } of templates()) {
-        for (const step of promptSteps(name)) {
-          const { items } = (step.with?.schema as PromptSchema).properties.access_patterns;
-          expect({ name, fields: Object.keys(items?.properties ?? {}) }).toEqual({
-            name,
-            fields: rendered,
-          });
-          expect({ name, required: items?.required }).toEqual({ name, required: rendered });
-          expect(yaml).not.toMatch(/^\s*- params:/m);
-        }
-      }
-    });
-
-    it('writes every attribute ki_shapes documents', () => {
-      const documented = [
-        ...new Set(
-          [...kiShapesReference.content.matchAll(/`attributes\.([a-z_]+)`/g)].map(([, key]) => key)
-        ),
-      ];
-      const written = new Set(
-        TEMPLATE_NAMES.flatMap((name) =>
-          assembledKis(name).flatMap(({ attributes }) => Object.keys(attributes ?? {}))
-        )
-      );
-
-      expect(documented.length).toBeGreaterThan(0);
-      expect(documented.filter((key) => !written.has(key))).toEqual([]);
-    });
-  });
-
-  it('escapes a unit key for ES|QL in the per-unit queries and in the pagination cursor', async () => {
-    const template = parsedTemplate(UNIT_PROFILE_TEMPLATE_NAME);
-    const discovery = stepNamed(template, 'discover_units').with?.query as string;
-    const unitEscaped = stepNamed(template, 'unit_context').with?.unit_escaped as string;
-    // LiquidJS reads backslash escapes inside string literals, so a filter argument written as
-    // '\"' is a bare quote and the replace does nothing. Render for real to catch that.
-    const liquid = new Liquid();
-    const key = 'Contoso "Pro" 15\\in';
-    const esqlLiteral = 'Contoso \\"Pro\\" 15\\\\in';
-
-    const escapedUnit = await liquid.parseAndRender(unitEscaped, { foreach: { item: [key] } });
-    const rendered = await liquid.parseAndRender(discovery, {
-      consts: { unit_index: 'sales', unit_key: 'ProductKey' },
-      variables: { cursor: key },
-    });
-
-    expect(escapedUnit).toBe(esqlLiteral);
-    // A raw quote in the cursor would end the string literal and break every page after it.
-    expect(rendered).toContain(`ProductKey > "${esqlLiteral}"`);
-  });
-
   it('documents the escape as LiquidJS reads it, with backslashes escaped first', () => {
     const { content } = aiIndexAutomationsSkill;
 
     expect(content).not.toContain(`| \`replace: '"', '\\"'\` |`);
     expect(content).toContain(`\`replace: '\\\\', '\\\\\\\\' | replace: '"', '\\\\"'\``);
     expect(content).toMatch(/LiquidJS reads backslash escapes inside a quoted argument/);
-  });
-
-  describe('KI provenance in the templates', () => {
-    // Id-like provenance moved to top-level `references`; `expires_at` is top-level too.
-    const MOVED_ATTRIBUTES = [
-      'source_index',
-      'source_doc_id',
-      'trace_ids',
-      'conversation_id',
-      'expires_at',
-    ];
-    const REFERENCE_URI = /^(index|doc|trace|conversation):\/\//;
-
-    it('keeps id-like provenance and expiry out of attributes in every template', () => {
-      for (const name of TEMPLATE_NAMES) {
-        for (const ki of assembledKis(name)) {
-          for (const key of MOVED_ATTRIBUTES) {
-            expect({ name, key, present: key in (ki.attributes ?? {}) }).toEqual({
-              name,
-              key,
-              present: false,
-            });
-          }
-        }
-      }
-    });
-
-    it('writes each literal reference as a derived_from URI in one of the four schemes', () => {
-      for (const name of [
-        INDEX_METADATA_TEMPLATE_NAME,
-        DOCUMENT_TEMPLATE_NAME,
-        TARGETED_KI_WRITER_TEMPLATE_NAME,
-      ]) {
-        for (const ki of assembledKis(name)) {
-          expect(Array.isArray(ki.references)).toBe(true);
-          for (const reference of ki.references as KiReference[]) {
-            expect(reference.uri).toMatch(REFERENCE_URI);
-            expect(reference.relation).toBe('derived_from');
-          }
-        }
-      }
-    });
-
-    it('references the profiled index from the index metadata template', () => {
-      const [ki] = assembledKis(INDEX_METADATA_TEMPLATE_NAME);
-
-      expect(referenceUris(ki)).toEqual(['index://{{ consts.source_index }}']);
-    });
-
-    it('references the source index and document from the document template', () => {
-      const [ki] = assembledKis(DOCUMENT_TEMPLATE_NAME);
-
-      expect(referenceUris(ki)).toEqual([
-        'index://{{ consts.source_index }}',
-        'doc://{{ consts.source_index }}/{{ steps.document_context.output.doc_id }}',
-      ]);
-    });
-
-    it('references the unit index, and the catalog index only when it is a separate index', async () => {
-      const template = parsedTemplate(UNIT_PROFILE_TEMPLATE_NAME);
-      const [ki] = assembledKis(UNIT_PROFILE_TEMPLATE_NAME);
-      const source = stepNamed(template, 'unit_context').with?.references;
-
-      expect(ki.references).toBe('${{ steps.unit_context.output.references | json_parse }}');
-      expect(typeof source).toBe('string');
-
-      const render = async (consts: Record<string, string>): Promise<KiReference[]> =>
-        JSON.parse(await new Liquid().parseAndRender(source as string, { consts }));
-
-      expect(await render({ unit_index: 'sales', catalog_index: 'products' })).toEqual([
-        { uri: 'index://sales', relation: 'derived_from' },
-        { uri: 'index://products', relation: 'derived_from' },
-      ]);
-      expect(await render({ unit_index: 'sales', catalog_index: 'sales' })).toEqual([
-        { uri: 'index://sales', relation: 'derived_from' },
-      ]);
-    });
-
-    it('references the traces, conversation and index behind a targeted KI', () => {
-      const [ki] = assembledKis(TARGETED_KI_WRITER_TEMPLATE_NAME);
-      const uris = referenceUris(ki);
-
-      expect(uris.some((uri) => uri.startsWith('trace://'))).toBe(true);
-      expect(uris.some((uri) => uri.startsWith('conversation://'))).toBe(true);
-      expect(uris).toContain('index://my-source-index');
-      // Values that are not identifiers stay in attributes.
-      expect(ki.attributes).toHaveProperty('error_text');
-      expect(ki.attributes).toHaveProperty('prevalence');
-    });
-
-    it('no longer tells a data-stream destination to omit ki_id', () => {
-      for (const reference of templates()) {
-        expect(reference.content).not.toMatch(/which\s+(#\s+)?rejects it/);
-      }
-    });
   });
 
   it('mentions every referencedContent entry by name in the skill content', () => {
@@ -568,10 +82,10 @@ describe('aiIndexAutomationsSkill', () => {
       `${internalNamespaces.workflows}.get_step_definitions`,
       `${internalNamespaces.workflows}.get_trigger_definitions`,
       `${internalNamespaces.workflows}.get_examples`,
-      `${internalNamespaces.workflows}.get_connectors`,
       `${internalNamespaces.workflows}.workflow_execute_step`,
-      'platform.context_engine.save_automation',
-      'platform.context_engine.run_automation',
+      contextEngineAutomationTools.installAutomationTemplate,
+      contextEngineAutomationTools.saveAutomation,
+      contextEngineAutomationTools.runAutomation,
     ]);
   });
 
@@ -662,21 +176,18 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('names each template where its strategy is described, so the brief can cite one', () => {
-      expect(content).toMatch(/Index\/Table Metadata.*\n?.*`index-metadata-template`/);
-      expect(content).toMatch(/Bottom-Up.*\n?.*`document-template`/);
-      expect(content).toMatch(/Cumulative \/ Wiki-style.*\n?.*`unit-profile-template`/);
-      expect(content).toMatch(/Targeted KIs.*\n?.*`targeted-ki-writer`/);
+      // Install-tool strategies: template param appears near each strategy description.
+      expect(content).toMatch(/Index\/Table Metadata.*\n?.*template: index_metadata/);
+      expect(content).toMatch(/Bottom-Up.*\n?.*template: document_orchestration/);
+      expect(content).toMatch(/Cumulative.*\n?.*template: unit_profile/);
+      // targeted_ki_writer is now installed via the install_automation_template tool.
+      expect(content).toMatch(/template: targeted_ki_writer/);
       expect(content).not.toContain('entity-profile-template');
     });
 
-    it('describes the unit template as the three strategy answers written into consts', () => {
-      expect(content).toMatch(/`unit_index` and `unit_key` are the unit/);
+    it('describes the unit profile automation as the three strategy answers and pagination', () => {
       expect(content).toMatch(/how units are found and refreshed/);
-      expect(content).toMatch(
-        /the metrics, the `activity_field` range\s+and `catalog_index` are what one KI carries/
-      );
-      expect(content).toMatch(/`discovery_filter` and `batch_size` are how units are\s+found/);
-      expect(content).toMatch(/A re-run\s+regenerates every unit/);
+      expect(content).toMatch(/a re-run regenerates every unit/);
       expect(content).not.toMatch(/fingerprint|profile_version|freshness_field/);
     });
 
@@ -697,9 +208,8 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).not.toMatch(/\| `title` \| text \+ semantic \|/);
     });
 
-    it('documents while and variables, which the unit template depends on', () => {
-      expect(content).toMatch(/\*\*A `while` pages through a corpus/);
-      expect(content).toMatch(/readable as `variables\.<key>`/);
+    it('does not teach loop.continue, which no template uses', () => {
+      expect(content).not.toMatch(/variables\.<(key|name)>/);
       // No template skips an iteration any more, so the skill no longer teaches it.
       expect(content).not.toContain('loop.continue');
     });
@@ -708,10 +218,10 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/Never rerun a\s+failed call unchanged/);
     });
 
-    it('points the strategies without a template at the one to start from', () => {
-      expect(content).toMatch(/Selective \/ Outlier.*\n?.*start from `document-template`/);
-      expect(content).toMatch(/Atomic Facts.*\n?.*start from `document-template`/);
-      expect(content).toMatch(/Detection \/ Feature.*\n?.*start from `index-metadata-template`/);
+    it('points the strategies without an install path at the unit-profile-template shape', () => {
+      expect(content).toMatch(
+        /Outlier, atomic facts, detection[^\n]*\n[^\n]*start from the shape of `unit-profile-template`/
+      );
     });
 
     it('says what a template already encodes, so it is edited rather than rewritten', () => {
@@ -720,9 +230,9 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/none of them announce themselves/);
     });
 
-    it('has the brief name the template, since a subagent without one writes from nothing', () => {
-      expect(content).toMatch(/\*\*the template it starts from, by name\*\*/);
-      expect(content).toMatch(/rediscovering what the\s+template already encodes/);
+    it('has the brief name the workflow it starts from, since a subagent without one writes from nothing', () => {
+      expect(content).toMatch(/\*\*the workflow it starts from, by name\*\*/);
+      expect(content).toMatch(/rediscovering what\s+that automation already encodes/);
     });
 
     it('points at the lookup tools that cover built-in and connector step types', () => {
@@ -764,7 +274,9 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(
         /\*\*State the time estimate from the pilot in the same message\.\*\*/
       );
-      expect(content).toMatch(/divide to get a per-unit time, and multiply by the\s+unit count/);
+      expect(content).toMatch(
+        /divide to get a per-unit time, and multiply by the\s+number of units the saved run will write/
+      );
       expect(content).toMatch(/units, not rows/);
       expect(content).toMatch(/Say \*at least\*/);
       expect(content).toMatch(/Show the three numbers, not only the result/);
@@ -775,7 +287,7 @@ describe('aiIndexAutomationsSkill', () => {
         /\*\*When the projection exceeds one hour, put the estimate in bold between 🚨 markers\*\*/
       );
       expect(content).toMatch(
-        /"🚨 \*\*The full run over 2,517 units will take at least 11 hours\*\* 🚨"/
+        /"🚨 \*\*The full run over 300 units will take at least 80 minutes\*\* 🚨"/
       );
       expect(content).toMatch(/Under an hour, write it in plain text/);
     });
@@ -832,39 +344,13 @@ describe('aiIndexAutomationsSkill', () => {
         '`elasticsearch.search`',
         '`elasticsearch.request`',
         '`ai.prompt`',
+        '`parallel`',
         '`foreach`',
-        '`while`',
         '`if`',
         '`data.set`',
         '`console`',
       ]) {
         expect(content).toContain(stepType);
-      }
-    });
-
-    it('covers every step type the templates use, so none needs looking up', () => {
-      const closedSet = [
-        'elasticsearch.esql.query',
-        'elasticsearch.search',
-        'elasticsearch.request',
-        'ai.prompt',
-        'foreach',
-        'while',
-        'if',
-        'data.set',
-        'console',
-        'context-engine.createKi',
-      ];
-
-      for (const reference of templates()) {
-        // Anchored on the `- name:` above it, so the `type:` keys inside an ai.prompt output
-        // schema are not mistaken for step types.
-        const used = [...reference.content.matchAll(/- name: [^\n]+\n\s*type: ([\w.-]+)/g)].map(
-          ([, stepType]) => stepType
-        );
-
-        expect(used.length).toBeGreaterThan(0);
-        expect(used.filter((stepType) => !closedSet.includes(stepType))).toEqual([]);
       }
     });
 
@@ -934,15 +420,11 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).not.toMatch(/an `elasticsearch\.esql\.query` selecting `id`/);
     });
 
-    it('confirms cleanup on the newest revision per id, since a data stream keeps deleted ones', () => {
+    it('confirms cleanup through the query tool, which hides deleted revisions', () => {
       expect(content).toMatch(
-        /\| INLINE STATS latest = MAX\(@timestamp\) BY id\n\| WHERE @timestamp == latest/
+        /FROM <destination>\n\| MV_EXPAND tags\n\| WHERE tags == "ce-pilot-<runId>"\n\| LIMIT 1/
       );
-      expect(content).toMatch(
-        /\| WHERE governance\.lifecycle\.status IS NULL OR governance\.lifecycle\.status != "deleted"/
-      );
-      // Mapping only appears once something wrote the field, so the filter needs a way out.
-      expect(content).toMatch(/unknown column, drop that line/);
+      expect(content).not.toMatch(/\| INLINE STATS latest = MAX\(@timestamp\) BY id/);
     });
 
     it('warns that the unexpanded query looks like a pilot that wrote nothing', () => {
@@ -955,11 +437,11 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/cleanup is not optional/);
     });
 
-    it('names the KI id as a second handle on pilot output, on either destination', () => {
-      expect(content).not.toMatch(/refuses `ki_id`/);
+    it('isolates pilot writes by prefixing ki_id with the run tag', () => {
       expect(content).toMatch(
-        /on a data stream each write appends a revision under the\s+same `id`/
+        /Prefix the\s+`ki_id` on `context-engine\.createKi` with the same `ce-pilot-<runId>-`/
       );
+      expect(content).toMatch(/the `ce-pilot-\*` prefix from `ki_id`/);
     });
 
     it('puts the pilot tag where the templates build the indicator, not on the write step', () => {
@@ -967,10 +449,8 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/not on\s+`context-engine\.createKi`/);
     });
 
-    it('points the pilot bound at the consts the templates already expose', () => {
-      expect(content).toMatch(
-        /`max_documents`, `corpus_filter`, `discovery_filter`, and `batch_size`/
-      );
+    it('points the pilot bound at the install tool arguments and custom workflow consts', () => {
+      expect(content).toMatch(/`maxUnits`, `maxDocuments`,\n`corpusFilter` and `discoveryFilter`/);
     });
 
     it('saves the piloted definition rather than a regenerated one', () => {
@@ -1061,17 +541,7 @@ describe('aiIndexAutomationsSkill', () => {
 
     it('does not let piloting a workflow be read as licence to run the saved one', () => {
       expect(content).toContain('Running one is a separate decision');
-      expect(content).toMatch(
-        /do not\s+execute a saved\s+workflow unless the context in this conversation calls for it/
-      );
-    });
-
-    it('has run_automation report a failed start as the final answer, not a retryable task', () => {
-      expect(content).toMatch(
-        /run_automation` reports that the run did not start, that is the answer/
-      );
-      expect(content).toMatch(/that is the answer, not a task/);
-      expect(content).toMatch(/a second attempt doubles it/);
+      expect(content).toMatch(/Running the saved automation is not the same act/);
     });
 
     it('gives save and run each their own confirmation dialog', () => {
@@ -1083,34 +553,6 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/An `if` condition is KQL, not Liquid/);
       expect(content).toContain('iteration-on-failure');
       expect(content).toContain('on-failure');
-    });
-
-    it('documents every Liquid filter the templates depend on', () => {
-      const templateYaml = templates()
-        .map(({ content: yaml }) => yaml)
-        .join('\n');
-      const used = new Set(
-        [...templateYaml.matchAll(/\|\s*([a-z_]+)\s*(?::|\}\}|\|)/g)].map(([, filter]) => filter)
-      );
-
-      expect(used.size).toBeGreaterThan(0);
-      expect([...used].filter((filter) => !content.includes(`\`${filter}`))).toEqual([]);
-    });
-
-    it('documents only filters a template uses', () => {
-      const templateYaml = templates()
-        .map(({ content: yaml }) => yaml)
-        .join('\n');
-      const table = content.slice(content.indexOf('| Filter | Use |')).split('\n\n')[0];
-      const documented = table
-        .split('\n')
-        .slice(2)
-        .flatMap((row) => [...row.split(' | ')[0].matchAll(/`([a-z_]+)/g)].map(([, name]) => name));
-
-      expect(documented.length).toBeGreaterThan(0);
-      expect(
-        documented.filter((name) => !new RegExp(`\\|\\s*${name}\\b`).test(templateYaml))
-      ).toEqual([]);
     });
 
     it('notes the ES|QL row cap, which otherwise truncates a large corpus silently', () => {
