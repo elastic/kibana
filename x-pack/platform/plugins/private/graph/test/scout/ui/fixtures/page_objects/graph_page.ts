@@ -193,6 +193,41 @@ export class GraphPage {
     await expect(this.addFieldButton).toHaveAttribute('aria-disabled', 'false');
   }
 
+  async pickIndexPatternByName(dataViewName: string) {
+    await this.datasourceButton.click();
+    await this.page
+      .getByRole('dialog', { name: 'Select a data source' })
+      .getByRole('button', { name: dataViewName, exact: true })
+      .click();
+    await this.addFieldButton.waitFor({ state: 'visible' });
+    await this.page.waitForFunction(
+      () =>
+        document
+          .querySelector('[data-test-subj="graph-add-field-button"]')
+          ?.getAttribute('aria-disabled') === 'false',
+      undefined,
+      { timeout: 10000 }
+    );
+  }
+
+  async changeIndexPatternByName(dataViewName: string) {
+    await this.datasourceButton.click();
+    await this.confirmModalConfirmButton.click();
+    await this.page
+      .getByRole('dialog', { name: 'Select a data source' })
+      .getByRole('button', { name: dataViewName, exact: true })
+      .click();
+    await this.addFieldButton.waitFor({ state: 'visible' });
+    await this.page.waitForFunction(
+      () =>
+        document
+          .querySelector('[data-test-subj="graph-add-field-button"]')
+          ?.getAttribute('aria-disabled') === 'false',
+      undefined,
+      { timeout: 10000 }
+    );
+  }
+
   async addFields(fields: string[]) {
     await this.addFieldButton.click();
     await this.fieldSearchInput.waitFor({ state: 'visible' });
@@ -459,13 +494,11 @@ export class GraphPage {
    * first; click each non-keep node via its own `graph-selected-<label>`
    * selector to avoid stale list-index handles.
    */
-  async isolateNodes(labels: string[]) {
+  async isolateEdge(labels: string[]) {
     await this.selectNodes(labels);
     await this.invertSelectionButton.click();
     await this.removeSelectionButton.click();
   }
 
-  async isolateEdge(from: string, to: string) {
-    await this.isolateNodes([from, to]);
   }
 }

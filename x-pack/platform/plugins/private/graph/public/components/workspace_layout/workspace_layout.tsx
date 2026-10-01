@@ -78,7 +78,7 @@ export const WorkspaceLayoutComponent = ({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
   const [control, setControl] = useState<ControlType>('none');
-  const [selectedNode, setSelectedNode] = useState<WorkspaceNode>();
+  const [selectedNodeId, setSelectedNodeId] = useState<string>();
 
   const search = useLocation().search;
   const urlQuery = new URLSearchParams(search).get('query');
@@ -89,13 +89,13 @@ export const WorkspaceLayoutComponent = ({
     workspaceInitialized || savedWorkspace.id || savedWorkspace.isSaving
   );
 
-  const selectSelected = useCallback((node: WorkspaceNode) => {
-    setSelectedNode(node);
+  const selectSelected = useCallback((nodeId: string) => {
+    setSelectedNodeId(nodeId);
     setControl('editLabel');
   }, []);
 
   const onSetControl = useCallback((newControl: ControlType) => {
-    setSelectedNode(undefined);
+    setSelectedNodeId(undefined);
     setControl(newControl);
   }, []);
 
@@ -219,7 +219,7 @@ export const WorkspaceLayoutComponent = ({
 
           <ControlPanel
             control={control}
-            selectedNode={selectedNode}
+            selectedNodeId={selectedNodeId}
             colors={colorChoices}
             mergeCandidates={mergeCandidates}
             selectSelected={selectSelected}

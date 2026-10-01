@@ -117,22 +117,20 @@ describe('workspace_layout', () => {
   });
 
   it('rerenders the control panel when editor focus changes', () => {
-    const firstNode = { id: 'first-node' } as WorkspaceNode;
-    const secondNode = { id: 'second-node' } as WorkspaceNode;
     const component = shallow(<WorkspaceLayoutComponent {...defaultProps} />);
 
-    component.find(ControlPanel).prop('selectSelected')(firstNode);
+    component.find(ControlPanel).prop('selectSelected')('first-node');
     component.update();
     expect(component.find(ControlPanel).props()).toMatchObject({
       control: 'editLabel',
-      selectedNode: firstNode,
+      selectedNodeId: 'first-node',
     });
 
-    component.find(ControlPanel).prop('selectSelected')(secondNode);
+    component.find(ControlPanel).prop('selectSelected')('second-node');
     component.update();
     expect(component.find(ControlPanel).props()).toMatchObject({
       control: 'editLabel',
-      selectedNode: secondNode,
+      selectedNodeId: 'second-node',
     });
   });
 });
