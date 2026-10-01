@@ -166,7 +166,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
+  apiTest('schema: rejects alert_id over 150 chars with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getActivateEpisodeActionUrl('a'.repeat(151)), {
       headers: writerHeaders,
       body: { reason: 'valid reason' },
@@ -175,7 +175,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('returns 404 when episode_id matches no events', async ({ apiClient }) => {
+  apiTest('returns 404 when alert_id matches no events', async ({ apiClient }) => {
     const response = await apiClient.post(getActivateEpisodeActionUrl('unknown-episode'), {
       headers: writerHeaders,
       body: { reason: 'valid reason' },

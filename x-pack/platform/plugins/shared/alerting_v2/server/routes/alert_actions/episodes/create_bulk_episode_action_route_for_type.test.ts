@@ -28,7 +28,7 @@ describe('createBulkEpisodeActionRouteForType', () => {
     const RouteClass = makeRouteClass();
 
     expect(RouteClass.method).toBe('post');
-    expect(RouteClass.path).toBe('/api/alerting/v2/episodes/_bulk_assign');
+    expect(RouteClass.path).toBe('/api/alerting/v2/alerts/_bulk_assign');
     expect(RouteClass.options?.summary).toBe('Bulk assign alert episodes');
     expect(RouteClass.validate).toBeDefined();
     expect(RouteClass.validate).toEqual(

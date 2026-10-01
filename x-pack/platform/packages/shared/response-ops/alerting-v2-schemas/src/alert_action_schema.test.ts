@@ -123,14 +123,14 @@ describe('seriesAlertActionParamsSchema', () => {
 });
 
 describe('episodeAlertActionParamsSchema', () => {
-  it('accepts an episode_id and rejects an empty one', () => {
-    expect(() => episodeAlertActionParamsSchema.parse({ episode_id: 'episode-1' })).not.toThrow();
-    expect(() => episodeAlertActionParamsSchema.parse({ episode_id: '' })).toThrow();
+  it('accepts an alert_id and rejects an empty one', () => {
+    expect(() => episodeAlertActionParamsSchema.parse({ alert_id: 'episode-1' })).not.toThrow();
+    expect(() => episodeAlertActionParamsSchema.parse({ alert_id: '' })).toThrow();
   });
 
   it('rejects unknown keys (strict mode)', () => {
     expect(() =>
-      episodeAlertActionParamsSchema.parse({ episode_id: 'episode-1', foo: 'bar' })
+      episodeAlertActionParamsSchema.parse({ alert_id: 'episode-1', foo: 'bar' })
     ).toThrow();
   });
 });

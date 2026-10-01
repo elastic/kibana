@@ -169,14 +169,14 @@ export type SeriesAlertActionParams = z.infer<typeof seriesAlertActionParamsSche
 
 export const episodeAlertActionParamsSchema = z
   .object({
-    episode_id: z
+    alert_id: z
       .string()
       .min(1)
       .max(ID_MAX_LENGTH)
-      .describe('Identifier of the alert episode to apply the action to.'),
+      .describe('Identifier of the alert to apply the action to.'),
   })
   .strict()
-  .describe('Path parameters for episode-level alert action endpoints.');
+  .describe('Path parameters for alert-level alert action endpoints.');
 export type EpisodeAlertActionParams = z.infer<typeof episodeAlertActionParamsSchema>;
 
 // Route body schemas for the series-level endpoints (action_type comes from the path).
