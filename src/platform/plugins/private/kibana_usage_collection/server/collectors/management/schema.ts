@@ -727,6 +727,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmMaxNumberOfServices': {
+    type: 'long',
+    _meta: { description: 'Maximum number of services shown in the APM Services Inventory.' },
+  },
   'observability:apmEnableTransactionProfiling': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -852,6 +856,20 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable Streams Canvas',
+    },
+  },
+  'observability:nightshiftContinuousOnboardingEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Non-default value of whether continuous knowledge indicator onboarding is enabled.',
+    },
+  },
+  'observability:nightshiftContinuousOnboardingIntervalHours': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the minimum hours between continuous knowledge indicator onboarding runs per source.',
     },
   },
   'observability:nightshiftContinuousOnboardingEnabled': {

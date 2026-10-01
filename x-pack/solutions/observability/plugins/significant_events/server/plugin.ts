@@ -732,6 +732,10 @@ export class SignificantEventsPlugin
       await this.managedWorkflowsInstaller?.install();
       await this.removeLegacyWorkflows?.();
     } finally {
+      // Independent of the install outcome: one failing static workflow would otherwise keep the
+      // legacy default-space documents around, next to their per-space replacements, on every
+      // restart. It never throws.
+      await this.removeLegacyWorkflows?.();
       await this.reassertPauseAfterWorkflowInstall();
     }
   }

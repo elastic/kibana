@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/292864
+issues:
+- https://github.com/elastic/kibana/issues/292851
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix "Show array values" defaulting to true on export for new Last Value columns
+description: Fixes visualizations and dashboard API to correctly apply defaults to `showArrayValues`/`multi_value`.

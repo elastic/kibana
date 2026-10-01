@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import type { RouteRegisterParameters } from '.';
 import { IDLE_SOCKET_TIMEOUT } from '.';
@@ -50,6 +51,7 @@ export function registerFlameChartSearchRoute({
         const flamegraph = await profilingDataAccess.services.fetchFlamechartData({
           core,
           esClient,
+          abortSignal: getRequestAbortedSignal(request.events.aborted$),
           totalSeconds: endSecs - startSecs,
           query: {
             bool: {
