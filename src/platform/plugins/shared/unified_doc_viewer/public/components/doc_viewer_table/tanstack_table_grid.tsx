@@ -102,7 +102,6 @@ const GridCellAnchorContext = createContext<React.RefObject<HTMLDivElement | nul
   current: null,
 });
 
-// Mirrors the EuiDataGrid hover action button: icon only, label exposed via tooltip and aria-label.
 const CellActionIconButton: typeof EuiButtonIcon = ({ children, title, ...rest }) => (
   <EuiToolTip content={title} disableScreenReaderOutput>
     <EuiButtonIcon {...rest} aria-label={title ?? ''} size="xs" iconSize="s" color="text" />

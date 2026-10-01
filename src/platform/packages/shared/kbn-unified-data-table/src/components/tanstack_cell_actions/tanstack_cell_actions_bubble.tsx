@@ -9,7 +9,7 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiButtonIcon, EuiPortal, EuiToolTip, keys, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiPortal, keys, useEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import {
@@ -321,11 +321,8 @@ export const TanStackCellActionsBubble = React.memo(
             ))}
           </div>
         ) : (
-          <EuiToolTip
-            content={cellActionsLabel}
-            disableScreenReaderOutput
-            anchorProps={{ css: { display: 'inline-flex' } }}
-          >
+          <>
+            {/* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap -- Ellipsis opens the toolbar; per-action tooltips appear on the expanded buttons. */}
             <EuiButtonIcon
               buttonRef={triggerRef}
               color="text"
@@ -334,13 +331,13 @@ export const TanStackCellActionsBubble = React.memo(
               size="xs"
               iconSize="s"
               aria-label={cellActionsLabel}
-              aria-haspopup="toolbar"
+              aria-haspopup={true}
               aria-expanded={isOpen}
               data-test-subj={triggerTestSubj}
               onClick={handleTriggerClick}
               onKeyDown={handleTriggerKeyDown}
             />
-          </EuiToolTip>
+          </>
         )}
       </div>
     );

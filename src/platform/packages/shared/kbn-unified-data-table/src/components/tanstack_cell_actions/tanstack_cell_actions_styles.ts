@@ -18,9 +18,8 @@ const cellActionPopIn = keyframes({
 });
 
 export const tanStackCellActionsStyles = {
-  cellWithActions: (themeContext: UseEuiTheme) => {
-    const { euiTheme } = themeContext;
-    return css({
+  cellWithActions: (_themeContext: UseEuiTheme) =>
+    css({
       position: 'relative',
       overflow: 'hidden',
       [`&:hover .${TANSTACK_CELL_ACTIONS_CLASS}, &:focus-within .${TANSTACK_CELL_ACTIONS_CLASS}`]: {
@@ -31,8 +30,7 @@ export const tanStackCellActionsStyles = {
           display: 'none',
           pointerEvents: 'none',
         },
-    });
-  },
+    }),
 
   cellActions: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;

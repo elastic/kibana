@@ -48,8 +48,10 @@ const buildFieldRow = (name: string, value: string, isPinned = false) =>
 
 const mockRows: FieldRow[] = [buildFieldRow('fieldA', 'valueA'), buildFieldRow('fieldB', 'valueB')];
 
-const openCellActionsBubble = async () => {
-  await userEvent.click(await screen.findByTestId('tanStackCellActionsButton'));
+const openCellActionsBubble = async (gridCell: HTMLElement) => {
+  await userEvent.click(
+    await within(gridCell).findByTestId('tanStackCellActionsButton')
+  );
 };
 
 describe('TanStackTableGrid', () => {
@@ -139,18 +141,21 @@ describe('TanStackTableGrid', () => {
 
   it('only mounts cell actions for the hovered or focused cell', async () => {
     render(<TanStackTableGrid {...defaultProps} />);
-    expect(screen.queryByTestId('tanStackCellActionsButton')).not.toBeInTheDocument();
+    expect(screen.queryAllByTestId('tanStackCellActionsButton')).toHaveLength(0);
 
-    await userEvent.hover(screen.getByText('fieldA'));
-    await openCellActionsBubble();
+    const fieldNameCell = screen.getByText('fieldA').closest<HTMLElement>('[role="gridcell"]')!;
+    await userEvent.hover(fieldNameCell);
+    await openCellActionsBubble(fieldNameCell);
     await userEvent.click(screen.getByTestId('toggleColumnButton-fieldA'));
     expect(defaultProps.onAddColumn).toHaveBeenCalledWith('fieldA');
 
-    await userEvent.unhover(screen.getByText('fieldA'));
-    expect(screen.queryByTestId('tanStackCellActionsButton')).not.toBeInTheDocument();
+    await userEvent.unhover(fieldNameCell);
+    fieldNameCell.blur();
+    expect(within(fieldNameCell).queryByTestId('tanStackCellActionsButton')).not.toBeInTheDocument();
 
-    screen.getByText('valueB').closest<HTMLElement>('[role="gridcell"]')?.focus();
-    await openCellActionsBubble();
+    const valueCell = screen.getByText('valueB').closest<HTMLElement>('[role="gridcell"]')!;
+    valueCell.focus();
+    await openCellActionsBubble(valueCell);
     expect(screen.getByTestId('copyValueButton-fieldB')).toBeInTheDocument();
     // Unmapped fields cannot be filtered.
     expect(screen.queryByTestId('addFilterForValueButton-fieldB')).not.toBeInTheDocument();
@@ -158,8 +163,9 @@ describe('TanStackTableGrid', () => {
 
   it('opens the cell popover with actions and warnings', async () => {
     render(<TanStackTableGrid {...defaultProps} rows={[mockRows[0]]} />);
-    await userEvent.hover(screen.getByText('valueA'));
-    await openCellActionsBubble();
+    const valueCell = screen.getByText('valueA').closest<HTMLElement>('[role="gridcell"]')!;
+    await userEvent.hover(valueCell);
+    await openCellActionsBubble(valueCell);
     await userEvent.click(screen.getByTestId('euiDataGridCellExpandButton'));
 
     const popover = await screen.findByTestId('euiDataGridExpansionPopover');
