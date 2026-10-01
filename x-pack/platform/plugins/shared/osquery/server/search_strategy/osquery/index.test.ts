@@ -1093,5 +1093,66 @@ describe('osquerySearchStrategyProvider space scoping', () => {
         (queryOf(searchMock.mock.calls[0]) as { bool: { filter: unknown[] } }).bool.filter
       ).toContainEqual({ term: { space_id: 'my-space' } });
     });
+
+    it('fails closed when the lookup errors, issuing no data search', async () => {
+      const { provider, searchMock, internalMetadataSearch } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+      });
+      internalMetadataSearch.mockRejectedValueOnce(
+        Object.assign(new Error('security_exception'), { statusCode: 403 })
+      );
+
+      await expect(runSearch(provider, resultsRequest)).rejects.toMatchObject({
+        statusCode: 403,
+      });
+      expect(searchMock).not.toHaveBeenCalled();
+    });
+
+    it('reuses a verified lookup for later searches within the same request', async () => {
+      const { provider, searchMock, internalMetadataSearch } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+      });
+      const depsRequest = {};
+
+      await runSearch(provider, resultsRequest, depsRequest);
+      await runSearch(provider, actionResultsRequest, depsRequest);
+
+      expect(internalMetadataSearch).toHaveBeenCalledTimes(1);
+      expect(searchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps the CCS lookup on the local actions index while data reads reach remotes', async () => {
+      (hasConnectedRemoteClusters as jest.Mock).mockResolvedValueOnce(true);
+      const { provider, searchMock, internalMetadataSearch } = setup({
+        activeSpaceId: 'my-space',
+        actionsIndexExists: true,
+      });
+
+      await runSearch(provider, resultsRequest);
+
+      expect(internalMetadataSearch.mock.calls[0][0].index).toEqual(`${ACTIONS_INDEX}*`);
+      expect(searchMock.mock.calls[0][0].params.index).toEqual([
+        `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+        `*:logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+      ]);
+    });
+
+    it('drops CCS remote patterns from data reads when CPS fans them out', async () => {
+      (hasConnectedRemoteClusters as jest.Mock).mockResolvedValueOnce(true);
+      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+      const { provider, getSearchStrategy } = setup({
+        activeSpaceId: 'my-space',
+        cpsActive: true,
+      });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+
+      await runSearch(provider, resultsRequest);
+
+      expect(enhancedSearchMock.mock.calls[0][0].params.index).toEqual([
+        `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+      ]);
+    });
   });
 });

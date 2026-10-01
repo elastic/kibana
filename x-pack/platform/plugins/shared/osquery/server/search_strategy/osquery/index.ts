@@ -45,9 +45,10 @@ import { getReadEsClient } from '../../utils/get_read_es_client';
  *
  * Types not allowlisted for `action_data.space_id`: `actions` enumerates across
  * actions; `exportResults` is not unconditionally id-bound in the factory
- * (opaque `baseFilter` KQL), so named-space live-query export remains a known
- * gap; `actionDetails` is an id-bound lookup of Kibana-written action metadata
- * on `ACTIONS_INDEX`, not agent `action_data`.
+ * (opaque `baseFilter` KQL), so live-query export reaches unstamped documents
+ * only through the action document gate, and stays on the top-level `space_id`
+ * filter where that gate does not run; `actionDetails` is an id-bound lookup of
+ * Kibana-written action metadata on `ACTIONS_INDEX`, not agent `action_data`.
  *
  * `scheduledActionResults` is deliberately absent even though it is `schedule_id`
  * bound. `action_data` only exists on documents produced by a Fleet action, and
@@ -156,12 +157,19 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             cpsActive: from(osqueryContext.isCpsActive(deps.request)),
           });
         }),
-        mergeMap((context) => {
+        mergeMap((probed) => {
+          // A fanned-out CPS read already reaches linked projects, and a `*:` remote
+          // expression alongside `project_routing` is not a shape Elasticsearch has been
+          // verified to accept (Defend suppresses it the same way).
+          const context = { ...probed, ccsEnabled: probed.ccsEnabled && !probed.cpsActive };
           const gatedActionId = getActionDocGatedActionId(request);
 
           // Without an osquery actions index (and no CPS fan-out to reach one), live
           // actions exist only on `.fleet-actions`, which the gate never reads. Those
-          // reads keep the data-document space filter instead of failing.
+          // reads keep the data-document space filter instead of failing. Under CPS a
+          // miss stays a 404 even with no local actions index: falling back to the
+          // data-document filter there would let the default space match field-less
+          // documents from linked projects.
           if (gatedActionId == null || (!context.actionsIndexExists && !context.cpsActive)) {
             return of({ ...context, skipSpaceFilter: false });
           }
@@ -172,6 +180,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               spaceId: context.activeSpace?.id ?? DEFAULT_SPACE_ID,
               actionId: gatedActionId,
               actionsIndexExists: context.actionsIndexExists,
+              request: deps.request,
             })
           ).pipe(
             map((found) => {
@@ -195,6 +204,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             // Single decision for hit-level enforceSpaceScope and for any
             // global-agg builder that cannot inherit the top-level query.
             const matchActionDataSpaceId =
+              !skipSpaceFilter &&
               ID_BOUND_FACTORY_QUERY_TYPES.includes(factoryQueryType) &&
               !isScheduleBoundRequest(request);
 

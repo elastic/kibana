@@ -115,13 +115,15 @@ export const getActionResultsRoute = (
 
           // Mirrors the search strategy's gate: without an osquery actions index and
           // without CPS fan-out, live actions live only on `.fleet-actions`, and the
-          // strategy keeps the data-document space filter for that read.
+          // strategy keeps the data-document space filter for that read. Passing the
+          // request lets the strategy's own check reuse this lookup.
           if (actionsIndexExists || cpsActive) {
             const hasMetadata = await findOsqueryActionMetadata({
               esClient: getReadEsClient(clusterClient, request, cpsActive),
               spaceId,
               actionId: request.params.actionId,
               actionsIndexExists,
+              request,
             });
 
             if (!hasMetadata) {

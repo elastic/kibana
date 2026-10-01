@@ -196,7 +196,8 @@ export const createExportRouteHandler =
     // provided, so the PIT itself must carry the correct index scope.
     // ignore_unavailable mirrors query.all_results.dsl.ts.
     // If openPointInTime throws, there is no PIT to close — handle separately.
-    const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
+    // A fanned-out CPS read does not also add CCS `*:` remote expressions.
+    const ccsEnabled = !cpsActive && (await hasConnectedRemoteClusters(internalEsClient));
 
     let pitId: string;
     try {
