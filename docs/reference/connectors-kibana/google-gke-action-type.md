@@ -12,7 +12,7 @@ applies_to:
 The Google Kubernetes Engine (GKE) connector lets an agent operate the managed infrastructure around a GKE cluster without an SRE running `gcloud` by hand. It discovers clusters and node pools, scales and autoscales node pools, upgrades and rolls back, toggles network and security policy, provisions and tears down clusters, and tracks the asynchronous operation every change returns.
 
 ::::{note}
-This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 ::::
 
 It does not touch workloads. Pods, deployments, logs, and `kubectl`-style apply, scale, and rollout belong to the [Kubernetes connector](/reference/connectors-kibana/kubernetes-action-type.md). The `getCluster` action returns the API server endpoint and CA certificate that connector needs, and the same service account key authenticates there through its GKE authentication type.
@@ -110,11 +110,11 @@ Every cluster action accepts an optional `projectId` and a `location` (the zone 
 
 ### Cluster lifecycle
 
-`createCluster`
-:   Provisions an Autopilot cluster, or a Standard cluster with one default node pool. Parameters: `location`, `clusterId`, and optional `autopilot`, `initialNodeCount`, `machineType`, `diskSizeGb`, `nodeLocations`, `initialClusterVersion`, `releaseChannel`, `network`, `subnetwork`, `enableWorkloadIdentity`, `enableNetworkPolicy`, `resourceLabels`, `resourceManagerTags`. Workflow steps only.
+`createCluster` _(not yet available)_
+:   Provisions an Autopilot cluster, or a Standard cluster with one default node pool. Parameters: `location`, `clusterId`, and optional `autopilot`, `initialNodeCount`, `machineType`, `diskSizeGb`, `nodeLocations`, `initialClusterVersion`, `releaseChannel`, `network`, `subnetwork`, `enableWorkloadIdentity`, `enableNetworkPolicy`, `resourceLabels`, `resourceManagerTags`.
 
-`deleteCluster`
-:   Deletes a cluster and everything running in it. Requires `confirmClusterId` to equal `clusterId`. Workflow steps only.
+`deleteCluster` _(not yet available)_
+:   Deletes a cluster and everything running in it. Requires `confirmClusterId` to equal `clusterId`.
 
 ## Usage notes [google-gke-usage-notes]
 
