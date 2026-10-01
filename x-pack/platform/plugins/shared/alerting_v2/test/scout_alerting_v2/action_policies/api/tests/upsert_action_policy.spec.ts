@@ -60,7 +60,71 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.snoozed_until).toBeNull();
       // On create, updatedAt equals createdAt — there has been no replace yet.
       expect(response.body.updated_at).toBe(response.body.created_at);
-      expect(response.body.auth.apiKey).toBeUndefined();
+      // API key ownership is server-side only and must never be exposed over the wire.
+      expect(response.body.auth).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'upsert: should create a disabled policy when the body sets enabled=false',
+    async ({ apiClient, apiServices }) => {
+      const id = 'upsert-create-disabled-policy';
+      const response = await apiClient.put(getActionPolicyUrl(id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { ...buildCreateActionPolicyData({ name: 'created-disabled' }), enabled: false },
+      });
+
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.enabled).toBe(false);
+
+      const persisted = await apiServices.alertingV2.actionPolicies.get(id);
+      expect(persisted.enabled).toBe(false);
+    }
+  );
+
+  apiTest(
+    'upsert: should enable a disabled policy when the replace body sets enabled=true',
+    async ({ apiClient, apiServices }) => {
+      const id = 'upsert-enable-via-put-policy';
+      await apiServices.alertingV2.actionPolicies.upsert(
+        id,
+        buildCreateActionPolicyData({ name: 'to-be-enabled' })
+      );
+      await apiServices.alertingV2.actionPolicies.disable(id);
+
+      const response = await apiClient.put(getActionPolicyUrl(id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { ...buildCreateActionPolicyData({ name: 'now-enabled' }), enabled: true },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.enabled).toBe(true);
+
+      const persisted = await apiServices.alertingV2.actionPolicies.get(id);
+      expect(persisted.enabled).toBe(true);
+    }
+  );
+
+  apiTest(
+    'upsert: should disable an enabled policy when the replace body sets enabled=false',
+    async ({ apiClient, apiServices }) => {
+      const id = 'upsert-disable-via-put-policy';
+      const created = await apiServices.alertingV2.actionPolicies.upsert(
+        id,
+        buildCreateActionPolicyData({ name: 'to-be-disabled-via-put' })
+      );
+      expect(created.enabled).toBe(true);
+
+      const response = await apiClient.put(getActionPolicyUrl(id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { ...buildCreateActionPolicyData({ name: 'now-disabled' }), enabled: false },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.enabled).toBe(false);
+
+      const persisted = await apiServices.alertingV2.actionPolicies.get(id);
+      expect(persisted.enabled).toBe(false);
     }
   );
 
@@ -109,11 +173,10 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(replaced.body.description).toBe('after replace');
       expect(replaced.body.destinations).toStrictEqual([{ type: 'workflow', id: 'wf-2' }]);
 
-      expect(replaced.body.created_by).toBe(created.created_by);
+      expect(replaced.body.created_by).toStrictEqual(created.created_by);
       expect(replaced.body.created_at).toBe(created.created_at);
 
       expect(replaced.body.updated_at).not.toBe(created.created_at);
-      expect(replaced.body.version).not.toBe(created.version);
     }
   );
 

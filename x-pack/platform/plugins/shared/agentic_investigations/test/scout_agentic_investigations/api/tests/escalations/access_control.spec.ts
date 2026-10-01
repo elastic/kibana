@@ -150,19 +150,17 @@ apiTest.describe(
     );
 
     apiTest(
-      'PATCH from a collaborator returns 404 — current limitation: only owner can mutate (tracked in follow-up)',
+      'PATCH title from a collaborator returns 403 — collaborator lacks manage_escalations',
       async ({ apiClient }) => {
-        // The agent_builder conversation client enforces owner-only access for patchMetadata and
-        // update, so a collaborator with manage_escalations gets 404 (not 403) on PATCH.
-        // This test documents the current behaviour; a follow-up issue will address it once
-        // agent_builder exposes a non-owner write access mode.
+        // The editor role does not include escalations_all (includeIn: 'none'), so the privilege
+        // gate fires before the ownership check and returns 403.
         const response = await apiClient.patch(ESCALATION_BY_ID_PATH(privateEscalationId), {
           headers: { ...INTERNAL_HEADERS, ...editorCookieHeader },
           body: { title: 'Collaborator rename attempt' },
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(404);
+        expect(response).toHaveStatusCode(403);
       }
     );
   }
