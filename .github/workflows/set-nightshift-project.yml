@@ -15,6 +15,7 @@ env:
   WORKSTREAM_FIELD_ID: 'PVTSSF_lADOAGc3Zs4BbAmjzhWPSno'
   LABEL_TO_OPTION: |
     {
+      "kbn-evals": "6bf0df26",
       "Feature: Nightshift Interfaces": "50665193",
       "Feature: Nightshift UX": "6fffd57e",
       "Feature: Nightshift Context Engine": "4f02c77b",
