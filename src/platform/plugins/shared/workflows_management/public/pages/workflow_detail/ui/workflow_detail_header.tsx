@@ -20,8 +20,10 @@ import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
+import { isPageTrigger } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
+import { WorkflowPageShareModal } from './workflow_page_share_modal';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -119,6 +121,7 @@ export const WorkflowDetailHeader = React.memo(
     const back = useWorkflowDetailHeaderBack();
     const styles = useMemoCss(componentStyles);
     const [isAccessOpen, setIsAccessOpen] = useState(false);
+    const [isPageShareOpen, setIsPageShareOpen] = useState(false);
     const {
       canCreateWorkflow,
       canUpdateWorkflow: hasUpdatePrivilege,
@@ -132,6 +135,8 @@ export const WorkflowDetailHeader = React.memo(
 
     const workflow = useSelector(selectWorkflow);
     const canUpdateWorkflow = hasUpdatePrivilege && workflow?.permissions?.edit !== false;
+    // The saved definition, not the editor buffer: an unsaved page trigger has no URL yet.
+    const hasPage = Boolean(workflow?.definition?.triggers?.some(isPageTrigger));
     const canManageAccess = hasUpdatePrivilege && workflow?.permissions?.manage === true;
     const isManagedWorkflow = workflow?.managed === true;
     const canReadVisibleWorkflowExecution =
@@ -381,6 +386,25 @@ export const WorkflowDetailHeader = React.memo(
       if (workflowId) {
         items.push(executionsToggleItem);
       }
+      if (workflowId && hasPage) {
+        items.push({
+          id: 'workflowPageShare',
+          order: 3,
+          label: i18n.translate('workflows.workflowDetailHeader.sharePage', {
+            defaultMessage: 'Share page',
+          }),
+          iconType: 'link',
+          run: () => setIsPageShareOpen(true),
+          testId: 'workflowPageShareButton',
+          // Anyone with the URL can submit the page, so revealing it needs edit rights.
+          disableButton: !canUpdateWorkflow,
+          tooltipContent: !canUpdateWorkflow
+            ? i18n.translate('workflows.workflowDetailHeader.sharePageDisabledTooltip', {
+                defaultMessage: 'You need the Workflows Update privilege to share the page.',
+              })
+            : undefined,
+        });
+      }
       if (historyItem) {
         items.push(historyItem);
       }
@@ -415,6 +439,8 @@ export const WorkflowDetailHeader = React.memo(
       isExecutionsTab,
       workflowId,
       executionsToggleItem,
+      hasPage,
+      canUpdateWorkflow,
       historyItem,
       addConnectorsMenuItem,
       enabledSwitchConfig,
@@ -465,6 +491,12 @@ export const WorkflowDetailHeader = React.memo(
         </EuiPageTemplate>
         {isAccessOpen && workflow && (
           <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
+        )}
+        {isPageShareOpen && workflowId && (
+          <WorkflowPageShareModal
+            workflowId={workflowId}
+            onClose={() => setIsPageShareOpen(false)}
+          />
         )}
       </>
     );

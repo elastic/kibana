@@ -16,22 +16,32 @@ export const PAGE_SECRET_LENGTH = 64;
 /**
  * Derives the secret part of a page URL from the deployment signing key.
  *
- * Nothing secret is stored: the `page-id` in the workflow YAML identifies the page
- * but does not open it, so YAML, exports, and change history never contain a
- * credential. Rotating a page assigns a new `page-id`, which changes the secret.
- * The space is bound in so a page URL cannot be replayed in another space.
+ * Nothing secret is stored and nothing page-related lives in the workflow YAML.
+ * The secret binds the space, the workflow id, and `pageGeneration`, a counter on
+ * the workflow document. Rotating the page increments the counter, which retires
+ * the old URL. Binding the space stops a URL from being replayed in another space.
  */
-export const computePageSecret = (signingKey: string, spaceId: string, pageId: string): string =>
-  createHmac('sha256', signingKey).update(`workflow-page|${spaceId}|${pageId}`).digest('hex');
+export const computePageSecret = (
+  signingKey: string,
+  { spaceId, workflowId, generation }: PageSecretInput
+): string =>
+  createHmac('sha256', signingKey)
+    .update(`workflow-page|${spaceId}|${workflowId}|${generation}`)
+    .digest('hex');
+
+export interface PageSecretInput {
+  spaceId: string;
+  workflowId: string;
+  generation: number;
+}
 
 /** Constant-time check so a wrong secret leaks no timing signal. */
 export const verifyPageSecret = (
   signingKey: string,
-  spaceId: string,
-  pageId: string,
+  input: PageSecretInput,
   candidate: string
 ): boolean => {
-  const expected = Buffer.from(computePageSecret(signingKey, spaceId, pageId), 'utf8');
+  const expected = Buffer.from(computePageSecret(signingKey, input), 'utf8');
   const provided = Buffer.from(candidate, 'utf8');
   return expected.length === provided.length && timingSafeEqual(expected, provided);
 };
