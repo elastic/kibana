@@ -9,10 +9,3 @@ export {
   AttachmentsOverviewSection,
   type AttachmentsOverviewSectionProps,
 } from './attachments_overview_section';
-export { extractAttachmentTargets, type AttachmentTargets } from './extract_attachment_targets';
-export {
-  buildAlertsPageUrl,
-  buildAttacksPageUrl,
-  buildEntityAnalyticsPageUrl,
-  buildRulesPageUrl,
-} from './build_security_urls';
