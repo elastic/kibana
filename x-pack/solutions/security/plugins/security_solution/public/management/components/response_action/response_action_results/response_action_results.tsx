@@ -205,7 +205,7 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
                 </>
               )}
 
-              {isMultiAgent && index !== agents.length - 1 && <EuiHorizontalRule margin="xl" />}
+              {isMultiAgent && index !== agents.length - 1 && <EuiHorizontalRule margin="l" />}
             </div>
           );
         })}
