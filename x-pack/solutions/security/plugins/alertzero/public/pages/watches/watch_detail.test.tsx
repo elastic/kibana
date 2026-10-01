@@ -1266,6 +1266,57 @@ describe('WatchDetailPage', () => {
       expect(disableModal()).not.toBeInTheDocument();
     });
 
+    it('shows no notice on the next Watch when a save finishes after navigating away', async () => {
+      mockUseWorkers.mockReturnValue({
+        data: { workers: allWorkers([]) },
+        isLoading: false,
+        error: null,
+        refetch: jest.fn(),
+      } as never);
+      let resolveSave: ((value: { worker: Worker }) => void) | undefined;
+      const mutateAsync = jest.fn(
+        () =>
+          new Promise<{ worker: Worker }>((resolve) => {
+            resolveSave = resolve;
+          })
+      );
+      mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
+      const watchQuery = (watchId: CatalogWatchId) =>
+        ({
+          data: { watch: createCatalogWatchPlaceholder(watchId) },
+          isLoading: false,
+          error: null,
+          refetch: jest.fn(),
+        } as never);
+      mockUseWatch.mockReturnValue(watchQuery(SYSTEM_SECURITY_WATCH_DETECTION_ID));
+      const history = createMemoryHistory({
+        initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`],
+      });
+      render(
+        <I18nProvider>
+          <Router history={history}>
+            <Route path="/watches/:watchId">
+              <WatchDetailPage />
+            </Route>
+          </Router>
+        </I18nProvider>
+      );
+
+      fireEvent.click(enabledSwitch(RULE_CREATION));
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+
+      mockUseWatch.mockReturnValue(watchQuery(SYSTEM_SECURITY_WATCH_HUNT_ID));
+      act(() => {
+        history.push(`/watches/${SYSTEM_SECURITY_WATCH_HUNT_ID}`);
+      });
+      await act(async () => {
+        resolveSave?.({ worker: allWorkers([RULE_CREATION])[0] });
+      });
+
+      expect(screen.queryByTestId('alertZeroWorkerBlockedAfterSaveModal')).not.toBeInTheDocument();
+    });
+
     it('asks before turning off Attack Discovery while Endpoint Analysis is enabled', () => {
       renderWatch(
         SYSTEM_SECURITY_WATCH_FLOOR_ID,

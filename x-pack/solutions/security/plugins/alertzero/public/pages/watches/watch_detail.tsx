@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -45,6 +45,8 @@ import * as settingsI18n from './settings_translations';
 export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
+  const currentWatchId = useRef(watchId);
+  currentWatchId.current = watchId;
   const canWrite = useCanWriteAlertZero();
   const { euiTheme } = useEuiTheme();
   const { data, isLoading, error, refetch } = useWatch(watchId);
@@ -106,6 +108,7 @@ export const WatchDetailPage: React.FC = () => {
       setSaveBlockedByInvalidDraft(true);
       return;
     }
+    const savedFromWatchId = watchId;
     const enabledSavedFrom = enabledById;
     const storedEnabledById = new Map(
       (workersData?.workers ?? []).map((worker) => [worker.id, worker.enabled])
@@ -121,6 +124,10 @@ export const WatchDetailPage: React.FC = () => {
       }
       throw saveError;
     }
+    // The page stays mounted across Watches; a notice from the Watch the user left would mislead.
+    if (currentWatchId.current !== savedFromWatchId) {
+      return;
+    }
     const savedIds = new Set(savedWorkerIds);
     const enabledAfterSave: WorkerEnabledById = new Map(
       [...enabledSavedFrom].map(([workerId, enabled]) => [
@@ -131,7 +138,7 @@ export const WatchDetailPage: React.FC = () => {
     setBlockedNoticeQueue(
       getBlockedAfterSaveNotices(storedEnabledById, enabledAfterSave, savedWorkerIds)
     );
-  }, [save, hasInvalidDraft, enabledById, workersData?.workers]);
+  }, [save, hasInvalidDraft, watchId, enabledById, workersData?.workers]);
 
   const handleEnabledChange = useCallback(
     (worker: Worker, enabled: boolean) => {
