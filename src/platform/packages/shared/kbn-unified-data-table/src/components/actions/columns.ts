@@ -45,8 +45,6 @@ export function getStateColumnActions({
   }
 
   function onRemoveColumn(columnName: string) {
-    // Single-column removal still records popularity. That behavior predates bulk removal.
-    popularizeField(dataView, columnName, dataViews, capabilities);
     onRemoveColumns([columnName]);
   }
 
@@ -56,8 +54,6 @@ export function getStateColumnActions({
       return [];
     }
 
-    // Clearing many fields is not a usage signal, and popularizeField writes the data view
-    // saved object once per field. Keep that write on the single-column path only.
     const currentColumns = columns || [];
     const nextColumns: string[] = [];
     const removedColumnNames: string[] = [];

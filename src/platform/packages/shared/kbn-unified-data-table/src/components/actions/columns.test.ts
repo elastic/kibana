@@ -241,15 +241,16 @@ describe('Test column actions', () => {
       });
     });
 
-    it('popularizes a single-column removal and skips popularity for bulk removal', () => {
+    it('does not popularize field removal', () => {
       const setAppState = jest.fn();
       const actions = getStateColumnAction({ columns: ['first', 'second'] }, setAppState);
       jest.mocked(popularizeField).mockClear();
 
-      actions.onRemoveColumn('first');
+      actions.onAddColumn('third');
       expect(popularizeField).toHaveBeenCalledTimes(1);
 
       jest.mocked(popularizeField).mockClear();
+      actions.onRemoveColumn('first');
       actions.onRemoveColumns(['first', 'second']);
       expect(popularizeField).not.toHaveBeenCalled();
     });
