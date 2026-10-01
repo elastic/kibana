@@ -1814,8 +1814,6 @@ describe('ConversationClient', () => {
           events: [makeTerminatedEvent()] as ConversationEvent[],
         })
       );
-      mockEsClient.delete.mockResolvedValue({});
-
       await client.updateRoundFeedback('conversation-1', executionId, { vote: null });
 
       expect(mockRawEsClient.delete).toHaveBeenCalledWith(

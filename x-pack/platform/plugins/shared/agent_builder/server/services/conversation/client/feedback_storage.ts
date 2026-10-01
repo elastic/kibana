@@ -6,8 +6,6 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { IndexStorageSettings } from '@kbn/storage-adapter';
-import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type {
   ConversationRoundFeedback,
@@ -16,22 +14,8 @@ import type {
 
 export const feedbackIndexName = chatSystemIndex('conversation_feedback');
 
-const feedbackStorageSettings = {
-  name: feedbackIndexName,
-  schema: {
-    properties: {
-      conversation_id: types.keyword({}),
-      execution_id: types.keyword({}),
-      agent_id: types.keyword({}),
-      vote: types.keyword({}),
-      chips: types.keyword({}),
-      comment: types.text({}),
-      submitted_at: types.date({}),
-      connector_id: types.keyword({}),
-      model: types.keyword({}),
-    },
-  },
-} satisfies IndexStorageSettings;
+// One feedback doc per execution; a conversation rarely exceeds single digits of rounds.
+const MAX_FEEDBACK_PER_CONVERSATION = 100;
 
 export interface FeedbackDocument {
   conversation_id: string;
@@ -44,25 +28,6 @@ export interface FeedbackDocument {
   connector_id?: string;
   model?: string;
 }
-
-export type FeedbackStorage = StorageIndexAdapter<
-  typeof feedbackStorageSettings,
-  FeedbackDocument
->;
-
-export const createFeedbackStorage = ({
-  logger,
-  esClient,
-}: {
-  logger: Logger;
-  esClient: ElasticsearchClient;
-}): FeedbackStorage => {
-  return new StorageIndexAdapter<typeof feedbackStorageSettings, FeedbackDocument>(
-    esClient,
-    logger,
-    feedbackStorageSettings
-  );
-};
 
 /** Stable doc id: one feedback record per execution per conversation. */
 const feedbackDocId = (conversationId: string, executionId: string) =>
@@ -115,18 +80,29 @@ export class FeedbackClient {
     try {
       response = await this.esClient.search<FeedbackDocument>({
         index: feedbackIndexName,
-        size: 100,
+        size: MAX_FEEDBACK_PER_CONVERSATION,
         query: { term: { conversation_id: conversationId } },
       });
     } catch (err) {
       if (err?.meta?.statusCode === 404 || err?.statusCode === 404) {
         return undefined;
       }
-      this.logger.warn(`Failed to fetch feedback for conversation ${conversationId}: ${err}`);
+      this.logger.error(`Failed to fetch feedback for conversation ${conversationId}: ${err}`);
       return undefined;
     }
 
-    const hits = response.hits.hits;
+    const { hits } = response.hits;
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+
+    if (total > MAX_FEEDBACK_PER_CONVERSATION) {
+      this.logger.warn(
+        `Conversation ${conversationId} has ${total} feedback docs; only the first ${MAX_FEEDBACK_PER_CONVERSATION} are returned`
+      );
+    }
+
     if (hits.length === 0) return undefined;
 
     const feedback: Record<string, ConversationRoundFeedback> = {};

@@ -62,13 +62,14 @@ export const FeedbackActions: React.FC<FeedbackActionsProps> = ({ executionId })
         ? terminalEvent.data.model_usage
         : undefined;
     return {
+      agentId: conversation?.agent_id,
       connectorId: usage?.connector_id,
       model: usage?.model,
       inputTokens: usage?.input_tokens,
       outputTokens: usage?.output_tokens,
       llmCalls: usage?.llm_calls,
     };
-  }, [terminalEvent]);
+  }, [conversation?.agent_id, terminalEvent]);
 
   const {
     vote,

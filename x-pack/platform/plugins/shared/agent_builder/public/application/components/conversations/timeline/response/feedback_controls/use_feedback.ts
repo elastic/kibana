@@ -52,11 +52,9 @@ interface UseFeedbackReturn extends FeedbackState {
 }
 
 interface FeedbackEbtContext {
-  traceId?: string;
   connectorId?: string;
   model?: string;
   agentId?: string;
-  toolNames?: string[];
   inputTokens?: number;
   outputTokens?: number;
   llmCalls?: number;
@@ -66,11 +64,9 @@ const SUBMITTED_VISIBLE_MS = 2500;
 const SUBMITTED_FADE_MS = 500;
 
 const makeEbtPayload = (ctx: FeedbackEbtContext | undefined) => ({
-  trace_id: ctx?.traceId,
   connector_id: ctx?.connectorId,
   model: ctx?.model,
   agent_id: ctx?.agentId,
-  tool_names: ctx?.toolNames,
   input_tokens: ctx?.inputTokens,
   output_tokens: ctx?.outputTokens,
   llm_calls: ctx?.llmCalls,
