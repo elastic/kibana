@@ -47,7 +47,7 @@ describe('useMenuHeaderStyle', () => {
     const { styles } = result.current;
 
     expect(styles).toContain('padding:16px');
-    expect(styles).toContain('min-height:64px');
+    expect(styles).toContain('min-height:calc(64px + 1px)');
     expect(styles).toContain('display:flex');
     expect(styles).toContain('align-items:center');
     expect(styles).not.toContain('line-height:2.25em');
@@ -58,7 +58,7 @@ describe('useMenuHeaderStyle', () => {
     const { styles } = result.current;
 
     expect(styles).toContain('padding:8px');
-    expect(styles).toContain('min-height:48px');
+    expect(styles).toContain('min-height:calc(48px + 1px)');
     expect(styles).toContain('display:flex');
     expect(styles).toContain('align-items:center');
     expect(styles).not.toContain('line-height:2.25em');

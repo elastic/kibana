@@ -12,8 +12,8 @@ import { css } from '@emotion/react';
 
 /**
  * Secondary menu header spacing.
- * Matches the App Header height contract: `standard` is 64px / `size.base`,
- * `compact` is 48px / `size.s`. Content is flex-centered for baseline alignment.
+ * Matches the App Header shell outer height: `standard` is 64px + thin border,
+ * `compact` is 48px + thin border. Content is flex-centered for baseline alignment.
  */
 export type SecondaryHeaderSpacing = 'standard' | 'compact';
 
@@ -34,8 +34,8 @@ export function useMenuHeaderStyle(spacing: SecondaryHeaderSpacing = 'standard')
     align-items: center;
     flex-shrink: 0;
     padding: ${isCompact ? euiTheme.size.s : euiTheme.size.base} var(--horizontal-padding);
-    margin: 0 1px;
-    min-height: ${isCompact ? '48px' : '64px'};
+    // Match App Header shell outer height (49/65): content floor + thin border width, no hairline.
+    min-height: calc(${isCompact ? '48px' : '64px'} + ${euiTheme.border.width.thin});
 
     & h4 {
       margin-block: 0;
