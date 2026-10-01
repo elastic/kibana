@@ -15,10 +15,14 @@ export {
   EuiDataGridObject,
   EuiGlobalToastListObject,
   EuiSuperSelectObject,
+  EuiSelectableObject,
+  EuiBasicTableObject,
+  EuiDraggableObject,
 } from '@elastic/eui-test-helpers';
 
-// Prototype destined for `@elastic/eui-test-helpers`; lives here until it is
-// ported and published.
-export { EuiSelectableObject } from './selectable_object';
-export { EuiBasicTableObject } from './basic_table_object';
-export { EuiDraggableObject } from './draggable_object';
+/**
+ * Stable EUI selectors, keyed like `page.components`, for when no Component Object method fits.
+ *
+ * @example page.locator(euiSelectors.basicTable.ROW_SELECTOR)
+ */
+export { selectors as euiSelectors } from '@elastic/eui-test-helpers';

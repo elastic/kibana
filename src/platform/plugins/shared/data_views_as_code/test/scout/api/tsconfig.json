@@ -4,6 +4,10 @@
     "outDir": "target/types"
   },
   "include": ["**/*"],
-  "kbn_references": ["@kbn/scout", "@kbn/core-http-common"],
+  "kbn_references": [
+    "@kbn/scout",
+    "@kbn/core-http-common",
+    "@kbn/as-code-shared-schemas",
+  ],
   "exclude": ["target/**/*"]
 }

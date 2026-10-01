@@ -32,6 +32,7 @@
     "@kbn/deeplinks-workflows",
     "@kbn/deeplinks-agent-builder",
     "@kbn/deeplinks-context-engine",
+    "@kbn/deeplinks-evals",
     "@kbn/ui-side-navigation",
     "@kbn/core-chrome-sidebar"
   ],

@@ -5,68 +5,98 @@
  * 2.0.
  */
 
-import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
+import { panelGridSchema, type AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import {
-  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
-  customContentStateSchema,
-  customContentUpdateSchema,
 } from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
-import { definePanelType } from '../panel_type';
+import type { PanelResolutionRequestBase } from '../../../resolve_panel';
 
-/** Create schema: no template — the server generates it server-side during the tool call. */
-export const customContentPanelConfigSchema = customContentStateSchema
-  .omit({ template: true })
-  .extend({
-    prompt: z
+/**
+ * Custom content panel requests.
+ *
+ * Custom content is an HTML template generated server-side, so it is requested
+ * like a Lens or Vega panel (`source: 'request'`, `renderer: 'custom_content'`).
+ * The resolver that turns these requests into panel content lives in
+ * `core/resolvers/custom_content_panel_resolver.ts`.
+ */
+
+/** Request to generate a new custom content panel's template. */
+export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase {
+  renderer: 'custom_content';
+  /** What to display. */
+  nlQuery: string;
+  /** ES|QL query feeding the template. Omit for static content. */
+  esql?: string;
+  existingPanel?: undefined;
+}
+
+/** Request to refine an existing custom content panel's template. */
+export interface CustomContentPanelEditRequest extends PanelResolutionRequestBase {
+  renderer: 'custom_content';
+  existingPanel: AttachmentPanel;
+  /** What to change. Omitted when the edit only changes the query. */
+  nlQuery?: string;
+  /** New ES|QL query. Omit to keep the existing query; pass `null` to remove it. */
+  esql?: string | null;
+}
+
+/** Request to generate or refine a custom content panel's template; `existingPanel` tells them apart. */
+export type CustomContentPanelResolutionRequest =
+  | CustomContentPanelAddRequest
+  | CustomContentPanelEditRequest;
+
+/** Adds a new custom content panel. */
+export const customContentPanelRequestSchema = z.object({
+  source: z.literal('request'),
+  renderer: z
+    .literal('custom_content')
+    .describe(
+      'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express.'
+    ),
+  grid: panelGridSchema,
+  query: z
+    .string()
+    .min(1)
+    .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
+    .describe(
+      'Natural language description of what to display. The HTML template is generated server-side from it — do not supply markup yourself.'
+    ),
+  esql: z
+    .string()
+    .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
+    .optional()
+    .describe(
+      'ES|QL query whose result rows feed the template. Omit for static content — it is not generated for you. Build it with the generate_esql tool rather than writing it yourself; the panel fails if Elasticsearch rejects it.'
+    ),
+});
+
+/** Edits an existing custom content panel by id. */
+export const customContentEditPanelRequestSchema = z
+  .object({
+    source: z.literal('request'),
+    renderer: z
+      .literal('custom_content')
+      .describe('Required to edit a custom content panel; it is not inferred from the panel.'),
+    panelId: z.string().max(256).describe('Existing custom content panel id to update.'),
+    query: z
       .string()
       .min(1)
       .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-      .describe(
-        'Natural language description of what to display. A visually consistent HTML template is generated server-side from this prompt — do not supply a template yourself.'
-      ),
-    esqlQuery: z
-      .string()
-      .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
       .optional()
       .describe(
-        'ES|QL query whose results are passed to the generated template as row objects. Omit for static content.'
+        'Natural language instruction for what to change. The server refines the existing template, preserving layout and design where possible.'
       ),
+    esql: z
+      .string()
+      .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
+      .nullable()
+      .optional()
+      .describe(
+        'New ES|QL query. Omit to keep the existing query; pass null to remove it. Build it with the generate_esql tool rather than writing it yourself.'
+      ),
+  })
+  .refine(({ query, esql }) => query !== undefined || esql !== undefined, {
+    message: 'At least one of query or esql must be provided.',
   });
-
-/** Edit schema: prompt and esqlQuery only — template is generated server-side. */
-const customContentEditConfigSchema = customContentUpdateSchema;
-
-/**
- * The custom_content variant of a `config`-source panel input, discriminated by
- * `type: 'custom_content'`.
- */
-export const customContentPanelConfigInputSchema = z.object({
-  source: z.literal('config'),
-  type: z.literal('custom_content'),
-  grid: panelGridSchema,
-  config: customContentPanelConfigSchema.describe('Custom content panel config.'),
-});
-
-export const editCustomContentPanelConfigInputSchema = z.object({
-  source: z.literal('config'),
-  type: z.literal('custom_content'),
-  panelId: z.string().max(256).describe('Existing custom_content panel id to update.'),
-  config: customContentEditConfigSchema.describe(
-    'Updated config. Supply only the fields that change. The server refines the existing template based on the merged prompt and esqlQuery — preserving layout and design where possible.'
-  ),
-});
-
-/** Registry entry for the `custom_content` panel type. */
-export const customContentPanelDefinition = definePanelType({
-  embeddableType: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-  validateConfigEdit: (existingPanel) =>
-    existingPanel.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE
-      ? { ok: true }
-      : {
-          ok: false,
-          error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as custom content. Use source: "request" for ES|QL-backed Lens or Vega panels.`,
-        },
-});

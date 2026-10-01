@@ -81,7 +81,7 @@ describe('generateRulesFromRaw', () => {
           },
         ],
       });
-    }).toThrowError('Expected a single rule definition, but found 2.');
+    }).toThrow('Expected a single rule definition, but found 2.');
   });
 
   it('provides a rule trace describing the location of the error', () => {
@@ -176,7 +176,7 @@ describe('generateRulesFromRaw', () => {
             field: { username: '*' },
           } as any,
         });
-      }).toThrowError('Expected an array of rules, but found object.');
+      }).toThrow('Expected an array of rules, but found object.');
     });
 
     it('expects each entry to be an object with a single property', () => {
@@ -189,7 +189,7 @@ describe('generateRulesFromRaw', () => {
             } as any,
           ],
         });
-      }).toThrowError('Expected a single rule definition, but found 2.');
+      }).toThrow('Expected a single rule definition, but found 2.');
     });
   });
 
@@ -201,7 +201,7 @@ describe('generateRulesFromRaw', () => {
             field: { username: '*' },
           } as any,
         });
-      }).toThrowError('Expected an array of rules, but found object.');
+      }).toThrow('Expected an array of rules, but found object.');
     });
 
     it('expects each entry to be an object with a single property', () => {
@@ -214,7 +214,7 @@ describe('generateRulesFromRaw', () => {
             } as any,
           ],
         });
-      }).toThrowError('Expected a single rule definition, but found 2.');
+      }).toThrow('Expected a single rule definition, but found 2.');
     });
   });
 
@@ -228,7 +228,7 @@ describe('generateRulesFromRaw', () => {
             },
           ],
         });
-      }).toThrowError('Expected an object, but found array.');
+      }).toThrow('Expected an object, but found array.');
     });
 
     it(`expects an single property in its object value`, () => {
@@ -239,7 +239,7 @@ describe('generateRulesFromRaw', () => {
             dn: '*',
           },
         });
-      }).toThrowError('Expected a single field, but found 2.');
+      }).toThrow('Expected a single field, but found 2.');
     });
 
     it('accepts an array of possible values', () => {
@@ -281,7 +281,7 @@ describe('generateRulesFromRaw', () => {
             },
           ],
         } as any);
-      }).toThrowError('Expected an object, but found array.');
+      }).toThrow('Expected an object, but found array.');
     });
 
     it(`can only be nested inside an "all" clause`, () => {
@@ -297,7 +297,7 @@ describe('generateRulesFromRaw', () => {
             },
           ],
         });
-      }).toThrowError(`"except" rule can only exist within an "all" rule.`);
+      }).toThrow(`"except" rule can only exist within an "all" rule.`);
 
       expect(() => {
         generateRulesFromRaw({
@@ -307,7 +307,7 @@ describe('generateRulesFromRaw', () => {
             },
           },
         });
-      }).toThrowError(`"except" rule can only exist within an "all" rule.`);
+      }).toThrow(`"except" rule can only exist within an "all" rule.`);
     });
 
     it('converts an "except field" rule into an equivilent "except all" rule', () => {

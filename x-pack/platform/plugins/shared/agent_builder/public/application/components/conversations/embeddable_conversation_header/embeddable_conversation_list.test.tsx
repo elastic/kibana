@@ -10,15 +10,16 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EmbeddableConversationList } from './embeddable_conversation_list';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../hooks/use_conversation_list';
 
 jest.mock('../../../context/conversation/conversation_context', () => ({
   useConversationContext: jest.fn(),
 }));
 
-jest.mock('../../../context/streaming/streaming_context', () => ({
-  useStreamingContext: jest.fn(),
+jest.mock('../../../hooks/use_agent_builder_service', () => ({
+  useAgentBuilderServices: jest.fn(() => ({
+    conversationTemplatesService: { getTemplateUIDefinition: jest.fn() },
+  })),
 }));
 
 jest.mock('../../../hooks/use_conversation_list', () => ({
@@ -40,7 +41,6 @@ jest.mock('../conversation_list_item_styles', () => ({
 }));
 
 const mockUseConversationContext = jest.mocked(useConversationContext);
-const mockUseStreamingContext = jest.mocked(useStreamingContext);
 const mockUseConversationList = jest.mocked(useConversationList);
 
 const renderList = (props: { searchValue?: string; onClose?: () => void } = {}) => {
@@ -57,12 +57,10 @@ const renderList = (props: { searchValue?: string; onClose?: () => void } = {}) 
 describe('EmbeddableConversationList', () => {
   let setConversationId: jest.Mock;
   let resetAttachments: jest.Mock;
-  let removeAllErrors: jest.Mock;
 
   beforeEach(() => {
     setConversationId = jest.fn();
     resetAttachments = jest.fn();
-    removeAllErrors = jest.fn();
 
     mockUseConversationContext.mockReturnValue({
       agentId: 'agent-1',
@@ -71,10 +69,8 @@ describe('EmbeddableConversationList', () => {
       resetAttachments,
     } as unknown as ReturnType<typeof useConversationContext>);
 
-    mockUseStreamingContext.mockReturnValue({
-      removeAllErrors,
-    } as unknown as ReturnType<typeof useStreamingContext>);
-
+    // `searchValue` defaults to '' in these tests, so `isSearching` is false and the
+    // list conversations below are what gets rendered.
     mockUseConversationList.mockReturnValue({
       conversations: [
         {
@@ -91,6 +87,10 @@ describe('EmbeddableConversationList', () => {
         },
       ],
       isLoading: false,
+      isSearching: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      isFetchingNextPage: false,
     } as unknown as ReturnType<typeof useConversationList>);
   });
 
@@ -104,7 +104,6 @@ describe('EmbeddableConversationList', () => {
     expect(resetAttachments).toHaveBeenCalledTimes(1);
     expect(setConversationId).toHaveBeenCalledWith('conv-2');
     expect(onClose).toHaveBeenCalledTimes(1);
-    expect(removeAllErrors).toHaveBeenCalledTimes(1);
   });
 
   it('does not call resetAttachments when re-clicking the currently active conversation', () => {
@@ -117,14 +116,5 @@ describe('EmbeddableConversationList', () => {
     expect(resetAttachments).not.toHaveBeenCalled();
     expect(setConversationId).toHaveBeenCalledWith('conv-1');
     expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls removeAllErrors on every conversation click', () => {
-    renderList();
-
-    fireEvent.click(screen.getByTestId('agentBuilderEmbeddableConversation-conv-2'));
-    fireEvent.click(screen.getByTestId('agentBuilderEmbeddableConversation-conv-1'));
-
-    expect(removeAllErrors).toHaveBeenCalledTimes(2);
   });
 });

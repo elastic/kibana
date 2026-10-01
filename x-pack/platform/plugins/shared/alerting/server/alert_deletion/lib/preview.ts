@@ -6,13 +6,14 @@
  */
 
 import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { allowedAppCategories, type AlertDeletionContext } from '../alert_deletion_client';
 import { getActiveAlertsQuery, getInactiveAlertsQuery } from '.';
 
 export const previewTask = async (
   context: AlertDeletionContext,
   settings: RulesSettingsAlertDeleteProperties,
-  spaceId: string
+  spaceId: SpaceId
 ) => {
   const esClient = await context.elasticsearchClientPromise;
 

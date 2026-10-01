@@ -6,8 +6,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { omit } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import {
+  isSavedObjectErrorResult,
+  type SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import {
+  DASHBOARD_ARTIFACT_TYPE,
+  RUNBOOK_ARTIFACT_TYPE,
+  RUNBOOK_CONTENT_LIMIT,
+} from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
   createRuleDataSchema,
@@ -15,26 +25,53 @@ import {
   ruleKindSchema,
   scheduleSchema,
   querySchema,
-  recoveryStrategySchema,
-  noDataStrategySchema,
+  recoverySchema,
+  recoveryStrategy,
+  noDataSchema,
   getRootEsqlQuery,
   groupingSchema,
   stateTransitionSchema,
+  isAbsenceDistinguishableFromBreach,
   isStateTransitionAllowed,
-  isSignalUsingStandaloneFormat,
-  isSignalQueryBreachOnly,
-  isRecoveryQueryConsistentWithStrategy,
-  isRecoveryQueryProvidedForStrategy,
-  isNoDataQueryConsistentWithStrategy,
-  isNoDataQueryProvidedForStrategy,
+  isLifecycleConfigAllowedForKind,
+  isRecoveryConditionUsableWithBreach,
+  isRecoveryTransitionConsistentWithStrategy,
+  REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
 } from '@kbn/alerting-v2-schemas';
-import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
+import { resolveArtifactId } from '@kbn/alerting-v2-utils';
+import { buildRulePayload } from '@kbn/alerting-v2-utils';
+import { dashboardIdSchema } from '../../../lib/artifact_types';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 import { resolveTimeFieldForQuery } from './resolve_time_field';
+
+type RuleArtifact = NonNullable<RuleAttachmentData['artifacts']>[number];
+
+type DashboardArtifact = RuleArtifact & {
+  type: typeof DASHBOARD_ARTIFACT_TYPE;
+  data: { dashboard_id: string };
+};
+
+type RunbookArtifact = RuleArtifact & {
+  type: typeof RUNBOOK_ARTIFACT_TYPE;
+  data: { content: string };
+};
+
+const isDashboardArtifact = (artifact: RuleArtifact): artifact is DashboardArtifact =>
+  artifact.type === DASHBOARD_ARTIFACT_TYPE;
+
+const isRunbookArtifact = (artifact: RuleArtifact): artifact is RunbookArtifact =>
+  artifact.type === RUNBOOK_ARTIFACT_TYPE;
 
 // Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
 // local to avoid forcing an export purely for this guard.
 const MAX_RULE_TAGS = 20;
+
+// Mirrors `artifactsSchema.max(100)` in @kbn/alerting-v2-schemas.
+const MAX_RULE_ARTIFACTS = 100;
+
+// Saved-object type for Kibana dashboards. Same string as DASHBOARD_ARTIFACT_TYPE
+// but a different concept (SO type vs rule artifact type).
+const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 /**
  * Ensures the agent-builder provenance tag is present without clobbering any
@@ -49,6 +86,53 @@ const withAgentBuilderTag = (tags: string[] | undefined): string[] => {
   return [...existing, AGENT_BUILDER_TAG];
 };
 
+/**
+ * Maps dashboard saved-object IDs onto `dashboard` artifacts in the create/update
+ * API shape. Reuses an existing artifact `id` when the same dashboard is already
+ * attached so repeated `set_dashboards` calls do not churn identifiers.
+ */
+const toDashboardArtifacts = (
+  dashboardIds: string[],
+  existingArtifacts: DashboardArtifact[]
+): DashboardArtifact[] => {
+  const existingIdByDashboardId = new Map<string, string>();
+  for (const artifact of existingArtifacts) {
+    existingIdByDashboardId.set(artifact.data.dashboard_id, artifact.id);
+  }
+
+  const seen = new Set<string>();
+  const dashboards: DashboardArtifact[] = [];
+  for (const dashboardId of dashboardIds) {
+    if (seen.has(dashboardId)) {
+      continue;
+    }
+    seen.add(dashboardId);
+    dashboards.push({
+      id: resolveArtifactId(DASHBOARD_ARTIFACT_TYPE, existingIdByDashboardId.get(dashboardId)),
+      type: DASHBOARD_ARTIFACT_TYPE,
+      data: { dashboard_id: dashboardId },
+    });
+  }
+  return dashboards;
+};
+
+/** True when content is missing or blank after trim — treated as unlink. */
+const isRunbookUnlinkContent = (content: string | null): content is null =>
+  content == null || content.trim().length === 0;
+
+/**
+ * Maps markdown onto a single `runbook` artifact in the create/update API shape.
+ * Reuses the first existing runbook `id` so replace does not churn identifiers.
+ */
+const toRunbookArtifact = (
+  content: string,
+  existingArtifacts: RunbookArtifact[]
+): RunbookArtifact => ({
+  id: resolveArtifactId(RUNBOOK_ARTIFACT_TYPE, existingArtifacts[0]?.id),
+  type: RUNBOOK_ARTIFACT_TYPE,
+  data: { content },
+});
+
 // ─── Operation schemas ────────────────────────────────────────────────────────
 // Every field-level schema is derived from the shared alerting-v2-schemas
 // parent objects (via .shape / .unwrap()) so that tool-level validation
@@ -56,7 +140,6 @@ const withAgentBuilderTag = (tags: string[] | undefined): string[] => {
 
 export const setMetadataOperationSchema = metadataSchema
   .partial()
-  .omit({ owner: true })
   .extend({ operation: z.literal('set_metadata') })
   .describe(
     'Use `set_metadata` to name the rule and add a description or tags so the user can filter by it later.'
@@ -68,7 +151,7 @@ export const setKindOperationSchema = z
     kind: ruleKindSchema,
   })
   .describe(
-    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`)."
+    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`). Switching to `signal` drops the alert-only `recovery`, `no_data` and `state_transition` settings."
   );
 
 export const setScheduleOperationSchema = scheduleSchema
@@ -82,11 +165,23 @@ export const setQueryOperationSchema = z
   .object({
     operation: z.literal('set_query'),
     query: querySchema,
-    recovery_strategy: recoveryStrategySchema.optional(),
-    no_data_strategy: noDataStrategySchema.optional(),
+  })
+  .describe('Use `set_query` to define the ES|QL condition that should fire the rule.');
+
+export const setRecoveryOperationSchema = z
+  .object({
+    operation: z.literal('set_recovery'),
+    recovery: recoverySchema,
+  })
+  .describe('Use `set_recovery` to control how alert episodes recover. Requires `kind: alert`.');
+
+export const setNoDataOperationSchema = z
+  .object({
+    operation: z.literal('set_no_data'),
+    no_data: noDataSchema,
   })
   .describe(
-    'Use `set_query` to define the ES|QL condition that should fire the rule. Optionally set how recovery is detected and what happens when data stops arriving.'
+    'Use `set_no_data` to control what happens when data stops arriving. Requires `kind: alert`.'
   );
 
 export const setGroupingOperationSchema = groupingSchema
@@ -98,12 +193,38 @@ export const setGroupingOperationSchema = groupingSchema
   );
 
 export const setStateTransitionOperationSchema = stateTransitionSchema
-  .unwrap()
-  .unwrap()
-  .omit({ pending_operator: true, recovering_operator: true })
   .extend({ operation: z.literal('set_state_transition') })
   .describe(
     'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
+  );
+
+export const setDashboardsOperationSchema = z
+  .object({
+    operation: z.literal('set_dashboards'),
+    dashboard_ids: z
+      .array(dashboardIdSchema.describe('Dashboard saved-object ID.'))
+      .max(MAX_RULE_ARTIFACTS)
+      .describe(
+        'Dashboard saved-object IDs to link as investigation artifacts on the rule. Each ID must be an existing dashboard the current user can read. Replaces previously linked dashboards. Pass an empty array to unlink all dashboards.'
+      ),
+  })
+  .describe(
+    'Use `set_dashboards` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a `dashboard` artifact (`{ id, type: "dashboard", data: { dashboard_id } }`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.'
+  );
+
+export const setRunbookOperationSchema = z
+  .object({
+    operation: z.literal('set_runbook'),
+    content: z
+      .string()
+      .max(RUNBOOK_CONTENT_LIMIT)
+      .nullable()
+      .describe(
+        `Markdown investigation steps. Stored as a \`runbook\` artifact (\`{ id, type: "runbook", data: { content } }\`). Replaces any previously attached runbook; other artifacts (e.g. dashboards) are preserved. Pass \`null\` or an empty string to unlink. Whitespace-only content is treated as unlink. Max ${RUNBOOK_CONTENT_LIMIT} characters.`
+      ),
+  })
+  .describe(
+    `Use \`set_runbook\` to attach investigation markdown to the rule. Stored as a \`runbook\` artifact (\`{ id, type: "runbook", data: { content } }\`), matching the create/update API. Replaces any previously attached runbook; other artifacts (e.g. dashboards) are preserved. Pass \`null\` or an empty string to unlink. Whitespace-only content is treated as unlink. Content longer than ${RUNBOOK_CONTENT_LIMIT} characters is rejected.`
   );
 
 export const validateOperationSchema = z
@@ -121,8 +242,12 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setKindOperationSchema,
   setScheduleOperationSchema,
   setQueryOperationSchema,
+  setRecoveryOperationSchema,
+  setNoDataOperationSchema,
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
+  setDashboardsOperationSchema,
+  setRunbookOperationSchema,
   validateOperationSchema,
 ]);
 
@@ -141,6 +266,41 @@ export class RuleOperationValidationError extends Error {
     this.name = 'RuleOperationValidationError';
   }
 }
+
+/**
+ * Confirms each ID is a dashboard saved object the current user can read.
+ * Empty `dashboard_ids` (unlink all) skips the lookup.
+ */
+const assertDashboardsExist = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  dashboardIds: string[]
+): Promise<void> => {
+  const uniqueIds = [...new Set(dashboardIds)];
+  if (uniqueIds.length === 0) {
+    return;
+  }
+
+  try {
+    const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(
+      uniqueIds.map((id) => ({ type: DASHBOARD_SAVED_OBJECT_TYPE, id }))
+    );
+    const missing = savedObjects
+      .filter(isSavedObjectErrorResult)
+      .map((savedObject) => savedObject.id);
+    if (missing.length > 0) {
+      throw new RuleOperationValidationError(
+        `Dashboard saved object(s) not found: ${missing.join(', ')}. ` +
+          `Resolve dashboard titles to saved-object IDs before calling set_dashboards.`
+      );
+    }
+  } catch (err) {
+    if (err instanceof RuleOperationValidationError) {
+      throw err;
+    }
+    const message = err instanceof Error ? err.message : String(err);
+    throw new RuleOperationValidationError(`Could not verify dashboards: ${message}`);
+  }
+};
 
 // ─── ES|QL query validation ───────────────────────────────────────────────────
 
@@ -181,7 +341,8 @@ async function validateEsqlQuery(
 export const executeRuleOperations = async (
   data: Partial<RuleAttachmentData>,
   operations: RuleOperation[],
-  esClient?: IScopedClusterClient,
+  esClient: IScopedClusterClient | undefined,
+  savedObjectsClient: SavedObjectsClientContract,
   { isNew = false }: { isNew?: boolean } = {}
 ): Promise<RuleOperationsResult> => {
   let next = { ...data };
@@ -204,7 +365,12 @@ export const executeRuleOperations = async (
       }
 
       case 'set_kind':
-        next = { ...next, kind: op.kind };
+        // An alert draft always carries the alert-only fields and no operation
+        // can remove them, so converting to a signal has to clear them here.
+        next =
+          op.kind === 'signal'
+            ? omit({ ...next, kind: op.kind }, ['recovery', 'no_data', 'state_transition'])
+            : { ...next, kind: op.kind };
         break;
 
       case 'set_schedule': {
@@ -253,36 +419,31 @@ export const executeRuleOperations = async (
           ...next,
           query: op.query,
           ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
-          ...(op.recovery_strategy !== undefined
-            ? { recovery_strategy: op.recovery_strategy }
-            : {}),
-          ...(op.no_data_strategy !== undefined ? { no_data_strategy: op.no_data_strategy } : {}),
         };
+        break;
+      }
 
-        if (!isRecoveryQueryConsistentWithStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'query.recovery is only allowed when recovery_strategy is "query".'
-          );
-        }
-        if (!isRecoveryQueryProvidedForStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'recovery_strategy "query" requires a recovery block in the query ' +
-              '(recovery: { segment } for composed, recovery: { query } for standalone).'
-          );
-        }
-        if (!isNoDataQueryConsistentWithStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.'
-          );
-        }
-        if (!isNoDataQueryProvidedForStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'no_data_strategy (other than "none") requires a no_data block in the query ' +
-              'for standalone-format rules.'
-          );
+      case 'set_recovery': {
+        next = { ...next, recovery: op.recovery };
+
+        // A recovering delay is inert under `manual` and the write API rejects
+        // the pair, and no operation can remove a phase, so switching to manual
+        // has to clear it here.
+        if (
+          next.recovery?.strategy === recoveryStrategy.manual &&
+          next.state_transition?.recovering
+        ) {
+          const stateTransition = omit(next.state_transition, 'recovering');
+          next = Object.keys(stateTransition).length
+            ? { ...next, state_transition: stateTransition }
+            : omit(next, 'state_transition');
         }
         break;
       }
+
+      case 'set_no_data':
+        next = { ...next, no_data: op.no_data };
+        break;
 
       case 'set_grouping': {
         if (lastQueryColumns && lastQueryColumns.length > 0) {
@@ -307,17 +468,61 @@ export const executeRuleOperations = async (
           ...next,
           state_transition: {
             ...next.state_transition,
-            ...(op.pending_count !== undefined ? { pending_count: op.pending_count } : {}),
-            ...(op.pending_timeframe !== undefined
-              ? { pending_timeframe: op.pending_timeframe }
-              : {}),
-            ...(op.recovering_count !== undefined ? { recovering_count: op.recovering_count } : {}),
-            ...(op.recovering_timeframe !== undefined
-              ? { recovering_timeframe: op.recovering_timeframe }
-              : {}),
+            ...(op.pending !== undefined ? { pending: op.pending } : {}),
+            ...(op.recovering !== undefined ? { recovering: op.recovering } : {}),
           },
         };
         break;
+
+      case 'set_dashboards': {
+        await assertDashboardsExist(savedObjectsClient, op.dashboard_ids);
+        const existingArtifacts = next.artifacts ?? [];
+        const otherArtifacts: RuleArtifact[] = [];
+        const existingDashboardArtifacts: DashboardArtifact[] = [];
+        for (const artifact of existingArtifacts) {
+          if (isDashboardArtifact(artifact)) {
+            existingDashboardArtifacts.push(artifact);
+          } else {
+            otherArtifacts.push(artifact);
+          }
+        }
+        const dashboardArtifacts = toDashboardArtifacts(
+          op.dashboard_ids,
+          existingDashboardArtifacts
+        );
+        const artifacts = [...otherArtifacts, ...dashboardArtifacts];
+        if (artifacts.length > MAX_RULE_ARTIFACTS) {
+          throw new RuleOperationValidationError(
+            `A rule can have at most ${MAX_RULE_ARTIFACTS} artifacts.`
+          );
+        }
+        next = { ...next, artifacts };
+        break;
+      }
+
+      case 'set_runbook': {
+        const existingArtifacts = next.artifacts ?? [];
+        const otherArtifacts: RuleArtifact[] = [];
+        const existingRunbookArtifacts: RunbookArtifact[] = [];
+        for (const artifact of existingArtifacts) {
+          if (isRunbookArtifact(artifact)) {
+            existingRunbookArtifacts.push(artifact);
+          } else {
+            otherArtifacts.push(artifact);
+          }
+        }
+        const runbookArtifacts = isRunbookUnlinkContent(op.content)
+          ? []
+          : [toRunbookArtifact(op.content, existingRunbookArtifacts)];
+        const artifacts = [...otherArtifacts, ...runbookArtifacts];
+        if (artifacts.length > MAX_RULE_ARTIFACTS) {
+          throw new RuleOperationValidationError(
+            `A rule can have at most ${MAX_RULE_ARTIFACTS} artifacts.`
+          );
+        }
+        next = { ...next, artifacts };
+        break;
+      }
 
       case 'validate': {
         const payload = buildRulePayload(next);
@@ -360,13 +565,31 @@ export const executeRuleOperations = async (
     );
   }
 
-  if (!isSignalUsingStandaloneFormat(next)) {
-    throw new RuleOperationValidationError('kind "signal" requires query.format "standalone".');
+  if (!isLifecycleConfigAllowedForKind(next)) {
+    throw new RuleOperationValidationError('Signal rules cannot set recovery or no_data.');
   }
 
-  if (!isSignalQueryBreachOnly(next)) {
+  // `set_query` replaces the query and `set_recovery` replaces the strategy, so
+  // either one can leave `condition` with nothing to contrast against. Judge
+  // the combination after both have been applied — a query-only edit never
+  // enters `set_recovery`.
+  if (!isRecoveryConditionUsableWithBreach(next)) {
     throw new RuleOperationValidationError(
-      'Signal rules cannot set recovery_strategy or no_data_strategy.'
+      'recovery.strategy "condition" requires query.breach. Without a breach segment ' +
+        'every row of the base query breaches, so the rule could never recover.'
+    );
+  }
+
+  if (!isAbsenceDistinguishableFromBreach(next)) {
+    throw new RuleOperationValidationError(
+      `${REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE} Without one, a group that stops breaching ` +
+        'disappears from both queries and is read as no data rather than recovered.'
+    );
+  }
+
+  if (!isRecoveryTransitionConsistentWithStrategy(next)) {
+    throw new RuleOperationValidationError(
+      'state_transition.recovering has no effect when recovery.strategy is "manual".'
     );
   }
 

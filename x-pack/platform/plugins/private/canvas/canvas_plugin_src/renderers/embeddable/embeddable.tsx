@@ -94,10 +94,18 @@ const renderReactEmbeddable = ({
       };
     }, []);
 
+    const panelProps = useMemo(
+      () => ({
+        isSharedItem: true,
+      }),
+      []
+    );
+
     return (
       <EmbeddableRenderer
         type={type}
         maybeId={uuid}
+        panelProps={panelProps}
         getParentApi={(): CanvasContainerApi => ({
           ...container,
           ...searchApi,

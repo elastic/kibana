@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { YaraMetaKeyOfInterest } from '../../../../common/endpoint/types';
+
 export type YaraDiagnosticSeverity = 'error' | 'warning';
 
 export interface YaraDiagnostic {
@@ -14,7 +16,27 @@ export interface YaraDiagnostic {
   line: number;
 }
 
+export type YaraCompiledRuleMeta = {
+  [key in YaraMetaKeyOfInterest]?: string;
+};
+
+export interface YaraCompiledRule {
+  /** YARA rule identifier (the token after `rule`). */
+  identifier: string;
+  meta: YaraCompiledRuleMeta;
+  /** Meta keys that appeared more than once. Values are omitted from `meta`. */
+  duplicateMeta: YaraMetaKeyOfInterest[];
+}
+
 export interface YaraValidateResult {
+  /** Errors seen by libyara. Capped at 64. */
   errors: YaraDiagnostic[];
+  /** Warnings seen by libyara. Capped at 64. */
   warnings: YaraDiagnostic[];
+  /** Total errors seen by libyara. */
+  errorCount: number;
+  /** Total warnings seen by libyara. */
+  warningCount: number;
+  /** Rules compiled by libyara. Empty when compile fails or the source has no rules. */
+  rules: YaraCompiledRule[];
 }

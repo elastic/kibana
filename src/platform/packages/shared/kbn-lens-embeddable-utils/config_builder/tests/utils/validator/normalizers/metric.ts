@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Test-only metric (`lnsMetric`) attribute normalizer for strict SO ↔ API round-trip checks.
+ */
+
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
+  type DataType,
   type MetricVisualizationState,
 } from '@kbn/lens-common';
 
@@ -46,6 +51,7 @@ interface LegacyMetricStyling {
   colorMode?: unknown;
   valuesTextSize?: unknown;
   titlesTextSize?: unknown;
+  secondaryLabelPosition?: unknown;
 }
 
 // Optional visualization accessors that legacy SOs may persist as explicit `null`; the transform
@@ -146,13 +152,18 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
     viz.primaryAlign = viz.primaryAlign ?? viz.valuesTextAlign ?? DEFAULT_PRIMARY_VALUE_ALIGNMENT;
     viz.primaryPosition = viz.primaryPosition ?? DEFAULT_PRIMARY_POSITION;
 
-    // Without a secondary metric, the transform resets secondary styling to its defaults.
+    // Predict the API round-trip: empty legacy label is hidden; otherwise keep
+    // visibility, defaulting old charts to `before`.
     if (viz.secondaryMetricAccessor) {
       viz.secondaryAlign = viz.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT;
-      viz.secondaryLabelPosition = viz.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
+      viz.secondaryNameVisibility =
+        viz.secondaryLabel === ''
+          ? 'hidden'
+          : viz.secondaryNameVisibility ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
     } else {
+      // Comparison fill only; the transform does not persist these without a secondary metric.
       viz.secondaryAlign = DEFAULT_SECONDARY_VALUE_ALIGNMENT;
-      viz.secondaryLabelPosition = DEFAULT_SECONDARY_LABEL_PLACEMENT;
+      viz.secondaryNameVisibility = DEFAULT_SECONDARY_LABEL_PLACEMENT;
     }
 
     // Absent sizing round-trips through the API as `auto`, which maps back to `valueFontMode: 'default'`.
@@ -173,15 +184,18 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       delete viz.subtitle;
     }
 
-    // Deprecated / legacy TSVB-era styling keys are not produced by the transform.
+    // Keys the API transform does not emit (TSVB leftovers and pre-rename metric fields).
     delete viz.valuesTextAlign;
     delete viz.titleWeight;
+    delete viz.secondaryPrefix;
+    delete viz.secondaryLabel;
     delete legacyViz.textAlign;
     delete legacyViz.size;
     delete legacyViz.titlePosition;
     delete legacyViz.colorMode;
     delete legacyViz.valuesTextSize;
     delete legacyViz.titlesTextSize;
+    delete legacyViz.secondaryLabelPosition;
 
     return attributes;
   },
@@ -189,7 +203,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
     const viz = attributes.state.visualization;
 
     viz.secondaryAlign = viz.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT;
-    viz.secondaryLabelPosition = viz.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
+    viz.secondaryNameVisibility = viz.secondaryNameVisibility ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
 
     return attributes;
   },
@@ -238,14 +252,6 @@ const alignMetricColumns: NormalizerConfig<MetricAttributes> = {
     }
     return attributes;
   },
-  ignore: [
-    // ES|QL column display format (`params`) is not preserved through the API round-trip,
-    // consistent with the already-ignored `meta` / `inMetricDimension` text-based fields.
-    'state.datasourceStates.textBased.layers.*.columns.*.params',
-    // Runtime-only ES|QL fields not produced by the transform.
-    'state.datasourceStates.textBased.initialContext',
-    'state.datasourceStates.textBased.layers.*.columns.*.variable',
-  ],
 };
 
 /**
@@ -463,6 +469,27 @@ const alignIds: NormalizerConfig<MetricAttributes> = {
   },
 };
 
+function inferColumnDataType(
+  newColumnId: string,
+  { isTextBased }: { isTextBased: boolean }
+): DataType | undefined {
+  if (!isTextBased) {
+    return;
+  }
+  if (
+    newColumnId === 'metric_accessor_breakdown' ||
+    newColumnId === `${ACCESSOR}_breakdown_trendline`
+  ) {
+    return 'string';
+  }
+  if (newColumnId === 'x_date_histogram') {
+    return 'date';
+  }
+  if (canonicalMetricColumns.has(newColumnId)) {
+    return 'number';
+  }
+}
+
 export const normalizeMetric = mergeNormalizers([
   getCommonNormalizer<MetricAttributes>(({ state: { visualization } }) => ({
     layerRemapping: [
@@ -470,6 +497,7 @@ export const normalizeMetric = mergeNormalizers([
       [visualization.trendlineLayerId, TRENDLINE_LAYER_ID],
     ],
     columnRemapping: getColumnRemapping(visualization),
+    inferColumnDataType,
   })),
   getPaletteNormalizer<MetricAttributes>('state.visualization.palette', isSingleValueMetric),
   alignIds,

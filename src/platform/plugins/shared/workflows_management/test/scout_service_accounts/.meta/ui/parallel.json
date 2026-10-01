@@ -1,0 +1,78 @@
+{
+  "sha1": "e05efea8bd2cc31fb45f15e1a214fed03e176660",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ebc16deb623f50b-d6a9e10b7da46a3",
+      "title": "Service account editor with the feature flag enabled selects, saves, and resolves an account with block settings after reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_editor.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "ebc16deb623f50b-0ed8ef434849dbf",
+      "title": "Service account editor with the feature flag enabled selects, saves, and resolves an account with inline settings after reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_editor.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "ebc16deb623f50b-16474ef31db3d68",
+      "title": "Service account editor with the feature flag enabled loads the next directory page with the keyboard without changing YAML",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_editor.spec.ts",
+        "line": 59,
+        "column": 21
+      }
+    },
+    {
+      "id": "ebc16deb623f50b-621e94bb6e89962",
+      "title": "Service account editor with the feature flag enabled loads the next directory page with the mouse without changing YAML",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_editor.spec.ts",
+        "line": 59,
+        "column": 21
+      }
+    },
+    {
+      "id": "65bbacf416ac297-43eccf3b79377a3",
+      "title": "Changing a saved workflow service account replaces an existing ID and supports searching by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_replacement.spec.ts",
+        "line": 15,
+        "column": 14
+      }
+    }
+  ]
+}

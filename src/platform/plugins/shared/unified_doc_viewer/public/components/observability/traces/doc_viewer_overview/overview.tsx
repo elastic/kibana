@@ -50,6 +50,8 @@ export type OverviewProps = DocViewRenderProps &
     showWaterfall?: boolean;
     showActions?: boolean;
     docViewActions?: DocViewActions;
+    /** Used when the hit's flattened `trace.id` is missing (common for some OTel shapes). */
+    fallbackTraceId?: string;
   };
 
 export type TraceOverviewSections = 'errors-table';
@@ -74,6 +76,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
       docViewActions,
       initialState,
       onInitialStateChange,
+      fallbackTraceId,
     },
     ref
   ) => {
@@ -87,7 +90,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
     const isOtelSpan = apmDurationField == null && flattenedHit[DURATION] != null;
     const duration = apmDurationField ?? flattenedHit[DURATION]! * 0.001;
 
-    const traceId = flattenedHit[TRACE_ID];
+    const traceId = flattenedHit[TRACE_ID] ?? fallbackTraceId;
     const transactionId = flattenedHit[TRANSACTION_ID];
     const spanId = flattenedHit[SPAN_ID];
     const serviceName = flattenedHit[SERVICE_NAME];

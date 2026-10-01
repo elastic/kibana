@@ -9,17 +9,10 @@ import { createHash } from 'crypto';
 import { stableStringify } from '@kbn/std';
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type {
-  AlertEvent,
-  AlertEventSeverity,
-  AlertEventType,
-} from '../../resources/datastreams/alert_events';
-import {
-  alertEventSeverity,
-  alertEventType,
-  buildRuleEventDocument,
-} from '../../resources/datastreams/alert_events';
+import type { AlertEventSeverity, RuleResponse } from '@kbn/alerting-v2-schemas';
+import { alertEventSeverity } from '@kbn/alerting-v2-schemas';
+import type { AlertEventDocument, AlertEventType } from '../../resources/datastreams/alert_events';
+import { alertEventType, buildRuleEventDocument } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
 
 /**
@@ -124,9 +117,14 @@ export interface BuildAlertEventsBaseOpts {
    * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
    */
   scheduledTimestamp: string;
+  maxGroupsPerExecution: number;
+  activeGroupHashes?: ReadonlySet<string>;
 }
 
-export type AlertEventsBatchBuilder = (batch: Array<Record<string, unknown>>) => AlertEvent[];
+export interface AlertEventsBatchBuilder {
+  buildBatch(batch: Array<Record<string, unknown>>): AlertEventDocument[];
+  readonly droppedGroupCount: number;
+}
 
 export function createAlertEventsBatchBuilder({
   ruleId,
@@ -135,31 +133,54 @@ export function createAlertEventsBatchBuilder({
   ruleAttributes,
   type,
   scheduledTimestamp,
+  maxGroupsPerExecution,
+  activeGroupHashes = new Set<string>(),
 }: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
   // Stable per run to support retries without duplicating documents.
   // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
   const executionUuid = buildExecutionUuid({ ruleId, spaceId, scheduledTimestamp });
 
-  // Timestamp when the alert event is written to the index.
-  const wroteAt = new Date().toISOString();
   const source = 'internal';
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
+  const hasGroupingFields = groupingFields.length > 0;
+  const groupHashes = new Set<string>();
+  const droppedGroupHashes = new Set<string>();
   let index = 0;
 
-  return (batch: Array<Record<string, unknown>>): AlertEvent[] => {
-    const alertEventsBatch: AlertEvent[] = [];
+  const buildBatch = (batch: Array<Record<string, unknown>>): AlertEventDocument[] => {
+    const alertEventsBatch: AlertEventDocument[] = [];
 
     for (const rowDoc of batch) {
+      // Advance per row (even when dropped) so non-dropped rows keep deterministic hashes across retries.
+      const rowIndex = index++;
+
       const groupHash = buildGroupHash({
         rowDoc,
         groupKeyFields: groupingFields,
         get fallbackSeed(): string {
-          return `${executionUuid}|row:${index}|${stableStringify(rowDoc)}`;
+          return `${executionUuid}|row:${rowIndex}|${stableStringify(rowDoc)}`;
         },
       });
 
+      const isNewGroup = !groupHashes.has(groupHash);
+      const isActiveGroup = activeGroupHashes.has(groupHash);
+      if (
+        // Only check maxGroupsPerExecution for grouped rules
+        hasGroupingFields &&
+        isNewGroup &&
+        // Active groups with an existing episode should not be dropped.
+        !isActiveGroup &&
+        groupHashes.size >= maxGroupsPerExecution
+      ) {
+        droppedGroupHashes.add(groupHash);
+        continue;
+      }
+
+      if (isNewGroup) {
+        groupHashes.add(groupHash);
+      }
+
       const doc = buildRuleEventDocument({
-        '@timestamp': wroteAt,
         scheduled_timestamp: scheduledTimestamp,
         rule: { id: ruleId, version: ruleVersion },
         group_hash: groupHash,
@@ -171,11 +192,17 @@ export function createAlertEventsBatchBuilder({
         severity: extractSeverity(rowDoc),
       });
 
-      index++;
       alertEventsBatch.push(doc);
     }
 
     return alertEventsBatch;
+  };
+
+  return {
+    buildBatch,
+    get droppedGroupCount() {
+      return droppedGroupHashes.size;
+    },
   };
 }
 
@@ -205,9 +232,7 @@ export function buildRecoveryAlertEvents({
   scheduledTimestamp,
   type,
   dataPresentGroupHashes,
-}: BuildRecoveryAlertEventsOpts): AlertEvent[] {
-  const wroteAt = new Date().toISOString();
-
+}: BuildRecoveryAlertEventsOpts): AlertEventDocument[] {
   return activeGroupHashes
     .filter(
       ({ group_hash }) =>
@@ -216,7 +241,6 @@ export function buildRecoveryAlertEvents({
     )
     .map(({ group_hash }) =>
       buildRuleEventDocument({
-        '@timestamp': wroteAt,
         scheduled_timestamp: scheduledTimestamp,
         rule: { id: ruleId, version: ruleVersion },
         group_hash,
@@ -251,11 +275,8 @@ export function buildContinuedBreachAlertEvents({
   groupHashes,
   scheduledTimestamp,
   type,
-}: BuildContinuedBreachAlertEventsOpts): AlertEvent[] {
-  const wroteAt = new Date().toISOString();
-
+}: BuildContinuedBreachAlertEventsOpts): AlertEventDocument[] {
   return groupHashes.map((groupHash) => ({
-    '@timestamp': wroteAt,
     scheduled_timestamp: scheduledTimestamp,
     rule: { id: ruleId, version: ruleVersion },
     group_hash: groupHash,
@@ -279,7 +300,7 @@ export interface BuildNoDataAlertEventsOpts {
 /**
  * Creates `no_data` alert events for the supplied group hashes.
  *
- * Used when no_data_strategy is configured on the rule.
+ * Used when the rule's `no_data.strategy` classifies absent groups.
  */
 export function buildNoDataAlertEvents({
   ruleId,
@@ -288,11 +309,8 @@ export function buildNoDataAlertEvents({
   groupHashes,
   scheduledTimestamp,
   type,
-}: BuildNoDataAlertEventsOpts): AlertEvent[] {
-  const wroteAt = new Date().toISOString();
-
+}: BuildNoDataAlertEventsOpts): AlertEventDocument[] {
   return groupHashes.map((groupHash) => ({
-    '@timestamp': wroteAt,
     scheduled_timestamp: scheduledTimestamp,
     rule: { id: ruleId, version: ruleVersion },
     group_hash: groupHash,
@@ -345,7 +363,7 @@ export function buildQueryRecoveryAlertEvents({
   esqlResponse,
   scheduledTimestamp,
   type,
-}: BuildQueryRecoveryAlertEventsOpts): AlertEvent[] {
+}: BuildQueryRecoveryAlertEventsOpts): AlertEventDocument[] {
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
 
@@ -388,11 +406,8 @@ export function buildQueryRecoveryAlertEvents({
     return [];
   }
 
-  const wroteAt = new Date().toISOString();
-
   return Array.from(recoveredByGroupHash).map(([groupHash, data]) =>
     buildRuleEventDocument({
-      '@timestamp': wroteAt,
       scheduled_timestamp: scheduledTimestamp,
       rule: { id: ruleId, version: ruleVersion },
       group_hash: groupHash,

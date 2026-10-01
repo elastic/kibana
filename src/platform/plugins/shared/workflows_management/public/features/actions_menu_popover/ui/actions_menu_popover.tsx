@@ -7,14 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiPopoverProps } from '@elastic/eui';
-import { EuiPopover } from '@elastic/eui';
+import { EuiModal } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionsMenu } from './actions_menu';
 import type { ActionsMenuProps } from './actions_menu';
 
-interface ActionsMenuPopoverProps extends EuiPopoverProps, ActionsMenuProps {}
+interface ActionsMenuPopoverProps extends ActionsMenuProps {
+  isOpen: boolean;
+  closePopover: () => void;
+}
+
+const panelCss = css({
+  width: 'min(920px, calc(100vw - 48px))',
+  overflow: 'hidden',
+});
 
 export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   onActionSelected,
@@ -22,18 +30,22 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   jumpToStepEntries,
   onCommandSelected,
   onJumpToStep,
-  ...props
+  closePopover,
+  isOpen,
 }: ActionsMenuPopoverProps) {
+  if (!isOpen) return null;
+
   return (
-    <EuiPopover
-      panelPaddingSize="none"
-      aria-label={i18n.translate('workflows.actionsMenu.modalTitle', {
+    <EuiModal
+      onClose={closePopover}
+      outsideClickCloses
+      initialFocus="[name='actions-menu-search']"
+      aria-label={i18n.translate('workflows.actionsMenu.modalAriaLabel', {
         defaultMessage: 'Actions menu',
       })}
-      hasArrow={false}
-      display="block"
-      initialFocus="[name='actions-menu-search']"
-      {...props}
+      maxWidth={false}
+      css={panelCss}
+      data-test-subj="actionsMenuModal"
     >
       <ActionsMenu
         onActionSelected={onActionSelected}
@@ -42,6 +54,6 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
         onCommandSelected={onCommandSelected}
         onJumpToStep={onJumpToStep}
       />
-    </EuiPopover>
+    </EuiModal>
   );
 });

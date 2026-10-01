@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +16,7 @@ import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
 import {
   DiscoverFlyouts,
-  dismissAllFlyoutsExceptFor,
+  openAfterDismissingOtherFlyouts,
   type MetricsGridSettings,
 } from '@kbn/discover-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -29,7 +29,12 @@ import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
-import { createESQLQuery, firstNonNullable, getMetricUniqueKey } from '../../../common/utils';
+import {
+  createESQLQuery,
+  firstNonNullable,
+  getAggregationLabel,
+  getMetricUniqueKey,
+} from '../../../common/utils';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -168,7 +173,6 @@ export const MetricsGrid = ({
 
   const handleViewDetails = useCallback(
     (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
       onFlyoutStateChange({
         gridPosition: index,
         metricUniqueKey: getMetricUniqueKey(metricItem),
@@ -178,6 +182,31 @@ export const MetricsGrid = ({
     },
     [onFlyoutStateChange]
   );
+
+  const hasFlyoutToOpen = Boolean(flyoutData) && isTabSelected;
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  // Push flyouts share one inline offset on the app scroll container, so this one only mounts once
+  // the others have unmounted. Keyed on whether a flyout is owed rather than on `flyoutData`, so
+  // switching metrics while the flyout is open does not dismiss and remount it. This covers both
+  // View details and a tab restoring its `flyoutState` when it becomes active.
+  useEffect(() => {
+    if (!hasFlyoutToOpen) {
+      setIsFlyoutOpen(false);
+      return;
+    }
+
+    let isCurrent = true;
+    openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricInsights, () => {
+      if (isCurrent) {
+        setIsFlyoutOpen(true);
+      }
+    });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [hasFlyoutToOpen]);
 
   const handleCloseFlyout = useCallback(() => {
     if (!flyoutState) {
@@ -269,7 +298,7 @@ export const MetricsGrid = ({
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {flyoutData && isTabSelected && (
+      {flyoutData && isFlyoutOpen && (
         <MetricInsightsFlyout
           metricItem={flyoutData.metricItem}
           esqlQuery={flyoutData.esqlQuery}
@@ -375,6 +404,11 @@ const ChartItem = React.memo(
         : '';
     }, [metricItem, applicableDimensions, whereStatements, userSource, gridSettings]);
 
+    const yAxisTitle = useMemo(() => {
+      const instrument = firstNonNullable(metricItem.metricTypes);
+      return instrument ? getAggregationLabel({ instrument, gridSettings }) : undefined;
+    }, [metricItem.metricTypes, gridSettings]);
+
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
       dimensions: applicableDimensions,
@@ -420,6 +454,7 @@ const ChartItem = React.memo(
           title={metricItem.metricName}
           description={description}
           chartLayers={chartLayers}
+          yAxisTitle={yAxisTitle}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}

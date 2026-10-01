@@ -153,6 +153,29 @@ describe('request utils', () => {
       );
       expect(params).not.toHaveProperty('ccs_minimize_roundtrips');
     });
+
+    test('Does not set `ignore_throttled` for PIT even when frozen indices are enabled', async () => {
+      const mockUiSettingsClient = getMockUiSettingsClient({
+        [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: true,
+      });
+      const mockConfig = getMockSearchConfig({});
+      const params = await getDefaultAsyncSubmitParams(
+        mockUiSettingsClient,
+        mockConfig,
+        {},
+        { isPit: true }
+      );
+      expect(params).not.toHaveProperty('ignore_throttled');
+    });
+
+    test('Sets `ignore_throttled` to false for non-PIT when frozen indices are enabled', async () => {
+      const mockUiSettingsClient = getMockUiSettingsClient({
+        [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: true,
+      });
+      const mockConfig = getMockSearchConfig({});
+      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {});
+      expect(params).toHaveProperty('ignore_throttled', false);
+    });
   });
 
   describe('getDefaultAsyncGetParams', () => {

@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState, type ComponentProps } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentProps,
+} from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiSuperSelect,
@@ -16,7 +23,7 @@ import {
   type EuiComboBoxOptionOption,
   type EuiComboBoxOptionsListProps,
 } from '@elastic/eui';
-import type { UseFormReturn } from 'react-hook-form';
+import type { UseFormReturn, UseControllerProps } from 'react-hook-form';
 import { useController, type Control, Controller } from 'react-hook-form';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { i18n } from '@kbn/i18n';
@@ -46,21 +53,17 @@ interface FilterSelectionInputProps {
   getFilterValuesOptions: (anchor: Omit<Partial<FilterInput>, 'tagValue'>) => string[];
 }
 
-interface FilterInputStandardSelectProps
+type FilterInputSelectName = Exclude<keyof FilterInput, 'tagValue'>;
+
+interface FilterInputStandardSelectProps<TName extends FilterInputSelectName>
   extends Pick<
     EuiSuperSelectProps,
-    | 'compressed'
-    | 'disabled'
-    | 'placeholder'
-    | 'aria-label'
-    | 'fullWidth'
-    | 'isInvalid'
-    | 'popoverProps'
+    'compressed' | 'disabled' | 'placeholder' | 'aria-label' | 'fullWidth' | 'popoverProps' | 'css'
   > {
-  control: Control<Exclude<FilterInput, { tagValue: undefined }>>;
-  name: Exclude<keyof FilterInput, 'tagValue'>;
+  control: Control<FilterInput>;
+  name: TName;
+  rules?: UseControllerProps<FilterInput, TName>['rules'];
   options: ReturnType<typeof toSelectableOptions>;
-  placeholder?: string;
 }
 
 const operatorDisplayMap: Record<FilterOperatorLiteral, string> = {
@@ -103,16 +106,41 @@ function toSelectableOptions(values: string[], valueToLabelMapper?: (value: stri
   }));
 }
 
-function FilterInputStandardSelect({
+function toComboBoxOptions(values: string[]): Array<EuiComboBoxOptionOption<string>> {
+  return values.map((value) => ({
+    key: value,
+    label: value,
+    value,
+  }));
+}
+
+function toTagValueList(tagValue: FilterInput['tagValue']): string[] {
+  if (tagValue == null) {
+    return [];
+  }
+
+  return Array.isArray(tagValue) ? tagValue : [tagValue];
+}
+
+function isMultiValueOperator(operator: FilterOperatorLiteral | undefined) {
+  return operator !== undefined && getOperatorKind(operator) === OperatorKind.ONE_OF;
+}
+
+function isExistenceCheckOperator(operator: FilterOperatorLiteral | undefined) {
+  return operator !== undefined && getOperatorKind(operator) === OperatorKind.EXISTS;
+}
+
+function FilterInputStandardSelect<TName extends FilterInputSelectName>({
   control,
   options,
   name,
+  rules,
   ...props
-}: FilterInputStandardSelectProps) {
-  const { field } = useController({
+}: FilterInputStandardSelectProps<TName>) {
+  const { field, fieldState } = useController<FilterInput, TName>({
     name,
     control,
-    rules: { required: true },
+    rules,
   });
 
   const handleChange = useCallback<NonNullable<EuiSuperSelectProps['onChange']>>(
@@ -129,6 +157,7 @@ function FilterInputStandardSelect({
       options={options}
       valueOfSelected={field.value}
       onChange={handleChange}
+      isInvalid={fieldState.error != null}
       fullWidth
       {...props}
     />
@@ -152,6 +181,15 @@ export function FilterSelectionInput({
     'tagValue',
   ]);
 
+  const isMultiValueFilteringOperation = useMemo(
+    () => isMultiValueOperator(filteringOperator),
+    [filteringOperator]
+  );
+  const isExistenceCheckFilteringOperation = useMemo(
+    () => isExistenceCheckOperator(filteringOperator),
+    [filteringOperator]
+  );
+
   useEffect(() => {
     if (anchoringFilteringTagName && !filteringOperator) {
       // when a filtering dimension is selected, set a default operator of "EQUALS"
@@ -160,22 +198,24 @@ export function FilterSelectionInput({
   }, [anchoringFilteringTagName, filteringOperator, form]);
 
   useEffect(() => {
+    // clear errors when new values are set
+    form.clearErrors();
+  }, [anchoringFilteringTagName, filteringOperator, filteringTagValue, form]);
+
+  useEffect(() => {
+    if (!isExistenceCheckFilteringOperation || filteringTagValue === undefined) {
+      return;
+    }
+
+    // reset the tag value when the operator is changed to an existence check operator
+    form.resetField('tagValue', { defaultValue: undefined });
+  }, [filteringOperator, filteringTagValue, form, isExistenceCheckFilteringOperation]);
+
+  useEffect(() => {
     if (filteringOperator || filteringTagValue) {
       onFilterInputChanged(form.getValues());
     }
   }, [filteringTagValue, filteringOperator, form, onFilterInputChanged]);
-
-  const isMultiValueOperator = useMemo(() => {
-    return (
-      filteringOperator !== undefined && getOperatorKind(filteringOperator) === OperatorKind.ONE_OF
-    );
-  }, [filteringOperator]);
-
-  const isExistenceCheckOperator = useMemo(() => {
-    return (
-      filteringOperator !== undefined && getOperatorKind(filteringOperator) === OperatorKind.EXISTS
-    );
-  }, [filteringOperator]);
 
   const filteringDimensionsOptions = useMemo(
     () => toSelectableOptions(getFilteringDimensionsOptions()),
@@ -190,49 +230,65 @@ export function FilterSelectionInput({
     []
   );
 
-  const [customFilterValues, setCustomFilterValues] = useState<string[]>([]);
+  const knownFilterValues = useMemo(
+    () =>
+      getFilterValuesOptions({
+        tagName: anchoringFilteringTagName,
+        operator: filteringOperator,
+      }),
+    [anchoringFilteringTagName, filteringOperator, getFilterValuesOptions]
+  );
+
+  const [customFilterValues, setCustomFilterValues] = useState<string[]>(() => {
+    const knownValues = new Set(
+      getFilterValuesOptions({
+        tagName: form.getValues('tagName'),
+        operator: form.getValues('operator'),
+      })
+    );
+
+    return toTagValueList(form.getValues('tagValue')).filter((value) => !knownValues.has(value));
+  });
+
+  const previousTagNameRef = useRef(anchoringFilteringTagName);
 
   useEffect(() => {
-    if (errors.tagValue) {
-      setCustomFilterValues((prevCustomFilterValues) =>
-        prevCustomFilterValues.filter((value) => value !== filteringTagValue)
-      );
+    if (previousTagNameRef.current === anchoringFilteringTagName) {
+      return;
     }
+
+    previousTagNameRef.current = anchoringFilteringTagName;
+    setCustomFilterValues([]);
+  }, [anchoringFilteringTagName]);
+
+  useEffect(() => {
+    if (!errors.tagValue) {
+      return;
+    }
+
+    const failedValues = new Set(toTagValueList(filteringTagValue));
+    setCustomFilterValues((prevCustomFilterValues) =>
+      prevCustomFilterValues.filter((value) => !failedValues.has(value))
+    );
   }, [filteringTagValue, errors.tagValue]);
 
   const filterValues = useMemo(() => {
-    return toSelectableOptions(
-      ([] as string[]).concat(
-        customFilterValues,
-        getFilterValuesOptions({ tagName: anchoringFilteringTagName, operator: filteringOperator })
-      )
-    );
-  }, [anchoringFilteringTagName, customFilterValues, filteringOperator, getFilterValuesOptions]);
-
-  const validateTagValue = useCallback(
-    (_value: FilterInput['tagValue'], formValues: FilterInput) => {
-      return validateExpression(formValues);
-    },
-    [validateExpression]
-  );
+    return toComboBoxOptions([...new Set([...customFilterValues, ...knownFilterValues])]);
+  }, [customFilterValues, knownFilterValues]);
 
   const renderTagValueInput = useCallback<
     ComponentProps<typeof Controller<FilterInput, 'tagValue'>>['render']
   >(
-    ({ field: { ref, ...field } }) => {
+    ({ field: { ref, ...field }, fieldState }) => {
       const handleChange = (options: Array<EuiComboBoxOptionOption<string>>) => {
-        if (isMultiValueOperator) {
+        if (isMultiValueFilteringOperation) {
           field.onChange(options.map((option) => option.value));
         } else {
           field.onChange(options[0]?.value);
         }
       };
 
-      const selectedOptions = filterValues.filter((option) =>
-        Array.isArray(field.value)
-          ? field.value.includes(option.value)
-          : field.value === option.value
-      );
+      const selectedOptions = toComboBoxOptions(toTagValueList(field.value));
 
       const onCreateOption: NonNullable<EuiComboBoxOptionsListProps<string>['onCreateOption']> = (
         searchValue
@@ -243,11 +299,18 @@ export function FilterSelectionInput({
           return;
         }
 
-        setCustomFilterValues((prev) => [...prev, normalizedSearchValue]);
+        setCustomFilterValues((prev) =>
+          prev.includes(normalizedSearchValue) ? prev : [...prev, normalizedSearchValue]
+        );
 
-        if (isMultiValueOperator) {
-          // Select the option.
-          field.onChange([normalizedSearchValue]);
+        if (isMultiValueFilteringOperation) {
+          const currentValues = Array.isArray(field.value) ? field.value : [];
+
+          if (currentValues.includes(normalizedSearchValue)) {
+            return;
+          }
+
+          field.onChange([...currentValues, normalizedSearchValue]);
         } else {
           field.onChange(normalizedSearchValue);
         }
@@ -256,7 +319,7 @@ export function FilterSelectionInput({
       const panelMinWidth = calculateWidthFromEntries(filterValues, ['label']);
 
       const isDisabled =
-        !anchoringFilteringTagName || !filteringOperator || isExistenceCheckOperator;
+        !anchoringFilteringTagName || !filteringOperator || isExistenceCheckFilteringOperation;
 
       return (
         <EuiComboBox
@@ -264,9 +327,9 @@ export function FilterSelectionInput({
           options={filterValues}
           onChange={handleChange}
           selectedOptions={selectedOptions}
-          singleSelection={isMultiValueOperator ? false : { asPlainText: true }}
+          singleSelection={isMultiValueFilteringOperation ? false : { asPlainText: true }}
           isDisabled={isDisabled}
-          isInvalid={errors.tagValue != null}
+          isInvalid={fieldState.error != null}
           onCreateOption={onCreateOption}
           customOptionText={i18n.translate('cpsUtils.projectPicker.filterBox.customOptionText', {
             defaultMessage: "Add '{searchValue}' as your search value on {tagName}",
@@ -281,6 +344,7 @@ export function FilterSelectionInput({
                   defaultMessage: 'Select a value',
                 })
           }
+          isClearable={false}
           inputRef={ref}
           truncationProps={{ truncation: 'middle' as const }}
           inputPopoverProps={{ panelMinWidth, anchorPosition: 'downRight' }}
@@ -293,9 +357,8 @@ export function FilterSelectionInput({
       filterValues,
       anchoringFilteringTagName,
       filteringOperator,
-      isExistenceCheckOperator,
-      isMultiValueOperator,
-      errors.tagValue,
+      isExistenceCheckFilteringOperation,
+      isMultiValueFilteringOperation,
     ]
   );
 
@@ -321,8 +384,10 @@ export function FilterSelectionInput({
       [`@media (min-width: ${euiTheme.breakpoint.s}px)`]: {
         flexWrap: 'nowrap' as const,
 
-        '& > *': {
+        '& > *:nth-child(3n+1), & > *:nth-child(3n+2), & > *:nth-child(3n+3)': {
           flexBasis: 'calc(100% / 3)',
+          flexShrink: 1,
+          flexGrow: 0,
         },
 
         '& > *:nth-child(3n+1) button:not(:has(svg)), & > *:nth-child(3n+1) [data-test-subj="comboBoxInput"]':
@@ -361,6 +426,9 @@ export function FilterSelectionInput({
           anchorPosition: 'downLeft',
           panelMinWidth: calculateWidthFromEntries(filteringDimensionsOptions, ['label']),
         }}
+        rules={{
+          required: true,
+        }}
         compressed
         fullWidth
       />
@@ -374,6 +442,16 @@ export function FilterSelectionInput({
           anchorPosition: 'downLeft',
           panelMinWidth: calculateWidthFromEntries(filterOperators, ['label']),
         }}
+        rules={{
+          required: true,
+          validate: (value, formValues) => {
+            if (isExistenceCheckFilteringOperation) {
+              return validateExpression(formValues);
+            }
+            return !!value;
+          },
+          deps: ['tagName'],
+        }}
         compressed
       />
       <Controller
@@ -381,8 +459,14 @@ export function FilterSelectionInput({
         name="tagValue"
         render={renderTagValueInput}
         rules={{
-          required: !isExistenceCheckOperator,
-          validate: validateTagValue,
+          required: !isExistenceCheckFilteringOperation,
+          validate: (_value, formValues) => {
+            if (isExistenceCheckFilteringOperation) {
+              return true;
+            }
+
+            return validateExpression(formValues);
+          },
           deps: ['tagName', 'operator'],
         }}
       />

@@ -39,14 +39,23 @@ const createProcs = () => ({ run: jest.fn() } as unknown as ProcRunner);
 
 const getArgs = (procs: ProcRunner) => (procs.run as jest.Mock).mock.calls[0][1].args as string[];
 
+const getEnv = (procs: ProcRunner) =>
+  (procs.run as jest.Mock).mock.calls[0][1].env as Record<string, string | undefined>;
+
 describe('runKibanaServer()', () => {
   const originalEnvValue = process.env.KBN_DISALLOW_CODE_GEN_FROM_STRINGS;
+  const originalKbnHmr = process.env.KBN_HMR;
 
   afterEach(() => {
     if (originalEnvValue === undefined) {
       delete process.env.KBN_DISALLOW_CODE_GEN_FROM_STRINGS;
     } else {
       process.env.KBN_DISALLOW_CODE_GEN_FROM_STRINGS = originalEnvValue;
+    }
+    if (originalKbnHmr === undefined) {
+      delete process.env.KBN_HMR;
+    } else {
+      process.env.KBN_HMR = originalKbnHmr;
     }
   });
 
@@ -59,6 +68,20 @@ describe('runKibanaServer()', () => {
     const args = getArgs(procs);
     expect(args[0]).toBe(CODE_GEN_FLAG);
     expect(args[1]).toMatch(/scripts[\\/]kibana$/);
+    expect(args).toContain('--server.rateLimiter.enabled=false');
+  });
+
+  it('does not disable the rate limiter for Scout servers', async () => {
+    const procs = createProcs();
+    delete process.env.KBN_DISALLOW_CODE_GEN_FROM_STRINGS;
+
+    await runKibanaServer({
+      procs,
+      config: createConfig(),
+      uiEphemeralDirPrefix: 'scout',
+    });
+
+    expect(getArgs(procs)).not.toContain('--server.rateLimiter.enabled=false');
   });
 
   it('omits the flag when opted out via the environment', async () => {
@@ -89,5 +112,32 @@ describe('runKibanaServer()', () => {
     await runKibanaServer({ procs, config: createConfig(), installDir: '/tmp/kibana-build' });
 
     expect(getArgs(procs)).not.toContain(CODE_GEN_FLAG);
+  });
+
+  it('disables Rspack HMR by default', async () => {
+    const procs = createProcs();
+    delete process.env.KBN_HMR;
+
+    await runKibanaServer({ procs, config: createConfig() });
+
+    expect(getEnv(procs).KBN_HMR).toBe('false');
+  });
+
+  it('preserves an explicit Rspack HMR opt-in', async () => {
+    const procs = createProcs();
+    process.env.KBN_HMR = 'true';
+
+    await runKibanaServer({ procs, config: createConfig() });
+
+    expect(getEnv(procs).KBN_HMR).toBe('true');
+  });
+
+  it('allows test configuration to opt into Rspack HMR', async () => {
+    const procs = createProcs();
+    delete process.env.KBN_HMR;
+
+    await runKibanaServer({ procs, config: createConfig({ KBN_HMR: 'true' }) });
+
+    expect(getEnv(procs).KBN_HMR).toBe('true');
   });
 });

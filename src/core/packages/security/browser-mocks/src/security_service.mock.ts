@@ -31,6 +31,8 @@ const createStartMock = () => {
     }),
     serviceAccounts: lazyObject({
       isEnabled: jest.fn().mockReturnValue(false),
+      canCreate: jest.fn().mockReturnValue(false),
+      create: jest.fn(),
     }),
   });
 
@@ -52,6 +54,8 @@ const createInternalStartMock = () => {
     }),
     serviceAccounts: lazyObject({
       isEnabled: jest.fn().mockReturnValue(false),
+      canCreate: jest.fn().mockReturnValue(false),
+      create: jest.fn(),
     }),
   });
 

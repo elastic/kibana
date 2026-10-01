@@ -9,6 +9,7 @@
 
 import type { SelectionDetails, SelectionOption } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
+import type { StepPropertyItem, StepPropertyValidationResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import { isTemplateReference } from './is_template_reference';
 import { stepSchemas } from '../../../../common/step_schemas';
@@ -18,7 +19,6 @@ import {
   getStepPropertyValidationOutcomeCacheKey,
   setCachedStepPropertyValidationOutcome,
 } from '../../../shared/lib/step_property_selection_cache';
-import type { StepPropertyItem, StepPropertyValidationResult } from '../model/types';
 
 export { clearStepPropertyValidationOutcomeCache } from '../../../shared/lib/step_property_selection_cache';
 
@@ -46,7 +46,7 @@ function buildValidationResult(
   if (hasError) {
     return {
       id: stepPropertyItem.id,
-      severity: 'error' as const,
+      severity: 'error',
       message: details.message,
       beforeMessage,
       afterMessage: null,
@@ -55,7 +55,8 @@ function buildValidationResult(
       startColumn: stepPropertyItem.startColumn,
       endLineNumber: stepPropertyItem.endLineNumber,
       endColumn: stepPropertyItem.endColumn,
-      owner: 'step-property-validation' as const,
+      owner: 'step-property-validation',
+      ruleId: 'invalidStepProperty',
     };
   }
 
@@ -70,7 +71,7 @@ function buildValidationResult(
     startColumn: stepPropertyItem.startColumn,
     endLineNumber: stepPropertyItem.endLineNumber,
     endColumn: stepPropertyItem.endColumn,
-    owner: 'step-property-validation' as const,
+    owner: 'step-property-validation',
   };
 }
 

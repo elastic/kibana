@@ -15,6 +15,7 @@ export enum GenAISemanticConventions {
   GenAIOperationName = 'gen_ai.operation.name',
   GenAIResponseModel = 'gen_ai.response.model',
   GenAIRequestModel = 'gen_ai.request.model',
+  GenAIRequestReasoningLevel = 'gen_ai.request.reasoning.level',
   GenAIProviderName = 'gen_ai.provider.name',
   GenAIOutputType = 'gen_ai.output.type',
   GenAIToolCallId = 'gen_ai.tool.call.id',
@@ -62,6 +63,7 @@ export interface GenAISemConvAttributes {
     | 'invoke_agent'
     | 'invoke_workflow';
   [GenAISemanticConventions.GenAIRequestModel]?: string;
+  [GenAISemanticConventions.GenAIRequestReasoningLevel]?: string;
   [GenAISemanticConventions.GenAIResponseModel]?: string;
   [GenAISemanticConventions.GenAIProviderName]?: string;
   'error.type'?: string;

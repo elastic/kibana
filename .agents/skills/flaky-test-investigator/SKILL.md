@@ -100,15 +100,15 @@ Check the test against these best practices — the ones flaky tests most often 
 - **Prefer APIs for setup and teardown** (`docs/extend/testing/ui-best-practices#prefer-kibana-apis-over-ui-for-setup-and-teardown`): driving setup/teardown through the UI is slower and flakier.
 - **Wait for UI updates after actions** (`docs/extend/testing/ui-best-practices#wait-for-ui-updates-when-the-next-action-requires-it`): confirm the action produced the expected result and the UI has rendered before continuing.
 - **Wait for complex UI to finish rendering** (`docs/extend/testing/ui-best-practices#wait-for-complex-components-to-fully-render`).
-- **Don't use manual retry loops** (`docs/extend/testing/ui-best-practices#dont-use-manual-retry-loops`): if a click or type only works "sometimes", don't re-issue it in a retry — that hides an actionability bug a real user would hit. Fix the interaction or wait on a stable readiness signal instead (see the fix guardrails below).
+- **Don't use manual retry loops** (`docs/extend/testing/ui-best-practices#dont-use-manual-retry-loops`): if a click or type only works "sometimes", don't re-issue it in a retry — that hides an actionability bug a real user would hit. Fix the interaction or wait on a stable readiness signal instead (see the fix guidelines below).
 - **Expect a shared test environment** (`docs/extend/testing/scout-best-practices#expect-a-shared-test-environment`): tests can't assume a clean deployment — other suites leave objects behind, and Cloud ships preinstalled content (Fleet dashboards, prebuilt detection rules, preconfigured connectors). Assertions over lists must tolerate entries the test didn't create: narrow queries to the test's own data, address objects by identity (not position), assert containment (not totality), and never assert that data is absent cluster-wide (empty prompts, "no data" redirects).
 - **Don't leak state into the next suite** (`docs/extend/testing/scout-best-practices#dont-leak-state-into-the-next-suite`): whatever a suite creates or changes is still there for the suites that run after it on the same servers. Namespace resource names per run, use a suite-unique time window for fixed-timestamp data, tear down the underlying resource (not just the saved object tracking it), and revert behavior-changing state (settings, feature flags, index templates).
 
 Scout and FTR tests should also follow the general best practices in `docs/extend/testing/scout-best-practices.md`, the UI best practices in `docs/extend/testing/ui-best-practices.md`, and the API best practices in `docs/extend/testing/api-best-practices.md`.
 
-### Fix guardrails
+### Fix guidelines
 
-Any fix you recommend must stay within the shared fix guardrails at `.github/workflows/shared/flaky-test-fix-guardrails.md` — the single source of truth for fix anti-patterns, shared with the automated fixer and verifier workflows. Read that file before writing a fix recommendation.
+Any fix you recommend should follow the shared fix guidelines at `.github/workflows/shared/flaky-fix-guidelines.md` — the single source of truth for how to think about a durable fix, shared with the automated fixer and verifier workflows. Read that file before writing a fix recommendation.
 
 ### Investigation pitfalls
 
@@ -118,6 +118,8 @@ Watch out for these pitfalls when investigating the failure:
 - **Trusting flaky-test-runner alone**: a fully green run does not prove a fix held. The runner runs tests in isolation, which isn't always the case (Scout test runs share the same test servers for multiple test configs). It is also a local pipeline that cannot reproduce a real Elastic Cloud environment (see `references/pipelines.md`) — for a failure that happens on Cloud pipelines, a green flaky-runner result says little about whether the fix holds there.
 - **Assuming "fix the test, not the product"**: always ask first whether the product could be at fault. Test-only fixes are meaningfully less durable than fixes that change production code.
 - **Reading fault from the throwing stack frame**: a waiting-side timeout always throws from the waiter (FTR/Playwright service code), so the frame tells you who threw, not whose fault it is. It is not evidence against a product bug.
+- **Blaming a prior fix without matching signatures**: before concluding an earlier fix "didn't hold", confirm the recurrence carries the _same_ error signature (same element/assertion/call site) that fix targeted. A fix can be correct and the test still flaky at a _different_ step — that is a new, separate flake, not a failed fix; diagnose it on its own merits. If the test keeps surfacing fresh races at successive steps, consider reducing UI interactions (API-driven setup/teardown, or splitting the test) rather than stacking waits.
+- **Counting a pre-fix Cloud build as a recurrence**: a Cloud image trails `main`, so a failure reported soon after a fix merged may have run a checkout that predates the fix. Resolve the run's `Build hash` and confirm the build contains the fix via the GitHub compare API (see `references/pipelines.md`) before treating the failure as a recurrence — otherwise it is propagation lag, not the fix failing.
 - **Reporting false certainty**: "I don't know, here are the two plausible explanations and what would distinguish them" is more useful to the owning team than a confident wrong answer.
 
 ### Is a fix worth it?

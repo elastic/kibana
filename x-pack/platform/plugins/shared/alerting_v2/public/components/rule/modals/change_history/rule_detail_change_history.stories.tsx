@@ -124,7 +124,7 @@ const RuleDetailChangeHistoryShell = ({
               title={i18n.translate('xpack.alertingV2.ruleChangeHistory.story.callout', {
                 defaultMessage: 'Mock adapter — no Kibana server required',
               })}
-              iconType="iInCircle"
+              iconType="info"
             >
               <p>
                 History for <EuiCode>{rule.id}</EuiCode>

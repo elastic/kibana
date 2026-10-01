@@ -17,14 +17,15 @@ import {
   alertAttachmentDataSchema,
   type AlertAttachmentData,
 } from '@kbn/alerting-v2-schemas';
+import { alertEpisodeToAlertAttachment } from '@kbn/alerting-v2-utils';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
-import { alertEpisodeToAlertAttachment } from '../../../common/agent_builder/alert_mappers';
 import type { EpisodesClient } from '../../lib/episodes_client';
 import type { RulesClient } from '../../lib/rules_client';
 import { loadRuleMetadata } from '../common/load_rule_metadata';
 import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 import { getRuleTool, getRuleToolId } from '../tools/get_rule';
+import { getRuleEventsTool, getRuleEventsToolId } from '../tools/get_rule_events';
 import { refreshAlertTool, refreshAlertToolId } from '../tools/refresh_alert';
 
 interface CreateAlertAttachmentTypeOptions {
@@ -44,11 +45,13 @@ const formatAlertDescription = ({
   data,
   refreshToolId,
   getRuleToolId: ruleToolId,
+  ruleEventsToolId,
 }: {
   attachmentId: string;
   data: AlertAttachmentData;
   refreshToolId: string;
   getRuleToolId: string;
+  ruleEventsToolId: string;
 }): string => {
   const lines = [
     'This is a platform alert, not a Security/SIEM detection alert.',
@@ -83,8 +86,8 @@ const formatAlertDescription = ({
   if (data.last_snooze_action) {
     lines.push(`Snooze: ${data.last_snooze_action}`);
   }
-  if (data.snooze_expiry) {
-    lines.push(`Snooze expiry: ${data.snooze_expiry}`);
+  if (data.snoozed_until) {
+    lines.push(`Snoozed until: ${data.snoozed_until}`);
   }
   if (data.last_tags?.length) {
     lines.push(`Tags: ${data.last_tags.join(', ')}`);
@@ -95,6 +98,9 @@ const formatAlertDescription = ({
   );
   lines.push(
     `Use the ${ruleToolId} tool to fetch the alert rule associated with this alert, then query that rule's source indices. To modify that rule, or create a new rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`
+  );
+  lines.push(
+    `Use the ${ruleEventsToolId} tool to fetch this episode's rule events from .rule-events, including timestamp, episode.status, severity, source, group_hash, and event data. Call it with no arguments; pass start/end only to narrow the window. It returns at most 100 rows (oldest first). If truncated is true, call again with start set to the last event's @timestamp and the same end; skip the overlapping first row. Do not retry the same window. If truncated is still true for a very small window, stop and use the rows you have.`
   );
 
   return lines.join('\n');
@@ -197,6 +203,7 @@ export const createAlertAttachmentType = ({
       const ruleId = data['rule.id'];
       const refreshToolId = refreshAlertToolId(attachment.id);
       const ruleToolId = getRuleToolId(attachment.id);
+      const ruleEventsToolId = getRuleEventsToolId(attachment.id);
 
       return {
         getRepresentation: () => ({
@@ -206,6 +213,7 @@ export const createAlertAttachmentType = ({
             data,
             refreshToolId,
             getRuleToolId: ruleToolId,
+            ruleEventsToolId,
           }),
         }),
         getBoundedTools: () => [
@@ -225,12 +233,19 @@ export const createAlertAttachmentType = ({
             getRulesClient,
             getPrivilegeChecker,
           }),
+          getRuleEventsTool({
+            attachmentId: attachment.id,
+            episodeId: alertId,
+            logger: attachmentLogger,
+            getEpisodesClient,
+            getPrivilegeChecker,
+          }),
         ],
       };
     },
 
     getAgentDescription: () =>
-      `A platform alert attachment — a stateful lifecycle of related alert events for a platform alert rule and group. This is not a Security/SIEM detection alert: do not use the security alert-analysis skill, detection-rule tools, or .alerts-security.alerts-* indices. It is read-only snapshot context. Use the attachment-scoped refresh_alert tool when you need the latest alert state, and get_rule to fetch the associated platform alert rule and its source indices. To create, explain, or modify that rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
+      `A platform alert attachment — a stateful lifecycle of related alert events for a platform alert rule and group. This is not a Security/SIEM detection alert: do not use the security alert-analysis skill, detection-rule tools, or .alerts-security.alerts-* indices. It is read-only snapshot context. Use the attachment-scoped refresh_alert tool when you need the latest alert state, get_rule to fetch the associated platform alert rule and its source indices, and get_rule_events to fetch the alert's underlying rule events. To create, explain, or modify that rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
 
     isReadonly: true,
 

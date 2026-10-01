@@ -58,14 +58,15 @@ const pickOutputSizeFields = (
   }),
 });
 
-function resolveExecutionTriggerTelemetry(triggeredBy: string | undefined): {
+function resolveExecutionTriggerTelemetry(workflowExecution: EsWorkflowExecution): {
   triggerType: WellKnownWorkflowTriggerSource | 'event';
   eventTriggerId?: string;
 } {
+  const { triggeredBy } = workflowExecution;
   if (isWellKnownWorkflowTriggerSource(triggeredBy)) {
     return { triggerType: triggeredBy };
   }
-  if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+  if (isEventDrivenWorkflowTriggerSource(workflowExecution)) {
     return { triggerType: 'event', eventTriggerId: triggeredBy };
   }
 
@@ -165,9 +166,7 @@ function buildBaseExecutionTelemetryFields(
   workflowExecution: EsWorkflowExecution,
   executionMetadata: WorkflowExecutionTelemetryMetadata
 ) {
-  const { triggerType, eventTriggerId } = resolveExecutionTriggerTelemetry(
-    workflowExecution.triggeredBy
-  );
+  const { triggerType, eventTriggerId } = resolveExecutionTriggerTelemetry(workflowExecution);
   const managedWorkflowFields = toManagedWorkflowTelemetryFields(workflowExecution);
   return {
     workflowExecutionId: workflowExecution.id,
@@ -410,9 +409,7 @@ export class WorkflowExecutionTelemetryClient {
   }): void {
     const { workflowExecution, logTriggerEventsEnabled } = params;
     const executionMetadata = extractExecutionMetadata(workflowExecution, []);
-    const { triggerType, eventTriggerId } = resolveExecutionTriggerTelemetry(
-      workflowExecution.triggeredBy
-    );
+    const { triggerType, eventTriggerId } = resolveExecutionTriggerTelemetry(workflowExecution);
     const managedWorkflowFields = toManagedWorkflowTelemetryFields(workflowExecution);
 
     const eventData: EventDrivenExecutionSuppressedParams = {

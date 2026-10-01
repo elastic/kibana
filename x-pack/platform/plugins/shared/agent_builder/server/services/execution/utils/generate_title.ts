@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
-import type { Conversation, ConversationRound, ConverseInput } from '@kbn/agent-builder-common';
+import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import { CONVERSATION_TITLE_MAX_LENGTH } from '@kbn/agent-builder-common';
 import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 
@@ -35,11 +35,7 @@ export const generateTitle = ({
 }): Observable<string> => {
   return defer(async () => {
     try {
-      const title = await generateConversationTitle({
-        previousRounds: conversation.rounds,
-        nextInput,
-        chatModel,
-      });
+      const title = await generateConversationTitle({ nextInput, chatModel });
       return boundTitle(title);
     } catch (e) {
       return conversation.title;
@@ -48,11 +44,9 @@ export const generateTitle = ({
 };
 
 const generateConversationTitle = async ({
-  previousRounds,
   nextInput,
   chatModel,
 }: {
-  previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   chatModel: InferenceChatModel;
 }) => {

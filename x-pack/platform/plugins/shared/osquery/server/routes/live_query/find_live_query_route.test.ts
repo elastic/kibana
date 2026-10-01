@@ -61,7 +61,7 @@ describe('findLiveQueryRoute', () => {
     jest.clearAllMocks();
 
     mockOsqueryContext = {
-      cpsEnabled: false,
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
       },
@@ -482,7 +482,7 @@ describe('findLiveQueryRoute', () => {
     beforeEach(() => {
       mockOsqueryContext = {
         ...mockOsqueryContext,
-        cpsEnabled: true,
+        isCpsActive: jest.fn().mockResolvedValue(true),
         getStartServices: jest.fn().mockResolvedValue([
           { elasticsearch: { client: { asInternalUser: mockEsClient } } },
           {

@@ -19,7 +19,7 @@ describe('hashedItemStore', () => {
 
         const hashedItemStore = new HashedItemStore(sessionStorage);
         (hashedItemStore as any).getIndexedItems(); // trigger retrieving of indexedItems array from HashedItemStore.PERSISTED_INDEX_KEY
-        expect(spy).toBeCalledWith(HashedItemStore.PERSISTED_INDEX_KEY);
+        expect(spy).toHaveBeenCalledWith(HashedItemStore.PERSISTED_INDEX_KEY);
         spy.mockReset();
       });
 
@@ -327,7 +327,7 @@ describe('hashedItemStore', () => {
         });
 
         it("doesn't throw", () => {
-          expect(() => hashedItemStore.clear()).not.toThrowError();
+          expect(() => hashedItemStore.clear()).not.toThrow();
         });
       });
     });

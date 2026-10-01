@@ -10,13 +10,16 @@ import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import {
   getManagedWorkflowDefinition,
-  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   INVESTIGATE_STEP_ID,
   investigationStateSchema,
-  MAX_BLIND_SPOTS,
+  MAX_EVIDENCE_CHART_ANNOTATIONS,
+  MAX_EVIDENCE_CHART_POINTS,
+  MAX_EVIDENCE_CHART_SERIES,
   MAX_HYPOTHESIS_EVIDENCE,
+  MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
 } from './investigation_state';
 
@@ -51,11 +54,10 @@ const normalizeSchema = (value: unknown): unknown => {
 /**
  * The `investigate` step's structured-output schema is hand-authored JSON Schema in
  * `investigation_workflow.yaml` (the YAML asset can't import code), and must be kept in sync
- * by hand with `investigationStateSchema` — that's the schema the investigation agent's
- * progress-report tool streams live AND the schema the UI uses to parse the persisted final
- * result, so the structured output must match exactly for the UI to render it. These tests
- * catch drift structurally (via z.toJSONSchema equality) and behaviorally (the same example
- * payloads validate identically against both).
+ * by hand with `investigationStateSchema`, which the investigation agent's progress-report tool
+ * streams live and consumers use to parse persisted results. These tests catch workflow drift
+ * structurally (via z.toJSONSchema equality) and behaviorally (the same payloads validate
+ * identically against both schemas).
  *
  * This lives here — importing the workflow definition from `@kbn/workflows/managed` — rather
  * than as a test in `@kbn/workflows` importing this schema, because `@kbn/workflows` is
@@ -64,13 +66,11 @@ const normalizeSchema = (value: unknown): unknown => {
  * under Elastic License 2.0, among others) is licensing-legal in the other direction.
  */
 describe('investigation_workflow.yaml structured-output schema stays in sync with investigationStateSchema', () => {
-  const workflowDefinition = getManagedWorkflowDefinition(
-    SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID
-  );
+  const workflowDefinition = getManagedWorkflowDefinition(NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID);
 
   if (!workflowDefinition?.yaml) {
     throw new Error(
-      `Could not find a static \`yaml\` definition for managed workflow id "${SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID}"`
+      `Could not find a static \`yaml\` definition for managed workflow id "${NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID}"`
     );
   }
 
@@ -93,44 +93,6 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     );
   });
 
-  const severityUpdate = {
-    field: 'severity' as const,
-    from: '40-medium' as const,
-    to: '80-critical' as const,
-    reason: 'Checkout is fully blocked for every user, not intermittently degraded as triaged.',
-    evidence: [
-      {
-        description: 'Zero successful checkout completions during the incident window.',
-        esql_query:
-          'FROM traces | WHERE service.name == "checkout" | STATS failures = COUNT(*) WHERE event.outcome == "failure"',
-      },
-      { description: 'All checkout pods in CrashLoopBackOff for the full window.' },
-    ],
-  };
-
-  const statusUpdate = {
-    field: 'status' as const,
-    from: 'open' as const,
-    to: 'dismissed' as const,
-    reason: 'The investigation found no evidence of an actual failure — this is a false alarm.',
-    evidence: [{ description: 'All metrics remained within normal bounds throughout the window.' }],
-  };
-
-  const summaryUpdate = {
-    field: 'summary' as const,
-    from: 'Potential latency spike on the checkout service.',
-    to: 'Latency on the checkout service remained within SLA bounds — the triage summary overstated impact.',
-    reason:
-      'P99 latency never exceeded 200ms and error rates stayed below 0.1% throughout the incident window.',
-    evidence: [
-      {
-        description: 'P99 latency stayed below 200ms throughout.',
-        esql_query:
-          'FROM traces | WHERE service.name == "checkout" | STATS p99 = PERCENTILE(duration, 99)',
-      },
-    ],
-  };
-
   const validPayload = {
     summary: 'A deploy at 14:02 introduced a connection leak in the checkout service.',
     hypotheses: [
@@ -148,35 +110,20 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
       },
     ],
     conclusion: 'Connection pool exhaustion caused by the 14:02 deploy.',
+    severity: '80-critical',
     recommendations: [
       {
         title: 'Revert the pool-size config change',
+        confidence: 0.95,
         description: 'Raise it back above the previous value.',
         code: 'connection_pool:\n  max_size: 100',
       },
     ],
-    blind_spots: [
-      {
-        title: 'No profiling data available',
-        description: 'Would have confirmed whether a leak compounded the exhaustion.',
-      },
-    ],
-    significant_event_updates: [severityUpdate],
   };
 
   it('accepts a valid payload under both the YAML JSON Schema and the zod schema', () => {
     expect(validate(validPayload)).toBe(true);
     expect(investigationStateSchema.safeParse(validPayload).success).toBe(true);
-  });
-
-  it('accepts all three event_update field types (severity, status, summary) under both schemas', () => {
-    const allFields = {
-      ...validPayload,
-      significant_event_updates: [severityUpdate, statusUpdate, summaryUpdate],
-    };
-
-    expect(validate(allFields)).toBe(true);
-    expect(investigationStateSchema.safeParse(allFields).success).toBe(true);
   });
 
   it('accepts a minimal payload (empty hypotheses, no optional fields) under both schemas', () => {
@@ -203,145 +150,154 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(invalidHypothesis).success).toBe(false);
   });
 
-  it('accepts hypothesis evidence carrying a query and its window under both schemas', () => {
-    const withEvidence = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'Connection pool exhaustion after the 14:02 deploy',
-          confidence: 0.9,
-          status: 'confirmed',
-          reason: 'Pool metrics spiked exactly at deploy time.',
-          evidence: [
+  const sampleChart = {
+    type: 'line',
+    title: 'orders-api pool utilization',
+    x_axis: { type: 'time' },
+    y_axis: { label: 'Utilization', unit: 'percent' },
+    series: [
+      {
+        name: 'orders-api',
+        points: [
+          { x: '2026-07-28T14:00:00Z', y: 42 },
+          { x: '2026-07-28T14:05:00Z', y: 100 },
+        ],
+      },
+    ],
+    annotations: [{ x: '2026-07-28T14:02:00Z', label: 'Deploy v2.3.1' }],
+  };
+
+  const withHypothesisEvidence = (evidence: unknown[]) => ({
+    summary: 'ok',
+    hypotheses: [
+      {
+        candidate: 'Connection pool exhaustion after the 14:02 deploy',
+        confidence: 0.9,
+        status: 'confirmed',
+        evidence,
+      },
+    ],
+  });
+
+  it('accepts markdown evidence with a chart under both schemas', () => {
+    const payload = withHypothesisEvidence([
+      {
+        description: '| minute | utilization |\n| --- | --- |\n| 14:00 | 42% |\n| 14:05 | 100% |',
+        chart: sampleChart,
+      },
+    ]);
+
+    expect(validate(payload)).toBe(true);
+    expect(investigationStateSchema.safeParse(payload).success).toBe(true);
+  });
+
+  it('accepts evidence that is a markdown observation with no chart under both schemas', () => {
+    const payload = withHypothesisEvidence([
+      { description: 'All checkout pods were in `CrashLoopBackOff`.' },
+    ]);
+
+    expect(validate(payload)).toBe(true);
+    expect(investigationStateSchema.safeParse(payload).success).toBe(true);
+  });
+
+  it('accepts a stacked bar chart over categories with a range annotation under both schemas', () => {
+    const payload = withHypothesisEvidence([
+      {
+        description: 'Errors per region.',
+        chart: {
+          type: 'bar',
+          title: 'Errors by region',
+          x_axis: { type: 'category', label: 'Region' },
+          y_axis: {},
+          stacked: true,
+          series: [
+            { name: '5xx', points: [{ x: 'eu-west-1', y: 12 }] },
+            { name: '4xx', points: [{ x: 'eu-west-1', y: 3 }] },
+          ],
+          annotations: [{ x: 'eu-west-1', x_end: 'us-east-1', label: 'Affected' }],
+        },
+      },
+    ]);
+
+    expect(validate(payload)).toBe(true);
+    expect(investigationStateSchema.safeParse(payload).success).toBe(true);
+  });
+
+  it('rejects a chart without series under both schemas', () => {
+    const payload = withHypothesisEvidence([
+      { description: 'Empty.', chart: { ...sampleChart, series: [] } },
+    ]);
+
+    expect(validate(payload)).toBe(false);
+    expect(investigationStateSchema.safeParse(payload).success).toBe(false);
+  });
+
+  it('rejects an unsupported chart type under both schemas', () => {
+    const payload = withHypothesisEvidence([
+      { description: 'Pie.', chart: { ...sampleChart, type: 'pie' } },
+    ]);
+
+    expect(validate(payload)).toBe(false);
+    expect(investigationStateSchema.safeParse(payload).success).toBe(false);
+  });
+
+  it('rejects a chart exceeding the series, point, or annotation bounds under both schemas', () => {
+    const series = { name: 's', points: [{ x: 'a', y: 1 }] };
+    const tooManySeries = withHypothesisEvidence([
+      {
+        description: 'x',
+        chart: {
+          ...sampleChart,
+          series: Array.from({ length: MAX_EVIDENCE_CHART_SERIES + 1 }, () => series),
+        },
+      },
+    ]);
+    const tooManyPoints = withHypothesisEvidence([
+      {
+        description: 'x',
+        chart: {
+          ...sampleChart,
+          series: [
             {
-              description: 'Pool utilization saturates at 14:02.',
-              esql_query: 'FROM metrics-* | STATS max = MAX(pool.utilization)',
-              time_range: { from: '2026-07-28T13:30:00Z', to: '2026-07-28T15:00:00Z' },
+              name: 's',
+              points: Array.from({ length: MAX_EVIDENCE_CHART_POINTS + 1 }, (_, index) => ({
+                x: `${index}`,
+                y: index,
+              })),
             },
           ],
         },
-      ],
-    };
+      },
+    ]);
+    const tooManyAnnotations = withHypothesisEvidence([
+      {
+        description: 'x',
+        chart: {
+          ...sampleChart,
+          annotations: Array.from({ length: MAX_EVIDENCE_CHART_ANNOTATIONS + 1 }, () => ({
+            x: 'a',
+            label: 'b',
+          })),
+        },
+      },
+    ]);
 
-    expect(validate(withEvidence)).toBe(true);
-    expect(investigationStateSchema.safeParse(withEvidence).success).toBe(true);
+    for (const payload of [tooManySeries, tooManyPoints, tooManyAnnotations]) {
+      expect(validate(payload)).toBe(false);
+      expect(investigationStateSchema.safeParse(payload).success).toBe(false);
+    }
   });
 
-  it('accepts evidence that is an observation with no query under both schemas', () => {
-    const observationOnly = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'Missing null check',
-          confidence: 0.8,
-          status: 'confirmed',
-          evidence: [{ description: 'All checkout pods were in CrashLoopBackOff.' }],
-        },
-      ],
-    };
+  it('rejects a chart point without a numeric y under both schemas', () => {
+    const payload = withHypothesisEvidence([
+      {
+        description: 'x',
+        chart: { ...sampleChart, series: [{ name: 's', points: [{ x: 'a', y: 'high' }] }] },
+      },
+    ]);
 
-    expect(validate(observationOnly)).toBe(true);
-    expect(investigationStateSchema.safeParse(observationOnly).success).toBe(true);
-  });
-
-  it('accepts evidence carrying a query and a code reference in one entry under both schemas', () => {
-    const withCode = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'A 1ms gRPC timeout in the product validation loop',
-          confidence: 0.95,
-          status: 'confirmed',
-          evidence: [
-            {
-              description: 'Errors spike at 08:40 and the handler re-raises on deadline exceeded.',
-              esql_query: 'FROM logs.otel | STATS count = COUNT(*)',
-              time_range: { from: '2026-08-05T08:00:00Z', to: '2026-08-05T09:10:00Z' },
-              code: {
-                source: 'github_connector',
-                repo: 'elastic/otel-demo-scenario',
-                path: 'src/recommendationservice/recommendation_server.py',
-                host: 'github.com',
-                ref: 'f07c1da942b0c555fab6cf4eab612df1997b1329',
-              },
-            },
-          ],
-        },
-      ],
-    };
-
-    expect(validate(withCode)).toBe(true);
-    expect(investigationStateSchema.safeParse(withCode).success).toBe(true);
-  });
-
-  it('accepts a code reference with neither host nor ref, which simply will not be linked', () => {
-    const unlinkable = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'X',
-          confidence: 0.5,
-          status: 'investigating',
-          evidence: [
-            {
-              description: 'The retry guard is missing.',
-              code: {
-                source: 'code_search',
-                repo: 'open-telemetry/opentelemetry-demo',
-                path: 'src/recommendationservice/recommendation_server.py',
-              },
-            },
-          ],
-        },
-      ],
-    };
-
-    expect(validate(unlinkable)).toBe(true);
-    expect(investigationStateSchema.safeParse(unlinkable).success).toBe(true);
-  });
-
-  it('rejects a code reference missing its repo under both schemas', () => {
-    const missingRepo = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'X',
-          confidence: 0.5,
-          status: 'investigating',
-          evidence: [
-            {
-              description: 'Read the handler.',
-              code: { source: 'github_connector', path: 'src/handler.ts' },
-            },
-          ],
-        },
-      ],
-    };
-
-    expect(validate(missingRepo)).toBe(false);
-    expect(investigationStateSchema.safeParse(missingRepo).success).toBe(false);
-  });
-
-  it('rejects a code reference with an unknown source under both schemas', () => {
-    const badSource = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'X',
-          confidence: 0.5,
-          status: 'investigating',
-          evidence: [
-            {
-              description: 'Read the handler.',
-              code: { source: 'gitlab', repo: 'acme/foo', path: 'src/handler.ts' },
-            },
-          ],
-        },
-      ],
-    };
-
-    expect(validate(badSource)).toBe(false);
-    expect(investigationStateSchema.safeParse(badSource).success).toBe(false);
+    expect(validate(payload)).toBe(false);
+    expect(investigationStateSchema.safeParse(payload).success).toBe(false);
   });
 
   it('rejects hypothesis evidence exceeding MAX_HYPOTHESIS_EVIDENCE under both schemas', () => {
@@ -363,29 +319,6 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(tooMuchEvidence).success).toBe(false);
   });
 
-  it('rejects evidence with a half-specified time range under both schemas', () => {
-    const missingTo = {
-      summary: 'ok',
-      hypotheses: [
-        {
-          candidate: 'X',
-          confidence: 0.5,
-          status: 'investigating',
-          evidence: [
-            {
-              description: 'Ran a query.',
-              esql_query: 'FROM logs-* | LIMIT 1',
-              time_range: { from: '2026-07-28T13:30:00Z' },
-            },
-          ],
-        },
-      ],
-    };
-
-    expect(validate(missingTo)).toBe(false);
-    expect(investigationStateSchema.safeParse(missingTo).success).toBe(false);
-  });
-
   it('rejects an invalid hypothesis status under both schemas', () => {
     const invalidStatus = {
       summary: 'ok',
@@ -403,14 +336,58 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(oversized).success).toBe(false);
   });
 
-  it('accepts a minimal recommendation (title only) under both schemas', () => {
+  it('rejects an investigation severity outside the canonical tiers under both schemas', () => {
+    const invalidSeverity = { ...validPayload, severity: 'critical' };
+
+    expect(validate(invalidSeverity)).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidSeverity).success).toBe(false);
+  });
+
+  it('accepts a minimal scored recommendation under both schemas', () => {
     const minimalRecommendation = {
       ...validPayload,
-      recommendations: [{ title: 'Roll back the deployment' }],
+      recommendations: [{ title: 'Roll back the deployment', confidence: 0.9 }],
     };
 
     expect(validate(minimalRecommendation)).toBe(true);
     expect(investigationStateSchema.safeParse(minimalRecommendation).success).toBe(true);
+  });
+
+  it('rejects a recommendation without confidence under both schemas', () => {
+    const recommendationWithoutConfidence = {
+      ...validPayload,
+      recommendations: [{ title: 'Roll back the deployment' }],
+    };
+
+    expect(validate(recommendationWithoutConfidence)).toBe(false);
+    expect(investigationStateSchema.safeParse(recommendationWithoutConfidence).success).toBe(false);
+  });
+
+  it('rejects item confidence outside the 0–1 range under both schemas', () => {
+    const invalidConfidence = {
+      ...validPayload,
+      recommendations: [{ title: 'Roll back the deployment', confidence: 1.1 }],
+    };
+
+    expect(validate(invalidConfidence)).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidConfidence).success).toBe(false);
+  });
+
+  it('sorts items by confidence descending and preserves source order for ties', () => {
+    const parsed = investigationStateSchema.parse({
+      ...validPayload,
+      recommendations: [
+        { title: 'First tied step', confidence: 0.7 },
+        { title: 'Highest step', confidence: 0.9 },
+        { title: 'Second tied step', confidence: 0.7 },
+      ],
+    });
+
+    expect(parsed.recommendations?.map(({ title }) => title)).toEqual([
+      'Highest step',
+      'First tied step',
+      'Second tied step',
+    ]);
   });
 
   it('rejects a recommendations array exceeding MAX_RECOMMENDATIONS under both schemas', () => {
@@ -418,6 +395,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
       ...validPayload,
       recommendations: Array.from({ length: MAX_RECOMMENDATIONS + 1 }, (_, index) => ({
         title: `Step ${index}`,
+        confidence: 0.8,
       })),
     };
 
@@ -428,109 +406,130 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
   it('rejects a recommendation missing its title under both schemas', () => {
     const missingTitle = {
       ...validPayload,
-      recommendations: [{ description: 'Do the thing' }],
+      recommendations: [{ confidence: 0.8, description: 'Do the thing' }],
     };
 
     expect(validate(missingTitle)).toBe(false);
     expect(investigationStateSchema.safeParse(missingTitle).success).toBe(false);
   });
 
-  it('rejects a blind spot missing its description under both schemas', () => {
-    const missingDescription = {
+  it('accepts a payload with an impact entity carrying a name and evidence under both schemas', () => {
+    const withImpact = {
       ...validPayload,
-      blind_spots: [{ title: 'No traces for the cart service' }],
+      impact: {
+        entities: [
+          {
+            name: 'checkout-service',
+            type: 'service',
+            evidence: {
+              description: 'checkout-service error rate during incident window',
+              chart: sampleChart,
+            },
+          },
+        ],
+      },
     };
 
-    expect(validate(missingDescription)).toBe(false);
-    expect(investigationStateSchema.safeParse(missingDescription).success).toBe(false);
+    expect(validate(withImpact)).toBe(true);
+    expect(investigationStateSchema.safeParse(withImpact).success).toBe(true);
   });
 
-  it('rejects a blind_spots array exceeding MAX_BLIND_SPOTS under both schemas', () => {
-    const tooManyBlindSpots = {
+  it('accepts an impact entity with only a name (no optional fields) under both schemas', () => {
+    const minimalImpact = {
       ...validPayload,
-      blind_spots: Array.from({ length: MAX_BLIND_SPOTS + 1 }, (_, index) => ({
-        title: `Gap ${index}`,
-        description: `Missing data ${index}`,
-      })),
+      impact: { entities: [{ name: 'payment-service' }] },
     };
 
-    expect(validate(tooManyBlindSpots)).toBe(false);
-    expect(investigationStateSchema.safeParse(tooManyBlindSpots).success).toBe(false);
+    expect(validate(minimalImpact)).toBe(true);
+    expect(investigationStateSchema.safeParse(minimalImpact).success).toBe(true);
   });
 
-  it('rejects an event_update with an unknown field under both schemas', () => {
-    const unknownField = {
+  it('accepts an impact entity with feature_id and stream_name under both schemas', () => {
+    const withKi = {
       ...validPayload,
-      significant_event_updates: [
-        {
-          field: 'confidence',
-          from: '0.5',
-          to: '0.8',
-          reason: 'better',
-          evidence: [{ description: 'x' }],
+      impact: {
+        entities: [
+          {
+            name: 'cart-service',
+            type: 'service',
+            feature_id: 'ki-abc123',
+            stream_name: 'logs-app',
+          },
+        ],
+      },
+    };
+
+    expect(validate(withKi)).toBe(true);
+    expect(investigationStateSchema.safeParse(withKi).success).toBe(true);
+  });
+
+  it('rejects an impact entity missing its required name under both schemas', () => {
+    const missingName = {
+      ...validPayload,
+      impact: { entities: [{ type: 'service' }] },
+    };
+
+    expect(validate(missingName)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingName).success).toBe(false);
+  });
+
+  it('rejects an impact entities array exceeding MAX_IMPACT_ENTITIES under both schemas', () => {
+    const tooManyEntities = {
+      ...validPayload,
+      impact: {
+        entities: Array.from({ length: MAX_IMPACT_ENTITIES + 1 }, (_, i) => ({
+          name: `service-${i}`,
+        })),
+      },
+    };
+
+    expect(validate(tooManyEntities)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyEntities).success).toBe(false);
+  });
+
+  it('accepts an impact summary alongside the entities under both schemas', () => {
+    const withImpactSummary = {
+      ...validPayload,
+      impact: {
+        summary: 'Checkout failed for ~30% of requests for 40 minutes in eu-west-1.',
+        entities: [{ name: 'checkout-service' }],
+      },
+    };
+
+    expect(validate(withImpactSummary)).toBe(true);
+    expect(investigationStateSchema.safeParse(withImpactSummary).success).toBe(true);
+  });
+
+  it('accepts an impact with only a top-level summary and evidence under both schemas', () => {
+    const topLevelImpact = {
+      ...validPayload,
+      impact: {
+        summary: 'Checkout failed for ~30% of requests for 40 minutes in eu-west-1.',
+        evidence: {
+          description: 'Failed checkout requests per 5 minutes.',
+          chart: sampleChart,
         },
-      ],
+      },
     };
 
-    expect(validate(unknownField)).toBe(false);
-    expect(investigationStateSchema.safeParse(unknownField).success).toBe(false);
+    expect(validate(topLevelImpact)).toBe(true);
+    expect(investigationStateSchema.safeParse(topLevelImpact).success).toBe(true);
   });
 
-  it('rejects a severity event_update with an invalid enum value under both schemas', () => {
-    const invalidSeverity = {
+  it('accepts an empty impact object under both schemas', () => {
+    const emptyImpact = { ...validPayload, impact: {} };
+
+    expect(validate(emptyImpact)).toBe(true);
+    expect(investigationStateSchema.safeParse(emptyImpact).success).toBe(true);
+  });
+
+  it('accepts chart-only evidence without a description under both schemas', () => {
+    const chartOnlyEvidence = {
       ...validPayload,
-      significant_event_updates: [{ ...severityUpdate, to: '90-mega' }],
+      impact: { summary: 'Checkout failed.', evidence: { chart: sampleChart } },
     };
 
-    expect(validate(invalidSeverity)).toBe(false);
-    expect(investigationStateSchema.safeParse(invalidSeverity).success).toBe(false);
-  });
-
-  it('rejects a status event_update with an invalid enum value under both schemas', () => {
-    const invalidStatus = {
-      ...validPayload,
-      significant_event_updates: [{ ...statusUpdate, to: 'unknown' }],
-    };
-
-    expect(validate(invalidStatus)).toBe(false);
-    expect(investigationStateSchema.safeParse(invalidStatus).success).toBe(false);
-  });
-
-  it('rejects an event_update missing a required field (reason) under both schemas', () => {
-    const { reason, ...withoutReason } = severityUpdate;
-    const missingReason = { ...validPayload, significant_event_updates: [withoutReason] };
-
-    expect(validate(missingReason)).toBe(false);
-    expect(investigationStateSchema.safeParse(missingReason).success).toBe(false);
-  });
-
-  it('rejects an event_update with empty evidence under both schemas', () => {
-    const emptyEvidence = {
-      ...validPayload,
-      significant_event_updates: [{ ...severityUpdate, evidence: [] }],
-    };
-
-    expect(validate(emptyEvidence)).toBe(false);
-    expect(investigationStateSchema.safeParse(emptyEvidence).success).toBe(false);
-  });
-
-  it('rejects a summary event_update with an empty `to` under both schemas', () => {
-    const emptySummary = {
-      ...validPayload,
-      significant_event_updates: [{ ...summaryUpdate, to: '' }],
-    };
-
-    expect(validate(emptySummary)).toBe(false);
-    expect(investigationStateSchema.safeParse(emptySummary).success).toBe(false);
-  });
-
-  it('rejects a significant_event_updates array exceeding MAX_SIGNIFICANT_EVENT_UPDATES under both schemas', () => {
-    const tooMany = {
-      ...validPayload,
-      significant_event_updates: [severityUpdate, statusUpdate, summaryUpdate, severityUpdate],
-    };
-
-    expect(validate(tooMany)).toBe(false);
-    expect(investigationStateSchema.safeParse(tooMany).success).toBe(false);
+    expect(validate(chartOnlyEvidence)).toBe(true);
+    expect(investigationStateSchema.safeParse(chartOnlyEvidence).success).toBe(true);
   });
 });

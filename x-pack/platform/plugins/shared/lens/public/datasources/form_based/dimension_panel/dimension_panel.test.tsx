@@ -302,7 +302,7 @@ describe('FormBasedDimensionEditor', () => {
     const filterOperations = jest.fn().mockReturnValue(true);
 
     renderDimensionPanel({ filterOperations });
-    expect(filterOperations).toBeCalled();
+    expect(filterOperations).toHaveBeenCalled();
   });
 
   it('should show field select', () => {
@@ -1829,7 +1829,7 @@ describe('FormBasedDimensionEditor', () => {
     expect(wrapper.find(EuiComboBox).prop('selectedOptions')).toEqual([
       {
         label: 'nonexistent',
-        value: { type: 'field', field: 'nonexistent' },
+        value: { type: 'field', field: 'nonexistent', operationType: 'date_histogram' },
       },
     ]);
   });
@@ -2500,6 +2500,33 @@ describe('FormBasedDimensionEditor', () => {
     expect(
       wrapper.find('[data-test-subj="lens-dimensionTabs-static_value"]').first().prop('isSelected')
     ).toBeTruthy();
+  });
+
+  it('should not show tabs and render the static value editor when staticValueOnly is set', () => {
+    const stateWithNoColumn: FormBasedPrivateState = getStateWithColumns({});
+
+    wrapper = mountWithProviders(
+      <FormBasedDimensionEditorComponent
+        {...defaultProps}
+        supportStaticValue
+        staticValueOnly
+        state={stateWithNoColumn}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="lens-dimensionTabs"]').exists()).toBeFalsy();
+    expect(
+      wrapper.find('[data-test-subj="lns-indexPattern-static_value-input"]').exists()
+    ).toBeTruthy();
+  });
+
+  it('should not show quick functions for an existing quick function column when staticValueOnly is set', () => {
+    wrapper = mountWithProviders(
+      <FormBasedDimensionEditorComponent {...defaultProps} supportStaticValue staticValueOnly />
+    );
+
+    expect(wrapper.find('[data-test-subj="lens-dimensionTabs"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="indexPattern-dimension-field"]').exists()).toBeFalsy();
   });
 
   it('should not show any tab when formula is in full screen mode', () => {

@@ -19,7 +19,7 @@ Until both are enabled, every route returns `404`.
 
 ## Authentication
 
-All API routes require a valid Kibana session or API key. The easiest way to get started is the **one-click setup** endpoint or UI page (see below).
+All API routes require a valid Kibana session or API key. The easiest way to get started is the setup endpoint or UI page (see below).
 
 ### Setup endpoint
 
@@ -40,10 +40,7 @@ The API key is scoped to the calling user's privileges and expires after 30 days
 
 ### Setup UI
 
-Navigate to `/app/elasticRamen` in Kibana. Click **Generate credentials** to create an API key. The page will:
-
-1. Attempt to auto-deliver credentials to a local agent at `http://localhost:14642/config`
-2. Fall back to displaying the credentials for manual copy if no local agent is found
+Navigate to `/app/elasticRamen` in Kibana. Click **Create credentials** to create an API key. Copy the JSON and paste it into the Elastic Ramen setup dialog.
 
 ## Required headers
 
@@ -138,7 +135,14 @@ Use `"model": "default"` to always use the default connector.
 
 ### Conversations
 
-CRUD endpoints for managing chat conversations stored in Elasticsearch.
+CRUD endpoints for Agent Builder conversations. RAMEN (and older clients) still send and receive `conversation_rounds`. Agent Builder itself now stores the canonical transcript as timeline `events` with `schema_version >= 1`.
+
+These routes sit on the Agent Builder conversation index and keep both shapes in sync:
+
+- **Read:** `GET` returns `conversation_rounds`. For an events-native document (`schema_version >= 1`) with events, the rounds are folded from the timeline (Agent Builder's live chat appends events without rewriting the stored rounds, so the events are authoritative). Each round id yields one round: HITL resume executions are merged into it, an unanswered pause is `awaiting_prompt` with its `pending_prompts`, a failed/aborted run carries `interruption`, and executions that are still running are omitted. The full round input (including `attachment_refs`) and stored round `feedback` are preserved. Legacy documents return their stored rounds unchanged.
+- **Write:** `POST` / `PUT` still accept only `conversation_rounds` in the request body. Unknown fields from newer RAMEN builds (`events`, `schema_version`) are stripped by the route schema. Each round is projected by status: `completed` → `responded` terminal, `awaiting_prompt` → `prompt_requested` terminal, `in_progress` → no terminal, `interruption` → `execution_failed` / `execution_aborted`. On `PUT` to an events-native document the submitted rounds are reconciled with the stored timeline rather than replacing it: additive/custom events are kept, rounds spanning a HITL resume keep their stored events, a terminated round is never regressed to in-progress, and running rounds the caller never saw are kept. Legacy documents get a fresh projection and are stamped with `schema_version`.
+- **Fidelity:** the fold is a simplified port of Agent Builder's converters. `ask_user_question` answers are not copied onto question steps when merging a resume, and HITL rounds cannot be edited from RAMEN (the stored timeline wins).
+- **Compatibility:** Older RAMEN clients that only send `conversation_rounds` keep working. Newer RAMEN (see [elastic-ramen#120](https://github.com/elastic/elastic-ramen/pull/120)) also hydrates rounds on the client so takeover works against Kibana versions that do not yet include this write-path change.
 
 #### List conversations
 
@@ -146,7 +150,7 @@ CRUD endpoints for managing chat conversations stored in Elasticsearch.
 GET /internal/elastic_ramen/conversations?agent_id=<optional>
 ```
 
-Returns conversations for the current space, sorted by `updated_at` descending (max 100). The `conversation_rounds` field is excluded from list results.
+Returns conversations for the current space, sorted by `updated_at` descending (max 100). The `conversation_rounds` and `events` fields are excluded from list results.
 
 #### Get conversation
 
@@ -154,7 +158,7 @@ Returns conversations for the current space, sorted by `updated_at` descending (
 GET /internal/elastic_ramen/conversations/:id
 ```
 
-Returns a single conversation with full `conversation_rounds`.
+Returns a single conversation with full `conversation_rounds` (hydrated from `events` when needed, as above).
 
 #### Create conversation
 
@@ -171,7 +175,7 @@ Body:
 }
 ```
 
-Returns `{ "id": "generated-uuid" }`.
+Returns `{ "id": "generated-uuid" }`. The stored document also includes `events` and `schema_version`.
 
 #### Update conversation
 
@@ -187,7 +191,7 @@ Body (all fields optional):
 }
 ```
 
-Returns `{ "id": "conversation-id" }`.
+Returns `{ "id": "conversation-id" }`. When `conversation_rounds` is present, `events` are reconciled with those rounds (see above) so Agent Builder stays in sync.
 
 ## Configuration for external tools
 
@@ -243,7 +247,7 @@ The plugin lives at `x-pack/platform/plugins/shared/elastic_console/`.
 
 ### Type check
 ```
-yarn test:type_check --project x-pack/platform/plugins/shared/elastic_console/tsconfig.json
+pnpm test:type_check --project x-pack/platform/plugins/shared/elastic_console/tsconfig.json
 ```
 
 ### Lint

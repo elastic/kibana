@@ -11,6 +11,7 @@ import {
   ruleUpdatedTriggerCommonDefinition,
 } from '../../../../../common/workflows/triggers';
 import { RULE_UPDATED_EVENT_TYPE, type RuleUpdatedEvent } from '../../rule_event_publisher/events';
+import { toLifecycleWorkflowPayload } from './to_lifecycle_payload';
 import type { RuleWorkflowTriggerBinding } from './types';
 
 export { RuleUpdatedTriggerId } from '../../../../../common/workflows/triggers';
@@ -18,7 +19,7 @@ export { RuleUpdatedTriggerId } from '../../../../../common/workflows/triggers';
 /**
  * Binding from the bus `rule.updated` event to the `alerting.ruleUpdated`
  * workflow trigger. The internal event payload also carries the full domain
- * rule; `toPayload` projects only the rule ref so that state never reaches
+ * rule; `toPayload` projects identity plus tags so the snapshot never reaches
  * workflows.
  */
 export const ruleUpdatedTrigger: RuleWorkflowTriggerBinding<
@@ -28,7 +29,5 @@ export const ruleUpdatedTrigger: RuleWorkflowTriggerBinding<
   eventType: RULE_UPDATED_EVENT_TYPE,
   triggerId: RuleUpdatedTriggerId,
   definition: ruleUpdatedTriggerCommonDefinition,
-  toPayload: (event) => ({
-    rule: { ruleId: event.payload.ruleId, spaceId: event.payload.spaceId },
-  }),
+  toPayload: toLifecycleWorkflowPayload,
 };

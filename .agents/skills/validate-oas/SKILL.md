@@ -35,7 +35,7 @@ Refresh flow:
 1. Bootstrap dependencies if needed:
 
 ```bash
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ```
 
 2. Regenerate captured OAS snapshots. Read the include paths from the Buildkite step:
@@ -106,7 +106,7 @@ Do not manually convert to JSON pointers. The CLI handles conversion for error f
 Environment refresh:
 
 ```bash
-yarn kbn bootstrap
+pnpm kbn bootstrap
 
 CI_STEP=.buildkite/scripts/steps/checks/capture_oas_snapshot.sh
 INCLUDE_PATHS=$(grep -oE -- '--include-path /api[^ \\"]*' "$CI_STEP" | awk '{print $2}')

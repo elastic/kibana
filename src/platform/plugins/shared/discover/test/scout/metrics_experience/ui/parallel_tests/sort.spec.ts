@@ -95,7 +95,9 @@ spaceTest.describe(
         // Tab state is written to local storage on a trailing throttle, so an
         // immediate reload could race the write. Poll storage until the sort
         // lands to deterministically test "persisted sort survives a reload".
-        await expect.poll(() => metricsExperience.getPersistedSortDirection()).toBe('desc');
+        await expect
+          .poll(() => metricsExperience.getPersistedMetricsStateField('sortDirection'))
+          .toBe('desc');
       });
 
       await spaceTest.step('the descending sort survives a full page reload', async () => {
@@ -147,7 +149,9 @@ spaceTest.describe(
         .toContain('sortDirection:desc');
       // Wait for 'desc' to land in local storage before capturing the URL and then resetting,
       // so the subsequent cleared-storage check is meaningful.
-      await expect.poll(() => metricsExperience.getPersistedSortDirection()).toBe('desc');
+      await expect
+        .poll(() => metricsExperience.getPersistedMetricsStateField('sortDirection'))
+        .toBe('desc');
       const descendingUrl = page.url();
 
       await spaceTest.step('return the locally persisted sort to the default', async () => {
@@ -161,7 +165,9 @@ spaceTest.describe(
         // The default 'asc' is stripped from storage rather than written, so we cannot poll for
         // its presence. Instead poll until sortDirection is absent, confirming the throttled
         // tab-state write has settled before we navigate to the captured URL.
-        await expect.poll(() => metricsExperience.getPersistedSortDirection()).toBeUndefined();
+        await expect
+          .poll(() => metricsExperience.getPersistedMetricsStateField('sortDirection'))
+          .toBeUndefined();
       });
 
       await spaceTest.step('opening the captured URL applies its sort', async () => {

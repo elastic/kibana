@@ -250,21 +250,13 @@ export const completedInvestigationState: InvestigationState = {
   recommendations: [
     {
       title: 'Roll back the checkout deployment',
+      confidence: 0.95,
       description: 'Revert version 2026.07.24-1 and monitor P95 latency.',
     },
     {
       title: 'Add a deployment guardrail',
+      confidence: 0.75,
       description: 'Block releases when checkout latency exceeds the service baseline.',
-    },
-  ],
-  blind_spots: [
-    {
-      title: 'Missing database spans',
-      description: 'The slow inventory query is not represented in distributed traces.',
-    },
-    {
-      title: 'Limited deployment metadata',
-      description: 'Commit identifiers are not included in checkout logs.',
     },
   ],
 };

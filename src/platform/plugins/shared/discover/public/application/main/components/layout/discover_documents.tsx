@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { ApproximationBadge } from '@kbn/esql-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -26,6 +27,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
   UnifiedDataTableProps,
   UnifiedDataTableRestorableState,
   UseColumnsProps,
@@ -47,7 +50,6 @@ import {
 } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import useLatest from 'react-use/lib/useLatest';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -58,6 +60,7 @@ import {
   selectTabCombinedFilters,
   useAppStateSelector,
   useCurrentTabRuntimeState,
+  type ExpandedDocCascadePath,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
@@ -75,6 +78,8 @@ import type {
   UpdateESQLQueryFn,
 } from '../../../../context_awareness';
 import { useAdditionalCellActions, useProfileAccessor } from '../../../../context_awareness';
+import { getEsqlDatatableFromDocuments } from '../../../../utils/get_esql_datatable_from_documents';
+import { getGridRequestId } from '../../../../utils/get_grid_request_id';
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
@@ -84,8 +89,6 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { useScopedServices } from '../../../../components/scoped_services_provider';
-import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
@@ -114,14 +117,12 @@ function DiscoverDocumentsComponent({
   const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
   const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
-  const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
-  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata, discoverFeatureFlags } =
-    services;
+  const { dataViews, capabilities, uiSettings, uiActions } = services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
@@ -134,6 +135,8 @@ function DiscoverDocumentsComponent({
     columns,
     sampleSizeState,
     density,
+    documentsDisplayMode,
+    jsonModeSettings,
   ] = useAppStateSelector((state) => {
     return [
       state.dataSource,
@@ -146,15 +149,24 @@ function DiscoverDocumentsComponent({
       state.columns,
       state.sampleSize,
       state.density,
+      state.documentsDisplayMode,
+      state.jsonModeSettings,
     ];
   });
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
   const expandedDocOwner = useCurrentTabSelector((state) => state.expandedDocOwner);
-  const renderDocumentViewMeta = useCurrentTabSelector((state) => state.renderDocumentViewMeta);
-  const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
   const isEsqlMode = useIsEsqlMode();
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
+  const isWarningCalloutDismissed = useCurrentTabSelector(
+    (state) => state.isWarningCalloutDismissed
+  );
+  const setIsWarningCalloutDismissed = useCurrentTabAction(
+    internalStateActions.setIsWarningCalloutDismissed
+  );
+  const dismissWarningCallout = useCallback(() => {
+    dispatch(setIsWarningCalloutDismissed({ isWarningCalloutDismissed: true }));
+  }, [dispatch, setIsWarningCalloutDismissed]);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
@@ -182,12 +194,7 @@ function DiscoverDocumentsComponent({
     [dispatch, updateAppState]
   );
 
-  const {
-    columns: currentColumns,
-    onAddColumn,
-    onRemoveColumn,
-    onSetColumns,
-  } = useColumns({
+  const { columns: currentColumns, onSetColumns } = useColumns({
     capabilities,
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
@@ -198,33 +205,12 @@ function DiscoverDocumentsComponent({
     settings: grid,
   });
 
-  const onAddColumnWithTracking = useCallback(
-    (columnName: string) => {
-      onAddColumn(columnName);
-      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
-    },
-    [onAddColumn, scopedEBTManager, fieldsMetadata]
-  );
-
-  const onRemoveColumnWithTracking = useCallback(
-    (columnName: string) => {
-      onRemoveColumn(columnName);
-      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
-    },
-    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
-  );
-
-  const docViewerRef = useRef<DocViewerApi>(null);
-
-  useEffect(() => {
-    if (initialDocViewerTabId) {
-      docViewerRef.current?.setSelectedTabId(initialDocViewerTabId);
-    }
-  }, [initialDocViewerTabId]);
-
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const getExpandedDocSetter = useCallback(
-    (owner: string): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
+    (
+        owner: string,
+        expandedDocCascadePath?: ExpandedDocCascadePath
+      ): NonNullable<UnifiedDataTableProps['setExpandedDoc']> =>
       (
         doc: DataTableRecord | undefined,
         options?: {
@@ -236,13 +222,11 @@ function DiscoverDocumentsComponent({
           setExpandedDoc({
             expandedDoc: doc,
             expandedDocOwner: doc ? owner : undefined,
+            expandedDocCascadePath: doc ? expandedDocCascadePath : undefined,
             initialDocViewerTabId: options?.initialTabId,
             initialDocViewerTabState: options?.initialTabState,
           })
         );
-        if (options?.initialTabId) {
-          docViewerRef.current?.setSelectedTabId(options.initialTabId);
-        }
       },
     [dispatch, setExpandedDoc]
   );
@@ -250,11 +234,6 @@ function DiscoverDocumentsComponent({
   const setExpandedDocForDefaultOwner = useMemo(
     () => getExpandedDocSetter(DEFAULT_EXPANDED_DOC_OWNER),
     [getExpandedDocSetter]
-  );
-
-  const setExpandedDocForCurrentOwner = useMemo(
-    () => getExpandedDocSetter(expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER),
-    [expandedDocOwner, getExpandedDocSetter]
   );
 
   const latestExpandedDocOwner = useLatest(expandedDocOwner);
@@ -329,6 +308,20 @@ function DiscoverDocumentsComponent({
     [dispatch, updateAppState]
   );
 
+  const onUpdateDocumentsDisplayMode = useCallback(
+    (newDocumentsDisplayMode: DocumentsDisplayMode) => {
+      dispatch(updateAppState({ appState: { documentsDisplayMode: newDocumentsDisplayMode } }));
+    },
+    [dispatch, updateAppState]
+  );
+
+  const onUpdateJsonModeSettings = useCallback(
+    (newJsonModeSettings: JsonModeSettings) => {
+      dispatch(updateAppState({ appState: { jsonModeSettings: newJsonModeSettings } }));
+    },
+    [dispatch, updateAppState]
+  );
+
   // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
     () => showTimeFieldColumn({ uiSettings, query }),
@@ -360,27 +353,6 @@ function DiscoverDocumentsComponent({
     [dispatch, updateESQLQuery]
   );
 
-  const docViewerUiState = useCurrentTabSelector((state) => state.uiState.docViewer);
-  const setDocViewerUiState = useCurrentTabAction(internalStateActions.setDocViewerUiState);
-
-  const onInitialDocViewerStateChange = useCallback(
-    (newDocViewerUiState: Partial<DocViewerRestorableState>) => {
-      dispatch(setDocViewerUiState({ docViewerUiState: newDocViewerUiState }));
-    },
-    [dispatch, setDocViewerUiState]
-  );
-
-  const setInitialDocViewerTabIdAction = useCurrentTabAction(
-    internalStateActions.setInitialDocViewerTabId
-  );
-
-  const onUpdateSelectedTabId = useCallback(
-    (tabId: string | undefined) => {
-      dispatch(setInitialDocViewerTabIdAction({ initialDocViewerTabId: tabId }));
-    },
-    [dispatch, setInitialDocViewerTabIdAction]
-  );
-
   const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
   const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
   const onInitialStateChange = useCallback(
@@ -388,12 +360,6 @@ function DiscoverDocumentsComponent({
       dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState }));
     },
     [dispatch, setDataGridUiState]
-  );
-
-  // This is temporary, sourceDisplayMode should be get from the app state.
-  const sourceDisplayMode = useMemo(
-    () => (discoverFeatureFlags.getDataTableJsonViewEnabled() ? 'json' : 'summary'),
-    [discoverFeatureFlags]
   );
 
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
@@ -411,13 +377,58 @@ function DiscoverDocumentsComponent({
       }),
     [rowHeight, dataGridUiState, services.storage, configRowHeight]
   );
+  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
+  // Same ES|QL table the histogram uses, so Summary cells can fetch without waiting for the chart.
+  const { table: esqlTable } = useMemo(
+    () =>
+      getEsqlDatatableFromDocuments({
+        documentsValue: documentState,
+        isEsqlMode,
+      }),
+    [documentState, isEsqlMode]
+  );
+  // New result identity after refresh - keeps sparkline cache from reusing a stale series.
+  const requestId = useMemo(() => getGridRequestId(documentState.result), [documentState.result]);
+  const abortSignal = dataStateContainer.getAbortController()?.signal;
+  const searchContext = useMemo(() => {
+    if (!isEsqlMode || !esqlTable || !query) {
+      return undefined;
+    }
+    return {
+      query,
+      table: esqlTable,
+      filters,
+      timeRange: requestParams.timeRangeAbsolute,
+      esqlVariables,
+      searchSessionId: requestParams.searchSessionId,
+      // Match the table's ES|QL fast-mode setting on the sparkline follow-up.
+      isApproximate: esqlApproximation,
+      requestId,
+      abortSignal,
+    };
+  }, [
+    abortSignal,
+    esqlApproximation,
+    esqlTable,
+    esqlVariables,
+    filters,
+    isEsqlMode,
+    query,
+    requestId,
+    requestParams.searchSessionId,
+    requestParams.timeRangeAbsolute,
+  ]);
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
       dataView,
       density: cellRendererDensity,
       rowHeight: cellRendererRowHeight,
+      searchContext,
+      // Spinner while the grid is fetching; warning icon if it finished without context.
+      isDataLoading,
     }),
-    [dataView, cellRendererDensity, cellRendererRowHeight]
+    [cellRendererDensity, cellRendererRowHeight, dataView, isDataLoading, searchContext]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
@@ -426,8 +437,14 @@ function DiscoverDocumentsComponent({
   }, [cellRendererParams, getCellRenderersAccessor]);
 
   const callouts = useMemo(
-    () => <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />,
-    [documentState.interceptedWarnings]
+    () => (
+      <SearchResponseWarningsCallout
+        warnings={documentState.interceptedWarnings ?? []}
+        isDismissed={isWarningCalloutDismissed}
+        onDismiss={dismissWarningCallout}
+      />
+    ),
+    [dismissWarningCallout, documentState.interceptedWarnings, isWarningCalloutDismissed]
   );
 
   const loadingIndicator = useMemo(
@@ -450,6 +467,8 @@ function DiscoverDocumentsComponent({
     () => (canSaveDiscoverTable ? <SaveDiscoverTableButton /> : undefined),
     [canSaveDiscoverTable]
   );
+
+  const approximationApplied = documentState.approximationApplied;
 
   const renderCustomToolbarWithElements = useMemo(
     () =>
@@ -495,8 +514,6 @@ function DiscoverDocumentsComponent({
   const setCascadedDocumentsDataGridUiState = useCurrentTabAction(
     internalStateActions.setCascadedDocumentsDataGridUiState
   );
-  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
-  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
       !isCascadedDocumentsVisible(availableCascadeGroups, query) ||
@@ -553,13 +570,6 @@ function DiscoverDocumentsComponent({
     setSelectedCascadeGroups,
     renderViewModeToggle,
   ]);
-
-  const flyoutColumnsMeta = useMemo(() => {
-    if (!expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER) {
-      return columnsMeta;
-    }
-    return cascadedColumnsMeta;
-  }, [expandedDocOwner, columnsMeta, cascadedColumnsMeta]);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -629,6 +639,16 @@ function DiscoverDocumentsComponent({
             configRowHeight={configRowHeight}
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+            externalAdditionalControls={
+              approximationApplied ? (
+                <span style={{ marginRight: 4 }}>
+                  <ApproximationBadge
+                    isApproximationApplied
+                    data-test-subj="discoverApproximationApplied"
+                  />
+                </span>
+              ) : undefined
+            }
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
@@ -645,32 +665,13 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             onFullScreenChange={setIsDataGridFullScreen}
-            sourceDisplayMode={sourceDisplayMode}
+            documentsDisplayModeState={documentsDisplayMode}
+            onUpdateDocumentsDisplayMode={onUpdateDocumentsDisplayMode}
+            jsonModeSettingsState={jsonModeSettings}
+            onUpdateJsonModeSettings={onUpdateJsonModeSettings}
           />
         </CellActionsProvider>
       </div>
-      {expandedDoc && renderDocumentViewMeta && (
-        <DiscoverGridFlyout
-          dataView={dataView}
-          hit={expandedDoc}
-          hits={renderDocumentViewMeta.displayedRows}
-          // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
-          columns={renderDocumentViewMeta.displayedColumns}
-          columnsMeta={flyoutColumnsMeta}
-          savedSearchId={persistedDiscoverSession?.id!}
-          query={query}
-          initialTabId={initialDocViewerTabId}
-          onFilter={onAddFilter}
-          onRemoveColumn={onRemoveColumnWithTracking}
-          onAddColumn={onAddColumnWithTracking}
-          onClose={() => setExpandedDocForCurrentOwner(undefined)}
-          setExpandedDoc={setExpandedDocForCurrentOwner}
-          docViewerRef={docViewerRef}
-          onUpdateSelectedTabId={onUpdateSelectedTabId}
-          initialDocViewerState={docViewerUiState}
-          onInitialDocViewerStateChange={onInitialDocViewerStateChange}
-        />
-      )}
     </EuiFlexItem>
   );
 }

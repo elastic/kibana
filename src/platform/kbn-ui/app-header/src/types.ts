@@ -7,13 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * This contract is declarative on purpose: apps describe what to show (text, options, callbacks),
+ * and the header decides how it looks. Do not add `ReactNode`, `ReactElement`, JSX, or render-prop
+ * fields here. They let every app paint its own UI, and the header stops looking like one
+ * component. The renderer also coerces text to plain strings and drops undeclared keys, see
+ * "Strict props" in the `@kbn/app-header` README.
+ *
+ * When the existing props cannot express something, add a new declarative field for it (for
+ * example a text badge variant) rather than a slot for arbitrary content. `renderCustomBadge` is a
+ * deprecated exception, not a pattern to copy.
+ */
+
 import type { ReactElement, MouseEventHandler } from 'react';
 import type { IconType } from '@elastic/eui';
 import type { AppMenuConfig } from '@kbn/ui-app-menu';
 import type { FavoriteButtonStatus } from '@kbn/ui-favorite-button';
 
-export type AppHeaderBack = string | AppHeaderBackTarget;
-
+/**
+ * Single back target. Points at the IA parent of the page, or at an explicit
+ * satellite origin. Never `history.back()`.
+ */
 export interface AppHeaderBackTarget {
   href: string;
   /**
@@ -21,9 +35,14 @@ export interface AppHeaderBackTarget {
    * Do not use it to navigate to `href`; Kibana handles same-origin links as SPA navigation.
    */
   onClick?: MouseEventHandler;
-  /** Destination name for accessibility (e.g. "Back to {label}"). */
-  label?: string;
+  /**
+   * Names the destination (parent page or satellite origin), never a category
+   * or the current page. Used as "Back to {label}".
+   */
+  label: string;
 }
+
+export type AppHeaderBack = AppHeaderBackTarget;
 
 export interface AppHeaderBadge {
   label: string;
@@ -220,6 +239,17 @@ export interface AppHeaderShareAction {
 }
 
 /**
+ * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+ * Not a stable App Header contract.
+ */
+export interface AppHeaderExperimentalDashboardAiAction {
+  onClick: (context: { returnFocus: () => void }) => void;
+  isDisabled?: boolean;
+  testId?: string;
+  tooltip: string;
+}
+
+/**
  * Plain-text page description. Use the object form to add a URL rendered with a fixed
  * "Learn more" label.
  */
@@ -239,8 +269,14 @@ interface AppHeaderConfigBase {
   favorite?: AppHeaderFavoriteAction;
   share?: AppHeaderShareAction;
   /**
+   * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
+   * Not a stable App Header contract.
+   */
+  experimentalDashboardAiAction?: AppHeaderExperimentalDashboardAiAction;
+  /**
    * Defaults to `standard`, except a sparse header (no title, badges, tabs, description, metadata,
-   * title append, favorite, or share) defaults to `compact`. An explicit value always wins.
+   * title append, favorite, share, or experimental dashboard AI action) defaults to `compact`.
+   * An explicit value always wins.
    */
   spacing?: AppHeaderSpacing;
 }

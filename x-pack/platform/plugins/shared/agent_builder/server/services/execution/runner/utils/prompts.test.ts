@@ -13,6 +13,12 @@ import {
   ConfirmationStatus,
 } from '@kbn/agent-builder-common/agents/prompts';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
+import {
+  completedRoundTimeline,
+  eventsNativeConversation,
+  pausedRoundTimeline,
+  pausedThenInterruptedResumeTimeline,
+} from '../../../../test_utils/timeline';
 import { createPromptManager, getAgentPromptStorageState, toolConfirmationId } from './prompts';
 
 describe('prompts utilities', () => {
@@ -369,6 +375,10 @@ describe('prompts utilities', () => {
         response: { allow: true },
       };
 
+      /**
+       * Whether the next input resumes a pause is decided on the events: `completed` builds a
+       * responded round, `awaitingPrompt` an unanswered pause.
+       */
       const conversationWith = ({
         lastRoundStatus,
         responses,
@@ -378,11 +388,26 @@ describe('prompts utilities', () => {
           string,
           typeof declinedResponse | typeof authorizedResponse | typeof confirmationResponse
         >;
-      }) =>
-        createEmptyConversation({
-          rounds: [createRound({ status: lastRoundStatus })],
-          state: { prompt: { responses } },
-        });
+      }) => ({
+        ...eventsNativeConversation(
+          lastRoundStatus === ConversationRoundStatus.awaitingPrompt
+            ? pausedRoundTimeline()
+            : completedRoundTimeline()
+        ),
+        state: { prompt: { responses } },
+      });
+
+      it('scopes authorization responses out when stored rounds say awaiting_prompt but the events consumed the prompt', () => {
+        const conversation = {
+          ...eventsNativeConversation(pausedThenInterruptedResumeTimeline()),
+          rounds: [createRound({ id: 'r1', status: ConversationRoundStatus.awaitingPrompt })],
+          state: { prompt: { responses: { 'auth-prompt': authorizedResponse } } },
+        };
+
+        const result = getAgentPromptStorageState({ input: { message: 'hello' }, conversation });
+
+        expect(result.responses['auth-prompt']).toBeUndefined();
+      });
 
       it('drops carried-over declined authorization responses when starting a new round', () => {
         const conversation = conversationWith({

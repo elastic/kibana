@@ -27,15 +27,14 @@ export const toBackTargets = (
   const targets: BackNavigation[] = [];
 
   for (const item of backItems) {
-    const target = typeof item === 'string' ? { href: item } : item;
-    const href = target.href?.trim();
+    const href = item.href?.trim();
     if (!href) {
       continue;
     }
     targets.push({
       backHref: href,
-      backOnClick: target.onClick,
-      backDestinationLabel: target.label,
+      backOnClick: item.onClick,
+      backDestinationLabel: item.label,
     });
   }
 

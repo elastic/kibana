@@ -20,7 +20,7 @@ export function MonitoringBeatsOverviewProvider({ getService }) {
     }
 
     noRecentActivityMessageIsShowing() {
-      return testSubjects.exists(SUBJ_NO_RECENT_ACTIVITY_MESSAGE);
+      return testSubjects.waitForExists(SUBJ_NO_RECENT_ACTIVITY_MESSAGE, { timeout: 5000 });
     }
   })();
 }
