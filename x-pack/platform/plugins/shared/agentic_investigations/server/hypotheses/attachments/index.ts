@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { ImpactPrivilegesChecker } from '../../impact/services/check_impact_privileges';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import type { HypothesesService } from '../services/hypotheses_service';
 import { hypothesesAttachment } from './hypotheses_attachment_type';
 
@@ -20,7 +20,7 @@ export const registerHypothesesAttachment = (
     logger,
   }: {
     getHypothesesService: () => HypothesesService;
-    privileges: ImpactPrivilegesChecker;
+    privileges: InvestigationsPrivilegesChecker;
     logger: Logger;
   }
 ): void => {

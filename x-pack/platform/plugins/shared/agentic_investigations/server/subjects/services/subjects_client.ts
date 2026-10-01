@@ -12,7 +12,7 @@ import type {
   InvestigationSubjectInput,
   InvestigationSubjectKey,
 } from '../../../common/subjects/subject';
-import type { ImpactPrivilegesChecker } from '../../impact/services/check_impact_privileges';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import type { ResolveUser } from '../../services/resolve_user';
 import type { ClaimSubjectsParams, ClaimSubjectsResult } from './subject_claims_service';
 import type { SubjectsService } from './subjects_service';
@@ -37,8 +37,8 @@ export interface SubjectsClient {
 export interface SubjectsClientDeps {
   getSubjectsService: () => SubjectsService;
   getSpaceId: (request: KibanaRequest) => string;
-  /** Subjects share the investigations manage privilege with impact. */
-  privileges: ImpactPrivilegesChecker;
+  /** Writes need the investigations manage privilege; reads accept read or manage. */
+  privileges: InvestigationsPrivilegesChecker;
   resolveUser: ResolveUser;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
   getAttachmentClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;

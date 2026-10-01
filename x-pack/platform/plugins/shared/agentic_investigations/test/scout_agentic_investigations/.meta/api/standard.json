@@ -507,6 +507,314 @@
         "line": 165,
         "column": 11
       }
+    },
+    {
+      "id": "40d12a708ba9237-a4c070f0f463817",
+      "title": "Investigation query API access control returns 403 on every read for a user without an investigations privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/access_control.spec.ts",
+        "line": 41,
+        "column": 31
+      }
+    },
+    {
+      "id": "40d12a708ba9237-6bc44234831efdd",
+      "title": "Investigation query API access control lets a user with only the read privilege get, list, and count investigations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/access_control.spec.ts",
+        "line": 56,
+        "column": 79
+      }
+    },
+    {
+      "id": "40d12a708ba9237-16db6c224ecf1df",
+      "title": "Investigation query API access control does not let a user with only the read privilege write impact",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/access_control.spec.ts",
+        "line": 91,
+        "column": 16
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-edbbe94f87f0227",
+      "title": "GET /internal/investigations/investigations — investigation query API GET by id joins metadata, subjects, and impact",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 117,
+        "column": 18
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-d2db66b532db413",
+      "title": "GET /internal/investigations/investigations — investigation query API GET by id returns 404 for a conversation that is not an investigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 141,
+        "column": 20
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-99d55fd536246a6",
+      "title": "GET /internal/investigations/investigations — investigation query API GET by id returns 404 for an unknown id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 149,
+        "column": 81
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-9e154a20e435e3b",
+      "title": "GET /internal/investigations/investigations — investigation query API filters by subject id, open and closed alike",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 158,
+        "column": 13
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-89d79627663ec9d",
+      "title": "GET /internal/investigations/investigations — investigation query API finds the open investigation holding a subject",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 164,
+        "column": 7
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-48af730cc7f35e7",
+      "title": "GET /internal/investigations/investigations — investigation query API filters by subject type and id together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 173,
+        "column": 57
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-7561f810330758f",
+      "title": "GET /internal/investigations/investigations — investigation query API intersects subject and entity filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 182,
+        "column": 14
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-bcf34c0201655f4",
+      "title": "GET /internal/investigations/investigations — investigation query API filters by impacted entity, open and closed alike",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 186,
+        "column": 79
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-a4a11a308929889",
+      "title": "GET /internal/investigations/investigations — investigation query API filters by impacted entity and status together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 196,
+        "column": 91
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-1f512d2d4944251",
+      "title": "GET /internal/investigations/investigations — investigation query API filters by impacted entity id or name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 202,
+        "column": 7
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-523ed2317cf7358",
+      "title": "GET /internal/investigations/investigations — investigation query API filters by severity and free text, sorted by severity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 211,
+        "column": 79
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-ebafe8f67a2e92a",
+      "title": "GET /internal/investigations/investigations — investigation query API in_progress=false includes idle investigations; true excludes them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 218,
+        "column": 15
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-d39bd8311e9c3bb",
+      "title": "GET /internal/investigations/investigations — investigation query API pages a filtered list and reports the total",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 235,
+        "column": 7
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-2428a48b14967be",
+      "title": "GET /internal/investigations/investigations — investigation query API never returns conversations on another template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 256,
+        "column": 25
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-0c0e23e683bfd34",
+      "title": "GET /internal/investigations/investigations — investigation query API counts the filtered investigations per severity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 258,
+        "column": 81
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-e660c5571136bd2",
+      "title": "GET /internal/investigations/investigations — investigation query API returns 400 for an out-of-range page size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 271,
+        "column": 15
+      }
+    },
+    {
+      "id": "bde301540dae144-92b6861d0aa9e1d",
+      "title": "Investigations are isolated per Space lists the investigation in its own Space by entity and by subject",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/space_isolation.spec.ts",
+        "line": 49,
+        "column": 55
+      }
+    },
+    {
+      "id": "bde301540dae144-f95f27805cd0931",
+      "title": "Investigations are isolated per Space does not list it in the default Space, by entity, subject, or text",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/space_isolation.spec.ts",
+        "line": 68,
+        "column": 18
+      }
+    },
+    {
+      "id": "bde301540dae144-13b93cb4e806981",
+      "title": "Investigations are isolated per Space returns 404 for its id in the default Space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/space_isolation.spec.ts",
+        "line": 84,
+        "column": 18
+      }
     }
   ]
 }

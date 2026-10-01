@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-/** Thrown when the acting principal lacks the privilege the operation needs. */
-export class ImpactForbiddenError extends Error {
+/** Thrown when the acting principal lacks the investigations privilege the operation needs. */
+export class InvestigationsForbiddenError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'ImpactForbiddenError';
+    this.name = 'InvestigationsForbiddenError';
   }
 }
