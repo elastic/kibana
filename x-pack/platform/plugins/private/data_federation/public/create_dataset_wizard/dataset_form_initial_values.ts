@@ -72,6 +72,7 @@ export const emptyDatasetFormValues = (): CreateDatasetFormValues => ({
     trimSpacesIsValid: true,
     partitionDetectionIsValid: true,
     errorModeIsValid: true,
+    schemaResolutionIsValid: true,
     unmanagedSettings: {},
   },
   mappings: {
@@ -153,6 +154,7 @@ export const dataSetToFormValues = (data: DataSetWithName): CreateDatasetFormVal
     trimSpacesIsValid: true,
     partitionDetectionIsValid: true,
     errorModeIsValid: true,
+    schemaResolutionIsValid: true,
     unmanagedSettings: getUnmanagedDatasetSettings(data.settings),
   },
   mappings: mappingsToEditorValue(data.mappings),

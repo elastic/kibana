@@ -28,6 +28,7 @@ describe('dataset_form_initial_values', () => {
       trimSpacesIsValid: true,
       partitionDetectionIsValid: true,
       errorModeIsValid: true,
+      schemaResolutionIsValid: true,
       unmanagedSettings: {},
     });
     expect(values.settings.format).toBe('');

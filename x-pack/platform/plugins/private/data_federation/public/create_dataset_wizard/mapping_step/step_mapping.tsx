@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useController, useFormContext } from 'react-hook-form';
+import { useController, useFormContext, useFormState, useWatch } from 'react-hook-form';
 
 import type { CreateDatasetFormValues } from '../create_dataset_form_state';
 import { InferSchemaToggle } from './infer_schema_toggle';
@@ -30,9 +30,15 @@ export function StepMapping() {
   const {
     services: { docLinks },
   } = useKibana<DataFederationKibanaServices>();
-  const { control } = useFormContext<CreateDatasetFormValues>();
+  const { control, getFieldState, trigger } = useFormContext<CreateDatasetFormValues>();
   const updateContent = useWizardStep();
   const { field } = useController({ name: 'mappings', control });
+  const schemaResolutionFormState = useFormState({ control, name: 'settings.schema_resolution' });
+  const isSchemaResolutionInvalid = getFieldState(
+    'settings.schema_resolution',
+    schemaResolutionFormState
+  ).invalid;
+  const schemaResolutionIsValid = useWatch({ control, name: 'ui.schemaResolutionIsValid' });
   const [shouldShowTimeseriesValidation, setShouldShowTimeseriesValidation] = useState(false);
   const [shouldShowDefineSchemaValidation, setShouldShowDefineSchemaValidation] = useState(false);
   const [hasAttemptedValidation, setHasAttemptedValidation] = useState(false);
@@ -177,15 +183,29 @@ export function StepMapping() {
     updateContent({
       // Always report a boolean so other steps can still validate/navigate.
       // We keep the "don't show errors until Next is pressed" behavior separate.
-      isValid: hasAttemptedValidation ? isMappingStepValid : true,
+      isValid: hasAttemptedValidation ? isMappingStepValid && !isSchemaResolutionInvalid : true,
       validate: async () => {
         setHasAttemptedValidation(true);
         setShouldShowTimeseriesValidation(true);
         setShouldShowDefineSchemaValidation(true);
-        return isMappingStepValid;
+        const isSchemaResolutionValid = await trigger('settings.schema_resolution');
+        return isMappingStepValid && isSchemaResolutionValid;
       },
     });
-  }, [hasAttemptedValidation, isMappingStepValid, updateContent]);
+  }, [
+    hasAttemptedValidation,
+    isMappingStepValid,
+    isSchemaResolutionInvalid,
+    trigger,
+    updateContent,
+  ]);
+
+  useEffect(() => {
+    // The schema resolution rule depends on its validity flag and the infer schema mode, neither of
+    // which re-validates on its own because the form never submits.
+    if (!hasAttemptedValidation) return;
+    trigger('settings.schema_resolution');
+  }, [schemaResolutionIsValid, dynamicMode, hasAttemptedValidation, trigger]);
 
   return (
     <div data-test-subj="createDatasetWizardMappingStep">

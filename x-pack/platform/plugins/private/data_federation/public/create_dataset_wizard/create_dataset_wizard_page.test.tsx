@@ -687,7 +687,9 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('nextButton')).toBeDisabled();
 
     // Fixing the problem clears the error and re-enables Next without clicking it.
-    fireEvent.click(getByTestId('createDatasetWizardInferSchemaCard'));
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetWizardInferSchemaCard'));
+    });
     expect(queryByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeNull();
     expect(getByTestId('nextButton')).toBeEnabled();
   });
@@ -722,6 +724,57 @@ describe('CreateDatasetWizardPage', () => {
       'true'
     );
     expect(getByTestId('nextButton')).toBeEnabled();
+  });
+
+  it('blocks Next on the mapping step while the schema resolution combo box holds text that is not a selected option', async () => {
+    const { getByTestId, getAllByTestId, findByTestId, findByText, queryByText } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+
+    fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
+      target: { value: 'event_time' },
+    });
+    await act(async () => {
+      fireEvent.click(getByTestId('createDatasetWizardSchemaResolutionToggle'));
+    });
+    const input = getByTestId('createDatasetWizardSchemaResolution').querySelector('input');
+    if (!input) throw new Error('schema resolution input not found');
+    await act(async () => {
+      fireEvent.change(input, { target: { value: 'bogus' } });
+      fireEvent.blur(input);
+    });
+
+    await clickNext(getByTestId);
+    expect(getByTestId('createDatasetWizardMappingStep')).toBeInTheDocument();
+    expect(
+      await findByText(createDatasetWizardStrings.comboBoxSelectValidOption)
+    ).toBeInTheDocument();
+    await waitFor(() => expect(getByTestId('nextButton')).toBeDisabled());
+
+    await act(async () => {
+      fireEvent.change(input, { target: { value: '' } });
+    });
+    await act(async () => {
+      fireEvent.click(input);
+    });
+    const candidates = getAllByTestId('createDatasetWizardSchemaResolutionOption-strict');
+    const option = candidates.find((el) => el.getAttribute('role') === 'option') ?? candidates[0];
+    await act(async () => {
+      fireEvent.click(option);
+    });
+    await waitFor(() => expect(getByTestId('nextButton')).toBeEnabled());
+    expect(queryByText(createDatasetWizardStrings.comboBoxSelectValidOption)).toBeNull();
   });
 
   it('enables timeseries when @timestamp is added via field mappings', async () => {

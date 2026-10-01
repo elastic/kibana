@@ -108,6 +108,8 @@ export interface CreateDatasetFormValues {
     partitionDetectionIsValid: boolean;
     /** False while the error mode combo box holds typed text that has not been resolved to an option. */
     errorModeIsValid: boolean;
+    /** False while the schema resolution combo box holds typed text that has not been resolved to an option. */
+    schemaResolutionIsValid: boolean;
     /**
      * Passthrough-only dataset settings not managed by the wizard UI.
      * Used to preserve API-supported settings on edit, and included in review/request output.
