@@ -33,8 +33,26 @@ function getBaseUrl(tokenUrl: string | undefined): string {
   return base.replace(/\/+$/, '');
 }
 
+// nextRecordsUrl is appended to the instance URL and requested with the OAuth token, so it must stay a
+// relative cursor path: a value such as `@attacker.example/x` would otherwise change the request host.
+const NEXT_RECORDS_URL_REGEX = /^\/services\/data\/v\d+\.\d+\/(query|search)\/[A-Za-z0-9-]+$/;
+const INVALID_NEXT_RECORDS_URL_MESSAGE =
+  'nextRecordsUrl must be the relative path returned by a previous response, e.g. /services/data/v66.0/query/01gxx0000002-2000';
+
+const NextRecordsUrlSchema = lazySchema(() =>
+  z
+    .string()
+    .max(SALESFORCE_MAX_URL_LENGTH)
+    .regex(NEXT_RECORDS_URL_REGEX, { message: INVALID_NEXT_RECORDS_URL_MESSAGE })
+    .optional()
+    .describe('Pagination URL from previous response')
+);
+
 /** Resolve Salesforce nextRecordsUrl (relative path) to a full URL. */
 function createPaginationUrl(baseUrl: string, nextRecordsUrl: string): string {
+  if (!NEXT_RECORDS_URL_REGEX.test(nextRecordsUrl)) {
+    throw new Error(INVALID_NEXT_RECORDS_URL_MESSAGE);
+  }
   return `${baseUrl}${nextRecordsUrl}`;
 }
 
@@ -108,11 +126,7 @@ export const SalesforceConnector: ConnectorSpec = {
             .describe(
               'SOQL query. Prefer LIMIT 10-20 and WHERE to narrow results; use nextRecordsUrl from response for more.'
             ),
-          nextRecordsUrl: z
-            .string()
-            .max(SALESFORCE_MAX_URL_LENGTH)
-            .optional()
-            .describe('Pagination URL from previous response'),
+          nextRecordsUrl: NextRecordsUrlSchema,
         })
       ),
       handler: async (ctx, input) => {
@@ -181,11 +195,7 @@ export const SalesforceConnector: ConnectorSpec = {
             .number()
             .default(10)
             .describe('Max records to return (1-2000). Prefer 10-20 to keep context small.'),
-          nextRecordsUrl: z
-            .string()
-            .max(SALESFORCE_MAX_URL_LENGTH)
-            .optional()
-            .describe('Pagination URL from previous response'),
+          nextRecordsUrl: NextRecordsUrlSchema,
         })
       ),
       handler: async (ctx, input) => {
@@ -230,11 +240,7 @@ export const SalesforceConnector: ConnectorSpec = {
             .describe(
               'Object API names to search, comma-separated (e.g. Account,Contact). Prefer 1-3 types to keep result size down. Custom objects require "Allow Search" enabled. Use describe to discover object names.'
             ),
-          nextRecordsUrl: z
-            .string()
-            .max(SALESFORCE_MAX_URL_LENGTH)
-            .optional()
-            .describe('Pagination URL from previous response'),
+          nextRecordsUrl: NextRecordsUrlSchema,
         })
       ),
       handler: async (ctx, input) => {
