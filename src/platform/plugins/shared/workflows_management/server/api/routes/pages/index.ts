@@ -29,5 +29,5 @@ export function registerPageRoutes(deps: RouteDependencies) {
   registerPageFormRoute(deps, pages.signingKey);
   registerPageSubmitRoute(deps, pages.signingKey, pages.runAsApiKey);
   registerPageLinkRoute(deps, pages.signingKey);
-  registerPageRotateRoute(deps);
+  registerPageRotateRoute(deps, pages.signingKey);
 }

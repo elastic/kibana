@@ -17,7 +17,11 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
-import { isPageTrigger } from './schema/triggers/page_trigger_schema';
+import {
+  hasAtMostOnePageTrigger,
+  isPageTrigger,
+  MULTIPLE_PAGE_TRIGGERS_ERROR,
+} from './schema/triggers/page_trigger_schema';
 import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../common/constants';
 import {
   HITL_EXTERNAL_CHANNELS_DESCRIPTION,
@@ -1109,7 +1113,10 @@ function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSc
 }
 
 export const WorkflowSchema = WorkflowSchemaBase.extend({
-  triggers: z.array(TriggerSchema).min(1),
+  triggers: z
+    .array(TriggerSchema)
+    .min(1)
+    .refine(hasAtMostOnePageTrigger, { message: MULTIPLE_PAGE_TRIGGERS_ERROR }),
 }).transform((data) => {
   const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 

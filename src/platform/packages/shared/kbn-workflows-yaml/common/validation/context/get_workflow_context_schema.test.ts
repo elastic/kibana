@@ -460,7 +460,6 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
       triggers: [
         {
           type: 'page',
-          'page-id': 'abc',
           inputs: {
             properties: { summary: { type: 'string' }, severity: { type: 'string' } },
             required: ['summary'],

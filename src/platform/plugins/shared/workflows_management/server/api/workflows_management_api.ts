@@ -590,10 +590,16 @@ export class WorkflowsManagementApi {
       { yaml: clonedYaml },
       spaceId,
       request,
-      { nameFallback: cloneName, regeneratePageIds: true }
+      { nameFallback: cloneName }
     );
     this.notifySml(result.id, spaceId, 'create', request);
     return result;
+  }
+
+  /** Retires the workflow page URL. Needs edit access, like any change to the workflow. */
+  public async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<number> {
+    await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+    return this.workflowsService.rotatePage(id, spaceId, request);
   }
 
   public async updateWorkflow(

@@ -918,7 +918,7 @@ describe('getInputsFromDefinition', () => {
 
   it('should return the JSON Schema inputs from a page trigger', () => {
     const definition = {
-      triggers: [{ type: 'page', 'page-id': 'abc', inputs: expectedSchema }],
+      triggers: [{ type: 'page', inputs: expectedSchema }],
     } as unknown as WorkflowYaml;
 
     expect(getInputsFromDefinition(definition)).toEqual(expectedSchema);

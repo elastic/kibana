@@ -430,7 +430,7 @@ export class WorkflowsService {
     workflow: CreateWorkflowCommand,
     spaceId: string,
     request: KibanaRequest,
-    options?: { nameFallback?: string; regeneratePageIds?: boolean }
+    options?: { nameFallback?: string }
   ): Promise<WorkflowDetailDto> {
     await this.ensureInitialized();
     return this.crudService.createWorkflow(workflow, spaceId, request, options);
@@ -454,6 +454,11 @@ export class WorkflowsService {
   ): Promise<UpdatedWorkflowResponseDto> {
     await this.ensureInitialized();
     return this.crudService.updateWorkflow(id, workflow, spaceId, request);
+  }
+
+  public async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<number> {
+    await this.ensureInitialized();
+    return this.crudService.rotatePage(id, spaceId, request);
   }
 
   public async restoreWorkflowVersion(

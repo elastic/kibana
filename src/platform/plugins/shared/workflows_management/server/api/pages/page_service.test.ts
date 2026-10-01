@@ -8,14 +8,17 @@
  */
 
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { computePageSecret } from './page_secret';
 import { getPageSubmitter, parsePageSubmission, resolvePage } from './page_service';
 import { ExternalResumeError } from '../external_resume/external_resume_error';
 
-const PAGE_ID = '7f3c2a1e-0000-4000-8000-000000000001';
+const KEY = 'k'.repeat(32);
+const SPACE_ID = 'default';
+const WORKFLOW_ID = 'report-incident';
 
-const workflowWithPage = (pageId: string, overrides: Partial<WorkflowDetailDto> = {}) =>
+const pageWorkflow = (overrides: Partial<WorkflowDetailDto> = {}) =>
   ({
-    id: `workflow-for-${pageId}`,
+    id: WORKFLOW_ID,
     enabled: true,
     valid: true,
     definition: {
@@ -23,7 +26,6 @@ const workflowWithPage = (pageId: string, overrides: Partial<WorkflowDetailDto> 
         { type: 'manual' },
         {
           type: 'page',
-          'page-id': pageId,
           title: 'Report an incident',
           inputs: { type: 'object', properties: { summary: { type: 'string' } } },
         },
@@ -32,35 +34,57 @@ const workflowWithPage = (pageId: string, overrides: Partial<WorkflowDetailDto> 
     ...overrides,
   } as unknown as WorkflowDetailDto);
 
+const secretFor = (generation: number) =>
+  computePageSecret(KEY, { spaceId: SPACE_ID, workflowId: WORKFLOW_ID, generation });
+
+const resolve = (workflow: WorkflowDetailDto | null, secret: string) =>
+  resolvePage(jest.fn().mockResolvedValue(workflow), {
+    signingKey: KEY,
+    spaceId: SPACE_ID,
+    workflowId: WORKFLOW_ID,
+    secret,
+  });
+
+const expectHiddenNotFound = (promise: Promise<unknown>) =>
+  expect(promise).rejects.toEqual(expect.objectContaining({ statusCode: 404, expose: false }));
+
 describe('resolvePage', () => {
-  it('finds the enabled workflow whose page trigger has the page-id', async () => {
-    const finder = jest
-      .fn()
-      .mockResolvedValue([workflowWithPage('other'), workflowWithPage(PAGE_ID)]);
+  it('loads the workflow by id and returns its page trigger', async () => {
+    const getWorkflow = jest.fn().mockResolvedValue(pageWorkflow());
 
-    const page = await resolvePage(finder, { pageId: PAGE_ID, spaceId: 'default' });
+    const page = await resolvePage(getWorkflow, {
+      signingKey: KEY,
+      spaceId: SPACE_ID,
+      workflowId: WORKFLOW_ID,
+      secret: secretFor(0),
+    });
 
-    expect(finder).toHaveBeenCalledWith('page', 'default');
-    expect(page.workflow.id).toBe(`workflow-for-${PAGE_ID}`);
+    expect(getWorkflow).toHaveBeenCalledWith(WORKFLOW_ID, SPACE_ID);
     expect(page.trigger.title).toBe('Report an incident');
   });
 
-  it('returns a non-exposed 404 when no enabled workflow has the page-id', async () => {
-    const finder = jest.fn().mockResolvedValue([workflowWithPage('other')]);
+  it('accepts the secret of the current generation only', async () => {
+    const rotated = pageWorkflow({ pageGeneration: 2 });
 
-    await expect(resolvePage(finder, { pageId: PAGE_ID, spaceId: 'default' })).rejects.toEqual(
-      expect.objectContaining({ statusCode: 404, expose: false })
-    );
+    await expect(resolve(rotated, secretFor(2))).resolves.toBeDefined();
+    await expectHiddenNotFound(resolve(rotated, secretFor(1)));
   });
 
-  it('skips a workflow whose definition is invalid', async () => {
-    const finder = jest
-      .fn()
-      .mockResolvedValue([workflowWithPage(PAGE_ID, { valid: false, definition: null })]);
-
-    await expect(
-      resolvePage(finder, { pageId: PAGE_ID, spaceId: 'default' })
-    ).rejects.toBeInstanceOf(ExternalResumeError);
+  it('hides why a request failed', async () => {
+    await expectHiddenNotFound(resolve(null, secretFor(0)));
+    await expectHiddenNotFound(resolve(pageWorkflow(), 'wrong'));
+    await expectHiddenNotFound(resolve(pageWorkflow({ enabled: false }), secretFor(0)));
+    await expectHiddenNotFound(
+      resolve(pageWorkflow({ valid: false, definition: null }), secretFor(0))
+    );
+    await expectHiddenNotFound(
+      resolve(
+        pageWorkflow({
+          definition: { triggers: [{ type: 'manual' }] },
+        } as unknown as Partial<WorkflowDetailDto>),
+        secretFor(0)
+      )
+    );
   });
 });
 

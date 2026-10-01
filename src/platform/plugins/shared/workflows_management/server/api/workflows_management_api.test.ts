@@ -580,7 +580,7 @@ describe('WorkflowsManagementApi', () => {
         }),
         'default',
         mockRequest,
-        { nameFallback: 'Original Workflow Copy', regeneratePageIds: true }
+        { nameFallback: 'Original Workflow Copy' }
       );
       expect(result.name).toBe('Original Workflow Copy');
       expect(result.id).toBe('workflow-clone-456');
@@ -725,7 +725,7 @@ enabled: true`;
         { yaml: 'not-a-workflow' },
         'default',
         mockRequest,
-        { nameFallback: 'Original Copy', regeneratePageIds: true }
+        { nameFallback: 'Original Copy' }
       );
     });
 
@@ -767,7 +767,7 @@ enabled: true`;
         expect.any(Object),
         spaceId,
         mockRequest,
-        { nameFallback: 'Original Workflow Copy', regeneratePageIds: true }
+        { nameFallback: 'Original Workflow Copy' }
       );
     });
   });
