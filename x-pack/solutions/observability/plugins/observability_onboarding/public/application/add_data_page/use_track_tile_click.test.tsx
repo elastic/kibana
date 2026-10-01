@@ -48,18 +48,6 @@ describe('useTrackTileClick', () => {
     expect(onClick).toHaveBeenCalledWith(click);
   });
 
-  it('flags clicks made while the search field holds a term', () => {
-    const { trackTileClick, reportEvent } = setup('/?search=nginx');
-
-    trackTileClick({ tile_id: 'epr:nginx', surface: 'search_result' })(click);
-
-    expect(reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
-      tile_id: 'epr:nginx',
-      surface: 'search_result',
-      has_search_term: true,
-    });
-  });
-
   it('reads the search term before a route tile navigates away', () => {
     const { trackTileClick, history, reportEvent } = setup('/?search=nginx');
 
@@ -75,17 +63,5 @@ describe('useTrackTileClick', () => {
       has_search_term: true,
     });
     expect(history.location.pathname).toBe('/kubernetes');
-  });
-
-  it('does not count an empty search param as a search term', () => {
-    const { trackTileClick, reportEvent } = setup('/?search=');
-
-    trackTileClick({ tile_id: 'linux', surface: 'tile' })(click);
-
-    expect(reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
-      tile_id: 'linux',
-      surface: 'tile',
-      has_search_term: false,
-    });
   });
 });

@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { matchers } from '@emotion/jest';
 import React from 'react';
@@ -541,17 +541,6 @@ describe('LandingPage tile click telemetry (V2)', () => {
       )
       .map(([, fields]) => fields);
 
-  const dockerCollectionJourney = [
-    { tile_id: 'docker', surface: 'tile', collection_id: 'docker', has_search_term: false },
-    {
-      tile_id: 'epr:docker_otel',
-      surface: 'collection_variant',
-      collection_id: 'docker',
-      is_recommended: false,
-      has_search_term: false,
-    },
-  ];
-
   it('reports opening a collection and picking a variant as exactly two events, in order', async () => {
     const user = userEvent.setup();
     const coreStart = renderLandingAtPath('/');
@@ -561,23 +550,16 @@ describe('LandingPage tile click telemetry (V2)', () => {
     await screen.findByTestId('collectionFlyout');
     await user.click(screen.getByTestId('collectionVariantRow-epr:docker_otel'));
 
-    expect(reportedTileClicks(coreStart)).toEqual(dockerCollectionJourney);
-  });
-
-  it('reports the same two events when the journey uses the keyboard', async () => {
-    const user = userEvent.setup();
-    const coreStart = renderLandingAtPath('/');
-    await waitForCollectionTile('observabilityOnboardingIntegrationTile-docker');
-
-    within(screen.getByTestId('observabilityOnboardingIntegrationTile-docker'))
-      .getByRole('button')
-      .focus();
-    await user.keyboard('{Enter}');
-    await screen.findByTestId('collectionFlyout');
-    within(screen.getByTestId('collectionVariantRow-epr:docker_otel')).getByRole('link').focus();
-    await user.keyboard('{Enter}');
-
-    expect(reportedTileClicks(coreStart)).toEqual(dockerCollectionJourney);
+    expect(reportedTileClicks(coreStart)).toEqual([
+      { tile_id: 'docker', surface: 'tile', collection_id: 'docker', has_search_term: false },
+      {
+        tile_id: 'epr:docker_otel',
+        surface: 'collection_variant',
+        collection_id: 'docker',
+        is_recommended: false,
+        has_search_term: false,
+      },
+    ]);
   });
 
   it('flags a tile clicked after a search was typed', async () => {

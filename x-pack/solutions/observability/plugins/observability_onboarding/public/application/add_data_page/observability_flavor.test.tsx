@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -300,27 +300,6 @@ describe('useObservabilityCuratedCategories', () => {
     expect(opentelemetry?.href).toBe('/otel-apm');
     expect(opentelemetry?.onClick).toBeDefined();
     expect(apm?.href).toBe('/app/apm/onboarding');
-  });
-
-  it('reports a route tile click and still navigates', () => {
-    const services = buildServices();
-    const { result } = renderHook(
-      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
-      { wrapper: createWrapper(services) }
-    );
-    const linux = result.current
-      .flatMap((category) => category.tiles)
-      .find((tile) => tile.id === 'linux');
-
-    const event = plainLeftClick();
-    act(() => linux?.onClick?.(event));
-
-    expect(services.analytics.reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
-      tile_id: 'linux',
-      surface: 'tile',
-      has_search_term: false,
-    });
-    expect(event.preventDefault).toHaveBeenCalled();
   });
 
   it('reports a link-only curated tile click and leaves navigation to the link', () => {

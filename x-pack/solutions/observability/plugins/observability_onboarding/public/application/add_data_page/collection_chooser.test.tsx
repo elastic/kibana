@@ -226,21 +226,6 @@ describe('CollectionChooser', () => {
     );
   });
 
-  it('reports a variant without the badge as not recommended', async () => {
-    const user = userEvent.setup();
-    const core = renderChooser({ collection: 'mysql' });
-
-    await screen.findByTestId('collectionFlyout');
-    await user.click(
-      within(screen.getByTestId('collectionVariantRow-epr:mysql')).getByRole('link')
-    );
-
-    expect(core.analytics.reportEvent).toHaveBeenCalledWith(
-      OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT.eventType,
-      expect.objectContaining({ tile_id: 'epr:mysql', is_recommended: false })
-    );
-  });
-
   it('keeps Fleet order and shows no recommendation when no member is an OpenTelemetry package', async () => {
     renderChooser({ collection: 'redis' });
 

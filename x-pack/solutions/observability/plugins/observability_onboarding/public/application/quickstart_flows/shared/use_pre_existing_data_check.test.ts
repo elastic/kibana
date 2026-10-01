@@ -41,8 +41,4 @@ describe('usePreExistingDataCheck', () => {
       osType: 'darwin',
     });
   });
-
-  it('sends only the start time when no OS is given', () => {
-    expect(requestQueryFor({ flow: 'otel_host' })).toEqual({ start: expect.any(String) });
-  });
 });

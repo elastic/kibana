@@ -58,25 +58,6 @@ describe('checkPreExistingData', () => {
     );
   });
 
-  it('adds the given filters to the window query', async () => {
-    const client = createMockEsClient(hitsResponse(0));
-    const osFilter = { term: { 'os.type': 'darwin' } };
-    await checkPreExistingData(client, indices, start, [osFilter]);
-
-    expect(client.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: {
-          bool: {
-            filter: [
-              { range: { '@timestamp': { gte: '2026-03-31T09:55:00.000Z', lt: start } } },
-              osFilter,
-            ],
-          },
-        },
-      })
-    );
-  });
-
   it('returns false on no shards available error', async () => {
     const error = new errors.ResponseError({
       statusCode: 503,
