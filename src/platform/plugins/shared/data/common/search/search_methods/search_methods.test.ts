@@ -130,11 +130,11 @@ describe('SearchMethodsService', () => {
       );
     });
 
-    it('requests column_metadata when columnMetadata option is true', async () => {
+    it('requests column_metadata when columnMetadata param is true', async () => {
       const mockResponse = { columns: [], values: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      await service.esql({ query: 'FROM logs' }, { columnMetadata: true });
+      await service.esql({ query: 'FROM logs', columnMetadata: true });
 
       expect(mockSearch).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -310,7 +310,7 @@ describe('SearchMethodsService', () => {
       });
     });
 
-    describe('searchContext', () => {
+    describe('search context', () => {
       const phraseFilter: Filter = {
         meta: { alias: null, disabled: false, negate: false },
         query: { match_phrase: { host: 'fromFilterPill' } },
@@ -323,27 +323,22 @@ describe('SearchMethodsService', () => {
         mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
       });
 
-      it('leaves the request untouched when no search context is provided', async () => {
+      it('defaults the time zone from advanced settings even with no context fields', async () => {
         await service.esql({ query: 'FROM logs' });
 
-        expect(getEsQueryConfig).not.toHaveBeenCalled();
-        expect(getRequestParams()).toEqual(
-          expect.objectContaining({ filter: undefined, params: undefined, time_zone: undefined })
-        );
+        expect(getRequestParams().time_zone).toBe('America/New_York');
       });
 
-      it('combines filters, query, and time range into the request filter', async () => {
-        await service.esql(
-          { query: 'FROM logs' },
-          {
-            searchContext: {
-              timeRange,
-              timeField: '@timestamp',
-              filters: [phraseFilter],
-              query: { language: 'kuery', query: 'service:fromQueryBar' },
-            },
-          }
-        );
+      it('combines kibanaFilters, kqlQuery, and timeRange into the request filter', async () => {
+        await service.esql({
+          query: 'FROM logs',
+          kibanaQueryContext: {
+            timeRange,
+            timeField: '@timestamp',
+            kibanaFilters: [phraseFilter],
+            kqlQuery: { language: 'kuery', query: 'service:fromQueryBar' },
+          },
+        });
 
         const filterJson = JSON.stringify(getRequestParams().filter);
         expect(filterJson).toContain('fromFilterPill');
@@ -359,11 +354,11 @@ describe('SearchMethodsService', () => {
         });
       });
 
-      it('only applies the time range through named params without a time field', async () => {
-        await service.esql(
-          { query: 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend' },
-          { searchContext: { timeRange } }
-        );
+      it('only applies the timeRange through named params without a timeField', async () => {
+        await service.esql({
+          query: 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend',
+          kibanaQueryContext: { timeRange },
+        });
 
         expect(getRequestParams().filter).toBeUndefined();
         expect(getRequestParams().params).toEqual([
@@ -373,17 +368,15 @@ describe('SearchMethodsService', () => {
       });
 
       it('adds control variables used in the query as named params', async () => {
-        await service.esql(
-          { query: 'FROM logs | STATS COUNT(*) BY ?field' },
-          {
-            searchContext: {
-              esqlVariables: [
-                { key: 'field', value: 'host', type: ESQLVariableType.FIELDS },
-                { key: 'unused', value: 'other', type: ESQLVariableType.VALUES },
-              ],
-            },
-          }
-        );
+        await service.esql({
+          query: 'FROM logs | STATS COUNT(*) BY ?field',
+          kibanaQueryContext: {
+            esqlVariables: [
+              { key: 'field', value: 'host', type: ESQLVariableType.FIELDS },
+              { key: 'unused', value: 'other', type: ESQLVariableType.VALUES },
+            ],
+          },
+        });
 
         expect(getRequestParams().query).toBe('FROM logs | STATS COUNT(*) BY ??field');
         expect(getRequestParams().params).toEqual([{ field: 'host' }]);
@@ -392,14 +385,12 @@ describe('SearchMethodsService', () => {
       it('merges the context with the filter and named params from the caller', async () => {
         const callerFilter = { term: { status: 'fromCaller' } };
 
-        await service.esql(
-          {
-            query: 'FROM logs | WHERE status == ?status AND @timestamp >= ?_tstart',
-            params: [{ status: 'fromCaller' }],
-            filter: callerFilter,
-          },
-          { searchContext: { timeRange, filters: [phraseFilter] } }
-        );
+        await service.esql({
+          query: 'FROM logs | WHERE status == ?status AND @timestamp >= ?_tstart',
+          params: [{ status: 'fromCaller' }],
+          filter: callerFilter,
+          kibanaQueryContext: { timeRange, kibanaFilters: [phraseFilter] },
+        });
 
         expect(getRequestParams().filter.bool.filter).toContainEqual(callerFilter);
         expect(JSON.stringify(getRequestParams().filter)).toContain('fromFilterPill');
@@ -409,23 +400,17 @@ describe('SearchMethodsService', () => {
         ]);
       });
 
-      it('ignores ES|QL queries in the context', async () => {
-        await service.esql(
-          { query: 'FROM logs' },
-          { searchContext: { query: { esql: 'FROM other' } } }
-        );
+      it('ignores ES|QL queries in kqlQuery', async () => {
+        await service.esql({
+          query: 'FROM logs',
+          kibanaQueryContext: { kqlQuery: { esql: 'FROM other' } as any },
+        });
 
         expect(getRequestParams().filter).toBeUndefined();
       });
 
-      it('defaults the time zone from advanced settings', async () => {
-        await service.esql({ query: 'FROM logs' }, { searchContext: {} });
-
-        expect(getRequestParams().time_zone).toBe('America/New_York');
-      });
-
-      it('prefers the time zone from the caller', async () => {
-        await service.esql({ query: 'FROM logs', timeZone: 'Europe/Paris' }, { searchContext: {} });
+      it('prefers the timeZone from the caller', async () => {
+        await service.esql({ query: 'FROM logs', timeZone: 'Europe/Paris' });
 
         expect(getRequestParams().time_zone).toBe('Europe/Paris');
       });
@@ -544,8 +529,9 @@ describe('SearchMethodsService', () => {
             query: { match: { message: 'error' } },
             aggs: { status_count: { terms: { field: 'status' } } },
             size: 50,
+            trackTotalHits: true,
           },
-          { inspector, trackTotalHits: true }
+          { inspector }
         );
 
         expect(requestResponder.json).toHaveBeenCalledWith({
@@ -739,6 +725,7 @@ describe('SearchMethodsService', () => {
       const result = await service.dslPaginated({
         index: 'logs-*',
         query: { match_all: {} },
+        sort: [{ '@timestamp': 'desc' }],
       });
 
       expect(result.pagination.hasNextPage).toBe(false);

@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery } from '@kbn/es-query';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 import type { ISearchMethods } from '@kbn/search-types';
@@ -16,8 +15,6 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { EsRawResponse } from './es_raw_response';
 
 import type { KibanaContext } from '..';
-import { getEsQueryConfig } from '../../es_query';
-import type { UiSettingsCommon } from '../..';
 
 const name = 'esdsl';
 
@@ -39,7 +36,6 @@ export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<
 
 interface EsdslStartDependencies {
   searchService: ISearchMethods;
-  uiSettingsClient: UiSettingsCommon;
 }
 
 export const getEsdslFn = ({
@@ -80,25 +76,9 @@ export const getEsdslFn = ({
       },
     },
     async fn(input, args, { inspectorAdapters, abortSignal, getKibanaRequest }) {
-      const { searchService, uiSettingsClient } = await getStartDependencies(getKibanaRequest);
+      const { searchService } = await getStartDependencies(getKibanaRequest);
 
       const dsl = JSON.parse(args.dsl);
-
-      if (input) {
-        const esQueryConfigs = getEsQueryConfig(uiSettingsClient as any);
-        const query = buildEsQuery(
-          undefined, //        args.index,
-          input.query || [],
-          input.filters || [],
-          esQueryConfigs
-        );
-
-        if (dsl.query) {
-          query.bool.must.push(dsl.query);
-        }
-
-        dsl.query = query;
-      }
 
       try {
         const { rawResponse } = await searchService.dsl(
@@ -106,6 +86,12 @@ export const getEsdslFn = ({
             index: args.index,
             size: args.size,
             ...dsl,
+            ...(input && {
+              kibanaQueryContext: {
+                kibanaFilters: input.filters,
+                kqlQuery: input.query,
+              },
+            }),
           },
           {
             abortSignal,

@@ -32,15 +32,13 @@ export function getEsdsl({
 }) {
   return getEsdslFn({
     getStartDependencies: async (getKibanaRequest: any) => {
-      const [core, , { search }] = await getStartServices();
+      const [, , { search }] = await getStartServices();
       if (!getKibanaRequest || !getKibanaRequest()) {
         throw new Error('TODO: add text');
       }
       const request = getKibanaRequest();
-      const savedObjectsClient = core.savedObjects.getScopedClient(request);
       const scopedClient = search.asScoped(request);
       return {
-        uiSettingsClient: core.uiSettings.asScopedToClient(savedObjectsClient),
         searchService: scopedClient,
       };
     },

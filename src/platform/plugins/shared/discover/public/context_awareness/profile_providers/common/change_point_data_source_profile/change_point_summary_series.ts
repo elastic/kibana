@@ -203,13 +203,13 @@ const loadLineSeries = async ({
       query,
       ...(filter ? { filter } : {}),
       ...(namedParams.length ? { params: namedParams } : {}),
+      dropNullColumns: true,
+      approximation: fetchParams.isApproximate,
     },
     {
       abortSignal,
       sessionId: fetchParams.searchSessionId,
-      dropNullColumns: true,
       projectRouting: fetchParams.projectRouting,
-      approximation: fetchParams.isApproximate,
       executionContext: {
         type: 'discover',
         name: 'change_point_summary_series',

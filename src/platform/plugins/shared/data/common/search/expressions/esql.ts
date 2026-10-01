@@ -148,26 +148,29 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         : undefined;
 
       const { datatable } = await searchService.esql(
-        { query, locale },
+        {
+          query,
+          locale,
+          kibanaQueryContext: {
+            timeRange: input?.timeRange,
+            timeField,
+            kibanaFilters: [
+              ...(ignoreGlobalFilters ? [] : input?.filters ?? []),
+              ...(delayFilter ? [delayFilter] : []),
+            ],
+            kqlQuery: ignoreGlobalFilters ? undefined : input?.query,
+            esqlVariables: input?.esqlVariables,
+          },
+          approximation: input?.isApproximate,
+          dropNullColumns: true,
+          includeExecutionMetadata: true,
+          columnMetadata: true,
+        },
         {
           abortSignal,
           sessionId: getSearchSessionId(),
           executionContext: getExecutionContext(),
           projectRouting: input?.projectRouting,
-          approximation: input?.isApproximate,
-          dropNullColumns: true,
-          includeExecutionMetadata: true,
-          columnMetadata: true,
-          searchContext: {
-            timeRange: input?.timeRange,
-            timeField,
-            filters: [
-              ...(ignoreGlobalFilters ? [] : input?.filters ?? []),
-              ...(delayFilter ? [delayFilter] : []),
-            ],
-            query: ignoreGlobalFilters ? undefined : input?.query,
-            esqlVariables: input?.esqlVariables,
-          },
           inspector: {
             adapter: inspectorAdapters.requests ?? new RequestAdapter(),
             title:

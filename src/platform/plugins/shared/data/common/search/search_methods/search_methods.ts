@@ -21,11 +21,12 @@ import type {
   IDslSearchParams,
   IDslSearchOptions,
   IDslSearchResult,
+  IDslPaginatedSearchParams,
+  IDslPaginatedSearchOptions,
   IDslPaginatedSearchResult,
   IDslPagination,
   IEsqlSearchParams,
   IEsqlSearchOptions,
-  IEsqlSearchContext,
   IEsqlSearchResult,
   IEqlSearchParams,
   IEqlSearchOptions,
@@ -38,6 +39,7 @@ import type {
   IEsSearchRequest,
   IKibanaSearchRequest,
   ISearchGeneric,
+  KibanaQueryContext,
 } from '@kbn/search-types';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import type {
@@ -80,12 +82,11 @@ export class SearchMethodsService implements ISearchMethods {
    * Execute an ES|QL search
    */
   async esql(params: IEsqlSearchParams, options?: IEsqlSearchOptions): Promise<IEsqlSearchResult> {
-    const esqlParams = options?.searchContext
-      ? await this.applyEsqlSearchContext(params, options.searchContext)
-      : params;
-    const request = this.buildEsqlRequest(esqlParams, options);
+    const esqlParams = await this.applyEsqlSearchContext(params);
+    const request = this.buildEsqlRequest(esqlParams);
     const searchOptions = this.mapEsqlOptions(
       options,
+      params,
       'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY
     );
 
@@ -96,7 +97,7 @@ export class SearchMethodsService implements ISearchMethods {
 
     requestResponder?.json({
       ...((request.params ?? {}) as Record<string, unknown>),
-      ...(options?.approximation !== undefined && { approximation: options.approximation }),
+      ...(params.approximation !== undefined && { approximation: params.approximation }),
     });
 
     try {
@@ -110,8 +111,8 @@ export class SearchMethodsService implements ISearchMethods {
 
       const datatable = mapEsqlResponseToDatatable(response.rawResponse as any, {
         query: params.query,
-        timeRange: options?.searchContext?.timeRange,
-        esqlVariables: options?.searchContext?.esqlVariables,
+        timeRange: params.kibanaQueryContext?.timeRange,
+        esqlVariables: params.kibanaQueryContext?.esqlVariables,
         warning: response.warning,
       });
 
@@ -132,7 +133,10 @@ export class SearchMethodsService implements ISearchMethods {
    * Execute a DSL (Elasticsearch Query DSL) search
    */
   async dsl(params: IDslSearchParams, options?: IDslSearchOptions): Promise<IDslSearchResult> {
-    const request = this.buildDslRequest(params, options);
+    const dslParams = params.kibanaQueryContext
+      ? await this.applyDslKibanaQueryContext(params)
+      : params;
+    const request = this.buildDslRequest(dslParams, options);
     const searchOptions = this.mapDslOptions(options, params);
 
     const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
@@ -171,16 +175,16 @@ export class SearchMethodsService implements ISearchMethods {
    * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
    */
   async dslPaginated(
-    params: IDslSearchParams,
-    _options?: Omit<IDslSearchOptions, 'trackTotalHits'>
+    params: IDslPaginatedSearchParams,
+    options?: IDslPaginatedSearchOptions
   ): Promise<IDslPaginatedSearchResult> {
-    const options = {
-      ..._options,
-      // trackTotalHits is required for pagination to determine if there are more pages
-      trackTotalHits: true,
-    };
-    const request = this.buildDslRequest(params, options);
-    const response = await this.executeSearch(request, this.mapDslOptions(options, params));
+    // trackTotalHits is required for pagination to determine if there are more pages
+    const paginatedParams = { ...params, trackTotalHits: true as const };
+    const request = this.buildDslRequest(paginatedParams, options);
+    const response = await this.executeSearch(
+      request,
+      this.mapDslOptions(options, paginatedParams)
+    );
 
     return {
       rawResponse: response.rawResponse,
@@ -280,6 +284,32 @@ export class SearchMethodsService implements ISearchMethods {
   // ============================================================================
   // DSL Search Helpers
   // ============================================================================
+
+  private async applyDslKibanaQueryContext(params: IDslSearchParams): Promise<IDslSearchParams> {
+    const {
+      timeRange,
+      timeField,
+      kibanaFilters = [],
+      kqlQuery,
+    } = params.kibanaQueryContext as KibanaQueryContext;
+    const esQueryConfig = await this.deps.getEsQueryConfig();
+
+    const timeFilter = timeRange && getTime(undefined, timeRange, { fieldName: timeField });
+    const contextFilters = [...kibanaFilters, ...(timeFilter ? [timeFilter] : [])];
+    const contextQueries = castArray(kqlQuery ?? []).filter(isOfQueryType);
+
+    if (!contextFilters.length && !contextQueries.length) {
+      return params;
+    }
+
+    const contextQuery = buildEsQuery(undefined, contextQueries, contextFilters, esQueryConfig);
+    if (params.query) {
+      contextQuery.bool.must.push(params.query);
+    }
+
+    return { ...params, query: contextQuery };
+  }
+
   private buildDslRequest(params: IDslSearchParams, options?: IDslSearchOptions): IEsSearchRequest {
     const {
       index: _,
@@ -291,6 +321,8 @@ export class SearchMethodsService implements ISearchMethods {
       _source,
       runtimeMappings,
       highlight,
+      kibanaQueryContext: _kibanaQueryContext,
+      trackTotalHits,
       ...rest
     } = params;
     const body: Record<string, any> = {
@@ -306,7 +338,7 @@ export class SearchMethodsService implements ISearchMethods {
       // It could make sense to lock this down further if we get more confident or if expression functions
       // can no longer be used directly in Canvas
       ...rest,
-      track_total_hits: options?.trackTotalHits,
+      track_total_hits: trackTotalHits,
     };
 
     return {
@@ -370,10 +402,7 @@ export class SearchMethodsService implements ISearchMethods {
   // ES|QL Search Helpers
   // ============================================================================
 
-  private buildEsqlRequest(
-    params: IEsqlSearchParams,
-    options?: IEsqlSearchOptions
-  ): IKibanaSearchRequest<ESQLSearchParams> {
+  private buildEsqlRequest(params: IEsqlSearchParams): IKibanaSearchRequest<ESQLSearchParams> {
     return {
       params: {
         query: params.query,
@@ -381,17 +410,21 @@ export class SearchMethodsService implements ISearchMethods {
         filter: params.filter as any,
         time_zone: params.timeZone,
         locale: params.locale,
-        dropNullColumns: options?.dropNullColumns,
-        include_execution_metadata: options?.includeExecutionMetadata,
-        ...(options?.columnMetadata ? { settings: { column_metadata: true } } : {}),
+        dropNullColumns: params.dropNullColumns,
+        include_execution_metadata: params.includeExecutionMetadata,
+        ...(params.columnMetadata ? { settings: { column_metadata: true } } : {}),
       },
     };
   }
 
-  private async applyEsqlSearchContext(
-    params: IEsqlSearchParams,
-    { timeRange, timeField, filters = [], query, esqlVariables = [] }: IEsqlSearchContext
-  ): Promise<IEsqlSearchParams> {
+  private async applyEsqlSearchContext(params: IEsqlSearchParams): Promise<IEsqlSearchParams> {
+    const {
+      timeRange,
+      timeField,
+      kibanaFilters = [],
+      kqlQuery,
+      esqlVariables = [],
+    } = params.kibanaQueryContext ?? {};
     const esQueryConfig = await this.deps.getEsQueryConfig();
 
     // this is for backward compatibility, if the query is of fields or functions type
@@ -400,8 +433,8 @@ export class SearchMethodsService implements ISearchMethods {
     const esqlQuery = fixESQLQueryWithVariables(params.query, esqlVariables);
 
     const timeFilter = timeRange && getTime(undefined, timeRange, { fieldName: timeField });
-    const contextFilters = [...filters, ...(timeFilter ? [timeFilter] : [])];
-    const contextQueries = castArray(query ?? []).filter(isOfQueryType);
+    const contextFilters = [...kibanaFilters, ...(timeFilter ? [timeFilter] : [])];
+    const contextQueries = castArray(kqlQuery ?? []).filter(isOfQueryType);
     const contextFilter =
       contextFilters.length || contextQueries.length
         ? buildEsQuery(undefined, contextQueries, contextFilters, esQueryConfig)
@@ -443,10 +476,12 @@ export class SearchMethodsService implements ISearchMethods {
 
   private mapEsqlOptions(
     options: IEsqlSearchOptions | undefined,
+    params: IEsqlSearchParams,
     strategy: typeof ESQL_ASYNC_SEARCH_STRATEGY
   ): ISearchOptions {
     return {
       ...this.mapBaseOptions(options),
+      approximation: params.approximation,
       strategy,
     };
   }
@@ -525,7 +560,6 @@ export class SearchMethodsService implements ISearchMethods {
       sessionId: options.sessionId,
       executionContext: options.executionContext,
       projectRouting: options.projectRouting,
-      approximation: options.approximation,
     };
   }
 }

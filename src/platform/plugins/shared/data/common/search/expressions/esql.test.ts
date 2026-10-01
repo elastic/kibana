@@ -72,10 +72,10 @@ describe('getEsqlFn', () => {
       createExecutionContext()
     );
 
-    const options = mockSearchService.esql.mock.calls[0][1];
-    expect(options?.columnMetadata).toBe(true);
-    expect(options?.dropNullColumns).toBe(true);
-    expect(options?.includeExecutionMetadata).toBe(true);
+    const [params] = mockSearchService.esql.mock.calls[0];
+    expect(params.columnMetadata).toBe(true);
+    expect(params.dropNullColumns).toBe(true);
+    expect(params.includeExecutionMetadata).toBe(true);
   });
 
   describe('ignoreGlobalFilters', () => {
@@ -99,13 +99,13 @@ describe('getEsqlFn', () => {
         createExecutionContext()
       );
 
-      const [params, options] = mockSearchService.esql.mock.calls[0];
+      const [params] = mockSearchService.esql.mock.calls[0];
       expect(params.query).toBe('FROM index');
-      expect(options?.searchContext?.filters).toEqual([inputFilter]);
-      expect(options?.searchContext?.query).toEqual(input.query);
+      expect(params.kibanaQueryContext?.kibanaFilters).toEqual([inputFilter]);
+      expect(params.kibanaQueryContext?.kqlQuery).toEqual(input.query);
     });
 
-    it('excludes global query and filters from the search context when ignoreGlobalFilters is true', async () => {
+    it('excludes global query and filters when ignoreGlobalFilters is true', async () => {
       const mockSearchService = getMockSearchService();
 
       await createEsqlFn(mockSearchService).fn(
@@ -114,14 +114,14 @@ describe('getEsqlFn', () => {
         createExecutionContext()
       );
 
-      const [params, options] = mockSearchService.esql.mock.calls[0];
+      const [params] = mockSearchService.esql.mock.calls[0];
       expect(params.query).toBe('FROM index');
-      expect(options?.searchContext?.filters).toEqual([]);
-      expect(options?.searchContext?.query).toBeUndefined();
+      expect(params.kibanaQueryContext?.kibanaFilters).toEqual([]);
+      expect(params.kibanaQueryContext?.kqlQuery).toBeUndefined();
     });
   });
 
-  it('passes the time range, time field, and control variables in the search context', async () => {
+  it('passes the time range, timeField, and control variables in kibanaQueryContext', async () => {
     const mockSearchService = getMockSearchService();
     const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' };
     const esqlVariables = [{ key: 'field', value: 'host', type: ESQLVariableType.FIELDS }];
@@ -132,10 +132,12 @@ describe('getEsqlFn', () => {
       createExecutionContext()
     );
 
-    const [params, options] = mockSearchService.esql.mock.calls[0];
+    const [params] = mockSearchService.esql.mock.calls[0];
     expect(params.query).toBe('FROM index | KEEP ??field');
-    expect(options?.searchContext).toEqual(
-      expect.objectContaining({ timeRange, timeField: '@timestamp', esqlVariables })
-    );
+    expect(params.kibanaQueryContext).toMatchObject({
+      timeRange,
+      timeField: '@timestamp',
+      esqlVariables,
+    });
   });
 });

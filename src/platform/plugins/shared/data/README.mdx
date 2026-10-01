@@ -163,29 +163,31 @@ console.log(result.rawResponse.values);
 
 #### ES|QL Search with Kibana Search Context
 
-Pass a `searchContext` to apply the time range, filters, query bar, and ES|QL controls from the surrounding app, such as a dashboard panel's fetch context:
+Pass the Kibana search context fields — time range, filters, query bar, and ES|QL controls — in the first argument. They shape the query ES runs, so they belong alongside `query` rather than in the options. The second argument (`options`) is for Kibana plumbing: session ID, inspector, abort signal, execution context, and project routing.
 
 ```.ts
 const result = await data.search.esql(
-  { query: 'FROM logs-* | STATS count = COUNT(*) BY ??field' },
   {
-    sessionId: fetchContext.searchSessionId,
-    searchContext: {
+    query: 'FROM logs-* | STATS count = COUNT(*) BY ??field',
+    kibanaQueryContext: {
       timeRange: fetchContext.timeRange,
       timeField: '@timestamp',
-      filters: fetchContext.filters,
-      query: fetchContext.query,
+      kibanaFilters: fetchContext.filters,
+      kqlQuery: fetchContext.query,
       esqlVariables: fetchContext.esqlVariables,
     },
+  },
+  {
+    sessionId: fetchContext.searchSessionId,
   }
 );
 ```
 
-When `searchContext` is provided, the method:
+When `kibanaQueryContext` is provided, the method:
 
-- combines `filters`, `query` (KQL or Lucene; ES|QL queries are ignored), and a range filter on `timeField` for `timeRange` with any `filter` you pass. Without a `timeField`, the time range is only applied through the named params below.
+- combines `kibanaFilters`, `kqlQuery` (KQL or Lucene; ES|QL queries are ignored), and a range filter on `timeField` for `timeRange` with any raw DSL `filter` you pass. Without a `timeField`, the time range is only applied through the named params below.
 - adds the `?_tstart` and `?_tend` named params from `timeRange`, and the values of control variables used in the query, to `params`.
-- defaults `timeZone` to the `dateFormat:tz` advanced setting.
+- always defaults `timeZone` to the `dateFormat:tz` advanced setting when `timeZone` is not set.
 
 #### Basic DSL Search
 
