@@ -115,6 +115,33 @@ describe('CatalogView', () => {
     );
   });
 
+  it('hides the skipped-validator diagnostic from the details flyout', async () => {
+    const skippedValidationItem = {
+      ...item,
+      validation: {
+        status: 'skipped',
+        diagnostics: ['Validation was skipped because no standalone validator is configured.'],
+      },
+    } satisfies CatalogItem;
+    getCatalogMock.mockResolvedValue({
+      page: 1,
+      perPage: 25,
+      total: 1,
+      items: [skippedValidationItem],
+    });
+    renderView();
+
+    fireEvent.click(await screen.findByTestId('codeIntelligenceCatalogRow'));
+
+    const flyout = screen.getByTestId('codeIntelligenceCatalogEntryFlyout');
+    expect(within(flyout).getByTestId('codeIntelligenceCatalogEntryValidation')).toHaveTextContent(
+      'skipped'
+    );
+    expect(within(flyout).getByTestId('codeIntelligenceCatalogEntryDetails')).not.toHaveTextContent(
+      'Validation was skipped because no standalone validator is configured.'
+    );
+  });
+
   it('shows the empty message when no entries match', async () => {
     getCatalogMock.mockResolvedValue({ page: 1, perPage: 25, total: 0, items: [] });
     renderView();
