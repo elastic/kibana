@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line @kbn/eslint/module_migration
-import { createWebWorker } from 'monaco-editor/internal/common/workers.js';
 import { monaco } from './monaco_imports';
 import type { CustomLangModuleType } from './types';
 import { getWorker } from './languages/worker_factory';
@@ -128,40 +126,3 @@ Object.defineProperties(monaco.editor, {
     configurable: false,
   },
 });
-
-// In Monaco version >= 0.54, the createWebWorker function signature changed to accept `{ worker: Worker|Promise<Worker> }`
-// instead of the previous `{ moduleId, label, createData }`, monaco-yaml (via monaco-worker-manager@2) still
-// uses the old signature.
-// This shim intercepts old-style calls, manually creates the Worker, sends
-// the two initialization messages monaco-worker-manager requires before Monaco's own INITIALIZE handshake,
-// then forwards to the real createWebWorker with the new API.
-//
-// This is not a novel implementation a variant of it is present in monaco 0.54,
-// see https://github.com/microsoft/monaco-editor/blob/v0.54.0/src/editor/editor.main.ts#L10-L16.
-{
-  // Monaco version >= 0.54 dropped exposing IWebWorkerOptions from its public types.
-  interface LegacyWebWorkerOptions {
-    moduleId: string;
-    label?: string;
-    createData?: object;
-    host?: monaco.editor.IInternalWebWorkerOptions['host'];
-    keepIdleModels?: boolean;
-  }
-
-  type CreateWebWorkerOptions = monaco.editor.IInternalWebWorkerOptions | LegacyWebWorkerOptions;
-
-  const isLegacyWebWorkerOptions = (opts: CreateWebWorkerOptions): opts is LegacyWebWorkerOptions =>
-    'moduleId' in opts && !('worker' in opts);
-
-  const originalCreateWebWorker = monaco.editor.createWebWorker;
-
-  monaco.editor.createWebWorker = function <T extends object>(
-    opts: CreateWebWorkerOptions
-  ): monaco.editor.MonacoWebWorker<T> {
-    if (isLegacyWebWorkerOptions(opts)) {
-      return createWebWorker(opts);
-    }
-
-    return originalCreateWebWorker(opts);
-  };
-}
