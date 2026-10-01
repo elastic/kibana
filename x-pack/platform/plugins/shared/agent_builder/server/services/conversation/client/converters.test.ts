@@ -2311,7 +2311,6 @@ describe('conversation model converters', () => {
       expect(updated.events?.map((event) => event.id)).toEqual(['seed::user_message']);
     });
 
-
     it('keeps events-native docs stamped with the native marker on update', () => {
       const conversation = eventsNativeStored();
       conversation.schema_version = CONVERSATION_SCHEMA_VERSION;

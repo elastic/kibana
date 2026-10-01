@@ -194,6 +194,8 @@ export const useFeedback = (
       clearSubmittedTimers,
       invalidateConversation,
       addErrorToast,
+      ebtContext,
+      services.analytics,
     ]
   );
 
