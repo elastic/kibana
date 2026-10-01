@@ -18,12 +18,12 @@ import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
-import type { TimeRange } from '../../use_time_range_param';
 import {
-  getEntityFilterESQL,
+  buildEntityFilterClauses,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
-} from '../../use_entity_filters_param';
+  type TimeRange,
+} from '../../new_entities_table';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
@@ -70,7 +70,7 @@ export const useEntitiesWithAnomaliesCount = ({
       euidApi.euid,
       resolvedIndex.indexName,
       timeRange,
-      getEntityFilterESQL(entityFilters),
+      buildEntityFilterClauses(entityFilters),
       jobIds
     );
   }, [euidApi, resolvedIndex?.indexName, timeRange, entityFilters, jobIds]);

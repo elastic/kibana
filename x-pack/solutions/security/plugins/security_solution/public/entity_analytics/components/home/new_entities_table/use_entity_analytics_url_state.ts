@@ -26,6 +26,14 @@ export interface EntityFilters {
   dataSources: string[];
 }
 
+export const EMPTY_ENTITY_FILTERS: EntityFilters = {
+  entityTypes: [],
+  riskLevels: [],
+  assetCriticality: [],
+  watchlists: [],
+  dataSources: [],
+};
+
 // ── param keys ────────────────────────────────────────────────────────────────
 
 const PARAM = {

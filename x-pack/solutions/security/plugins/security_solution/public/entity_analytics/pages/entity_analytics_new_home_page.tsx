@@ -14,6 +14,7 @@ import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { isNoneGroup } from '@kbn/grouping';
 import type { EntityType } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { PageLoader } from '../../common/components/page_loader';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -28,6 +29,7 @@ import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entit
 import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
 import { useGetWatchlists } from '../api/hooks/use_get_watchlists';
 import { useErrorToast } from '../../common/hooks/use_error_toast';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { DataViewContext } from '../components/home/entities_table';
 import {
   EntitiesGroups,
@@ -36,6 +38,7 @@ import {
   useEntityGridFilters,
   RAW_VIEW_COLUMNS,
   RESOLVED_VIEW_COLUMNS,
+  toList,
 } from '../components/home/new_entities_table';
 import type {
   RowActions,
@@ -54,8 +57,24 @@ import { useInvestigateInTimeline } from '../../common/hooks/timeline/use_invest
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import type { ESBoolQuery } from '../../../common/typed_json';
+import {
+  useAlertBasedTiles,
+  useEntitiesWithAnomaliesCount,
+  useNewEntityCount,
+  useRiskMoversCount,
+  useNewlyHighCriticalCount,
+} from '../components/home/needs_attention_tiles/hooks';
+import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
+import {
+  EMPTY_ENTITY_IDS,
+  type ActiveFilter,
+  type SignalCardData,
+} from '../components/home/needs_attention_tiles/data';
 
 const ENTITY_TABLE_SCOPE_ID = 'entity-analytics-new-entities-table';
+
+/** Cap card → table IN-list size; ES|QL IN lists and ES terms queries both have practical limits. */
+const MAX_CARD_FILTER_ENTITY_IDS = 1000;
 
 const VIEW_BY_OPTIONS = [
   {
@@ -147,6 +166,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   } = useEntityStoreDataView(spaceId);
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { euiTheme } = useEuiTheme();
+  const { addWarning } = useAppToasts();
   const {
     openEntityFlyout,
     openEntityResolution,
@@ -171,6 +191,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     setPage,
     setPageSize,
   } = useEntityAnalyticsUrlState();
+
+  const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null);
 
   const activeColumns = viewBy === 'raw' ? RAW_VIEW_COLUMNS : RESOLVED_VIEW_COLUMNS;
 
@@ -332,6 +354,352 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const isGroupSelected = !isNoneGroup(groupsSelected);
 
+  const { data: entityStoreStatusData, isLoading: entityStoreStatusLoading } =
+    useEntityStoreStatus();
+  const entityStoreDisabled =
+    entityStoreStatusData?.status === 'not_installed' ||
+    entityStoreStatusData?.status === 'stopped';
+  const entityStoreInstalling = entityStoreStatusData?.status === 'installing';
+  // Hooks must run before the disabled-prompt return. Skip ES|QL until the store
+  // is known to be running so we do not query a missing entities-latest alias.
+  const skipTileQueries =
+    !spaceId || entityStoreStatusLoading || entityStoreDisabled || entityStoreInstalling;
+
+  const resolvedSpaceId = spaceId ?? 'default';
+
+  const {
+    alertsCount,
+    alertsEntityIds,
+    watchlistedCount,
+    watchlistedEntityIds,
+    isLoading: alertBasedLoading,
+  } = useAlertBasedTiles({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+  });
+  const {
+    count: anomaliesCount,
+    entityIds: anomaliesEntityIds,
+    isLoading: anomaliesLoading,
+  } = useEntitiesWithAnomaliesCount({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+  });
+  const {
+    count: newEntityCount,
+    entityIds: newEntityEntityIds,
+    isLoading: newEntityLoading,
+  } = useNewEntityCount({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+  });
+  const {
+    count: riskMoversCount,
+    entityIds: riskMoversEntityIds,
+    isLoading: riskMoversLoading,
+    isMissingIndex: riskMoversMissingIndex,
+  } = useRiskMoversCount({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+  });
+  const {
+    count: newlyHCCount,
+    entityIds: newlyHCEntityIds,
+    isLoading: newlyHCLoading,
+    isMissingIndex: newlyHCMissingIndex,
+  } = useNewlyHighCriticalCount({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+  });
+
+  const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
+    setActiveFilter((prev) =>
+      prev?.cardId === cardId ? null : { type: 'card', cardId, label: cardId }
+    );
+  }, []);
+
+  const selectedEntityIds = useMemo(() => {
+    if (!activeFilter || activeFilter.type !== 'card') {
+      return EMPTY_ENTITY_IDS;
+    }
+    switch (activeFilter.cardId) {
+      case 'entitiesWithAlerts':
+        return alertsEntityIds;
+      case 'entitiesWithAnomalies':
+        return anomaliesEntityIds;
+      case 'riskMovers':
+        return riskMoversEntityIds;
+      case 'newlyHighCritical':
+        return newlyHCEntityIds;
+      case 'watchlisted':
+        return watchlistedEntityIds;
+      case 'newEntity':
+        return newEntityEntityIds;
+      default:
+        return EMPTY_ENTITY_IDS;
+    }
+  }, [
+    activeFilter,
+    alertsEntityIds,
+    anomaliesEntityIds,
+    riskMoversEntityIds,
+    newlyHCEntityIds,
+    watchlistedEntityIds,
+    newEntityEntityIds,
+  ]);
+
+  const cardWhereExpression = useMemo(() => {
+    if (!activeFilter || activeFilter.type !== 'card') return undefined;
+    // Always constrain when a card is active — empty list matches nothing so the
+    // table stays consistent with a 0-count tile rather than falling back to all entities.
+    const ids =
+      selectedEntityIds.length > MAX_CARD_FILTER_ENTITY_IDS
+        ? selectedEntityIds.slice(0, MAX_CARD_FILTER_ENTITY_IDS)
+        : selectedEntityIds;
+    return ids.length ? `entity.id IN (${toList(ids)})` : 'false';
+  }, [activeFilter, selectedEntityIds]);
+
+  const gridWhereExpression = useMemo(() => {
+    const parts = [whereExpression, cardWhereExpression].filter(Boolean);
+    return parts.length ? parts.join(' AND ') : undefined;
+  }, [whereExpression, cardWhereExpression]);
+
+  useUpdateEffect(() => {
+    setPage(0);
+  }, [gridWhereExpression, setPage]);
+
+  useUpdateEffect(() => {
+    if (!activeFilter || selectedEntityIds.length <= MAX_CARD_FILTER_ENTITY_IDS) {
+      return;
+    }
+    addWarning({
+      title: i18n.translate(
+        'xpack.securitySolution.entityAnalytics.home.tiles.cardFilterLimitTitle',
+        {
+          defaultMessage: 'Table shows {limit} of {count} entities',
+          values: { limit: MAX_CARD_FILTER_ENTITY_IDS, count: selectedEntityIds.length },
+        }
+      ),
+      text: i18n.translate(
+        'xpack.securitySolution.entityAnalytics.home.tiles.cardFilterLimitDescription',
+        {
+          defaultMessage:
+            'The table is limited to {limit} entities from this tile. Narrow the time range or filters to see a smaller set.',
+          values: { limit: MAX_CARD_FILTER_ENTITY_IDS },
+        }
+      ),
+    });
+  }, [activeFilter, selectedEntityIds.length, addWarning]);
+
+  const signalCards = useMemo(
+    (): SignalCardData[] => [
+      {
+        id: 'entitiesWithAlerts',
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.title',
+          {
+            defaultMessage: 'Entities with alerts',
+          }
+        ),
+        value: alertsCount,
+        isLoading: alertBasedLoading,
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
+          {
+            defaultMessage: 'Entities with at least one alert in the last {timeRange}',
+            values: { timeRange },
+          }
+        ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.filterLabel',
+          {
+            defaultMessage: 'Entities with alerts ({timeRange})',
+            values: { timeRange },
+          }
+        ),
+      },
+      {
+        id: 'entitiesWithAnomalies',
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.title',
+          {
+            defaultMessage: 'Entities with anomalies',
+          }
+        ),
+        value: anomaliesCount,
+        isLoading: anomaliesLoading,
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
+          {
+            defaultMessage: 'Entities with at least one ML anomaly in the last {timeRange}',
+            values: { timeRange },
+          }
+        ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.filterLabel',
+          {
+            defaultMessage: 'Entities with anomalies ({timeRange})',
+            values: { timeRange },
+          }
+        ),
+      },
+      {
+        id: 'riskMovers',
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.title',
+          {
+            defaultMessage: 'Risk movers',
+          }
+        ),
+        value: riskMoversCount,
+        isLoading: riskMoversLoading,
+        noDataMessage: riskMoversMissingIndex
+          ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
+              defaultMessage: 'Requires risk score history data',
+            })
+          : undefined,
+        description:
+          timeRange === '24h'
+            ? i18n.translate(
+                'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description24h',
+                {
+                  defaultMessage: 'Entities whose risk score rose ≥10 points vs yesterday',
+                }
+              )
+            : i18n.translate(
+                'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description',
+                {
+                  defaultMessage:
+                    'Entities whose risk score rose ≥10 points vs the previous {timeRange}',
+                  values: { timeRange },
+                }
+              ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.filterLabel',
+          {
+            defaultMessage: 'Risk movers',
+          }
+        ),
+      },
+      {
+        id: 'newlyHighCritical',
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.title',
+          {
+            defaultMessage: 'Newly high/critical',
+          }
+        ),
+        value: newlyHCCount,
+        isLoading: newlyHCLoading,
+        noDataMessage: newlyHCMissingIndex
+          ? i18n.translate(
+              'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
+              {
+                defaultMessage: 'Requires risk score history data',
+              }
+            )
+          : undefined,
+        description:
+          timeRange === '24h'
+            ? i18n.translate(
+                'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description24h',
+                {
+                  defaultMessage:
+                    'Entities that crossed into High or Critical risk since yesterday',
+                }
+              )
+            : i18n.translate(
+                'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description',
+                {
+                  defaultMessage:
+                    'Entities that crossed into High or Critical risk in the last {timeRange}',
+                  values: { timeRange },
+                }
+              ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.filterLabel',
+          {
+            defaultMessage: 'Newly high/critical',
+          }
+        ),
+      },
+      {
+        id: 'watchlisted',
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.title',
+          {
+            defaultMessage: 'Watchlisted',
+          }
+        ),
+        value: watchlistedCount,
+        isLoading: alertBasedLoading,
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
+          {
+            defaultMessage:
+              'Entities on a watchlist with at least one alert in the last {timeRange}',
+            values: { timeRange },
+          }
+        ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.filterLabel',
+          {
+            defaultMessage: 'Watchlisted',
+          }
+        ),
+      },
+      {
+        id: 'newEntity',
+        title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newEntity.title', {
+          defaultMessage: 'New entity',
+        }),
+        value: newEntityCount,
+        isLoading: newEntityLoading,
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
+          {
+            defaultMessage:
+              'Entities first seen in the last {timeRange} with a risk score above zero',
+            values: { timeRange },
+          }
+        ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.filterLabel',
+          {
+            defaultMessage: 'New entity (last {timeRange})',
+            values: { timeRange },
+          }
+        ),
+      },
+    ],
+    [
+      alertsCount,
+      alertBasedLoading,
+      anomaliesCount,
+      anomaliesLoading,
+      riskMoversCount,
+      riskMoversLoading,
+      newlyHCCount,
+      newlyHCLoading,
+      newlyHCMissingIndex,
+      watchlistedCount,
+      newEntityCount,
+      newEntityLoading,
+      riskMoversMissingIndex,
+      timeRange,
+    ]
+  );
+
   const groupBySelectorElement = (
     <GroupSelector
       groupingId="ea-new-home-group-by"
@@ -400,13 +768,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     [getSecuritySolutionUrl]
   );
 
-  const { data: entityStoreStatusData } = useEntityStoreStatus();
-  const entityStoreDisabled =
-    entityStoreStatusData?.status === 'not_installed' ||
-    entityStoreStatusData?.status === 'stopped';
-  const entityStoreInstalling = entityStoreStatusData?.status === 'installing';
-
-  if (isDataViewLoading || entityStoreInstalling) return <PageLoader />;
+  if (isDataViewLoading || entityStoreStatusLoading || entityStoreInstalling)
+    return <PageLoader />;
   if (isDataViewError) return <DataViewErrorComponent />;
   if (entityStoreDisabled) return <EntityStoreDisabledEmptyPrompt />;
 
@@ -456,6 +819,20 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
             esFilter={esFilter}
             watchlistNames={watchlistNames}
           />
+
+          <EuiSpacer size="m" />
+
+          <div
+            css={css`
+              padding-inline: ${euiTheme.size.base};
+            `}
+          >
+            <SignalCards
+              activeFilter={activeFilter}
+              cards={signalCards}
+              onFilterForCard={handleFilterForCard}
+            />
+          </div>
         </div>
 
         <EuiSpacer size="m" />
@@ -484,7 +861,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 view={viewBy}
                 timeRange={timeRange}
                 watchlistNames={watchlistNames}
-                whereExpression={whereExpression}
+                whereExpression={gridWhereExpression}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
                 groupSelectorComponent={viewControls}

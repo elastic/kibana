@@ -11,7 +11,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store';
 import { useEntityAnalyticsUrlState } from './use_entity_analytics_url_state';
 import type { EntityFilters } from './use_entity_analytics_url_state';
-import { esc, toList } from './common';
+import { buildFilterClause, esc, toList } from './common';
 
 /** Membership on multivalue keyword fields — scalar `IN` returns null for multi-valued docs. */
 const buildMvContainsExpression = (field: string, values: string[]): string => {
@@ -19,7 +19,8 @@ const buildMvContainsExpression = (field: string, values: string[]): string => {
   return clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
 };
 
-const buildEntityFiltersExpression = (filters: EntityFilters): string => {
+/** AND-joined ES|QL predicate for URL entity filters (no leading `| WHERE`). */
+export const buildEntityFiltersExpression = (filters: EntityFilters): string => {
   const parts: string[] = [];
 
   if (filters.entityTypes.length)
@@ -35,6 +36,10 @@ const buildEntityFiltersExpression = (filters: EntityFilters): string => {
 
   return parts.join(' AND ');
 };
+
+/** `| WHERE …` pipe clauses for NAT tile queries (empty when no filters). */
+export const buildEntityFilterClauses = (filters: EntityFilters): string[] =>
+  buildFilterClause(buildEntityFiltersExpression(filters));
 
 export const useEntityGridFilters = () => {
   const getGlobalFilters = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
