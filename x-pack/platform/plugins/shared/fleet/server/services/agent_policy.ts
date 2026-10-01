@@ -3043,7 +3043,7 @@ export const agentPolicyService = new AgentPolicyService();
 
 type PackagePolicyVersionAttributes = Pick<
   PackagePolicySOAttributes,
-  'package' | 'package_agent_version_condition' | 'inputs_for_versions'
+  'name' | 'package' | 'package_agent_version_condition' | 'inputs_for_versions'
 >;
 
 // `inputs_for_versions` is stripped from mapped PackagePolicy, so read the saved object directly.
@@ -3059,7 +3059,7 @@ async function findPackagePoliciesForVersionCheck(
         savedObjectType,
         `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(policyId)}`
       ),
-      fields: ['package', 'package_agent_version_condition', 'inputs_for_versions'],
+      fields: ['name', 'package', 'package_agent_version_condition', 'inputs_for_versions'],
       perPage: SO_SEARCH_LIMIT,
     })
     .catch(
@@ -3067,6 +3067,15 @@ async function findPackagePoliciesForVersionCheck(
         `Error encountered while attempting to get all package policies for agent policy [${policyId}]`
       )
     );
+
+  for (const so of packagePolicySOs.saved_objects) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: so.id,
+      name: so.attributes.name,
+      savedObjectType,
+    });
+  }
 
   return packagePolicySOs.saved_objects;
 }

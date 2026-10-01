@@ -1180,16 +1180,31 @@ describe('Agent policy', () => {
 
       mockPackagePolicySOs(soClient, [
         {
+          name: 'apache-1',
           package: { name: 'apache', title: 'Apache', version: '1.3.2' },
           package_agent_version_condition: '>=9.3.0',
         },
         {
+          name: 'nginx-1',
           package: { name: 'nginx', title: 'Nginx', version: '1.0.0' },
           package_agent_version_condition: '>=8.0.0',
         },
       ]);
 
       await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
+
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'find',
+        id: 'pp-0',
+        name: 'apache-1',
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'find',
+        id: 'pp-1',
+        name: 'nginx-1',
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
 
       expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
