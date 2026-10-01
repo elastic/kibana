@@ -111,7 +111,7 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
         );
       }
       const resp = await callInstall(defaultInferenceEndpoints.ELSER);
-      expect(resp.body.installed).to.be(
+      expect(resp.body.installed).to.equal(
         true,
         `Product docs install failed: ${JSON.stringify(resp.body)}`
       );
@@ -163,7 +163,7 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
           (h) =>
             /esql/i.test(h.url) || /ES\|QL/i.test(h.content_title) || /esql/i.test(h.content_title)
         );
-        expect(found).to.be(
+        expect(found).to.equal(
           true,
           `Expected an ES|QL result in top ${TOP_N}, got: ${JSON.stringify(
             hits.map((h) => h.content_title)
@@ -174,7 +174,7 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
       it('ES|QL pipe syntax query surfaces ES|QL content', async () => {
         const hits = await searchDocs('pipe syntax ES|QL query language', [...PRODUCTS], TOP_N);
         const found = hits.some((h) => /ES\|QL/i.test(h.content_title) || /esql/i.test(h.url));
-        expect(found).to.be(
+        expect(found).to.equal(
           true,
           `Expected an ES|QL result in top ${TOP_N}, got: ${JSON.stringify(
             hits.map((h) => h.content_title)
@@ -185,7 +185,7 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
       it('ES|QL IP_LOCATION query surfaces the IP_LOCATION command docs', async () => {
         const hits = await searchDocs('ES|QL IP_LOCATION command', ['elasticsearch'], TOP_N);
         const found = hits.some((h) => /query-languages\/esql\/commands\/ip-location/i.test(h.url));
-        expect(found).to.be(
+        expect(found).to.equal(
           true,
           `Expected https://www.elastic.co/docs/reference/query-languages/esql/commands/ip-location in top ${TOP_N}, got: ${JSON.stringify(
             hits.map((h) => ({ title: h.content_title, url: h.url }))
@@ -205,7 +205,7 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
             /anomaly/i.test(h.content_title) ||
             /machine.learning/i.test(h.url)
         );
-        expect(found).to.be(
+        expect(found).to.equal(
           true,
           `Expected an anomaly-detection result in top ${TOP_N}, got: ${JSON.stringify(
             hits.map((h) => h.content_title)
@@ -218,7 +218,7 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
         const found = hits.some(
           (h) => /dashboard/i.test(h.url) || /dashboard/i.test(h.content_title)
         );
-        expect(found).to.be(
+        expect(found).to.equal(
           true,
           `Expected a dashboard result in top ${TOP_N}, got: ${JSON.stringify(
             hits.map((h) => h.content_title)
@@ -229,7 +229,7 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
       it('index mapping query surfaces Elasticsearch mapping content', async () => {
         const hits = await searchDocs('index mapping field types', ['elasticsearch'], TOP_N);
         const found = hits.some((h) => /mapping/i.test(h.url) || /mapping/i.test(h.content_title));
-        expect(found).to.be(
+        expect(found).to.equal(
           true,
           `Expected a mapping result in top ${TOP_N}, got: ${JSON.stringify(
             hits.map((h) => h.content_title)
@@ -246,7 +246,7 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
         const found = hits.some(
           (h) => /fleet/i.test(h.url) || /fleet/i.test(h.content_title) || /agent/i.test(h.url)
         );
-        expect(found).to.be(
+        expect(found).to.equal(
           true,
           `Expected a Fleet/Agent result in top ${TOP_N}, got: ${JSON.stringify(
             hits.map((h) => h.content_title)
@@ -263,7 +263,7 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
             /alert/i.test(h.content_title) ||
             /rule/i.test(h.content_title)
         );
-        expect(found).to.be(
+        expect(found).to.equal(
           true,
           `Expected an alert/rule result in top ${TOP_N}, got: ${JSON.stringify(
             hits.map((h) => h.content_title)
@@ -279,7 +279,7 @@ export const productDocsSearchQualitySuite = (_: {}, { getService }: FtrProvider
             /index.pattern/i.test(h.url) ||
             /data view/i.test(h.content_title)
         );
-        expect(found).to.be(
+        expect(found).to.equal(
           true,
           `Expected a data-view result in top ${TOP_N}, got: ${JSON.stringify(
             hits.map((h) => h.content_title)
