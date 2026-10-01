@@ -14,11 +14,7 @@ import type {
 } from '../../types/workspace_state';
 import type { WorkspaceState } from '../../state_management/workspace';
 
-export const syncRuntimeTopology = (
-  runtimeGraph: RuntimeGraph,
-  state: WorkspaceState,
-  layoutController: WorkspaceLayoutController
-): void => {
+export const createRuntimeGraphFromState = (state: WorkspaceState): RuntimeGraph => {
   const nodesMap: Record<string, WorkspaceNode> = {};
   state.nodeIds.forEach((id) => {
     const node = state.nodesById[id];
@@ -61,9 +57,37 @@ export const syncRuntimeTopology = (
     };
   });
 
-  runtimeGraph.nodesMap = nodesMap;
-  runtimeGraph.nodes = state.nodeIds.map((id) => nodesMap[id]);
-  runtimeGraph.edgesMap = edgesMap;
-  runtimeGraph.edges = state.edgeIds.map((id) => edgesMap[id]);
+  return {
+    nodesMap,
+    nodes: state.nodeIds.map((id) => nodesMap[id]),
+    edgesMap,
+    edges: state.edgeIds.map((id) => edgesMap[id]),
+    blocklistedNodes: state.blocklistedNodeIds.map((id) => {
+      const node = state.blocklistedNodesById[id];
+      return {
+        x: node.x,
+        y: node.y,
+        label: node.label,
+        icon: getIcon(node.icon ?? ''),
+        data: node.data,
+        scaledSize: node.scaledSize,
+        parent: null,
+        color: node.color,
+      };
+    }),
+  };
+};
+
+export const syncRuntimeTopology = (
+  runtimeGraph: RuntimeGraph,
+  state: WorkspaceState,
+  layoutController: WorkspaceLayoutController
+): void => {
+  const synchronizedGraph = createRuntimeGraphFromState(state);
+  runtimeGraph.nodesMap = synchronizedGraph.nodesMap;
+  runtimeGraph.nodes = synchronizedGraph.nodes;
+  runtimeGraph.edgesMap = synchronizedGraph.edgesMap;
+  runtimeGraph.edges = synchronizedGraph.edges;
+  runtimeGraph.blocklistedNodes = synchronizedGraph.blocklistedNodes;
   layoutController.start();
 };
