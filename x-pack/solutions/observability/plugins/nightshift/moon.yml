@@ -30,7 +30,6 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-observability'
-  - '@kbn/dev-cli-runner'
   - '@kbn/discover-plugin'
   - '@kbn/ebt-click'
   - '@kbn/ebt-tools'
@@ -70,7 +69,6 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
-    - scripts/**/*
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'

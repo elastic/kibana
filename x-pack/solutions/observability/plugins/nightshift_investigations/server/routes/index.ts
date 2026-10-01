@@ -6,13 +6,9 @@
  */
 
 import { startInvestigationRoute } from './start_investigation';
-import { getInvestigationRoute } from './get_investigation';
 import { emitLifecycleEventRoute } from './emit_lifecycle_event';
 import { ensureInvestigationRoute } from './ensure_investigation';
 import { findOrCreateSlackThreadInvestigationRoute } from './find_or_create_slack_thread_investigation';
-import { listInvestigationsRoute } from './list_investigations';
-import { updateInvestigationRoute } from './update_investigation';
-import { followInvestigationRoute } from './follow_investigation';
 import { getInvestigationAvailabilityRoute } from './get_investigation_availability';
 import { listCortexPagesRoute } from './list_cortex_pages';
 import { getCortexPageRoute } from './get_cortex_page';
@@ -36,13 +32,9 @@ import {
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
-  ...getInvestigationRoute,
   ...emitLifecycleEventRoute,
   ...ensureInvestigationRoute,
   ...findOrCreateSlackThreadInvestigationRoute,
-  ...listInvestigationsRoute,
-  ...updateInvestigationRoute,
-  ...followInvestigationRoute,
   ...getInvestigationAvailabilityRoute,
   ...listCortexPagesRoute,
   ...getCortexPageRoute,

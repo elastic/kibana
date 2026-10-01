@@ -25,12 +25,7 @@ const createPlugin = (memoryEnabled = false) =>
     })
   );
 
-const createSetupDeps = () =>
-  ({
-    taskManager: {
-      registerTaskDefinitions: jest.fn(),
-    },
-  } as unknown as NightshiftInvestigationsSetupDeps);
+const createSetupDeps = (): NightshiftInvestigationsSetupDeps => ({});
 
 describe('NightshiftInvestigationsPlugin setup', () => {
   it('accepts one investigation quota callback', () => {
