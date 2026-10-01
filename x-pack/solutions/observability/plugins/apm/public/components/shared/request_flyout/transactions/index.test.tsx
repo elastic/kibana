@@ -20,24 +20,6 @@ jest.mock('./use_request_flyout_transactions', () => ({
   useRequestFlyoutTransactions: (...args: unknown[]) => mockUseRequestFlyoutTransactions(...args),
 }));
 
-// TransactionDetailFlyout — lightweight stub.
-jest.mock('../../transaction_detail_flyout', () => ({
-  TransactionDetailFlyout: ({
-    filters,
-    onClose,
-  }: {
-    filters: { transactionName: string };
-    onClose: () => void;
-  }) => (
-    <div data-test-subj="transactionDetailFlyout">
-      <span data-test-subj="transactionDetailFlyoutName">{filters.transactionName}</span>
-      <button data-test-subj="transactionDetailFlyoutClose" onClick={onClose}>
-        Close
-      </button>
-    </div>
-  ),
-}));
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -83,11 +65,14 @@ const SAMPLE_ITEMS = [
   },
 ];
 
-function renderComponent(contextOverrides: Partial<RequestFlyoutContextValue> = {}) {
+function renderComponent(
+  contextOverrides: Partial<RequestFlyoutContextValue> = {},
+  onTransactionSelect?: jest.Mock
+) {
   const ctx = { ...BASE_CONTEXT, ...contextOverrides };
   return render(
     <RequestFlyoutContextProvider value={ctx}>
-      <RequestFlyoutAffectedEndpoints />
+      <RequestFlyoutAffectedEndpoints onTransactionSelect={onTransactionSelect} />
     </RequestFlyoutContextProvider>
   );
 }
@@ -129,50 +114,24 @@ describe('RequestFlyoutAffectedEndpoints', () => {
     expect(screen.getByText('Loading transactions…')).toBeInTheDocument();
   });
 
-  it('opens TransactionDetailFlyout when a transaction name link is clicked', () => {
-    renderComponent();
+  it('calls onTransactionSelect with name and type when a transaction name link is clicked', () => {
+    const onTransactionSelect = jest.fn();
+    renderComponent({}, onTransactionSelect);
 
     fireEvent.click(screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products'));
 
-    const flyout = screen.getByTestId('transactionDetailFlyout');
-    expect(flyout).toBeInTheDocument();
-    expect(screen.getByTestId('transactionDetailFlyoutName')).toHaveTextContent(
-      'GET /api/products'
-    );
+    expect(onTransactionSelect).toHaveBeenCalledWith('GET /api/products', 'request');
   });
 
-  it('closes TransactionDetailFlyout when the same row is clicked again (toggle)', () => {
-    renderComponent();
-
-    const link = screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products');
-
-    fireEvent.click(link);
-    expect(screen.getByTestId('transactionDetailFlyout')).toBeInTheDocument();
-
-    fireEvent.click(link);
-    expect(screen.queryByTestId('transactionDetailFlyout')).not.toBeInTheDocument();
-  });
-
-  it('switches selected transaction when a different name link is clicked', () => {
-    renderComponent();
+  it('calls onTransactionSelect again when a different name link is clicked', () => {
+    const onTransactionSelect = jest.fn();
+    renderComponent({}, onTransactionSelect);
 
     fireEvent.click(screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products'));
-    expect(screen.getByTestId('transactionDetailFlyoutName')).toHaveTextContent(
-      'GET /api/products'
-    );
-
     fireEvent.click(screen.getByTestId('requestFlyoutTransactionNameLink-POST /api/orders'));
-    expect(screen.getByTestId('transactionDetailFlyoutName')).toHaveTextContent('POST /api/orders');
-  });
 
-  it('closes the detail flyout when the flyout close button is clicked', () => {
-    renderComponent();
-
-    fireEvent.click(screen.getByTestId('requestFlyoutTransactionNameLink-GET /api/products'));
-    expect(screen.getByTestId('transactionDetailFlyout')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('transactionDetailFlyoutClose'));
-    expect(screen.queryByTestId('transactionDetailFlyout')).not.toBeInTheDocument();
+    expect(onTransactionSelect).toHaveBeenCalledTimes(2);
+    expect(onTransactionSelect).toHaveBeenNthCalledWith(2, 'POST /api/orders', 'request');
   });
 
   it('shows the max-transactions warning when isMaxTransactionsReached is true', () => {
@@ -190,10 +149,5 @@ describe('RequestFlyoutAffectedEndpoints', () => {
   it('does not show the max-transactions warning by default', () => {
     renderComponent();
     expect(screen.queryByText(/Not all transactions are shown/i)).not.toBeInTheDocument();
-  });
-
-  it('does not render TransactionDetailFlyout when no transaction is selected', () => {
-    renderComponent();
-    expect(screen.queryByTestId('transactionDetailFlyout')).not.toBeInTheDocument();
   });
 });

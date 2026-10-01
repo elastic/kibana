@@ -10,6 +10,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -19,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { FailedCallBucket } from '@kbn/apm-api-shared';
 import React from 'react';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useRequestFlyoutContext } from '../request_flyout_context';
 import { useRequestFlyoutFailedCalls } from './use_request_flyout_failed_calls';
 
@@ -74,10 +76,26 @@ function getBucketLabel(
 
 export function RequestFlyoutFailedCalls() {
   const {
-    connection: { sourceLabel, targetLabel },
+    connection: { sourceServiceName, targetServiceName, sourceLabel, targetLabel },
+    filters: { environment, rangeFrom, rangeTo },
   } = useRequestFlyoutContext();
 
+  const { link } = useApmRouter();
   const { buckets, totalFailed, isSampled, isLoading } = useRequestFlyoutFailedCalls();
+
+  /**
+   * Build a deep link to a specific APM error group page.
+   * Only called when topErrorGroupId is non-null (i.e. the error came from a real APM doc).
+   * server bucket → target service; everything else → source service.
+   */
+  function errorGroupHref(bucketType: FailedCallBucket['type'], groupId: string): string {
+    const serviceName =
+      bucketType === 'server' && targetServiceName ? targetServiceName : sourceServiceName;
+    return link('/services/{serviceName}/errors/{groupId}', {
+      path: { serviceName, groupId },
+      query: {},
+    });
+  }
 
   const columns: Array<EuiBasicTableColumn<FailedCallBucket>> = [
     {
@@ -108,7 +126,7 @@ export function RequestFlyoutFailedCalls() {
       name: i18n.translate('xpack.apm.requestFlyout.failedCalls.column.topError', {
         defaultMessage: 'Top error',
       }),
-      render: (topError: string | null) => {
+      render: (topError: string | null, item: FailedCallBucket) => {
         if (!topError) {
           return (
             <EuiText size="s" color="subdued">
@@ -119,7 +137,19 @@ export function RequestFlyoutFailedCalls() {
           );
         }
         const truncated = topError.length > 60 ? `${topError.slice(0, 60)}…` : topError;
-        return topError.length > 60 ? (
+        // Only link when we have a real APM error group — status-code labels (gRPC/HTTP)
+        // have no corresponding error doc to link to.
+        if (item.topErrorGroupId) {
+          const href = errorGroupHref(item.type, item.topErrorGroupId);
+          return truncated !== topError ? (
+            <EuiToolTip content={topError}>
+              <EuiLink href={href}>{truncated}</EuiLink>
+            </EuiToolTip>
+          ) : (
+            <EuiLink href={href}>{topError}</EuiLink>
+          );
+        }
+        return truncated !== topError ? (
           <EuiToolTip content={topError}>
             <EuiText size="s">{truncated}</EuiText>
           </EuiToolTip>
@@ -140,9 +170,21 @@ export function RequestFlyoutFailedCalls() {
 
   const hasFailures = totalFailed > 0;
 
+  const seeAllErrorsHref = link('/services/{serviceName}/errors', {
+    path: { serviceName: sourceServiceName },
+    query: {
+      environment,
+      rangeFrom,
+      rangeTo,
+      kuery: '',
+      serviceGroup: '',
+      comparisonEnabled: false,
+    },
+  });
+
   return (
     <section data-test-subj="requestFlyoutSection-failedCalls">
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>
@@ -152,6 +194,20 @@ export function RequestFlyoutFailedCalls() {
             </h3>
           </EuiTitle>
         </EuiFlexItem>
+        {hasFailures && (
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              href={seeAllErrorsHref}
+              data-test-subj="requestFlyoutSeeAllErrors"
+            >
+              <EuiText size="s">
+                {i18n.translate('xpack.apm.requestFlyout.failedCalls.seeAllErrors', {
+                  defaultMessage: 'See all errors',
+                })}
+              </EuiText>
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />

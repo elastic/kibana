@@ -13,13 +13,15 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { asMillisecondDuration, asPercent } from '../../../../../common/utils/formatters';
 import { ImpactBar } from '../../impact_bar';
-import { TransactionDetailFlyout } from '../../transaction_detail_flyout';
-import { useRequestFlyoutContext } from '../request_flyout_context';
 import { useRequestFlyoutTransactions } from './use_request_flyout_transactions';
 import type { ConnectionTransactionGroup } from './use_request_flyout_transactions';
+
+interface RequestFlyoutAffectedEndpointsProps {
+  onTransactionSelect?: (name: string, transactionType: string) => void;
+}
 
 /**
  * "Transactions" tab in the edge flyout.
@@ -30,29 +32,22 @@ import type { ConnectionTransactionGroup } from './use_request_flyout_transactio
  *
  * Column names are unified with the Operations tab:
  *   Name · Avg time · Calls · Failed · Time consumed
+ *
+ * TransactionDetailFlyout state is owned by the parent (RequestFlyout) so that
+ * EUI can render it as a side panel sibling to the main flyout.
  */
-export function RequestFlyoutAffectedEndpoints() {
-  const {
-    deps,
-    connection: { sourceServiceName },
-    filters: { environment, rangeFrom, rangeTo, start, end },
-  } = useRequestFlyoutContext();
-
+export function RequestFlyoutAffectedEndpoints({
+  onTransactionSelect,
+}: RequestFlyoutAffectedEndpointsProps) {
   const { items, isLoading, isMaxTransactionsReached } = useRequestFlyoutTransactions();
 
-  const [selectedTransaction, setSelectedTransaction] = useState<{
-    name: string;
-    transactionType: string;
-  } | null>(null);
-
-  const onTransactionClick = useCallback((item: ConnectionTransactionGroup) => {
-    if (!item.transactionType) return;
-    setSelectedTransaction((prev) =>
-      prev?.name === item.name && prev.transactionType === item.transactionType
-        ? null
-        : { name: item.name, transactionType: item.transactionType }
-    );
-  }, []);
+  const onTransactionClick = useCallback(
+    (item: ConnectionTransactionGroup) => {
+      if (!item.transactionType || !onTransactionSelect) return;
+      onTransactionSelect(item.name, item.transactionType);
+    },
+    [onTransactionSelect]
+  );
 
   const columns: Array<EuiBasicTableColumn<ConnectionTransactionGroup>> = [
     {
@@ -146,22 +141,6 @@ export function RequestFlyoutAffectedEndpoints() {
           data-test-subj="requestFlyoutAffectedEndpointsTable"
         />
       </section>
-      {selectedTransaction && (
-        <TransactionDetailFlyout
-          deps={deps}
-          filters={{
-            serviceName: sourceServiceName,
-            transactionName: selectedTransaction.name,
-            transactionType: selectedTransaction.transactionType,
-            environment,
-            rangeFrom,
-            rangeTo,
-            start,
-            end,
-          }}
-          onClose={() => setSelectedTransaction(null)}
-        />
-      )}
     </>
   );
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { ConnectionFailedCallsResponse } from '@kbn/apm-api-shared';
@@ -66,28 +65,29 @@ function grpcLabel(code: number): string {
   return `gRPC ${GRPC_CODE_NAMES[code] ?? code}`;
 }
 
+interface TopErrorDoc {
+  message: string;
+  groupId: string;
+}
+
 /**
- * Returns a human-readable top-error label for a bucket of failed spans.
- * Priority: APM error message → HTTP/gRPC status from the span.
+ * Returns a human-readable top-error label and, when the label came from a
+ * real APM error document, its error group ID for deep-linking.
+ * Priority: APM error doc → HTTP/gRPC status from the span.
  */
 function pickTopError({
-  errorMessage,
+  errorDoc,
   httpStatuses,
   grpcCodes,
 }: {
-  errorMessage: string | null;
+  errorDoc: TopErrorDoc | null;
   httpStatuses: number[];
   grpcCodes: number[];
-}): string | null {
-  if (errorMessage) return errorMessage;
-
-  // Pick the most frequent HTTP status code (already sorted by frequency from agg)
-  if (httpStatuses.length > 0) return `HTTP ${httpStatuses[0]}`;
-
-  // Pick the most frequent gRPC status code
-  if (grpcCodes.length > 0) return grpcLabel(grpcCodes[0]);
-
-  return null;
+}): { topError: string | null; topErrorGroupId: string | null } {
+  if (errorDoc) return { topError: errorDoc.message, topErrorGroupId: errorDoc.groupId };
+  if (httpStatuses.length > 0) return { topError: `HTTP ${httpStatuses[0]}`, topErrorGroupId: null };
+  if (grpcCodes.length > 0) return { topError: grpcLabel(grpcCodes[0]), topErrorGroupId: null };
+  return { topError: null, topErrorGroupId: null };
 }
 
 /**
@@ -194,7 +194,7 @@ export function getConnectionFailedCalls({
     // Dependency-only edges: single bucket, no child join possible.
     // -----------------------------------------------------------------------
     if (!targetServiceName) {
-      const topError = await getTopErrorForSpans({
+      const topErrorDoc = await getTopErrorForSpans({
         apmEventClient,
         serviceName: sourceServiceName,
         spanIds: failedSpans.map((s) => s.spanId),
@@ -215,7 +215,7 @@ export function getConnectionFailedCalls({
           {
             type: 'dependency',
             count: failedSpans.length,
-            topError: pickTopError({ errorMessage: topError, httpStatuses, grpcCodes }),
+            ...pickTopError({ errorDoc: topErrorDoc, httpStatuses, grpcCodes }),
           },
         ],
         totalFailed,
@@ -287,7 +287,7 @@ export function getConnectionFailedCalls({
     // -----------------------------------------------------------------------
     // Step 3: fetch top error message per bucket.
     // -----------------------------------------------------------------------
-    const [callerError, serverError] = await Promise.all([
+    const [callerErrorDoc, serverErrorDoc] = await Promise.all([
       callerSpans.length > 0
         ? getTopErrorForSpans({
             apmEventClient,
@@ -328,8 +328,8 @@ export function getConnectionFailedCalls({
         {
           type: 'caller',
           count: callerSpans.length,
-          topError: pickTopError({
-            errorMessage: callerError,
+          ...pickTopError({
+            errorDoc: callerErrorDoc,
             httpStatuses: callerHttpStatuses,
             grpcCodes: callerGrpcCodes,
           }),
@@ -337,13 +337,14 @@ export function getConnectionFailedCalls({
         {
           type: 'server',
           count: serverSpans.length,
-          topError: serverError,
+          topError: serverErrorDoc?.message ?? null,
+          topErrorGroupId: serverErrorDoc?.groupId ?? null,
         },
         {
           type: 'client',
           count: clientSpans.length,
-          topError: pickTopError({
-            errorMessage: null,
+          ...pickTopError({
+            errorDoc: null,
             httpStatuses: clientHttpStatuses,
             grpcCodes: clientGrpcCodes,
           }),
@@ -377,7 +378,7 @@ async function getTopErrorForSpans({
   environment: Environment;
   start: number;
   end: number;
-}): Promise<string | null> {
+}): Promise<TopErrorDoc | null> {
   const response = await apmEventClient.search(
     'get_connection_failed_calls_top_error_spans',
     {
@@ -405,11 +406,11 @@ async function getTopErrorForSpans({
     }
   );
 
-  return extractTopErrorMessage(response);
+  return extractTopError(response);
 }
 
 /**
- * Fetches the top error message associated with the given s2 transaction IDs.
+ * Fetches the top error doc associated with the given s2 transaction IDs.
  */
 async function getTopErrorForTransactions({
   apmEventClient,
@@ -425,7 +426,7 @@ async function getTopErrorForTransactions({
   environment: Environment;
   start: number;
   end: number;
-}): Promise<string | null> {
+}): Promise<TopErrorDoc | null> {
   const response = await apmEventClient.search(
     'get_connection_failed_calls_top_error_txns',
     {
@@ -453,18 +454,16 @@ async function getTopErrorForTransactions({
     }
   );
 
-  return extractTopErrorMessage(response);
+  return extractTopError(response);
 }
 
-function extractTopErrorMessage(response: Awaited<ReturnType<APMEventClient['search']>>): string | null {
+function extractTopError(response: Awaited<ReturnType<APMEventClient['search']>>): TopErrorDoc | null {
   const topBucket = (response.aggregations as any)?.top_group?.buckets?.[0];
   if (!topBucket) return null;
   const source = topBucket.sample?.hits?.hits?.[0]?._source;
   if (!source) return null;
-  return (
-    source[ERROR_LOG_MESSAGE] ||
-    source[ERROR_EXC_MESSAGE] ||
-    source[ERROR_EXC_TYPE] ||
-    null
-  );
+  const message: string | null =
+    source[ERROR_LOG_MESSAGE] || source[ERROR_EXC_MESSAGE] || source[ERROR_EXC_TYPE] || null;
+  if (!message) return null;
+  return { message, groupId: String(topBucket.key) };
 }

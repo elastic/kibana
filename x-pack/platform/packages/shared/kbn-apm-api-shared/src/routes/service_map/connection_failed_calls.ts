@@ -31,6 +31,12 @@ export interface FailedCallBucket {
   count: number;
   /** Best available error label for the most frequent failure in this bucket. */
   topError: string | null;
+  /**
+   * APM error group ID when `topError` came from an actual APM error document.
+   * Null when the label was derived from an HTTP/gRPC status code on the span —
+   * in that case there is no linkable error group.
+   */
+  topErrorGroupId: string | null;
 }
 
 export interface ConnectionFailedCallsResponse {
