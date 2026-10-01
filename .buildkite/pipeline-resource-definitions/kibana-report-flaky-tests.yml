@@ -36,6 +36,8 @@ spec:
         # Refresh the suite issues of suites flaky again: new numbers in the body, a comment (and a
         # Slack notification through triage) on new failures, a reopen on failures after the close
         FLAKY_TESTS_UPDATE_ISSUES: 'true'
+        # Days between two comments on the same issue; reopens always comment
+        FLAKY_TESTS_COMMENT_INTERVAL_DAYS: '3'
       allow_rebuilds: true
       branch_configuration: main
       cancel_intermediate_builds: true

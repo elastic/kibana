@@ -75,6 +75,7 @@ const run = (
     closedSince: CLOSED_SINCE,
     maxNewIssues: 10,
     updateIssues: true,
+    commentIntervalDays: 3,
     dryRun: false,
     ...overrides,
   });
@@ -416,6 +417,36 @@ describe('reportFlakySuiteIssues', () => {
           reopened: false,
         },
       ]);
+    });
+
+    it('records the comment as the last notification, so the next one waits for the interval', async () => {
+      const github = createGithubApi([suiteIssue(42)]);
+
+      await run(github, { report: report() });
+
+      const [[, { body }]] = github.editIssue.mock.calls;
+      expect(readFlakySuiteIssueMetadata(body)?.['report.notifiedAt']).toBe(
+        GENERATED_AT.toISOString()
+      );
+    });
+
+    it('waits --comment-interval-days after the last notification, then covers the failures since', async () => {
+      // filed two days before the report, after which the suite failed again
+      const filedAt = new Date('2026-09-07T10:00:00.000Z');
+      const recent = createGithubApi([suiteIssue(42, {}, filedAt)]);
+      const due = createGithubApi([suiteIssue(42, {}, filedAt)]);
+
+      const summary = await run(recent, { report: report() });
+      await run(due, { report: report(), commentIntervalDays: 2 });
+
+      expect(recent.editIssue).toHaveBeenCalledTimes(1);
+      expect(recent.addIssueComment).not.toHaveBeenCalled();
+      expect(summary.actions[0]).toMatchObject({ action: 'updated', commented: false });
+      // the notification is not moved forward without a comment
+      const [[, { body }]] = recent.editIssue.mock.calls;
+      expect(readFlakySuiteIssueMetadata(body)?.['report.notifiedAt']).toBe(filedAt.toISOString());
+      // two calendar days, even though the report ran earlier in the day than the filing one
+      expect(due.addIssueComment).toHaveBeenCalledTimes(1);
     });
 
     it('refreshes the issue without a comment when the suite has not failed since the last report', async () => {

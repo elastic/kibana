@@ -49,6 +49,8 @@ export interface FlakySuiteIssueContext {
   relatedIssues?: number[];
   /** Metadata of the issue being refreshed, merged into the new one; absent for a new issue. */
   previous?: RecordedFlakySuiteIssueMetadata;
+  /** The refresh comes with a comment, so this report notified the owners. */
+  notifies?: boolean;
 }
 
 /** One report's numbers for the suite's worst test, kept in the body so the history survives. */
@@ -80,6 +82,11 @@ export interface FlakySuiteIssueMetadata {
   'report.count': number;
   /** One snapshot per report that found the suite flaky, oldest first. */
   'report.history': FlakySuiteReportSnapshot[];
+  /**
+   * Newest report that notified the owners: the one that filed the issue, whose team label gets
+   * them pinged, or the latest that commented. Refreshes comment at most every few days from it.
+   */
+  'report.notifiedAt'?: string;
 }
 
 /** What an issue body records; older issues lack some of it. */
@@ -117,6 +124,7 @@ export const readFlakySuiteIssueMetadata = (
   const generatedAt = metadataValue(body, 'report.generatedAt');
   const count = metadataValue(body, 'report.count');
   const history = metadataValue(body, 'report.history');
+  const notifiedAt = metadataValue(body, 'report.notifiedAt');
   return {
     'suite.filePath': filePath,
     'suite.title': typeof title === 'string' ? title : undefined,
@@ -127,8 +135,16 @@ export const readFlakySuiteIssueMetadata = (
     'report.generatedAt': typeof generatedAt === 'string' ? generatedAt : undefined,
     'report.count': typeof count === 'number' ? count : undefined,
     'report.history': Array.isArray(history) ? history.filter(isSnapshot) : [],
+    'report.notifiedAt': typeof notifiedAt === 'string' ? notifiedAt : undefined,
   };
 };
+
+/**
+ * When the owners were last told about the suite; for issues filed before it was recorded, the
+ * oldest report kept, which is the one that filed them until the history is capped.
+ */
+export const lastNotifiedAt = (metadata: RecordedFlakySuiteIssueMetadata): string | undefined =>
+  metadata['report.notifiedAt'] ?? metadata['report.history'][0]?.generatedAt;
 
 const snapshot = (suite: FlakySuite, report: FlakyTestReport): FlakySuiteReportSnapshot => ({
   generatedAt: report.generatedAt.toISOString(),
@@ -181,10 +197,13 @@ const union = (current: readonly string[], previous: readonly string[] = []): st
 export const flakySuiteIssueMetadata = (
   suite: FlakySuite,
   report: FlakyTestReport,
-  previous?: RecordedFlakySuiteIssueMetadata
+  previous?: RecordedFlakySuiteIssueMetadata,
+  notifies = false
 ): FlakySuiteIssueMetadata => {
   const pipelines = failedPipelines(suite, report);
   const history = [...(previous?.['report.history'] ?? []), snapshot(suite, report)];
+  const notifiedAt =
+    !previous || notifies ? report.generatedAt.toISOString() : lastNotifiedAt(previous);
   return {
     'suite.filePath': suite.filePath,
     ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
@@ -204,6 +223,7 @@ export const flakySuiteIssueMetadata = (
       ? (previous['report.count'] ?? Math.max(previous['report.history'].length, 1)) + 1
       : 1,
     'report.history': history.slice(-MAX_REPORT_HISTORY),
+    ...(notifiedAt ? { 'report.notifiedAt': notifiedAt } : {}),
   };
 };
 
@@ -637,7 +657,7 @@ export const renderFlakySuiteIssueBody = (
   ];
   return updateIssueMetadata(
     sections.filter((section) => section !== undefined).join('\n\n'),
-    flakySuiteIssueMetadata(suite, ctx.report, ctx.previous),
+    flakySuiteIssueMetadata(suite, ctx.report, ctx.previous, ctx.notifies),
     FLAKY_TEST_SUITE_METADATA_PREFIX
   );
 };

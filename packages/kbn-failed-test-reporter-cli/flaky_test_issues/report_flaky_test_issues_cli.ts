@@ -29,6 +29,8 @@ const DEFAULT_TRACKING_REPO = DEFAULT_GITHUB_REPO;
  */
 const DEFAULT_CLOSED_SINCE_DAYS = 365;
 const DEFAULT_MAX_NEW_ISSUES = 10;
+/** A daily report would otherwise comment on a suite failing every day each morning. */
+const DEFAULT_COMMENT_INTERVAL_DAYS = 3;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /** `owner/name`, as GitHub spells a repository. */
@@ -63,6 +65,10 @@ export function runReportFlakyTestIssuesCli() {
       if (!Number.isInteger(maxNewIssues) || maxNewIssues < 0) {
         throw createFlagError('--max-new-issues must be a non-negative integer');
       }
+      const commentIntervalDays = flagsReader.requiredNumber('comment-interval-days');
+      if (!Number.isInteger(commentIntervalDays) || commentIntervalDays < 1) {
+        throw createFlagError('--comment-interval-days must be a positive integer');
+      }
       const closedSince = new Date(Date.now() - closedSinceDays * MS_PER_DAY);
 
       log.info(`Reading flaky test report from ${inputPath}`);
@@ -84,7 +90,10 @@ export function runReportFlakyTestIssuesCli() {
             ? `, and a suite whose every test has one in ${tracking.repo} is skipped`
             : '') +
           `; at most ${maxNewIssues} new issues` +
-          (updateIssues ? ', suite issues of suites flaky again are refreshed' : '')
+          (updateIssues
+            ? `, suite issues of suites flaky again are refreshed and commented on at most ` +
+              `every ${commentIntervalDays} days`
+            : '')
       );
 
       const summary = await reportFlakySuiteIssues({
@@ -96,6 +105,7 @@ export function runReportFlakyTestIssuesCli() {
         closedSince,
         maxNewIssues,
         updateIssues,
+        commentIntervalDays,
         dryRun,
       });
 
@@ -127,7 +137,8 @@ export function runReportFlakyTestIssuesCli() {
         issue about it or an issue about the suite or its file; a single test without one is
         enough for the suite issue to be filed. A suite with an issue of its own in --github-repo
         has it refreshed: the body gets this report's numbers, a comment is posted when the suite
-        failed since the last report, and an issue closed before such a failure is reopened.
+        failed since the owners were last notified, at most every --comment-interval-days, and an
+        issue closed before such a failure is reopened.
 
         Examples:
           GITHUB_TOKEN=... node scripts/report_flaky_test_issues --input .scout/flaky_tests.json --dry-run
@@ -141,6 +152,7 @@ export function runReportFlakyTestIssuesCli() {
           'tracking-repo',
           'closed-since-days',
           'max-new-issues',
+          'comment-interval-days',
         ],
         boolean: ['dry-run', 'update-issues'],
         default: {
@@ -150,6 +162,7 @@ export function runReportFlakyTestIssuesCli() {
           'tracking-repo': DEFAULT_TRACKING_REPO,
           'closed-since-days': String(DEFAULT_CLOSED_SINCE_DAYS),
           'max-new-issues': String(DEFAULT_MAX_NEW_ISSUES),
+          'comment-interval-days': String(DEFAULT_COMMENT_INTERVAL_DAYS),
           'dry-run': false,
           'update-issues': true,
         },
@@ -161,6 +174,7 @@ export function runReportFlakyTestIssuesCli() {
           --closed-since-days   Only closed issues updated within this many days count as tracking a suite [default: ${DEFAULT_CLOSED_SINCE_DAYS}]
           --max-new-issues      Issues created per run, worst suites first [default: ${DEFAULT_MAX_NEW_ISSUES}]
           --no-update-issues    Skip suites with an issue of their own instead of refreshing it
+          --comment-interval-days  Days between two comments on a refreshed issue; reopens always comment [default: ${DEFAULT_COMMENT_INTERVAL_DAYS}]
           --dry-run             Read issues and log what would be filed or updated without writing
         `,
       },
