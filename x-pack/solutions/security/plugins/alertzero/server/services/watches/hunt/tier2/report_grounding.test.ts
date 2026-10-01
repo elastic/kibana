@@ -230,6 +230,21 @@ describe('assertEsqlGroundedInReport', () => {
     ).toBe(true);
   });
 
+  it('refuses a CJK full-text term even though every character is a Unicode letter', () => {
+    // Every character in `权限提升` ("privilege escalation") matches `\p{L}`, but the standard
+    // tokenizer has no space-delimited word boundary for Han text, so it emits one token per
+    // ideograph. A document containing only `升` would come back as a hit this gate would have
+    // approved as the whole four-character value, the same gap as the hyphenated-term case above,
+    // just via a script this gate's letters-only check could not tell from one safe word.
+    const query = 'FROM logs-aws.* | WHERE MATCH(message, "权限提升") | LIMIT 10';
+    expect(
+      assertEsqlGroundedInReport(query, {
+        reportText: 'the actor reached 权限提升',
+        iocValues: [],
+      }).ok
+    ).toBe(false);
+  });
+
   it('says an unfiltered query has no predicate, not that the report is missing from it', () => {
     const result = assertEsqlGroundedInReport('FROM logs-aws.* | LIMIT 1', {
       reportText,

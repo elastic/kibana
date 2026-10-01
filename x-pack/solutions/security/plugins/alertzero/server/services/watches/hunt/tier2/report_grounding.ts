@@ -170,10 +170,18 @@ const PATTERN_OPERATORS: ReadonlySet<string> = new Set(['like', 'rlike']);
 const WORD_CHARACTER = /[\p{L}\p{N}_]/u;
 
 /**
- * Unambiguously one token under the standard tokenizer: letters, digits and underscore
- * throughout, with no punctuation an analyzer could split on.
+ * Unambiguously one token under the standard tokenizer: ASCII letters, digits and underscore
+ * throughout. Deliberately narrower than `WORD_CHARACTER` above (which has a different job --
+ * finding term boundaries inside report text that may itself be in any script): the standard
+ * tokenizer's word-break algorithm (UAX #29) only behaves like "one token per space-delimited
+ * word" for scripts that use spaces. CJK text has no such boundary, so the standard tokenizer
+ * emits one token per ideograph -- `MATCH(message, "权限提升")` is four independent OR
+ * alternatives, not one, even though every character is a `\p{L}` letter. Accepting all of
+ * `\p{L}` here would ground the whole value as a single verified term while the analyzed query
+ * matches on any one character of it. ASCII is the one range this gate can be sure of; anything
+ * else keeps the placeholder and has `MATCH_PHRASE` as its escape hatch, same as punctuation.
  */
-const SINGLE_TOKEN = /^[\p{L}\p{N}_]+$/u;
+const SINGLE_TOKEN = /^[A-Za-z0-9_]+$/;
 
 /**
  * True when `value` appears in `text` as a term of its own rather than buried inside a longer
@@ -346,10 +354,12 @@ const requiredRegexpCore = (alternative: string): string[] => {
  * `role`, so a document containing only `role` comes back as a hit this gate had already approved
  * as `escalated-role`. Whether a given field's mapping would really split it is not something this
  * gate can see, so there is no correct simulation of the analyzer to fall back on — only a choice
- * about which direction to be wrong in. The choice here: a term has to be letters, digits and
- * underscore throughout (unambiguously one token under the standard tokenizer) to ground at all;
- * anything else — hyphenated, dotted, multi-word-as-one-literal — keeps the placeholder regardless
- * of whether the report contains it. `MATCH_PHRASE` is exempt, because its terms are conjunctive
+ * about which direction to be wrong in. The choice here: a term has to be ASCII letters, digits
+ * and underscore throughout (unambiguously one token under the standard tokenizer) to ground at
+ * all; anything else — hyphenated, dotted, multi-word-as-one-literal, or a non-ASCII script the
+ * tokenizer would segment differently (CJK text has no space-delimited words, so the standard
+ * tokenizer emits one token per ideograph) — keeps the placeholder regardless of whether the
+ * report contains it. `MATCH_PHRASE` is exempt, because its terms are conjunctive
  * and ordered rather than independent OR alternatives: a hyphenated or multi-word phrase still has
  * to appear together, in order, so it stays grounded by the whitespace-split rule above with no
  * extra check, and is the shape to steer generation at when a value cannot stand as one token.
