@@ -105,7 +105,10 @@ export interface ListAttachmentsResult {
  * Same as the individual fields from `CreateAttachmentArgs`, without `conversationId`,
  * `access`, or `render_inline` (those are specified once at the bulk level).
  */
-export type BulkCreateAttachmentInput = Omit<CreateAttachmentArgs, 'conversationId' | 'access' | 'render_inline'>;
+export type BulkCreateAttachmentInput = Omit<
+  CreateAttachmentArgs,
+  'conversationId' | 'access' | 'render_inline'
+>;
 
 /**
  * Error reported when one attachment in a `bulkCreate` call fails.

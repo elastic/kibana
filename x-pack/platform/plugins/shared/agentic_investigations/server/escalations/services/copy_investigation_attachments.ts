@@ -8,10 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ConversationWithPermissions } from '@kbn/agent-builder-common';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import type {
-  AttachmentPublicClient,
-  BulkCreateAttachmentInput,
-} from '@kbn/agent-builder-server';
+import type { AttachmentPublicClient, BulkCreateAttachmentInput } from '@kbn/agent-builder-server';
 import { ESCALATION_ATTACHMENT_WRITE_ACCESS } from '../../../common/escalations/constants';
 
 /**
@@ -71,7 +68,11 @@ export const copyInvestigationAttachments = async ({
     // Already-exists errors are expected on idempotent retries — downgrade them to debug.
     const level = error.message.includes('already exists') ? 'debug' : 'warn';
     logger[level](
-      `[escalations] Failed to copy attachment to escalation. escalationId=${escalation.id} investigationId=${investigation.id} attachmentId=${error.id ?? '(no id)'} type=${error.type} error=${error.message}`
+      `[escalations] Failed to copy attachment to escalation. escalationId=${
+        escalation.id
+      } investigationId=${investigation.id} attachmentId=${error.id ?? '(no id)'} type=${
+        error.type
+      } error=${error.message}`
     );
   }
 

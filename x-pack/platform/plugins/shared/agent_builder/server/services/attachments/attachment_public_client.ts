@@ -300,7 +300,14 @@ export const createAttachmentPublicClient = ({
 
         try {
           const attachment = await stateManager.add(
-            { id, type, data: input.data, origin: input.origin, description: input.description, hidden: input.hidden } as AttachmentInput,
+            {
+              id,
+              type,
+              data: input.data,
+              origin: input.origin,
+              description: input.description,
+              hidden: input.hidden,
+            } as AttachmentInput,
             ATTACHMENT_REF_ACTOR.user,
             resolveContext,
             { request }

@@ -201,7 +201,9 @@ describe('copyInvestigationAttachments', () => {
 
     (attachmentsClient.bulkCreate as jest.Mock).mockResolvedValue({
       created: [],
-      errors: [{ id: 'inv-1:att1', type: 'text', message: "Attachment with id 'x' already exists" }],
+      errors: [
+        { id: 'inv-1:att1', type: 'text', message: "Attachment with id 'x' already exists" },
+      ],
     });
 
     await copyInvestigationAttachments({
