@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/ui';
 import {
   ALERTING_V2_ALERTS_ALL_ROLE,
@@ -13,7 +14,7 @@ import {
   test,
 } from '../fixtures';
 
-const SEEDED_RULE_ID = 'scout-alerts-privileges-rule';
+const SEEDED_RULE_ID = `scout-alerts-privileges-${randomUUID()}`;
 
 /*
  * Covers the UI capability gating on the Alerts (episodes) page (PR #277710).
