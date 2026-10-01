@@ -309,7 +309,7 @@ describe('SlackAppService', () => {
         name: expect.stringMatching(
           /^nightshift-relay-agent-builder-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
         ),
-        roles: ['editor'],
+        roles: ['viewer'],
         trustedPlatformAssumers: ['relay'],
       });
       expect(startInstall).toHaveBeenCalledWith({
