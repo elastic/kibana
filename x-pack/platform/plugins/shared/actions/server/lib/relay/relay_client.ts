@@ -348,6 +348,7 @@ const toRelayInstallWireBody = (
     kibana_version: body.kibana_version,
     license_info: body.license_info,
     ...(body.created_by_user_key ? { created_by_user_key: body.created_by_user_key } : {}),
+    ...(body.agent_id ? { agent_id: body.agent_id } : {}),
   };
 
   if (hasServiceAccountId && serviceAccountId !== undefined) {
