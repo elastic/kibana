@@ -45,6 +45,7 @@ import { ViewInDiscoverButton } from './discover_button';
 import { StreamFlyoutOverview } from './stream_flyout_overview';
 import { StreamDeleteModal } from '../stream_delete_modal';
 import { StreamProcessing } from './stream_processing';
+import { StreamRemoveProcessingConfirmationModal } from './stream_remove_processing_confirm_modal';
 
 const TABS = [
   {
@@ -180,6 +181,7 @@ function StreamFlyoutContent({
       ? requestedTab
       : DEFAULT_TAB;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showConfirmRemoval, setShowConfirmRemoval] = useState(false);
   const [isHeaderMenuOpen, setHeaderMenuOpen] = useState(false);
   const headerId = useGeneratedHtmlId();
   const headerMenuId = useGeneratedHtmlId({ prefix: 'canvasFlyoutHeaderMenu' });
@@ -338,9 +340,8 @@ function StreamFlyoutContent({
           if (showing) {
             selectTab('processing');
             setShowProcessing(showing);
-          } else if (!hasProcessingEnabled) {
-            setShowProcessing(false);
-            selectTab('overview');
+          } else {
+            setShowConfirmRemoval(true);
           }
         }}
       >
@@ -478,6 +479,16 @@ function StreamFlyoutContent({
             {footer}
           </div>
         </EuiFlyoutFooter>
+      )}
+      {showConfirmRemoval && (
+        <StreamRemoveProcessingConfirmationModal
+          onClose={() => setShowConfirmRemoval(false)}
+          onConfirm={() => {
+            setShowConfirmRemoval(false);
+            setShowProcessing(false);
+            selectTab('overview');
+          }}
+        />
       )}
       {showDeleteModal && Streams.ingest.all.GetResponse.is(definition) && (
         <StreamDeleteModal
