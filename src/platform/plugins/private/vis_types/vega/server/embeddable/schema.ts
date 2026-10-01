@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { ensureNoUnsafeProperties } from '@kbn/std';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
 import type {
@@ -19,6 +20,15 @@ import {
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
+
+// HJSON specs are opaque strings; the client is responsible for parsing them safely.
+const jsonSpecValueSchema = z.looseObject({}).superRefine((value, ctx) => {
+  try {
+    ensureNoUnsafeProperties(value);
+  } catch (error) {
+    ctx.addIssue({ code: 'custom', message: `Invalid Vega spec: ${error.message}` });
+  }
+});
 
 export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return (
@@ -43,12 +53,12 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
             }),
             z.object({
               format: z.literal('json'),
-              value: z.looseObject({}),
+              value: jsonSpecValueSchema,
             }),
           ])
           .meta({
             description:
-              'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object.',
+              'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object. JSON specs must not contain `__proto__` or `constructor.prototype` keys.',
           }),
       })
       // Strip unknown keys for forward-compatible additive changes in this public contract.
