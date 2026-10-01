@@ -116,7 +116,6 @@ const makeAttrs = (overrides: Partial<InvestigationAttributes> = {}): Investigat
   conclusion: 'No issues found.',
   hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
   recommendations: [{ title: 'Keep monitoring', confidence: 0.7 }],
-  blind_spots: [{ title: 'Blind spot', confidence: 0.6, description: 'desc' }],
   ...overrides,
 });
 
@@ -183,24 +182,23 @@ describe('NightshiftInvestigationsClient.get()', () => {
       severity: undefined,
       hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
       recommendations: [{ title: 'Keep monitoring', confidence: 0.7 }],
-      blind_spots: [{ title: 'Blind spot', confidence: 0.6, description: 'desc' }],
       conversation_id: 'conv-1',
       impact: { entities: [{ name: 'checkout-service' }] },
     });
   });
 
-  it('omits historical recommendation and blind-spot arrays without confidence', async () => {
+  it('omits historical recommendations without confidence and legacy blind spots', async () => {
     repository.get.mockResolvedValue({
       ...makeRecord(),
       recommendations: [{ title: 'Keep monitoring' }],
-      blind_spots: [{ title: 'Blind spot', description: 'desc' }],
+      blind_spots: [{ title: 'Blind spot', confidence: 0.6, description: 'desc' }],
     } as unknown as InvestigationRecord);
 
     const result = await makeClient().get('inv-1');
 
     expect(result.summary).toBe('All clear.');
     expect(result.recommendations).toBeUndefined();
-    expect(result.blind_spots).toBeUndefined();
+    expect(result).not.toHaveProperty('blind_spots');
   });
 
   it('returns subject.summary from the stored subject_summary attribute', async () => {
@@ -366,7 +364,6 @@ describe('NightshiftInvestigationsClient.list()', () => {
     expect(result.results[0]).not.toHaveProperty('conclusion');
     expect(result.results[0]).not.toHaveProperty('hypotheses');
     expect(result.results[0]).not.toHaveProperty('recommendations');
-    expect(result.results[0]).not.toHaveProperty('blind_spots');
     expect(result.results[0]).not.toHaveProperty('conversation_id');
   });
 

@@ -113,22 +113,13 @@ export const runInvestigation = async (
           output.execution_error;
       }
     }
-    const {
-      summary,
-      conclusion,
-      severity,
-      hypotheses,
-      recommendations,
-      blind_spots: blindSpots,
-      impact,
-    } = investigation;
+    const { summary, conclusion, severity, hypotheses, recommendations, impact } = investigation;
     output.structured_report = {
       summary,
       conclusion,
       severity,
       hypotheses,
       recommendations,
-      blind_spots: blindSpots,
       impact,
     };
     if (output.conversation_id) {

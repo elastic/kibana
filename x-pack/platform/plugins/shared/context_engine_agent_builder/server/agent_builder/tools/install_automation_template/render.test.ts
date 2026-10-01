@@ -127,6 +127,14 @@ describe('automation template rendering', () => {
           categoryField: 'tier',
         }),
     ],
+    [
+      'targeted_ki_writer',
+      () =>
+        renderTargetedKiWriterTemplate({
+          aiIndexId: 'airline-loyalty',
+          kis: '- ki_id: test\n  ki:\n    type: constraint\n    title: "T"\n    content: "c"',
+        }),
+    ],
   ])('renders %s into a definition the workflow schema accepts', (_template, render) => {
     const parsed = WorkflowSchemaBase.safeParse(parse(render()));
 
