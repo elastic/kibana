@@ -17,8 +17,35 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
+import type {
+  Investigation,
+  InvestigationProposalSummary,
+} from '@kbn/agentic-investigations-plugin/common';
 import { ImpactSection } from './impact_section';
+
+const PROPOSAL_STATUS_LABELS: Record<InvestigationProposalSummary['status'], string> = {
+  pending: i18n.translate('xpack.investigationOutput.proposalStatus.pending', {
+    defaultMessage: 'Needs review',
+  }),
+  executing: i18n.translate('xpack.investigationOutput.proposalStatus.executing', {
+    defaultMessage: 'Executing',
+  }),
+  succeeded: i18n.translate('xpack.investigationOutput.proposalStatus.succeeded', {
+    defaultMessage: 'Succeeded',
+  }),
+  failed: i18n.translate('xpack.investigationOutput.proposalStatus.failed', {
+    defaultMessage: 'Failed',
+  }),
+  expired: i18n.translate('xpack.investigationOutput.proposalStatus.expired', {
+    defaultMessage: 'Expired',
+  }),
+  no_action: i18n.translate('xpack.investigationOutput.proposalStatus.noAction', {
+    defaultMessage: 'No action',
+  }),
+  superseded: i18n.translate('xpack.investigationOutput.proposalStatus.superseded', {
+    defaultMessage: 'Superseded',
+  }),
+};
 
 const Section: React.FC<React.PropsWithChildren<{ title: string; 'data-test-subj': string }>> = ({
   title,
@@ -89,7 +116,7 @@ export const FinalResults: React.FC<{ investigation: Investigation }> = ({ inves
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiBadge color={proposal.status === 'pending' ? 'accent' : 'hollow'}>
-                      {proposal.status}
+                      {PROPOSAL_STATUS_LABELS[proposal.status]}
                     </EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem>

@@ -76,6 +76,7 @@ describe('InvestigationOutput', () => {
     expect(screen.getByTestId('investigationOutputProposals')).toHaveTextContent(
       'Roll back the checkout deploy'
     );
+    expect(screen.getByTestId('investigationOutputProposals')).toHaveTextContent('Needs review');
 
     await userEvent.click(screen.getByText('Connection pool exhaustion'));
     expect(screen.getByTestId('investigationEvidenceItem')).toHaveTextContent(
