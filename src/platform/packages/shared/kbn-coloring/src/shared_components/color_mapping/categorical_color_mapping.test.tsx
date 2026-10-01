@@ -12,7 +12,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { getKbnPalettes } from '@kbn/palettes';
+import { getKbnPalettes, KbnPalette } from '@kbn/palettes';
 
 import type {
   ColorMappingInputCategoricalData,
@@ -26,6 +26,8 @@ const ASSIGNMENTS_LIST = 'lns-colorMapping-assignmentsList';
 const ASSIGNMENTS_PROMPT = 'lns-colorMapping-assignmentsPrompt';
 const ASSIGNMENTS_PROMPT_ADD_ALL = 'lns-colorMapping-assignmentsPromptAddAll';
 const ASSIGNMENT_ITEM = (i: number) => `lns-colorMapping-assignmentsItem${i}`;
+const PALETTE_PICKER = 'kbnColoring_ColorMapping_PalettePicker';
+const PALETTE_OPTION = (id: string) => `kbnColoring_ColorMapping_Palette-${id}`;
 
 const palettes = getKbnPalettes({ name: 'amsterdam', darkMode: false });
 const specialTokens = new Map([
@@ -116,5 +118,37 @@ describe('color mapping', () => {
     expect(screen.getByTestId(ASSIGNMENT_ITEM(5))).toHaveTextContent(
       '{"gte":0,"lt":1000,"label":""}'
     );
+  });
+
+  describe('palette selector', () => {
+    const openPalettePicker = () => {
+      fireEvent.click(screen.getByTestId(PALETTE_PICKER));
+    };
+
+    it('does not list the legacy line optimized palette for new charts', () => {
+      renderCategoricalColorMapping();
+      openPalettePicker();
+
+      expect(
+        screen.getByTestId(PALETTE_OPTION(KbnPalette.ElasticLineOptimized))
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(PALETTE_OPTION(KbnPalette.ElasticLineOptimizedLegacy))
+      ).toBeNull();
+    });
+
+    it('lists and selects the legacy line optimized palette when the chart already uses it', () => {
+      renderCategoricalColorMapping({
+        model: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: KbnPalette.ElasticLineOptimizedLegacy,
+        },
+      });
+      openPalettePicker();
+
+      expect(
+        screen.getByTestId(PALETTE_OPTION(KbnPalette.ElasticLineOptimizedLegacy))
+      ).toHaveAttribute('aria-selected', 'true');
+    });
   });
 });
