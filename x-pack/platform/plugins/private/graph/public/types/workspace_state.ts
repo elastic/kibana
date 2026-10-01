@@ -85,7 +85,6 @@ export interface TermIntersect {
 }
 
 export interface RuntimeWorkspace {
-  layoutController: WorkspaceLayoutController;
   nodesMap: Record<string, WorkspaceNode>;
   edgesMap: Record<string, WorkspaceEdge>;
   nodes: WorkspaceNode[];
@@ -105,10 +104,6 @@ export interface WorkspaceLayoutController {
 
 export type GraphExploreCallback = (data: ExploreResults) => void;
 export type GraphSearchCallback = (data: SearchResults) => void;
-
-export interface RuntimeWorkspaceOptions {
-  layoutController: WorkspaceLayoutController;
-}
 
 export type ControlType =
   | 'style'
