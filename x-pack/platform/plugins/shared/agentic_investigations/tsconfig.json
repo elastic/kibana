@@ -44,7 +44,8 @@
     "@kbn/proposals-ui",
     "@kbn/charts-theme",
     "@kbn/core-ui-settings-browser",
-    "@kbn/visualization-utils"
+    "@kbn/visualization-utils",
+    "@kbn/workflows-management-plugin"
   ],
   "exclude": ["target/**/*"]
 }
