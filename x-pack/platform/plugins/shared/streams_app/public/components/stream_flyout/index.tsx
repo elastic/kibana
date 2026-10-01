@@ -231,16 +231,18 @@ function StreamFlyoutContent({
 
   const renderTabs = useMemo(
     () =>
-      tabs.filter(({ id }) => id !== 'processing' || isProcessingEnabled).map(({ id, label }) => (
-        <EuiTab
-          isSelected={id === selectedTab}
-          key={id}
-          onClick={() => selectTab(id)}
-          data-test-subj={`streamsCanvasFlyoutTab-${id}`}
-        >
-          {label}
-        </EuiTab>
-      )),
+      tabs
+        .filter(({ id }) => id !== 'processing' || isProcessingEnabled)
+        .map(({ id, label }) => (
+          <EuiTab
+            isSelected={id === selectedTab}
+            key={id}
+            onClick={() => selectTab(id)}
+            data-test-subj={`streamsCanvasFlyoutTab-${id}`}
+          >
+            {label}
+          </EuiTab>
+        )),
     [selectTab, selectedTab, isProcessingEnabled, tabs]
   );
 
