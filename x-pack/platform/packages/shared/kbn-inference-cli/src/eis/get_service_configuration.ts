@@ -7,7 +7,7 @@
 import { promises as Fs } from 'fs';
 import Path from 'path';
 import os from 'os';
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { parse } from 'yaml';
 
 class GitCheckoutError extends Error {
