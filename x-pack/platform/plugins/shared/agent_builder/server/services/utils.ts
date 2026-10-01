@@ -73,14 +73,17 @@ export const toStableUserId = async ({
  * `getCurrentUser` for API-key auth often omits `profile_uid`. Looking up the key with
  * `with_profile_uid` recovers the creator's profile so ownership can match interactive
  * sessions for the same user. Older keys or creators without an activated profile return
- * undefined and callers fall back to username matching.
+ * undefined and callers fall back to username matching. With `ownerUsername`, a key created by
+ * someone else resolves to undefined too, so the id never names another user than the username.
  */
 const resolveApiKeyOwnerProfileUid = async ({
   request,
   esClient,
+  ownerUsername,
 }: {
   request: KibanaRequest;
   esClient: ElasticsearchClient;
+  ownerUsername?: string;
 }): Promise<string | undefined> => {
   const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
   if (!id) {
@@ -93,7 +96,11 @@ const resolveApiKeyOwnerProfileUid = async ({
       id,
     });
 
-    return response.api_keys?.[0]?.profile_uid;
+    const [apiKey] = response.api_keys ?? [];
+    if (ownerUsername !== undefined && apiKey?.username !== ownerUsername) {
+      return undefined;
+    }
+    return apiKey?.profile_uid;
   } catch (error) {
     if (
       error instanceof errors.ResponseError &&
@@ -117,7 +124,11 @@ const resolveApiKeyOwnerProfileUid = async ({
  * the API key owner's username does not match the originating user.
  *
  * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
- * back to the ES `_security/_authenticate` API for the username only.
+ * back to the ES `_security/_authenticate` API for the username.
+ *
+ * A fake request authenticates with an API key. When its identity carries no profile_uid, the id
+ * is the key creator's profile uid, as for an HTTP request made with the same key, so a run
+ * started from a task owns what the same identity created over HTTP.
  */
 export const getUserFromRequest = async ({
   request,
@@ -132,19 +143,41 @@ export const getUserFromRequest = async ({
   const isAdmin = await isAdminFromRequest({ esClient });
 
   if (authUser?.username) {
+    const { username } = authUser;
+    // An enriched fake request hides its authentication type, but it still authenticates with
+    // the API key in its header.
+    const isFakeApiKeyRequest =
+      request.isFakeRequest &&
+      extractApiKeyIdFromAuthzHeader(request.headers.authorization) !== undefined;
     return {
       id: await toStableUserId({
-        authUser,
-        resolveApiKeyProfileUid: () => resolveApiKeyOwnerProfileUid({ request, esClient }),
+        authUser: isFakeApiKeyRequest
+          ? { username, profile_uid: authUser.profile_uid, authentication_type: 'api_key' }
+          : authUser,
+        resolveApiKeyProfileUid: () =>
+          resolveApiKeyOwnerProfileUid({
+            request,
+            esClient,
+            ownerUsername: isFakeApiKeyRequest ? username : undefined,
+          }),
       }),
-      username: authUser.username,
+      username,
       isAdmin,
     };
   }
 
   const authResponse = await esClient.security.authenticate();
+  const id =
+    authUser?.profile_uid ??
+    (authResponse.authentication_type === 'api_key'
+      ? await resolveApiKeyOwnerProfileUid({
+          request,
+          esClient,
+          ownerUsername: authResponse.username,
+        })
+      : undefined);
   return {
-    id: authUser?.profile_uid,
+    id,
     username: authResponse.username,
     isAdmin,
   };
