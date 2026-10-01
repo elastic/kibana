@@ -147,6 +147,27 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
+    it('persists the description in Elasticsearch and returns it to callers', async () => {
+      mockHappyPath();
+      const description = 'Reads events for investigation workflows.';
+      await expect(
+        serviceAccounts.create(request, { ...createParams, description })
+      ).resolves.toEqual({
+        ...createdAccount,
+        description,
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({ method: 'PUT', body: { roles: createParams.roles, description } })
+      );
+    });
+
+    it('rejects an oversized description before creating an account', async () => {
+      await expect(
+        serviceAccounts.create(request, { ...createParams, description: 'x'.repeat(1001) })
+      ).rejects.toThrow();
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
     it('creates the account, mints its token and stores the credential', async () => {
       mockHappyPath();
 
@@ -767,7 +788,7 @@ describe('EsServiceAccounts', () => {
         count: 2,
         service_accounts: [
           queried('acme/billing', { enabled: false, roles: ['billing_read'] }),
-          queried('kibana/nightshift-relay'),
+          queried('kibana/nightshift-relay', { description: 'Runs investigation workflows.' }),
         ],
       });
       credentialStore.findExisting.mockResolvedValue(new Set(['kibana/nightshift-relay']));
@@ -799,6 +820,7 @@ describe('EsServiceAccounts', () => {
           {
             id: 'kibana/nightshift-relay',
             name: 'nightshift-relay',
+            description: 'Runs investigation workflows.',
             roles: ['viewer'],
             enabled: true,
             assumable: true,
@@ -933,7 +955,9 @@ describe('EsServiceAccounts', () => {
 
     it('reads the user-managed account and confirms it is assumable', async () => {
       esClient.asCurrentUser.transport.request
-        .mockResolvedValueOnce(accountEntry({ roles: ['viewer'] }))
+        .mockResolvedValueOnce(
+          accountEntry({ roles: ['viewer'], description: 'Runs investigation workflows.' })
+        )
         // The account still holds Kibana's token, so the stored credential describes it.
         .mockResolvedValueOnce(accountCredentials(['kibana-managed']));
       credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
@@ -943,6 +967,7 @@ describe('EsServiceAccounts', () => {
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
         id: ACCOUNT_ID,
         name: 'nightshift-relay',
+        description: 'Runs investigation workflows.',
         roles: ['viewer'],
         enabled: true,
         assumable: true,
