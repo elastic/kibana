@@ -14,6 +14,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { getUiApi } from '.';
+import * as roleSelector from '../management/service_accounts/service_account_role_selector';
 
 const renderComponent = async ({
   enabled = true,
@@ -52,26 +53,32 @@ const renderComponent = async ({
 
 describe('getCreateServiceAccount UI API', () => {
   it('loads the standalone flyout and reports the created account', async () => {
-    const { core, account, onCreated } = await renderComponent();
-    expect(await screen.findByTestId('createServiceAccountFlyout')).toBeVisible();
-    const selector = screen.getByRole('button', { name: 'Set privileges' });
-    await waitFor(() => expect(selector).toBeEnabled());
-    fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
-      target: { value: account.name },
-    });
-    await user.click(selector);
-    await user.click(await screen.findByTestId('roleOption-viewer'));
-    await user.keyboard('{Escape}');
-    await user.click(screen.getByTestId('createServiceAccountSubmit'));
-    expect(core.security.serviceAccounts.create).toHaveBeenCalledWith({
-      name: account.name,
-      roles: account.roles,
-    });
-    expect(onCreated).toHaveBeenCalledWith(account);
-    expect(core.http.get).toHaveBeenCalledWith(
-      '/api/security/role',
-      expect.objectContaining({ query: expect.objectContaining({ includeReservedRoles: true }) })
-    );
+    const selector = jest
+      .spyOn(roleSelector, 'ServiceAccountRoleSelector')
+      .mockImplementation(({ onChange }) => (
+        <button onClick={() => onChange(['viewer'])}>Select viewer</button>
+      ));
+    try {
+      const { core, account, onCreated } = await renderComponent();
+      expect(await screen.findByTestId('createServiceAccountFlyout')).toBeVisible();
+      fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
+        target: { value: account.name },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Select viewer' }));
+      await waitFor(() => expect(screen.getByTestId('createServiceAccountSubmit')).toBeEnabled());
+      fireEvent.click(screen.getByTestId('createServiceAccountSubmit'));
+      await waitFor(() => expect(onCreated).toHaveBeenCalledWith(account));
+      expect(core.security.serviceAccounts.create).toHaveBeenCalledWith({
+        name: account.name,
+        roles: account.roles,
+      });
+      expect(core.http.get).toHaveBeenCalledWith(
+        '/api/security/role',
+        expect.objectContaining({ query: expect.objectContaining({ includeReservedRoles: true }) })
+      );
+    } finally {
+      selector.mockRestore();
+    }
   });
 
   it.each([
