@@ -234,7 +234,10 @@ export class AuthenticationService {
         const baseUrl =
           http.basePath.publicBaseUrl ??
           `${request.url.protocol}//${request.url.host}${http.basePath.serverBasePath}`;
-        const resourceMetadataUrl = `${baseUrl}/.well-known/oauth-protected-resource`;
+        // Build path-aware discovery URL per RFC 9728 §3.1:
+        // /.well-known/oauth-protected-resource{space-prefix}{request-path}
+        const spaceBasePath = http.basePath.get(request);
+        const resourceMetadataUrl = `${baseUrl}/.well-known/oauth-protected-resource${spaceBasePath}${request.url.pathname}`;
 
         return toolkit.render({
           body: JSON.stringify({

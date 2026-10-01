@@ -1087,6 +1087,50 @@ describe('AuthenticationService', () => {
         });
       });
 
+      it('builds path-aware resource_metadata URL from the request path', async () => {
+        const mockReturnedValue = { type: 'render' as any };
+        const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate(
+            {
+              mcp: {
+                oauth2: {
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
+                },
+              },
+            },
+            { serverless: true }
+          ),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+
+        const { onPreResponseHandler } = getService();
+
+        await onPreResponseHandler(
+          httpServerMock.createKibanaRequest({
+            path: '/api/agent_builder/mcp',
+            routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+          }),
+          { statusCode: 401 },
+          mockOnPreResponseToolkit
+        );
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              'WWW-Authenticate':
+                'Bearer resource_metadata="http://myhost.com/mock-server-basepath/.well-known/oauth-protected-resource/mock-server-basepath/api/agent_builder/mcp"',
+            }),
+          })
+        );
+      });
+
       it('does not add WWW-Authenticate header when mcp config is not set', async () => {
         const mockReturnedValue = { type: 'next' as any };
         const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();

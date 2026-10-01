@@ -516,8 +516,8 @@ export class SecurityPlugin
     const { protocol, hostname, port } = core.http.getServerInfo();
     const serverBaseUrl = `${protocol}://${hostname}:${port}`;
 
-    const kibanaServerResourceURL =
-      config.mcp?.oauth2?.metadata?.resource ?? core.http.basePath.publicBaseUrl ?? serverBaseUrl;
+    // Base URL used to build path-aware OAuth audiences (e.g., baseURL + /api/agent_builder/mcp).
+    const kibanaServerResourceURL = core.http.basePath.publicBaseUrl ?? serverBaseUrl;
 
     // Shared by every consumer below: constructing a second instance would re-read the
     // configured TLS material and create a second connection pool.

@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+
 import type { RouteDefinitionParams } from '..';
 
-export function defineOAuthProtectedResourceRoute({ router, config }: RouteDefinitionParams) {
+export function defineOAuthProtectedResourceRoute({
+  router,
+  basePath,
+  config,
+}: RouteDefinitionParams) {
   if (!config.mcp?.oauth2) {
     return;
   }
@@ -23,9 +29,7 @@ export function defineOAuthProtectedResourceRoute({ router, config }: RouteDefin
 
   // https://datatracker.ietf.org/doc/html/rfc9728#section-2
   // Only resource is required by the specification and authorization_servers must be present for our UIAM OAuth implementation.
-  const metadataBody: Record<string, unknown> = {
-    authorization_servers: metadata.authorization_servers,
-    resource: metadata.resource,
+  const optionalMetadataFields: Record<string, unknown> = {
     ...(metadata.bearer_methods_supported
       ? { bearer_methods_supported: metadata.bearer_methods_supported }
       : {}),
@@ -44,28 +48,46 @@ export function defineOAuthProtectedResourceRoute({ router, config }: RouteDefin
     },
     (_context, _request, response) => {
       return response.ok({
-        body: metadataBody,
+        body: {
+          authorization_servers: metadata.authorization_servers,
+          resource: metadata.resource,
+          ...optionalMetadataFields,
+        },
         headers: { 'content-type': 'application/json' },
       });
     }
   );
 
-  // MCP Client tries path-aware discovery first (e.g.,
+  // MCP clients try path-aware discovery first (e.g.,
   // /.well-known/oauth-protected-resource/api/agent_builder/mcp) before falling
   // back to the root URL. Without this catch-all, the path-aware URL hits Kibana's
   // auth middleware and redirects to the login page (302 → 200 HTML), which the SDK
   // treats as a successful response and tries to parse as JSON, causing a failure.
-  // https://datatracker.ietf.org/doc/html/rfc8414#section-3.1
+  // https://datatracker.ietf.org/doc/html/rfc9728#section-3.1
   router.get(
     {
       path: '/.well-known/oauth-protected-resource/{path*}',
       security: securityConfig,
       options: { access: 'public' },
-      validate: false,
+      validate: {
+        params: schema.object({
+          path: schema.maybe(schema.string()),
+        }),
+      },
     },
-    (_context, _request, response) => {
+    (_context, request, response) => {
+      const path = request.params.path;
+      const resourceUrl = new URL(metadata.resource);
+      if (path) {
+        resourceUrl.pathname = `/${path}`;
+      }
+
       return response.ok({
-        body: metadataBody,
+        body: {
+          authorization_servers: metadata.authorization_servers,
+          resource: resourceUrl.toString(),
+          ...optionalMetadataFields,
+        },
         headers: { 'content-type': 'application/json' },
       });
     }
