@@ -49,7 +49,7 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
         <EuiFlexGroup css={headerStyle} alignItems="center" gutterSize="s" responsive={false}>
           {iconType && (
             <EuiFlexItem grow={false}>
-              <EuiIcon type={iconType} size="m" color="subdued" />
+              <EuiIcon type={iconType} size="m" color="subdued" aria-hidden={true} />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>

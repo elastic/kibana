@@ -62,7 +62,7 @@ export const Header: FC<HeaderProps> = ({
       </EuiFlexItem>
       {iconType && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} size="m" color="subdued" />
+          <EuiIcon type={iconType} size="m" color="subdued" aria-hidden={true} />
         </EuiFlexItem>
       )}
       {title && (
