@@ -24,7 +24,7 @@ import {
   workspaceRuntimeChanged,
   type GraphStore,
 } from '../state_management';
-import { createWorkspace } from '../services/workspace/graph_client_workspace';
+import { createWorkspace } from '../services/workspace/runtime_workspace';
 import { GraphLayoutController } from '../services/workspace/graph_layout_controller';
 import { mergeRuntimeGraph as applyRuntimeGraphMerge } from '../services/workspace/runtime_graph_merge';
 import { ReduxLayoutTopology } from '../services/workspace/redux_layout_topology';
@@ -33,6 +33,7 @@ import {
   buildNodeQuery,
 } from '../services/workspace/graph_request_builders';
 import { transformIntersectionResponse } from '../services/workspace/intersections';
+import { unpackGroupedNodes } from '../services/workspace/runtime_grouping';
 import { WorkspaceLayout } from '../components/workspace_layout';
 import type { GraphServices } from '../application';
 import { useWorkspaceLoader } from '../helpers/use_workspace_loader';
@@ -116,7 +117,7 @@ export const WorkspaceRoute = ({
     if (!workspace || !indexName) return [];
     const topLevelNodes = nodes.filter((node) => node.parent === undefined);
     const request = buildIntersectionRequest(
-      topLevelNodes.map((node) => buildNodeQuery(workspace.returnUnpackedGroupeds([node])))
+      topLevelNodes.map((node) => buildNodeQuery(unpackGroupedNodes([node], workspace.edges)))
     );
     const response = await searchGraph(indexName, request);
     return transformIntersectionResponse(response, topLevelNodes);

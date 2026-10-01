@@ -7,6 +7,7 @@
 
 import type { Workspace, WorkspaceNode } from '../types';
 import { buildNodeQuery } from '../services/workspace/graph_request_builders';
+import { unpackGroupedNodes } from '../services/workspace/runtime_grouping';
 
 export const buildWorkspaceQuery = (
   workspace: Workspace,
@@ -15,7 +16,7 @@ export const buildWorkspaceQuery = (
 ) => {
   const should = nodes
     .filter((node) => node.parent === undefined)
-    .map((node) => buildNodeQuery(workspace.returnUnpackedGroupeds([node])));
+    .map((node) => buildNodeQuery(unpackGroupedNodes([node], workspace.edges)));
   return {
     bool: {
       should,
