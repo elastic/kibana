@@ -105,11 +105,17 @@ consts:
 settings:
   timeout: '10m'
 steps:
-  # Required source 1: the persisted Attack Discovery.
+  # Required source 1: the Attack Discovery, from either stream a producer writes
+  # to. The product-managed stream is what the Attack Discovery feature persists
+  # to (and the only one a serverless project can hold); the ad-hoc stream is what
+  # the generation chain reads its discoveries back from and hands ids out of.
+  # Either may be absent in a space, so a missing one must not fail the search.
   - name: load_attack_discovery
     type: elasticsearch.search
     with:
-      index: '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
+      index: '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
+      ignore_unavailable: true
+      allow_no_indices: true
       size: 1
       query:
         ids:

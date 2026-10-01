@@ -375,14 +375,28 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(loadAttack?.type).toBe('elasticsearch.search');
     });
 
-    it('reads it from the product-managed Attack Discovery alerts data stream', () => {
+    // BOTH streams: the generation chain (`attack_discovery_batched_generation.yaml`)
+    // reads its discoveries back from the ad-hoc stream and hands those ids to the
+    // review, while a manual seed and the Attack Discovery feature itself persist
+    // to the product-managed one. A lookup on one alone fails the other's runs.
+    it('reads it from the product-managed and the ad-hoc Attack Discovery streams', () => {
       expect(loadAttack?.with?.index).toBe(
-        '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
+        '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},' +
+          '.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
       );
     });
 
-    // The persisted document is indexed UNDER `kibana.alert.uuid`, so `_id` is the
-    // same value and needs no mapping to be queryable.
+    // On serverless the ad-hoc stream cannot be created at all, and a space that
+    // never ran the other producer has no product-managed stream either. A search
+    // that names an absent stream must not fail the run: the guard below is what
+    // reports the missing document.
+    it('tolerates a stream that does not exist in this space', () => {
+      expect(loadAttack?.with?.ignore_unavailable).toBe(true);
+      expect(loadAttack?.with?.allow_no_indices).toBe(true);
+    });
+
+    // Each stream indexes the discovery UNDER `kibana.alert.uuid`, so `_id` is the
+    // same value in both and needs no mapping to be queryable.
     it('reads it by the id it was given', () => {
       expect(loadAttack?.with?.query).toEqual({
         ids: { values: ['{{ inputs.attack_discovery_id }}'] },

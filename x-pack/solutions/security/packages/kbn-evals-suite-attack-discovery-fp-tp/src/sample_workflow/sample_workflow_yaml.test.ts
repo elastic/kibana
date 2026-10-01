@@ -11,7 +11,7 @@ import {
   createWorkflowLiquidEngine,
   WorkflowSchema,
 } from '@kbn/workflows';
-import { FP_TP_ATTACK_INDEX, FP_TP_VERDICT_RULES } from '../world';
+import { FP_TP_ATTACK_ADHOC_INDEX, FP_TP_ATTACK_INDEX, FP_TP_VERDICT_RULES } from '../world';
 import { readSampleWorkflowYaml } from './sample_workflow_yaml';
 
 interface YamlStep {
@@ -117,13 +117,23 @@ describe('sample FP/TP analysis workflow', () => {
     expect(collapseWhitespace(rules)).toBe(collapseWhitespace(FP_TP_VERDICT_RULES));
   });
 
-  it('reads the persisted Attack Discovery from the product-managed alerts index', () => {
-    // FP_TP_ATTACK_INDEX is the per-space-default form (`...alerts-default`); the
-    // workflow step templates the space suffix instead of hardcoding `default`.
-    const indexPrefix = FP_TP_ATTACK_INDEX.replace(/-default$/, '');
+  it('reads the Attack Discovery from both streams a producer writes to', () => {
+    // FP_TP_ATTACK_INDEX / FP_TP_ATTACK_ADHOC_INDEX are the per-space-default forms
+    // (`...alerts-default`); the workflow step templates the space suffix instead
+    // of hardcoding `default`. Both are searched because the generation chain
+    // hands out ad-hoc ids while the seeder and the Attack Discovery feature
+    // persist to the product-managed stream.
+    const spaceScoped = (index: string) =>
+      `${index.replace(/-default$/, '')}-{{ workflow.spaceId }}`;
     expect(stepIn('load_attack_discovery')?.with?.index).toBe(
-      `${indexPrefix}-{{ workflow.spaceId }}`
+      `${spaceScoped(FP_TP_ATTACK_INDEX)},${spaceScoped(FP_TP_ATTACK_ADHOC_INDEX)}`
     );
+  });
+
+  it('does not fail the search when one of those streams is absent', () => {
+    // On serverless the ad-hoc stream cannot exist at all.
+    expect(stepIn('load_attack_discovery')?.with?.ignore_unavailable).toBe(true);
+    expect(stepIn('load_attack_discovery')?.with?.allow_no_indices).toBe(true);
   });
 
   it('routes the agent through the AlertZero reasoning feature', () => {

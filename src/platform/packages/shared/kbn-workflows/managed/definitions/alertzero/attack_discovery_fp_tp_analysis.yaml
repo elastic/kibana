@@ -129,15 +129,27 @@ consts:
   no_rows: []
 steps:
   # Loaded rather than received, so a retry cannot reason over a copy that went
-  # stale. `ids` works because a persisted discovery is indexed under its
+  # stale. `ids` works because a discovery is indexed under its
   # `kibana.alert.uuid`, making `_id` the same value.
+  #
+  # BOTH streams, because the two producers write to different ones. The
+  # product-managed `.alerts-security.attack.discovery.alerts-<space>` stream is
+  # what the Attack Discovery feature persists to (and the only one a serverless
+  # project can hold). `.adhoc.alerts-security.attack.discovery.alerts-<space>`
+  # is what `attack_discovery_batched_generation.yaml` reads its discoveries back
+  # from, and the ids it hands the review are those documents. A lookup on one
+  # alone fails the other's runs with `require_attack_discovery`. Either stream
+  # may be absent in a given space, and on serverless the ad-hoc one cannot exist
+  # at all, so a missing stream must not fail the search.
   #
   # A required source, so no `on-failure`: a failed search fails the run, which the
   # review records as `failed`.
   - name: load_attack_discovery
     type: elasticsearch.search
     with:
-      index: .alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
+      index: .alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
+      ignore_unavailable: true
+      allow_no_indices: true
       size: 1
       query:
         ids:
@@ -151,8 +163,9 @@ steps:
     if: "${{ steps.load_attack_discovery.output.hits.total.value == 0 }}"
     with:
       message: >-
-        No persisted Attack Discovery found for id
-        "{{ inputs.attack_discovery_id }}" in space {{ workflow.spaceId }}.
+        No Attack Discovery found for id
+        "{{ inputs.attack_discovery_id }}" in space {{ workflow.spaceId }},
+        in either the product-managed or the ad-hoc discovery stream.
         Required source unavailable; no classification was produced.
 
   # A metadata READ and nothing else: posting to this conversation, or running
