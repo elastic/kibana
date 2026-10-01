@@ -13,26 +13,36 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 
 export const OTHER_SERVICE_NAME = '_other';
 
-export function MaxGroupsMessage() {
+export function MaxGroupsMessage({ serviceOverflowCount }: { serviceOverflowCount?: number }) {
   const { docLinks } = useApmPluginContext().core;
+
+  const apmServerDocs = (
+    <EuiLink
+      data-test-subj="apmMaxGroupsMessageDocsLink"
+      href={docLinks.links.apm.troubleshootingTooManyTransactions}
+      target="_blank"
+    >
+      {i18n.translate('xpack.apm.tooltip.link.apmServerDocs', {
+        defaultMessage: 'docs',
+      })}
+    </EuiLink>
+  );
+
+  if (serviceOverflowCount && serviceOverflowCount > 0) {
+    return (
+      <FormattedMessage
+        defaultMessage="The number of services has exceeded the current capacity. {serviceOverflowCount, plural, one {# additional service is not shown.} other {# additional services are not shown.}} Please review {apmServerDocs} to mitigate the situation."
+        id="xpack.apm.tooltip.maxGroup.messageWithOverflowCount"
+        values={{ serviceOverflowCount, apmServerDocs }}
+      />
+    );
+  }
 
   return (
     <FormattedMessage
       defaultMessage="The cardinality of APM data being collected is too high. Please review {apmServerDocs} to mitigate the situation."
       id="xpack.apm.tooltip.maxGroup.message"
-      values={{
-        apmServerDocs: (
-          <EuiLink
-            data-test-subj="apmMaxGroupsMessageDocsLink"
-            href={docLinks.links.apm.troubleshootingTooManyTransactions}
-            target="_blank"
-          >
-            {i18n.translate('xpack.apm.tooltip.link.apmServerDocs', {
-              defaultMessage: 'docs',
-            })}
-          </EuiLink>
-        ),
-      }}
+      values={{ apmServerDocs }}
     />
   );
 }
