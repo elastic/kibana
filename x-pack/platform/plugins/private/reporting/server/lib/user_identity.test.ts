@@ -65,7 +65,6 @@ describe('toStableUserIds', () => {
         authUser: {
           username: 'rshared',
           profile_uid: 'profile-123',
-          authentication_type: 'realm',
           lookup_realm: { type: 'native', name: 'default_native' },
         },
       })
@@ -77,7 +76,6 @@ describe('toStableUserIds', () => {
       toStableUserIds({
         authUser: {
           username: 'rshared',
-          authentication_type: 'realm',
           lookup_realm: { type: 'file', name: 'default_file' },
         },
       })
@@ -87,7 +85,6 @@ describe('toStableUserIds', () => {
       toStableUserIds({
         authUser: {
           username: 'rshared',
-          authentication_type: 'realm',
           lookup_realm: { type: 'native', name: 'default_native' },
         },
       })
@@ -95,13 +92,10 @@ describe('toStableUserIds', () => {
   });
 
   it('returns no ids when realm information is incomplete and there is no profile uid', async () => {
-    await expect(
-      toStableUserIds({ authUser: { username: 'rshared', authentication_type: 'realm' } })
-    ).resolves.toEqual([]);
+    await expect(toStableUserIds({ authUser: { username: 'rshared' } })).resolves.toEqual([]);
     await expect(
       toStableUserIds({
         authUser: {
-          authentication_type: 'realm',
           lookup_realm: { type: 'native', name: 'default_native' },
         },
       })
@@ -113,7 +107,6 @@ describe('toStableUserIds', () => {
       toStableUserIds({
         authUser: {
           username: 'rshared',
-          authentication_type: 'api_key',
           lookup_realm: esApiKeyRealm,
         },
         resolveApiKeyOwner: async () => ({
@@ -131,7 +124,6 @@ describe('toStableUserIds', () => {
       toStableUserIds({
         authUser: {
           username: 'rshared',
-          authentication_type: 'api_key',
           lookup_realm: esApiKeyRealm,
         },
         resolveApiKeyOwner: async () => ({
@@ -143,21 +135,17 @@ describe('toStableUserIds', () => {
     ).resolves.toEqual(['realm:["file","default_file","rshared"]']);
   });
 
-  it.each(['api_key', 'token'])(
-    'never derives an id from the synthetic realm for an API key using %s authentication',
-    async (authenticationType) => {
-      await expect(
-        toStableUserIds({
-          authUser: {
-            username: 'rshared',
-            authentication_type: authenticationType,
-            lookup_realm: { type: '_es_api_key', name: '_es_api_key' },
-          },
-          resolveApiKeyOwner: async () => undefined,
-        })
-      ).resolves.toEqual([]);
-    }
-  );
+  it('never derives an id from the synthetic realm reported for an API key', async () => {
+    await expect(
+      toStableUserIds({
+        authUser: {
+          username: 'rshared',
+          lookup_realm: { type: '_es_api_key', name: '_es_api_key' },
+        },
+        resolveApiKeyOwner: async () => undefined,
+      })
+    ).resolves.toEqual([]);
+  });
 
   it.each([
     { kind: 'ordinary', username: 'rshared' },
@@ -168,7 +156,6 @@ describe('toStableUserIds', () => {
       const viaApiKey = await toStableUserIds({
         authUser: {
           username,
-          authentication_type: 'api_key',
           lookup_realm: esApiKeyRealm,
         },
         resolveApiKeyOwner: async () => ({
@@ -180,7 +167,6 @@ describe('toStableUserIds', () => {
       const viaSession = await toStableUserIds({
         authUser: {
           username,
-          authentication_type: 'realm',
           lookup_realm: { type: 'file', name: 'default_file' },
         },
       });
@@ -195,7 +181,6 @@ describe('toStableUserIds', () => {
         authUser: {
           username: 'rshared',
           profile_uid: 'profile-123',
-          authentication_type: 'api_key',
           lookup_realm: esApiKeyRealm,
         },
         resolveApiKeyOwner: async () => ({ profileUid: 'profile-123' }),

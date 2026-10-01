@@ -29,7 +29,6 @@ export interface ReportingUserIdentity {
 interface StableUserIdAuthUser extends ApiKeyAuthUser {
   username?: string;
   profile_uid?: string;
-  authentication_type?: string;
   lookup_realm?: { type?: string; name?: string };
 }
 
