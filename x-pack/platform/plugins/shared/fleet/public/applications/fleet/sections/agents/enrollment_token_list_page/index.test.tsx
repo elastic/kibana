@@ -9,7 +9,7 @@ import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../mock';
-import type { EnrollmentAPIKey } from '../../../../types';
+import type { EnrollmentAPIKey } from '../../../types';
 
 import { EnrollmentTokenListPage } from '.';
 
