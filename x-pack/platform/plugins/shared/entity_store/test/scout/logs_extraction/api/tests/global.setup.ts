@@ -6,22 +6,22 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { PUBLIC_HEADERS } from '../../../common/fixtures/constants';
-import { installEntityStoreSuite, startAllEntityTypes } from '../../../common/fixtures/helpers';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../../common';
+import { installEntityStoreSuiteWithKbnClient } from '../../../common/fixtures/helpers';
 
 globalSetupHook(
   'Install Entity Store once for logs extraction API suite',
-  async ({ apiClient, samlAuth }) => {
-    await installEntityStoreSuite({ apiClient, samlAuth });
+  async ({ kbnClient }) => {
+    await installEntityStoreSuiteWithKbnClient({ kbnClient });
 
-    const credentials = await samlAuth.asInteractiveUser('admin');
-    const defaultHeaders = {
-      ...credentials.cookieHeader,
-      ...PUBLIC_HEADERS,
-    };
-    const startResponse = await startAllEntityTypes(apiClient, defaultHeaders);
-    if (startResponse.statusCode !== 200) {
-      throw new Error(`Failed to start entity types for logs suite: ${startResponse.statusCode}`);
+    const startResponse = await kbnClient.request({
+      method: 'PUT',
+      path: ENTITY_STORE_ROUTES.public.START,
+      headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+      body: {},
+    });
+    if (startResponse.status !== 200) {
+      throw new Error(`Failed to start entity types for logs suite: ${startResponse.status}`);
     }
   }
 );

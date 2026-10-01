@@ -6,11 +6,11 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { installEntityStoreSuite } from '../../../common/fixtures/helpers';
+import { installEntityStoreSuiteWithKbnClient } from '../../../common/fixtures/helpers';
 
 globalSetupHook(
   'Install Entity Store once for CRUD and resolution API suite',
-  async ({ apiClient, samlAuth }) => {
-    await installEntityStoreSuite({ apiClient, samlAuth });
+  async ({ kbnClient }) => {
+    await installEntityStoreSuiteWithKbnClient({ kbnClient });
   }
 );
