@@ -33,6 +33,8 @@ describe('AgentBuilderWorkflowsPlugin', () => {
     const attachments = { addAttachmentType: jest.fn() };
     const telemetry = { reportWorkflowCreated: jest.fn() };
     const queryClient = { getQueryData: jest.fn() };
+    const workflowsExtensions = { getStepDefinition: jest.fn() };
+    const triggersActionsUi = { actionTypeRegistry: {} };
 
     const depsStart = {
       agentBuilder: { attachments },
@@ -40,6 +42,8 @@ describe('AgentBuilderWorkflowsPlugin', () => {
         getTelemetry: jest.fn().mockResolvedValue(telemetry),
         getQueryClient: jest.fn().mockResolvedValue(queryClient),
       },
+      workflowsExtensions,
+      triggersActionsUi,
     } as unknown as PluginStartDependencies;
 
     coreSetup.getStartServices.mockResolvedValue([coreStart, depsStart, {}]);
@@ -47,11 +51,26 @@ describe('AgentBuilderWorkflowsPlugin', () => {
     const plugin = new AgentBuilderWorkflowsPlugin();
     plugin.setup(coreSetup, {} as PluginSetupDependencies);
 
-    return { coreSetup, coreStart, attachments, telemetry, queryClient };
+    return {
+      coreSetup,
+      coreStart,
+      attachments,
+      telemetry,
+      queryClient,
+      workflowsExtensions,
+      triggersActionsUi,
+    };
   };
 
   it('registers workflow attachment renderers on setup', async () => {
-    const { coreStart, attachments, telemetry, queryClient } = setupPlugin();
+    const {
+      coreStart,
+      attachments,
+      telemetry,
+      queryClient,
+      workflowsExtensions,
+      triggersActionsUi,
+    } = setupPlugin();
 
     await flushPromises();
 
@@ -60,6 +79,7 @@ describe('AgentBuilderWorkflowsPlugin', () => {
       core: coreStart,
       telemetry,
       queryClient,
+      workflowsUiServices: { workflowsExtensions, triggersActionsUi },
     });
   });
 

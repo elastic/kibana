@@ -39,6 +39,10 @@ export class AgentBuilderWorkflowsPlugin
         core: coreStart,
         telemetry,
         queryClient,
+        workflowsUiServices: {
+          workflowsExtensions: depsStart.workflowsExtensions,
+          triggersActionsUi: depsStart.triggersActionsUi,
+        },
       });
     })();
 

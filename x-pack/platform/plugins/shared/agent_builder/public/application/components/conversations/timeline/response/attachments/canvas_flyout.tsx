@@ -136,7 +136,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const flyoutSize = isSidebar || isNarrowViewport ? 'full' : width;
 
   const flyoutBodyStyles = css`
-    padding-top: ${euiTheme.size.m};
+    padding-top: ${uiDefinition.canvasHideTopPadding ? 0 : euiTheme.size.m};
 
     > .euiFlyoutBody__overflow {
       mask-image: none;

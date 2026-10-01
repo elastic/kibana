@@ -6,7 +6,6 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
@@ -16,21 +15,21 @@ import type {
   CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import { CodeEditor } from '@kbn/code-editor';
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useWorkflowsApi,
   useWorkflowsCapabilities,
-  useWorkflowsMonacoTheme,
-  WORKFLOW_READ_ONLY_MONACO_OPTIONS,
   type WorkflowApi,
+  type WorkflowsUiServices,
+  WorkflowsUiServicesProvider,
 } from '@kbn/workflows-ui';
 import type { QueryClient } from '@kbn/react-query';
 import { PLUGIN_ID as WORKFLOW_PLUGIN_ID } from '@kbn/workflows-management-plugin/common';
 import type { WorkflowsBaseTelemetry } from '@kbn/workflows-management-plugin/public';
 import { WorkflowInfoStripe } from './workflow_info_stripe';
+import { WorkflowYamlCanvasPreview } from './workflow_yaml_canvas_preview';
 
 interface WorkflowYamlData {
   yaml: string;
@@ -130,8 +129,6 @@ const WorkflowYamlCanvasContent: React.FC<{
   telemetry,
   queryClient,
 }) => {
-  useWorkflowsMonacoTheme();
-
   const workflowApi = useWorkflowsApi();
   const { canCreateWorkflow, canUpdateWorkflow, canReadWorkflow } = useWorkflowsCapabilities();
   const { notifications } = useKibana<{ notifications: CoreStart['notifications'] }>().services;
@@ -331,31 +328,19 @@ const WorkflowYamlCanvasContent: React.FC<{
     labels,
   ]);
 
-  return (
-    <div
-      css={css`
-        height: 100%;
-        min-height: 400px;
-        width: 100%;
-      `}
-    >
-      <CodeEditor
-        languageId="yaml"
-        value={attachment.data.yaml}
-        options={WORKFLOW_READ_ONLY_MONACO_OPTIONS}
-      />
-    </div>
-  );
+  return <WorkflowYamlCanvasPreview yaml={attachment.data.yaml} />;
 };
 
 export const createWorkflowYamlAttachmentUiDefinition = ({
   core,
   telemetry,
   queryClient,
+  workflowsUiServices,
 }: {
   core: CoreStart;
   telemetry: WorkflowsBaseTelemetry;
   queryClient: QueryClient;
+  workflowsUiServices: WorkflowsUiServices;
 }): AttachmentUIDefinition<WorkflowYamlAttachment> => {
   const { application } = core;
   let currentAppId: string | undefined;
@@ -384,6 +369,8 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
       }),
 
     getIcon: () => 'workflowsApp',
+
+    canvasHideTopPadding: true,
 
     getActionButtons: ({ attachment, isCanvas, openCanvas }) => {
       if (isCanvas) return [];
@@ -430,16 +417,18 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
 
     renderCanvasContent: ({ attachment, isSidebar }, { registerActionButtons, updateOrigin }) => (
       <KibanaContextProvider services={core}>
-        <WorkflowYamlCanvasContent
-          attachment={attachment}
-          isSidebar={isSidebar}
-          registerActionButtons={registerActionButtons}
-          updateOrigin={updateOrigin}
-          application={application}
-          isOnWorkflowPage={isOnWorkflowPage}
-          telemetry={telemetry}
-          queryClient={queryClient}
-        />
+        <WorkflowsUiServicesProvider services={workflowsUiServices}>
+          <WorkflowYamlCanvasContent
+            attachment={attachment}
+            isSidebar={isSidebar}
+            registerActionButtons={registerActionButtons}
+            updateOrigin={updateOrigin}
+            application={application}
+            isOnWorkflowPage={isOnWorkflowPage}
+            telemetry={telemetry}
+            queryClient={queryClient}
+          />
+        </WorkflowsUiServicesProvider>
       </KibanaContextProvider>
     ),
   };

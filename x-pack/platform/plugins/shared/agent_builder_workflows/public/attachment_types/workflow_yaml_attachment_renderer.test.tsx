@@ -11,15 +11,20 @@ import { BehaviorSubject } from 'rxjs';
 import { QueryClient } from '@kbn/react-query';
 import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { createMockWorkflowApi, createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
+import {
+  createMockWorkflowApi,
+  createMockWorkflowsCapabilities,
+  createMockWorkflowsUiServices,
+} from '@kbn/workflows-ui/mocks';
 import type { WorkflowsBaseTelemetry } from '@kbn/workflows-management-plugin/public';
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
+// The preview has its own test; stub it so this suite stays on the canvas wiring.
+jest.mock('./workflow_yaml_canvas_preview', () => ({
+  WorkflowYamlCanvasPreview: ({ yaml }: { yaml: string }) => (
+    <pre data-test-subj="workflowYamlCanvasPreview">{yaml}</pre>
+  ),
 }));
 
 const mockWorkflowApi = createMockWorkflowApi();
@@ -54,6 +59,7 @@ const createMockServices = ({
     core,
     telemetry,
     queryClient: new QueryClient(),
+    workflowsUiServices: createMockWorkflowsUiServices(),
   };
 };
 
@@ -238,12 +244,12 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
   });
 
   describe('renderCanvasContent', () => {
-    it('renders a YAML code editor', () => {
+    it('renders the workflow preview with the attachment YAML', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
       const attachment = createAttachment();
 
-      const { container } = render(
+      const { getByTestId } = render(
         <>
           {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
@@ -252,7 +258,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         </>
       );
 
-      expect(container.querySelector('[data-test-subj="TextBasedLangEditor"]')).toBeDefined();
+      expect(getByTestId('workflowYamlCanvasPreview')).toHaveTextContent('name: Test Workflow');
     });
 
     it('registers Save button for new workflow', () => {

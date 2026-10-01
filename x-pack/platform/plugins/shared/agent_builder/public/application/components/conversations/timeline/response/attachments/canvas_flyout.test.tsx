@@ -83,6 +83,30 @@ describe('CanvasFlyout', () => {
     expect(screen.getByText("Couldn't render this attachment")).not.toBeNull();
   });
 
+  it.each([
+    [undefined, '12px'],
+    [true, '0px'],
+  ])(
+    'sets the body top padding when canvasHideTopPadding is %s',
+    (canvasHideTopPadding, paddingTop) => {
+      mockAttachmentsService.getAttachmentUiDefinition.mockReturnValue({
+        getLabel: () => 'Test attachment',
+        renderCanvasContent: () => <div data-test-subj="canvasContent" />,
+        canvasHideTopPadding,
+      });
+      mockCanvasState = {
+        attachment: { id: 'attachment-1', type: 'test', data: {} },
+        isSidebar: false,
+      };
+
+      render(<CanvasFlyout attachmentsService={mockAttachmentsService} />);
+
+      const body = screen.getByTestId('canvasContent').closest('.euiFlyoutBody');
+      expect(body).not.toBeNull();
+      expect(window.getComputedStyle(body as Element).paddingTop).toBe(paddingTop);
+    }
+  );
+
   it('closes canvas when conversation ID changes', () => {
     const { rerender } = render(<CanvasFlyout attachmentsService={mockAttachmentsService} />);
 
