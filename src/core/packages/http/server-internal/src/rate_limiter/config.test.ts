@@ -18,9 +18,19 @@ describe('rateLimiterConfigSchema', () => {
     });
   });
 
-  it('allows disabling without elu or term', () => {
+  it('allows disabling while elu and term remain in config', () => {
     expect(rateLimiterConfigSchema.validate({ enabled: false })).toEqual({
       enabled: false,
+      elu: 0.8,
+      term: 'medium',
+    });
+  });
+
+  it('allows disabling with a cohort elu override present in kibana.yml', () => {
+    expect(rateLimiterConfigSchema.validate({ enabled: false, elu: 0.6 })).toEqual({
+      enabled: false,
+      elu: 0.6,
+      term: 'medium',
     });
   });
 });
