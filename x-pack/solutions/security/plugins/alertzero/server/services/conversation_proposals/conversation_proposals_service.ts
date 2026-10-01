@@ -155,7 +155,10 @@ export class ConversationProposalsService {
     try {
       const impacts = await this.getImpactClient(request).listByConversationIds(uniqueIds);
       return new Map(
-        impacts.map((impact) => [impact.conversationId, impact.entities.map((entity) => entity.id)])
+        impacts.map((impact) => [
+          impact.conversationId,
+          (impact.entities ?? []).map((entity) => entity.id),
+        ])
       );
     } catch (err) {
       this.logger.debug(`Could not resolve investigation impact: ${err}`);
