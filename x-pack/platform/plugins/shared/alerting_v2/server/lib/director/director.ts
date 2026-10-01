@@ -50,6 +50,8 @@ interface ResolveEpisodeIdResult {
   readonly isNew: boolean;
 }
 
+type DecidedAlert = NonNullable<AlertEventDocument['alert']>;
+
 export interface DirectorRunStats {
   readonly newEpisodeIds: readonly string[];
 }
@@ -61,6 +63,17 @@ export interface DirectorRunResult {
 
 @injectable()
 export class DirectorService {
+  /**
+   * Episode decided for each group_hash so far in a rule execution. The executor streams
+   * results in batches and calls the director once per batch, while `.rule-events` writes
+   * are not refreshed, so a later batch cannot read back the episode minted by an earlier
+   * one. Keyed by execution context (one per execution) so it is released with it.
+   */
+  private readonly decidedAlertsByExecution = new WeakMap<
+    ExecutionContext,
+    Map<string, DecidedAlert>
+  >();
+
   constructor(
     @inject(TransitionStrategyFactory)
     private readonly strategyFactory: TransitionStrategyFactory,
@@ -97,12 +110,18 @@ export class DirectorService {
     logger: LoggerServiceContract
   ): Promise<DirectorRunResult> {
     const scope = executionContext.createScope();
-    const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
-    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
-      rule,
-      groupHashes,
-      executionContext
-    );
+    const decidedAlerts = this.getDecidedAlerts(executionContext);
+
+    // Groups already decided earlier in this execution do not need their persisted state.
+    const groupHashes = [
+      ...new Set(
+        alertEvents.map((e) => e.group_hash).filter((groupHash) => !decidedAlerts.has(groupHash))
+      ),
+    ];
+    const alertStateByGroupHash =
+      groupHashes.length > 0
+        ? await this.fetchLatestAlertStateByGroupHash(rule, groupHashes, executionContext)
+        : new Map<string, LatestAlertEventState>();
 
     scope.add(() => alertStateByGroupHash.clear());
 
@@ -111,12 +130,11 @@ export class DirectorService {
 
       const newEpisodeIds: string[] = [];
       const evaluatedAt = new Date().toISOString();
-      // Episode decided for each group by the first row seen in this batch. Later rows for
-      // the same group attach to it, otherwise a group without an open episode would mint
-      // one episode per row (the prior-state snapshot is only loaded once per batch).
-      const decidedAlertByGroupHash = new Map<string, NonNullable<AlertEventDocument['alert']>>();
+      // Later rows for a group attach to the episode decided for its first row, otherwise a
+      // group without an open episode would mint one episode per row (the prior-state
+      // snapshot is only loaded once per batch).
       const processed = alertEvents.map((currentAlertEvent) => {
-        const decidedAlert = decidedAlertByGroupHash.get(currentAlertEvent.group_hash);
+        const decidedAlert = decidedAlerts.get(currentAlertEvent.group_hash);
         if (decidedAlert) {
           return { ...currentAlertEvent, alert: { ...decidedAlert } };
         }
@@ -131,7 +149,7 @@ export class DirectorService {
         });
 
         if (alertEvent.alert) {
-          decidedAlertByGroupHash.set(currentAlertEvent.group_hash, alertEvent.alert);
+          decidedAlerts.set(currentAlertEvent.group_hash, alertEvent.alert);
           if (isNewEpisode) {
             newEpisodeIds.push(alertEvent.alert.id);
           }
@@ -152,6 +170,15 @@ export class DirectorService {
         });
       }
     }
+  }
+
+  private getDecidedAlerts(executionContext: ExecutionContext): Map<string, DecidedAlert> {
+    let decidedAlerts = this.decidedAlertsByExecution.get(executionContext);
+    if (!decidedAlerts) {
+      decidedAlerts = new Map();
+      this.decidedAlertsByExecution.set(executionContext, decidedAlerts);
+    }
+    return decidedAlerts;
   }
 
   private async fetchLatestAlertStateByGroupHash(

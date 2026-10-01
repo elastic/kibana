@@ -831,6 +831,75 @@ describe('DirectorService', () => {
         expect(result.stats.newEpisodeIds).toEqual(['episode-a', 'episode-b']);
       });
 
+      it('keeps a group on one episode across batches of the same execution', async () => {
+        (uuidV4 as jest.Mock).mockReturnValueOnce('episode-1').mockReturnValueOnce('episode-2');
+
+        // `.rule-events` writes are not refreshed, so the second batch still sees no state.
+        mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
+        const executionContext = createExecutionContext(new AbortController().signal);
+
+        const first = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext,
+          alertEvents: rowsFor('hash-1', 1),
+        });
+        const second = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext,
+          alertEvents: [...rowsFor('hash-1', 1), ...rowsFor('hash-2', 1)],
+        });
+
+        expect(first.alertEvents[0].alert?.id).toBe('episode-1');
+        expect(second.alertEvents.map((e) => e.alert?.id)).toEqual(['episode-1', 'episode-2']);
+        expect(first.stats.newEpisodeIds).toEqual(['episode-1']);
+        expect(second.stats.newEpisodeIds).toEqual(['episode-2']);
+      });
+
+      it('skips the state query when every group was already decided in the execution', async () => {
+        mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
+        const executionContext = createExecutionContext(new AbortController().signal);
+
+        await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext,
+          alertEvents: rowsFor('hash-1', 1),
+        });
+        mockEsClient.esql.query.mockClear();
+
+        const second = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext,
+          alertEvents: rowsFor('hash-1', 2),
+        });
+
+        expect(mockEsClient.esql.query).not.toHaveBeenCalled();
+        expect(second.alertEvents).toHaveLength(2);
+        expect(second.stats.newEpisodeIds).toEqual([]);
+      });
+
+      it('does not share decisions between executions', async () => {
+        (uuidV4 as jest.Mock).mockReturnValueOnce('episode-1').mockReturnValueOnce('episode-2');
+        mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
+
+        const run = () =>
+          directorService.run({
+            spaceId: 'default',
+            rule,
+            executionContext: createExecutionContext(new AbortController().signal),
+            alertEvents: rowsFor('hash-1', 1),
+          });
+
+        const first = await run();
+        const second = await run();
+
+        expect(first.alertEvents[0].alert?.id).toBe('episode-1');
+        expect(second.alertEvents[0].alert?.id).toBe('episode-2');
+      });
+
       it('keeps every row of a user-locked group on the locked episode, forced active', async () => {
         mockEsClient.esql.query.mockResolvedValue(
           createLatestAlertEventStateResponse([
