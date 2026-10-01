@@ -95,6 +95,14 @@ jest.mock('./v1_rule_templates_data_source', () => ({
   }),
 }));
 
+jest.mock('../../hooks/use_fetch_rule_template_tags', () => ({
+  useFetchRuleTemplateTags: () => ({
+    data: [],
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
 jest.mock('../../hooks/use_compose_discover_flyout', () => ({
   useComposeDiscoverFlyout: () => ({
     flyout: null,
@@ -201,7 +209,9 @@ describe('Rule library tab isolation', () => {
     await user.type(searchBox, 'tag:prod alpha');
 
     await waitFor(() => {
-      expect(mockFindV2.mock.calls.at(-1)[0].searchQuery).toBe('tag:prod alpha');
+      const params = mockFindV2.mock.calls.at(-1)[0];
+      expect(params.searchQuery).toBe('alpha');
+      expect(params.filters.tag).toMatchObject({ include: ['prod'] });
     });
 
     await user.click(screen.getByTestId('ruleLibraryV1Tab'));
@@ -229,7 +239,7 @@ describe('Rule library tab isolation', () => {
     expect(callsAfterReturn.length).toBeGreaterThan(0);
     for (const [params] of callsAfterReturn) {
       expect(params.searchQuery).not.toBe('beta');
-      expect(params.searchQuery).not.toBe('tag:prod alpha');
+      expect(params.searchQuery).not.toBe('alpha');
       expectIsolatedQuery(params);
     }
   });
