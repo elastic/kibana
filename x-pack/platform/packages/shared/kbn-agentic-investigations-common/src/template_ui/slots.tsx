@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
@@ -39,23 +38,12 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
-  /**
-   * Renders the "Attachments" subsection. Supplied by the caller so this package can link to
-   * Security app pages without taking a dependency on Kibana core or security_solution. Omitted
-   * entirely when the caller does not supply it.
-   */
-  renderAttachmentsOverview?: (attachments: VersionedAttachment[]) => React.ReactNode;
 }
 
-export const OverviewSlot = ({
-  conversation,
-  renderProposedActions,
-  renderAttachmentsOverview,
-}: OverviewSlotProps) => (
+export const OverviewSlot = ({ conversation, renderProposedActions }: OverviewSlotProps) => (
   <OverviewTab
     investigation={conversationToInvestigation(conversation)}
     attachments={conversation.attachments}
-    renderAttachmentsOverview={renderAttachmentsOverview}
     proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
   />
 );

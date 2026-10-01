@@ -11,6 +11,17 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import type { Investigation } from '../../types';
 import { OverviewTab } from './details_flyout_tab_contents';
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: (appId: string, options?: { path?: string }) =>
+          `/app/security${options?.path ?? ''}`,
+      },
+    },
+  }),
+}));
+
 const investigation = {
   id: 'investigation-1',
   template_id: 'investigation',
@@ -29,25 +40,30 @@ const investigation = {
 
 const attachment: VersionedAttachment = {
   id: 'attachment-1',
-  type: 'security.alert',
-  versions: [{ version: 1, data: {}, created_at: '2026-09-01T10:00:00.000Z', content_hash: 'a' }],
+  type: 'security.alerts',
+  versions: [
+    {
+      version: 1,
+      data: { alertIds: ['alert-1'] },
+      created_at: '2026-09-01T10:00:00.000Z',
+      content_hash: 'a',
+    },
+  ],
   current_version: 1,
+  active: true,
 };
 
 const renderTab = ({
   attachments,
-  renderAttachmentsOverview,
   investigationOverrides,
 }: {
   attachments?: VersionedAttachment[];
-  renderAttachmentsOverview?: (a: VersionedAttachment[]) => React.ReactNode;
   investigationOverrides?: Partial<Investigation>;
 } = {}) =>
   render(
     <OverviewTab
       investigation={{ ...investigation, ...investigationOverrides }}
       attachments={attachments}
-      renderAttachmentsOverview={renderAttachmentsOverview}
     />
   );
 
@@ -61,31 +77,21 @@ describe('OverviewTab', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
-  it('does not render attachment summary when no renderAttachmentsOverview is provided', () => {
+  it('renders the Attachments section when attachments are present', () => {
     renderTab({ attachments: [attachment] });
 
-    expect(screen.queryByText('Attachment summary')).not.toBeInTheDocument();
+    expect(screen.getByText('Attachments')).toBeInTheDocument();
   });
 
-  it('calls renderAttachmentsOverview when attachments are present', () => {
-    const renderAttachmentsOverview = jest.fn().mockReturnValue(<div>12 alerts</div>);
-    renderTab({ attachments: [attachment], renderAttachmentsOverview });
+  it('does not render the Attachments section when attachments is empty', () => {
+    renderTab({ attachments: [] });
 
-    expect(renderAttachmentsOverview).toHaveBeenCalledWith([attachment]);
-    expect(screen.getByText('12 alerts')).toBeInTheDocument();
+    expect(screen.queryByText('Attachments')).not.toBeInTheDocument();
   });
 
-  it('does not call renderAttachmentsOverview when attachments is empty', () => {
-    const renderAttachmentsOverview = jest.fn().mockReturnValue(<div>12 alerts</div>);
-    renderTab({ attachments: [], renderAttachmentsOverview });
+  it('does not render the Attachments section when attachments is undefined', () => {
+    renderTab({ attachments: undefined });
 
-    expect(renderAttachmentsOverview).not.toHaveBeenCalled();
-  });
-
-  it('does not call renderAttachmentsOverview when attachments is undefined', () => {
-    const renderAttachmentsOverview = jest.fn().mockReturnValue(<div>12 alerts</div>);
-    renderTab({ attachments: undefined, renderAttachmentsOverview });
-
-    expect(renderAttachmentsOverview).not.toHaveBeenCalled();
+    expect(screen.queryByText('Attachments')).not.toBeInTheDocument();
   });
 });

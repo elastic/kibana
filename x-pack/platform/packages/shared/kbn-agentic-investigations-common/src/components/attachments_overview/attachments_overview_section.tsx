@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,22 +15,34 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getAlertRow } from './types/alert';
 import { getAttackRow } from './types/attack';
 import { getEntityRow } from './types/entity';
 import { getRuleRow } from './types/rule';
 import { ATTACHMENTS_OVERVIEW_LABELS } from './translations';
 
+const SECURITY_APP_ID = 'securitySolutionUI';
+
 export interface AttachmentsOverviewSectionProps {
   attachments: readonly VersionedAttachment[];
-  /** Builds a Security app URL for the given path, including base path and space prefix. */
-  getSecurityAppUrl: (path: string) => string;
 }
 
 /** Renders the "Attachments" subsection inside the investigation Overview tab.
  *  Rows appear only for types that have at least one item and a resolvable URL. */
 export const AttachmentsOverviewSection = memo<AttachmentsOverviewSectionProps>(
-  ({ attachments, getSecurityAppUrl }) => {
+  ({ attachments }) => {
+    const {
+      services: { application },
+    } = useKibana<{
+      application: { getUrlForApp(appId: string, options?: { path?: string }): string };
+    }>();
+
+    const getSecurityAppUrl = useCallback(
+      (path: string) => application.getUrlForApp(SECURITY_APP_ID, { path }),
+      [application]
+    );
+
     const rows = useMemo(
       () =>
         [
