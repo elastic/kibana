@@ -252,6 +252,9 @@ export interface EsWorkflowStepExecution {
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;
 
+  /** Whether this step belongs to a managed workflow execution. */
+  managed?: boolean;
+
   /**
    * Optional Human-In-The-Loop audit envelope, populated only by
    * HITL-aware steps (today: `wait_for_input`). Both the wrapper and
@@ -591,10 +594,13 @@ export interface ConnectorInstance {
   isPreconfigured: boolean;
   isDeprecated: boolean;
   config?: ConnectorInstanceConfig;
+  connectorType?: string;
+  isInferenceEndpoint?: boolean;
 }
 
 export interface ConnectorInstanceConfig {
   taskType?: string;
+  selectedActions?: string[];
 }
 
 export interface ConnectorTypeInfo {
@@ -863,6 +869,10 @@ export interface ConnectorIdSelectionHandler {
    * If true, creation from the connector ID selection will be enabled for the first type in the `connectorTypes` list.
    */
   enableCreation?: boolean;
+  /**
+   * Feature ID used to resolve inference endpoints for this selection.
+   */
+  inferenceFeatureId?: string;
 }
 
 export interface ConnectorExamples {

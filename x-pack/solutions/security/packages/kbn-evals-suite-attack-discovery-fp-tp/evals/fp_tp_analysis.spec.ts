@@ -8,8 +8,9 @@
 /**
  * Outcome eval for the Attack Discovery FP/TP analysis workflow (security-team#19285).
  *
- * `beforeAll` installs the sample workflow (until #19282 ships the managed one) and routes
- * the `alertzero_reasoning` inference feature to the model under test. Each task seeds a
+ * `beforeAll` routes the `alertzero_reasoning` inference feature to the model under test.
+ * The suite runs the managed analysis workflow. It installs the sample workflow only when
+ * `FP_TP_WORKFLOW_SOURCE` is `sample`. Each task seeds a
  * fresh copy of one example's world, creates an empty Investigation, runs the workflow,
  * and grades its execution output against the contract in security-team#19280.
  *

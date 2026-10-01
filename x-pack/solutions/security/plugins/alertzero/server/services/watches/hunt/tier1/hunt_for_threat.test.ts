@@ -22,11 +22,26 @@ const scope: ResolvedIndexScope = {
 /**
  * `requiredMatches` stands in for the separate count the service runs against the
  * required patterns: the hit bar is read from that, not from the capped
- * `per_index` buckets in `searchResponse`.
+ * `per_index` buckets in `searchResponse`. When the cap drops every required
+ * bucket but the count confirms a hit, a second search recovers those buckets
+ * (`requiredOnlyResponse`); leave it unset to simulate an alias-only hit that
+ * still has no required `_index` name.
  */
-const buildEsClient = (searchResponse: unknown, requiredMatches = 0): ElasticsearchClient =>
+const buildEsClient = (
+  searchResponse: unknown,
+  requiredMatches = 0,
+  requiredOnlyResponse?: unknown
+): ElasticsearchClient =>
   ({
-    search: jest.fn().mockResolvedValue(searchResponse),
+    search: jest
+      .fn()
+      .mockResolvedValueOnce(searchResponse)
+      .mockResolvedValue(
+        requiredOnlyResponse ?? {
+          hits: { total: { value: 0 }, hits: [] },
+          aggregations: { per_index: { buckets: [] } },
+        }
+      ),
     count: jest.fn().mockResolvedValue({ count: requiredMatches }),
   } as unknown as ElasticsearchClient);
 
@@ -348,7 +363,9 @@ describe('huntForThreat', () => {
 
   it('reads the hit bar from a required-index count, not the capped per_index buckets', async () => {
     // The required bucket lost the cap race to higher-volume optional indices, so
-    // it is absent here although a required index does hold a match.
+    // it is absent from the first response although a required index does hold a
+    // match. The recovery search, scoped to required patterns alone, brings it back
+    // so Tier 2 still has a concrete target.
     const esClient = buildEsClient(
       {
         hits: { total: { value: 900 }, hits: [] },
@@ -358,7 +375,13 @@ describe('huntForThreat', () => {
           affected_users: { buckets: [] },
         },
       },
-      1
+      1,
+      {
+        hits: { total: { value: 0 }, hits: [] },
+        aggregations: {
+          per_index: { buckets: [{ key: 'logs-aws.cloudtrail-default', doc_count: 1 }] },
+        },
+      }
     );
 
     const result = await huntForThreat(esClient, {
@@ -367,10 +390,58 @@ describe('huntForThreat', () => {
     });
 
     expect(result.has_confirmed_hit).toBe(true);
-    expect(result.per_index.some((entry) => entry.required)).toBe(false);
+    expect(result.per_index).toEqual([
+      { index: 'logs-aws.cloudtrail-default', hit_count: 1, required: true },
+      { index: '.alerts-security.alerts-default', hit_count: 900, required: false },
+    ]);
     expect(esClient.count).toHaveBeenCalledWith(
       expect.objectContaining({ index: scope.required, query: expect.any(Object) })
     );
+    expect(esClient.search).toHaveBeenCalledTimes(2);
+    expect(esClient.search).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        index: scope.required,
+        size: 0,
+        aggs: { per_index: { terms: { field: '_index', size: 500 } } },
+      })
+    );
+  });
+
+  it('leaves per_index without a required bucket when the confirmed hit arrived only through an alias', async () => {
+    // Searching `logs-*` hits docs via an alias whose concrete `_index` is
+    // `archive-v1`, which no required pattern names. Recovery on required
+    // patterns alone still only sees that backing name, so Tier 2 keeps the
+    // no_matched_scope skip rather than inventing a target.
+    const esClient = buildEsClient(
+      {
+        hits: { total: { value: 1 }, hits: [] },
+        aggregations: {
+          per_index: { buckets: [{ key: 'archive-v1', doc_count: 1 }] },
+          affected_hosts: { buckets: [] },
+          affected_users: { buckets: [] },
+        },
+      },
+      1,
+      {
+        hits: { total: { value: 0 }, hits: [] },
+        aggregations: {
+          per_index: { buckets: [{ key: 'archive-v1', doc_count: 1 }] },
+        },
+      }
+    );
+
+    const result = await huntForThreat(esClient, {
+      scope: {
+        ...scope,
+        required: ['logs-*', '-logs-elastic_agent*'],
+        optional: [],
+      },
+      iocs: [{ type: 'ip', value: '10.0.0.1' }],
+    });
+
+    expect(result.has_confirmed_hit).toBe(true);
+    expect(result.per_index.some((entry) => entry.required)).toBe(false);
   });
 
   it('does NOT set has_confirmed_hit when the only hit is in an optional index', async () => {
