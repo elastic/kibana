@@ -84,15 +84,23 @@ describe('nightshift-investigations scout hook', () => {
     expect(output.env).not.toHaveProperty('SANDBOX_API_PORT');
   });
 
-  it('falls back to SANDBOX_* exported in the shell, with the config taking precedence', () => {
+  it('falls back to SANDBOX_* exported in the shell when config has no sandbox block', () => {
     const shell = {
       SANDBOX_API_KEY: 'shell-key',
       SANDBOX_CLIENT_CERT_PATH: CERT,
       SANDBOX_CLIENT_KEY_PATH: SHELL_KEY,
     };
     expect(runHook({}, shell).output.env).toMatchObject(shell);
+  });
+
+  it('config takes precedence over the shell for host/port/cert/key, but NOT for the API key', () => {
+    const shell = { SANDBOX_API_KEY: 'shell-key', SANDBOX_CLIENT_KEY_PATH: SHELL_KEY };
     expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
-      SANDBOX_API_KEY: 'key',
+      // The API key set in the shell always wins: it lets a dispatched run (e.g. a Buildkite
+      // build triggered with a specific, freshly-minted credential) force which credential is
+      // used, rather than merely filling a gap left by config.
+      SANDBOX_API_KEY: 'shell-key',
+      // Unlike the API key, the cert path is config-first, as before.
       SANDBOX_CLIENT_KEY_PATH: KEY,
     });
   });
