@@ -48,7 +48,16 @@ export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REP
 const UIAM_DOCKER_REGISTRY = 'docker.elastic.co';
 const UIAM_DOCKER_PROMOTED_REPO = `${UIAM_DOCKER_REGISTRY}/kibana-ci/uiam`;
 
-export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_PROMOTED_REPO}:latest-verified`;
+/**
+ * Pinned to a digest as well as the tag. CI agents come with a copy of `latest-verified` baked in,
+ * and PR builds reuse it instead of pulling, so a promotion would not reach CI until the agents are
+ * rebuilt. To move to a newer promoted image, replace the digest with the one that
+ * `docker buildx imagetools inspect docker.elastic.co/kibana-ci/uiam:latest-verified` reports.
+ */
+const UIAM_DEFAULT_IMAGE_DIGEST =
+  'sha256:3b2d0890339815fd947a2e31f560befa3081119197275eb32e7d8d9cebc99885';
+
+export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_PROMOTED_REPO}:latest-verified@${UIAM_DEFAULT_IMAGE_DIGEST}`;
 
 const DOCKER_HEALTHCHECK_RETRIES = 30;
 const CONTAINER_READY_CHECK_INTERVAL_MS = 2_000;
