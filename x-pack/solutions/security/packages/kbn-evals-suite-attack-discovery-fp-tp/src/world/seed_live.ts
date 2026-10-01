@@ -97,14 +97,18 @@ const ensureAttackDataStreamSafe = async (esClient: EsClient, index: string): Pr
   const templates = await esClient.indices
     .getIndexTemplate({ name: '.alerts-security*' })
     .then((r) => r.index_templates ?? [])
-    .catch((error: { statusCode?: number }) => (error.statusCode === 404 ? [] : Promise.reject(error)));
+    .catch((error: { statusCode?: number }) =>
+      error.statusCode === 404 ? [] : Promise.reject(error)
+    );
   const matches = templates.filter((entry) => {
     const tpl = entry.index_template as
       | { index_patterns?: string[]; template?: { data_stream?: unknown } }
       | undefined;
     return (
       tpl?.template?.data_stream !== undefined &&
-      (tpl.index_patterns ?? []).some((pattern) => new RegExp(`^${pattern.replace(/\*/g, '.*')}$`).test(index))
+      (tpl.index_patterns ?? []).some((pattern) =>
+        new RegExp(`^${pattern.replace(/\*/g, '.*')}$`).test(index)
+      )
     );
   });
   if (matches.length === 0) {
@@ -115,18 +119,20 @@ const ensureAttackDataStreamSafe = async (esClient: EsClient, index: string): Pr
       )
     );
   }
-  await esClient.indices.createDataStream({ name: index }).catch(async (error: { statusCode?: number }) => {
-    // concurrent eval tasks can both observe the 404 and race to provision.
-    // Accept the failure ONLY as evidence of a lost race: re-verify the stream
-    // exists; any other 400/409 is a real provisioning error and must throw so
-    // the write never falls through to auto-creating a plain index.
-    if (error.statusCode === 400 || error.statusCode === 409) {
-      if (await streamExists()) {
-        return;
+  await esClient.indices
+    .createDataStream({ name: index })
+    .catch(async (error: { statusCode?: number }) => {
+      // concurrent eval tasks can both observe the 404 and race to provision.
+      // Accept the failure ONLY as evidence of a lost race: re-verify the stream
+      // exists; any other 400/409 is a real provisioning error and must throw so
+      // the write never falls through to auto-creating a plain index.
+      if (error.statusCode === 400 || error.statusCode === 409) {
+        if (await streamExists()) {
+          return;
+        }
       }
-    }
-    throw error;
-  });
+      throw error;
+    });
 };
 
 const createWithConflictRetry = async (
@@ -191,7 +197,11 @@ const bulkWithConflictRetry = async (
     let nonConflict = false;
     items.forEach((item, idx) => {
       if (!isConflictItem(item)) {
-        if (Object.values(item as Record<string, { status?: number }>).some((op) => (op?.status ?? 200) >= 300)) {
+        if (
+          Object.values(item as Record<string, { status?: number }>).some(
+            (op) => (op?.status ?? 200) >= 300
+          )
+        ) {
           nonConflict = true;
         }
         return;
