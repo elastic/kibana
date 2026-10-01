@@ -43,7 +43,6 @@ export {
   type FeatureUpsert,
   type FeatureWithFilter,
   type IgnoredFeature,
-  CODE_ANALYSIS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
   DATASET_ANALYSIS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
