@@ -25,6 +25,8 @@ const MAX_DOCUMENTS_LIMIT = 10_000;
 const MAX_BODY_CHARS_LIMIT = 50_000;
 const MAX_UNITS_LIMIT = 10_000;
 const MAX_KIS_LENGTH = 50_000;
+/** One KI per source, so the list is capped at the 100-KI budget. */
+const MAX_INDEX_METADATA_SOURCES = 100;
 
 /**
  * Which arguments belong to which template. Anything listed against another template is rejected
@@ -38,14 +40,15 @@ const TEMPLATE_FIELDS = {
     'maxDocuments',
     'bodyMaxChars',
   ],
-  index_metadata: ['categoryField'],
+  index_metadata: ['categoryField', 'sources'],
   unit_profile: ['unitKey', 'activityField', 'breakdownField', 'maxUnits'],
   targeted_ki_writer: ['kis'],
 } as const;
 
+/** index_metadata takes either `sources` or `sourceIndex` + `categoryField`; checked separately. */
 const REQUIRED_TEMPLATE_FIELDS = {
   document_orchestration: ['titleField', 'bodyField', 'sourceIndex'],
-  index_metadata: ['categoryField', 'sourceIndex'],
+  index_metadata: [],
   unit_profile: ['unitKey', 'activityField', 'breakdownField', 'sourceIndex'],
   targeted_ki_writer: ['kis'],
 } as const;
@@ -58,7 +61,7 @@ const installAutomationTemplateSchema = z
         dedent`
           Which automation to install. Required fields per template:
           document_orchestration → name, sourceIndex, titleField, bodyField
-          index_metadata         → name, sourceIndex, categoryField
+          index_metadata         → name, sources  (or sourceIndex + categoryField for one index)
           unit_profile           → name, sourceIndex, unitKey, activityField, breakdownField
           targeted_ki_writer     → name, kis  (no sourceIndex)
         `
@@ -78,7 +81,20 @@ const installAutomationTemplateSchema = z
       .max(MAX_SOURCE_INDEX_LENGTH)
       .optional()
       .describe(
-        'REQUIRED for document_orchestration, index_metadata, unit_profile. Not used by targeted_ki_writer. Index or data stream the automation reads.'
+        'REQUIRED for document_orchestration and unit_profile. For index_metadata, use sources instead, or sourceIndex + categoryField for a single index. Not used by targeted_ki_writer. Index or data stream the automation reads.'
+      ),
+    sources: z
+      .array(
+        z.object({
+          index: z.string().min(1).max(MAX_SOURCE_INDEX_LENGTH),
+          categoryField: z.string().min(1).max(MAX_FIELD_NAME_LENGTH),
+        })
+      )
+      .min(1)
+      .max(MAX_INDEX_METADATA_SOURCES)
+      .optional()
+      .describe(
+        'index_metadata only. Every index to profile, one KI each: list every source of the AI index here so one install covers them all. categoryField is the keyword field that index groups by first.'
       ),
     titleField: z
       .string()
@@ -97,7 +113,9 @@ const installAutomationTemplateSchema = z
       .min(1)
       .max(MAX_FIELD_NAME_LENGTH)
       .optional()
-      .describe('REQUIRED for index_metadata. Keyword field the index profile groups by.'),
+      .describe(
+        'index_metadata with a single sourceIndex only. Keyword field the index profile groups by.'
+      ),
     unitKey: z
       .string()
       .min(1)
@@ -198,6 +216,28 @@ const installAutomationTemplateSchema = z
       }
     }
 
+    if (value.template === 'index_metadata') {
+      const hasSingle = value.sourceIndex !== undefined || value.categoryField !== undefined;
+      if (value.sources !== undefined && hasSingle) {
+        ctx.addIssue({
+          code: 'custom',
+          message:
+            'Pass either sources or sourceIndex + categoryField for index_metadata, not both.',
+          path: ['sources'],
+        });
+      } else if (value.sources === undefined) {
+        for (const field of ['sourceIndex', 'categoryField'] as const) {
+          if (value[field] === undefined) {
+            ctx.addIssue({
+              code: 'custom',
+              message: `index_metadata needs sources, or ${field} alongside the other single-index field.`,
+              path: [field],
+            });
+          }
+        }
+      }
+    }
+
     if (value.template === 'targeted_ki_writer' && value.sourceIndex !== undefined) {
       ctx.addIssue({
         code: 'custom',
@@ -257,14 +297,17 @@ const toInstallParams = (
     };
   }
 
+  if (input.sources) {
+    return { template: 'index_metadata', sources: input.sources, name };
+  }
+
   if (!input.categoryField || !input.sourceIndex) {
-    throw new Error('categoryField and sourceIndex are required for index_metadata.');
+    throw new Error('index_metadata needs sources, or sourceIndex and categoryField.');
   }
 
   return {
     template: 'index_metadata',
-    sourceIndex: input.sourceIndex,
-    categoryField: input.categoryField,
+    sources: [{ index: input.sourceIndex, categoryField: input.categoryField }],
     name,
   };
 };
@@ -302,7 +345,7 @@ export const createInstallAutomationTemplateTool = ({
 
     Required fields per template (you MUST include all of them or the call will fail):
       document_orchestration → name, sourceIndex, titleField, bodyField
-      index_metadata         → name, sourceIndex, categoryField
+      index_metadata         → name, sources  (or sourceIndex + categoryField for one index)
       unit_profile           → name, sourceIndex, unitKey, activityField, breakdownField
       targeted_ki_writer     → name, kis  (no sourceIndex)
 
@@ -314,7 +357,8 @@ export const createInstallAutomationTemplateTool = ({
 
     document_orchestration summarises each document into its own KI with verified ES|QL access
     patterns.
-    index_metadata writes one KI profiling the whole index, grouped by categoryField.
+    index_metadata writes one KI per source index, each profiling that whole index grouped by its
+    categoryField. Pass every source of the AI index in sources so one install covers them all.
     unit_profile writes one KI per distinct unitKey value, grounded in per-unit aggregations.
     targeted_ki_writer takes no dynamic parameters beyond name and kis. It writes KIs verbatim from
     the kis YAML you supply, then the workflow can be run with platform.core.execute_workflow.

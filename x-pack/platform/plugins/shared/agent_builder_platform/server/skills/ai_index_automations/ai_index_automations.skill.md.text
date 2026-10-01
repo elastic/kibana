@@ -302,9 +302,11 @@ install arguments almost one for one.
 
 **Index/Table Metadata** (`type: index_metadata`) — call
 `platform.context_engine.install_automation_template` with `template: index_metadata`. Pass
-`sourceIndex` and `categoryField`, a keyword field an analyst would group by. The AI index is the
-one attached to the conversation. The tool fills the consts and attaches the workflow. Do not write
-the YAML and do not start a subagent.
+`sources`, one `{ index, categoryField }` per source of the AI index, where `categoryField` is the
+keyword field an analyst would group that index by. List every source the profile should cover:
+one install and one run write one KI per source, so do not install the template once per index.
+The AI index is the one attached to the conversation. The tool fills the consts and attaches the
+workflow. Do not write the YAML and do not start a subagent.
 
 **Bottom-Up** (`type: document`) — call `platform.context_engine.install_automation_template` with
 `template: document_orchestration`. Pass `sourceIndex`, `titleField` and `bodyField`. The AI index

@@ -602,6 +602,16 @@ describe('aiIndexAutomationsSkill', () => {
     });
   });
 
+  describe('index metadata over several sources', () => {
+    const prose = aiIndexAutomationsSkill.content.replace(/\s+/g, ' ');
+
+    it('installs once for every source of the AI index, one KI per source', () => {
+      expect(prose).toMatch(/Pass `sources`, one `\{ index, categoryField \}` per source/);
+      expect(prose).toMatch(/one install and one run write one KI per source/);
+      expect(prose).not.toMatch(/Pass `sourceIndex` and `categoryField`, a keyword field/);
+    });
+  });
+
   describe('reinstalling a template', () => {
     const content = aiIndexAutomationsSkill.content;
 

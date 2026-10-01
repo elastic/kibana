@@ -68,18 +68,72 @@ describe('automation template rendering', () => {
     expect(yaml).toContain('| WHERE code == \\"__KEEP__\\"');
   });
 
-  it('fills the index metadata consts', () => {
-    const yaml = renderIndexMetadataTemplate({
+  describe('index metadata', () => {
+    const twoSources = {
       aiIndexId: 'airline-loyalty',
       automationName: 'loyalty-index-metadata',
-      sourceIndex: 'loyalty-docs',
-      categoryField: 'tier',
+      sources: [
+        { index: 'loyalty-docs', categoryField: 'tier' },
+        { index: 'flight-activity', categoryField: 'Loyalty Card' },
+      ],
+    };
+
+    it('writes every source into one sources const', () => {
+      const yaml = renderIndexMetadataTemplate(twoSources);
+
+      expect(parse(yaml).consts.sources).toEqual([
+        { index: 'loyalty-docs', category_field: 'tier' },
+        { index: 'flight-activity', category_field: 'Loyalty Card' },
+      ]);
+      expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.index_metadata);
+      expect(yaml).not.toMatch(/__[A-Z0-9_]+__/);
     });
 
-    expect(yaml).toContain('category_field: "tier"');
-    expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.index_metadata);
-    expect(yaml).not.toMatch(/__[A-Z0-9_]+__/);
-    expect(yaml).toContain('ki_id: "{{ consts.automation_name }}"');
+    it('loops over the sources, reading each one from the loop item rather than a single const', () => {
+      const yaml = renderIndexMetadataTemplate(twoSources);
+
+      expect(yaml).toContain('foreach: "{{ consts.sources | json }}"');
+      expect(yaml).not.toMatch(/consts\.source_index|consts\.category_field/);
+      expect(yaml).toContain('path: /{{ steps.source_context.output.index }}/_mapping');
+    });
+
+    it('writes one KI per source, keyed by the automation name and the index', () => {
+      const yaml = renderIndexMetadataTemplate(twoSources);
+
+      expect(yaml).toContain(
+        'ki_id: "{{ consts.automation_name }}/{{ steps.source_context.output.index }}"'
+      );
+    });
+
+    it('rejects an unsafe identifier in any source', () => {
+      expect(() =>
+        renderIndexMetadataTemplate({
+          ...twoSources,
+          sources: [twoSources.sources[0], { index: 'flights', categoryField: 'tier`' }],
+        })
+      ).toThrow(/categoryField/);
+      expect(() =>
+        renderIndexMetadataTemplate({
+          ...twoSources,
+          sources: [{ index: 'flights{{ x }}', categoryField: 'tier' }],
+        })
+      ).toThrow(/sourceIndex/);
+    });
+
+    it('rejects the same index twice, whose KIs would overwrite each other', () => {
+      expect(() =>
+        renderIndexMetadataTemplate({
+          ...twoSources,
+          sources: [twoSources.sources[0], { index: 'loyalty-docs', categoryField: 'status' }],
+        })
+      ).toThrow(/loyalty-docs/);
+    });
+
+    it('rejects an empty source list', () => {
+      expect(() => renderIndexMetadataTemplate({ ...twoSources, sources: [] })).toThrow(
+        /at least one source/
+      );
+    });
   });
 
   it('fills the unit profile consts', () => {
@@ -111,9 +165,11 @@ describe('automation template rendering', () => {
   });
 
   it('backticks every field identifier so names containing spaces parse', () => {
-    expect(CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE).toContain('BY `{{ consts.category_field }}`');
     expect(CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE).toContain(
-      'COUNT_DISTINCT(`{{ consts.category_field }}`)'
+      'BY `{{ steps.source_context.output.category_field }}`'
+    );
+    expect(CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE).toContain(
+      'COUNT_DISTINCT(`{{ steps.source_context.output.category_field }}`)'
     );
     expect(CONTEXT_ENGINE_DOCUMENT_TEMPLATE).toContain('{{ consts.body_field }}');
     expect(CONTEXT_ENGINE_DOCUMENT_TEMPLATE).toContain('{{ consts.title_field }}');
@@ -143,8 +199,10 @@ describe('automation template rendering', () => {
         renderIndexMetadataTemplate({
           aiIndexId: 'airline-loyalty',
           automationName: 'loyalty-index-metadata',
-          sourceIndex: 'loyalty-docs',
-          categoryField: 'tier',
+          sources: [
+            { index: 'loyalty-docs', categoryField: 'tier' },
+            { index: 'flight-activity', categoryField: 'Loyalty Card' },
+          ],
         }),
     ],
     [
@@ -167,14 +225,6 @@ describe('automation template rendering', () => {
     expect(() =>
       renderUnitProfileTemplate({ ...unitValues, unitKey: 'Province` | DROP x | EVAL y="' })
     ).toThrow(/unitKey .* backtick/);
-    expect(() =>
-      renderIndexMetadataTemplate({
-        aiIndexId: 'airline-loyalty',
-        automationName: 'loyalty-index-metadata',
-        sourceIndex: 'loyalty-docs',
-        categoryField: 'tier`',
-      })
-    ).toThrow(/categoryField/);
   });
 
   describe('targeted_ki_writer template', () => {

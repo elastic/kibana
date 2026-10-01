@@ -181,16 +181,19 @@ describe('installAutomationTemplateHandler', () => {
       params: {
         template: 'index_metadata',
         name: 'loyalty-index-metadata',
-        sourceIndex: 'loyalty-docs',
-        categoryField: 'tier',
+        sources: [
+          { index: 'loyalty-docs', categoryField: 'tier' },
+          { index: 'flight-activity', categoryField: 'Loyalty Card' },
+        ],
       },
       ...createDeps([{ type: 'workflow', value: 'wf-orchestration' }]),
     });
 
     expect(saveAutomationHandlerMock.mock.calls[0][0].params).not.toHaveProperty('workflowId');
-    expect(saveAutomationHandlerMock.mock.calls[0][0].params.workflowYaml).toContain(
-      AUTOMATION_TEMPLATE_TAGS.index_metadata
-    );
+    const yaml = saveAutomationHandlerMock.mock.calls[0][0].params.workflowYaml;
+    expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.index_metadata);
+    expect(yaml).toContain('"index":"loyalty-docs"');
+    expect(yaml).toContain('"index":"flight-activity"');
   });
 
   it('overwrites the index metadata automation when its name matches', async () => {
@@ -204,8 +207,10 @@ describe('installAutomationTemplateHandler', () => {
       params: {
         template: 'index_metadata',
         name: 'loyalty-index-metadata',
-        sourceIndex: 'loyalty-docs',
-        categoryField: 'tier',
+        sources: [
+          { index: 'loyalty-docs', categoryField: 'tier' },
+          { index: 'flight-activity', categoryField: 'Loyalty Card' },
+        ],
       },
       ...createDeps([{ type: 'workflow', value: 'wf-metadata' }]),
     });

@@ -5,7 +5,20 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { installAutomationTemplateHandler } from './handler';
 import { createInstallAutomationTemplateTool } from './tool';
+
+jest.mock('./handler', () => ({
+  installAutomationTemplateHandler: jest
+    .fn()
+    .mockResolvedValue({ workflowId: 'wf-saved', replaced: false }),
+}));
+
+const installHandlerMock = installAutomationTemplateHandler as jest.MockedFunction<
+  typeof installAutomationTemplateHandler
+>;
 
 const createTool = () =>
   createInstallAutomationTemplateTool({
@@ -246,5 +259,107 @@ describe('install_automation_template schema', () => {
     });
 
     expect(parsed.success).toBe(false);
+  });
+
+  describe('index metadata sources', () => {
+    const base = { template: 'index_metadata', name: 'loyalty-index-metadata' };
+    const sources = [
+      { index: 'loyalty-docs', categoryField: 'tier' },
+      { index: 'flight-activity', categoryField: 'Loyalty Card' },
+    ];
+
+    it('takes every source of the AI index in one install', () => {
+      expect(schema.safeParse({ ...base, sources }).success).toBe(true);
+    });
+
+    it('still takes a single sourceIndex and categoryField', () => {
+      expect(
+        schema.safeParse({ ...base, sourceIndex: 'loyalty-docs', categoryField: 'tier' }).success
+      ).toBe(true);
+    });
+
+    it('takes one form or the other, never both and never neither', () => {
+      expect(
+        schema.safeParse({ ...base, sources, sourceIndex: 'loyalty-docs', categoryField: 'tier' })
+          .success
+      ).toBe(false);
+      expect(schema.safeParse({ ...base, sources, categoryField: 'tier' }).success).toBe(false);
+      expect(schema.safeParse(base).success).toBe(false);
+    });
+
+    it('bounds the list: at least one source, at most the KI budget', () => {
+      expect(schema.safeParse({ ...base, sources: [] }).success).toBe(false);
+      const tooMany = Array.from({ length: 101 }, (_, i) => ({
+        index: `index-${i}`,
+        categoryField: 'tier',
+      }));
+      expect(schema.safeParse({ ...base, sources: tooMany }).success).toBe(false);
+    });
+
+    it('rejects sources on another template', () => {
+      expect(
+        schema.safeParse({
+          template: 'unit_profile',
+          name: 'loyalty-province-profile',
+          sourceIndex: 'loyalty-history',
+          unitKey: 'Province',
+          activityField: 'Enrollment Date',
+          breakdownField: 'Loyalty Card',
+          sources,
+        }).success
+      ).toBe(false);
+    });
+  });
+});
+
+describe('install_automation_template handler arguments', () => {
+  const runTool = (params: Record<string, unknown>) =>
+    createTool().handler(
+      params as never,
+      {
+        request: httpServerMock.createKibanaRequest(),
+        spaceId: 'default',
+        attachments: {} as never,
+        logger: loggingSystemMock.createLogger(),
+      } as never
+    );
+
+  beforeEach(() => {
+    installHandlerMock.mockClear();
+  });
+
+  it('passes the sources list through for index metadata', async () => {
+    await runTool({
+      template: 'index_metadata',
+      name: 'loyalty-index-metadata',
+      sources: [
+        { index: 'loyalty-docs', categoryField: 'tier' },
+        { index: 'flight-activity', categoryField: 'Loyalty Card' },
+      ],
+    });
+
+    expect(installHandlerMock.mock.calls[0][0].params).toEqual({
+      template: 'index_metadata',
+      name: 'loyalty-index-metadata',
+      sources: [
+        { index: 'loyalty-docs', categoryField: 'tier' },
+        { index: 'flight-activity', categoryField: 'Loyalty Card' },
+      ],
+    });
+  });
+
+  it('turns a single sourceIndex and categoryField into a one-source list', async () => {
+    await runTool({
+      template: 'index_metadata',
+      name: 'loyalty-index-metadata',
+      sourceIndex: 'loyalty-docs',
+      categoryField: 'tier',
+    });
+
+    expect(installHandlerMock.mock.calls[0][0].params).toEqual({
+      template: 'index_metadata',
+      name: 'loyalty-index-metadata',
+      sources: [{ index: 'loyalty-docs', categoryField: 'tier' }],
+    });
   });
 });
