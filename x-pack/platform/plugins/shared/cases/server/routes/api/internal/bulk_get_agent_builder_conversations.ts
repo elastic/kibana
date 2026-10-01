@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
+import { isPublicConversation } from '@kbn/agent-builder-common';
 import { INTERNAL_AGENT_BUILDER_CONVERSATIONS_BULK_GET_URL } from '../../../../common/constants';
 import type { agentBuilderApiV1 } from '../../../../common/types/api';
 import { BulkGetConversationsRequestRt } from '../../../../common/types/api/agent_builder/v1';
@@ -49,11 +50,15 @@ export const createBulkGetAgentBuilderConversationsRoute = ({
         const found = await client.bulkGet(ids);
 
         const res: agentBuilderApiV1.BulkGetConversationsResponse = {
-          conversations: Array.from(found.values(), ({ id, title, agent_id: agentId }) => ({
-            id,
-            title,
-            agent_id: agentId,
-          })),
+          conversations: Array.from(
+            found.values(),
+            ({ id, title, agent_id: agentId, access_control: accessControl }) => ({
+              id,
+              title,
+              agent_id: agentId,
+              access_mode: isPublicConversation(accessControl) ? 'public' : 'private',
+            })
+          ),
         };
 
         return response.ok({ body: res });

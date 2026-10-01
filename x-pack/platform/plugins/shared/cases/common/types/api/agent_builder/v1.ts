@@ -24,6 +24,7 @@ export interface ConversationSummary {
   id: string;
   title: string;
   agent_id: string;
+  access_mode: 'public' | 'private';
 }
 
 /** Only the conversations the requester can open are returned. */

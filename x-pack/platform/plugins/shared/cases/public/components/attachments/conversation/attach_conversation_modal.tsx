@@ -59,8 +59,9 @@ export const AttachConversationModal: React.FC<AttachConversationModalProps> = (
   const [agentId, setAgentId] = useState(ALL_AGENTS);
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PAGE_SIZE);
-  const [attachedIds, setAttachedIds] = useState<Set<string>>(
-    () => new Set(getConversationAttachmentIds(caseData.comments))
+  const attachedIds = useMemo(
+    () => new Set(getConversationAttachmentIds(caseData.comments)),
+    [caseData.comments]
   );
 
   useDebounce(() => setDebouncedQuery(query.trim()), 250, [query]);
@@ -72,9 +73,11 @@ export const AttachConversationModal: React.FC<AttachConversationModalProps> = (
     page,
     perPage,
   });
+  // Closes on success like the saved-object modal; the case refresh re-renders the view behind it.
   const { attach, attachingId, isAttaching } = useAttachConversation({
     caseId: caseData.id,
     caseOwner: caseData.owner,
+    onAttached: onClose,
   });
 
   const agentOptions = useMemo(
@@ -90,9 +93,8 @@ export const AttachConversationModal: React.FC<AttachConversationModalProps> = (
       try {
         await attach(conversation);
       } catch {
-        return;
+        // The create mutation already reported the failure in a toast.
       }
-      setAttachedIds((prev) => new Set(prev).add(conversation.id));
     },
     [attach]
   );

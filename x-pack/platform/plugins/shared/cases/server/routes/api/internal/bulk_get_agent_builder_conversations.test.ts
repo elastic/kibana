@@ -38,7 +38,17 @@ describe('bulk get agent builder conversations route', () => {
 
   it('returns only the conversations Agent Builder resolved for the requester', async () => {
     bulkGet.mockResolvedValue(
-      new Map([['c-1', { id: 'c-1', title: 'Triage', agent_id: 'agent-1', rounds: [] }]])
+      new Map([
+        [
+          'c-1',
+          {
+            id: 'c-1',
+            title: 'Triage',
+            agent_id: 'agent-1',
+            access_control: { access_mode: 'public', entries: [] },
+          },
+        ],
+      ])
     );
 
     const { request, response } = await callRoute({ ids: ['c-1', 'c-hidden'] });
@@ -46,7 +56,9 @@ describe('bulk get agent builder conversations route', () => {
     expect(getScopedClient).toHaveBeenCalledWith({ request });
     expect(bulkGet).toHaveBeenCalledWith(['c-1', 'c-hidden']);
     expect(response.ok).toHaveBeenCalledWith({
-      body: { conversations: [{ id: 'c-1', title: 'Triage', agent_id: 'agent-1' }] },
+      body: {
+        conversations: [{ id: 'c-1', title: 'Triage', agent_id: 'agent-1', access_mode: 'public' }],
+      },
     });
   });
 

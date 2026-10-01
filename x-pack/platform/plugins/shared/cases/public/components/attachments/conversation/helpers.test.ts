@@ -63,7 +63,10 @@ describe('conversation attachment helpers', () => {
         comment,
       ]);
       const accessible = new Map([
-        ['conv-1', { id: 'conv-1', title: 'Renamed', agent_id: 'agent-new' }],
+        [
+          'conv-1',
+          { id: 'conv-1', title: 'Renamed', agent_id: 'agent-new', access_mode: 'public' as const },
+        ],
       ]);
 
       expect(applyConversationAccess(caseData, accessible).comments).toEqual([

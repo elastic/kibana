@@ -53,7 +53,9 @@ describe('useCaseDataWithVisibleConversations', () => {
     jest.clearAllMocks();
     mockServices();
     mockPost.mockResolvedValue({
-      conversations: [{ id: 'conv-1', title: 'Live title', agent_id: 'agent-new' }],
+      conversations: [
+        { id: 'conv-1', title: 'Live title', agent_id: 'agent-new', access_mode: 'private' },
+      ],
     });
   });
 

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiInMemoryTable,
@@ -18,10 +19,16 @@ import type { CommonAttachmentListViewProps } from '../../../client/attachment_f
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { useConversationAttachmentOpenedEBT } from '../../../analytics/use_conversation_attachment_ebt';
+import { openConversationInChat } from '../../../agent_builder/open_conversation_in_chat';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { SavedObjectDeleteButton } from '../common/saved_object/saved_object_delete_button';
-import { getConversationHref, isConversationAttachment } from './helpers';
+import {
+  getConversationAttachmentIds,
+  getConversationHref,
+  isConversationAttachment,
+} from './helpers';
 import { useAgentBuilderAgents } from './use_agent_builder_agents';
+import { useBulkGetConversations } from './use_visible_conversations';
 import * as i18n from './translations';
 
 interface ConversationRow {
@@ -47,6 +54,12 @@ export const ConversationAttachmentsTable: React.FC<CommonAttachmentListViewProp
   } = useKibana();
   const { nameById } = useAgentBuilderAgents();
   const trackOpened = useConversationAttachmentOpenedEBT();
+  // Same request the case view already made to decide visibility, so this is a cache hit.
+  const conversationIds = useMemo(
+    () => getConversationAttachmentIds(caseData.comments),
+    [caseData.comments]
+  );
+  const { data: liveById } = useBulkGetConversations(conversationIds);
 
   const rows = useMemo<ConversationRow[]>(() => {
     const term = searchTerm?.toLowerCase();
@@ -85,7 +98,10 @@ export const ConversationAttachmentsTable: React.FC<CommonAttachmentListViewProp
       }
       event.preventDefault();
       trackOpened('chat');
-      agentBuilder?.openChat({ conversationId: row.conversationId, agentId: row.agentId });
+      openConversationInChat(agentBuilder, {
+        conversationId: row.conversationId,
+        agentId: row.agentId,
+      });
     },
     [agentBuilder, trackOpened]
   );
@@ -140,6 +156,21 @@ export const ConversationAttachmentsTable: React.FC<CommonAttachmentListViewProp
         render: (agentId: string) => nameById.get(agentId) ?? agentId,
       },
       {
+        name: i18n.VISIBILITY,
+        field: 'conversationId',
+        render: (conversationId: string) => {
+          const accessMode = liveById?.get(conversationId)?.access_mode;
+          return accessMode ? (
+            <EuiBadge
+              color="hollow"
+              data-test-subj={`cases-conversation-attachments-table-visibility-${conversationId}`}
+            >
+              {accessMode === 'public' ? i18n.VISIBILITY_PUBLIC : i18n.VISIBILITY_PRIVATE}
+            </EuiBadge>
+          ) : null;
+        },
+      },
+      {
         name: i18n.DATE_ADDED,
         field: 'createdAt',
         render: (createdAt: string) => <FormattedRelativePreferenceDate value={createdAt} />,
@@ -147,7 +178,7 @@ export const ConversationAttachmentsTable: React.FC<CommonAttachmentListViewProp
       { name: i18n.ATTACHED_BY, field: 'createdBy' },
       { name: i18n.ACTIONS, width: '100px', actions },
     ];
-  }, [application, caseData.id, nameById, openChat, permissions.delete, trackFullPage]);
+  }, [application, caseData.id, liveById, nameById, openChat, permissions.delete, trackFullPage]);
 
   if (rows.length === 0) {
     return (

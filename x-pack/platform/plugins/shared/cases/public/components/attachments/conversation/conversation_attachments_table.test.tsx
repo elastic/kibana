@@ -18,11 +18,14 @@ import { AGENT_BUILDER_CONVERSATION_ATTACHMENT_TYPE } from '../../../../common/c
 import type { AttachmentUIV2, CaseUI } from '../../../../common/ui/types';
 import { ConversationAttachmentsTable } from './conversation_attachments_table';
 import { useAgentBuilderAgents } from './use_agent_builder_agents';
+import { useBulkGetConversations } from './use_visible_conversations';
 
 jest.mock('./use_agent_builder_agents');
+jest.mock('./use_visible_conversations');
 jest.mock('../../../containers/use_delete_comment');
 
 const useAgentBuilderAgentsMock = useAgentBuilderAgents as jest.Mock;
+const useBulkGetConversationsMock = useBulkGetConversations as jest.Mock;
 const useDeleteCommentMock = useDeleteComment as jest.Mock;
 
 const conversationAttachment = (id: string, conversationId: string, title: string) =>
@@ -59,6 +62,12 @@ describe('ConversationAttachmentsTable', () => {
       nameById: new Map([['agent-1', 'Security agent']]),
     });
     useDeleteCommentMock.mockReturnValue({ isLoading: false, mutate: jest.fn() });
+    useBulkGetConversationsMock.mockReturnValue({
+      data: new Map([
+        ['conv-1', { id: 'conv-1', title: 'Suspicious login', agent_id: 'agent-1', access_mode: 'public' }],
+        ['conv-2', { id: 'conv-2', title: 'Latency regression', agent_id: 'agent-1', access_mode: 'private' }],
+      ]),
+    });
   });
 
   it('renders one row per conversation attachment with the agent name', () => {
@@ -72,6 +81,12 @@ describe('ConversationAttachmentsTable', () => {
     expect(screen.getByTestId('cases-conversation-attachments-table-link-c2')).toBeInTheDocument();
     expect(screen.getAllByText('Security agent')).toHaveLength(2);
     expect(screen.getAllByText('Alice A')).toHaveLength(2);
+    expect(
+      screen.getByTestId('cases-conversation-attachments-table-visibility-conv-1')
+    ).toHaveTextContent('Public');
+    expect(
+      screen.getByTestId('cases-conversation-attachments-table-visibility-conv-2')
+    ).toHaveTextContent('Private');
   });
 
   it('opens the conversation in chat from the title and in full page from the action', async () => {

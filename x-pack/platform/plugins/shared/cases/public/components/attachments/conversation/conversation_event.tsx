@@ -11,6 +11,7 @@ import type { ConversationAttachmentMetadata } from '../../../../common/types/do
 import type { UnifiedReferenceAttachmentViewProps } from '../../../client/attachment_framework/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useConversationAttachmentOpenedEBT } from '../../../analytics/use_conversation_attachment_ebt';
+import { openConversationInChat } from '../../../agent_builder/open_conversation_in_chat';
 import { getConversationHref } from './helpers';
 import * as i18n from './translations';
 
@@ -31,7 +32,7 @@ const ConversationEventComponent: React.FC<ConversationViewProps> = ({
 
   const onClick = useCallback(() => {
     trackOpened('chat');
-    agentBuilder?.openChat({ conversationId: attachmentId, agentId });
+    openConversationInChat(agentBuilder, { conversationId: attachmentId, agentId });
   }, [agentBuilder, attachmentId, agentId, trackOpened]);
 
   // The href keeps Cmd/Ctrl+click and "open in new tab" working for the full page.

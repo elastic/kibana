@@ -16,9 +16,11 @@ import * as i18n from './translations';
 export const useAttachConversation = ({
   caseId,
   caseOwner,
+  onAttached,
 }: {
   caseId: string;
   caseOwner: string;
+  onAttached: () => void;
 }) => {
   const { showSuccessToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
@@ -39,11 +41,12 @@ export const useAttachConversation = ({
         });
         showSuccessToast(i18n.ATTACH_SUCCESS_TITLE(conversation.title));
         refreshCaseViewPage();
+        onAttached();
       } finally {
         setAttachingId(null);
       }
     },
-    [caseId, caseOwner, createAttachments, refreshCaseViewPage, showSuccessToast]
+    [caseId, caseOwner, createAttachments, onAttached, refreshCaseViewPage, showSuccessToast]
   );
 
   return { attach, attachingId, isAttaching };

@@ -44,6 +44,10 @@ export const AGENT = i18n.translate('xpack.cases.attachments.conversation.table.
   defaultMessage: 'Agent',
 });
 
+export const VISIBILITY = i18n.translate('xpack.cases.attachments.conversation.table.visibility', {
+  defaultMessage: 'Visibility',
+});
+
 export const DATE_ADDED = i18n.translate('xpack.cases.attachments.conversation.table.dateAdded', {
   defaultMessage: 'Date added',
 });

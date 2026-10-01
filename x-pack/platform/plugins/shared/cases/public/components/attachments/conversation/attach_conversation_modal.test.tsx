@@ -83,17 +83,14 @@ describe('AttachConversationModal', () => {
     );
   });
 
-  it('attaches a conversation and marks the row as attached', async () => {
+  it('attaches the selected conversation and closes on success', async () => {
     renderModal();
 
     await userEvent.click(screen.getByTestId('cases-attach-conversation-button-conv-1'));
 
     expect(attach).toHaveBeenCalledWith(items[0]);
-    await waitFor(() =>
-      expect(screen.getByTestId('cases-attach-conversation-button-conv-1')).toBeDisabled()
-    );
-    expect(screen.getByTestId('cases-attach-conversation-button-conv-1')).toHaveTextContent(
-      'Attached'
+    expect(useAttachConversationMock).toHaveBeenCalledWith(
+      expect.objectContaining({ caseId: basicCase.id, onAttached: onClose })
     );
   });
 

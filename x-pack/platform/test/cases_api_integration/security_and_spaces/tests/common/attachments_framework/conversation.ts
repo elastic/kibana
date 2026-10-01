@@ -130,7 +130,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body).to.eql({
           conversations: [
-            { id: conversation.id, title: 'Readable', agent_id: conversation.agent_id },
+            {
+              id: conversation.id,
+              title: 'Readable',
+              agent_id: conversation.agent_id,
+              access_mode: 'private',
+            },
           ],
         });
       });
