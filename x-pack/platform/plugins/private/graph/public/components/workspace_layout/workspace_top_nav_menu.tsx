@@ -57,7 +57,6 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const title = useSelector(metaDataSelector).title;
   const hasFields = useSelector(hasFieldsSelector);
   const datasource = useSelector(datasourceSelector);
-  const { blocklistedNodeIds, blocklistedNodesById } = useSelector(workspaceSelector);
   const allSavingDisabled = props.graphSavePolicy === 'none';
   const isInspectDisabled = props.requestAdapter.getRequests().length === 0;
   const canSave = Boolean(props.capabilities.graph.save);
@@ -136,19 +135,24 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
         }),
         iconType: 'gear',
         run: () => {
-          const settingsObservable = asSyncedObservable(() => ({
-            blocklistedNodes: blocklistedNodeIds.map((id) => {
-              const node = blocklistedNodesById[id];
-              return {
-                id,
-                label: node.label,
-                icon: getIcon(node.icon ?? ''),
-              };
-            }),
-            unblockNode: (node: BlocklistedNodeDisplay) => dispatch(unblockNode(node.id)),
-            unblockAll: () => dispatch(unblockAllNodes()),
-            canEditDrillDownUrls: props.canEditDrillDownUrls,
-          })) as unknown as AsObservable<SettingsWorkspaceProps>['observable'];
+          const settingsObservable = asSyncedObservable(() => {
+            const { blocklistedNodeIds, blocklistedNodesById } = workspaceSelector(
+              store.getState()
+            );
+            return {
+              blocklistedNodes: blocklistedNodeIds.map((id) => {
+                const node = blocklistedNodesById[id];
+                return {
+                  id,
+                  label: node.label,
+                  icon: getIcon(node.icon ?? ''),
+                };
+              }),
+              unblockNode: (node: BlocklistedNodeDisplay) => dispatch(unblockNode(node.id)),
+              unblockAll: () => dispatch(unblockAllNodes()),
+              canEditDrillDownUrls: props.canEditDrillDownUrls,
+            };
+          }) as unknown as AsObservable<SettingsWorkspaceProps>['observable'];
 
           props.coreStart.overlays.openFlyout(
             toMountPoint(
@@ -210,8 +214,6 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
     };
   }, [
     allSavingDisabled,
-    blocklistedNodeIds,
-    blocklistedNodesById,
     canSave,
     confirmWipeWorkspace,
     datasource,

@@ -111,6 +111,7 @@ export const MergeCandidates = ({ mergeCandidates, onSetControl }: MergeCandidat
             <span>
               <EuiToolTip content={mergeTerm1ToTerm2ButtonMsg} disableScreenReaderOutput>
                 <EuiButtonIcon
+                  data-test-subj="graphMergeLeftIntoRight"
                   iconType="chevronDoubleRight"
                   size="xs"
                   style={{ opacity: 0.2 + mc.overlap / mc.v1 }}
@@ -136,6 +137,7 @@ export const MergeCandidates = ({ mergeCandidates, onSetControl }: MergeCandidat
 
               <EuiToolTip content={mergeTerm2ToTerm1ButtonMsg} disableScreenReaderOutput>
                 <EuiButtonIcon
+                  data-test-subj="graphMergeRightIntoLeft"
                   iconType="chevronDoubleLeft"
                   size="xs"
                   style={{ opacity: 0.2 + mc.overlap / mc.v2 }}

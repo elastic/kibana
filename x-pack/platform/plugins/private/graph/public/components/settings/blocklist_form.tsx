@@ -72,6 +72,7 @@ export function BlocklistForm({
                 label={node.label}
                 extraAction={{
                   iconType: 'trash',
+                  'data-test-subj': `graphUnblocklistNode-${node.id}`,
                   'aria-label': i18n.translate('xpack.graph.blocklist.removeButtonAriaLabel', {
                     defaultMessage: 'Delete',
                   }),

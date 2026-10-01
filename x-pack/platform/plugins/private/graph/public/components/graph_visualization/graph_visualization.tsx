@@ -186,6 +186,9 @@ export function GraphVisualization({
                     }
                   }}
                   className="gphNode"
+                  data-test-subj="graphNode"
+                  data-node-id={node.id}
+                  data-node-color={node.color}
                   css={css`
                     cursor: pointer;
                   `}

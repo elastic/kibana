@@ -30,16 +30,20 @@ export class GraphPage {
   readonly vennSmallTerm1: Locator;
   readonly vennSmallOverlap: Locator;
   readonly vennSmallTerm2: Locator;
+  readonly nodeLabelInput: Locator;
+  readonly rawDocumentsDrilldown: Locator;
+  readonly inspectorRequestTab: Locator;
+  readonly inspectorResponseTab: Locator;
+  readonly datasourceButton: Locator;
+  readonly queryInput: Locator;
 
   // Internal locators — consumed only by methods on this class.
   private readonly newButton: Locator;
   private readonly settingsButton: Locator;
   private readonly emptyState: Locator;
-  private readonly datasourceButton: Locator;
   private readonly addFieldButton: Locator;
   private readonly fieldSearchInput: Locator;
   private readonly exploreButton: Locator;
-  private readonly queryInput: Locator;
   private readonly selectAllButton: Locator;
   private readonly invertSelectionButton: Locator;
   private readonly removeSelectionButton: Locator;
@@ -53,6 +57,18 @@ export class GraphPage {
   private readonly nodeCircles: Locator;
   private readonly clickableEdges: Locator;
   private readonly selectionListFields: Locator;
+  private readonly graphNodes: Locator;
+  private readonly undoButton: Locator;
+  private readonly redoButton: Locator;
+  private readonly groupButton: Locator;
+  private readonly ungroupButton: Locator;
+  private readonly mergeLeftIntoRightButton: Locator;
+  private readonly expandSelectionButton: Locator;
+  private readonly fillConnectionsButton: Locator;
+  private readonly blockSelectionButton: Locator;
+  private readonly styleSelectionButton: Locator;
+  private readonly drilldownButton: Locator;
+  private readonly inspectButton: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.contentList = new ContentListWrapper(page);
@@ -89,6 +105,22 @@ export class GraphPage {
     this.nodeCircles = this.page.testSubj.locator('graphNodeCircle');
     this.clickableEdges = this.page.testSubj.locator('graphClickableEdge');
     this.selectionListFields = this.page.locator('[data-test-subj^="graphSelectionListField-"]');
+    this.graphNodes = this.page.testSubj.locator('graphNode');
+    this.undoButton = this.page.testSubj.locator('graphUndo');
+    this.redoButton = this.page.testSubj.locator('graphRedo');
+    this.groupButton = this.page.testSubj.locator('graphGroupSelection');
+    this.ungroupButton = this.page.testSubj.locator('graphUngroupSelection');
+    this.mergeLeftIntoRightButton = this.page.testSubj.locator('graphMergeLeftIntoRight');
+    this.expandSelectionButton = this.page.testSubj.locator('graphExpandSelection');
+    this.fillConnectionsButton = this.page.testSubj.locator('graphFillConnections');
+    this.blockSelectionButton = this.page.testSubj.locator('graphBlockSelection');
+    this.styleSelectionButton = this.page.testSubj.locator('graphStyleSelection');
+    this.drilldownButton = this.page.testSubj.locator('graphDrilldown');
+    this.inspectButton = this.page.testSubj.locator('graphInspectButton');
+    this.nodeLabelInput = this.page.testSubj.locator('graphNodeLabelInput');
+    this.rawDocumentsDrilldown = this.page.testSubj.locator('graphRawDocumentsDrilldown');
+    this.inspectorRequestTab = this.page.getByRole('tab', { name: 'Request', exact: true });
+    this.inspectorResponseTab = this.page.getByRole('tab', { name: 'Response', exact: true });
 
     this.vennLargeTerm1 = this.page.testSubj.locator('graphVennLargeTerm1');
     this.vennLargeTerm2 = this.page.testSubj.locator('graphVennLargeTerm2');
@@ -145,6 +177,41 @@ export class GraphPage {
     );
   }
 
+  async pickIndexPatternByName(dataViewName: string) {
+    await this.datasourceButton.click();
+    await this.page
+      .getByRole('dialog', { name: 'Select a data source' })
+      .getByRole('button', { name: dataViewName, exact: true })
+      .click();
+    await this.addFieldButton.waitFor({ state: 'visible' });
+    await this.page.waitForFunction(
+      () =>
+        document
+          .querySelector('[data-test-subj="graph-add-field-button"]')
+          ?.getAttribute('aria-disabled') === 'false',
+      undefined,
+      { timeout: 10000 }
+    );
+  }
+
+  async changeIndexPatternByName(dataViewName: string) {
+    await this.datasourceButton.click();
+    await this.confirmModalConfirmButton.click();
+    await this.page
+      .getByRole('dialog', { name: 'Select a data source' })
+      .getByRole('button', { name: dataViewName, exact: true })
+      .click();
+    await this.addFieldButton.waitFor({ state: 'visible' });
+    await this.page.waitForFunction(
+      () =>
+        document
+          .querySelector('[data-test-subj="graph-add-field-button"]')
+          ?.getAttribute('aria-disabled') === 'false',
+      undefined,
+      { timeout: 10000 }
+    );
+  }
+
   async addFields(fields: string[]) {
     await this.addFieldButton.click();
     await this.fieldSearchInput.waitFor({ state: 'visible' });
@@ -160,8 +227,141 @@ export class GraphPage {
   }
 
   async runQuery(query: string) {
-    await this.queryInput.fill(query);
+    await this.queryInput.clear();
+    await this.queryInput.pressSequentially(query);
     await this.exploreButton.click();
+  }
+
+  async createWorkspaceWithQuery({
+    dataViewTitle,
+    dataViewName,
+    fields,
+    query,
+  }: {
+    dataViewTitle: string;
+    dataViewName?: string;
+    fields: string[];
+    query: string;
+  }) {
+    await this.goto();
+    await this.waitForListing();
+    await this.clickCreateGraph();
+    await this.waitForWorkspace();
+    if (dataViewName) {
+      await this.pickIndexPatternByName(dataViewName);
+    } else {
+      await this.pickIndexPattern(dataViewTitle);
+    }
+    await this.addFields(fields);
+    await this.runQuery(query);
+    await this.page.waitForFunction(
+      () => document.querySelectorAll('[data-test-subj="graphNodeCircle"]').length > 0
+    );
+  }
+
+  node(label: string): Locator {
+    return this.graphNodes.filter({ has: this.page.getByText(label, { exact: true }) });
+  }
+
+  /** Select nodes through the stable sidebar instead of moving D3 geometry. */
+  async selectNodes(labels: string[]) {
+    await this.selectAllButton.click();
+
+    const PREFIX = 'graphSelectionListField-';
+    const selectedLabels = await this.selectionListFields.evaluateAll(
+      (elements, prefix) =>
+        elements
+          .map((element) => element.getAttribute('data-test-subj') ?? '')
+          .map((testSubject) =>
+            testSubject.startsWith(prefix) ? testSubject.slice(prefix.length) : null
+          )
+          .filter((label): label is string => label !== null),
+      PREFIX
+    );
+
+    const labelsToKeep = new Set(labels);
+    for (const selectedLabel of selectedLabels) {
+      if (!labelsToKeep.has(selectedLabel)) {
+        await this.page.locator(`[data-test-subj="graph-selected-${selectedLabel}"]`).click();
+      }
+    }
+
+    const focusedLabel = labels[labels.length - 1];
+    if (focusedLabel) {
+      await this.page.testSubj
+        .locator(`graphSelectionListField-${focusedLabel}`)
+        .getByText(focusedLabel, { exact: true })
+        .click();
+    }
+  }
+
+  async selectAllNodes() {
+    await this.selectAllButton.click();
+  }
+
+  async groupSelection() {
+    await this.groupButton.click();
+  }
+
+  async ungroupSelection() {
+    await this.ungroupButton.click();
+  }
+
+  async mergeLeftIntoRight() {
+    await this.mergeLeftIntoRightButton.click();
+  }
+
+  async undo() {
+    await this.undoButton.click();
+  }
+
+  async redo() {
+    await this.redoButton.click();
+  }
+
+  async expandSelection() {
+    await this.expandSelectionButton.click();
+  }
+
+  async fillConnections() {
+    await this.fillConnectionsButton.click();
+  }
+
+  async blockSelection() {
+    await this.blockSelectionButton.click();
+  }
+
+  async setNodeLabel(label: string) {
+    await this.nodeLabelInput.fill(label);
+    await this.nodeLabelInput.press('Tab');
+  }
+
+  async selectNodeColor(color: string) {
+    await this.styleSelectionButton.click();
+    await this.page.testSubj.locator(`graphColorPicker-${color}`).click();
+  }
+
+  async openInspector() {
+    await this.appMenu.clickItem(this.inspectButton);
+  }
+
+  async openDrilldowns() {
+    await this.drilldownButton.click();
+  }
+
+  async saveWorkspace() {
+    await this.appMenu.clickItem(this.saveButton);
+    await this.saveConfirmButton.click();
+    await this.saveSuccessToast.waitFor({ state: 'visible' });
+  }
+
+  async openHiddenList() {
+    await this.clickSettings();
+    await this.page.testSubj.locator('blocklist').click();
+  }
+
+  async unblockAllNodes() {
+    await this.page.testSubj.locator('graphUnblocklistAll').click();
   }
 
   async saveWorkspaceAs(title: string) {
@@ -252,26 +452,7 @@ export class GraphPage {
    * selector to avoid stale list-index handles.
    */
   async isolateEdge(from: string, to: string) {
-    await this.selectAllButton.click();
-
-    const PREFIX = 'graphSelectionListField-';
-    const allLabels = await this.selectionListFields.evaluateAll(
-      (els, prefix) =>
-        els
-          .map((el) => el.getAttribute('data-test-subj') ?? '')
-          .map((subj) => (subj.startsWith(prefix) ? subj.slice(prefix.length) : null))
-          .filter((label): label is string => label !== null),
-      PREFIX
-    );
-
-    const keep = new Set([from, to]);
-    for (const label of allLabels) {
-      if (keep.has(label)) {
-        continue;
-      }
-      await this.page.locator(`[data-test-subj="graph-selected-${label}"]`).click();
-    }
-
+    await this.selectNodes([from, to]);
     await this.invertSelectionButton.click();
     await this.removeSelectionButton.click();
   }

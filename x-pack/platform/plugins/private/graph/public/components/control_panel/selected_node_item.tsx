@@ -78,7 +78,10 @@ export const SelectedNodeItem = ({
           cx="12"
           cy="12"
           style={{ fill: node.color }}
-          onClick={() => onDeselectNode(node)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onDeselectNode(node);
+          }}
           data-test-subj={`graph-selected-${node.label}`}
         />
         <IconRenderer

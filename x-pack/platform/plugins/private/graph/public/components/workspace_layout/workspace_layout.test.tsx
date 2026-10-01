@@ -20,6 +20,7 @@ import type {
 import type { OverlayStart, Capabilities } from '@kbn/core/public';
 import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 import { ReduxGraphVisualization as GraphVisualization } from '../graph_visualization';
+import { ControlPanel } from '../control_panel';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({
@@ -112,5 +113,23 @@ describe('workspace_layout', () => {
       />
     );
     expect(component.find(GraphVisualization).exists()).toBe(true);
+  });
+
+  it('rerenders the control panel when editor focus changes', () => {
+    const component = shallow(<WorkspaceLayoutComponent {...defaultProps} />);
+
+    component.find(ControlPanel).prop('selectSelected')('first-node');
+    component.update();
+    expect(component.find(ControlPanel).props()).toMatchObject({
+      control: 'editLabel',
+      selectedNodeId: 'first-node',
+    });
+
+    component.find(ControlPanel).prop('selectSelected')('second-node');
+    component.update();
+    expect(component.find(ControlPanel).props()).toMatchObject({
+      control: 'editLabel',
+      selectedNodeId: 'second-node',
+    });
   });
 });
