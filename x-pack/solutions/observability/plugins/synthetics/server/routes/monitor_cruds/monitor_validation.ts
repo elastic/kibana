@@ -427,7 +427,12 @@ export const normalizeAPIConfig = (
     };
   }
 
-  if (rawParams) {
+  // An empty string clears params. Any other explicitly supplied value, including falsy ones such
+  // as `false`, `0` or `null`, must be validated: skipping them would silently drop the stored
+  // params. `null` is only tolerated when there was no stored value to lose.
+  const isParamsProvided = rawParams !== undefined && rawParams !== '';
+  const isNullWithoutStoredParams = rawParams == null && previousParams == null;
+  if (isParamsProvided && !isNullWithoutStoredParams) {
     const { value, error } = validateParams(rawParams, previousParams);
     if (error) {
       formattedConfig[ConfigKey.PARAMS] = rawParams as string;

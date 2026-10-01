@@ -1332,6 +1332,29 @@ describe('normalizeAPIConfig', () => {
     }
   );
 
+  it.each([[false], [0], [null]])(
+    'rejects falsy params that would silently clear stored params: %p',
+    (params) => {
+      expect(
+        normalizeAPIConfig({ type: 'browser', params } as any, { previousParams: '{"a":"b"}' })
+          .errorMessage
+      ).toMatch(/^Invalid params: /);
+    }
+  );
+
+  it('still treats empty string params as clearing them', () => {
+    expect(
+      normalizeAPIConfig({ type: 'browser', params: '' } as any, { previousParams: '{"a":"b"}' })
+        .errorMessage
+    ).toBeUndefined();
+  });
+
+  it('tolerates null params when there is no stored value to lose', () => {
+    expect(
+      normalizeAPIConfig({ type: 'browser', params: null } as any).errorMessage
+    ).toBeUndefined();
+  });
+
   it('accepts params objects with nested values', () => {
     const params = '{"retries":3,"options":{"mode":"fast"}}';
     expect(normalizeAPIConfig({ type: 'browser', params } as any)).toEqual({

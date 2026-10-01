@@ -994,6 +994,23 @@ describe('UpdateMonitorAPI', () => {
       expect(result.survivors).toHaveLength(1);
     });
 
+    it.each([[false], [0], [null]])(
+      'rejects a patch that sets params to %p instead of silently clearing stored params',
+      async (params) => {
+        const { routeContext, mocks } = createMockRouteContext();
+        mocks.findDecryptedMonitors.mockResolvedValue([monitorWithParams('{"token":"secret"}')]);
+
+        const api = new UpdateMonitorAPI(routeContext);
+        const result = await api.execute({
+          updates: updatesFor(['mon-1'], { [ConfigKey.PARAMS]: params as unknown as string }),
+        });
+
+        expect(result.survivors).toHaveLength(0);
+        expect(result.perIdErrors['mon-1'].code).toBe('validation_failed');
+        expect(result.perIdErrors['mon-1'].message).toMatch(/^Invalid params: /);
+      }
+    );
+
     it('rejects a patch that changes params to a value that is not a JSON object', async () => {
       const { routeContext, mocks } = createMockRouteContext();
       mocks.findDecryptedMonitors.mockResolvedValue([monitorWithParams('{"token":"secret"}')]);
