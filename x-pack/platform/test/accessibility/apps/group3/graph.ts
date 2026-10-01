@@ -63,34 +63,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('saveCancelButton');
     });
 
-    it('Graph settings - advanced settings tab', async function () {
-      await testSubjects.click('graphSettingsButton');
-      await a11y.testAppSnapshot();
+    describe('Graph settings', () => {
+      before(async () => {
+        await testSubjects.click('graphSettingsButton');
+        await testSubjects.existOrFail('advancedSettings');
+      });
+
+      after(async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.missingOrFail('graphSettingsFlyout');
+      });
+
+      it('advanced settings tab', async function () {
+        await a11y.testAppSnapshot();
+      });
+
+      it('block list tab', async function () {
+        await testSubjects.click('blocklist');
+        await a11y.testAppSnapshot();
+      });
+
+      it('drilldowns tab', async function () {
+        await testSubjects.click('drillDowns');
+        await a11y.testAppSnapshot();
+      });
+
+      it('drilldown tab - add new drilldown', async function () {
+        await testSubjects.click('drillDowns');
+        await testSubjects.click('graphAddNewTemplate');
+        await a11y.testAppSnapshot();
+      });
     });
 
-    it('Graph settings - block list tab', async function () {
-      await testSubjects.click('blocklist');
-      await a11y.testAppSnapshot();
-    });
-
-    it('Graph settings - drilldowns tab', async function () {
-      await testSubjects.click('drillDowns');
-      await a11y.testAppSnapshot();
-      await browser.pressKeys(browser.keys.ESCAPE);
-    });
-
-    it('Graph settings drilldown tab - add new drilldown', async function () {
-      await testSubjects.click('graphSettingsButton');
-      await testSubjects.click('drillDowns');
-      await testSubjects.click('graphAddNewTemplate');
-      await a11y.testAppSnapshot();
-      await browser.pressKeys(browser.keys.ESCAPE);
-    });
-
-    it('Create new graph page', async function () {
-      await testSubjects.click('graphNewButton');
-      await testSubjects.click('confirmModalConfirmButton');
-      await a11y.testAppSnapshot();
+    // Mocha runs a suite's own tests before its nested suites, so this needs its own suite to keep
+    // running after 'Graph settings': it discards the datasource, disabling the settings button.
+    describe('Create new graph', () => {
+      it('Create new graph page', async function () {
+        await testSubjects.click('graphNewButton');
+        await testSubjects.click('confirmModalConfirmButton');
+        await a11y.testAppSnapshot();
+      });
     });
   });
 }
