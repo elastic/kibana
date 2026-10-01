@@ -4219,9 +4219,11 @@ describe('Package policy service', () => {
       const updateAndGetAttributes = async ({
         storedCondition,
         targetCondition,
+        requestCondition,
       }: {
         storedCondition?: string;
         targetCondition?: string;
+        requestCondition?: string;
       }) => {
         const savedObjectsClient = createSavedObjectClientMock();
         const mockPackagePolicy = createPackagePolicyMock();
@@ -4269,7 +4271,11 @@ describe('Package policy service', () => {
           savedObjectsClient,
           elasticsearchClient,
           'the-package-policy-id',
-          { ...mockPackagePolicy, inputs: [] }
+          {
+            ...mockPackagePolicy,
+            inputs: [],
+            ...(requestCondition ? { package_agent_version_condition: requestCondition } : {}),
+          }
         );
         (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
 
@@ -4286,8 +4292,8 @@ describe('Package policy service', () => {
         expect(attributes).toHaveProperty('package_agent_version_condition', '');
       });
 
-      it('should not add the condition when neither the policy nor the target package has one', async () => {
-        const attributes = await updateAndGetAttributes({});
+      it('should not add the condition when neither the policy nor the target package has one, ignoring a caller-supplied value', async () => {
+        const attributes = await updateAndGetAttributes({ requestCondition: '>=1.0.0' });
         expect(attributes).not.toHaveProperty('package_agent_version_condition');
       });
     });
@@ -6720,7 +6726,7 @@ describe('Package policy service', () => {
       expect(updatedAttributes).toHaveProperty('package_agent_version_condition', '');
     });
 
-    it('should not add package_agent_version_condition when neither the policy nor the target package has one', async () => {
+    it('should not add package_agent_version_condition when neither the policy nor the target package has one, ignoring a caller-supplied value', async () => {
       const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
 
@@ -6759,7 +6765,7 @@ describe('Package policy service', () => {
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
-        { ...mockPackagePolicy, inputs: [] },
+        { ...mockPackagePolicy, inputs: [], package_agent_version_condition: '>=1.0.0' },
       ]);
 
       (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
