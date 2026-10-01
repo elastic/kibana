@@ -95,6 +95,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       tabInitialInternalState = cloneDeep(tabState.initialInternalState);
     }
 
+    const controlGroupState = esqlControls ?? tabState.attributes.controlGroupState;
+    const initialEsqlVariables = extractEsqlVariables(controlGroupState ?? null);
+
     if (esqlControls) {
       dispatch(
         updateAttributes({
@@ -104,11 +107,13 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
           },
         })
       );
+    }
 
+    if (initialEsqlVariables.length) {
       dispatch(
         internalStateSlice.actions.setEsqlVariables({
           tabId,
-          esqlVariables: extractEsqlVariables(esqlControls),
+          esqlVariables: initialEsqlVariables,
         })
       );
     }
@@ -197,7 +202,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       ({ esqlSource, dataView } = await resolveEsqlSource({
         esql: initialQuery.esql,
         services,
-        esqlVariables: esqlControls ? extractEsqlVariables(esqlControls) : undefined,
+        esqlVariables: initialEsqlVariables.length ? initialEsqlVariables : undefined,
         timeRange: initialTimeRange,
       }));
     } else {

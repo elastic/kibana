@@ -25,6 +25,8 @@ import {
 } from '../../../../../../common/constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { EsqlSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import * as resolveEsqlSourceModule from '../../../data_fetching/resolve_esql_source';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMockWithTimeField, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -1157,5 +1159,48 @@ describe('tab_state actions', () => {
       // Verify the visContext attribute remains the same
       expect(tab.attributes.visContext).toBe(visContext);
     });
+  });
+
+  it('resolves a saved session with its control variables', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMockWithTimeField],
+    });
+    const persistedTab = getPersistedTabMock({
+      dataView: dataViewMockWithTimeField,
+      services,
+      appStateOverrides: {
+        query: { esql: 'FROM logs-* | WHERE host == ?foo' },
+        dataSource: { type: DataSourceType.Esql },
+      },
+      attributesOverrides: { controlGroupState: mockControlState },
+    });
+    const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource').mockResolvedValue({
+      esqlSource: createMockEsqlSource(),
+      dataView: dataViewMockWithTimeField,
+    });
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({
+        id: 'test-session',
+        tabs: [persistedTab],
+      }),
+    });
+    await toolkit.initializeSingleTab({
+      tabId: persistedTab.id,
+      skipWaitForDataFetching: true,
+    });
+
+    expect(resolveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esql: 'FROM logs-* | WHERE host == ?foo',
+        esqlVariables: [{ key: 'foo', type: 'values', value: 'bar' }],
+      })
+    );
+    expect(selectTab(toolkit.internalState.getState(), persistedTab.id).esqlVariables).toEqual([
+      { key: 'foo', type: 'values', value: 'bar' },
+    ]);
+    resolveSpy.mockRestore();
   });
 });
