@@ -45,8 +45,11 @@ evaluate.describe(
   () => {
     evaluate(
       'agrees with human verdicts on fixed chart-form pairs',
-      async ({ executorClient, inferenceClient, log }) => {
-        const judge = createChartIntentJudge({ inferenceClient, log });
+      async ({ executorClient, inferenceClient, evaluationConnector, log }) => {
+        const judge = createChartIntentJudge({
+          inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
+          log,
+        });
 
         await executorClient.runExperiment(
           {
