@@ -130,7 +130,7 @@ describe('ObservabilityAlertingPlugin', () => {
           expect.objectContaining({
             id: 'rule-library',
             path: '/rule-library',
-            visibleIn: ['globalSearch', 'projectSideNav'],
+            visibleIn: [],
           }),
           expect.objectContaining({
             id: 'action-policies',
