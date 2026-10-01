@@ -239,7 +239,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
 
         // Rebuild content only when the hovered line changes, not on every pixel of movement.
         if (tooltipLineRef.current !== line) {
-          tooltipLineRef.current = line;
+          tooltipLineRef.current = line ?? null;
           const total = formatDuration(duration.totalMs).trim();
           const avg = formatDuration(Math.round(duration.totalMs / duration.runCount)).trim();
           const minStr = formatDuration(duration.minMs).trim();
