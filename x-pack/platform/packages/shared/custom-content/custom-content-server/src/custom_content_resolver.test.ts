@@ -69,6 +69,9 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     const systemArg: string = mockChatComplete.mock.calls[0][0].system;
     expect(systemArg).toContain('Output ONLY valid HTML');
     expect(systemArg).not.toContain('Liquid template syntax');
+    expect(systemArg).toContain('body { margin: 0; padding: 0;');
+    expect(systemArg).not.toContain('body { margin: 0; padding: var(--cc-space-l);');
+    expect(systemArg).toContain('The host owns the panel surface');
   });
 });
 

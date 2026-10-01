@@ -21,7 +21,7 @@ import {
 import { extractDeclaredHeight } from './extract_declared_height';
 
 const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the host application's real design tokens for both light and dark themes at render time. Use them for EVERY space, radius and font declaration and for every UI color — surfaces, text, borders, chrome and data marks. Never hardcode a pixel spacing value or a font stack, and never hardcode one of those colors, or the panel will look foreign next to the charts beside it. (Illustrations are the exception; see below.)
-- Required body reset: body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); background: var(--cc-color-background); }
+- Required body reset: body { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); }
 - Card/surface backgrounds: var(--cc-color-surface).
 - Accent colors for UI emphasis: var(--cc-color-primary) (blue), var(--cc-color-accent) (teal), var(--cc-color-accent-2) (pink), var(--cc-color-warning) (yellow).
 - Chart series colors: var(--cc-vis-0) through var(--cc-vis-9), in order. Use these for bars, lines, slices and any per-category color — they are the host's colorblind-safe visualization palette. Do NOT use the semantic accent colors above for data series; they are UI chrome and read heavy when used as data.
@@ -31,7 +31,7 @@ const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to t
 - Type scale: 0.75rem for secondary/label text, 0.875rem for body, 1.5rem or more for a headline KPI number. Use font-weight 600 for emphasis rather than a larger size.
 - This applies to SVG charts too. In a chart, \`fill\`, \`stroke\`, \`stop-color\` and every other color attribute must be a token — var(--cc-vis-N) for data marks, var(--cc-color-*) for chrome like axes and gridlines. For example \`<path fill="var(--cc-vis-0)">\`. Charts are where hardcoded palettes creep in; there is no exception for a chart.
 - Illustration is the one exception. The tokens above are the panel's UI vocabulary: surfaces, text, chrome, borders and data marks. They are not for pictures. When you are drawing a thing rather than charting it — an animal, a plant, a vehicle, a scene — pick colors that are plausible for the subject itself. Do NOT color an illustration from var(--cc-vis-N) or the accent tokens: those are a data palette, and an animal or object rendered in chart colors looks wrong. Literal colors are correct here, because a depicted thing looks the same in light and dark mode. The page background, all text, and any card behind the illustration still use tokens.
-- Never re-declare \`background\` or \`color\` on \`body\`. The panel frame already sets both from the active theme, and overriding them makes the panel render dark in light mode (or the reverse) for every user.
+- Never re-declare \`background\`, \`padding\` or \`color\` on \`body\`. The host owns the panel surface, and each component inside the body owns its internal spacing. Overriding the body makes the panel stand apart from its host.
 - Motion durations: var(--cc-motion-fast), var(--cc-motion-normal), var(--cc-motion-slow), with var(--cc-ease) for easing. No arbitrary values like 1.6s or one-off cubic-bezier curves.`;
 
 const HEIGHT_DECLARATION_GUIDANCE = `HEIGHT DECLARATION — the FIRST line of your output must be exactly:
@@ -41,7 +41,6 @@ where N is the height in CSS pixels your content occupies. Anything after N is i
 The panel renders in a frame of exactly this height. It cannot measure itself and the host cannot measure it, so this number is the only sizing information anyone gets. Too small and the panel scrolls; too large and the content sits above a large empty gap, which looks broken. Aim to be accurate, not generous.
 
 Add it up from the markup you actually wrote, top to bottom, and show the arithmetic after the number so every term corresponds to something you wrote:
-- body padding: 32 (top and bottom together)
 - a heading row: 60
 - one row of KPI / status cards: 130 (a row, not a card — count rows as ceil(cards / columns))
 - one compact table or list row: 30, plus 30 for a header row
@@ -52,10 +51,10 @@ Add it up from the markup you actually wrote, top to bottom, and show the arithm
 Count only the spacing you actually wrote between sections. Do not add slack "to be safe" — the gap under the content is as visible as a scrollbar.
 
 Worked example — a heading plus four status cards in a two-column grid:
-32 + 60 + (2 rows x 130) = 352, so emit \`<!-- cc-height: 352 = 32 + 60 + 2x130 -->\`.
+60 + (2 rows x 130) = 320, so emit \`<!-- cc-height: 320 = 60 + 2x130 -->\`.
 
 Second example — a row of 4 KPI cards, then a 4-row bar list inside a card, then a footer line:
-32 + 130 + (32 + 30 + 4x30) + 24 = 368.
+130 + (32 + 30 + 4x30) + 24 = 336.
 
 Size for the data you were actually given. If the schema description or prompt says there are four items, size for four rows — do NOT pad for rows that might exist later. When a LIMIT in the query caps the rows, size for that limit. Between ${CUSTOM_CONTENT_MIN_HEIGHT} and ${CUSTOM_CONTENT_MAX_HEIGHT}.
 

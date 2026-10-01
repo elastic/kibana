@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useCustomContentHtml } from './use_custom_content_html';
 import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
 import { CustomContentGeneratingPrompt } from './custom_content_generating_prompt';
@@ -52,6 +52,14 @@ const iframeCss = css({
   height: '100%',
   border: 'none',
   background: 'transparent',
+});
+
+const wrapperCss = css({
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  flex: '1 1 100%',
+  minHeight: 200,
 });
 
 const IFRAME_TITLE = i18n.translate('xpack.customContent.iframeTitle', {
@@ -96,19 +104,6 @@ export const CustomContentComponent = ({
   });
 
   useEffect(() => onLoadingChange(isLoading), [isLoading, onLoadingChange]);
-
-  const wrapperCss = useMemo(
-    () =>
-      css({
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        flex: '1 1 100%',
-        minHeight: 200,
-        background: euiTheme.colors.emptyShade,
-      }),
-    [euiTheme.colors.emptyShade]
-  );
 
   return (
     <div css={wrapperCss} data-shared-item data-test-subj="customContentPanel">

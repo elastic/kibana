@@ -35,8 +35,8 @@ export function injectStyleTag(html: string, style: string): string {
 }
 
 /**
- * Minimal baseline for the sandboxed iframe: background, font and text color, plus the margin and
- * box-sizing reset those imply.
+ * Minimal baseline for the sandboxed iframe: font and text color, plus a margin, padding and
+ * box-sizing reset. The host owns the panel surface and the template owns its internal spacing.
  *
  * Emitted *before* any template CSS (`injectStyleTag` inserts at the top of `<head>`), so an author
  * or generated rule of equal specificity wins. A floor, not a lock-in — never append this after the
@@ -46,11 +46,6 @@ export function injectStyleTag(html: string, style: string): string {
  * point here is only that a panel with no CSS of its own does not render as a bare browser
  * document. Everything is a token, so it tracks the theme without reading it.
  *
- * Two rules are `!important`, both because they are ours rather than the template's: the body
- * background and the reduced-motion guard.
- * Both stay escapable on purpose — redefining the token, or an author `!important`, wins. These
- * only need to be unbypassable by accident.
- *
  * The guard is enforced here rather than asked for in the prompt because a generated template
  * cannot be relied on to wrap its own keyframes — and the templates most likely to animate are the
  * long, complex ones, which are exactly where prompt rules decay first. EUI's own idiom is the
@@ -58,9 +53,8 @@ export function injectStyleTag(html: string, style: string): string {
  * pattern when you control the CSS; overriding CSS we did not write needs the opt-out form.
  */
 const BASE_STYLES = `
-body{margin:0;padding:var(--cc-space-l);box-sizing:border-box;font-family:var(--cc-font-family);color:var(--cc-color-text)}
+body{margin:0;padding:0;box-sizing:border-box;font-family:var(--cc-font-family);color:var(--cc-color-text)}
 *,*::before,*::after{box-sizing:inherit}
-body{background:var(--cc-color-background)!important}
 @media screen and (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 `;
 
@@ -75,7 +69,6 @@ export function buildThemeCss(
   // to avoid. A dropped token makes `var()` resolve to the property's initial value instead.
   const vars: Array<[string, string | number | undefined]> = [
     ['--cc-color-text', c.textParagraph],
-    ['--cc-color-background', isDark ? c.emptyShade : 'transparent'],
     ['--cc-color-surface', isDark ? c.lightestShade : c.emptyShade],
     ['--cc-color-primary', c.primary],
     ['--cc-color-accent', c.accentSecondary],

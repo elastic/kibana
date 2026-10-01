@@ -78,28 +78,31 @@ describe('applyHtmlTheme', () => {
     const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
 
     expect(result).toContain('font-family:var(--cc-font-family)');
-    expect(result).toContain('padding:var(--cc-space-l)');
+    expect(result).toContain('padding:0');
     expect(result).toContain('color:var(--cc-color-text)');
+    expect(result).not.toContain('body{background:');
   });
 
   it('emits the baseline before the template so author CSS still wins', () => {
-    const authored = '<html><head><style>body{padding:0}</style></head><body></body></html>';
+    const authored =
+      '<html><head><style>body{padding:var(--cc-space-l)}</style></head><body></body></html>';
 
     const result = applyHtmlTheme(authored, 'LIGHT', euiTheme);
 
-    expect(result.indexOf('--cc-space-l')).toBeLessThan(result.indexOf('body{padding:0}'));
+    expect(result.indexOf('body{margin:0;padding:0')).toBeLessThan(
+      result.indexOf('body{padding:var(--cc-space-l)}')
+    );
   });
 
-  // Everything else in the baseline is a floor the template can override. These two are not, so
-  // the count is pinned: a third `!important` should be a deliberate decision, not a drive-by.
-  it('locks the body background and the reduced-motion guard, and nothing else', () => {
+  // Everything else in the baseline is a floor the template can override. Reduced motion is not,
+  // so the count is pinned: another `!important` should be a deliberate decision, not a drive-by.
+  it('locks the reduced-motion guard and nothing else', () => {
     const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
 
-    expect(result).toContain('body{background:var(--cc-color-background)!important}');
     expect(result).toContain(
       '@media screen and (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}'
     );
-    expect(result.match(/!important/g)).toHaveLength(3);
+    expect(result.match(/!important/g)).toHaveLength(2);
   });
 
   it('exposes the motion tokens', () => {
@@ -124,20 +127,6 @@ describe('applyHtmlTheme', () => {
     const result = applyHtmlTheme('<html><head></head><body></body></html>', 'LIGHT', euiTheme);
     expect(result).toContain('--cc-color-text:#111');
     expect(result).toContain('--cc-color-border:#ccc');
-  });
-
-  // Pins the light/dark branch in `buildThemeCss`. Inverting it would paint a dark background in
-  // light mode, and no other test would catch it — every other case here runs in LIGHT.
-  it('resolves the background variable per theme', () => {
-    const markup = '<html><head></head><body></body></html>';
-
-    expect(applyHtmlTheme(markup, 'LIGHT', euiTheme)).toContain(
-      '--cc-color-background:transparent'
-    );
-
-    const dark = applyHtmlTheme(markup, 'DARK', euiTheme);
-    expect(dark).toContain('--cc-color-background:#fff');
-    expect(dark).not.toContain('--cc-color-background:transparent');
   });
 
   it('sets the color-scheme meta per theme', () => {
