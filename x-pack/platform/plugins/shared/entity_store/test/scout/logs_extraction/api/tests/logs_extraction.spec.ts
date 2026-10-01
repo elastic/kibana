@@ -81,8 +81,11 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
-    await teardownLogsTestDataStream(esClient);
+    try {
+      await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
+    } finally {
+      await teardownLogsTestDataStream(esClient);
+    }
   });
 
   apiTest('Should extract properly extract host', async ({ apiClient, esClient, log }) => {

@@ -55,7 +55,19 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       const stopResponse = await stopEntityTypes(apiClient, defaultHeaders, ['host']);
       expect(stopResponse.statusCode).toBe(200);
     } finally {
-      await teardownLogsTestDataStream(esClient);
+      try {
+        const startMaintainerResponse = await apiClient.put(
+          ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START('automated-resolution'),
+          {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: {},
+          }
+        );
+        expect(startMaintainerResponse.statusCode).toBe(200);
+      } finally {
+        await teardownLogsTestDataStream(esClient);
+      }
     }
   });
 

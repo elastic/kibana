@@ -61,18 +61,21 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
-      const resetResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          logExtraction: {
-            docsLimit: LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
-            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+      try {
+        const resetResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            logExtraction: {
+              docsLimit: LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+              maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+            },
           },
-        },
-      });
-      expect(resetResponse.statusCode).toBe(200);
-      await teardownLogsTestDataStream(esClient);
+        });
+        expect(resetResponse.statusCode).toBe(200);
+      } finally {
+        await teardownLogsTestDataStream(esClient);
+      }
     });
 
     apiTest(
