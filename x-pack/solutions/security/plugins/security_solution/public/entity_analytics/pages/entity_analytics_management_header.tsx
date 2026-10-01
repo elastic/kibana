@@ -215,7 +215,9 @@ export const EntityAnalyticsManagementHeader = ({
           void toggleEntityAnalytics();
         },
         disabled: isToggleDisabled,
-        'data-test-subj': ENTITY_ANALYTICS_SWITCH_TEST_ID,
+        'data-test-subj': isToggleStatusLoading
+          ? `${ENTITY_ANALYTICS_SWITCH_TEST_ID}-loading`
+          : ENTITY_ANALYTICS_SWITCH_TEST_ID,
       },
       items: canClearEntityData
         ? [
@@ -231,7 +233,13 @@ export const EntityAnalyticsManagementHeader = ({
           ]
         : [],
     }),
-    [canClearEntityData, isToggleChecked, isToggleDisabled, toggleEntityAnalytics]
+    [
+      canClearEntityData,
+      isToggleChecked,
+      isToggleDisabled,
+      isToggleStatusLoading,
+      toggleEntityAnalytics,
+    ]
   );
 
   const deleteError = safeErrorMessage(deleteEntityStoreMutation.error);

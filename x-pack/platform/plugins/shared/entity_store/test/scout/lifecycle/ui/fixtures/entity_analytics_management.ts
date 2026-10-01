@@ -19,11 +19,9 @@ const PAGE_URL = 'security/entity_analytics_management';
  */
 export class EntityAnalyticsManagementPage {
   public readonly entityAnalyticsSwitch: Locator;
-  public readonly statusLoading: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.entityAnalyticsSwitch = this.page.testSubj.locator('entity-analytics-switch');
-    this.statusLoading = this.page.testSubj.locator('entity-analytics-status-loading');
   }
 
   async navigate(): Promise<void> {
@@ -38,7 +36,9 @@ export class EntityAnalyticsManagementPage {
   }
 
   async waitForStatusLoaded(): Promise<void> {
-    await this.statusLoading.waitFor({ state: 'detached', timeout: 30000 });
+    // `entity-analytics-switch` is rendered only after the status query settles.
+    // While loading, the control is mounted under a different test id, disabled,
+    // and labeled "Disabled", so visibility of this locator is the terminal signal.
     await this.entityAnalyticsSwitch.waitFor({ state: 'visible', timeout: 30000 });
   }
 
