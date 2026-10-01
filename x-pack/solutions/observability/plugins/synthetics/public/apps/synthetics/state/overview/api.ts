@@ -21,7 +21,6 @@ export const fetchOverviewTrendStats = async (
     return apiService.post(
       SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
       monitors,
-      undefined,
       {},
       {
         signal,

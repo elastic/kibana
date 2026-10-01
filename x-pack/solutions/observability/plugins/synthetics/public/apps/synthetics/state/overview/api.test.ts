@@ -30,7 +30,6 @@ describe('fetchOverviewTrendStats', () => {
     expect(mockPost).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
       monitors,
-      undefined,
       {},
       { signal }
     );

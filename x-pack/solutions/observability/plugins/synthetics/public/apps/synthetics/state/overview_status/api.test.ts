@@ -44,12 +44,9 @@ describe('overview status APIs', () => {
 
     await fetchOverviewStatus({ pageState }, signal);
 
-    expect(mockGet).toHaveBeenCalledWith(
-      SYNTHETICS_API_URLS.OVERVIEW_STATUS,
-      expect.anything(),
-      expect.anything(),
-      { signal }
-    );
+    expect(mockGet).toHaveBeenCalledWith(SYNTHETICS_API_URLS.OVERVIEW_STATUS, expect.anything(), {
+      signal,
+    });
   });
 
   it('sends monitorQueryIds in the request body', async () => {
@@ -76,7 +73,6 @@ describe('overview status APIs', () => {
     expect(mockPost).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE,
       { monitorQueryIds: ['mon-1'] },
-      expect.anything(),
       expect.anything(),
       { signal }
     );

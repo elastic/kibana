@@ -9,7 +9,7 @@ import { call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
 import type { Action } from 'redux-actions';
 import type { OverviewStatusStateReducer } from '../overview_status';
 import { selectOverviewStatus } from '../overview_status';
-import type { OverviewTrend, TrendTable } from '../../../../../common/types';
+import type { OverviewTrend, TrendRequest, TrendTable } from '../../../../../common/types';
 import { selectOverviewTrends } from './selectors';
 import { refreshOverviewTrends, trendStatsBatch } from './actions';
 import { fetchOverviewTrendStats as trendsApi } from './api';
@@ -42,9 +42,12 @@ export function* fetchTrendEffect(
 }
 
 export function* fetchOverviewTrendStats(requestCancellationManager?: RequestCancellationManager) {
-  yield takeEvery(String(trendStatsBatch.get), function* (action: Action<TrendRequest[]>): Generator {
-    yield call(fetchTrendEffect, action, requestCancellationManager);
-  });
+  yield takeEvery(
+    String(trendStatsBatch.get),
+    function* (action: Action<TrendRequest[]>): Generator {
+      yield call(fetchTrendEffect, action, requestCancellationManager);
+    }
+  );
 }
 
 export function* refreshTrends(

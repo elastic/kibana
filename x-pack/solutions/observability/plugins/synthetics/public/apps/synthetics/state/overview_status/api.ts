@@ -55,11 +55,11 @@ export const fetchOverviewStatus = async (
   signal?: AbortSignal
 ): Promise<PaginatedOverviewStatus> => {
   const params = toStatusOverviewQueryArgs(pageState);
-  return apiService.get(
-    SYNTHETICS_API_URLS.OVERVIEW_STATUS,
-    { ...params, scopeStatusByLocation, ...(statusFilter ? { statusFilter } : {}) },
-    { signal }
-  );
+  const query = { ...params, scopeStatusByLocation, ...(statusFilter ? { statusFilter } : {}) };
+  if (signal) {
+    return apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, query, { signal });
+  }
+  return apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, query);
 };
 
 /**
@@ -79,10 +79,10 @@ export const fetchStaleStatus = async (
 ): Promise<OverviewStaleStatus> => {
   const { monitorQueryIds: _ignoredMonitorQueryIds, ...params } =
     toStatusOverviewQueryArgs(pageState);
-  return apiService.post(
-    SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE,
-    { monitorQueryIds },
-    params,
-    { signal }
-  );
+  if (signal) {
+    return apiService.post(SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE, { monitorQueryIds }, params, {
+      signal,
+    });
+  }
+  return apiService.post(SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE, { monitorQueryIds }, params);
 };
