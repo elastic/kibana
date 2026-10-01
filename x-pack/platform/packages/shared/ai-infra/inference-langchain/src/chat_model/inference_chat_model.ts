@@ -14,7 +14,11 @@ import {
   type BindToolsInput,
   type LangSmithParams,
 } from '@langchain/core/language_models/chat_models';
-import type { InteropZodType } from '@langchain/core/utils/types';
+import {
+  interopSafeParseAsync,
+  isInteropZodSchema,
+  type InteropZodType,
+} from '@langchain/core/utils/types';
 import type {
   BaseLanguageModelInput,
   StructuredOutputMethodOptions,
@@ -22,7 +26,6 @@ import type {
 } from '@langchain/core/language_models/base';
 import type { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { isInteropZodSchema } from '@langchain/core/utils/types';
 import type { ChatResult, ChatGeneration } from '@langchain/core/outputs';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { OutputParserException } from '@langchain/core/output_parsers';
@@ -366,7 +369,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
 
     let functionName = name ?? 'extract';
     let tools: ToolDefinition[];
-    if (isInteropZodSchema(schema)) {
+    const zodSchema = isInteropZodSchema(schema) ? schema : undefined;
+    if (zodSchema) {
       tools = [
         {
           type: 'function',
@@ -374,9 +378,9 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
             name: functionName,
             description,
             parameters:
-              '_zod' in (schema as object)
-                ? z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' })
-                : zodToJsonSchema(schema as unknown as Parameters<typeof zodToJsonSchema>[0]),
+              '_zod' in (zodSchema as object)
+                ? z4.toJSONSchema(zodSchema as unknown as z4.ZodType, { io: 'input' })
+                : zodToJsonSchema(zodSchema as unknown as Parameters<typeof zodToJsonSchema>[0]),
           },
         },
       ];
@@ -399,7 +403,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     const llm = this.bindTools(tools, { tool_choice: functionName });
 
     const outputParser = RunnableLambda.from<AIMessageChunk, RunOutput>(
-      (input: AIMessageChunk): RunOutput => {
+      async (input: AIMessageChunk): Promise<RunOutput> => {
         if (!input.tool_calls || input.tool_calls.length === 0) {
           throw new Error('No tool calls found in the response.');
         }
@@ -407,7 +411,18 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
         if (!toolCall) {
           throw new Error(`No tool call found with name ${functionName}.`);
         }
-        return toolCall.args as RunOutput;
+        if (!zodSchema) {
+          return toolCall.args as RunOutput;
+        }
+        const parsed = await interopSafeParseAsync(zodSchema, toolCall.args);
+        if (parsed.success) {
+          return parsed.data;
+        }
+        const text = JSON.stringify(toolCall.args);
+        throw new OutputParserException(
+          `Failed to parse. Text: "${text}". Error: ${JSON.stringify(parsed.error.issues)}`,
+          text
+        );
       }
     );
 
