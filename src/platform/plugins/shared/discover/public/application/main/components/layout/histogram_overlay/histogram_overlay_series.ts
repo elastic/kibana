@@ -9,9 +9,17 @@
 
 import dateMath from '@kbn/datemath';
 import type { TimeRange } from '@kbn/es-query';
-import type { CountSparkline } from '@kbn/esql-utils';
+import type { CountSparkline, ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { FetchStatus } from '../../../../types';
 import type { DiscoverHistogramOverlaySelection } from '../../../state_management/redux/runtime_state';
+
+/** Returns the output field when the query groups by exactly one CATEGORIZE expression. */
+export const getSingleCategorizeGroupField = (
+  groupByFields: ESQLStatsQueryMeta['groupByFields']
+): string | undefined => {
+  const fields = groupByFields.filter(({ type }) => type === 'categorize');
+  return fields.length === 1 ? fields[0].field : undefined;
+};
 
 /** Reads a dense numeric sparkline, rejecting empty or non-finite values. */
 export const readSparklineValues = (value: unknown): number[] | undefined => {

@@ -6,12 +6,26 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { parseInterval } from '@kbn/data-plugin/common';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import {
   TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META,
   TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META,
 } from '@kbn/lens-common';
-import { stackHistogramSeriesFn } from './stack_histogram_series_fn';
+import { getStackHistogramSeries } from '../../defs/stack_histogram_series';
+import type { StackHistogramInterval } from './stack_histogram_series';
 import { stackHistogramSeries } from './stack_histogram_series';
+
+const histogramInterval = (value: string, timeZone = 'UTC'): StackHistogramInterval => {
+  const parsed = parseInterval(value);
+
+  if (!parsed) {
+    throw new Error(`Could not parse interval ${value}`);
+  }
+
+  return { interval: parsed, timeZone };
+};
 
 const table = (rows: Datatable['rows'], interval = { interval: 1, unit: 'hour' }): Datatable => ({
   type: 'datatable',
@@ -45,7 +59,8 @@ describe('stackHistogramSeries', () => {
         { timestamp: '2020-01-01T00:00:00.000Z', results: 5 },
         { timestamp: '2020-01-01T01:00:00.000Z', results: 3 },
       ]),
-      args
+      args,
+      histogramInterval('1h')
     );
 
     expect(result.rows).toEqual([
@@ -72,7 +87,8 @@ describe('stackHistogramSeries', () => {
         { timestamp: '2020-01-01T00:00:00.000Z', results: 10 },
         { timestamp: '2020-01-01T01:00:00.000Z', results: 10 },
       ]),
-      { ...args, values: [8] }
+      { ...args, values: [8] },
+      histogramInterval('1h')
     );
 
     expect(result.rows.map((row) => row.overlay)).toEqual([4, 4]);
@@ -88,7 +104,8 @@ describe('stackHistogramSeries', () => {
         from: '2020-01-01T00:00:00.000Z',
         to: '2021-01-01T00:00:00.000Z',
         values: [2],
-      }
+      },
+      histogramInterval('1y')
     );
 
     expect(result.rows[0]).toMatchObject({ overlay: 2, remainder: 3 });
@@ -168,15 +185,106 @@ describe('stackHistogramSeries', () => {
     expect(result.meta?.[TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META]).toBe(false);
   });
 
-  it('emits a zero overlay for malformed expression arguments', () => {
-    const input = table([{ timestamp: '2020-01-01T00:00:00.000Z', results: 1 }]);
-    const result = stackHistogramSeriesFn(input, {
-      ...args,
-      values: 'not-json',
-      isSampled: false,
-    });
+  it('infers equal spacing when histogram metadata is unavailable', () => {
+    const input: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: 'timestamp', name: 'timestamp', meta: { type: 'date' } },
+        { id: 'results', name: 'results', meta: { type: 'number' } },
+      ],
+      rows: [
+        { timestamp: '2020-01-01T00:00:00.000Z', results: 5 },
+        { timestamp: '2020-01-01T01:00:00.000Z', results: 3 },
+      ],
+    };
 
-    expectZeroOverlay(result, [1]);
+    const result = stackHistogramSeries(input, args);
+
+    expect(result.rows.map((row) => row.overlay)).toEqual([2, 3]);
+    expect(result.meta?.[TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META]).toBe(true);
+  });
+
+  it('uses the timezone calendar day across a daylight-saving transition', () => {
+    const from = '2020-03-08T05:00:00.000Z';
+    const to = '2020-03-09T04:00:00.000Z';
+    const result = stackHistogramSeries(
+      table([{ timestamp: from, results: 23 }]),
+      { ...args, from, to, values: [23] },
+      histogramInterval('1d', 'America/New_York')
+    );
+
+    expect(result.rows[0]).toMatchObject({ overlay: 23, remainder: 0 });
+    expect(result.meta?.[TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META]).toBe(false);
+    expect(result.meta?.[TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META]).toBe(true);
+  });
+});
+
+describe('stack histogram series expression', () => {
+  const expressionArgs = {
+    ...args,
+    values: JSON.stringify(args.values),
+  };
+
+  it('uses the interval resolved from the histogram column', async () => {
+    const result: Datatable = await functionWrapper(
+      getStackHistogramSeries(createDatatableUtilitiesMock, () => 'UTC')
+    )(
+      table([
+        { timestamp: '2020-01-01T00:00:00.000Z', results: 5 },
+        { timestamp: '2020-01-01T01:00:00.000Z', results: 3 },
+      ]),
+      expressionArgs
+    );
+
+    expect(result.rows.map((row) => row.overlay)).toEqual([2, 3]);
+    expect(result.meta?.[TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META]).toBe(true);
+  });
+
+  it('keeps a renderable table when interval resolution throws', async () => {
+    const input = table([{ timestamp: '2020-01-01T00:30:00.000Z', results: 7 }]);
+    const result: Datatable = await functionWrapper(
+      getStackHistogramSeries(
+        () => {
+          throw new Error('missing KibanaRequest');
+        },
+        () => {
+          throw new Error('missing KibanaRequest');
+        }
+      )
+    )(input, expressionArgs);
+
+    expect(result.columns.map((column) => column.id)).toEqual([
+      'timestamp',
+      'results',
+      'remainder',
+      'overlay',
+    ]);
+    expect(result.rows).toEqual([
+      {
+        timestamp: '2020-01-01T00:30:00.000Z',
+        results: 7,
+        overlay: 0,
+        remainder: 7,
+      },
+    ]);
+    expect(result.meta?.[TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META]).toBe(false);
+  });
+
+  it('emits a zero overlay for malformed expression arguments', async () => {
+    const input = table([{ timestamp: '2020-01-01T00:00:00.000Z', results: 1 }]);
+    const result: Datatable = await functionWrapper(
+      getStackHistogramSeries(createDatatableUtilitiesMock, () => 'UTC')
+    )(input, { ...expressionArgs, values: 'not-json' });
+
+    expect(result.rows).toEqual([
+      {
+        timestamp: '2020-01-01T00:00:00.000Z',
+        results: 1,
+        overlay: 0,
+        remainder: 1,
+      },
+    ]);
+    expect(result.meta?.[TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META]).toBe(false);
     expect(result).not.toBe(input);
   });
 });

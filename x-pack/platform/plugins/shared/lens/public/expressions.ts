@@ -11,7 +11,7 @@ import { getDatatable } from '../common/expressions/defs/datatable/datatable';
 import { datatableColumn } from '../common/expressions/impl/datatable/datatable_column';
 import { mapToColumns } from '../common/expressions/defs/map_to_columns/map_to_columns';
 import { getDateHistogramTextBased } from '../common/expressions/defs/date_histogram';
-import { stackHistogramSeries } from '../common/expressions/defs/stack_histogram_series';
+import { getStackHistogramSeries } from '../common/expressions/defs/stack_histogram_series';
 import { formatColumn } from '../common/expressions/defs/format_column';
 import { counterRate } from '../common/expressions/defs/counter_rate';
 import { getTimeScale } from '../common/expressions/defs/time_scale/time_scale';
@@ -43,6 +43,6 @@ export const setupExpressions = (
     getDatatable(formatFactory),
     getTimeScale(getDatatableUtilities, getTimeZone, getForceNow),
     getDateHistogramTextBased(getDatatableUtilities, getTimeZone),
-    stackHistogramSeries,
+    getStackHistogramSeries(getDatatableUtilities, getTimeZone),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));
 };

@@ -10,7 +10,8 @@ import {
   TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META,
   TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META,
 } from '@kbn/lens-common';
-import moment from 'moment';
+import type { Duration } from 'moment';
+import moment from 'moment-timezone';
 
 export interface StackHistogramSeriesArgs {
   timeColumn: string;
@@ -25,26 +26,11 @@ export interface StackHistogramSeriesArgs {
   sampleProbability?: number;
 }
 
-const FIXED_INTERVAL_MS: Record<string, number> = {
-  millisecond: 1,
-  milliseconds: 1,
-  ms: 1,
-  second: 1000,
-  seconds: 1000,
-  s: 1000,
-  minute: 60 * 1000,
-  minutes: 60 * 1000,
-  m: 60 * 1000,
-  hour: 60 * 60 * 1000,
-  hours: 60 * 60 * 1000,
-  h: 60 * 60 * 1000,
-  day: 24 * 60 * 60 * 1000,
-  days: 24 * 60 * 60 * 1000,
-  d: 24 * 60 * 60 * 1000,
-  week: 7 * 24 * 60 * 60 * 1000,
-  weeks: 7 * 24 * 60 * 60 * 1000,
-  w: 7 * 24 * 60 * 60 * 1000,
-};
+/** Histogram interval already resolved by datatable utilities. */
+export interface StackHistogramInterval {
+  interval: Duration;
+  timeZone?: string;
+}
 
 const readTimestamp = (value: unknown): number | undefined => {
   if (typeof value === 'number' && Number.isFinite(value)) {
@@ -59,42 +45,10 @@ const readTimestamp = (value: unknown): number | undefined => {
   return undefined;
 };
 
-const readBucket = (
-  column: DatatableColumn | undefined
-): { interval: number; unit: string } | undefined => {
-  const bucket = column?.meta?.esMeta?.bucket;
-
-  if (!bucket || typeof bucket !== 'object') {
-    return undefined;
-  }
-
-  const interval = 'interval' in bucket ? bucket.interval : undefined;
-  const unit = 'unit' in bucket ? bucket.unit : undefined;
-
-  if (typeof interval !== 'number' || !Number.isFinite(interval) || interval <= 0) {
-    return undefined;
-  }
-
-  if (typeof unit !== 'string' || unit.length === 0) {
-    return undefined;
-  }
-
-  return { interval, unit };
-};
-
-const intervalDuration = (start: number, interval: number, unit: string): number | undefined => {
-  const normalized = unit.toLowerCase();
-
-  if (normalized === 'year' || normalized === 'years' || normalized === 'y') {
-    return moment.utc(start).add(interval, 'year').valueOf() - start;
-  }
-
-  if (normalized === 'month' || normalized === 'months') {
-    return moment.utc(start).add(interval, 'month').valueOf() - start;
-  }
-
-  const unitMs = FIXED_INTERVAL_MS[normalized];
-  return unitMs === undefined ? undefined : interval * unitMs;
+const calendarDuration = (start: number, histogram: StackHistogramInterval): number | undefined => {
+  const startMoment = moment.tz(start, histogram.timeZone ?? 'UTC');
+  const duration = startMoment.clone().add(histogram.interval).valueOf() - startMoment.valueOf();
+  return duration > 0 ? duration : undefined;
 };
 
 const inferFixedInterval = (starts: number[]): number | undefined => {
@@ -197,7 +151,8 @@ const zeroOverlayTable = (table: Datatable, args: StackHistogramSeriesArgs): Dat
  */
 export const stackHistogramSeries = (
   table: Datatable,
-  args: StackHistogramSeriesArgs
+  args: StackHistogramSeriesArgs,
+  histogram?: StackHistogramInterval
 ): Datatable => {
   if (
     columnIdsCollide(args) ||
@@ -236,11 +191,10 @@ export const stackHistogramSeries = (
   }
 
   const bucketStarts = starts as number[];
-  const bucket = readBucket(timeColumn);
-  const fixedInterval = bucket ? undefined : inferFixedInterval(bucketStarts);
+  const fixedInterval = histogram ? undefined : inferFixedInterval(bucketStarts);
   const durationAt = (start: number): number | undefined => {
-    if (bucket) {
-      return intervalDuration(start, bucket.interval, bucket.unit);
+    if (histogram) {
+      return calendarDuration(start, histogram);
     }
 
     if (fixedInterval !== undefined) {
@@ -254,12 +208,15 @@ export const stackHistogramSeries = (
     return undefined;
   };
 
-  if (bucketStarts.some((start) => durationAt(start) === undefined)) {
+  const durations = bucketStarts.map(durationAt);
+
+  if (durations.some((duration) => duration === undefined)) {
     return zeroOverlayTable(table, args);
   }
 
+  const bucketEnds = bucketStarts.map((start, index) => start + (durations[index] as number));
   const minStart = Math.min(...bucketStarts);
-  const maxEnd = Math.max(...bucketStarts.map((start) => start + (durationAt(start) as number)));
+  const maxEnd = Math.max(...bucketEnds);
   const rangesOverlap = maxEnd > from && minStart < to;
 
   if (!rangesOverlap) {
@@ -271,7 +228,7 @@ export const stackHistogramSeries = (
   const overlapCounts = new Array<number>(values.length).fill(0);
   const rows = table.rows.map((row, rowIndex) => {
     const start = bucketStarts[rowIndex];
-    const end = start + (durationAt(start) as number);
+    const end = bucketEnds[rowIndex];
     let overlay = 0;
 
     values.forEach((value, index) => {

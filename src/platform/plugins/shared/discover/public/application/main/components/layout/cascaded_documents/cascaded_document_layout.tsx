@@ -41,6 +41,7 @@ import {
   buildHistogramOverlaySelection,
   resolveHistogramOverlayPublication,
 } from './histogram_overlay_selection';
+import { getSingleCategorizeGroupField } from '../histogram_overlay/histogram_overlay_series';
 import { getPatternComparisonMessageState } from '../histogram_overlay/pattern_comparison_message';
 import {
   publishHistogramOverlaySelection,
@@ -119,9 +120,7 @@ const ESQLDataCascade = React.memo(
     const chartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
     const sparkline = useMemo(() => getCountSparkline(esqlQuery.esql), [esqlQuery.esql]);
     const canComparePatterns = useMemo(
-      () =>
-        queryMeta.groupByFields.filter((field) => field.type === 'categorize').length === 1 &&
-        Boolean(sparkline),
+      () => Boolean(getSingleCategorizeGroupField(queryMeta.groupByFields)) && Boolean(sparkline),
       [queryMeta.groupByFields, sparkline]
     );
     const patternComparison = getPatternComparisonMessageState({

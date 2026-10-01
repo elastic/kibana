@@ -43,7 +43,7 @@ export interface UnifiedHistogramConfig {
   layoutPropsMap: Record<string, UnifiedHistogramPartialLayoutProps | undefined>;
 }
 
-/** Pattern series plus the cascade row that produced it. */
+/** Pattern series plus the Discover row that produced it. */
 export interface DiscoverHistogramOverlaySelection extends UnifiedHistogramOverlaySeries {
   nodeId: string;
 }
@@ -169,7 +169,7 @@ const sameHistogramOverlaySelection = (
   );
 };
 
-/** Publishes the expanded pattern series. No-ops when the tab runtime is already gone. */
+/** Publishes the selected pattern series. No-ops when the tab runtime is already gone. */
 export const publishHistogramOverlaySelection = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string,

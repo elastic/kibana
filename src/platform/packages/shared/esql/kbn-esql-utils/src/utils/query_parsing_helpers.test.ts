@@ -1373,11 +1373,10 @@ describe('esql query helpers', () => {
     const countSparkline =
       'FROM logs | STATS Sparkline = SPARKLINE(COUNT(*), @timestamp, 40, ?_tstart, ?_tend) BY Pattern = CATEGORIZE(message)';
 
-    it('returns one count sparkline and keeps the requested bucket target', () => {
+    it('returns one count sparkline', () => {
       expect(getCountSparkline(countSparkline)).toEqual({
         column: 'Sparkline',
         timeField: '@timestamp',
-        bucketCount: 40,
         from: { kind: 'param', value: '_tstart' },
         to: { kind: 'param', value: '_tend' },
         isSampled: false,

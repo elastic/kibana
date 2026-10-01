@@ -12,6 +12,7 @@ import type { CountSparkline, ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import type { DiscoverHistogramOverlaySelection } from '../../../state_management/redux/runtime_state';
 import {
   buildHistogramOverlaySeries,
+  getSingleCategorizeGroupField,
   readSparklineValues,
 } from '../histogram_overlay/histogram_overlay_series';
 import type { ESQLDataGroupNode } from './blocks/types';
@@ -33,15 +34,9 @@ export const buildHistogramOverlaySelection = ({
   queryMeta: ESQLStatsQueryMeta;
   sparkline: CountSparkline | undefined;
 }): DiscoverHistogramOverlaySelection | undefined => {
-  const categorizeFields = queryMeta.groupByFields.filter((field) => field.type === 'categorize');
+  const categorizeField = getSingleCategorizeGroupField(queryMeta.groupByFields);
 
-  if (
-    !expanded ||
-    typeof expanded === 'boolean' ||
-    categorizeFields.length !== 1 ||
-    !sparkline ||
-    !timeRange
-  ) {
+  if (!expanded || typeof expanded === 'boolean' || !categorizeField || !sparkline || !timeRange) {
     return undefined;
   }
 
@@ -53,7 +48,7 @@ export const buildHistogramOverlaySelection = ({
 
   const [node] = expandedNodes;
 
-  if (node.groupColumn !== categorizeFields[0].field) {
+  if (node.groupColumn !== categorizeField) {
     return undefined;
   }
 

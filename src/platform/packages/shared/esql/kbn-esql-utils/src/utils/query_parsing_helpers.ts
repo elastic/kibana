@@ -620,7 +620,6 @@ export interface CountSparklineBound {
 export interface CountSparkline {
   column: string;
   timeField: string;
-  bucketCount: number;
   from: CountSparklineBound;
   to: CountSparklineBound;
   isSampled: boolean;
@@ -730,7 +729,6 @@ const readCountSparklineCall = (
   return {
     column,
     timeField: timeField.name,
-    bucketCount: bucketCount.value,
     from: fromBound,
     to: toBound,
   };
@@ -767,7 +765,6 @@ const readCountSparklineArg = (
 
 /**
  * Returns the only `SPARKLINE(COUNT(*), timeField, buckets, from, to)` in the query.
- * `bucketCount` is the requested target, not the length of the returned array.
  */
 export const getCountSparkline = (esql: string): CountSparkline | undefined => {
   let root: ESQLAstQueryExpression;

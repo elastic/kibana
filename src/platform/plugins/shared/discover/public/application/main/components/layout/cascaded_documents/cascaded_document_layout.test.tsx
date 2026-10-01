@@ -293,7 +293,6 @@ describe('CascadedDocumentsLayout', () => {
     mockGetCountSparkline.mockReturnValue({
       column: 'Sparkline',
       timeField: 'timestamp',
-      bucketCount: 1,
       from: { kind: 'date', value: '2020-01-01T00:00:00.000Z' },
       to: { kind: 'date', value: '2020-01-02T00:00:00.000Z' },
       isSampled: false,

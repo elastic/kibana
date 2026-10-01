@@ -581,7 +581,7 @@ function DiscoverDocumentsComponent({
   const documentsQuery = isOfAggregateQueryType(documentState.query)
     ? documentState.query.esql
     : undefined;
-  const gridPatternComparison = useRegularGridPatternComparison({
+  const { message, publisher, rowAdditionalLeadingControls } = useRegularGridPatternComparison({
     active: !cascadeLayoutActive,
     rows,
     query,
@@ -600,7 +600,7 @@ function DiscoverDocumentsComponent({
       getRenderCustomToolbarWithElements({
         saveToDashboardButton,
         leftSide: isDataGridFullScreen ? undefined : renderViewModeToggle(),
-        centerContent: gridPatternComparison.message,
+        centerContent: message,
         bottomSection: (
           <>
             {callouts}
@@ -610,7 +610,7 @@ function DiscoverDocumentsComponent({
       }),
     [
       callouts,
-      gridPatternComparison.message,
+      message,
       isDataGridFullScreen,
       loadingIndicator,
       renderViewModeToggle,
@@ -655,7 +655,7 @@ function DiscoverDocumentsComponent({
       </EuiScreenReaderOnly>
       <div className="unifiedDataTable" css={styles.dataTable}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
-          {gridPatternComparison.publisher}
+          {publisher}
           <DiscoverGrid
             ariaLabelledBy="documentsAriaLabel"
             cascadedDocumentsContext={cascadedDocumentsContext}
@@ -699,7 +699,7 @@ function DiscoverDocumentsComponent({
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
             externalAdditionalControls={externalAdditionalControls}
-            rowAdditionalLeadingControls={gridPatternComparison.rowAdditionalLeadingControls}
+            rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}

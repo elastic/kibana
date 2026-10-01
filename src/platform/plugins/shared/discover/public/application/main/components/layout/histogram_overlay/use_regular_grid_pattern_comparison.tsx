@@ -31,6 +31,7 @@ import {
 } from '../../../state_management/redux';
 import {
   buildHistogramOverlaySeries,
+  getSingleCategorizeGroupField,
   readSparklineValues,
   resolveHistogramOverlayPublication,
 } from './histogram_overlay_series';
@@ -99,13 +100,11 @@ export const canCompareGridPatterns = ({
   sparkline: CountSparkline | undefined;
   timeFieldName: string | undefined;
 }): boolean => {
-  const categorizeFields = groupByFields.filter((field) => field.type === 'categorize');
-
   // A STATS query is required for CATEGORIZE, and the histogram does not apply a breakdown
   // to transformational commands. A leftover breakdown (the logs profile defaults to
   // log.level) must not hide the action while the chart shows no breakdown.
   return (
-    categorizeFields.length === 1 &&
+    Boolean(getSingleCategorizeGroupField(groupByFields)) &&
     Boolean(sparkline) &&
     Boolean(timeFieldName) &&
     sparkline?.timeField === timeFieldName
@@ -163,6 +162,7 @@ export const resolvePublishedGridHistogramOverlay = ({
     return undefined;
   }
 
+  // Preserve stale rows before clearing transiently missing current inputs.
   if (!isEqual(rowsTimeRange, timeRange) || !isEqual(rowsEsqlVariables, currentEsqlVariables)) {
     return 'preserve';
   }
@@ -363,9 +363,9 @@ export const useRegularGridPatternComparison = ({
   const esql = isOfAggregateQueryType(query) ? query.esql : undefined;
   const sparkline = useMemo(() => (esql ? getCountSparkline(esql) : undefined), [esql]);
   const queryMeta = useMemo(() => (esql ? getESQLStatsQueryMeta(esql) : undefined), [esql]);
-  const categorizeField = queryMeta?.groupByFields.find(
-    (field) => field.type === 'categorize'
-  )?.field;
+  const categorizeField = queryMeta
+    ? getSingleCategorizeGroupField(queryMeta.groupByFields)
+    : undefined;
   const compatible = Boolean(
     esql &&
       queryMeta &&
