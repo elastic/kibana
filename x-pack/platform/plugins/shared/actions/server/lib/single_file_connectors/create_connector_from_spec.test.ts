@@ -7,7 +7,7 @@
 
 import { types } from 'util';
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
+import { connectorsSpecs, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 import { ActionTypeRegistry, type ActionTypeRegistryOpts } from '../../action_type_registry';
@@ -58,6 +58,20 @@ describe('createConnectorTypeFromSpec', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('shipped specs', () => {
+    for (const spec of Object.values(connectorsSpecs)) {
+      it(`builds validators for ${spec.metadata.id}`, () => {
+        const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+        expect(() => connectorType.validate.config.schema).not.toThrow();
+        expect(() => connectorType.validate.secrets.schema).not.toThrow();
+        if (connectorType.validate.params) {
+          expect(() => connectorType.validate.params?.schema).not.toThrow();
+        }
+      });
+    }
   });
 
   it('uses _test as the reserved test subAction', () => {
