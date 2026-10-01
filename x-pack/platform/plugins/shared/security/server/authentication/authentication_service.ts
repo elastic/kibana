@@ -37,6 +37,7 @@ import { Authenticator } from './authenticator';
 import { canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
 import { UiamOAuth } from './oauth';
+import { UiamSystemIdentity } from './system_identity';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { KIBANA_AUTH_FULL_HEADER, NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
@@ -53,7 +54,12 @@ import type { UserProfileServiceStartInternal } from '../user_profile';
 interface AuthenticationServiceSetupParams {
   http: Pick<
     HttpServiceSetup,
-    'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse' | 'staticAssets'
+    | 'basePath'
+    | 'csp'
+    | 'registerAuth'
+    | 'registerOnPreResponse'
+    | 'setSelfClientUnauthorizedErrorHandler'
+    | 'staticAssets'
   >;
   customBranding: CustomBrandingSetup;
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
@@ -389,6 +395,31 @@ export class AuthenticationService {
 
       return toolkit.notHandled();
     });
+
+    http.setSelfClientUnauthorizedErrorHandler(async ({ request }, toolkit) => {
+      if (!license.isLicenseAvailable() || !license.isEnabled()) {
+        return toolkit.notHandled();
+      }
+
+      // Core only consults this handler for a 401 raised by the authentication lifecycle, so the
+      // target route handler did not run and replaying the call cannot duplicate a side
+      // effect. Unlike the Elasticsearch path there is no expiry marker to test. Kibana boomifies
+      // the upstream error — so the trigger is ownership instead: only a fake request bound to a
+      // service account, whose credential Kibana minted and can mint again, is recoverable.
+      // A real request's credential would have to be refreshed through the session machinery,
+      // which would mutate the ambient authentication state of a request this call merely borrows.
+      if (!request.isFakeRequest) {
+        return toolkit.notHandled();
+      }
+
+      // It is possible that the request is not bound to a service account.
+      // We do not yet have a great mechanism to detect within the authentication service,
+      // so we rely on the service accounts backend to return null for requests that are not bound to a service account.
+      const authHeaders = await getServiceAccounts()
+        ?.backend.reauthenticateFakeRequest(request)
+        .catch(() => null);
+      return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
+    });
   }
 
   start({
@@ -437,6 +468,23 @@ export class AuthenticationService {
           uiam,
         })
       : null;
+
+    // UIAM derives Kibana's own identity from the mTLS client certificate alone, so the capability
+    // only exists when that certificate is configured. `xpack.security.uiam.ssl.certificate` and
+    // `.key` are optional, and without them every mint fails with a UIAM 401.
+    const canMintSystemIdentityTokens = Boolean(
+      config.uiam?.ssl.certificate && config.uiam.ssl.key
+    );
+    if (uiam && !canMintSystemIdentityTokens) {
+      this.logger.debug(
+        'UIAM is enabled without a client certificate (`xpack.security.uiam.ssl.certificate` and `.key`), so Kibana cannot mint tokens for its own identity.'
+      );
+    }
+
+    const systemIdentity =
+      uiam && canMintSystemIdentityTokens
+        ? new UiamSystemIdentity({ logger: this.logger.get('system-identity'), uiam })
+        : undefined;
 
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
@@ -490,6 +538,8 @@ export class AuthenticationService {
               convert: uiamAPIKeys.convert.bind(uiamAPIKeys),
               getInternalCallerAttestationHeaders:
                 uiamAPIKeys.getInternalCallerAttestationHeaders.bind(uiamAPIKeys),
+              isOwnClientAuthentication: uiamAPIKeys.isOwnClientAuthentication.bind(uiamAPIKeys),
+              isExternalApiKey: uiamAPIKeys.isExternalApiKey.bind(uiamAPIKeys),
             }
           : null,
       },
@@ -508,6 +558,8 @@ export class AuthenticationService {
             resolveUsers: uiamOAuth.resolveUsers.bind(uiamOAuth),
           }
         : null,
+
+      systemIdentity,
 
       login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {
         const providerIdentifier =

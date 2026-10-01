@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
@@ -12,17 +13,23 @@ import { mockServices } from '../common/services/__mocks__/services.mock';
 import type { Services } from '../common/services';
 import { createNavigationTree } from './navigation_tree';
 
+const containsLink = (nodes: NavigationTreeDefinition['body'], link: string): boolean =>
+  nodes.some(
+    (node) =>
+      node.link === link || (node.children !== undefined && containsLink(node.children, link))
+  );
+
 describe('createNavigationTree', () => {
   const createServices = (options?: { agentBuilderNavAtTop?: boolean }): Services => ({
     ...mockServices,
     featureFlags: {
       ...mockServices.featureFlags,
-      getBooleanValue: jest.fn((flag: string, defaultValue?: boolean) => {
+      getBooleanValue$: jest.fn((flag: string, defaultValue?: boolean) => {
         if (flag === AGENT_BUILDER_NAV_AT_TOP_FLAG) {
-          return options?.agentBuilderNavAtTop ?? defaultValue ?? false;
+          return of(options?.agentBuilderNavAtTop ?? defaultValue ?? false);
         }
 
-        return defaultValue ?? false;
+        return of(defaultValue ?? false);
       }),
     },
     uiSettings: {
@@ -72,5 +79,13 @@ describe('createNavigationTree', () => {
 
     expect(agentBuilderIndex).toBe(0);
     expect(contextEngineIndex).toBe(1);
+  });
+
+  it('includes service accounts in Admin and Settings', async () => {
+    const { footer = [] } = (await createNavigationTree(
+      createServices()
+    )) as NavigationTreeDefinition;
+
+    expect(containsLink(footer, 'management:service_accounts')).toBe(true);
   });
 });

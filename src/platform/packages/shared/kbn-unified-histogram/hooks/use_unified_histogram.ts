@@ -39,6 +39,11 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    */
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   /**
+   * When false, hides the Lens edit and save toolbar actions on the chart.
+   * Defaults to true.
+   */
+  withLensActions?: boolean;
+  /**
    * Disabled action IDs for the Lens embeddable
    */
   disabledActions?: LensEmbeddableInput['disabledActions'];

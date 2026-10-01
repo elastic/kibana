@@ -13,7 +13,7 @@ import type { BenchmarkExample } from './benchmark_dataset';
 import {
   ALERT_ANALYSIS_EXAMPLES,
   AUTOMATIC_TROUBLESHOOTING_EXAMPLES,
-  DASHBOARD_MANAGEMENT_EXAMPLES,
+  DASHBOARDS_EXAMPLES,
   DETECTION_RULE_EDIT_EXAMPLES,
   ENTITY_ANALYTICS_EXAMPLES,
   FIND_RULES_EXAMPLES,
@@ -33,7 +33,6 @@ import {
   SERVICE_MAP_EXAMPLES,
   SIEM_READINESS_EXAMPLES,
   SIG_EVENTS_MANAGEMENT_EXAMPLES,
-  SIG_EVENTS_MEMORY_EXAMPLES,
   SKILL_AUTHORING_EXAMPLES,
   STREAMS_MANAGEMENT_EXAMPLES,
   THREAT_HUNTING_EXAMPLES,
@@ -116,10 +115,10 @@ evaluate.describe(
       await evaluateBenchmark({ skillId: 'skill-authoring', examples: SKILL_AUTHORING_EXAMPLES });
     });
 
-    evaluate('dashboard-management routing', async ({ evaluateBenchmark }) => {
+    evaluate('dashboards routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({
-        skillId: 'dashboard-management',
-        examples: DASHBOARD_MANAGEMENT_EXAMPLES,
+        skillId: 'dashboards',
+        examples: DASHBOARDS_EXAMPLES,
       });
     });
   }
@@ -131,13 +130,6 @@ evaluate.describe(
   'Skill Selection Benchmark — Streams',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
-    evaluate('sig-events-memory routing', async ({ evaluateBenchmark }) => {
-      await evaluateBenchmark({
-        skillId: 'significant-events-memory',
-        examples: SIG_EVENTS_MEMORY_EXAMPLES,
-      });
-    });
-
     evaluate('streams-management routing', async ({ evaluateBenchmark }) => {
       await evaluateBenchmark({
         skillId: 'streams-management',

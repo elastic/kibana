@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { WorkflowListDto, WorkflowListItemDto } from '@kbn/workflows';
 import { ActionsService } from './actions_service';
@@ -29,7 +30,12 @@ const makeManagement = (
   };
 };
 
-const workflowItem = (id: string, actionMetadata: unknown, tags: string[] = ['action']) => ({
+const workflowItem = (
+  id: string,
+  actionMetadata: unknown,
+  tags: string[] = ['action'],
+  extraDefinition: Record<string, unknown> = {}
+) => ({
   id,
   name: id,
   description: '',
@@ -38,7 +44,7 @@ const workflowItem = (id: string, actionMetadata: unknown, tags: string[] = ['ac
   managedBy: 'alertzero',
   definition: (actionMetadata === null
     ? null
-    : { consts: { actionMetadata } }) as WorkflowListItemDto['definition'],
+    : { consts: { actionMetadata }, ...extraDefinition }) as WorkflowListItemDto['definition'],
   createdAt: '2026-01-01T00:00:00.000Z',
   tags,
   valid: true,
@@ -51,14 +57,17 @@ const page = (results: WorkflowListDto['results'], total = results.length): Work
   results,
 });
 
+const request = httpServerMock.createKibanaRequest();
+
 describe('ActionsService', () => {
   it('queries managed workflows tagged action (managed installs, not unmanaged)', async () => {
     const { getWorkflows, client } = makeManagement([page([])]);
     const service = new ActionsService(() => client, logger);
-    await service.list('default');
+    await service.list('default', request);
     expect(getWorkflows).toHaveBeenCalledWith(
       expect.objectContaining({ tags: ['action'], managedFilter: 'managed' }),
-      'default'
+      'default',
+      request
     );
   });
 
@@ -76,7 +85,7 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
     expect(result).toEqual({
       total: 1,
       actions: [
@@ -102,13 +111,14 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default', ['contain', 'escalate']);
+    const result = await service.list('default', request, ['contain', 'escalate']);
     expect(result.actions.map((a) => a.workflowId)).toEqual(['a-contain', 'b-escalate']);
     expect(result.total).toBe(2);
     // the filter is applied AFTER fetching, so the API still queries by tag only
     expect(getWorkflows).toHaveBeenCalledWith(
       expect.objectContaining({ tags: ['action'] }),
-      'default'
+      'default',
+      request
     );
   });
 
@@ -117,7 +127,7 @@ describe('ActionsService', () => {
       page([workflowItem('a-contain', { name: 'A', category: 'contain' })]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default', ['nightshift-specific-category']);
+    const result = await service.list('default', request, ['nightshift-specific-category']);
     expect(result).toEqual({ actions: [], total: 0 });
   });
 
@@ -129,7 +139,7 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
     expect(result.actions.map((a) => a.workflowId)).toEqual(['valid']);
   });
 
@@ -142,7 +152,7 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
     expect(result.actions.map((a) => a.workflowId)).toEqual(['valid']);
   });
 
@@ -156,18 +166,21 @@ describe('ActionsService', () => {
       { ...page(second, 101), page: 2 },
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
     expect(result.total).toBe(101);
     expect(getWorkflows).toHaveBeenCalledTimes(2);
     expect(getWorkflows).toHaveBeenLastCalledWith(
       expect.objectContaining({ page: 2, size: 100 }),
-      'default'
+      'default',
+      request
     );
   });
 
   it('throws when workflows management is unavailable', async () => {
     const service = new ActionsService(() => undefined, logger);
-    await expect(service.list('default')).rejects.toThrow('Workflows management is not available');
+    await expect(service.list('default', request)).rejects.toThrow(
+      'Workflows management is not available'
+    );
   });
 
   it('sorts entries by name', async () => {
@@ -178,7 +191,81 @@ describe('ActionsService', () => {
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
-    const result = await service.list('default');
+    const result = await service.list('default', request);
     expect(result.actions.map((a) => a.name)).toEqual(['Alpha action', 'Zeta action']);
+  });
+
+  it('projects the manual trigger inputs JSON Schema verbatim as inputSchema', async () => {
+    const inputSchema = {
+      properties: {
+        actionInput: {
+          type: 'object',
+          properties: { name: { type: 'string' }, query: { type: 'string' } },
+          required: ['name', 'query'],
+        },
+      },
+      required: ['actionInput'],
+      additionalProperties: false,
+      // x- prefixed annotations are legal JSON Schema but unknown to the
+      // workflow's zod schema, which would strip them from its parsed copy —
+      // the catalog must publish the original object, verbatim.
+      'x-es-validation': { message: 'Action input' },
+    };
+    const { client } = makeManagement([
+      page([
+        workflowItem('action-create-rule', { name: 'Create detection rule' }, ['action'], {
+          triggers: [{ type: 'manual', inputs: inputSchema }],
+        }),
+      ]),
+    ]);
+    const service = new ActionsService(() => client, logger);
+    const result = await service.list('default', request);
+    expect(result.actions[0].inputSchema).toEqual(inputSchema);
+  });
+
+  it('omits inputSchema when the definition has no manual-trigger inputs schema', async () => {
+    const { client } = makeManagement([
+      page([
+        // No triggers at all.
+        workflowItem('no-triggers', { name: 'No triggers' }),
+        // A manual trigger with no inputs.
+        workflowItem('manual-no-inputs', { name: 'Manual no inputs' }, ['action'], {
+          triggers: [{ type: 'manual' }],
+        }),
+        // A non-manual trigger carrying inputs — must not be read.
+        workflowItem('alert-trigger', { name: 'Alert trigger' }, ['action'], {
+          triggers: [{ type: 'alert', inputs: { properties: {} } }],
+        }),
+        // Schema-shaped but malformed values the manual-trigger schema rejects.
+        workflowItem('properties-array', { name: 'Properties array' }, ['action'], {
+          triggers: [{ type: 'manual', inputs: { properties: [] } }],
+        }),
+        workflowItem('properties-null', { name: 'Properties null' }, ['action'], {
+          triggers: [{ type: 'manual', inputs: { properties: null } }],
+        }),
+      ]),
+    ]);
+    const service = new ActionsService(() => client, logger);
+    const result = await service.list('default', request);
+    expect(result.actions).toEqual([
+      expect.not.objectContaining({ inputSchema: expect.anything() }),
+      expect.not.objectContaining({ inputSchema: expect.anything() }),
+      expect.not.objectContaining({ inputSchema: expect.anything() }),
+      expect.not.objectContaining({ inputSchema: expect.anything() }),
+      expect.not.objectContaining({ inputSchema: expect.anything() }),
+    ]);
+  });
+
+  it('omits inputSchema for legacy array-format trigger inputs', async () => {
+    const { client } = makeManagement([
+      page([
+        workflowItem('legacy-inputs', { name: 'Legacy inputs' }, ['action'], {
+          triggers: [{ type: 'manual', inputs: [{ name: 'actionInput', type: 'string' }] }],
+        }),
+      ]),
+    ]);
+    const service = new ActionsService(() => client, logger);
+    const result = await service.list('default', request);
+    expect(result.actions[0]).not.toHaveProperty('inputSchema');
   });
 });

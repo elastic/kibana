@@ -22,7 +22,7 @@ export const WatchesRoutes: React.FC = () => (
     {/* Literal /watches/<section> routes must precede /watches/:watchId, or the section name is
         read as a watch id. */}
     <Route path="/watches/:watchId" component={WatchDetailPage} />
-    {/* Land on the first catalog Watch so live mode is not dumped onto mock-only Workers. */}
+    {/* Land on the first catalog Watch rather than an empty section. */}
     <Route path="/watches" exact render={() => <Redirect to={DEFAULT_WATCH_PATH} />} />
   </Routes>
 );

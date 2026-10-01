@@ -329,7 +329,7 @@ export interface AgentBuilderPluginStart {
    */
   runtime: RuntimeStart;
   /**
-   * Conversations service (read-only), to list and retrieve conversations.
+   * Conversations service, to list, retrieve, and append events to conversations.
    */
   conversations: ConversationsStart;
   /**

@@ -250,6 +250,21 @@ export const INVALID_MITRE_RULES_MODAL_DISABLED_SECTION = i18n.translate(
   }
 );
 
+export const COVERAGE_OVERVIEW_MITRE_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.mitreErrorTitle',
+  {
+    defaultMessage: 'Failed to load MITRE ATT&CK® data',
+  }
+);
+
+export const COVERAGE_OVERVIEW_MITRE_ERROR_BODY = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.mitreErrorBody',
+  {
+    defaultMessage:
+      'The coverage matrix could not be displayed because MITRE ATT&CK® data failed to load. Refresh the page to try again.',
+  }
+);
+
 export const INVALID_MITRE_ID_BADGE_TOOLTIP = (id: string) =>
   i18n.translate(
     'xpack.securitySolution.coverageOverviewDashboard.invalidMitreRulesModal.invalidMitreIdBadgeTooltip',

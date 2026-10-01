@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
 import { partition } from 'lodash';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction } from '../../actions/types';
@@ -31,28 +31,32 @@ const WORKFLOW_ACTION_IDS: ReadonlySet<string> = new Set([
 ]);
 
 export interface EpisodeFooterActionMenuProps {
+  /** DOM node to anchor the popover to (the footer primary action button). */
+  anchor: HTMLElement;
+  /** Whether the popover is currently open. */
+  isOpen: boolean;
+  onClose: () => void;
   /** Already filtered to compatible actions. The menu does not re-filter. */
   actions: EpisodeAction[];
   episodes: AlertEpisode[];
-  /** Full episode details page href, rendered as the first menu item. */
-  viewDetailsHref: string;
+  /** Full episode details page href, rendered as the first menu item when present. */
+  viewDetailsHref?: string | null;
   onSuccess?: () => void;
 }
 
 /** Primary flyout footer control listing every action available for an episode. */
 export const EpisodeFooterActionMenu = ({
+  anchor,
+  isOpen,
+  onClose,
   actions,
   episodes,
   viewDetailsHref,
   onSuccess,
 }: EpisodeFooterActionMenuProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const togglePopover = () => setIsPopoverOpen((prev) => !prev);
-  const closePopover = () => setIsPopoverOpen(false);
-
-  const [workflowActions, otherActions] = partition(actions, ({ id }) =>
-    WORKFLOW_ACTION_IDS.has(id)
+  const [workflowActions, otherActions] = partition(
+    actions,
+    (action) => WORKFLOW_ACTION_IDS.has(action.id) || action.isWorkflowAction === true
   );
 
   const toMenuItem = (action: EpisodeAction): EuiContextMenuPanelItemDescriptor => {
@@ -62,7 +66,13 @@ export const EpisodeFooterActionMenu = ({
     if (action.renderMenuItem) {
       return {
         key: action.id,
-        renderItem: () => action.renderMenuItem!({ episodes, onSuccess, closeMenu: closePopover }),
+        renderItem: () =>
+          action.renderMenuItem!({
+            episodes,
+            onSuccess,
+            closeMenu: onClose,
+            surface: 'details_flyout',
+          }),
       };
     }
 
@@ -71,20 +81,22 @@ export const EpisodeFooterActionMenu = ({
       icon: action.iconType,
       'data-test-subj': `alertingV2EpisodeTakeAction-${action.id}`,
       onClick: () => {
-        closePopover();
+        onClose();
         action.execute({ episodes, onSuccess });
       },
     };
   };
 
-  const viewDetailsGroup: EuiContextMenuPanelItemDescriptor[] = [
-    {
-      name: i18n.FLYOUT_VIEW_DETAILS,
-      icon: 'eye',
-      href: viewDetailsHref,
-      'data-test-subj': 'alertingV2EpisodeTakeAction-viewDetails',
-    },
-  ];
+  const viewDetailsGroup: EuiContextMenuPanelItemDescriptor[] = viewDetailsHref
+    ? [
+        {
+          name: i18n.FLYOUT_VIEW_DETAILS,
+          icon: 'eye',
+          href: viewDetailsHref,
+          'data-test-subj': 'alertingV2EpisodeTakeAction-viewDetails',
+        },
+      ]
+    : [];
 
   const nonEmptyGroups = [
     viewDetailsGroup,
@@ -103,26 +115,16 @@ export const EpisodeFooterActionMenu = ({
   const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, items }];
 
   return (
-    <EuiPopover
+    <EuiWrappingPopover
+      button={anchor}
+      isOpen={isOpen}
+      closePopover={onClose}
       aria-label={i18n.FLYOUT_TAKE_ACTION}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
       anchorPosition="upRight"
       panelPaddingSize="s"
       data-test-subj="alertingV2EpisodeFlyoutTakeAction"
-      button={
-        <EuiButton
-          fill
-          iconType="chevronSingleDown"
-          iconSide="right"
-          onClick={togglePopover}
-          data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
-        >
-          {i18n.FLYOUT_TAKE_ACTION}
-        </EuiButton>
-      }
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
-    </EuiPopover>
+    </EuiWrappingPopover>
   );
 };

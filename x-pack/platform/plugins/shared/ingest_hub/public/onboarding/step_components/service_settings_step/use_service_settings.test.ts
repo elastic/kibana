@@ -124,6 +124,78 @@ describe('useServiceSettings — incompleteInstances', () => {
   });
 });
 
+// --- namespace ---
+
+describe('useServiceSettings — namespace', () => {
+  const svcWithRequired = makeEntry('svc_a', {
+    signalTypes: ['logs'],
+    dataStreams: ['svc_a'],
+    inputs: ['aws-s3'],
+    defaultEnabledInputs: ['aws-s3'],
+    requiredConfig: ['bucket_arn'],
+    varDefsByInput: { 'aws-s3': { bucket_arn: makeTextVarDef('bucket_arn') } },
+    varDefsByDataStream: {
+      svc_a: {
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        varDefsByInput: { 'aws-s3': { bucket_arn: makeTextVarDef('bucket_arn') } },
+        requiredConfig: ['bucket_arn'],
+      },
+    },
+  });
+  const filledVars = {
+    svc_a: {
+      enabledInputs: ['aws-s3'],
+      varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::my-bucket' } },
+    },
+  };
+
+  beforeEach(() => {
+    mockUseSessionStorage.mockImplementation((_key: string, initial: unknown) => useState(initial));
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['svc_a'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map([['svc_a', svcWithRequired]]),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+  });
+
+  it('persists the namespace alongside the instance vars', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
+    expect(result.current.getServiceVars('svc_a').namespace).toBe('prod');
+  });
+
+  it('copies the source namespace onto a duplicate when none is given', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, []));
+    expect(result.current.getServiceVars('svc_a__dup-1').namespace).toBe('prod');
+  });
+
+  it('uses the namespace given for a duplicate over the source one', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, [], 'staging'));
+    expect(result.current.getServiceVars('svc_a__dup-1').namespace).toBe('staging');
+  });
+
+  it('marks an instance incomplete when its namespace is invalid', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'Prod'));
+    expect(result.current.incompleteInstanceIds.has('svc_a')).toBe(true);
+    expect(result.current.isReady).toBe(false);
+  });
+
+  it('keeps an instance complete when its namespace is empty', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], ''));
+    expect(result.current.incompleteInstances).toHaveLength(0);
+    expect(result.current.isReady).toBe(true);
+  });
+});
+
 // --- signal filter ---
 
 describe('useServiceSettings — signal filter', () => {
@@ -216,5 +288,98 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
     expect(ids).toContain('guardduty__dup-2'); // still present
     expect(ids).toContain('guardduty__dup-3'); // new — not a collision
     expect(new Set(ids).size).toBe(ids.length); // all unique
+  });
+});
+
+// ─── lazy serviceVars prune effect ───────────────────────────────────────────
+
+describe('useServiceSettings — lazy serviceVars prune', () => {
+  it('removes serviceVars entries whose instanceId is not in the current instance list', async () => {
+    // Simulate a session where guardduty and a stale entry 'old_service' exist in serviceVars.
+    // After mount the effect should prune 'old_service' because it has no matching instance.
+    let storedState: unknown = {
+      globalRegion: 'us-east-1',
+      instances: [
+        { instanceId: 'guardduty', serviceId: 'guardduty', name: 'GuardDuty', isDuplicate: false },
+      ],
+      serviceVars: {
+        guardduty: { enabledDataStreams: ['guardduty'], varsByDataStream: {} },
+        old_service: { enabledDataStreams: ['old_service'], varsByDataStream: {} },
+      },
+    };
+    const setPersisted = jest.fn((updater: unknown) => {
+      if (typeof updater === 'function') {
+        storedState = (updater as Function)(storedState);
+      } else {
+        storedState = updater;
+      }
+    });
+    mockUseSessionStorage.mockReturnValue([storedState, setPersisted]);
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['guardduty'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: AWS_SERVICES_MAP,
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+
+    renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    // setPersisted must have been called to prune the stale key.
+    expect(setPersisted).toHaveBeenCalled();
+    const written = (storedState as any).serviceVars;
+    expect(written).toHaveProperty('guardduty');
+    expect(written).not.toHaveProperty('old_service');
+  });
+
+  it('does not call setPersisted when there are no stale keys', () => {
+    const storedState = {
+      globalRegion: 'us-east-1',
+      instances: [
+        { instanceId: 'guardduty', serviceId: 'guardduty', name: 'GuardDuty', isDuplicate: false },
+      ],
+      serviceVars: {
+        guardduty: { enabledDataStreams: ['guardduty'], varsByDataStream: {} },
+      },
+    };
+    const setPersisted = jest.fn();
+    mockUseSessionStorage.mockReturnValue([storedState, setPersisted]);
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['guardduty'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: AWS_SERVICES_MAP,
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+
+    renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    expect(setPersisted).not.toHaveBeenCalled();
+  });
+
+  it('preserves all valid entries and removes only stale ones', () => {
+    const storedState = {
+      globalRegion: '',
+      instances: [
+        { instanceId: 'svc_a', serviceId: 'svc_a', name: 'A', isDuplicate: false },
+        { instanceId: 'svc_b', serviceId: 'svc_b', name: 'B', isDuplicate: false },
+      ],
+      serviceVars: {
+        svc_a: { enabledDataStreams: [], varsByDataStream: {} },
+        svc_b: { enabledDataStreams: [], varsByDataStream: {} },
+        svc_stale: { enabledDataStreams: [], varsByDataStream: {} },
+      },
+    };
+    const setPersisted = jest.fn();
+    mockUseSessionStorage.mockReturnValue([storedState, setPersisted]);
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['svc_a', 'svc_b'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: AWS_SERVICES_MAP,
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+
+    renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    expect(setPersisted).toHaveBeenCalled();
+    const call = setPersisted.mock.calls[0][0];
+    expect(call.serviceVars).toHaveProperty('svc_a');
+    expect(call.serviceVars).toHaveProperty('svc_b');
+    expect(call.serviceVars).not.toHaveProperty('svc_stale');
   });
 });

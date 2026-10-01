@@ -28,7 +28,6 @@ import type { FC, ComponentType } from 'react';
 import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
-import type { EntitiesListColumns } from '../../../entity_analytics/components/entity_store/hooks/use_entities_list_columns';
 import type { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import type { HostsTableColumns } from '../../hosts/components/hosts_table';
@@ -97,8 +96,7 @@ declare type BasicTableColumns =
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns
-  | UsersTableColumns
-  | EntitiesListColumns;
+  | UsersTableColumns;
 
 export declare type SiemTables = BasicTableProps<BasicTableColumns>;
 

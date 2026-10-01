@@ -13,6 +13,7 @@ import { DetectionsList, MAX_VISIBLE_DETECTIONS } from './detections_list';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
@@ -105,7 +106,7 @@ const defaultListEvent = mockEvent();
 const renderList = (props: Partial<React.ComponentProps<typeof DetectionsList>> = {}) =>
   render(
     <I18nProvider>
-      <DetectionsList event={defaultListEvent} eventUuid="evt-uuid-001" {...props} />
+      <DetectionsList event={defaultListEvent} eventId="evt-001" {...props} />
     </I18nProvider>
   );
 
@@ -318,7 +319,7 @@ describe('DetectionsList', () => {
       return (
         <DetectionsList
           event={defaultListEvent}
-          eventUuid="evt-uuid-001"
+          eventId="evt-001"
           selectedDetectionId={selectedDetectionId}
           onDetectionClick={(detection) => setSelectedDetectionId(detection.detection_id)}
         />

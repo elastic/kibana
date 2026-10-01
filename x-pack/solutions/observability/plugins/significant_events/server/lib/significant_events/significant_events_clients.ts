@@ -1,0 +1,126 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import { firstValueFrom, type Observable } from 'rxjs';
+import {
+  DetectionService,
+  detectionsDataStream,
+  type StoredDetection,
+  type detectionsMappings,
+} from './detections';
+import type { DetectionClient } from './detections';
+import { EventService, eventsDataStream, type StoredEvent, type eventsMappings } from './events';
+import type { EventClient, SignificantEventsReadClient } from './events';
+import type { TriggerEmitter } from '../../workflows/triggers/emit';
+
+export interface SignificantEventsServices {
+  detection: DetectionService;
+  event: EventService;
+}
+
+export interface SignificantEventsClients {
+  getDetectionClient: () => Promise<DetectionClient>;
+  getEventClient: () => Promise<EventClient>;
+  /**
+   * Flag-aware accessor for read-only `{id}`/list lookups migrated onto `RuleEventsClient`
+   * (currently: `eventsSearchRoute`, `eventsLifecycleRoute`, `eventsGetRoute`,
+   * `eventsTriggerInvestigationRoute`). Reads the current `useRuleEventsRead$` value on each
+   * call. Only call this for handlers that exclusively call `findByEventId` (or the list/search
+   * equivalent) — any handler needing `EventClient`-only methods (`bulkCreate`,
+   * `findByEventUuid`, `findLatestActive`, `emitTrigger`, …) must keep using `getEventClient()`,
+   * which always returns `EventClient` regardless of the flag.
+   */
+  getEventSearchClient: () => Promise<SignificantEventsReadClient>;
+}
+
+export function createSignificantEventsServices(): SignificantEventsServices {
+  return {
+    detection: new DetectionService(),
+    event: new EventService(),
+  };
+}
+
+export function createSignificantEventsClients({
+  services,
+  dataStreams,
+  esClient,
+  space,
+  triggerEmitter,
+  useRuleEventsRead$,
+}: {
+  services: SignificantEventsServices;
+  dataStreams: DataStreamsStart;
+  esClient: ElasticsearchClient;
+  space: string;
+  triggerEmitter?: TriggerEmitter;
+  /**
+   * Current `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` value. Read when a search client is created,
+   * so a later flag change applies to the next search.
+   */
+  useRuleEventsRead$?: Observable<boolean>;
+}): SignificantEventsClients {
+  const buildEventClientOptions = async () => ({
+    dataStreamClient: await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
+      eventsDataStream.name
+    ),
+    esClient,
+    space,
+    triggerEmitter,
+  });
+
+  // Shared EventClient instance — both `getEventClient` and `getEventSearchClient` (when flag is
+  // off) return the same object so that `eventSearchClient === eventClient` identity checks in
+  // write-path helpers correctly short-circuit the redundant legacy-lineage lookup (#1517).
+  // This `let` is declared inside `createSignificantEventsClients` — one closure per request;
+  // no cross-request state is shared.
+  // Promise-based memoization: storing the promise (not the resolved value) ensures concurrent
+  // callers racing before initialization completes all receive the same instance rather than each
+  // constructing their own, which would silently break the `eventSearchClient === eventClient`
+  // identity checks in write-path helpers.
+  let sharedEventClientPromise: Promise<EventClient> | undefined;
+  const getSharedEventClient = (): Promise<EventClient> => {
+    if (!sharedEventClientPromise) {
+      sharedEventClientPromise = buildEventClientOptions().then(
+        (opts) => services.event.getClient(opts) as EventClient
+      );
+    }
+    return sharedEventClientPromise;
+  };
+
+  return {
+    getDetectionClient: async () =>
+      services.detection.getClient({
+        dataStreamClient: await dataStreams.initializeClient<
+          typeof detectionsMappings,
+          StoredDetection
+        >(detectionsDataStream.name),
+        esClient,
+        space,
+      }),
+    // Every caller of `getEventClient()` (routes other than the read-only search handlers,
+    // agent-builder tools, workflow triggers) uses the full `EventClient` surface (`bulkCreate`,
+    // `findByEventUuid`, `findLatestActive`, `emitTrigger`, …), which `RuleEventsClient`
+    // intentionally does not implement (#1517). This accessor always returns `EventClient`,
+    // independent of `useRuleEventsRead$` — the flag only affects `getEventSearchClient()`.
+    getEventClient: getSharedEventClient,
+    getEventSearchClient: async (): Promise<SignificantEventsReadClient> => {
+      // Safe to read the flag when the client is created: each caller uses the instance for one
+      // read, then drops it. The next call evaluates the stream again.
+      const useRuleEventsRead = useRuleEventsRead$
+        ? await firstValueFrom(useRuleEventsRead$)
+        : false;
+      if (!useRuleEventsRead) {
+        // Return the shared EventClient so callers can use `readClient === eventClient` to detect
+        // that no synthetic-UUID translation is needed.
+        return getSharedEventClient();
+      }
+      return services.event.getClient({ ...(await buildEventClientOptions()), useRuleEventsRead });
+    },
+  };
+}

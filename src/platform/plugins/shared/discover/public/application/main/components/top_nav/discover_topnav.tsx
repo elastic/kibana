@@ -109,7 +109,13 @@ export const DiscoverTopNav = ({
       // so it's visible but non-interactive until a query resolves a data view.
       return { disabled: true };
     }
-    return { disabled: !dataView.isTimeBased() };
+    const disabled =
+      (dataView.type !== 'esql' && !dataView.isTimeBased()) ||
+      (dataView.type === 'esql' && !dataView.timeFieldName);
+
+    return {
+      disabled,
+    };
   }, [dataView]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
