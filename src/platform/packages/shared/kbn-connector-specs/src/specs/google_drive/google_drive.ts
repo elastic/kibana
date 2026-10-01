@@ -461,7 +461,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             .min(1)
             .max(MAX_FILE_IDS)
             .describe(
-              'Array of file IDs (up to 100) to fetch metadata for. Use IDs from searchFiles or listFiles results. Returns ownership, sharing, permissions, and other details for each file.'
+              'Array of file IDs (up to 250) to fetch metadata for. Use IDs from searchFiles or listFiles results. Returns ownership, sharing, permissions, and other details for each file.'
             ),
         })
       ),
