@@ -400,15 +400,18 @@ export function generateEsqlQuery(
   }
 
   // Process buckets
-  const termsBucketCount = bucketEsAggsEntries.filter(([, col]) =>
-    isColumnOfType<TermsIndexPatternColumn>('terms', col)
-  ).length;
+  const termsBuckets = bucketEsAggsEntries.flatMap(([, col], index) =>
+    isColumnOfType<TermsIndexPatternColumn>('terms', col) ? [{ col, index }] : []
+  );
   const resolvedBucketExprs = new Map<number, string>();
   const usedBucketAliases = new Set<string>();
   const bucketAliasesByExpression = new Map<string, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
     if (isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
-      const termsFailure = getTermsConversionFailure(col, { hasDateHistogram, termsBucketCount });
+      const termsFailure = getTermsConversionFailure(col, {
+        hasDateHistogram,
+        termsBucketCount: termsBuckets.length,
+      });
       if (termsFailure) {
         return getEsqlQueryFailedResult(termsFailure);
       }
@@ -549,13 +552,8 @@ export function generateEsqlQuery(
   const validMetrics = dedupeFragmentsByOutputName(metricsResult);
   const validBuckets = dedupeFragmentsByOutputName(bucketsResult);
 
-  // Inner top-N terms = last terms bucket in order; remaining buckets are LIMIT BY groups.
-  const termsBucketIndexes = bucketEsAggsEntries
-    .map(([, col], index) => ({ col, index }))
-    .filter(({ col }) => isColumnOfType<TermsIndexPatternColumn>('terms', col));
-  const innerTermsBucket = termsBucketIndexes[termsBucketIndexes.length - 1] as
-    | { col: TermsIndexPatternColumn; index: number }
-    | undefined;
+  // Last terms dimension is the innermost Top values (Lens bucket order).
+  const innerTermsBucket = termsBuckets.at(-1);
 
   if (validBuckets.length > 0) {
     // Alias bucket expressions that use named params so column names are stable.
