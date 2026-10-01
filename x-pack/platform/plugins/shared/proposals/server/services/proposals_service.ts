@@ -21,7 +21,11 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionMetadata } from '@kbn/workflows';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
-import { PROPOSAL_ATTACHMENT_TYPE, PROPOSALS_RESUME_CHANNEL } from '@kbn/proposals-common';
+import {
+  DEFAULT_PROPOSAL_TITLE,
+  PROPOSAL_ATTACHMENT_TYPE,
+  PROPOSALS_RESUME_CHANNEL,
+} from '@kbn/proposals-common';
 import type {
   CreateProposalRequest,
   DismissReason,
@@ -47,7 +51,7 @@ import {
 } from './esql';
 import type { ChartsWindow } from './esql';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
-import { toSortRanks } from '../storage/sort_ranks';
+import { CONFIDENCE_RANK_FIELD, IMPACT_RANK_FIELD, toSortRanks } from '../storage/sort_ranks';
 import {
   ProposalConflictError,
   ProposalExpiredError,
@@ -146,15 +150,17 @@ export class ProposalsService {
     // never consulted, and the queue silently drops a proposal it cannot group.
     const category = blankToUndefined(params.category) ?? metadata?.category;
     const impact = blankToUndefined(params.impact) ?? metadata?.impact ?? 'low';
-    // Both are required on the stored document, so a blank has to resolve to
-    // something rather than to an omission: `confidence` feeds the queue's
-    // secondary sort rank, and `origin` says who proposed it.
+    // Required on the stored document, so a blank has to resolve to something
+    // rather than to an omission: it feeds the queue's secondary sort rank.
     const confidence = blankToUndefined(params.confidence) ?? 'medium';
-    const origin = blankToUndefined(params.origin) ?? 'worker';
 
     const document: ProposalDocument = {
       spaceId,
       conversationId: params.conversationId,
+      // Resolved once here rather than re-derived by every reader: same
+      // precedence as `category`, with the action's own name behind it and a
+      // constant behind that, so every proposal is named exactly once.
+      title: blankToUndefined(params.title) ?? metadata?.name ?? DEFAULT_PROPOSAL_TITLE,
       comment: params.comment,
       actionWorkflowId,
       actionInput: params.actionInput,
@@ -162,7 +168,7 @@ export class ProposalsService {
       impact,
       confidence,
       category,
-      origin,
+      origin: params.origin,
       ...toSortRanks({ impact, confidence }),
       expiresAt: blankToUndefined(params.expiresAt),
       workflowExecutionId: blankToUndefined(params.workflowExecutionId),
@@ -176,15 +182,7 @@ export class ProposalsService {
 
     await this.deps.storage.index({ id, document, op_type: 'create' });
 
-    // The action's name, since a proposal has no title of its own yet; the
-    // workflow id is the last resort so an unnamed action still reads as
-    // something more specific than the generic fallback.
-    await this.attachToConversation(
-      id,
-      params.conversationId,
-      metadata?.name ?? actionWorkflowId,
-      request
-    );
+    await this.attachToConversation(id, params.conversationId, document.title, request);
 
     const proposal = toProposal(id, document);
     return { ...proposal, action: metadata, expired: isExpired(proposal) };
@@ -201,7 +199,7 @@ export class ProposalsService {
   private async attachToConversation(
     proposalId: string,
     conversationId: string,
-    title: string | undefined,
+    title: string,
     request: KibanaRequest
   ): Promise<void> {
     try {
@@ -256,8 +254,8 @@ export class ProposalsService {
       from: query.from,
       query: { bool: { filter: toFilterClauses(query, spaceId) } },
       sort: sort ?? [
-        { impactRank: { order: 'asc' } },
-        { confidenceRank: { order: 'asc' } },
+        { [IMPACT_RANK_FIELD]: { order: 'asc' } },
+        { [CONFIDENCE_RANK_FIELD]: { order: 'asc' } },
         // Soonest deadline first; proposals without one come after those with.
         { expiresAt: { order: 'asc', missing: '_last' } },
         // Final tiebreak, so paging over equally-ranked proposals is stable.
@@ -289,7 +287,7 @@ export class ProposalsService {
    * keeping this to four queries rather than one per bucket.
    */
   async chartsSummary(
-    { windowHours, bucketMinutes }: ProposalChartsSummaryQuery,
+    { windowHours, bucketMinutes, origin }: ProposalChartsSummaryQuery,
     spaceId: string
   ): Promise<ProposalChartsSummaryResponse> {
     const now = Date.now();
@@ -307,7 +305,7 @@ export class ProposalsService {
       currentOpen: 0,
     });
 
-    const window: ChartsWindow = { spaceId, windowStartIso, bucketMinutes };
+    const window: ChartsWindow = { spaceId, windowStartIso, bucketMinutes, origin };
 
     let anchorResponse;
     let opensResponse;
@@ -584,6 +582,10 @@ export class ProposalsService {
     const cloneId = uuidv4();
     const { id: _id, ...original } = proposal;
 
+    // What the predecessor will carry once the supersession write below lands,
+    // resolved here so both documents agree on it.
+    const failure = executionError ?? original.executionError;
+
     const document: ProposalDocument = {
       ...original,
       status: 'pending',
@@ -594,6 +596,9 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
+      // Why the attempt this one re-offers failed. Denormalised from the
+      // predecessor so the queue can say so from the row it already has.
+      previousExecutionError: failure,
     };
 
     // The clone is created before the original is marked, deliberately. The
@@ -608,7 +613,7 @@ export class ProposalsService {
     const superseded: ProposalDocument = {
       ...original,
       supersededBy: cloneId,
-      ...(executionError !== undefined ? { executionError } : {}),
+      ...(failure !== undefined ? { executionError: failure } : {}),
     };
 
     await this.writeDocument(id, superseded, { seqNo, primaryTerm });
@@ -625,7 +630,7 @@ export class ProposalsService {
    * any single revision — mirroring `clone()`'s inheritance of the same fields.
    */
   async revise(
-    { id, comment, actionInput, impact, confidence }: ReviseProposalParams,
+    { id, title, comment, actionInput, impact, confidence }: ReviseProposalParams,
     spaceId: string,
     request: KibanaRequest
   ): Promise<{ proposalId: string; revision: number }> {
@@ -678,6 +683,9 @@ export class ProposalsService {
     // Resolved once, so the enums and the ranks derived from them cannot drift.
     const nextImpact = impact ?? original.impact;
     const nextConfidence = confidence ?? original.confidence;
+    // Only a real override replaces the predecessor's: a blank would strip the
+    // proposal of the name `create()` resolved for it.
+    const nextTitle = blankToUndefined(title);
 
     const revisionId = uuidv4();
     const rootProposalId = original.rootProposalId ?? id;
@@ -698,6 +706,10 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
+      // `previousExecutionError` rides along with the spread untouched: a
+      // revision corrects a proposal, it does not run anything, so the last
+      // attempt to fail is still the one the predecessor was re-offered for.
+      ...(nextTitle !== undefined ? { title: nextTitle } : {}),
       ...(comment !== undefined ? { comment } : {}),
       ...(mergedActionInput !== undefined ? { actionInput: mergedActionInput } : {}),
       impact: nextImpact,
@@ -1197,6 +1209,9 @@ const toFilterClauses = (
   if (filters.conversationId) {
     filter.push({ term: { conversationId: filters.conversationId } });
   }
+  if (filters.origin) {
+    filter.push({ term: { origin: filters.origin } });
+  }
   if (filters.category) {
     filter.push({ term: { category: filters.category } });
   }
@@ -1227,10 +1242,10 @@ const toFilterClauses = (
 
 /**
  * Drops the storage-only sort ranks, so they never reach the API contract.
- * Destructuring is the point: adding a rank field forces this to be updated.
+ * One key rather than a list, because they are nested under `ranks`: a third
+ * rank is a change to `ProposalSortRanks` alone.
  */
-const stripRanks = ({ impactRank, confidenceRank, ...proposal }: StoredProposalRecord): Proposal =>
-  proposal;
+const stripRanks = ({ ranks, ...proposal }: StoredProposalRecord): Proposal => proposal;
 
 const toProposal = (id: string, document: ProposalDocument): Proposal =>
   stripRanks({ id, ...document });

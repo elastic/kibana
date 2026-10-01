@@ -12,7 +12,7 @@ import {
   toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
-import type { PanelFailure } from '../utils';
+import type { OperationFailure } from '../utils';
 import { getErrorMessage } from '../utils';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import type { InlinePanelOperationType } from '../resolve_panel';
@@ -181,8 +181,10 @@ const getResolvedPanelCreationRequests = ({
  * - `source: 'config'`: built by value from the panel type's registry definition.
  * - `source: 'request'`: read from the up-front parallel resolution (keyed by
  *   panel input index).
+ * - `source: 'attachment'`: built from the referenced visualization attachment.
  *
- * Returns `undefined` and records a failure when a panel request didn't resolve.
+ * Returns `undefined` and records a failure when a panel request or attachment
+ * didn't resolve.
  */
 export const createPanelInputMaterializer = ({
   resolvedPanelCreationRequests,
@@ -194,7 +196,7 @@ export const createPanelInputMaterializer = ({
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   operationIndex: number;
   operationType: InlinePanelOperationType;
-  failures: PanelFailure[];
+  failures: OperationFailure[];
   resolveAttachmentPanel?: ResolveAttachmentPanel;
 }): ((item: NewPanelInput, panelInputIndex: number) => MaterializedPanelInput | undefined) => {
   const resolvedRequestByInputIndex = new Map(
@@ -247,7 +249,7 @@ export const createPanelInputMaterializer = ({
 export const applyCustomContentTemplates = async (
   materialized: Array<{ panel: MaterializedPanelInput | undefined }>,
   resolveTemplate: ResolveCustomContentTemplate,
-  failures: PanelFailure[]
+  failures: OperationFailure[]
 ): Promise<void> => {
   await Promise.all(
     materialized.map(async (entry) => {

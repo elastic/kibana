@@ -720,9 +720,13 @@ steps:
     type: workflow.execute
     if: "${{ steps.resolve_escalation.output.escalate == true }}"
     with:
-      workflow-id: system-create-proposal
+      workflow-id: system-create-alertzero-proposal
       inputs:
         conversationId: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        # The attack's own name, which `resolve_escalation` already heads the
+        # comment with. Truncated because this trigger allows 1024 and the
+        # proposal step rejects anything over 256.
+        title: "{{ inputs.title | truncate: 256, '' }}"
         comment: "{{ steps.resolve_escalation.output.comment }}"
         actionWorkflowId: "{{ consts.handoff_to_forensics_action }}"
         actionInput: "${{ steps.resolve_escalation.output.action_input }}"

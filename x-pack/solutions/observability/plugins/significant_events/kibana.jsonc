@@ -25,6 +25,7 @@
       "agentBuilder",
       "agentBuilderSml",
       "cloud",
+      "cps",
       "nightshiftInvestigations",
       "serverless",
       "searchInferenceEndpoints",
