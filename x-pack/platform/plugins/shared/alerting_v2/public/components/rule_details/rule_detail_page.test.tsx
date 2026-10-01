@@ -241,12 +241,13 @@ describe('RuleDetailPage', () => {
 
   it('renders native kind, status, and tag badges in the app header', () => {
     renderPage(baseRule);
+    expect(screen.getByTestId('esqlRulesBadge')).toHaveTextContent('ES|QL rules');
     const kindBadge = screen.getByTestId('kindBadge');
     expect(kindBadge).toHaveTextContent('Events');
     expect(kindBadge.querySelector('[data-euiicon-type="chartBarVertical"]')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('+3'));
     expect(screen.getByTestId('enabledBadge')).toHaveTextContent('Enabled');
     expect(screen.queryByTestId('disabledBadge')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText('+3'));
     expect(screen.getByText('prod')).toBeInTheDocument();
     expect(screen.getByText('infra')).toBeInTheDocument();
   });
@@ -256,6 +257,7 @@ describe('RuleDetailPage', () => {
     const kindBadge = screen.getByTestId('kindBadge');
     expect(kindBadge).toHaveTextContent('Alerts');
     expect(kindBadge.querySelector('[data-euiicon-type="bell"]')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('+3'));
     expect(screen.getByTestId('disabledBadge')).toHaveTextContent('Disabled');
     expect(screen.queryByTestId('enabledBadge')).not.toBeInTheDocument();
   });
@@ -419,6 +421,7 @@ describe('RuleDetailPage', () => {
     it('still shows the read-only enabled status badge', () => {
       renderPage(baseRule);
 
+      fireEvent.click(screen.getByText('+3'));
       expect(screen.getByTestId('enabledBadge')).toHaveTextContent('Enabled');
     });
   });

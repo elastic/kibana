@@ -67,6 +67,18 @@ const useObservabilityRulesTabs = (
   useMemo(() => {
     const tabs: AppHeaderTab[] = [];
 
+    if (showV1) {
+      tabs.push({
+        id: 'v1Rules',
+        label: i18n.translate('xpack.observabilityAlerting.rulesPage.v1RulesTabTitle', {
+          defaultMessage: 'Standard rules',
+        }),
+        isSelected: selected === 'v1',
+        href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`),
+        'data-test-subj': 'v1RulesTab',
+      });
+    }
+
     if (showV2) {
       tabs.push({
         id: ALERTING_V2_RULES_TAB_ID,
@@ -83,18 +95,6 @@ const useObservabilityRulesTabs = (
           ),
         },
         'data-test-subj': 'v2RulesTab',
-      });
-    }
-
-    if (showV1) {
-      tabs.push({
-        id: 'v1Rules',
-        label: i18n.translate('xpack.observabilityAlerting.rulesPage.v1RulesTabTitle', {
-          defaultMessage: 'Standard rules',
-        }),
-        isSelected: selected === 'v1',
-        href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`),
-        'data-test-subj': 'v1RulesTab',
       });
     }
 

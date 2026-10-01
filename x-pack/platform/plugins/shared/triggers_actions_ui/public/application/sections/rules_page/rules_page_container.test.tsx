@@ -270,15 +270,15 @@ describe('rulesPage', () => {
         expect(await screen.findByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'false');
       });
 
-      it('orders the V2 rules tab before the V1 rules tab', async () => {
+      it('orders the Standard rules tab before the ES|QL rules tab', async () => {
         const history = createMemoryHistory({ initialEntries: ['/'] });
         renderRulesPage(history);
 
         const tabs = await screen.findAllByRole('tab');
 
         expect(tabs.map((tab) => tab.getAttribute('data-test-subj'))).toEqual([
-          'v2RulesTab',
           'v1RulesTab',
+          'v2RulesTab',
         ]);
       });
 

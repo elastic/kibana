@@ -143,23 +143,7 @@ export const RulesListHeader = ({
   );
 
   const defaultTabs = useMemo<AppHeaderTab[]>(() => {
-    const headerTabs: AppHeaderTab[] = [
-      {
-        id: ALERTING_V2_RULES_TAB_ID,
-        label: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabTitle', {
-          defaultMessage: 'ES|QL rules',
-        }),
-        isSelected: true,
-        href: basePath.prepend(paths.ruleList),
-        badge: {
-          iconType: 'dot',
-          tooltip: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabNewBadgeTooltip', {
-            defaultMessage: 'New',
-          }),
-        },
-        'data-test-subj': 'v2RulesTab',
-      },
-    ];
+    const headerTabs: AppHeaderTab[] = [];
 
     if (canAccessTriggersActionsRules(application.capabilities)) {
       headerTabs.push({
@@ -172,6 +156,22 @@ export const RulesListHeader = ({
         'data-test-subj': 'v1RulesTab',
       });
     }
+
+    headerTabs.push({
+      id: ALERTING_V2_RULES_TAB_ID,
+      label: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabTitle', {
+        defaultMessage: 'ES|QL rules',
+      }),
+      isSelected: true,
+      href: basePath.prepend(paths.ruleList),
+      badge: {
+        iconType: 'dot',
+        tooltip: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabNewBadgeTooltip', {
+          defaultMessage: 'New',
+        }),
+      },
+      'data-test-subj': 'v2RulesTab',
+    });
 
     // A one-item tablist is not a tablist — omit tabs unless both surfaces are shown.
     return headerTabs.length > 1 ? headerTabs : [];
