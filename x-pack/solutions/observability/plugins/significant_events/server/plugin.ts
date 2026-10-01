@@ -121,6 +121,7 @@ import { createSignificantEventsAvailability } from './agent_builder/tools/signi
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
+import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
@@ -477,6 +478,17 @@ export class SignificantEventsPlugin
       server: this.server,
       getScopedClients: this.getScopedClients,
     });
+
+    // Without this a deleted or disabled source's rules keep firing until the next catalog
+    // reconcile, which only runs with continuous onboarding or sync.
+    plugins.nightshiftSources.onSourceChange(
+      createSourceChangeListener({
+        getScopedClients: this.getScopedClients,
+        onboardingClient: streamsKIsOnboardingClient,
+        maintenanceService: this.maintenanceService,
+        logger: this.logger,
+      })
+    );
 
     const priceService = createPriceService({
       fetchFn: fetch,

@@ -498,6 +498,62 @@ describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
   });
 });
 
+describe('promoteUnbackedQueriesRoute', () => {
+  const promoteRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_promote'];
+
+  it('offers only enabled sources for promotion, so disabled sources get no live rules', async () => {
+    const promoteUnbackedQueries = jest
+      .fn()
+      .mockResolvedValue({ promoted: 1, skipped_stats: 0, skipped_ineligible: 0 });
+    const list = jest.fn().mockResolvedValue({ sources: [{ id: 'enabled-source' }], total: 1 });
+    const handlerParams = {
+      params: { body: { queryIds: ['q1'] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: { list },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ promoteUnbackedQueries }),
+      }),
+      server: {},
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof promoteRoute.handler>[0];
+
+    await promoteRoute.handler(handlerParams);
+
+    expect(list).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+    expect(promoteUnbackedQueries).toHaveBeenCalledWith(
+      expect.objectContaining({ queryIds: ['q1'], sourceIds: ['enabled-source'] })
+    );
+  });
+});
+
+describe('persistQueriesRoute', () => {
+  const persistRoute =
+    internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_persist'];
+
+  it('rejects a disabled source, which would get a live rule', async () => {
+    const handlerParams = {
+      params: { path: { streamName: 'logs.test' }, body: { queries: [] } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({
+            source: { id: 'logs.test', view_name: 'logs.test', enabled: false },
+          }),
+        },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof persistRoute.handler>[0];
+
+    await expect(persistRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
+    });
+  });
+});
+
 describe('generateQueriesRoute', () => {
   const generateRoute =
     internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_generate'];
@@ -630,7 +686,8 @@ describe('generateQueriesRoute', () => {
 });
 
 describe('upsertQueryRoute', () => {
-  const source = { id: 'logs.test', view_name: 'logs.test, logs.test.*' };
+  const source = { id: 'logs.test', view_name: 'logs.test, logs.test.*', enabled: true };
+  const disabledSource = { ...source, enabled: false };
   const upsertBody = {
     title: 'Error count',
     description: '',
@@ -705,6 +762,29 @@ describe('upsertQueryRoute', () => {
 
     await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({
       output: { statusCode: 404 },
+    });
+    expect(upsertQuery).not.toHaveBeenCalled();
+  });
+
+  it('rejects every upsert for a disabled source, which would get a live rule', async () => {
+    const upsertQuery = jest.fn();
+    const handlerParams = {
+      params: { path: { queryId: 'q1' }, body: upsertBody },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: { get: jest.fn().mockResolvedValue({ source: disabledSource }) },
+        licensing: {},
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          upsertQuery,
+          getQueryLinks: jest.fn().mockResolvedValue([makeQueryLink('q1', 40)]),
+        }),
+      }),
+      server: makeServer(),
+      maintenanceService: makeMaintenanceService(),
+    } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
+
+    await expect(upsertQueryRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 409 },
     });
     expect(upsertQuery).not.toHaveBeenCalled();
   });

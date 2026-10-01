@@ -42,7 +42,9 @@ import {
 } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
+import { assertSourceEnabled } from '../../../utils/assert_source_enabled';
 import { resolveSourceIds } from '../../../utils/resolve_source_ids';
+import { listAllSources } from '../../../utils/list_all_sources';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
@@ -127,7 +129,8 @@ const promoteUnbackedQueriesRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const sourceIds = await resolveSourceIds(undefined, sourcesClient);
+    // A disabled source's rules must stay off, so its queries wait until the source is enabled.
+    const sourceIds = (await listAllSources(sourcesClient, { enabled: true })).map(({ id }) => id);
 
     return kiClient.promoteUnbackedQueries({
       queryIds: params?.body?.queryIds,
@@ -730,6 +733,8 @@ const persistQueriesRoute = createServerRoute({
       scopedClients.getKnowledgeIndicatorClient(),
     ]);
 
+    assertSourceEnabled(source);
+
     return persistQueries(source.id, queries, {
       kiClient,
       viewName: source.view_name,
@@ -790,6 +795,9 @@ const upsertQueryRoute = createServerRoute({
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const streamName = targetName ?? (await resolveExistingQueryStreamName(kiClient, queryId));
     const { source } = await sourcesClient.get(streamName);
+    // Any upsert can install a rule: a new query gets one, and an edit that changes the ES|QL
+    // replaces the old one with an enabled rule.
+    assertSourceEnabled(source);
 
     validateEsqlQueryForSourceOrThrow({
       esqlQuery: queryBody.esql.query,
