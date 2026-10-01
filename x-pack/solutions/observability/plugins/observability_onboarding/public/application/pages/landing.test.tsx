@@ -580,7 +580,6 @@ describe('LandingPage tile click telemetry (V2)', () => {
     expect(reportedTileClicks(coreStart)).toEqual(dockerCollectionJourney);
   });
 
-  // Typing does not rebuild the tiles, so the flag has to come from the url at click time.
   it('flags a tile clicked after a search was typed', async () => {
     const user = userEvent.setup();
     const coreStart = renderLandingAtPath('/');

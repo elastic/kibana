@@ -39,7 +39,6 @@ const renderPlainCard = (
 export interface RenderResultCardOptions {
   /** Names the chooser to open in the url, which is what renders the flyout. */
   onOpenCollection: (groupId: string) => void;
-  /** Reports the pick before the card navigates or opens the chooser. */
   trackTileClick: TrackTileClick;
 }
 
