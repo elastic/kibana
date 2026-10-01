@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
+import { createRecordingAxiosClient } from '../../lib/recording_axios_client';
 import { SharepointOnline } from './sharepoint_online';
 
 /**
@@ -988,6 +989,24 @@ describe('SharepointOnline', () => {
         SharepointOnline.actions.downloadItemFromURL.handler(mockContext, { downloadUrl })
       ).rejects.toThrow('downloadItemFromURL only downloads from https://*.sharepoint.com');
       expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('does not send the Graph bearer token with the download request', async () => {
+      const { client, requests } = createRecordingAxiosClient(
+        { Authorization: 'Bearer graph-token' },
+        () => ({ data: Uint8Array.from([72, 105]), status: 200, headers: {} })
+      );
+      const downloadUrl =
+        'https://contoso.sharepoint.com/sites/hr/_layouts/15/download.aspx?UniqueId=abc&tempauth=token';
+
+      await SharepointOnline.actions.downloadItemFromURL.handler(
+        { ...mockContext, client } as unknown as ActionContext,
+        { downloadUrl }
+      );
+
+      expect(requests).toHaveLength(1);
+      expect(requests[0].url).toBe(downloadUrl);
+      expect(requests[0].headers).not.toHaveProperty('Authorization');
     });
 
     it('should throw when downloadUrl is not provided', async () => {

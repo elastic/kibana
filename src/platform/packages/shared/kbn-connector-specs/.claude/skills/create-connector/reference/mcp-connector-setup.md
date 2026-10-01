@@ -147,7 +147,7 @@ Good descriptions make typed actions discoverable and usable by LLMs. Apply desc
    ```typescript
    const SearchInputSchema = lazySchema(() =>
      z.object({
-       query: z.string().describe('GitHub search query using GitHub search syntax (e.g., "repo:elastic/kibana is:open label:bug")'),
+       query: z.string().max(1000).describe('GitHub search query using GitHub search syntax (e.g., "repo:elastic/kibana is:open label:bug")'),
        type: z.enum(['repositories', 'code', 'issues', 'users']).describe('The type of GitHub content to search'),
      })
    );

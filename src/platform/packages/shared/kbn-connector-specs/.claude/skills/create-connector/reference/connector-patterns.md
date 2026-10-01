@@ -163,7 +163,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const SearchInputSchema = lazySchema(() =>
   z.object({
-    query: z.string().describe('Search query string'),
+    query: z.string().max(1000).describe('Search query string'),
     limit: z.number().optional().describe('Maximum results (default: 20)'),
   })
 );
@@ -171,7 +171,7 @@ export type SearchInput = z.infer<typeof SearchInputSchema>;
 
 export const GetItemInputSchema = lazySchema(() =>
   z.object({
-    id: z.string().describe('The item ID'),
+    id: z.string().max(255).describe('The item ID'),
   })
 );
 export type GetItemInput = z.infer<typeof GetItemInputSchema>;
@@ -234,7 +234,7 @@ export const YourMcpConnector: ConnectorSpec = {
       description: 'Search Your Service by keyword using the underlying MCP tool.',
       input: lazySchema(() =>
         z.object({
-          query: z.string().describe('Keyword or natural-language search query'),
+          query: z.string().max(1000).describe('Keyword or natural-language search query'),
         })
       ),
       handler: withMcpClient(async (client, input) => {
@@ -257,8 +257,8 @@ export const YourMcpConnector: ConnectorSpec = {
       description: 'Call any MCP tool by name with arbitrary arguments. Use listTools first to discover available tools.',
       input: lazySchema(() =>
         z.object({
-          name: z.string().describe('The MCP tool name (from listTools)'),
-          arguments: z.record(z.unknown()).optional().describe('Tool arguments as a key/value map'),
+          name: z.string().min(1).max(200).describe('The MCP tool name (from listTools)'),
+          arguments: z.record(z.string().max(200), z.unknown()).optional().describe('Tool arguments as a key/value map'),
         })
       ),
       handler: withMcpClient(async (client, input) => {
@@ -848,15 +848,15 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
 ```typescript
 export const SearchInputSchema = lazySchema(() =>
   z.object({
-    query: z.string().describe('Keyword or natural-language search query'),
+    query: z.string().max(1000).describe('Keyword or natural-language search query'),
     limit: z.number().optional().describe('Maximum results to return (1–100, default 20)'),
-    state: z.string().optional().describe('Filter by state: "new", "in_progress", or "resolved"'),
+    state: z.string().max(50).optional().describe('Filter by state: "new", "in_progress", or "resolved"'),
   })
 );
 
 export const GetItemInputSchema = lazySchema(() =>
   z.object({
-    id: z.string().describe('The item sys_id, returned by the search action'),
+    id: z.string().max(255).describe('The item sys_id, returned by the search action'),
   })
 );
 ```

@@ -238,7 +238,7 @@ Every Zod parameter schema **must** call `.describe()`. Include:
 ```typescript
 const SearchInputSchema = lazySchema(() =>
   z.object({
-    query: z.string().describe('Full-text search query. Example: "Q4 budget report"'),
+    query: z.string().max(1000).describe('Full-text search query. Example: "Q4 budget report"'),
     maxResults: z
       .number()
       .int()
