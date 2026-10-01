@@ -6,6 +6,7 @@
  */
 
 import type { KbnClient } from '@kbn/test';
+import { formatError } from '../../lib/type_guards';
 import type { WorkflowExecutionSummary, WorkflowStepExecutionSummary } from './kibana_api';
 import { listExecutionsByIds, listExecutionsStartedAfter, listStepExecutions } from './kibana_api';
 import type { DispatchRecord } from './types';
@@ -53,6 +54,11 @@ export interface ProgressSnapshot {
   workerExecutions: WorkflowExecutionSummary[];
   workDoneSteps: WorkflowStepExecutionSummary[];
   childExecutions: Record<string, WorkflowExecutionSummary[]>;
+  /**
+   * Child workflows whose executions could not be listed, by workflow id. Their entry in
+   * `childExecutions` is empty, which must not be read as "nothing ran".
+   */
+  childExecutionErrors: Record<string, string>;
 }
 
 export interface DispatchProgress {
@@ -108,6 +114,11 @@ export const classifyDispatches = ({
 export const isSettled = (phase: DispatchPhase): boolean =>
   phase === 'dispatch_failed' || phase === 'parked' || phase === 'finished';
 
+interface ChildListing {
+  executions: WorkflowExecutionSummary[];
+  error?: string;
+}
+
 export const fetchProgress = async ({
   kbnClient,
   workerWorkflowId,
@@ -136,8 +147,9 @@ export const fetchProgress = async ({
       startedAfter: runStartedAt,
     }),
     ...childWorkflowIds.map((workflowId) =>
-      listExecutionsStartedAfter({ kbnClient, workflowId, startedAfter: runStartedAt }).catch(
-        () => []
+      listExecutionsStartedAfter({ kbnClient, workflowId, startedAfter: runStartedAt }).then(
+        (executions): ChildListing => ({ executions }),
+        (error): ChildListing => ({ executions: [], error: formatError(error) })
       )
     ),
   ]);
@@ -147,7 +159,13 @@ export const fetchProgress = async ({
     workerExecutions,
     workDoneSteps,
     childExecutions: Object.fromEntries(
-      childWorkflowIds.map((workflowId, index) => [workflowId, children[index]])
+      childWorkflowIds.map((workflowId, index) => [workflowId, children[index].executions])
+    ),
+    childExecutionErrors: Object.fromEntries(
+      childWorkflowIds.flatMap((workflowId, index) => {
+        const { error } = children[index];
+        return error ? [[workflowId, error]] : [];
+      })
     ),
   };
 };

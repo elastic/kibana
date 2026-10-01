@@ -72,6 +72,7 @@ const buildInput = (overrides: Partial<ReportInput> = {}): ReportInput => ({
     takenAt: RUN_END,
     workerExecutions: [buildExecution()],
     workDoneSteps: [buildStep()],
+    childExecutionErrors: {},
     childExecutions: {},
   },
   stepExecutions: {},
@@ -131,6 +132,7 @@ describe('buildReport', () => {
           takenAt: RUN_END,
           workerExecutions: [buildExecution({ status: 'running' })],
           workDoneSteps: [],
+          childExecutionErrors: {},
           childExecutions: {},
         },
       })
@@ -149,6 +151,7 @@ describe('buildReport', () => {
           takenAt: RUN_END,
           workerExecutions: [],
           workDoneSteps: [],
+          childExecutionErrors: {},
           childExecutions: {},
         },
       })
@@ -175,6 +178,7 @@ describe('buildReport', () => {
             buildExecution({ id: 'c', status: 'completed' }),
           ],
           workDoneSteps: [],
+          childExecutionErrors: {},
           childExecutions: {},
         },
       })
@@ -244,6 +248,7 @@ describe('buildReport', () => {
           takenAt: RUN_END,
           workerExecutions: [buildExecution({ status: 'running' })],
           workDoneSteps: [],
+          childExecutionErrors: {},
           childExecutions: {},
         },
       })
@@ -290,6 +295,7 @@ describe('buildReport', () => {
           takenAt: RUN_END,
           workerExecutions: [buildExecution()],
           workDoneSteps: [buildStep()],
+          childExecutionErrors: {},
           childExecutions: {
             'system-create-alertzero-proposal': [
               buildExecution({ id: 'p1', status: 'waiting' }),
@@ -304,6 +310,41 @@ describe('buildReport', () => {
     expect(report.childExecutions['system-create-alertzero-proposal'].open).toBe(2);
   });
 
+  it('flags a child workflow whose executions could not be listed', () => {
+    const report = buildReport(
+      buildInput({
+        snapshot: {
+          takenAt: RUN_END,
+          workerExecutions: [buildExecution()],
+          workDoneSteps: [buildStep()],
+          childExecutions: { 'system-create-alertzero-proposal': [] },
+          childExecutionErrors: { 'system-create-alertzero-proposal': '403 Forbidden' },
+        },
+      })
+    );
+
+    expect(report.childExecutions['system-create-alertzero-proposal'].error).toBe('403 Forbidden');
+    expect(renderReportMarkdown(report)).toContain(
+      '`system-create-alertzero-proposal`: executions unavailable (403 Forbidden)'
+    );
+  });
+
+  it('leaves the error out for a child workflow that was listed', () => {
+    const report = buildReport(
+      buildInput({
+        snapshot: {
+          takenAt: RUN_END,
+          workerExecutions: [buildExecution()],
+          workDoneSteps: [buildStep()],
+          childExecutions: { 'system-create-alertzero-proposal': [] },
+          childExecutionErrors: {},
+        },
+      })
+    );
+
+    expect(report.childExecutions['system-create-alertzero-proposal']).not.toHaveProperty('error');
+  });
+
   it('sums token usage over executions', () => {
     const report = buildReport(
       buildInput({
@@ -311,6 +352,7 @@ describe('buildReport', () => {
           takenAt: RUN_END,
           workerExecutions: [buildExecution({ usage: { inputTokens: 100, outputTokens: 10 } })],
           workDoneSteps: [buildStep()],
+          childExecutionErrors: {},
           childExecutions: {
             'system-security-alert-analysis': [
               buildExecution({ id: 'c1', usage: { inputTokens: 900, outputTokens: 90 } }),

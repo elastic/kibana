@@ -24,6 +24,8 @@ export interface MetricsSample {
   batchesByPhase: Partial<Record<DispatchPhase, number>>;
   workerExecutionsByStatus: Record<string, number>;
   childExecutionsByStatus: Record<string, Record<string, number>>;
+  /** Child workflows whose executions could not be listed in this sample, by workflow id. */
+  childExecutionErrors?: Record<string, string>;
   taskManager?: TaskManagerSample;
   error?: string;
 }
@@ -70,6 +72,17 @@ export const startCollector = ({
   let latest: MetricsSample | undefined;
   let latestSnapshot: ProgressSnapshot | undefined;
   let stopped = false;
+  const warnedChildErrors = new Map<string, string>();
+
+  const warnAboutChildErrors = (errors: Record<string, string>): void => {
+    const unreported = Object.entries(errors).filter(
+      ([workflowId, message]) => warnedChildErrors.get(workflowId) !== message
+    );
+    for (const [workflowId, message] of unreported) {
+      warnedChildErrors.set(workflowId, message);
+      log.warning(`Could not list executions of ${workflowId}: ${message}`);
+    }
+  };
 
   const sampleTaskManager = async (): Promise<TaskManagerSample | undefined> => {
     try {
@@ -124,6 +137,10 @@ export const startCollector = ({
           countBy(executions, ({ status }) => status),
         ])
       );
+      if (Object.keys(snapshot.childExecutionErrors).length > 0) {
+        sample.childExecutionErrors = snapshot.childExecutionErrors;
+        warnAboutChildErrors(snapshot.childExecutionErrors);
+      }
     } catch (error) {
       sample.error = formatError(error);
       log.warning(`Sample failed: ${sample.error}`);

@@ -66,7 +66,11 @@ export interface Report {
     taskManagerOverdueTasks: number | undefined;
     taskManagerLoadP50: number | undefined;
   };
-  childExecutions: Record<string, { byStatus: Record<string, number>; open: number }>;
+  /** `error` is set when the executions could not be listed; the counts are then not meaningful. */
+  childExecutions: Record<
+    string,
+    { byStatus: Record<string, number>; open: number; error?: string }
+  >;
   accuracy: {
     alertsScored: number;
     byLabel: Record<AlertLabel, Record<Verdict | 'none', number>>;
@@ -262,7 +266,8 @@ export const buildReport = ({
     childExecutions: Object.fromEntries(
       Object.entries(snapshot.childExecutions).map(([workflowId, executions]) => {
         const byStatus = countBy(executions, ({ status }) => status);
-        return [workflowId, { byStatus, open: inFlight(byStatus) }];
+        const error = snapshot.childExecutionErrors[workflowId];
+        return [workflowId, { byStatus, open: inFlight(byStatus), ...(error ? { error } : {}) }];
       })
     ),
     accuracy: {
@@ -330,9 +335,10 @@ export const renderReportMarkdown = (report: Report): string => {
     `- Peak Task Manager drift p99 (ms): ${peaks.taskManagerDriftP99Ms ?? 'n/a'}`,
     `- Peak overdue tasks: ${peaks.taskManagerOverdueTasks ?? 'n/a'}`,
     `- Peak Task Manager load p50: ${peaks.taskManagerLoadP50 ?? 'n/a'}`,
-    ...Object.entries(report.childExecutions).map(
-      ([workflowId, { byStatus, open }]) =>
-        `- \`${workflowId}\`: ${formatCounts(byStatus)} (${open} still open)`
+    ...Object.entries(report.childExecutions).map(([workflowId, { byStatus, open, error }]) =>
+      error
+        ? `- \`${workflowId}\`: executions unavailable (${error})`
+        : `- \`${workflowId}\`: ${formatCounts(byStatus)} (${open} still open)`
     ),
     '',
     '## Accuracy (triaged alerts only)',

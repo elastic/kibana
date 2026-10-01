@@ -5,10 +5,25 @@
  * 2.0.
  */
 
+import { ToolingLog } from '@kbn/tooling-log';
+import { createKbnClient } from '../../lib/clients';
 import type { WorkflowExecutionSummary, WorkflowStepExecutionSummary } from './kibana_api';
+import { listExecutionsByIds, listExecutionsStartedAfter, listStepExecutions } from './kibana_api';
 import type { ProgressSnapshot } from './progress';
-import { REPORTED_STEP_IDS, WORK_DONE_STEP_ID, classifyDispatches, isSettled } from './progress';
+import {
+  REPORTED_STEP_IDS,
+  WORK_DONE_STEP_ID,
+  classifyDispatches,
+  fetchProgress,
+  isSettled,
+} from './progress';
 import type { DispatchRecord } from './types';
+
+jest.mock('./kibana_api', () => ({
+  listExecutionsByIds: jest.fn(),
+  listExecutionsStartedAfter: jest.fn(),
+  listStepExecutions: jest.fn(),
+}));
 
 const buildDispatch = (overrides: Partial<DispatchRecord> = {}): DispatchRecord => ({
   batchId: 'batch-0001',
@@ -49,6 +64,7 @@ const buildSnapshot = (overrides: Partial<ProgressSnapshot> = {}): ProgressSnaps
   workerExecutions: [buildExecution()],
   workDoneSteps: [],
   childExecutions: {},
+  childExecutionErrors: {},
   ...overrides,
 });
 
@@ -143,5 +159,54 @@ describe('isSettled', () => {
 
   it.each(['not_visible', 'running'] as const)('does not settle %s', (phase) => {
     expect(isSettled(phase)).toBe(false);
+  });
+});
+
+describe('fetchProgress', () => {
+  const kbnClient = createKbnClient({
+    kibanaUrl: 'http://localhost:5601',
+    elasticsearchUrl: 'http://localhost:9200',
+    auth: { type: 'basic', username: 'elastic', password: 'changeme' },
+    log: new ToolingLog(),
+  });
+  const listExecutionsByIdsMock = jest.mocked(listExecutionsByIds);
+  const listExecutionsStartedAfterMock = jest.mocked(listExecutionsStartedAfter);
+  const listStepExecutionsMock = jest.mocked(listStepExecutions);
+
+  const fetch = () =>
+    fetchProgress({
+      kbnClient,
+      workerWorkflowId: 'worker',
+      childWorkflowIds: ['analysis', 'proposal'],
+      dispatches: [buildDispatch()],
+      runStartedAt: '2026-09-30T12:00:00.000Z',
+    });
+
+  beforeEach(() => {
+    listExecutionsByIdsMock.mockReset().mockResolvedValue([buildExecution()]);
+    listStepExecutionsMock.mockReset().mockResolvedValue([]);
+    listExecutionsStartedAfterMock.mockReset();
+  });
+
+  it('lists the executions of every child workflow', async () => {
+    listExecutionsStartedAfterMock.mockResolvedValue([buildExecution({ id: 'child-1' })]);
+
+    const snapshot = await fetch();
+
+    expect(Object.keys(snapshot.childExecutions)).toEqual(['analysis', 'proposal']);
+    expect(snapshot.childExecutions.analysis).toEqual([buildExecution({ id: 'child-1' })]);
+    expect(snapshot.childExecutionErrors).toEqual({});
+  });
+
+  it('reports a child workflow that could not be listed instead of treating it as empty', async () => {
+    listExecutionsStartedAfterMock
+      .mockResolvedValueOnce([buildExecution({ id: 'child-1' })])
+      .mockRejectedValueOnce(new Error('403 Forbidden'));
+
+    const snapshot = await fetch();
+
+    expect(snapshot.childExecutions.analysis).toHaveLength(1);
+    expect(snapshot.childExecutions.proposal).toEqual([]);
+    expect(snapshot.childExecutionErrors).toEqual({ proposal: expect.stringContaining('403') });
   });
 });
