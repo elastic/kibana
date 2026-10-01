@@ -107,7 +107,10 @@ describe('Context Engine agent instructions', () => {
       expect(instructions).toMatch(
         /attaches the automation without a dialog and does not start a run/
       );
-      expect(instructions).toMatch(/the result has `replaced: true` when that happened/);
+      expect(instructions).toMatch(
+        /installing the same template again with the same name replaces that automation in place, and the result has `replaced: true`; a different name adds another automation/
+      );
+      expect(instructions).not.toMatch(/rather than adding a second one/);
     });
 
     it('gates every subagent handoff on a confirmed plan in the proposal shape, grounded in queries', () => {
