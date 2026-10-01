@@ -182,7 +182,9 @@ describe('createLlmSynthesizeMemoryGroup', () => {
       recalledIds: [],
       labels: { useful: [], harmful: [] },
       extractions: [{ slug: 'checkout-redis', title: 'Checkout Redis', tags: [], replaces: [] }],
-      synthesizeMemoryGroup: createLlmSynthesizeMemoryGroup({ inferenceClient: { output } as never }),
+      synthesizeMemoryGroup: createLlmSynthesizeMemoryGroup({
+        inferenceClient: { output } as never,
+      }),
       logger: loggerMock.create(),
     });
 
