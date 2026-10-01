@@ -859,6 +859,70 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix connector and step icons in the workflows list showing the generic plugs fallback [#263880]({{kib-pull}}263880).
 
 
+## 9.4.8 [kibana-9.4.8-release-notes]
+
+### Fixes [kibana-9.4.8-fixes]
+
+**Elastic Agent Builder**:
+* Fix Agent Builder tools hanging or timing out on data streams that span the frozen tier. Tools now skip frozen tier indices [#292349]({{kib-pull}}292349).
+
+**Alerting and cases**:
+* Fix forced rule runs and schedule changes being silently dropped when you request them while the rule is finishing a run [#293492]({{kib-pull}}293492).
+* Fix bulk alert tag updates also changing matching alerts in other {{kib}} spaces [#285874]({{kib-pull}}285874).
+* Fix Jira Service Management and Opsgenie connector actions failing when the rendered alert message exceeds 130 characters. The connectors now truncate the message instead [#291698]({{kib-pull}}291698).
+% !!DEFERRED!! Not on the 9.4 branch (backport missing as of 2026-10-01). Re-verify against the next BC before publishing.
+% * Fix the **Tracking containment** rule editor breaking when you select a data view [#289778]({{kib-pull}}289778).
+
+**Dashboards and Visualizations**:
+* Increase the TinyMath expression length limit so longer visualization formulas no longer fail [#290314]({{kib-pull}}290314).
+* Fix Go to URL drilldowns leaving Mustache tokens such as `event.values.[0]` unreplaced in the drilldown name [#290363]({{kib-pull}}290363).
+
+**Data ingestion and {{fleet}}**:
+* Fix deleting a managed integration policy leaving the agent listed as active [#290181]({{kib-pull}}290181).
+* Fix update and delete of legacy managed integration policies returning HTTP 404 or reporting success while the deployment kept running [#287011]({{kib-pull}}287011).
+* Fix agentless agents enrolled in other {{kib}} spaces appearing in the {{fleet}} **Agents** list [#293142]({{kib-pull}}293142).
+* Fix version-specific agent policy assignment failing repeatedly for agent policies in non-default {{kib}} spaces [#293010]({{kib-pull}}293010).
+* Fix the {{fleet}} output edit flyout freezing or showing no counts when thousands of agent policies use the output [#291972]({{kib-pull}}291972).
+* Fix Elastic Agent upgrade and agent policy requests hanging for up to two minutes when {{kib}} can't retrieve the list of available Elastic Agent versions [#292788]({{kib-pull}}292788).
+* Fix integration upgrades failing when a custom analyzer or normalizer was added to a `@custom` component template after the write index was created. {{fleet}} now rolls over the data stream instead [#291813]({{kib-pull}}291813).
+* Fix {{fleet}} installing only the first trained model when an integration package includes several [#290145]({{kib-pull}}290145).
+* Fix `ambiguous_conflict` errors on dashboard assets when you install an integration in multiple {{kib}} spaces [#291648]({{kib-pull}}291648).
+* Fix installed integration icons rendering as black shapes [#293176]({{kib-pull}}293176).
+* Fix the **Edit pipeline** button in the ingest pipeline details flyout moving off-screen when a processor contains a long value [#291000]({{kib-pull}}291000).
+
+**Data management**:
+* Fix Index Management moving component templates listed in `ignore_missing_component_templates` to the end of `composed_of` when you edit or clone an index template [#290171]({{kib-pull}}290171).
+
+**Developer tools**:
+* Fix Console reporting {{es}} request timeouts as connection failures. Console now explains that the request might still be running and suggests checking its status before you retry [#289481]({{kib-pull}}289481).
+
+% !!DEFERRED!! Discover. Not on the 9.4 branch (backport missing as of 2026-10-01). Re-verify against the next BC before publishing.
+% * Fix Discover showing an invalid time range from the URL instead of falling back to the default time range [#290358]({{kib-pull}}290358).
+
+**{{es}} solution**:
+* Add an **Expand site group members** toggle to SharePoint Online connectors for compact document-level security [#288070]({{kib-pull}}288070).
+* Add a **Sync all mail folders** option to the Outlook connector [#291396]({{kib-pull}}291396).
+* Fix deleted content connectors remaining in the connectors list [#290859]({{kib-pull}}290859).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.4.8 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{elastic-sec}} solution**:
+For the {{elastic-sec}} 9.4.8 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**{{kib}} platform**:
+* Hide the **Activate user** action on deactivated users when you have read-only access [#289801]({{kib-pull}}289801).
+* Fix a failed audit log write after startup crashing {{kib}}. {{kib}} now reports a degraded state and turns the audit logger off instead [#287360]({{kib-pull}}287360).
+* Fix {{kib}} shutting down when the product documentation installer downloads a corrupt or incomplete artifact [#291142]({{kib-pull}}291142).
+* Fix PDF and PNG reports using too much memory, and failing on memory-constrained instances, when you generate them from a wide browser window [#289062]({{kib-pull}}289062).
+
+**Machine learning and {{infer}}**:
+* Fix streaming {{infer}} requests returning no content when `elasticsearch.compression` is enabled, which made Agent Builder report an empty response [#290381]({{kib-pull}}290381).
+* Fix LLM feature settings listing every connector when you lack inference privileges, instead of only the allowed connectors [#290457]({{kib-pull}}290457).
+* Fix LLM resolution failing when you lack the Actions privilege and an {{infer}} endpoint is configured in model settings [#290533]({{kib-pull}}290533).
+* Fix the anomaly detection bucket span estimation API accepting an unlimited number of detectors, which could exhaust {{kib}} server resources [#291203]({{kib-pull}}291203).
+* Fix the field statistics flyout in the anomaly detection job wizard closing on its own while the wizard validates the job [#292297]({{kib-pull}}292297).
+
 ## 9.4.7 [kibana-9.4.7-release-notes]
 
 ### Fixes [kibana-9.4.7-fixes]
@@ -866,17 +930,12 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 **Alerting and cases**:
 * Fix alerting resource installation using unbounded concurrency, which could exhaust {{kib}} heap when many contexts and namespaces install at once [#287643]({{kib-pull}}287643).
 * Fix the **Additional fields** editor on the {{sn-itsm}}, {{sn-sir}}, and Jira connectors rejecting Mustache context variables as invalid JSON [#286578]({{kib-pull}}286578).
-% !!DEFERRED!! Not on the 9.4 branch (backport missing as of 2026-09-11). Re-verify against the next BC before publishing.
-% * Fix the **Tracking containment** rule editor breaking when you select a data view [#289778]({{kib-pull}}289778).
 
 **Dashboards and Visualizations**:
 * Fix the **Update filter** button being unreachable when the filter editor is taller than the screen [#289163]({{kib-pull}}289163).
 * Fix Options list filters stopping after you delete a collapsible dashboard section [#287923]({{kib-pull}}287923).
 * Fix Canvas functions API creating data tables with more than 50 columns per row [#287935]({{kib-pull}}287935).
 * Fix the Maps timeslider close button registering clicks only on the top quarter of the control [#287441]({{kib-pull}}287441).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.4.7-114f131b (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Fix Go to URL drilldowns leaving Mustache tokens such as `event.values.[0]` unreplaced in the drilldown name [#290363]({{kib-pull}}290363).
-% * Increase the TinyMath expression length limit so longer visualization formulas no longer fail [#290314]({{kib-pull}}290314).
 
 **Data ingestion and {{fleet}}**:
 * Fix {{fleet}} blocking a package policy save when every enrolled agent is incompatible with the package version, including agents that report a pre-release version. {{fleet}} shows a warning instead of blocking the save [#289596]({{kib-pull}}289596).
@@ -889,8 +948,6 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix managed integration orphan cleanup so it respects package-policy ownership and the force flag [#287571]({{kib-pull}}287571).
 * Fix {{fleet}} package policies keeping stale secret references after you rotate credentials [#287642]({{kib-pull}}287642).
 * Fix slow {{fleet}} outputs fetching on {{fleet}} setup and Integrations UI page load [#287113]({{kib-pull}}287113).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.4.7-114f131b (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Fix deleting a managed integration policy leaving the agent listed as active [#290181]({{kib-pull}}290181).
 
 **Data management**:
 * Fix classic streams leaving a stale {{es}} data stream mappings override after you remove all field overrides [#288788]({{kib-pull}}288788).
@@ -911,8 +968,6 @@ For the {{elastic-sec}} 9.4.7 release information, refer to [{{elastic-sec}} Sol
 **{{kib}} platform**:
 * Fix unexpected logouts after an access token is refreshed during a search or dashboard refresh [#286038]({{kib-pull}}286038).
 * Fix audit log records omitting the client IP address for requests made over HTTP/2 [#285344]({{kib-pull}}285344).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.4.7-114f131b (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Hide the **Activate user** action on deactivated users when you have read-only access [#289801]({{kib-pull}}289801).
 
 ## 9.4.6 [kibana-9.4.6-release-notes]
 
