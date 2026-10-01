@@ -152233,57 +152233,6 @@ components:
         - per_page
         - total
         - search_matches
-    Kibana_HTTP_APIs_alerting_put_rule:
-      additionalProperties: false
-      type: object
-      properties:
-        artifacts:
-          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
-          items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
-          maxItems: 100
-          type: array
-        enabled:
-          description: Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state; otherwise it becomes the new stored value.
-          type: boolean
-        grouping:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
-        kind:
-          anyOf:
-            - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
-              enum:
-                - alert
-              type: string
-            - description: Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
-              enum:
-                - signal
-              type: string
-          description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
-        metadata:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
-        no_data:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
-        query:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
-        recovery:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
-        schedule:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
-        state_transition:
-          allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
-          nullable: true
-        time_field:
-          default: '@timestamp'
-          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
-          maxLength: 256
-          minLength: 1
-          type: string
-      required:
-        - kind
-        - metadata
-        - schedule
-        - query
     Kibana_HTTP_APIs_alerting_put_action_policy:
       additionalProperties: false
       type: object
@@ -152344,6 +152293,57 @@ components:
         - name
         - description
         - destinations
+    Kibana_HTTP_APIs_alerting_put_rule:
+      additionalProperties: false
+      type: object
+      properties:
+        artifacts:
+          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
+          maxItems: 100
+          type: array
+        enabled:
+          description: Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state; otherwise it becomes the new stored value.
+          type: boolean
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
+        kind:
+          anyOf:
+            - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
+              enum:
+                - alert
+              type: string
+            - description: Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
+              enum:
+                - signal
+              type: string
+          description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
+        metadata:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
+        no_data:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        recovery:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
+        schedule:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
+        state_transition:
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
+          nullable: true
+        time_field:
+          default: '@timestamp'
+          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
+          maxLength: 256
+          minLength: 1
+          type: string
+      required:
+        - kind
+        - metadata
+        - schedule
+        - query
     Kibana_HTTP_APIs_alerting_rule_artifact:
       additionalProperties: false
       type: object
