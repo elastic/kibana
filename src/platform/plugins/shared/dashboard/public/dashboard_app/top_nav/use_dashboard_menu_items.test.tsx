@@ -14,7 +14,12 @@ import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
 import { dashboardContextWrapper } from '../../mocks';
-import { coreServices, dataService, shareService } from '../../services/kibana_services';
+import {
+  coreServices,
+  dataService,
+  searchSessionsManagementService,
+  shareService,
+} from '../../services/kibana_services';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
 import { BehaviorSubject } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
@@ -273,7 +278,7 @@ describe('useDashboardMenuItems', () => {
       expect(backgroundSearchItem).toBeDefined();
       backgroundSearchItem!.run?.();
 
-      expect(dataService.search.showSearchSessionsFlyout).toHaveBeenCalledWith(
+      expect(searchSessionsManagementService?.openFlyout).toHaveBeenCalledWith(
         expect.objectContaining({
           trackingProps: { openedFrom: 'background search button' },
         })

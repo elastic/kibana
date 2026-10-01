@@ -14,6 +14,7 @@ import { InitialTabStateService } from '../plugin_imports/initial_tab_state_serv
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { searchSessionsManagementMock } from '@kbn/search-sessions-management-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import {
   analyticsServiceMock,
@@ -290,6 +291,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       },
     },
     savedSearch: savedSearchPluginMock.createStartContract(),
+    searchSessionsManagement: searchSessionsManagementMock.createStartContract(),
     dataViews: dataPlugin.dataViews,
     timefilter: dataPlugin.query.timefilter.timefilter,
     lens: {

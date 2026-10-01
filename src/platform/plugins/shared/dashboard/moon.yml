@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/shared/dashboard
 dependsOn:
+  - '@kbn/search-sessions-management-plugin'
   - '@kbn/core'
   - '@kbn/inspector-plugin'
   - '@kbn/kibana-react-plugin'

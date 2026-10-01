@@ -1108,6 +1108,7 @@ packages:
   - 'src/platform/plugins/shared/saved_objects_tagging_oss'
   - 'src/platform/plugins/shared/saved_search'
   - 'src/platform/plugins/shared/screenshot_mode'
+  - 'src/platform/plugins/shared/search_sessions_management'
   - 'src/platform/plugins/shared/share'
   - 'src/platform/plugins/shared/telemetry'
   - 'src/platform/plugins/shared/telemetry_collection_manager'

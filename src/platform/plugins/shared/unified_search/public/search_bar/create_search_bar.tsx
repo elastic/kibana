@@ -20,6 +20,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { EsqlPluginStart } from '@kbn/esql/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -38,6 +39,7 @@ export interface StatefulSearchBarDeps {
   cps: CPSPluginStart;
   esql?: EsqlPluginStart;
   licensing?: LicensingPluginStart;
+  searchSessionsManagement?: SearchSessionsManagementPluginStart;
 }
 
 export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = Omit<
@@ -174,6 +176,7 @@ export function createSearchBar({
   cps,
   esql,
   licensing,
+  searchSessionsManagement,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -249,6 +252,7 @@ export function createSearchBar({
           cps,
           esql,
           licensing,
+          searchSessionsManagement,
           ...core,
         }}
       >

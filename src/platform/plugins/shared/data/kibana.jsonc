@@ -24,8 +24,7 @@
       "inspector",
       "fieldFormats",
       "dataViews",
-      "screenshotMode",
-      "management"
+      "screenshotMode"
     ],
     "optionalPlugins": [
       "usageCollection",
@@ -34,7 +33,6 @@
     ],
     "requiredBundles": [
       "kibanaUtils",
-      "kibanaReact",
       "inspector"
     ],
     "extraPublicDirs": [

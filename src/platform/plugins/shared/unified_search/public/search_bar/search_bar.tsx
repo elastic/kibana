@@ -599,20 +599,24 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           defaultMessage='"{name}" is running now. Feel free to close the tab. <link>Check its progress here.</link>'
           values={{
             name,
-            link: (chunks: React.ReactNode) => (
-              <EuiLink
-                data-test-subj="backgroundSearchToastLink"
-                onClick={() => {
-                  this.services.notifications.toasts.remove(toast);
-                  this.services.data.search.showSearchSessionsFlyout({
-                    appId: this.services.appName,
-                    trackingProps: { openedFrom: 'toast' },
-                  });
-                }}
-              >
-                {chunks}
-              </EuiLink>
-            ),
+            link: (chunks: React.ReactNode) => {
+              const { searchSessionsManagement } = this.services;
+              if (!searchSessionsManagement) return chunks;
+              return (
+                <EuiLink
+                  data-test-subj="backgroundSearchToastLink"
+                  onClick={() => {
+                    this.services.notifications.toasts.remove(toast);
+                    searchSessionsManagement.openFlyout({
+                      appId: this.services.appName,
+                      trackingProps: { openedFrom: 'toast' },
+                    });
+                  }}
+                >
+                  {chunks}
+                </EuiLink>
+              );
+            },
           }}
         />,
         this.services
