@@ -43,7 +43,7 @@ export const createDatasetWizardStrings = {
     }
   ),
   mappingStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappingStepLabel', {
-    defaultMessage: 'Mapping',
+    defaultMessage: 'Schema mappings',
   }),
   mappingStepErrorsTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.mappingStepErrorsTitle',

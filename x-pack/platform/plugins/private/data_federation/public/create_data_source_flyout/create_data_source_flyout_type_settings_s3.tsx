@@ -7,8 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCode, EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
@@ -255,13 +254,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
         fullWidth
         isInvalid={Boolean(roleArnState.error)}
         error={roleArnState.error?.message}
-        helpText={
-          <FormattedMessage
-            id="xpack.dataFederation.createFlyout.s3.federated.roleArnHelpText"
-            defaultMessage="After the resources are created, copy {roleArn} value and paste it here."
-            values={{ roleArn: <EuiCode>RoleArn</EuiCode> }}
-          />
-        }
+        helpText={setupValues ? s3FederatedIdentitySetupStrings.roleArnHelp : undefined}
       >
         <EuiFieldText
           data-test-subj="createDataSourceFlyoutS3FederatedRoleArn"
