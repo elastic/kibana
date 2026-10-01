@@ -236,7 +236,9 @@ test.describe('Stream data retention - updating failure store', () => {
     'should reconcile an unchanged failure store definition',
     { tag: tags.stateful.classic },
     async ({ page, pageObjects, apiServices, esClient }) => {
-      await pinFailureStore(apiServices, 'logs-generic-default', { disabled: {} });
+      await pinFailureStore(apiServices, 'logs-generic-default', {
+        lifecycle: { disabled: {} },
+      });
       await esClient.indices.putDataStreamOptions(
         {
           name: 'logs-generic-default',
@@ -246,7 +248,9 @@ test.describe('Stream data retention - updating failure store', () => {
         },
         { meta: true }
       );
-      await pinFailureStore(apiServices, 'logs-generic-default', { disabled: {} });
+      await pinFailureStore(apiServices, 'logs-generic-default', {
+        lifecycle: { disabled: {} },
+      });
 
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
