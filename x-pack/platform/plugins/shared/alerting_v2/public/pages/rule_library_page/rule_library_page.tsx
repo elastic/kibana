@@ -10,6 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
+import { usePrivilegeCheck } from '../../application/privilege_check_context';
 import { experimentalBadge } from '../../components/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
@@ -37,9 +38,17 @@ const V1_TAB_LABEL = i18n.translate('xpack.alertingV2.ruleLibrary.v1TabTitle', {
 export const RuleLibraryPage = () => {
   useBreadcrumbs('rule_library_list');
   const { canAccessV1, canAccessV2 } = useRuleLibraryAccess();
-  const [selectedEngine, setSelectedEngine] = useState<RuleLibraryEngine | null>(() =>
-    getDefaultRuleLibraryEngine({ canAccessV1, canAccessV2 })
-  );
+  const hostCheck = usePrivilegeCheck();
+  const [selectedEngine, setSelectedEngine] = useState<RuleLibraryEngine | null>(() => {
+    const engine = getDefaultRuleLibraryEngine({ canAccessV1, canAccessV2 });
+    if (engine) {
+      return engine;
+    }
+    // A host can grant rules access through solution privileges that are
+    // broader than the management capability used for the v1 tab. That grant
+    // is classic rules access, so show the v1 library instead of an empty page.
+    return hostCheck?.(['rules'], 'read') ? 'v1' : null;
+  });
   const showV2Library = selectedEngine === 'v2';
   const singleEngineMode = !(canAccessV1 && canAccessV2);
   const { flyout, confirmationModal, openCreateFromTemplateFlyout } = useComposeDiscoverFlyout();

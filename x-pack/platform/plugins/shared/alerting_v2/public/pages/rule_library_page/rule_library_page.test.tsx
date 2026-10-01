@@ -11,6 +11,10 @@ import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import type { CreateRuleData, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
+import {
+  PrivilegeCheckProvider,
+  type PrivilegeCheck,
+} from '../../application/privilege_check_context';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { RuleLibraryPage } from './rule_library_page';
 
@@ -128,10 +132,12 @@ const mockTemplate: RuleTemplateResponse = {
   rule: mockCreatePayload,
 };
 
-const renderPage = (initialEntries?: string[]) =>
+const renderPage = (initialEntries?: string[], privilegeCheck?: PrivilegeCheck) =>
   render(
     <ListPageTestProviders initialEntries={initialEntries}>
-      <RuleLibraryPage />
+      <PrivilegeCheckProvider value={privilegeCheck}>
+        <RuleLibraryPage />
+      </PrivilegeCheckProvider>
     </ListPageTestProviders>
   );
 
@@ -188,6 +194,16 @@ describe('RuleLibraryPage', () => {
 
     expect(screen.queryByRole('tab')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockedRuleLibraryList')).toHaveAttribute('data-url-sync', 'true');
+  });
+
+  it('shows the v1 library when a host grants access without global v1 or v2 capabilities', () => {
+    mockCanAccessV2 = false;
+    mockCanAccessV1 = false;
+    renderPage(undefined, () => true);
+
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockedRuleLibraryList')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockedV1RuleLibraryList')).toHaveAttribute('data-url-sync', 'true');
   });
 
   it('hides the tab strip and the v2 list when the user can access only v1 rules', () => {
