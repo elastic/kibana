@@ -182,10 +182,10 @@ export const createDatasetWizardStrings = {
   offLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.offLabel', {
     defaultMessage: 'Off',
   }),
-  saveDatasetButton: i18n.translate(
-    'xpack.dataFederation.createDatasetWizard.saveDatasetButtonLabel',
+  addDatasetButton: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.addDatasetButtonLabel',
     {
-      defaultMessage: 'Save dataset',
+      defaultMessage: 'Add dataset',
     }
   ),
   saveErrorTitle: i18n.translate('xpack.dataFederation.createDatasetWizard.saveErrorTitle', {

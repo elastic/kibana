@@ -239,8 +239,8 @@ export function CreateDatasetWizardPage({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
-                    iconType={isLastStep ? 'check' : 'chevronSingleRight'}
-                    iconSide={isLastStep ? 'left' : 'right'}
+                    iconType={isLastStep ? undefined : 'chevronSingleRight'}
+                    iconSide="right"
                     onClick={() => (isLastStep ? onSave() : goToStep(activeStepIndex + 1))}
                     disabled={stepContent.isValid === false}
                     isLoading={isSaving}
@@ -251,7 +251,7 @@ export function CreateDatasetWizardPage({
                         ? createDatasetWizardStrings.savingButton
                         : isEditMode
                         ? createDatasetWizardStrings.saveButton
-                        : createDatasetWizardStrings.saveDatasetButton
+                        : createDatasetWizardStrings.addDatasetButton
                       : createDatasetWizardStrings.nextButton}
                   </EuiButton>
                 </EuiFlexItem>

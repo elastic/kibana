@@ -192,8 +192,9 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetWizardReview-name')).toHaveTextContent('logs-dataset');
     expect(getByTestId('createDatasetWizardReview-partition_detection')).toHaveTextContent('Hive');
     expect(getByTestId('nextButton')).toHaveTextContent(
-      createDatasetWizardStrings.saveDatasetButton
+      createDatasetWizardStrings.addDatasetButton
     );
+    expect(getByTestId('nextButton').querySelector('[data-euiicon-type]')).toBeNull();
 
     await clickNext(getByTestId);
     await waitFor(() => {
