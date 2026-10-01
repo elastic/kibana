@@ -356,3 +356,56 @@ export const OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT: Eve
     context: flowContextSchema,
   },
 };
+
+export type AddDataTileSurface = 'tile' | 'mini_tile' | 'search_result' | 'collection_variant';
+
+export interface AddDataTileClickEventFields {
+  tile_id: string;
+  surface: AddDataTileSurface;
+  collection_id?: string;
+  has_search_term: boolean;
+  is_recommended?: boolean;
+}
+
+export const OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT: EventTypeOpts<AddDataTileClickEventFields> =
+  {
+    eventType: 'observability_onboarding_add_data_tile_click',
+    schema: {
+      tile_id: {
+        type: 'keyword',
+        _meta: {
+          description:
+            "Id of the clicked item. Curated and mini tiles use the tile id (e.g. 'linux', 'browse_all'). Search results and collection variants use the Fleet card id (e.g. 'collection:nginx', 'epr:nginx_otel'), so on collection_variant clicks it identifies the picked variant.",
+        },
+      },
+      surface: {
+        type: 'keyword',
+        _meta: {
+          description:
+            "Where on the Add Data page the click happened: 'tile' (curated grid), 'mini_tile' (More integrations row), 'search_result', or 'collection_variant' (collection chooser flyout).",
+        },
+      },
+      collection_id: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Fleet integration group id. Set when the click opens the collection chooser, and on variants picked inside it.',
+          optional: true,
+        },
+      },
+      has_search_term: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the search field held a term when the click happened.',
+        },
+      },
+      is_recommended: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'Whether the picked variant carried the Recommended badge. Only set on collection_variant clicks.',
+          optional: true,
+        },
+      },
+    },
+  };

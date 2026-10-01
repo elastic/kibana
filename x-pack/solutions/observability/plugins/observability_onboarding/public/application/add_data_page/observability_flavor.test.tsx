@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { IS_INGEST_HUB_ONBOARDING_ENABLED } from '../../../common/feature_flags';
+import { OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { FleetCardsProvider } from './fleet_cards_provider';
 import {
   useObservabilityCuratedCategories,
   useObservabilityMiniTiles,
 } from './observability_flavor';
+
+const TILE_CLICK_EVENT = OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT.eventType;
 
 const mockUseAvailablePackages = jest.fn();
 
@@ -115,10 +118,10 @@ const createWrapper = (services: ReturnType<typeof buildServices> = buildService
 
 // The plain `createWrapper` has no FleetCardsProvider, so those tests double
 // as the fallback proof: no collection data means unchanged tile navigation.
-const createProviderWrapper = () => {
+const createProviderWrapper = (services: ReturnType<typeof buildServices> = buildServices()) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <I18nProvider>
-      <KibanaContextProvider services={buildServices()}>
+      <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={['/']}>
           <FleetCardsProvider>{children}</FleetCardsProvider>
         </MemoryRouter>
@@ -298,6 +301,67 @@ describe('useObservabilityCuratedCategories', () => {
     expect(opentelemetry?.onClick).toBeDefined();
     expect(apm?.href).toBe('/app/apm/onboarding');
   });
+
+  it('reports a route tile click and still navigates', () => {
+    const services = buildServices();
+    const { result } = renderHook(
+      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      { wrapper: createWrapper(services) }
+    );
+    const linux = result.current
+      .flatMap((category) => category.tiles)
+      .find((tile) => tile.id === 'linux');
+
+    const event = plainLeftClick();
+    act(() => linux?.onClick?.(event));
+
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
+      tile_id: 'linux',
+      surface: 'tile',
+      has_search_term: false,
+    });
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it('reports a link-only curated tile click and leaves navigation to the link', () => {
+    const services = buildServices();
+    const { result } = renderHook(
+      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      { wrapper: createWrapper(services) }
+    );
+    const azure = result.current
+      .flatMap((category) => category.tiles)
+      .find((tile) => tile.id === 'azure');
+
+    const event = plainLeftClick();
+    azure?.onClick?.(event);
+
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
+      tile_id: 'azure',
+      surface: 'tile',
+      has_search_term: false,
+    });
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it('leaves collection_id out when a grouped tile falls back to its link', () => {
+    const services = buildServices();
+    const { result } = renderHook(
+      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      { wrapper: createWrapper(services) }
+    );
+    const docker = result.current
+      .flatMap((category) => category.tiles)
+      .find((tile) => tile.id === 'docker');
+
+    docker?.onClick?.(plainLeftClick());
+
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
+      tile_id: 'docker',
+      surface: 'tile',
+      has_search_term: false,
+    });
+  });
 });
 
 describe('useObservabilityMiniTiles', () => {
@@ -318,7 +382,26 @@ describe('useObservabilityMiniTiles', () => {
     expect(result.current[0]['data-test-subj']).toBe(
       'observabilityOnboardingIntegrationMiniTile-prometheus'
     );
-    expect(result.current[0].onClick).toBeUndefined();
+  });
+
+  it('reports a link-only mini tile click and leaves navigation to the link', () => {
+    const services = buildServices();
+    const { result } = renderHook(
+      () => useObservabilityMiniTiles({ onOpenCollection: jest.fn() }),
+      { wrapper: createWrapper(services) }
+    );
+    const prometheus = result.current.find((tile) => tile.id === 'prometheus');
+    expect(prometheus?.href).toContain('/app/integrations/detail/prometheus/overview');
+
+    const event = plainLeftClick();
+    prometheus?.onClick?.(event);
+
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
+      tile_id: 'prometheus',
+      surface: 'mini_tile',
+      has_search_term: false,
+    });
+    expect(event.preventDefault).not.toHaveBeenCalled();
   });
 
   it('swaps the metrics-only tiles for OpenTelemetry when metrics onboarding is unavailable', () => {
@@ -412,8 +495,9 @@ describe('collection chooser tiles', () => {
 
   it('turns the docker tile into a badged chooser opener when Fleet provides the group', async () => {
     const onOpenCollection = jest.fn();
+    const services = buildServices();
     const { result } = renderHook(() => useObservabilityCuratedCategories({ onOpenCollection }), {
-      wrapper: createProviderWrapper(),
+      wrapper: createProviderWrapper(services),
     });
 
     await waitFor(() => {
@@ -430,6 +514,12 @@ describe('collection chooser tiles', () => {
 
     docker?.onClick?.(clickEvent);
     expect(onOpenCollection).toHaveBeenCalledWith('docker');
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
+      tile_id: 'docker',
+      surface: 'tile',
+      collection_id: 'docker',
+      has_search_term: false,
+    });
   });
 
   // The tile spends a moment before Fleet's packages land and must stay usable.
@@ -450,8 +540,9 @@ describe('collection chooser tiles', () => {
 
   it('turns the prometheus mini tile into a chooser opener when Fleet provides the group', async () => {
     const onOpenCollection = jest.fn();
+    const services = buildServices();
     const { result } = renderHook(() => useObservabilityMiniTiles({ onOpenCollection }), {
-      wrapper: createProviderWrapper(),
+      wrapper: createProviderWrapper(services),
     });
 
     await waitFor(() => {
@@ -463,6 +554,12 @@ describe('collection chooser tiles', () => {
 
     result.current.find((tile) => tile.id === 'prometheus')?.onClick?.(clickEvent);
     expect(onOpenCollection).toHaveBeenCalledWith('prometheus');
+    expect(services.analytics.reportEvent).toHaveBeenCalledWith(TILE_CLICK_EVENT, {
+      tile_id: 'prometheus',
+      surface: 'mini_tile',
+      collection_id: 'prometheus',
+      has_search_term: false,
+    });
   });
 
   it('keeps the other tiles navigating even with collection data present', async () => {
