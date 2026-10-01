@@ -348,6 +348,7 @@ function StreamFlyoutContent({
           } else {
             setShowConfirmRemoval(true);
           }
+          setHeaderMenuOpen(false);
         }}
       >
         {i18n.translate('xpack.streams.flyout.tab.toggleProcessing', {
@@ -372,6 +373,7 @@ function StreamFlyoutContent({
         color="danger"
         onClick={() => {
           setShowDeleteModal(true);
+          setHeaderMenuOpen(false);
         }}
       >
         {i18n.translate('xpack.streams.flyout.tab.deleteStreamLink', {
