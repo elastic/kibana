@@ -258,7 +258,14 @@ steps:
                   description: 'true when events_write appended the event version.'
                 reason:
                   type: string
-                  enum: [bulk_error, duplicate_in_batch, existing_active_event, unchanged_outcome, unknown_event_id]
+                  enum:
+                    [
+                      bulk_error,
+                      duplicate_in_batch,
+                      existing_active_event,
+                      unchanged_outcome,
+                      unknown_event_id,
+                    ]
                   description: 'Failure or skip reason when written is false.'
               required: [event_id, severity, status, written]
         required: [written_rule_uuids, significant_events]
