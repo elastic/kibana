@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import type { DropResult } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiComboBox,
-  EuiFieldNumber,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,136 +23,206 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiSelect,
+  EuiIcon,
+  EuiPanel,
+  EuiScreenReaderOnly,
   EuiSpacer,
-  EuiText,
+  EuiSwitch,
   EuiTextArea,
   EuiTitle,
-  EuiToolTip,
+  euiDragDropReorder,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { CaseTaskPriority } from '../../../common/types/domain/task/v1';
 import type {
   CaseTaskTemplate,
+  CaseTaskTemplateSubtask,
   CaseTaskTemplateTask,
 } from '../../../common/types/domain/task_template/v1';
 import { MAX_TASKS_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCreateTaskTemplate, useUpdateTaskTemplate } from '../../containers/use_case_tasks';
-import { severities } from '../severity/config';
+import { DueWithinField, type DueWithinDraft } from '../tasks/due_within_field';
+import { PRIORITY_OPTIONS } from '../tasks/priority_options';
 import * as i18n from './translations';
 
-const PRIORITY_OPTIONS = (Object.keys(severities) as CaseTaskPriority[]).map((value) => ({
-  value,
-  text: severities[value].label,
-}));
-
-interface TaskDraft {
-  title: string;
-  priority: CaseTaskPriority;
-  dueInDays: string;
-  subtasks: Array<{ title: string; priority: CaseTaskPriority; dueInDays: string }>;
+type RowDraft = Omit<CaseTaskTemplateSubtask, 'due_within'> & { dueWithin: DueWithinDraft };
+interface TaskDraft extends RowDraft {
+  subtasks: RowDraft[];
 }
 
-const emptyTask = (): TaskDraft => ({ title: '', priority: 'medium', dueInDays: '', subtasks: [] });
+const emptyRow = (): RowDraft => ({
+  title: '',
+  description: '',
+  priority: 'medium',
+  required: false,
+  dueWithin: { value: '', unit: 'hours' },
+});
+
+const toDraft = (entry: CaseTaskTemplateSubtask): RowDraft => ({
+  title: entry.title,
+  description: entry.description,
+  priority: entry.priority,
+  required: entry.required,
+  dueWithin: entry.due_within
+    ? { value: String(entry.due_within.value), unit: entry.due_within.unit }
+    : { value: '', unit: 'hours' },
+});
 
 const fromTemplate = (template?: CaseTaskTemplate): TaskDraft[] =>
-  template?.tasks.map((task) => ({
-    title: task.title,
-    priority: task.priority,
-    dueInDays: task.relative_due_days?.toString() ?? '',
-    subtasks: task.subtasks.map((sub) => ({
-      title: sub.title,
-      priority: sub.priority,
-      dueInDays: sub.relative_due_days?.toString() ?? '',
-    })),
-  })) ?? [emptyTask()];
+  template?.tasks.map((task) => ({ ...toDraft(task), subtasks: task.subtasks.map(toDraft) })) ?? [
+    { ...emptyRow(), subtasks: [] },
+  ];
 
-const toDays = (value: string): number | null => (value.trim() === '' ? null : Number(value));
+const toEntry = (draft: RowDraft): CaseTaskTemplateSubtask => ({
+  title: draft.title.trim(),
+  description: draft.description.trim(),
+  priority: draft.priority,
+  required: draft.required,
+  due_within:
+    draft.dueWithin.value.trim() === '' || Number(draft.dueWithin.value) <= 0
+      ? null
+      : { value: Number(draft.dueWithin.value), unit: draft.dueWithin.unit },
+});
 
 const toTemplateTasks = (drafts: TaskDraft[]): CaseTaskTemplateTask[] =>
   drafts
     .filter((task) => task.title.trim() !== '')
     .map((task) => ({
-      title: task.title.trim(),
-      description: '',
-      priority: task.priority,
-      relative_due_days: toDays(task.dueInDays),
-      subtasks: task.subtasks
-        .filter((sub) => sub.title.trim() !== '')
-        .map((sub) => ({
-          title: sub.title.trim(),
-          description: '',
-          priority: sub.priority,
-          relative_due_days: toDays(sub.dueInDays),
-        })),
+      ...toEntry(task),
+      subtasks: task.subtasks.filter((sub) => sub.title.trim() !== '').map(toEntry),
     }));
 
-interface TaskRowProps {
-  task: { title: string; priority: CaseTaskPriority; dueInDays: string };
+interface TaskEditorRowProps {
+  draft: RowDraft;
   isSubtask?: boolean;
-  onChange: (patch: Partial<TaskRowProps['task']>) => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLElement>;
+  onChange: (patch: Partial<RowDraft>) => void;
   onRemove: () => void;
+  onAddSubtask?: () => void;
   dataTestSubj: string;
 }
 
-const TaskRow: React.FC<TaskRowProps> = ({ task, isSubtask, onChange, onRemove, dataTestSubj }) => {
+/** One task of the list. Title and description take the full width so long titles stay readable. */
+const TaskEditorRow: React.FC<TaskEditorRowProps> = ({
+  draft,
+  isSubtask,
+  dragHandleProps,
+  onChange,
+  onRemove,
+  onAddSubtask,
+  dataTestSubj,
+}) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="center"
-      responsive={false}
-      css={{ paddingLeft: isSubtask ? euiTheme.size.xl : 0 }}
+    <EuiPanel
+      hasBorder
+      paddingSize="s"
+      css={{ marginLeft: isSubtask ? euiTheme.size.xl : 0, marginBottom: euiTheme.size.s }}
       data-test-subj={dataTestSubj}
     >
-      <EuiFlexItem>
-        <EuiFieldText
-          compressed
-          placeholder={i18n.TASK_TITLE_PLACEHOLDER}
-          maxLength={MAX_TITLE_LENGTH}
-          value={task.title}
-          onChange={(event) => onChange({ title: event.target.value })}
-          aria-label={i18n.TASK_TITLE_PLACEHOLDER}
-          data-test-subj={`${dataTestSubj}-title`}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ width: 120 }}>
-        <EuiSelect
-          compressed
-          options={PRIORITY_OPTIONS}
-          value={task.priority}
-          onChange={(event) => onChange({ priority: event.target.value as CaseTaskPriority })}
-          aria-label={i18n.PRIORITY}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ width: 110 }}>
-        <EuiFieldNumber
-          compressed
-          min={0}
-          placeholder={i18n.DUE_IN_DAYS}
-          value={task.dueInDays}
-          onChange={(event) => onChange({ dueInDays: event.target.value })}
-          aria-label={i18n.DUE_IN_DAYS}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={i18n.REMOVE_TASK} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="minusInCircle"
-            color="danger"
-            aria-label={i18n.REMOVE_TASK}
-            onClick={onRemove}
-            data-test-subj={`${dataTestSubj}-remove`}
+      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+        {dragHandleProps && (
+          <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.size.xs }}>
+            <div
+              {...dragHandleProps}
+              aria-label={i18n.DRAG_HANDLE}
+              data-test-subj={`${dataTestSubj}-handle`}
+            >
+              <EuiIcon type="drag" size="s" color="subdued" aria-hidden={true} />
+            </div>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
+          <EuiFieldText
+            compressed
+            fullWidth
+            placeholder={isSubtask ? i18n.SUBTASK_TITLE_PLACEHOLDER : i18n.TASK_TITLE_PLACEHOLDER}
+            maxLength={MAX_TITLE_LENGTH}
+            value={draft.title}
+            onChange={(event) => onChange({ title: event.target.value })}
+            aria-label={i18n.TASK_TITLE_PLACEHOLDER}
+            data-test-subj={`${dataTestSubj}-title`}
           />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          <EuiTextArea
+            compressed
+            fullWidth
+            rows={1}
+            resize="vertical"
+            placeholder={i18n.TASK_DESCRIPTION_PLACEHOLDER}
+            value={draft.description}
+            onChange={(event) => onChange({ description: event.target.value })}
+            aria-label={i18n.TASK_DESCRIPTION_PLACEHOLDER}
+            data-test-subj={`${dataTestSubj}-description`}
+          />
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="m" alignItems="flexEnd" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow label={i18n.PRIORITY} display="rowCompressed">
+                <EuiComboBox<CaseTaskTemplateSubtask['priority']>
+                  compressed
+                  singleSelection={{ asPlainText: true }}
+                  isClearable={false}
+                  options={PRIORITY_OPTIONS}
+                  selectedOptions={PRIORITY_OPTIONS.filter(({ value }) => value === draft.priority)}
+                  onChange={([selected]) =>
+                    selected?.value && onChange({ priority: selected.value })
+                  }
+                  css={{ width: 130 }}
+                  aria-label={i18n.PRIORITY}
+                  data-test-subj={`${dataTestSubj}-priority`}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <DueWithinField
+                value={draft.dueWithin}
+                onChange={(dueWithin) => onChange({ dueWithin })}
+                dataTestSubj={`${dataTestSubj}-due`}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} css={{ paddingBottom: euiTheme.size.xs }}>
+              <EuiSwitch
+                compressed
+                label={i18n.REQUIRED}
+                checked={draft.required}
+                onChange={(event) => onChange({ required: event.target.checked })}
+                data-test-subj={`${dataTestSubj}-required`}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem />
+            {onAddSubtask && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="branch"
+                  onClick={onAddSubtask}
+                  data-test-subj={`${dataTestSubj}-add-subtask`}
+                >
+                  {i18n.ADD_SUBTASK}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                color="danger"
+                iconType="trash"
+                onClick={onRemove}
+                data-test-subj={`${dataTestSubj}-remove`}
+              >
+                {isSubtask ? i18n.REMOVE_SUBTASK : i18n.REMOVE_TASK}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
 
-TaskRow.displayName = 'TaskRow';
+TaskEditorRow.displayName = 'TaskEditorRow';
 
 export interface TaskListFlyoutProps {
   template?: CaseTaskTemplate;
@@ -168,6 +240,7 @@ export const TaskListFlyout: React.FC<TaskListFlyoutProps> = ({ template, onClos
   const [tags, setTags] = useState<string[]>(template?.tags ?? []);
   const [tasks, setTasks] = useState<TaskDraft[]>(() => fromTemplate(template));
   const [showErrors, setShowErrors] = useState(false);
+  const [announcement, setAnnouncement] = useState('');
 
   const templateTasks = toTemplateTasks(tasks);
   const nameInvalid = name.trim() === '';
@@ -176,6 +249,17 @@ export const TaskListFlyout: React.FC<TaskListFlyoutProps> = ({ template, onClos
 
   const updateTask = (index: number, patch: Partial<TaskDraft>) =>
     setTasks((prev) => prev.map((task, i) => (i === index ? { ...task, ...patch } : task)));
+
+  const onDragEnd = useCallback(({ source, destination }: DropResult) => {
+    if (!destination) return;
+    setTasks((prev) => {
+      const reordered = euiDragDropReorder(prev, source.index, destination.index);
+      setAnnouncement(
+        i18n.TASK_MOVED(reordered[destination.index].title, destination.index + 1, reordered.length)
+      );
+      return reordered;
+    });
+  }, []);
 
   const onSubmit = async () => {
     if (nameInvalid || tasksInvalid) {
@@ -251,84 +335,74 @@ export const TaskListFlyout: React.FC<TaskListFlyoutProps> = ({ template, onClos
           </EuiFormRow>
           <EuiFormRow
             label={i18n.FIELD_TASKS}
+            helpText={i18n.TASKS_HELP}
             isInvalid={showErrors && tasksInvalid}
             error={i18n.TASKS_REQUIRED}
             fullWidth
           >
             <div>
-              <EuiFlexGroup gutterSize="s" responsive={false} css={{ paddingRight: 40 }}>
-                <EuiFlexItem>
-                  <EuiText size="xs" color="subdued">
-                    {i18n.TASK_TITLE_PLACEHOLDER}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} css={{ width: 120 }}>
-                  <EuiText size="xs" color="subdued">
-                    {i18n.PRIORITY}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} css={{ width: 110 }}>
-                  <EuiText size="xs" color="subdued">
-                    {i18n.DUE_IN_DAYS}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="xs" />
-              {tasks.map((task, index) => (
-                <div key={index}>
-                  <TaskRow
-                    task={task}
-                    onChange={(patch) => updateTask(index, patch)}
-                    onRemove={() => setTasks((prev) => prev.filter((_, i) => i !== index))}
-                    dataTestSubj={`cases-task-list-task-${index}`}
-                  />
-                  {task.subtasks.map((sub, subIndex) => (
-                    <React.Fragment key={subIndex}>
-                      <EuiSpacer size="xs" />
-                      <TaskRow
-                        task={sub}
-                        isSubtask
-                        onChange={(patch) =>
-                          updateTask(index, {
-                            subtasks: task.subtasks.map((s, i) =>
-                              i === subIndex ? { ...s, ...patch } : s
-                            ),
-                          })
-                        }
-                        onRemove={() =>
-                          updateTask(index, {
-                            subtasks: task.subtasks.filter((_, i) => i !== subIndex),
-                          })
-                        }
-                        dataTestSubj={`cases-task-list-task-${index}-subtask-${subIndex}`}
-                      />
-                    </React.Fragment>
-                  ))}
-                  {totalRows < MAX_TASKS_PER_CASE && (
-                    <EuiButtonEmpty
-                      size="xs"
-                      iconType="branch"
-                      onClick={() =>
-                        updateTask(index, {
-                          subtasks: [
-                            ...task.subtasks,
-                            { title: '', priority: 'medium', dueInDays: '' },
-                          ],
-                        })
-                      }
-                      data-test-subj={`cases-task-list-task-${index}-add-subtask`}
-                    >
-                      {i18n.ADD_SUBTASK}
-                    </EuiButtonEmpty>
-                  )}
-                  <EuiSpacer size="s" />
+              <EuiScreenReaderOnly>
+                <div aria-live="polite" role="status">
+                  {announcement}
                 </div>
-              ))}
+              </EuiScreenReaderOnly>
+              <EuiDragDropContext onDragEnd={onDragEnd}>
+                <EuiDroppable droppableId="cases-task-list-tasks" spacing="none">
+                  {tasks.map((task, index) => (
+                    <EuiDraggable
+                      key={`task-${index}`}
+                      index={index}
+                      draggableId={`task-${index}`}
+                      customDragHandle
+                      hasInteractiveChildren
+                      spacing="none"
+                    >
+                      {(provided) => (
+                        <div>
+                          <TaskEditorRow
+                            draft={task}
+                            dragHandleProps={provided.dragHandleProps ?? undefined}
+                            onChange={(patch) => updateTask(index, patch)}
+                            onRemove={() => setTasks((prev) => prev.filter((_, i) => i !== index))}
+                            onAddSubtask={
+                              totalRows < MAX_TASKS_PER_CASE
+                                ? () =>
+                                    updateTask(index, { subtasks: [...task.subtasks, emptyRow()] })
+                                : undefined
+                            }
+                            dataTestSubj={`cases-task-list-task-${index}`}
+                          />
+                          {task.subtasks.map((sub, subIndex) => (
+                            <TaskEditorRow
+                              key={subIndex}
+                              draft={sub}
+                              isSubtask
+                              onChange={(patch) =>
+                                updateTask(index, {
+                                  subtasks: task.subtasks.map((s, i) =>
+                                    i === subIndex ? { ...s, ...patch } : s
+                                  ),
+                                })
+                              }
+                              onRemove={() =>
+                                updateTask(index, {
+                                  subtasks: task.subtasks.filter((_, i) => i !== subIndex),
+                                })
+                              }
+                              dataTestSubj={`cases-task-list-task-${index}-subtask-${subIndex}`}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </EuiDraggable>
+                  ))}
+                </EuiDroppable>
+              </EuiDragDropContext>
               {totalRows < MAX_TASKS_PER_CASE && (
                 <EuiButtonEmpty
                   size="s"
                   iconType="plusInCircle"
-                  onClick={() => setTasks((prev) => [...prev, emptyTask()])}
+                  onClick={() => setTasks((prev) => [...prev, { ...emptyRow(), subtasks: [] }])}
                   data-test-subj="cases-task-list-add-task"
                 >
                   {i18n.ADD_TASK}

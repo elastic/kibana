@@ -24,6 +24,7 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { useAttachmentsTabClickedEBT } from '../../analytics/use_attachments_tab_ebt';
 import { useGetCaseTasks } from '../../containers/use_case_tasks';
 import { isTaskFinished } from '../tasks/tasks_table';
+import { COMPLETION_ARIA as TASKS_COMPLETION_ARIA } from '../tasks/translations';
 
 export interface CaseViewTabsProps {
   caseData: CaseUI;
@@ -49,7 +50,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   } = useCasesFeatures();
 
   const { data: tasksData } = useGetCaseTasks(caseData.id, { enabled: tasksAuthorized });
-  const openTasks = tasksData?.tasks.filter((task) => !isTaskFinished(task)).length;
+  const totalTasks = tasksData?.tasks.length ?? 0;
+  const completedTasks = tasksData?.tasks.filter(isTaskFinished).length ?? 0;
 
   const { data: similarCasesData } = useGetSimilarCases({
     caseId: caseData.id,
@@ -97,7 +99,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
                 <AttachmentsBadge
                   isActive={activeTab === CASE_VIEW_PAGE_TABS.TASKS}
                   euiTheme={euiTheme}
-                  count={openTasks}
+                  count={totalTasks === 0 ? 0 : `${completedTasks}/${totalTasks}`}
+                  aria-label={TASKS_COMPLETION_ARIA(completedTasks, totalTasks)}
                   dataTestSubj="case-view-tasks-badge"
                 />
               ),
@@ -109,7 +112,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       activeTab,
       euiTheme,
       isAttachmentsTabActive,
-      openTasks,
+      completedTasks,
+      totalTasks,
       similarCasesData?.total,
       tasksAuthorized,
       totalAttachments,

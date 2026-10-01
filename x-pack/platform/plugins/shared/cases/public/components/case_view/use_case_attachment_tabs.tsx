@@ -59,11 +59,13 @@ export const AttachmentsBadge = ({
   count,
   euiTheme,
   dataTestSubj = 'case-view-attachments-badge',
+  'aria-label': ariaLabel,
 }: {
   isActive: boolean;
-  count?: number;
+  count?: number | string;
   euiTheme: EuiThemeComputed<{}>;
   dataTestSubj?: string;
+  'aria-label'?: string;
 }) => (
   <EuiNotificationBadge
     size="m"
@@ -73,6 +75,7 @@ export const AttachmentsBadge = ({
     `}
     data-test-subj={dataTestSubj}
     color={isActive ? 'accent' : 'subdued'}
+    aria-label={ariaLabel}
   >
     {count ?? 0}
   </EuiNotificationBadge>

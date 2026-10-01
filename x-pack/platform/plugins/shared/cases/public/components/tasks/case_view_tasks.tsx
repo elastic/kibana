@@ -171,7 +171,15 @@ export const CaseViewTasks: React.FC<CaseViewTasksProps> = ({ caseId }) => {
           onClose={closeDialog}
         />
       )}
-      {dialog?.kind === 'apply' && <ApplyTaskListModal caseId={caseId} onClose={closeDialog} />}
+      {dialog?.kind === 'apply' && (
+        <ApplyTaskListModal
+          caseId={caseId}
+          appliedTemplateIds={[
+            ...new Set(tasks.flatMap((t) => (t.template_id ? [t.template_id] : []))),
+          ]}
+          onClose={closeDialog}
+        />
+      )}
     </EuiFlexItem>
   );
 };

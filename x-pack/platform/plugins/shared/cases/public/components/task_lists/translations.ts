@@ -95,9 +95,49 @@ export const TASK_TITLE_PLACEHOLDER = i18n.translate('xpack.cases.taskLists.fiel
   defaultMessage: 'Task title',
 });
 
-export const DUE_IN_DAYS = i18n.translate('xpack.cases.taskLists.fields.dueInDays', {
-  defaultMessage: 'Due in (days)',
+export const SUBTASK_TITLE_PLACEHOLDER = i18n.translate(
+  'xpack.cases.taskLists.fields.subtaskTitle',
+  {
+    defaultMessage: 'Sub-task title',
+  }
+);
+
+export const TASK_DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.cases.taskLists.fields.taskDescription',
+  {
+    defaultMessage: 'Description (optional)',
+  }
+);
+
+export const REQUIRED = i18n.translate('xpack.cases.taskLists.fields.required', {
+  defaultMessage: 'Required',
 });
+
+export const REQUIRED_ON = i18n.translate('xpack.cases.taskLists.fields.requiredOn', {
+  defaultMessage: 'Required',
+});
+
+export const REQUIRED_OFF = i18n.translate('xpack.cases.taskLists.fields.requiredOff', {
+  defaultMessage: 'Optional',
+});
+
+export const REMOVE_SUBTASK = i18n.translate('xpack.cases.taskLists.fields.removeSubtask', {
+  defaultMessage: 'Remove sub-task',
+});
+
+export const DRAG_HANDLE = i18n.translate('xpack.cases.taskLists.fields.dragHandle', {
+  defaultMessage: 'Drag to reorder',
+});
+
+export const TASKS_HELP = i18n.translate('xpack.cases.taskLists.fields.tasksHelp', {
+  defaultMessage: 'Drag tasks to change the order analysts see them in.',
+});
+
+export const TASK_MOVED = (title: string, position: number, total: number) =>
+  i18n.translate('xpack.cases.taskLists.fields.taskMoved', {
+    values: { title, position, total },
+    defaultMessage: '{title} moved to position {position} of {total}',
+  });
 
 export const PRIORITY = i18n.translate('xpack.cases.taskLists.fields.priority', {
   defaultMessage: 'Priority',

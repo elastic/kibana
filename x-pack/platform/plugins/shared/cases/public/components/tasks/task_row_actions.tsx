@@ -106,7 +106,7 @@ export const TaskRowActions: React.FC<TaskRowActionsProps> = ({
         button={
           <EuiToolTip content={i18n.TASK_ACTIONS} disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType="boxesHorizontal"
+              iconType="boxesVertical"
               aria-label={i18n.TASK_ACTIONS_ARIA(task.title)}
               onClick={() => setIsOpen((open) => !open)}
               data-test-subj={`cases-task-actions-${task.id}`}

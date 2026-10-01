@@ -9,7 +9,11 @@ import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { MAX_TASKS_PER_CASE } from '../../../common/constants';
 import type { CaseTask } from '../../../common/types/domain/task/v1';
-import type { CaseTaskTemplate } from '../../../common/types/domain/task_template/v1';
+import type {
+  CaseTaskTemplate,
+  CaseTaskTemplateSubtask,
+  DueWithin,
+} from '../../../common/types/domain/task_template/v1';
 import { UserActionTypes } from '../../../common/types/domain/user_action/action/v1';
 import type { CaseUserActionService } from '../../services';
 import type { CaseTaskService } from '../../services/tasks';
@@ -17,29 +21,24 @@ import type { CaseTaskTemplateService } from '../../services/task_templates';
 import type { TaskInput } from '../../services/tasks/types';
 import type { User } from '../../common/types/user';
 
-const dueDateFrom = (relativeDays: number | null, anchor: Date): string | null => {
-  if (relativeDays === null) {
-    return null;
-  }
-  const due = new Date(anchor);
-  due.setDate(due.getDate() + relativeDays);
-  return due.toISOString();
+const MS_PER_UNIT: Record<DueWithin['unit'], number> = {
+  minutes: 60_000,
+  hours: 3_600_000,
+  days: 86_400_000,
 };
 
-const toInput = (
-  entry: {
-    title: string;
-    description: string;
-    priority: TaskInput['priority'];
-    relative_due_days: number | null;
-  },
-  templateId: string,
-  anchor: Date
-): TaskInput => ({
+const dueDateFrom = (dueWithin: DueWithin | null, anchor: Date): string | null =>
+  dueWithin === null
+    ? null
+    : new Date(anchor.getTime() + dueWithin.value * MS_PER_UNIT[dueWithin.unit]).toISOString();
+
+const toInput = (entry: CaseTaskTemplateSubtask, templateId: string, anchor: Date): TaskInput => ({
   title: entry.title,
   description: entry.description,
   priority: entry.priority,
-  due_date: dueDateFrom(entry.relative_due_days, anchor),
+  required: entry.required ?? false,
+  // Lists saved before due_within existed have no value here.
+  due_date: dueDateFrom(entry.due_within ?? null, anchor),
   template_id: templateId,
 });
 
@@ -74,6 +73,10 @@ export const applyTaskListToCase = async ({
   userActionService: CaseUserActionService;
 }): Promise<CaseTask[]> => {
   const anchor = new Date();
+  const { tasks: existing } = await taskService.findTasks({ caseIds: [caseId] });
+  if (existing.some((task) => task.template_id === template.id)) {
+    throw Boom.conflict(`Task list "${template.name}" has already been applied to this case`);
+  }
   await ensureTaskCapacity(
     taskService,
     caseId,

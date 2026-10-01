@@ -35,6 +35,8 @@ export const CaseTaskAttributesRt = rt.strict({
   priority: CaseTaskPriorityRt,
   assignees: rt.array(CaseTaskAssigneeRt),
   due_date: rt.union([rt.string, rt.null]),
+  /** Flagged by the SOP author; shown to analysts, not enforced yet. */
+  required: rt.boolean,
   started_at: rt.union([rt.string, rt.null]),
   completed_at: rt.union([rt.string, rt.null]),
   sort_order: rt.number,

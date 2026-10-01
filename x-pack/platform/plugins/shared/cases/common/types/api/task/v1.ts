@@ -47,6 +47,7 @@ export const TaskCreateRequestRt = rt.intersection([
       priority: CaseTaskPriorityRt,
       assignees: AssigneesRt,
       due_date: rt.union([rt.string, rt.null]),
+      required: rt.boolean,
       parent_task_id: rt.union([rt.string, rt.null]),
     })
   ),
@@ -62,6 +63,7 @@ export const TaskPatchRequestRt = rt.intersection([
       priority: CaseTaskPriorityRt,
       assignees: AssigneesRt,
       due_date: rt.union([rt.string, rt.null]),
+      required: rt.boolean,
     })
   ),
 ]);

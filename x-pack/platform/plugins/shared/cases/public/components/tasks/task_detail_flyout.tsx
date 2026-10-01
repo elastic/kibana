@@ -88,7 +88,7 @@ export const TaskDetailFlyout: React.FC<TaskDetailFlyoutProps> = ({
             !isTaskFinished(task) && new Date(task.due_date) < new Date() ? 'danger' : undefined
           }
         >
-          {formatDate(task.due_date, 'date')}
+          {formatDate(task.due_date, 'dateTime')}
         </EuiText>
       ) : (
         <EuiText size="s" color="subdued">
@@ -130,6 +130,11 @@ export const TaskDetailFlyout: React.FC<TaskDetailFlyoutProps> = ({
           <EuiFlexItem grow={false}>
             <SeverityHealth severity={task.priority as unknown as CaseSeverity} />
           </EuiFlexItem>
+          {task.required && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">{i18n.REQUIRED}</EuiBadge>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

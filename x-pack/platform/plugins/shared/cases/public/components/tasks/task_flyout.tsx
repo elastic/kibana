@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiDatePicker,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,12 +20,12 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSelect,
+  EuiSwitch,
   EuiSpacer,
   EuiTextArea,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import moment from 'moment';
 import type { CaseTask, CaseTaskPriority } from '../../../common/types/domain/task/v1';
 import type { taskApiV1 } from '../../../common/types/api';
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
@@ -35,6 +34,7 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { useCreateTask, useUpdateTask } from '../../containers/use_case_tasks';
 import { severities } from '../severity/config';
 import { TaskAssigneesField } from './task_assignees_field';
+import { DueWithinField, dueDateFromDraft, type DueWithinDraft } from './due_within_field';
 import * as i18n from './translations';
 
 const PRIORITY_OPTIONS = (Object.keys(severities) as CaseTaskPriority[]).map((value) => ({
@@ -46,15 +46,28 @@ interface TaskFormState {
   title: string;
   description: string;
   priority: CaseTaskPriority;
-  dueDate: moment.Moment | null;
+  dueWithin: DueWithinDraft;
+  required: boolean;
   assignees: CaseTask['assignees'];
 }
+
+/** Expresses an existing deadline as the largest whole unit that still fits, so an edit round-trips. */
+const dueWithinFromDate = (dueDate: string | null | undefined): DueWithinDraft => {
+  const remainingMs = dueDate ? new Date(dueDate).getTime() - Date.now() : 0;
+  if (remainingMs <= 0) return { value: '', unit: 'hours' };
+  const minutes = Math.round(remainingMs / 60_000);
+  if (minutes >= 1440 && minutes % 1440 === 0)
+    return { value: String(minutes / 1440), unit: 'days' };
+  if (minutes >= 60) return { value: String(Math.round(minutes / 60)), unit: 'hours' };
+  return { value: String(minutes), unit: 'minutes' };
+};
 
 const fromTask = (task?: CaseTask): TaskFormState => ({
   title: task?.title ?? '',
   description: task?.description ?? '',
   priority: task?.priority ?? 'medium',
-  dueDate: task?.due_date ? moment(task.due_date) : null,
+  dueWithin: dueWithinFromDate(task?.due_date),
+  required: task?.required ?? false,
   assignees: task?.assignees ?? [],
 });
 
@@ -75,7 +88,8 @@ export const TaskFlyout: React.FC<TaskFlyoutProps> = ({ caseId, task, parentTask
   const { mutateAsync: createTask, isLoading: isCreating } = useCreateTask(caseId);
   const { mutateAsync: updateTask, isLoading: isUpdating } = useUpdateTask(caseId);
 
-  const [form, setForm] = useState<TaskFormState>(() => fromTask(task));
+  const [initialForm] = useState<TaskFormState>(() => fromTask(task));
+  const [form, setForm] = useState<TaskFormState>(initialForm);
   const [showTitleError, setShowTitleError] = useState(false);
   const setField = <K extends keyof TaskFormState>(key: K, value: TaskFormState[K]) =>
     setForm((previous) => ({ ...previous, [key]: value }));
@@ -92,7 +106,14 @@ export const TaskFlyout: React.FC<TaskFlyoutProps> = ({ caseId, task, parentTask
       title: form.title.trim(),
       description: form.description.trim(),
       priority: form.priority,
-      due_date: form.dueDate?.toISOString() ?? null,
+      // Editing keeps the stored deadline unless the field was changed or cleared.
+      due_date:
+        task &&
+        form.dueWithin.value === initialForm.dueWithin.value &&
+        form.dueWithin.unit === initialForm.dueWithin.unit
+          ? task.due_date
+          : dueDateFromDraft(form.dueWithin),
+      required: form.required,
       ...(canAssign ? { assignees: form.assignees } : {}),
     };
     if (task) {
@@ -104,7 +125,17 @@ export const TaskFlyout: React.FC<TaskFlyoutProps> = ({ caseId, task, parentTask
       await createTask({ ...fields, parent_task_id: parentTask?.id ?? null });
     }
     onClose();
-  }, [canAssign, createTask, form, isTitleInvalid, onClose, parentTask?.id, task, updateTask]);
+  }, [
+    canAssign,
+    createTask,
+    form,
+    initialForm,
+    isTitleInvalid,
+    onClose,
+    parentTask?.id,
+    task,
+    updateTask,
+  ]);
 
   return (
     <EuiFlyout
@@ -172,13 +203,20 @@ export const TaskFlyout: React.FC<TaskFlyoutProps> = ({ caseId, task, parentTask
               data-test-subj="cases-task-priority"
             />
           </EuiFormRow>
-          <EuiFormRow label={i18n.FIELD_DUE_DATE} fullWidth>
-            <EuiDatePicker
-              fullWidth
-              selected={form.dueDate}
-              onChange={(date) => setField('dueDate', date)}
-              onClear={() => setField('dueDate', null)}
-              data-test-subj="cases-task-due-date"
+          <DueWithinField
+            fullWidth
+            helpText={i18n.DUE_WITHIN_HELP}
+            value={form.dueWithin}
+            onChange={(dueWithin) => setField('dueWithin', dueWithin)}
+            dataTestSubj="cases-task-due-within"
+          />
+          <EuiFormRow label={i18n.REQUIRED} helpText={i18n.REQUIRED_HELP} fullWidth>
+            <EuiSwitch
+              label={i18n.REQUIRED}
+              showLabel={false}
+              checked={form.required}
+              onChange={(event) => setField('required', event.target.checked)}
+              data-test-subj="cases-task-required"
             />
           </EuiFormRow>
         </EuiForm>

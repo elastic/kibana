@@ -97,6 +97,7 @@ export class CaseTaskService {
           priority: t.priority ?? 'medium',
           assignees: t.assignees ?? [],
           due_date: t.due_date ?? null,
+          required: t.required ?? false,
           started_at: status === 'in_progress' ? now : null,
           completed_at: isFinished(status) ? now : null,
           sort_order: sortOrder,

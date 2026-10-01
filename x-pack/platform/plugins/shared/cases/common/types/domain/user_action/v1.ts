@@ -199,4 +199,6 @@ export type { WorkflowPayload, WorkflowOrigin, WorkflowUserActionPayload } from 
 export type CreateTaskUserAction = UserAction<rt.TypeOf<typeof CreateTaskUserActionRt>>;
 export type UpdateTaskUserAction = UserAction<rt.TypeOf<typeof UpdateTaskUserActionRt>>;
 export type DeleteTaskUserAction = UserAction<rt.TypeOf<typeof DeleteTaskUserActionRt>>;
-export type ApplyTaskTemplateUserAction = UserAction<rt.TypeOf<typeof ApplyTaskTemplateUserActionRt>>;
+export type ApplyTaskTemplateUserAction = UserAction<
+  rt.TypeOf<typeof ApplyTaskTemplateUserActionRt>
+>;

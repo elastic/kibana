@@ -75,16 +75,24 @@ export default ({ getService }: FtrProviderContext): void => {
         title: 'Block sender',
         description: '',
         priority: 'high',
-        relative_due_days: 1,
+        required: false,
+        due_within: { value: 1, unit: 'hours' },
         subtasks: [
-          { title: 'Confirm block', description: '', priority: 'medium', relative_due_days: null },
+          {
+            title: 'Confirm block',
+            description: '',
+            priority: 'medium',
+            required: false,
+            due_within: null,
+          },
         ],
       },
       {
         title: 'Reset credentials',
         description: '',
         priority: 'critical',
-        relative_due_days: null,
+        required: false,
+        due_within: null,
         subtasks: [],
       },
     ],
@@ -159,6 +167,17 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const { userActions } = await findCaseUserActions({ supertest, caseID: theCase.id });
       expect(userActions.map((action) => action.type)).to.contain('apply_task_template');
+
+      // The same list cannot be applied to a case twice.
+      await request(
+        supertest,
+        'post',
+        CASE_TASKS_APPLY_TEMPLATE_URL.replace('{case_id}', theCase.id),
+        {
+          body: { template_id: template.id },
+          expectedHttpCode: 409,
+        }
+      );
     });
 
     it('seeds tasks when a case is created from a template that references a task list', async () => {

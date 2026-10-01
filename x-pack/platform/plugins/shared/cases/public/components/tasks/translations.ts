@@ -178,6 +178,44 @@ export const FIELD_DUE_DATE = i18n.translate('xpack.cases.tasks.fields.dueDate',
   defaultMessage: 'Due date',
 });
 
+export const DUE_WITHIN = i18n.translate('xpack.cases.tasks.fields.dueWithin', {
+  defaultMessage: 'Due within',
+});
+
+export const DUE_WITHIN_HELP = i18n.translate('xpack.cases.tasks.fields.dueWithinHelp', {
+  defaultMessage: 'Leave empty for no deadline.',
+});
+
+export const UNIT_MINUTES = i18n.translate('xpack.cases.tasks.fields.unitMinutes', {
+  defaultMessage: 'minutes',
+});
+
+export const UNIT_HOURS = i18n.translate('xpack.cases.tasks.fields.unitHours', {
+  defaultMessage: 'hours',
+});
+
+export const UNIT_DAYS = i18n.translate('xpack.cases.tasks.fields.unitDays', {
+  defaultMessage: 'days',
+});
+
+export const REQUIRED = i18n.translate('xpack.cases.tasks.required', {
+  defaultMessage: 'Required',
+});
+
+export const REQUIRED_HELP = i18n.translate('xpack.cases.tasks.requiredHelp', {
+  defaultMessage: 'Mark this task as part of the required procedure.',
+});
+
+export const ALREADY_APPLIED = i18n.translate('xpack.cases.tasks.alreadyApplied', {
+  defaultMessage: 'Already applied',
+});
+
+export const COMPLETION_ARIA = (completed: number, total: number) =>
+  i18n.translate('xpack.cases.tasks.completionAriaLabel', {
+    values: { completed, total },
+    defaultMessage: '{completed} of {total} tasks completed',
+  });
+
 export const FIELD_ASSIGNEES = i18n.translate('xpack.cases.tasks.fields.assignees', {
   defaultMessage: 'Assignees',
 });

@@ -20,6 +20,7 @@ export interface TaskInput {
   priority?: CaseTaskPriority;
   assignees?: CaseTaskAssignee[];
   due_date?: string | null;
+  required?: boolean;
   parent_task_id?: string | null;
   template_id?: string | null;
 }
@@ -47,6 +48,7 @@ export interface UpdateTaskArgs extends IndexRefresh {
   priority?: CaseTaskPriority;
   assignees?: CaseTaskAssignee[];
   due_date?: string | null;
+  required?: boolean;
 }
 
 export interface FindTasksArgs {

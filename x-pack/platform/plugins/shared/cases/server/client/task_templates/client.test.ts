@@ -21,8 +21,8 @@ const template: CaseTaskTemplate = {
     {
       title: 'Block sender',
       description: '',
-      priority: 'high',
-      relative_due_days: 1,
+      priority: 'high', required: false,
+      due_within: { value: 1, unit: 'days' },
       subtasks: [],
     },
   ],

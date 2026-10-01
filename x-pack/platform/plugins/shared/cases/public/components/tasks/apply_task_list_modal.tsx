@@ -23,27 +23,39 @@ import * as i18n from './translations';
 
 export interface ApplyTaskListModalProps {
   caseId: string;
+  /** Task lists already on the case; the server refuses them again, so the picker says so up front. */
+  appliedTemplateIds: string[];
   onClose: () => void;
 }
 
-export const ApplyTaskListModal: React.FC<ApplyTaskListModalProps> = ({ caseId, onClose }) => {
+export const ApplyTaskListModal: React.FC<ApplyTaskListModalProps> = ({
+  caseId,
+  appliedTemplateIds,
+  onClose,
+}) => {
   const titleId = useGeneratedHtmlId();
   const { data, isLoading } = useGetTaskTemplates();
   const { mutateAsync: applyTaskTemplate, isLoading: isApplying } = useApplyTaskTemplate(caseId);
   const [selectedId, setSelectedId] = useState<string | undefined>();
 
-  const options = (data?.templates ?? []).map((template) => ({
-    key: template.id,
-    label: template.name,
-    checked: template.id === selectedId ? ('on' as const) : undefined,
-    append: (
-      <EuiText size="xs" color="subdued">
-        {i18n.TASK_LIST_TASK_COUNT(
-          template.tasks.reduce((count, task) => count + 1 + task.subtasks.length, 0)
-        )}
-      </EuiText>
-    ),
-  }));
+  const options = (data?.templates ?? []).map((template) => {
+    const applied = appliedTemplateIds.includes(template.id);
+    return {
+      key: template.id,
+      label: template.name,
+      disabled: applied,
+      checked: template.id === selectedId ? ('on' as const) : undefined,
+      append: (
+        <EuiText size="xs" color="subdued">
+          {applied
+            ? i18n.ALREADY_APPLIED
+            : i18n.TASK_LIST_TASK_COUNT(
+                template.tasks.reduce((count, task) => count + 1 + task.subtasks.length, 0)
+              )}
+        </EuiText>
+      ),
+    };
+  });
 
   return (
     <EuiModal

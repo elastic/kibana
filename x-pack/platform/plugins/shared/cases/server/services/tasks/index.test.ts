@@ -29,6 +29,7 @@ const taskSO = (overrides: Partial<CaseTaskAttributes> & { id?: string } = {}) =
       priority: 'medium' as const,
       assignees: [],
       due_date: null,
+      required: false,
       started_at: null,
       completed_at: null,
       sort_order: 1000,

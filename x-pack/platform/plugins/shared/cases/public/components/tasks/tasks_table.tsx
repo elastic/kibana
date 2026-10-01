@@ -18,9 +18,11 @@ import {
   EuiScreenReaderOnly,
   EuiText,
   EuiTextColor,
+  EuiToolTip,
   formatDate,
   useEuiTheme,
 } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n-react';
 import { UserAvatar } from '@kbn/user-profile-components';
 import type { CaseSeverity } from '../../../common/types/domain';
 import type { CaseTask } from '../../../common/types/domain/task/v1';
@@ -159,6 +161,13 @@ export const TasksTable: React.FC<TasksTableProps> = ({
                     <EuiBadge color={badge.color}>{badge.label}</EuiBadge>
                   </EuiFlexItem>
                 )}
+                {task.required && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="warning" data-test-subj={`cases-task-required-${task.id}`}>
+                      {i18n.REQUIRED}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
                 {(commentCounts[task.id] ?? 0) > 0 && (
                   <EuiFlexItem grow={false}>
                     <EuiText
@@ -223,14 +232,16 @@ export const TasksTable: React.FC<TasksTableProps> = ({
         if (!dueDate) return null;
         const overdue = !isTaskFinished(task) && new Date(dueDate) < new Date();
         return (
-          <EuiTextColor color={overdue ? 'danger' : undefined}>
-            {formatDate(dueDate, 'date')}
-            {overdue && (
-              <EuiScreenReaderOnly>
-                <span>{` ${i18n.OVERDUE}`}</span>
-              </EuiScreenReaderOnly>
-            )}
-          </EuiTextColor>
+          <EuiToolTip content={formatDate(dueDate, 'dateTime')}>
+            <EuiTextColor color={overdue ? 'danger' : undefined}>
+              <FormattedRelative value={dueDate} />
+              {overdue && (
+                <EuiScreenReaderOnly>
+                  <span>{` ${i18n.OVERDUE}`}</span>
+                </EuiScreenReaderOnly>
+              )}
+            </EuiTextColor>
+          </EuiToolTip>
         );
       },
     },

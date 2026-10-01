@@ -28,7 +28,8 @@ const template = (overrides: Partial<CaseTaskTemplate> = {}): CaseTaskTemplate =
       title: 'Block sender',
       description: '',
       priority: 'high',
-      relative_due_days: null,
+      required: false,
+      due_within: null,
       subtasks: [],
     },
   ],
@@ -72,6 +73,32 @@ describe('seedTaskListsFromTemplate', () => {
     });
     expect(userActionService.creator.createUserAction).toHaveBeenCalledTimes(2);
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('resolves due within against now and carries the required flag', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
+    taskTemplateService.getTemplate.mockResolvedValueOnce(
+      template({
+        tasks: [
+          {
+            title: 'Escalate',
+            description: '',
+            priority: 'critical',
+            required: true,
+            due_within: { value: 30, unit: 'minutes' },
+            subtasks: [],
+          },
+        ],
+      })
+    );
+
+    await seed(['tpl-1']);
+
+    expect(taskService.bulkCreateTasks.mock.calls[0][0].tasks[0]).toMatchObject({
+      required: true,
+      due_date: '2026-01-01T00:30:00.000Z',
+    });
+    jest.useRealTimers();
   });
 
   it('skips a task list from another solution and keeps going', async () => {

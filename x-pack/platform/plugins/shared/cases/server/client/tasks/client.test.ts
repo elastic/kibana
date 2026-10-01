@@ -25,6 +25,7 @@ const task: CaseTask = {
   priority: 'medium',
   assignees: [],
   due_date: null,
+  required: false,
   started_at: null,
   completed_at: null,
   sort_order: 1000,
@@ -321,9 +322,16 @@ describe('TasksSubClient', () => {
             title: 'Root',
             description: '',
             priority: 'high',
-            relative_due_days: 2,
+            required: false,
+            due_within: { value: 2, unit: 'days' },
             subtasks: [
-              { title: 'Child', description: '', priority: 'low', relative_due_days: null },
+              {
+                title: 'Child',
+                description: '',
+                priority: 'low',
+                required: false,
+                due_within: null,
+              },
             ],
           },
         ],
@@ -355,6 +363,31 @@ describe('TasksSubClient', () => {
       });
     });
 
+    it('refuses to apply the same task list twice', async () => {
+      taskTemplateService.getTemplate.mockResolvedValue({
+        id: 'tpl-1',
+        version: 'v1',
+        name: 'Phishing',
+        description: '',
+        tags: [],
+        owner: theCase.attributes.owner,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: task.created_by,
+        updated_at: null,
+        updated_by: null,
+        tasks: [],
+      });
+      taskService.findTasks.mockResolvedValue({
+        tasks: [{ ...task, template_id: 'tpl-1' }],
+        total: 1,
+      });
+
+      await expect(client.applyTemplate(theCase.id, 'tpl-1')).rejects.toThrow(
+        'has already been applied to this case'
+      );
+      expect(taskService.bulkCreateTasks).not.toHaveBeenCalled();
+    });
+
     it('enforces the per-case limit across the whole list', async () => {
       taskService.findTasks.mockResolvedValue({ tasks: [], total: MAX_TASKS_PER_CASE - 1 });
       taskTemplateService.getTemplate.mockResolvedValue({
@@ -373,14 +406,16 @@ describe('TasksSubClient', () => {
             title: 'A',
             description: '',
             priority: 'medium',
-            relative_due_days: null,
+            required: false,
+            due_within: null,
             subtasks: [],
           },
           {
             title: 'B',
             description: '',
             priority: 'medium',
-            relative_due_days: null,
+            required: false,
+            due_within: null,
             subtasks: [],
           },
         ],

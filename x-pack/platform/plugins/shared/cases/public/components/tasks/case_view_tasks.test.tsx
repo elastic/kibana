@@ -38,6 +38,7 @@ const task = (overrides: Partial<CaseTask>): CaseTask => ({
   priority: 'medium',
   assignees: [],
   due_date: null,
+  required: false,
   started_at: null,
   completed_at: null,
   sort_order: 1000,
@@ -226,6 +227,37 @@ describe('CaseViewTasks', () => {
     expect(screen.getByTestId('cases-task-row-child-1')).toBeInTheDocument();
     // The count reports the whole list, not the filtered view.
     expect(screen.getByTestId('cases-tasks-count')).toHaveTextContent('Showing 4 tasks, 3 open');
+  });
+
+  it('marks task lists already on the case as applied in the picker', async () => {
+    mockedHooks.useGetTaskTemplates.mockReturnValue({
+      data: {
+        templates: [
+          { id: 'tpl-applied', name: 'Phishing', tasks: [], tags: [] },
+          { id: 'tpl-new', name: 'Containment', tasks: [], tags: [] },
+        ],
+        total: 2,
+      },
+      isLoading: false,
+    } as unknown as ReturnType<typeof hooks.useGetTaskTemplates>);
+    mockedHooks.useApplyTaskTemplate.mockReturnValue({
+      mutateAsync: jest.fn(),
+      isLoading: false,
+    } as unknown as ReturnType<typeof hooks.useApplyTaskTemplate>);
+    mockTasksQuery({
+      data: { tasks: [task({ id: 'root-1', template_id: 'tpl-applied' })], comment_counts: {} },
+    });
+    renderWithTestingProviders(<CaseViewTasks caseId="case-1" />, {
+      wrapperProps: { permissions: allCasesPermissions() },
+    });
+
+    await userEvent.click(screen.getByTestId('cases-tasks-apply-list'));
+    const options = await screen.findByTestId('cases-task-list-options');
+    expect(within(options).getByText('Already applied')).toBeInTheDocument();
+    expect(within(options).getByRole('option', { name: /Phishing/ })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it('opens the add task flyout', async () => {

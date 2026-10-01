@@ -9,22 +9,31 @@ import * as rt from 'io-ts';
 import { UserRt } from '../user/v1';
 import { CaseTaskPriorityRt } from '../task/v1';
 
+export const DueWithinUnitRt = rt.keyof({ minutes: null, hours: null, days: null });
+
+/** Relative deadline, resolved against the time the list is applied. */
+export const DueWithinRt = rt.strict({
+  value: rt.number,
+  unit: DueWithinUnitRt,
+});
+
 /**
- * A reusable task list. Applying it to a case creates one task per entry, in
- * array order, with `relative_due_days` resolved against the time of applying.
+ * A reusable task list. Applying it to a case creates one task per entry, in array order.
  */
 export const CaseTaskTemplateSubtaskRt = rt.strict({
   title: rt.string,
   description: rt.string,
   priority: CaseTaskPriorityRt,
-  relative_due_days: rt.union([rt.number, rt.null]),
+  required: rt.boolean,
+  due_within: rt.union([DueWithinRt, rt.null]),
 });
 
 export const CaseTaskTemplateTaskRt = rt.strict({
   title: rt.string,
   description: rt.string,
   priority: CaseTaskPriorityRt,
-  relative_due_days: rt.union([rt.number, rt.null]),
+  required: rt.boolean,
+  due_within: rt.union([DueWithinRt, rt.null]),
   subtasks: rt.array(CaseTaskTemplateSubtaskRt),
 });
 
@@ -50,6 +59,8 @@ export const CaseTaskTemplateRt = rt.intersection([
 
 export const CaseTaskTemplatesRt = rt.array(CaseTaskTemplateRt);
 
+export type DueWithinUnit = rt.TypeOf<typeof DueWithinUnitRt>;
+export type DueWithin = rt.TypeOf<typeof DueWithinRt>;
 export type CaseTaskTemplateSubtask = rt.TypeOf<typeof CaseTaskTemplateSubtaskRt>;
 export type CaseTaskTemplateTask = rt.TypeOf<typeof CaseTaskTemplateTaskRt>;
 export type CaseTaskTemplateAttributes = rt.TypeOf<typeof CaseTaskTemplateAttributesRt>;
