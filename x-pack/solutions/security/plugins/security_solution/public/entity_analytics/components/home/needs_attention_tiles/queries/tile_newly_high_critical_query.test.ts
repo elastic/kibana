@@ -111,6 +111,6 @@ describe('buildNewlyHighCriticalCountQuery', () => {
     const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
     expect(query).toContain('COALESCE(`entity.relationships.resolution.resolved_to`, entity.id)');
     expect(query).toContain('value = COUNT_DISTINCT(effective_id)');
-    expect(query).toContain('entity_ids = VALUES(entity.id)');
+    expect(query).toContain('entity_ids = VALUES(effective_id)');
   });
 });

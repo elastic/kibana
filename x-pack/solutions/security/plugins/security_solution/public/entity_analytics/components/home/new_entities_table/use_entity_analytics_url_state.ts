@@ -14,6 +14,7 @@ import { SEVERITY_UI_SORT_ORDER } from '../../../common/utils';
 import { ValidCriticalityLevels } from '../../../../../common/entity_analytics/asset_criticality/constants';
 import { RISK_SCORE_NORM_FIELD, PAGE_SIZE_OPTIONS, TIME_RANGE_OPTIONS } from './common';
 import type { TimeRange } from './common';
+import { isTileCard, type SignalCardId } from '../needs_attention_tiles/data';
 
 export { TIME_RANGE_OPTIONS };
 export type { TimeRange };
@@ -44,6 +45,7 @@ const PARAM = {
   PAGE: 'eaPage',
   PAGE_SIZE: 'eaPageSize',
   EXPANDED: 'eaExpanded',
+  ACTIVE_TILE: 'eaActiveTile',
   // entity filter params kept identical to the existing hooks so bookmarked URLs remain valid
   ENTITY_TYPES: 'entityTypes',
   RISK_LEVELS: 'riskLevels',
@@ -121,6 +123,8 @@ export interface EntityAnalyticsUrlState {
   entityFilters: EntityFilters;
   /** Entity ids with expanded child rows (persisted across filter/pagination). */
   expandedIds: string[];
+  /** Selected needs-attention tile; omitted from the URL when none. */
+  activeTile: SignalCardId | null;
 }
 
 export interface EntityAnalyticsUrlStateResult extends EntityAnalyticsUrlState {
@@ -133,6 +137,8 @@ export interface EntityAnalyticsUrlStateResult extends EntityAnalyticsUrlState {
   setPageSize: (size: number) => void;
   /** Resets page to 0. */
   setEntityFilters: (filters: EntityFilters) => void;
+  /** Resets page to 0. Pass null to clear. */
+  setActiveTile: (tile: SignalCardId | null) => void;
   resetPage: () => void;
   /** Toggles an entity id in `eaExpanded` without pushing history. */
   toggleExpandedId: (entityId: string) => void;
@@ -170,6 +176,12 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     const rawPage = params.get(PARAM.PAGE);
     if (rawPage !== null && !isNonNegativeInt(rawPage)) {
       params.delete(PARAM.PAGE);
+      dirty = true;
+    }
+    // eaActiveTile is omitted when none; strip a present invalid value.
+    const rawActiveTile = params.get(PARAM.ACTIVE_TILE);
+    if (rawActiveTile !== null && !isTileCard(rawActiveTile)) {
+      params.delete(PARAM.ACTIVE_TILE);
       dirty = true;
     }
 
@@ -227,6 +239,15 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
       dataSources: splitParam(rawDataSources),
     }),
     [rawEntityTypes, rawRiskLevels, rawAssetCriticality, rawWatchlists, rawDataSources]
+  );
+
+  const rawExpanded = p.get(PARAM.EXPANDED);
+  const expandedIds = useMemo(() => parseExpandedIds(rawExpanded), [rawExpanded]);
+
+  const rawActiveTile = p.get(PARAM.ACTIVE_TILE);
+  const activeTile = useMemo(
+    (): SignalCardId | null => (isTileCard(rawActiveTile) ? rawActiveTile : null),
+    [rawActiveTile]
   );
 
   // ── write ─────────────────────────────────────────────────────────────────
@@ -301,6 +322,15 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
       }),
     [update]
   );
+  const setActiveTile = useCallback(
+    (tile: SignalCardId | null) =>
+      update((params) => {
+        if (tile == null) params.delete(PARAM.ACTIVE_TILE);
+        else params.set(PARAM.ACTIVE_TILE, tile);
+        params.delete(PARAM.PAGE);
+      }),
+    [update]
+  );
   const resetPage = useCallback(() => update((params) => params.delete(PARAM.PAGE)), [update]);
 
   const toggleExpandedId = useCallback(
@@ -323,9 +353,6 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     [update]
   );
 
-  const rawExpanded = p.get(PARAM.EXPANDED);
-  const expandedIds = useMemo(() => parseExpandedIds(rawExpanded), [rawExpanded]);
-
   return {
     timeRange,
     view,
@@ -335,12 +362,14 @@ export const useEntityAnalyticsUrlState = (): EntityAnalyticsUrlStateResult => {
     pageSize,
     entityFilters,
     expandedIds,
+    activeTile,
     setTimeRange,
     setView,
     setSort,
     setPage,
     setPageSize,
     setEntityFilters,
+    setActiveTile,
     resetPage,
     toggleExpandedId,
     clearExpandedIds,

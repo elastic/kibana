@@ -15,6 +15,7 @@ import { isNoneGroup } from '@kbn/grouping';
 import type { EntityType } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { PageLoader } from '../../common/components/page_loader';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -69,6 +70,7 @@ import {
   EMPTY_ENTITY_IDS,
   type ActiveFilter,
   type SignalCardData,
+  type SignalCardId,
 } from '../components/home/needs_attention_tiles/data';
 
 const ENTITY_TABLE_SCOPE_ID = 'entity-analytics-new-entities-table';
@@ -128,9 +130,10 @@ const VIEW_BY_SELECTOR_TITLE = i18n.translate(
 const buildCombinedFilter = (
   esFilter: ESBoolQuery | undefined,
   entityFilters: EntityFilters,
-  view: 'resolved' | 'raw'
+  view: 'resolved' | 'raw',
+  cardFilter?: QueryDslQueryContainer | null
 ) => {
-  const filterClauses = [
+  const filterClauses: QueryDslQueryContainer[] = [
     ...(esFilter ? [esFilter] : []),
     ...(entityFilters.entityTypes.length
       ? [{ terms: { 'entity.EngineMetadata.Type': entityFilters.entityTypes } }]
@@ -147,6 +150,7 @@ const buildCombinedFilter = (
     ...(entityFilters.dataSources.length
       ? [{ terms: { 'entity.source': entityFilters.dataSources } }]
       : []),
+    ...(cardFilter ? [cardFilter] : []),
   ];
   const mustNotClauses =
     view === 'resolved'
@@ -155,6 +159,23 @@ const buildCombinedFilter = (
   return filterClauses.length || mustNotClauses.length
     ? { bool: { filter: filterClauses, must: [], must_not: mustNotClauses, should: [] } }
     : undefined;
+};
+
+/** DSL counterpart of the tile ES|QL clause (grouping buckets use this path). */
+const buildTileCardFilter = (ids: string[], view: 'resolved' | 'raw'): QueryDslQueryContainer => {
+  if (!ids.length) return { match_none: {} };
+  if (view === 'raw') {
+    return {
+      bool: {
+        should: [
+          { terms: { 'entity.id': ids } },
+          { terms: { 'entity.relationships.resolution.resolved_to': ids } },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+  }
+  return { terms: { 'entity.id': ids } };
 };
 
 export const EntityAnalyticsNewHomePage: React.FC = () => {
@@ -190,9 +211,14 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     pageSize,
     setPage,
     setPageSize,
+    activeTile,
+    setActiveTile,
   } = useEntityAnalyticsUrlState();
 
-  const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null);
+  const activeFilter = useMemo((): ActiveFilter | null => {
+    if (!activeTile) return null;
+    return { type: 'card', cardId: activeTile, label: activeTile };
+  }, [activeTile]);
 
   const activeColumns = viewBy === 'raw' ? RAW_VIEW_COLUMNS : RESOLVED_VIEW_COLUMNS;
 
@@ -328,30 +354,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const [groupingPageIndex, setGroupingPageIndex] = useState(0);
   const [groupingPageSize, setGroupingPageSize] = useState(25);
 
-  const combinedFilter = useMemo(
-    () => buildCombinedFilter(esFilter, entityFilters, viewBy),
-    [esFilter, entityFilters, viewBy]
-  );
-
-  const groupingState = useMemo<EntityURLStateResult>(
-    () => ({
-      query: (combinedFilter as ESBoolQuery | undefined) ?? {
-        bool: { filter: [], must: [], should: [], must_not: [] },
-      },
-      setUrlQuery: () => {},
-      pageSize: groupingPageSize,
-      pageIndex: groupingPageIndex,
-      onChangePage: setGroupingPageIndex,
-      onChangeItemsPerPage: setGroupingPageSize,
-      sort: [],
-      filters: [],
-      onSort: () => {},
-      onResetFilters: () => {},
-      getRowsFromPages: () => [],
-    }),
-    [combinedFilter, groupingPageSize, groupingPageIndex]
-  );
-
   const isGroupSelected = !isNoneGroup(groupsSelected);
 
   const { data: entityStoreStatusData, isLoading: entityStoreStatusLoading } =
@@ -422,17 +424,18 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     skip: skipTileQueries,
   });
 
-  const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
-    setActiveFilter((prev) =>
-      prev?.cardId === cardId ? null : { type: 'card', cardId, label: cardId }
-    );
-  }, []);
+  const handleFilterForCard = useCallback(
+    (cardId: SignalCardId) => {
+      setActiveTile(activeTile === cardId ? null : cardId);
+    },
+    [activeTile, setActiveTile]
+  );
 
   const selectedEntityIds = useMemo(() => {
-    if (!activeFilter || activeFilter.type !== 'card') {
+    if (!activeTile) {
       return EMPTY_ENTITY_IDS;
     }
-    switch (activeFilter.cardId) {
+    switch (activeTile) {
       case 'entitiesWithAlerts':
         return alertsEntityIds;
       case 'entitiesWithAnomalies':
@@ -449,7 +452,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         return EMPTY_ENTITY_IDS;
     }
   }, [
-    activeFilter,
+    activeTile,
     alertsEntityIds,
     anomaliesEntityIds,
     riskMoversEntityIds,
@@ -458,16 +461,54 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     newEntityEntityIds,
   ]);
 
+  const cappedTileEntityIds = useMemo(() => {
+    if (!activeTile) return null;
+    return selectedEntityIds.length > MAX_CARD_FILTER_ENTITY_IDS
+      ? selectedEntityIds.slice(0, MAX_CARD_FILTER_ENTITY_IDS)
+      : selectedEntityIds;
+  }, [activeTile, selectedEntityIds]);
+
   const cardWhereExpression = useMemo(() => {
-    if (!activeFilter || activeFilter.type !== 'card') return undefined;
+    if (cappedTileEntityIds == null) return undefined;
     // Always constrain when a card is active — empty list matches nothing so the
     // table stays consistent with a 0-count tile rather than falling back to all entities.
-    const ids =
-      selectedEntityIds.length > MAX_CARD_FILTER_ENTITY_IDS
-        ? selectedEntityIds.slice(0, MAX_CARD_FILTER_ENTITY_IDS)
-        : selectedEntityIds;
-    return ids.length ? `entity.id IN (${toList(ids)})` : 'false';
-  }, [activeFilter, selectedEntityIds]);
+    if (!cappedTileEntityIds.length) return 'false';
+    const list = toList(cappedTileEntityIds);
+    // Tiles emit resolved (effective) ids. Resolved view: parent rows only.
+    // Raw view: parent + members of those identities.
+    return viewBy === 'raw'
+      ? `(entity.id IN (${list}) OR entity.relationships.resolution.resolved_to IN (${list}))`
+      : `entity.id IN (${list})`;
+  }, [cappedTileEntityIds, viewBy]);
+
+  const cardFilter = useMemo((): QueryDslQueryContainer | null => {
+    if (cappedTileEntityIds == null) return null;
+    return buildTileCardFilter(cappedTileEntityIds, viewBy);
+  }, [cappedTileEntityIds, viewBy]);
+
+  const combinedFilter = useMemo(
+    () => buildCombinedFilter(esFilter, entityFilters, viewBy, cardFilter),
+    [esFilter, entityFilters, viewBy, cardFilter]
+  );
+
+  const groupingState = useMemo<EntityURLStateResult>(
+    () => ({
+      query: (combinedFilter as ESBoolQuery | undefined) ?? {
+        bool: { filter: [], must: [], should: [], must_not: [] },
+      },
+      setUrlQuery: () => {},
+      pageSize: groupingPageSize,
+      pageIndex: groupingPageIndex,
+      onChangePage: setGroupingPageIndex,
+      onChangeItemsPerPage: setGroupingPageSize,
+      sort: [],
+      filters: [],
+      onSort: () => {},
+      onResetFilters: () => {},
+      getRowsFromPages: () => [],
+    }),
+    [combinedFilter, groupingPageSize, groupingPageIndex]
+  );
 
   const gridWhereExpression = useMemo(() => {
     const parts = [whereExpression, cardWhereExpression].filter(Boolean);
@@ -479,7 +520,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   }, [gridWhereExpression, setPage]);
 
   useUpdateEffect(() => {
-    if (!activeFilter || selectedEntityIds.length <= MAX_CARD_FILTER_ENTITY_IDS) {
+    setGroupingPageIndex(0);
+  }, [cardWhereExpression, whereExpression, viewBy]);
+
+  useUpdateEffect(() => {
+    if (!activeTile || selectedEntityIds.length <= MAX_CARD_FILTER_ENTITY_IDS) {
       return;
     }
     addWarning({
@@ -499,7 +544,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         }
       ),
     });
-  }, [activeFilter, selectedEntityIds.length, addWarning]);
+  }, [activeTile, selectedEntityIds.length, addWarning]);
 
   const signalCards = useMemo(
     (): SignalCardData[] => [
@@ -768,8 +813,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     [getSecuritySolutionUrl]
   );
 
-  if (isDataViewLoading || entityStoreStatusLoading || entityStoreInstalling)
-    return <PageLoader />;
+  if (isDataViewLoading || entityStoreStatusLoading || entityStoreInstalling) return <PageLoader />;
   if (isDataViewError) return <DataViewErrorComponent />;
   if (entityStoreDisabled) return <EntityStoreDisabledEmptyPrompt />;
 
@@ -851,6 +895,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 timeRange={timeRange}
                 watchlistNames={watchlistNames}
                 view={viewBy}
+                cardWhereExpression={cardWhereExpression}
                 groupSelectorComponent={viewControls}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}

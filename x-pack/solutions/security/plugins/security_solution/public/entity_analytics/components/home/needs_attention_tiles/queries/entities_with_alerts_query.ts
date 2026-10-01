@@ -62,7 +62,7 @@ export const buildAlertBasedTilesQuery = (
   parts.push(`    alerts_count           = COUNT_DISTINCT(effective_id),`);
   parts.push(`    alerts_entity_ids      = VALUES(effective_id),`);
   parts.push(`    watchlisted_count      = COUNT_DISTINCT(watchlisted_effective_id),`);
-  parts.push(`    watchlisted_entity_ids = VALUES(watchlisted_entity_id)`);
+  parts.push(`    watchlisted_entity_ids = VALUES(watchlisted_effective_id)`);
 
   return parts.join('\n');
 };
