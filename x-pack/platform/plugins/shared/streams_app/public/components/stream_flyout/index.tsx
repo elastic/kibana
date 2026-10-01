@@ -167,7 +167,7 @@ function StreamFlyoutContent({
   onSelectTab,
 }: StreamFlyoutProps) {
   const { euiTheme } = useEuiTheme();
-  const { loading, definition } = useStreamFlyoutDetail();
+  const { loading, definition, refresh } = useStreamFlyoutDetail();
   const [uncontrolledTab, setUncontrolledTab] = useState<StreamFlyoutTabId>(DEFAULT_TAB);
   const selectTab = onSelectTab ?? setUncontrolledTab;
   const { quality, isQualityLoading } = useDataSetQuality(name, definition);
@@ -196,6 +196,11 @@ function StreamFlyoutContent({
       },
     },
   } = useKibana();
+
+  const refreshAll = useCallback(() => {
+    refreshStreams?.();
+    refresh();
+  }, [refreshStreams, refresh]);
 
   const processors = useMemo(
     () =>
@@ -261,8 +266,8 @@ function StreamFlyoutContent({
   );
 
   const page = useMemo(
-    () => TAB_PAGES[selectedTab]({ name, onClose, loading, refreshStreams }),
-    [loading, name, onClose, refreshStreams, selectedTab]
+    () => TAB_PAGES[selectedTab]({ name, onClose, loading, refreshStreams: refreshAll }),
+    [loading, name, onClose, refreshAll, selectedTab]
   );
   const badges = [];
 
