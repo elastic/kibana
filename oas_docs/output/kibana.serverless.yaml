@@ -42310,6 +42310,78 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/agents/{agentId}/restart:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/restart</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Restart an Elastic Agent. The request fails when the agent is inactive, on a version earlier than 9.6.0, or enrolled in a hosted agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+      operationId: post-fleet-agents-agentid-restart
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The agent ID to restart
+          in: path
+          name: agentId
+          required: true
+          schema:
+            maxLength: 512
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    actionId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_action_id_response'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_action_message_response'
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Restart an agent
+      tags:
+        - Elastic Agent actions
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/agents/{agentId}/rollback:
     post:
       description: |-
@@ -42816,6 +42888,7 @@ paths:
                             - PRIVILEGE_LEVEL_CHANGE
                             - ROLLBACK
                             - REMOVE_COLLECTOR
+                            - RESTART
                           type: string
                         version:
                           description: agent version number (UPGRADE action)
@@ -43678,6 +43751,103 @@ paths:
       summary: Bulk request diagnostics from agents
       tags:
         - Elastic Agent actions
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/agents/bulk_restart:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/bulk_restart</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Restart multiple Elastic Agents. Agents that are enrolled in a hosted policy or are on a version earlier than 9.6.0 are excluded from the action and receive individual error results.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+      operationId: post-fleet-agents-bulk-restart
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkRestartAgentsRequest:
+                value:
+                  agents:
+                    - agent-1
+                    - agent-2
+                  batchSize: 100
+                  includeInactive: false
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                agents:
+                  anyOf:
+                    - items:
+                        maxLength: 512
+                        type: string
+                      maxItems: 10000
+                      type: array
+                    - maxLength: 1000000
+                      type: string
+                batchSize:
+                  minimum: 1
+                  type: number
+                includeInactive:
+                  default: false
+                  type: boolean
+              required:
+                - agents
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    actionId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_action_id_response'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_action_message_response'
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Bulk restart agents
+      tags:
+        - Elastic Agent actions
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
