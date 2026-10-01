@@ -935,8 +935,8 @@ export const EntityFlyout = ({
     >
       {dashboardPreview ? (
         <>
-          <EuiFlyoutHeader hasBorder>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlyoutHeader hasBorder css={css`padding-bottom: 0;`}>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false} css={css`margin-bottom: -4px;`}>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="editorUndo"
@@ -954,6 +954,7 @@ export const EntityFlyout = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   iconType="cross"
+                  size="xs"
                   aria-label={i18n.translate(
                     'entityCentricLabFlyout.flyout.closeAriaLabel',
                     { defaultMessage: 'Close' }
@@ -965,7 +966,7 @@ export const EntityFlyout = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiHorizontalRule margin="s" />
+            <EuiHorizontalRule margin="xs" css={css`margin-left: -24px; margin-right: -24px; width: auto;`} />
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
@@ -998,7 +999,7 @@ export const EntityFlyout = ({
         <>
       <EuiFlyoutHeader css={css`padding-bottom: 0;`}>
         {/* Top row: expand + close icons right-aligned */}
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="xs" responsive={false}>
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="xs" responsive={false} css={css`margin-top: -8px; margin-bottom: -4px;`}>
           {onExpand ? (
             <EuiFlexItem grow={false}>
               <EuiToolTip
@@ -1015,6 +1016,7 @@ export const EntityFlyout = ({
                   )}
                   color="text"
                   display="empty"
+                  size="xs"
                   onClick={() => onExpand?.(activeTab)}
                   data-test-subj="entityCentricLabFlyoutExpand"
                 />
@@ -1030,20 +1032,13 @@ export const EntityFlyout = ({
               )}
               color="text"
               display="empty"
+              size="xs"
               onClick={onClose}
               data-test-subj="entityCentricLabFlyoutClose"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiHorizontalRule margin="s" />
-        {/* Timestamp above the title — latest Kibana flyout pattern */}
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('entityCentricLabFlyout.flyout.lastUpdate', {
-            defaultMessage: 'Last update {lastUpdate}',
-            values: { lastUpdate: overview.lastUpdate },
-          })}
-        </EuiText>
-        <EuiSpacer size="xs" />
+        <EuiHorizontalRule margin="xs" css={css`margin-left: -24px; margin-right: -24px; width: auto;`} />
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           {kind ? (
             <EuiFlexItem grow={false}>

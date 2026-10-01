@@ -89,8 +89,19 @@ export const ENTITY_CATEGORIES: readonly EntityCategoryDescriptor[] = [
  */
 export const ELASTICON_HIDDEN_CATEGORY_IDS: ReadonlySet<EntityCategoryId> = new Set(['services']);
 
+/**
+ * ElasticOn Phase 1 default data profile: this category is intentionally
+ * empty so demos can show the onboarding empty state without wiping the
+ * whole inventory.
+ */
+export const ELASTICON_DEFAULT_EMPTY_CATEGORY_ID: EntityCategoryId = 'middlewares';
+
 export const isCategoryHiddenInElasticOn = (categoryId: EntityCategoryId): boolean =>
   ELASTICON_HIDDEN_CATEGORY_IDS.has(categoryId);
+
+export const isElasticOnDefaultEmptyCategory = (
+  categoryId: EntityCategoryId | undefined
+): boolean => categoryId === ELASTICON_DEFAULT_EMPTY_CATEGORY_ID;
 
 export const getVisibleEntityCategories = (
   isElasticOn: boolean
@@ -1027,12 +1038,14 @@ export const buildFakeEntities = (
         : findSpec('networking'),
       healthFn
     ),
-    ...buildCategoryEntitiesWithScenario(
-      multiplier > 1
-        ? scaleSpec(findSpec('middlewares'), multiplier)
-        : findSpec('middlewares'),
-      healthFn
-    ),
+    ...(scenario === 'default'
+      ? []
+      : buildCategoryEntitiesWithScenario(
+          multiplier > 1
+            ? scaleSpec(findSpec('middlewares'), multiplier)
+            : findSpec('middlewares'),
+          healthFn
+        )),
     ...buildCategoryEntitiesWithScenario(
       multiplier > 1 ? scaleSpec(findSpec('llms'), multiplier) : findSpec('llms'),
       healthFn

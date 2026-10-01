@@ -22,7 +22,7 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
+  EuiFlyoutResizable,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
@@ -145,13 +145,14 @@ export const LogDocumentFlyout = ({
   const handleNext = useCallback(() => onNavigate('next'), [onNavigate]);
 
   return (
-    <EuiFlyout
+    <EuiFlyoutResizable
       ownFocus={false}
+      session="inherit"
       onClose={onClose}
       size="s"
       hideCloseButton
       aria-labelledby="logDocFlyoutTitle"
-      css={css`z-index: 1001;`}
+      data-test-subj="entityCentricLabLogDocumentFlyout"
     >
       <EuiFlyoutHeader css={css`padding-bottom: 0;`}>
         {/* Title row */}
@@ -162,7 +163,7 @@ export const LogDocumentFlyout = ({
           gutterSize="s"
         >
           <EuiFlexItem>
-            <EuiTitle size="m" id="logDocFlyoutTitle">
+            <EuiTitle size="s" id="logDocFlyoutTitle">
               <h2>
                 {i18n.translate(
                   'entityCentricLabFlyout.flyout.logDoc.title',
@@ -528,6 +529,6 @@ export const LogDocumentFlyout = ({
           </EuiCodeBlock>
         )}
       </EuiFlyoutBody>
-    </EuiFlyout>
+    </EuiFlyoutResizable>
   );
 };

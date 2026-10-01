@@ -28,6 +28,7 @@ import React, {
 import { GROUP_BY_STORAGE_KEY } from './storage_keys';
 import {
   VARIATION_DIMENSIONS,
+  resolveVariationDefaultOption,
   type VariationDimension,
 } from './variation_registry';
 
@@ -53,11 +54,19 @@ const readFromStorage = (): Record<string, string> => {
   return map;
 };
 
-const writeToStorage = (dimensionId: string, optionId: string): void => {
+const writeToStorage = (
+  dimensionId: string,
+  optionId: string,
+  selections: Readonly<Record<string, string>>
+): void => {
   try {
     const dim = VARIATION_DIMENSIONS.find((d) => d.id === dimensionId);
     if (!dim) return;
-    if (optionId === dim.defaultOption) {
+    const effectiveDefault = resolveVariationDefaultOption(dimensionId, {
+      ...selections,
+      ...(dimensionId === 'phase' ? { phase: optionId } : {}),
+    });
+    if (optionId === effectiveDefault) {
       localStorage.removeItem(`${STORAGE_PREFIX}${dimensionId}`);
     } else {
       localStorage.setItem(`${STORAGE_PREFIX}${dimensionId}`, optionId);
@@ -76,18 +85,19 @@ interface VariationContextValue {
   get: (dimensionId: string) => string;
   /** Replaces the active option for one dimension (persists to localStorage). */
   set: (dimensionId: string, optionId: string) => void;
+  /** Whether the dimension is at its effective default (ignores stored override). */
+  isAtDefault: (dimensionId: string) => boolean;
   /** Full dimension registry (used by the switcher UI). */
   dimensions: readonly VariationDimension[];
 }
 
-const defaultGet = (dimensionId: string): string => {
-  const dim = VARIATION_DIMENSIONS.find((d) => d.id === dimensionId);
-  return dim?.defaultOption ?? '';
-};
+const defaultGet = (dimensionId: string): string =>
+  resolveVariationDefaultOption(dimensionId, {});
 
 const VariationContext = createContext<VariationContextValue>({
   get: defaultGet,
   set: () => {},
+  isAtDefault: () => true,
   dimensions: VARIATION_DIMENSIONS,
 });
 
@@ -103,34 +113,39 @@ export const VariationProvider = ({ children }: PropsWithChildren<{}>) => {
   const get = useCallback(
     (dimensionId: string): string => {
       if (selections[dimensionId]) return selections[dimensionId];
-      const dim = VARIATION_DIMENSIONS.find((d) => d.id === dimensionId);
-      return dim?.defaultOption ?? '';
+      return resolveVariationDefaultOption(dimensionId, selections);
     },
     [selections]
   );
 
   const set = useCallback(
     (dimensionId: string, optionId: string) => {
-      writeToStorage(dimensionId, optionId);
-      // When the phase changes, clear persisted state that is
-      // phase-specific so the UI re-defaults cleanly:
-      //   - bucket metric selections (Alerts vs Health default)
-      //   - group-by (phase1 has 'alerts' field, phase3 has 'health')
-      if (dimensionId === 'phase') {
-        try {
-          localStorage.removeItem('entityCentricLab.bucketMetricSelection.v4');
-          localStorage.removeItem(GROUP_BY_STORAGE_KEY);
-        } catch {
-          // ignore
-        }
-      }
       setSelections((prev) => {
         const next = { ...prev };
-        const dim = VARIATION_DIMENSIONS.find((d) => d.id === dimensionId);
-        if (dim && optionId === dim.defaultOption) {
+        const effectiveDefault = resolveVariationDefaultOption(dimensionId, {
+          ...prev,
+          ...(dimensionId === 'phase' ? { phase: optionId } : {}),
+        });
+        if (optionId === effectiveDefault) {
           delete next[dimensionId];
         } else {
           next[dimensionId] = optionId;
+        }
+        writeToStorage(dimensionId, optionId, prev);
+        // When the phase changes, clear persisted state that is
+        // phase-specific so the UI re-defaults cleanly:
+        //   - bucket metric selections (Alerts vs Health default)
+        //   - group-by (phase1 has 'alerts' field, phase3 has 'health')
+        //   - dashboard style (Phase 1 → list + flyout preview)
+        if (dimensionId === 'phase') {
+          try {
+            localStorage.removeItem('entityCentricLab.bucketMetricSelection.v4');
+            localStorage.removeItem(GROUP_BY_STORAGE_KEY);
+            localStorage.removeItem(`${STORAGE_PREFIX}dashboardStyle`);
+          } catch {
+            // ignore
+          }
+          delete next.dashboardStyle;
         }
         return next;
       });
@@ -138,9 +153,20 @@ export const VariationProvider = ({ children }: PropsWithChildren<{}>) => {
     []
   );
 
+  const isAtDefault = useCallback(
+    (dimensionId: string): boolean => {
+      const explicit = selections[dimensionId];
+      if (!explicit) {
+        return true;
+      }
+      return explicit === resolveVariationDefaultOption(dimensionId, selections);
+    },
+    [selections]
+  );
+
   const value = useMemo<VariationContextValue>(
-    () => ({ get, set, dimensions: VARIATION_DIMENSIONS }),
-    [get, set]
+    () => ({ get, set, isAtDefault, dimensions: VARIATION_DIMENSIONS }),
+    [get, set, isAtDefault]
   );
 
   return (

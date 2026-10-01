@@ -141,6 +141,30 @@ export const TABLE_STYLE_DIMENSION: VariationDimension = {
 
 export type DashboardStyleVariation = 'embedded' | 'list' | 'listWithPreview';
 
+/** Dashboard style default when no explicit prototype override is stored. */
+export const getDashboardStyleDefaultForPhase = (
+  phase: PhaseVariation
+): DashboardStyleVariation =>
+  phase === 'phase1' ? 'listWithPreview' : 'list';
+
+/**
+ * Effective default for a variation dimension (may depend on other dimensions).
+ */
+export const resolveVariationDefaultOption = (
+  dimensionId: string,
+  selections: Readonly<Record<string, string>>
+): string => {
+  const dim = VARIATION_DIMENSIONS.find((d) => d.id === dimensionId);
+  if (!dim) {
+    return '';
+  }
+  if (dimensionId === 'dashboardStyle') {
+    const phase = (selections.phase ?? PHASE_DIMENSION.defaultOption) as PhaseVariation;
+    return getDashboardStyleDefaultForPhase(phase);
+  }
+  return dim.defaultOption;
+};
+
 export const DASHBOARD_STYLE_DIMENSION: VariationDimension = {
   id: 'dashboardStyle',
   label: 'Dashboard style',

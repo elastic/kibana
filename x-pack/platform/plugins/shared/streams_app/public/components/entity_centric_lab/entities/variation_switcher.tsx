@@ -159,7 +159,7 @@ const SeedDemoDataButton = () => {
 
 export const VariationSwitcher = () => {
   const { euiTheme } = useEuiTheme();
-  const { get, set, dimensions } = useVariationContext();
+  const { get, set, isAtDefault, dimensions } = useVariationContext();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
@@ -167,9 +167,7 @@ export const VariationSwitcher = () => {
 
   // Highlight the button when any dimension is non-default, so the user
   // knows the prototype is in a non-standard configuration.
-  const hasNonDefault = dimensions.some(
-    (dim) => get(dim.id) !== dim.defaultOption
-  );
+  const hasNonDefault = dimensions.some((dim) => !isAtDefault(dim.id));
 
   return (
     <div

@@ -425,27 +425,50 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
           defaultMessage: 'Name',
         }),
         width: '40%',
-        render: (title: string, item: StoredCustomDashboard) => (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiLink
-                href={`${getBasePath()}/app/dashboards#/view/${item.id}`}
-                onClick={(e: React.MouseEvent) => {
-                  e.preventDefault();
-                  window.open(`${getBasePath()}/app/dashboards#/view/${item.id}`, '_blank', 'noopener');
-                }}
-                external
-              >
-                {title}
-              </EuiLink>
-            </EuiFlexItem>
-            {!item.enabled && item.scopedToEntity ? (
+        render: (title: string, item: StoredCustomDashboard) => {
+          const href = `${getBasePath()}/app/dashboards#/view/${item.id}`;
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{item.scopedToEntity} only</EuiBadge>
+                {onPreviewDashboard ? (
+                  <EuiLink
+                    onClick={() =>
+                      onPreviewDashboard({
+                        title,
+                        href,
+                        dashboard: {
+                          id: item.id,
+                          title,
+                          savedObjectTitle: title,
+                          savedObjectId: item.id,
+                          scopeField: '',
+                        },
+                      })
+                    }
+                  >
+                    {title}
+                  </EuiLink>
+                ) : (
+                  <EuiLink
+                    href={href}
+                    onClick={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      window.open(href, '_blank', 'noopener');
+                    }}
+                    external
+                  >
+                    {title}
+                  </EuiLink>
+                )}
               </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        ),
+              {!item.enabled && item.scopedToEntity ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">{item.scopedToEntity} only</EuiBadge>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          );
+        },
       },
       {
         field: 'description',
@@ -470,7 +493,7 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
         ),
       },
     ],
-    [handleRemoveCustom]
+    [handleRemoveCustom, onPreviewDashboard]
   );
 
   return (

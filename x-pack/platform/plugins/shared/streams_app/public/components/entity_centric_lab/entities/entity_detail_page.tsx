@@ -38,6 +38,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EntityFlyout,
   EntityFlyoutServicesProvider,
@@ -975,8 +976,8 @@ const EntityDetailPageInner = () => {
           size="l"
           data-test-subj="entityDetailPageDashboardPreview"
         >
-          <EuiFlyoutHeader hasBorder>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlyoutHeader hasBorder css={css`padding-bottom: 0;`}>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false} css={css`margin-bottom: -4px;`}>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="editorUndo"
@@ -994,6 +995,7 @@ const EntityDetailPageInner = () => {
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   iconType="cross"
+                  size="xs"
                   aria-label={i18n.translate(
                     'xpack.streams.entityCentricLab.detailPage.dashboardPreview.closeAriaLabel',
                     { defaultMessage: 'Close' }
@@ -1005,7 +1007,7 @@ const EntityDetailPageInner = () => {
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiHorizontalRule margin="s" />
+            <EuiHorizontalRule margin="xs" css={css`margin-left: -24px; margin-right: -24px; width: auto;`} />
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">

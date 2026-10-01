@@ -131,6 +131,7 @@ import {
   getTagFacets,
   getVisibleEntityCategories,
   isCategoryHiddenInElasticOn,
+  isElasticOnDefaultEmptyCategory,
   matchesExtraFilters,
   matchesTagFilters,
 } from './fake_entities';
@@ -510,6 +511,56 @@ const computeAlertsBadge = (
   return { label: '0 active alerts', color: 'success' };
 };
 
+const AddObservabilityDataEmptyPrompt = ({
+  categoryScope,
+}: {
+  readonly categoryScope?: EntityCategoryId;
+}) => {
+  const {
+    core: {
+      http: { basePath },
+    },
+  } = useKibana();
+
+  const addDataHref = useMemo(() => {
+    const onboardingCategory = categoryScope
+      ? (ONBOARDING_CATEGORY_MAP[categoryScope] ?? categoryScope)
+      : undefined;
+    const appPath = `/app/observabilityOnboarding${
+      onboardingCategory ? `?category=${encodeURIComponent(onboardingCategory)}` : ''
+    }`;
+    return basePath.prepend(appPath);
+  }, [basePath, categoryScope]);
+
+  return (
+    <EuiEmptyPrompt
+      icon={<img src={emptyStateIllustration} alt="" width={120} />}
+      title={
+        <h2>
+          {i18n.translate('xpack.streams.entityCentricLab.entities.emptyState.title', {
+            defaultMessage: 'Add Observability data',
+          })}
+        </h2>
+      }
+      body={
+        <p>
+          {i18n.translate('xpack.streams.entityCentricLab.entities.emptyState.body', {
+            defaultMessage:
+              'Connect your systems and get full visibility into logs, metrics, and traces.',
+          })}
+        </p>
+      }
+      actions={[
+        <EuiButton fill iconType="plusInCircle" key="add-data" href={addDataHref}>
+          {i18n.translate('xpack.streams.entityCentricLab.entities.emptyState.addData', {
+            defaultMessage: 'Add data',
+          })}
+        </EuiButton>,
+      ]}
+    />
+  );
+};
+
 const AddDataOverlay = ({ onClose }: { readonly onClose: () => void }) => {
   const { euiTheme } = useEuiTheme();
   return createPortal(
@@ -777,8 +828,17 @@ const AllEntitiesViewInner = ({
   const detailVariation = useVariation('detail') as DetailVariation;
   const phaseVariation = useVariation('phase');
   const isPhase1 = phaseVariation === 'phase1';
+  const isDemoEmptyCategoryPage =
+    isElasticOn &&
+    dataVariation === 'default' &&
+    isElasticOnDefaultEmptyCategory(categoryScope);
+  const showAddDataEmptyPrompt =
+    isElasticOn && (dataVariation === 'empty' || isDemoEmptyCategoryPage);
   const tableStyleVariation = useVariation('tableStyle') as TableStyleVariation;
-  const dashboardStyleVariation = useVariation('dashboardStyle') as 'embedded' | 'list';
+  const dashboardStyleVariation = useVariation('dashboardStyle') as
+    | 'embedded'
+    | 'list'
+    | 'listWithPreview';
   const scenarioVariation = useVariation('scenario');
   const variationCtx = useVariationContext();
 
@@ -2205,56 +2265,21 @@ const AllEntitiesViewInner = ({
           <EuiFlexItem>
             {showOverviewTab ? (
               categoryScope ? (
-                <MonitoringAssetsView
-                  category={categoryScope}
-                  onSelectEntity={openEntity}
-                  scopeLabel={cloudProviderScope ? headerLabel : undefined}
-                  dataStreamNameIncludes={cloudStreamMatch}
-                />
+                isDemoEmptyCategoryPage ? (
+                  <AddObservabilityDataEmptyPrompt categoryScope={categoryScope} />
+                ) : (
+                  <MonitoringAssetsView
+                    category={categoryScope}
+                    onSelectEntity={openEntity}
+                    scopeLabel={cloudProviderScope ? headerLabel : undefined}
+                    dataStreamNameIncludes={cloudStreamMatch}
+                  />
+                )
               ) : (
                 <AllEntitiesOverviewView onSelectEntity={openEntity} />
               )
-            ) : isElasticOn && dataVariation === 'empty' ? (
-              <EuiEmptyPrompt
-                icon={<img src={emptyStateIllustration} alt="" width={120} />}
-                title={
-                  <h2>
-                    {i18n.translate(
-                      'xpack.streams.entityCentricLab.entities.emptyState.title',
-                      { defaultMessage: 'Add Observability data' }
-                    )}
-                  </h2>
-                }
-                body={
-                  <p>
-                    {i18n.translate(
-                      'xpack.streams.entityCentricLab.entities.emptyState.body',
-                      {
-                        defaultMessage:
-                          'Connect your systems and get full visibility into logs, metrics, and traces.',
-                      }
-                    )}
-                  </p>
-                }
-                actions={[
-                  <EuiButton
-                    fill
-                    iconType="plusInCircle"
-                    key="add-data"
-                    href={
-                      '/alb/s/nicolas-prouvost/app/observabilityOnboarding' +
-                      (categoryScope
-                        ? `?category=${ONBOARDING_CATEGORY_MAP[categoryScope] ?? categoryScope}`
-                        : '')
-                    }
-                  >
-                    {i18n.translate(
-                      'xpack.streams.entityCentricLab.entities.emptyState.addData',
-                      { defaultMessage: 'Add data' }
-                    )}
-                  </EuiButton>,
-                ]}
-              />
+            ) : showAddDataEmptyPrompt ? (
+              <AddObservabilityDataEmptyPrompt categoryScope={categoryScope} />
             ) : isElasticOn ? (
               <>
                 {/*
