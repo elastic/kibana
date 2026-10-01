@@ -7,8 +7,8 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 
 1. **Load Cortex.** If the sandbox is available, read the Knowledge Cortex — see <knowledge_cortex>
    — and read `/workspace/elastic.md` with `nightshift_sandbox_view_file` for how to query cluster
-   telemetry from the sandbox.{{decision_trees_load_step}} Do not use memory tools or `ki_search`; Cortex is the only prior
-   knowledge source. Prior context may already tell you what kind of system this is and which
+   telemetry from the sandbox.{{decision_trees_load_step}}{{semantic_memory_load_step}} Do not use
+   memory tools or `ki_search`. Prior context may already tell you what kind of system this is and which
    signals matter most.
 
    Report progress: `summary` noting what prior context you found (or that none existed);

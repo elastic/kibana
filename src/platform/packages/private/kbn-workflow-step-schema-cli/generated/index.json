@@ -602,9 +602,13 @@
     "new_relic.runNrqlQuery",
     "new_relic.unacknowledgeIssue",
     "new_relic.updateMutingRule",
+    "nightshift.composeHydrateNotifications",
     "nightshift.cortexHydrate",
     "nightshift.cortexOptimize",
     "nightshift.ensureInvestigationAgent",
+    "nightshift.memoryMaterializeToSandbox",
+    "nightshift.memoryOptimize",
+    "nightshift.obtainSandbox",
     "nightshift.resolveModel",
     "nightshift.triggerInvestigation",
     "notion.getDataSource",
@@ -985,11 +989,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "4375577b7caa33dd99e77b3f0970063ed70c86e4280f397ddc20b828dcfb31ed"
+      "sha256": "de19b7e44d0877209c67c50ca782760507eda9495639eed62350ee5230431f60"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "c2b7d2687934748519b6b47934e94fc621804553ba803ba13030ba5e4b8e851f"
+      "sha256": "aa5c862867cbcae3a6b1925d47a8f5b19797cb1696af849d2c2fdaebda8fb681"
     }
   }
 }

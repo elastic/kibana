@@ -29,6 +29,7 @@ import {
 } from '../errors/alert_error_messages';
 import {
   ALERT_ACTIONS_RESOURCE_KEY,
+  alertActionActorType,
   type AlertActionDocument,
 } from '../../resources/datastreams/alert_actions';
 import { ALERT_EVENTS_RESOURCE_KEY } from '../../resources/datastreams/alert_events';
@@ -452,7 +453,10 @@ export class AlertActionsClient {
         : actionData;
 
     return {
-      actor: userProfileUid,
+      actor: {
+        type: alertActionActorType.user,
+        ...(userProfileUid != null ? { profile_uid: userProfileUid } : {}),
+      },
       action_type: action.action_type,
       last_series_event_timestamp: alertEvent['@timestamp'],
       rule_id: alertEvent.rule_id,

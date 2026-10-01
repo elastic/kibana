@@ -49,12 +49,12 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashOne,
-          episode: { id: 'bulk-series-snooze-episode-one', status: 'active' },
+          alert: { id: 'bulk-series-snooze-episode-one', status: 'active' },
         }),
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHashTwo,
-          episode: { id: 'bulk-series-snooze-episode-two', status: 'active' },
+          alert: { id: 'bulk-series-snooze-episode-two', status: 'active' },
         }),
       ]);
 
@@ -107,7 +107,7 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
-        episode: { id: 'bulk-series-unsnooze-episode', status: 'active' },
+        alert: { id: 'bulk-series-unsnooze-episode', status: 'active' },
       }),
     ]);
 
@@ -142,7 +142,7 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: knownGroup,
-          episode: { id: 'bulk-series-partial-known-episode', status: 'active' },
+          alert: { id: 'bulk-series-partial-known-episode', status: 'active' },
         }),
       ]);
 
