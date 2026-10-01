@@ -54,9 +54,7 @@ const mockExecutionPanelProps: { current: Record<string, unknown> } = { current:
 jest.mock('./workflow_execution_panel', () => ({
   WorkflowExecutionPanel: (props: {
     execution: WorkflowExecutionDto | null;
-    error: Error | null;
     showBackButton: boolean;
-    waitingAction?: { submitState?: unknown };
   }) => {
     mockExecutionPanelProps.current = props;
     return (

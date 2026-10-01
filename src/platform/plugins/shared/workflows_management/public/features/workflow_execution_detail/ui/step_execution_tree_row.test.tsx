@@ -368,7 +368,7 @@ describe('StepExecutionTreeRow', () => {
     };
     getStepIconType.mockReturnValueOnce('hourglass');
 
-    const { container } = renderRow({
+    renderRow({
       stepId: 'collect_input',
       stepType: 'waitForInput',
       status: ExecutionStatus.WAITING_FOR_INPUT,

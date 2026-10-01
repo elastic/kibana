@@ -1009,13 +1009,12 @@ const collectCollapsedAncestorIds = (nodes: OpenTreeNode[], targetId: string | n
   const ids: string[] = [];
   const walk = (list: OpenTreeNode[]) => {
     for (const node of list) {
-      if (!nodeContainsId(node, targetId) || node.id === targetId) {
-        continue;
+      if (nodeContainsId(node, targetId) && node.id !== targetId) {
+        if (node.row?.stepType && collapsedTypes.has(node.row.stepType)) {
+          ids.push(node.id);
+        }
+        walk(node.children);
       }
-      if (node.row?.stepType && collapsedTypes.has(node.row.stepType)) {
-        ids.push(node.id);
-      }
-      walk(node.children);
     }
   };
   walk(nodes);
