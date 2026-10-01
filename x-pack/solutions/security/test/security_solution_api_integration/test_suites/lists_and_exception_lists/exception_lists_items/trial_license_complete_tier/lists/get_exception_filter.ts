@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -22,7 +22,7 @@ import {
 import { getCreateExceptionListItemMinimalSchemaMockWithoutId } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
-import { createListsIndex, deleteListsIndex } from '../../../utils';
+import { createListsIndex, deleteListsIndex, deleteAllExceptions } from '../../../utils';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -37,6 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
+        await deleteAllExceptions(supertest, log);
         await deleteListsIndex(supertest, log);
       });
 
