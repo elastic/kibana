@@ -158,7 +158,7 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
       expect(
         screen.getByTestId('fieldListGroupedSelectedFields-deselectSelectedFields')
       ).toBeVisible();
-      expect(screen.getByRole('button', { name: 'Restart selected fields' })).toBeVisible();
+      expect(screen.getByRole('button', { name: 'Clear selected fields' })).toBeVisible();
       expect(screen.getByTestId('fieldListGroupedSelectedFields-count')).toBeVisible();
     });
 

@@ -219,9 +219,9 @@ export const getFieldKey = (field: FieldListItem): string =>
 
 const DeselectSelectedFieldsButton = ({ id, onClick }: { id: string; onClick: () => void }) => {
   const buttonLabel = i18n.translate(
-    'unifiedFieldList.fieldsAccordion.restartSelectedFieldsButtonLabel',
+    'unifiedFieldList.fieldsAccordion.clearSelectedFieldsButtonLabel',
     {
-      defaultMessage: 'Restart selected fields',
+      defaultMessage: 'Clear selected fields',
     }
   );
 
@@ -233,11 +233,7 @@ const DeselectSelectedFieldsButton = ({ id, onClick }: { id: string; onClick: ()
         data-test-subj={`${id}-deselectSelectedFields`}
         iconType="undo"
         size="xs"
-        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onClick();
-        }}
+        onClick={onClick}
       />
     </EuiToolTip>
   );

@@ -186,7 +186,7 @@ describe('Test column actions', () => {
   });
 
   describe('onRemoveColumns', () => {
-    it('does not update state for an empty request', () => {
+    it('does not update state when passed an empty array', () => {
       const setAppState = jest.fn();
       const actions = getStateColumnAction(
         { columns: ['first'], sort: [['first', 'desc']] },

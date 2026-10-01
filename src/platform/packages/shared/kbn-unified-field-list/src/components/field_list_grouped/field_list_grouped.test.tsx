@@ -236,6 +236,28 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('calls onDeselectSelectedFields when the selected fields button is pressed', async () => {
+    const user = userEvent.setup();
+    const onDeselectSelectedFields = jest.fn();
+
+    await mountGroupedList({
+      listProps: {
+        ...defaultProps,
+        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+        onDeselectSelectedFields,
+      },
+      hookParams: {
+        dataViewId: null,
+        allFields,
+        onSelectedFieldFilter: (field) => field.name === 'bytes',
+      },
+    });
+
+    await user.click(screen.getByTestId('fieldListGroupedSelectedFields-deselectSelectedFields'));
+
+    expect(onDeselectSelectedFields).toHaveBeenCalledTimes(1);
+  });
+
   it('renders correctly when Meta gets open', async () => {
     const user = userEvent.setup();
 

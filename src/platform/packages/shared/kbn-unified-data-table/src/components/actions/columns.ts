@@ -51,19 +51,23 @@ export function getStateColumnActions({
   }
 
   function onRemoveColumns(columnNames: string[]): string[] {
-    const uniqueColumnNames = [...new Set(columnNames)];
-    if (uniqueColumnNames.length === 0) {
+    const namesToRemove = new Set(columnNames);
+    if (namesToRemove.size === 0) {
       return [];
     }
 
     // Clearing many fields is not a usage signal, and popularizeField writes the data view
     // saved object once per field. Keep that write on the single-column path only.
-    const namesToRemove = new Set(uniqueColumnNames);
     const currentColumns = columns || [];
-    const removedColumnNames = uniqueColumnNames.filter((columnName) =>
-      currentColumns.includes(columnName)
-    );
-    const nextColumns = currentColumns.filter((col) => !namesToRemove.has(col));
+    const nextColumns: string[] = [];
+    const removedColumnNames: string[] = [];
+    for (const col of currentColumns) {
+      if (namesToRemove.has(col)) {
+        removedColumnNames.push(col);
+      } else {
+        nextColumns.push(col);
+      }
+    }
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const nextSort =
       sort && sort.length ? sort.filter((subArr) => !namesToRemove.has(subArr[0])) : [];
