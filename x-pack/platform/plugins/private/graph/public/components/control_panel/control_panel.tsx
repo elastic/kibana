@@ -10,13 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { type UseEuiTheme, useEuiShadow, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type {
-  ControlType,
-  TermIntersect,
-  UrlTemplate,
-  RuntimeGraph,
-  WorkspaceField,
-} from '../../types';
+import type { ControlType, TermIntersect, UrlTemplate, WorkspaceField } from '../../types';
 import { urlTemplateRegex } from '../../helpers/url_template';
 import { SelectionToolBar } from './selection_tool_bar';
 import { ControlPanelToolBar } from './control_panel_tool_bar';
@@ -36,13 +30,13 @@ import {
 import { SelectedNodeItem, type SelectedNodeView } from './selected_node_item';
 import { getIcon } from '../../helpers/style_choices';
 import { gphSidebarHeaderStyles } from '../../styles';
+import { createRuntimeGraphFromState } from '../../services/workspace/sync_runtime_topology';
 
 export interface TargetOptions {
   toFields: WorkspaceField[];
 }
 
 interface ControlPanelProps {
-  runtimeGraph: RuntimeGraph;
   control: ControlType;
   selectedNodeId?: string;
   colors: string[];
@@ -57,7 +51,6 @@ interface ControlPanelStateProps {
 }
 
 const ControlPanelComponent = ({
-  runtimeGraph,
   liveResponseFields,
   urlTemplates,
   control,
@@ -68,7 +61,8 @@ const ControlPanelComponent = ({
   selectSelected,
 }: ControlPanelProps & ControlPanelStateProps) => {
   const dispatch = useDispatch<GraphDispatch>();
-  const { nodeIds, nodesById, selectedNodeIds } = useSelector(workspaceSelector);
+  const workspaceState = useSelector(workspaceSelector);
+  const { nodeIds, nodesById, selectedNodeIds } = workspaceState;
   const childCounts = nodeIds.reduce<Record<string, number>>((counts, nodeId) => {
     const parentId = nodesById[nodeId].parentId;
     if (parentId) counts[parentId] = (counts[parentId] ?? 0) + 1;
@@ -89,7 +83,7 @@ const ControlPanelComponent = ({
     const url = template.url;
     const newUrl = url.replace(
       urlTemplateRegex,
-      template.encoder.encode(runtimeGraph, selectedNodeIds)
+      template.encoder.encode(createRuntimeGraphFromState(workspaceState), selectedNodeIds)
     );
     window.open(newUrl, '_blank', 'noopener,noreferrer');
   };
