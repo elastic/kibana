@@ -108,9 +108,10 @@ export function QuickSearchVisor({
   );
 
   const onNlSubmit = useCallback(() => {
-    if (isDisabled) return;
+    // Search is disabled for an empty editor query. KQL needs that query; NL does not.
+    if (isDisabled && query.trim()) return;
     submitNl();
-  }, [isDisabled, submitNl]);
+  }, [isDisabled, query, submitNl]);
 
   const onVisorModeChange = useCallback(
     (id: string) => {

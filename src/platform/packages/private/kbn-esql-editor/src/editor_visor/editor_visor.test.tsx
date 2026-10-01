@@ -198,6 +198,52 @@ describe('Quick search visor', () => {
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
     });
 
+    it('submits natural language when the editor query is empty even if submit is disabled', async () => {
+      (corePluginMock.http.post as jest.Mock).mockResolvedValue({
+        content: 'FROM logs | LIMIT 10',
+      });
+      const onNlResult = jest.fn();
+      const { getByTestId } = renderWithI18n(
+        renderWithEnterprise({ ...props, query: '', isDisabled: true, onNlResult })
+      );
+
+      await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
+      await act(async () => {
+        await userEvent.click(getByTestId('esqlVisorAskAiButton'));
+      });
+      await act(async () => {
+        await userEvent.type(getByTestId('esqlVisorNLQueryInput'), 'show me logs{enter}');
+      });
+
+      await waitFor(() => {
+        expect(corePluginMock.http.post).toHaveBeenCalledWith(
+          '/internal/esql/nl_to_esql',
+          expect.objectContaining({
+            body: JSON.stringify({ nlInstruction: 'show me logs', currentQuery: '' }),
+          })
+        );
+      });
+      await waitFor(() => expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10'));
+    });
+
+    it('does not submit natural language when the visor is disabled and the editor has a query', async () => {
+      const onNlResult = jest.fn();
+      const { getByTestId } = renderWithI18n(
+        renderWithEnterprise({ ...props, isDisabled: true, onNlResult })
+      );
+
+      await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
+      await act(async () => {
+        await userEvent.click(getByTestId('esqlVisorAskAiButton'));
+      });
+      await act(async () => {
+        await userEvent.type(getByTestId('esqlVisorNLQueryInput'), 'show me logs{enter}');
+      });
+
+      expect(corePluginMock.http.post).not.toHaveBeenCalled();
+      expect(onNlResult).not.toHaveBeenCalled();
+    });
+
     it('should show the Stop button while NL generation is in progress', async () => {
       (corePluginMock.http.post as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
