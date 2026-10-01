@@ -16,7 +16,7 @@ This plugin owns the record, the decision, and the guarantee that an approved ac
                           @kbn/agentic-investigations-common's investigation flyout
 server/
   plugin.ts config.ts types.ts constants.ts features.ts
-  routes/ services/ storage/ step_types/ attachments/ managed_workflows/
+  routes/ services/ storage/ step_types/ attachments/ managed_workflows/ tools/
 public/
   plugin.ts index.ts types.ts
   hooks/ components/ attachments/ step_types/
@@ -342,6 +342,16 @@ An action declaring `always-gate` therefore overrides any autonomy the caller re
 **The calling workflow must itself be managed.** An unmanaged parent can neither execute a managed child nor see globally-installed definitions, so a Worker registered outside `@kbn/workflows/managed` cannot reach the gate.
 
 Omitting an optional input is safe. A Liquid template for an absent input still renders — as `''` — so every optional step input is declared with `optionalStepInput`, which treats `''` and `null` as absent. Without it, `actionInput: '${{ inputs.actionInput }}'` on a non-action proposal would fail schema validation before the handler ran.
+
+### How an agent creates a proposal
+
+The builtin Agent Builder tool `proposals.create` (`server/tools/create_proposal_tool.ts`, allow-listed in `@kbn/agent-builder-server`) lets an agent propose an action in the conversation it runs in. It takes `title`, `comment` (Markdown), `origin` (the closed enum above; the agent's instructions name it), and optionally `impact`, `confidence`, and `category`. It takes no `actionWorkflowId`: the analyst carries the action out and approves or dismisses it.
+
+- **It goes through the gate like any Worker.** The tool starts `system-create-proposal` with `workflowsManagement.management.executeWorkflow`, as the caller's request, with the conversation id of the innermost agent on the run stack. It does not call `ProposalsService.create`, because a proposal's decision is only ever recorded behind its gate (`resumeGate` refuses a proposal with no gate execution).
+- **The card is attached by the gate's create step**, through the public attachment client (`render_inline: true`), not through the run's attachment state. That write needs the caller to own the conversation, which holds for an investigation run started by its owner; otherwise the proposal is still created and only the card is missing, as for any Worker. Because the attachment is written out of band, the agent does not see its id in the same turn; the card is shown to the analyst all the same.
+- **It waits briefly for the proposal.** It polls `findByWorkflowExecutionId` for up to 5 seconds and returns `{ acknowledged, proposal_id, title, status, workflow_execution_id }`. If the create step has not run by then, it returns `{ acknowledged, workflow_execution_id, note }` and tells the agent not to create the proposal again.
+- **Cost:** each call leaves one gate execution parked (52-week sentinel timeout) until the analyst decides or the proposal expires (72h default), the same as every Worker proposal.
+- **Availability:** unavailable unless workflows are available and the principal holds `manage_proposals`; the handler checks again on every call. Starting the gate also needs the caller to be allowed to execute the managed workflow.
 
 ### Authoring an action workflow
 
