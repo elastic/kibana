@@ -1,5 +1,5 @@
 {
-  "sha1": "b8b0bc91cc93a2a814e94535e1548a3455bbab23",
+  "sha1": "251aa41169f10ca36f81bf298aabd890f90ecd6b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/access_control.spec.ts",
-        "line": 136,
+        "line": 107,
         "column": 10
       }
     },
@@ -28,13 +28,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/access_control.spec.ts",
-        "line": 151,
+        "line": 122,
         "column": 7
       }
     },
     {
-      "id": "d7094cddc0c6f94-a1846c3e5b72580",
-      "title": "Escalation access control — private escalations and collaborators PATCH title from a collaborator returns 404 — title update requires owner access",
+      "id": "d7094cddc0c6f94-2262e8e4372ca7d",
+      "title": "Escalation access control — private escalations and collaborators PATCH title from a collaborator returns 403 — collaborator lacks manage_escalations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/escalations/access_control.spec.ts",
-        "line": 162,
+        "line": 133,
         "column": 30
       }
     },

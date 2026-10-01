@@ -61,18 +61,6 @@ const finalState: InvestigationState = {
       description: 'Alert before queued checkout requests begin to time out.',
     },
   ],
-  blind_spots: [
-    {
-      title: 'No profiling data available',
-      confidence: 0.7,
-      description: 'Could not confirm whether a leak compounded the exhaustion.',
-    },
-    {
-      title: 'No database query samples available',
-      confidence: 0.6,
-      description: 'Could not rule out a slower query path after the deployment.',
-    },
-  ],
 };
 
 describe('InvestigationOutput', () => {
@@ -137,10 +125,6 @@ describe('InvestigationOutput', () => {
       'Roll back the deployment that introduced the regression'
     );
     expect(finalResults).toHaveTextContent('Recommended');
-    expect(finalResults).toHaveTextContent('Blind spots');
-    expect(finalResults).toHaveTextContent('2 identified');
-    expect(finalResults).toHaveTextContent('No profiling data available');
-    expect(finalResults).toHaveTextContent('Most impactful');
     expect(finalResults).not.toHaveTextContent('95%');
   });
 
@@ -148,7 +132,6 @@ describe('InvestigationOutput', () => {
     const user = userEvent.setup();
     const recommendationTitle =
       '**Block the attacker IPs** via `hosts.deny` and [runbook](https://example.com)';
-    const blindSpotTitle = 'No `apm-*` indices';
     const stateWithMarkdown: InvestigationState = {
       ...finalState,
       recommendations: [
@@ -158,16 +141,12 @@ describe('InvestigationOutput', () => {
           description: 'Follow the **response procedure** in the [runbook](https://example.com).',
         },
       ],
-      blind_spots: [
-        { title: blindSpotTitle, confidence: 0.8, description: 'Needed for _tracing_.' },
-      ],
     };
 
     renderWithI18n(<InvestigationOutput status="complete" state={stateWithMarkdown} />);
 
     const finalResults = screen.getByTestId('investigationOutputFinalResults');
     expect(finalResults).toHaveTextContent(recommendationTitle);
-    expect(finalResults).toHaveTextContent(blindSpotTitle);
     expect(screen.queryByRole('link', { name: 'runbook' })).not.toBeInTheDocument();
 
     const recommendationButton = screen.getByText(recommendationTitle).closest('button');
@@ -178,51 +157,10 @@ describe('InvestigationOutput', () => {
     expect(recommendationButton.querySelector('a, div, p, button, strong, code')).toBeNull();
     await user.click(recommendationButton);
 
-    const dialog = screen.getByRole('dialog');
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('response procedure').tagName).toBe('STRONG');
     expect(screen.getByRole('link', { name: 'runbook' })).toBeInTheDocument();
-    fireEvent.keyDown(dialog, { key: 'Escape' });
-
-    const blindSpotButton = screen.getByText(blindSpotTitle).closest('button');
-    expect(blindSpotButton).not.toBeNull();
-    if (!blindSpotButton) {
-      throw new Error('Expected blind-spot title to be rendered inside a button');
-    }
-    expect(blindSpotButton.querySelector('a, div, p, button, strong, code')).toBeNull();
-    await user.click(blindSpotButton);
-
-    expect(screen.getByText('tracing').tagName).toBe('EM');
   });
-
-  it('renders a recovered blind spot once when its title and description are the same sentence', () => {
-    const gap = 'No GeoIP enrichment available for the attacker IPs.';
-    const stateWithRecoveredGap: InvestigationState = {
-      ...finalState,
-      blind_spots: [{ title: gap, confidence: 0.8, description: gap }],
-    };
-
-    renderWithI18n(<InvestigationOutput status="complete" state={stateWithRecoveredGap} />);
-
-    const blindSpots = screen.getByTestId('investigationOutputBlindSpots');
-    expect(blindSpots.textContent?.match(/No GeoIP enrichment/g)).toHaveLength(1);
-    expect(screen.queryByRole('button', { name: gap })).not.toBeInTheDocument();
-  });
-
-  it.each(['', '   '])(
-    'does not make a blind spot expandable when its description is empty',
-    (description) => {
-      const title = 'No profiling data available';
-      const stateWithEmptyDescription: InvestigationState = {
-        ...finalState,
-        blind_spots: [{ title, confidence: 0.8, description }],
-      };
-
-      renderWithI18n(<InvestigationOutput status="complete" state={stateWithEmptyDescription} />);
-
-      expect(screen.getByText(title)).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: title })).not.toBeInTheDocument();
-    }
-  );
 
   it.each([
     ['description', { description: '   ' }],
@@ -276,7 +214,7 @@ describe('InvestigationOutput', () => {
     expect(screen.getByRole('dialog').querySelector('pre')).toBeInTheDocument();
   });
 
-  it('opens recommendation details with a click and blind-spot details from a collapsed accordion', async () => {
+  it('opens recommendation details with a click', async () => {
     const user = userEvent.setup();
     renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
 
@@ -295,19 +233,6 @@ describe('InvestigationOutput', () => {
     expect(screen.getByRole('dialog')).toHaveTextContent(
       'Restore the last known-good checkout deployment.'
     );
-
-    const blindSpots = screen.getByTestId('investigationOutputBlindSpots');
-    expect(blindSpots).toHaveTextContent('No profiling data available');
-    const firstBlindSpot = screen.getByRole('button', { name: /No profiling data available/ });
-    expect(firstBlindSpot).toHaveAttribute('aria-expanded', 'false');
-
-    await user.click(firstBlindSpot);
-
-    expect(firstBlindSpot).toHaveAttribute('aria-expanded', 'true');
-    expect(blindSpots).toHaveTextContent(
-      'Could not confirm whether a leak compounded the exhaustion.'
-    );
-    expect(recommendations).not.toContainElement(blindSpots);
   });
 
   it('opens recommendation details with the keyboard and returns focus on close', async () => {
@@ -329,7 +254,7 @@ describe('InvestigationOutput', () => {
     expect(action).toHaveFocus();
   });
 
-  it('renders the conclusion on its own when no recommendations or blind spots were reported', () => {
+  it('renders the conclusion on its own when no recommendations were reported', () => {
     const conclusionOnly: InvestigationState = {
       summary: finalState.summary,
       hypotheses: finalState.hypotheses,
@@ -342,10 +267,9 @@ describe('InvestigationOutput', () => {
       'A deploy at 14:02 introduced a connection leak in the checkout service.'
     );
     expect(screen.queryByTestId('investigationOutputRecommendations')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('investigationOutputBlindSpots')).not.toBeInTheDocument();
   });
 
-  it('renders no final results block when a complete investigation reported none of the three', () => {
+  it('renders no final results block when a complete investigation reported neither', () => {
     const withoutFinalResults: InvestigationState = {
       summary: finalState.summary,
       hypotheses: finalState.hypotheses,

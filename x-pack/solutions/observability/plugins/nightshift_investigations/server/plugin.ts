@@ -31,9 +31,13 @@ import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_de
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
-import { isInvestigationAvailable } from './is_investigation_available';
+import {
+  isInvestigationInfrastructureAvailable,
+  isInvestigationRunAvailable,
+} from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
+import { resolveModelStepDefinition } from './step_definitions/resolve_model';
 import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
@@ -96,11 +100,11 @@ export class NightshiftInvestigationsPlugin
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
-  private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
   private inference?: NightshiftInvestigationsStartDeps['inference'];
   private elasticsearch?: ElasticsearchServiceStart;
   private savedObjects?: CoreStart['savedObjects'];
+  private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
   private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
@@ -286,6 +290,14 @@ export class NightshiftInvestigationsPlugin
             getAgentAvailability: () => this.getInvestigationAvailability(),
           })
         );
+        plugins.workflowsExtensions.registerStepDefinition(
+          resolveModelStepDefinition({
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            logger: this.logger.get('resolve_model'),
+          })
+        );
         if (this.cortexEnabled) {
           plugins.workflowsExtensions.registerStepDefinition(
             cortexHydrateStepDefinition({
@@ -297,7 +309,8 @@ export class NightshiftInvestigationsPlugin
           plugins.workflowsExtensions.registerStepDefinition(
             cortexOptimizeStepDefinition({
               getInference: () => this.inference,
-              getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
+              getSavedObjects: () => this.savedObjects,
+              getUiSettings: () => this.uiSettings,
               analytics: core.analytics,
               logger: this.logger.get('cortex'),
             })
@@ -385,11 +398,11 @@ export class NightshiftInvestigationsPlugin
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
     this.sandboxStart = plugins.sandbox;
-    this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
     this.ruleRegistry = plugins.ruleRegistry;
     this.inference = plugins.inference;
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
+    this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
     this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
@@ -433,12 +446,12 @@ export class NightshiftInvestigationsPlugin
       getInvestigationsClient: this.getInvestigationsClient,
       deleteAllInvestigations: () => investigationSweepRepository.deleteAllAcrossSpaces(),
       isInvestigationAvailable: (request) =>
-        isInvestigationAvailable({
+        isInvestigationRunAvailable({
           request,
           featureFlags: coreStart.featureFlags,
           agentBuilder: this.agentBuilder,
+          inference: this.inference,
           logger: this.logger,
-          searchInferenceEndpoints: this.searchInferenceEndpoints,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
@@ -460,8 +473,8 @@ export class NightshiftInvestigationsPlugin
         return {
           featureFlags: this.featureFlags,
           agentBuilder: this.agentBuilder,
+          inference: this.inference,
           logger: this.logger,
-          searchInferenceEndpoints: this.searchInferenceEndpoints,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
@@ -488,13 +501,29 @@ export class NightshiftInvestigationsPlugin
       agentAvailability: this.getInvestigationAvailability(),
       investigationQuotaCallback: this.investigationQuotaCallback,
       investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
-      isAvailable: () =>
-        isInvestigationAvailable({
+      inference: this.inference,
+      savedObjects: this.savedObjects,
+      uiSettings: this.uiSettings,
+      isAvailable: (connectorId) =>
+        isInvestigationRunAvailable({
           request,
           featureFlags: this.featureFlags!,
           agentBuilder: this.agentBuilder,
+          inference: this.inference,
           logger: this.logger,
-          searchInferenceEndpoints: this.searchInferenceEndpoints,
+          connectorId,
+          spaceId: resolvedSpaceId,
+          spaces: this.spaces,
+          workflowsExtensions: this.workflowsExtensionsStart,
+          workflowsManagement: this.workflowsManagement,
+        }),
+      isInfrastructureAvailable: () =>
+        isInvestigationInfrastructureAvailable({
+          request,
+          featureFlags: this.featureFlags!,
+          agentBuilder: this.agentBuilder,
+          inference: this.inference,
+          logger: this.logger,
           spaceId: resolvedSpaceId,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
