@@ -93,6 +93,40 @@ describe('getAttackRow', () => {
     ).toBeUndefined();
   });
 
+  it('ignores hidden attachments', () => {
+    const data = { id: 'atk1' };
+    expect(
+      getAttackRow([makeAttachment('security.attack_discovery', data, { hidden: true })], getUrl)
+    ).toBeUndefined();
+  });
+
+  it('uses the latest version created_at for the upper bound when attachment is updated', () => {
+    const a = makeAttachment('security.attack_discovery', { id: 'atk1' });
+    a.versions = [
+      {
+        version: 1,
+        data: { id: 'atk1' },
+        created_at: '2026-09-10T00:00:00.000Z',
+        content_hash: 'a',
+      },
+      {
+        version: 2,
+        data: { id: 'atk1' },
+        created_at: '2026-09-25T00:00:00.000Z',
+        content_hash: 'b',
+      },
+    ];
+    a.current_version = 2;
+    const row = getAttackRow([a], getUrl)!;
+    const params = parseParams(row.href) as Record<
+      string,
+      { global: { timerange: { to: string } } }
+    >;
+    const to = new Date(params.timerange.global.timerange.to);
+    const expectedTo = new Date(new Date('2026-09-25T00:00:00.000Z').getTime() + 60 * 1000);
+    expect(to.getTime()).toBe(expectedTo.getTime());
+  });
+
   it('applies the same phrases filter pattern as alerts', () => {
     const data = { id: 'atk1' };
     const b = makeAttachment('security.attack_discovery', { id: 'atk2' });

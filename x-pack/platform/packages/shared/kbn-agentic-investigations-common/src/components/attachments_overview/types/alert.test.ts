@@ -86,6 +86,13 @@ describe('getAlertRow — security.alert', () => {
       getAlertRow([makeAttachment('security.alert', data, { active: false })], getUrl)
     ).toBeUndefined();
   });
+
+  it('ignores hidden attachments', () => {
+    const data = { alert: JSON.stringify({ _id: 'id1', _index: ALERT_INDEX }) };
+    expect(
+      getAlertRow([makeAttachment('security.alert', data, { hidden: true })], getUrl)
+    ).toBeUndefined();
+  });
 });
 
 describe('getAlertRow — security.alerts', () => {
@@ -181,5 +188,32 @@ describe('getAlertRow — URL params', () => {
       new Date('2026-09-10T00:00:00.000Z').getTime() - 7 * 24 * 60 * 60 * 1000
     );
     expect(from.getTime()).toBe(expected.getTime());
+  });
+
+  it('uses the latest version created_at for the upper bound when attachment is updated', () => {
+    const a = makeAttachment('security.alerts', { alertIds: ['id1'] });
+    a.versions = [
+      {
+        version: 1,
+        data: { alertIds: ['id1'] },
+        created_at: '2026-09-10T00:00:00.000Z',
+        content_hash: 'a',
+      },
+      {
+        version: 2,
+        data: { alertIds: ['id1'] },
+        created_at: '2026-09-25T00:00:00.000Z',
+        content_hash: 'b',
+      },
+    ];
+    a.current_version = 2;
+    const row = getAlertRow([a], getUrl)!;
+    const params = parseParams(row.href) as Record<
+      string,
+      { global: { timerange: { to: string } } }
+    >;
+    const to = new Date(params.timerange.global.timerange.to);
+    const expectedTo = new Date(new Date('2026-09-25T00:00:00.000Z').getTime() + 60 * 1000);
+    expect(to.getTime()).toBe(expectedTo.getTime());
   });
 });
