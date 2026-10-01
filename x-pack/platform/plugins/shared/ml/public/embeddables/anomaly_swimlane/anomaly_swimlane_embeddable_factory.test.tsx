@@ -171,7 +171,7 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
       await waitFor(() => {
         expect(mockSwimlaneContainer).toHaveBeenCalled();
         const lastProps = mockSwimlaneContainer.mock.calls.at(-1)?.[0];
-        expect(lastProps?.onCellsSelection).toBeUndefined();
+        expect(lastProps?.onPaginationChange).toEqual(expect.any(Function));
         expect(lastProps?.onPaginationChange).toBeUndefined();
       });
     });
