@@ -167,6 +167,45 @@ describe('Index Fields', () => {
       );
     });
   });
+  describe('prototype-collision safety', () => {
+    const protoNames = ['constructor', 'toString', 'hasOwnProperty', '__proto__'];
+
+    test.each(protoNames)(
+      'field named %s resolves without throwing and is included in results',
+      async (fieldName) => {
+        const fieldSpec = [
+          {
+            name: fieldName,
+            type: 'keyword',
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+            esTypes: ['keyword'] as string[],
+          },
+        ];
+        const result = await formatIndexFields(beatFields, [fieldSpec], ['test-index']);
+        const match = result.find((f) => f.name === fieldName);
+        expect(match).toBeDefined();
+        expect(match!.name).toBe(fieldName);
+      }
+    );
+
+    test('calling formatIndexFields with a constructor-named field does not mutate the global Object constructor', async () => {
+      const fieldSpec = [
+        {
+          name: 'constructor',
+          type: 'keyword',
+          searchable: true,
+          aggregatable: true,
+          readFromDocValues: true,
+          esTypes: ['keyword'] as string[],
+        },
+      ];
+      await formatIndexFields(beatFields, [fieldSpec], ['test-index']);
+      expect(Object.prototype.hasOwnProperty.call(Object, 'category')).toBe(false);
+    });
+  });
+
   describe('createFieldItem', () => {
     test('Basic functionality', () => {
       const item = createFieldItem(

@@ -6,8 +6,15 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_USER_ACTIONS_PER_PAGE } from '../../../constants';
-import { paginationSchema } from '../../../schema';
+import {
+  MAX_USER_ACTIONS_PER_PAGE,
+  MAX_USER_ACTION_SEARCH_LENGTH,
+  MAX_USER_ACTION_AUTHOR_LENGTH,
+  MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+  MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
+} from '../../../constants';
+import { limitedArraySchema, limitedStringSchema, paginationSchema } from '../../../schema';
 import type { CaseUserActionInjectedIdsSchema } from '../../domain/user_action/v1';
 import {
   CaseUserActionBasicSchema,
@@ -15,6 +22,7 @@ import {
   UserActionsSchema,
 } from '../../domain/user_action/v1';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
+import { ActionSourceTypes } from '../../domain/user_action/source/v1';
 import type { AttachmentsV2 } from '../../domain';
 
 const UserActionAdditionalFindRequestFilterTypes = {
@@ -35,6 +43,12 @@ const UserActionFindRequestTypesValues = Object.values(UserActionFindRequestType
   UserActionFindRequestTypeValue,
   ...UserActionFindRequestTypeValue[]
 ];
+
+const ActionSourceTypeValues = Object.values(ActionSourceTypes) as [string, ...string[]];
+const UserActionFindRequestSourcesValues = [
+  ...ActionSourceTypeValues,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
+] as [string, ...string[]];
 
 /**
  * User actions stats API
@@ -82,6 +96,32 @@ export const UserActionFindResponseSchema = z.object({
 export type CaseUserActionStats = z.infer<typeof CaseUserActionStatsSchema>;
 export type CaseUserActionStatsResponse = z.infer<typeof CaseUserActionStatsResponseSchema>;
 export type UserActionFindRequest = z.infer<typeof UserActionFindRequestSchema>;
+
+export const UserActionInternalFindRequestSchema = UserActionFindRequestSchema.extend({
+  authors: limitedArraySchema({
+    codec: limitedStringSchema({
+      fieldName: 'authors',
+      min: 1,
+      max: MAX_USER_ACTION_AUTHOR_LENGTH,
+    }),
+    fieldName: 'authors',
+    min: 0,
+    max: MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+  }).optional(),
+  search: limitedStringSchema({
+    fieldName: 'search',
+    min: 1,
+    max: MAX_USER_ACTION_SEARCH_LENGTH,
+  }).optional(),
+  sources: limitedArraySchema({
+    codec: z.enum(UserActionFindRequestSourcesValues),
+    fieldName: 'sources',
+    min: 0,
+    max: MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
+  }).optional(),
+});
+
+export type UserActionInternalFindRequest = z.infer<typeof UserActionInternalFindRequestSchema>;
 export type UserActionFindResponse = z.infer<typeof UserActionFindResponseSchema>;
 export type CaseUserActionDeprecatedResponse = z.infer<
   typeof CaseUserActionDeprecatedResponseSchema
@@ -90,6 +130,7 @@ export type CaseUserActionsDeprecatedResponse = z.infer<
   typeof CaseUserActionsDeprecatedResponseSchema
 >;
 export type UserActionFindRequestTypes = (typeof UserActionFindRequestTypesValues)[number];
+export type UserActionFindRequestSources = (typeof UserActionFindRequestSourcesValues)[number];
 export type UserActionWithResponse<T> = T & { id: string; version: string } & z.infer<
     typeof CaseUserActionInjectedIdsSchema
   >;

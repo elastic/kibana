@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React, { useState, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { OverviewTrend } from '../../../../../../../../common/types';
 import { useMetricSubtitle } from '../../../../../hooks/use_metric_subtitle';
 import { MetricItemExtra } from './metric_item_extra';
@@ -21,9 +21,11 @@ import type { ClientPluginsStart } from '../../../../../../../plugin';
 import { useLocationName, useStatusByLocationOverview } from '../../../../../hooks';
 import {
   selectErrorPopoverState,
+  selectOverviewShowLastRun,
   selectOverviewTrends,
   toggleErrorPopoverOpen,
 } from '../../../../../state';
+import { resolveDisplayStatus } from '../../../../../state/overview_status';
 import {
   hideTestNowFlyoutAction,
   manualTestRunInProgressSelector,
@@ -36,7 +38,7 @@ import { MetricItemIcon } from './metric_item_icon';
 import type { FlyoutParamProps } from '../types';
 import { getTrendDuration } from '../../../../../utils/formatting/trend_duration';
 
-export const METRIC_ITEM_HEIGHT = 180;
+export const METRIC_ITEM_HEIGHT = 200; // room for a wrapped tag row above duration
 
 export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
@@ -53,6 +55,10 @@ export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?
       return euiTheme.colors.backgroundBasePlain;
     case 'pending':
       return euiTheme.colors.backgroundBasePlain;
+    case 'stale':
+      // Amber, not neutral grey: a monitor that stopped reporting is a signal
+      // worth investigating (it may be masking an incident).
+      return euiTheme.colors.backgroundBaseWarning;
     default:
       return euiTheme.colors.backgroundBaseSuccess;
   }
@@ -122,6 +128,11 @@ export const MetricItem = ({
   onClick: (params: FlyoutParamProps) => void;
 }) => {
   const status = monitor.overallStatus;
+  const showLastRun = useSelector(selectOverviewShowLastRun);
+  // `stale` monitors stay in their bucket (count + filter intact); when the
+  // user enables "Show last run" we only change what colour the card paints
+  // with — surfacing the last-known up/down instead of the neutral amber.
+  const displayStatus = resolveDisplayStatus(monitor, showLastRun);
   const locationId = monitor.locations[0]?.id ?? '';
   const { euiTheme } = useEuiTheme();
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + locationId];
@@ -206,6 +217,8 @@ export const MetricItem = ({
             pointer-events: auto;
             opacity: 1;
           }
+          /* Charts clips the body on __gap, not __body. */
+          .echMetricText__gap,
           .echMetricText__body {
             overflow: visible;
           }
@@ -226,7 +239,7 @@ export const MetricItem = ({
                 onClick({
                   locationId,
                   configId: monitor.configId,
-                  id: monitor.configId,
+                  id: monitor.monitorQueryId,
                   location: locationName,
                   spaces: monitor.spaces,
                 });
@@ -246,6 +259,7 @@ export const MetricItem = ({
                     <div
                       role="button"
                       tabIndex={0}
+                      css={{ width: '100%', minWidth: 0 }}
                       onMouseDown={(e) => e.stopPropagation()}
                       onMouseUp={(e) => e.stopPropagation()}
                       onClick={(e) => {
@@ -257,7 +271,7 @@ export const MetricItem = ({
                           onClick({
                             locationId,
                             configId: monitor.configId,
-                            id: monitor.configId,
+                            id: monitor.monitorQueryId,
                             location: locationName ?? '',
                             spaces: monitor.spaces,
                           });
@@ -269,7 +283,7 @@ export const MetricItem = ({
                           onClick({
                             locationId,
                             configId: monitor.configId,
-                            id: monitor.configId,
+                            id: monitor.monitorQueryId,
                             location: locationName ?? '',
                             spaces: monitor.spaces,
                           });
@@ -282,7 +296,7 @@ export const MetricItem = ({
                           onClick({
                             locationId: locId,
                             configId: monitor.configId,
-                            id: monitor.configId,
+                            id: monitor.monitorQueryId,
                             location: locLabel,
                             spaces: monitor.spaces,
                           });
@@ -290,7 +304,7 @@ export const MetricItem = ({
                       />
                     </div>
                   ),
-                  color: getColor(euiTheme, monitor.isEnabled, status),
+                  color: getColor(euiTheme, monitor.isEnabled, displayStatus),
                   trendShape: MetricTrendShape.Area,
                   trend: trendData !== 'loading' && !!trendData?.data ? trendData.data : [],
                   ...getMetricValueProps(trendData),

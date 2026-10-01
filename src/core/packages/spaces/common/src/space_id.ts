@@ -23,6 +23,13 @@ const SPACE_ID_REGEX = /^[a-z0-9_-]+$/;
 /**
  * Validates and brands a plain string as a {@link SpaceId}.
  *
+ * Use this at untrusted write/ingress boundaries — where a space id first enters
+ * the system from an unvalidated source (e.g. the space create/update API, or URL
+ * path parsing). For already-trusted values (persisted saved objects, task
+ * state/params, request-derived ids, server-injected metadata) use
+ * {@link brandSpaceId} instead: re-validating on read cannot repair a malformed
+ * value and only risks throwing on legacy/corrupt data.
+ *
  * @throws if `value` does not match `/^[a-z0-9_-]+$/`
  */
 export const asSpaceId = (value: string): SpaceId => {
@@ -35,9 +42,39 @@ export const asSpaceId = (value: string): SpaceId => {
 };
 
 /**
+ * Re-brands an already-trusted string as a {@link SpaceId} without re-validating.
+ *
+ * This is a trusted-boundary re-brand for values that were format-validated when
+ * they first entered the system (space creation, URL ingress) and have since been
+ * persisted or propagated — e.g. saved-object fields, task state/params,
+ * request-derived ids, and server-injected metadata. Unlike {@link asSpaceId} it
+ * never throws, so a legacy or corrupt persisted value can't silently take a rule
+ * out of execution or crash a render/bootstrap path.
+ */
+export const brandSpaceId = (value: string): SpaceId => value as SpaceId;
+
+/**
  * The identifier of the built-in default Kibana space.
  */
 export const DEFAULT_SPACE_ID: SpaceId = 'default' as SpaceId;
+
+/**
+ * The identifier in a saved object's `namespaces` array when it is shared globally to all spaces.
+ *
+ * Deliberately not a {@link SpaceId}. This and {@link UNKNOWN_SPACE} are sentinels
+ * that stand in place of a space id inside a `namespaces` array; neither names a
+ * space that exists, and neither matches `SPACE_ID_REGEX`, so {@link asSpaceId}
+ * rejects both. Leaving them as plain string literals is what keeps a sentinel
+ * from being passed where a real space is expected.
+ */
+export const ALL_SPACES_ID = '*';
+
+/**
+ * The identifier in a saved object's `namespaces` array when it is shared to an unknown space (e.g., one that the end user is not authorized to see).
+ *
+ * See {@link ALL_SPACES_ID} for why this is not a {@link SpaceId}.
+ */
+export const UNKNOWN_SPACE = '?';
 
 /**
  * Returns the URL path prefix for the given space (`/s/<spaceId>`),

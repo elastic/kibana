@@ -36,7 +36,12 @@ export const AlertTimelineSeriesLabel: React.FC<AlertTimelineSeriesLabelProps> =
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false} alignItems="flexStart">
       <EuiFlexItem grow={false}>
         <EuiToolTip content={tooltipLabel} display="block">
-          <EuiText size="xs" className="eui-textTruncate" data-test-subj="alertTimelineSeriesLabel">
+          <EuiText
+            size="xs"
+            className="eui-textTruncate"
+            data-test-subj="alertTimelineSeriesLabel"
+            tabIndex={0}
+          >
             <strong>{displayLabel}</strong>
           </EuiText>
         </EuiToolTip>

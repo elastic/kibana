@@ -16,6 +16,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   EuiWrappingPopover,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -68,6 +69,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
       [newName],
       [tagName],
       (hasCompleted) => onTagsUpdated([newName], [tagName], hasCompleted),
+      undefined,
       i18n.translate('xpack.fleet.renameAgentTags.successNotificationTitle', {
         defaultMessage: 'Tag renamed',
       }),
@@ -84,6 +86,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
       [],
       [tagName],
       (hasCompleted) => onTagsUpdated([], [tagName], hasCompleted),
+      undefined,
       i18n.translate('xpack.fleet.deleteAgentTags.successNotificationTitle', {
         defaultMessage: 'Tag deleted',
       }),
@@ -96,20 +99,31 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
   return (
     <>
       {tagMenuButtonVisible && (
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          aria-label={i18n.translate('xpack.fleet.tagOptions.tagOptionsToggleButtonLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.fleet.tagOptions.tagOptionsToggleButtonLabel', {
             defaultMessage: 'Tag Options',
           })}
-          color="text"
-          onClick={(event: MouseEvent<HTMLButtonElement>) => {
-            setTagOptionsButton(event.currentTarget);
-            setTagOptionsVisible(!tagOptionsVisible);
-          }}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            aria-label={i18n.translate('xpack.fleet.tagOptions.tagOptionsToggleButtonLabel', {
+              defaultMessage: 'Tag Options',
+            })}
+            color="text"
+            onClick={(event: MouseEvent<HTMLButtonElement>) => {
+              event.stopPropagation();
+              setTagOptionsButton(event.currentTarget);
+              setTagOptionsVisible(!tagOptionsVisible);
+            }}
+          />
+        </EuiToolTip>
       )}
       {tagOptionsVisible && (
         <EuiWrappingPopover
+          aria-label={i18n.translate('xpack.fleet.tagOptions.popoverAriaLabel', {
+            defaultMessage: 'Tag options',
+          })}
           isOpen={true}
           button={tagOptionsButton!}
           closePopover={closePopover}

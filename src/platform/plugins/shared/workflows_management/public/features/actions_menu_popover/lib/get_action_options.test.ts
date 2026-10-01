@@ -45,6 +45,12 @@ describe('getActionOptions', () => {
         euiColorVis6: '#color6',
       },
       textParagraph: '#textColor',
+      textInverse: '#inverse',
+      textAccent: '#accent',
+      textPrimary: '#primary',
+      textAssistance: '#assistance',
+      textWarning: '#warning',
+      textAccentSecondary: '#accentSecondary',
     },
   } as unknown as EuiThemeComputed<{}>;
 
@@ -69,9 +75,9 @@ describe('getActionOptions', () => {
     expect(result[0].id).toBe('triggers');
     expect(result[1].id).toBe('elasticsearch');
     expect(result[2].id).toBe('kibana');
-    expect(result[3].id).toBe('ai');
-    expect(result[4].id).toBe('data');
-    expect(result[5].id).toBe('external');
+    expect(result[3].id).toBe('external');
+    expect(result[4].id).toBe('ai');
+    expect(result[5].id).toBe('data');
     expect(result[6].id).toBe('flowControl');
   });
 
@@ -81,7 +87,7 @@ describe('getActionOptions', () => {
 
     expect(triggersGroup).toBeDefined();
     if (triggersGroup && 'options' in triggersGroup) {
-      expect(triggersGroup.options).toHaveLength(3);
+      // Built-in triggers keep a fixed Manual → Alert → Schedule order (not A–Z).
       expect(triggersGroup.options.map((opt) => opt.id)).toEqual(['manual', 'alert', 'scheduled']);
     }
   });
@@ -92,6 +98,7 @@ describe('getActionOptions', () => {
         id: 'cases.updated',
         title: 'Case updated',
         description: 'When a case is created or updated.',
+        stability: 'tech_preview',
       },
     ]);
 
@@ -102,10 +109,81 @@ describe('getActionOptions', () => {
     if (triggersGroup && isActionGroup(triggersGroup)) {
       const builtInCount = 3;
       expect(triggersGroup.options).toHaveLength(builtInCount + 1);
+
       const casesOption = triggersGroup.options.find((opt) => opt.id === 'cases.updated');
       expect(casesOption).toBeDefined();
       if (casesOption && isActionOption(casesOption)) {
         expect(casesOption.stability).toBe('tech_preview');
+      }
+      expect(triggersGroup.options.find((opt) => opt.id === 'triggers.cases')).toBeUndefined();
+    }
+  });
+
+  it('should group registered triggers by namespace inside the triggers menu', () => {
+    (triggerSchemas.getTriggerDefinitions as jest.Mock).mockReturnValueOnce([
+      {
+        id: 'cases.caseCreated',
+        title: 'Cases - Case created',
+        description: 'When a case is created.',
+        stability: 'tech_preview',
+      },
+      {
+        id: 'cases.caseUpdated',
+        title: 'Cases - Case updated',
+        description: 'When a case is updated.',
+        stability: 'tech_preview',
+      },
+      {
+        id: 'alerting.ruleCreated',
+        title: 'Alerting - Rule created',
+        description: 'When a rule is created.',
+        stability: 'tech_preview',
+      },
+    ]);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const triggersGroup = result.find((group) => group.id === 'triggers');
+
+    expect(triggersGroup).toBeDefined();
+    if (triggersGroup && isActionGroup(triggersGroup)) {
+      expect(triggersGroup.options.slice(0, 3).map((opt) => opt.id)).toEqual([
+        'manual',
+        'alert',
+        'scheduled',
+      ]);
+      expect(triggersGroup.options.slice(3).map((opt) => opt.id)).toEqual([
+        'alerting.ruleCreated',
+        'triggers.cases',
+      ]);
+    }
+  });
+
+  it('should set pathIds on trigger namespace groups for navigation from search', () => {
+    (triggerSchemas.getTriggerDefinitions as jest.Mock).mockReturnValueOnce([
+      {
+        id: 'cases.caseCreated',
+        title: 'Cases - Case created',
+        description: 'When a case is created.',
+        stability: 'tech_preview',
+      },
+      {
+        id: 'cases.caseUpdated',
+        title: 'Cases - Case updated',
+        description: 'When a case is updated.',
+        stability: 'tech_preview',
+      },
+    ]);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const triggersGroup = result.find((group) => group.id === 'triggers');
+
+    expect(triggersGroup).toBeDefined();
+    if (triggersGroup && isActionGroup(triggersGroup)) {
+      expect(triggersGroup.pathIds).toEqual(['triggers']);
+      const casesGroup = triggersGroup.options.find((opt) => opt.id === 'triggers.cases');
+      expect(casesGroup).toBeDefined();
+      if (casesGroup && isActionGroup(casesGroup)) {
+        expect(casesGroup.pathIds).toEqual(['triggers', 'triggers.cases']);
       }
     }
   });
@@ -116,17 +194,23 @@ describe('getActionOptions', () => {
 
     expect(flowControlGroup).toBeDefined();
     if (flowControlGroup && 'options' in flowControlGroup) {
-      expect(flowControlGroup.options).toHaveLength(8);
-      expect(flowControlGroup.options.map((opt) => opt.id)).toEqual([
-        'if',
-        'switch',
-        'foreach',
-        'while',
-        'wait',
-        'waitForInput',
-        'workflow.execute',
-        'workflow.executeAsync',
-      ]);
+      expect(flowControlGroup.options).toHaveLength(10);
+      const labels = flowControlGroup.options.map((opt) => opt.label);
+      expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b)));
+      expect(flowControlGroup.options.map((opt) => opt.id).sort()).toEqual(
+        [
+          'foreach',
+          'if',
+          'parallel',
+          'switch',
+          'wait',
+          'waitForApproval',
+          'waitForInput',
+          'while',
+          'workflow.execute',
+          'workflow.executeAsync',
+        ].sort()
+      );
     }
   });
 
@@ -202,9 +286,13 @@ describe('getActionOptions', () => {
       expect(kibanaGroup.options).toHaveLength(1);
       const casesNested = kibanaGroup.options[0];
       expect(casesNested.id).toBe('kibana.cases');
+      expect(casesNested.iconVariant).toBe('neutral');
+      expect(casesNested.iconColor).toBe(mockEuiTheme.colors.textParagraph);
       if (isActionGroup(casesNested)) {
         expect(casesNested.options).toHaveLength(1);
         expect(casesNested.options[0].id).toBe('cases.createCase');
+        expect(casesNested.options[0].iconVariant).toBe('neutral');
+        expect(casesNested.options[0].iconColor).toBe(mockEuiTheme.colors.textParagraph);
       }
     }
   });
@@ -238,11 +326,13 @@ describe('getActionOptions', () => {
       expect(casesNested).toBeDefined();
       if (casesNested && isActionGroup(casesNested)) {
         expect(casesNested.pathIds).toEqual(['kibana', 'kibana.cases']);
+        const createCase = casesNested.options.find((opt) => opt.id === 'cases.createCase');
+        expect(createCase?.pathIds).toEqual(['kibana', 'kibana.cases', 'cases.createCase']);
       }
     }
   });
 
-  it('should list nested Cases group before other Kibana options when both are present', () => {
+  it('should list nested Cases group alphabetically among other Kibana options', () => {
     const mockConnectors = [
       {
         type: 'kibana.saved_object',
@@ -279,8 +369,59 @@ describe('getActionOptions', () => {
     expect(kibanaGroup).toBeDefined();
     if (kibanaGroup && isActionGroup(kibanaGroup)) {
       expect(kibanaGroup.options).toHaveLength(2);
+      // "Cases" comes before "Kibana Summary" alphabetically
       expect(kibanaGroup.options[0].id).toBe('kibana.cases');
       expect(kibanaGroup.options[1].id).toBe('kibana.saved_object');
+      const labels = kibanaGroup.options.map((o) => o.label);
+      expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b)));
+    }
+  });
+
+  it('should sort subcategory items alphabetically by label', () => {
+    const mockConnectors = [
+      {
+        type: 'data.zeta',
+        description: 'Zeta step',
+      },
+      {
+        type: 'data.alpha',
+        description: 'Alpha step',
+      },
+      {
+        type: 'data.middle',
+        description: 'Middle step',
+      },
+    ];
+
+    mockWorkflowsExtensions.getStepDefinition.mockImplementation((type: string) => {
+      const labels: Record<string, string> = {
+        'data.zeta': 'Zeta Transform',
+        'data.alpha': 'Alpha Transform',
+        'data.middle': 'Middle Transform',
+      };
+      if (!(type in labels)) return undefined;
+      return {
+        id: type,
+        label: labels[type],
+        description: `${labels[type]} description`,
+        icon: 'database',
+        category: StepCategory.Data,
+        inputSchema: z.object({}),
+        outputSchema: z.object({}),
+      } as any;
+    });
+    (getAllConnectors as jest.Mock).mockReturnValue(mockConnectors);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const dataGroup = result.find((group) => group.id === 'data');
+
+    expect(dataGroup).toBeDefined();
+    if (dataGroup && isActionGroup(dataGroup)) {
+      // Built-in "Set Variables" plus three custom steps, A–Z
+      const labels = dataGroup.options.map((o) => o.label);
+      expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b)));
+      expect(labels[0]).toBe('Alpha Transform');
+      expect(labels[labels.length - 1]).toBe('Zeta Transform');
     }
   });
 
@@ -305,6 +446,24 @@ describe('getActionOptions', () => {
       if (isActionOption(option)) {
         expect(option.iconType).toBe('logoElasticsearch');
       }
+    }
+  });
+
+  it('should not double-decode connector descriptions', () => {
+    const mockConnector = {
+      type: 'elasticsearch.search',
+      description: '<strong>Search</strong> &amp; inspect &amp;lt;safe&amp;gt;.',
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const elasticsearchGroup = result.find((group) => group.id === 'elasticsearch');
+
+    expect(elasticsearchGroup).toBeDefined();
+    if (elasticsearchGroup && isActionGroup(elasticsearchGroup)) {
+      expect(elasticsearchGroup.options[0].description).toBe('Search & inspect &lt;safe&gt;.');
     }
   });
 
@@ -462,6 +621,66 @@ describe('getActionOptions', () => {
         expect(sharepointGroup.options[0].id).toBe('sharepoint-online.getAllSites');
         expect(sharepointGroup.options[0].label).toBe('Get All Sites');
         expect(sharepointGroup.options[0].description).toBe('sharepoint-online.getAllSites');
+      }
+    }
+  });
+
+  it('should sort External systems & apps items alphabetically by label', () => {
+    const mockConnectors = [
+      {
+        actionTypeId: '.slack',
+        displayName: 'Slack',
+        type: 'slack.api',
+        description: 'Slack - Post message',
+        summary: 'Post message',
+      },
+      {
+        actionTypeId: '.zendesk',
+        displayName: 'Zendesk',
+        type: 'zendesk.create',
+        description: 'Zendesk - Create ticket',
+        summary: 'Create ticket',
+      },
+      {
+        actionTypeId: '.aws_lambda',
+        displayName: 'AWS Lambda',
+        type: 'aws_lambda.invoke',
+        description: 'AWS Lambda - Invoke',
+        summary: 'Invoke',
+      },
+      {
+        actionTypeId: '.teams',
+        displayName: 'Teams',
+        type: 'teams.message',
+        description: 'Teams - Send message',
+        summary: 'Send message',
+      },
+    ];
+
+    (getAllConnectors as jest.Mock).mockReturnValue(mockConnectors);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
+    (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
+      () => true
+    );
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const externalGroup = result.find((group) => group.id === 'external');
+
+    expect(externalGroup).toBeDefined();
+    if (externalGroup && isActionGroup(externalGroup)) {
+      const labels = externalGroup.options.map((o) => o.label);
+      expect(labels).toEqual(['AWS Lambda', 'Slack', 'Teams', 'Zendesk']);
+      expect(labels).toEqual(
+        [...labels].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+      );
+
+      // Nested sub-actions are also A–Z
+      const slack = externalGroup.options.find((o) => o.id === 'slack');
+      if (slack && isActionGroup(slack)) {
+        const childLabels = slack.options.map((o) => o.label);
+        expect(childLabels).toEqual(
+          [...childLabels].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+        );
       }
     }
   });

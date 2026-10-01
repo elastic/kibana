@@ -12,6 +12,7 @@ import {
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -19,7 +20,7 @@ import {
   forwardToRemoteKibana,
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
-import { ExampleNotFoundError } from '../../storage/example_not_found_error';
+import { ExampleNotFoundError } from '../../storage/datasets/example_not_found_error';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerDeleteExampleRoute = ({
@@ -27,6 +28,7 @@ export const registerDeleteExampleRoute = ({
   logger,
   canEncrypt,
   getEncryptedSavedObjectsStart,
+  getSpaceId,
 }: RouteDependencies) => {
   router.versioned
     .delete({
@@ -78,8 +80,9 @@ export const registerDeleteExampleRoute = ({
           }
 
           const { datasetId, exampleId } = request.params;
+          const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
-          const datasetClient = evalsContext.datasetService.getClient();
+          const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
 
           const exists = await datasetClient.datasetExists(datasetId);
           if (!exists) {
@@ -110,7 +113,8 @@ export const registerDeleteExampleRoute = ({
             });
           }
 
-          logger.error(`Failed to delete evaluation dataset example: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to delete evaluation dataset example: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to delete evaluation dataset example' },

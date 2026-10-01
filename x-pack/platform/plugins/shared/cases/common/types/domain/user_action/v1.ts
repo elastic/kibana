@@ -7,6 +7,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { UserSchema } from '../user/v1';
+import {
+  ActionSourceSchema,
+  ActionSourceTypes,
+  isActionSource,
+  isHeaderActionSource,
+  toActionSource,
+} from './source/v1';
 import { UserActionActionsSchema } from './action/v1';
 import { AssigneesUserActionSchema } from './assignees/v1';
 import { CategoryUserActionSchema } from './category/v1';
@@ -33,9 +40,19 @@ import { CustomFieldsUserActionSchema } from './custom_fields/v1';
 import { ObservablesUserActionSchema } from './observables/v1';
 import { TemplateUserActionSchema } from './template/v1';
 import { ExtendedFieldsUserActionSchema } from './extended_fields/v1';
+import { WorkflowUserActionSchema } from './workflow/v1';
 
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionSchema } from './status/v1';
+export {
+  ActionSourceSchema,
+  ActionSourceTypes,
+  isActionSource,
+  isHeaderActionSource,
+  toActionSource,
+};
+export type { ActionSource, ActionSourceType } from './source/v1';
+
 export type { UserActionType, UserActionAction } from './action/v1';
 
 const UserActionCommonAttributesSchema = z.object({
@@ -43,6 +60,7 @@ const UserActionCommonAttributesSchema = z.object({
   created_by: UserSchema,
   owner: z.string(),
   action: UserActionActionsSchema,
+  source: ActionSourceSchema.nullable().optional(),
 });
 
 /**
@@ -73,6 +91,7 @@ const BasicUserActionsSchema = z.union([
   ObservablesUserActionSchema,
   ExtendedFieldsUserActionSchema,
   TemplateUserActionSchema,
+  WorkflowUserActionSchema,
 ]);
 
 const CommonUserActionsWithIdsSchema = z.union([BasicUserActionsSchema, CommentUserActionSchema]);
@@ -165,3 +184,6 @@ export type CustomFieldsUserAction = UserAction<z.infer<typeof CustomFieldsUserA
 export type ObservablesUserAction = UserAction<z.infer<typeof ObservablesUserActionSchema>>;
 export type ExtendedFieldsUserAction = UserAction<z.infer<typeof ExtendedFieldsUserActionSchema>>;
 export type TemplateUserAction = UserAction<z.infer<typeof TemplateUserActionSchema>>;
+export type WorkflowUserAction = UserAction<z.infer<typeof WorkflowUserActionSchema>>;
+export { WorkflowUserActionSchema, WorkflowOriginSchema } from './workflow/v1';
+export type { WorkflowPayload, WorkflowOrigin, WorkflowUserActionPayload } from './workflow/v1';

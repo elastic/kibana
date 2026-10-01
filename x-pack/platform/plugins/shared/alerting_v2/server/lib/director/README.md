@@ -110,16 +110,25 @@ The director writes one of these episode statuses:
 | --- | --- | --- |
 | `inactive` | `breached` | `pending` |
 | `inactive` | `recovered` | `inactive` |
-| `inactive` | `no_data` | `inactive` |
 | `pending` | `breached` | `active` |
 | `pending` | `recovered` | `inactive` |
-| `pending` | `no_data` | `pending` |
 | `active` | `breached` | `active` |
 | `active` | `recovered` | `recovering` |
-| `active` | `no_data` | `active` |
 | `recovering` | `breached` | `active` |
 | `recovering` | `recovered` | `inactive` |
-| `recovering` | `no_data` | `recovering` |
+
+`no_data` transitions depend on `rule.no_data.strategy`:
+
+| Current episode status | `no_data.strategy` | Next episode status |
+| --- | --- | --- |
+| any | `'alert'` | `active` |
+| any | `'keep_last'` | (unchanged — preserve current status) |
+| `inactive` | `'resolve'` | `inactive` |
+| `pending` | `'resolve'` | `inactive` |
+| `active` | `'resolve'` | `inactive` |
+| `recovering` | `'resolve'` | `inactive` |
+
+For `'resolve'`, the episode resolves directly to `inactive` on the first no-data run. `'ignore'` never produces a `no_data` event to begin with.
 
 ### `CountTimeframeStrategy`
 
@@ -128,13 +137,32 @@ The director writes one of these episode statuses:
 - `pending -> active`
 - `recovering -> inactive`
 
+A `no_data` event on a rule with `no_data.strategy: 'resolve'` always bypasses this gating and resolves directly to `inactive`, regardless of `state_transition.recovering.count` / `state_transition.recovering.timeframe`.
+
 It supports:
 
 - count only
 - timeframe only
 - count + timeframe with `AND` / `OR`
 
-For timeframe evaluation, it compares the current alert event timestamp with the last stored episode timestamp.
+For timeframe evaluation, it compares the director run time (`evaluatedAt`) with the last stored episode timestamp; the current event has no `@timestamp` yet, since ES sets it at ingest.
+
+#### Count semantics
+
+A count of `N` is the number of evaluations the episode spends in the phase. The phase resolves on the evaluation after that, so with consecutive breaches:
+
+| `pending.count` | eval 1 | eval 2 | eval 3 | Becomes `active` on |
+| --- | --- | --- | --- | --- |
+| `0` | `active` | `active` | `active` | evaluation 1 |
+| `1` | `pending` | `active` | `active` | evaluation 2 |
+| `2` | `pending` | `pending` | `active` | evaluation 3 |
+| `3` | `pending` | `pending` | `pending` | evaluation 4 |
+
+`recovering.count` behaves the same way for `recovering -> inactive`.
+
+A count of `0` skips the phase, unless a `timeframe` is combined with it using `and`: then the timeframe still has to elapse, so `{ count: 0, timeframe: '5m', operator: 'and' }` holds the phase until the timeframe is met. With `or`, the count alone is enough and the phase is skipped.
+
+**Caveat:** elapsed time for an `and`-combined `timeframe` is measured against the previous evaluation's stored timestamp, not against when the phase was entered (see above), so it never accumulates past roughly one schedule interval. An `and`-combined `timeframe` therefore only resolves reliably when the rule's schedule interval is >= the timeframe; on a shorter schedule it holds the phase indefinitely. This applies to any count, not just `0`.
 
 ## When to add a new strategy
 
@@ -206,6 +234,7 @@ Example:
 ```typescript
 import { CountTimeframeStrategy } from './count_timeframe_strategy';
 import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
   buildLatestAlertEvent,
   buildStrategyStateTransitionContext,
@@ -213,7 +242,8 @@ import {
 
 describe('CountTimeframeStrategy', () => {
   it('transitions pending to active when threshold is met', () => {
-    const strategy = new CountTimeframeStrategy();
+    const { loggerService } = createLoggerService();
+    const strategy = new CountTimeframeStrategy(loggerService);
 
     const result = strategy.getNextState(
       buildStrategyStateTransitionContext({

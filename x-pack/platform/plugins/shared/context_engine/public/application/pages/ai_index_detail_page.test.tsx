@@ -1,0 +1,907 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiProvider } from '@elastic/eui';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createAppChromeMock } from '../test_utils/app_chrome_mock';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
+import { createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import React from 'react';
+import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
+import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
+import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
+import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
+import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
+import { AiIndexDetailPage } from './ai_index_detail_page';
+import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
+
+jest.mock('@kbn/esql/public', () => ({
+  ESQLLangEditor: ({
+    query,
+    onTextLangQueryChange,
+  }: {
+    query: { esql: string };
+    onTextLangQueryChange: (query: { esql: string }) => void;
+  }) => (
+    <textarea
+      data-test-subj="mockEsqlEditor"
+      value={query.esql}
+      onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
+    />
+  ),
+}));
+
+jest.mock('../hooks/use_data_connectors', () => ({
+  useDataConnectors: () => ({
+    connectors: [],
+    connectorNameById: new Map(),
+    connectorActionTypeById: new Map(),
+    isLoading: false,
+  }),
+}));
+
+const mockMgetWorkflows = jest.fn();
+const mockCreateWorkflow = jest.fn();
+
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsApi: () => ({
+    mgetWorkflows: mockMgetWorkflows,
+    createWorkflow: mockCreateWorkflow,
+  }),
+}));
+
+const mockUseKiList = jest.fn();
+
+jest.mock('../hooks/use_ki_list', () => ({
+  useKiList: (...args: unknown[]) => mockUseKiList(...args),
+}));
+
+const defaultKiListMock = {
+  kis: [],
+  total: 25,
+  summary: {
+    total: 25,
+    countsByType: [
+      { type: 'index_metadata', count: 10 },
+      { type: 'document', count: 8 },
+      { type: 'detection', count: 7 },
+    ],
+  },
+  isLoading: false,
+  isFetching: false,
+  error: undefined,
+  refetch: jest.fn(),
+};
+
+jest.mock('../hooks/use_signal_groups', () => ({
+  useSignalGroups: () => ({ groups: [], isLoading: false, error: undefined, refetch: jest.fn() }),
+}));
+
+jest.mock('../hooks/use_feedback_loop_enabled', () => ({
+  useFeedbackLoopEnabled: jest.fn(() => true),
+}));
+
+jest.mock('../hooks/use_agent_builder_agents', () => ({
+  useAgentBuilderAgents: () => ({
+    agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
+    isLoading: false,
+    error: undefined,
+  }),
+}));
+
+const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
+
+jest.mock('../hooks/use_signals', () => ({
+  useSignals: () => ({
+    signals: [],
+    total: 0,
+    isLoading: false,
+    error: undefined,
+    refetch: jest.fn(),
+  }),
+}));
+
+const aiIndex: GetAiIndexResponse = {
+  id: 'my-ai-index',
+  managed: false,
+  dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+  automations: [],
+  sources: [{ type: 'esql', value: 'FROM My view' }],
+  traces: [],
+  date_created: '2026-01-01T00:00:00.000Z',
+  date_modified: '2026-01-01T00:00:00.000Z',
+};
+
+const createServices = () => {
+  const services = {
+    ...coreMock.createStart(),
+    data: dataPluginMock.createStartContract(),
+    share: sharePluginMock.createStartContract(),
+    history: scopedHistoryMock.create(),
+    appChrome: createAppChromeMock(),
+  };
+  services.application.getUrlForApp.mockImplementation(
+    (appId, options) => `/app/${appId}${options?.path ?? ''}`
+  );
+  return services;
+};
+
+const renderWithProviders = (
+  services: ReturnType<typeof createServices>,
+  locationState?: typeof AI_INDEX_CREATED_LOCATION_STATE
+) => {
+  const discoverLocator = sharePluginMock.createLocator();
+  discoverLocator.getRedirectUrl.mockReturnValue('/app/discover');
+
+  const indexManagementLocator = sharePluginMock.createLocator();
+  indexManagementLocator.getUrl.mockResolvedValue(
+    '/app/management/data/index_management/indices/index_details?indexName=ai-index-ds-my-ai-index'
+  );
+
+  jest.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
+    if (locatorId === DISCOVER_APP_LOCATOR) {
+      return discoverLocator;
+    }
+    if (locatorId === INDEX_MANAGEMENT_LOCATOR_ID) {
+      return indexManagementLocator;
+    }
+    return undefined;
+  });
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <ChromeServiceProvider value={{ chrome: services.chrome }}>
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider
+            services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <MemoryRouter
+                initialEntries={[
+                  {
+                    pathname: getAiIndexDetailPath(aiIndex.id),
+                    ...(locationState ? { state: locationState } : {}),
+                  },
+                ]}
+              >
+                <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
+              </MemoryRouter>
+            </QueryClientProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
+    </ChromeServiceProvider>
+  );
+};
+
+const waitForAiIndexDetailLoaded = () => screen.findByTestId('contextAiIndexSourceRow');
+
+const confirmAutomationDelete = async () => {
+  const modal = await screen.findByTestId('contextAutomationDeleteConfirmModal');
+  fireEvent.click(within(modal).getByRole('button', { name: 'Remove' }));
+};
+
+const removeAutomationFromRow = async (rowIndex: number) => {
+  const actionButtons = screen.getAllByTestId('contextAutomationRowActionsButton');
+  fireEvent.click(actionButtons[rowIndex]);
+  fireEvent.click(await screen.findByTestId('contextRemoveAutomationButton'));
+  await confirmAutomationDelete();
+};
+
+describe('AiIndexDetailPage', () => {
+  beforeEach(() => {
+    mockMgetWorkflows.mockResolvedValue([]);
+    mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
+    mockUseFeedbackLoopEnabled.mockReturnValue(true);
+    mockUseKiList.mockImplementation(() => defaultKiListMock);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    mockUseKiList.mockImplementation(() => defaultKiListMock);
+  });
+
+  it('shows a dismissible success callout when navigated from AI index creation', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    await screen.findByTestId('contextAiIndexSourcesEmpty');
+
+    expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
+    expect(screen.getByText('Your AI index is ready')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Add sources to build agent context from your data, or use it to store agent memory/i
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexCreatedCalloutDocumentationLink')).toHaveAttribute(
+      'href',
+      services.docLinks.links.contextEngine.overview
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss AI index created message' }));
+
+    expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+  });
+
+  it('does not show the success callout without creation navigation state', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+  });
+
+  it('dismisses the success callout when a source is added after creation', async () => {
+    const services = createServices();
+    const indexWithoutSources = { ...aiIndex, sources: [] };
+    const indexWithSources = {
+      ...aiIndex,
+      sources: [{ type: 'esql', value: 'FROM My view' }],
+    };
+    services.http.get
+      .mockResolvedValueOnce(indexWithoutSources)
+      .mockResolvedValueOnce(indexWithSources);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services, AI_INDEX_CREATED_LOCATION_STATE);
+
+    await screen.findByTestId('contextAddSourcesButton');
+    expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
+
+    const editor = await screen.findByTestId('mockEsqlEditor');
+    fireEvent.change(editor, { target: { value: 'FROM My view' } });
+    fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
+    fireEvent.click(screen.getByTestId('contextEditSourcesDoneButton'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextAiIndexCreatedCallout')).not.toBeInTheDocument();
+    });
+  });
+
+  it('strips creation navigation state from history after showing the callout', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+    const history = createMemoryHistory({
+      initialEntries: [
+        {
+          pathname: getAiIndexDetailPath(aiIndex.id),
+          state: AI_INDEX_CREATED_LOCATION_STATE,
+        },
+      ],
+    });
+
+    const discoverLocator = sharePluginMock.createLocator();
+    discoverLocator.getRedirectUrl.mockReturnValue('/app/discover');
+
+    const indexManagementLocator = sharePluginMock.createLocator();
+    indexManagementLocator.getUrl.mockResolvedValue(
+      '/app/management/data/index_management/indices/index_details?indexName=ai-index-ds-my-ai-index'
+    );
+
+    jest.spyOn(services.share.url.locators, 'get').mockImplementation((locatorId: string) => {
+      if (locatorId === DISCOVER_APP_LOCATOR) {
+        return discoverLocator;
+      }
+      if (locatorId === INDEX_MANAGEMENT_LOCATOR_ID) {
+        return indexManagementLocator;
+      }
+      return undefined;
+    });
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <ChromeServiceProvider value={{ chrome: services.chrome }}>
+        <I18nProvider>
+          <EuiProvider>
+            <KibanaContextProvider
+              services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
+            >
+              <QueryClientProvider client={queryClient}>
+                <Router history={history}>
+                  <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
+                </Router>
+              </QueryClientProvider>
+            </KibanaContextProvider>
+          </EuiProvider>
+        </I18nProvider>
+      </ChromeServiceProvider>
+    );
+
+    await screen.findByTestId('contextAiIndexSourcesEmpty');
+
+    expect(screen.getByTestId('contextAiIndexCreatedCallout')).toBeInTheDocument();
+    expect(history.location.state).toBeUndefined();
+  });
+
+  it('fetches the AI index and renders its id and sources', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.application.capabilities = {
+      ...services.application.capabilities,
+      discover_v2: { show: true },
+    };
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(services.http.get).toHaveBeenCalledWith(
+      '/api/context_engine/ai_index/my-ai-index',
+      expect.objectContaining({ version: expect.any(String) })
+    );
+    expect(screen.getByTestId('contextAiIndexDetailPageTitle')).toHaveTextContent('my-ai-index');
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
+    expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
+    expect(await screen.findByTestId('contextAiIndexDetailTabs')).toBeInTheDocument();
+  });
+
+  it('renders a back button linking to the AI indexes landing page', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.application.getUrlForApp.mockImplementation(
+      (appId, options) => `/app/${appId}${options?.path ?? ''}`
+    );
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(services.application.getUrlForApp).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_APP_ID,
+      expect.objectContaining({ path: CONTEXT_ENGINE_PATHS.landing })
+    );
+    expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toHaveAttribute(
+      'href',
+      '/app/context_engine/'
+    );
+  });
+
+  it('navigates to the landing page and prevents the anchor default navigation on back click', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    const backButton = screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ);
+    const clickEvent = createEvent.click(backButton);
+    fireEvent(backButton, clickEvent);
+
+    expect(clickEvent.defaultPrevented).toBe(true);
+    expect(services.application.navigateToApp).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_APP_ID,
+      expect.objectContaining({ path: CONTEXT_ENGINE_PATHS.landing })
+    );
+  });
+
+  it('renders an empty state when there are no sources', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+    renderWithProviders(services);
+
+    expect(await screen.findByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAutomationsLocked')).toHaveAttribute(
+      'aria-label',
+      'Automations locked. Add a source above to unlock automations.'
+    );
+    expect(screen.queryByTestId('contextAiIndexAutomationsEmpty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+  });
+
+  it('hides the signals section when the feedback loop is disabled', async () => {
+    mockUseFeedbackLoopEnabled.mockReturnValue(false);
+
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+
+    renderWithProviders(services);
+
+    expect(await screen.findByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAutomationsLocked')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
+  });
+
+  it('shows automations once sources are configured', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+  });
+
+  it('keeps automations visible when sources are removed but automations remain', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      sources: [],
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+
+    renderWithProviders(services);
+
+    await screen.findByTestId('contextAiIndexDetailPageTitle');
+
+    expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('contextAiIndexAutomationRow')).toHaveTextContent(
+      'My workflow'
+    );
+  });
+
+  it('shows automations list once automations are configured', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('contextAiIndexAutomationRow')).toBeInTheDocument();
+  });
+
+  it('renders an error state when the fetch fails', async () => {
+    const services = createServices();
+    services.http.get.mockRejectedValue(new Error('boom'));
+
+    renderWithProviders(services);
+
+    expect(await screen.findByTestId('contextAiIndexDetailError')).toHaveTextContent('boom');
+    expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toBeInTheDocument();
+  });
+
+  it('saves edited traces and refetches the AI index', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+    expect(services.http.get).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('contextAddTracesButton'));
+
+    fireEvent.change(screen.getByTestId('contextTraceAgentComboBox').querySelector('input')!, {
+      target: { value: 'Loyalty' },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Loyalty Support Agent')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Loyalty Support Agent'));
+    fireEvent.click(screen.getByTestId('contextTracesSaveButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [{ type: 'elastic_agent', value: 'agent-1' }],
+          }),
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextTraceAgentComboBox')).not.toBeInTheDocument();
+    });
+    expect(services.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('edits the description and refetches the AI index', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+    expect(services.http.get).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('contextAddDescriptionButton'));
+
+    const textArea = await screen.findByTestId('contextDescriptionTextArea');
+    fireEvent.change(textArea, { target: { value: 'A brand new description' } });
+    fireEvent.click(screen.getByTestId('contextDescriptionSaveButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
+            description: 'A brand new description',
+          }),
+        })
+      );
+    });
+
+    // The editor closes and the detail data is refetched after a successful save.
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
+    });
+    expect(services.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('opens the inline sources editor with the current sources selected', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
+
+    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
+  });
+
+  it('saves edited sources and refetches the AI index', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services);
+
+    await screen.findByTestId('contextAddSourcesButton');
+    expect(services.http.get).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('contextAddSourcesButton'));
+
+    // The ES|QL tab is selected by default; author a raw query and add it.
+    const editor = await screen.findByTestId('mockEsqlEditor');
+    fireEvent.change(editor, { target: { value: 'FROM My view' } });
+    fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
+    fireEvent.click(screen.getByTestId('contextEditSourcesDoneButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
+          }),
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('contextEditSourcesInlineEditor')).not.toBeInTheDocument();
+    });
+    expect(services.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('renders an empty state when there are no automations', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+    expect(mockMgetWorkflows).not.toHaveBeenCalled();
+  });
+
+  it('shows edit controls once the AI index has loaded', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddDescriptionButton')).not.toBeInTheDocument();
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextAddDescriptionButton')).toBeEnabled();
+
+    expect(screen.getByTestId('contextAddAutomationButton')).toBeEnabled();
+  });
+
+  it('keeps the rows rendered while the summaries for an edited list resolve', async () => {
+    const services = createServices();
+    const indexWithTwoAutomations = {
+      ...aiIndex,
+      automations: [
+        { type: 'workflow', value: 'wf-1' },
+        { type: 'workflow', value: 'wf-2' },
+      ],
+    };
+    services.http.get.mockResolvedValueOnce(indexWithTwoAutomations).mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    services.http.put.mockResolvedValue({ status: 'updated' });
+    mockMgetWorkflows.mockResolvedValue([
+      { id: 'wf-1', name: 'My workflow', enabled: true },
+      { id: 'wf-2', name: 'Another workflow', enabled: false },
+    ]);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+    expect(await screen.findAllByTestId('contextAiIndexAutomationRow')).toHaveLength(2);
+
+    // Removing changes the summaries query key, which must not send the panel back to its loading state.
+    await removeAutomationFromRow(1);
+
+    expect(screen.queryByTestId('contextAiIndexAutomationsLoading')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('contextAiIndexAutomationRow')).toHaveTextContent('My workflow');
+    });
+  });
+
+  it('lists existing automations with the resolved workflow name and status', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(await screen.findByTestId('contextAiIndexAutomationRow')).toHaveTextContent(
+      'My workflow'
+    );
+    expect(screen.getByTestId('contextAiIndexAutomationRow')).toHaveTextContent('Enabled');
+    expect(mockMgetWorkflows).toHaveBeenCalledWith({ ids: ['wf-1'] });
+  });
+
+  it('creates a workflow, attaches it, and opens the editor', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    fireEvent.click(screen.getByTestId('contextAddAutomationButton'));
+    fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
+
+    await waitFor(() => {
+      expect(mockCreateWorkflow).toHaveBeenCalledWith({
+        yaml: expect.stringContaining('my-ai-index automation'),
+      });
+    });
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [{ type: 'workflow', value: 'wf-created' }],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
+          }),
+        })
+      );
+    });
+
+    expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
+      path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
+    });
+  });
+
+  it('hides edit controls and shows the managed badge for managed AI indexes', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, managed: true });
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextAiIndexDetailManagedBadge')).toHaveTextContent('Managed');
+    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
+  });
+
+  it('shows all overview sections for managed AI indexes without setup locks', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      managed: true,
+      sources: [],
+      automations: [],
+    });
+
+    renderWithProviders(services);
+
+    await screen.findByTestId('contextAiIndexDetailManagedBadge');
+
+    expect(screen.queryByTestId('contextAutomationsLocked')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsLocked')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
+  });
+
+  it('shows edit controls and no managed badge for non-managed AI indexes', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({ ...aiIndex, managed: false });
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexDetailManagedBadge')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAddDescriptionButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextEditSourcesButton')).toBeInTheDocument();
+
+    expect(screen.getByTestId('contextAddAutomationButton')).toBeInTheDocument();
+  });
+
+  it('renders connector sources using the connector id when no name is resolved', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      sources: [{ type: 'connector', value: 'connector-abc' }],
+    });
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('connector-abc');
+    expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('Connector');
+  });
+
+  it('removes an automation and refetches', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    services.http.put.mockResolvedValue({ status: 'updated' });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+    expect(services.http.get).toHaveBeenCalledTimes(1);
+
+    await removeAutomationFromRow(0);
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
+          }),
+        })
+      );
+    });
+
+    expect(services.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('switches to the Knowledge Indicators tab', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.application.capabilities = {
+      ...services.application.capabilities,
+      discover_v2: { show: true },
+    };
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextKiListPanel')).not.toBeInTheDocument();
+
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-knowledge_indicators'));
+
+    expect(screen.getByTestId('contextKiListPanel')).toBeInTheDocument();
+  });
+
+  it('hides the Knowledge Indicators tab when there are no KIs', async () => {
+    mockUseKiList.mockImplementation(() => ({
+      ...defaultKiListMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextAiIndexDetailTab-knowledge_indicators')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
+  });
+
+  it('hides the Knowledge Indicators tab while the KI summary is loading', async () => {
+    mockUseKiList.mockImplementation(() => ({
+      ...defaultKiListMock,
+      isLoading: true,
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
+  });
+
+  it('hides the Knowledge Indicators tab when the KI summary request fails', async () => {
+    mockUseKiList.mockImplementation(() => ({
+      ...defaultKiListMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+      error: new Error('Request timed out'),
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
+  });
+});

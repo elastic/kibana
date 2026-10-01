@@ -15,10 +15,13 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
   MAX_DESCRIPTION_LENGTH,
+  MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTERS,
   MAX_LENGTH_PER_TAG,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
   MAX_TAGS_PER_CASE,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 import { DeepStrict } from '@kbn/zod-helpers';
@@ -93,6 +96,25 @@ describe('CasePostRequestSchema', () => {
       expect((result.data.connector as Record<string, unknown>).foo).toBeUndefined();
     }
   });
+
+  it('accepts a template with no version (resolved on create when templates are enabled)', () => {
+    const result = CasePostRequestSchema.safeParse({
+      ...validPostRequest,
+      template: { id: 'template-id' },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it.each([0, -1, 1.5])(
+    'rejects a template version that is not a positive integer (%p)',
+    (version) => {
+      const result = CasePostRequestSchema.safeParse({
+        ...validPostRequest,
+        template: { id: 'template-id', version },
+      });
+      expect(result.success).toBe(false);
+    }
+  );
 
   it('rejects more than MAX_ASSIGNEES_PER_CASE assignees', () => {
     const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foobar' });
@@ -379,5 +401,38 @@ describe('CasesSearchRequestSchema', () => {
     expect(
       CasesSearchRequestSchema.safeParse({ extendedFieldFilters: [{ label: 'priority' }] }).success
     ).toBe(false);
+  });
+
+  it('accepts extended field filters at the Field Library limits', () => {
+    const extendedFieldFilters = Array.from({ length: MAX_EXTENDED_FIELD_FILTERS }, () => ({
+      label: 'l'.repeat(MAX_TEMPLATE_DEFINITION_LENGTH),
+      value: 'v'.repeat(MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH),
+    }));
+
+    expect(CasesSearchRequestSchema.safeParse({ extendedFieldFilters }).success).toBe(true);
+  });
+
+  it.each([
+    {
+      field: 'label',
+      extendedFieldFilters: [
+        { label: 'l'.repeat(MAX_TEMPLATE_DEFINITION_LENGTH + 1), value: 'value' },
+      ],
+    },
+    {
+      field: 'value',
+      extendedFieldFilters: [
+        { label: 'label', value: 'v'.repeat(MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH + 1) },
+      ],
+    },
+    {
+      field: 'filter count',
+      extendedFieldFilters: Array.from({ length: MAX_EXTENDED_FIELD_FILTERS + 1 }, (_, index) => ({
+        label: `label-${index}`,
+        value: 'value',
+      })),
+    },
+  ])('rejects extended field filters above the $field limit', ({ extendedFieldFilters }) => {
+    expect(CasesSearchRequestSchema.safeParse({ extendedFieldFilters }).success).toBe(false);
   });
 });

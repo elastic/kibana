@@ -5,9 +5,22 @@
  * 2.0.
  */
 
+// Compatibility shim: preserves the existing public API while code moves to core/ and providers/aws/.
+export { INGEST_HUB_ENABLED_FLAG, INGEST_HUB_ONBOARDING_ENABLED_FLAG } from './core';
+
 export {
-  INGEST_HUB_ENABLED_FLAG,
-  INGEST_HUB_ONBOARDING_ENABLED_FLAG,
   AWS_ONBOARDING_TITLE,
   AWS_ONBOARDING_DESCRIPTION,
-} from './constants';
+  ALL_INTEGRATIONS_SID,
+  getIntegrationSid,
+  buildIamPolicyDocument,
+  formatIamPolicyDocument,
+  AWS_SERVICE_PROVIDER_PERMISSIONS,
+  IAM_PERMISSIONS_API_PATH,
+} from './providers/aws';
+export type {
+  IamPolicyDocument,
+  ProviderPermissions,
+  GetIamPermissionsResponse,
+  ServiceIamPermissions,
+} from './providers/aws';

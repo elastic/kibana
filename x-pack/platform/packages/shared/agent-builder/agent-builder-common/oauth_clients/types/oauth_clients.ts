@@ -18,6 +18,7 @@ export interface OAuthClientLogo {
 export interface OAuthClientConnectionsSummary {
   active?: string[];
   revoked?: string[];
+  expired?: string[];
 }
 
 export interface OAuthClient {

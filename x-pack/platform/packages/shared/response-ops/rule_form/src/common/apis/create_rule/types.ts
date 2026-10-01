@@ -21,4 +21,6 @@ export interface CreateRuleBody<Params extends RuleTypeParams = RuleTypeParams> 
   alertDelay?: Rule<Params>['alertDelay'];
   flapping?: Rule<Params>['flapping'];
   artifacts?: Rule<Params>['artifacts'];
+  /** The id of the rule template this rule was created from, when known. Telemetry only. */
+  templateId?: string;
 }

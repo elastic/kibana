@@ -70,6 +70,16 @@ describe('configure', () => {
       expect(result.data).toStrictEqual(defaultRequest);
     });
 
+    it.each([true, false])(
+      'has expected attributes in request with extractObservables %p',
+      (value) => {
+        const request = { ...defaultRequest, extractObservables: value };
+        const result = ConfigurationRequestSchema.safeParse(request);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(request);
+      }
+    );
+
     it(`does not accept customFields exceeding ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {
       const customFields = new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
         key: 'text_custom_field',
@@ -112,6 +122,13 @@ describe('configure', () => {
       const result = ConfigurationPatchRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('has expected attributes in request with extractObservables', () => {
+      const request = { ...defaultRequest, extractObservables: false };
+      const result = ConfigurationPatchRequestSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
     });
 
     it(`does not accept customFields exceeding ${MAX_CUSTOM_FIELDS_PER_CASE}`, () => {

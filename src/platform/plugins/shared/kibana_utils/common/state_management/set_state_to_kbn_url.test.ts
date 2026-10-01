@@ -61,6 +61,41 @@ describe('set_state_to_kbn_url', () => {
       );
     });
 
+    it('should remove state from url when state is undefined', () => {
+      const newUrl = setStateToKbnUrl(
+        '_s',
+        undefined,
+        { useHash: false },
+        'http://localhost:5601/oxf/app/kibana#/yourApp?_s=(test:123)&_g=()'
+      );
+      expect(newUrl).toMatchInlineSnapshot(`"http://localhost:5601/oxf/app/kibana#/yourApp?_g=()"`);
+    });
+
+    it('should remove hashed state from url when state is undefined', () => {
+      const newUrl = setStateToKbnUrl(
+        '_s',
+        undefined,
+        { useHash: true },
+        'http://localhost:5601/oxf/app/kibana#/yourApp?_s=h@a897fac&_g=()'
+      );
+      expect(newUrl).toMatchInlineSnapshot(`"http://localhost:5601/oxf/app/kibana#/yourApp?_g=()"`);
+    });
+
+    it('should remove state from url before hash when state is undefined', () => {
+      const newUrl = setStateToKbnUrl(
+        '_s',
+        undefined,
+        { useHash: false, storeInHashQuery: false },
+        'http://localhost:5601/oxf/app/kibana?_s=(test:123)&_g=()#/yourApp'
+      );
+      expect(newUrl).toMatchInlineSnapshot(`"http://localhost:5601/oxf/app/kibana?_g=()#/yourApp"`);
+    });
+
+    it('should keep null state in url', () => {
+      const newUrl = setStateToKbnUrl('_s', null, { useHash: false }, url);
+      expect(newUrl).toMatchInlineSnapshot(`"http://localhost:5601/oxf/app/kibana#/yourApp?_s=!n"`);
+    });
+
     it('should set expanded state to url before hash', () => {
       let newUrl = setStateToKbnUrl('_s', state1, { useHash: false, storeInHashQuery: false }, url);
       expect(newUrl).toMatchInlineSnapshot(

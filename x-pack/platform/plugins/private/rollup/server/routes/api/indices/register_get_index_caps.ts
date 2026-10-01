@@ -33,6 +33,10 @@ export const registerGetIndexCapsRoute = ({
         const { client: clusterClient } = (await context.core).elasticsearch;
         const body = await clusterClient.asCurrentUser.rollup.getRollupIndexCaps({
           index: '*',
+          querystring: {
+            expand_wildcards: 'open',
+            ignore_unavailable: true,
+          },
         });
         return response.ok({ body });
       } catch (err) {

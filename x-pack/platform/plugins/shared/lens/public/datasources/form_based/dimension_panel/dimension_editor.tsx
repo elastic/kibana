@@ -47,6 +47,7 @@ import {
   deleteColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
+import { getColumnParamsForNewBucket } from '../include_empty_rows_defaults';
 import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
@@ -108,9 +109,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
     toggleFullscreen,
     isFullscreen,
     supportStaticValue,
+    staticValueOnly,
     enableFormatSelector = true,
     layerType,
     paramEditorCustomProps,
+    activeVisualizationTypeId,
   } = props;
   const services = {
     data: props.data,
@@ -282,14 +285,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
     ...incompleteParams
   } = incompleteInfo || {};
 
+  // restricts the editor to the static value option (i.e. for ES|QL charts without data views)
+  const isStaticValueOnly = Boolean(staticValueOnly && supportStaticValue);
+
   const isQuickFunctionSelected = Boolean(
     supportStaticValue
       ? selectedOperationDefinition && isQuickFunction(selectedOperationDefinition.type)
       : !selectedOperationDefinition || isQuickFunction(selectedOperationDefinition.type)
   );
-  const showQuickFunctions = temporaryQuickFunction || isQuickFunctionSelected;
+  const showQuickFunctions =
+    !isStaticValueOnly && (temporaryQuickFunction || isQuickFunctionSelected);
 
   const showStaticValueFunction =
+    isStaticValueOnly ||
     temporaryStaticValue ||
     (temporaryState === 'none' &&
       supportStaticValue &&
@@ -536,15 +544,27 @@ export function DimensionEditor(props: DimensionEditorProps) {
         );
       }
 
+      const dimensionTestSubj = `lns-indexPatternDimension-${operationType}${
+        compatibleWithCurrentField ? '' : ' incompatible'
+      }`;
+
       return {
         id: operationType as string,
-        label,
+        // Click target is the label (`-label`). The item button is width 100% and the
+        // function-help extraAction overlays its right edge, so a center-click on the
+        // button opens help instead of selecting the function.
+        label: (
+          <span
+            data-test-subj={`${dimensionTestSubj}-label`}
+            css={{ display: 'inline-block', maxWidth: '100%' }}
+          >
+            {label}
+          </span>
+        ),
         isActive,
         isDisabled: !!disabledStatus,
         css: operationsButtonStyles(euiThemeContext),
-        'data-test-subj': `lns-indexPatternDimension-${operationType}${
-          compatibleWithCurrentField ? '' : ' incompatible'
-        }`,
+        'data-test-subj': dimensionTestSubj,
         [`aria-pressed`]: isActive,
         extraAction: operationDefinitionMap[operationType].helpComponent
           ? {
@@ -611,6 +631,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               op: operationType,
               visualizationGroups: dimensionGroups,
               targetGroup: props.groupId,
+              columnParams: getColumnParamsForNewBucket(operationType, activeVisualizationTypeId),
             });
             if (
               temporaryQuickFunction &&
@@ -623,6 +644,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
             const possibleFields = fieldByOperation.get(operationType) ?? new Set<string>();
+            const columnParams = getColumnParamsForNewBucket(
+              operationType,
+              activeVisualizationTypeId
+            );
 
             let newLayer: FormBasedLayer;
             const singleField = getSingleValue(possibleFields);
@@ -635,6 +660,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 field: currentIndexPattern.getFieldByName(singleField),
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
+                columnParams,
               });
             } else {
               newLayer = insertOrReplaceColumn({
@@ -646,6 +672,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 field: possibleFields.has(DOCUMENT_FIELD_NAME) ? documentField : undefined,
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
+                columnParams,
               });
             }
             if (
@@ -679,6 +706,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               ? currentIndexPattern.getFieldByName(selectedColumn.sourceField)
               : undefined,
             visualizationGroups: dimensionGroups,
+            columnParams: getColumnParamsForNewBucket(operationType, activeVisualizationTypeId),
           });
           setStateWrapper(newLayer);
         },
@@ -884,6 +912,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           dimensionGroups={dimensionGroups}
           groupId={props.groupId}
           operationDefinitionMap={operationDefinitionMap}
+          activeVisualizationTypeId={activeVisualizationTypeId}
         />
       ) : null}
       {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
@@ -947,7 +976,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const hasFormula =
     !isFullscreen && operationSupportMatrix.operationWithoutField.has(formulaOperationName);
 
-  const hasButtonGroups = !isFullscreen && (hasFormula || supportStaticValue);
+  const hasButtonGroups = !isFullscreen && !isStaticValueOnly && (hasFormula || supportStaticValue);
 
   const initialMethod = useMemo(() => {
     let methodId = '';

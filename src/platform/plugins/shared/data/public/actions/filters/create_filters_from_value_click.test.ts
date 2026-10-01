@@ -10,25 +10,31 @@
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { dataPluginMock } from '../../mocks';
-import { setIndexPatterns, setSearchService } from '../../services';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { setHttp, setIndexPatterns, setSearchService } from '../../services';
+import { getESQLAdHocDataview, getViews } from '@kbn/esql-utils';
+import type { HttpStart } from '@kbn/core/public';
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
   getESQLAdHocDataview: jest.fn(),
+  getViews: jest.fn(),
 }));
 
 const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.MockedFunction<
   typeof getESQLAdHocDataview
 >;
+const mockGetViews = getViews as jest.MockedFunction<typeof getViews>;
 
 import {
   createFiltersFromValueClickAction,
   appendFilterToESQLQueryFromValueClickAction,
   createFilterESQL,
+  clearKnownEsqlViewSources,
+  clearInjectedEsqlViewFields,
 } from './create_filters_from_value_click';
 import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { BytesFormat } from '@kbn/field-formats-plugin/common';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { RangeFilter } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
@@ -212,6 +218,14 @@ describe('createFiltersFromClickEvent', () => {
       expect(filter.length).toBe(1);
     });
 
+    test('does not treat the literal MISSING_TOKEN string as a missing value for aggregated columns', async () => {
+      table.rows[0]['1-1'] = MISSING_TOKEN;
+      const filter = await createFilterESQL(table, 0, 0);
+
+      // Only null/undefined short-circuit; a real "__missing__" value still creates a filter.
+      expect(filter.length).toBe(1);
+    });
+
     describe('raw columns (createFilterFromRawColumnsESQL)', () => {
       const mockFieldByName = jest.fn();
       const mockDataView = createStubDataView({
@@ -279,6 +293,52 @@ describe('createFiltersFromClickEvent', () => {
         );
       });
 
+      test('should create a negated exists filter for a missing raw value', async () => {
+        const mockFilterableField = {
+          name: 'message',
+          filterable: true,
+        };
+        mockFieldByName.mockReturnValue(mockFilterableField);
+        table.rows[0]['1-1'] = null;
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(filter).toEqual([
+          {
+            meta: {
+              index: 'mock-dataview-id',
+              negate: true,
+            },
+            query: {
+              exists: {
+                field: 'message',
+              },
+            },
+          },
+        ]);
+      });
+
+      test('should create a phrase filter for the literal MISSING_TOKEN string, not an exists filter', async () => {
+        mockFieldByName.mockReturnValue({ name: 'message', filterable: true });
+        // A document can legitimately contain the string "__missing__"; in the ES|QL path this
+        // is a real value (only the DSL terms agg injects the sentinel), so it must be filtered
+        // as a phrase and never be mistaken for a missing field.
+        table.rows[0]['1-1'] = MISSING_TOKEN;
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(filter).toHaveLength(1);
+        expect(filter[0]).toEqual(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              match_phrase: expect.objectContaining({ message: MISSING_TOKEN }),
+            }),
+          })
+        );
+        expect(filter[0].meta.negate).toBeFalsy();
+      });
+
       test('returns no filters when a computed column name matches sourceField and an index field with that name exists', async () => {
         table.columns[0].isComputedColumn = true;
         mockFieldByName.mockReturnValue({
@@ -291,6 +351,37 @@ describe('createFiltersFromClickEvent', () => {
         expect(mockFieldByName).toHaveBeenCalledTimes(1);
         expect(mockFieldByName).toHaveBeenCalledWith('message');
         expect(filter).toEqual([]);
+      });
+
+      test('returns no filters for that same computed column even after it is given a custom Lens label', async () => {
+        // Renaming the dimension via the Appearance section only changes column.name/label; it
+        // must not make an EVAL-computed column look like a genuine RENAME of the real field.
+        table.columns[0].isComputedColumn = true;
+        table.columns[0].name = 'My Custom Label';
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: true,
+        });
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(filter).toEqual([]);
+      });
+
+      test('still creates a filter for a genuinely RENAMEd column, even with a custom Lens label', async () => {
+        table.columns[0].isComputedColumn = true;
+        table.columns[0].name = 'My Custom Label';
+        (table.columns[0].meta!.sourceParams as Record<string, unknown>)!.isSourceFieldFilterable =
+          true;
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: true,
+        });
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(filter).toHaveLength(1);
       });
 
       test('should create phrases filter for array value using sourceField for index field name', async () => {
@@ -333,6 +424,196 @@ describe('createFiltersFromClickEvent', () => {
             }),
           })
         );
+      });
+
+      describe('ES|QL views', () => {
+        const viewList = {
+          views: [
+            {
+              name: 'meow',
+              query: 'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY geo.dest',
+            },
+            {
+              name: 'woof',
+              query: 'FROM kibana_sample_data_logs | EVAL foo = geo.dest',
+            },
+            {
+              name: 'bark',
+              query: 'FROM kibana_sample_data_logs | EVAL foo = CONCAT(geo.dest, "x")',
+            },
+          ],
+        };
+
+        const useViewColumn = (indexPattern: string, sourceField: string, value: string) => {
+          table.columns[0] = {
+            name: sourceField,
+            id: '1-1',
+            meta: {
+              type: 'string',
+              sourceParams: {
+                indexPattern,
+                sourceField,
+                isSourceFieldFilterable: true,
+              },
+            },
+          };
+          table.rows[0]['1-1'] = value;
+        };
+
+        const fieldsAdd = jest.spyOn(mockDataView.fields, 'add');
+
+        beforeEach(() => {
+          clearKnownEsqlViewSources();
+          clearInjectedEsqlViewFields();
+          setHttp({} as HttpStart);
+          mockGetViews.mockClear();
+          mockGetViews.mockResolvedValue(viewList);
+          mockFieldByName.mockReturnValue(undefined);
+          fieldsAdd.mockClear();
+        });
+
+        test('creates a phrase filter for a STATS grouping field on a view', async () => {
+          useViewColumn('meow', 'geo.dest', 'US');
+
+          const filter = await createFilterESQL(table, 0, 0);
+
+          expect(filter).toEqual([
+            expect.objectContaining({
+              query: { match_phrase: { 'geo.dest': 'US' } },
+            }),
+          ]);
+          expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
+            expect.objectContaining({ query: 'FROM meow' })
+          );
+          expect(
+            mockGetESQLAdHocDataview.mock.calls[0][0].options?.skipFetchFields
+          ).toBeUndefined();
+          expect(fieldsAdd).toHaveBeenCalledWith(
+            expect.objectContaining({
+              name: 'geo.dest',
+              type: 'string',
+              searchable: true,
+              aggregatable: false,
+            })
+          );
+        });
+
+        test('does not create a filter for an aggregate column of a view', async () => {
+          useViewColumn('meow', 'count', '10');
+
+          const filter = await createFilterESQL(table, 0, 0);
+
+          expect(filter).toEqual([]);
+          expect(fieldsAdd).not.toHaveBeenCalled();
+        });
+
+        test('creates a phrase filter for a pass-through field and a bare EVAL alias', async () => {
+          useViewColumn('woof', 'geo.dest', 'US');
+          const passThrough = await createFilterESQL(table, 0, 0);
+          expect(passThrough[0]).toEqual(
+            expect.objectContaining({
+              query: { match_phrase: { 'geo.dest': 'US' } },
+            })
+          );
+
+          clearKnownEsqlViewSources();
+          mockGetESQLAdHocDataview.mockClear();
+          useViewColumn('woof', 'foo', 'US');
+          const alias = await createFilterESQL(table, 0, 0);
+          expect(alias[0]).toEqual(
+            expect.objectContaining({
+              query: { match_phrase: { 'geo.dest': 'US' } },
+            })
+          );
+          expect(fieldsAdd).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              name: 'geo.dest',
+            })
+          );
+        });
+
+        test('does not create a filter for an EVAL expression', async () => {
+          useViewColumn('bark', 'foo', 'USx');
+
+          const filter = await createFilterESQL(table, 0, 0);
+
+          expect(filter).toEqual([]);
+        });
+
+        test('skips field caps on a later click once the pattern is known to be a view', async () => {
+          useViewColumn('meow', 'geo.dest', 'US');
+          await createFilterESQL(table, 0, 0);
+          mockGetESQLAdHocDataview.mockClear();
+
+          await createFilterESQL(table, 0, 0);
+
+          expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
+            expect.objectContaining({
+              query: 'FROM meow',
+              options: { skipFetchFields: true },
+            })
+          );
+        });
+
+        test('creates a view filter when field caps rejects the view name', async () => {
+          useViewColumn('meow', 'geo.dest', 'US');
+          mockGetESQLAdHocDataview
+            .mockRejectedValueOnce(new Error('index_not_found'))
+            .mockResolvedValueOnce(mockDataView);
+
+          const filter = await createFilterESQL(table, 0, 0);
+
+          expect(filter[0]).toEqual(
+            expect.objectContaining({
+              query: { match_phrase: { 'geo.dest': 'US' } },
+            })
+          );
+          expect(mockGetESQLAdHocDataview).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              options: { skipFetchFields: true },
+            })
+          );
+        });
+
+        test('does not filter from an injected field after the view is gone', async () => {
+          useViewColumn('meow', 'geo.dest', 'US');
+          await createFilterESQL(table, 0, 0);
+
+          clearKnownEsqlViewSources();
+          mockGetViews.mockResolvedValue({ views: [] });
+          mockGetViews.mockClear();
+          mockFieldByName.mockReturnValue({ name: 'geo.dest', filterable: true });
+          const fieldsRemove = jest.spyOn(mockDataView.fields, 'remove');
+
+          const filter = await createFilterESQL(table, 0, 0);
+
+          expect(filter).toEqual([]);
+          expect(mockGetViews).toHaveBeenCalled();
+          expect(fieldsRemove).toHaveBeenCalled();
+          fieldsRemove.mockRestore();
+        });
+
+        test('does not fetch views when field caps already resolved a filterable index field', async () => {
+          mockFieldByName.mockReturnValue({ name: 'message', filterable: true });
+          table.columns[0] = {
+            name: 'message',
+            id: '1-1',
+            meta: {
+              type: 'string',
+              sourceParams: {
+                indexPattern: 'logs*',
+                sourceField: 'message',
+              },
+            },
+          };
+          table.rows[0]['1-1'] = 'test message';
+
+          const filter = await createFilterESQL(table, 0, 0);
+
+          expect(filter).toHaveLength(1);
+          expect(mockGetViews).not.toHaveBeenCalled();
+          expect(fieldsAdd).not.toHaveBeenCalled();
+        });
       });
     });
   });

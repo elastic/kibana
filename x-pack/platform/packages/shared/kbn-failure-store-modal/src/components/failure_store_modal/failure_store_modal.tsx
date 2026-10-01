@@ -10,7 +10,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFormRow,
   EuiModal,
   EuiModalBody,
@@ -20,6 +19,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -292,17 +292,18 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                     {isCustomPeriod || defaultRetentionPeriod ? (
                       <RetentionPeriodField disabled={!isCustomPeriod || inherit} />
                     ) : (
-                      <EuiCallOut
+                      <KbnInfoCallout
                         announceOnMount
                         typeof="info"
                         size="m"
                         data-test-subj="defaultRetentionCallout"
-                      >
-                        <FormattedMessage
-                          id="xpack.failureStoreModal.form.defaultRetentionAvailableText"
-                          defaultMessage="This will pull the default value set at the cluster level."
-                        />
-                      </EuiCallOut>
+                        title={
+                          <FormattedMessage
+                            id="xpack.failureStoreModal.form.defaultRetentionAvailableText"
+                            defaultMessage="This will pull the default value set at the cluster level."
+                          />
+                        }
+                      />
                     )}
                   </EuiFormRow>
                   {showIlmDescription && (

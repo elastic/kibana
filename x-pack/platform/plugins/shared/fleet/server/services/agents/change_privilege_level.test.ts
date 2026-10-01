@@ -13,6 +13,8 @@ import type { Agent } from '../../types';
 
 import { FleetUnauthorizedError } from '../../errors';
 
+import { SO_SEARCH_LIMIT } from '../../constants';
+
 import { createAgentAction, createErrorActionResults } from './actions';
 import { getAgentById } from './crud';
 import {
@@ -20,6 +22,7 @@ import {
   changeAgentPrivilegeLevel,
 } from './change_privilege_level';
 import { getAgents } from './crud';
+import * as changePrivilegeRunner from './change_privilege_runner';
 
 jest.mock('../package_policy');
 jest.mock('./crud');
@@ -51,7 +54,7 @@ describe('changeAgentPrivilegeLevel', () => {
     (getAgentById as jest.Mock).mockRejectedValue(new Error(`Agent ${agentId} does not exist`));
     await expect(
       changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
-    ).rejects.toThrowError(`Agent ${agentId} does not exist`);
+    ).rejects.toThrow(`Agent ${agentId} does not exist`);
   });
 
   it('should return early if the agent is already unprivileged', async () => {
@@ -69,7 +72,7 @@ describe('changeAgentPrivilegeLevel', () => {
     } as any);
     await expect(
       changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Cannot remove root privilege. Privilege level change is supported from version 9.3.0.'
     );
   });
@@ -93,7 +96,7 @@ describe('changeAgentPrivilegeLevel', () => {
 
     await expect(
       changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       `Agent agent-id is on policy ${policyId}, which contains integrations that require root privilege: Package 2`
     );
   });
@@ -178,6 +181,7 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
   const mockedAgent: Agent = {
     id: 'agent-123',
     policy_id: 'policy-0001',
+    policy_base_id: 'policy-0001',
     last_checkin: new Date().toISOString(),
     components: [],
     local_metadata: {
@@ -266,5 +270,108 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
       },
       'agent does not support privilege change action'
     );
+  });
+});
+
+describe('bulkChangeAgentsPrivilegeLevel kuery path — cheap count and sync/async branching', () => {
+  let mockGetAgentsByKuery: jest.SpyInstance;
+  let mockOpenPointInTime: jest.SpyInstance;
+  let mockBulkChangePrivilegeAgentsBatch: jest.SpyInstance;
+  let mockChangePrivilegeActionRunner: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockGetAgentsByKuery = jest.spyOn(jest.requireMock('./crud'), 'getAgentsByKuery');
+    mockOpenPointInTime = jest
+      .spyOn(jest.requireMock('./crud'), 'openPointInTime')
+      .mockResolvedValue('pit-id');
+    mockBulkChangePrivilegeAgentsBatch = jest
+      .spyOn(changePrivilegeRunner, 'bulkChangePrivilegeAgentsBatch')
+      .mockResolvedValue({ actionId: 'test-action-id' });
+    mockChangePrivilegeActionRunner = jest
+      .spyOn(changePrivilegeRunner, 'ChangePrivilegeActionRunner')
+      .mockImplementation(
+        () =>
+          ({
+            runActionAsyncTask: jest.fn().mockResolvedValue({ actionId: 'async-action-id' }),
+          } as any)
+      );
+  });
+
+  afterEach(() => {
+    mockGetAgentsByKuery.mockRestore();
+    mockOpenPointInTime.mockRestore();
+    mockBulkChangePrivilegeAgentsBatch.mockRestore();
+    mockChangePrivilegeActionRunner.mockRestore();
+  });
+
+  it('uses perPage:0 for the initial count query', async () => {
+    mockGetAgentsByKuery.mockResolvedValue({ agents: [], total: 0, page: 1, perPage: 0 });
+
+    await bulkChangeAgentsPrivilegeLevel(esClientMock, soClientMock, { kuery: 'status:online' });
+
+    expect(mockGetAgentsByKuery).toHaveBeenNthCalledWith(
+      1,
+      esClientMock,
+      soClientMock,
+      expect.objectContaining({ perPage: 0 })
+    );
+  });
+
+  it('runs inline and fetches agents when total <= batchSize', async () => {
+    const agents = [{ id: 'agent-1' }];
+    mockGetAgentsByKuery
+      .mockResolvedValueOnce({ agents: [], total: 5, page: 1, perPage: 0 }) // count
+      .mockResolvedValueOnce({ agents, total: 5, page: 1, perPage: SO_SEARCH_LIMIT }); // fetch
+
+    await bulkChangeAgentsPrivilegeLevel(esClientMock, soClientMock, { kuery: 'status:online' });
+
+    expect(mockGetAgentsByKuery).toHaveBeenNthCalledWith(
+      2,
+      esClientMock,
+      soClientMock,
+      expect.objectContaining({ perPage: SO_SEARCH_LIMIT })
+    );
+    expect(mockBulkChangePrivilegeAgentsBatch).toHaveBeenCalledWith(
+      esClientMock,
+      soClientMock,
+      agents,
+      expect.anything()
+    );
+    expect(mockChangePrivilegeActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('schedules async task and returns actionId immediately when total > batchSize', async () => {
+    const batchSize = 100;
+    mockGetAgentsByKuery.mockResolvedValueOnce({ agents: [], total: 500, page: 1, perPage: 0 });
+
+    const result = await bulkChangeAgentsPrivilegeLevel(esClientMock, soClientMock, {
+      kuery: 'status:online',
+      batchSize,
+    });
+
+    expect(result).toEqual({ actionId: 'async-action-id' });
+    expect(mockGetAgentsByKuery).toHaveBeenCalledTimes(1);
+    expect(mockChangePrivilegeActionRunner).toHaveBeenCalledWith(
+      esClientMock,
+      soClientMock,
+      expect.objectContaining({ batchSize, total: 500 }),
+      expect.anything()
+    );
+    expect(mockBulkChangePrivilegeAgentsBatch).not.toHaveBeenCalled();
+  });
+
+  it('runs inline when total equals batchSize (boundary)', async () => {
+    const batchSize = 100;
+    mockGetAgentsByKuery
+      .mockResolvedValueOnce({ agents: [], total: 100, page: 1, perPage: 0 }) // count
+      .mockResolvedValueOnce({ agents: [], total: 100, page: 1, perPage: batchSize }); // fetch
+
+    await bulkChangeAgentsPrivilegeLevel(esClientMock, soClientMock, {
+      kuery: 'status:online',
+      batchSize,
+    });
+
+    expect(mockBulkChangePrivilegeAgentsBatch).toHaveBeenCalled();
+    expect(mockChangePrivilegeActionRunner).not.toHaveBeenCalled();
   });
 });

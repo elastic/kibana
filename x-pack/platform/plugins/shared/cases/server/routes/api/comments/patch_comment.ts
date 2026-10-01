@@ -6,14 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { AttachmentPatchRequestV2 } from '../../../../common/types/api';
-import { AttachmentPatchRequestSchema } from '../../../../common/types/api';
-import { decodeWithExcessOrThrowZod } from '../../../common/runtime_types';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+import { toLegacyCaseResponse, toUnifiedAttachmentPatchRequest } from '../../../common/attachments';
 
 export const patchCommentRoute = createCasesRoute({
   method: 'patch',
@@ -33,16 +31,18 @@ export const patchCommentRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const query = decodeWithExcessOrThrowZod(AttachmentPatchRequestSchema)(
-        request.body
-      ) as AttachmentPatchRequestV2;
-
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const res: caseDomainV1.Case = await client.attachments.update({
+
+      // 1. v1 request body -> unified patch payload
+      const updateRequest = toUnifiedAttachmentPatchRequest(request.body);
+      // 2. update the unified attachment (returns the case with comments)
+      const updatedCase = await client.attachments.update({
         caseID: request.params.case_id,
-        updateRequest: query,
+        updateRequest,
       });
+      // 3. unified case -> v1 response
+      const res: caseDomainV1.Case = toLegacyCaseResponse(updatedCase);
 
       return response.ok({
         body: res,

@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line no-restricted-imports
 import { EcsFlat } from '@elastic/ecs';
 import { useQuery, useQueryClient } from '@kbn/react-query';
-import { TableFieldNameCell } from '../../../document_details/right/components/table_field_name_cell';
+import { TableFieldNameCell } from '../../../../flyout_v2/shared/components/table_field_name_cell';
 
 interface FlattenedItem {
   key: string; // Flattened dot notation object path for an object;

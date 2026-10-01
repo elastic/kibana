@@ -4,7 +4,7 @@ steps:
     key: osquery-cypress
     agents:
       machineType: n2-highmem-4
-      diskSizeGb: 120
+      diskSizeGb: 130
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -24,7 +24,7 @@ steps:
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
       machineType: n2-highmem-4
-      diskSizeGb: 120
+      diskSizeGb: 130
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:

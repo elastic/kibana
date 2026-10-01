@@ -52,7 +52,6 @@ const ILM_OPTIONS: RetentionOption[] = [
 const STREAM_OPTIONS: RetentionOption[] = [
   {
     name: 'logs-elastic_agent-default',
-    method: 'ilm',
     descriptionCategory: 'Success',
     descriptionParts: ['60d', '3 phases', '2 downsamples'],
     descriptionCategorySecondLine: 'Fail',
@@ -60,41 +59,70 @@ const STREAM_OPTIONS: RetentionOption[] = [
     badge: 'ILM',
     inspectable: true,
   },
-  { name: 'logs-synth-default', method: 'dlm', descriptionParts: ['60d'] },
-  { name: 'logs.ecs', method: 'dlm', descriptionParts: ['∞', '1 downsample step'] },
+  { name: 'logs-synth-default', descriptionParts: ['60d'] },
+  { name: 'logs.ecs', descriptionParts: ['∞', '1 downsample step'] },
   {
     name: 'metrics-hostmetrics-default',
-    method: 'ilm',
     descriptionParts: ['.alerts-ilm-policy'],
     badge: 'ILM',
     inspectable: true,
   },
   {
     name: 'profiling-events-5pow01',
-    method: 'ilm',
     descriptionParts: ['.amet-illium-dolor'],
     badge: 'ILM',
     inspectable: true,
   },
   {
     name: 'profiling-events-5pow02',
-    method: 'ilm',
     descriptionParts: ['.amet-ipsum-dolor'],
     badge: 'ILM',
     inspectable: true,
   },
   {
     name: 'logs.ecs.android',
-    method: 'dlm',
     descriptionParts: ['60d'],
     descriptionPartsSecondLine: ['3 data phases', '2 downsample steps'],
   },
-  { name: 'logs.ecs.linux', method: 'dlm', descriptionParts: ['60d'] },
-  { name: 'logs.ecs.windows', method: 'dlm', descriptionParts: ['365d'] },
-  { name: 'logs.otel', method: 'dlm', descriptionParts: ['60d'] },
-  { name: 'logs.otel.android', method: 'dlm', descriptionParts: ['∞'] },
-  { name: 'logs.otel.linux', method: 'dlm', descriptionParts: ['60d'] },
-  { name: 'logs.otel.windows', method: 'dlm', descriptionParts: ['90d'] },
+  { name: 'logs.ecs.linux', descriptionParts: ['60d'] },
+  { name: 'logs.ecs.windows', descriptionParts: ['365d'] },
+  { name: 'logs.otel', descriptionParts: ['60d'] },
+  { name: 'logs.otel.android', descriptionParts: ['∞'] },
+  { name: 'logs.otel.linux', descriptionParts: ['60d'] },
+  { name: 'logs.otel.windows', descriptionParts: ['90d'] },
+];
+
+// Edit Data Lifecycle flyout with managed/system policies mixed in. Managed policies are hidden
+// behind the "Managed" filter toggle and carry a "Managed" badge when shown.
+const ILM_OPTIONS_WITH_MANAGED: RetentionOption[] = [
+  {
+    name: 'my-custom-policy',
+    descriptionParts: ['60d', '3 data phases'],
+    inspectable: true,
+  },
+  {
+    name: 'another-custom-policy',
+    descriptionParts: ['90d', '2 data phases'],
+    inspectable: true,
+  },
+  {
+    name: '.alerts-ilm-policy',
+    descriptionParts: ['60d', '4 data phases', '2 downsample steps'],
+    inspectable: true,
+    isManaged: true,
+  },
+  {
+    name: '.fleet-actions-results-ilm-policy',
+    descriptionParts: ['∞', '1 data phase'],
+    inspectable: true,
+    isManaged: true,
+  },
+  {
+    name: '.deprecation-indexing-ilm-policy',
+    descriptionParts: ['365d', '2 data phases'],
+    inspectable: true,
+    isManaged: true,
+  },
 ];
 
 const Panel = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -153,25 +181,69 @@ export const IlmPolicies: Story = {
   render: () => <IlmPoliciesExample />,
 };
 
-const IlmPoliciesInheritedExample = () => {
-  const inheritedPolicyName = ILM_OPTIONS[0].name;
-  const inheritedOptions = ILM_OPTIONS.filter((o) => o.name === inheritedPolicyName);
+const IlmPoliciesWithManagedExample = () => {
+  const [selected, setSelected] = useState(ILM_OPTIONS_WITH_MANAGED[0].name);
 
   return (
-    <Panel title="Inherited (read-only single policy)">
+    <Panel title="With managed policies (toggle 'Managed' to reveal them)">
       <RetentionSelector
-        options={inheritedOptions}
-        selectedOptionName={inheritedPolicyName}
-        onSelectOption={action('onSelectOption')}
+        options={ILM_OPTIONS_WITH_MANAGED}
+        selectedOptionName={selected}
+        onSelectOption={setSelected}
         onInspect={action('onInspect')}
-        isDisabled
-        showSearch={false}
-        listStyle="panel"
-        showRowActions={false}
         searchPlaceholder="Search by policy name"
         inspectButtonLabel={(name) => `Inspect '${name}'`}
       />
     </Panel>
+  );
+};
+
+export const IlmPoliciesWithManaged: Story = {
+  name: 'ILM policies — with managed/system policies',
+  render: () => <IlmPoliciesWithManagedExample />,
+};
+
+const IlmPoliciesInheritedExample = () => {
+  const inheritedPolicyName = ILM_OPTIONS[0].name;
+  const inheritedOptions = ILM_OPTIONS.filter((o) => o.name === inheritedPolicyName);
+
+  const inheritedManagedPolicy =
+    ILM_OPTIONS_WITH_MANAGED.find((o) => o.isManaged) ?? ILM_OPTIONS_WITH_MANAGED[0];
+
+  return (
+    <>
+      <Panel title="Inherited (read-only single policy)">
+        <RetentionSelector
+          options={inheritedOptions}
+          selectedOptionName={inheritedPolicyName}
+          onSelectOption={action('onSelectOption')}
+          onInspect={action('onInspect')}
+          isDisabled
+          showSearch={false}
+          listStyle="panel"
+          showRowActions={false}
+          searchPlaceholder="Search by policy name"
+          inspectButtonLabel={(name) => `Inspect '${name}'`}
+        />
+      </Panel>
+
+      <EuiSpacer size="m" />
+
+      <Panel title="Inherited (read-only, managed policy)">
+        <RetentionSelector
+          options={[inheritedManagedPolicy]}
+          selectedOptionName={inheritedManagedPolicy.name}
+          onSelectOption={action('onSelectOption')}
+          onInspect={action('onInspect')}
+          isDisabled
+          showSearch={false}
+          listStyle="panel"
+          showRowActions={false}
+          searchPlaceholder="Search by policy name"
+          inspectButtonLabel={(name) => `Inspect '${name}'`}
+        />
+      </Panel>
+    </>
   );
 };
 
@@ -182,7 +254,6 @@ export const IlmPoliciesInheritedReadOnly: Story = {
 
 const StreamsExample = () => {
   const [selected, setSelected] = useState('logs.otel');
-  const [selectedMethods, setSelectedMethods] = useState<string[]>([]);
 
   return (
     <>
@@ -195,14 +266,6 @@ const StreamsExample = () => {
           searchPlaceholder="Search by stream name"
           inspectButtonLabel={(name) => `Inspect ILM policy for '${name}'`}
           inspectPlacement="badge"
-          methodFilter={{
-            selectedMethods,
-            onChangeSelectedMethods: setSelectedMethods,
-            methodOptions: [
-              { key: 'dlm', label: 'Data stream lifecycle' },
-              { key: 'ilm', label: 'ILM policy' },
-            ],
-          }}
         />
       </Panel>
 
@@ -218,14 +281,6 @@ const StreamsExample = () => {
           searchPlaceholder="Search by stream name"
           inspectButtonLabel={(name) => `Inspect ILM policy for '${name}'`}
           inspectPlacement="badge"
-          methodFilter={{
-            selectedMethods,
-            onChangeSelectedMethods: setSelectedMethods,
-            methodOptions: [
-              { key: 'dlm', label: 'Data stream lifecycle' },
-              { key: 'ilm', label: 'ILM policy' },
-            ],
-          }}
         />
       </Panel>
     </>

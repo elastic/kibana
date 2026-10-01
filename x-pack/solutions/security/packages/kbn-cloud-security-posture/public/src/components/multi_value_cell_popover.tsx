@@ -58,6 +58,7 @@ const MultiValueCellPopoverComponent = <T, K = string>({
       {items.length > 1 && (
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={getShowMoreAriaLabel(field, items.length - 1)}
             button={
               <EuiBadge
                 data-test-subj={MULTI_VALUE_CELL_MORE_BUTTON}

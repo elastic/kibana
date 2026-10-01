@@ -12,6 +12,7 @@ import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
   STACK_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
 } from '../../../constants/attachments';
 import {
   AlertAttachmentAttributesSchema,
@@ -144,6 +145,7 @@ const UnifiedDocumentAttachmentPayloadSchema = z
       z.literal(SECURITY_ALERT_ATTACHMENT_TYPE),
       z.literal(OBSERVABILITY_ALERT_ATTACHMENT_TYPE),
       z.literal(STACK_ALERT_ATTACHMENT_TYPE),
+      z.literal(SECURITY_ENTITY_ATTACHMENT_TYPE),
     ]),
     attachmentId: z.union([z.string(), z.array(z.string())]),
     owner: z.string(),
@@ -171,7 +173,3 @@ export type AttachmentsV2 = z.infer<typeof AttachmentsSchemaV2>;
 export type AttachmentAttributesV2 = z.infer<typeof AttachmentAttributesSchemaV2>;
 export type AttachmentPatchAttributesV2 = z.infer<typeof AttachmentPatchAttributesSchemaV2>;
 export type DocumentAttachmentAttributesV2 = z.infer<typeof DocumentAttachmentAttributesSchemaV2>;
-/**
- * Transitional read-shape mode while v1/v2 attachments coexist.
- */
-export type AttachmentMode = 'legacy' | 'unified';

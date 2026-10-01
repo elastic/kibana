@@ -35,9 +35,12 @@
  *   JEST_CONFIGS_DEPS            — comma-separated Buildkite step keys this step depends on
  *   FTR_EXTRA_ARGS               — extra CLI args forwarded to FTR jobs via env
  *   GITHUB_PR_NUMBER             — PR number; activates PR-specific ci-stats source
- *   GITHUB_PR_MERGE_BASE         — merge-base commit; activates selective testing + merge-base source
- *   GITHUB_PR_LABELS             — comma-separated PR labels; activates selective testing when
- *                                  it contains the selective-tests label
+ *   GITHUB_PR_MERGE_BASE         — PR selective-testing and ci-stats base
+ *   BUILDKITE_MERGE_QUEUE_BASE_COMMIT — commit the merge group is built on (for single-PR
+ *                                       squash groups, the parent of HEAD); selective-testing base
+ *   MERGE_QUEUE_MERGE_BASE       — merge base with main, below earlier queued PRs; ci-stats only
+ *   GITHUB_PR_LABELS             — comma-separated PR labels; ci:prevent-selective-testing
+ *                                  disables selective testing
  */
 
 /**
@@ -95,14 +98,15 @@ export const TEST_STEP_TIMEOUT_MINUTES = 50;
 
 /** Agent disk sizes (GiB) per step type. */
 export const AGENT_DISK_GIB = {
-  JEST_UNIT: 110,
-  JEST_INTEGRATION: 105,
-  FTR: 105,
+  JEST_UNIT: 130,
+  JEST_INTEGRATION: 130,
+  FTR: 130,
 } as const;
 
 /** Well-known Buildkite pipeline slugs referenced in source prioritization. */
 export const PIPELINES = {
   ON_MERGE: 'kibana-on-merge',
+  MERGE_QUEUE: 'kibana-merge-queue',
   PULL_REQUEST: 'kibana-pull-request',
   ES_SERVERLESS_VERIFY: 'kibana-elasticsearch-serverless-verify-and-promote',
 } as const;

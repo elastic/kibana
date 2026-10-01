@@ -12,13 +12,13 @@ import { stringifyZodError } from '@kbn/zod-helpers';
 import type { ToastInputFields } from '@kbn/core/public';
 import { builderMap as customFieldsBuilder } from '../components/custom_fields/builder';
 import {
-  AttachmentType,
   CaseSchema,
   CasesSchema,
   ConfigurationSchema,
   ConfigurationsSchema,
   UserActionsSchema,
 } from '../../common/types/domain';
+import { isAlertAttachmentType } from '../../common/utils/attachments';
 import type {
   CasePatchRequest,
   CaseResolveResponse,
@@ -119,8 +119,8 @@ export const createUpdateSuccessToaster = (
   key: UpdateByKey['updateKey'],
   value: UpdateByKey['updateValue']
 ): ToastInputFields => {
-  const caseHasAlerts = caseBeforeUpdate.comments.some(
-    (comment) => comment.type === AttachmentType.alert
+  const caseHasAlerts = caseBeforeUpdate.comments.some((comment) =>
+    isAlertAttachmentType(comment.type)
   );
 
   const toast: ToastInputFields = {

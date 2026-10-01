@@ -19,6 +19,7 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   previousAppState: {},
   forceFetchOnSelect: false,
   isDataViewLoading: false,
+  isWarningCalloutDismissed: false,
   dataRequestParams: {
     timeRangeAbsolute: undefined,
     timeRangeRelative: undefined,
@@ -38,13 +39,15 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     cascadedDocumentsMap: {},
   },
   esqlVariables: [],
-  defaultProfileState: {
+  profileAppStateDefaults: {
     resetId: '',
     fieldsToReset: 'none',
     snapshotsByProfileId: {},
   },
+  profileState: {},
   expandedDoc: undefined,
   expandedDocOwner: undefined,
+  expandedDocCascadePath: undefined,
   renderDocumentViewMeta: undefined,
   uiState: {},
 };

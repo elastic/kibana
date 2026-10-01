@@ -329,4 +329,91 @@ describe('BulkActions', () => {
     fireEvent.click(getByTestId('installSelectedItemsButton'));
     expect(installSelectedRule).toHaveBeenCalled();
   });
+
+  it('disables the install selected button when only partially translated rules are selected', () => {
+    const mockTranslationStats = getRuleMigrationTranslationStatsMock({
+      rules: {
+        total: 13,
+        success: {
+          total: 11,
+          result: {
+            full: 3,
+            partial: 1,
+            untranslatable: 7,
+          },
+          installable: 3,
+          missing_index: 1,
+          prebuilt: 0,
+        },
+        failed: 2,
+      },
+    });
+    const selectedRules = [
+      getRuleMigrationRuleMock({
+        id: '1',
+        status: SiemMigrationStatus.COMPLETED,
+        translation_result: MigrationTranslationResult.PARTIAL,
+      }),
+    ];
+    const { getByTestId } = render(
+      <TestProviders>
+        <BulkActions
+          selectedRules={selectedRules}
+          translationStats={mockTranslationStats}
+          isTableLoading={false}
+          installSelectedRule={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('installSelectedItemsButton')).toBeDisabled();
+  });
+
+  it('enables the install selected button when a fully translated rule is selected alongside a partial one', () => {
+    const mockTranslationStats = getRuleMigrationTranslationStatsMock({
+      rules: {
+        total: 13,
+        success: {
+          total: 11,
+          result: {
+            full: 3,
+            partial: 1,
+            untranslatable: 7,
+          },
+          installable: 3,
+          missing_index: 1,
+          prebuilt: 0,
+        },
+        failed: 2,
+      },
+    });
+    const selectedRules = [
+      getRuleMigrationRuleMock({
+        id: '1',
+        status: SiemMigrationStatus.COMPLETED,
+        translation_result: MigrationTranslationResult.PARTIAL,
+      }),
+      getRuleMigrationRuleMock({
+        id: '2',
+        status: SiemMigrationStatus.COMPLETED,
+        translation_result: MigrationTranslationResult.FULL,
+      }),
+    ];
+    const { getByTestId, getByText } = render(
+      <TestProviders>
+        <BulkActions
+          selectedRules={selectedRules}
+          translationStats={mockTranslationStats}
+          isTableLoading={false}
+          installSelectedRule={jest.fn()}
+          setMissingIndexPatternFlyoutOpen={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('installSelectedItemsButton')).not.toBeDisabled();
+    // Only the fully translated rule counts as installable
+    expect(getByText('Install selected (1)')).toBeInTheDocument();
+  });
 });

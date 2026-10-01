@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { captureBodyRt } from '@kbn/apm-common';
+export { captureBodySchema } from '@kbn/apm-common';

@@ -16,10 +16,12 @@ import React, { useMemo } from 'react';
 import { SECURITY_FEATURE_ID } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryMarkdownFormatter } from '../../attack_discovery_markdown_formatter';
+import { getOriginalAlertIds } from '../../../../helpers';
 import { ViewInAiAssistant } from '../view_in_ai_assistant';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAttackDiscoveryAttachment } from '../../use_attack_discovery_attachment';
+import { isAttackDiscoveryAlert } from '../../../utils/is_attack_discovery_alert';
 
 interface Props {
   attackDiscovery: AttackDiscovery;
@@ -73,7 +75,20 @@ const ActionableSummaryComponent: React.FC<Props> = ({
 
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
-  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
+  // Only a persisted discovery can be attached, so "Add to chat" is not offered otherwise.
+  const persistedAttackDiscovery = isAttackDiscoveryAlert(attackDiscovery)
+    ? attackDiscovery
+    : undefined;
+
+  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(
+    persistedAttackDiscovery,
+    replacements
+  );
+
+  const originalAlertIds = useMemo(
+    () => getOriginalAlertIds(attackDiscovery.alertIds, replacements),
+    [attackDiscovery.alertIds, replacements]
+  );
 
   return (
     <EuiPanel color="subdued" data-test-subj="actionableSummary">
@@ -82,19 +97,22 @@ const ActionableSummaryComponent: React.FC<Props> = ({
           <AttackDiscoveryMarkdownFormatter
             disableActions={disabledActions}
             markdown={entitySummaryOrTitle}
+            alertIds={originalAlertIds}
           />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           {isAgentChatExperienceEnabled ? (
-            <NewAgentBuilderAttachment
-              onClick={openAgentBuilderFlyout}
-              size="xs"
-              telemetry={{
-                pathway: 'attack_discovery_bottom',
-                attachments: ['alert'],
-              }}
-            />
+            persistedAttackDiscovery != null && (
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                size="xs"
+                telemetry={{
+                  pathway: 'attack_discovery_bottom',
+                  attachments: ['attack_discovery'],
+                }}
+              />
+            )
           ) : (
             <ViewInAiAssistant
               compact={true}

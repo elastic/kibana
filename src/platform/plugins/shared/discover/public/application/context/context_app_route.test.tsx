@@ -20,6 +20,8 @@ import { useDataView } from '../../hooks/use_data_view';
 import { useRootProfile } from '../../context_awareness/hooks/use_root_profile';
 import type { ContextAppProps } from './context_app';
 import { popularizeField } from '@kbn/unified-data-table';
+import { type ContextAwarenessToolkit } from '../../context_awareness';
+import { TEST_PROFILE_STATE_DEF } from '../../context_awareness/__mocks__/profile_state';
 
 let mockContextAppProps: ContextAppProps | undefined;
 
@@ -75,6 +77,38 @@ describe('ContextAppRoute', () => {
 
     return { services, props: mockContextAppProps! };
   };
+
+  it('provides an in-memory profile state toolkit', () => {
+    const services = createDiscoverServicesMock();
+    const originalCreateScopedProfilesManager =
+      services.profilesManager.createScopedProfilesManager.bind(services.profilesManager);
+    let capturedToolkit: ContextAwarenessToolkit | undefined;
+
+    services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+    jest
+      .spyOn(services.profilesManager, 'createScopedProfilesManager')
+      .mockImplementation((args) => {
+        capturedToolkit = args.toolkit;
+        return originalCreateScopedProfilesManager(args);
+      });
+
+    renderContextAppRoute(services);
+
+    if (!capturedToolkit) {
+      throw new Error('Expected ContextAppRoute to create a scoped profiles manager.');
+    }
+
+    const stateAdapter = capturedToolkit.getStateAdapter(TEST_PROFILE_STATE_DEF);
+    expect(stateAdapter.getState()).toEqual(TEST_PROFILE_STATE_DEF.defaultState);
+
+    stateAdapter.setState({ ...TEST_PROFILE_STATE_DEF.defaultState, uiValue: 'primary' });
+    stateAdapter.updateState({ uiValue: 'success' });
+
+    expect(stateAdapter.getState()).toEqual({
+      ...TEST_PROFILE_STATE_DEF.defaultState,
+      uiValue: 'success',
+    });
+  });
 
   it('dispatches addFilter side effects', () => {
     const services = createDiscoverServicesMock();

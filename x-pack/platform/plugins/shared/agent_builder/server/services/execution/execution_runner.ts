@@ -5,7 +5,23 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, catchError, throwError, EMPTY } from 'rxjs';
+import {
+  merge,
+  of,
+  from,
+  concat,
+  filter,
+  identity,
+  map,
+  tap,
+  catchError,
+  throwError,
+  EMPTY,
+  shareReplay,
+  ignoreElements,
+  concatMap,
+  take,
+} from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -13,40 +29,53 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
+import type { ChatEvent, ConverseInput, ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
+  isRoundStartedEvent,
+  isRoundInterruptedEvent,
   isAgentBuilderError,
-  AgentBuilderErrorCode,
   AgentExecutionMode,
   createInternalError,
+  normalizeInteractive,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
+import type { InteractivityConfig } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { SerializedExecutionError } from '@kbn/agent-builder-common';
 import type {
   AgentExecution,
   ConversationAgentExecution,
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import { ElasticGenAIAttributes, UserAttributes } from '@kbn/inference-tracing';
+import type { Span } from '@opentelemetry/api';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
   generateTitle,
   handleCancellation,
+  createAbortedError,
   executeAgent$,
+  appendRoundTerminated$,
+  appendResumeExecution$,
+  executionStartedEvents$,
   getConversation,
-  updateConversation$,
-  createConversation$,
   resolveServices,
   convertErrors,
+  toClientError,
+  isPendingResumeConversation,
+  isPlaceholderUser,
+  resolveTelemetryOrigin,
+  persistExecutionInterruption,
+  trackExecutionInterruption,
   type ConversationWithOperation,
 } from './utils';
-import { createConversationIdSetEvent } from './utils/events';
+import { reportRoundTelemetry } from './utils/report_round_telemetry';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { withConverseSpan } from '../../tracing';
+import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -72,6 +101,20 @@ export interface AgentExecutionDeps {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
+export const setUserAttributes = (
+  span: Span | undefined,
+  user: { id?: string; username?: string }
+): void => {
+  if (!span) {
+    return;
+  }
+  if (user.id) {
+    span.setAttribute(UserAttributes.UserId, user.id);
+  }
+  if (user.username) {
+    span.setAttribute(UserAttributes.UserName, user.username);
+  }
+};
 /**
  * Unified entry point for agent execution. Dispatches to the appropriate handler
  * based on the execution mode.
@@ -81,16 +124,34 @@ export const handleAgentExecution = async ({
   deps,
   request,
   abortSignal,
+  interactivity,
 }: {
   execution: AgentExecution;
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
+  interactivity?: InteractivityConfig;
 }): Promise<Observable<ChatEvent>> => {
+  const resolvedInteractivity: InteractivityConfig =
+    interactivity ??
+    execution.interactivity ??
+    normalizeInteractive(undefined, execution.executionMode);
   if (execution.executionMode === AgentExecutionMode.standalone) {
-    return handleStandaloneExecution({ execution, deps, request, abortSignal });
+    return handleStandaloneExecution({
+      execution,
+      deps,
+      request,
+      abortSignal,
+      interactivity: resolvedInteractivity,
+    });
   }
-  return handleConversationExecution({ execution, deps, request, abortSignal });
+  return handleConversationExecution({
+    execution,
+    deps,
+    request,
+    abortSignal,
+    interactivity: resolvedInteractivity,
+  });
 };
 
 /**
@@ -102,166 +163,283 @@ const handleConversationExecution = async ({
   deps,
   request,
   abortSignal,
+  interactivity,
 }: {
   execution: ConversationAgentExecution;
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
+  interactivity: InteractivityConfig;
 }): Promise<Observable<ChatEvent>> => {
   const {
     agentId = agentBuilderDefaultAgentId,
     connectorId,
     conversationId,
-    capabilities,
     structuredOutput,
     outputSchema,
     storeConversation = true,
-    autoCreateConversationWithId = false,
+    accessControl,
+    readOnly,
+    origin,
     nextInput,
     browserApiTools,
     configurationOverrides,
-    action,
+    telemetryMetadata,
+    maxContentLength,
+    reasoningLevel,
+    subagentCreation,
+    projectRouting,
+    roundId,
+    conversationOperation,
+    receivedAt: receivedAtIso,
   } = execution.agentParams;
 
-  const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
+  const { owner } = execution;
 
-  // Resolve scoped services
-  const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
-    agentId,
-    connectorId,
+  // A record written before the execution service resolved all of these cannot be run.
+  if (!conversationId || !roundId || !conversationOperation || !owner || !receivedAtIso) {
+    throw createInternalError('Execution is missing required conversation parameters');
+  }
+
+  const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
+    deps;
+
+  const conversationClient = await deps.conversationService.getScopedClientAsUser({
     request,
-    ...deps,
+    user: { ...owner, isAdmin: false },
   });
 
-  // Get conversation
-  const conversation = await getConversation({
-    agentId,
-    conversationId,
-    autoCreateConversationWithId,
-    conversationClient,
-  });
+  const author = conversationClient.getAuthor(origin?.author);
 
-  // Emit conversation ID for new conversations (only when persisting)
-  const conversationIdEvent$ =
-    storeConversation && conversation.operation === 'CREATE'
-      ? of(createConversationIdSetEvent(conversation.id))
+  // The execution service resolved the conversation, created it when it was new and wrote the
+  // opening user message before this run was dispatched: the run reads the stored document and is
+  // told how the request resolved it, since its own read only ever sees an update. A run that does
+  // not store its conversation wrote nothing to read, so it resolves the placeholder here.
+  const conversation: ConversationWithOperation = storeConversation
+    ? { ...(await conversationClient.get(conversationId)), operation: conversationOperation }
+    : await getConversation({
+        agentId,
+        conversationId,
+        autoCreateConversationWithId: true,
+        conversationClient,
+        accessControl,
+        readOnly,
+        origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
+        subagentCreation,
+      });
+
+  // Matches the receipt-time write's timestamp, so a rebuilt interruption event lands with the
+  // same created_at rather than moving to when this run picked the record up.
+  const receivedAt = new Date(receivedAtIso);
+
+  const roundOrigin = origin ? { type: origin.type } : undefined;
+  const telemetryOrigin = resolveTelemetryOrigin({ conversation, requestOrigin: origin?.type });
+
+  // From here on the receipt-time `user_message` is stored (fresh round) or a pending round is
+  // being resumed: any rejection before the stream exists would leave it dangling, so the setup
+  // window is guarded and its failure recorded as an interrupted execution. Service/connector
+  // resolution moved inside this guard too, so a run that fails to resolve one still gets a
+  // terminal recorded next to the message that was already persisted.
+  try {
+    const { modelProvider, selectedConnectorId } = await resolveServices({
+      agentId,
+      connectorId,
+      telemetryMetadata,
+      request,
+      ...deps,
+    });
+
+    // Execute agent
+    const agentEvents$ = executeAgent$({
+      agentId,
+      executionId: execution.executionId,
+      request,
+      nextInput,
+      origin,
+      author,
+      structuredOutput,
+      outputSchema,
+      abortSignal,
+      conversation,
+      defaultConnectorId: selectedConnectorId,
+      telemetryMetadata,
+      maxContentLength,
+      reasoningLevel,
+      runAgent,
+      browserApiTools,
+      configurationOverrides,
+      interactivity,
+      parentExecutionId: execution.parentExecutionId,
+      projectRouting,
+      roundId,
+    });
+
+    // Generate title when creating a new conversation
+    // OR when the conversation still carries the default placeholder title
+    const needsTitle = conversationNeedsTitle(conversation) && !subagentCreation;
+    const title$ = (
+      needsTitle
+        ? generateTitle({
+            chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
+            conversation,
+            nextInput,
+          })
+        : of(conversation.title)
+    ).pipe(shareReplay(1));
+
+    // Persist conversation (optional)
+    const persistenceEvents$ = storeConversation
+      ? buildPersistenceEvents({
+          conversation,
+          conversationClient,
+          title$,
+          agentEvents$,
+          nextInput,
+          author,
+        })
       : EMPTY;
 
-  // Execute agent
-  const agentEvents$ = executeAgent$({
-    agentId,
-    executionId: execution.executionId,
-    request,
-    nextInput,
-    capabilities,
-    structuredOutput,
-    outputSchema,
-    abortSignal,
-    conversation,
-    defaultConnectorId: selectedConnectorId,
-    runAgent,
-    browserApiTools,
-    configurationOverrides,
-    action,
-  });
+    const startedEvents$ = storeConversation
+      ? executionStartedEvents$({ conversation, agentEvents$ })
+      : EMPTY;
 
-  // Generate title (for CREATE) or use existing title (for UPDATE)
-  const title$ =
-    conversation.operation === 'CREATE'
-      ? generateTitle({
-          chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
-          conversation,
-          nextInput,
-        })
-      : of(conversation.title);
+    const chatModel = (await modelProvider.getDefaultModel()).chatModel;
+    const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
-  // Persist conversation (optional)
-  const persistenceEvents$ = storeConversation
-    ? buildPersistenceEvents({
+    const agentRegistry = await agentService.getRegistry({ request });
+    const { name: agentName } = await agentRegistry.get(agentId);
+
+    const { headers } = request;
+    const opikTraceId = headers.opik_trace_id as string | undefined;
+    const opikParentSpanId = headers.opik_parent_span_id as string | undefined;
+    const opikHeaders =
+      opikTraceId && opikParentSpanId
+        ? { opik_trace_id: opikTraceId, opik_parent_span_id: opikParentSpanId }
+        : undefined;
+
+    const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+    const privacySettings = await loadTracingPrivacySettings({
+      uiSettingsClient: deps.uiSettings.asScopedToClient(
+        deps.savedObjects.getScopedClient(request)
+      ),
+      logger,
+      spaceId,
+    });
+
+    return withConverseSpan(
+      {
         agentId,
-        conversation,
-        conversationClient,
-        conversationId,
-        title$,
-        agentEvents$,
-        action,
-      })
-    : EMPTY;
+        agentName,
+        providerName: connectorProvider,
+        conversationId: conversation.id,
+        spaceId,
+        privacySettings,
+        opikHeaders,
+      },
+      (span) => {
+        // The conversation is stored by now, so its owner is known — except for a run that does
+        // not store one, whose placeholder owner is nobody and stays unreported.
+        if (author || !isPlaceholderUser(conversation.user)) {
+          setUserAttributes(span, {
+            id: author?.id ?? conversation.user.id,
+            username: author?.username ?? conversation.user.username,
+          });
+        }
 
-  // Merge all event streams
-  const effectiveConversationId =
-    conversation.operation === 'CREATE' ? conversation.id : conversationId;
+        const titleAttr$ = storeConversation
+          ? title$.pipe(
+              tap((title) => {
+                span?.setAttribute(ElasticGenAIAttributes.ConversationTitle, title);
+              }),
+              ignoreElements()
+            )
+          : EMPTY;
 
-  const chatModel = (await modelProvider.getDefaultModel()).chatModel;
-  const connectorProvider = getConnectorProvider(chatModel.getConnector());
-
-  const { headers } = request;
-  const opikTraceId = headers.opik_trace_id as string | undefined;
-  const opikParentSpanId = headers.opik_parent_span_id as string | undefined;
-  const opikHeaders =
-    opikTraceId && opikParentSpanId
-      ? { opik_trace_id: opikTraceId, opik_parent_span_id: opikParentSpanId }
-      : undefined;
-
-  const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
-
-  return withConverseSpan(
-    { agentId, conversationId: effectiveConversationId, spaceId, opikHeaders },
-    () =>
-      merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
-        handleCancellation(abortSignal),
-        tap((event) => {
-          try {
+        return merge(agentEvents$, startedEvents$, persistenceEvents$, titleAttr$).pipe(
+          // Graceful cancellation first, so an abort is normalised to RequestAbortedError before the
+          // interruption tracker classifies the error.
+          handleCancellation(abortSignal),
+          storeConversation
+            ? trackExecutionInterruption({
+                persist: ({ error, interrupted, completed }) =>
+                  persistExecutionInterruption({
+                    conversation,
+                    conversationClient,
+                    roundId,
+                    receivedAt,
+                    input: nextInput,
+                    author,
+                    origin: roundOrigin,
+                    error,
+                    interrupted,
+                    completed,
+                    logger,
+                  }),
+              })
+            : identity,
+          // `round_started` / `round_interrupted` are internal plumbing for the persistence layer.
+          filter((event) => !isRoundStartedEvent(event) && !isRoundInterruptedEvent(event)),
+          tap((event) => {
             if (isRoundCompleteEvent(event)) {
-              const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
-              const currentRoundCount = isReplacingRound
-                ? conversation.rounds.length
-                : (conversation.rounds?.length ?? 0) + 1;
-
-              // metering
-              meteringService
-                .reportExecution({
-                  conversationId: effectiveConversationId,
-                  executionId: execution.executionId,
-                  roundCount: currentRoundCount,
-                  agentId,
-                  round: event.data.round,
-                  modelProvider: connectorProvider,
-                })
-                .catch((err) => {
-                  logger.warn(`Failed to report execution metering: ${err}`);
-                });
-
-              // snapshot telemetry tracking
-              if (effectiveConversationId) {
-                trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
-              }
-
-              // EBT tracking
-              analyticsService?.reportRoundComplete({
-                conversationId: effectiveConversationId,
-                executionId: execution.executionId,
-                roundCount: currentRoundCount,
+              reportRoundTelemetry({
+                event,
+                conversation,
+                nextInput,
                 agentId,
-                round: event.data.round,
+                executionId: execution.executionId,
                 modelProvider: connectorProvider,
+                meteringService,
+                trackingService,
+                analyticsService,
+                logger,
               });
             }
-          } catch (error) {
-            logger.error(`Failed to report round complete telemetry: ${error}`);
-          }
-        }),
-        convertErrors({
-          agentId,
+          }),
+          // Must stay below the telemetry tap: `resume_execution` carries the unmerged per-execution
+          // round that telemetry needs, and is only stripped so it doesn't reach the client.
+          map(stripResumeExecution),
+          convertErrors({
+            agentId,
+            logger,
+            analyticsService,
+            trackingService,
+            modelProvider: connectorProvider,
+            conversationId: conversation.id,
+            executionId: execution.executionId,
+            roundOrigin: telemetryOrigin,
+          })
+        );
+      }
+    );
+  } catch (err) {
+    // Normalised once so the conversation terminal, the execution document and the client all
+    // carry the same error.
+    // A Boom-style 4xx from a setup dependency (auth, not found) used to reach the route unchanged;
+    // keep its status. Mid-run dependency failures stay 500 (see `toClientError`).
+    const normalized = abortSignal.aborted
+      ? createAbortedError(abortSignal)
+      : toClientError(err, { preserveHttpStatus: true });
+    const terminals = storeConversation
+      ? await persistExecutionInterruption({
+          conversation,
+          conversationClient,
+          roundId,
+          receivedAt,
+          input: nextInput,
+          author,
+          origin: roundOrigin,
+          error: normalized,
           logger,
-          analyticsService,
-          trackingService,
-          modelProvider: connectorProvider,
-          conversationId: effectiveConversationId,
-          executionId: execution.executionId,
         })
-      )
-  );
+      : [];
+    // Surfaced as a stream — the persisted terminal, then the error — so live clients and
+    // followers see the same thing a reloaded conversation shows, and the stream-based status
+    // writers record the outcome exactly as they do for a failure mid-run.
+    return concat(
+      from(terminals as ChatEvent[]),
+      throwError(() => normalized)
+    );
+  }
 };
 
 /**
@@ -313,6 +491,13 @@ export const collectAndWriteEvents = ({
       }
     };
 
+    const finalFlush = async () => {
+      if (flushInProgress) {
+        await flushInProgress;
+      }
+      await flush();
+    };
+
     events$.subscribe({
       next: (event) => {
         pendingEvents.push(event);
@@ -320,94 +505,84 @@ export const collectAndWriteEvents = ({
       },
       error: (err) => {
         cleanup();
-        reject(err);
+        // The batch holding the terminal timeline event must land before the failure is recorded,
+        // otherwise no follower could ever see it.
+        finalFlush()
+          .catch((flushErr) => {
+            logger.error(
+              `Failed to flush events for execution ${execution.executionId} after error: ${flushErr.message}`
+            );
+          })
+          .finally(() => reject(err));
       },
       complete: () => {
         cleanup();
-        const finalFlush = async () => {
-          if (flushInProgress) {
-            await flushInProgress;
-          }
-          await flush();
-        };
         finalFlush().then(resolve, reject);
       },
     });
   });
 };
 
-/**
- * Converts an unknown error to a {@link SerializedExecutionError} for persistence.
- * - If the error is already an AgentBuilderError, serializes it using toJSON().
- * - Otherwise, wraps it as an internalError, preserving the HTTP status from
- *   Boom-style errors (or any error carrying a numeric `statusCode`) in
- *   `meta.statusCode` so the route layer can return the correct code.
- */
-export const serializeExecutionError = (error: unknown): SerializedExecutionError => {
-  if (isAgentBuilderError(error)) {
-    return { code: error.code as AgentBuilderErrorCode, message: error.message, meta: error.meta };
-  }
-  const message = error instanceof Error ? error.message : String(error);
-  const statusCode = getHttpStatusFromError(error);
-  return {
-    code: AgentBuilderErrorCode.internalError,
-    message,
-    ...(statusCode !== undefined ? { meta: { statusCode } } : {}),
-  };
-};
+const conversationNeedsTitle = (conversation: { title?: string }): boolean =>
+  !conversation.title || conversation.title === DEFAULT_CONVERSATION_TITLE;
 
-const getHttpStatusFromError = (error: unknown): number | undefined => {
-  if (typeof error !== 'object' || error === null) return undefined;
-  const { output, statusCode } = error as {
-    output?: { statusCode?: unknown };
-    statusCode?: unknown;
-  };
-  const candidate =
-    typeof output?.statusCode === 'number'
-      ? output.statusCode
-      : typeof statusCode === 'number'
-      ? statusCode
-      : undefined;
-  return typeof candidate === 'number' && candidate >= 400 && candidate < 600
-    ? candidate
-    : undefined;
+const stripResumeExecution = (event: ChatEvent): ChatEvent => {
+  if (!isRoundCompleteEvent(event) || !event.data.resume_execution) {
+    return event;
+  }
+  const { resume_execution: _resumeExecution, ...data } = event.data;
+  return { ...event, data };
 };
 
 const buildPersistenceEvents = ({
-  agentId,
   conversation,
   conversationClient,
-  conversationId,
   title$,
   agentEvents$,
-  action,
+  nextInput,
+  author,
 }: {
-  agentId: string;
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
-  conversationId?: string;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
-  action?: ConversationAction;
+  nextInput: ConverseInput;
+  author?: ConversationRoundAuthor;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
-  if (conversation.operation === 'CREATE') {
-    return createConversation$({
-      agentId,
-      conversationClient,
-      conversationId: conversationId || conversation.id,
-      title$,
-      roundCompletedEvents$,
-    });
+  const isResume = isPendingResumeConversation(conversation);
+  const useTwoPhase = !isResume;
+
+  if (useTwoPhase) {
+    const roundStartedEvents$ = agentEvents$.pipe(filter(isRoundStartedEvent));
+    const endTitle$ = conversationNeedsTitle(conversation) ? title$ : undefined;
+
+    return roundStartedEvents$.pipe(
+      concatMap((startEvent) =>
+        appendRoundTerminated$({
+          conversation,
+          conversationClient,
+          roundCompletedEvents$: roundCompletedEvents$.pipe(
+            filter((event) => event.data.round.id === startEvent.data.round_id),
+            take(1)
+          ),
+          title$: endTitle$,
+        })
+      )
+    );
   }
 
-  return updateConversation$({
-    conversationClient,
+  // A resume appends a new execution (append-only); the pause is never rewritten. This also covers
+  // legacy (non events-native) documents: `fromEs` derives their timeline from rounds on read, so
+  // the append writes the full projection and promotes the document to events-native.
+  return appendResumeExecution$({
     conversation,
-    title$,
+    conversationClient,
     roundCompletedEvents$,
-    action,
+    input: nextInput,
+    author,
+    title$: conversationNeedsTitle(conversation) ? title$ : undefined,
   });
 };
 
@@ -420,18 +595,23 @@ const handleStandaloneExecution = async ({
   deps,
   request,
   abortSignal,
+  interactivity,
 }: {
   execution: StandaloneAgentExecution;
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
+  interactivity: InteractivityConfig;
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
+  const { telemetryMetadata, maxContentLength, reasoningLevel, projectRouting } =
+    execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
     connectorId: execution.agentParams.connectorId,
+    telemetryMetadata,
     request,
     ...deps,
   });
@@ -441,15 +621,21 @@ const handleStandaloneExecution = async ({
     executionId: execution.executionId,
     request,
     nextInput: execution.agentParams.nextInput,
-    capabilities: execution.agentParams.capabilities,
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
+    telemetryMetadata,
+    maxContentLength,
+    reasoningLevel,
     runAgent,
+    projectRouting,
     executionMode: AgentExecutionMode.standalone,
+    interactivity,
+    parentExecutionId: execution.parentExecutionId,
   });
 
   return agentEvents$.pipe(
+    filter((event) => !isRoundStartedEvent(event) && !isRoundInterruptedEvent(event)),
     handleCancellation(abortSignal),
     catchError((err) => {
       logger.error(`Error executing standalone agent: ${err.stack ?? err.message}`);

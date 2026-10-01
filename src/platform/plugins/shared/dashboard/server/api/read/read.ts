@@ -9,6 +9,7 @@
 
 import type { RequestTiming } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
@@ -31,6 +32,10 @@ export async function read(
     DASHBOARD_SAVED_OBJECT_TYPE,
     id
   );
+
+  if (isSavedObjectErrorResult(savedObject)) {
+    throw new Error(savedObject.error.message);
+  }
 
   const resolveHeaders: Record<string, string> = {
     'kbn-resolve-outcome': outcome,

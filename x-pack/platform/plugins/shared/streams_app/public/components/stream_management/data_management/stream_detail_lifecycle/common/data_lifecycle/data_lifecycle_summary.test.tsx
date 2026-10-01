@@ -27,6 +27,31 @@ describe('DataLifecycleSummary', () => {
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
       expect(screen.getByTestId('dataLifecycleSummary-skeleton')).toBeInTheDocument();
     });
+
+    it('exposes the stats readiness signal as loading while a (re)fetch is inflight', () => {
+      const phases: LifecyclePhase[] = [
+        { color: '#FF0000', name: 'hot', label: 'hot', size: '10gb', grow: 5 },
+      ];
+      // Phases already rendered while loading models a post-save refetch, not the initial load.
+      render(<DataLifecycleSummary {...defaultProps} model={{ loading: true, phases }} />);
+
+      expect(screen.getByTestId('dataLifecycleSummary-stats-loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataLifecycleSummary-stats-loaded')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dataLifecycleSummary-skeleton')).not.toBeInTheDocument();
+    });
+
+    it('prefixes the stats readiness signal with testSubjPrefix when provided', () => {
+      render(
+        <DataLifecycleSummary
+          {...defaultProps}
+          model={{ loading: false, phases: [], testSubjPrefix: 'failureStore' }}
+        />
+      );
+
+      expect(
+        screen.getByTestId('failureStore-dataLifecycleSummary-stats-loaded')
+      ).toBeInTheDocument();
+    });
   });
 
   describe('Empty State', () => {
@@ -35,6 +60,7 @@ describe('DataLifecycleSummary', () => {
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
       expect(screen.queryByTestId('dataLifecycleSummary-skeleton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dataLifecycleSummary-stats-loaded')).toBeInTheDocument();
     });
 
     it('should render the title badge when provided', () => {

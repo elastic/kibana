@@ -37,7 +37,7 @@ import {
 import type { CustomThresholdLocators } from './custom_threshold_executor';
 import { createCustomThresholdExecutor } from './custom_threshold_executor';
 import { createQueryInspector } from './query_inspector';
-import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import { FIRED_ACTION, WARNING_ACTION, NO_DATA_ACTION } from './constants';
 import type { ObservabilityConfig } from '../../..';
 import type { CustomThresholdAlert } from './types';
 
@@ -85,7 +85,7 @@ export function thresholdRuleType(
       },
     },
     defaultActionGroupId: FIRED_ACTION.id,
-    actionGroups: [FIRED_ACTION, NO_DATA_ACTION],
+    actionGroups: [FIRED_ACTION, WARNING_ACTION, NO_DATA_ACTION],
     minimumLicenseRequired: 'basic' as LicenseType,
     isExportable: true,
     executor: createCustomThresholdExecutor({ basePath, logger, config, locators }),

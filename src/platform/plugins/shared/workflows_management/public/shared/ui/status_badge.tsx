@@ -39,12 +39,12 @@ const getExecutionStatusColorsMap = (
 ): Record<ExecutionStatus, ExecutionStatusColors> => {
   return {
     [ExecutionStatus.COMPLETED]: {
-      color: euiTheme.colors.vis.euiColorVisSuccess0,
+      color: euiTheme.colors.textSuccess,
       backgroundColor: euiTheme.colors.backgroundBaseSuccess,
       tokenColor: 'euiColorVis0' as const,
     },
     [ExecutionStatus.FAILED]: {
-      color: euiTheme.colors.danger,
+      color: euiTheme.colors.textDanger,
       backgroundColor: euiTheme.colors.backgroundBaseDanger,
       tokenColor: 'euiColorVis6' as const,
     },
@@ -52,6 +52,11 @@ const getExecutionStatusColorsMap = (
       color: euiTheme.colors.textSubdued,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       tokenColor: 'gray' as const,
+    },
+    [ExecutionStatus.QUEUED]: {
+      color: euiTheme.colors.textSubdued,
+      backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      tokenColor: 'euiColorVis9' as const,
     },
     [ExecutionStatus.RUNNING]: {
       color: euiTheme.colors.textSubdued,
@@ -79,7 +84,7 @@ const getExecutionStatusColorsMap = (
       tokenColor: 'gray',
     },
     [ExecutionStatus.TIMED_OUT]: {
-      color: euiTheme.colors.danger,
+      color: euiTheme.colors.textDanger,
       backgroundColor: euiTheme.colors.backgroundBaseDanger,
       tokenColor: 'euiColorVis6' as const,
     },
@@ -110,6 +115,7 @@ const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
   [ExecutionStatus.FAILED]: 'errorFill',
   [ExecutionStatus.TIMED_OUT]: 'errorFill',
   [ExecutionStatus.PENDING]: 'clock',
+  [ExecutionStatus.QUEUED]: 'sortUp',
   [ExecutionStatus.RUNNING]: 'play',
   [ExecutionStatus.WAITING]: 'clock',
   [ExecutionStatus.WAITING_FOR_INPUT]: 'hourglass',

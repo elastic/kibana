@@ -14,6 +14,9 @@ export const STATUS_LABELS = {
   [ExecutionStatus.PENDING]: i18n.translate('workflowsManagement.executionStatus.pending', {
     defaultMessage: 'Pending',
   }),
+  [ExecutionStatus.QUEUED]: i18n.translate('workflowsManagement.executionStatus.queued', {
+    defaultMessage: 'Queued',
+  }),
   [ExecutionStatus.WAITING]: i18n.translate('workflowsManagement.executionStatus.waiting', {
     defaultMessage: 'Waiting',
   }),
@@ -36,7 +39,7 @@ export const STATUS_LABELS = {
     defaultMessage: 'Success',
   }),
   [ExecutionStatus.FAILED]: i18n.translate('workflowsManagement.executionStatus.failed', {
-    defaultMessage: 'Error',
+    defaultMessage: 'Failed',
   }),
   [ExecutionStatus.CANCELLED]: i18n.translate('workflowsManagement.executionStatus.cancelled', {
     defaultMessage: 'Canceled',

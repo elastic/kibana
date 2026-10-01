@@ -21,23 +21,6 @@ export async function deleteConnectorById(
   });
 }
 
-export async function deleteAllConnectors(kbnClient: KbnClient): Promise<void> {
-  const list = await kbnClient.request<Array<{ id: string }>>({
-    method: 'GET',
-    path: '/api/actions/connectors',
-  });
-  const connectors = Array.isArray(list.data) ? list.data : [];
-  await Promise.all(
-    connectors.map((connector) =>
-      kbnClient.request({
-        method: 'DELETE',
-        path: `/api/actions/connector/${encodeURIComponent(connector.id)}`,
-        headers: XSFR,
-      })
-    )
-  );
-}
-
 export async function createGenAiConnectorForProxy(
   kbnClient: KbnClient,
   proxy: LlmProxy

@@ -13,7 +13,7 @@ import {
   type NamedAggregation,
   type GroupingSort,
 } from '@kbn/grouping';
-import type { RunTimeMappings } from '../../../../sourcerer/store/model';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 
 export interface AlertsGroupingQueryParams {
   additionalFilters: Array<{

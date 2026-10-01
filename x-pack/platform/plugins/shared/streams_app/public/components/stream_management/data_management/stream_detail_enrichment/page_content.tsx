@@ -325,7 +325,7 @@ export function StreamDetailEnrichmentContentImpl() {
   };
 
   return (
-    <EuiSplitPanel.Outer grow hasShadow={false}>
+    <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={false} borderRadius="none">
       <EuiSplitPanel.Inner
         paddingSize="none"
         css={css`
@@ -380,7 +380,7 @@ export function StreamDetailEnrichmentContentImpl() {
                           <EuiToolTip content={ADD_TO_DATASET_ARIA_LABEL} disableScreenReaderOutput>
                             <EuiButtonIcon
                               aria-label={ADD_TO_DATASET_ARIA_LABEL}
-                              iconType="beaker"
+                              iconType="flask"
                               color="text"
                               onClick={onAddToDataset}
                               data-test-subj="streamsEnrichmentAddToDatasetButton"

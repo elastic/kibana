@@ -16,19 +16,13 @@ import { ResponseSectionContent } from '../../../../flyout_v2/document/main/comp
  * Response section adapter for the legacy expandable flyout overview tab.
  */
 export const ResponseSection = memo(() => {
-  const { isRulePreview, searchHit } = useDocumentDetailsContext();
+  const { searchHit } = useDocumentDetailsContext();
   const goToResponseTab = useNavigateToLeftPanel({
     tab: LeftPanelResponseTab,
   });
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
-  return (
-    <ResponseSectionContent
-      hit={hit}
-      isRulePreview={isRulePreview}
-      onShowResponseDetails={goToResponseTab}
-    />
-  );
+  return <ResponseSectionContent hit={hit} onShowResponseDetails={goToResponseTab} />;
 });
 
 ResponseSection.displayName = 'ResponseSection';

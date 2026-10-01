@@ -66,7 +66,6 @@
     "@kbn/inference-connectors",
     "@kbn/react-query",
     "@kbn/shared-ux-ai-components",
-    "@kbn/evals-plugin",
     "@kbn/logging-mocks",
   ],
   "exclude": ["target/**/*"]

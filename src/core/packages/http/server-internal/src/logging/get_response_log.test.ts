@@ -11,7 +11,8 @@ import type { Request } from '@hapi/hapi';
 import Boom from '@hapi/boom';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { getEcsResponseLog } from './get_response_log';
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
+import { getEcsResponseLog, getSlimInfoResponseLog } from './get_response_log';
 
 jest.mock('./get_payload_size', () => ({
   getResponsePayloadBytes: jest.fn().mockReturnValue(1234),
@@ -159,6 +160,16 @@ describe('getEcsResponseLog', () => {
     expect(result.meta?.trace?.id).toBe('trace_id');
   });
 
+  test('sets http.request.id from request app storage', () => {
+    const req = createMockHapiRequest({
+      app: {
+        requestId: 'opaque-id',
+      },
+    });
+    const result = getEcsResponseLog(req, logger);
+    expect(result.meta.http?.request?.id).toBe('opaque-id');
+  });
+
   test('handles Boom errors in the response', () => {
     const req = createMockHapiRequest({
       response: Boom.badRequest(),
@@ -224,6 +235,24 @@ describe('getEcsResponseLog', () => {
         Object {
           "es-client-authentication": "[REDACTED]",
           "user-agent": "world",
+        }
+      `);
+    });
+
+    test('redacts the UIAM internal-caller attestation header by default', () => {
+      const req = createMockHapiRequest({
+        headers: {
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'ae3fda37-xxx',
+          'user-agent': 'world',
+        },
+        response: { headers: { 'content-length': '123' } },
+      });
+      const result = getEcsResponseLog(req, logger);
+      // @ts-expect-error ECS custom field
+      expect(result.meta.http.request.headers).toMatchInlineSnapshot(`
+        Object {
+          "user-agent": "world",
+          "x-kbn-uiam-internal-caller-attestation": "[REDACTED]",
         }
       `);
     });
@@ -380,6 +409,36 @@ describe('getEcsResponseLog', () => {
         },
       }
     `);
+  });
+
+  describe('getSlimInfoResponseLog', () => {
+    test('includes status, path, and request id without query or headers', () => {
+      const req = createMockHapiRequest({
+        path: '/internal/api/endpoint/agent_status',
+        query: { agentIds: 'abc' },
+        headers: { authorization: 'secret', 'user-agent': 'test' },
+        app: { requestId: 'opaque-id' },
+      });
+      const result = getSlimInfoResponseLog(req);
+      expect(result.message).toBe('GET /internal/api/endpoint/agent_status 200');
+      expect(result.meta).toEqual({
+        http: {
+          request: { method: 'GET', id: 'opaque-id' },
+          response: { status_code: 200 },
+        },
+        url: { path: '/internal/api/endpoint/agent_status' },
+      });
+    });
+
+    test('handles Boom errors', () => {
+      const req = createMockHapiRequest({
+        path: '/internal/api/endpoint/agent_status',
+        response: Boom.badRequest(),
+      });
+      const result = getSlimInfoResponseLog(req);
+      expect(result.message).toBe('GET /internal/api/endpoint/agent_status 400');
+      expect(result.meta.http?.response?.status_code).toBe(400);
+    });
   });
 
   test('handles invalid response time correctly', () => {

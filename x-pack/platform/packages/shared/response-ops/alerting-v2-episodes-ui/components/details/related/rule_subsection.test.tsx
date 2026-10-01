@@ -8,8 +8,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisode } from '../../../queries/episodes_query';
+import { RuleStateStatus, type LoadedRuleState } from '../../../types/rule_state';
 import { RelatedEpisodesRuleSubsection } from './rule_subsection';
 import { useFetchSameRuleEpisodesQuery } from '../../../hooks/use_fetch_same_rule_episodes_query';
 
@@ -39,7 +40,15 @@ jest.mock('./related_list', () => ({
 
 const mockUseFetch = jest.mocked(useFetchSameRuleEpisodesQuery);
 
-const mockRule = { id: 'rule-1', metadata: { name: 'Test Rule' } } as RuleResponse;
+const loadedRuleState: LoadedRuleState = {
+  status: RuleStateStatus.loaded,
+  ruleId: 'rule-1',
+  rule: { id: 'rule-1', metadata: { name: 'Test Rule' } } as RuleResponse,
+};
+
+const mockRuleProps = {
+  ruleState: loadedRuleState,
+};
 const mockGetEpisodeDetailsHref = (id: string) => `/base/${id}`;
 
 describe('RelatedEpisodesRuleSubsection', () => {
@@ -62,7 +71,7 @@ describe('RelatedEpisodesRuleSubsection', () => {
         <RelatedEpisodesRuleSubsection
           currentEpisodeId="ep-1"
           currentGroupHash="gh-1"
-          rule={mockRule}
+          {...mockRuleProps}
           getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
         />
       </I18nProvider>
@@ -81,13 +90,17 @@ describe('RelatedEpisodesRuleSubsection', () => {
         <RelatedEpisodesRuleSubsection
           currentEpisodeId="ep-1"
           currentGroupHash={undefined}
-          rule={mockRule}
+          {...mockRuleProps}
           getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
         />
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('alertingV2RelatedEpisodesRuleLoading')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2RelatedEpisodesRuleLoading')
+        .querySelector('.euiSkeletonRectangle')
+    ).not.toBeNull();
   });
 
   it('shows the empty state when there are no episodes', () => {
@@ -98,7 +111,7 @@ describe('RelatedEpisodesRuleSubsection', () => {
         <RelatedEpisodesRuleSubsection
           currentEpisodeId="ep-1"
           currentGroupHash={undefined}
-          rule={mockRule}
+          {...mockRuleProps}
           getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
         />
       </I18nProvider>
@@ -107,5 +120,26 @@ describe('RelatedEpisodesRuleSubsection', () => {
     expect(screen.getByText('Other episodes for this rule')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2RelatedEpisodesRuleEmpty')).toBeInTheDocument();
     expect(screen.getByText('No other related episodes for this rule.')).toBeInTheDocument();
+  });
+
+  it.each([
+    ['a heading when not compressed', false, 'H4'],
+    ['a heading when compressed', true, 'H4'],
+  ])('renders the subsection label as %s', (_name, compressed, tagName) => {
+    mockUseFetch.mockReturnValue({ data: [], isLoading: false } as any);
+
+    render(
+      <I18nProvider>
+        <RelatedEpisodesRuleSubsection
+          currentEpisodeId="ep-1"
+          currentGroupHash="gh-1"
+          {...mockRuleProps}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+          compressed={compressed}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Other groups for this rule').tagName).toBe(tagName);
   });
 });

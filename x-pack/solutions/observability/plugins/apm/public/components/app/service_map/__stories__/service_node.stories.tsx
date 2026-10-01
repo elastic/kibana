@@ -12,7 +12,7 @@ import { useEuiTheme } from '@elastic/eui';
 import type { ElasticAgentName, OpenTelemetryAgentName } from '@kbn/apm-types';
 import { ServiceNode } from '../../../shared/service_map/service_node';
 import type { ServiceNodeData } from '../../../../../common/service_map';
-import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
+import { ServiceMapHighlightProvider } from '../../../shared/service_map/service_map_search_context';
 import { ServiceMapAlertsNavigateProvider } from '../../../shared/service_map/service_map_alerts_navigate_context';
 import { WithSearchHighlight } from './search_highlight_helper';
 
@@ -31,7 +31,7 @@ const meta: Meta<typeof ServiceNode> = {
   decorators: [
     (Story) => (
       <ReactFlowProvider>
-        <ServiceMapSearchProvider>
+        <ServiceMapHighlightProvider>
           <ServiceMapAlertsNavigateProvider
             makeAlertsNavigateHandler={noopMakeAlertsNavigateHandler}
           >
@@ -39,7 +39,7 @@ const meta: Meta<typeof ServiceNode> = {
               <Story />
             </div>
           </ServiceMapAlertsNavigateProvider>
-        </ServiceMapSearchProvider>
+        </ServiceMapHighlightProvider>
       </ReactFlowProvider>
     ),
   ],

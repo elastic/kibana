@@ -86,6 +86,28 @@ describe('toolToLangchain', () => {
 
     expect(JSON.parse(results).results).toEqual([{ type: ToolResultType.other, data: 'foo' }]);
   });
+
+  it('uses buildContent to build the LLM-facing content when provided', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ hello: z.string() }),
+      execute: jest
+        .fn()
+        .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
+    });
+
+    const buildContent = jest.fn().mockReturnValue('custom-content');
+
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, buildContent });
+    const results = await langchainTool.invoke({ hello: 'world' });
+
+    expect(buildContent).toHaveBeenCalledWith({
+      results: [{ type: ToolResultType.other, data: 'foo' }],
+      toolId: 'toolA',
+      toolCallId: 'unknown',
+    });
+    expect(results).toEqual('custom-content');
+  });
 });
 
 describe('createToolIdMappings', () => {

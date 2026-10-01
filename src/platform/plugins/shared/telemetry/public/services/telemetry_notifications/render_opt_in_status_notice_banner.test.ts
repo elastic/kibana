@@ -43,7 +43,7 @@ describe('renderOptInStatusNoticeBanner', () => {
       telemetryService,
     });
 
-    expect(overlays.banners.add).toBeCalledTimes(1);
+    expect(overlays.banners.add).toHaveBeenCalledTimes(1);
 
     expect(returnedBannerId).toBe(bannerID);
     const bannerConfig = overlays.banners.add.mock.calls[0];

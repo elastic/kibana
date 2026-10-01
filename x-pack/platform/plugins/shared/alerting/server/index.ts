@@ -14,6 +14,8 @@ export type RulesClient = PublicMethodsOf<RulesClientClass>;
 
 export type {
   RuleType,
+  RuleTypeParamsAuthorizer,
+  RuleTypeParamsAuthorizerContext,
   ActionGroup,
   ActionGroupIdsOf,
   AlertingPlugin,
@@ -55,6 +57,16 @@ export type {
   GetRuleHistoryResult,
   RuleChangeTrackingDisabledError,
 } from './rules_client';
+export type {
+  BulkCreateRulesItem,
+  BulkCreateRulesParams,
+  BulkCreateRulesResult,
+} from './application/rule/methods/bulk_create';
+export type {
+  BulkUpdateRulesItem,
+  BulkUpdateRulesParams,
+  BulkUpdateRulesResult,
+} from './application/rule/methods/bulk_update';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';

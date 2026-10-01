@@ -75,6 +75,7 @@ components:
             parameters:
               oneOf:
                 - type: object
+                  title: kernel
                   description: Dump the entire kernel memory.
                   required:
                     - type
@@ -84,6 +85,17 @@ components:
                       enum:
                         - kernel
                 - type: object
+                  title: raw
+                  description: Dump the entire raw memory.
+                  required:
+                    - type
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - raw
+                - type: object
+                  title: Process PID
                   description: Dump the entire memory of a process using the PID.
                   required:
                     - type
@@ -96,6 +108,7 @@ components:
                     pid:
                       type: number
                 - type: object
+                  title: Process Entity ID
                   description: Dump the entire memory of a process using the entity ID.
                   required:
                     - type
@@ -107,4 +120,6 @@ components:
                         - process
                     entity_id:
                       type: string
+                      minLength: 1
+                      maxLength: 256
 

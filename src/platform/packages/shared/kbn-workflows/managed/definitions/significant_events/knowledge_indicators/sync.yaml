@@ -1,0 +1,77 @@
+# Knowledge Indicator (KI) sync (groundedness) sweep workflow.
+#
+# Runs on its own schedule, independent of the continuous-extraction toggle, and
+# reconciles every stream that has knowledge indicators:
+#   1. Fetches all streams with KIs from the _streams_with_indicators endpoint.
+#   2. For each stream, calls the per-stream _reconcile route (groundedness check,
+#      expiry-driven tombstoning, orphan Streams-owned rule cleanup).
+#
+# Per-stream failures do not abort the sweep (iteration-on-failure: continue),
+# and each _reconcile call retries transient failures on its own.
+#
+# This is a managed workflow installed by the significant_events plugin. It is
+# created disabled and enabled on demand by SyncWorkflowService.ensureEnabled,
+# bootstrapped from the feature-extraction path. Once enabled it keeps running on
+# its own schedule, independent of extraction.
+
+version: '1'
+name: 'KI Sync'
+enabled: false
+description: 'This workflow is used by the system and should not be modified.'
+tags:
+  - observability
+  - streams
+  - significant-events
+  - knowledge-indicators
+  - sync
+settings:
+  # Max duration of one sweep — independent of the schedule interval below.
+  timeout: '60m'
+  # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
+  concurrency:
+    key: significant-events-ki-sync
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: '24h'
+  - type: manual
+steps:
+  # Step 1: Fetch every stream that has knowledge indicators.
+  - name: get_streams
+    type: kibana.request
+    with:
+      method: GET
+      path: '/internal/streams/_knowledge_indicators/_streams_with_indicators'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: '5s'
+        strategy: exponential
+
+  # Step 2: Only proceed if there are streams to reconcile.
+  - name: has_candidates
+    type: if
+    condition: 'steps.get_streams.output.streams[0].streamName:*'
+    steps:
+      - name: reconcile_all
+        type: foreach
+        foreach: '${{ steps.get_streams.output.streams }}'
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: reconcile
+            type: kibana.request
+            with:
+              method: POST
+              path: '/internal/streams/{{ foreach.item.streamName }}/knowledge_indicators/_reconcile'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: '5s'
+                strategy: exponential

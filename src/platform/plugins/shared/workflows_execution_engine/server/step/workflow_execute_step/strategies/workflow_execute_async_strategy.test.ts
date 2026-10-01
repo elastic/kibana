@@ -82,6 +82,7 @@ describe('WorkflowExecuteAsyncStrategy', () => {
         id: 'child-workflow-id',
         name: 'Child Workflow',
         isTestRun: false,
+        isEphemeral: false,
       }),
       expect.objectContaining({
         spaceId: 'default',
@@ -93,6 +94,16 @@ describe('WorkflowExecuteAsyncStrategy', () => {
         parentStepId: 'async-step-1',
         parentDepth: 0,
       }),
+      mockRequest
+    );
+  });
+
+  it('forwards document version from repository-loaded workflow', async () => {
+    await strategy.execute(createMockWorkflow({ version: 5 }), {}, 'default', mockRequest, 0);
+
+    expect(mockEngine.executeWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'child-workflow-id', version: 5 }),
+      expect.any(Object),
       mockRequest
     );
   });
@@ -127,7 +138,7 @@ describe('WorkflowExecuteAsyncStrategy', () => {
     await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
     expect(mockEngine.executeWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ isTestRun: true }),
+      expect.objectContaining({ isTestRun: true, isEphemeral: false }),
       expect.any(Object),
       mockRequest
     );

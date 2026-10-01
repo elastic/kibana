@@ -9,7 +9,7 @@ metadata:
       title: Pipeline link
 spec:
   type: buildkite-pipeline
-  owner: 'group:appex-ai-infra'
+  owner: 'group:search-ml-ux'
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -19,7 +19,7 @@ spec:
       description: Runs the GenAI FTR tests daily
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#appex-ai-infra-alerts'
+        SLACK_NOTIFICATIONS_CHANNEL: '#search-ml-ux-alerts'
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main
@@ -27,6 +27,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/gen_ai_testing.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/gen_ai_testing.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -37,7 +42,7 @@ spec:
       teams:
         everyone:
           access_level: BUILD_AND_READ
-        appex-ai-infra:
+        search-ml-ux:
           access_level: MANAGE_BUILD_AND_READ
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ

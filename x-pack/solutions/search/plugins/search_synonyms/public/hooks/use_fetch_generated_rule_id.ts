@@ -18,7 +18,7 @@ export const useFetchGeneratedRuleId = (
   return useMutation(
     async ({ synonymsSetId }: { synonymsSetId: string }) => {
       return await http.post<{ id: string }>(
-        `/internal/search_synonyms/synonyms/${synonymsSetId}/generate`
+        `/internal/search_synonyms/synonyms/${encodeURIComponent(synonymsSetId)}/generate`
       );
     },
     {

@@ -6,15 +6,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiLoadingSpinner,
-  EuiPageTemplate,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
@@ -29,6 +24,7 @@ import { useDefaultModelSettings } from '../../hooks/use_default_model_settings'
 import { useDefaultModelValidation } from '../../hooks/use_default_model_validation';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useKibana } from '../../hooks/use_kibana';
+import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
 import { getModelStatus, isModelDeprecated } from '../../utils/eis_utils';
@@ -63,6 +59,7 @@ export const ModelSettings: React.FC = () => {
   const {
     services: { application, http },
   } = useKibana();
+  const { canManage } = useInferenceCapabilities();
   const usageTracker = useUsageTracker();
   const deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo> = useMemo(() => {
     if (connectorsLoading || !connectors) return new Map();
@@ -192,10 +189,33 @@ export const ModelSettings: React.FC = () => {
 
   const showFeatureSections = enableAi && featureSpecificModels;
 
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      ...(canManage
+        ? {
+            primaryActionItem: {
+              id: 'saveSettings',
+              label: i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
+                defaultMessage: 'Save settings',
+              }),
+              iconType: 'save' as const,
+              run: handleSave,
+              testId: 'save-settings-button',
+              disableButton: !isDirty || !defaultModelValidation.isValid,
+              isLoading: isFeatureSaving,
+            },
+          }
+        : {}),
+      items: [],
+    }),
+    [canManage, defaultModelValidation.isValid, handleSave, isDirty, isFeatureSaving]
+  );
+
   if (connectorsLoading || isLoading) {
     return (
       <EuiPageTemplate.Section
         paddingSize="none"
+        alignment="center"
         data-test-subj="modelSettingsContent"
         restrictWidth={true}
       >
@@ -210,40 +230,13 @@ export const ModelSettings: React.FC = () => {
 
   return (
     <>
-      <EuiPageTemplate.Header
-        data-test-subj="modelSettingsPageHeader"
-        pageTitle={i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
+      <AppHeader
+        title={i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
           defaultMessage: 'Feature settings',
         })}
-        bottomBorder
-        paddingSize="none"
-        restrictWidth={true}
-        rightSideItems={[
-          <EuiButton
-            fill
-            onClick={handleSave}
-            isLoading={isFeatureSaving}
-            isDisabled={!isDirty || !defaultModelValidation.isValid}
-            data-test-subj="save-settings-button"
-          >
-            {i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
-              defaultMessage: 'Save settings',
-            })}
-          </EuiButton>,
-          <EuiButtonEmpty
-            iconType="popout"
-            iconSide="right"
-            iconSize="s"
-            flush="both"
-            target="_blank"
-            data-test-subj="settings-api-documentation"
-            href={docLinks.featureSettings}
-          >
-            {i18n.translate('xpack.searchInferenceEndpoints.settings.documentationLabel', {
-              defaultMessage: 'Documentation',
-            })}
-          </EuiButtonEmpty>,
-        ]}
+        menu={menu}
+        docLink={docLinks.featureSettings}
+        spacing="bleed"
       />
       <EuiSpacer size="l" />
       <EuiPageTemplate.Section
@@ -253,58 +246,52 @@ export const ModelSettings: React.FC = () => {
       >
         {!hasAdvancedSettingsSavePermission && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               title={i18n.translate(
                 'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.title',
                 {
                   defaultMessage: 'Advanced Settings permission required',
                 }
               )}
-              color="warning"
-              iconType="lock"
               data-test-subj="noAdvancedSettingsPermissionCallout"
               announceOnMount={false}
-            >
-              <p data-test-subj="noAdvancedSettingsPermissionCalloutDescription">
-                {i18n.translate(
-                  'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.description',
-                  {
-                    defaultMessage:
-                      'Saving the default AI model setting requires the Advanced Settings: All privilege. Contact your administrator if you need to make changes.',
-                  }
-                )}
-              </p>
-            </EuiCallOut>
+              text={
+                <p data-test-subj="noAdvancedSettingsPermissionCalloutDescription">
+                  {i18n.translate(
+                    'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.description',
+                    {
+                      defaultMessage:
+                        'Saving the default AI model setting requires the Advanced Settings: All privilege. Contact your administrator if you need to make changes.',
+                    }
+                  )}
+                </p>
+              }
+            />
             <EuiSpacer size="l" />
           </>
         )}
         {showFeatureSections && invalidEndpointIds.size > 0 && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               title={i18n.translate(
                 'xpack.searchInferenceEndpoints.settings.invalidEndpoints.title',
                 {
                   defaultMessage: 'Some assigned inference endpoints are no longer available',
                 }
               )}
-              color="danger"
-              iconType="warning"
               data-test-subj="invalidEndpointsCallout"
               announceOnMount
-            >
-              <p>
-                {i18n.translate(
-                  'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
-                  {
-                    defaultMessage:
-                      'The following endpoints could not be found: {endpointList}. Features using these endpoints may not work as expected.',
-                    values: {
-                      endpointList: [...invalidEndpointIds].join(', '),
-                    },
-                  }
-                )}
-              </p>
-            </EuiCallOut>
+              text={i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
+                {
+                  defaultMessage:
+                    'The following endpoints could not be found: {endpointList}. Features using these endpoints may not work as expected.',
+                  values: {
+                    endpointList: [...invalidEndpointIds].join(', '),
+                  },
+                }
+              )}
+            />
             <EuiSpacer size="l" />
           </>
         )}
@@ -351,7 +338,7 @@ export const ModelSettings: React.FC = () => {
         <DefaultModelSection
           defaultModelSettings={defaultModelSettings}
           validation={defaultModelValidation}
-          disabled={!hasAdvancedSettingsSavePermission}
+          disabled={!canManage || !hasAdvancedSettingsSavePermission}
         />
         {showFeatureSections && (
           <>
@@ -399,6 +386,7 @@ export const ModelSettings: React.FC = () => {
                     isBeta={section.isBeta}
                     isTechPreview={section.isTechPreview}
                     globalDefaultId={defaultModelState.defaultModelId}
+                    canManage={canManage}
                   />
                   <EuiSpacer size="xl" />
                 </React.Fragment>

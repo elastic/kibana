@@ -127,6 +127,7 @@ describe('configure', () => {
           label: 'Email',
         },
       ],
+      extractObservables: true,
     };
 
     it('has expected attributes in request', () => {
@@ -173,6 +174,7 @@ describe('configure', () => {
           label: 'Email',
         },
       ],
+      extractObservables: true,
     };
 
     it('has expected attributes in request', () => {

@@ -9,7 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { AutomaticImportPluginRequestHandlerContext } from '../types';
-import { buildAutomaticImportResponse } from './utils';
+import { buildAutomaticImportResponse, isSecurityExceptionError } from './utils';
 import { withAvailability } from './with_availability';
 import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
 import {
@@ -19,23 +19,8 @@ import {
   ReanalyzeDataStreamRequestBody,
   UploadSamplesToDataStreamRequestBody,
   UpdateDataStreamPipelineRequestBody,
+  UPLOAD_SAMPLES_MAX_REQUEST_BYTES,
 } from '../../common';
-
-const isSecurityExceptionError = (err: unknown): boolean => {
-  if (!(err instanceof Error)) {
-    return false;
-  }
-
-  const elasticsearchError = err as Error & {
-    meta?: { body?: { error?: { type?: string } } };
-  };
-
-  return (
-    elasticsearchError.meta?.body?.error?.type === 'security_exception' ||
-    err.message.includes('security_exception') ||
-    err.message.includes('is unauthorized for user')
-  );
-};
 
 export const registerDataStreamRoutes = (
   router: IRouter<AutomaticImportPluginRequestHandlerContext>,
@@ -61,6 +46,7 @@ const uploadSamplesRoute = (
           requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
         },
       },
+      options: { body: { maxBytes: UPLOAD_SAMPLES_MAX_REQUEST_BYTES } },
     })
     .addVersion(
       {

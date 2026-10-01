@@ -10,12 +10,18 @@ import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 export class AlertDetailsPage {
   public readonly tracesInDiscoverAction: Locator;
   public readonly viewInApmAction: Locator;
+  public readonly anomalyCallout: Locator;
+  public readonly anomalySeverityBadge: Locator;
+  public readonly anomalyChartPanel: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.tracesInDiscoverAction = this.page.testSubj.locator(
       'apmAlertDetailsTracesOpenInDiscoverAction'
     );
     this.viewInApmAction = this.page.testSubj.locator('apmAlertDetailsOpenInApmAction');
+    this.anomalyCallout = this.page.testSubj.locator('apmAlertDetailsAnomalyCallout');
+    this.anomalySeverityBadge = this.page.testSubj.locator('apmAlertDetailsAnomalySeverityBadge');
+    this.anomalyChartPanel = this.page.testSubj.locator('apmAlertDetailsAnomalyChartPanel');
   }
 
   async goto(alertId: string) {
@@ -23,12 +29,20 @@ export class AlertDetailsPage {
   }
 
   getChartPanel(chartTitle: string): Locator {
-    return this.page.locator('.euiPanel').filter({ hasText: chartTitle });
+    return this.page
+      .locator('.euiPanel')
+      .filter({ has: this.page.getByRole('heading', { name: chartTitle, exact: true }) });
   }
 
   getOpenActionsButton(chartTitle: string): Locator {
     return this.getChartPanel(chartTitle).locator(
       '[data-test-subj="apmAlertDetailsOpenActionsDropdown"]'
+    );
+  }
+
+  getAnomalySeverityBadgeInPanel(chartTitle: string): Locator {
+    return this.getChartPanel(chartTitle).locator(
+      '[data-test-subj="apmAlertDetailsAnomalySeverityBadge"]'
     );
   }
 

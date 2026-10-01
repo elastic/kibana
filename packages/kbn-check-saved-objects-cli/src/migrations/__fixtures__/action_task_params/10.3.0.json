@@ -1,0 +1,27 @@
+{
+  "10.2.0": [
+    {
+      "actionId": "string",
+      "executionId": "string?",
+      "apiKey": "string?|null",
+      "params": "record?",
+      "consumer": "string?",
+      "source": "string?",
+      "relatedSavedObjects": "array?",
+      "apiKeyId": "string?"
+    }
+  ],
+  "10.3.0": [
+    {
+      "actionId": "string",
+      "executionId": "string?",
+      "apiKey": "string?|null",
+      "params": "record?",
+      "consumer": "string?",
+      "source": "string?",
+      "relatedSavedObjects": "array?",
+      "apiKeyId": "string?",
+      "uiamApiKeyExternal": "boolean?"
+    }
+  ]
+}

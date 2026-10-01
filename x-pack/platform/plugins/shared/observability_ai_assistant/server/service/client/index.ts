@@ -227,9 +227,11 @@ export class ObservabilityAIAssistantClient {
       const isConversationUpdate = persist && !!predefinedConversationId;
       const conversationId = persist ? predefinedConversationId || v4() : undefined;
       let resolveConversationRequest: (value: ConversationCreateRequest | undefined) => void;
+      let rejectConversationRequest: (err: Error) => void;
       const conversationRequestPromise = new Promise<ConversationCreateRequest | undefined>(
-        (resolve) => {
+        (resolve, reject) => {
           resolveConversationRequest = resolve;
+          rejectConversationRequest = reject;
         }
       );
 
@@ -484,7 +486,9 @@ export class ObservabilityAIAssistantClient {
       return {
         response$,
         getConversation: async () => {
-          const subscription = response$.subscribe();
+          const subscription = response$.subscribe({
+            error: (err) => rejectConversationRequest(err),
+          });
 
           try {
             const response = await conversationRequestPromise;

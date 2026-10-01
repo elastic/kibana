@@ -6,7 +6,7 @@
  */
 
 import { useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { OverviewView } from '../../../../../../state';
 import {

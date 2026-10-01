@@ -11,7 +11,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { esql } from '@elastic/esql';
-import type { StorageTransportOptions } from '../..';
+import type { StorageClientBulkRequest, StorageTransportOptions } from '../..';
 import { StorageIndexAdapter, type StorageSettings } from '../..';
 
 const createLoggerMock = (): jest.Mocked<Logger> => {
@@ -155,6 +155,51 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
+  it('forwards if_seq_no and if_primary_term for bulk index operations', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.bulk({
+      operations: [
+        {
+          index: {
+            _id: 'doc1',
+            if_seq_no: 7,
+            if_primary_term: 2,
+            document: { foo: 'bar' },
+          },
+        },
+      ],
+    });
+
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operations: [{ index: { _id: 'doc1', if_seq_no: 7, if_primary_term: 2 } }, { foo: 'bar' }],
+      })
+    );
+  });
+
+  it('rejects bulk index operations with only one OCC field set', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    expect(() =>
+      client.bulk({
+        operations: [
+          {
+            index: {
+              _id: 'doc1',
+              if_seq_no: 7,
+              document: { foo: 'bar' },
+            },
+          } as unknown as StorageClientBulkRequest<{ _id?: string }>['operations'][number],
+        ],
+      })
+    ).toThrow('Bulk index OCC requires both if_seq_no and if_primary_term');
+
+    expect(esClient.bulk).not.toHaveBeenCalled();
+  });
+
   it('forwards transport options to esClient.delete', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
@@ -194,6 +239,35 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
           }),
         }),
       })
+    );
+  });
+
+  it('forwards priority to the index template when set', async () => {
+    const adapter = new StorageIndexAdapter(
+      esClient,
+      loggerMock,
+      { ...storageSettings, priority: 600 },
+      { isServerless: true }
+    );
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ priority: 600 })
+    );
+  });
+
+  it('omits priority from the index template when unset', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: true,
+    });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.not.objectContaining({ priority: expect.anything() })
     );
   });
 

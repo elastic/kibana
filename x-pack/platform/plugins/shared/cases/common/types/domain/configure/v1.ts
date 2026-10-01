@@ -109,6 +109,10 @@ export const ConfigurationBasicWithoutOwnerSchema = z.object({
    * Observable types configured for the case
    */
   observableTypes: ObservableTypesConfigurationSchema,
+  /**
+   * Whether to extract observables from the case
+   */
+  extractObservables: z.boolean(),
 });
 
 export const CasesConfigureBasicSchema = ConfigurationBasicWithoutOwnerSchema.extend({

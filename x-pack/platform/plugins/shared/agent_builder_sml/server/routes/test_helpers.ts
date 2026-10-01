@@ -1,0 +1,57 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+
+export const createMockSmlService = () => ({
+  search: jest.fn(),
+  autocomplete: jest.fn(),
+  checkItemsAccess: jest.fn(),
+  indexAttachment: jest.fn(),
+  deleteAttachment: jest.fn(),
+  getDocuments: jest.fn(),
+  getTypeDefinition: jest.fn(),
+  listTypeDefinitions: jest.fn(),
+  getCrawler: jest.fn(),
+});
+
+const createMockUiSettingsClient = (enabled = true) => ({
+  get: jest.fn().mockImplementation(async (key: string) => {
+    if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) return enabled;
+    return undefined;
+  }),
+});
+
+/** Create a coreSetup mock with the spaces plugin returning the given spaceId. */
+export const createTestCoreSetup = (spaceId = 'test-space') => {
+  const coreSetup = coreMock.createSetup();
+  (coreSetup.getStartServices as jest.Mock).mockResolvedValue([
+    {},
+    { spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue(spaceId) } } },
+    {},
+  ]);
+  return coreSetup;
+};
+
+/** Create a coreSetup mock with no spaces plugin (triggers 'default' space fallback). */
+export const createTestCoreSetupNoSpaces = () => {
+  const coreSetup = coreMock.createSetup();
+  (coreSetup.getStartServices as jest.Mock).mockResolvedValue([{}, {}, {}]);
+  return coreSetup;
+};
+
+export const buildMockContext = (uiSettingsEnabled = true) => ({
+  core: Promise.resolve({
+    uiSettings: { client: createMockUiSettingsClient(uiSettingsEnabled) },
+    elasticsearch: { client: { asInternalUser: {}, asCurrentUser: {} } },
+    savedObjects: { client: {} },
+  }),
+});
+
+export { httpServerMock, httpServiceMock };

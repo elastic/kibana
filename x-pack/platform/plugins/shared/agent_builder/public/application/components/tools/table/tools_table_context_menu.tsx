@@ -10,6 +10,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -132,18 +133,21 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
   return (
     <EuiPopover
       id={`${tool.id}_context-menu`}
+      aria-label={labels.tools.toolContextMenuButtonLabel}
       panelPaddingSize="s"
       button={
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          onClick={() => setIsOpen((openState) => !openState)}
-          aria-label={labels.tools.toolContextMenuButtonLabel}
-          {...getEbtProps({
-            element: AGENT_BUILDER_UI_EBT.element.pageContent,
-            action: AGENT_BUILDER_UI_EBT.action.globalManagement.OPEN_CONTEXT_MENU,
-            detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
-          })}
-        />
+        <EuiToolTip content={labels.tools.toolContextMenuButtonLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            onClick={() => setIsOpen((openState) => !openState)}
+            aria-label={labels.tools.toolContextMenuButtonLabel}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.OPEN_CONTEXT_MENU,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+            })}
+          />
+        </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}

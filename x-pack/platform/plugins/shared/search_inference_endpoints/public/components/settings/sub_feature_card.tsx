@@ -58,6 +58,7 @@ interface SubFeatureCardProps {
   hasSavedObject: boolean;
   isFeatureDirty: boolean;
   globalDefaultId: string;
+  canManage?: boolean;
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -71,6 +72,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   hasSavedObject,
   isFeatureDirty,
   globalDefaultId,
+  canManage = true,
 }) => {
   const { data: connectors = [] } = useConnectors();
   const { features: registeredFeatures } = useRegisteredFeatures();
@@ -123,7 +125,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     !feature.maxNumberOfEndpoints || endpointIds.length < feature.maxNumberOfEndpoints;
 
   const showGlobalDefaultRow = !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL;
-  const { icon: globalDefaultIcon = 'compute', label: globalDefaultLabel = globalDefaultId } =
+  const { icon: globalDefaultIcon = 'processor', label: globalDefaultLabel = globalDefaultId } =
     endpointDisplayMap.get(globalDefaultId) ?? {};
   const globalDefaultDeprecationInfo =
     !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL
@@ -199,6 +201,9 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     setIsDisableModalOpen(false);
   }, [featureId, effectiveRecommendedEndpoints, onEndpointsChange]);
 
+  const showAddModelPopover = canManage && (!hasOverflow || isExpanded) && canAddMore;
+  const showCopyToButton = canManage && (!hasOverflow || isExpanded) && hasOtherSubFeatures;
+
   return (
     <>
       <EuiFlexGroup
@@ -252,6 +257,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             )}
             checked={useRecommendedDefaults}
             onChange={(e) => handleToggleRecommendedDefaults(e.target.checked)}
+            disabled={!canManage}
           />
         </EuiFlexItem>
 
@@ -313,7 +319,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                           hasInteractiveChildren
                         >
                           {(provided) => {
-                            const { icon = 'compute', label = endpointId } =
+                            const { icon = 'processor', label = endpointId } =
                               endpointDisplayMap.get(endpointId) ?? {};
                             const isInvalid = invalidEndpointIds.has(endpointId);
                             const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
@@ -324,19 +330,26 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                   data-test-subj={`endpoint-row-${endpointId}`}
                                 >
                                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                                    <EuiFlexItem grow={false}>
-                                      <EuiPanel
-                                        color="transparent"
-                                        paddingSize="none"
-                                        {...provided.dragHandleProps}
-                                        aria-label={i18n.translate(
-                                          'xpack.searchInferenceEndpoints.settings.dragHandle',
-                                          { defaultMessage: 'Drag to reorder' }
-                                        )}
-                                      >
-                                        <EuiIcon type="grab" size="s" color="subdued" aria-hidden />
-                                      </EuiPanel>
-                                    </EuiFlexItem>
+                                    {canManage && (
+                                      <EuiFlexItem grow={false}>
+                                        <EuiPanel
+                                          color="transparent"
+                                          paddingSize="none"
+                                          {...provided.dragHandleProps}
+                                          aria-label={i18n.translate(
+                                            'xpack.searchInferenceEndpoints.settings.dragHandle',
+                                            { defaultMessage: 'Drag to reorder' }
+                                          )}
+                                        >
+                                          <EuiIcon
+                                            type="dragVertical"
+                                            size="s"
+                                            color="subdued"
+                                            aria-hidden
+                                          />
+                                        </EuiPanel>
+                                      </EuiFlexItem>
+                                    )}
                                     <EuiFlexItem grow={false}>
                                       {isInvalid ? (
                                         <EuiIconTip
@@ -390,32 +403,34 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                         metadata={deprecationInfo.metadata}
                                       />
                                     )}
-                                    <EuiFlexItem grow={false}>
-                                      <EuiToolTip
-                                        content={i18n.translate(
-                                          'xpack.searchInferenceEndpoints.settings.removeModel',
-                                          {
-                                            defaultMessage: 'Remove model',
-                                          }
-                                        )}
-                                        disableScreenReaderOutput
-                                      >
-                                        <EuiButtonIcon
-                                          iconType="cross"
-                                          aria-label={i18n.translate(
+                                    {canManage && (
+                                      <EuiFlexItem grow={false}>
+                                        <EuiToolTip
+                                          content={i18n.translate(
                                             'xpack.searchInferenceEndpoints.settings.removeModel',
                                             {
                                               defaultMessage: 'Remove model',
                                             }
                                           )}
-                                          size="s"
-                                          color="text"
-                                          onClick={() => handleRemove(index)}
-                                          isDisabled={endpointIds.length <= 1}
-                                          data-test-subj={`remove-endpoint-${endpointId}`}
-                                        />
-                                      </EuiToolTip>
-                                    </EuiFlexItem>
+                                          disableScreenReaderOutput
+                                        >
+                                          <EuiButtonIcon
+                                            iconType="cross"
+                                            aria-label={i18n.translate(
+                                              'xpack.searchInferenceEndpoints.settings.removeModel',
+                                              {
+                                                defaultMessage: 'Remove model',
+                                              }
+                                            )}
+                                            size="s"
+                                            color="text"
+                                            onClick={() => handleRemove(index)}
+                                            isDisabled={endpointIds.length <= 1}
+                                            data-test-subj={`remove-endpoint-${endpointId}`}
+                                          />
+                                        </EuiToolTip>
+                                      </EuiFlexItem>
+                                    )}
                                   </EuiFlexGroup>
                                 </EuiSplitPanel.Inner>
                                 {index !== visibleEndpoints.length - 1 && (
@@ -439,7 +454,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                   {hasOverflow && !isExpanded && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         size="s"
                         onClick={() => setIsExpanded(true)}
                         data-test-subj={`show-more-${featureId}`}
@@ -452,7 +467,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   )}
-                  {(!hasOverflow || isExpanded) && canAddMore && (
+                  {showAddModelPopover && (
                     <EuiFlexItem grow={false}>
                       <AddModelPopover
                         existingEndpointIds={endpointIds}
@@ -462,7 +477,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                       />
                     </EuiFlexItem>
                   )}
-                  {(!hasOverflow || isExpanded) && hasOtherSubFeatures && (
+                  {showCopyToButton && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
                         iconType="copy"
@@ -618,7 +633,7 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
         />
       )}
       {endpointIds.map((endpointId, index) => {
-        const { icon = 'compute', label = endpointId } = endpointDisplayMap.get(endpointId) ?? {};
+        const { icon = 'processor', label = endpointId } = endpointDisplayMap.get(endpointId) ?? {};
         const isInvalid = invalidEndpointIds.has(endpointId);
         const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
         return (

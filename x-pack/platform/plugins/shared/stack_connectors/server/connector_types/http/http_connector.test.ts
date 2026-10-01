@@ -23,6 +23,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
+import { getOAuthPasswordAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_password_access_token';
 
 import type { HttpConnectorType, HttpConnectorTypeExecutorOptions } from './types';
 
@@ -81,6 +82,10 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
 
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
+}));
+
+jest.mock('@kbn/actions-plugin/server/lib/get_oauth_password_access_token', () => ({
+  getOAuthPasswordAccessToken: jest.fn(),
 }));
 
 const requestMock = utils.request as jest.Mock;
@@ -379,6 +384,72 @@ describe('config validation', () => {
   });
 
   describe('connector validation', () => {
+    test('returns error when OAuth2 password grant credentials are missing', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'https://token.example.com',
+      };
+
+      expect(() => {
+        validateConnector(connectorType, { config, secrets: emptySecrets });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled"`
+      );
+    });
+
+    test('returns error when OAuth2 password grant username is provided without password', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'https://token.example.com',
+      };
+
+      expect(() => {
+        validateConnector(connectorType, { config, secrets: { ...emptySecrets, user: 'bob' } });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled"`
+      );
+    });
+
+    test('returns error when OAuth2 password grant password is provided without username', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'https://token.example.com',
+      };
+
+      expect(() => {
+        validateConnector(connectorType, {
+          config,
+          secrets: { ...emptySecrets, password: 'supersecret' },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled"`
+      );
+    });
+
+    test('succeeds when OAuth2 password grant credentials are provided', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'https://token.example.com',
+      };
+      const secrets: ConnectorTypeSecretsType = {
+        ...emptySecrets,
+        user: 'bob',
+        password: 'supersecret',
+      };
+
+      expect(() => {
+        validateConnector(connectorType, { config, secrets });
+      }).not.toThrow();
+    });
+
     test('returns error when hasProxyAuth is true but proxyUrl is missing', () => {
       const config: ConnectorTypeConfigType = {
         ...emptyConfig,
@@ -554,6 +625,35 @@ describe('config validation', () => {
       );
     });
   });
+
+  describe('OAuth2 Password', () => {
+    test('throws if accessTokenUrl is missing', async () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'https://test.com',
+        authType: AuthType.OAuth2Password,
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating connector type config: error validation http action config: missing Access Token URL (accessTokenUrl) field"`
+      );
+    });
+
+    test('passes when accessTokenUrl is set', async () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'https://test.com',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'http://fake.test',
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).not.toThrow();
+    });
+  });
 });
 
 describe('params validation', () => {
@@ -617,6 +717,33 @@ describe('params validation', () => {
       query: {
         key1: 'value1',
         key2: 'value2',
+      },
+    };
+    expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
+      method: 'GET',
+      ...params,
+    });
+  });
+
+  test('params validation passes when query contains numbers and booleans', () => {
+    const params: Record<string, any> = {
+      query: {
+        limit: 100,
+        active: true,
+        flag: false,
+      },
+    };
+    expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
+      method: 'GET',
+      ...params,
+    });
+  });
+
+  test('params validation passes when query contains array values', () => {
+    const params: Record<string, any> = {
+      query: {
+        tag: ['security', 'critical'],
+        ids: [1, 2, 3],
       },
     };
     expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
@@ -887,7 +1014,7 @@ describe('execute()', () => {
       logger: mockedLogger,
       connectorUsageCollector,
     });
-    expect(mockedLogger.error).toBeCalledWith(
+    expect(mockedLogger.error).toHaveBeenCalledWith(
       'error on some-id http event: maxContentLength size of 1000000 exceeded'
     );
   });
@@ -1497,6 +1624,105 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0].url).toContain('key2=value2');
   });
 
+  test('execute preserves a query string embedded in path', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'GET',
+        path: '/api/users.info?user=U123',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toBe('https://abc.def/api/users.info?user=U123');
+  });
+
+  test('execute preserves query strings in both the base URL and path', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def?tenant=1',
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'GET',
+        path: '/api/users.info?user=U123',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toBe(
+      'https://abc.def/api/users.info?tenant=1&user=U123'
+    );
+  });
+
+  test('execute preserves the raw encoding of a query string embedded in path', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'GET',
+        path: '/api/search?q=a%20b&flag&symbol=~',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toBe(
+      'https://abc.def/api/search?q=a%20b&flag&symbol=~'
+    );
+  });
+
+  test('execute combines inline, explicit, and secret query parameters', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        ...emptySecrets,
+        secretQueryParams: { apiKey: 'secret-api-key' },
+      },
+      params: {
+        method: 'GET',
+        path: '/api/search?q=a%20b&flag&symbol=~',
+        query: { page: '1' },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toBe(
+      'https://abc.def/api/search?q=a%20b&flag&symbol=~&apiKey=secret-api-key&page=1'
+    );
+  });
+
   test('execute injects secretQueryParams from connector secrets into URL', async () => {
     const config: ConnectorTypeConfigType = {
       ...emptyConfig,
@@ -1658,6 +1884,83 @@ describe('execute()', () => {
 
     const resultUrl = requestMock.mock.calls[0][0].url;
     expect(resultUrl).toContain('foo=bar');
+  });
+
+  test('execute appends numeric and boolean query params as strings', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://example.com/api',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: emptySecrets,
+      params: {
+        method: 'GET',
+        query: { limit: 100, active: true },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const resultUrl = requestMock.mock.calls[0][0].url;
+    expect(resultUrl).toContain('limit=100');
+    expect(resultUrl).toContain('active=true');
+  });
+
+  test('execute repeats key for array query params', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://example.com/api',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: emptySecrets,
+      params: {
+        method: 'GET',
+        query: { tag: ['security', 'critical'] },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const resultUrl = requestMock.mock.calls[0][0].url;
+    expect(resultUrl).toContain('tag=security');
+    expect(resultUrl).toContain('tag=critical');
+  });
+
+  test('execute appends mixed scalar and array query params', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://example.com/api',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: emptySecrets,
+      params: {
+        method: 'GET',
+        query: { status: 'active', limit: 50, tag: ['a', 'b'] },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    const resultUrl = requestMock.mock.calls[0][0].url;
+    expect(resultUrl).toContain('status=active');
+    expect(resultUrl).toContain('limit=50');
+    expect(resultUrl).toContain('tag=a');
+    expect(resultUrl).toContain('tag=b');
   });
 
   test('execute uses params.url when config.url is not provided', async () => {
@@ -2514,6 +2817,70 @@ describe('execute()', () => {
       const headers = (utils.request as jest.Mock).mock.calls[0][0].headers;
       expect(headers.Authorization).toBe(accessToken);
       expect(headers['X-Custom']).toBe('value');
+    });
+  });
+
+  describe('oauth2 password grant', () => {
+    it('returns error result if access token retrieval fails', async () => {
+      (getOAuthPasswordAccessToken as jest.Mock).mockResolvedValue(undefined);
+
+      const execOptions: HttpConnectorTypeExecutorOptions = {
+        actionId: 'test-id',
+        config: {
+          ...emptyConfig,
+          url: 'https://test.com',
+          authType: AuthType.OAuth2Password,
+          accessTokenUrl: 'https://token.url',
+        },
+        params: {
+          method: 'POST',
+          path: '/endpoint',
+          body: '{}',
+        },
+        secrets: { ...emptySecrets, user: 'test-user', password: 'test-password' },
+        configurationUtilities,
+        logger: mockedLogger,
+        services,
+        connectorUsageCollector,
+      };
+
+      const result = await connectorType.executor?.(execOptions);
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('Unable to retrieve new access token');
+    });
+
+    it('adds access token to headers', async () => {
+      const accessToken = 'Bearer my-access-token';
+      (getOAuthPasswordAccessToken as jest.Mock).mockResolvedValueOnce(accessToken);
+      createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
+
+      const execOptions: HttpConnectorTypeExecutorOptions = {
+        actionId: 'test-id',
+        config: {
+          ...emptyConfig,
+          url: 'https://test.com',
+          authType: AuthType.OAuth2Password,
+          accessTokenUrl: 'https://token.url',
+        },
+        params: {
+          method: 'POST',
+          path: '/endpoint',
+          body: '{}',
+        },
+        secrets: { ...emptySecrets, user: 'test-user', password: 'test-password' },
+        configurationUtilities,
+        logger: mockedLogger,
+        services,
+        connectorUsageCollector,
+      };
+
+      await connectorType.executor?.(execOptions);
+
+      expect(getOAuthPasswordAccessToken).toHaveBeenCalledWith(
+        expect.objectContaining({ username: 'test-user', password: 'test-password' })
+      );
+      expect((utils.request as jest.Mock).mock.calls[0][0].headers.Authorization).toBe(accessToken);
     });
   });
 });

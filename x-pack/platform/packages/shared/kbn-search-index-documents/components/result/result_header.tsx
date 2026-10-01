@@ -14,11 +14,10 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiPopoverFooter,
-  EuiPopoverTitle,
   EuiTextColor,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -50,23 +49,22 @@ const Definition: React.FC<TermDef> = ({ label }) => (
 const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
-  const popoverTitleId = useGeneratedHtmlId();
+  const metaDataLabel = i18n.translate(
+    'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
+    { defaultMessage: 'Document metadata for {id}', values: { id } }
+  );
 
   const metaDataIcon = (
-    <EuiButtonIcon
-      display="empty"
-      size="xs"
-      iconType="info"
-      color="primary"
-      onClick={() => setPopoverIsOpen(!popoverIsOpen)}
-      aria-label={i18n.translate(
-        'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
-        {
-          defaultMessage: 'Metadata for document: {id}',
-          values: { id },
-        }
-      )}
-    />
+    <EuiToolTip content={metaDataLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        display="empty"
+        size="xs"
+        iconType="info"
+        color="primary"
+        onClick={() => setPopoverIsOpen(!popoverIsOpen)}
+        aria-label={metaDataLabel}
+      />
+    </EuiToolTip>
   );
 
   return (
@@ -74,13 +72,8 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
       button={metaDataIcon}
       isOpen={popoverIsOpen}
       closePopover={closePopover}
-      aria-labelledby={popoverTitleId}
+      aria-label={metaDataLabel}
     >
-      <EuiPopoverTitle id={popoverTitleId}>
-        {i18n.translate('xpack.searchIndexDocuments.result.header.metadata.title', {
-          defaultMessage: 'Document metadata',
-        })}
-      </EuiPopoverTitle>
       <EuiFlexGroup gutterSize="s" direction="column" style={{ width: '20rem' }}>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
@@ -108,7 +101,7 @@ export const ResultHeader: React.FC<Props> = ({ title, metaData }) => {
     <Styles.ResultHeader euiTheme={euiTheme}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="xs">
+          <EuiTitle size="xxs">
             <h4>{title}</h4>
           </EuiTitle>
         </EuiFlexItem>

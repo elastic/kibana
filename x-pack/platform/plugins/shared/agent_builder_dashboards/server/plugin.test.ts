@@ -7,7 +7,6 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { AgentBuilderDashboardsPlugin } from './plugin';
-import { dashboardManagementSkill } from './skills/dashboard_management_skill';
 
 describe('AgentBuilderDashboardsPlugin', () => {
   it('registers the dashboard attachment type, skill, and SML type', () => {
@@ -24,14 +23,17 @@ describe('AgentBuilderDashboardsPlugin', () => {
           attachments: { registerType: registerAttachmentType },
           skills: { register: registerSkill },
         },
-        agentContextLayer: {
+        agentBuilderSml: {
           registerType: registerSmlType,
         },
       } as never
     );
 
     expect(registerAttachmentType).toHaveBeenCalledTimes(1);
-    expect(registerSkill).toHaveBeenCalledWith(dashboardManagementSkill);
+    expect(registerSkill).toHaveBeenCalledTimes(1);
+    expect(registerSkill).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'dashboard-management' })
+    );
     expect(registerSmlType).toHaveBeenCalledTimes(1);
     expect(registerSmlType).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboard' }));
   });

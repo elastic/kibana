@@ -11,6 +11,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import React, { useState } from 'react';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -152,6 +153,7 @@ const dataViewsMock = {
   getIndices: jest.fn().mockResolvedValue([]),
 };
 const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
+const notificationsMock = notificationServiceMock.createStartContract();
 
 (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
   Promise.resolve(searchSourceMock)
@@ -236,6 +238,7 @@ const setup = (
         http: httpMock,
         unifiedSearch: unifiedSearchMock,
         dataViewEditor: dataViewEditorMock,
+        notifications: notificationsMock,
       }}
     >
       <Wrapper ruleParams={ruleParams} metadata={metadata} />

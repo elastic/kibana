@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 export interface PartitionFieldsRequiredCalloutProps {
   fieldNamesWithEmptyValues: string[];
@@ -22,7 +23,7 @@ export const PartitionFieldsRequiredCallout: React.FC<PartitionFieldsRequiredCal
 
   return (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
         announceOnMount
         title={
           <FormattedMessage
@@ -35,7 +36,6 @@ export const PartitionFieldsRequiredCallout: React.FC<PartitionFieldsRequiredCal
             }}
           />
         }
-        iconType="question"
         size="s"
       />
       <EuiSpacer size="m" />

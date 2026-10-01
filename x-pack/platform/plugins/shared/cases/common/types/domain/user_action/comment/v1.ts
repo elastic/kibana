@@ -10,7 +10,7 @@ import { UserActionTypes } from '../action/v1';
 import {
   AttachmentRequestSchemaV2,
   AttachmentRequestWithoutRefsSchemaV2,
-} from '../../../api/attachment/v2';
+} from '../../../api/attachment/v2_union';
 
 export const CommentUserActionPayloadSchema = z.object({ comment: AttachmentRequestSchemaV2 });
 

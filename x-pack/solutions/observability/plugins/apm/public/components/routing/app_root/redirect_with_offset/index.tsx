@@ -24,14 +24,19 @@ export function RedirectWithOffset({ children }: { children: React.ReactElement 
   const matchesRoute = isRouteWithComparison({ apmRouter, location });
   const query = qs.parse(location.search);
 
-  // Redirect when 'comparisonType' is set as we now use offset instead
-  // or when 'comparisonEnabled' is not set as it's now required
-  if (matchesRoute && ('comparisonType' in query || !('comparisonEnabled' in query))) {
+  // 'comparisonEnabled' is a required boolean; it's invalid when absent or not
+  // 'true'/'false' (e.g. a bare `?comparisonEnabled` key parses as null).
+  const isComparisonEnabledValid =
+    query.comparisonEnabled === 'true' || query.comparisonEnabled === 'false';
+
+  // Redirect to use offset instead of 'comparisonType', or to set a valid 'comparisonEnabled'.
+  if (matchesRoute && ('comparisonType' in query || !isComparisonEnabledValid)) {
     const { comparisonType, comparisonEnabled: urlComparisonEnabled, ...queryRest } = query;
 
     const comparisonEnabled = getComparisonEnabled({
       core,
-      urlComparisonEnabled: urlComparisonEnabled
+      // Only honor a valid URL value; otherwise use the advanced setting default.
+      urlComparisonEnabled: isComparisonEnabledValid
         ? toBoolean(urlComparisonEnabled as string)
         : undefined,
     }).toString();

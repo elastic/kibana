@@ -7,4 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const WORKPLACE_AI_PROJECT_SETTINGS = [];
+import {
+  ALERTING_V2_ENABLED_SETTING_ID,
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
+} from '@kbn/management-settings-ids';
+
+export const WORKPLACE_AI_PROJECT_SETTINGS = [
+  ALERTING_V2_ENABLED_SETTING_ID,
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
+];

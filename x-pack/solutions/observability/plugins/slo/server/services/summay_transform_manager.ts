@@ -20,7 +20,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
     private generator: SummaryTransformGenerator,
     private scopedClusterClient: IScopedClusterClient,
     private logger: Logger,
-    private abortController: AbortController = new AbortController()
+    private signal: AbortSignal = new AbortController().signal
   ) {}
 
   async install(slo: SLODefinition): Promise<TransformId> {
@@ -29,7 +29,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(transformParams, {
-            signal: this.abortController.signal,
+            signal: this.signal,
           }),
         {
           logger: this.logger,
@@ -57,7 +57,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.previewTransform(
             { transform_id: transformId },
-            { signal: this.abortController.signal }
+            { signal: this.signal }
           ),
         { logger: this.logger }
       );
@@ -73,7 +73,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.startTransform(
             { transform_id: transformId },
-            { ignore: [409], signal: this.abortController.signal }
+            { ignore: [409], signal: this.signal }
           ),
         {
           logger: this.logger,
@@ -91,7 +91,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.stopTransform(
             { transform_id: transformId, wait_for_completion: true, force: true },
-            { ignore: [404], signal: this.abortController.signal }
+            { ignore: [404], signal: this.signal }
           ),
         { logger: this.logger }
       );
@@ -107,7 +107,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform(
             { transform_id: transformId, force: true },
-            { ignore: [404], signal: this.abortController.signal }
+            { ignore: [404], signal: this.signal }
           ),
         { logger: this.logger }
       );
@@ -123,7 +123,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.getTransform(
             { transform_id: transformId },
-            { signal: this.abortController.signal }
+            { signal: this.signal }
           ),
         { logger: this.logger }
       );

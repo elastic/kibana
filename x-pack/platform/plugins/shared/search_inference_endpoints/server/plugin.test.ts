@@ -7,9 +7,14 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import { SearchInferenceEndpointsPlugin } from './plugin';
 import {
   ELASTIC_INFERENCE_SERVICE_APP_ID,
@@ -82,14 +87,16 @@ describe('SearchInferenceEndpointsPlugin', () => {
       });
     });
 
-    it('registers feature with read privilege disabled', () => {
+    it('registers feature with read privilege enabled', () => {
       plugin.setup(coreSetup, { features });
 
       const feature = features.registerKibanaFeature.mock.calls[0][0];
 
       expect(feature.privileges?.read).toMatchObject({
-        disabled: true,
+        savedObject: { all: [], read: ['inference-settings'] },
+        ui: ['show'],
       });
+      expect(feature.privileges?.read).not.toHaveProperty('disabled');
     });
   });
 
@@ -111,13 +118,93 @@ describe('SearchInferenceEndpointsPlugin', () => {
       });
     });
 
-    it('endpoints.getForFeature reads inference settings with getScopedClient', async () => {
+    it('endpoints.getForFeature reads inference settings with the internal client', async () => {
       const request = httpServerMock.createKibanaRequest();
       await startContract.endpoints.getForFeature('any_feature', request);
 
-      expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
+      expect(coreStart.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
         includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
       });
+    });
+
+    it('scopes the internal settings client to the namespace of the request', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const scopedClient = savedObjectsClientMock.create();
+      scopedClient.getCurrentNamespace.mockReturnValue('applications');
+      coreStart.savedObjects.getScopedClient.mockReturnValue(scopedClient);
+
+      const internalClient = savedObjectsClientMock.create();
+      const spaceScopedClient = savedObjectsClientMock.create();
+      internalClient.asScopedToNamespace.mockReturnValue(spaceScopedClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
+
+      await startContract.endpoints.getForFeature('any_feature', request);
+
+      expect(internalClient.asScopedToNamespace).toHaveBeenCalledWith('applications');
+      expect(spaceScopedClient.get).toHaveBeenCalledWith(INFERENCE_SETTINGS_SO_TYPE, 'default');
+      expect(internalClient.get).not.toHaveBeenCalled();
+    });
+
+    it('does not scope the internal settings client when the request is in the default space', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const internalClient = savedObjectsClientMock.create();
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
+
+      await startContract.endpoints.getForFeature('any_feature', request);
+
+      expect(internalClient.asScopedToNamespace).not.toHaveBeenCalled();
+      expect(internalClient.get).toHaveBeenCalledWith(INFERENCE_SETTINGS_SO_TYPE, 'default');
+    });
+
+    it('applies the admin-configured model list to users who cannot read the settings saved object', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const scopedClient = savedObjectsClientMock.create();
+      scopedClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.decorateForbiddenError(
+          new Error(`Unable to get ${INFERENCE_SETTINGS_SO_TYPE}`)
+        )
+      );
+      coreStart.savedObjects.getScopedClient.mockReturnValue(scopedClient);
+
+      const internalClient = savedObjectsClientMock.create();
+      internalClient.get.mockResolvedValue({
+        id: 'default',
+        type: INFERENCE_SETTINGS_SO_TYPE,
+        references: [],
+        attributes: { features: [{ feature_id: 'any_feature', endpoints: [{ id: 'allowed' }] }] },
+      });
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
+
+      const createConnector = (connectorId: string) => ({
+        connectorId,
+        name: connectorId,
+        type: '.gen-ai',
+        config: {},
+        capabilities: {},
+        isPreconfigured: false,
+        isInferenceEndpoint: false,
+      });
+      const inference = inferenceMock.createStartContract();
+      inference.getConnectorList.mockResolvedValue([
+        createConnector('allowed'),
+        createConnector('hidden'),
+      ] as any);
+      inference.getConnectorById.mockImplementation(
+        async (id: string) => createConnector(id) as any
+      );
+
+      const contract = plugin.start(coreStart, { actions: actionsMock.createStart(), inference });
+      contract.features.register({
+        featureId: 'any_feature',
+        featureName: 'Any feature',
+        featureDescription: 'Any feature',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+      const result = await contract.endpoints.getForFeature('any_feature', request);
+
+      expect(result.soEntryFound).toBe(true);
+      expect(result.endpoints.map((e) => e.connectorId)).toEqual(['allowed']);
     });
 
     it('creates a separate scoped SO client per request, ensuring space isolation', async () => {
@@ -132,6 +219,88 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
       expect(requestsUsed).toContain(requestA);
       expect(requestsUsed).toContain(requestB);
+    });
+
+    describe('getForFeature with onlyReturnConfigured', () => {
+      it('returns empty list when no SO entry and no recommended endpoints', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const result = await startContract.endpoints.getForFeature('any_feature', request, {
+          onlyReturnConfigured: true,
+        });
+        expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+      });
+
+      it('enforces defaultConnectorOnly policy: returns only the admin default connector', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const defaultConnector = {
+          connectorId: 'admin-default',
+          name: 'admin-default',
+          type: '.gen-ai',
+          config: {},
+          capabilities: {},
+          isPreconfigured: false,
+          isInferenceEndpoint: false,
+        };
+
+        // Configure uiSettings to indicate defaultConnectorOnly is enabled
+        const uiSettingsScoped = {
+          get: jest.fn().mockImplementation((key: string) => {
+            if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) return true;
+            if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return 'admin-default';
+            return undefined;
+          }),
+        };
+        coreStart.uiSettings.asScopedToClient.mockReturnValue(uiSettingsScoped as any);
+
+        const inference = inferenceMock.createStartContract();
+        inference.getConnectorList.mockResolvedValue([]);
+        inference.getConnectorById.mockResolvedValue(defaultConnector as any);
+
+        const contractWithDefaultOnly = plugin.start(coreStart, {
+          actions: actionsMock.createStart(),
+          inference,
+        });
+
+        const result = await contractWithDefaultOnly.endpoints.getForFeature(
+          'any_feature',
+          request,
+          { onlyReturnConfigured: true }
+        );
+        expect(result).toEqual({
+          endpoints: [defaultConnector],
+          warnings: [],
+          soEntryFound: false,
+        });
+      });
+
+      it('returns empty list when defaultConnectorOnly is set but no default connector is configured', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        const uiSettingsScoped = {
+          get: jest.fn().mockImplementation((key: string) => {
+            if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) return true;
+            if (key === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) return 'NO_DEFAULT_CONNECTOR';
+            return undefined;
+          }),
+        };
+        coreStart.uiSettings.asScopedToClient.mockReturnValue(uiSettingsScoped as any);
+
+        const inference = inferenceMock.createStartContract();
+        inference.getConnectorList.mockResolvedValue([]);
+        inference.getConnectorById.mockRejectedValue(new Error('not found'));
+
+        const contractWithDefaultOnly = plugin.start(coreStart, {
+          actions: actionsMock.createStart(),
+          inference,
+        });
+
+        const result = await contractWithDefaultOnly.endpoints.getForFeature(
+          'any_feature',
+          request,
+          { onlyReturnConfigured: true }
+        );
+        expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+      });
     });
   });
 });

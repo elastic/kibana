@@ -82,6 +82,13 @@ export interface CloudPrivilegedUrls {
    * or if the user does not have the `manage_security` cluster privilege.
    */
   usersAndRolesUrl?: string;
+  /**
+   * The full URL to the serverless project page on Elastic Cloud with the Search Power editor expanded.
+   * Undefined if not running in Serverless, or if the user does not have one of the `superuser`, `admin` or `developer` roles.
+   *
+   * @example `{deploymentUrl}?tab=settings&edit=search_power`
+   */
+  searchPowerUrl?: string;
 }
 
 export type CloudUrls = CloudBasicUrls & CloudPrivilegedUrls;
@@ -187,6 +194,11 @@ export interface CloudSetup extends CloudBasicUrls {
    */
   csp?: string;
   /**
+   * The cloud region identifier (e.g., `us-east-1`, `europe-west1`, `eastus2`).
+   * Provider-specific region name without the CSP prefix.
+   */
+  region?: string;
+  /**
    * Method to retrieve privileged URLs for the Cloud plugin.
    */
   getPrivilegedUrls: () => Promise<CloudPrivilegedUrls>;
@@ -212,7 +224,8 @@ export interface CloudSetup extends CloudBasicUrls {
   isCloudEnabled: boolean;
   /**
    * `true` when running on ECE (Elastic Cloud Enterprise).
-   * `false` or `undefined` on ESS or self-managed.
+   * When `isSaasContainer` is missing, cloud-enabled non-serverless deployments are assumed to
+   * be ECE. Self-managed and serverless deployments remain `undefined` unless explicitly set.
    */
   isEce?: boolean;
   /**

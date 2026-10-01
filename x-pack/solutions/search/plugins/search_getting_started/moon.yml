@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-getting-started'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/search-getting-started'
   description: Moon project for @kbn/search-getting-started
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/solutions/search/plugins/search_getting_started
 dependsOn:
   - '@kbn/core'
@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/scout-search'
   - '@kbn/search-agent'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/custom-icons'
   - '@kbn/agent-builder-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/core-spaces-common'

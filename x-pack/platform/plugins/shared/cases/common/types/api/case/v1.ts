@@ -19,10 +19,13 @@ import {
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_DELETE_IDS_LENGTH,
   MAX_DESCRIPTION_LENGTH,
+  MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTERS,
   MAX_LENGTH_PER_TAG,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
   MAX_TAGS_PER_CASE,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 import {
@@ -54,6 +57,21 @@ import {
   CaseCustomFieldTextWithValidationValueSchema,
   CaseCustomFieldNumberWithValidationValueSchema,
 } from '../custom_field/v1';
+
+/**
+ * Template reference accepted on case CREATION. Unlike the stored/domain `CaseTemplate` (and the
+ * PATCH request, where switching templates is an explicit versioned action), `version` may be
+ * omitted here: the server resolves the template's latest version and pins it on the case.
+ * `version` must be a positive integer (matches the `integer, minimum: 1` OpenAPI contract).
+ */
+export const CaseRequestTemplateSchema = z.object({
+  id: z.string().max(MAX_TITLE_LENGTH),
+  version: z
+    .number()
+    .int({ message: 'The template version must be a positive integer.' })
+    .min(1, { message: 'The template version must be a positive integer.' })
+    .optional(),
+});
 
 const CaseCustomFieldTextWithValidationSchema = z.object({
   key: z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
@@ -225,7 +243,7 @@ export const CasePostRequestSchema = z.object({
    * The list of custom field values of the case.
    */
   customFields: CaseRequestCustomFieldsSchema.optional(),
-  template: CaseTemplateSchema.nullable().optional(),
+  template: CaseRequestTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z
     .record(z.string().max(1000), z.string().max(MAX_DESCRIPTION_LENGTH))
     .optional(),
@@ -395,8 +413,16 @@ const CasesSearchRequestSearchFieldsValues = [
 export const CasesSearchRequestSearchFieldsSchema = z.enum(CasesSearchRequestSearchFieldsValues);
 
 const ExtendedFieldFilterSchema = z.object({
-  label: z.string().max(MAX_TITLE_LENGTH),
-  value: z.string().max(MAX_DESCRIPTION_LENGTH),
+  label: limitedStringSchema({
+    fieldName: 'extendedFieldFilters.label',
+    min: 1,
+    max: MAX_TEMPLATE_DEFINITION_LENGTH,
+  }),
+  value: limitedStringSchema({
+    fieldName: 'extendedFieldFilters.value',
+    min: 1,
+    max: MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  }),
 });
 
 export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend({
@@ -417,8 +443,14 @@ export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend(
     .optional(),
   /**
    * Extended field filters parsed from label:value syntax in the search bar.
+   * Same-label values are OR'd; distinct labels are AND'd.
    */
-  extendedFieldFilters: z.array(ExtendedFieldFilterSchema).optional(),
+  extendedFieldFilters: limitedArraySchema({
+    codec: ExtendedFieldFilterSchema,
+    fieldName: 'extendedFieldFilters',
+    min: 0,
+    max: MAX_EXTENDED_FIELD_FILTERS,
+  }).optional(),
 });
 
 export const CasesFindRequestWithCustomFieldsSchema = CasesFindRequestSchema.extend({
@@ -438,6 +470,20 @@ export const CasesFindResponseSchema = CasesStatusResponseSchema.extend({
   page: z.number(),
   per_page: z.number(),
   total: z.number(),
+});
+
+/**
+ * Response of the internal `_search` API. A superset of the public `_find` response: it adds
+ * `mttr` so the (internal-only) cases list metrics bar can reflect the same query as the table.
+ * `mttr` deliberately lives here and NOT on `CasesFindResponseSchema` so the public `_find`
+ * contract (and its generated OpenAPI) never advertises a field the public API does not return.
+ */
+export const CasesSearchResponseSchema = CasesFindResponseSchema.extend({
+  /**
+   * The average resolve time in seconds of the cases matching the search, ignoring the
+   * status filter (like the status counts). Null when no matching case has been closed.
+   */
+  mttr: z.number().nullable().optional(),
 });
 
 export const CasesSimilarResponseSchema = z.object({
@@ -596,6 +642,7 @@ export type CasesDeleteRequest = z.infer<typeof CasesDeleteRequestSchema>;
 export type CasesByAlertIDRequest = z.infer<typeof CasesByAlertIDRequestSchema>;
 export type CasesFindRequest = z.infer<typeof CasesFindRequestSchema>;
 export type CasesFindResponse = z.infer<typeof CasesFindResponseSchema>;
+export type CasesSearchResponse = z.infer<typeof CasesSearchResponseSchema>;
 export type CasePatchRequest = z.infer<typeof CasePatchRequestSchema>;
 export type CasesPatchRequest = z.infer<typeof CasesPatchRequestSchema>;
 export type UpdateSummary = z.infer<typeof UpdateSummarySchema>;

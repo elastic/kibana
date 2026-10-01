@@ -12,15 +12,20 @@ import { SecurityPageName } from '../../../../../common';
 export const getNavCategories = (
   chatExperience: AIChatExperience,
   enableAlertsAndAttacksAlignment?: boolean,
-  isNewEAHomePageEnabled?: boolean,
-  securityClassicNavExternalLinks?: boolean
+  isAgentBuilderNavAtTop?: boolean
 ): SeparatorLinkCategory[] => {
   const categories: SeparatorLinkCategory[] = [
     {
       type: LinkCategoryType.separator,
-      linkIds: securityClassicNavExternalLinks
-        ? [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards]
-        : [SecurityPageName.dashboards],
+      linkIds:
+        // Agent builder for AI agent chat and at the top
+        chatExperience === AIChatExperience.Agent && isAgentBuilderNavAtTop
+          ? [
+              SecurityPageName.externalLinkAgentBuilder,
+              SecurityPageName.externalLinkDiscover,
+              SecurityPageName.dashboards,
+            ]
+          : [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards],
     },
     {
       type: LinkCategoryType.separator,
@@ -29,15 +34,11 @@ export const getNavCategories = (
         enableAlertsAndAttacksAlignment
           ? SecurityPageName.alertDetections
           : SecurityPageName.alerts,
-        ...(securityClassicNavExternalLinks
-          ? [
-              // Agent builder for AI agent chat and not classic AI experience
-              ...(chatExperience === AIChatExperience.Agent
-                ? [SecurityPageName.externalLinkAgentBuilder]
-                : []),
-              SecurityPageName.externalLinkWorkflows,
-            ]
+        // Agent builder for AI agent chat and not classic AI experience
+        ...(chatExperience === AIChatExperience.Agent && !isAgentBuilderNavAtTop
+          ? [SecurityPageName.externalLinkAgentBuilder]
           : []),
+        SecurityPageName.externalLinkWorkflows,
         SecurityPageName.attackDiscovery,
         SecurityPageName.cloudSecurityPostureFindings,
         SecurityPageName.case,
@@ -46,9 +47,7 @@ export const getNavCategories = (
     {
       type: LinkCategoryType.separator,
       linkIds: [
-        isNewEAHomePageEnabled
-          ? SecurityPageName.entityAnalyticsHomePage
-          : SecurityPageName.entityAnalyticsLanding,
+        SecurityPageName.entityAnalyticsHomePage,
         SecurityPageName.exploreLanding,
         SecurityPageName.timelines,
         SecurityPageName.threatIntelligence,

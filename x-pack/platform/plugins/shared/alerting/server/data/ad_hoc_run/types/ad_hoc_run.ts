@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RawRule } from '../../../types';
 import type { RuleDomain } from '../../../application/rule/types';
 import type { AdHocRunStatus, BackfillInitiator } from '../../../../common/constants';
@@ -50,6 +51,16 @@ type AdHocRunRule = Omit<AdHocRunSORule, 'actions'> & Pick<RuleDomain, 'id' | 'a
 export interface AdHocRunSO extends Record<string, unknown> {
   apiKeyId: string;
   apiKeyToUse: string;
+  // UIAM API key snapshotted from the rule when the backfill was scheduled.
+  // Optional because legacy ad hoc runs and ES-only deployments don't have one.
+  uiamApiKey?: string;
+  // Id of `uiamApiKey`, stored unencrypted so the API key invalidation task can see that this
+  // ad hoc run still holds the key. Absent for user-created Cloud keys, which carry no id and
+  // are never invalidated by alerting.
+  uiamApiKeyId?: string;
+  // UIAM's verdict on whether `uiamApiKey` is an external (user-created Cloud) API key, also
+  // snapshotted from the rule. Absent means internal-key treatment (fail closed).
+  uiamApiKeyExternal?: boolean;
   createdAt: string;
   duration: string;
   enabled: boolean;
@@ -66,6 +77,9 @@ export interface AdHocRunSO extends Record<string, unknown> {
 export interface AdHocRun {
   apiKeyId: string;
   apiKeyToUse: string;
+  uiamApiKey?: string;
+  uiamApiKeyId?: string;
+  uiamApiKeyExternal?: boolean;
   createdAt: string;
   duration: string;
   enabled: boolean;
@@ -74,7 +88,7 @@ export interface AdHocRun {
   initiator: BackfillInitiator;
   initiatorId?: string;
   rule: AdHocRunRule;
-  spaceId: string;
+  spaceId: SpaceId;
   start: string;
   status: AdHocRunStatus;
   schedule: AdHocRunSchedule[];

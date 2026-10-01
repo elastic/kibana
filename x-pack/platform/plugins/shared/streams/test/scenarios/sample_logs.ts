@@ -15,26 +15,55 @@ import type { LoghubTimestampLayout } from '@kbn/sample-log-parser';
 import { SampleParserClient } from '@kbn/sample-log-parser';
 import type { WiredIngestUpsertRequest } from '@kbn/streams-schema';
 import { castArray } from 'lodash';
+import type { Readable } from 'stream';
+import { Transform, pipeline } from 'stream';
 import type { Scenario } from '@kbn/synthtrace';
 import { withClient } from '@kbn/synthtrace';
+
+/**
+ * Serializes documents and routes every one into a single classic stream by overriding `_index`,
+ * instead of replicating into the wired root streams (the default `streamsClient` pipeline).
+ */
+function singleStreamPipeline(streamName: string) {
+  return (base: Readable) =>
+    pipeline(
+      base,
+      new Transform({
+        objectMode: true,
+        transform(chunk: Serializable<LogDocument>, _encoding, callback) {
+          for (const document of chunk.serialize()) {
+            this.push({ ...document, _index: streamName });
+          }
+          callback();
+        },
+      }),
+      (err) => {
+        if (err) {
+          throw err;
+        }
+      }
+    );
+}
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { logger } = runOptions;
   const client = new SampleParserClient({ logger });
 
-  const { rpm, streamType, systems, isLogsEnabled, skipFork, loghubTimestampLayout } =
+  const { rpm, streamName, streamType, systems, isLogsEnabled, skipFork, loghubTimestampLayout } =
     (runOptions.scenarioOpts ?? {}) as {
       rpm?: number;
       systems?: string | string[];
+      streamName?: string;
       streamType?: 'classic' | 'wired';
       skipFork?: boolean;
       isLogsEnabled?: boolean;
       loghubTimestampLayout?: LoghubTimestampLayout;
     };
 
+  // Targeting a specific stream only makes sense for classic streams; force `classic` when set.
   const generators = await client.getLogGenerators({
     rpm,
-    streamType: streamType === 'classic' ? 'classic' : 'wired',
+    streamType: streamName || streamType === 'classic' ? 'classic' : 'wired',
     systems: {
       loghub: castArray(systems ?? []).flatMap((item) => item.split(',')),
     },
@@ -45,7 +74,8 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     bootstrap: async ({ streamsClient }) => {
       await streamsClient.enable();
 
-      if (skipFork) {
+      // When routing into a specific classic stream the wired root-stream forks don't apply.
+      if (skipFork || streamName) {
         return;
       }
 
@@ -176,6 +206,11 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         const wrapped = new Error('Error occurred while forking streams', { cause: error });
         logger.error(wrapped);
         throw wrapped;
+      }
+    },
+    setupPipeline: ({ streamsClient }) => {
+      if (streamName) {
+        streamsClient.setPipeline(singleStreamPipeline(streamName));
       }
     },
     generate: ({ range, clients: { streamsClient } }) => {

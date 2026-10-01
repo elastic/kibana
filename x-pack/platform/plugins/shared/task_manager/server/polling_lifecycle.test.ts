@@ -20,8 +20,16 @@ import type {
   TaskClaiming as TaskClaimingClass,
   ClaimOwnershipResult,
 } from './queries/task_claiming';
+import { TaskManagerRunner } from './task_running';
+import type { ConcreteTaskInstance } from './task';
 import type { Err, Ok } from './lib/result_type';
 import { asOk, isErr, isOk } from './lib/result_type';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  ADJUST_THROUGHPUT_INTERVAL,
+  BACKPRESSURE_HOLD_INTERVALS,
+} from './lib/create_managed_configuration';
+import { BulkUpdateError } from './lib/errors';
 import { FillPoolResult } from './lib/fill_pool';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
@@ -29,8 +37,15 @@ import type { TaskEventLogger } from './task';
 import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
+import type { TaskManagerBackpressure } from './task_events';
 import { TaskEventType } from './task_events';
 import { EsApiKeyStrategy } from './api_key_strategy';
+import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
+import { taskExecutionControlServiceMock } from './execution_control/task_execution_control_service.mock';
+
+const resetInFlightTasksMock = resetInFlightTasksOwnedByThisNode as jest.MockedFunction<
+  typeof resetInFlightTasksOwnedByThisNode
+>;
 
 const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
@@ -45,6 +60,18 @@ jest.mock('./queries/task_claiming', () => {
 jest.mock('./constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
 }));
+
+jest.mock('./lib/task_reconciliation', () => ({
+  resetInFlightTasksOwnedByThisNode: jest.fn(),
+}));
+
+jest.mock('./task_running', () => {
+  const actual = jest.requireActual('./task_running');
+  return {
+    ...actual,
+    TaskManagerRunner: jest.fn(),
+  };
+});
 
 interface EsError extends Error {
   name: string;
@@ -69,6 +96,9 @@ describe('TaskPollingLifecycle', () => {
       discovery: {
         active_nodes_lookback: '30s',
         interval: 10000,
+      },
+      execution_control: {
+        poll_interval: 5000,
       },
       kibanas_per_partition: 2,
       invalidate_api_key_task: {
@@ -107,7 +137,7 @@ describe('TaskPollingLifecycle', () => {
       },
       worker_utilization_running_average_window: 5,
       metrics_reset_interval: 3000,
-      claim_strategy: 'update_by_query',
+      claim_strategy: 'mget',
       request_timeouts: {
         update_by_query: 1000,
       },
@@ -116,6 +146,7 @@ describe('TaskPollingLifecycle', () => {
       grant_uiam_api_keys: false,
     },
     taskStore: mockTaskStore,
+    executionControlService: taskExecutionControlServiceMock.create(),
     logger: taskManagerLogger,
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
@@ -134,6 +165,8 @@ describe('TaskPollingLifecycle', () => {
   beforeEach(() => {
     mockTaskClaiming = taskClaimingMock.create({});
     (TaskClaiming as jest.Mock<TaskClaimingClass>).mockClear();
+    (TaskManagerRunner as jest.Mock).mockClear();
+    resetInFlightTasksMock.mockReset().mockResolvedValue(undefined);
     clock = sinon.useFakeTimers();
   });
 
@@ -154,33 +187,82 @@ describe('TaskPollingLifecycle', () => {
       },
     });
 
-    test('begins polling once the ES and SavedObjects services are available', () => {
+    test('begins polling once the ES and SavedObjects services are available', async () => {
+      clock.restore();
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       new TaskPollingLifecycle({ ...taskManagerOpts, elasticsearchAndSOAvailability$ });
 
-      clock.tick(150);
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
 
       elasticsearchAndSOAvailability$.next(true);
 
-      clock.tick(150);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
+      await retryUntil(
+        'polling started',
+        () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0
+      );
     });
 
-    test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_UPDATE_BY_QUERY', () => {
+    test('waits for the startup task reconciliation to finish before polling', async () => {
+      clock.restore();
+      let resolveReconciliation: () => void = () => {};
+      resetInFlightTasksMock.mockReturnValue(
+        new Promise<void>((resolve) => {
+          resolveReconciliation = resolve;
+        })
+      );
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      new TaskPollingLifecycle({ ...taskManagerOpts, elasticsearchAndSOAvailability$ });
 
-      new TaskPollingLifecycle({
-        ...taskManagerOpts,
-        elasticsearchAndSOAvailability$,
-        startingCapacity: 40,
+      elasticsearchAndSOAvailability$.next(true);
+
+      await retryUntil(
+        'reconciliation started',
+        () => resetInFlightTasksMock.mock.calls.length > 0
+      );
+      expect(resetInFlightTasksMock).toHaveBeenCalledWith({
+        logger: taskManagerLogger,
+        taskStore: mockTaskStore,
       });
-      const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
-        .calls[0][0].getAvailableCapacity;
+      // the poller must not start until reconciliation resolves
+      await delay(100);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
 
-      expect(taskClaimingGetCapacity()).toEqual(40);
-      expect(taskClaimingGetCapacity('report')).toEqual(1);
-      expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
+      resolveReconciliation();
+      await retryUntil(
+        'polling started',
+        () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0
+      );
+    });
+
+    test('begins polling even when the startup task reconciliation fails', async () => {
+      clock.restore();
+      resetInFlightTasksMock.mockRejectedValue(new Error('reconciliation failed'));
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      new TaskPollingLifecycle({ ...taskManagerOpts, elasticsearchAndSOAvailability$ });
+
+      elasticsearchAndSOAvailability$.next(true);
+
+      await retryUntil(
+        'polling started',
+        () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0
+      );
+    });
+
+    test('runs the startup task reconciliation only once across availability changes', async () => {
+      clock.restore();
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      new TaskPollingLifecycle({ ...taskManagerOpts, elasticsearchAndSOAvailability$ });
+
+      elasticsearchAndSOAvailability$.next(true);
+      await retryUntil(
+        'reconciliation started',
+        () => resetInFlightTasksMock.mock.calls.length > 0
+      );
+      elasticsearchAndSOAvailability$.next(false);
+      elasticsearchAndSOAvailability$.next(true);
+      await delay(100);
+
+      expect(resetInFlightTasksMock).toHaveBeenCalledTimes(1);
     });
 
     test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_MGET', () => {
@@ -202,7 +284,8 @@ describe('TaskPollingLifecycle', () => {
   });
 
   describe('stop', () => {
-    test('stops polling if stop() is called', () => {
+    test('stops polling if stop() is called', async () => {
+      clock.restore();
       const elasticsearchAndSOAvailability$ = new Subject<boolean>();
       const pollingLifecycle = new TaskPollingLifecycle({
         elasticsearchAndSOAvailability$,
@@ -216,13 +299,95 @@ describe('TaskPollingLifecycle', () => {
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(0);
       elasticsearchAndSOAvailability$.next(true);
 
-      clock.tick(50);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
+      await retryUntil(
+        'polling started',
+        () => mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length > 0
+      );
 
       pollingLifecycle.stop();
+      const callsAfterStop =
+        mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length;
 
-      clock.tick(100);
-      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
+      await delay(300);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(
+        callsAfterStop
+      );
+    });
+
+    test('does not begin polling if stopped while the startup task reconciliation is in flight', async () => {
+      clock.restore();
+      let resolveReconciliation: () => void = () => {};
+      resetInFlightTasksMock.mockReturnValue(
+        new Promise<void>((resolve) => {
+          resolveReconciliation = resolve;
+        })
+      );
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const pollingLifecycle = new TaskPollingLifecycle({
+        elasticsearchAndSOAvailability$,
+        ...taskManagerOpts,
+      });
+
+      elasticsearchAndSOAvailability$.next(true);
+      await retryUntil(
+        'reconciliation started',
+        () => resetInFlightTasksMock.mock.calls.length > 0
+      );
+      pollingLifecycle.stop();
+
+      resolveReconciliation();
+      await delay(100);
+      expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('execution control', () => {
+    test('cancels all running tasks when execution is paused', () => {
+      const executionControlService = taskExecutionControlServiceMock.create();
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const pollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        executionControlService,
+        elasticsearchAndSOAvailability$,
+      });
+      const cancelSpy = jest.spyOn(pollingLifecycle.pool, 'cancelRunningTasks');
+
+      executionControlService.state.next({ paused: true, pausedTaskTypes: [] });
+
+      expect(cancelSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('cancels only the newly paused task types', () => {
+      const executionControlService = taskExecutionControlServiceMock.create();
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const pollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        executionControlService,
+        elasticsearchAndSOAvailability$,
+      });
+      const cancelByTypesSpy = jest.spyOn(pollingLifecycle.pool, 'cancelRunningTasksByTypes');
+
+      executionControlService.state.next({ paused: false, pausedTaskTypes: ['foo'] });
+
+      expect(cancelByTypesSpy).toHaveBeenCalledWith(['foo']);
+    });
+
+    test('does not cancel running tasks when execution is resumed', () => {
+      const executionControlService = taskExecutionControlServiceMock.create({
+        paused: true,
+        pausedTaskTypes: [],
+      });
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const pollingLifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        executionControlService,
+        elasticsearchAndSOAvailability$,
+      });
+      const cancelSpy = jest.spyOn(pollingLifecycle.pool, 'cancelRunningTasks');
+
+      executionControlService.state.next({ paused: false, pausedTaskTypes: [] });
+
+      expect(cancelSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -332,6 +497,9 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
+      // flush the microtask queue so the startup task reconciliation
+      // completes and the poller starts
+      await new Promise((resolve) => setImmediate(resolve));
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
       await retryUntil('workerUtilizationEvent emitted', () => {
         return !!emittedEvents.find(
@@ -372,6 +540,9 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
+      // flush the microtask queue so the startup task reconciliation
+      // completes and the poller starts
+      await new Promise((resolve) => setImmediate(resolve));
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
       await retryUntil('workerUtilizationEvent emitted', () => {
         return !!emittedEvents.find(
@@ -407,6 +578,9 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
+      // flush the microtask queue so the startup task reconciliation
+      // completes and the poller starts
+      await new Promise((resolve) => setImmediate(resolve));
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
       await retryUntil('workerUtilizationEvent emitted', () => {
         return !!emittedEvents.find(
@@ -440,6 +614,9 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
+      // flush the microtask queue so the startup task reconciliation
+      // completes and the poller starts
+      await new Promise((resolve) => setImmediate(resolve));
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
       await retryUntil('pollingCycleEvent emitted', () => {
         return !!emittedEvents.find(
@@ -482,6 +659,9 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
+      // flush the microtask queue so the startup task reconciliation
+      // completes and the poller starts
+      await new Promise((resolve) => setImmediate(resolve));
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
       await retryUntil('pollingCycleEvent emitted', () => {
         return !!emittedEvents.find(
@@ -523,6 +703,9 @@ describe('TaskPollingLifecycle', () => {
       );
 
       elasticsearchAndSOAvailability$.next(true);
+      // flush the microtask queue so the startup task reconciliation
+      // completes and the poller starts
+      await new Promise((resolve) => setImmediate(resolve));
       expect(mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalled();
       await retryUntil('pollingCycleEvent emitted', () => {
         return !!emittedEvents.find(
@@ -564,6 +747,178 @@ describe('TaskPollingLifecycle', () => {
       expect(capacitySubscription).toHaveBeenNthCalledWith(1, 20);
       expect(pollIntervalSubscription).toHaveBeenCalledTimes(1);
       expect(pollIntervalSubscription).toHaveBeenNthCalledWith(1, 2);
+    });
+  });
+
+  describe('enrichFakeRequest', () => {
+    const buildMockTaskInstance = (): ConcreteTaskInstance => ({
+      id: 'foo',
+      taskType: 'bar',
+      runAt: new Date(),
+      scheduledAt: new Date(),
+      startedAt: new Date(),
+      retryAt: null,
+      attempts: 0,
+      params: {},
+      state: {},
+      status: 'idle' as ConcreteTaskInstance['status'],
+      ownerId: null,
+      traceparent: '',
+    });
+
+    test('stores the enrichFakeRequest option on the lifecycle instance', () => {
+      const enrichFakeRequest = jest.fn();
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+        enrichFakeRequest,
+      });
+
+      expect(
+        (lifecycle as unknown as { enrichFakeRequest: typeof enrichFakeRequest }).enrichFakeRequest
+      ).toBe(enrichFakeRequest);
+    });
+
+    test('forwards enrichFakeRequest to TaskManagerRunner when creating a runner for a task', () => {
+      const enrichFakeRequest = jest.fn();
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+        enrichFakeRequest,
+      });
+
+      (
+        lifecycle as unknown as {
+          createTaskRunnerForTask: (instance: ConcreteTaskInstance) => void;
+        }
+      ).createTaskRunnerForTask(buildMockTaskInstance());
+
+      expect(TaskManagerRunner).toHaveBeenCalledTimes(1);
+      expect(TaskManagerRunner).toHaveBeenCalledWith(
+        expect.objectContaining({ enrichFakeRequest })
+      );
+    });
+  });
+
+  describe('backpressure events', () => {
+    const collectBackpressureEvents = (lifecycle: TaskPollingLifecycle) => {
+      const events: TaskManagerBackpressure[] = [];
+      lifecycle.events.subscribe((event) => {
+        if (event.type === TaskEventType.TASK_MANAGER_BACKPRESSURE) {
+          events.push(event as TaskManagerBackpressure);
+        }
+      });
+      return events;
+    };
+
+    test('emits an active backpressure event with the ES-pressure reason when Elasticsearch errors', () => {
+      const errors$ = new Subject<Error>();
+      const store = taskStoreMock.create({});
+      (store as unknown as { errors$: Subject<Error> }).errors$ = errors$;
+
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        taskStore: store,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+      });
+      const events = collectBackpressureEvents(lifecycle);
+
+      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+      const active = events
+        .map((event) => (isOk(event.event) ? event.event.value : undefined))
+        .filter((snapshot) => snapshot?.active);
+      expect(active.length).toBeGreaterThan(0);
+      expect(active[active.length - 1]).toMatchObject({
+        active: true,
+        reason: 'too_many_requests',
+      });
+    });
+
+    test('stays inactive under the low-utilization poll-interval change (capacity-driven, not ES)', () => {
+      const errors$ = new Subject<Error>();
+      const store = taskStoreMock.create({});
+      (store as unknown as { errors$: Subject<Error> }).errors$ = errors$;
+
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        taskStore: store,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+      });
+      const events = collectBackpressureEvents(lifecycle);
+
+      // No ES errors: advancing time exercises the managed-config loop without
+      // reducing capacity, so backpressure must never report active.
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+      const anyActive = events.some((event) => isOk(event.event) && event.event.value.active);
+      expect(anyActive).toBe(false);
+    });
+
+    test('stays continuously active across the idle windows of a sustained cluster block', () => {
+      const errors$ = new Subject<Error>();
+      const store = taskStoreMock.create({});
+      (store as unknown as { errors$: Subject<Error> }).errors$ = errors$;
+
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        taskStore: store,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+      });
+      const events = collectBackpressureEvents(lifecycle);
+
+      const clusterBlockError = () =>
+        new BulkUpdateError({ statusCode: 403, type: 'cluster_block_exception' });
+
+      // A real block re-errors only ~once per 61s poll, so model one block error
+      // followed by error-free windows within the hold.
+      errors$.next(clusterBlockError());
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      for (let i = 0; i < BACKPRESSURE_HOLD_INTERVALS - 1; i++) {
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      }
+
+      // Once active it must not flip back mid-block (one inactive snapshot is
+      // expected at startup, before the block error arrives).
+      const snapshots = events
+        .map((event) => (isOk(event.event) ? event.event.value : undefined))
+        .filter((snapshot): snapshot is NonNullable<typeof snapshot> => snapshot !== undefined);
+      const activeStates = snapshots.map((snapshot) => snapshot.active);
+      const firstActive = activeStates.indexOf(true);
+      expect(firstActive).toBeGreaterThanOrEqual(0);
+      expect(activeStates.slice(firstActive).every(Boolean)).toBe(true);
+      expect(snapshots[snapshots.length - 1]).toMatchObject({
+        active: true,
+        reason: 'cluster_block',
+      });
+    });
+
+    test('clears once the hold elapses with no further ES errors', () => {
+      const errors$ = new Subject<Error>();
+      const store = taskStoreMock.create({});
+      (store as unknown as { errors$: Subject<Error> }).errors$ = errors$;
+
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        taskStore: store,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+      });
+      const events = collectBackpressureEvents(lifecycle);
+
+      errors$.next(new BulkUpdateError({ statusCode: 403, type: 'cluster_block_exception' }));
+      // Advance well past the hold with no further errors so backpressure clears.
+      for (let i = 0; i < BACKPRESSURE_HOLD_INTERVALS + 2; i++) {
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      }
+
+      const last = events
+        .map((event) => (isOk(event.event) ? event.event.value : undefined))
+        .filter((snapshot): snapshot is NonNullable<typeof snapshot> => snapshot !== undefined)
+        .pop();
+      expect(last).toMatchObject({ active: false, reason: null });
     });
   });
 });

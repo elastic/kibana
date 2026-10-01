@@ -16,8 +16,8 @@ import { useTimelineStatus } from '../../open_timeline/use_timeline_status';
 
 jest.mock('../../../../common/lib/apm/use_start_transaction');
 jest.mock('../../open_timeline/use_timeline_status');
-jest.mock('react-redux', () => {
-  const origin = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const origin = jest.requireActual('react-redux-v7');
   const mockDispatch = jest.fn();
   return {
     ...origin,

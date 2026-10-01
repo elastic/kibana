@@ -13,7 +13,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ContentListItem } from '@kbn/content-list-provider';
-import type { ParsedPart, SkeletonOutput } from '@kbn/content-list-assembly';
+import type { ParsedPart } from '@kbn/ui-react-assembly';
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
+import type { SkeletonOutput } from '../../skeleton/descriptor';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
 import { getColumnLayoutProps, pickAttribute, type ColumnLayoutProps } from '../layout';
@@ -202,7 +204,7 @@ export const buildActionsColumn = (
       maxWidth: pickAttribute(attributes, 'maxWidth', resolvedWidth),
     }),
     sticky,
-    'data-test-subj': 'content-list-table-column-actions',
+    'data-test-subj': CONTENT_LIST_TEST_SUBJECTS.columnActions,
   };
 };
 

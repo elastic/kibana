@@ -9,8 +9,12 @@ import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { ResourceTypes } from '@kbn/product-doc-common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
+import {
+  ResourceTypes,
+  resolveDefaultInferenceIdFromInferenceGet,
+  resolveInstalledProductDocInferenceId,
+} from '@kbn/product-doc-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { securityTool } from './constants';
@@ -43,7 +47,7 @@ export const securityLabsSearchTool = (
         return { status: 'available' };
       },
     },
-    handler: async ({ query: nlQuery }, { request, modelProvider, logger }) => {
+    handler: async ({ query: nlQuery }, { request, modelProvider, logger, spaceId }) => {
       logger.debug(`${SECURITY_LABS_SEARCH_TOOL_ID} tool called with query: ${nlQuery}`);
 
       try {
@@ -59,20 +63,34 @@ export const securityLabsSearchTool = (
           };
         }
 
-        const inferenceId = defaultInferenceEndpoints.ELSER;
-        const isAvailable =
-          (await llmTasks.retrieveDocumentationAvailable({
-            inferenceId,
-            resourceType: ResourceTypes.securityLabs,
-          })) ?? false;
+        // Prefer the environment default (Jina when its endpoint exists, else ELSER), then
+        // fall back through the remaining candidates to whichever model actually has
+        // Security Labs content installed. On-prem clusters without a Jina endpoint resolve
+        // to ELSER automatically.
+        const inferenceId = await resolveInstalledProductDocInferenceId({
+          getDefaultInferenceId: () =>
+            resolveDefaultInferenceIdFromInferenceGet(() =>
+              coreStart.elasticsearch.client.asInternalUser.inference.get({})
+            ),
+          isDocumentationAvailable: async (candidateInferenceId) =>
+            (await llmTasks.retrieveDocumentationAvailable({
+              inferenceId: candidateInferenceId,
+              resourceType: ResourceTypes.securityLabs,
+            })) ?? false,
+        });
 
-        if (!isAvailable) {
-          const basePath = coreStart.http.basePath.get(request);
-          const settingsUrl = `${basePath}${GENAI_SETTINGS_APP_PATH}`;
+        if (!inferenceId) {
+          // Use serverBasePath (not request.basePath): Agent Builder requests can omit
+          // basePath, producing /app/... links the chat UI treats as external/broken.
+          const settingsUrl = addSpaceIdToPath(
+            coreStart.http.basePath.serverBasePath,
+            spaceId,
+            GENAI_SETTINGS_APP_PATH
+          );
           return {
             results: [
               createErrorResult({
-                message: `Security Labs content is not installed. To use this tool, please install Security Labs from the GenAI Settings page: ${settingsUrl}. Do not perform any other tool calls, and provide the user with a link to install the documentation.`,
+                message: `Security Labs content is not installed. To use this tool, please install Security Labs from GenAI Settings. Provide the user with this exact markdown link and do not alter the URL path: [GenAI Settings](${settingsUrl}). Do not perform any other tool calls.`,
                 metadata: { settingsUrl },
               }),
             ],
@@ -91,7 +109,18 @@ export const securityLabsSearchTool = (
           resourceTypes: [ResourceTypes.securityLabs],
         });
 
-        if (!result.success || result.documents.length === 0) {
+        if (!result.success) {
+          return {
+            results: [
+              createErrorResult({
+                message: 'Failed to retrieve Security Labs documentation for the given query.',
+                metadata: { query: nlQuery },
+              }),
+            ],
+          };
+        }
+
+        if (result.documents.length === 0) {
           return { results: [] };
         }
 
@@ -125,5 +154,12 @@ export const securityLabsSearchTool = (
       }
     },
     tags: ['security', 'security-labs', 'knowledge-base', 'search'],
+    annotations: {
+      title: 'Search Security Labs',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   };
 };

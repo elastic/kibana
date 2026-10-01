@@ -10,10 +10,12 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
+import { InitialTabStateService } from '../plugin_imports/initial_tab_state_service';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import {
   analyticsServiceMock,
   coreMock,
@@ -47,11 +49,13 @@ import type { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
+import { ProfileStateRegistry } from '../../common/context_awareness';
 import { DiscoverEBTManager } from '../ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 import { createUrlTrackerMock } from './url_tracker.mock';
 import { createBrowserHistory } from 'history';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
+import type { DiscoverSessionService } from '../session';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -192,6 +196,18 @@ export function createDiscoverServicesMock(): DiscoverServices {
   history.push('/');
 
   const { profilesManagerMock } = createContextAwarenessMocks();
+  const savedSearch = savedSearchPluginMock.createStartContract();
+  const discoverSessionService: DiscoverSessionService = {
+    get: jest.fn(async (id: string) => ({
+      session: await savedSearch.getDiscoverSession(id),
+      warnings: [],
+    })),
+    save: jest.fn(async (session: SaveDiscoverSessionParams) => ({
+      ...session,
+      id: session.id ?? 'new-session',
+      managed: false,
+    })),
+  };
 
   return {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
@@ -201,6 +217,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     chrome: corePluginMock.chrome,
     history,
     getScopedHistory: () => scopedHistoryMock.create(),
+    initialTabStateService: new InitialTabStateService(),
     data: dataPlugin,
     dataVisualizer: {
       FieldStatisticsTable: jest.fn(() => createElement('div')),
@@ -223,7 +240,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       },
       management: {
         insightsAndAlerting: {
-          triggersActions: true,
+          triggersActionsRules: true,
         },
       },
       indexPatterns: {
@@ -237,6 +254,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     uiActions: uiActionsPluginMock.createStartContract(),
     uiSettings: uiSettingsMock,
+    settings: corePluginMock.settings,
     http: {
       basePath: '/',
       post: jest.fn((path: string) => {
@@ -274,6 +292,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addWarning: jest.fn(),
       addDanger: jest.fn(),
       addSuccess: jest.fn(),
+      addError: jest.fn(),
     },
     notifications: {
       toasts: notificationServiceMock.createStartContract().toasts,
@@ -285,7 +304,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
         updateTagsReferences: jest.fn(),
       },
     },
-    savedSearch: savedSearchPluginMock.createStartContract(),
+    savedSearch,
+    discoverSessionService,
     dataViews: dataPlugin.dataViews,
     timefilter: dataPlugin.query.timefilter.timefilter,
     lens: {
@@ -307,6 +327,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
     urlTracker: createUrlTrackerMock(),
     profilesManager: profilesManagerMock,
+    profileStateRegistry: new ProfileStateRegistry(),
     ebtManager: new DiscoverEBTManager(),
     cps: cpsPluginMock.createStartContract(),
     setHeaderActionMenu: jest.fn(),
@@ -314,7 +335,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: jest.fn(() => false),
       getIsEsqlDefault: jest.fn(() => false),
-      getEmbeddableTransformsEnabled: jest.fn(() => true),
     },
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),
@@ -323,10 +343,17 @@ export function createDiscoverServicesMock(): DiscoverServices {
       transferBackToEditor: jest.fn(),
       getByValueTab: jest.fn(),
       getEmbeddableId: jest.fn(() => undefined),
+      getOriginatingPath: jest.fn(() => undefined),
       clearEditorState: jest.fn(),
     },
     alertingVTwo: {
-      DynamicRuleFormFlyout: jest.fn(() => null),
+      CreateRuleOptionsFlyout: jest.fn(() => null),
+      RulesPage: jest.fn(() => null),
+      RuleLibraryPage: jest.fn(() => null),
+      EpisodesPage: jest.fn(() => null),
+      ActionPoliciesPage: jest.fn(() => null),
+      ExecutionHistoryPage: jest.fn(() => null),
+      createAlertingV2HostApp: jest.fn(),
     },
     trackUiMetric: jest.fn(),
     logger: { get: jest.fn(() => loggerMock.create()) },

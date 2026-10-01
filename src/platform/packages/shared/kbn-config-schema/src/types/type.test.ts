@@ -25,10 +25,12 @@ class MyType extends Type<any> {
 
 describe('meta', () => {
   it('sets meta when provided', () => {
+    const semanticMeta = { description: 'my description', deprecated: true };
     const type = new MyType({
-      meta: { description: 'my description', deprecated: true },
+      meta: semanticMeta,
     });
     const meta = type.getSchema().describe();
+    expect(type.getMeta()).toEqual(semanticMeta);
     expect(get(meta, 'flags.description')).toBe('my description');
     expect(get(meta, `metas[0].${META_FIELD_X_OAS_DEPRECATED}`)).toBe(true);
     expect(get(meta, `metas[1].${META_FIELD_X_OAS_DISCONTINUED}`)).toBeUndefined();

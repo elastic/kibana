@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { ALERT_SEVERITY_VALUES, type AlertSeverity } from '@kbn/rule-data-utils';
 import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
 import {
   ALLOWED_MAX_ALERTS,
@@ -170,13 +172,9 @@ export const snoozedInstanceConditionSchema = schema.oneOf([
   }),
   schema.object({
     type: schema.literal('severity_equals'),
-    value: schema.oneOf([
-      schema.literal('critical'),
-      schema.literal('high'),
-      schema.literal('medium'),
-      schema.literal('low'),
-      schema.literal('info'),
-    ]),
+    value: schema.oneOf(
+      ALERT_SEVERITY_VALUES.map((severity) => schema.literal(severity)) as [Type<AlertSeverity>]
+    ),
   }),
 ]);
 
@@ -214,12 +212,16 @@ export const ruleDomainSchema = schema.object({
   scheduledTaskId: schema.maybe(schema.string()),
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
+  createdByProfileUid: schema.maybe(schema.nullable(schema.string())),
+  updatedByProfileUid: schema.maybe(schema.nullable(schema.string())),
   createdAt: dateSchema,
   updatedAt: dateSchema,
   apiKey: schema.nullable(schema.string()),
   apiKeyOwner: schema.nullable(schema.string()),
+  apiKeyOwnerProfileUid: schema.maybe(schema.nullable(schema.string())),
   apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
   uiamApiKey: schema.maybe(schema.nullable(schema.string())),
+  uiamApiKeyExternal: schema.maybe(schema.nullable(schema.boolean())),
   throttle: schema.maybe(schema.nullable(schema.string())),
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
@@ -262,9 +264,12 @@ export const ruleSchema = schema.object({
   scheduledTaskId: schema.maybe(schema.string()),
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
+  createdByProfileUid: schema.maybe(schema.nullable(schema.string())),
+  updatedByProfileUid: schema.maybe(schema.nullable(schema.string())),
   createdAt: dateSchema,
   updatedAt: dateSchema,
   apiKeyOwner: schema.nullable(schema.string()),
+  apiKeyOwnerProfileUid: schema.maybe(schema.nullable(schema.string())),
   apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
   throttle: schema.maybe(schema.nullable(schema.string())),
   muteAll: schema.boolean(),

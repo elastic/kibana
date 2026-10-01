@@ -23,6 +23,7 @@ describe('transformConnectorSpecResponse', () => {
         is_technical_preview: true,
       },
       schema: { type: 'object', properties: {} },
+      is_testable: true,
     });
 
     expect(result.metadata).toEqual({
@@ -36,6 +37,7 @@ describe('transformConnectorSpecResponse', () => {
       isTechnicalPreview: true,
     });
     expect(result.schema).toEqual({ type: 'object', properties: {} });
+    expect(result.isTestable).toBe(true);
   });
 
   it('omits optional metadata fields when absent on the wire', () => {
@@ -48,6 +50,7 @@ describe('transformConnectorSpecResponse', () => {
         supported_feature_ids: ['cases'],
       },
       schema: {},
+      is_testable: false,
     });
 
     expect(result.metadata).toEqual({
@@ -57,5 +60,29 @@ describe('transformConnectorSpecResponse', () => {
       minimumLicense: 'gold',
       supportedFeatureIds: ['cases'],
     });
+    expect(result.isTestable).toBe(false);
+  });
+
+  it('transforms actions from wire format to client format', () => {
+    const result = transformConnectorSpecResponse({
+      metadata: {
+        id: '.test',
+        display_name: 'Test',
+        description: 'Test connector',
+        minimum_license: 'basic',
+        supported_feature_ids: ['agentBuilder'],
+      },
+      schema: {},
+      is_testable: false,
+      actions: [
+        { name: 'listIncidents', description: 'List incidents', is_tool: true },
+        { name: 'getIncident', is_tool: true },
+      ],
+    });
+
+    expect(result.actions).toEqual([
+      { name: 'listIncidents', description: 'List incidents', isTool: true },
+      { name: 'getIncident', isTool: true },
+    ]);
   });
 });

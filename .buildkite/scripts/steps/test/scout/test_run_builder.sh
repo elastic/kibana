@@ -46,7 +46,7 @@ echo '--- Resolve Scout selective-testing scope'
 
 # Build the generic code-changes file (changed files + affected @kbn/ modules)
 # consumed by `scout resolve-testing-scope` below.
-ts-node "$(dirname "${0}")/resolve_selective_testing.ts" \
+node "$(dirname "${0}")/resolve_selective_testing.ts" \
   "$AFFECTED_MERGE_BASE" \
   "$CODE_CHANGES_FILE"
 
@@ -72,6 +72,12 @@ buildkite-agent artifact upload "$CODE_CHANGES_FILE"
 # Run Order" step computes its own scope independently, so it does not need
 # this artifact.
 buildkite-agent artifact upload "$TESTING_SCOPE_FILE"
+
+# Moon shadow-mode comparison (observational only); upload if present.
+CODE_CHANGES_MOON_SHADOW_FILE=".scout/code_changes.moon_shadow.json"
+if [[ -f "$CODE_CHANGES_MOON_SHADOW_FILE" ]]; then
+  buildkite-agent artifact upload "$CODE_CHANGES_MOON_SHADOW_FILE"
+fi
 
 SCOUT_TEST_DISTRIBUTION_STRATEGY="${SCOUT_TEST_DISTRIBUTION_STRATEGY:-configs}"
 
@@ -129,7 +135,7 @@ fi
 source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 
 echo '--- Producing Scout Test Execution Steps'
-ts-node "$(dirname "${0}")/test_run_builder.ts"
+node "$(dirname "${0}")/test_run_builder.ts"
 
 echo '--- Upload scout test run order artifacts to GCS'
 if [[ -f scout_playwright_configs_scheduled.json ]]; then

@@ -95,6 +95,14 @@ describe('RecentlyAccessed#start()', () => {
     ]);
   });
 
+  it('removes an item by id', async () => {
+    const { recentlyAccessed } = await getStart();
+    recentlyAccessed.add('/app/item1', 'Item 1', 'item1');
+    recentlyAccessed.add('/app/item2', 'Item 2', 'item2');
+    recentlyAccessed.remove('item1');
+    expect(recentlyAccessed.get()).toEqual([{ link: '/app/item2', label: 'Item 2', id: 'item2' }]);
+  });
+
   it('exposes an observable', async () => {
     const { recentlyAccessed } = await getStart();
     const stop$ = new Subject<void>();

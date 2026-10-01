@@ -5,33 +5,52 @@
  * 2.0.
  */
 
-import type { CreateActionPolicyDataInput, CreateRuleData } from '@kbn/alerting-v2-schemas';
+import { createHash } from 'crypto';
+import type {
+  CreateActionPolicyDataInput,
+  CreateRuleData,
+  RuleTemplateData,
+} from '@kbn/alerting-v2-schemas';
+import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import type { AlertEvent } from '../../../server/resources/datastreams/alert_events';
 import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 
 /**
  * Defaults used by `buildCreateRuleData` so the integration specs only have to
  * spell out what makes each rule unique (typically `metadata.name`, the
- * `evaluation.query.base`, and the `state_transition` policy under test).
+ * `query.breach`, and the `state_transition` policy under test).
  *
  * Notes:
  * - `schedule` uses the fast test-harness interval (5s every / 1m lookback)
  *   so the executor produces events quickly during integration runs.
- * - `state_transition: { pending_count: 0, recovering_count: 0 }` drives the
- *   lifecycle straight to active/inactive, which is what most executor tests
- *   want. Tests that care about the lifecycle override it explicitly. Signal
- *   rules must opt out via `state_transition: undefined` because the schema
- *   forbids state_transition for `kind: 'signal'`.
+ * - `state_transition: { pending: { count: 0 }, recovering: { count: 0 } }`
+ *   drives the lifecycle straight to active/inactive, which is what most
+ *   executor tests want. Tests that care about the lifecycle override it
+ *   explicitly. Signal rules must opt out via `state_transition: undefined`
+ *   because the schema forbids state_transition for `kind: 'signal'`.
+ * - `recovery: { strategy: 'no_breach' }` so that, by default, rules recover
+ *   whenever a previously-breaching group stops appearing in the breach query
+ *   results, and `no_data: { strategy: 'ignore' }` so absence is not
+ *   classified. Alert rules must carry both. Signal rules must opt out by
+ *   passing `recovery: undefined` and `no_data: undefined`, because the schema
+ *   forbids them on `kind: 'signal'`. Tests that override `query` should keep a
+ *   recovering `recovery` strategy if they want the executor to emit recovery
+ *   events.
+ * - When a caller turns recovery off (`recovery: { strategy: 'manual' }`)
+ *   without supplying its own `state_transition`, `buildCreateRuleData` strips
+ *   the default `recovering` block, since the write API rejects an inert
+ *   recovering delay when recovery never happens.
  */
 const DEFAULTS: CreateRuleData = {
   kind: 'alert',
   metadata: { name: 'scout-rule' },
   schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-  evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+  recovery: { strategy: recoveryStrategy.no_breach },
+  no_data: { strategy: noDataStrategy.ignore },
+  query: { base: 'FROM logs-* | LIMIT 10' },
   time_field: '@timestamp',
-  recovery_policy: { type: 'no_breach' },
   grouping: { fields: ['host.name'] },
-  state_transition: { pending_count: 0, recovering_count: 0 },
+  state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
 };
 
 const ACTION_POLICY_DEFAULTS: CreateActionPolicyDataInput = {
@@ -42,9 +61,37 @@ const ACTION_POLICY_DEFAULTS: CreateActionPolicyDataInput = {
 
 export type BuildCreateRuleDataInput = Partial<CreateRuleData>;
 
-export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => ({
-  ...DEFAULTS,
-  ...input,
+export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => {
+  const merged: CreateRuleData = { ...DEFAULTS, ...input };
+
+  const recoveryEnabled =
+    merged.recovery != null && merged.recovery.strategy !== recoveryStrategy.manual;
+
+  if (!recoveryEnabled && input.state_transition === undefined && merged.state_transition != null) {
+    const { recovering, ...rest } = merged.state_transition;
+    merged.state_transition = rest;
+  }
+
+  return merged;
+};
+
+export const buildRuleTemplateData = (rule: BuildCreateRuleDataInput = {}): RuleTemplateData => ({
+  engine: 'v2',
+  rule: buildCreateRuleData(rule),
+});
+
+export const buildV1RuleTemplateAttributes = ({
+  name = 'scout-v1-template',
+  tags = ['v1-only'],
+  engine,
+}: { name?: string; tags?: string[]; engine?: string } = {}) => ({
+  ...(engine ? { engine } : {}),
+  name,
+  tags,
+  description: 'Alerting v1 rule template',
+  ruleTypeId: '.index-threshold',
+  schedule: { interval: '1m' },
+  params: { threshold: [1000] },
 });
 
 export type BuildCreateActionPolicyDataInput = Partial<CreateActionPolicyDataInput>;
@@ -56,11 +103,45 @@ export const buildCreateActionPolicyData = (
   ...input,
 });
 
+/**
+ * Minimal valid workflow YAML. Action policy specs only need the workflow to
+ * exist and be searchable by name so it can be picked as a destination, so the
+ * body is deliberately a single no-op console step.
+ *
+ * `name` is emitted as a JSON string, which is also a valid YAML double-quoted
+ * scalar, so callers can pass names containing `:` or `#` without producing
+ * YAML that parses into something else.
+ */
+export const buildWorkflowYaml = (name: string): string => `name: ${JSON.stringify(name)}
+enabled: true
+description: Scout action policy destination
+triggers:
+  - type: manual
+steps:
+  - name: log
+    type: console
+    with:
+      message: "scout"
+`;
+
 export const buildActionPolicyDestinations = (count: number) =>
   Array.from({ length: count }, (_, i) => ({
     type: 'workflow' as const,
     id: `wf-${i}`,
   }));
+
+/**
+ * Returns an ISO timestamp `offsetMs` in the future (default: 24h).
+ */
+export const getSnoozeDate = (offsetMs: number = 86_400_000): string =>
+  new Date(Date.now() + offsetMs).toISOString();
+/**
+ * The server only ever produces a group hash by hashing the grouping key, and
+ * the API validates that shape, so specs derive theirs from a readable seed.
+ */
+export const buildGroupHash = (seed: string): string =>
+  createHash('sha256').update(seed).digest('hex');
+
 /**
  * Defaults used by `buildAlertEvent` so the integration specs only have to
  * spell out what makes each alert event unique.
@@ -73,7 +154,7 @@ export const buildAlertEvent = (input: BuildAlertEventInput = {}): AlertEvent =>
     '@timestamp': now,
     scheduled_timestamp: now,
     rule: { id: 'scout-rule-id', version: 1 },
-    group_hash: 'scout-group-hash',
+    group_hash: buildGroupHash('scout-group-hash'),
     data: {},
     status: 'breached',
     source: 'scout-test',
@@ -81,4 +162,24 @@ export const buildAlertEvent = (input: BuildAlertEventInput = {}): AlertEvent =>
     space_id: 'default',
     ...input,
   };
+};
+
+/**
+ * Builds an external alert event (no `rule` field) for tests that exercise
+ * the source-based episode path (e.g. PagerDuty, Opsgenie).
+ */
+export type BuildExternalAlertEventInput = Omit<Partial<AlertEvent>, 'rule'>;
+
+export const buildExternalAlertEvent = (input: BuildExternalAlertEventInput = {}): AlertEvent => {
+  const now = new Date().toISOString();
+  return {
+    '@timestamp': now,
+    group_hash: buildGroupHash('external-group-hash'),
+    data: {},
+    status: 'breached',
+    source: 'pagerduty',
+    type: 'alert',
+    space_id: 'default',
+    ...input,
+  } as AlertEvent;
 };

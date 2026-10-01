@@ -42,6 +42,7 @@ describe('mute alert instance', () => {
     ruleTypeRegistry: ruleTypeRegistryMock,
     getAlertIndicesAlias: getAlertIndicesAliasMock,
     getUserName: async () => {},
+    getProfileUid: async () => null,
     alertsService: alertsServiceMock,
   } as unknown as RulesClientContext;
 
@@ -89,7 +90,7 @@ describe('mute alert instance', () => {
 
     expect(auditLoggerMock.log).toHaveBeenCalledTimes(1);
     expect(authorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-    expect(actionsAuthorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+    expect(actionsAuthorizationMock.ensureAuthorized).not.toHaveBeenCalled();
     expect(ruleTypeRegistryMock.ensureRuleTypeEnabled).toHaveBeenCalledTimes(1);
     expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(1);
     expect(alertsServiceMock.isExistingAlert).not.toHaveBeenCalled();
@@ -102,6 +103,8 @@ describe('mute alert instance', () => {
       {
         mutedInstanceIds: ['instance1'],
         updatedAt: expect.any(String),
+        updatedBy: undefined,
+        updatedByProfileUid: null,
       },
       { version: 'v1' }
     );
@@ -153,7 +156,7 @@ describe('mute alert instance', () => {
 
     expect(auditLoggerMock.log).toHaveBeenCalledTimes(1);
     expect(authorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-    expect(actionsAuthorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+    expect(actionsAuthorizationMock.ensureAuthorized).not.toHaveBeenCalled();
     expect(ruleTypeRegistryMock.ensureRuleTypeEnabled).toHaveBeenCalledTimes(1);
     expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(2);
     expect(alertsServiceMock.isExistingAlert).toHaveBeenCalledTimes(1);
@@ -166,6 +169,8 @@ describe('mute alert instance', () => {
       {
         mutedInstanceIds: ['instance1'],
         updatedAt: expect.any(String),
+        updatedBy: undefined,
+        updatedByProfileUid: null,
       },
       { version: 'v1' }
     );

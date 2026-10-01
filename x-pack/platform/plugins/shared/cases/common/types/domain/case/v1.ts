@@ -8,7 +8,11 @@
 import { z } from '@kbn/zod/v4';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { Settings } from '../../../bundled-types.gen';
-import { CASE_EXTENDED_FIELDS, CASE_EXTENDED_FIELDS_LABELS } from '../../../constants';
+import {
+  CASE_EXTENDED_FIELDS,
+  CASE_EXTENDED_FIELDS_LABELS,
+  CASE_EXTENDED_FIELDS_CONTROLS,
+} from '../../../constants';
 import { ExternalServiceSchema } from '../external_service/v1';
 import { CaseAssigneesSchema, UserSchema } from '../user/v1';
 import { CaseConnectorSchema } from '../connector/v1';
@@ -152,6 +156,11 @@ export const CaseAttributesSchema = CaseBasicSchema.extend({
   // Populated at response time by enrichCasesWithFieldLabels — not persisted to the SO.
   // Maps storage keys (e.g. `priority_as_keyword`) to user-facing labels (e.g. "Priority").
   [CASE_EXTENDED_FIELDS_LABELS]: z.record(z.string(), z.string()).optional(),
+  // Populated alongside extended_fields_labels by enrichCasesWithFieldLabels — not persisted.
+  // Maps storage keys to the field's control type (e.g. `USER_PICKER`), so a value that needs
+  // parsing (user picker, checkbox group, toggle) can be rendered correctly wherever a case is
+  // displayed without threading full field definitions through every consumer.
+  [CASE_EXTENDED_FIELDS_CONTROLS]: z.record(z.string(), z.string()).optional(),
 });
 
 export const CaseSchema = CaseAttributesSchema.extend({

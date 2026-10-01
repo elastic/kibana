@@ -99,6 +99,14 @@ const ConnectorsFormComponent: React.FC<Props> = ({
     connectors: supportedActionConnectors,
   });
 
+  const onCancelClick = useCallback(() => {
+    form.reset({
+      resetValues: true,
+      defaultValue: { connectorId: initialConnectorId, fields: initialConnectorFields },
+    });
+    onCancel();
+  }, [form, initialConnectorId, initialConnectorFields, onCancel]);
+
   const onSubmitConnector = useCallback(async () => {
     const { isValid, data: newData } = await submit();
     if (isValid && newData.connectorId) {
@@ -166,7 +174,7 @@ const ConnectorsFormComponent: React.FC<Props> = ({
               <EuiButtonEmpty
                 data-test-subj="edit-connectors-cancel"
                 iconType="cross"
-                onClick={onCancel}
+                onClick={onCancelClick}
                 size="s"
               >
                 {i18n.CANCEL}

@@ -1,0 +1,204 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Redirect, useHistory, useLocation } from 'react-router-dom';
+import { EuiSpacer } from '@elastic/eui';
+
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
+import type { DataSetWithName, DataSource } from '../common';
+import { mainTranslations } from './main_i18n';
+import { DataSourcesTabContent } from './data_sources_tab_content';
+import { DatasetsTabContent } from './datasets_tab_content';
+import { CreateDatasetWizardPage } from './create_dataset_wizard';
+import type { DataFederationKibanaServices } from './types';
+import { useLoadList } from './use_load_list';
+
+import {
+  CREATE_DATASET_PATH,
+  DATASETS_PATH,
+  DATA_SOURCES_PATH,
+  EDIT_DATASET_PATH,
+  isDatasetWizardPath,
+} from './app_paths';
+
+export const Main: FunctionComponent = () => {
+  const {
+    services: { dataSourcesClient, datasetsClient, docLinks },
+  } = useKibana<DataFederationKibanaServices>();
+
+  const dataFederationLinks = docLinks.links.dataFederation;
+
+  const history = useHistory();
+  const { pathname } = useLocation();
+
+  const {
+    items: dataSources,
+    hasLoaded: hasLoadedDataSources,
+    reload: reloadDataSources,
+  } = useLoadList<DataSource>(
+    useCallback(async () => await dataSourcesClient.get(), [dataSourcesClient])
+  );
+
+  const {
+    items: dataSets,
+    hasLoaded: hasLoadedDataSets,
+    reload: reloadDataSets,
+  } = useLoadList<DataSetWithName>(
+    useCallback(async () => await datasetsClient.get(), [datasetsClient])
+  );
+
+  const isWizardPath = isDatasetWizardPath(pathname);
+  const selectedTabId = useMemo<'datasets' | 'data_sources'>(() => {
+    return pathname.startsWith(DATA_SOURCES_PATH) ? 'data_sources' : 'datasets';
+  }, [pathname]);
+  const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
+
+  useEffect(() => {
+    if (isWizardPath || hasUserSelectedTab || !hasLoadedDataSources || !hasLoadedDataSets) {
+      return;
+    }
+
+    if (dataSources.length === 0 && dataSets.length === 0 && selectedTabId !== 'data_sources') {
+      history.replace(DATA_SOURCES_PATH);
+    }
+  }, [
+    dataSets.length,
+    history,
+    hasLoadedDataSets,
+    hasLoadedDataSources,
+    hasUserSelectedTab,
+    dataSources.length,
+    isWizardPath,
+    selectedTabId,
+  ]);
+
+  const onTabClick = useCallback(
+    (id: 'datasets' | 'sources') => {
+      setHasUserSelectedTab(true);
+      history.push(id === 'sources' ? DATA_SOURCES_PATH : DATASETS_PATH);
+    },
+    [history]
+  );
+
+  const tabs = useMemo<AppHeaderTab[]>(
+    () => [
+      {
+        id: 'datasets',
+        label: mainTranslations.tabs.sets,
+        isSelected: selectedTabId === 'datasets',
+        onClick: () => onTabClick('datasets'),
+        'data-test-subj': 'dataFederationDatasetsTab',
+      },
+      {
+        id: 'sources',
+        label: mainTranslations.tabs.sources,
+        isSelected: selectedTabId === 'data_sources',
+        onClick: () => onTabClick('sources'),
+        'data-test-subj': 'dataFederationDataSourcesTab',
+      },
+    ],
+    [onTabClick, selectedTabId]
+  );
+
+  return (
+    <>
+      {!isWizardPath && (
+        <>
+          <AppHeader
+            title={mainTranslations.pageTitle}
+            badges={[{ label: mainTranslations.experimental }]}
+            tabs={tabs}
+            description={mainTranslations.pageDescription}
+            spacing="bleed"
+            docLink={dataFederationLinks.overview}
+            menu={{
+              items: [
+                {
+                  id: 'quickstart',
+                  label: mainTranslations.quickstartLink,
+                  iconType: 'rocket',
+                  href: dataFederationLinks.quickstart,
+                  target: '_blank',
+                  overflow: true,
+                  order: 3,
+                },
+              ],
+            }}
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
+
+      <Routes>
+        <Route
+          exact
+          path={CREATE_DATASET_PATH}
+          render={() => (
+            <CreateDatasetWizardPage
+              dataSources={dataSources}
+              existingDataSetNames={dataSets.map((ds) => ds.name)}
+              loadDataSets={reloadDataSets}
+              loadDataSources={reloadDataSources}
+            />
+          )}
+        />
+        <Route
+          exact
+          path={EDIT_DATASET_PATH}
+          render={({ match }) => {
+            const datasetName = decodeURIComponent(match.params.datasetName);
+            const initialDataSet = dataSets.find((dataSet) => dataSet.name === datasetName);
+            if (!hasLoadedDataSets) {
+              return null;
+            }
+            if (!initialDataSet) {
+              return <Redirect to={DATASETS_PATH} />;
+            }
+            return (
+              <CreateDatasetWizardPage
+                key={initialDataSet.name}
+                initialDataSet={initialDataSet}
+                dataSources={dataSources}
+                existingDataSetNames={dataSets.map((ds) => ds.name)}
+                loadDataSets={reloadDataSets}
+                loadDataSources={reloadDataSources}
+              />
+            );
+          }}
+        />
+        <Route
+          exact
+          path={DATASETS_PATH}
+          render={() => (
+            <DatasetsTabContent
+              dataSources={dataSources}
+              dataSets={dataSets}
+              loadDataSets={reloadDataSets}
+            />
+          )}
+        />
+        <Route
+          exact
+          path={DATA_SOURCES_PATH}
+          render={() => (
+            <DataSourcesTabContent
+              dataSources={dataSources}
+              dataSets={dataSets}
+              loadDataSources={reloadDataSources}
+            />
+          )}
+        />
+        <Redirect exact from="/" to={DATASETS_PATH} />
+        <Redirect to={DATASETS_PATH} />
+      </Routes>
+    </>
+  );
+};

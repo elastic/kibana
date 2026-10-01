@@ -11,8 +11,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 /**
- * There is a requirement for the menu header to have a sticky position.
- * We cannot apply border to the header because we need to account for the scrollbar.
+ * Menu header rendered above the scrolling menu body, so it stays in view.
  */
 export function useMenuHeaderStyle() {
   const { euiTheme } = useEuiTheme();
@@ -22,12 +21,10 @@ export function useMenuHeaderStyle() {
     // 20px is forced by section dividers
     --horizontal-padding: calc(20px - var(--border-width));
 
-    position: sticky;
-    top: 0;
-    z-index: calc(${euiTheme.levels.content} + 1);
+    flex-shrink: 0;
     padding: ${euiTheme.size.base} var(--horizontal-padding) ${euiTheme.size.xxs}
       var(--horizontal-padding);
     margin: 0 1px;
-    min-height: var(--secondary-menu-header-height);
+    min-height: 42px;
   `;
 }

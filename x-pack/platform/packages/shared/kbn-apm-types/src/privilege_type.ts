@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
 export enum PrivilegeType {
   EVENT = 'event:write',
@@ -16,6 +16,6 @@ export enum ClusterPrivilegeType {
   MANAGE_OWN_API_KEY = 'manage_own_api_key',
 }
 
-export const privilegesTypeRt = t.array(
-  t.union([t.literal(PrivilegeType.EVENT), t.literal(PrivilegeType.AGENT_CONFIG)])
+export const privilegesTypeSchema = z.array(
+  z.union([z.literal(PrivilegeType.EVENT), z.literal(PrivilegeType.AGENT_CONFIG)])
 );

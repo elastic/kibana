@@ -23,7 +23,7 @@ import { MissingIntegrationCallout } from '../../monitor_add_edit/steps/missing_
 import { SummaryPanel } from './summary_panel';
 
 import { useGetUrlParams } from '../../../hooks';
-import { useMonitorDetailsPage } from '../use_monitor_details_page';
+import { MonitorDetailsPage } from '../../common/app_header';
 import { useMonitorRangeFrom } from '../hooks/use_monitor_range_from';
 import { MonitorAlerts } from './monitor_alerts';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
@@ -46,13 +46,8 @@ export const MonitorSummary = () => {
   // Configure the agent builder flyout with the monitor details
   useMonitorAttachmentConfig();
 
-  const redirect = useMonitorDetailsPage();
-  if (redirect) {
-    return redirect;
-  }
-
   return (
-    <>
+    <MonitorDetailsPage selectedTab="overview">
       <MissingIntegrationCallout configId={configId} />
       <MonitorPendingWrapper>
         <MonitorMWsCallout />
@@ -104,7 +99,7 @@ export const MonitorSummary = () => {
           <TestRunsTable paginable={false} from={from} to={to} />
         </LoadWhenInView>
       </MonitorPendingWrapper>
-    </>
+    </MonitorDetailsPage>
   );
 };
 

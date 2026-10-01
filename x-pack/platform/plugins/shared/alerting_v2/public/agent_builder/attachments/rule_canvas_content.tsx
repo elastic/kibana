@@ -14,12 +14,15 @@ import {
 } from '@kbn/agent-builder-browser/attachments';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { RuleProvider } from '../../components/rule_details/rule_context';
-import { RuleHeaderDescription } from '../../components/rule_details/rule_header_description';
+import {
+  RuleHeaderDescription,
+  RuleTagsList,
+} from '../../components/rule_details/rule_summary_header';
 import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
 import { paths } from '../../constants';
 import { RulesApi, type RuleApiResponse } from '../../services/rules_api';
-import { buildRulePayload } from '../../../common/agent_builder/rule_mappers';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export interface RuleCanvasContentProps
@@ -97,8 +100,9 @@ export const RuleCanvasContent = ({
         label: i18n.translate('xpack.alertingV2.ruleAttachment.viewInRules', {
           defaultMessage: 'View in Rules',
         }),
-        icon: 'popout',
+        icon: 'external',
         type: ActionButtonType.OVERFLOW,
+        // TODO: Migrate to rules locator once agent builder attachments render inside the LocatorProvider tree
         handler: () => {
           application.navigateToUrl(basePath.prepend(paths.ruleDetails(ruleId)));
         },
@@ -120,9 +124,19 @@ export const RuleCanvasContent = ({
   return (
     <RuleProvider rule={data as unknown as RuleApiResponse}>
       <EuiPanel paddingSize="l" hasShadow={false}>
-        <RuleHeaderDescription />
-        <EuiSpacer size="m" />
-        <RuleSidebar />
+        {data.metadata.description && (
+          <>
+            <RuleHeaderDescription />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {data.metadata.tags && data.metadata.tags.length > 0 && (
+          <>
+            <RuleTagsList />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <RuleSidebar showQueryPreview />
       </EuiPanel>
     </RuleProvider>
   );

@@ -7,7 +7,12 @@
 
 export type FailedDataLifecycleApplyPayload =
   | { inheritLifecycle: true }
-  | { inheritLifecycle: false; failureStoreEnabled: boolean; retention?: string };
+  | {
+      inheritLifecycle: false;
+      failureStoreEnabled: boolean;
+      retention?: string;
+      retentionDisabled?: boolean;
+    };
 
 export interface BuildFailedDataLifecycleApplyPayloadArgs {
   inheritLifecycle: boolean;
@@ -17,6 +22,7 @@ export interface BuildFailedDataLifecycleApplyPayloadArgs {
    * When `failureStoreEnabled` is false, retention is ignored.
    */
   retention?: string;
+  retentionDisabled?: boolean;
 }
 
 /**
@@ -31,13 +37,15 @@ export const buildFailedDataLifecycleApplyPayload = ({
   inheritLifecycle,
   failureStoreEnabled,
   retention,
+  retentionDisabled,
 }: BuildFailedDataLifecycleApplyPayloadArgs): FailedDataLifecycleApplyPayload => {
   if (inheritLifecycle) return { inheritLifecycle: true };
 
-  const trimmedRetention = retention?.trim();
+  const trimmedRetention = typeof retention === 'string' ? retention.trim() : undefined;
   return {
     inheritLifecycle: false,
     failureStoreEnabled,
+    ...(failureStoreEnabled && retentionDisabled === true ? { retentionDisabled: true } : {}),
     ...(failureStoreEnabled && trimmedRetention ? { retention: trimmedRetention } : {}),
   };
 };

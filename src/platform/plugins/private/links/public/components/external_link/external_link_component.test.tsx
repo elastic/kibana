@@ -11,11 +11,11 @@ import React from 'react';
 
 import userEvent from '@testing-library/user-event';
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+
 import { ExternalLinkComponent } from './external_link_component';
 import { coreServices } from '../../services/kibana_services';
 import type { ResolvedLink } from '../../types';
-import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
 
 describe('external link component', () => {
   const defaultLinkInfo: ResolvedLink = {
@@ -80,8 +80,8 @@ describe('external link component', () => {
 
     const link = await screen.findByTestId('externalLink--https://example.com');
     await userEvent.click(link);
-    expect(coreServices.application.navigateToUrl).toBeCalledTimes(1);
-    expect(coreServices.application.navigateToUrl).toBeCalledWith('https://example.com');
+    expect(coreServices.application.navigateToUrl).toHaveBeenCalledTimes(1);
+    expect(coreServices.application.navigateToUrl).toHaveBeenCalledWith('https://example.com');
   });
 
   test('disables link when url validation fails', async () => {

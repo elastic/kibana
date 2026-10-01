@@ -126,6 +126,43 @@ Based on the above, provide the schedule in the following JSON format:
   ],
 ]);
 
+export const SEVERITY_AND_RISK_SCORE_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `Your role is to assess the severity and risk score for an Elastic Detection (SIEM) rule based on its intent, detection logic, and threat context.
+
+Severity levels and their corresponding default risk scores:
+- low: 21 — Informational or low-impact events; benign activity that warrants monitoring
+- medium: 47 — Suspicious activity that may require investigation; moderate impact
+- high: 73 — Likely malicious activity with significant potential impact
+- critical: 99 — Confirmed or near-certain attack; immediate response required
+
+Guidelines for choosing severity:
+- Consider the type of attack and its potential business impact
+- MITRE ATT&CK tactics can inform severity: initial access, discovery (low–medium), lateral movement, privilege escalation, credential access (medium–high), execution, persistence, exfiltration, impact (high–critical)
+- Consider whether the activity is always malicious vs. potentially benign
+- Consider data sensitivity (e.g., detections in authentication or identity data warrant higher severity)
+- The risk_score should reflect the numeric score that matches the chosen severity level (low=21, medium=47, high=73, critical=99), but you may adjust within a ±10 range when context warrants
+
+Respond with ONLY a JSON object in this exact format:
+{{
+  "severity": "medium",
+  "risk_score": 47,
+  "reasoning": "Brief explanation of why this severity was chosen"
+}}`,
+  ],
+  [
+    'human',
+    `
+    <context>
+      User request: {user_request}
+      ES|QL query: {esql_query}
+      Rule description: {rule_description}
+      MITRE ATT&CK mappings: {mitre_mappings}
+    </context>`,
+  ],
+]);
+
 export const MITRE_MAPPING_SELECTION_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',

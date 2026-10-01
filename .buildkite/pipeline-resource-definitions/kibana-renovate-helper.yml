@@ -26,6 +26,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/renovate_helper.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/renovate_helper.yml
+            cleanup_sparse_state: true
       cancel_intermediate_builds: true
       provider_settings:
         build_pull_requests: true

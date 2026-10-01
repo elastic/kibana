@@ -8,18 +8,19 @@
  */
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { callKibanaApi, CallKibanaApiResponseTooLargeError } from './call_kibana_api';
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
+import {
+  callKibanaApi,
+  CallKibanaApiResponseTooLargeError,
+  KibanaApiCallError,
+} from './call_kibana_api';
+import { toExecutionError } from '../step/errors';
 
-const originalFetch = global.fetch;
-const mockedFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
-
-beforeAll(() => {
-  global.fetch = mockedFetch;
-});
-
-afterAll(() => {
-  global.fetch = originalFetch;
-});
+// Core's HTTP self client is the transport. `asScoped(request).fetch(path, options)` is mocked so we
+// assert what the helper hands to Core (path, query, body, the headers Core does not manage, and the
+// access/rawResponse flags) and drive its response-shaping contract from the mocked raw `Response`.
+const mockSelfFetch = jest.fn();
+const mockAsScoped = jest.fn(() => ({ fetch: mockSelfFetch }));
 
 function createMockReadableStream(payload: Uint8Array) {
   let consumed = false;
@@ -65,6 +66,12 @@ function createMockResponse({
   } as unknown as Response;
 }
 
+/** Mirrors what the self client returns for `{ asResponse: true, rawResponse: true }`. */
+const mockSelfResponse = (response: Response, url = 'http://localhost:5601/api/status') => ({
+  request: { url },
+  response,
+});
+
 function createFakeRequest({
   headers = {},
   isInternalApiRequest = false,
@@ -78,24 +85,35 @@ function createFakeRequest({
       ...headers,
     },
     isInternalApiRequest,
+    isFakeRequest: true,
   } as unknown as KibanaRequest;
 }
 
-function createCoreStart(publicBaseUrl = 'https://kibana.example.com'): CoreStart {
+function createCoreStart({ serverBasePath = '' }: { serverBasePath?: string } = {}): CoreStart {
   return {
     http: {
-      basePath: { publicBaseUrl },
+      basePath: {
+        serverBasePath,
+        prepend: jest.fn((path: string) => `${serverBasePath}${path}`),
+      },
+      selfClient: { asScoped: mockAsScoped },
     },
   } as unknown as CoreStart;
 }
 
+/** Options the helper passed to the self client's `fetch` on its first (only) call. */
+const lastFetchOptions = () => mockSelfFetch.mock.calls[0][1] as Record<string, any>;
+const lastFetchHeaders = () => lastFetchOptions().headers as Record<string, string>;
+
 describe('callKibanaApi', () => {
   beforeEach(() => {
-    mockedFetch.mockReset();
+    mockSelfFetch.mockReset();
+    mockAsScoped.mockClear();
+    mockAsScoped.mockImplementation(() => ({ fetch: mockSelfFetch }));
   });
 
-  it('builds the URL with query parameters and forwards method', async () => {
-    mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+  it('forwards the path, query, and method to the self client', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 
     await callKibanaApi(
       { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
@@ -106,14 +124,219 @@ describe('callKibanaApi', () => {
       }
     );
 
-    const [url, init] = mockedFetch.mock.calls[0];
-    expect(url).toBe('https://kibana.example.com/api/cases/_find?perPage=20&owner=cases');
-    expect((init as RequestInit).method).toBe('GET');
-    expect((init as RequestInit).body).toBeUndefined();
+    const [path, options] = mockSelfFetch.mock.calls[0];
+    expect(path).toBe('/api/cases/_find');
+    expect(options.method).toBe('GET');
+    expect(options.query).toEqual({ perPage: 20, owner: 'cases', skip: undefined });
+    expect(options.body).toBeUndefined();
   });
 
-  it('serializes the body as JSON for POST', async () => {
-    mockedFetch.mockResolvedValue(createMockResponse({ body: { id: 'abc' } }));
+  it('includes the configured server base path in loopback requests', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest(),
+        coreStart: createCoreStart({ serverBasePath: '/my-base-path' }),
+      },
+      {
+        method: 'GET',
+        path: '/api/status',
+      }
+    );
+
+    expect(mockSelfFetch.mock.calls[0][0]).toBe('/my-base-path/api/status');
+  });
+
+  it('delegates server base path resolution to Core', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    const coreStart = createCoreStart({ serverBasePath: '/configured-base-path' });
+    const prependBasePath = coreStart.http.basePath.prepend as jest.Mock;
+    prependBasePath.mockReturnValue('/core-resolved-base-path/api/status');
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest(),
+        coreStart,
+      },
+      {
+        method: 'GET',
+        path: '/api/status',
+      }
+    );
+
+    expect(prependBasePath).toHaveBeenCalledWith('/api/status');
+    expect(mockSelfFetch.mock.calls[0][0]).toBe('/core-resolved-base-path/api/status');
+  });
+
+  it('places a non-default space after the configured server base path', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest(),
+        coreStart: createCoreStart({ serverBasePath: '/my-base-path' }),
+        spaceId: 'my-space',
+      },
+      {
+        method: 'POST',
+        path: '/api/detection_engine/signals/assignees',
+        body: { assignees: ['elastic'] },
+      }
+    );
+
+    expect(mockSelfFetch.mock.calls[0][0]).toBe(
+      '/my-base-path/s/my-space/api/detection_engine/signals/assignees'
+    );
+    expect(lastFetchOptions().body).toEqual({ assignees: ['elastic'] });
+  });
+
+  // The self client resolves the base URL itself, and the workflow fake request has no base path, so
+  // the space can only reach Core through the path we hand it.
+  it('rejects dot-segment paths that could escape the workflow space', async () => {
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'current' },
+        { method: 'GET', path: '/s/current/../victim' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+    for (const path of [
+      '/api/.%2e/victim',
+      '/api/%2e./victim',
+      '/api/%2e%2e/victim',
+      '/api/../victim',
+    ]) {
+      await expect(
+        callKibanaApi(
+          { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'current' },
+          { method: 'GET', path }
+        )
+      ).rejects.toThrow('Invalid Kibana API path');
+    }
+  });
+
+  it('forwards an explicit space prefix for the default space', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'default' },
+      { method: 'GET', path: '/s/other-space/api/saved_objects/_find' }
+    );
+
+    expect(mockSelfFetch.mock.calls[0][0]).toBe('/s/other-space/api/saved_objects/_find');
+  });
+
+  it('allows encoded route parameters while rejecting malformed and authority paths', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    for (const path of ['/api/items/foo%20bar', '/api/items/%E2%9C%93']) {
+      await callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path }
+      );
+    }
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/%' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/%2e%2e%2fvictim' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '//victim/api' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/\n/evil.example/x' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/%0a/evil.example' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+  });
+
+  it('allows encoded slashes in the query string and still rejects them in the path', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'GET', path: '/api/search?filter=foo%2Fbar' }
+    );
+    expect(mockSelfFetch.mock.calls[0][0]).toBe('/api/search?filter=foo%2Fbar');
+
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/%2fsecret?ok=1' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+  });
+
+  it('prefixes the path with /s/{spaceId} for a non-default space', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'my-space' },
+      { method: 'GET', path: '/api/cases/_find', query: { perPage: 20 } }
+    );
+
+    const [path, options] = mockSelfFetch.mock.calls[0];
+    expect(path).toBe('/s/my-space/api/cases/_find');
+    expect(options.prependBasePath).toBe(false);
+  });
+
+  it.each(['/api/cases', '/s/other/api/cases', '/s/my-space/api/cases'])(
+    'sends %s unchanged under the base path when prefixSpace is false',
+    async (path) => {
+      mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+      await callKibanaApi(
+        {
+          fakeRequest: createFakeRequest(),
+          coreStart: createCoreStart({ serverBasePath: '/my-base-path' }),
+          spaceId: 'my-space',
+        },
+        { method: 'GET', path, prefixSpace: false }
+      );
+
+      expect(mockSelfFetch.mock.calls[0][0]).toBe(`/my-base-path${path}`);
+    }
+  );
+
+  it('does not prefix the path for the default space', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'default' },
+      { method: 'GET', path: '/api/cases/_find' }
+    );
+
+    expect(mockSelfFetch.mock.calls[0][0]).toBe('/api/cases/_find');
+  });
+
+  it('does not prefix the path when no space is provided', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'GET', path: '/api/status' }
+    );
+
+    expect(mockSelfFetch.mock.calls[0][0]).toBe('/api/status');
+  });
+
+  it('forwards the body for POST (the self client serializes it)', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { id: 'abc' } })));
 
     await callKibanaApi(
       { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
@@ -124,26 +347,74 @@ describe('callKibanaApi', () => {
       }
     );
 
-    const [, init] = mockedFetch.mock.calls[0];
-    const headers = (init as RequestInit).headers as Record<string, string>;
-    expect(headers['Content-Type']).toBe('application/json');
-    expect((init as RequestInit).body).toBe(JSON.stringify({ title: 'Test', owner: 'cases' }));
+    expect(lastFetchOptions().body).toEqual({ title: 'Test', owner: 'cases' });
   });
 
-  it('propagates Authorization from the fake request', async () => {
-    mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+  it('scopes the self client to the fake request (so Core forwards its credential)', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    const fakeRequest = createFakeRequest({ headers: { authorization: 'ApiKey caller-key' } });
+
+    await callKibanaApi(
+      { fakeRequest, coreStart: createCoreStart() },
+      {
+        method: 'GET',
+        path: '/api/status',
+      }
+    );
+
+    expect(mockAsScoped).toHaveBeenCalledWith(fakeRequest);
+  });
+
+  it('requests the internal access level and a raw response', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'GET', path: '/api/status' }
+    );
+
+    const options = lastFetchOptions();
+    expect(options.access).toBe('internal');
+    expect(options.asResponse).toBe(true);
+    expect(options.rawResponse).toBe(true);
+    expect(options.prependBasePath).toBe(false);
+  });
+
+  it('does not pass the UIAM attestation header to the self client', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 
     await callKibanaApi(
       {
-        fakeRequest: createFakeRequest({ headers: { authorization: 'ApiKey caller-key' } }),
+        fakeRequest: createFakeRequest({ headers: { authorization: 'ApiKey essu_internal_key' } }),
         coreStart: createCoreStart(),
       },
       { method: 'GET', path: '/api/status' }
     );
 
-    const [, init] = mockedFetch.mock.calls[0];
-    const headers = (init as RequestInit).headers as Record<string, string>;
-    expect(headers.Authorization).toBe('ApiKey caller-key');
+    expect(lastFetchHeaders()).not.toHaveProperty(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER);
+    expect(mockAsScoped).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({ authorization: 'ApiKey essu_internal_key' }),
+      })
+    );
+  });
+
+  it('drops a caller-supplied attestation header', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest({ headers: { authorization: 'ApiKey essu_internal_key' } }),
+        coreStart: createCoreStart(),
+      },
+      {
+        method: 'GET',
+        path: '/api/status',
+        headers: { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'forged-attestation' },
+      }
+    );
+
+    expect(lastFetchHeaders()).not.toHaveProperty(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER);
   });
 
   it('throws when the fake request has no Authorization header', async () => {
@@ -156,24 +427,11 @@ describe('callKibanaApi', () => {
         { method: 'GET', path: '/api/status' }
       )
     ).rejects.toThrow(/missing Authorization header/);
-    expect(mockedFetch).not.toHaveBeenCalled();
-  });
-
-  it('always sets x-elastic-internal-origin to Kibana', async () => {
-    mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
-
-    await callKibanaApi(
-      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
-      { method: 'GET', path: '/api/status' }
-    );
-
-    const [, init] = mockedFetch.mock.calls[0];
-    const headers = (init as RequestInit).headers as Record<string, string>;
-    expect(headers['x-elastic-internal-origin']).toBe('Kibana');
+    expect(mockSelfFetch).not.toHaveBeenCalled();
   });
 
   it('injects event-chain headers from the fake request and workflow run id', async () => {
-    mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 
     await callKibanaApi(
       {
@@ -192,15 +450,59 @@ describe('callKibanaApi', () => {
       { method: 'GET', path: '/api/status' }
     );
 
-    const [, init] = mockedFetch.mock.calls[0];
-    const headers = (init as RequestInit).headers as Record<string, string>;
+    const headers = lastFetchHeaders();
     expect(headers['x-kibana-event-chain-depth']).toBe('2');
     expect(headers['x-kibana-event-chain-source-execution-id']).toBe('src-exec');
     expect(headers['x-kibana-workflow-execution-id']).toBe('run-42');
   });
 
-  it('drops caller-supplied reserved headers but keeps custom ones', async () => {
-    mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+  it('strips Content-Type for FormData but preserves it for buffered non-FormData bodies', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      {
+        method: 'POST',
+        path: '/api/foo',
+        rawBody: new FormData(),
+        headers: { 'Content-Type': 'multipart/form-data; boundary=caller' },
+      }
+    );
+    expect(lastFetchHeaders()['Content-Type']).toBeUndefined();
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      {
+        method: 'POST',
+        path: '/api/foo',
+        rawBody: new URLSearchParams({ value: 'one' }),
+        headers: { 'Content-Type': 'text/plain' },
+      }
+    );
+    expect((mockSelfFetch.mock.calls[1][1] as any).headers['Content-Type']).toBe('text/plain');
+  });
+
+  it('defaults JSON string bodies to application/json while preserving explicit content types', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'POST', path: '/api/foo', body: '{"a":1}' }
+    );
+    expect(lastFetchHeaders()['content-type']).toBe('application/json');
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      {
+        method: 'POST',
+        path: '/api/foo',
+        body: '{"a":1}',
+        headers: { 'Content-Type': 'text/plain' },
+      }
+    );
+    expect((mockSelfFetch.mock.calls[1][1] as any).headers['Content-Type']).toBe('text/plain');
+  });
+
+  it('drops caller-supplied protected headers but keeps custom ones', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 
     await callKibanaApi(
       { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
@@ -211,25 +513,61 @@ describe('callKibanaApi', () => {
         headers: {
           Authorization: 'Bearer attacker',
           'content-type': 'text/plain',
+          cookie: 'sid=1',
+          host: 'evil.example',
+          'kbn-version': '0.0.0',
+          'x-kbn-self-call': 'false',
           'x-elastic-internal-origin': 'spoof',
+          'x-elastic-internal-origin-request': 'spoof',
           'x-kibana-event-chain-depth': '99',
+          'x-client-authentication': 'invented-secret',
+          'es-secondary-x-client-authentication': 'invented-secret',
           'x-custom-trace-id': 'trace-1',
         },
       }
     );
 
-    const [, init] = mockedFetch.mock.calls[0];
-    const headers = (init as RequestInit).headers as Record<string, string>;
-    expect(headers.Authorization).toBe('ApiKey test-key');
-    expect(headers['Content-Type']).toBe('application/json');
-    expect(headers['x-elastic-internal-origin']).toBe('Kibana');
+    const headers = lastFetchHeaders();
+    // Core owns authorization and the UIAM shared secret, and forwarding them would make the self
+    // client throw, so they are stripped here. The explicit caller content type is preserved for
+    // JSON requests.
+    expect(headers.Authorization).toBeUndefined();
+    expect(headers['content-type']).toBe('text/plain');
+    expect(headers.cookie).toBeUndefined();
+    expect(headers.host).toBeUndefined();
+    expect(headers['kbn-version']).toBeUndefined();
+    expect(headers['x-kbn-self-call']).toBeUndefined();
+    expect(headers['x-elastic-internal-origin']).toBeUndefined();
+    expect(headers['x-elastic-internal-origin-request']).toBeUndefined();
+    expect(headers['x-client-authentication']).toBeUndefined();
+    expect(headers['es-secondary-x-client-authentication']).toBeUndefined();
+    // Engine-stamped, not caller-forgeable.
     expect(headers['x-kibana-event-chain-depth']).toBeUndefined();
+    // Genuinely custom headers pass through untouched.
     expect(headers['x-custom-trace-id']).toBe('trace-1');
   });
 
-  it('throws an Error with status and body on non-2xx', async () => {
-    mockedFetch.mockResolvedValue(
-      createMockResponse({ body: { message: 'forbidden' }, status: 403 })
+  it('always sends x-kbn-alerting-clone-api-key: true, even if the step tries to set it', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      {
+        method: 'POST',
+        path: '/api/detection_engine/rules/_bulk_action',
+        body: { action: 'enable', ids: ['r1'] },
+        headers: { 'X-Kbn-Alerting-Clone-Api-Key': 'false' },
+      }
+    );
+
+    const headers = lastFetchHeaders();
+    expect(headers['x-kbn-alerting-clone-api-key']).toBe('true');
+    expect(headers['X-Kbn-Alerting-Clone-Api-Key']).toBeUndefined();
+  });
+
+  it('throws a KibanaApiCallError with the unchanged HTTP <status>: <body> message on non-2xx', async () => {
+    mockSelfFetch.mockResolvedValue(
+      mockSelfResponse(createMockResponse({ body: { message: 'forbidden' }, status: 403 }))
     );
 
     await expect(
@@ -240,8 +578,135 @@ describe('callKibanaApi', () => {
     ).rejects.toThrow('HTTP 403: {"message":"forbidden"}');
   });
 
+  it('exposes parsed status, headers, and body on the thrown KibanaApiCallError', async () => {
+    const response = createMockResponse({
+      body: { attributes: { summary: { failed: 1 }, results: { updated: [{ id: 'r1' }] } } },
+      status: 500,
+    });
+    response.headers.set('x-trace-id', 'trace-err');
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(response));
+
+    expect.assertions(6);
+    try {
+      await callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'POST', path: '/api/detection_engine/rules/_bulk_action' }
+      );
+    } catch (err) {
+      expect(err).toBeInstanceOf(KibanaApiCallError);
+      const error = err as KibanaApiCallError;
+      expect(error.status).toBe(500);
+      expect(error.headers['x-trace-id']).toBe('trace-err');
+      expect(error.url).toBe('http://localhost:5601/api/status');
+      expect(error.body).toEqual({
+        attributes: { summary: { failed: 1 }, results: { updated: [{ id: 'r1' }] } },
+      });
+      // message stays byte-compatible with the previous behavior
+      expect(error.message).toBe(
+        `HTTP 500: ${JSON.stringify({
+          attributes: { summary: { failed: 1 }, results: { updated: [{ id: 'r1' }] } },
+        })}`
+      );
+    }
+  });
+
+  it('does not truncate the recovered error body at the old 1 MB cap', async () => {
+    // ~2 MB JSON body, well above the previous hard-coded 1 MB error-body cap.
+    const updated = Array.from({ length: 20000 }, (_, i) => ({
+      id: `rule-${i}`,
+      status: 'failed',
+    }));
+    const largeBody = { attributes: { results: { updated } } };
+    mockSelfFetch.mockResolvedValue(
+      mockSelfResponse(createMockResponse({ body: largeBody, status: 500 }))
+    );
+
+    expect.assertions(2);
+    try {
+      await callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'POST', path: '/api/detection_engine/rules/_bulk_action' }
+      );
+    } catch (err) {
+      const error = err as KibanaApiCallError;
+      // Full structured body is parseable (not a truncated string) and complete.
+      expect((error.body as typeof largeBody).attributes.results.updated).toHaveLength(20000);
+      expect(error.body).toEqual(largeBody);
+    }
+  });
+
+  it('throws CallKibanaApiResponseTooLargeError when an error body exceeds maxResponseBytes', async () => {
+    const payload = new TextEncoder().encode(JSON.stringify({ message: 'x'.repeat(2048) }));
+    mockSelfFetch.mockResolvedValue(
+      mockSelfResponse(createMockResponse({ body: payload, status: 500 }))
+    );
+
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), maxResponseBytes: 256 },
+        { method: 'GET', path: '/api/boom' }
+      )
+    ).rejects.toBeInstanceOf(CallKibanaApiResponseTooLargeError);
+  });
+
+  it('truncates an error body above maxErrorBodyBytes and keeps the HTTP status', async () => {
+    const encoder = new TextEncoder();
+    const chunks = [encoder.encode('{"message":"'), encoder.encode(`${'x'.repeat(2048)}"}`)];
+    const response = createMockResponse({ body: '', status: 500 });
+    (response as { body: unknown }).body = {
+      getReader: () => ({
+        read: async () =>
+          chunks.length > 0 ? { done: false, value: chunks.shift() } : { done: true },
+        releaseLock: () => {},
+        cancel: jest.fn(),
+      }),
+    };
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(response));
+
+    const error = await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), maxResponseBytes: 256 },
+      { method: 'GET', path: '/api/boom', maxErrorBodyBytes: 16 }
+    ).catch((err) => err);
+
+    expect(error).toBeInstanceOf(KibanaApiCallError);
+    expect(error.status).toBe(500);
+    expect(error.body).toBe('{"message":"... [truncated]');
+    expect(error.message).toBe('HTTP 500: {"message":"... [truncated]');
+  });
+
+  it('normalizes to type/message/details:{status} via toExecutionError, never body/headers (ES guard)', async () => {
+    mockSelfFetch.mockResolvedValue(
+      mockSelfResponse(
+        createMockResponse({
+          body: { secret: 'do-not-persist', big: 'x'.repeat(100) },
+          status: 500,
+        })
+      )
+    );
+
+    expect.assertions(5);
+    try {
+      await callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/boom' }
+      );
+    } catch (err) {
+      // The engine normalizes a thrown KibanaApiCallError via `toExecutionError` (not the generic
+      // `fromError`), lifting only the safe scalar `status` into `details`.
+      const serialized = toExecutionError(err as Error).toSerializableObject();
+      expect(serialized.type).toBe('KibanaApiCallError');
+      expect(serialized.details).toEqual({ status: 500 });
+      expect(serialized as Record<string, unknown>).not.toHaveProperty('body');
+      expect(serialized as Record<string, unknown>).not.toHaveProperty('headers');
+      // The raw body must not leak into the persisted `details`.
+      expect(JSON.stringify(serialized.details)).not.toContain('do-not-persist');
+    }
+  });
+
   it('returns body {} for 204 No Content', async () => {
-    mockedFetch.mockResolvedValue(createMockResponse({ body: '', status: 204 }));
+    mockSelfFetch.mockResolvedValue(
+      mockSelfResponse(createMockResponse({ body: '', status: 204 }))
+    );
 
     const result = await callKibanaApi(
       { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
@@ -253,7 +718,9 @@ describe('callKibanaApi', () => {
   });
 
   it('returns body {} for 304 Not Modified', async () => {
-    mockedFetch.mockResolvedValue(createMockResponse({ body: '', status: 304 }));
+    mockSelfFetch.mockResolvedValue(
+      mockSelfResponse(createMockResponse({ body: '', status: 304 }))
+    );
 
     const result = await callKibanaApi(
       { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
@@ -265,8 +732,10 @@ describe('callKibanaApi', () => {
   });
 
   it('parses JSON content types into objects', async () => {
-    mockedFetch.mockResolvedValue(
-      createMockResponse({ body: { id: '1', value: 'ok' }, contentType: 'application/json' })
+    mockSelfFetch.mockResolvedValue(
+      mockSelfResponse(
+        createMockResponse({ body: { id: '1', value: 'ok' }, contentType: 'application/json' })
+      )
     );
 
     const result = await callKibanaApi<{ id: string; value: string }>(
@@ -278,8 +747,10 @@ describe('callKibanaApi', () => {
   });
 
   it('returns a string when text content cannot be parsed as JSON', async () => {
-    mockedFetch.mockResolvedValue(
-      createMockResponse({ body: 'plain text response', contentType: 'text/plain' })
+    mockSelfFetch.mockResolvedValue(
+      mockSelfResponse(
+        createMockResponse({ body: 'plain text response', contentType: 'text/plain' })
+      )
     );
 
     const result = await callKibanaApi(
@@ -292,8 +763,8 @@ describe('callKibanaApi', () => {
 
   it('returns a Buffer for binary content types', async () => {
     const bytes = new Uint8Array([0x01, 0x02, 0x03, 0xff]);
-    mockedFetch.mockResolvedValue(
-      createMockResponse({ body: bytes, contentType: 'application/octet-stream' })
+    mockSelfFetch.mockResolvedValue(
+      mockSelfResponse(createMockResponse({ body: bytes, contentType: 'application/octet-stream' }))
     );
 
     const result = await callKibanaApi(
@@ -305,8 +776,8 @@ describe('callKibanaApi', () => {
     expect(Buffer.from(bytes).equals(result.body as Buffer)).toBe(true);
   });
 
-  it('forwards the abort signal to fetch', async () => {
-    mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+  it('forwards the abort signal to the self client', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
     const controller = new AbortController();
 
     await callKibanaApi(
@@ -314,14 +785,65 @@ describe('callKibanaApi', () => {
       { method: 'GET', path: '/api/foo', signal: controller.signal }
     );
 
-    const [, init] = mockedFetch.mock.calls[0];
-    expect((init as RequestInit).signal).toBe(controller.signal);
+    expect(lastFetchOptions().signal).toBe(controller.signal);
+  });
+
+  it('cancels the response body when the signal aborts after headers', async () => {
+    let resolveRead: (result: { done: boolean; value?: Uint8Array }) => void;
+    let signalReadStarted: () => void;
+    const readStarted = new Promise<void>((resolve) => {
+      signalReadStarted = resolve;
+    });
+    const pendingRead = new Promise<{ done: boolean; value?: Uint8Array }>((resolve) => {
+      resolveRead = resolve;
+    });
+    const cancel = jest.fn(() => resolveRead({ done: true }));
+    const response = {
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      body: {
+        getReader: () => ({
+          read: () => {
+            signalReadStarted();
+            return pendingRead;
+          },
+          releaseLock: () => {},
+          cancel,
+        }),
+      },
+    } as unknown as Response;
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(response));
+    const controller = new AbortController();
+
+    const result = callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'GET', path: '/api/foo', signal: controller.signal }
+    );
+    await readStarted;
+    controller.abort();
+
+    await expect(result).rejects.toMatchObject({ name: 'AbortError' });
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards the timeout to the self client', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'GET', path: '/api/foo', timeout: 300_000 }
+    );
+
+    expect(lastFetchOptions().timeout).toBe(300_000);
   });
 
   it('throws CallKibanaApiResponseTooLargeError when body exceeds maxResponseBytes', async () => {
     const payload = new Uint8Array(1024);
-    mockedFetch.mockResolvedValue(
-      createMockResponse({ body: payload, contentType: 'application/octet-stream' })
+    mockSelfFetch.mockResolvedValue(
+      mockSelfResponse(
+        createMockResponse({ body: payload, contentType: 'application/octet-stream' })
+      )
     );
 
     await expect(
@@ -339,7 +861,7 @@ describe('callKibanaApi', () => {
   it('returns the response status and headers', async () => {
     const response = createMockResponse({ body: { ok: true } });
     response.headers.set('x-trace-id', 'trace-xyz');
-    mockedFetch.mockResolvedValue(response);
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(response));
 
     const result = await callKibanaApi(
       { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
@@ -349,5 +871,6 @@ describe('callKibanaApi', () => {
     expect(result.status).toBe(200);
     expect(result.headers['content-type']).toBe('application/json');
     expect(result.headers['x-trace-id']).toBe('trace-xyz');
+    expect(result.url).toBe('http://localhost:5601/api/status');
   });
 });

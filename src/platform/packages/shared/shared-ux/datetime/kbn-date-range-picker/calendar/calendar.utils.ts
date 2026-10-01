@@ -55,3 +55,37 @@ export function getScrollDirectionIcon(
   if (direction === 'forward') return 'sortDown';
   return undefined;
 }
+
+/**
+ * Returns the day button that should receive focus when tabbing into the
+ * calendar: the focus-target day (`tabindex="0"`) of the month currently in
+ * view. Every mounted react-day-picker instance has exactly one such day, so
+ * a scroller-wide query would match the first mounted month — many months
+ * before the one the scroller is centered on.
+ *
+ * Falls back to the scroller-wide `[tabindex="0"]` when no month wrapper
+ * matches.
+ */
+export function getMonthInViewFocusTarget(scroller: HTMLElement): HTMLElement | null {
+  const monthItems = Array.from(scroller.querySelectorAll<HTMLElement>('[data-month-index]'));
+  const centerLine = scroller.scrollTop + scroller.clientHeight / 2;
+
+  let monthInView: HTMLElement | null = null;
+  let closestDistance = Number.POSITIVE_INFINITY;
+  for (const monthItem of monthItems) {
+    const monthTop = monthItem.offsetTop;
+    const monthBottom = monthTop + monthItem.offsetHeight;
+    const distance =
+      centerLine < monthTop ? monthTop - centerLine : Math.max(0, centerLine - monthBottom);
+
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      monthInView = monthItem;
+    }
+  }
+
+  return (
+    monthInView?.querySelector<HTMLElement>('[tabindex="0"]') ??
+    scroller.querySelector<HTMLElement>('[tabindex="0"]')
+  );
+}

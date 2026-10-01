@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
+import { chunk, pick } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { SkipRuleInstallReason } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -15,13 +15,19 @@ import type {
   PerformRuleInstallationRequestBody,
   InstalledRuleBasicInfo,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import {
+  SecurityRuleChangeTrackingAction,
+  type SecurityRuleChangeTracking,
+} from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
+import {
+  aggregatePrebuiltRuleErrors,
+  type PrebuiltRulesInstallError,
+} from '../../logic/aggregate_prebuilt_rule_errors';
+import { PREBUILT_RULES_BULK_CREATE_BATCH_SIZE } from '../../constants';
 import { ensureLatestRulesPackageInstalled } from '../../logic/integrations/ensure_latest_rules_package_installed';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
-import { PREBUILT_RULE_BATCH_SIZE } from '../../constants';
-import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import type { RuleSignatureId, RuleVersion } from '../../../../../../common/api/detection_engine';
@@ -58,7 +64,7 @@ export const performRuleInstallationHandler = async (
       rule_id: RuleSignatureId;
       version: RuleVersion;
     }> = [];
-    const ruleErrors = [];
+    const ruleErrors: PrebuiltRulesInstallError[] = [];
     const installedRules: InstalledRuleBasicInfo[] = [];
     const skippedRules: SkippedRuleInstall[] = [];
 
@@ -111,29 +117,25 @@ export const performRuleInstallationHandler = async (
       ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
-    const changeTracking = {
-      metadata: {
-        bulkCount: ruleInstallQueue.length,
-      },
-    };
+    const installBatches = chunk(ruleInstallQueue, PREBUILT_RULES_BULK_CREATE_BATCH_SIZE);
 
-    while (ruleInstallQueue.length > 0) {
-      const rulesToInstall = ruleInstallQueue.splice(0, PREBUILT_RULE_BATCH_SIZE);
-      const { assets: ruleAssets } = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
+    for (const batch of installBatches) {
+      const { assets: ruleAssets } = await ruleAssetsClient.fetchAssetsByVersion(batch);
 
-      const { results, errors } = await createPrebuiltRules(
-        detectionRulesClient,
-        ruleAssets,
+      const changeTracking: SecurityRuleChangeTracking = {
+        action: SecurityRuleChangeTrackingAction.ruleInstall,
+        metadata: { bulkCount: ruleInstallQueue.length },
+      };
+
+      const { results, errors } = await detectionRulesClient.bulkCreatePrebuiltRules({
+        rules: ruleAssets,
         changeTracking,
-        logger
-      );
+      });
 
-      const batchInstalledRules = results.map(({ result: rule }) =>
-        pick(rule, ['id', 'rule_id', 'version'])
+      installedRules.push(...results.map((rule) => pick(rule, ['id', 'rule_id', 'version'])));
+      ruleErrors.push(
+        ...errors.map(({ item, error }) => ({ item: pick(item, ['rule_id', 'name']), error }))
       );
-
-      installedRules.push(...batchInstalledRules);
-      ruleErrors.push(...errors);
     }
 
     const { error: timelineInstallationError } = await performTimelinesInstallation(

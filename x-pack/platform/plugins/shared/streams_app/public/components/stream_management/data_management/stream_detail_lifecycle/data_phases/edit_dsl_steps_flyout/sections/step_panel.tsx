@@ -23,6 +23,8 @@ export interface StepPanelProps {
   timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
   dataRetentionMs?: number;
   dataRetentionEsFormat?: string;
+  frozenAfterMs?: number;
+  frozenAfterEsFormat?: string;
 }
 
 export const StepPanel = ({
@@ -34,6 +36,8 @@ export const StepPanel = ({
   timeUnitOptions,
   dataRetentionMs,
   dataRetentionEsFormat,
+  frozenAfterMs,
+  frozenAfterEsFormat,
 }: StepPanelProps) => {
   const isHidden = selectedStepIndex !== stepIndex;
   const stepNumber = stepIndex + 1;
@@ -55,6 +59,8 @@ export const StepPanel = ({
               timeUnitOptions={timeUnitOptions}
               dataRetentionMs={dataRetentionMs}
               dataRetentionEsFormat={dataRetentionEsFormat}
+              frozenAfterMs={frozenAfterMs}
+              frozenAfterEsFormat={frozenAfterEsFormat}
             />
           </EuiFlexItem>
 
@@ -63,6 +69,10 @@ export const StepPanel = ({
               item={item}
               dataTestSubj={dataTestSubj}
               timeUnitOptions={timeUnitOptions}
+              dataRetentionMs={dataRetentionMs}
+              dataRetentionEsFormat={dataRetentionEsFormat}
+              frozenAfterMs={frozenAfterMs}
+              frozenAfterEsFormat={frozenAfterEsFormat}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

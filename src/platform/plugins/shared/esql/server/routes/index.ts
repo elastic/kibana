@@ -15,31 +15,34 @@ import type { ESQLExtensionsRegistry } from '../extensions_registry';
 import { registerGetJoinIndicesRoute } from './get_join_indices';
 import { registerGetTimeseriesIndicesRoute } from './get_timeseries_indices';
 import { registerGetViewsRoute } from './get_views';
+import { registerViewsManagementRoutes } from './views_management';
 import { registerGetDatasetsRoute } from './get_datasets';
 import { registerESQLExtensionsRoute } from './get_esql_extensions_route';
 import { registerLookupIndexRoutes } from './lookup_index';
 import { registerGetSourcesRoute } from './get_all_sources';
 import { registerGetTimeFieldRoute } from './get_timefield';
+import { registerGetSourceInfoRoute } from './get_source_info';
 import { registerNLtoESQLRoute } from './nl_to_esql_route';
 import { registerSuggestFixRoute } from './suggest_fix_route';
 
 export const registerRoutes = (
   setup: CoreSetup<EsqlServerPluginStart>,
   extensionsRegistry: ESQLExtensionsRegistry,
-  initContext: PluginInitializerContext,
-  isServerless: boolean
+  initContext: PluginInitializerContext
 ) => {
   const router = setup.http.createRouter();
 
   registerGetJoinIndicesRoute(router, initContext);
   registerGetTimeseriesIndicesRoute(router, initContext);
-  registerGetViewsRoute(router, initContext, isServerless);
+  registerGetViewsRoute(router, initContext);
+  registerViewsManagementRoutes(router, initContext);
   registerGetDatasetsRoute(router, initContext);
   registerESQLExtensionsRoute(router, extensionsRegistry, initContext);
   registerGetInferenceEndpointsRoute(router, initContext);
   registerLookupIndexRoutes(router, initContext);
   registerGetSourcesRoute(router, initContext);
-  registerGetTimeFieldRoute(router, initContext, isServerless);
+  registerGetTimeFieldRoute(router, initContext);
+  registerGetSourceInfoRoute(router, initContext);
   registerNLtoESQLRoute(router, setup.getStartServices, initContext);
   registerSuggestFixRoute(router, setup.getStartServices, initContext);
 };

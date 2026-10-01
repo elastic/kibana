@@ -10,9 +10,11 @@
 import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, useEuiTheme } from '@elastic/eui';
 import type { EuiBreakpointSize, EuiThemeComputed } from '@elastic/eui';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
+import { CONTENT_LIST_TEST_SUBJECTS, getContentListRowSubj } from '@kbn/content-list-common';
 import {
   useContentListConfig,
   useContentListItems,
@@ -62,8 +64,9 @@ export interface ContentListTableProps {
   responsiveBreakpoint?: EuiBreakpointSize | boolean;
   /**
    * Custom message to display when a search or filter returns zero results.
-   * When omitted, `EuiBasicTable` renders its built-in empty row. Has no
-   * effect when the whole list is empty; `<ContentList>` owns that state.
+   * When omitted, renders a default "No items found" with
+   * `data-test-subj="contentListNoResults"` (matches {@link ContentListWrapper}).
+   * Has no effect when the whole list is empty; `<ContentList>` owns that state.
    */
   noItemsMessage?: ReactNode;
   /**
@@ -98,7 +101,7 @@ export interface ContentListTableProps {
  * @param id - The item's ID.
  * @returns A stable row ID string.
  */
-export const getRowId = (id: string): string => `content-list-table-row-${id}`;
+export const getRowId = getContentListRowSubj;
 
 /**
  * Keep sticky cells (e.g. `Column.Actions` with `sticky: true`) in visual sync
@@ -327,16 +330,24 @@ const cssActionsCellNoWrap = css`
  * </ContentListProvider>
  * ```
  */
+const DEFAULT_NO_ITEMS_MESSAGE = (
+  <span data-test-subj="contentListNoResults">
+    {i18n.translate('contentManagement.contentList.table.noItemsMessage', {
+      defaultMessage: 'No items found',
+    })}
+  </span>
+);
+
 const ContentListTableComponent = ({
   title,
   tableLayout = 'auto',
   compressed = false,
   scrollableInline = true,
   responsiveBreakpoint = false,
-  noItemsMessage,
+  noItemsMessage = DEFAULT_NO_ITEMS_MESSAGE,
   children,
   filter,
-  'data-test-subj': dataTestSubj = 'content-list-table',
+  'data-test-subj': dataTestSubj = CONTENT_LIST_TEST_SUBJECTS.table,
 }: ContentListTableProps) => {
   const { supports } = useContentListConfig();
   const { euiTheme } = useEuiTheme();

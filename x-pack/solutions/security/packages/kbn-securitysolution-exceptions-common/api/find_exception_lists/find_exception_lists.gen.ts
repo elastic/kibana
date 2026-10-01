@@ -33,29 +33,47 @@ Uses the `so type.field name:field` value syntax, where `so type` can be:
 - `exception-list-agnostic`: Specify an exception list that is shared across spaces.
 
       */
-    filter: FindExceptionListsFilter.optional(),
+    filter: FindExceptionListsFilter.optional().describe(
+      'Filters the returned results according to the value of the specified field.\n\nUses the `so type.field name:field` value syntax, where `so type` can be:\n\n- `exception-list`: Specify a space-aware exception list.\n- `exception-list-agnostic`: Specify an exception list that is shared across spaces.\n'
+    ),
     /**
       * Determines whether the returned containers are Kibana associated with a Kibana space
 or available in all spaces (`agnostic` or `single`)
 
       */
-    namespace_type: ArrayFromString(ExceptionNamespaceType).optional().default(['single']),
+    namespace_type: ArrayFromString(ExceptionNamespaceType)
+      .optional()
+      .default(['single'])
+      .describe(
+        'Determines whether the returned containers are Kibana associated with a Kibana space\nor available in all spaces (`agnostic` or `single`)\n'
+      ),
     /**
      * The page number to return
      */
-    page: z.coerce.number().int().min(1).optional(),
+    page: z.coerce.number().int().min(1).optional().describe('The page number to return'),
     /**
      * The number of exception lists to return per page
      */
-    per_page: z.coerce.number().int().min(1).optional(),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe('The number of exception lists to return per page'),
     /**
      * Determines which field is used to sort the results.
      */
-    sort_field: z.string().optional(),
+    sort_field: z
+      .string()
+      .optional()
+      .describe('Determines which field is used to sort the results.'),
     /**
      * Determines the sort order, which can be `desc` or `asc`.
      */
-    sort_order: z.enum(['desc', 'asc']).optional(),
+    sort_order: z
+      .enum(['desc', 'asc'])
+      .optional()
+      .describe('Determines the sort order, which can be `desc` or `asc`.'),
   })
 );
 export type FindExceptionListsRequestQuery = z.infer<typeof FindExceptionListsRequestQuery>;

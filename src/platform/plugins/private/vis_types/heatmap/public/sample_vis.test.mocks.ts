@@ -12,7 +12,7 @@ export const sampleHeatmapVis = {
   type: {
     name: 'heatmap',
     title: 'Heatmap',
-    description: 'Creates a heatmap viz',
+    description: 'Creates a heatmap vis',
     icon: 'visHeatmap',
     stage: 'production',
     options: {

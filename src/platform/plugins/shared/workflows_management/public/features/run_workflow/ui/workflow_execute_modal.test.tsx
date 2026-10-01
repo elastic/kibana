@@ -28,10 +28,12 @@ jest.mock('@kbn/workflows-ui', () => ({
 const defaultWorkflowsCapabilities = {
   canCreateWorkflow: true,
   canReadWorkflow: true,
+  canReadManagedWorkflow: true,
   canUpdateWorkflow: true,
   canDeleteWorkflow: true,
   canExecuteWorkflow: true,
   canReadWorkflowExecution: true,
+  canReadManagedWorkflowExecution: true,
   canCancelWorkflowExecution: true,
 };
 
@@ -159,6 +161,7 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
+          workflowId="wf-1"
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
         />
@@ -179,6 +182,7 @@ describe('WorkflowExecuteModal', () => {
             ...baseWorkflowDefinition,
             triggers: [{ type: 'alert' }],
           }}
+          workflowId="wf-1"
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
         />
@@ -191,8 +195,8 @@ describe('WorkflowExecuteModal', () => {
       expect(queryByText('Event')).not.toBeInTheDocument();
     });
 
-    it('uses the test run title and still exposes the full trigger tab set', () => {
-      const { getByText } = renderWithProviders(
+    it('uses the test run title and hides historical without a workflow id', () => {
+      const { getByText, queryByText } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={true}
           definition={null}
@@ -206,7 +210,7 @@ describe('WorkflowExecuteModal', () => {
       expect(getByText('Document')).toBeInTheDocument();
       expect(getByText('Event')).toBeInTheDocument();
       expect(getByText('Manual')).toBeInTheDocument();
-      expect(getByText('Historical')).toBeInTheDocument();
+      expect(queryByText('Historical')).not.toBeInTheDocument();
     });
 
     it('keeps the alert trigger enabled when RAC prefetch succeeds (no capability pre-check)', () => {
@@ -332,6 +336,7 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
+          workflowId="wf-1"
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
         />
@@ -363,6 +368,7 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
+          workflowId="wf-1"
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
         />
@@ -521,7 +527,7 @@ describe('WorkflowExecuteModal', () => {
   });
 
   describe('Auto-run logic', () => {
-    it('auto-runs and closes modal when workflow has no alerts and no inputs', () => {
+    it('auto-runs and closes modal when workflow has no alerts and no inputs', async () => {
       renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
@@ -534,11 +540,13 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(mockOnSubmit).toHaveBeenCalledWith({}, 'manual');
-      expect(mockOnClose).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledWith({}, 'manual');
+        expect(mockOnClose).toHaveBeenCalled();
+      });
     });
 
-    it('auto-runs only once when onSubmit and onClose change identity', () => {
+    it('auto-runs only once when onSubmit and onClose change identity', async () => {
       const definition = {
         ...baseWorkflowDefinition,
         triggers: [{ type: 'manual' as const }],
@@ -553,8 +561,10 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(mockOnSubmit).toHaveBeenCalledTimes(1);
-      expect(mockOnClose).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+        expect(mockOnClose).toHaveBeenCalledTimes(1);
+      });
 
       rerender(
         <WorkflowExecuteModal
@@ -663,6 +673,35 @@ describe('WorkflowExecuteModal', () => {
   });
 
   describe('Form submission', () => {
+    it('does not close when onSubmit rejects', async () => {
+      mockOnSubmit.mockRejectedValue(new Error('run failed'));
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={
+            {
+              ...baseWorkflowDefinition,
+              triggers: [
+                {
+                  type: 'manual',
+                  inputs: [{ name: 'test-input', type: 'string', required: true }],
+                },
+              ],
+            } as WorkflowYaml
+          }
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByTestId('executeWorkflowButton'));
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled();
+      });
+      expect(mockOnClose).not.toHaveBeenCalled();
+    });
+
     it('renders the execute button', () => {
       const { getByTestId } = renderWithProviders(
         <WorkflowExecuteModal
@@ -979,6 +1018,30 @@ describe('WorkflowExecuteModal', () => {
   });
 
   describe('Historical trigger', () => {
+    it('does not render historical for unsaved test workflows', () => {
+      const { queryByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={true}
+          definition={
+            {
+              ...baseWorkflowDefinition,
+              triggers: [
+                {
+                  type: 'manual',
+                  inputs: [{ name: 'test-input', type: 'string', required: true }],
+                },
+              ],
+            } as WorkflowYaml
+          }
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(queryByText('Historical')).not.toBeInTheDocument();
+      expect(mockWorkflowExecuteHistoricalForm).not.toHaveBeenCalled();
+    });
+
     it('defaults to historical tab when initialExecutionId is provided', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal
@@ -1021,6 +1084,7 @@ describe('WorkflowExecuteModal', () => {
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
+          workflowId="wf-1"
           onClose={mockOnClose}
           onSubmit={mockOnSubmit}
         />

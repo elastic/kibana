@@ -6,13 +6,12 @@
  */
 
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import type { State } from '../../common/store/types';
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
+import { useDataViewManagerStatus } from '../../data_view_manager/hooks/use_data_view_manager_status';
 
 export const DataViewManagerBootstrap = () => {
   const initDataViewManager = useInitDataViewManager();
-  const sharedStatus = useSelector((state: State) => state.dataViewManager.shared.status);
+  const sharedStatus = useDataViewManagerStatus();
 
   useEffect(() => {
     if (sharedStatus === 'pristine' || sharedStatus === 'error') {

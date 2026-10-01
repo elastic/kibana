@@ -180,6 +180,9 @@ kibana_vars=(
     server.securityResponseHeaders.strictTransportSecurity
     server.securityResponseHeaders.xContentTypeOptions
     server.securityResponseHeaders.crossOriginOpenerPolicy
+    server.selfHttp.target
+    server.selfHttp.ssl.verificationMode
+    server.selfHttp.ssl.certificateAuthorities
     server.shutdownTimeout
     server.socketTimeout
     server.ssl.cert
@@ -198,6 +201,7 @@ kibana_vars=(
     server.ssl.truststore.path
     server.uuid
     server.xsrf.allowlist
+    server.xsrf.allowedSchemes
     server.xsrf.disableProtection
     status.allowAnonymous
     status.v6ApiFormat
@@ -278,6 +282,11 @@ kibana_vars=(
     xpack.banners.textContent
     xpack.cases.enabled
     xpack.cases.analytics.index.enabled
+    xpack.cases.analyticsV2.enabled
+    xpack.cases.analyticsV2.enableAdminRoutes
+    xpack.cases.analyticsV2.reconciliationIntervalMinutes
+    xpack.cases.analyticsV2.resetTaskTimeoutMinutes
+    xpack.cases.analyticsV2.resetPageDelayMs
     xpack.cases.incrementalId.enabled
     xpack.cases.incrementalId.taskIntervalMinutes
     xpack.cases.incrementalId.taskStartDelayMinutes
@@ -420,6 +429,7 @@ kibana_vars=(
     xpack.security.loginHelp
     xpack.security.sameSiteCookies
     xpack.security.secureCookies
+    xpack.security.serviceAccounts.requestLifetime
     xpack.security.session.cleanupInterval
     xpack.security.session.concurrentSessions.maxSessions
     xpack.security.session.idleTimeout

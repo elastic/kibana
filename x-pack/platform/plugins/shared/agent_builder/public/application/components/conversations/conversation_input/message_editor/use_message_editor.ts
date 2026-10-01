@@ -9,8 +9,13 @@ import type { RefObject } from 'react';
 import { useRef, useMemo, useState, useCallback } from 'react';
 import type { CommandMatchResult, CommandBadgeData } from './command_menu';
 import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
-import { createCommandBadgeElement, deserializeCommandBadge } from './command_badge';
+import { createCommandBadgeElement, deserializeInputSegments } from './command_badge';
 import { serializeEditorContent } from './serialize';
+import {
+  createImagePlaceholderElement,
+  getPlaceholderNamesFromElement,
+  removePlaceholderByName as removePlaceholderByNameFromDom,
+} from './image_placeholder';
 import {
   createCommandRange,
   createTextFragment,
@@ -30,6 +35,8 @@ export interface MessageEditorInstance {
   dismissActionMenu: () => void;
   /** Handle selection of an item from the command menu */
   handleCommandSelect: (selection: CommandBadgeData) => void;
+  /** Reports whether the active command's mounted menu has anything to show, for a given query */
+  reportMenuContent: (hasVisibleContent: boolean, forQuery: string) => void;
 }
 
 export interface MessageEditorController {
@@ -38,6 +45,8 @@ export interface MessageEditorController {
   setContent: (text: string) => void;
   clear: () => void;
   isEmpty: boolean;
+  getPlaceholderNames: () => string[];
+  removePlaceholderByName: (name: string) => void;
 }
 
 /**
@@ -51,15 +60,18 @@ const useMessageEditorInstance = ({
   ref,
   syncIsEmpty,
   onEditorFocus,
+  onContentChange,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
   onEditorFocus?: () => void;
+  onContentChange?: () => void;
 }): MessageEditorInstance => {
   const {
     match: commandMatch,
     dismiss: dismissCommandMenu,
     checkInputForCommand,
+    reportContent,
   } = useCommandMenu();
   const prefetchCommandMenus = useCommandMenuPrefetch();
 
@@ -69,6 +81,7 @@ const useMessageEditorInstance = ({
       // Sync empty state, maintain caret targets, and re-evaluate command menu on every input change
       onChange: () => {
         syncIsEmpty();
+        onContentChange?.();
         if (ref.current) {
           if (ensureCaretTargetBeforeFirstBadge(ref.current)) {
             const sel = window.getSelection();
@@ -93,6 +106,7 @@ const useMessageEditorInstance = ({
       },
       commandMatch,
       dismissActionMenu: dismissCommandMenu,
+      reportMenuContent: reportContent,
       // Replace the command text (e.g. "/summ") with a badge element:
       handleCommandSelect: (selection: CommandBadgeData) => {
         if (!ref.current || !commandMatch.activeCommand) {
@@ -116,15 +130,18 @@ const useMessageEditorInstance = ({
 
         syncIsEmpty();
         dismissCommandMenu();
+        onContentChange?.();
       },
     }),
     [
       ref,
       syncIsEmpty,
+      onContentChange,
       checkInputForCommand,
       prefetchCommandMenus,
       commandMatch,
       dismissCommandMenu,
+      reportContent,
       onEditorFocus,
     ]
   );
@@ -165,7 +182,7 @@ const useMessageEditorController = ({
         if (!ref.current) {
           return;
         }
-        const segments = deserializeCommandBadge(text);
+        const segments = deserializeInputSegments(text);
         ref.current.innerHTML = '';
 
         for (const segment of segments) {
@@ -173,6 +190,8 @@ const useMessageEditorController = ({
             ref.current.appendChild(createTextFragment(segment.value));
           } else if (segment.type === 'badge') {
             ref.current.appendChild(createCommandBadgeElement(segment.data));
+          } else if (segment.type === 'image') {
+            ref.current.appendChild(createImagePlaceholderElement(segment.name));
           }
         }
 
@@ -184,6 +203,13 @@ const useMessageEditorController = ({
         if (ref.current) {
           ref.current.innerHTML = '';
           setIsEmpty(true);
+        }
+      },
+      getPlaceholderNames: () => (ref.current ? getPlaceholderNamesFromElement(ref.current) : []),
+      removePlaceholderByName: (name: string) => {
+        if (ref.current) {
+          removePlaceholderByNameFromDom(ref.current, name);
+          syncIsEmpty();
         }
       },
       isEmpty,
@@ -210,12 +236,12 @@ const useMessageEditorController = ({
  * <MessageEditor messageEditor={messageEditor} onSubmit={handleSubmit} />
  */
 export const useMessageEditor = (
-  options: { onEditorFocus?: () => void } = {}
+  options: { onEditorFocus?: () => void; onContentChange?: () => void } = {}
 ): {
   messageEditor: MessageEditorInstance;
   controller: MessageEditorController;
 } => {
-  const { onEditorFocus } = options;
+  const { onEditorFocus, onContentChange } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
 
@@ -233,7 +259,7 @@ export const useMessageEditor = (
     setIsEmpty(nextIsEmpty);
   }, []);
 
-  const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus });
+  const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus, onContentChange });
   const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty, setIsEmpty });
   const messageEditor = useMemo(
     () => ({

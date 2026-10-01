@@ -8,7 +8,7 @@
  */
 
 import { readFileSync } from 'fs';
-import globby from 'globby';
+import { globby } from 'globby';
 import * as path from 'path';
 import type ts from 'typescript';
 import { parseUsageCollection } from './ts_parser';

@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-types'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/obs-signals-traces-team'
 toolchains:
   default: node
 language: typescript
@@ -14,25 +14,30 @@ project:
   title: '@kbn/apm-types'
   description: Moon project for @kbn/apm-types
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/obs-signals-traces-team'
   sourceRoot: x-pack/platform/packages/shared/kbn-apm-types
 dependsOn:
   - '@kbn/elastic-agent-utils'
   - '@kbn/i18n'
   - '@kbn/es-query'
-  - '@kbn/io-ts-utils'
   - '@kbn/es-types'
   - '@kbn/apm-types-shared'
   - '@kbn/slo-schema'
   - '@kbn/rule-data-utils'
+  - '@kbn/ml-anomaly-utils'
+  - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - shared-common
   - package
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

@@ -24,6 +24,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { createEndpointFleetServicesFactoryMock } from '../../fleet/endpoint_fleet_services_factory.mocks';
 import { ScriptsLibraryMock } from '../../scripts_library/mocks';
 import type { MemoryDumpActionRequestBody } from '../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import { getPackagePolicyInfoFromFleetKuery } from '../../../mocks/utils.mock';
@@ -221,12 +222,12 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     esClient,
   });
 
-  // Enable the mocking of internal fleet services
-  const fleetServices = endpointService.getInternalFleetServices();
-  jest.spyOn(fleetServices, 'ensureInCurrentSpace');
-
+  // use fleet services mock for `getInternalFleetServices()`
   const getInternalFleetServicesMock = jest.spyOn(endpointService, 'getInternalFleetServices');
-  getInternalFleetServicesMock.mockReturnValue(fleetServices);
+  const fleetServicesFactoryMock = createEndpointFleetServicesFactoryMock({
+    fleetDependencies: endpointServiceStartContract.fleetStartServices,
+  });
+  getInternalFleetServicesMock.mockReturnValue(fleetServicesFactoryMock.service.asInternalUser());
 
   // Mock the Scripts Library client
   jest.spyOn(endpointService, 'getScriptsLibraryClient').mockReturnValue(scriptsLibraryClientMock);
@@ -300,7 +301,7 @@ const createKillOrSuspendProcessOptionsMock = (
   const options: KillOrSuspendProcessRequestBody = {
     ...createNoParamsResponseActionOptionsMock(),
     parameters,
-  };
+  } as KillOrSuspendProcessRequestBody;
   return merge(options, overrides);
 };
 

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Global, css } from '@emotion/react';
-import { layoutVarName } from '@kbn/ui-chrome-layout-constants';
+import { layoutVarName } from './constants';
 import { useLayoutState } from './layout_state_context';
 
 /**

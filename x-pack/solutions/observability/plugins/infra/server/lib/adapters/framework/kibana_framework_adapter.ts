@@ -170,9 +170,14 @@ export class KibanaFramework {
   public async callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
-    params: CallWithRequestParams,
+    rawParams: CallWithRequestParams,
     request?: KibanaRequest
   ) {
+    // `requestTimeout` is a transport-level option, not part of the request
+    // body, so it must be pulled off before `params` gets spread into the
+    // Elasticsearch client call bodies below.
+    const { requestTimeout, ...paramsWithoutTimeout } = rawParams ?? {};
+    let params: CallWithRequestParams = paramsWithoutTimeout;
     const { elasticsearch, uiSettings } = await requestContext.core;
 
     const includeFrozen = await uiSettings.client.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
@@ -221,7 +226,7 @@ export class KibanaFramework {
                 ...frozenIndicesParams,
                 ...projectRoutingParams,
               } as estypes.SearchRequest,
-              { signal }
+              { signal, ...(requestTimeout ? { requestTimeout } : {}) }
             ),
         });
 

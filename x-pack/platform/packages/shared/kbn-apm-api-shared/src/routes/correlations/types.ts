@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-export const entityTypeRt = t.union([t.literal('transaction'), t.literal('exit_span')]);
+export const entityTypeSchema = z.enum(['transaction', 'exit_span']);
 
-export const metricRt = t.union([t.literal('latency'), t.literal('failure_rate')]);
+export const metricSchema = z.enum(['latency', 'failure_rate', 'throughput', 'infra_metrics']);

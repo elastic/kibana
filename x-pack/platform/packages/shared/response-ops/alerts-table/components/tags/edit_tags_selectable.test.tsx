@@ -86,8 +86,8 @@ describe('EditTagsSelectable', () => {
       await userEvent.click(screen.getByText(tag));
     }
 
-    expect(props.onChangeTags).toBeCalledTimes(props.tags.length);
-    expect(props.onChangeTags).nthCalledWith(props.tags.length, {
+    expect(props.onChangeTags).toHaveBeenCalledTimes(props.tags.length);
+    expect(props.onChangeTags).toHaveBeenNthCalledWith(props.tags.length, {
       selectedItems: ['one', 'two'],
       unSelectedItems: ['coke', 'pepsi'],
     });
@@ -100,11 +100,14 @@ describe('EditTagsSelectable', () => {
       await userEvent.click(screen.getByText(tag));
     }
 
-    expect(propsMultipleAlerts.onChangeTags).toBeCalledTimes(propsMultipleAlerts.tags.length);
-    expect(propsMultipleAlerts.onChangeTags).nthCalledWith(propsMultipleAlerts.tags.length, {
-      selectedItems: ['two', 'three', 'coke', 'pepsi'],
-      unSelectedItems: ['one'],
-    });
+    expect(propsMultipleAlerts.onChangeTags).toHaveBeenCalledTimes(propsMultipleAlerts.tags.length);
+    expect(propsMultipleAlerts.onChangeTags).toHaveBeenNthCalledWith(
+      propsMultipleAlerts.tags.length,
+      {
+        selectedItems: ['two', 'three', 'coke', 'pepsi'],
+        unSelectedItems: ['one'],
+      }
+    );
   });
 
   it('renders the icons correctly after selecting and deselecting tags', async () => {
@@ -125,11 +128,14 @@ describe('EditTagsSelectable', () => {
       expect(screen.getByTestId(iconDataTestSubj)).toBeInTheDocument();
     }
 
-    expect(propsMultipleAlerts.onChangeTags).toBeCalledTimes(propsMultipleAlerts.tags.length);
-    expect(propsMultipleAlerts.onChangeTags).nthCalledWith(propsMultipleAlerts.tags.length, {
-      selectedItems: ['two', 'three', 'coke', 'pepsi'],
-      unSelectedItems: ['one'],
-    });
+    expect(propsMultipleAlerts.onChangeTags).toHaveBeenCalledTimes(propsMultipleAlerts.tags.length);
+    expect(propsMultipleAlerts.onChangeTags).toHaveBeenNthCalledWith(
+      propsMultipleAlerts.tags.length,
+      {
+        selectedItems: ['two', 'three', 'coke', 'pepsi'],
+        unSelectedItems: ['one'],
+      }
+    );
   });
 
   it('adds a new tag correctly', async () => {
@@ -147,8 +153,8 @@ describe('EditTagsSelectable', () => {
 
     await userEvent.click(addNewTagButton);
 
-    expect(props.onChangeTags).toBeCalledTimes(1);
-    expect(props.onChangeTags).nthCalledWith(1, {
+    expect(props.onChangeTags).toHaveBeenCalledTimes(1);
+    expect(props.onChangeTags).toHaveBeenNthCalledWith(1, {
       selectedItems: ['not-exist', 'coke', 'pepsi'],
       unSelectedItems: [],
     });
@@ -160,8 +166,8 @@ describe('EditTagsSelectable', () => {
     expect(screen.getByText('Select all')).toBeInTheDocument();
     await userEvent.click(screen.getByText('Select all'));
 
-    expect(propsMultipleAlerts.onChangeTags).toBeCalledTimes(1);
-    expect(propsMultipleAlerts.onChangeTags).nthCalledWith(1, {
+    expect(propsMultipleAlerts.onChangeTags).toHaveBeenCalledTimes(1);
+    expect(propsMultipleAlerts.onChangeTags).toHaveBeenNthCalledWith(1, {
       selectedItems: propsMultipleAlerts.tags,
       unSelectedItems: [],
     });
@@ -173,8 +179,8 @@ describe('EditTagsSelectable', () => {
     expect(screen.getByText('Select all')).toBeInTheDocument();
     await userEvent.click(screen.getByText('Select none'));
 
-    expect(propsMultipleAlerts.onChangeTags).toBeCalledTimes(1);
-    expect(propsMultipleAlerts.onChangeTags).nthCalledWith(1, {
+    expect(propsMultipleAlerts.onChangeTags).toHaveBeenCalledTimes(1);
+    expect(propsMultipleAlerts.onChangeTags).toHaveBeenNthCalledWith(1, {
       selectedItems: [],
       unSelectedItems: ['one', 'three', 'coke', 'pepsi'],
     });
@@ -196,8 +202,8 @@ describe('EditTagsSelectable', () => {
 
     await userEvent.click(screen.getByTestId(iconDataTestSubj));
 
-    expect(propsMultipleAlerts.onChangeTags).toBeCalledTimes(1);
-    expect(propsMultipleAlerts.onChangeTags).nthCalledWith(1, {
+    expect(propsMultipleAlerts.onChangeTags).toHaveBeenCalledTimes(1);
+    expect(propsMultipleAlerts.onChangeTags).toHaveBeenNthCalledWith(1, {
       selectedItems: [],
       unSelectedItems: ['one'],
     });
@@ -226,8 +232,8 @@ describe('EditTagsSelectable', () => {
 
     await userEvent.click(addNewTagButton);
 
-    expect(props.onChangeTags).toBeCalledTimes(1);
-    expect(props.onChangeTags).nthCalledWith(1, {
+    expect(props.onChangeTags).toHaveBeenCalledTimes(1);
+    expect(props.onChangeTags).toHaveBeenNthCalledWith(1, {
       selectedItems: ['on', 'coke', 'pepsi'],
       unSelectedItems: [],
     });

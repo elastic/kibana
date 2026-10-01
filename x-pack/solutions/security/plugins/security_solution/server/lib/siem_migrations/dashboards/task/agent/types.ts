@@ -18,7 +18,7 @@ import type { EsqlKnowledgeBase } from '../../../common/task/util/esql_knowledge
 import type { ChatModel } from '../../../common/task/util/actions_client_chat';
 import type { migrateDashboardConfigSchema, migrateDashboardState } from './state';
 import type { DashboardMigrationTelemetryClient } from '../dashboard_migrations_telemetry_client';
-import type { MigrationResources } from '../../../common/task/retrievers/resource_retriever';
+import type { EnrichedMigrationResources } from '../../../common/task/util/enrich_lookup_resources';
 
 export type MigrateDashboardState = typeof migrateDashboardState.State;
 export type MigrateDashboardConfigSchema = (typeof migrateDashboardConfigSchema)['State'];
@@ -77,7 +77,7 @@ export interface TranslatePanelNodeParams {
   parsed_panel: ParsedPanel;
   description: string;
   dashboard_description: string;
-  resources: MigrationResources;
+  resources: EnrichedMigrationResources;
   index: number;
 }
 

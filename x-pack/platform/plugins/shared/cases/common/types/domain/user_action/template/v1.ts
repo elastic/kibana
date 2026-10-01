@@ -13,6 +13,9 @@ export const TemplateUserActionPayloadSchema = z.object({
     .object({
       id: z.string(),
       version: z.number(),
+      // Optional point-in-time snapshot of the applied template's name so the activity log can read
+      // "applied <name> template" without a lookup. Older user actions predate it.
+      name: z.string().optional(),
     })
     .nullable(),
 });

@@ -6,11 +6,17 @@
  */
 
 import { isString } from 'lodash';
-import type { CaseAssignees, CaseCustomFields, CaseSettings } from '../../../common/types/domain';
+import type {
+  Case,
+  CaseAssignees,
+  CaseCustomFields,
+  CaseSettings,
+} from '../../../common/types/domain';
 import {
   CaseAssigneesSchema,
   CaseCustomFieldsSchema,
   CaseSettingsSchema,
+  CaseTemplateSchema,
 } from '../../../common/types/domain';
 import { ExtendedFieldsSchema } from '../../../common/types/domain/user_action/extended_fields/v1';
 
@@ -32,4 +38,8 @@ export const isCaseSettings = (value: unknown): value is CaseSettings => {
 
 export const isExtendedFields = (value: unknown): value is Record<string, string> => {
   return ExtendedFieldsSchema.safeParse(value).success;
+};
+
+export const isCaseTemplate = (value: unknown): value is NonNullable<Case['template']> => {
+  return CaseTemplateSchema.safeParse(value).success;
 };

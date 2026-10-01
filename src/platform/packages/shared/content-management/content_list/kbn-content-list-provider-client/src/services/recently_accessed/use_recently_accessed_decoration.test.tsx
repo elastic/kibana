@@ -16,7 +16,7 @@ import { RECENT_FIELD } from './recents_filter_renderer';
 
 // Simulate per-component resolver isolation: each `createComponent` call
 // returns a unique component whose `resolve` is closure-bound to that call.
-// This mirrors the fix in `@kbn/content-list-assembly` where resolvers are
+// This mirrors the fix in `@kbn/ui-react-assembly` where resolvers are
 // keyed by component function rather than stored in a shared slot.
 jest.mock('@kbn/content-list-toolbar', () => ({
   filter: {

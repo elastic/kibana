@@ -12,6 +12,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { SEARCH_MODAL_SELECTOR_PREFIX } from './types';
 import { EventReporter } from '../telemetry';
 import { SearchModalInternal } from './search_modal_internal';
 
@@ -27,7 +28,6 @@ jest.useFakeTimers({ legacyFakeTimers: true });
 describe('SearchModalInternal', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
   const core = coreMock.createStart();
-  const basePathUrl = '/plugins/globalSearchBar/assets/';
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
   let eventReporter: EventReporter;
@@ -49,15 +49,14 @@ describe('SearchModalInternal', () => {
         <SearchModalInternal
           globalSearch={{ ...searchService, searchCharLimit: 1000 }}
           navigateToUrl={applications.navigateToUrl}
-          basePathUrl={basePathUrl}
           reportEvent={eventReporter}
           onClose={jest.fn()}
         />
       </IntlProvider>
     );
 
-    expect(screen.getByTestId('chromeProjectNextSearchModalInput')).toBeInTheDocument();
-    expect(screen.getByTestId('chromeProjectNextSearchModalFooter')).toBeInTheDocument();
+    expect(screen.getByTestId('nav-search-input')).toBeInTheDocument();
+    expect(screen.getByTestId(`${SEARCH_MODAL_SELECTOR_PREFIX}Footer`)).toBeInTheDocument();
   });
 
   it('reports searchFocus on mount and searchBlur on unmount', () => {
@@ -69,7 +68,6 @@ describe('SearchModalInternal', () => {
         <SearchModalInternal
           globalSearch={{ ...searchService, searchCharLimit: 1000 }}
           navigateToUrl={applications.navigateToUrl}
-          basePathUrl={basePathUrl}
           reportEvent={eventReporter}
           onClose={jest.fn()}
         />

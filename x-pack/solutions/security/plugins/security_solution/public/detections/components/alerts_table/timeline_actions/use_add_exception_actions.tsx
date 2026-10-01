@@ -9,10 +9,11 @@ import { useCallback, useMemo } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
-import { useUserData } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
+import { ALERT_EXCEPTION_ACTION_IDS } from '../../../../common/constants/action_ids';
 
 export interface UseExceptionActionProps {
   isEndpointAlert: boolean;
@@ -24,7 +25,7 @@ export const useAlertExceptionActions = ({
   onAddExceptionTypeClick,
 }: UseExceptionActionProps) => {
   const canEditExceptions = useUserPrivileges().rulesPrivileges.exceptions.edit;
-  const [{ hasIndexWrite }] = useUserData();
+  const { hasIndexWrite } = useAlertsPrivileges();
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const handleDetectionExceptionModal = useCallback(() => {
@@ -44,14 +45,14 @@ export const useAlertExceptionActions = ({
         ? []
         : [
             {
-              key: 'add-endpoint-exception-menu-item',
+              key: ALERT_EXCEPTION_ACTION_IDS.addEndpointException,
               'data-test-subj': 'add-endpoint-exception-menu-item',
               disabled: disabledAddEndpointException,
               onClick: handleEndpointExceptionModal,
               name: ACTION_ADD_ENDPOINT_EXCEPTION,
             },
             {
-              key: 'add-exception-menu-item',
+              key: ALERT_EXCEPTION_ACTION_IDS.addRuleException,
               'data-test-subj': 'add-exception-menu-item',
               disabled: disabledAddException,
               onClick: handleDetectionExceptionModal,

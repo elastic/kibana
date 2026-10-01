@@ -20,6 +20,7 @@ export const episodeUnackedTriggerCommonDefinition: CommonTriggerDefinition<
   typeof episodeUnackedPayloadSchema
 > = {
   id: EPISODE_UNACKED_TRIGGER_ID,
+  stability: 'tech_preview',
   eventSchema: episodeUnackedPayloadSchema,
   title: i18n.translate('xpack.alertingVTwo.workflowTriggers.episodeUnacked.title', {
     defaultMessage: 'Alerting - Episode unacknowledged',

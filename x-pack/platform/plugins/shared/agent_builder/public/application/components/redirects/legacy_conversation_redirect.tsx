@@ -6,20 +6,20 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Navigate, useNavigate } from 'react-router-dom-v5-compat';
+import { Redirect, useHistory, useParams } from 'react-router-dom';
 
-import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
 
 import { useLastAgentId } from '../../hooks/use_last_agent_id';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { appPaths } from '../../utils/app_paths';
+import { RedirectLoading } from './redirect_loading';
 
 export const LegacyConversationRedirect: React.FC = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
-  const navigate = useNavigate();
-  const lastAgentId = useLastAgentId();
+  const history = useHistory();
+  const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
+
   const { conversationsService } = useAgentBuilderServices();
 
   const isNewConversation = !conversationId || conversationId === 'new';
@@ -37,32 +37,23 @@ export const LegacyConversationRedirect: React.FC = () => {
 
   useEffect(() => {
     if (conversation?.agent_id && conversationId) {
-      navigate(
+      history.replace(
         appPaths.agent.conversations.byId({
           agentId: conversation.agent_id,
           conversationId,
-        }),
-        { replace: true }
+        })
       );
     } else if (isError && conversationId) {
-      navigate(appPaths.agent.conversations.byId({ agentId: lastAgentId, conversationId }), {
-        replace: true,
-      });
+      history.replace(appPaths.agent.conversations.byId({ agentId: lastAgentId, conversationId }));
     }
-  }, [conversation, conversationId, isError, lastAgentId, navigate]);
+  }, [conversation, conversationId, isError, lastAgentId, history]);
 
   if (isNewConversation) {
-    return <Navigate to={appPaths.agent.root({ agentId: lastAgentId })} replace />;
+    return <Redirect to={appPaths.agent.root({ agentId: lastAgentId })} />;
   }
 
-  if (isLoading) {
-    return (
-      <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+  if (isLoading || !isLastAgentIdReady) {
+    return <RedirectLoading />;
   }
 
   return null;

@@ -6,6 +6,8 @@
  */
 
 import type { WorkflowsSearchParams } from '@kbn/workflows';
+import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
+import type { ListRuleExecutionsUiParams } from './use_fetch_rule_executions';
 
 export const ruleKeys = {
   all: ['rule'] as const,
@@ -20,7 +22,23 @@ export const ruleKeys = {
   }) => [...ruleKeys.lists(), filters] as const,
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
-  tags: (filter?: string) => [...ruleKeys.all, 'tags', { filter }] as const,
+  allTags: () => [...ruleKeys.all, 'tags'] as const,
+  tags: (search?: string, kind?: string) => [...ruleKeys.allTags(), { search, kind }] as const,
+};
+
+export const ruleTemplateKeys = {
+  all: ['ruleTemplate'] as const,
+  allTags: () => [...ruleTemplateKeys.all, 'tags'] as const,
+  tags: (search?: string) => [...ruleTemplateKeys.allTags(), { search }] as const,
+  lists: () => [...ruleTemplateKeys.all, 'list'] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    tags?: string[];
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) => [...ruleTemplateKeys.lists(), filters] as const,
 };
 
 export const workflowKeys = {
@@ -34,8 +52,8 @@ export const workflowKeys = {
 
 export const matcherSuggestionKeys = {
   all: ['matcherSuggestions'] as const,
-  dataFields: (matcher?: string) =>
-    [...matcherSuggestionKeys.all, 'dataFields', { matcher: matcher || undefined }] as const,
+  ruleEventFields: (matcher?: string) =>
+    [...matcherSuggestionKeys.all, 'ruleEventFields', { matcher: matcher || undefined }] as const,
 };
 
 export const actionPolicyKeys = {
@@ -46,20 +64,42 @@ export const actionPolicyKeys = {
     page: number;
     perPage: number;
     search?: string;
-    tags?: string[];
     enabled?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) => [...actionPolicyKeys.lists(), filters] as const,
-  allTags: () => [...actionPolicyKeys.all, 'tags'] as const,
-  tags: (search?: string) => [...actionPolicyKeys.allTags(), { search }] as const,
+  linkedForRule: (ruleId: string) =>
+    [...actionPolicyKeys.lists(), 'linkedForRule', ruleId] as const,
 };
 
 export const executionHistoryKeys = {
   all: ['executionHistory'] as const,
-  list: (filters: { page: number; perPage: number }) =>
-    [...executionHistoryKeys.all, 'list', filters] as const,
-  countSince: (since: string) => [...executionHistoryKeys.all, 'countSince', since] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    ruleIds?: string[];
+    outcomes?: PolicyExecutionOutcomeFilter;
+    episodeIds?: string[];
+    from?: string;
+    to?: string;
+    sortField?: 'dispatchedAt';
+    sortOrder?: 'asc' | 'desc';
+  }) => [...executionHistoryKeys.all, 'list', filters] as const,
+  newEventsSince: (
+    since: string,
+    filters: {
+      search?: string;
+      ruleIds?: string[];
+      outcomes?: PolicyExecutionOutcomeFilter;
+    } = {}
+  ) => [...executionHistoryKeys.all, 'newEventsSince', since, filters] as const,
+};
+
+export const ruleExecutionKeys = {
+  all: ['ruleExecution'] as const,
+  list: (filters: ListRuleExecutionsUiParams) =>
+    [...ruleExecutionKeys.all, 'list', filters] as const,
 };
 
 export const userProfileKeys = {

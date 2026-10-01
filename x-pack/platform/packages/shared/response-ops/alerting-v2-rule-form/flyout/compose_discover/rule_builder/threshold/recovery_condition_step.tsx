@@ -23,8 +23,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ComposeFormValues } from '../../compose_form_types';
-import type { RuleBuilderRecoveryProps } from '../types';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
+import type { FormValues } from '../../../../form/types';
+import type { CustomRecoveryRenderProps } from '../../types';
 import { useBuilderState } from '../builder_state_context';
 import type { ThresholdFormValues, RecoveryCondition, RecoveryConfig } from './form_types';
 import {
@@ -32,14 +33,15 @@ import {
   DEFAULT_RECOVERY_CONDITION,
   deriveRecoveryConditions,
   generateId,
+  reconcileAlertConditionMetrics,
 } from './form_types';
 import { COMPARATOR_OPTIONS, CONDITION_OPERATOR_OPTIONS } from './translations';
 import { buildRecoveryBlock } from './build_esql';
 
-export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state, dispatch }) => {
+export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
   const { state: builderState, setState: onBuilderStateChange } =
     useBuilderState<ThresholdFormValues>();
-  const { setValue, getValues } = useFormContext<ComposeFormValues>();
+  const { setValue, getValues } = useFormContext<FormValues>();
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -73,16 +75,13 @@ export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state,
 
   useEffect(() => {
     if (!recoveryConfig || !generatedRecoveryBlock) return;
-    const current = getValues('query');
-    if (current.format !== 'composed') return;
-    if (current.blocks.recover === generatedRecoveryBlock) return;
-    setValue('query', {
-      ...current,
-      blocks: { ...current.blocks, recover: generatedRecoveryBlock },
+    const current = getValues('recovery');
+    if (current?.segment === generatedRecoveryBlock) return;
+    setValue('recovery', {
+      strategy: recoveryStrategy.condition,
+      segment: generatedRecoveryBlock,
     });
   }, [recoveryConfig, generatedRecoveryBlock, getValues, setValue]);
-
-  const hasValidRecoveryBlock = Boolean(generatedRecoveryBlock);
 
   const metricOptions = useMemo(() => {
     const statLabels = builderState.stats.filter((s) => s.label.trim()).map((s) => s.label);
@@ -113,65 +112,41 @@ export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state,
   const addRecoveryCondition = useCallback(() => {
     if (!recoveryConfig) return;
     updateRecovery({
-      conditions: [
-        ...recoveryConfig.conditions,
-        { id: generateId(), ...DEFAULT_RECOVERY_CONDITION },
-      ],
+      conditions: reconcileAlertConditionMetrics(
+        [...recoveryConfig.conditions, { id: generateId(), ...DEFAULT_RECOVERY_CONDITION }],
+        builderState.stats,
+        builderState.evaluations
+      ),
     });
-  }, [recoveryConfig, updateRecovery]);
+  }, [recoveryConfig, updateRecovery, builderState.stats, builderState.evaluations]);
 
   const removeRecoveryCondition = useCallback(
     (index: number) => {
       if (!recoveryConfig) return;
-      const next = recoveryConfig.conditions.filter((_, i) => i !== index);
+      const filtered = recoveryConfig.conditions.filter((_, i) => i !== index);
       updateRecovery({
-        conditions: next.length ? next : [{ id: generateId(), ...DEFAULT_RECOVERY_CONDITION }],
+        conditions: reconcileAlertConditionMetrics(
+          filtered.length ? filtered : [{ id: generateId(), ...DEFAULT_RECOVERY_CONDITION }],
+          builderState.stats,
+          builderState.evaluations
+        ),
       });
     },
-    [recoveryConfig, updateRecovery]
+    [recoveryConfig, updateRecovery, builderState.stats, builderState.evaluations]
   );
 
   if (!recoveryConfig) return null;
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h4>
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.recoveryCondition.thresholdTitle"
-                defaultMessage="Recovery threshold conditions"
-              />
-            </h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.alertingV2.composeDiscover.recoveryCondition.previewTooltip',
-              { defaultMessage: 'Preview results' }
-            )}
-          >
-            <EuiButtonIcon
-              iconType="inspect"
-              aria-label={i18n.translate(
-                'xpack.alertingV2.composeDiscover.recoveryCondition.previewAriaLabel',
-                { defaultMessage: 'Preview results' }
-              )}
-              isDisabled={!hasValidRecoveryBlock || state.childOpen}
-              onClick={() =>
-                dispatch({
-                  type: 'OPEN_CHILD_FOR_STEP',
-                  step: state.step,
-                  isAlert: true,
-                })
-              }
-              data-test-subj="ruleBuilderRecoveryPreview"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTitle size="xxs">
+        <h4>
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.recoveryCondition.thresholdTitle"
+            defaultMessage="Recovery threshold conditions"
+          />
+        </h4>
+      </EuiTitle>
       <EuiSpacer size="s" />
 
       {recoveryConfig.conditions.length > 1 && (
@@ -325,7 +300,7 @@ export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state,
       })}
       <EuiButtonEmpty
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addRecoveryCondition}
         data-test-subj="ruleBuilderAddRecoveryCondition"
       >

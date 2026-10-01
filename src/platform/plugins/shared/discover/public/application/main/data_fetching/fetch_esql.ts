@@ -54,6 +54,7 @@ export interface FetchEsqlParams {
   esqlVariables?: ESQLControlVariable[];
   searchSessionId?: string;
   projectRouting?: ProjectRouting;
+  esqlApproximation: boolean;
   inspectorConfig?: {
     title: string;
     description: string;
@@ -74,6 +75,7 @@ export function fetchEsql({
   esqlVariables,
   searchSessionId,
   projectRouting,
+  esqlApproximation,
   inspectorConfig,
 }: FetchEsqlParams): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
@@ -94,6 +96,7 @@ export function fetchEsql({
             timeRange,
             esqlVariables,
             projectRouting,
+            isApproximate: esqlApproximation,
           },
           searchSessionId,
         });
@@ -105,6 +108,7 @@ export function fetchEsql({
         let esqlQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
         let esqlHeaderWarning: string | undefined;
+        let approximationApplied: boolean | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
           const response = resp as Datatable | EsqlErrorResponse;
           if (response.type === 'error') {
@@ -112,6 +116,7 @@ export function fetchEsql({
           } else {
             const table = response as Datatable;
             const rows = table?.rows ?? [];
+            approximationApplied = table.meta?.approximationApplied;
             const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
@@ -154,6 +159,7 @@ export function fetchEsql({
               interceptedWarnings,
               esqlQueryColumns,
               esqlHeaderWarning,
+              approximationApplied,
             };
           }
         });
@@ -163,6 +169,7 @@ export function fetchEsql({
         interceptedWarnings: [],
         esqlQueryColumns: [],
         esqlHeaderWarning: undefined,
+        approximationApplied: undefined,
       };
     })
     .catch((err) => {

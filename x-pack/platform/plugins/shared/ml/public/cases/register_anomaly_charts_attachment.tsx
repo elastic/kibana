@@ -23,21 +23,21 @@ export function registerAnomalyChartsCasesAttachment(
   pluginStart: MlStartDependencies,
   usageCollection?: UsageCollectionSetup
 ) {
-  cases.attachmentFramework.registerUnified(
+  cases.attachmentFramework.registerAttachment(
     defineAttachment({
       id: ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
-      icon: PLUGIN_ICON,
-      displayName: i18n.translate('xpack.ml.cases.anomalyCharts.displayName', {
-        defaultMessage: 'Anomaly charts',
-      }),
-      getAttachmentViewObject: () => ({
+      getIcon: () => PLUGIN_ICON,
+      getLabel: () =>
+        i18n.translate('xpack.ml.cases.anomalyCharts.displayName', {
+          defaultMessage: 'Anomaly charts',
+        }),
+      getCreationActivity: () => ({
         event: (
           <FormattedMessage
             id="xpack.ml.cases.anomalyCharts.embeddableAddedEvent"
-            defaultMessage="added anomaly chart"
+            defaultMessage="added anomaly charts"
           />
         ),
-        timelineAvatar: PLUGIN_ICON,
         children: React.lazy(async () => {
           const { initializeAnomalyChartsAttachment } = await import(
             './anomaly_charts_attachments'
@@ -54,6 +54,9 @@ export function registerAnomalyChartsCasesAttachment(
         }),
       }),
       schema: AnomalyChartsAttachmentPayloadSchema,
+      // `data.state` is the ML embeddable input bag produced by the anomaly
+      // charts "Add to case" flow — not authorable in YAML.
+      workflowSchema: false,
     })
   );
 }

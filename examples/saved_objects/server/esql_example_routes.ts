@@ -9,10 +9,13 @@
 
 import { AuthzDisabled } from '@kbn/core-security-server';
 import type { IRouter, Logger } from '@kbn/core/server';
-import type { estypes } from '@elastic/elasticsearch';
+import { esql } from '@elastic/esql';
 import { isResponseError } from '@kbn/es-errors';
 import { TYPE_A, TYPE_B } from './saved_objects';
 import { setupData } from './saved_objects_data';
+
+const colTypeAField = esql.col(`${TYPE_A}.myField`);
+const colTypeBField = esql.col(`${TYPE_B}.anotherField`);
 
 export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
   // Basic query — no user input, plain pipeline string is safe.
@@ -42,7 +45,11 @@ export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
           const result = await savedObjectsClient.esql({
             type: [TYPE_A, TYPE_B],
             namespaces: ['default'],
-            pipeline: `| KEEP type, ${TYPE_A}.myField, ${TYPE_B}.anotherField | SORT type | LIMIT 100`,
+            pipeline: esql`
+              KEEP type, ${colTypeAField}, ${colTypeBField}
+              | SORT type
+              | LIMIT 100
+            `,
           });
           return res.ok({
             body: {
@@ -59,10 +66,8 @@ export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
       }
     );
 
-  // Parameterized query — when the pipeline includes user-provided values,
-  // use ES|QL named params (`?paramName`) to prevent injection attacks.
-  // Values are passed via the `params` array as `{ name: value }` entries
-  // (typed as `EsqlNamedValue`) and are never interpolated into the query string.
+  // Parameterized query — use ${{ name: value }} holes in the esql tag for user-supplied
+  // values. They become named ES|QL parameters forwarded over the wire, never in the query string.
   router.versioned
     .post({
       path: '/api/saved_objects_example/_esql_query_parameterized',
@@ -82,15 +87,18 @@ export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
         const savedObjectsClient = core.savedObjects.client;
         await setupData(savedObjectsClient);
 
-        // Simulate user input — NEVER interpolate this into the pipeline string.
+        // Simulate user input — use ${{ name: value }} holes to promote the value to a
+        // named parameter. The value is forwarded over the wire, never in the query string.
         const searchTerm = 'some search term';
 
         try {
           const result = await savedObjectsClient.esql({
             type: TYPE_A,
             namespaces: ['default'],
-            pipeline: `| WHERE ${TYPE_A}.myField == ?searchTerm | LIMIT 10`,
-            params: [{ searchTerm } satisfies estypes.EsqlNamedValue],
+            pipeline: esql`
+              WHERE ${colTypeAField} == ${{ searchTerm }}
+              | LIMIT 10
+            `,
           });
           return res.ok({
             body: {

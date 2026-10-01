@@ -5,26 +5,12 @@
  * 2.0.
  */
 
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  coreFeatureFlagsMock,
-  savedObjectsClientMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import { schema } from '@kbn/config-schema';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { RecoveredActionGroup } from '../../../../../common';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import {
@@ -41,68 +27,49 @@ import {
   enabledRuleForBulkOpsWithActions1WithUiam,
   enabledRuleForBulkOpsWithActions2WithUiam,
 } from '../../../../rules_client/tests/test_helpers';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
+import type { AlertsService } from '../../../../alerts_service';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
-
-jest.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
+import { softDeleteGapsByQuery } from '../../../../lib/rule_gaps/soft_delete_gaps_by_query';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
-const softDeleteGapsMock = softDeleteGaps as jest.Mock;
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
+jest.mock('../../../../lib/rule_gaps/soft_delete_gaps_by_query', () => ({
+  softDeleteGapsByQuery: jest.fn(),
+}));
+
+const softDeleteGapsByQueryMock = softDeleteGapsByQuery as jest.Mock;
+
 const logger = loggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-const backfillClient = backfillClientMock.create();
 const eventLogClient = eventLogClientMock.create();
 const eventLogger = eventLoggerMock.create();
 
+const mockAlertsService = {
+  setAlertsToUntracked: jest.fn().mockResolvedValue([]),
+};
+
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: createAPIKeyMock,
-  cloneAPIKey: jest.fn(),
-  logger,
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
+  encryptedSavedObjects,
+  authorization,
   auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  isSystemAction: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
   backfillClient,
-  uiSettings: uiSettingsServiceMock.createStartContract(),
+} = getRulesClientMockParams({
+  kibanaVersion,
+  createAPIKey: createAPIKeyMock,
+  logger,
   eventLogger,
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+  alertsService: mockAlertsService as unknown as AlertsService,
+});
 
 const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
   id: 'id2',
@@ -226,11 +193,10 @@ describe('bulkDelete', () => {
       unsecuredSavedObjectsClient,
     });
 
-    expect(softDeleteGapsMock).toHaveBeenCalledWith({
+    expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({
       ruleIds,
       eventLogClient,
       logger,
-      eventLogger,
     });
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
@@ -334,7 +300,7 @@ describe('bulkDelete', () => {
     );
   });
 
-  test('swallows errors when soft deleting gaps fails', async () => {
+  test('swallows errors when soft deleting gaps fails and still returns deleted rules', async () => {
     mockCreatePointInTimeFinderAsInternalUser({
       saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
     });
@@ -346,12 +312,42 @@ describe('bulkDelete', () => {
       ],
     });
 
-    softDeleteGapsMock.mockRejectedValue(new Error('Boom!'));
+    softDeleteGapsByQueryMock.mockRejectedValueOnce(new Error('Boom!'));
 
-    await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+    const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to soft delete gaps for rules: id1,id2: Boom!'
     );
+    expect(result.rules).toHaveLength(2);
+    expect(result.errors).toEqual([]);
+  });
+
+  // `softDeleteGapsByQuery` swallows its own errors, so a rejecting
+  // `getEventLogClient` is the only way the outer try/catch is reached in
+  // production — e.g. when the ES or saved objects client is unavailable.
+  test('still returns deleted rules when getEventLogClient throws', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
+    });
+
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'id2', type: 'alert', success: true },
+      ],
+    });
+
+    rulesClientParams.getEventLogClient.mockRejectedValueOnce(new Error('No event log client'));
+
+    const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+    expect(softDeleteGapsByQueryMock).not.toHaveBeenCalled();
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
+      'delete(): Failed to soft delete gaps for rules: id1,id2: No event log client'
+    );
+    expect(result.rules).toHaveLength(2);
+    expect(result.errors).toEqual([]);
   });
 
   test('should try to delete rules, two successful and one with 500 error', async () => {
@@ -453,11 +449,10 @@ describe('bulkDelete', () => {
       unsecuredSavedObjectsClient,
     });
 
-    expect(softDeleteGapsMock).toHaveBeenCalledWith({
-      ruleIds: ['id1', 'id2'],
+    expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({
+      ruleIds: ['id1'],
       eventLogClient,
       logger,
-      eventLogger,
     });
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
@@ -530,6 +525,19 @@ describe('bulkDelete', () => {
       expect.anything(),
       expect.anything()
     );
+
+    expect(softDeleteGapsByQueryMock).toHaveBeenCalledTimes(2);
+    expect(softDeleteGapsByQueryMock).toHaveBeenNthCalledWith(1, {
+      ruleIds: ['id1'],
+      eventLogClient,
+      logger,
+    });
+    expect(softDeleteGapsByQueryMock).toHaveBeenNthCalledWith(2, {
+      ruleIds: ['id2'],
+      eventLogClient,
+      logger,
+    });
+
     expect(result).toStrictEqual({
       rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2],
       errors: [],
@@ -612,12 +620,14 @@ describe('bulkDelete', () => {
 
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
-      expect(logger.debug).toBeCalledTimes(1);
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
         'Successfully deleted schedules for underlying tasks: id1'
       );
-      expect(logger.error).toBeCalledTimes(1);
-      expect(logger.error).toBeCalledWith('Failure to delete schedules for underlying tasks: id2');
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failure to delete schedules for underlying tasks: id2'
+      );
     });
 
     test('should not throw an error if taskManager throw an error', async () => {
@@ -633,8 +643,8 @@ describe('bulkDelete', () => {
 
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
-      expect(logger.error).toBeCalledTimes(1);
-      expect(logger.error).toBeCalledWith(
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
         'Failure to delete schedules for underlying tasks: id1, id2. TaskManager bulkRemove failed with Error: UPS'
       );
     });
@@ -664,11 +674,11 @@ describe('bulkDelete', () => {
 
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
-      expect(logger.debug).toBeCalledTimes(1);
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
         'Successfully deleted schedules for underlying tasks: id1, id2'
       );
-      expect(logger.error).toBeCalledTimes(0);
+      expect(logger.error).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -705,7 +715,7 @@ describe('bulkDelete', () => {
         statuses: [{ id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
       });
 
-      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrowError(
+      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow(
         'Unauthorized'
       );
 
@@ -721,9 +731,7 @@ describe('bulkDelete', () => {
         statuses: [{ id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
       });
 
-      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrowError(
-        'Error'
-      );
+      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow('Error');
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');
@@ -844,7 +852,7 @@ describe('bulkDelete', () => {
       );
     });
 
-    test('captures the full pre-deletion attributes and references of each rule', async () => {
+    test('captures the full pre-deletion attributes of each rule', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
@@ -863,27 +871,58 @@ describe('bulkDelete', () => {
 
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [
-          {
-            // setGlobalDate pins Date.now() to mockedDateString.
-            timestamp: '2019-02-12T21:01:22.479Z',
+          expect.objectContaining({
+            snapshot: expect.objectContaining({
+              id: enabledRuleForBulkOpsWithActions1.id,
+              name: enabledRuleForBulkOpsWithActions1.attributes.name,
+              alertTypeId: enabledRuleForBulkOpsWithActions1.attributes.alertTypeId,
+              createdAt: enabledRuleForBulkOpsWithActions1.attributes.createdAt,
+              updatedAt: enabledRuleForBulkOpsWithActions1.attributes.updatedAt,
+            }),
+          }),
+          expect.objectContaining({
+            snapshot: expect.objectContaining({
+              id: enabledRuleForBulkOpsWithActions2.id,
+              name: enabledRuleForBulkOpsWithActions2.attributes.name,
+              alertTypeId: enabledRuleForBulkOpsWithActions2.attributes.alertTypeId,
+              createdAt: enabledRuleForBulkOpsWithActions2.attributes.createdAt,
+              updatedAt: enabledRuleForBulkOpsWithActions2.attributes.updatedAt,
+            }),
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('captures context of each rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await trackingClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
             objectId: enabledRuleForBulkOpsWithActions1.id,
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
-            snapshot: {
-              attributes: enabledRuleForBulkOpsWithActions1.attributes,
-              references: enabledRuleForBulkOpsWithActions1.references,
-            },
-          },
-          {
-            timestamp: '2019-02-12T21:01:22.479Z',
+          }),
+          expect.objectContaining({
             objectId: enabledRuleForBulkOpsWithActions2.id,
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
-            snapshot: {
-              attributes: enabledRuleForBulkOpsWithActions2.attributes,
-              references: enabledRuleForBulkOpsWithActions2.references,
-            },
-          },
+          }),
         ],
         expect.any(Object)
       );
@@ -1111,6 +1150,86 @@ describe('bulkDelete', () => {
       // Default rulesClient has no changeTrackingService; verify the call simply did not throw.
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
       expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalled();
+    });
+
+    test('captures rule.revision in object.sequence', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [enabledRuleForBulkOps1],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
+      });
+
+      await trackingClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            sequence: 1,
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+  });
+
+  describe('gap soft-deletion ordering and scope', () => {
+    test('should soft-delete gaps only for successfully deleted rules', async () => {
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          getBulkOperationStatusErrorResponse(500),
+          { id: 'id3', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(softDeleteGapsByQueryMock).toHaveBeenCalledTimes(1);
+      expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({
+        ruleIds: ['id1', 'id3'],
+        eventLogClient,
+        logger,
+      });
+    });
+
+    test('should not soft-delete gaps when no rules are successfully deleted', async () => {
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          getBulkOperationStatusErrorResponse(500),
+          getBulkOperationStatusErrorResponse(500),
+        ],
+      });
+
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(softDeleteGapsByQueryMock).not.toHaveBeenCalled();
+    });
+
+    test('should soft-delete gaps after SO deletion, not before', async () => {
+      const callOrder: string[] = [];
+
+      unsecuredSavedObjectsClient.bulkDelete.mockImplementation(async () => {
+        callOrder.push('bulkDeleteSo');
+        return {
+          statuses: [
+            { id: 'id1', type: 'alert', success: true },
+            { id: 'id2', type: 'alert', success: true },
+          ],
+        };
+      });
+
+      softDeleteGapsByQueryMock.mockImplementation(async () => {
+        callOrder.push('softDeleteGaps');
+      });
+
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(callOrder.indexOf('bulkDeleteSo')).toBeLessThan(callOrder.indexOf('softDeleteGaps'));
     });
   });
 });

@@ -31,7 +31,7 @@ describe('dateSuffixesBetween', () => {
 });
 
 describe('episodeIndexNames', () => {
-  it('returns ep index names using a provided date suffix override', () => {
+  it('returns opaque episode tokens instead of insights.epN', () => {
     const names = episodeIndexNames({
       episodeId: 'ep1',
       endMs: Date.parse('2026-01-01T00:00:00.000Z'),
@@ -39,6 +39,8 @@ describe('episodeIndexNames', () => {
       dateSuffixOverride: '2026.01.14',
     });
 
-    expect(names.endpointEvents).toEqual('logs-endpoint.events.insights.ep1.2026.01.14');
+    expect(names.endpointEvents).toEqual('logs-endpoint.events.f56865fe.2026.01.14');
+    expect(names.endpointAlerts).toEqual('logs-endpoint.alerts.f56865fe.2026.01.14');
+    expect(names.legacyEndpointEvents).toEqual('logs-endpoint.events.insights.ep1.2026.01.14');
   });
 });

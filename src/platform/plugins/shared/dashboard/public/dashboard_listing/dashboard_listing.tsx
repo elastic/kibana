@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
@@ -18,12 +18,16 @@ import { QueryClientProvider } from '@kbn/react-query';
 import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 
 import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderTab } from '@kbn/app-header';
 import type { AppMenuConfig, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
 import type { DashboardListingProps, DashboardListingTab } from './types';
+import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboard_json_flyout';
+import { importDashboardJsonStrings } from './import_json/_import_dashboard_json_strings';
+import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 
 export const DashboardListing = ({
   children,
@@ -41,6 +45,8 @@ export const DashboardListing = ({
   const history = useHistory();
   const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
 
+  const [refreshListBouncer, setRefreshListBouncer] = useState(false);
+
   const tabs = useMemo(
     () =>
       getDashboardListingTabs({
@@ -49,17 +55,39 @@ export const DashboardListing = ({
         useSessionStorageIntegration,
         initialFilter,
         getTabs,
+        refreshListBouncer,
       }),
-    [goToDashboard, getDashboardUrl, useSessionStorageIntegration, initialFilter, getTabs]
+    [
+      goToDashboard,
+      getDashboardUrl,
+      useSessionStorageIntegration,
+      initialFilter,
+      getTabs,
+      refreshListBouncer,
+    ]
   );
 
   const activeTabId = useMemo(() => {
     return tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';
   }, [tabs, activeTabParam]);
 
-  const changeActiveTab = (tabId: string) => {
-    history.push(`/list/${tabId}`);
-  };
+  const changeActiveTab = useCallback(
+    (tabId: string) => {
+      history.push(`/list/${tabId}`);
+    },
+    [history]
+  );
+
+  const headerTabs = useMemo<AppHeaderTab[]>(
+    () =>
+      tabs.map((tab) => ({
+        id: tab.id,
+        label: tab.title,
+        isSelected: tab.id === activeTabId,
+        onClick: () => changeActiveTab(tab.id),
+      })),
+    [tabs, activeTabId, changeActiveTab]
+  );
 
   const getBreadcrumbs = useCallback(
     (appId: string): EmbeddableEditorBreadcrumb[] => {
@@ -87,6 +115,11 @@ export const DashboardListing = ({
     },
     [tabs, activeTabId]
   );
+
+  const onImportSuccess = useCallback((id: string, title: string) => {
+    setRefreshListBouncer((b) => !b);
+    coreServices.notifications.toasts.addSuccess(importDashboardJsonStrings.getSuccessToast(title));
+  }, []);
 
   const appMenu = useMemo<AppMenuConfig | undefined>(() => {
     const tabsByIdMap = new Map((tabs as DashboardListingTab[]).map((tab) => [tab.id, tab]));
@@ -148,8 +181,27 @@ export const DashboardListing = ({
               }
             : undefined,
       },
+      items: getDashboardCapabilities().createNew
+        ? [
+            {
+              id: 'importDashboardJson',
+              order: 0,
+              label: i18n.translate('dashboard.listing.importDashboardButtonLabel', {
+                defaultMessage: 'Import dashboard',
+              }),
+              iconType: 'upload',
+              testId: 'dashboardListingImportButton',
+              run: (params) => {
+                openImportDashboardJsonFlyout({
+                  onImportSuccess,
+                  returnFocus: params?.returnFocus,
+                });
+              },
+            },
+          ]
+        : [],
     };
-  }, [tabs]);
+  }, [tabs, onImportSuccess]);
 
   return (
     <I18nProvider>
@@ -159,6 +211,7 @@ export const DashboardListing = ({
           title={i18n.translate('dashboard.listing.title', {
             defaultMessage: 'Dashboards',
           })}
+          tabs={headerTabs}
           menu={appMenu}
         />
         <TabbedTableListView
@@ -168,6 +221,7 @@ export const DashboardListing = ({
           activeTabId={activeTabId}
           changeActiveTab={changeActiveTab}
           showCreateButton={false}
+          hideTabs
         />
       </QueryClientProvider>
     </I18nProvider>

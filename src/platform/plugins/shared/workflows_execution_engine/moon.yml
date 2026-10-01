@@ -17,6 +17,7 @@ project:
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/plugins/shared/workflows_execution_engine
 dependsOn:
+  - '@kbn/alerting-plugin'
   - '@kbn/apm-utils'
   - '@kbn/core'
   - '@kbn/config-schema'
@@ -27,6 +28,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/eval-kql'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-security-server'
   - '@kbn/cloud-plugin'
   - '@kbn/utility-types'
   - '@kbn/zod'
@@ -38,9 +40,11 @@ dependsOn:
   - '@kbn/usage-api-plugin'
   - '@kbn/logging-mocks'
   - '@kbn/crypto'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/es-errors'
   - '@kbn/spaces-plugin'
   - '@kbn/core-spaces-common'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod
@@ -50,6 +54,7 @@ tags:
 fileGroups:
   src:
     - index.ts
+    - test_helpers.ts
     - common/**/*
     - public/**/*
     - server/**/*

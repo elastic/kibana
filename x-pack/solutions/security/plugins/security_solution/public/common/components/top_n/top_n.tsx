@@ -101,6 +101,7 @@ const TopNComponent: React.FC<Props> = ({
         onChange={onViewSelected}
         options={options}
         valueOfSelected={view}
+        aria-label={i18n.VIEW_SELECT_ARIA_LABEL}
       />
     ),
     [onViewSelected, options, styles.viewSelect, view]
@@ -146,9 +147,12 @@ const TopNComponent: React.FC<Props> = ({
         )}
       </div>
 
-      <EuiToolTip content={i18n.CLOSE} disableScreenReaderOutput>
+      <EuiToolTip
+        content={i18n.CLOSE}
+        disableScreenReaderOutput
+        anchorProps={{ css: styles.closeButton }}
+      >
         <EuiButtonIcon
-          css={styles.closeButton}
           aria-label={i18n.CLOSE}
           data-test-subj="close"
           iconType="cross"

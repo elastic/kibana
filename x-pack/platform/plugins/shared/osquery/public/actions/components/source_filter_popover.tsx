@@ -83,7 +83,7 @@ const SourceFilterPopoverComponent: React.FC<SourceFilterPopoverProps> = ({
 
   const triggerButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={togglePopover}
       isSelected={isOpen}
       hasActiveFilters={isFiltered}

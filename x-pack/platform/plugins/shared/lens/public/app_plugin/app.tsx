@@ -77,7 +77,6 @@ export function App({
   initialInput,
   incomingState,
   redirectToOrigin,
-  setHeaderActionMenu,
   contextOriginatingApp,
   topNavMenuEntryGenerators,
   initialContext,
@@ -164,8 +163,8 @@ export function App({
       ? initialContext.originatingApp
       : undefined;
   const legacyEditorAppUrl =
-    initialContext && 'vizEditorOriginatingAppUrl' in initialContext
-      ? initialContext.vizEditorOriginatingAppUrl
+    initialContext && 'visEditorOriginatingAppUrl' in initialContext
+      ? initialContext.visEditorOriginatingAppUrl
       : undefined;
   const showNoDataPopover = useCallback(() => {
     setIndicateNoData(true);
@@ -311,15 +310,15 @@ export function App({
 
       if (visualization.activeId === 'lnsXY') {
         try {
-          const updatedVizState = await saveUpdatedLinkedAnnotationsToLibrary(
+          const updatedVisState = await saveUpdatedLinkedAnnotationsToLibrary(
             visualization.state,
             lensAppServices.eventAnnotationService
           );
-          if (updatedVizState !== visualization.state) {
+          if (updatedVisState !== visualization.state) {
             dispatch(
               updateVisualizationState({
                 visualizationId: visualization.activeId,
-                newState: updatedVizState,
+                newState: updatedVisState,
               })
             );
           }
@@ -398,10 +397,10 @@ export function App({
   );
 
   const {
-    shouldShowGoBackToVizEditorModal,
+    shouldShowGoBackToVisEditorModal,
     goBackToOriginatingApp,
-    navigateToVizEditor,
-    closeGoBackToVizEditorModal,
+    navigateToVisEditor,
+    closeGoBackToVisEditorModal,
   } = useNavigateBackToApp({
     application,
     onAppLeave,
@@ -493,7 +492,6 @@ export function App({
           onAppLeave={onAppLeave}
           runSave={runSave}
           setIsSaveModalVisible={setIsSaveModalVisible}
-          setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
@@ -553,7 +551,7 @@ export function App({
           }
         />
       )}
-      {shouldShowGoBackToVizEditorModal && (
+      {shouldShowGoBackToVisEditorModal && (
         <EuiConfirmModal
           aria-labelledby={confirmModalTitleId}
           title={i18n.translate('xpack.lens.app.unsavedWorkTitle', {
@@ -561,8 +559,8 @@ export function App({
           })}
           titleProps={{ id: confirmModalTitleId }}
           maxWidth={600}
-          onCancel={closeGoBackToVizEditorModal}
-          onConfirm={navigateToVizEditor}
+          onCancel={closeGoBackToVisEditorModal}
+          onConfirm={navigateToVisEditor}
           cancelButtonText={i18n.translate('xpack.lens.app.goBackModalCancelBtn', {
             defaultMessage: 'Cancel',
           })}

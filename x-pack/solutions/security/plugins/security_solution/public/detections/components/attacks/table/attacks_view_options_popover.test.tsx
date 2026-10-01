@@ -14,6 +14,19 @@ import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 
 jest.mock('../../../../common/lib/kibana');
 
+jest.mock(
+  '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management',
+  () => ({
+    AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
+      <div data-test-subj="anonymizationSettingsModal">
+        <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
+          {'Close'}
+        </button>
+      </div>
+    ),
+  })
+);
+
 describe('AttacksViewOptionsPopover', () => {
   const defaultProps = {
     showAnonymized: false,
@@ -101,6 +114,60 @@ describe('AttacksViewOptionsPopover', () => {
 
       expect(anonymizedSwitch).toHaveAttribute('aria-checked', 'true');
       expect(attacksOnlySwitch).toHaveAttribute('aria-checked', 'false');
+    });
+  });
+
+  it('renders the anonymization settings button inside the popover', async () => {
+    const { getByTestId } = render(<AttacksViewOptionsPopover {...defaultProps} />);
+
+    fireEvent.click(getByTestId(`${TABLE_SECTION_TEST_ID}-view-options-button`));
+
+    await waitFor(() => {
+      expect(
+        getByTestId(`${TABLE_SECTION_TEST_ID}-anonymization-settings-button`)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('opens the anonymization settings modal when the settings button is clicked', async () => {
+    const { getByTestId } = render(<AttacksViewOptionsPopover {...defaultProps} />);
+
+    fireEvent.click(getByTestId(`${TABLE_SECTION_TEST_ID}-view-options-button`));
+
+    await waitFor(() => {
+      expect(
+        getByTestId(`${TABLE_SECTION_TEST_ID}-anonymization-settings-button`)
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(getByTestId(`${TABLE_SECTION_TEST_ID}-anonymization-settings-button`));
+
+    await waitFor(() => {
+      expect(getByTestId('anonymizationSettingsModal')).toBeInTheDocument();
+    });
+  });
+
+  it('closes the anonymization settings modal when onClose is triggered', async () => {
+    const { getByTestId, queryByTestId } = render(<AttacksViewOptionsPopover {...defaultProps} />);
+
+    fireEvent.click(getByTestId(`${TABLE_SECTION_TEST_ID}-view-options-button`));
+
+    await waitFor(() => {
+      expect(
+        getByTestId(`${TABLE_SECTION_TEST_ID}-anonymization-settings-button`)
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(getByTestId(`${TABLE_SECTION_TEST_ID}-anonymization-settings-button`));
+
+    await waitFor(() => {
+      expect(getByTestId('anonymizationSettingsModal')).toBeInTheDocument();
+    });
+
+    fireEvent.click(getByTestId('closeAnonymizationSettingsModal'));
+
+    await waitFor(() => {
+      expect(queryByTestId('anonymizationSettingsModal')).not.toBeInTheDocument();
     });
   });
 });

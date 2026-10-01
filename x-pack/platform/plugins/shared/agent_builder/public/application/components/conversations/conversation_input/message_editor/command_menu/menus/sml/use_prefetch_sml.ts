@@ -7,10 +7,7 @@
 
 import { useCallback } from 'react';
 import { useQueryClient } from '@kbn/react-query';
-import type {
-  SmlSearchFilters,
-  SmlSearchConstraints,
-} from '@kbn/agent-context-layer-plugin/public';
+import type { SmlSearchFilters, SmlSearchConstraints } from '@kbn/agent-builder-sml-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../../../../../../services/sml/constants';
 import { queryKeys } from '../../../../../../../query_keys';
 import { useAgentBuilderServices } from '../../../../../../../hooks/use_agent_builder_service';
@@ -19,10 +16,10 @@ import { useExperimentalFeatures } from '../../../../../../../hooks/use_experime
 export const usePrefetchSml = (constraints?: SmlSearchConstraints, filters?: SmlSearchFilters) => {
   const queryClient = useQueryClient();
   const { smlService } = useAgentBuilderServices();
-  const experimentalFeaturesEnabled = useExperimentalFeatures();
+  const smlEnabled = useExperimentalFeatures();
 
   return useCallback(() => {
-    if (!experimentalFeaturesEnabled) {
+    if (!smlEnabled) {
       return;
     }
     queryClient.prefetchQuery({
@@ -35,5 +32,5 @@ export const usePrefetchSml = (constraints?: SmlSearchConstraints, filters?: Sml
           filters,
         }),
     });
-  }, [experimentalFeaturesEnabled, queryClient, smlService, constraints, filters]);
+  }, [smlEnabled, queryClient, smlService, constraints, filters]);
 };

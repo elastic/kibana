@@ -5,44 +5,45 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { passThroughTransformer } from '../../../common/attachments/base';
 import { decodeOrThrowZod } from '../../../common/runtime_types';
 import type { AttachmentPersistedAttributes } from '../../../common/types/attachments_v1';
 import type { UnifiedAttachmentAttributes } from '../../../common/types/attachments_v2';
-import type {
-  AttachmentPatchAttributesV2,
-  AttachmentMode,
-} from '../../../../common/types/domain/attachment/v2';
-import { UnifiedAttachmentAttributesSchema } from '../../../../common/types/domain/attachment/v2';
+import type { AttachmentV2, UnifiedAttachment } from '../../../../common/types/domain';
+import type { AttachmentPatchAttributesV2 } from '../../../../common/types/domain/attachment/v2';
 import {
-  isMigratedAttachmentType,
-  isUnifiedOnlyAttachmentType,
-} from '../../../../common/utils/attachments';
+  UnifiedAttachmentAttributesSchema,
+  UnifiedAttachmentSchema,
+} from '../../../../common/types/domain/attachment/v2';
+import { isMigratedAttachmentType } from '../../../../common/utils/attachments';
 import {
   getAttachmentTypeFromAttributes,
   getAttachmentTypeTransformers,
 } from '../../../common/attachments';
+import { isUnifiedOnlyAttachment } from '../../type_guards';
 
 export type ModeTransformedAttributes =
   | { isUnified: true; attributes: UnifiedAttachmentAttributes }
   | { isUnified: false; attributes: AttachmentPersistedAttributes };
 
-export function transformAttributesForMode({
+/**
+ * Decides unified vs legacy shape on read. Migrated types (incl. legacy `actions`)
+ * fold to their unified shape in-memory; the stored SO is never mutated.
+ */
+export function toUnifiedAttributes({
   attributes,
-  mode,
 }: {
   attributes:
     | UnifiedAttachmentAttributes
     | AttachmentPersistedAttributes
     | AttachmentPatchAttributesV2;
-  mode: AttachmentMode;
 }): ModeTransformedAttributes {
   const attachmentType = getAttachmentTypeFromAttributes(attributes);
   const owner = attributes?.owner ?? '';
   const transformer = getAttachmentTypeTransformers(attachmentType, owner);
-  const isUnifiedOnly = isUnifiedOnlyAttachmentType(attachmentType);
 
-  if ((mode === 'unified' || isUnifiedOnly) && isMigratedAttachmentType(attachmentType, owner)) {
+  if (isMigratedAttachmentType(attachmentType, owner)) {
     const unifiedAttrs = transformer.toUnifiedSchema(attributes);
     const validatedAttributes = decodeOrThrowZod(UnifiedAttachmentAttributesSchema)(
       unifiedAttrs
@@ -53,6 +54,45 @@ export function transformAttributesForMode({
   const legacyAttrs = transformer.toLegacySchema(attributes);
   return { isUnified: false, attributes: legacyAttrs };
 }
+
+export const toUnifiedAttachment = (attachment: AttachmentV2): UnifiedAttachment => {
+  const { id, version, ...attributes } = attachment;
+  const { attributes: folded } = toUnifiedAttributes({ attributes });
+  return decodeOrThrowZod(UnifiedAttachmentSchema)({
+    id,
+    version,
+    ...folded,
+  }) as UnifiedAttachment;
+};
+
+/**
+ * Guards the legacy comment-SO write paths (`create`/`bulkCreate`/`update`/
+ * `bulkUpdate`). Unified-only attachments (no legacy counterpart) cannot be
+ * represented in the legacy schema, so persisting them as a
+ * `CASE_COMMENT_SAVED_OBJECT` fails deep in the response decode step with an
+ * opaque 500. This surfaces an actionable 400 instead, pointing operators at the
+ * required Kibana config.
+ *
+ * Two flavours are rejected:
+ *  - unified-only *types* (e.g. `security.entity`/`security.timeline`), reachable
+ *    on a misconfiguration where the type's own feature flag is on while
+ *    `xpack.cases.attachments.enabled` is off, and
+ *  - unified-only *instances* of hybrid types — a Lens-by-reference attachment
+ *    has no by-value legacy form even though by-value Lens does.
+ */
+export const assertLegacyWriteableAttachmentType = (
+  attributes:
+    | UnifiedAttachmentAttributes
+    | AttachmentPersistedAttributes
+    | AttachmentPatchAttributesV2
+): void => {
+  if (isUnifiedOnlyAttachment(attributes)) {
+    const type = getAttachmentTypeFromAttributes(attributes);
+    throw Boom.badRequest(
+      `Attachment type '${type}' has no legacy representation and requires the unified attachment SO type. Enable xpack.cases.attachments.enabled in your Kibana configuration.`
+    );
+  }
+};
 
 export function getTransformerForPatchAttributes(
   decodedAttributes: AttachmentPatchAttributesV2,

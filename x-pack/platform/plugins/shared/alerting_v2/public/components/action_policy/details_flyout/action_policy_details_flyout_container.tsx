@@ -6,10 +6,11 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
-import { CoreStart, useService } from '@kbn/core-di-browser';
+import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { paths } from '../../../constants';
+import { useAlertingLocators } from '../../../application/locator_context';
 import { EntityNotFoundFlyout } from '../../entity_not_found_flyout';
 import { LoadingFlyout } from '../../loading_flyout';
 import { useCreateActionPolicy } from '../../../hooks/use_create_action_policy';
@@ -22,16 +23,23 @@ import { useUnsnoozeActionPolicy } from '../../../hooks/use_unsnooze_action_poli
 import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_policy_api_key';
 import { DeleteActionPolicyConfirmModal } from '../delete_confirmation_modal';
 import { UpdateApiKeyConfirmationModal } from '../../../pages/list_action_policies_page/components/update_api_key_confirmation_modal';
+import { UserCapabilities } from '../../../services/user_capabilities';
 import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
 
 interface Props {
   policyId: string;
   onClose: () => void;
+  /** Managed-flyout session. Use `inherit` when this flyout opens on top of another. */
+  session?: EuiFlyoutProps['session'];
 }
 
-export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props) => {
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
+export const ActionPolicyDetailsFlyoutContainer = ({
+  policyId,
+  onClose,
+  session = 'start',
+}: Props) => {
+  const { actionPolicyLocators } = useAlertingLocators();
+  const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
 
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
@@ -49,13 +57,13 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
     isLoading: isDisabling,
     variables: disableVariables,
   } = useDisableActionPolicy();
-  const { mutate: snoozePolicy } = useSnoozeActionPolicy();
-  const { mutate: unsnoozePolicy } = useUnsnoozeActionPolicy();
+  const { mutate: snoozePolicy, isLoading: isSnoozing } = useSnoozeActionPolicy();
+  const { mutate: unsnoozePolicy, isLoading: isUnsnoozing } = useUnsnoozeActionPolicy();
   const { mutate: updateApiKey, isLoading: isUpdatingApiKey } = useUpdateActionPolicyApiKey();
 
   const navigateToEdit = (id: string) => {
     onClose();
-    navigateToUrl(basePath.prepend(paths.actionPolicyEdit(id)));
+    actionPolicyLocators.navigateSync({ page: 'edit', actionPolicyId: id });
   };
 
   const clonePolicy = (source: ActionPolicyResponse) => {
@@ -64,23 +72,17 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
       description,
       destinations,
       matcher,
-      groupBy,
+      group_by: groupBy,
       throttle,
-      tags,
-      groupingMode,
-      type,
-      ruleId,
+      grouping_mode: groupingMode,
     } = source;
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,
       destinations,
-      groupingMode: groupingMode ?? 'per_episode',
-      type,
-      ...(type === 'single_rule' && ruleId != null && { ruleId }),
-      ...(tags != null && { tags }),
+      grouping_mode: groupingMode ?? 'per_episode',
       ...(matcher != null && { matcher }),
-      ...(groupBy != null && { groupBy }),
+      ...(groupBy != null && { group_by: groupBy }),
       ...(throttle != null && { throttle }),
     };
     createActionPolicy(data);
@@ -88,19 +90,15 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
   };
 
   if (isLoading) {
-    return (
-      <LoadingFlyout
-        title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.loadingTitle', {
-          defaultMessage: 'Action policy',
-        })}
-        onClose={onClose}
-      />
-    );
+    return <LoadingFlyout type="overlay" session={session} ownFocus={false} onClose={onClose} />;
   }
 
   if (isError || !policy) {
     return (
       <EntityNotFoundFlyout
+        type="overlay"
+        session={session}
+        ownFocus={false}
         title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.notFoundTitle', {
           defaultMessage: 'Action policy not found',
         })}
@@ -123,6 +121,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
       {!isModalOpen && (
         <ActionPolicyDetailsFlyout
           policy={policy}
+          canWrite={canWrite}
           onClose={onClose}
           onEdit={navigateToEdit}
           onClone={clonePolicy}
@@ -136,6 +135,9 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
             (isEnabling && enableVariables === policy.id) ||
             (isDisabling && disableVariables === policy.id)
           }
+          isSnoozeLoading={isSnoozing || isUnsnoozing}
+          session={session}
+          ownFocus={false}
         />
       )}
       {policyToDelete && (

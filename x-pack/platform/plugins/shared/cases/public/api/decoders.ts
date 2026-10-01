@@ -7,12 +7,14 @@
 
 import type {
   CasesFindResponse,
+  CasesSearchResponse,
   CasesBulkGetResponse,
   CasesMetricsResponse,
   CasesSimilarResponse,
 } from '../../common/types/api';
 import {
   CasesFindResponseSchema,
+  CasesSearchResponseSchema,
   CasesBulkGetResponseSchema,
   CasesMetricsResponseSchema,
   CasesSimilarResponseSchema,
@@ -21,6 +23,14 @@ import { decodeWithToasterError } from '../containers/utils';
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
   decodeWithToasterError(CasesFindResponseSchema, respCases);
+
+/**
+ * Decodes the internal `_search` response, which is a superset of the public `_find` response that
+ * additionally carries `mttr` for the cases list metrics bar. Using the search schema here (rather
+ * than `CasesFindResponseSchema`) keeps the decode from stripping the `mttr` key.
+ */
+export const decodeCasesSearchResponse = (respCases?: CasesSearchResponse) =>
+  decodeWithToasterError(CasesSearchResponseSchema, respCases);
 
 export const decodeCasesMetricsResponse = (metrics?: CasesMetricsResponse) =>
   decodeWithToasterError(CasesMetricsResponseSchema, metrics);

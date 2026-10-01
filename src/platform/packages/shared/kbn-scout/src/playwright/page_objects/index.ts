@@ -10,47 +10,45 @@
 import type { ScoutPage } from '..';
 import type { ScoutLogger } from '../../common';
 import type { ScoutTestConfig } from '../../types';
+import { AppMenu } from './app_menu';
+import { Chrome } from './chrome';
 import { CollapsibleNav } from './collapsible_nav';
-import { CopySavedObjectsToSpaceFlyout } from './copy_saved_objects_to_space_flyout';
+import { Controls } from './controls';
 import { DashboardApp } from './dashboard_app';
+import { DataGrid } from './data_grid';
 import { DataViewsManagementPage } from './data_views_management_page';
-import { DashboardLinks } from './dashboard_links';
-import { DataViewEditorPage } from './data_view_editor_page';
 import { DatePicker } from './date_picker';
-import { DiscoverApp } from './discover_app';
+import { DiscoverApp } from './discover';
 import { FilterBar } from './filter_bar';
+import { InspectorPage } from './inspector';
 import { MapsPage } from './maps_page';
 import { QueryBar } from './query_bar';
-import { RenderablePage } from './renderable_page';
-import { SavedObjectsManagementPage } from './saved_objects_management_page';
-import { SavedQueryManagementMenu } from './saved_query_management_menu';
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
-import { Inspector } from './inspector';
 import { LensApp } from './lens_app';
 import { ListingTable } from './listing_table';
 import { LoginPage } from './login_page';
 import { HomePage } from './home_page';
-import { OverlaysPage } from './overlays';
+import { SavedObjectSaveModal } from './saved_object_save_modal';
 import { VisualizeApp } from './visualize_app';
-import {
-  ContentListWrapper,
-  buildContentListSearch,
-  buildContentListUrlRegex,
-} from './content_list';
-import type { ContentListUrlState } from './content_list';
+import { UnifiedTabs } from './unified_tabs';
+import { ContentListWrapper } from './content_list';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 
 export {
+  AppMenu,
   ContentListWrapper,
-  CopySavedObjectsToSpaceFlyout,
+  Controls,
+  DiscoverApp,
+  FilterBar,
+  DataGrid,
   DataViewsManagementPage,
+  InspectorPage,
+  LensApp,
+  QueryBar,
+  UnifiedTabs,
   ListingTable,
-  SavedObjectsManagementPage,
-  buildContentListSearch,
-  buildContentListUrlRegex,
 };
-export type { ContentListUrlState };
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
@@ -60,28 +58,27 @@ export interface PageObjectsFixtures {
 }
 
 export interface PageObjects {
+  controls: Controls;
   datePicker: DatePicker;
+  dataGrid: DataGrid;
   dataViewsManagement: DataViewsManagementPage;
   discover: DiscoverApp;
   dashboard: DashboardApp;
-  dashboardLinks: DashboardLinks;
-  dataViewEditor: DataViewEditorPage;
   filterBar: FilterBar;
+  inspector: InspectorPage;
   listingTable: ListingTable;
   home: HomePage;
   maps: MapsPage;
   queryBar: QueryBar;
-  renderable: RenderablePage;
-  savedObjectsManagement: SavedObjectsManagementPage;
-  copySavedObjectsToSpaceFlyout: CopySavedObjectsToSpaceFlyout;
-  savedQueryManagementMenu: SavedQueryManagementMenu;
+  chrome: Chrome;
+  appMenu: AppMenu;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
-  inspector: Inspector;
   lens: LensApp;
   login: LoginPage;
-  overlays: OverlaysPage;
   visualize: VisualizeApp;
+  saveModal: SavedObjectSaveModal;
+  unifiedTabs: UnifiedTabs;
 }
 
 /**
@@ -92,34 +89,26 @@ export interface PageObjects {
  */
 export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObjects {
   return {
+    controls: createLazyPageObject(Controls, fixtures.page),
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
-    dataViewEditor: createLazyPageObject(DataViewEditorPage, fixtures.page),
+    dataGrid: createLazyPageObject(DataGrid, fixtures.page),
     dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
-    dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
+    inspector: createLazyPageObject(InspectorPage, fixtures.page),
     listingTable: createLazyPageObject(ListingTable, fixtures.page),
     home: createLazyPageObject(HomePage, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
     queryBar: createLazyPageObject(QueryBar, fixtures.page),
-    renderable: createLazyPageObject(RenderablePage, fixtures.page),
-    savedObjectsManagement: createLazyPageObject(
-      SavedObjectsManagementPage,
-      fixtures.page,
-      fixtures.kbnUrl
-    ),
-    copySavedObjectsToSpaceFlyout: createLazyPageObject(
-      CopySavedObjectsToSpaceFlyout,
-      fixtures.page
-    ),
-    savedQueryManagementMenu: createLazyPageObject(SavedQueryManagementMenu, fixtures.page),
+    chrome: createLazyPageObject(Chrome, fixtures.page),
+    appMenu: createLazyPageObject(AppMenu, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
-    inspector: createLazyPageObject(Inspector, fixtures.page),
     lens: createLazyPageObject(LensApp, fixtures.page),
     login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
-    overlays: createLazyPageObject(OverlaysPage, fixtures.page),
     visualize: createLazyPageObject(VisualizeApp, fixtures.page),
+    saveModal: createLazyPageObject(SavedObjectSaveModal, fixtures.page),
+    unifiedTabs: createLazyPageObject(UnifiedTabs, fixtures.page),
   };
 }

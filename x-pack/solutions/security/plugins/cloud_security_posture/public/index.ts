@@ -7,7 +7,11 @@
 
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { CspPlugin } from './plugin';
-export type { CspSecuritySolutionContext } from './types';
+export type {
+  CspSecuritySolutionContext,
+  OpenFindingInSystemFlyout,
+  OpenFindingInSystemFlyoutHandle,
+} from './types';
 export type { CloudSecurityPosturePageId } from './common/navigation/types';
 export { getSecuritySolutionLink } from './common/navigation/security_solution_links';
 

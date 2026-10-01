@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseAwsHost, signRequest } from './aws_credential_helpers';
+import { buildCanonicalQueryString, parseAwsHost, signRequest } from './aws_credential_helpers';
 import { calculateAWSA4Signature, sha256Hash } from './aws_crypto_helpers';
 
 jest.mock('./aws_crypto_helpers', () => ({
@@ -42,6 +42,45 @@ describe('parseAwsHost()', () => {
       service: 's3',
       region: 'us-west-2',
     });
+  });
+
+  it('parses Amazon OpenSearch Service domain hostnames with region before service', () => {
+    expect(parseAwsHost('search-my-domain-abc123.us-east-1.es.amazonaws.com')).toEqual({
+      itemName: 'search-my-domain-abc123',
+      region: 'us-east-1',
+      service: 'es',
+    });
+    expect(parseAwsHost('vpc-my-domain-abc123.eu-west-1.es.amazonaws.com')).toEqual({
+      itemName: 'vpc-my-domain-abc123',
+      region: 'eu-west-1',
+      service: 'es',
+    });
+  });
+
+  it('parses OpenSearch Serverless collection hostnames with region before service', () => {
+    expect(parseAwsHost('abc123xyz.us-east-1.aoss.amazonaws.com')).toEqual({
+      itemName: 'abc123xyz',
+      region: 'us-east-1',
+      service: 'aoss',
+    });
+  });
+});
+
+describe('buildCanonicalQueryString()', () => {
+  // Regression test: `encodeURIComponent` leaves `! ' ( ) *` unescaped, but
+  // AWS's SigV4 canonicalization percent-encodes every character outside the
+  // RFC-3986 unreserved set. A wildcard search string like "login*" (a normal
+  // free-text filter value) must come out with the `*` escaped, or AWS
+  // re-canonicalizes the request differently than what was signed and
+  // rejects it with a generic access-denied error.
+  it('percent-encodes RFC-3986 reserved characters left unescaped by encodeURIComponent', () => {
+    expect(buildCanonicalQueryString({ searchString: "login*!'()" })).toBe(
+      'searchString=login%2A%21%27%28%29'
+    );
+  });
+
+  it('sorts keys and leaves already-safe characters untouched', () => {
+    expect(buildCanonicalQueryString({ b: '2', a: '1' })).toBe('a=1&b=2');
   });
 });
 

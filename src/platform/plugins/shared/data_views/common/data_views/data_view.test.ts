@@ -480,6 +480,19 @@ describe('IndexPattern', () => {
         })
       );
     });
+
+    test('should derive a scalar formatter from defaultFormatter', () => {
+      expect(
+        indexPattern.getFormatterForField({
+          name: 'durationSeconds',
+          type: 'number',
+          esTypes: ['long'],
+          searchable: true,
+          aggregatable: true,
+          defaultFormatter: 's',
+        })
+      ).toBeInstanceOf(MockFieldFormatter);
+    });
   });
 
   describe('toSpec', () => {

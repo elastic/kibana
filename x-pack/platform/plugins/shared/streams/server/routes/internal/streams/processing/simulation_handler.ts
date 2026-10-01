@@ -65,10 +65,16 @@ export interface ProcessingSimulationParams {
     name: string;
   };
   body: {
-    processing: StreamlangDSL;
     documents: FlattenRecord[];
     detected_fields?: NamedFieldDefinitionConfig[];
-  };
+  } & (
+    | {
+        processing: StreamlangDSL;
+      }
+    | {
+        processors: IngestProcessorContainer[];
+      }
+  );
 }
 
 export interface SimulateProcessingDeps {
@@ -77,6 +83,11 @@ export interface SimulateProcessingDeps {
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
 }
+
+const hasStreamlangProcessing = (
+  body: ProcessingSimulationParams['body']
+): body is Extract<ProcessingSimulationParams['body'], { processing: StreamlangDSL }> =>
+  'processing' in body;
 
 // Narrow down the type to only successful processor results
 export type SuccessfulPipelineSimulateDocumentResult = WithRequired<
@@ -138,32 +149,34 @@ export const simulateProcessing = async ({
     .filter(([, { type }]) => type === 'system')
     .map(([name]) => name);
 
-  // Validate the Streamlang DSL before attempting simulation
   const rootStream = getRoot(params.path.name);
   const isWiredStream = Streams.WiredStream.Definition.is(stream);
-  const validationResult = validateStreamlang(params.body.processing, {
-    reservedFields,
-    streamType: isWiredStream ? 'wired' : 'classic',
-    skipNamespaceValidation: isWiredStream && rootStream === LOGS_ECS_STREAM_NAME,
-  });
 
-  if (!validationResult.isValid) {
-    return {
-      documents: [],
-      processors_metrics: {},
-      documents_metrics: {
-        failed_rate: 1,
-        partially_parsed_rate: 0,
-        skipped_rate: 0,
-        parsed_rate: 0,
-        dropped_rate: 0,
-      },
-      detected_fields: [],
-      definition_error: {
-        type: 'validation_error',
-        message: validationResult.errors.map((e) => e.message).join(', '),
-      },
-    };
+  if (hasStreamlangProcessing(params.body)) {
+    const validationResult = validateStreamlang(params.body.processing, {
+      reservedFields,
+      streamType: isWiredStream ? 'wired' : 'classic',
+      skipNamespaceValidation: isWiredStream && rootStream === LOGS_ECS_STREAM_NAME,
+    });
+
+    if (!validationResult.isValid) {
+      return {
+        documents: [],
+        processors_metrics: {},
+        documents_metrics: {
+          failed_rate: 1,
+          partially_parsed_rate: 0,
+          skipped_rate: 0,
+          parsed_rate: 0,
+          dropped_rate: 0,
+        },
+        detected_fields: [],
+        definition_error: {
+          type: 'validation_error',
+          message: validationResult.errors.map((e) => e.message).join(', '),
+        },
+      };
+    }
   }
 
   const streamlangResolverOptions: StreamlangResolverOptions =
@@ -207,10 +220,10 @@ export const simulateProcessing = async ({
     pipelineSimulationResult.simulation,
     ingestSimulationResult.simulation,
     simulationData.docs,
-    params.body.processing,
+    simulationData.metricProcessors,
+    simulationData.conditionProcessorTags,
     Streams.WiredStream.Definition.is(stream),
-    streamFields,
-    streamlangResolverOptions
+    streamFields
   );
 
   /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
@@ -239,43 +252,44 @@ const prepareSimulationDocs = (
 };
 
 const prepareSimulationProcessors = async (
-  processing: StreamlangDSL,
+  processing: StreamlangDSL | IngestProcessorContainer[],
   resolverOptions?: StreamlangResolverOptions
-): Promise<IngestProcessorContainer[]> => {
+): Promise<Array<NonNullable<IngestProcessorContainer>>> => {
   //
   /**
    * We want to simulate processors logic and collect data independently from the user config for simulation purposes.
    * 1. Force each processor to not ignore failures to collect all errors
    * 2. Append the error message to the `_errors` field on failure
    */
-  const transpiledIngestPipelineProcessors = await buildSimulationProcessorsWithConditionNoops(
-    processing,
-    resolverOptions
-  );
+  const transpiledIngestPipelineProcessors = Array.isArray(processing)
+    ? processing
+    : await buildSimulationProcessorsWithConditionNoops(processing, resolverOptions);
 
-  return transpiledIngestPipelineProcessors.map((processor) => {
-    const type = Object.keys(processor)[0];
-    const processorConfig = (processor as Record<string, Record<string, unknown>>)[type];
+  return transpiledIngestPipelineProcessors
+    .filter((processor): processor is NonNullable<IngestProcessorContainer> => Boolean(processor))
+    .map((processor) => {
+      const type = Object.keys(processor)[0];
+      const processorConfig = (processor as Record<string, Record<string, unknown>>)[type];
 
-    return {
-      [type]: {
-        ...processorConfig,
-        ignore_failure: false,
-        on_failure: [
-          {
-            append: {
-              field: '_errors',
-              value: {
-                message: '{{{ _ingest.on_failure_message }}}',
-                processor_id: processorConfig?.tag,
-                type: 'generic_processor_failure',
+      return {
+        [type]: {
+          ...processorConfig,
+          ignore_failure: false,
+          on_failure: [
+            {
+              append: {
+                field: '_errors',
+                value: {
+                  message: '{{{ _ingest.on_failure_message }}}',
+                  processor_id: processorConfig?.tag,
+                  type: 'generic_processor_failure',
+                },
               },
             },
-          },
-        ],
-      },
-    };
-  });
+          ],
+        },
+      };
+    });
 };
 
 const prepareSimulationData = async (
@@ -285,7 +299,8 @@ const prepareSimulationData = async (
   resolverOptions?: StreamlangResolverOptions
 ) => {
   const { body } = params;
-  const { processing, documents } = body;
+  const { documents } = body;
+  const processing = hasStreamlangProcessing(body) ? body.processing : body.processors;
 
   const targetStreamName = Streams.WiredStream.Definition.is(stream)
     ? getRoot(stream.name)
@@ -308,6 +323,13 @@ const prepareSimulationData = async (
   return {
     docs: prepareSimulationDocs(documents, targetStreamName, geoPointFields),
     processors: await prepareSimulationProcessors(processing, resolverOptions),
+    metricProcessors: (hasStreamlangProcessing(body)
+      ? await buildSimulationProcessorsWithConditionNoops(body.processing, resolverOptions)
+      : body.processors
+    ).filter((processor): processor is NonNullable<IngestProcessorContainer> => Boolean(processor)),
+    conditionProcessorTags: hasStreamlangProcessing(body)
+      ? collectConditionBlockIds(body.processing)
+      : new Set<string>(),
   };
 };
 
@@ -590,21 +612,15 @@ const computePipelineSimulationResult = async (
   pipelineSimulationResult: SuccessfulPipelineSimulateResponse,
   ingestSimulationResult: SimulateIngestResponse,
   sampleDocs: Array<{ _source: FlattenRecord }>,
-  processing: StreamlangDSL,
+  metricProcessors: Array<NonNullable<IngestProcessorContainer>>,
+  conditionProcessorTags: Set<string>,
   isWiredStream: boolean,
-  streamFields: FieldDefinition,
-  resolverOptions?: StreamlangResolverOptions
+  streamFields: FieldDefinition
 ): Promise<{
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
 }> => {
-  const transpiledProcessors = await buildSimulationProcessorsWithConditionNoops(
-    processing,
-    resolverOptions
-  );
-
-  const processorsMap = initProcessorMetricsMap(transpiledProcessors);
-  const conditionProcessorTags = collectConditionBlockIds(processing);
+  const processorsMap = initProcessorMetricsMap(metricProcessors);
 
   const forbiddenFields = Object.entries(streamFields)
     .filter(([, { type }]) => type === 'system')

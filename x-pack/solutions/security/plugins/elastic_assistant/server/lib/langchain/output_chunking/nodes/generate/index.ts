@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClientLlm } from '@kbn/langchain/server';
+import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
 import type { ZodType } from '@kbn/zod/v4';
 
@@ -26,7 +26,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
   responseIsHallucinated,
   generationSchema,
 }: {
-  llm: ActionsClientLlm;
+  llm: BaseLLM;
   logger?: Logger;
   getCombinedPromptFn: (params: {
     anonymizedDocs: string[];

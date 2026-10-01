@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiText, EuiLoadingSpinner, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { selectOverviewStatus } from '../../../../state/overview_status';
 

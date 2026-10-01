@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableVisualizationState, FormBasedLayer, TextBasedLayer } from '@kbn/lens-common';
+/*
+ * Test-only datatable (`lnsDatatable`) attribute normalizer for strict SO ↔ API round-trip checks.
+ */
+
+import type {
+  DataType,
+  DatatableVisualizationState,
+  FormBasedLayer,
+  TextBasedLayer,
+} from '@kbn/lens-common';
 import { parseTransposeId, getTransposeId, TRANSPOSE_SEPARATOR } from '@kbn/transpose-utils';
 import { uniqBy } from 'lodash';
 import {
@@ -21,6 +30,7 @@ import type { AttributesNormalizer, NormalizerConfig } from './normalize';
 import type { IdRemapping } from './common';
 import {
   DEFAULT_LAYER_ID,
+  getColorMappingNormalizer,
   getCommonNormalizer,
   getFormBasedDatasourceState,
   getPaletteNormalizer,
@@ -28,9 +38,11 @@ import {
 } from './common';
 import {
   getAccessorName,
+  inferDatatypeFromColor,
   isMetricColumnNoESQL,
   isMetricColumnESQL,
 } from '../../../../transforms/charts/datatable/helpers';
+import { buildColorProps } from '../../../../transforms/charts/datatable/to_api/columns';
 
 type DatatableAttributes = Extract<LensAttributes, { visualizationType: 'lnsDatatable' }>;
 
@@ -93,6 +105,11 @@ const SPLIT_PREFIX = `${getAccessorName('split_metric_by')}_`;
 const METRIC_PREFIX = `${getAccessorName('metric')}_`;
 const METRIC_REF_PREFIX = `${getAccessorName('metric_ref')}_`;
 
+const isMetricColumnId = (id: string): boolean =>
+  id.startsWith(METRIC_PREFIX) && !id.startsWith(METRIC_REF_PREFIX);
+const isRowColumnId = (id: string): boolean => id.startsWith(ROW_PREFIX);
+const isSplitMetricColumnId = (id: string): boolean => id.startsWith(SPLIT_PREFIX);
+
 /**
  * A column id belongs to the visualization state (i.e. is rendered) when it
  * is a row, a split_metric_by, or a top-level metric.
@@ -100,34 +117,18 @@ const METRIC_REF_PREFIX = `${getAccessorName('metric_ref')}_`;
  * only in the datasource layer and are hidden at render time.
  */
 const isVisualizationStateColumnId = (id: string): boolean =>
-  id.startsWith(ROW_PREFIX) ||
-  id.startsWith(SPLIT_PREFIX) ||
-  (id.startsWith(METRIC_PREFIX) && !id.startsWith(METRIC_REF_PREFIX));
+  isRowColumnId(id) || isSplitMetricColumnId(id) || isMetricColumnId(id);
 
 /**
- * Canonical order for the original side: rows → split_metrics_by → metrics
+ * Canonical order for datasource columnOrder: split_metrics_by → rows → metrics
  * → everything else (refs and any unknowns).
- */
-const sortVisualizationStateColumnsToCanonicalOrder = (ids: string[]): string[] => [
-  ...ids.filter((id) => id.startsWith(ROW_PREFIX)),
-  ...ids.filter((id) => id.startsWith(SPLIT_PREFIX)),
-  ...ids.filter((id) => id.startsWith(METRIC_PREFIX) && !id.startsWith(METRIC_REF_PREFIX)),
-  ...ids.filter((id) => !isVisualizationStateColumnId(id)),
-];
-
-/**
- * Stable partition for the transformed side: move non-visualization-state
- * columns (refs and any unknowns) to the end while preserving the relative
- * order of everything else.
  *
- * Refs (e.g. the `max` referenced by a `counter_rate`) are hidden at render
- * time (`getTableSpec` filters via `isReferenced`), so their position inside
- * `columnOrder` does not affect the rendering. The transform interleaves
- * them with their owning metric via `processMetricColumnsWithReferences`.
- * We normalize that purely cosmetic placement to ease testing.
+ * Matches Lens datatable editor nesting (split outer, rows inner, metrics last).
  */
-const moveNonVisualizationStateColumnsToEnd = (ids: readonly string[]): string[] => [
-  ...ids.filter(isVisualizationStateColumnId),
+const sortDatasourceColumnsToCanonicalOrder = (ids: string[]): string[] => [
+  ...ids.filter((id) => isSplitMetricColumnId(id)),
+  ...ids.filter((id) => isRowColumnId(id)),
+  ...ids.filter((id) => isMetricColumnId(id)),
   ...ids.filter((id) => !isVisualizationStateColumnId(id)),
 ];
 
@@ -300,6 +301,49 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
   // Map original column ID → new column ID
   const idMap = new Map(toIdRemapping(columnRemapping));
 
+  // Map post-remap column ID → visualization column state.
+  const visColumnByNewId = new Map<string, DatatableColumn>(
+    columnRemapping.flatMap(({ oldId, newId }) => {
+      const visCol = visualization.columns.find((c) => c.columnId === oldId);
+      return visCol ? [[newId, visCol]] : [];
+    })
+  );
+
+  // Form-based: only last_value metrics need color to pick number vs string; other ops
+  // have a fixed dataType and fall through to `normalizeDataTypes`.
+  // Text-based: `getValueColumn` uses the same color hint for metrics/rows, and splits
+  // are always string. Bucket dates must not be forced to string on the form-based path.
+  const inferColumnDataType = (
+    newColumnId: string,
+    { isTextBased }: { isTextBased: boolean }
+  ): DataType | undefined => {
+    if (isTextBased) {
+      if (isSplitMetricColumnId(newColumnId)) {
+        return;
+      }
+      const visCol = visColumnByNewId.get(newColumnId);
+      const color = visCol ? buildColorProps(visCol).color : undefined;
+      if (isMetricColumnId(newColumnId)) {
+        return inferDatatypeFromColor(color, 'number');
+      }
+      if (isRowColumnId(newColumnId)) {
+        return inferDatatypeFromColor(color, 'string');
+      }
+      return;
+    }
+
+    if (!isMetricColumnId(newColumnId)) {
+      return;
+    }
+
+    const visCol = visColumnByNewId.get(newColumnId);
+    if (!visCol) {
+      return;
+    }
+
+    return inferDatatypeFromColor(buildColorProps(visCol).color, 'number');
+  };
+
   // Filter out visualization columns that only exist in the visualization state
   const filterOrphanColumns = getFilterOrphanColumns(datasourceStates);
 
@@ -433,6 +477,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
         if (col.colorMapping === null) {
           delete col.colorMapping;
         }
+
         // When palette is null, delete it
         if (col.palette === null) {
           delete col.palette;
@@ -462,51 +507,40 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     },
   };
 
-  // Align datasource column order for round-trip comparison.
-  //
-  // - `original`: full canonical sort (rows → splits → metrics → refs).
-  //   The API model has three separate arrays (`rows`, `split_metrics_by`,
-  //   `metrics`) and cannot represent arbitrary cross-group orderings, so any
-  //   non-canonical original must be normalized to canonical form before
-  //   comparison (lossy by design).
-  //
-  // - `transformed`: only push refs to the end (stable). Non-ref ordering is
-  //   the transform's emit order and stays untouched.
-  //   We only move the metric_ref columns to the end, because they
-  //   don't affect the rendering column order.
-  const sortDatasourceColumns: NormalizerConfig<DatatableAttributes> = {
+  // The transform always sets `inMetricDimension: true` on metric columns.
+  // there are integration panels that have `isMetric: true` on the viz column
+  // but were never tagged by the suggestion engine, so the layer column lacks
+  // the flag. Fill it in when the remapped column ID confirms it's a metric.
+  const alignEsqlInMetricDimension: NormalizerConfig<DatatableAttributes> = {
     original: (attrs) => {
-      const formBasedLayer = Object.values(
-        getFormBasedDatasourceState(attrs.state.datasourceStates)?.layers ?? {}
-      )[0];
-      if (formBasedLayer) {
-        formBasedLayer.columnOrder = sortVisualizationStateColumnsToCanonicalOrder(
-          formBasedLayer.columnOrder
-        );
+      const textBasedLayer = Object.values(attrs.state.datasourceStates.textBased?.layers ?? {})[0];
+      if (!textBasedLayer) {
+        return attrs;
       }
 
+      for (const column of textBasedLayer.columns) {
+        if (isMetricColumnId(column.columnId) && column.inMetricDimension === undefined) {
+          column.inMetricDimension = true;
+        }
+      }
+
+      return attrs;
+    },
+  };
+
+  // ES|QL text-based layers keep columns in editor order (often metrics first).
+  // fromAPIFormat emits split → rows → metrics for nesting; normalize originals only.
+  const sortEsqlDatasourceColumns: NormalizerConfig<DatatableAttributes> = {
+    original: (attrs) => {
       const textBasedLayer = Object.values(attrs.state.datasourceStates.textBased?.layers ?? {})[0];
       if (textBasedLayer) {
         const byId = new Map(textBasedLayer.columns.map((c) => [c.columnId, c]));
-        const orderedIds = sortVisualizationStateColumnsToCanonicalOrder(
+        const orderedIds = sortDatasourceColumnsToCanonicalOrder(
           textBasedLayer.columns.map((c) => c.columnId)
         );
         textBasedLayer.columns = orderedIds.map((id) => byId.get(id)!);
       }
 
-      return attrs;
-    },
-    transformed: (attrs) => {
-      const formBasedLayer = Object.values(
-        getFormBasedDatasourceState(attrs.state.datasourceStates)?.layers ?? {}
-      )[0];
-      if (formBasedLayer) {
-        formBasedLayer.columnOrder = moveNonVisualizationStateColumnsToEnd(
-          formBasedLayer.columnOrder
-        );
-      }
-
-      // ESQL has no refs, so the transform's emit order is already canonical.
       return attrs;
     },
   };
@@ -515,14 +549,17 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     getCommonNormalizer<DatatableAttributes>(() => ({
       layerRemapping,
       columnRemapping: toIdRemapping(columnRemapping),
+      inferColumnDataType,
     })),
     filterOrphanColumns,
     alignColumnTypes,
     alignId,
+    alignEsqlInMetricDimension,
     deduplicateColumns,
     sortColumns,
-    sortDatasourceColumns,
+    sortEsqlDatasourceColumns,
     alignLegacyTypes,
+    getColorMappingNormalizer<DatatableAttributes>('state.visualization.columns.*.colorMapping'),
     getPaletteNormalizer<DatatableAttributes>('state.visualization.columns.*.palette'),
   ])(attributes);
 };

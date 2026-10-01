@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CommonProps } from '@elastic/eui';
-import { EuiText, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { CardCompressedHeaderLayout, CardSectionPanel } from '../../artifact_entry_card';
@@ -29,19 +29,26 @@ export const GridHeader = memo<GridHeaderProps>(
 
     const expandToggleElement = useMemo(
       () => (
-        <EuiButtonIcon
-          data-test-subj={getTestId('expandCollapseAllButton')}
-          aria-label={i18n.translate(
-            'xpack.securitySolution.artifactCardGrid.expandCollapseLabel',
-            {
-              defaultMessage: 'Toggle all cards',
-            }
-          )}
-          aria-expanded={expandAllIconType === 'fold'}
-          iconType={expandAllIconType}
-          onClick={() => onExpandCollapseAll()}
-          css={{ marginLeft: '-5px' }}
-        />
+        <EuiToolTip
+          content={i18n.translate('xpack.securitySolution.artifactCardGrid.expandCollapseLabel', {
+            defaultMessage: 'Toggle all cards',
+          })}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj={getTestId('expandCollapseAllButton')}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.artifactCardGrid.expandCollapseLabel',
+              {
+                defaultMessage: 'Toggle all cards',
+              }
+            )}
+            aria-expanded={expandAllIconType === 'fold'}
+            iconType={expandAllIconType}
+            onClick={() => onExpandCollapseAll()}
+            css={{ marginLeft: '-5px' }}
+          />
+        </EuiToolTip>
       ),
       [getTestId, expandAllIconType, onExpandCollapseAll]
     );

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
-import type { CompositeSLODefinitionResponse, Paginated } from '@kbn/slo-schema';
+import type { CompositeSLOWithSummaryResponse, Paginated } from '@kbn/slo-schema';
 import { sloKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 import { usePluginContext } from './use_plugin_context';
@@ -26,7 +26,7 @@ interface CompositeSLOListParams {
 }
 
 export interface UseFetchCompositeSloListResponse {
-  data: Paginated<CompositeSLODefinitionResponse> | undefined;
+  data: Paginated<CompositeSLOWithSummaryResponse> | undefined;
   isInitialLoading: boolean;
   isLoading: boolean;
   isRefetching: boolean;

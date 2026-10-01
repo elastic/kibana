@@ -22,7 +22,7 @@ export const VERIFICATION_TTL_MS = 5 * 60 * 1000;
  *
  * No-ops when `enableOTelVerifier` is disabled (same as verify task).
  */
-export async function runVerifierPolicyCleanup(abortController: AbortController): Promise<void> {
+export async function runVerifierPolicyCleanup(signal: AbortSignal): Promise<void> {
   const logger = appContextService.getLogger().get('otel-verifier');
 
   if (!appContextService.getExperimentalFeatures()?.enableOTelVerifier) {
@@ -46,7 +46,7 @@ export async function runVerifierPolicyCleanup(abortController: AbortController)
     );
 
     for (const policy of verifierPolicies.items) {
-      throwIfAborted(abortController);
+      throwIfAborted(signal);
       logger.debug(
         `${CLEANUP_TASK_LOG} Current policy verifier policy ${policy.id} created at ${policy.created_at} updated at ${policy.updated_at}`
       );

@@ -12,9 +12,8 @@ import type {
 } from '../../../common/types/api';
 import {
   BulkGetAttachmentsRequestSchema,
-  BulkGetAttachmentsResponseSchema,
+  BulkGetAttachmentsResponseSchemaV2,
 } from '../../../common/types/api';
-import { BulkGetAttachmentsResponseSchemaV2 } from '../../../common/types/api/attachment/v2';
 import type { AttachmentAttributes, AttachmentAttributesV2 } from '../../../common/types/domain';
 import { flattenAttachmentSavedObjects } from '../../common/utils';
 import { createCaseError, generateCaseErrorResponse } from '../../common/error';
@@ -33,7 +32,7 @@ type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>
  * Retrieves multiple attachments by id.
  */
 export async function bulkGet(
-  { savedObjectIds, caseID, mode = 'legacy' }: BulkGetArgs,
+  { savedObjectIds, caseID }: BulkGetArgs,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<BulkGetAttachmentsResponseV2> {
@@ -51,7 +50,7 @@ export async function bulkGet(
     // perform an authorization check for the case
     await casesClient.cases.resolve({ id: caseID });
 
-    const attachments = await attachmentService.getter.bulkGet(request.ids, mode);
+    const attachments = await attachmentService.getter.bulkGet(request.ids);
 
     const { validAttachments, attachmentsWithErrors, invalidAssociationAttachments } =
       partitionAttachments(caseID, attachments);
@@ -73,11 +72,6 @@ export async function bulkGet(
       attachments: flattenAttachmentSavedObjects(authorizedAttachments),
       errors,
     };
-    if (mode === 'legacy') {
-      return decodeOrThrowZod(BulkGetAttachmentsResponseSchema)(
-        res
-      ) as unknown as BulkGetAttachmentsResponseV2;
-    }
     return decodeOrThrowZod(BulkGetAttachmentsResponseSchemaV2)(
       res
     ) as BulkGetAttachmentsResponseV2;

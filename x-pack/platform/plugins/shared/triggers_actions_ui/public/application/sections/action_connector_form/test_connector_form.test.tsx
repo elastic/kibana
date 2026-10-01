@@ -11,7 +11,6 @@ import TestConnectorForm from './test_connector_form';
 import { none, some } from 'fp-ts/Option';
 import type { ActionConnector, ActionParamsProps, GenericValidationResult } from '../../../types';
 import { ActionConnectorMode } from '../../../types';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
 import { screen } from '@testing-library/react';
 jest.mock('../../../common/lib/kibana');
@@ -57,8 +56,6 @@ const actionType = {
   actionConnectorFields: null,
   actionParamsFields: mockedActionParamsFields,
 };
-const actionTypeRegistry = actionTypeRegistryMock.create();
-actionTypeRegistry.get.mockReturnValue(actionType);
 
 const ExecutionModeComponent: React.FC<Pick<ActionParamsProps<{}>, 'executionMode'>> = ({
   executionMode,
@@ -104,7 +101,7 @@ describe('test_connector_form', () => {
         isExecutingAction={false}
         onExecutionAction={async () => {}}
         executionResult={none}
-        actionTypeRegistry={actionTypeRegistry}
+        actionTypeModel={actionType}
       />
     );
     const executeActionButton = screen.getByTestId('executeActionButton');
@@ -126,9 +123,6 @@ describe('test_connector_form', () => {
       actionConnectorFields: null,
       actionParamsFields: mockedActionParamsFieldsExecutionMode,
     };
-    const actionTypeRegistryExecutionMode = actionTypeRegistryMock.create();
-    actionTypeRegistryExecutionMode.get.mockReturnValue(actionTypeExecutionMode);
-
     const connector = {
       actionTypeId: actionTypeExecutionMode.id,
       config: {},
@@ -144,7 +138,7 @@ describe('test_connector_form', () => {
         isExecutingAction={false}
         onExecutionAction={async () => {}}
         executionResult={none}
-        actionTypeRegistry={actionTypeRegistryExecutionMode}
+        actionTypeModel={actionTypeExecutionMode}
       />
     );
 
@@ -171,7 +165,7 @@ describe('test_connector_form', () => {
           actionId: '',
           status: 'ok',
         })}
-        actionTypeRegistry={actionTypeRegistry}
+        actionTypeModel={actionType}
       />
     );
     expect(screen.getByTestId('executionSuccessfulResult')).toBeInTheDocument();
@@ -196,7 +190,7 @@ describe('test_connector_form', () => {
           status: 'error',
           message: 'Error Message',
         })}
-        actionTypeRegistry={actionTypeRegistry}
+        actionTypeModel={actionType}
       />
     );
     expect(screen.getByTestId('executionFailureResult')).toBeInTheDocument();
@@ -220,7 +214,7 @@ describe('test_connector_form', () => {
           actionId: '1234',
           status: 'ok',
         })}
-        actionTypeRegistry={actionTypeRegistry}
+        actionTypeModel={actionType}
       />
     );
 
@@ -238,6 +232,31 @@ describe('test_connector_form', () => {
     );
   });
 
+  it('hides the create action step when hideActionParamsStep is true', async () => {
+    const connector = {
+      actionTypeId: actionType.id,
+      config: {},
+      secrets: {},
+    } as ActionConnector;
+    renderWithI18n(
+      <TestConnectorForm
+        connector={connector}
+        executeEnabled={true}
+        actionParams={{}}
+        onEditAction={() => {}}
+        isExecutingAction={false}
+        onExecutionAction={async () => {}}
+        executionResult={none}
+        actionTypeModel={actionType}
+        hideActionParamsStep={true}
+      />
+    );
+
+    expect(screen.queryByText('Create an action')).not.toBeInTheDocument();
+    expect(screen.getByText('Run the test')).toBeInTheDocument();
+    expect(screen.getByTestId('executeActionButton')).toBeInTheDocument();
+  });
+
   it('does not render the code block if there is no execution result', async () => {
     const connector = {
       actionTypeId: actionType.id,
@@ -253,7 +272,7 @@ describe('test_connector_form', () => {
         isExecutingAction={false}
         onExecutionAction={async () => {}}
         executionResult={some(undefined)}
-        actionTypeRegistry={actionTypeRegistry}
+        actionTypeModel={actionType}
       />
     );
 

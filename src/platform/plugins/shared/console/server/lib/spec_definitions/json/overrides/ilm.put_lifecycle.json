@@ -40,17 +40,21 @@
               },
               "allocate": {
                 "number_of_replicas": 1,
+                "total_shards_per_node": "",
                 "include": {
                   "_name": "",
-                  "_ip": ""
+                  "_ip": "",
+                  "*": ""
                 },
                 "exclude": {
                   "_name": "",
-                  "_ip": ""
+                  "_ip": "",
+                  "*": ""
                 },
                 "require": {
                   "_name": "",
-                  "_ip": ""
+                  "_ip": "",
+                  "*": ""
                 }
               },
               "shrink": {
@@ -94,17 +98,21 @@
               "unfollow": {},
               "allocate": {
                 "number_of_replicas": 1,
+                "total_shards_per_node": "",
                 "include": {
                   "_name": "",
-                  "_ip": ""
+                  "_ip": "",
+                  "*": ""
                 },
                 "exclude": {
                   "_name": "",
-                  "_ip": ""
+                  "_ip": "",
+                  "*": ""
                 },
                 "require": {
                   "_name": "",
-                  "_ip": ""
+                  "_ip": "",
+                  "*": ""
                 }
               }
             }
@@ -145,7 +153,9 @@
             },
             "min_age": "1d",
             "actions": {
-              "delete": {}
+              "delete": {
+                "delete_searchable_snapshot": { "__one_of": [true, false] }
+              }
             }
           }
         }

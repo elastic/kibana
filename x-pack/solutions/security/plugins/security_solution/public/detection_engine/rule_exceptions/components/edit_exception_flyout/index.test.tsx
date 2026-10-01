@@ -13,7 +13,7 @@ import { TestProviders } from '../../../../common/mock';
 import { EditExceptionFlyout } from '.';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
@@ -71,53 +71,53 @@ describe('When the edit exception modal is opened', () => {
       hasAlertsUpdate: true,
       hasAlertsRead: true,
     });
-    mockUseFetchIndex.mockImplementation(() => [
-      false,
-      {
-        indexPatterns: createStubIndexPattern({
-          spec: {
-            id: '1234',
-            title: 'filebeat-*',
-            fields: {
-              'event.code': {
-                name: 'event.code',
-                type: 'string',
-                aggregatable: true,
-                searchable: true,
-              },
-              'file.path.caseless': {
-                name: 'file.path.caseless',
-                type: 'string',
-                aggregatable: true,
-                searchable: true,
-              },
-              subject_name: {
-                name: 'subject_name',
-                type: 'string',
-                aggregatable: true,
-                searchable: true,
-              },
-              trusted: {
-                name: 'trusted',
-                type: 'string',
-                aggregatable: true,
-                searchable: true,
-              },
-              'file.hash.sha256': {
-                name: 'file.hash.sha256',
-                type: 'string',
-                aggregatable: true,
-                searchable: true,
-              },
-            },
+    const flyoutDataViewStub = createStubIndexPattern({
+      spec: {
+        id: '1234',
+        title: 'filebeat-*',
+        fields: {
+          'event.code': {
+            name: 'event.code',
+            type: 'string',
+            aggregatable: true,
+            searchable: true,
           },
-        }),
+          'file.path.caseless': {
+            name: 'file.path.caseless',
+            type: 'string',
+            aggregatable: true,
+            searchable: true,
+          },
+          subject_name: {
+            name: 'subject_name',
+            type: 'string',
+            aggregatable: true,
+            searchable: true,
+          },
+          trusted: {
+            name: 'trusted',
+            type: 'string',
+            aggregatable: true,
+            searchable: true,
+          },
+          'file.hash.sha256': {
+            name: 'file.hash.sha256',
+            type: 'string',
+            aggregatable: true,
+            searchable: true,
+          },
+        },
       },
-    ]);
+    });
+    mockUseFetchIndex.mockImplementation(() => [false, { indexPatterns: flyoutDataViewStub }]);
     mockUseCurrentUser.mockReturnValue({ username: 'test-username' });
+    // After elastic/kibana#253666 the bulk-close gate sources its fields from
+    // `useFetchIndexPatterns` (the data view backing the field picker) rather
+    // than the alerts wildcard. Use the same field set here so the gate sees
+    // entries the test exercises (e.g. `file.hash.sha256`).
     mockFetchIndexPatterns.mockImplementation(() => ({
       isLoading: false,
-      indexPatterns: stubIndexPattern,
+      indexPatterns: flyoutDataViewStub,
       getExtendedFields: () => Promise.resolve([]),
     }));
     mockUseFindExceptionListReferences.mockImplementation(() => [
@@ -438,9 +438,9 @@ describe('When the edit exception modal is opened', () => {
         );
       });
 
-      it('should have the bulk close checkbox disabled', () => {
+      it('should have the bulk close checkbox enabled (warning shown on check)', () => {
         const checkbox = screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox');
-        expect(checkbox).toBeDisabled();
+        expect(checkbox).not.toBeDisabled();
       });
     });
   });
@@ -659,9 +659,11 @@ describe('When the edit exception modal is opened', () => {
       );
     });
 
-    it('should have the bulk close checkbox disabled', () => {
+    // The non-ECS field check no longer disables bulk close after
+    // elastic/kibana#253666 — the warning callout fills that role.
+    it('should have the bulk close checkbox enabled (warning shown on check)', () => {
       const checkbox = screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox');
-      expect(checkbox).toBeDisabled();
+      expect(checkbox).not.toBeDisabled();
     });
 
     it('should display the eql sequence callout', () => {
@@ -764,6 +766,75 @@ describe('When the edit exception modal is opened', () => {
 
       expect(screen.getByText(commentErrorMessage)).toBeInTheDocument();
       expect(screen.getByTestId('editExceptionConfirmButton')).toBeDisabled();
+    });
+  });
+
+  describe('bulk close and runtime-field resolution', () => {
+    // Stable instance — the alerts-actions component memoizes on the
+    // `indexPatterns` identity, so the mock must not mint a new stub per call.
+    const alertsIndexStub = createStubIndexPattern({
+      spec: { id: 'alerts-stub', title: '.alerts-security.alerts-default' },
+    });
+
+    const renderFlyoutAndSetItems = async () => {
+      render(
+        <TestProviders>
+          <EditExceptionFlyout
+            list={{
+              ...getExceptionListSchemaMock(),
+              type: 'detection',
+              namespace_type: 'single',
+              list_id: 'my_list_id',
+              id: '1234',
+            }}
+            rule={
+              {
+                ...getRulesSchemaMock(),
+                id: '345',
+                name: 'My rule',
+                rule_id: 'my_rule_id',
+                exceptions_list: [
+                  {
+                    id: '1234',
+                    list_id: 'my_list_id',
+                    type: 'detection',
+                    namespace_type: 'single',
+                  },
+                ],
+              } as Rule
+            }
+            itemToEdit={getExceptionListItemSchemaMock()}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
+    };
+
+    it('disables submit while the alerts-index fields are loading and bulk close is checked', async () => {
+      mockUseFetchIndex.mockImplementation(() => [true, { indexPatterns: alertsIndexStub }]);
+      await renderFlyoutAndSetItems();
+
+      fireEvent.click(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox'));
+
+      expect(screen.getByTestId('editExceptionConfirmButton')).toBeDisabled();
+    });
+
+    it('enables submit once the runtime-field map is resolved', async () => {
+      mockUseFetchIndex.mockImplementation(() => [
+        false,
+        { indexPatterns: alertsIndexStub, dataView: { id: 'stub-alerts-data-view' } },
+      ]);
+      await renderFlyoutAndSetItems();
+
+      fireEvent.click(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox'));
+
+      expect(screen.getByTestId('editExceptionConfirmButton')).not.toBeDisabled();
     });
   });
 

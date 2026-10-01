@@ -17,6 +17,20 @@ describe('TemplateUserActionPayloadSchema', () => {
     expect(result.data).toStrictEqual({ template: { id: 'tmpl-1', version: 3 } });
   });
 
+  it('accepts a payload with an optional template name', () => {
+    const payload = { template: { id: 'tmpl-1', version: 3, name: 'My Template' } };
+    const result = TemplateUserActionPayloadSchema.safeParse(payload);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(payload);
+  });
+
+  it('accepts a payload without a template name (name is optional / back-compat)', () => {
+    const result = TemplateUserActionPayloadSchema.safeParse({
+      template: { id: 'tmpl-1', version: 3 },
+    });
+    expect(result.success).toBe(true);
+  });
+
   it('accepts a payload with null template (remove)', () => {
     const result = TemplateUserActionPayloadSchema.safeParse({ template: null });
     expect(result.success).toBe(true);

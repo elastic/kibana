@@ -21,6 +21,7 @@ const createValidDefinition = (
   overrides: Partial<ServerTriggerDefinition> = {}
 ): ServerTriggerDefinition => ({
   id: 'cases.updated',
+  stability: 'tech_preview',
   title: 'Case updated',
   description: 'Fired when a case is updated.',
   eventSchema: validEventSchema,
@@ -78,6 +79,22 @@ describe('TriggerRegistry', () => {
       registry.register(createValidDefinition({ id: 'alerts.severityHigh' }));
       registry.register(createValidDefinition({ id: 'my-namespace.myEvent' }));
       expect(registry.list()).toHaveLength(3);
+    });
+
+    it('skips the namespaced id format for connector events', () => {
+      registry.register(
+        createValidDefinition({ id: 'slack2.app_mention', requiresConnectorId: true })
+      );
+      registry.register(createValidDefinition({ id: 'not-namespaced', requiresConnectorId: true }));
+
+      expect(registry.has('slack2.app_mention')).toBe(true);
+      expect(registry.has('not-namespaced')).toBe(true);
+    });
+
+    it('still rejects a snake_case event key when the trigger is not a connector event', () => {
+      expect(() => {
+        registry.register(createValidDefinition({ id: 'slack2.app_mention' }));
+      }).toThrow('must follow namespaced format');
     });
 
     it('rejects snake_case namespace or event segments', () => {

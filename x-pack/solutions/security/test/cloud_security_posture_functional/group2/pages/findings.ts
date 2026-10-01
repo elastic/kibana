@@ -147,11 +147,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.add(data);
 
       await findings.navigateToLatestFindingsPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor(
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     afterEach(async () => {

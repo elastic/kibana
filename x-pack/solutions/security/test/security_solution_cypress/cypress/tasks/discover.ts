@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { recurse } from 'cypress-recurse';
 import {
   AVAILABLE_FIELD_COUNT,
   DISCOVER_CONTAINER,
@@ -30,7 +29,39 @@ export const assertFieldsAreLoaded = () => {
 
 export const fillEsqlQueryBar = (query: string) => {
   // eslint-disable-next-line cypress/no-force
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(query, { force: true });
+  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).should('exist').click({ force: true });
+
+  const selectAll = Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a';
+  // eslint-disable-next-line cypress/no-force
+  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(`${selectAll}{del}`, { force: true });
+
+  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).then(($textarea) => {
+    const dataTransfer = new DataTransfer();
+    dataTransfer.setData('text/plain', query);
+    const pasteEvent = new ClipboardEvent('paste', {
+      clipboardData: dataTransfer,
+      bubbles: true,
+      cancelable: true,
+    });
+    $textarea[0].dispatchEvent(pasteEvent);
+  });
+
+  cy.window().then((win) => {
+    const monacoApi = (win as any).MonacoEnvironment?.monaco;
+    if (monacoApi) {
+      monacoApi.editor.getModels().forEach((model: any) => {
+        const value = model.getValue();
+        const normalized = value.replace(/\u00a0/g, ' ');
+        if (normalized !== value) {
+          model.setValue(normalized);
+        }
+      });
+    }
+  });
+
+  cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).should(($input) => {
+    expect(convertEditorNonBreakingSpaceToSpace($input.text())).to.eq(query);
+  });
 };
 
 export const selectCurrentDiscoverEsqlQuery = (
@@ -38,29 +69,14 @@ export const selectCurrentDiscoverEsqlQuery = (
 ) => {
   // eslint-disable-next-line cypress/no-force
   cy.get(discoverEsqlInput).click({ force: true });
-  fillEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}');
+  // eslint-disable-next-line cypress/no-force
+  cy.get(discoverEsqlInput).type(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}', {
+    force: true,
+  });
 };
 
 export const addDiscoverEsqlQuery = (esqlQuery: string) => {
-  recurse(
-    () => {
-      // ESQL input uses the monaco editor which doesn't allow for traditional input updates
-      selectCurrentDiscoverEsqlQuery();
-      fillEsqlQueryBar(esqlQuery);
-      return cy
-        .get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER)
-        .then(($el) => $el.text().replaceAll(String.fromCharCode(160), ' '));
-    },
-    (val) =>
-      val === esqlQuery || val.replaceAll(/\s/, '\u00b7') === esqlQuery.replaceAll(/\s/, '\u00b7'),
-    {
-      delay: 1000,
-      limit: 5,
-      log: (k) => {
-        cy.log(`query found-${k}.`);
-      },
-    }
-  );
+  fillEsqlQueryBar(esqlQuery);
   cy.get(DISCOVER_ESQL_EDITABLE_INPUT).blur();
   cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).click();
 };

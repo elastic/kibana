@@ -85,6 +85,9 @@ export type {
   RouteConfigOptionsBody,
   RouteContentType,
   SafeRouteMethod,
+  OnRequestValidationError,
+  RequestValidationError,
+  RequestValidationErrorHandler,
   RouteValidationFunction,
   RouteValidationResultFactory,
   RouteValidationSpec,
@@ -121,6 +124,7 @@ export type {
   AuthcOptional,
   Privilege,
   PrivilegeSet,
+  Privileges,
   AllRequiredCondition,
   AnyRequiredCondition,
   RouteSecurity,
@@ -166,11 +170,27 @@ export { AuthStatus } from './src/auth_state';
 export type { IAuthHeadersStorage, SetAuthHeaders, GetAuthHeaders } from './src/auth_headers';
 
 export type {
+  HttpSelfUnauthorizedErrorHandler,
+  HttpSelfUnauthorizedErrorHandlerOptions,
+  HttpSelfUnauthorizedErrorHandlerNotHandledResult,
+  HttpSelfUnauthorizedErrorHandlerResult,
+  HttpSelfUnauthorizedErrorHandlerRetryParams,
+  HttpSelfUnauthorizedErrorHandlerRetryResult,
+  HttpSelfUnauthorizedErrorHandlerToolkit,
+} from './src/self_client_unauthorized_error_handler';
+
+export type {
   HttpAuth,
   HttpServerInfo,
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
+  HttpSelfFetchHeaders,
+  HttpSelfFetchOptions,
+  HttpSelfFetchQuery,
+  HttpSelfResponse,
+  HttpSelfScopedClient,
+  HttpSelfService,
   HttpProtocol,
 } from './src/http_contract';
 

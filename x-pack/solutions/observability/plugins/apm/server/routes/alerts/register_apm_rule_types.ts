@@ -19,6 +19,7 @@ import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import {
   AGENT_NAME,
   ANOMALY_DETECTOR_TYPE,
+  ANOMALY_TIMESTAMP,
   CONTAINER_ID,
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
@@ -42,6 +43,10 @@ export const apmRuleTypeAlertFieldMap = {
   ...legacyExperimentalFieldMap,
   [ANOMALY_DETECTOR_TYPE]: {
     type: 'keyword',
+    required: false,
+  },
+  [ANOMALY_TIMESTAMP]: {
+    type: 'date',
     required: false,
   },
   [SERVICE_NAME]: {

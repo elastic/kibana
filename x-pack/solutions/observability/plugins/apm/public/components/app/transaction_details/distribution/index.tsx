@@ -27,6 +27,7 @@ import { fromQuery, push, toQuery } from '../../../shared/links/url_helpers';
 import type { TransactionTab } from '../waterfall_with_summary/transaction_tabs';
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
 import type { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
+import { isDiscoverDefaultLogColumns } from './get_trace_logs_columns';
 
 interface TransactionDistributionProps {
   onChartSelection: (event: XYBrushEvent) => void;
@@ -58,6 +59,20 @@ export function TransactionDistribution({
   const { waterfallItemId, detailTab } = urlParams;
 
   const { serviceName } = useApmServiceContext();
+
+  const traceSamples = traceSamplesFetchResult.data?.traceSamples;
+
+  // Derive the selected sample from the URL so the pagination index stays in
+  // sync with browser back/forward navigation. Passing `selectedSample` (even
+  // as `null`) puts `WaterfallWithSummary` into its controlled mode, where the
+  // index is derived from the URL instead of from local click-only state.
+  const selectedSample = useMemo(
+    () =>
+      traceSamples?.find(
+        (sample) => sample.traceId === traceId && sample.transactionId === transactionId
+      ) ?? null,
+    [traceSamples, traceId, transactionId]
+  );
 
   const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
     start,
@@ -153,23 +168,26 @@ export function TransactionDistribution({
         : config.grid;
 
       // Only include logs params with actual values to keep URLs clean
-      const hasColumns = config.columns && config.columns.length > 0;
+      const hasColumns = config.columns && !isDiscoverDefaultLogColumns(config.columns);
       const hasSort = cleanedSort && cleanedSort.length > 0;
       const hasGrid = cleanedGrid && Object.keys(cleanedGrid).length > 0;
 
-      history.replace({
-        ...history.location,
-        search: fromQuery({
-          ...currentQuery,
-          // Only include params that have meaningful values
-          logsColumns: hasColumns ? JSON.stringify(config.columns) : undefined,
-          logsSort: hasSort ? JSON.stringify(cleanedSort) : undefined,
-          logsGrid: hasGrid ? JSON.stringify(cleanedGrid) : undefined,
-          logsRowHeight: config.rowHeight,
-          logsRowsPerPage: config.rowsPerPage,
-          logsDensity: config.density,
-        }),
+      const nextSearch = fromQuery({
+        ...currentQuery,
+        logsColumns: hasColumns ? JSON.stringify(config.columns) : undefined,
+        logsSort: hasSort ? JSON.stringify(cleanedSort) : undefined,
+        logsGrid: hasGrid ? JSON.stringify(cleanedGrid) : undefined,
+        logsRowHeight: config.rowHeight,
+        logsRowsPerPage: config.rowsPerPage,
+        logsDensity: config.density,
       });
+
+      if (nextSearch !== history.location.search.slice(1)) {
+        history.replace({
+          ...history.location,
+          search: nextSearch,
+        });
+      }
     },
     [history]
   );
@@ -198,7 +216,8 @@ export function TransactionDistribution({
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
           traceSamplesFetchStatus={traceSamplesFetchResult.status}
-          traceSamples={traceSamplesFetchResult.data?.traceSamples}
+          traceSamples={traceSamples}
+          selectedSample={selectedSample}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}

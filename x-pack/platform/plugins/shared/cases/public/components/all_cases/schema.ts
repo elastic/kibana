@@ -7,6 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 import { CaseSeveritySchema, CaseStatusSchema } from '../../../common/types/domain';
+import {
+  MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTERS,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
+} from '../../../common/constants';
+import { limitedArraySchema, limitedStringSchema } from '../../../common/schema';
 
 export const AllCasesURLQueryParamsSchema = z
   .object({
@@ -17,6 +23,23 @@ export const AllCasesURLQueryParamsSchema = z
     category: z.array(z.string()),
     assignees: z.array(z.union([z.string(), z.null()])),
     customFields: z.record(z.string(), z.array(z.string())),
+    extendedFieldFilters: limitedArraySchema({
+      codec: z.object({
+        label: limitedStringSchema({
+          fieldName: 'extendedFieldFilters.label',
+          min: 1,
+          max: MAX_TEMPLATE_DEFINITION_LENGTH,
+        }),
+        value: limitedStringSchema({
+          fieldName: 'extendedFieldFilters.value',
+          min: 1,
+          max: MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+        }),
+      }),
+      fieldName: 'extendedFieldFilters',
+      min: 0,
+      max: MAX_EXTENDED_FIELD_FILTERS,
+    }),
     from: z.string(),
     to: z.string(),
     sortOrder: z.union([z.literal('asc'), z.literal('desc')]),

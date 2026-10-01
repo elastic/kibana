@@ -45,10 +45,11 @@ export const InstallPluginButton: React.FC = () => {
   return (
     <>
       <EuiPopover
+        aria-label={labels.plugins.installPluginButton}
         button={
           <EuiButton
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             iconSide="left"
             onClick={togglePopover}
             data-test-subj="agentBuilderInstallPluginButton"
@@ -83,7 +84,7 @@ export const InstallPluginButton: React.FC = () => {
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="uploadZip"
-              icon="exportAction"
+              icon="upload"
               onClick={handleOpenUploadModal}
               data-test-subj="agentBuilderUploadPluginMenuItem"
               {...getEbtProps({

@@ -336,12 +336,14 @@ describe('runSaveLensVisualization', () => {
         },
         { saveToLibrary: true }
       );
-      await runSaveLensVisualization(props, saveProps, options);
+      const result = await runSaveLensVisualization(props, saveProps, options);
 
       // callback called
       expect(saveToLibraryFn).toHaveBeenCalled();
       expect(toasts.addSuccess).toHaveBeenCalled();
       expect(props.redirectTo).toHaveBeenCalled();
+      expect(result?.persistedDoc?.savedObjectId).toBeTruthy();
+      expect(result?.isLinkedToOriginatingApp).toBeFalsy();
 
       // not called
       expect(props.application.navigateToApp).not.toHaveBeenCalledWith('lens', { path: '/' });

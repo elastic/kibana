@@ -6,6 +6,23 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "validation": {
+        "errors": [
+          {
+            "ids": [],
+            "messages": []
+          }
+        ],
+        "state": {
+          "__one_of": [
+            "edited",
+            "invalid",
+            "valid"
+          ]
+        }
+      }
+    },
     "methods": [
       "PUT"
     ],

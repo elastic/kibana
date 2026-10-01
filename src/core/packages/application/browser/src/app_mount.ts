@@ -175,7 +175,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
   onAppLeave: (handler: AppLeaveHandler) => void;
 
   /**
-   * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+   * @deprecated Pass `menu` to `AppHeader` from `@kbn/app-header`.
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 

@@ -1,11 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 const THRESHOLD = 0.15;
 const MARKER = '<!-- bundle-size-limits-comment -->';
+const LIMITS_PATH = 'packages/kbn-rspack-optimizer/limits.yml';
 
-const getContent = async ({ github, context }, ref) => {
+const getContent = async ({ github, context }, ref, path) => {
   const { data } = await github.rest.repos.getContent({
     owner: context.repo.owner,
     repo: context.repo.repo,
-    path: 'packages/kbn-optimizer/limits.yml',
+    path,
     ref,
   });
   return Buffer.from(data.content, 'base64').toString('utf8');
@@ -24,8 +34,8 @@ module.exports = async ({ github, context }) => {
   const pr = context.payload.pull_request;
 
   const [baseContent, headContent] = await Promise.all([
-    getContent({ github, context }, pr.base.sha),
-    getContent({ github, context }, pr.head.sha),
+    getContent({ github, context }, pr.base.sha, LIMITS_PATH),
+    getContent({ github, context }, pr.head.sha, LIMITS_PATH),
   ]);
 
   const baseMap = parseYaml(baseContent);
@@ -64,12 +74,14 @@ module.exports = async ({ github, context }) => {
     .sort((a, b) => b.pct - a.pct)
     .map(
       ({ plugin, baseSize, headSize, pct }) =>
-        `| \`${plugin}\` | ${baseSize.toLocaleString()} | ${headSize.toLocaleString()} | +${(pct * 100).toFixed(1)}% |`
+        `| \`${plugin}\` | ${baseSize.toLocaleString()} | ${headSize.toLocaleString()} | +${(
+          pct * 100
+        ).toFixed(1)}% |`
     )
     .join('\n');
 
   const body =
-    `@${pr.user.login}, this PR increases one or more page-load bundle sizes by 15% or more:\n\n` +
+    `@${pr.user.login}, this PR increases one or more page-load bundle sizes in \`${LIMITS_PATH}\` by 15% or more:\n\n` +
     `| Plugin | Before (bytes) | After (bytes) | Change |\n` +
     `|--------|----------------|---------------|--------|\n` +
     `${rows}\n\n` +

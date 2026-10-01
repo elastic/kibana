@@ -11,12 +11,18 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { VECTORDB_APP_ID, TUTORIALS_DEEP_LINK_ID } from '../common/constants';
+import {
+  VECTORDB_APP_ID,
+  GETTING_STARTED_DEEP_LINK_ID,
+  GETTING_STARTED_PATH,
+} from '../common/constants';
 import { createNavigationTree } from './navigation_tree';
+import { CONSOLE_DEFAULT_CONTENT } from './console_default_content';
 import type {
   ServerlessVectordbPluginSetup,
   ServerlessVectordbPluginStart,
   ServerlessVectordbServices,
+  ServerlessVectordbSetupDependencies,
   ServerlessVectordbStartDependencies,
 } from './types';
 
@@ -25,27 +31,30 @@ export class ServerlessVectordbPlugin
     Plugin<
       ServerlessVectordbPluginSetup,
       ServerlessVectordbPluginStart,
-      {},
+      ServerlessVectordbSetupDependencies,
       ServerlessVectordbStartDependencies
     >
 {
   public setup(
-    core: CoreSetup<ServerlessVectordbStartDependencies, ServerlessVectordbPluginStart>
+    core: CoreSetup<ServerlessVectordbStartDependencies, ServerlessVectordbPluginStart>,
+    { console: consolePlugin }: ServerlessVectordbSetupDependencies
   ): ServerlessVectordbPluginSetup {
+    consolePlugin?.setDefaultEditorContent?.(CONSOLE_DEFAULT_CONTENT);
+
     core.application.register({
       id: VECTORDB_APP_ID,
       title: i18n.translate('xpack.serverlessVectordb.app.title', {
         defaultMessage: 'Vector DB',
       }),
       appRoute: '/app/vectordb',
-      euiIconType: 'logoElasticsearch',
+      euiIconType: 'logoVectorDB',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: [
         {
-          id: TUTORIALS_DEEP_LINK_ID,
-          path: '/tutorials',
-          title: i18n.translate('xpack.serverlessVectordb.tutorials.title', {
-            defaultMessage: 'Tutorials',
+          id: GETTING_STARTED_DEEP_LINK_ID,
+          path: GETTING_STARTED_PATH,
+          title: i18n.translate('xpack.serverlessVectordb.gettingStarted.title', {
+            defaultMessage: 'Getting started',
           }),
           visibleIn: ['globalSearch', 'projectSideNav'],
         },
@@ -70,7 +79,7 @@ export class ServerlessVectordbPlugin
 
   public start(
     core: CoreStart,
-    { serverless }: ServerlessVectordbStartDependencies
+    { navigation }: ServerlessVectordbStartDependencies
   ): ServerlessVectordbPluginStart {
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
@@ -79,12 +88,12 @@ export class ServerlessVectordbPlugin
         const showAiAssistant = chatExperience !== AIChatExperience.Agent;
         return createNavigationTree({
           ...application,
+          core,
           showAiAssistant,
-          showAlertingV2: Boolean(application.capabilities.alertingVTwo),
         });
       })
     );
-    serverless.initNavigation('vectordb', navigationTree$);
+    navigation.initNavigation('vectordb', navigationTree$);
     return {};
   }
 

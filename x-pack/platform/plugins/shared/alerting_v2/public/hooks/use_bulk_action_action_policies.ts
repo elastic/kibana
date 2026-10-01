@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import type { BulkActionActionPoliciesBody } from '@kbn/alerting-v2-schemas';
+import type { BulkResponse } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { BulkActionActionPoliciesResponse } from '../services/action_policies_api';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import { actionPolicyKeys } from './query_key_factory';
+
+/**
+ * The bulk operations exposed by the action-policies list, each backed by its
+ * own by-ID endpoint. All share the same `BulkResponse` contract; `snooze`
+ * additionally carries the shared expiry.
+ */
+export type BulkActionActionPoliciesVariables =
+  | { action: 'enable' | 'disable' | 'delete' | 'unsnooze' | 'update_api_key'; ids: string[] }
+  | { action: 'snooze'; ids: string[]; snoozedUntil: string };
 
 const getSuccessMessage = (action: string, count: number): string => {
   switch (action) {
@@ -65,25 +73,41 @@ export const useBulkActionActionPolicies = () => {
   const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
 
-  return useMutation<BulkActionActionPoliciesResponse, Error, BulkActionActionPoliciesBody>({
-    mutationFn: (body) => actionPoliciesApi.bulkActionActionPolicies(body),
+  return useMutation<BulkResponse, Error, BulkActionActionPoliciesVariables>({
+    mutationFn: (variables) => {
+      switch (variables.action) {
+        case 'enable':
+          return actionPoliciesApi.bulkEnableActionPolicies(variables.ids);
+        case 'disable':
+          return actionPoliciesApi.bulkDisableActionPolicies(variables.ids);
+        case 'delete':
+          return actionPoliciesApi.bulkDeleteActionPolicies(variables.ids);
+        case 'unsnooze':
+          return actionPoliciesApi.bulkUnsnoozeActionPolicies(variables.ids);
+        case 'update_api_key':
+          return actionPoliciesApi.bulkUpdateApiKeyActionPolicies(variables.ids);
+        case 'snooze':
+          return actionPoliciesApi.bulkSnoozeActionPolicies(variables.ids, variables.snoozedUntil);
+      }
+    },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
+
+      const requested = variables.ids.length;
 
       if (data.errors.length > 0) {
         toasts.addWarning({
           title: i18n.translate('xpack.alertingV2.actionPolicy.bulkActionPartialSuccess', {
             defaultMessage: '{processed} of {total} action policies updated. {errorCount} failed.',
             values: {
-              processed: data.processed,
-              total: data.total,
+              processed: data.affected_count,
+              total: requested,
               errorCount: data.errors.length,
             },
           }),
         });
       } else {
-        const actionType = variables.actions[0]?.action;
-        toasts.addSuccess(getSuccessMessage(actionType, data.processed));
+        toasts.addSuccess(getSuccessMessage(variables.action, data.affected_count));
       }
     },
     onError: (error) => {

@@ -35,7 +35,6 @@ import { mobileRouteDefinitions } from './mobile';
 import { mobileErrorsRouteDefinitions } from './mobile_errors';
 import { mobileCrashesRouteDefinitions } from './mobile_crashes';
 import { fleetRouteDefinitions } from './fleet';
-import { debugTelemetryRouteDefinitions } from './debug_telemetry';
 import { storageExplorerRouteDefinitions } from './storage_explorer';
 import { sourceMapsRouteDefinitions } from './source_maps';
 import { agentConfigurationRouteDefinitions } from './agent_configuration';
@@ -73,7 +72,6 @@ export const routeDefinitions = {
   mobileErrors: mobileErrorsRouteDefinitions,
   mobileCrashes: mobileCrashesRouteDefinitions,
   fleet: fleetRouteDefinitions,
-  debugTelemetry: debugTelemetryRouteDefinitions,
   storageExplorer: storageExplorerRouteDefinitions,
   sourceMaps: sourceMapsRouteDefinitions,
   agentConfiguration: agentConfigurationRouteDefinitions,

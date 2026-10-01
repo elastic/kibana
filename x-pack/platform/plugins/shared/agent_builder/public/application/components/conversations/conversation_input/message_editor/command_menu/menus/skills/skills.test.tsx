@@ -77,4 +77,89 @@ describe('Skills', () => {
 
     useAgentSkillsMock.useAgentSkills = originalImpl;
   });
+
+  describe('reporting content presence via onContentChange', () => {
+    it('reports content when there are matching skills, for the current query', () => {
+      const onContentChange = jest.fn();
+      renderWithProvider(
+        <Skills query="" onSelect={jest.fn()} onContentChange={onContentChange} />
+      );
+
+      expect(onContentChange).toHaveBeenCalledWith(true, '');
+    });
+
+    it('reports no content once the query matches nothing, for the current query', () => {
+      const onContentChange = jest.fn();
+      renderWithProvider(
+        <Skills query="nosuchskill" onSelect={jest.fn()} onContentChange={onContentChange} />
+      );
+
+      expect(onContentChange).toHaveBeenCalledWith(false, 'nosuchskill');
+    });
+
+    it('keeps reporting content across every word of a multi-word skill name', () => {
+      const useAgentSkillsMock = jest.requireMock(
+        '../../../../../../../hooks/skills/use_agent_skills'
+      ) as {
+        useAgentSkills: () => unknown;
+      };
+      const originalImpl = useAgentSkillsMock.useAgentSkills;
+      useAgentSkillsMock.useAgentSkills = () => ({
+        skills: [...mockSkills, { id: 'skill-4', name: 'Skill With Spaces' }],
+        isLoading: false,
+        error: null,
+        isError: false,
+      });
+
+      const onContentChange = jest.fn();
+      const { rerender } = renderWithProvider(
+        <Skills query="Skill" onSelect={jest.fn()} onContentChange={onContentChange} />
+      );
+      expect(onContentChange).toHaveBeenLastCalledWith(true, 'Skill');
+
+      rerender(
+        <EuiProvider>
+          <Skills query="Skill With" onSelect={jest.fn()} onContentChange={onContentChange} />
+        </EuiProvider>
+      );
+      expect(onContentChange).toHaveBeenLastCalledWith(true, 'Skill With');
+
+      rerender(
+        <EuiProvider>
+          <Skills
+            query="Skill With Spaces"
+            onSelect={jest.fn()}
+            onContentChange={onContentChange}
+          />
+        </EuiProvider>
+      );
+      expect(onContentChange).toHaveBeenLastCalledWith(true, 'Skill With Spaces');
+
+      useAgentSkillsMock.useAgentSkills = originalImpl;
+    });
+
+    it('reports content while loading, even with zero skills so far', () => {
+      const useAgentSkillsMock = jest.requireMock(
+        '../../../../../../../hooks/skills/use_agent_skills'
+      ) as {
+        useAgentSkills: () => unknown;
+      };
+      const originalImpl = useAgentSkillsMock.useAgentSkills;
+      useAgentSkillsMock.useAgentSkills = () => ({
+        skills: [],
+        isLoading: true,
+        error: null,
+        isError: false,
+      });
+
+      const onContentChange = jest.fn();
+      renderWithProvider(
+        <Skills query="nosuchskill" onSelect={jest.fn()} onContentChange={onContentChange} />
+      );
+
+      expect(onContentChange).toHaveBeenCalledWith(true, 'nosuchskill');
+
+      useAgentSkillsMock.useAgentSkills = originalImpl;
+    });
+  });
 });

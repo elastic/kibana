@@ -75,8 +75,10 @@ const mockLensResponse = {
 } as unknown as VisualizationTablesWithMeta;
 
 const defaultProps = {
-  isLoading: false,
+  isSample: false as const,
   lensResponse: mockLensResponse,
+  from: 'now-7d',
+  to: 'now',
 };
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -161,10 +163,9 @@ describe('CostSavingsKeyInsight', () => {
     render(<CostSavingsKeyInsight {...defaultProps} />, { wrapper });
 
     await waitFor(() => {
-      expect(screen.getByTestId('alertProcessingKeyInsightsContainer')).toBeInTheDocument();
-      expect(screen.getByTestId('alertProcessingKeyInsightsGreetingGroup')).toBeInTheDocument();
-      expect(screen.getByTestId('alertProcessingKeyInsightsLogo')).toBeInTheDocument();
-      expect(screen.getByTestId('alertProcessingKeyInsightsGreeting')).toBeInTheDocument();
+      expect(screen.getByTestId('costSavingsKeyInsightsContainer')).toBeInTheDocument();
+      expect(screen.getByTestId('costSavingsKeyInsightsGreetingGroup')).toBeInTheDocument();
+      expect(screen.getByTestId('costSavingsKeyInsightsGreeting')).toBeInTheDocument();
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
       expect(mockUseKibana).toHaveBeenCalled();
       expect(mockLicenseService.isEnterprise).toHaveBeenCalled();
@@ -258,7 +259,10 @@ describe('CostSavingsKeyInsight', () => {
   });
 
   it('shows loading state when lensResponse is null', () => {
-    render(<CostSavingsKeyInsight isLoading={false} lensResponse={null} />, { wrapper });
+    render(
+      <CostSavingsKeyInsight from={'now-7d'} to={'now'} isSample={false} lensResponse={null} />,
+      { wrapper }
+    );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
@@ -293,7 +297,14 @@ describe('CostSavingsKeyInsight', () => {
       },
     };
 
-    rerender(<CostSavingsKeyInsight isLoading={false} lensResponse={newLensResponse} />);
+    rerender(
+      <CostSavingsKeyInsight
+        from={'now-7d'}
+        to={'now'}
+        isSample={false}
+        lensResponse={newLensResponse}
+      />
+    );
 
     await waitFor(() => {
       expect(mockChatComplete).toHaveBeenCalledTimes(2);
@@ -356,10 +367,9 @@ describe('CostSavingsKeyInsight', () => {
 
       it('should attempt to generate the insight', async () => {
         await waitFor(() => {
-          expect(screen.getByTestId('alertProcessingKeyInsightsContainer')).toBeInTheDocument();
-          expect(screen.getByTestId('alertProcessingKeyInsightsGreetingGroup')).toBeInTheDocument();
-          expect(screen.getByTestId('alertProcessingKeyInsightsLogo')).toBeInTheDocument();
-          expect(screen.getByTestId('alertProcessingKeyInsightsGreeting')).toBeInTheDocument();
+          expect(screen.getByTestId('costSavingsKeyInsightsContainer')).toBeInTheDocument();
+          expect(screen.getByTestId('costSavingsKeyInsightsGreetingGroup')).toBeInTheDocument();
+          expect(screen.getByTestId('costSavingsKeyInsightsGreeting')).toBeInTheDocument();
           expect(screen.getByRole('progressbar')).toBeInTheDocument();
           expect(mockUseKibana).toHaveBeenCalled();
           expect(mockLicenseService.isEnterprise).toHaveBeenCalled();
@@ -389,25 +399,43 @@ describe('CostSavingsKeyInsight', () => {
 
       mockUseAIValueExportContext.mockReturnValue({
         forwardedState: { insight: 'Test insight content' },
-        isInsightVerified: true,
+        isInsightVerified: false,
         shouldRegenerateInsight: false,
         setInsight: mockSetInsightInExportContext,
       });
 
       const { rerender } = render(
-        <CostSavingsKeyInsight isLoading={true} lensResponse={mockLensResponse} />,
+        <CostSavingsKeyInsight
+          from={'now-7d'}
+          to={'now'}
+          isSample={false}
+          lensResponse={mockLensResponse}
+        />,
         { wrapper }
       );
 
-      const container = screen.getByTestId('alertProcessingKeyInsightsGreetingGroup');
+      const container = screen.getByTestId('costSavingsKeyInsightsGreetingGroup');
       container.addEventListener('renderComplete', renderCompleteHandler);
 
       expect(container).toHaveAttribute('data-shared-item');
       expect(container).toHaveAttribute('data-render-complete', 'false');
       expect(renderCompleteHandler).not.toHaveBeenCalled();
 
-      // Change props to isLoading = false to render the insight
-      rerender(<CostSavingsKeyInsight isLoading={false} lensResponse={mockLensResponse} />);
+      // Verify the insight to render the markdown
+      mockUseAIValueExportContext.mockReturnValue({
+        forwardedState: { insight: 'Test insight content' },
+        isInsightVerified: true,
+        shouldRegenerateInsight: false,
+        setInsight: mockSetInsightInExportContext,
+      });
+      rerender(
+        <CostSavingsKeyInsight
+          from={'now-7d'}
+          to={'now'}
+          isSample={false}
+          lensResponse={mockLensResponse}
+        />
+      );
 
       await waitFor(() => {
         expect(container).toHaveAttribute('data-render-complete', 'true');

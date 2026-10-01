@@ -7,29 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto, WorkflowTokenUsage } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { ResumeExecutionButton } from './resume_execution_button';
+import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
+import { ResumeUnavailableCallout } from './resume_unavailable_callout';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { ServiceAccountName } from '../../../entities/service_accounts';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
+import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usage_badge';
 
 interface WorkflowExecutionOverviewProps {
   stepExecution: WorkflowStepExecutionDto;
   workflowExecutionDuration?: number;
+  /** Aggregated token usage across all `ai.*` steps in this execution. */
+  workflowExecutionUsage?: WorkflowTokenUsage;
   showResumeUI?: boolean;
   executionId?: string;
   resumeMessage?: string;
   resumeSchema?: JsonModelSchemaType;
+  approvalLabels?: ApprovalLabels;
   shouldAutoResume?: boolean;
   waitingStepExecutionId?: string;
+  hasResumeError?: boolean;
+  onRetryResume?: () => void;
 }
 
 const formatExecutionDate = (date: string) => {
@@ -56,24 +72,36 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
   ({
     stepExecution,
     workflowExecutionDuration,
+    workflowExecutionUsage,
     showResumeUI = false,
     executionId,
     resumeMessage,
     resumeSchema,
+    approvalLabels,
     shouldAutoResume = false,
     waitingStepExecutionId,
+    hasResumeError = false,
+    onRetryResume,
   }) => {
     const { euiTheme } = useEuiTheme();
 
     const context = stepExecution.input as Record<string, unknown> | undefined;
-    const executionData = context?.execution as { isTestRun?: boolean } | undefined;
+    const executionData = context?.execution as
+      | {
+          isTestRun?: boolean;
+          executedBy?: string;
+          effectiveIdentity?: { type: 'service_account'; id: string };
+        }
+      | undefined;
     const isTestRun = executionData?.isTestRun === true;
     const executionStarted = stepExecution.startedAt;
-    const executionEnded = context?.now as string | undefined;
+    const executionEnded = stepExecution.finishedAt || (context?.now as string | undefined);
 
     return (
       <EuiPanel
         hasShadow={false}
+        hasBorder={false}
+        borderRadius="none"
         paddingSize="m"
         css={{ height: '100%', paddingTop: euiTheme.size.m /* overrides EuiPanel's paddingTop */ }}
         data-test-subj="workflowExecutionOverview"
@@ -83,6 +111,27 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
+          {executionData?.effectiveIdentity?.type === 'service_account' && (
+            <EuiFlexItem grow={false}>
+              <EuiDescriptionList
+                data-test-subj="workflowExecutionIdentity"
+                listItems={[
+                  {
+                    title: i18n.translate('workflows.execution.triggeredByLabel', {
+                      defaultMessage: 'Triggered by',
+                    }),
+                    description: executionData.executedBy ?? '-',
+                  },
+                  {
+                    title: i18n.translate('workflows.execution.runAsLabel', {
+                      defaultMessage: 'Run as',
+                    }),
+                    description: <ServiceAccountName id={executionData.effectiveIdentity.id} />,
+                  },
+                ]}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
@@ -127,6 +176,14 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                           </EuiText>
                         </EuiFlexItem>
                       </EuiFlexGroup>
+                    </EuiFlexItem>
+                  )}
+                  {workflowExecutionUsage && (
+                    <EuiFlexItem grow={false}>
+                      <TokenUsageBadge
+                        usage={workflowExecutionUsage}
+                        data-test-subj="workflowExecutionTokenUsage"
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
@@ -194,6 +251,12 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
             </div>
           </EuiFlexItem>
 
+          {hasResumeError && onRetryResume && (
+            <EuiFlexItem grow={false}>
+              <ResumeUnavailableCallout onRetry={onRetryResume} />
+            </EuiFlexItem>
+          )}
+
           {showResumeUI && executionId && (
             <EuiFlexItem grow={false}>
               <ResumeExecutionButton
@@ -202,6 +265,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 stepStartedAt={stepExecution.startedAt}
                 resumeMessage={resumeMessage}
                 resumeSchema={resumeSchema}
+                approvalLabels={approvalLabels}
                 autoOpen={shouldAutoResume}
                 waitingStepExecutionId={waitingStepExecutionId}
               />

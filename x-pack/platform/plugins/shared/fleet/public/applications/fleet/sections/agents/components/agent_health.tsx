@@ -9,16 +9,8 @@ import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import type { EuiBadgeProps } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiCallOut,
-  EuiIcon,
-  EuiLink,
-  EuiPortal,
-  EuiSpacer,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiLink, EuiPortal, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
@@ -135,7 +127,7 @@ function getStatusComponent({
   }
 }
 
-const WrappedEuiCallOut = styled(EuiCallOut)`
+const WrappedWarningCallout = styled(KbnWarningCallout)`
   white-space: wrap !important;
 `;
 
@@ -240,10 +232,8 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
       {fromDetails && isStuckInUpdating(agent) ? (
         <>
           <EuiSpacer size="m" />
-          <WrappedEuiCallOut
-            iconType="warning"
+          <WrappedWarningCallout
             size="m"
-            color="warning"
             title={
               isAgentInFailedUpgradeState(agent.upgrade_details) ? (
                 <FormattedMessage
@@ -257,6 +247,20 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
                 />
               )
             }
+            actionProps={{
+              primary: {
+                onClick: () => {
+                  setIsUpgradeModalOpen(true);
+                },
+                'data-test-subj': 'restartUpgradeBtn',
+                children: (
+                  <FormattedMessage
+                    id="xpack.fleet.agentHealth.restartUpgradeBtn"
+                    defaultMessage="Restart upgrade"
+                  />
+                ),
+              },
+            }}
           >
             <p>
               <FormattedMessage
@@ -279,19 +283,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
                 }}
               />
             </p>
-            <EuiButton
-              color="warning"
-              onClick={() => {
-                setIsUpgradeModalOpen(true);
-              }}
-              data-test-subj="restartUpgradeBtn"
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentHealth.restartUpgradeBtn"
-                defaultMessage="Restart upgrade"
-              />
-            </EuiButton>
-          </WrappedEuiCallOut>
+          </WrappedWarningCallout>
         </>
       ) : null}
       {isUpgradeModalOpen && (

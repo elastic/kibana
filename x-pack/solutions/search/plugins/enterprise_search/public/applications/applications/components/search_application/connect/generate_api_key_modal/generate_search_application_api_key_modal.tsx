@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFieldText,
   EuiFlexGroup,
@@ -32,6 +31,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 
 import { GenerateSearchApplicationApiKeyLogic } from '../../../../api/search_applications/generate_search_application_api_key_logic';
 
@@ -129,7 +130,7 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
                     </>
                   ) : (
                     <EuiFlexItem>
-                      <EuiCallOut
+                      <KbnSuccessCallout
                         announceOnMount
                         title={
                           <FormattedMessage
@@ -140,8 +141,6 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
                             }}
                           />
                         }
-                        color="success"
-                        iconType="check"
                         role="alert"
                       />
                       <EuiFlexGroup alignItems="center">

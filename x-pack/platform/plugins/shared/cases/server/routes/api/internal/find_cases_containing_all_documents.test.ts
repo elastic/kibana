@@ -53,5 +53,25 @@ describe('findCasesContainingAllDocuments', () => {
       // type/owner restriction is handled by the attachment service, not the route
       expect(filter).not.toContain('cases-attachments.attributes.type');
     });
+
+    it('includes the security.entity unified type so entity attachments participate', async () => {
+      const casesClient = buildCasesClient({ documents: [{ id: 'alert-id' }] });
+
+      await processCase(casesClient, 'case-id', new Set(['alert-id']));
+
+      const {
+        calls: [params],
+      } = jest.mocked(casesClient.attachments.getAllDocumentsAttachedToCase).mock;
+
+      expect(params[0].unifiedAttachmentTypes).toEqual(['security.entity']);
+    });
+
+    it('returns case id when an entity attachment id is present', async () => {
+      const entityId = 'user:alice@host@default';
+      const casesClient = buildCasesClient({ documents: [{ id: entityId }] });
+
+      const result = await processCase(casesClient, 'case-id', new Set([entityId]));
+      expect(result).toBe('case-id');
+    });
   });
 });

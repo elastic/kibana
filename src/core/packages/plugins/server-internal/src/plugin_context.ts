@@ -257,6 +257,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       },
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
+      setSelfClientUnauthorizedErrorHandler: deps.http.setSelfClientUnauthorizedErrorHandler,
     },
     i18n: deps.i18n,
     logging: {
@@ -315,6 +316,11 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     security: {
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
       fips: deps.security.fips,
+      acquireFakeRequestEnricher: () => deps.security.acquireFakeRequestEnricher(),
+      serviceAccounts: {
+        registerWorkloadType: (registration) =>
+          deps.security.serviceAccounts.registerWorkloadType(plugin.name, registration),
+      },
     },
     userProfile: {
       registerUserProfileDelegate: (delegate) =>
@@ -383,6 +389,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       auth: deps.http.auth,
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
+      selfClient: deps.http.selfClient,
       staticAssets: {
         prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>
@@ -423,6 +430,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     security: {
       authc: deps.security.authc,
       audit: deps.security.audit,
+      serviceAccounts: deps.security.serviceAccounts.asScopedToPlugin(plugin.name),
     },
     userProfile: deps.userProfile,
     injection: {

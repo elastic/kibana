@@ -11,13 +11,18 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { type EisInferenceEndpoint, EisModelStatus } from '../../common/types';
+import type { EisInferenceEndpoint, CspRegion } from '../../common/types';
+import { EisModelStatus } from '../../common/types';
+import type { PolicyMode } from '../types';
 import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
+  isCspRegion,
 } from '../../common/type_guards';
 import type { MultiSelectFilterOption } from '../components/filter/multi_select_filter';
+import { GEO_ORDER } from '../types';
+import type { RegionOption } from '../types';
 
 // Inference ID prefixes for internal Elastic endpoints kept for backwards
 // compatibility that must not be surfaced in the UI.
@@ -92,6 +97,37 @@ export const getModelMetadata = (
   return undefined;
 };
 
+const mergeModelMetadata = (
+  current: EisInferenceEndpointMetadata | undefined,
+  incoming: EisInferenceEndpointMetadata | undefined
+): EisInferenceEndpointMetadata | undefined => {
+  if (!incoming) {
+    return current;
+  }
+  if (!current) {
+    return incoming;
+  }
+
+  const currentHeuristics = current.heuristics;
+  const incomingHeuristics = incoming.heuristics;
+  const releaseDate = currentHeuristics?.release_date ?? incomingHeuristics?.release_date;
+  const endOfLifeDate = currentHeuristics?.end_of_life_date ?? incomingHeuristics?.end_of_life_date;
+  const releaseUnchanged = releaseDate === currentHeuristics?.release_date;
+  const endOfLifeUnchanged = endOfLifeDate === currentHeuristics?.end_of_life_date;
+  if (releaseUnchanged && endOfLifeUnchanged) {
+    return current;
+  }
+
+  return {
+    ...current,
+    heuristics: {
+      ...currentHeuristics,
+      ...(releaseDate ? { release_date: releaseDate } : {}),
+      ...(endOfLifeDate ? { end_of_life_date: endOfLifeDate } : {}),
+    },
+  };
+};
+
 export const getModelStatus = (
   metadata: EisInferenceEndpointMetadata | undefined
 ): EisModelStatus => {
@@ -148,9 +184,10 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
       if (isInferenceEndpointWithDisplayCreatorMetadata(ep)) {
         existing.modelCreator = ep.metadata.display.model_creator;
       }
-      if (!existing.modelMetadata && isInferenceEndpointWithMetadata(ep)) {
-        existing.modelMetadata = ep.metadata;
-        existing.modelStatus = getModelStatus(ep.metadata);
+      const mergedMetadata = mergeModelMetadata(existing.modelMetadata, getModelMetadata(ep));
+      if (mergedMetadata !== existing.modelMetadata) {
+        existing.modelMetadata = mergedMetadata;
+        existing.modelStatus = getModelStatus(mergedMetadata);
       }
     } else {
       const cat = TASK_TYPE_CATEGORY[ep.task_type];
@@ -171,21 +208,21 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
   return [...groups.values()];
 };
 
-export const TASK_TYPE_FILTERS: Array<{ category: TaskTypeCategory; label: string }> = [
+export const MODEL_TYPE_FILTERS: Array<{ key: TaskTypeCategory; label: string }> = [
   {
-    category: 'LLM',
+    key: 'LLM',
     label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.llm', {
       defaultMessage: 'LLM',
     }),
   },
   {
-    category: 'Embedding',
+    key: 'Embedding',
     label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.embedding', {
       defaultMessage: 'Embedding',
     }),
   },
   {
-    category: 'Rerank',
+    key: 'Rerank',
     label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.filter.rerank', {
       defaultMessage: 'Rerank',
     }),
@@ -200,15 +237,37 @@ export const getProviderOptions = (models: GroupedModel[]): MultiSelectFilterOpt
   }));
 };
 
+export interface EisDisplayOptions {
+  showOutsideRegionPreferences: boolean;
+  showEndOfLifeModels: boolean;
+  showPreviewModels: boolean;
+}
+
+export const DEFAULT_EIS_DISPLAY_OPTIONS: EisDisplayOptions = {
+  showOutsideRegionPreferences: false,
+  showEndOfLifeModels: false,
+  showPreviewModels: false,
+};
+
 export interface FilterCriteria {
   searchQuery: string;
   selectedTaskTypes: Set<TaskTypeCategory>;
   selectedProviders: string[];
+  showOutsideRegionPreferences?: boolean;
+  showEndOfLifeModels?: boolean;
+  showPreviewModels?: boolean;
 }
 
 export const filterGroupedModels = (
   models: GroupedModel[],
-  { searchQuery, selectedTaskTypes, selectedProviders }: FilterCriteria
+  {
+    searchQuery,
+    selectedTaskTypes,
+    selectedProviders,
+    showOutsideRegionPreferences = false,
+    showEndOfLifeModels = false,
+    showPreviewModels = false,
+  }: FilterCriteria
 ): GroupedModel[] => {
   const q = searchQuery.toLowerCase();
 
@@ -225,6 +284,20 @@ export const filterGroupedModels = (
         return false;
       }
       if (selectedProviders.length > 0 && !selectedProviders.includes(m.modelCreator)) {
+        return false;
+      }
+      if (!showOutsideRegionPreferences) {
+        const isOutsideRegionPreferences = m.endpoints.some(
+          (endpoint) => endpoint.metadata?.denied_by_region_policy === true
+        );
+        if (isOutsideRegionPreferences) {
+          return false;
+        }
+      }
+      if (!showEndOfLifeModels && m.modelStatus === EisModelStatus.DeprecatedEOL) {
+        return false;
+      }
+      if (!showPreviewModels && m.modelStatus === EisModelStatus.Preview) {
         return false;
       }
       return true;
@@ -306,3 +379,147 @@ export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null
         }
       );
 }
+
+const GEO_DISPLAY_NAMES: Record<string, string> = {
+  apac: i18n.translate('xpack.searchInferenceEndpoints.geo.asiaPacific', {
+    defaultMessage: 'Asia Pacific',
+  }),
+  eu: i18n.translate('xpack.searchInferenceEndpoints.geo.europe', {
+    defaultMessage: 'Europe',
+  }),
+  us: i18n.translate('xpack.searchInferenceEndpoints.geo.northAmerica', {
+    defaultMessage: 'North America',
+  }),
+  other: i18n.translate('xpack.searchInferenceEndpoints.geo.other', {
+    defaultMessage: 'Other',
+  }),
+};
+
+/**
+ * Returns the i18n display name for an EIS `geo` code.
+ * EIS uses short codes ("us", "eu", "apac"); unknown values fall back to the raw code.
+ */
+export const getGeoDisplayName = (geo: string): string => GEO_DISPLAY_NAMES[geo] ?? geo;
+
+export const getRegionPlaceName = (r: CspRegion): string => r.region_display_name || r.region;
+
+export const getRegionDisplayName = (r: CspRegion): string =>
+  `${getRegionPlaceName(r)} - ${r.csp.toUpperCase()}`;
+
+const keepPreferredRegion = (current: CspRegion | undefined, incoming: CspRegion): CspRegion => {
+  if (!current) return incoming;
+  if (!current.region_display_name && incoming.region_display_name) {
+    return incoming;
+  }
+  return current;
+};
+
+/**
+ * Aggregates all unique CSP regions from EIS endpoint `regions` metadata.
+ * The returned list is deduplicated (by csp+region key) and sorted alphabetically.
+ */
+export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegion[] => {
+  const seen = new Map<string, CspRegion>();
+
+  for (const ep of endpoints) {
+    if (!isInferenceEndpointWithMetadata(ep)) continue;
+    const regions = ep.metadata.regions;
+    if (!regions) continue;
+
+    for (const region of regions) {
+      if (!isCspRegion(region)) continue;
+      const key = regionKey(region).toLowerCase();
+      seen.set(key, keepPreferredRegion(seen.get(key), region));
+    }
+  }
+
+  return [...seen.values()].sort((a, b) => {
+    const cspCmp = a.csp.localeCompare(b.csp);
+    return cspCmp !== 0 ? cspCmp : a.region.localeCompare(b.region);
+  });
+};
+
+export const regionKey = (region: CspRegion): string => `${region.csp}::${region.region}`;
+
+export interface ZoneGroup {
+  geo: string;
+  displayName: string;
+  regions: CspRegion[];
+}
+
+/**
+ * Groups available regions by geo zone, ordered by GEO_ORDER for known geos
+ * and alphabetically for any unknown ones.
+ */
+export const getZoneGroups = (availableRegions: CspRegion[]): ZoneGroup[] => {
+  const regionsByGeo: Record<string, CspRegion[]> = {};
+  for (const region of availableRegions) {
+    (regionsByGeo[region.geo ?? 'other'] ??= []).push(region);
+  }
+
+  const geoOrderList: readonly string[] = GEO_ORDER;
+  const knownGeos = geoOrderList.filter((geo) => geo in regionsByGeo);
+  const unknownGeos = Object.keys(regionsByGeo)
+    .filter((geo) => !geoOrderList.includes(geo))
+    .sort();
+
+  return [...knownGeos, ...unknownGeos].map((geo) => ({
+    geo,
+    displayName: getGeoDisplayName(geo),
+    regions: regionsByGeo[geo],
+  }));
+};
+
+export const isPolicyMode = (id: string): id is PolicyMode => id === 'geo' || id === 'regions';
+
+/**
+ * Returns all unique geo codes present in EIS endpoint metadata, ordered by `GEO_ORDER`
+ * with any unknown codes appended alphabetically. Handles future geo codes gracefully.
+ */
+export const getAvailableGeos = (endpoints: EisInferenceEndpoint[]): string[] => {
+  const seen = new Set<string>();
+
+  for (const ep of endpoints) {
+    if (!isInferenceEndpointWithMetadata(ep)) continue;
+    const regions = ep.metadata.regions;
+    if (!regions) continue;
+
+    for (const region of regions) {
+      if (!region || typeof region !== 'object') continue;
+      if (typeof region.geo === 'string' && region.geo.length > 0) {
+        seen.add(region.geo);
+      }
+    }
+  }
+
+  const geoOrderList: readonly string[] = GEO_ORDER;
+  const knownOrdered = geoOrderList.filter((g) => seen.has(g));
+  const unknownSorted = [...seen].filter((g) => !geoOrderList.includes(g)).sort();
+  return [...knownOrdered, ...unknownSorted];
+};
+
+/**
+ * Returns the unique geographies, then the unique CSP regions, where the given endpoints are available.
+ */
+export const getRegionOptions = (endpoints: EisInferenceEndpoint[]): RegionOption[] => {
+  const geoOptions = getAvailableGeos(endpoints)
+    .map((geo) => geo.toLowerCase())
+    .map((geo) => {
+      const displayName = getGeoDisplayName(geo);
+      return {
+        key: `geo-${geo}`,
+        label: displayName === geo ? geo.toUpperCase() : displayName,
+      };
+    });
+  const regionOptions = getAvailableRegions(endpoints).map((region) => ({
+    key: `region-${region.csp}-${region.region}`.toLowerCase(),
+    label: getRegionDisplayName(region),
+  }));
+
+  const seenKeys = new Set<string>();
+  return [...geoOptions, ...regionOptions].filter(({ key }) => {
+    if (seenKeys.has(key)) return false;
+    seenKeys.add(key);
+    return true;
+  });
+};

@@ -43,6 +43,7 @@ describe('form fields', () => {
       id: '',
       owner: mockedTestProvidersOwner[0],
       observableTypes: [],
+      extractObservables: true,
     },
   };
 
@@ -205,7 +206,7 @@ describe('form fields', () => {
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>,
-      { wrapperProps: { features: { alerts: { sync: false, enabled: true } } } }
+      { wrapperProps: { owner: ['observability'] } }
     );
 
     expect(screen.queryByTestId('caseSyncAlerts')).not.toBeInTheDocument();
@@ -233,7 +234,7 @@ describe('form fields', () => {
     await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: null,
           connectorId: 'none',
@@ -274,7 +275,7 @@ describe('form fields', () => {
     await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: 'new',
           tags: ['template-1'],
@@ -333,7 +334,7 @@ describe('form fields', () => {
     await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: null,
           tags: [],
@@ -386,7 +387,7 @@ describe('form fields', () => {
     await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           tags: [],
           category: null,

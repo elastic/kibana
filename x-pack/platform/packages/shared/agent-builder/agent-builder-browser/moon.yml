@@ -18,9 +18,10 @@ project:
   sourceRoot: x-pack/platform/packages/shared/agent-builder/agent-builder-browser
 dependsOn:
   - '@kbn/agent-builder-common'
+  - '@kbn/ebt-click'
   - '@kbn/zod'
   - '@kbn/i18n'
-  - '@kbn/i18n-react'
+  - '@kbn/core-spaces-common'
 tags:
   - shared-common
   - package

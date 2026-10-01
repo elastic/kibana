@@ -7,77 +7,78 @@
 
 import { QueryClient } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
-import { createNewConversation } from '../../utils/new_conversation';
 import { createConversationActions } from './use_conversation_actions';
 
 const conversationId = 'conv-1';
+const queryKey = queryKeys.conversations.byId(conversationId);
 
 const buildActions = () => {
-  const queryClient = new QueryClient();
-  const conversationsService = {} as unknown as ConversationsService;
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const get = jest.fn().mockResolvedValue({ id: conversationId, rounds: [] });
+  const conversationsService = { get } as unknown as ConversationsService;
   const actions = createConversationActions({
     conversationId,
     queryClient,
     conversationsService,
   });
-  return { queryClient, actions };
+  return { queryClient, actions, get };
 };
 
-const attachmentFixture = (current: number): VersionedAttachment[] => [
-  {
-    id: 'att-1',
-    type: 'dashboard',
-    current_version: current,
-    versions: Array.from({ length: current }, (_, i) => ({
-      version: i + 1,
-      data: { revision: i + 1 },
-      created_at: `2024-01-0${i + 1}T00:00:00.000Z`,
-      content_hash: `hash-${i + 1}`,
-    })),
-  },
-];
+const cachedConversation = {
+  id: conversationId,
+  agent_id: 'agent-1',
+  rounds: [],
+} as unknown as Conversation;
 
-describe('createConversationActions.setAttachments', () => {
-  it('writes the attachments array onto the cached conversation', () => {
-    const { queryClient, actions } = buildActions();
-    const queryKey = queryKeys.conversations.byId(conversationId);
-    queryClient.setQueryData<Conversation>(
-      queryKey,
-      createNewConversation({ id: conversationId, agentId: 'agent-1' })
-    );
+describe('createConversationActions execution lifecycle', () => {
+  it('onExecutionStarted refreshes the list only', () => {
+    const { queryClient, actions, get } = buildActions();
+    const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
 
-    const fresh = attachmentFixture(2);
-    actions.setAttachments({ attachments: fresh });
+    actions.onExecutionStarted();
 
-    const conversation = queryClient.getQueryData<Conversation>(queryKey);
-    expect(conversation?.attachments).toEqual(fresh);
+    expect(get).not.toHaveBeenCalled();
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.conversations.list });
   });
 
-  it('replaces a previous attachments array (does not merge)', () => {
-    const { queryClient, actions } = buildActions();
-    const queryKey = queryKeys.conversations.byId(conversationId);
-    queryClient.setQueryData<Conversation>(queryKey, {
-      ...createNewConversation({ id: conversationId, agentId: 'agent-1' }),
-      attachments: attachmentFixture(1),
-    });
+  it('onExecutionTerminated refreshes the list only', () => {
+    const { queryClient, actions, get } = buildActions();
+    const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
 
-    const fresh = attachmentFixture(2);
-    actions.setAttachments({ attachments: fresh });
+    actions.onExecutionTerminated();
 
-    const conversation = queryClient.getQueryData<Conversation>(queryKey);
-    expect(conversation?.attachments).toEqual(fresh);
-    expect(conversation?.attachments?.[0].current_version).toBe(2);
+    expect(get).not.toHaveBeenCalled();
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.conversations.list });
   });
 
-  it('no-ops when the conversation is not yet in the cache', () => {
-    const { queryClient, actions } = buildActions();
-    const queryKey = queryKeys.conversations.byId(conversationId);
+  it('refetchConversation cancels an older in-flight fetch and returns a fresh response', async () => {
+    const { queryClient, actions, get } = buildActions();
+    queryClient.setQueryData<Conversation>(queryKey, cachedConversation);
+    let finishOlder: (value: unknown) => void = () => {};
+    get
+      .mockImplementationOnce(() => new Promise((resolve) => (finishOlder = resolve)))
+      .mockResolvedValue({ id: conversationId, rounds: [], title: 'fresh' });
+    const older = queryClient
+      .fetchQuery({ queryKey, queryFn: () => get({ conversationId }) })
+      .catch(() => 'cancelled');
 
-    actions.setAttachments({ attachments: attachmentFixture(2) });
+    const fresh = actions.refetchConversation();
+    finishOlder({ id: conversationId, rounds: [], title: 'stale' });
 
-    expect(queryClient.getQueryData<Conversation>(queryKey)).toBeUndefined();
+    await expect(older).resolves.toBe('cancelled');
+    await expect(fresh).resolves.toMatchObject({ title: 'fresh' });
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(queryClient.getQueryData<Conversation>(queryKey)?.title).toBe('fresh');
+  });
+
+  it('refetchConversation rejects on failure and leaves the cached conversation untouched', async () => {
+    const { queryClient, actions, get } = buildActions();
+    queryClient.setQueryData<Conversation>(queryKey, { ...cachedConversation, title: 'kept' });
+    get.mockRejectedValue(new Error('boom'));
+
+    await expect(actions.refetchConversation()).rejects.toThrow('boom');
+    expect(queryClient.getQueryData<Conversation>(queryKey)?.title).toBe('kept');
   });
 });
