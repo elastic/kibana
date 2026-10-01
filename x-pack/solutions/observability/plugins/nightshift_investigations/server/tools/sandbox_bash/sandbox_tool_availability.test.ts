@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { coreMock, httpServerMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { NIGHTSHIFT_API_PRIVILEGES, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
@@ -22,7 +23,7 @@ const setup = ({
   hasManagePrivilege?: boolean;
 } = {}) => {
   const { featureFlags } = coreMock.createStart();
-  featureFlags.getBooleanValue.mockResolvedValue(enabled);
+  featureFlags.getBooleanValue$.mockReturnValue(of(enabled));
   const checkPrivileges = jest.fn(async () => ({ hasAllRequested: hasManagePrivilege }));
   const security = {
     authz: {
@@ -50,7 +51,7 @@ describe('createSandboxToolAvailability', () => {
     const { check, featureFlags, checkPrivileges } = setup();
 
     await expect(check()).resolves.toEqual({ status: 'available' });
-    expect(featureFlags.getBooleanValue).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
+    expect(featureFlags.getBooleanValue$).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
     expect(checkPrivileges).toHaveBeenCalledWith({
       kibana: [`api:${NIGHTSHIFT_API_PRIVILEGES.manage}`],
     });
