@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -85,9 +85,14 @@ describe('Main', () => {
       </EuiProvider>
     );
 
-    await waitFor(() => {
-      expect(services.dataSourcesClient.get).toHaveBeenCalled();
-      expect(services.datasetsClient.get).toHaveBeenCalled();
+    expect(services.dataSourcesClient.get).toHaveBeenCalled();
+    expect(services.datasetsClient.get).toHaveBeenCalled();
+
+    await act(async () => {
+      await Promise.all([
+        services.dataSourcesClient.get.mock.results[0].value,
+        services.datasetsClient.get.mock.results[0].value,
+      ]);
     });
 
     expect(getByTestId('datasetsTabContent')).toBeInTheDocument();
