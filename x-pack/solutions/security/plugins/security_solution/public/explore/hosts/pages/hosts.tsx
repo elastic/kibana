@@ -16,8 +16,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { PageScope } from '../../../data_view_manager/constants';
 import { SecurityPageName } from '../../../app/types';
-import { SecurityAppHeader } from '../../../common/components/app_header';
-import { useLastEventTimeText } from '../../../common/components/last_event_time/use_last_event_time_text';
+import { LastEventTimeHeader } from '../../components/last_event_time_header';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { HostsKpiComponent } from '../components/kpi_hosts';
@@ -100,11 +99,6 @@ const HostsComponent = () => {
   const { dataView, status } = useDataView(PageScope.explore);
   const selectedPatterns = useSelectedPatterns(dataView);
   const indicesExist = dataView.hasMatchedIndices();
-  const lastEventTimeText = useLastEventTimeText({
-    hostName: '',
-    indexKey: LastEventIndexKey.hosts,
-    indexNames: selectedPatterns,
-  });
 
   const [globalFilterQuery, kqlError] = useMemo(
     () =>
@@ -174,11 +168,11 @@ const HostsComponent = () => {
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
-              <SecurityAppHeader
+              <LastEventTimeHeader
                 title={i18n.PAGE_TITLE}
-                description={lastEventTimeText}
-                spacing="largeBleed"
                 docLink={docLinks.links.securitySolution.entityAnalytics.explore.hostsPage}
+                indexKey={LastEventIndexKey.hosts}
+                indexNames={selectedPatterns}
               />
 
               <SearchWithDataView dataView={dataView} />

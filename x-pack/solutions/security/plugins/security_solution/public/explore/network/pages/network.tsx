@@ -15,8 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { PageScope } from '../../../data_view_manager/constants';
 import { SecurityPageName } from '../../../app/types';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
-import { SecurityAppHeader } from '../../../common/components/app_header';
-import { useLastEventTimeText } from '../../../common/components/last_event_time/use_last_event_time_text';
+import { LastEventTimeHeader } from '../../components/last_event_time_header';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { NetworkKpiComponent } from '../components/kpi_network';
 import { SearchWithDataView } from '../../components/search_with_data_view';
@@ -86,10 +85,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const { dataView, status } = useDataView(PageScope.explore);
     const selectedPatterns = useSelectedPatterns(dataView);
     const indicesExist = dataView.hasMatchedIndices();
-    const lastEventTimeText = useLastEventTimeText({
-      indexKey: LastEventIndexKey.network,
-      indexNames: selectedPatterns,
-    });
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -151,11 +146,11 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
               <Display show={!globalFullScreen}>
-                <SecurityAppHeader
+                <LastEventTimeHeader
                   title={i18n.PAGE_TITLE}
-                  description={lastEventTimeText}
-                  spacing="largeBleed"
                   docLink={docLinks.links.securitySolution.entityAnalytics.explore.networkPage}
+                  indexKey={LastEventIndexKey.network}
+                  indexNames={selectedPatterns}
                 />
 
                 <SearchWithDataView dataView={dataView} />

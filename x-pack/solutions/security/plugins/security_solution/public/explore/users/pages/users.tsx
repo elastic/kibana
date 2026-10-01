@@ -16,11 +16,10 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { PageScope } from '../../../data_view_manager/constants';
 import { SecurityPageName } from '../../../app/types';
-import { SecurityAppHeader } from '../../../common/components/app_header';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { SearchWithDataView } from '../../components/search_with_data_view';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { useLastEventTimeText } from '../../../common/components/last_event_time/use_last_event_time_text';
+import { LastEventTimeHeader } from '../../components/last_event_time_header';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
@@ -101,10 +100,6 @@ const UsersComponent = () => {
   const { dataView, status } = useDataView(PageScope.explore);
   const selectedPatterns = useSelectedPatterns(dataView);
   const indicesExist = dataView.hasMatchedIndices();
-  const lastEventTimeText = useLastEventTimeText({
-    indexKey: LastEventIndexKey.users,
-    indexNames: selectedPatterns,
-  });
 
   const [globalFiltersQuery, kqlError] = useMemo(
     () =>
@@ -174,11 +169,11 @@ const UsersComponent = () => {
           <EuiWindowEvent event="resize" handler={noop} />
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-            <SecurityAppHeader
+            <LastEventTimeHeader
               title={i18n.PAGE_TITLE}
-              description={lastEventTimeText}
-              spacing="largeBleed"
               docLink={docLinks.links.securitySolution.entityAnalytics.explore.usersPage}
+              indexKey={LastEventIndexKey.users}
+              indexNames={selectedPatterns}
             />
 
             <SearchWithDataView dataView={dataView} />
