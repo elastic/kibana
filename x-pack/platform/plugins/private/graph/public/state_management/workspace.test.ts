@@ -79,7 +79,7 @@ const createRuntimeGraphListenerEnvironment = () => {
   const environment = createMockGraphStore({
     listeners: [registerWorkspaceListeners],
     mockedDepsOverwrites: {
-      getWorkspace: jest.fn(() => workspace),
+      getRuntimeGraph: jest.fn(() => workspace),
       exploreGraph: jest.fn().mockResolvedValue({ vertices: [], connections: [] }),
       searchGraph: jest.fn((_index: string, _request: object) => new Promise(() => {})),
       mergeRuntimeGraph: jest.fn((_workspace, graph) => workspace.mergeGraph(graph)),
