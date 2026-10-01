@@ -18,6 +18,10 @@ import { queryClient } from '../../query_client';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
+import {
+  getPackQueryStaleIntervalError,
+  getPackQueryStaleRruleError,
+} from '../../components/schedule_section/translations';
 
 const mockUseRouterNavigate = jest.fn();
 const mockAddDanger = jest.fn();
@@ -840,6 +844,53 @@ describe('PackForm', () => {
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
       fireEvent.click(getByTestId('update-pack-button'));
       await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
+      expect(mockAddDanger.mock.calls[0][0].text).toContain(
+        getPackQueryStaleIntervalError('q-stale')
+      );
+      expect(mockUpdateAsync).not.toHaveBeenCalled();
+    });
+
+    // The mirror of the case above. Without it this direction reached the user
+    // only as a 400 from the route, since the client checked one way round.
+    it('shows the backstop error in a toast when a query keeps an rrule override on an interval pack', async () => {
+      const defaultValue = {
+        id: 'pack-stale-rrule-q',
+        saved_object_id: 'saved-stale-rrule-q',
+        name: 'stale-rrule-query-pack',
+        description: '',
+        enabled: true,
+        queries: {
+          'q-stale-rrule': {
+            query: 'SELECT 1;',
+            interval: 3600,
+            ecs_mapping: {},
+            schedule_type: 'rrule' as const,
+            rrule_schedule: {
+              rrule: 'FREQ=DAILY',
+              start_date: '2024-01-01T00:00:00.000Z',
+            },
+          },
+        },
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        schedule_type: 'interval' as const,
+        interval: 3600,
+      };
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} />
+      );
+
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
+      fireEvent.click(getByTestId('update-pack-button'));
+      await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
+      expect(mockAddDanger.mock.calls[0][0].text).toContain(
+        getPackQueryStaleRruleError('q-stale-rrule')
+      );
       expect(mockUpdateAsync).not.toHaveBeenCalled();
     });
 

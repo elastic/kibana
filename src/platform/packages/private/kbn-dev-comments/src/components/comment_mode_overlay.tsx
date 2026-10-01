@@ -7,12 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Global, css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { IGNORE_SELECTOR } from '../constants';
-import { isIgnored, promoteToCommentable } from '../lib/anchor';
+import {
+  isIgnored,
+  isVisible,
+  promoteToCommentable,
+  tooltipAt,
+  tooltipShowing,
+  triggerOf,
+} from '../lib/anchor';
+import type { Point } from '../lib/anchor';
 import { holdsPassThrough, isPassingThrough, passThrough } from '../lib/pass_through';
+import { BOUNDARY_EVENTS, FOCUS_EVENTS, MOVE_EVENTS, createTooltipHold } from '../lib/tooltip_hold';
 import { useComments } from './comments_context';
+import { useLayerPortal, useLayerZIndex, useLayoutTick } from './hooks';
 
 const POINTER_EVENTS = [
   'pointerdown',
@@ -26,8 +38,11 @@ const POINTER_EVENTS = [
 /** Ways of changing a field's value other than key presses. */
 const INPUT_EVENTS = ['beforeinput', 'paste', 'cut', 'drop'] as const;
 
-/** Keys that select the focused element as the comment's target. */
+/** Keys that select the focused element, or the tooltip aimed at, as the comment's target. */
 const SELECT_KEYS = ['Enter', ' '];
+
+/** Keys that aim at the tooltip the focused element shows, and back at the element. */
+const AIM_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
 /** Keys that keep working on the page: moving focus, leaving comment mode, and browser or application shortcuts. */
 const passesThrough = (event: KeyboardEvent): boolean =>
@@ -53,17 +68,69 @@ const COMMENT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(
   CURSOR_SVG
 )}") 3 22, crosshair`;
 
+interface Aim {
+  /** The focused element, showing the tooltip. */
+  trigger: Element;
+  tooltip: Element;
+}
+
+/** Outlines the tooltip aimed at with the keyboard, while it shows. */
+const TooltipAim = ({ tooltip, onGone }: { tooltip: Element; onGone: () => void }) => {
+  const { euiTheme } = useEuiTheme();
+  const zIndex = useLayerZIndex();
+  const container = useLayerPortal('devCommentsTooltipAim', zIndex.tooltipPins);
+  useLayoutTick();
+  const showing = tooltip.isConnected && isVisible(tooltip);
+
+  useEffect(() => {
+    if (!showing) {
+      onGone();
+    }
+  }, [showing, onGone]);
+
+  if (!container || !showing) {
+    return null;
+  }
+  const { left, top, width, height } = tooltip.getBoundingClientRect();
+  return createPortal(
+    <div
+      css={css`
+        position: fixed;
+        left: ${left}px;
+        top: ${top}px;
+        width: ${width}px;
+        height: ${height}px;
+        outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+        outline-offset: ${euiTheme.size.xs};
+        border-radius: ${euiTheme.border.radius.small};
+        pointer-events: none;
+      `}
+      aria-hidden={true}
+      data-test-subj="devCommentsTooltipAim"
+    />,
+    container
+  );
+};
+
 /**
  * Comment mode: pointer and keyboard input to the page is swallowed in the
  * capture phase, so the UI state being commented on does not change. Releasing
  * the pointer on an element starts a comment (or moves the one being written);
- * so do Enter and Space on the focused element, which Tab still moves between.
- * With Alt held, pointer input goes to the page instead, and the cursor is its own.
+ * so do Enter and Space on the focused element. A tooltip stays showing while
+ * the pointer heads over to it, to be clicked, and while the layer's UI at it
+ * has focus, the page meanwhile told nothing of the pointer or focus; with the
+ * keyboard, an arrow key aims at the tooltip the focused element shows. With
+ * Alt held, pointer input goes to the page.
  */
 export const CommentModeOverlay = () => {
   const controller = useComments();
   const { ignoreSelectors } = controller;
   const [altHeld, setAltHeld] = useState(false);
+  const [aim, setAim] = useState<Aim | null>(null);
+  const aimRef = useRef(aim);
+  aimRef.current = aim;
+  const clearAim = useCallback(() => setAim(null), []);
+  const hold = useMemo(createTooltipHold, []);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => setAltHeld(event.altKey);
@@ -100,13 +167,25 @@ export const CommentModeOverlay = () => {
       return target instanceof Element && !isIgnored(target, ignoreSelectors) ? target : null;
     };
 
+    const pickTooltip = (tooltip: Element, point: Point, hit: Element, trigger: Element | null) =>
+      controller.pick(tooltip, point, hit, trigger ? { revealedBy: trigger } : undefined);
+
+    // A tooltip at the spot takes no pointer input but is what is seen there: the comment goes on it.
+    const pickAt = (target: Element, point: Point) => {
+      const shown = tooltipAt(point, ignoreSelectors);
+      if (shown) {
+        pickTooltip(shown.tooltip, point, shown.hit, hold.trigger() ?? triggerOf(shown.tooltip));
+      } else {
+        controller.pick(promoteToCommentable(target), point, target);
+      }
+    };
+
     const onPointer = (event: Event) => {
       const target = pageTarget(event);
       if (!target || isPassingThrough()) {
         return;
       }
       if (event instanceof MouseEvent && holdsPassThrough(event)) {
-        // The page's; the click without its Alt (see `passThrough`).
         if (event.type === 'click') {
           event.preventDefault();
           event.stopPropagation();
@@ -116,15 +195,38 @@ export const CommentModeOverlay = () => {
       }
       event.preventDefault();
       event.stopPropagation();
-
-      // On the pointer's release rather than the click: a disabled control gets
-      // no click, and clicks the page synthesizes come without a pointer.
+      // On the pointer's release: a disabled control gets no click, and clicks the page synthesizes come without a pointer.
       if (event.type === 'pointerup' && event instanceof MouseEvent && event.button === 0) {
-        controller.pick(
-          promoteToCommentable(target),
-          { x: event.clientX, y: event.clientY },
-          target
-        );
+        pickAt(target, { x: event.clientX, y: event.clientY });
+      }
+    };
+
+    // With Alt held, the pointer's whereabouts are the page's too: a tooltip held goes, as it would.
+    const onBoundary = (event: Event) => {
+      if (!(event instanceof MouseEvent)) {
+        return;
+      }
+      if (holdsPassThrough(event)) {
+        hold.release({ x: event.clientX, y: event.clientY });
+      } else {
+        hold.hold(event, ignoreSelectors);
+      }
+    };
+
+    const onMove = (event: Event) => {
+      if (!(event instanceof MouseEvent)) {
+        return;
+      }
+      if (holdsPassThrough(event)) {
+        hold.release({ x: event.clientX, y: event.clientY });
+      } else {
+        hold.move(event, ignoreSelectors);
+      }
+    };
+
+    const onFocusChange = (event: Event) => {
+      if (event instanceof FocusEvent) {
+        hold.focus(event, ignoreSelectors);
       }
     };
 
@@ -137,36 +239,58 @@ export const CommentModeOverlay = () => {
 
     const onKey = (event: KeyboardEvent) => {
       const target = pageTarget(event);
-
       if (!target || passesThrough(event)) {
         return;
       }
-
       event.preventDefault();
       event.stopPropagation();
-
-      const isSelection =
-        event.type === 'keydown' &&
-        SELECT_KEYS.includes(event.key) &&
-        target !== document.body &&
-        target !== document.documentElement;
-
-      if (isSelection) {
-        controller.pick(promoteToCommentable(target), centerOf(target), target);
+      if (
+        event.type !== 'keydown' ||
+        target === document.body ||
+        target === document.documentElement
+      ) {
+        return;
+      }
+      const aimed = aimRef.current?.trigger === target ? aimRef.current : null;
+      if (AIM_KEYS.includes(event.key)) {
+        const tooltip = aimed ? null : tooltipShowing(target, ignoreSelectors);
+        setAim(tooltip ? { trigger: target, tooltip } : null);
+      } else if (SELECT_KEYS.includes(event.key)) {
+        if (aimed && aimed.tooltip.isConnected && isVisible(aimed.tooltip)) {
+          const { tooltip } = aimed;
+          pickTooltip(tooltip, centerOf(tooltip), tooltip, promoteToCommentable(target));
+        } else {
+          controller.pick(promoteToCommentable(target), centerOf(target), target);
+        }
       }
     };
 
     POINTER_EVENTS.forEach((type) => document.addEventListener(type, onPointer, true));
+    BOUNDARY_EVENTS.forEach((type) => document.addEventListener(type, onBoundary, true));
+    MOVE_EVENTS.forEach((type) => document.addEventListener(type, onMove, true));
+    FOCUS_EVENTS.forEach((type) => document.addEventListener(type, onFocusChange, true));
     INPUT_EVENTS.forEach((type) => document.addEventListener(type, onInput, true));
     document.addEventListener('keydown', onKey, true);
     document.addEventListener('keyup', onKey, true);
+    // The aim is the focused element's.
+    document.addEventListener('focusin', clearAim, true);
     return () => {
       POINTER_EVENTS.forEach((type) => document.removeEventListener(type, onPointer, true));
+      BOUNDARY_EVENTS.forEach((type) => document.removeEventListener(type, onBoundary, true));
+      MOVE_EVENTS.forEach((type) => document.removeEventListener(type, onMove, true));
+      FOCUS_EVENTS.forEach((type) => document.removeEventListener(type, onFocusChange, true));
       INPUT_EVENTS.forEach((type) => document.removeEventListener(type, onInput, true));
       document.removeEventListener('keydown', onKey, true);
       document.removeEventListener('keyup', onKey, true);
+      document.removeEventListener('focusin', clearAim, true);
+      hold.end();
     };
-  }, [controller, ignoreSelectors]);
+  }, [controller, ignoreSelectors, hold, clearAim]);
 
-  return altHeld ? null : <Global styles={cursorStyles} />;
+  return (
+    <>
+      {!altHeld && <Global styles={cursorStyles} />}
+      {aim && <TooltipAim tooltip={aim.tooltip} onGone={clearAim} />}
+    </>
+  );
 };
