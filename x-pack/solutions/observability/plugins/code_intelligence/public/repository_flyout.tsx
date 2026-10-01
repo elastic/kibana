@@ -12,15 +12,20 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   DEFAULT_REPOSITORY_REF,
@@ -39,7 +44,7 @@ interface Props {
   /** The repository being edited; absent when adding one. */
   editing?: Repository;
   onSaved: (repository: Repository) => void;
-  onCancelEdit: () => void;
+  onClose: () => void;
 }
 
 const fieldErrors: Record<RepositorySettingsField, string> = {
@@ -76,23 +81,16 @@ const serverMessage = (error: unknown): string | undefined => {
   return typeof message === 'string' && message.trim().length > 0 ? message : undefined;
 };
 
-export const RepositoryForm = ({ http, editing, onSaved, onCancelEdit }: Props) => {
-  const [repository, setRepository] = useState('');
-  const [remoteUrl, setRemoteUrl] = useState('');
-  const [defaultRef, setDefaultRef] = useState(DEFAULT_REPOSITORY_REF);
-  const [enabled, setEnabled] = useState(true);
+export const RepositoryFlyout = ({ http, editing, onSaved, onClose }: Props) => {
+  const [repository, setRepository] = useState(editing?.repository ?? '');
+  const [remoteUrl, setRemoteUrl] = useState(editing?.remoteUrl ?? '');
+  const [defaultRef, setDefaultRef] = useState(editing?.defaultRef ?? DEFAULT_REPOSITORY_REF);
+  const [enabled, setEnabled] = useState(editing?.enabled ?? true);
   const [invalid, setInvalid] = useState<RepositorySettingsField[]>([]);
   const [saveError, setSaveError] = useState<string>();
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    setRepository(editing?.repository ?? '');
-    setRemoteUrl(editing?.remoteUrl ?? '');
-    setDefaultRef(editing?.defaultRef ?? DEFAULT_REPOSITORY_REF);
-    setEnabled(editing?.enabled ?? true);
-    setInvalid([]);
-    setSaveError(undefined);
-  }, [editing]);
+  const titleId = useGeneratedHtmlId({ prefix: 'codeIntelligenceRepositoryFlyoutTitle' });
+  const formId = useGeneratedHtmlId({ prefix: 'codeIntelligenceRepositoryForm' });
 
   const submit = async () => {
     const input: RepositorySettingsInput = {
@@ -111,14 +109,7 @@ export const RepositoryForm = ({ http, editing, onSaved, onCancelEdit }: Props) 
     if (problems.length > 0) return;
     setSaving(true);
     try {
-      const saved = await saveRepository(http, input);
-      onSaved(saved);
-      if (editing === undefined) {
-        setRepository('');
-        setRemoteUrl('');
-        setDefaultRef(DEFAULT_REPOSITORY_REF);
-        setEnabled(true);
-      }
+      onSaved(await saveRepository(http, input));
     } catch (error) {
       const fields = serverProblems(error);
       setInvalid(fields);
@@ -139,45 +130,54 @@ export const RepositoryForm = ({ http, editing, onSaved, onCancelEdit }: Props) 
     invalid.includes(field) ? fieldErrors[field] : undefined;
 
   return (
-    <EuiForm
-      component="form"
-      // `isInvalid` sets a native validity message that would otherwise block the corrected submit.
-      noValidate
-      data-test-subj="codeIntelligenceRepositoryForm"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void submit();
-      }}
+    <EuiFlyout
+      ownFocus
+      size="s"
+      aria-labelledby={titleId}
+      onClose={onClose}
+      data-test-subj="codeIntelligenceRepositoryFlyout"
     >
-      <EuiTitle size="xs">
-        <h3>
-          {editing === undefined
-            ? i18n.translate('xpack.codeIntelligence.repositoryForm.addTitle', {
-                defaultMessage: 'Add a repository',
-              })
-            : i18n.translate('xpack.codeIntelligence.repositoryForm.editTitle', {
-                defaultMessage: 'Edit {repository}',
-                values: { repository: editing.repository },
-              })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      {saveError !== undefined && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            iconType="error"
-            size="s"
-            data-test-subj="codeIntelligenceRepositorySaveError"
-            title={saveError}
-          />
-          <EuiSpacer size="s" />
-        </>
-      )}
-      <EuiFlexGroup gutterSize="m" alignItems="flexEnd" wrap>
-        <EuiFlexItem>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id={titleId}>
+            {editing === undefined
+              ? i18n.translate('xpack.codeIntelligence.repositoryForm.addTitle', {
+                  defaultMessage: 'Add repository',
+                })
+              : i18n.translate('xpack.codeIntelligence.repositoryForm.editTitle', {
+                  defaultMessage: 'Edit {repository}',
+                  values: { repository: editing.repository },
+                })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        {saveError !== undefined && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              iconType="error"
+              size="s"
+              data-test-subj="codeIntelligenceRepositorySaveError"
+              title={saveError}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <EuiForm
+          id={formId}
+          component="form"
+          // `isInvalid` sets a native validity message that would otherwise block the corrected submit.
+          noValidate
+          data-test-subj="codeIntelligenceRepositoryForm"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submit();
+          }}
+        >
           <EuiFormRow
+            fullWidth
             label={i18n.translate('xpack.codeIntelligence.repositoryForm.repositoryLabel', {
               defaultMessage: 'Repository',
             })}
@@ -188,6 +188,7 @@ export const RepositoryForm = ({ http, editing, onSaved, onCancelEdit }: Props) 
             error={rowError('repository')}
           >
             <EuiFieldText
+              fullWidth
               data-test-subj="codeIntelligenceRepositoryFormRepository"
               value={repository}
               disabled={editing !== undefined}
@@ -196,9 +197,8 @@ export const RepositoryForm = ({ http, editing, onSaved, onCancelEdit }: Props) 
               onChange={(event) => setRepository(event.target.value)}
             />
           </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={2}>
           <EuiFormRow
+            fullWidth
             label={i18n.translate('xpack.codeIntelligence.repositoryForm.remoteUrlLabel', {
               defaultMessage: 'Remote URL',
             })}
@@ -209,6 +209,7 @@ export const RepositoryForm = ({ http, editing, onSaved, onCancelEdit }: Props) 
             error={rowError('remoteUrl')}
           >
             <EuiFieldText
+              fullWidth
               data-test-subj="codeIntelligenceRepositoryFormRemoteUrl"
               value={remoteUrl}
               maxLength={MAX_REMOTE_URL_LENGTH}
@@ -216,9 +217,8 @@ export const RepositoryForm = ({ http, editing, onSaved, onCancelEdit }: Props) 
               onChange={(event) => setRemoteUrl(event.target.value)}
             />
           </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
           <EuiFormRow
+            fullWidth
             label={i18n.translate('xpack.codeIntelligence.repositoryForm.defaultRefLabel', {
               defaultMessage: 'Default ref',
             })}
@@ -229,6 +229,7 @@ export const RepositoryForm = ({ http, editing, onSaved, onCancelEdit }: Props) 
             error={rowError('defaultRef')}
           >
             <EuiFieldText
+              fullWidth
               data-test-subj="codeIntelligenceRepositoryFormDefaultRef"
               value={defaultRef}
               maxLength={MAX_REVISION_LENGTH}
@@ -236,9 +237,7 @@ export const RepositoryForm = ({ http, editing, onSaved, onCancelEdit }: Props) 
               onChange={(event) => setDefaultRef(event.target.value)}
             />
           </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
+          <EuiFormRow fullWidth>
             <EuiSwitch
               data-test-subj="codeIntelligenceRepositoryFormEnabled"
               label={i18n.translate('xpack.codeIntelligence.repositoryForm.enabledLabel', {
@@ -248,38 +247,36 @@ export const RepositoryForm = ({ http, editing, onSaved, onCancelEdit }: Props) 
               onChange={(event) => setEnabled(event.target.checked)}
             />
           </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="codeIntelligenceRepositoryFormSave"
-                  type="submit"
-                  fill
-                  isLoading={saving}
-                >
-                  {i18n.translate('xpack.codeIntelligence.repositoryForm.save', {
-                    defaultMessage: 'Save',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-              {editing !== undefined && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="codeIntelligenceRepositoryFormCancel"
-                    onClick={onCancelEdit}
-                  >
-                    {i18n.translate('xpack.codeIntelligence.repositoryForm.cancel', {
-                      defaultMessage: 'Cancel',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiForm>
+        </EuiForm>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="codeIntelligenceRepositoryFormCancel"
+              flush="left"
+              onClick={onClose}
+            >
+              {i18n.translate('xpack.codeIntelligence.repositoryForm.cancel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="codeIntelligenceRepositoryFormSave"
+              type="submit"
+              form={formId}
+              fill
+              isLoading={saving}
+            >
+              {i18n.translate('xpack.codeIntelligence.repositoryForm.save', {
+                defaultMessage: 'Save',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 };

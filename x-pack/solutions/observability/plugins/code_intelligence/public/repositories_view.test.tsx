@@ -88,6 +88,8 @@ const renderView = (
 };
 
 const runButton = () => screen.getByTestId('codeIntelligenceRunBatchButton');
+const openAddFlyout = () =>
+  fireEvent.click(screen.getByTestId('codeIntelligenceAddRepositoryButton'));
 
 describe('RepositoriesView', () => {
   beforeEach(() => {
@@ -112,23 +114,75 @@ describe('RepositoriesView', () => {
     expect(screen.getByTestId('codeIntelligenceBatchStatus')).toHaveTextContent('Running');
   });
 
-  it('runs only the selected repositories at the revisions entered for this run', async () => {
+  it('runs only the selected repositories at their stored default refs', async () => {
     startBatchMock.mockResolvedValue({ id: 'running-id' });
     getBatchMock.mockResolvedValue(runningBatch);
     renderView();
 
+    const revision = screen.getByTestId('codeIntelligenceRevision-elastic/two');
+    expect(revision).toHaveTextContent('main');
+    expect(revision.tagName).not.toBe('INPUT');
+    expect(screen.queryByRole('textbox')).toBeNull();
     fireEvent.click(screen.getByTestId('checkboxSelectRow-elastic/two'));
-    fireEvent.change(screen.getByTestId('codeIntelligenceRevision-elastic/two'), {
-      target: { value: 'v1.0' },
-    });
     expect(runButton()).toHaveTextContent('Run 1 selected repository');
     fireEvent.click(runButton());
 
     await waitFor(() =>
       expect(startBatchMock).toHaveBeenCalledWith(expect.anything(), [
-        { repository: 'elastic/two', revision: 'v1.0' },
+        { repository: 'elastic/two' },
       ])
     );
+  });
+
+  it('opens an empty add flyout from the toolbar and closes it on cancel', () => {
+    renderView();
+
+    expect(screen.queryByTestId('codeIntelligenceRepositoryFlyout')).toBeNull();
+    openAddFlyout();
+    const flyout = screen.getByTestId('codeIntelligenceRepositoryFlyout');
+    expect(within(flyout).getByRole('heading', { name: 'Add repository' })).toBeInTheDocument();
+    expect(screen.getByTestId('codeIntelligenceRepositoryFormRepository')).toHaveValue('');
+    expect(screen.getByTestId('codeIntelligenceRepositoryFormDefaultRef')).toHaveValue('HEAD');
+    fireEvent.click(screen.getByTestId('codeIntelligenceRepositoryFormCancel'));
+
+    expect(screen.queryByTestId('codeIntelligenceRepositoryFlyout')).toBeNull();
+    expect(saveRepositoryMock).not.toHaveBeenCalled();
+  });
+
+  it('opens the same flyout pre-filled when a repository is edited', async () => {
+    saveRepositoryMock.mockResolvedValue(repositoryRow('elastic/two', { defaultRef: 'v2.0' }));
+    const { reload } = renderView();
+
+    fireEvent.click(screen.getAllByTestId('codeIntelligenceEditRepository')[1]);
+    const flyout = screen.getByTestId('codeIntelligenceRepositoryFlyout');
+    expect(within(flyout).getByRole('heading', { name: 'Edit elastic/two' })).toBeInTheDocument();
+    expect(screen.getByTestId('codeIntelligenceRepositoryFormRepository')).toHaveValue(
+      'elastic/two'
+    );
+    expect(screen.getByTestId('codeIntelligenceRepositoryFormRemoteUrl')).toHaveValue(
+      'https://github.com/elastic/two.git'
+    );
+    const defaultRef = screen.getByTestId('codeIntelligenceRepositoryFormDefaultRef');
+    expect(defaultRef).toHaveValue('main');
+    fireEvent.change(defaultRef, { target: { value: 'v2.0' } });
+    fireEvent.click(screen.getByTestId('codeIntelligenceRepositoryFormSave'));
+
+    await waitFor(() => expect(reload).toHaveBeenCalled());
+    expect(saveRepositoryMock).toHaveBeenCalledWith(expect.anything(), {
+      repository: 'elastic/two',
+      remoteUrl: 'https://github.com/elastic/two.git',
+      defaultRef: 'v2.0',
+      enabled: true,
+    });
+    expect(screen.queryByTestId('codeIntelligenceRepositoryFlyout')).toBeNull();
+  });
+
+  it('offers to add a repository when none are configured', () => {
+    renderView([]);
+
+    expect(screen.getByText('No repositories configured')).toBeInTheDocument();
+    openAddFlyout();
+    expect(screen.getByTestId('codeIntelligenceRepositoryFlyout')).toBeInTheDocument();
   });
 
   it('explains a running batch and attaches it when the user follows it', async () => {
@@ -165,6 +219,7 @@ describe('RepositoriesView', () => {
     saveRepositoryMock.mockResolvedValue(repositoryRow('elastic/three'));
     const { reload } = renderView();
 
+    openAddFlyout();
     fireEvent.change(screen.getByTestId('codeIntelligenceRepositoryFormRepository'), {
       target: { value: 'elastic/three' },
     });
@@ -184,6 +239,7 @@ describe('RepositoriesView', () => {
 
   it('marks invalid fields without saving', async () => {
     renderView();
+    openAddFlyout();
 
     fireEvent.change(screen.getByTestId('codeIntelligenceRepositoryFormRepository'), {
       target: { value: 'not a repository' },
@@ -201,6 +257,7 @@ describe('RepositoriesView', () => {
   it('saves once an invalid field is corrected', async () => {
     saveRepositoryMock.mockResolvedValue(repositoryRow('elastic/three'));
     renderView();
+    openAddFlyout();
     const remoteUrl = screen.getByTestId('codeIntelligenceRepositoryFormRemoteUrl');
 
     fireEvent.change(screen.getByTestId('codeIntelligenceRepositoryFormRepository'), {
