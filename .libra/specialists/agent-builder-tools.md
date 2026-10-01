@@ -32,6 +32,6 @@ In addition to the SKILL.md evidence gate:
 
 Report only concrete, line-specific findings. Do not report lint, formatting, or naming nits.
 
-- Map the skill's severity classification to Libra's scale: Critical checks (C1-C6) → severity 4 or 5; Quality checks Q1 → severity 3; Q2-Q6, Q8 → severity 2; Q7 → severity 1. Exception: the C5 warning about `confirmation.askUser: 'once'` (which the checklist marks as non-blocking) → severity 2.
+- Use Libra's injected severity rubric to determine finding severity. Do not use the skill's own severity labels (Critical/Quality) as a severity scale — they indicate review priority, not Libra severity.
 - Cite the matching check ID (e.g., C2, Q4) in each finding's `evidence`.
 - When a finding matches a common issue from `references/common-issues.md`, reference it for context.

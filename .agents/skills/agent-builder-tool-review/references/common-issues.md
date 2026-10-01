@@ -53,9 +53,12 @@ entirely. Without `annotations.destructiveHint: true`, MCP hosts had no signal
 to gate the call.
 
 **What the review should catch:** Destructive tools must set
-`annotations.destructiveHint: true` and `confirmation.askUser` to `'once'` or
-`'always'`. Both signals are needed — annotations for MCP hosts, confirmation
-for 1P UI.
+`annotations.destructiveHint: true` and `confirmation.askUser` to `'always'`.
+Using `'once'` is permitted but should be flagged as a warning — `once` reuses
+the first confirmation for all subsequent calls to the same tool in a
+conversation, which can silently authorize deletes of different resources. Both
+annotation and confirmation signals are needed — annotations for MCP hosts,
+confirmation for 1P UI.
 
 ## Single Responsibility (Q1)
 
