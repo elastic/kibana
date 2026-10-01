@@ -404,13 +404,15 @@ export interface TaskUserScope {
 }
 
 /**
- * The workload a task runs as when it runs as a service account.
+ * How a task authenticates when it runs. The fields other than `type` depend on the type: a
+ * `service_account` credential names the workload the task runs as.
  */
-export interface TaskRunAs {
-  workloadType: string;
-  workloadId: string;
-  spaceId: string;
-  expectedServiceAccountId: string | null;
+export interface TaskCredential {
+  type: string;
+  workloadType?: string;
+  workloadId?: string;
+  spaceId?: string;
+  expectedServiceAccountId?: string | null;
 }
 
 /*
@@ -651,19 +653,15 @@ export interface ConcreteTaskInstance extends TaskInstance {
   partition?: number;
 
   /**
-   * How the task authenticates when it runs. Only written when the task is created.
+   * How the task authenticates when it runs. Part of the AAD, so it is only written when the task is created.
    */
-  credentialType?: string;
+  credential?: TaskCredential;
 
   /**
-   * The workload the task runs as. Part of the AAD, so it is only written when the task is created.
+   * Encrypted secret material for `credential`. For a service account it holds no secret, only a
+   * value whose decryption fails if `credential` was changed. Only written when the task is created.
    */
-  runAs?: TaskRunAs;
-
-  /**
-   * Encrypted value whose decryption fails if `runAs` was changed. Only written when the task is created.
-   */
-  runAsIntegrityCheck?: string;
+  encryptedCredential?: string;
 }
 
 export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {

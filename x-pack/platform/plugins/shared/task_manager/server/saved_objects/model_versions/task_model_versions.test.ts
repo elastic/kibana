@@ -34,43 +34,45 @@ const getTaskAttributes = (overrides: Attributes = {}): Attributes => ({
   ...overrides,
 });
 
-const runAs = {
+const credential = {
+  type: 'service_account',
   workloadType: 'workflow',
   workloadId: 'workflow-1',
   spaceId: 'default',
   expectedServiceAccountId: null,
 };
 
-const serviceAccountFields = {
-  credentialType: 'service_account',
-  runAs,
-  runAsIntegrityCheck: 'encrypted-value',
+const credentialFields = {
+  credential,
+  encryptedCredential: 'encrypted-value',
 };
 
 describe('taskModelVersions v13 forwardCompatibility', () => {
   it('drops the fields added in v14', () => {
-    const result = forwardCompatibilityV13.validate(getTaskAttributes(serviceAccountFields));
-    expect(result).not.toHaveProperty('credentialType');
-    expect(result).not.toHaveProperty('runAs');
-    expect(result).not.toHaveProperty('runAsIntegrityCheck');
+    const result = forwardCompatibilityV13.validate(getTaskAttributes(credentialFields));
+    expect(result).not.toHaveProperty('credential');
+    expect(result).not.toHaveProperty('encryptedCredential');
   });
 });
 
 describe('taskModelVersions v14 forwardCompatibility', () => {
   it('keeps the fields added in v14', () => {
-    const attributes = getTaskAttributes(serviceAccountFields);
+    const attributes = getTaskAttributes(credentialFields);
     expect(forwardCompatibilityV14.validate(attributes)).toEqual(attributes);
   });
 
-  it('accepts a credentialType added in a later version', () => {
-    const attributes = getTaskAttributes({ credentialType: 'future_credential_type' });
-    expect(forwardCompatibilityV14.validate(attributes)).toEqual(attributes);
-  });
-
-  it('keeps runAs fields added in a later version', () => {
+  it('accepts a credential type added in a later version, with its own fields', () => {
     const attributes = getTaskAttributes({
-      ...serviceAccountFields,
-      runAs: { ...runAs, futureField: 'value' },
+      ...credentialFields,
+      credential: { type: 'future_credential_type', futureKeyId: 'key-1' },
+    });
+    expect(forwardCompatibilityV14.validate(attributes)).toEqual(attributes);
+  });
+
+  it('keeps credential fields added in a later version', () => {
+    const attributes = getTaskAttributes({
+      ...credentialFields,
+      credential: { ...credential, futureField: 'value' },
     });
     expect(forwardCompatibilityV14.validate(attributes)).toEqual(attributes);
   });

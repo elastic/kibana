@@ -191,9 +191,9 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
       {
         type: 'mappings_addition',
         addedMappings: {
-          credentialType: { type: 'keyword', ignore_above: 1024 },
-          runAs: {
+          credential: {
             properties: {
+              type: { type: 'keyword', ignore_above: 1024 },
               workloadType: { type: 'keyword', ignore_above: 1024 },
               workloadId: { type: 'keyword', ignore_above: 1024 },
               spaceId: { type: 'keyword', ignore_above: 1024 },

@@ -768,7 +768,18 @@ export class TaskStore {
           const apiKey = updatedFields?.apiKey || doc?.apiKey;
           const uiamApiKey = updatedFields?.uiamApiKey || doc?.uiamApiKey;
           const userScope = updatedFields?.userScope || doc?.userScope;
-          const { credentialType, runAs, runAsIntegrityCheck } = doc;
+          const { credential, encryptedCredential } = doc;
+          // The encryption-aware client can't rewrite such a task: a merged update re-encrypts the
+          // API key without credential in its AAD, and a full replace encrypts encryptedCredential
+          // twice.
+          if (
+            (credential !== undefined || encryptedCredential !== undefined) &&
+            (apiKey || uiamApiKey)
+          ) {
+            throw new Error(
+              'Task has both a credential and an API key, which this version of Kibana cannot update'
+            );
+          }
 
           acc.set(doc.id, {
             type: 'task',
@@ -779,12 +790,11 @@ export class TaskStore {
               ...(apiKey ? { apiKey } : {}),
               ...(uiamApiKey ? { uiamApiKey } : {}),
               ...(userScope ? { userScope } : {}),
-              // A full replace drops every attribute it doesn't send. runAs is in the AAD, so it and
-              // runAsIntegrityCheck must be copied unchanged or decryption fails.
-              ...(!mergeAttributes && credentialType !== undefined ? { credentialType } : {}),
-              ...(!mergeAttributes && runAs !== undefined ? { runAs } : {}),
-              ...(!mergeAttributes && runAsIntegrityCheck !== undefined
-                ? { runAsIntegrityCheck }
+              // A full replace drops every attribute it doesn't send. credential is in the AAD, so it
+              // and encryptedCredential must be copied unchanged or decryption fails.
+              ...(!mergeAttributes && credential !== undefined ? { credential } : {}),
+              ...(!mergeAttributes && encryptedCredential !== undefined
+                ? { encryptedCredential }
                 : {}),
             },
             mergeAttributes,
@@ -800,19 +810,13 @@ export class TaskStore {
       new Map()
     );
 
-    // The encryption-aware client would encrypt the stored runAsIntegrityCheck ciphertext again,
-    // so those tasks are written through the plain repository. Tasks that also hold a decrypted
-    // API key stay on the encryption-aware client so the key is never stored in plaintext.
+    // The encryption-aware client would encrypt the stored encryptedCredential ciphertext again,
+    // so those tasks are written through the plain repository.
     const objectsToUpdate = Array.from(newDocs.values());
     const plainRepositoryObjects =
       soClientToUpdate === this.savedObjectsRepository
         ? []
-        : objectsToUpdate.filter(
-            ({ attributes }) =>
-              attributes.runAsIntegrityCheck !== undefined &&
-              !attributes.apiKey &&
-              !attributes.uiamApiKey
-          );
+        : objectsToUpdate.filter(({ attributes }) => attributes.encryptedCredential !== undefined);
     const soClientObjects = objectsToUpdate.filter(
       (object) => !plainRepositoryObjects.includes(object)
     );
@@ -1421,7 +1425,7 @@ export class TaskStore {
  * (either an ES API key or a UIAM API key) together with the `userScope`
  * metadata required to process it. Must be kept in sync with every credential
  * field registered for ESO encryption on the `task` saved object type, except
- * `runAsIntegrityCheck`, which is never decrypted or re-encrypted on update.
+ * `encryptedCredential`, which is never decrypted or re-encrypted on update.
  */
 export function docHasEncryptedApiKey(
   doc: Pick<ConcreteTaskInstance, 'apiKey' | 'uiamApiKey' | 'userScope'>
@@ -1441,9 +1445,8 @@ export function taskInstanceToAttributes(
       'userScope',
       'apiKey',
       'uiamApiKey',
-      'credentialType',
-      'runAs',
-      'runAsIntegrityCheck'
+      'credential',
+      'encryptedCredential'
     ),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
@@ -1468,9 +1471,8 @@ export function partialTaskInstanceToAttributes(
       'userScope',
       'apiKey',
       'uiamApiKey',
-      'credentialType',
-      'runAs',
-      'runAsIntegrityCheck'
+      'credential',
+      'encryptedCredential'
     ),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
     ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),

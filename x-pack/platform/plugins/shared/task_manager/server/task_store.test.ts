@@ -1444,7 +1444,7 @@ describe('TaskStore', () => {
       });
     });
 
-    test('does not send the service account fields', async () => {
+    test('does not send the credential fields', async () => {
       const task = {
         runAt: mockedDate,
         scheduledAt: mockedDate,
@@ -1459,14 +1459,14 @@ describe('TaskStore', () => {
         version: '123',
         ownerId: null,
         traceparent: 'myTraceparent',
-        credentialType: 'service_account',
-        runAs: {
+        credential: {
+          type: 'service_account',
           workloadType: 'workflow',
           workloadId: 'workflow-1',
           spaceId: 'default',
           expectedServiceAccountId: null,
         },
-        runAsIntegrityCheck: 'encrypted-value',
+        encryptedCredential: 'encrypted-value',
       };
 
       savedObjectsClient.update.mockImplementation(
@@ -1484,9 +1484,8 @@ describe('TaskStore', () => {
       await store.update(task, { validate: false });
 
       const [[, , attributes]] = savedObjectsClient.update.mock.calls;
-      expect(attributes).not.toHaveProperty('credentialType');
-      expect(attributes).not.toHaveProperty('runAs');
-      expect(attributes).not.toHaveProperty('runAsIntegrityCheck');
+      expect(attributes).not.toHaveProperty('credential');
+      expect(attributes).not.toHaveProperty('encryptedCredential');
     });
 
     test(`doesn't go through validation process to inject stateVersion when validate:false`, async () => {
@@ -2587,18 +2586,18 @@ describe('TaskStore', () => {
       );
     });
 
-    describe('service account fields', () => {
-      const runAsFields = {
-        credentialType: 'service_account',
-        runAs: {
+    describe('credential fields', () => {
+      const credentialFields = {
+        credential: {
+          type: 'service_account',
           workloadType: 'workflow',
           workloadId: 'workflow-1',
           spaceId: 'default',
           expectedServiceAccountId: null,
         },
-        runAsIntegrityCheck: 'encrypted-value',
+        encryptedCredential: 'encrypted-value',
       };
-      const runAsTask = { ...bulkUpdateTask, id: 'task:run-as', ...runAsFields };
+      const credentialTask = { ...bulkUpdateTask, id: 'task:credential', ...credentialFields };
       const apiKeyTask = { ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope };
 
       const toSavedObject = (task: typeof bulkUpdateTask) => ({
@@ -2611,21 +2610,21 @@ describe('TaskStore', () => {
 
       test('copies them unchanged when the whole document is replaced', async () => {
         savedObjectsClient.bulkUpdate.mockResolvedValue({
-          saved_objects: [toSavedObject(runAsTask)],
+          saved_objects: [toSavedObject(credentialTask)],
         });
 
-        await store.bulkUpdate([runAsTask], { validate: false, mergeAttributes: false });
+        await store.bulkUpdate([credentialTask], { validate: false, mergeAttributes: false });
 
         expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
           [
             {
-              id: runAsTask.id,
+              id: credentialTask.id,
               mergeAttributes: false,
               type: 'task',
-              version: runAsTask.version,
+              version: credentialTask.version,
               attributes: {
-                ...taskInstanceToAttributes(bulkUpdateTask, runAsTask.id),
-                ...runAsFields,
+                ...taskInstanceToAttributes(bulkUpdateTask, credentialTask.id),
+                ...credentialFields,
               },
             },
           ],
@@ -2635,19 +2634,19 @@ describe('TaskStore', () => {
 
       test('does not send them when attributes are merged', async () => {
         savedObjectsClient.bulkUpdate.mockResolvedValue({
-          saved_objects: [toSavedObject(runAsTask)],
+          saved_objects: [toSavedObject(credentialTask)],
         });
 
-        await store.bulkUpdate([runAsTask], { validate: false });
+        await store.bulkUpdate([credentialTask], { validate: false });
 
         expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
           [
             {
-              id: runAsTask.id,
+              id: credentialTask.id,
               mergeAttributes: true,
               type: 'task',
-              version: runAsTask.version,
-              attributes: taskInstanceToAttributes(bulkUpdateTask, runAsTask.id),
+              version: credentialTask.version,
+              attributes: taskInstanceToAttributes(bulkUpdateTask, credentialTask.id),
             },
           ],
           { refresh: false }
@@ -2660,10 +2659,10 @@ describe('TaskStore', () => {
         };
         mockGetScopedClient.mockReturnValue(mockScopedClient);
         savedObjectsClient.bulkUpdate.mockResolvedValue({
-          saved_objects: [toSavedObject(runAsTask)],
+          saved_objects: [toSavedObject(credentialTask)],
         });
 
-        const result = await store.bulkUpdate([apiKeyTask, runAsTask], {
+        const result = await store.bulkUpdate([apiKeyTask, credentialTask], {
           validate: false,
           mergeAttributes: false,
           options: { request: mockRequest },
@@ -2676,8 +2675,8 @@ describe('TaskStore', () => {
         expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
           [
             expect.objectContaining({
-              id: runAsTask.id,
-              attributes: expect.objectContaining(runAsFields),
+              id: credentialTask.id,
+              attributes: expect.objectContaining(credentialFields),
             }),
           ],
           { refresh: false }
@@ -2689,32 +2688,34 @@ describe('TaskStore', () => {
           }),
           expect.objectContaining({
             tag: 'ok',
-            value: expect.objectContaining({ id: runAsTask.id }),
+            value: expect.objectContaining({ id: credentialTask.id }),
           }),
         ]);
       });
 
-      test('keeps a task that also has an API key on the encryption-aware client', async () => {
-        const runAsTaskWithApiKey = { ...apiKeyTask, ...runAsFields };
-        const mockScopedClient = {
-          bulkUpdate: jest
-            .fn()
-            .mockResolvedValue({ saved_objects: [toSavedObject(runAsTaskWithApiKey)] }),
-        };
-        mockGetScopedClient.mockReturnValue(mockScopedClient);
+      test.each([true, false])(
+        'does not update a task that also has an API key (mergeAttributes: %s)',
+        async (mergeAttributes) => {
+          const credentialTaskWithApiKey = { ...apiKeyTask, ...credentialFields };
+          const mockScopedClient = {
+            bulkUpdate: jest.fn().mockResolvedValue({ saved_objects: [] }),
+          };
+          mockGetScopedClient.mockReturnValue(mockScopedClient);
 
-        await store.bulkUpdate([runAsTaskWithApiKey], {
-          validate: false,
-          mergeAttributes: false,
-          options: { request: mockRequest },
-        });
+          const result = await store.bulkUpdate([credentialTaskWithApiKey], {
+            validate: false,
+            mergeAttributes,
+            options: { request: mockRequest },
+          });
 
-        expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
-          [expect.objectContaining({ id: runAsTaskWithApiKey.id })],
-          { refresh: false }
-        );
-        expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
-      });
+          expect(logger.error).toHaveBeenCalledWith(
+            `[TaskStore] An error occured. Task ${credentialTaskWithApiKey.id} will not be updated. Error: Task has both a credential and an API key, which this version of Kibana cannot update`
+          );
+          expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith([], { refresh: false });
+          expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+          expect(result).toEqual([]);
+        }
+      );
     });
   });
 
@@ -2864,19 +2865,19 @@ describe('TaskStore', () => {
       expect(result).toEqual([asOk({ ...task, version: 'Wzg0LDFd' })]);
     });
 
-    test(`should not send the service account fields`, async () => {
+    test(`should not send the credential fields`, async () => {
       const task = {
         id: '324242',
         version: 'WzQsMV0=',
         attempts: 3,
-        credentialType: 'service_account',
-        runAs: {
+        credential: {
+          type: 'service_account',
           workloadType: 'workflow',
           workloadId: 'workflow-1',
           spaceId: 'default',
           expectedServiceAccountId: null,
         },
-        runAsIntegrityCheck: 'encrypted-value',
+        encryptedCredential: 'encrypted-value',
       };
 
       esClient.bulk.mockResolvedValue({
