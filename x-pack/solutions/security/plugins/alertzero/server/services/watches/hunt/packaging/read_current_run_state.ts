@@ -6,10 +6,12 @@
  */
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
-import { significantSecurityEventAttachmentReadSchema } from '../../../common/significant_security_event_schema';
-import { DEFAULT_BASELINE_TELEMETRY } from '../../services/watches/hunt/common/resolve_index_scope';
-import { buildMatchesRequired } from '../../services/watches/hunt/common/matches_required';
-import type { CurrentRunHost, CurrentRunState, ProcessSelector } from './types';
+import { significantSecurityEventAttachmentReadSchema } from '../../../../../common/significant_security_event_schema';
+import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
+import { DEFAULT_BASELINE_TELEMETRY } from '../common/resolve_index_scope';
+import { buildMatchesRequired } from '../common/matches_required';
+import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
+import type { CurrentRunHost, CurrentRunState } from './types';
 
 const SSE_ATTACHMENT_TYPE = 'security.significant_security_event';
 
@@ -30,20 +32,6 @@ const currentVersionData = (attachment: VersionedAttachment): unknown => {
   const version = attachment.versions.find((v) => v.version === attachment.current_version);
   return version?.data;
 };
-
-export type HostEnrollment = { enrolled: true; agentId: string } | { enrolled: false };
-
-export type ResolveHostEnrollment = (hostName: string) => Promise<HostEnrollment>;
-
-export type RehydrateProcessSelectors = (args: {
-  alerts: Array<{ alert_id: string; index: string }>;
-  events: Array<{
-    event_id: string;
-    source_index: string;
-    /** Present when the SSE attributed this event to a technique; preferred over a plain sample ref during dedupe. */
-    matched?: { technique_id?: string };
-  }>;
-}) => Promise<ProcessSelector[]>;
 
 /**
  * Reads current-run SSE attachments from a conversation and builds packaging state.

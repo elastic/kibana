@@ -10,15 +10,13 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import type {
   PackageReportInput,
   PackageReportOutput,
-} from '../../../common/step_types/package_report';
-import { buildHuntInvestigationConversationId } from '../../services/watches/hunt/common/hunt_investigation_id';
+} from '../../../../../common/step_types/package_report';
+import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
+import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
 import { decidePackageReport } from './decide_package_report';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
-import {
-  readCurrentRunState,
-  type RehydrateProcessSelectors,
-  type ResolveHostEnrollment,
-} from './read_current_run_state';
+import { readCurrentRunState } from './read_current_run_state';
+import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
 import type { CoverageSubject, CoverageWriteResult } from './types';
 
 export class PackageReportIdentityError extends Error {
@@ -128,9 +126,9 @@ export const runPackageReport = async ({
 
   // Threaded through to the packaging workflow's per-Proposal gate fan-out as a plain
   // workflow input (`hunt_package_report.yaml`'s `dispatch_gate` step) — the settlement
-  // barrier each gate checks before closing the Investigation. Never persisted to
-  // conversation metadata: the platform `investigation` template's schema has no room for
-  // it, and nothing ever read the metadata copy back (dead write, removed).
+  // barrier each gate checks before closing the Investigation. Not persisted to
+  // conversation metadata: the platform `investigation` template's schema has no room
+  // for it.
   const expectedProposalCount = decided.proposals.length;
 
   return {

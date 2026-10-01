@@ -6,7 +6,7 @@
  */
 
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
-import type { PackageReportMintPayload } from '../../../common/step_types/package_report';
+import type { PackageReportMintPayload } from '../../../../../common/step_types/package_report';
 
 /** One host observed on the current-run SSE, with enrollment resolution applied. */
 export interface CurrentRunHost {

@@ -8,7 +8,7 @@
 import { v5 as uuidv5 } from 'uuid';
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { JsonSchema } from '@kbn/workflows';
-import type { PackageReportMintPayload } from '../../../common/step_types/package_report';
+import type { PackageReportMintPayload } from '../../../../../common/step_types/package_report';
 import type {
   CurrentRunHost,
   CurrentRunState,

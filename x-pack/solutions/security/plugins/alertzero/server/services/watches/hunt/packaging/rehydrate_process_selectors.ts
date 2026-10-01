@@ -6,8 +6,22 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { RehydrateProcessSelectors } from './read_current_run_state';
 import type { ProcessSelector } from './types';
+
+/**
+ * Re-reads the process documents an SSE referenced and returns the selectors a kill/suspend
+ * proposal can be built from. Declared here, with its only implementation, so the run-state
+ * reader that consumes it depends on this module rather than the other way round.
+ */
+export type RehydrateProcessSelectors = (args: {
+  alerts: Array<{ alert_id: string; index: string }>;
+  events: Array<{
+    event_id: string;
+    source_index: string;
+    /** Present when the SSE attributed this event to a technique; preferred over a plain sample ref during dedupe. */
+    matched?: { technique_id?: string };
+  }>;
+}) => Promise<ProcessSelector[]>;
 
 /** 50 events + 50 alerts is the SSE schema's own ceiling on each array. */
 const MAX_REHYDRATE_DOCS = 100;
