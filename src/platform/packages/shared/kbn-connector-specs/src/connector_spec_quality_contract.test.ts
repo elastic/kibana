@@ -254,12 +254,21 @@ describe('connector spec quality contracts', () => {
         nested: z.object({ id: z.string().max(5) }).describe('nested'),
         labels: z.record(z.string(), z.string().max(5)).describe('labels'),
         either: z.union([z.string(), z.number()]).describe('either'),
+        preprocessed: z
+          .preprocess((value) => (value === '' ? undefined : value), z.string().optional())
+          .default('primary')
+          .describe('preprocessed'),
       });
 
       collectInputViolations(toInputJsonSchema(schema), 'action', violations, false);
 
       expect(violations).toEqual({
-        unboundedStrings: ['action.free', 'action.labels{key}', 'action.either.anyOf[0]'],
+        unboundedStrings: [
+          'action.free',
+          'action.labels{key}',
+          'action.either.anyOf[0]',
+          'action.preprocessed',
+        ],
         unboundedArrays: ['action.tags'],
         undescribedParams: ['action.free', 'action.nested.id'],
       });
