@@ -10,6 +10,7 @@ import {
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -18,6 +19,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { type EscalationModalRenderProps } from '@kbn/agentic-investigations-common';
 import {
@@ -26,20 +28,21 @@ import {
   useAttachToEscalation,
   useCurrentUserProfile,
   useSuggestUserProfiles,
+  useEscalationsForInvestigation,
 } from '@kbn/agentic-investigations-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import { ALERTZERO_APP_ID } from '@kbn/alertzero-common';
 import {
   ESCALATION_MODAL_TRANSLATIONS,
   ESCALATION_ERRORS,
   ESCALATION_SUCCESS,
 } from './escalation_modal_translations';
-import { SELECTED_CONVERSATION_ID_PARAM } from './conversations_url_params';
 import { AddToExistingEscalationForm } from './add_to_existing_escalation_form';
+import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { CreateEscalationForm } from './create_escalation_form';
+import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 
 const T = ESCALATION_MODAL_TRANSLATIONS;
 
@@ -58,22 +61,25 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
     const [incidentSearch, setIncidentSearch] = useState('');
     const [collaboratorSearch, setCollaboratorSearch] = useState('');
     const {
-      services: { notifications, application },
+      services: { notifications },
     } = useKibana<CoreStart>();
 
+    const { showEscalations } = useAgenticInvestigationsCapabilities();
+
+    const { getChatHref, openChat } = useOpenInChat();
+
     const makeViewEscalationPrimary = useCallback(
-      (escalationId: string) => {
-        const path = `/escalations?${SELECTED_CONVERSATION_ID_PARAM}=${escalationId}`;
+      (escalationId: string, agentId: string) => {
         return {
           children: ESCALATION_SUCCESS.linkText,
-          href: application.getUrlForApp(ALERTZERO_APP_ID, { path }),
+          href: getChatHref(escalationId, agentId),
           onClick: (e: React.MouseEvent) => {
             e.preventDefault();
-            void application.navigateToApp(ALERTZERO_APP_ID, { path });
+            openChat(escalationId, agentId);
           },
         };
       },
-      [application]
+      [getChatHref, openChat]
     );
 
     const { data: currentUserProfile } = useCurrentUserProfile();
@@ -85,11 +91,17 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
       isError: isEscalationsError,
       error: escalationsError,
       refetch: refetchEscalations,
-    } = useListEscalations({ searchQuery: incidentSearch });
+    } = useListEscalations({ searchQuery: incidentSearch, enabled: showEscalations });
+
+    const { data: existingEscalationsData } = useEscalationsForInvestigation(conversationId, {
+      enabled: showEscalations,
+    });
     const createEscalation = useCreateEscalation();
     const attachToEscalation = useAttachToEscalation();
 
     if (!conversationId) return null;
+
+    const existingEscalations = existingEscalationsData?.results ?? [];
 
     const incidents = (escalationsData?.results ?? []).map((e) => {
       const linkedInvestigations = e.metadata?.linked_investigations;
@@ -125,6 +137,39 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
           <EuiText size="s" color="subdued">
             <p>{T.subtitle(investigation.title)}</p>
           </EuiText>
+
+          {existingEscalations.length > 0 && (
+            <>
+              <EuiSpacer size="m" />
+              <KbnWarningCallout
+                announceOnMount
+                size="s"
+                title={T.alreadyEscalatedCallout.title(existingEscalations.length)}
+                data-test-subj="escalationModalAlreadyEscalatedCallout"
+              >
+                <ul style={{ marginBottom: 0 }}>
+                  {existingEscalations.map((e) => {
+                    const href = getChatHref(e.id, e.agent_id);
+                    return (
+                      <li key={e.id}>
+                        <EuiLink
+                          href={href}
+                          onClick={(ev: React.MouseEvent) => {
+                            ev.preventDefault();
+                            openChat(e.id, e.agent_id);
+                            onClose();
+                          }}
+                          data-test-subj={`escalationModalExistingEscalationLink-${e.id}`}
+                        >
+                          {e.title}
+                        </EuiLink>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </KbnWarningCallout>
+            </>
+          )}
 
           <EuiSpacer size="m" />
 
@@ -196,7 +241,9 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                   onSuccess: (escalation) => {
                     notifications?.toasts.addSuccess({
                       title: ESCALATION_SUCCESS.createTitle,
-                      actionProps: { primary: makeViewEscalationPrimary(escalation.id) },
+                      actionProps: {
+                        primary: makeViewEscalationPrimary(escalation.id, escalation.agent_id),
+                      },
                     });
                     onClose();
                   },
@@ -223,10 +270,12 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
               attachToEscalation.mutate(
                 { escalationId, linkedInvestigationId: conversationId },
                 {
-                  onSuccess: () => {
+                  onSuccess: (escalation) => {
                     notifications?.toasts.addSuccess({
                       title: ESCALATION_SUCCESS.addToTitle,
-                      actionProps: { primary: makeViewEscalationPrimary(escalationId) },
+                      actionProps: {
+                        primary: makeViewEscalationPrimary(escalation.id, escalation.agent_id),
+                      },
                     });
                     onClose();
                   },

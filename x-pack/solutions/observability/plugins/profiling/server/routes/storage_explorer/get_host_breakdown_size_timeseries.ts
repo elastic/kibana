@@ -7,13 +7,13 @@
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProfilingESField } from '@kbn/profiling-utils';
+import type { ProfilingESClient } from '@kbn/profiling-data-access-plugin/server';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../../common/histogram';
 import type { StorageExplorerHostDetailsTimeseries } from '../../../common/storage_explorer';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer';
-import type { ProfilingESClient } from '../../utils/create_profiling_es_client';
 import { getEstimatedSizeForDocumentsInIndex } from './get_daily_data_generation.size';
 import { allIndices, getIndicesStats } from './get_indices_stats';
 import { getProfilingHostsDetailsById } from './get_profiling_hosts_details_by_id';

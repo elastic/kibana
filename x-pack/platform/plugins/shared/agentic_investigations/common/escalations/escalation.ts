@@ -154,6 +154,13 @@ export const listEscalationsQuerySchema = z
       .default(MAX_ESCALATIONS_PAGE_SIZE),
     status: z.enum(['open', 'closed', 'all']).default('open'),
     search: z.string().max(256).optional(),
+    /**
+     * When set, only escalations that have this investigation id in their
+     * `metadata.linked_investigations` array are returned. Useful for checking
+     * whether an investigation is already part of one or more escalations before
+     * opening the escalation creation modal.
+     */
+    linked_investigation_id: conversationIdSchema.optional(),
   })
   .refine(({ page, per_page: perPage }) => page * perPage <= MAX_ESCALATIONS_RESULT_WINDOW, {
     message: `page * per_page must not exceed ${MAX_ESCALATIONS_RESULT_WINDOW}; escalations beyond that are not reachable through this API`,
