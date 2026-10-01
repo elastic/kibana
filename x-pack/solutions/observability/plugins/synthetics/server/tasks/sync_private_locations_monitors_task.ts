@@ -38,11 +38,11 @@ export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
  * `runSoon` (MW mutations and Sync now). This interval is only a safety net
  * for a missed notifyChange / leftover cleanup — not the MW trigger.
  */
-export const DEFAULT_TASK_SCHEDULE = '24h';
+export const DEFAULT_TASK_SCHEDULE = '1h';
 // Must exceed DEFAULT_TASK_SCHEDULE, or the safety-net run always resets its lookback.
 const MAX_LOOKBACK_HOURS = 48;
 
-// A failed sync must not wait for the 24h safety net, but retries are bounded.
+// A failed sync must not wait for the next safety-net run, but retries are bounded.
 export const FAILED_RUN_RETRY_DELAY_MS = 5 * 60 * 1000;
 export const MAX_FAILED_RUN_RETRIES = 3;
 
@@ -297,7 +297,7 @@ export class SyncPrivateLocationMonitorsTask {
       params: {},
     });
 
-    // Overwriting 5m / a user interval with 24h would otherwise delay the next
+    // Overwriting 5m / a user interval with 1h would otherwise delay the next
     // run by a day, including in-progress cleanup retries.
     if (previousInterval && previousInterval !== DEFAULT_TASK_SCHEDULE) {
       try {
