@@ -13,7 +13,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { CheckSetup } from './components/check_setup';
+import { CheckStatus } from './components/check_status';
 import { ProfilingDependenciesContextProvider } from './components/contexts/profiling_dependencies/profiling_dependencies_context';
 import { RouteBreadcrumbsContextProvider } from './components/contexts/route_breadcrumbs_context';
 import { TimeRangeContextProvider } from './components/contexts/time_range_context';
@@ -71,13 +71,13 @@ function App({
                   <ProfilingDependenciesContextProvider value={profilingDependencies}>
                     <ProfilingStatusContextProvider>
                       <LicenseProvider>
-                        <CheckSetup>
+                        <CheckStatus>
                           <RedirectWithDefaultDateRange>
                             <RouteBreadcrumbsContextProvider>
                               <RouteRenderer />
                             </RouteBreadcrumbsContextProvider>
                           </RedirectWithDefaultDateRange>
-                        </CheckSetup>
+                        </CheckStatus>
                       </LicenseProvider>
                     </ProfilingStatusContextProvider>
                   </ProfilingDependenciesContextProvider>

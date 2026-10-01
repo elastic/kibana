@@ -26,7 +26,7 @@ const UTILITY_PATHNAMES = [
   '/profiling-not-enabled',
 ];
 
-export function CheckSetup({ children }: { children: React.ReactElement }) {
+export function CheckStatus({ children }: { children: React.ReactElement }) {
   const { status, data, error, refresh } = useProfilingStatus();
   const license = useLicenseContext();
   const router = useProfilingRouter();
@@ -93,6 +93,5 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     path: {},
     query: { selectedTab: AddDataTabs.Kubernetes },
   });
-
-  throw new Error('Invalid state');
+  return null;
 }
