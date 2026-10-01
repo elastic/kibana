@@ -16,7 +16,7 @@ import type {
   GraphWorkspaceSavedObject,
   IndexPatternProvider,
   WorkspaceNode,
-  RuntimeWorkspace,
+  RuntimeGraph,
 } from '../../types';
 import type { OverlayStart, Capabilities } from '@kbn/core/public';
 import type { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
@@ -59,7 +59,7 @@ describe('workspace_layout', () => {
       reset: jest.fn(),
       getRequests: jest.fn(() => []),
     } as unknown as RequestAdapter,
-    workspace: {} as unknown as RuntimeWorkspace,
+    workspace: {} as unknown as RuntimeGraph,
   };
   it('should display conflict notification if outcome is conflict', () => {
     shallow(

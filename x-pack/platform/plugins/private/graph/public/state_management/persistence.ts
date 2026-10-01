@@ -8,9 +8,9 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { GraphWorkspaceSavedObject, RuntimeWorkspace } from '../types';
+import type { GraphWorkspaceSavedObject, RuntimeGraph } from '../types';
 import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.';
-import { createWorkspaceState, submitSearch, workspaceChanged } from '.';
+import { createRuntimeGraphState, submitSearch, workspaceChanged } from '.';
 import { datasourceSelector } from './datasource';
 import type { IndexpatternDatasource } from './datasource';
 import { setDatasource } from './datasource';
@@ -87,7 +87,7 @@ export const registerPersistenceListeners = (
         return;
       }
 
-      const createdWorkspace = deps.createWorkspace(
+      const createdWorkspace = deps.createRuntimeGraph(
         indexPattern.title,
         settingsSelector(listenerApi.getState())
       );
@@ -114,7 +114,7 @@ export const registerPersistenceListeners = (
       listenerApi.dispatch(loadTemplates(urlTemplates));
       listenerApi.dispatch(
         workspaceChanged(
-          createWorkspaceState(createdWorkspace, deps.getLayoutController()?.isRunning())
+          createRuntimeGraphState(createdWorkspace, deps.getLayoutController()?.isRunning())
         )
       );
       if (urlQuery) {
@@ -167,7 +167,7 @@ function showModal({
   selectedDatasource,
 }: {
   deps: GraphStoreDependencies;
-  workspace: RuntimeWorkspace;
+  workspace: RuntimeGraph;
   savedWorkspace: GraphWorkspaceSavedObject;
   state: GraphState;
   selectedDatasource: IndexpatternDatasource;

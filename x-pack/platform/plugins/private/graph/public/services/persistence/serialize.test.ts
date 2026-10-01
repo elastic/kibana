@@ -8,7 +8,7 @@
 import { appStateToSavedWorkspace, reduxStateToSavedWorkspace } from './serialize';
 import type {
   GraphWorkspaceSavedObject,
-  RuntimeWorkspace,
+  RuntimeGraph,
   WorkspaceEdge,
   WorkspaceNode,
   UrlTemplate,
@@ -16,11 +16,11 @@ import type {
   WorkspaceField,
 } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import { createWorkspaceState, type IndexpatternDatasource } from '../../state_management';
+import { createRuntimeGraphState, type IndexpatternDatasource } from '../../state_management';
 
 describe('serialize', () => {
   let appState: {
-    workspace: RuntimeWorkspace;
+    workspace: RuntimeGraph;
     urlTemplates: UrlTemplate[];
     advancedSettings: AdvancedSettings;
     selectedIndex: IndexpatternDatasource;
@@ -133,7 +133,7 @@ describe('serialize', () => {
           },
         ],
         edges: [] as WorkspaceEdge[],
-      } as RuntimeWorkspace,
+      } as RuntimeGraph,
     };
 
     // C is parent of B and D
@@ -177,7 +177,7 @@ describe('serialize', () => {
     appStateToSavedWorkspace(legacySavedWorkspace, appState, true);
     reduxStateToSavedWorkspace(
       reduxSavedWorkspace,
-      { ...appState, workspace: createWorkspaceState(appState.workspace) },
+      { ...appState, workspace: createRuntimeGraphState(appState.workspace) },
       true
     );
 
