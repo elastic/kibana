@@ -99,7 +99,7 @@ describe('graph_visualization', () => {
       width: 2.2,
     },
   ];
-  const workspace = {
+  const runtimeGraph = {
     nodes,
     edges,
   } as unknown as jest.Mocked<RuntimeGraph>;
@@ -121,7 +121,7 @@ describe('graph_visualization', () => {
       shallow(
         <GraphVisualization
           {...defaultSelectionProps}
-          workspace={{} as unknown as RuntimeGraph}
+          runtimeGraph={{} as unknown as RuntimeGraph}
           selectSelected={() => {}}
           onSetControl={() => {}}
           onSetMergeCandidates={() => {}}
@@ -148,7 +148,7 @@ describe('graph_visualization', () => {
       shallow(
         <GraphVisualization
           {...defaultSelectionProps}
-          workspace={workspace}
+          runtimeGraph={runtimeGraph}
           selectSelected={() => {}}
           onSetControl={() => {}}
           onSetMergeCandidates={() => {}}
@@ -163,7 +163,7 @@ describe('graph_visualization', () => {
     const instance = shallow(
       <GraphVisualization
         {...defaultSelectionProps}
-        workspace={workspace}
+        runtimeGraph={runtimeGraph}
         selectSelected={selectSelectedMock}
         onSetControl={() => {}}
         onSetMergeCandidates={() => {}}
@@ -182,7 +182,7 @@ describe('graph_visualization', () => {
       <GraphVisualization
         {...defaultSelectionProps}
         onToggleNodeSelection={() => false}
-        workspace={workspace}
+        runtimeGraph={runtimeGraph}
         selectSelected={() => {}}
         onSetControl={onSetControlMock}
         onSetMergeCandidates={() => {}}
@@ -198,7 +198,7 @@ describe('graph_visualization', () => {
     const instance = shallow(
       <GraphVisualization
         {...defaultSelectionProps}
-        workspace={workspace}
+        runtimeGraph={runtimeGraph}
         selectSelected={() => {}}
         onSetControl={() => {}}
         onSetMergeCandidates={() => {}}

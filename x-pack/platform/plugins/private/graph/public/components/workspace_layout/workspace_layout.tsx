@@ -47,7 +47,7 @@ type WorkspaceLayoutProps = Pick<
   | 'spaces'
   | 'inspect'
 > & {
-  workspace?: RuntimeGraph;
+  runtimeGraph?: RuntimeGraph;
   loading: boolean;
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;
@@ -62,7 +62,7 @@ interface WorkspaceLayoutStateProps {
 }
 
 export const WorkspaceLayoutComponent = ({
-  workspace,
+  runtimeGraph,
   loading,
   savedWorkspace,
   hasFields,
@@ -210,11 +210,11 @@ export const WorkspaceLayoutComponent = ({
         </div>
       )}
 
-      {isInitialized && workspace && (
+      {isInitialized && runtimeGraph && (
         <div id="GraphSvgContainer" css={styles.container}>
           <div css={styles.visualization}>
             <ReduxGraphVisualization
-              workspace={workspace}
+              runtimeGraph={runtimeGraph}
               selectSelected={selectSelected}
               onSetControl={onSetControl}
               onSetMergeCandidates={onSetMergeCandidates}
@@ -223,7 +223,7 @@ export const WorkspaceLayoutComponent = ({
           </div>
 
           <ControlPanel
-            workspace={workspace}
+            runtimeGraph={runtimeGraph}
             control={control}
             selectedNode={selectedNode}
             colors={colorChoices}

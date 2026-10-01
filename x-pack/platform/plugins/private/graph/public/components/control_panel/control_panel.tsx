@@ -42,7 +42,7 @@ export interface TargetOptions {
 }
 
 interface ControlPanelProps {
-  workspace: RuntimeGraph;
+  runtimeGraph: RuntimeGraph;
   control: ControlType;
   selectedNode?: WorkspaceNode;
   colors: string[];
@@ -57,7 +57,7 @@ interface ControlPanelStateProps {
 }
 
 const ControlPanelComponent = ({
-  workspace,
+  runtimeGraph,
   liveResponseFields,
   urlTemplates,
   control,
@@ -70,15 +70,15 @@ const ControlPanelComponent = ({
   const dispatch = useDispatch<GraphDispatch>();
   const { selectedNodeIds } = useSelector(workspaceSelector);
   const selectedNodes = selectedNodeIds
-    .map((nodeId) => workspace.nodesMap[nodeId])
+    .map((nodeId) => runtimeGraph.nodesMap[nodeId])
     .filter((node): node is WorkspaceNode => node !== undefined);
-  const hasNodes = workspace.nodes.length === 0;
+  const hasNodes = runtimeGraph.nodes.length === 0;
 
   const openUrlTemplate = (template: UrlTemplate) => {
     const url = template.url;
     const newUrl = url.replace(
       urlTemplateRegex,
-      template.encoder.encode(workspace, selectedNodeIds)
+      template.encoder.encode(runtimeGraph, selectedNodeIds)
     );
     window.open(newUrl, '_blank', 'noopener,noreferrer');
   };
