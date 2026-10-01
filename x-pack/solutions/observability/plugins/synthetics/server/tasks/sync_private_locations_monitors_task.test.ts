@@ -329,7 +329,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         return hasMWsChangedSpy.mock.calls[0][0].lastStartedAt;
       };
 
-      it('keeps the previous run start when it was the 24h safety-net interval ago', async () => {
+      it('keeps the previous run start after an outage shorter than the lookback', async () => {
         const previousRun = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
         expect(await runWithLastStartedAt(previousRun)).toBe(previousRun);
