@@ -494,3 +494,69 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
 - **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
 - **Proposals without a conversation.** Every proposal points at a `conversationId` and a `workflowExecutionId`; a standalone execution cannot create one yet.
+
+## Revising proposals with Elastic AI
+
+When the proposals plugin is enabled, it registers the built-in
+`proposal-management` skill and `platform.proposals.revise` tool. This works for
+AlertZero, Nightshift, and standalone chat proposals, including when AlertZero is
+disabled. Agents with Elastic capabilities enabled can discover the skill;
+loading it exposes `platform.proposals.revise` without manually adding the tool.
+Custom agents can explicitly select the skill instead. Skill availability checks
+the current request's proposal-management
+privilege without caching across users. The revision tool also enforces that
+privilege when invoked; skill visibility does not replace authorization.
+
+Proposal attachments expose a live, explicit JSON view of their identity,
+revision links, status, complete Markdown comment, action input, action metadata,
+and decision details. Internal storage and gate-execution fields are excluded.
+Reading the attachment still requires proposal read privileges.
+
+The revision tool accepts a complete replacement comment and shallow-merges
+action input. The skill instructs the agent to preserve the full narrative and
+all unchanged parameters, and update prose and input together. Agent Builder
+automatically renders the new pending revision. The skill directs attachment
+lookup through `attachments.list` and `attachments.read`. Superseding does not
+dismiss, approve, or execute a proposal.
+Because the chat displays the revision history, comment edits must stay localized:
+copy unaffected text and Markdown verbatim, preserving title styling and layout.
+Do not add sections or rewrite existing passages unless explicitly requested.
+
+### Model evaluation: preserve a complete proposal
+
+Run against a local stack with proposals enabled and a configured model, using
+the default Elastic AI agent without manually assigned proposal tools:
+
+1. Use the AlertZero plugin's `scripts/seed_proposal_attachments.sh` or the proposals
+   workflow to create proposal conversations.
+   Pick a pending rule proposal containing rationale, a warning that the rule is
+   created disabled, an Index table row with `logs-*`, and matching
+   `actionInput.index: ["logs-*"]`. Save its complete comment and action input.
+2. Ask: “Change the index pattern in this proposal from logs-* to logs*.”
+3. Inspect the tool trace: the agent should load
+   `proposal-management`, read the current attachment, and call
+   `platform.proposals.revise` once. It must not approve or execute.
+4. Compare documents: the successor is pending and undecided, retains
+   `rootProposalId`, increments `revision`, and points back via `supersedes`.
+   The predecessor is superseded and points forward via `supersededBy`.
+5. The successor's complete comment retains the title, rationale, disabled-rule
+   warning, and all unchanged table rows. Only the requested index changes.
+   Compare the raw Markdown: apart from the index replacements, it must be
+   identical, with no larger title, new headings, or added rationale/safety sections.
+   The complete action input retains name, description, query, severity,
+   risk_score, and any other original fields, with index changed to `["logs*"]`.
+6. Agent Builder automatically renders the successor. The response explains that
+   it awaits a human decision. Any attachment verification uses `attachments.list`
+   and `attachments.read` with a listed attachment ID. Repeat by referencing the
+   older card: the agent should read the current revision and preserve the first
+   edit in its next one.
+
+Also exercise a comment-only edit, a superseded chain, and a decided/expired
+proposal. The latter must not produce a new revision. This live-model evaluation
+is distinct from unit tests of the schema, formatter, registration, and service.
+
+Repeat the revision check with AlertZero disabled and a Nightshift or standalone
+chat proposal. Verify that the skill loads and revisions still succeed, while a
+user without proposal-management privileges cannot invoke the tool. Custom agents
+configured with the old `alertzero-proposal-management` skill or
+`security.alertzero.proposals.revise` tool should select the new identifiers.

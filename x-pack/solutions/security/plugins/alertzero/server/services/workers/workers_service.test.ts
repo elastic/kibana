@@ -66,6 +66,54 @@ const storedIdFromReport = (workflowId: string) =>
     ? workflowId.slice('opaque:'.length).replace(':', '-')
     : workflowId;
 
+/** In-memory rule-attachment service: attaching moves ids to attached, detaching moves them back. */
+const makeAttachmentService = (
+  opts: {
+    notAttachedIds?: string[];
+    attachedIds?: string[];
+    pageSize?: number;
+    skippedRuleCount?: number;
+  } = {}
+) => {
+  const notAttached = new Set(opts.notAttachedIds ?? ['rule-1', 'rule-2']);
+  const attached = new Set(opts.attachedIds ?? []);
+  const pageSize = opts.pageSize ?? Number.MAX_SAFE_INTEGER;
+  return {
+    getRuleAttachmentSelection: jest.fn(
+      async ({ attachmentFilter }: { search: string; attachmentFilter: string }) =>
+        attachmentFilter === 'not_attached'
+          ? {
+              ruleIds: [...notAttached].slice(0, pageSize),
+              attachedRuleIds: [],
+              skippedRuleCount: opts.skippedRuleCount,
+            }
+          : {
+              ruleIds: [],
+              attachedRuleIds: [...attached].slice(0, pageSize),
+              skippedRuleCount: opts.skippedRuleCount,
+            }
+    ),
+    updateRuleAttachments: jest.fn(
+      async ({
+        attachRuleIds,
+        detachRuleIds,
+      }: {
+        attachRuleIds: string[];
+        detachRuleIds: string[];
+      }) => {
+        for (const id of attachRuleIds) {
+          notAttached.delete(id);
+          attached.add(id);
+        }
+        for (const id of detachRuleIds) {
+          attached.delete(id);
+          notAttached.add(id);
+        }
+      }
+    ),
+  };
+};
+
 const createPersistentHarness = () => {
   const documents = new Map<string, PersistentWorkerDocument>();
   const documentId = (id: string, spaceId: string) => `${id}-${spaceId}`;
@@ -148,7 +196,9 @@ const createPersistentHarness = () => {
     }
   );
   const management = {
-    getWorkflow: jest.fn(),
+    // Present-and-enabled by default, representing a healthy deployment; tests that exercise
+    // the Alert Analysis preflight check override this per-call to cover the blocked cases.
+    getWorkflow: jest.fn(async () => ({ enabled: true })),
     getWorkflows: jest.fn(),
     getWorkflowExecutions: jest.fn(async () => ({ results: [], page: 1, size: 10, total: 0 })),
     getWorkflowExecution: jest.fn(async () => null),
@@ -163,13 +213,16 @@ const createPersistentHarness = () => {
     managedWorkflows,
     scheduledTasks,
     updateWorkflow,
-    createService: (agentBuilder?: AgentBuilderPluginStart) =>
-      new WorkersService(
+    createService: (agentBuilder?: AgentBuilderPluginStart) => {
+      const attachmentService = makeAttachmentService();
+      return new WorkersService(
         management,
         Promise.resolve(managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
-        { agentBuilder }
-      ),
+        { agentBuilder },
+        { getAttachmentService: async () => attachmentService }
+      );
+    },
   };
 };
 
@@ -193,7 +246,7 @@ describe('WorkersService', () => {
       .createService()
       .update(
         TRIAGE,
-        { settings: { autonomy: 'assisted' }, settingsRevision: null },
+        { settings: { autonomy: 'supervised' }, settingsRevision: null },
         SPACE,
         request
       );
@@ -202,7 +255,7 @@ describe('WorkersService', () => {
     if (result.outcome !== 'updated')
       throw new Error('Expected configure-before-enable to succeed');
     expect(result.response.worker.enabled).toBe(false);
-    expect(result.response.worker.settings.autonomy).toBe('assisted');
+    expect(result.response.worker.settings.autonomy).toBe('supervised');
     expect(result.response.worker.workflowId).toBe(reportedWorkflowId(TRIAGE, SPACE));
     expect(harness.documents.get(`${TRIAGE}-${SPACE}`)?.enabled).toBe(false);
   });
@@ -222,7 +275,7 @@ describe('WorkersService', () => {
       .createService()
       .update(
         TRIAGE,
-        { settings: { autonomy: 'assisted' }, settingsRevision: null },
+        { settings: { autonomy: 'manual' }, settingsRevision: null },
         'space-b',
         request
       );
@@ -231,7 +284,7 @@ describe('WorkersService', () => {
       'supervised'
     );
     expect((await harness.createService().get(TRIAGE, request, 'space-b'))?.settings.autonomy).toBe(
-      'assisted'
+      'manual'
     );
   });
 
@@ -240,7 +293,7 @@ describe('WorkersService', () => {
     const service = harness.createService();
     await service.update(
       TRIAGE,
-      { settings: { autonomy: 'assisted' }, settingsRevision: null },
+      { settings: { autonomy: 'supervised' }, settingsRevision: null },
       SPACE,
       request
     );
@@ -248,7 +301,7 @@ describe('WorkersService', () => {
     await expect(
       service.update(
         TRIAGE,
-        { settings: { autonomy: 'supervised' }, settingsRevision: null },
+        { settings: { autonomy: 'manual' }, settingsRevision: null },
         SPACE,
         request
       )
@@ -260,7 +313,7 @@ describe('WorkersService', () => {
     const service = harness.createService();
     const first = await service.update(
       TRIAGE,
-      { settings: { autonomy: 'assisted' }, settingsRevision: null },
+      { settings: { autonomy: 'supervised' }, settingsRevision: null },
       SPACE,
       request
     );
@@ -271,7 +324,7 @@ describe('WorkersService', () => {
       service.update(
         TRIAGE,
         {
-          settings: { autonomy: 'supervised' },
+          settings: { autonomy: 'manual' },
           settingsRevision: first.response.worker.settingsRevision,
         },
         SPACE,
@@ -291,7 +344,7 @@ describe('WorkersService', () => {
     const result = await service.update(
       TRIAGE,
       {
-        settings: { autonomy: 'assisted' },
+        settings: { autonomy: 'supervised' },
         settingsRevision: enabled.response.worker.settingsRevision,
       },
       SPACE,
@@ -736,6 +789,384 @@ describe('WorkersService', () => {
       expect(result.outcome).toBe('invalid');
       if (result.outcome !== 'invalid') throw new Error('Expected an invalid outcome');
       expect(result.message).toContain('scheduleInterval');
+    });
+  });
+
+  describe('alert triage worker opts', () => {
+    const makeService = (
+      harness: ReturnType<typeof createPersistentHarness>,
+      attachment: ReturnType<typeof makeAttachmentService> | null,
+      isAlertAnalysisRuntimeEnabled?: () => Promise<boolean>
+    ) => {
+      const getAttachmentServiceMock = attachment
+        ? (jest.fn(async () => attachment) as any)
+        : undefined;
+      const service = new WorkersService(
+        harness.management,
+        Promise.resolve(harness.managedWorkflows),
+        loggingSystemMock.createLogger() as Logger,
+        {},
+        {
+          getAttachmentService: getAttachmentServiceMock,
+          isAlertAnalysisRuntimeEnabled,
+        }
+      );
+      return { service, getAttachmentServiceMock };
+    };
+
+    // A combined settings-and-enable PATCH (one Watch Save) must not persist the settings half
+    // when the enable half is refused: the preflight check has to run, and fail, before the
+    // settings write, or the operator is left with a bumped revision and a Worker that still
+    // is not enabled — a state its own optimistic UI overlay cannot recover from without a
+    // second, separate save.
+    it('combined settings+enable PATCH: does not persist settings when the enable is blocked', async () => {
+      const harness = createPersistentHarness();
+      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({ enabled: false });
+      const attachment = makeAttachmentService();
+      const { service } = makeService(harness, attachment);
+
+      const result = await service.update(
+        TRIAGE,
+        {
+          settings: { extras: { autoCloseConfidenceScoreMinThreshold: 0.5 } },
+          settingsRevision: null,
+          enabled: true,
+        },
+        SPACE,
+        request
+      );
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
+      expect(harness.documents.has(`${TRIAGE}-${SPACE}`)).toBe(false);
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('preflight fail: blocks with a reason and does not enable the Worker', async () => {
+      const harness = createPersistentHarness();
+      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({ enabled: false });
+      const attachment = makeAttachmentService();
+      const { service } = makeService(harness, attachment);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
+      expect(harness.management.getWorkflow).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(String),
+        request
+      );
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    // getWorkflow returns null for an absent workflow, distinct from a present-but-disabled
+    // one; both must refuse the enable the same way, or a missing sub-workflow lets every rule
+    // fire into a `workflow.execute` that has nothing to execute.
+    it('preflight fail: blocks the enable when the Alert Analysis workflow is missing entirely', async () => {
+      const harness = createPersistentHarness();
+      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce(null);
+      const attachment = makeAttachmentService();
+      const { service } = makeService(harness, attachment);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('attachment service unavailable: blocks the enable instead of enabling unwired', async () => {
+      const harness = createPersistentHarness();
+      const { service } = makeService(harness, null);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'ruleAttachmentUnavailable' });
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('attaches in repeated passes until every rule is covered', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({
+        notAttachedIds: ['r1', 'r2', 'r3', 'r4', 'r5'],
+        pageSize: 2,
+      });
+      const { service } = makeService(harness, attachment);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result.outcome).toBe('updated');
+      expect(
+        attachment.updateRuleAttachments.mock.calls.map(([args]) => args.attachRuleIds)
+      ).toEqual([['r1', 'r2'], ['r3', 'r4'], ['r5']]);
+    });
+
+    it('reports how many rules the caller could not attach to', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({ skippedRuleCount: 4 });
+      const { service } = makeService(harness, attachment);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result).toEqual({
+        outcome: 'updated',
+        response: expect.objectContaining({ skippedRuleCount: 4 }),
+      });
+    });
+
+    it('omits skippedRuleCount when every rule could be attached', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService();
+      const { service } = makeService(harness, attachment);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result.outcome === 'updated' && 'skippedRuleCount' in result.response).toBe(false);
+    });
+
+    it('attach that makes no progress fails the enable rather than looping', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({ notAttachedIds: ['stuck'] });
+      attachment.updateRuleAttachments.mockResolvedValue(undefined);
+      const { service } = makeService(harness, attachment);
+
+      await expect(service.update(TRIAGE, { enabled: true }, SPACE, request)).rejects.toThrow(
+        'made no progress'
+      );
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    // The preflight check must not be gated on getAttachmentService being present.
+    // In environments where securitySolution plugin is absent the attachment service
+    // is undefined, but the runtime config guard must still block the enable.
+    it('runtime config off: blocks even when attachment service is absent', async () => {
+      const harness = createPersistentHarness();
+      const { service } = makeService(harness, null, async () => false);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    // The workflow's `enabled` flag is not sufficient on its own. It installs enabled, but
+    // `securitySolution:alertAnalysisWorkflowEnabled` now defaults to false, and with that off
+    // the workflow's own guard short-circuits: it completes having classified nothing, so the
+    // Worker reports success while triaging no alerts. Enabling into that state is worse than
+    // refusing, because nothing anywhere reports a problem.
+    it('runtime config off: blocks even though the workflow itself is enabled', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService();
+      const { service } = makeService(harness, attachment, async () => false);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+      expect(attachment.updateRuleAttachments).not.toHaveBeenCalled();
+    });
+
+    // An unreadable setting must not make the Worker permanently un-enableable: a failed read
+    // is not evidence that analysis is off.
+    it('runtime config unreadable: falls through to the remaining checks', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService();
+      const { service } = makeService(harness, attachment, async () => {
+        throw new Error('uiSettings unavailable');
+      });
+
+      expect((await service.update(TRIAGE, { enabled: true }, SPACE, request)).outcome).toBe(
+        'updated'
+      );
+    });
+
+    it('attach-then-enable: passes installed workflow ID (with space suffix) to the attachment service', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService();
+      const { service, getAttachmentServiceMock } = makeService(harness, attachment);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result.outcome).toBe('updated');
+      // The attachment service must receive the ID the install reported, not the bare
+      // registration constant and not a rebuilt `<worker>-<space>` — the workflow executor
+      // looks up by exact ID, and the harness reports an opaque one to prove we pass it through.
+      expect(getAttachmentServiceMock).toHaveBeenCalledWith(
+        request,
+        reportedWorkflowId(TRIAGE, SPACE)
+      );
+      expect(attachment.updateRuleAttachments).toHaveBeenCalledWith({
+        attachRuleIds: ['rule-1', 'rule-2'],
+        detachRuleIds: [],
+      });
+      expect(harness.updateWorkflow).toHaveBeenCalledWith(
+        reportedWorkflowId(TRIAGE, SPACE),
+        { enabled: true },
+        SPACE,
+        request
+      );
+    });
+
+    it('attach fails: Worker stays disabled (updateWorkflow not called)', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService();
+      attachment.updateRuleAttachments.mockRejectedValueOnce(new Error('bulk edit failed'));
+      const { service } = makeService(harness, attachment);
+
+      await expect(service.update(TRIAGE, { enabled: true }, SPACE, request)).rejects.toThrow(
+        'bulk edit failed'
+      );
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('attach fails partway through: rolls back only the rules this attempt attached, not rules already attached', async () => {
+      const harness = createPersistentHarness();
+      // 'existing-rule' was attached by a previous enable (or a manual attachment); r1/r2 are
+      // the rules this attempt selects to attach. A rollback must leave existing-rule alone.
+      const attachment = makeAttachmentService({
+        notAttachedIds: ['r1', 'r2'],
+        attachedIds: ['existing-rule'],
+        pageSize: 1,
+      });
+      const realUpdateRuleAttachments = attachment.updateRuleAttachments.getMockImplementation();
+      // Pass 1 (attach r1) succeeds for real; pass 2 (attach r2) fails.
+      attachment.updateRuleAttachments
+        .mockImplementationOnce(realUpdateRuleAttachments!)
+        .mockRejectedValueOnce(new Error('bulk edit failed on pass 2'));
+      const { service } = makeService(harness, attachment);
+
+      await expect(service.update(TRIAGE, { enabled: true }, SPACE, request)).rejects.toThrow(
+        'bulk edit failed on pass 2'
+      );
+
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+      // The compensating rollback detaches only r1, the rule the failed pass's predecessor
+      // attached, so no rule this attempt touched is left carrying the action.
+      expect(attachment.updateRuleAttachments).toHaveBeenCalledWith({
+        attachRuleIds: [],
+        detachRuleIds: ['r1'],
+      });
+      // existing-rule predates this attempt and must survive the rollback untouched — a
+      // rollback that detached every currently-attached rule would wipe it too.
+      expect(
+        (await attachment.getRuleAttachmentSelection({ search: '', attachmentFilter: 'attached' }))
+          .attachedRuleIds
+      ).toEqual(['existing-rule']);
+    });
+
+    it('attach fails and the rollback detach also fails: original attach error still surfaces', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({ notAttachedIds: ['r1', 'r2'], pageSize: 1 });
+      const realUpdateRuleAttachments = attachment.updateRuleAttachments.getMockImplementation();
+      // Pass 1 (attach r1) succeeds for real, so there is something to roll back; pass 2
+      // (attach r2) fails, and the compensating rollback detach fails too.
+      attachment.updateRuleAttachments
+        .mockImplementationOnce(realUpdateRuleAttachments!)
+        .mockRejectedValueOnce(new Error('bulk edit failed on pass 2'))
+        .mockRejectedValueOnce(new Error('rollback also failed'));
+      const { service } = makeService(harness, attachment);
+
+      await expect(service.update(TRIAGE, { enabled: true }, SPACE, request)).rejects.toThrow(
+        'bulk edit failed on pass 2'
+      );
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('disable: detaches all attached rules after disabling the Worker', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
+      const { service } = makeService(harness, attachment);
+      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      attachment.updateRuleAttachments.mockClear();
+      attachment.getRuleAttachmentSelection.mockClear();
+
+      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
+
+      expect(result.outcome).toBe('updated');
+      expect(attachment.getRuleAttachmentSelection).toHaveBeenCalledWith({
+        search: '',
+        attachmentFilter: 'attached',
+      });
+      expect(attachment.updateRuleAttachments).toHaveBeenCalledWith({
+        attachRuleIds: [],
+        detachRuleIds: ['r1'],
+      });
+    });
+
+    it('disable: reports how many rules the caller could not detach from', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({
+        notAttachedIds: ['r1'],
+        attachedIds: ['r1'],
+        skippedRuleCount: 3,
+      });
+      const { service } = makeService(harness, attachment);
+      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
+
+      expect(result).toEqual({
+        outcome: 'updated',
+        response: expect.objectContaining({ skippedRuleCount: 3 }),
+      });
+      if (result.outcome !== 'updated') throw new Error();
+      expect(result.response.worker.enabled).toBe(false);
+    });
+
+    it('disable: omits skippedRuleCount when every rule could be detached', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
+      const { service } = makeService(harness, attachment);
+      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
+
+      expect(result.outcome === 'updated' && 'skippedRuleCount' in result.response).toBe(false);
+    });
+
+    it('idempotent enable: skips attachment when all rules are already attached', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({ notAttachedIds: [] });
+      const { service } = makeService(harness, attachment);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result.outcome).toBe('updated');
+      expect(attachment.getRuleAttachmentSelection).toHaveBeenCalledWith({
+        search: '',
+        attachmentFilter: 'not_attached',
+      });
+      expect(attachment.updateRuleAttachments).not.toHaveBeenCalled();
+    });
+
+    it('detach error does not fail the disable operation', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({ notAttachedIds: ['r1'], attachedIds: ['r1'] });
+      const { service } = makeService(harness, attachment);
+      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      attachment.updateRuleAttachments.mockRejectedValueOnce(new Error('network error'));
+
+      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
+
+      expect(result.outcome).toBe('updated');
+      if (result.outcome !== 'updated') throw new Error();
+      expect(result.response.worker.enabled).toBe(false);
+    });
+
+    it('disable: a rejecting getAttachmentService does not fail the disable operation', async () => {
+      // The provider builds scoped rules/actions clients and calculates rule authorization
+      // (see security_solution/server/plugin.ts), so resolving it can throw independently of
+      // the detach call itself; that failure must be as best-effort as detachment is.
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService();
+      const { service, getAttachmentServiceMock } = makeService(harness, attachment);
+      await service.update(TRIAGE, { enabled: true }, SPACE, request);
+      getAttachmentServiceMock.mockRejectedValueOnce(new Error('failed to build rules client'));
+
+      const result = await service.update(TRIAGE, { enabled: false }, SPACE, request);
+
+      expect(result.outcome).toBe('updated');
+      if (result.outcome !== 'updated') throw new Error();
+      expect(result.response.worker.enabled).toBe(false);
     });
   });
 

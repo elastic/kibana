@@ -41,7 +41,7 @@ export type DataFormat = 'ecs' | 'otel';
 /**
  * Marker for services that use a dedicated ECF CloudFormation template rather than the shared
  * unified ECS template.
- *   - `'otel'`           — OTel multi-signal template (otel_logs-cloudformation.yaml), uses S3SourceBuckets
+ *   - `'otel'`           — OTel multi-signal template (otel_logs-cloudformation.yaml)
  *   - `'crowdstrike_fdr'`— CrowdStrike FDR dedicated template
  */
 export type EcfDedicatedTemplate = 'otel' | 'crowdstrike_fdr';
@@ -294,21 +294,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
     // firewall_metrics has no agentless support yet (tracked: elastic/integrations#19301).
     excludedDataStreams: ['firewall_metrics'],
-  },
-  {
-    id: 'firewall_otel',
-    name: 'AWS Network Firewall',
-    category: 'security_identity_compliance',
-    dataFormat: 'otel',
-    policyTemplate: 'firewall',
-    ecfDataStream: 'firewall_logs',
-    excludedDataStreams: ['firewall_metrics'],
-    deploymentMethods: [{ method: 'ecf', preferred: true }],
-    ecfOnly: true,
-    packageName: 'aws',
-    ecfLogType: 'networkfirewall',
-    ecfDedicatedTemplate: 'otel',
-    inputs: ['aws-s3'],
   },
   // aws_securityhub replaces securityhub policy template in aws (legacy)
   {
@@ -595,8 +580,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'AWS Cost and Usage Report (CUR 2.0)',
     category: 'cloud_financial_management',
     packageName: 'aws_billing',
-    deploymentMethods: [{ method: 'agent_based', preferred: true }],
-    signalTypes: ['metrics'],
   },
 
   // ── amazon_security_lake package — Security, Identity & Compliance ────────
@@ -605,8 +588,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'Amazon Security Lake',
     category: 'security_identity_compliance',
     packageName: 'amazon_security_lake',
-    deploymentMethods: [{ method: 'agent_based', preferred: true }],
-    signalTypes: ['logs'],
   },
 ];
 

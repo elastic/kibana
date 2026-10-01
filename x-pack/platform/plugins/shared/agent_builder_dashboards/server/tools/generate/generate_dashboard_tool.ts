@@ -18,7 +18,11 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
-import { dashboardTools } from '../../../common';
+import {
+  dashboardTools,
+  DASHBOARD_UPDATED_UI_EVENT,
+  type DashboardUpdatedUiEventData,
+} from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
   createAttachmentPanelResolver,
@@ -183,6 +187,18 @@ Use operations[] to:
         }
 
         logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
+
+        events.sendUiEvent<typeof DASHBOARD_UPDATED_UI_EVENT, DashboardUpdatedUiEventData>(
+          DASHBOARD_UPDATED_UI_EVENT,
+          {
+            attachment: {
+              id: attachment.id,
+              type: DASHBOARD_ATTACHMENT_TYPE,
+              data: finalDashboardData,
+              origin: attachment.origin,
+            },
+          }
+        );
 
         return {
           results: [

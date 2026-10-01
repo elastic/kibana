@@ -14,6 +14,7 @@ import {
   ESCALATIONS_UI_CAPABILITY_SHOW,
 } from '../common/escalations/constants';
 import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
+import { ReopenInvestigationStepId } from '../common/investigations/step_types';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
@@ -166,7 +167,11 @@ describe('AgenticInvestigationsPlugin', () => {
       const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(
         ([definition]) => definition.id
       );
-      expect(registeredIds).toEqual([AttachImpactStepId, GetImpactStepId]);
+      expect(registeredIds).toEqual([
+        AttachImpactStepId,
+        GetImpactStepId,
+        ReopenInvestigationStepId,
+      ]);
     });
 
     it('does not resolve the authorization service until a step actually runs', () => {
