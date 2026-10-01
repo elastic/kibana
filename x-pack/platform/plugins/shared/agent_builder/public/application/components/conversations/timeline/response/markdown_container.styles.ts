@@ -8,7 +8,7 @@
 import { css } from '@emotion/react';
 import { euiFontSize, type UseEuiTheme } from '@elastic/eui';
 
-// EUI's default markdown heading scale is sized for documents, far too large inside a chat message.
+// EUI's default heading sizes are too large for chat messages.
 const HEADING_FONT_SCALES = [
   ['h1', 'l'],
   ['h2', 'm'],

@@ -15,10 +15,7 @@ interface UseMarkdownLinkClick {
   externalLinkModal: React.ReactNode;
 }
 
-/**
- * Click handling for links rendered in conversation markdown: external links ask for confirmation,
- * internal links navigate in place when embedded in the sidebar.
- */
+/** Handles clicks on links rendered in conversation markdown. */
 export const useMarkdownLinkClick = (): UseMarkdownLinkClick => {
   const { isEmbeddedContext: isSidebar } = useConversationContext();
   const {

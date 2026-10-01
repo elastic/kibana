@@ -29,10 +29,7 @@ interface CreateConversationMarkdownComponentsArgs {
   onLinkClick: (href: string, e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-/**
- * Renderers shared by agent responses and user messages, so links, code blocks and tables look
- * and behave the same regardless of who wrote the message.
- */
+/** Renderers shared by agent responses and user messages. */
 export const createConversationMarkdownComponents = ({
   onLinkClick,
 }: CreateConversationMarkdownComponentsArgs) => ({

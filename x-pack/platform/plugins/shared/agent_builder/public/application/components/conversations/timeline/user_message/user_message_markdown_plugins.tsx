@@ -24,9 +24,8 @@ import {
   type UserMessageTextStyles,
 } from './use_user_message_text_styles';
 
-// Badges are serialized as markdown links, e.g. `[/Summarize](skill://skill-1)`. EUI's markdown
-// parser only allows http(s)/mailto links by default and rewrites anything else back to literal
-// text, so badge schemes must be allow-listed here to survive parsing as links.
+// Badges are markdown links, e.g. `[/Summarize](skill://skill-1)`. EUI's parser drops links that
+// are not http(s)/mailto, so badge schemes must be allow-listed.
 export const COMMAND_SCHEMES = new Set(
   sortedCommandDefinitions.map((definition) => definition.scheme)
 );
@@ -64,11 +63,7 @@ interface UserMessageMarkdownPlugins {
   styles: UserMessageTextStyles;
 }
 
-/**
- * Builds the parsing/processing plugin lists that make `EuiMarkdownFormat` render user message
- * text with the same renderers as agent responses, except that badge schemes are allow-listed as
- * links and a custom `a` renderer turns those links back into badges (image / command).
- */
+/** Markdown plugins for user messages. Badge links render as badges. */
 export const useUserMessageMarkdownPlugins = ({
   onHoverImage,
   onLinkClick,
