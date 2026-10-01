@@ -46,6 +46,7 @@ import { InProgressResolver } from './investigations/services/in_progress';
 import { InvestigationsQueryService } from './investigations/services/investigations_query_service';
 import { createInvestigationsClient } from './investigations/services/investigations_client';
 import { createGetInvestigationTool } from './investigations/tools/get_investigation_tool';
+import { createConversationReadCheck } from './investigation_attachments';
 import { createUserResolver } from './services/resolve_user';
 import type { ResolveUser } from './services/resolve_user';
 import type {
@@ -107,19 +108,26 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
     });
 
+    const assertCanReadConversation = createConversationReadCheck({
+      getConversationClient: (request) => this.getConversationClient(request),
+    });
+
     registerImpactAttachment(agentBuilder, {
       getImpactService: () => this.requireImpactService(),
       privileges: investigationsPrivileges,
+      assertCanReadConversation,
       logger: this.logger,
     });
     registerSubjectAttachment(agentBuilder, {
       getSubjectsService: () => this.requireSubjectsService(),
       privileges: investigationsPrivileges,
+      assertCanReadConversation,
       logger: this.logger,
     });
     registerHypothesesAttachment(agentBuilder, {
       getHypothesesService: () => this.requireHypothesesService(),
       privileges: investigationsPrivileges,
+      assertCanReadConversation,
       logger: this.logger,
     });
 

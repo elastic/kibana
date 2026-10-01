@@ -52,6 +52,12 @@ import type { InProgressResolver } from './in_progress';
 /** Bound on the proposals one investigation read returns. */
 const MAX_INVESTIGATION_PROPOSALS = 100;
 
+/**
+ * Attachment ids one conversation search filters on. Agent Builder caps a filter at 100
+ * expressions, and an `or` of N comparisons counts N + 1.
+ */
+const MAX_ATTACHMENT_IDS_PER_SEARCH = 50;
+
 const SEVERITY_RANK: Record<InvestigationSeverity, number> = {
   low: 1,
   medium: 2,
@@ -83,9 +89,9 @@ export interface InvestigationsQueryServiceDeps {
  * only the requested page is hydrated.
  *
  * A side-index document whose conversation attachment exists but is inactive (the user removed
- * it) is hidden. List rows only carry active attachment ids, so a conversation is read in full
- * only when one of its documents has no active attachment; a document that was never attached
- * (an agent turn that has not ended yet) stays visible.
+ * it) is hidden; a document that was never attached (an agent turn that has not ended yet) stays
+ * visible. See {@link InvestigationsQueryService.findRemovedDocumentIds} for how lists tell the
+ * two apart without reading every conversation in full.
  */
 export class InvestigationsQueryService {
   constructor(private readonly deps: InvestigationsQueryServiceDeps) {}
@@ -348,46 +354,97 @@ export class InvestigationsQueryService {
     const subjectsByConversation = groupBy(subjects, ({ conversationId }) => conversationId);
     const impactByConversation = new Map(impacts.map((impact) => [impact.conversationId, impact]));
 
-    return Promise.all(
-      conversations.map(async (conversation) => {
-        const conversationSubjects = subjectsByConversation.get(conversation.id) ?? [];
+    const removed = await this.findRemovedDocumentIds(
+      client,
+      conversations.map((conversation) => {
         const impact = impactByConversation.get(conversation.id);
-        const removed = await this.findRemovedAttachmentIds(client, conversation, [
-          ...conversationSubjects.map(({ id }) => id),
-          ...(impact ? [impact.id] : []),
-        ]);
-        return toSummary({
+        return {
           conversation,
-          inProgress: inProgressIds.has(conversation.id),
-          subjects: conversationSubjects.filter(({ id }) => !removed.has(id)),
-          impact: impact && !removed.has(impact.id) ? impact : undefined,
-        });
+          documentIds: [
+            ...(subjectsByConversation.get(conversation.id) ?? []).map(({ id }) => id),
+            ...(impact ? [impact.id] : []),
+          ],
+        };
       })
     );
+
+    return conversations.map((conversation) => {
+      const impact = impactByConversation.get(conversation.id);
+      return toSummary({
+        conversation,
+        inProgress: inProgressIds.has(conversation.id),
+        subjects: (subjectsByConversation.get(conversation.id) ?? []).filter(
+          ({ id }) => !removed.has(id)
+        ),
+        impact: impact && !removed.has(impact.id) ? impact : undefined,
+      });
+    });
   }
 
   /**
-   * Attachment ids the user removed from the conversation. Only reads the full conversation when
-   * a document has no active attachment in the list row, which is rare outside a running turn.
+   * Document ids on the page whose conversation attachment the user removed.
+   *
+   * List rows carry only active attachment ids, so a document missing from its row was either
+   * removed or never attached (an agent turn that has not ended). The conversation search filter
+   * on `attachment_id` matches an attachment whether or not it is active, so one search per
+   * chunk of such ids finds the conversations that hold one: a held id that is still not active
+   * was removed. Only a conversation with several such ids in the same search is read in full,
+   * to tell them apart. The cost no longer grows with every list call for every removed
+   * attachment: steady state is one light search per page.
    */
-  private async findRemovedAttachmentIds(
+  private async findRemovedDocumentIds(
     client: ConversationPublicClient,
-    conversation: ConversationSummary,
-    documentIds: string[]
+    rows: Array<{ conversation: ConversationSummary; documentIds: string[] }>
   ): Promise<Set<string>> {
-    const active = new Set((conversation.attachments ?? []).map(({ id }) => id));
-    if (documentIds.every((id) => active.has(id))) {
-      return new Set();
+    const unconfirmed = rows.flatMap(({ conversation, documentIds }) => {
+      const active = new Set((conversation.attachments ?? []).map(({ id }) => id));
+      return documentIds
+        .filter((id) => !active.has(id))
+        .map((id) => ({ conversationId: conversation.id, id }));
+    });
+
+    const removed = new Set<string>();
+    const ambiguous = new Set<string>();
+    for (let start = 0; start < unconfirmed.length; start += MAX_ATTACHMENT_IDS_PER_SEARCH) {
+      const chunk = unconfirmed.slice(start, start + MAX_ATTACHMENT_IDS_PER_SEARCH);
+      let holders: ConversationSummary[];
+      try {
+        ({ results: holders } = await client.search({
+          filter: nodeBuilder.or(chunk.map(({ id }) => nodeBuilder.is('attachment_id', id))),
+          page: 1,
+          perPage: chunk.length,
+        }));
+      } catch (error) {
+        this.deps.logger.debug(`Could not look up removed attachments: ${errorMessage(error)}`);
+        continue;
+      }
+      for (const holder of holders) {
+        // Active by now (the turn ended after the list read): not removed.
+        const activeNow = new Set((holder.attachments ?? []).map(({ id }) => id));
+        const held = chunk.filter(
+          ({ conversationId, id }) => conversationId === holder.id && !activeNow.has(id)
+        );
+        if (held.length === 1) {
+          removed.add(held[0].id);
+        } else if (held.length > 1) {
+          ambiguous.add(holder.id);
+        }
+      }
     }
-    try {
-      const { attachments } = await client.get(conversation.id);
-      return removedAttachmentIds(attachments);
-    } catch (error) {
-      this.deps.logger.debug(
-        `Could not read attachments of investigation ${conversation.id}: ${errorMessage(error)}`
-      );
-      return new Set();
-    }
+
+    await Promise.all(
+      [...ambiguous].map(async (conversationId) => {
+        try {
+          const { attachments } = await client.get(conversationId);
+          removedAttachmentIds(attachments).forEach((id) => removed.add(id));
+        } catch (error) {
+          this.deps.logger.debug(
+            `Could not read attachments of investigation ${conversationId}: ${errorMessage(error)}`
+          );
+        }
+      })
+    );
+    return removed;
   }
 
   /**

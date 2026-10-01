@@ -84,6 +84,7 @@ const setup = ({
   hypotheses,
   inProgressIds = [],
   proposals,
+  attachmentHolders = [],
 }: {
   searchResults?: ConversationWithoutRoundsWithPermissions[];
   bulkGetResults?: ConversationWithoutRoundsWithPermissions[];
@@ -92,10 +93,15 @@ const setup = ({
   hypotheses?: InvestigationHypotheses;
   inProgressIds?: string[];
   proposals?: ProposalsPluginStart;
+  /** What a search by attachment id returns: conversations that hold such an attachment. */
+  attachmentHolders?: ConversationWithoutRoundsWithPermissions[];
 } = {}) => {
   const client = {
     get: jest.fn(),
-    search: jest.fn().mockResolvedValue({ results: searchResults, total: searchResults.length }),
+    search: jest.fn(async ({ filter }: { filter: KueryNode }) => {
+      const results = isAttachmentLookup(filter) ? attachmentHolders : searchResults;
+      return { results, total: results.length };
+    }),
     bulkGet: jest
       .fn()
       .mockImplementation(
@@ -142,6 +148,9 @@ const setup = ({
   });
   return { service, client, subjectsService, subjectSearch, impactSearch, inProgress };
 };
+
+const isAttachmentLookup = (filter: KueryNode): boolean =>
+  toKqlExpression(filter).includes('attachment_id');
 
 const searchFilter = (client: { search: jest.Mock }): string =>
   toKqlExpression(client.search.mock.calls[0][0].filter as KueryNode);
@@ -465,40 +474,87 @@ describe('InvestigationsQueryService', () => {
       expect(results.map(({ id }) => id).sort()).toEqual(['summary', 'title', 'verdict']);
     });
 
-    it('reads a conversation in full only when one of its documents has no active attachment', async () => {
+    it('hides a removed document with one attachment lookup instead of reading the conversation', async () => {
       const { service, client } = setup({
         searchResults: [
           conversation('attached', {
             attachments: [{ id: 'doc-attached-alert-1', type: 'investigation_subject' }],
           }),
           conversation('removed'),
+          conversation('running'),
         ],
-        subjects: [subject('attached', 'alert-1'), subject('removed', 'alert-1')],
-      });
-      client.get.mockResolvedValue({
-        ...conversation('removed'),
-        attachments: [{ id: 'doc-removed-alert-1', active: false }],
+        subjects: [
+          subject('attached', 'alert-1'),
+          subject('removed', 'alert-1'),
+          subject('running', 'alert-1'),
+        ],
+        // The search by attachment id finds the removed one; the running turn never attached.
+        attachmentHolders: [conversation('removed')],
       });
 
       const { results } = await service.list(request, parseQuery());
 
-      expect(client.get).toHaveBeenCalledTimes(1);
-      expect(client.get).toHaveBeenCalledWith('removed');
+      expect(client.get).not.toHaveBeenCalled();
+      const lookups = client.search.mock.calls
+        .map(([{ filter }]) => toKqlExpression(filter as KueryNode))
+        .filter((kql) => kql.includes('attachment_id'));
+      expect(lookups).toHaveLength(1);
+      expect(lookups[0]).toContain('doc-removed-alert-1');
+      expect(lookups[0]).toContain('doc-running-alert-1');
+      expect(lookups[0]).not.toContain('doc-attached-alert-1');
       const byId = new Map(results.map((result) => [result.id, result]));
       expect(byId.get('attached')?.subjects).toHaveLength(1);
       expect(byId.get('removed')?.subjects).toEqual([]);
+      expect(byId.get('running')?.subjects).toHaveLength(1);
     });
 
-    it('keeps a document that was never attached, such as one written during a running turn', async () => {
-      const { service, client } = setup({
-        searchResults: [conversation('running')],
-        impacts: [impact('running')],
+    it('keeps a document whose attachment became active after the list read', async () => {
+      const { service } = setup({
+        searchResults: [conversation('ended')],
+        impacts: [impact('ended')],
+        attachmentHolders: [
+          conversation('ended', {
+            attachments: [{ id: 'impact-ended', type: 'investigation_impact' }],
+          }),
+        ],
       });
-      client.get.mockResolvedValue({ ...conversation('running'), attachments: [] });
 
       const { results } = await service.list(request, parseQuery());
 
       expect(results[0].impact).toBeDefined();
+    });
+
+    it('reads the conversation in full only when several of its documents are unconfirmed', async () => {
+      const { service, client } = setup({
+        searchResults: [conversation('mixed')],
+        subjects: [subject('mixed', 'alert-1'), subject('mixed', 'alert-2')],
+        attachmentHolders: [conversation('mixed')],
+      });
+      client.get.mockResolvedValue({
+        ...conversation('mixed'),
+        attachments: [{ id: 'doc-mixed-alert-1', active: false }],
+      });
+
+      const { results } = await service.list(request, parseQuery());
+
+      expect(client.get).toHaveBeenCalledWith('mixed');
+      expect(results[0].subjects.map(({ id }) => id)).toEqual(['alert-2']);
+    });
+
+    it('does not look up attachments when every document is attached', async () => {
+      const { service, client } = setup({
+        searchResults: [
+          conversation('attached', {
+            attachments: [{ id: 'impact-attached', type: 'investigation_impact' }],
+          }),
+        ],
+        impacts: [impact('attached')],
+      });
+
+      await service.list(request, parseQuery());
+
+      expect(client.search).toHaveBeenCalledTimes(1);
+      expect(client.get).not.toHaveBeenCalled();
     });
   });
 
@@ -525,7 +581,7 @@ describe('InvestigationsQueryService', () => {
 
   describe('findOpenBySubjects', () => {
     it('returns open investigations holding a visible matching subject, most recently updated first', async () => {
-      const { service, subjectsService, client } = setup({
+      const { service, subjectsService } = setup({
         bulkGetResults: [
           conversation('old', {
             updated_at: '2026-01-01T00:00:00.000Z',
@@ -544,6 +600,7 @@ describe('InvestigationsQueryService', () => {
           subject('closed', 'alert-1'),
           subject('removed', 'alert-1'),
         ],
+        attachmentHolders: [conversation('removed')],
       });
       subjectsService.findConversationIdsBySubjects.mockResolvedValue([
         'old',
@@ -551,10 +608,6 @@ describe('InvestigationsQueryService', () => {
         'closed',
         'removed',
       ]);
-      client.get.mockResolvedValue({
-        ...conversation('removed'),
-        attachments: [{ id: 'doc-removed-alert-1', active: false }],
-      });
 
       const found = await service.findOpenBySubjects(request, [{ type: 'alert', id: 'alert-1' }]);
 
@@ -564,7 +617,10 @@ describe('InvestigationsQueryService', () => {
 
   describe('with the subject index', () => {
     /** The real subjects service over in-memory storage, so the index queries run for real. */
-    const setupWithSubjectIndex = (conversations: ConversationWithoutRoundsWithPermissions[]) => {
+    const setupWithSubjectIndex = (
+      conversations: ConversationWithoutRoundsWithPermissions[],
+      attachmentHolders: ConversationWithoutRoundsWithPermissions[] = []
+    ) => {
       const storage = createInMemoryStorage<SubjectDocument>();
       const subjectsService = new SubjectsService({
         documents: subjectAttachment.createServiceFromStorage(storage),
@@ -588,7 +644,7 @@ describe('InvestigationsQueryService', () => {
         });
         return docId;
       };
-      const base = setup({ bulkGetResults: conversations });
+      const base = setup({ bulkGetResults: conversations, attachmentHolders });
       const service = new InvestigationsQueryService({
         getConversationClient: async () => base.client as unknown as ConversationPublicClient,
         getSpaceId: () => SPACE_ID,
@@ -682,16 +738,16 @@ describe('InvestigationsQueryService', () => {
     });
 
     it('does not match an investigation whose subject attachment the user removed', async () => {
-      const { service, seed, client } = setupWithSubjectIndex([conversation('removed')]);
-      const docId = seed('removed', 'alert', 'alert-1');
-      client.get.mockResolvedValue({
-        ...conversation('removed'),
-        attachments: [{ id: docId, active: false }],
-      });
+      const { service, seed, client } = setupWithSubjectIndex(
+        [conversation('removed')],
+        [conversation('removed')]
+      );
+      seed('removed', 'alert', 'alert-1');
 
       await expect(
         service.findOpenBySubjects(request, [{ type: 'alert', id: 'alert-1' }])
       ).resolves.toEqual([]);
+      expect(client.get).not.toHaveBeenCalled();
     });
   });
 });

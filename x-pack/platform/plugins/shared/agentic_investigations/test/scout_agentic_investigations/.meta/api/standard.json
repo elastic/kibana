@@ -1,5 +1,5 @@
 {
-  "sha1": "251aa41169f10ca36f81bf298aabd890f90ecd6b",
+  "sha1": "70ad38b46464cdfcd1769c3e9b396159e6ad6a2e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -518,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/access_control.spec.ts",
-        "line": 41,
-        "column": 31
+        "line": 54,
+        "column": 7
       }
     },
     {
@@ -532,8 +532,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/access_control.spec.ts",
-        "line": 56,
-        "column": 79
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
+      "id": "40d12a708ba9237-328deb85e368bca",
+      "title": "Investigation query API access control hides another user's private investigation from list, counts, and get",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/access_control.spec.ts",
+        "line": 103,
+        "column": 62
       }
     },
     {
@@ -546,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/access_control.spec.ts",
-        "line": 91,
-        "column": 16
+        "line": 145,
+        "column": 20
       }
     },
     {
@@ -733,8 +747,8 @@
       }
     },
     {
-      "id": "ace163ff6b9513e-2428a48b14967be",
-      "title": "GET /internal/investigations/investigations — investigation query API never returns conversations on another template",
+      "id": "ace163ff6b9513e-0fab7fc36cb7c6a",
+      "title": "GET /internal/investigations/investigations — investigation query API filters by status on the conversation search path",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -747,6 +761,34 @@
       }
     },
     {
+      "id": "ace163ff6b9513e-ba01c6d71470a38",
+      "title": "GET /internal/investigations/investigations — investigation query API filters by creation date",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 264,
+        "column": 14
+      }
+    },
+    {
+      "id": "ace163ff6b9513e-2428a48b14967be",
+      "title": "GET /internal/investigations/investigations — investigation query API never returns conversations on another template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
+        "line": 282,
+        "column": 23
+      }
+    },
+    {
       "id": "ace163ff6b9513e-0c0e23e683bfd34",
       "title": "GET /internal/investigations/investigations — investigation query API counts the filtered investigations per severity",
       "expectedStatus": "passed",
@@ -756,8 +798,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
-        "line": 258,
-        "column": 81
+        "line": 285,
+        "column": 29
       }
     },
     {
@@ -770,8 +812,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/query.spec.ts",
-        "line": 271,
-        "column": 15
+        "line": 309,
+        "column": 14
+      }
+    },
+    {
+      "id": "84e1a57e316050d-33c938f7d83539c",
+      "title": "Investigation documents whose attachment the user removed GET hides the removed impact and keeps the unattached subject",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/removed_attachments.spec.ts",
+        "line": 80,
+        "column": 40
+      }
+    },
+    {
+      "id": "84e1a57e316050d-eb3352940a56ca8",
+      "title": "Investigation documents whose attachment the user removed the list hides removed impact and keeps the unattached subject",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_agentic_investigations/api/tests/investigations/removed_attachments.spec.ts",
+        "line": 91,
+        "column": 11
       }
     },
     {

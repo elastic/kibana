@@ -81,23 +81,31 @@ export interface SeedInvestigationOptions {
   metadata?: Record<string, string>;
   impactEntities?: Array<{ id: string; name?: string }>;
   spaceId?: string;
+  /** Defaults to public. A private investigation is readable by its owner only. */
+  accessMode?: 'public' | 'private';
 }
 
 /**
- * Creates a public investigation conversation and attaches its impact through the internal
- * route, as the owner. Returns the conversation id.
+ * Creates an investigation conversation (public by default) and attaches its impact through the
+ * internal route, as the owner. Returns the conversation id.
  */
 export const seedInvestigation = async (
   apiClient: ApiClientFixture,
   cookieHeader: Record<string, string>,
-  { title, metadata = { status: 'open' }, impactEntities, spaceId }: SeedInvestigationOptions
+  {
+    title,
+    metadata = { status: 'open' },
+    impactEntities,
+    spaceId,
+    accessMode = 'public',
+  }: SeedInvestigationOptions
 ): Promise<string> => {
   const created = await apiClient.post(spaceUrl(AB_CONVERSATIONS_PATH, spaceId), {
     headers: { ...PUBLIC_HEADERS, ...cookieHeader },
     body: {
       title,
       template_id: 'investigation',
-      access_control: { access_mode: 'public' },
+      access_control: { access_mode: accessMode },
       metadata,
     },
     responseType: 'json',
