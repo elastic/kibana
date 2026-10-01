@@ -3378,7 +3378,7 @@ importers:
         version: 1.13.2
       axios:
         specifier: 1.20.0
-        version: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+        version: 1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
       base64-js:
         specifier: 1.5.1
         version: 1.5.1
@@ -28253,7 +28253,7 @@ snapshots:
     dependencies:
       '@slack/types': 2.11.0
       '@types/node': 24.10.13
-      axios: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+      axios: 1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
     transitivePeerDependencies:
       - debug
       - supports-color
@@ -30711,7 +30711,7 @@ snapshots:
 
   axe-core@4.12.1: {}
 
-  axios@1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
+  axios@1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1):
     dependencies:
       follow-redirects: 1.16.0(debug@4.4.3(supports-color@8.1.1))
       form-data: 4.0.6
@@ -31183,7 +31183,7 @@ snapshots:
 
   buildkite-test-collector@1.8.1(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1):
     dependencies:
-      axios: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+      axios: 1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
       dotenv: 16.5.0
       request-spy: 0.0.10
       strip-ansi: 6.0.1
@@ -31204,7 +31204,7 @@ snapshots:
       '@oclif/plugin-warn-if-update-available': 3.2.0(supports-color@8.1.1)
       '@stoplight/yaml': 4.3.0
       async-mutex: 0.5.0
-      axios: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+      axios: 1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
       chalk: 5.6.2
       debug: 4.4.3(supports-color@8.1.1)
       jsonpathly: 3.0.0
@@ -31451,7 +31451,7 @@ snapshots:
     dependencies:
       '@testim/chrome-version': 1.1.4
       adm-zip: 0.6.1
-      axios: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+      axios: 1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
       compare-versions: 6.1.1
       proxy-agent: 8.0.2(supports-color@8.1.1)
       proxy-from-env: 2.1.0
