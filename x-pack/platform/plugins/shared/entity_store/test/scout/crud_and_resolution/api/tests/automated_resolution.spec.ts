@@ -27,6 +27,8 @@ import {
   ingestDoc,
   forceLogExtraction,
   normalizeKeywordList,
+  startEntityTypes,
+  stopEntityTypes,
   setupLogsTestDataStream,
   teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
@@ -833,6 +835,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
   apiTest(
     'SID bridge links a local entity created by extraction to Active Directory',
     async ({ apiClient, esClient }) => {
+      await startEntityTypes(apiClient, defaultHeaders, ['user']);
       // Own stream/template, name outside logs-entity-store-tests-* so this
       // cannot overlap history_snapshot's default template at the same priority
       // (including a leftover wildcard from an older run).
@@ -904,6 +907,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
         await triggerMaintainerRun(apiClient, internalHeaders);
         await waitForResolution(esClient, localEntity, adEntity);
       } finally {
+        await stopEntityTypes(apiClient, defaultHeaders, ['user']);
         await teardownLogsTestDataStream(esClient, sidExtractionLogs);
       }
     }
