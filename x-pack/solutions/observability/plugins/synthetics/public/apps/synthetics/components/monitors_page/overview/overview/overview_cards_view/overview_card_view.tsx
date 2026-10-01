@@ -317,7 +317,11 @@ export const OverviewCardView = ({
 
   return (
     <>
-      <GridItemsByGroup setFlyoutConfigCallback={setFlyoutConfigCallback} view={view} />
+      <GridItemsByGroup
+        setFlyoutConfigCallback={setFlyoutConfigCallback}
+        view={view}
+        isInteractive={isInteractive}
+      />
       <EuiSpacer size="m" />
     </>
   );
