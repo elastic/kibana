@@ -567,18 +567,15 @@ export class RulesClient {
   private toRuleApiResponse({
     id,
     attrs,
-    version,
     references,
   }: {
     id: string;
     attrs: RuleSavedObjectAttributes;
-    version?: string;
     references: SavedObjectReference[] | undefined;
   }): RuleResponse {
     return transformRuleSoAttributesToRuleApiResponse(
       id,
-      this.withResolvedArtifacts(attrs, references),
-      version
+      this.withResolvedArtifacts(attrs, references)
     );
   }
 
@@ -636,7 +633,6 @@ export class RulesClient {
     const rule = this.toRuleApiResponse({
       id: persisted.id,
       attrs: persisted.attributes,
-      version: persisted.version,
       references: persisted.references,
     });
     this.ruleEventPublisher.emitRuleCreated(this.request, [
@@ -696,7 +692,6 @@ export class RulesClient {
       const rule = this.toRuleApiResponse({
         id: doc.id,
         attrs: doc.attributes,
-        version: doc.version,
         references: doc.references,
       });
       items.push(rule);
@@ -709,7 +704,7 @@ export class RulesClient {
   }
 
   @withApm
-  public async updateRule({ id, data, options }: UpdateRuleParams): Promise<RuleResponse> {
+  public async updateRule({ id, data }: UpdateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
     if (parsed.artifacts !== undefined) {
@@ -737,11 +732,10 @@ export class RulesClient {
       });
     }
 
-    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
       updatedBy: actor,
       updatedAt: nowIso,
-      version: ruleVersion,
+      version: this.getNextVersion(existingAttrs.version),
     });
 
     validateMergedRuleAttributes(id, nextAttrs);
@@ -773,17 +767,16 @@ export class RulesClient {
       registry: this.artifactTypeRegistry,
     });
 
-    const { version: newVersion } = await this.writeRuleAttrs({
+    await this.writeRuleAttrs({
       id,
       attrs: nextAttrs,
-      version: options?.version ?? existingVersion,
+      version: existingVersion,
       references,
     });
 
     const rule = this.toRuleApiResponse({
       id,
       attrs: nextAttrs,
-      version: newVersion,
       references,
     });
 
@@ -796,8 +789,8 @@ export class RulesClient {
 
   @withApm
   public async getRule({ id }: { id: string }): Promise<RuleResponse> {
-    const { attrs, version, references } = await this.getExistingRule(id);
-    return this.toRuleApiResponse({ id, attrs, version, references });
+    const { attrs, references } = await this.getExistingRule(id);
+    return this.toRuleApiResponse({ id, attrs, references });
   }
 
   @withApm
@@ -815,7 +808,6 @@ export class RulesClient {
         this.toRuleApiResponse({
           id: doc.id,
           attrs: doc.attributes,
-          version: doc.version,
           references: doc.references,
         })
       );
@@ -855,13 +847,7 @@ export class RulesClient {
     // emitted rule so the deletion orders after the last change.
     const rule = this.toRuleApiResponse({
       id,
-      attrs: {
-        ...existingAttrs,
-        metadata: {
-          ...existingAttrs.metadata,
-          version: this.getNextVersion(existingAttrs.metadata.version),
-        },
-      },
+      attrs: { ...existingAttrs, version: this.getNextVersion(existingAttrs.version) },
       references,
     });
     this.ruleEventPublisher.emitRuleDeleted(this.request, [
@@ -937,13 +923,12 @@ export class RulesClient {
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
-    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: true,
       updatedBy: actor,
       updatedAt: nowIso,
-      metadata: { ...existingAttrs.metadata, version: ruleVersion },
+      version: this.getNextVersion(existingAttrs.version),
     };
 
     // Re-enabling an already-enabled rule is intentionally not short-circuited:
@@ -959,7 +944,7 @@ export class RulesClient {
       scheduleEvery: nextAttrs.schedule.every,
     });
 
-    const { version: newVersion } = await this.writeRuleAttrs({
+    await this.writeRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
@@ -969,7 +954,6 @@ export class RulesClient {
     const rule = this.toRuleApiResponse({
       id,
       attrs: nextAttrs,
-      version: newVersion,
       references,
     });
     this.ruleEventPublisher.emitRuleEnabled(this.request, [
@@ -994,19 +978,18 @@ export class RulesClient {
     // Disabling an already-disabled rule is intentionally not short-circuited: it
     // re-writes the SO and removes the executor task (self-heal), and still emits
     // `ruleDisabled`.
-    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: false,
       updatedBy: actor,
       updatedAt: nowIso,
-      metadata: { ...existingAttrs.metadata, version: ruleVersion },
+      version: this.getNextVersion(existingAttrs.version),
     };
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
-    const { version: newVersion } = await this.writeRuleAttrs({
+    await this.writeRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
@@ -1016,7 +999,6 @@ export class RulesClient {
     const rule = this.toRuleApiResponse({
       id,
       attrs: nextAttrs,
-      version: newVersion,
       references,
     });
     this.ruleEventPublisher.emitRuleDisabled(this.request, [
@@ -1060,7 +1042,6 @@ export class RulesClient {
         this.toRuleApiResponse({
           id: so.id,
           attrs: so.attributes,
-          version: so.version,
           references: so.references,
         })
       ),
@@ -1193,13 +1174,7 @@ export class RulesClient {
               spaceId,
               rule: this.toRuleApiResponse({
                 id: result.id,
-                attrs: {
-                  ...doc.attrs,
-                  metadata: {
-                    ...doc.attrs.metadata,
-                    version: this.getNextVersion(doc.attrs.metadata.version),
-                  },
-                },
+                attrs: { ...doc.attrs, version: this.getNextVersion(doc.attrs.version) },
                 references: doc.references,
               }),
             }
@@ -1249,13 +1224,12 @@ export class RulesClient {
         continue;
       }
 
-      const ruleVersion = this.getNextVersion(doc.attributes.metadata.version);
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: true,
         updatedBy: actor,
         updatedAt: nowIso,
-        metadata: { ...doc.attributes.metadata, version: ruleVersion },
+        version: this.getNextVersion(doc.attributes.version),
       };
 
       itemsToUpdate.push({
@@ -1370,13 +1344,12 @@ export class RulesClient {
         continue;
       }
 
-      const ruleVersion = this.getNextVersion(doc.attributes.metadata.version);
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: false,
         updatedBy: actor,
         updatedAt: nowIso,
-        metadata: { ...doc.attributes.metadata, version: ruleVersion },
+        version: this.getNextVersion(doc.attributes.version),
       };
 
       itemsToUpdate.push({
@@ -1805,14 +1778,13 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
-    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: existingAttrs.enabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
       updatedBy: actor,
       updatedAt: nowIso,
-      version: ruleVersion,
+      version: this.getNextVersion(existingAttrs.version),
     });
 
     await this.validateSchedule([
@@ -1835,7 +1807,7 @@ export class RulesClient {
       registry: this.artifactTypeRegistry,
     });
 
-    const { version: newVersion } = await this.writeRuleAttrs({
+    await this.writeRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
@@ -1845,7 +1817,6 @@ export class RulesClient {
     const rule = this.toRuleApiResponse({
       id,
       attrs: nextAttrs,
-      version: newVersion,
       references,
     });
     this.ruleEventPublisher.emitRuleUpdated(this.request, [

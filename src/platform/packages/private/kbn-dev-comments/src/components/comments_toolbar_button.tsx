@@ -29,6 +29,8 @@ const isMac =
       navigator.userAgent
   );
 const SHORTCUT = isMac ? '⌘⇧K' : 'Ctrl+Shift+K';
+/** The key that hands pointer input to the page in comment mode (see `holdsPassThrough`). */
+const PASS_THROUGH_KEY = isMac ? '⌥' : 'Alt';
 
 export const CommentsToolbarButton = () => {
   const controller = useComments();
@@ -38,8 +40,11 @@ export const CommentsToolbarButton = () => {
     : i18n.translate('devComments.button.enter', { defaultMessage: 'Comment mode' });
   return (
     <EuiToolTip
-      content={`${label} (${SHORTCUT})`}
-      disableScreenReaderOutput
+      title={`${label} (${SHORTCUT})`}
+      content={i18n.translate('devComments.button.modifiers', {
+        defaultMessage: 'Hold {passThroughKey} to click through to the page',
+        values: { passThroughKey: PASS_THROUGH_KEY },
+      })}
       anchorProps={ignoreProps}
     >
       <EuiButtonIcon

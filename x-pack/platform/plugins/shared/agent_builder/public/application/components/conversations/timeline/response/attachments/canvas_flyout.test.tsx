@@ -6,14 +6,23 @@
  */
 
 import React from 'react';
+import { EuiFlyout } from '@elastic/eui';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY } from '@kbn/agent-builder-browser';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { CanvasFlyout } from './canvas_flyout';
 
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const { createElement } = jest.requireActual('react');
+  return { ...actual, EuiFlyout: jest.fn((props) => createElement(actual.EuiFlyout, props)) };
+});
+
 const mockCloseCanvas = jest.fn();
 const mockOpenSidebarConversation = jest.fn();
 let mockConversationId: string | undefined = 'conversation-1';
+let mockIsEmbeddedContext = false;
 let mockCanvasState: {
   attachment: UnknownAttachment;
   isSidebar: boolean;
@@ -35,6 +44,7 @@ jest.mock('../../../../../context/conversation/use_conversation_id', () => ({
 
 jest.mock('../../../../../context/conversation/conversation_context', () => ({
   useConversationContext: () => ({
+    isEmbeddedContext: mockIsEmbeddedContext,
     conversationActions: { invalidateConversation: jest.fn() },
   }),
 }));
@@ -61,7 +71,46 @@ describe('CanvasFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockConversationId = 'conversation-1';
+    mockIsEmbeddedContext = false;
     mockCanvasState = null;
+  });
+
+  describe('flyout session', () => {
+    const renderCanvas = ({ isSidebar }: { isSidebar: boolean }) => {
+      mockIsEmbeddedContext = isSidebar;
+      mockAttachmentsService.getAttachmentUiDefinition.mockReturnValue({
+        getLabel: () => 'Test attachment',
+        renderCanvasContent: () => <div>canvas body</div>,
+      });
+      mockCanvasState = {
+        attachment: { id: 'attachment-1', type: 'test', data: {} },
+        isSidebar,
+      };
+      render(<CanvasFlyout attachmentsService={mockAttachmentsService} />);
+      const [props] = jest.mocked(EuiFlyout).mock.lastCall ?? [];
+      return props;
+    };
+
+    it('stacks in the shared conversation flyout session in full screen', () => {
+      const props = renderCanvas({ isSidebar: false });
+
+      expect(props).toEqual(
+        expect.objectContaining({
+          session: 'start',
+          historyKey: CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+          outsideClickCloses: false,
+          flyoutMenuProps: { title: 'Attachment preview' },
+        })
+      );
+    });
+
+    it('stays unmanaged and closes on outside click in the sidebar', () => {
+      const props = renderCanvas({ isSidebar: true });
+
+      expect(props?.session).toBeUndefined();
+      expect(props?.historyKey).toBeUndefined();
+      expect(props?.outsideClickCloses).toBe(true);
+    });
   });
 
   it('shows a fallback instead of crashing when renderCanvasContent throws', () => {
@@ -134,6 +183,7 @@ describe('CanvasFlyout', () => {
     const TRIGGER_LABEL = 'fake-open-sidebar';
 
     const renderWithFakeCanvas = ({ isSidebar = false }: { isSidebar?: boolean } = {}) => {
+      mockIsEmbeddedContext = isSidebar;
       mockAttachmentsService.getAttachmentUiDefinition.mockReturnValue({
         getLabel: () => 'Test attachment',
         renderCanvasContent: (props: AttachmentRenderProps<UnknownAttachment>) => (

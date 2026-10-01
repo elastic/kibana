@@ -44,4 +44,23 @@ describe('NightshiftInvestigationsPlugin setup', () => {
       'Investigation quota callback is already registered'
     );
   });
+
+  it('registers model resolution when Cortex and decision trees are disabled', () => {
+    const registerStepDefinition = jest.fn();
+    const dependencies = {
+      ...createSetupDeps(),
+      workflowsManagement: {},
+      workflowsExtensions: {
+        registerManagedWorkflowOwner: jest.fn(),
+        registerTriggerDefinition: jest.fn(),
+        registerStepDefinition,
+      },
+    } as unknown as NightshiftInvestigationsSetupDeps;
+
+    createPlugin().setup(coreMock.createSetup(), dependencies);
+
+    expect(registerStepDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'nightshift.resolveModel' })
+    );
+  });
 });
