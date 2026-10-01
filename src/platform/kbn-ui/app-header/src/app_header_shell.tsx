@@ -24,7 +24,6 @@ export interface AppHeaderShellProps {
   title?: ReactNode;
   badges?: ReactNode;
   titleActions?: ReactNode;
-  alwaysShowTitleActions?: boolean;
   titleAppend?: ReactNode;
   trailing?: ReactNode;
   secondaryContent?: ReactNode;
@@ -79,8 +78,7 @@ const useHeaderStyles = (
   hasTabs: boolean,
   hasTitleAppend: boolean,
   hasSecondaryContent: boolean,
-  borderless: boolean,
-  alwaysShowTitleActions: boolean
+  borderless: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
 
@@ -212,8 +210,8 @@ const useHeaderStyles = (
       flex-shrink: 0;
       align-items: center;
       gap: ${euiTheme.size.xs};
-      opacity: ${hasTitleAppend || alwaysShowTitleActions ? 1 : 0};
-      pointer-events: ${hasTitleAppend || alwaysShowTitleActions ? 'auto' : 'none'};
+      opacity: ${hasTitleAppend ? 1 : 0};
+      pointer-events: ${hasTitleAppend ? 'auto' : 'none'};
       transition: opacity ${euiTheme.animation.fast} ease;
     `;
 
@@ -229,16 +227,7 @@ const useHeaderStyles = (
       secondaryContentRow,
       tabsRow,
     };
-  }, [
-    sticky,
-    spacing,
-    euiTheme,
-    hasTabs,
-    hasTitleAppend,
-    hasSecondaryContent,
-    borderless,
-    alwaysShowTitleActions,
-  ]);
+  }, [sticky, spacing, euiTheme, hasTabs, hasTitleAppend, hasSecondaryContent, borderless]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
@@ -246,7 +235,6 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
     title,
     badges,
     titleActions,
-    alwaysShowTitleActions = false,
     titleAppend,
     secondaryContent,
     secondaryContentTestSubj,
@@ -263,8 +251,7 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
       !!tabs,
       hasTitleAppend,
       !!secondaryContent,
-      borderless,
-      alwaysShowTitleActions
+      borderless
     );
 
     return (

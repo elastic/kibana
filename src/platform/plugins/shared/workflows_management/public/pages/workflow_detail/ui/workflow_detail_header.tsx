@@ -508,7 +508,6 @@ export const WorkflowDetailHeader = React.memo(
             back={back}
             badges={badges}
             share={share}
-            alwaysShowTitleActions
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
             spacing="compact"

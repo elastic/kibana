@@ -270,8 +270,6 @@ interface AppHeaderConfigBase {
   menu?: AppMenuConfig;
   favorite?: AppHeaderFavoriteAction;
   share?: AppHeaderShareAction;
-  /** Keep title actions visible without hover or focus. Defaults to false. */
-  alwaysShowTitleActions?: boolean;
   /**
    * @internal Experimental. Dashboard edit Enhance only. Do not use from other apps.
    * Not a stable App Header contract.

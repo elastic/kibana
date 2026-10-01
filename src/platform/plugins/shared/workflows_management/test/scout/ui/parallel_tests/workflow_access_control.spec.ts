@@ -68,7 +68,6 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     workflowId = new URL(page.url()).pathname.split('/').at(-1);
     if (!workflowId || workflowId === 'create') throw new Error('Workflow was not created');
     await editor.gotoWorkflow(workflowId);
-    await expect(page.getByRole('button', { name: 'Access control', exact: true })).toBeVisible();
     await editor.openAccessDialog();
     await expect(page.getByRole('heading', { name: 'Access control', exact: true })).toBeVisible();
     await expect(editor.accessMode).toContainText('Public');
