@@ -519,4 +519,115 @@ describe('GET /internal/code_intelligence/catalog', () => {
       })
     );
   });
+
+  it('rejects an unknown sort', () => {
+    expect(validateQuery({ sort: 'severity_desc' })).toEqual(
+      expect.objectContaining({ sort: 'severity_desc' })
+    );
+    expect(() => validateQuery({ sort: 'title' })).toThrow();
+  });
+
+  it.each([
+    [undefined, undefined, [{ updated_at: 'desc' }, '_doc']],
+    [undefined, 'error', ['_score', { updated_at: 'desc' }, '_doc']],
+    [
+      'severity_desc',
+      undefined,
+      [{ severity_score: { order: 'desc', missing: '_last' } }, { updated_at: 'desc' }, '_doc'],
+    ],
+    [
+      'severity_asc',
+      'error',
+      [
+        { severity_score: { order: 'asc', missing: '_last' } },
+        '_score',
+        { updated_at: 'desc' },
+        '_doc',
+      ],
+    ],
+  ])('sorts %s with search %s', async (sort, q, expected) => {
+    const { call, es } = setup();
+    await call(route, {
+      query: {
+        page: 1,
+        perPage: 25,
+        ...(sort === undefined ? {} : { sort }),
+        ...(q === undefined ? {} : { q }),
+      },
+    });
+    expect(es.client.search).toHaveBeenCalledWith(expect.objectContaining({ sort: expected }));
+  });
+});
+
+describe('GET /internal/code_intelligence/catalog_summary', () => {
+  const route = 'GET /internal/code_intelligence/catalog_summary';
+
+  it('counts entries per repository with the same severity ranges as the filter', async () => {
+    const { call, es } = setup();
+    es.client.search.mockResolvedValueOnce({
+      hits: { hits: [] },
+      aggregations: {
+        repositories: {
+          buckets: [
+            {
+              key: 'elastic/a',
+              doc_count: 7,
+              severities: {
+                buckets: {
+                  low: { doc_count: 3 },
+                  medium: { doc_count: 0 },
+                  high: { doc_count: 2 },
+                  critical: { doc_count: 1 },
+                },
+              },
+            },
+          ],
+        },
+      },
+    } as never);
+
+    const response = await call(route);
+
+    expect(es.client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'catalog',
+        ignore_unavailable: true,
+        size: 0,
+        aggs: {
+          repositories: {
+            terms: { field: 'repository', size: 1000 },
+            aggs: {
+              severities: {
+                filters: {
+                  filters: {
+                    low: { range: { severity_score: { gte: 0, lte: 39 } } },
+                    medium: { range: { severity_score: { gte: 40, lte: 59 } } },
+                    high: { range: { severity_score: { gte: 60, lte: 79 } } },
+                    critical: { range: { severity_score: { gte: 80, lte: 100 } } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+    );
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        repositories: [
+          {
+            repository: 'elastic/a',
+            total: 7,
+            severities: { low: 3, medium: 0, high: 2, critical: 1 },
+          },
+        ],
+      },
+    });
+  });
+
+  it('reports no repositories when the catalog is empty', async () => {
+    const { call } = setup();
+    const response = await call(route);
+    expect(response.ok).toHaveBeenCalledWith({ body: { repositories: [] } });
+  });
 });

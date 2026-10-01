@@ -52,13 +52,14 @@ const item: CatalogItem = {
 
 const otherRepository: Repository = { ...repository, repository: 'open-telemetry/demo' };
 
-const renderView = () =>
+const renderView = (props: Partial<React.ComponentProps<typeof CatalogView>> = {}) =>
   render(
     <CatalogView
       http={{} as HttpSetup}
       repositories={[repository, otherRepository]}
       repositoriesLoading={false}
       reloadRepositories={jest.fn()}
+      {...props}
     />
   );
 
@@ -128,6 +129,7 @@ describe('CatalogView', () => {
       repositories: [],
       kinds: [],
       severities: [],
+      sort: 'default',
       page: 1,
     });
 
@@ -143,8 +145,38 @@ describe('CatalogView', () => {
         repositories: ['elastic/eis-gateway', 'open-telemetry/demo'],
         kinds: [],
         severities: ['high', 'critical'],
+        sort: 'default',
         page: 1,
       })
+    );
+  });
+
+  it('sorts by severity and returns to the first page', async () => {
+    getCatalogMock.mockResolvedValue({ page: 1, perPage: 25, total: 0, items: [] });
+    renderView();
+    await screen.findByTestId('codeIntelligenceCatalogEmpty');
+
+    const sort = screen.getByTestId('codeIntelligenceCatalogSort');
+    expect(sort).toHaveDisplayValue('Recently updated');
+    fireEvent.change(sort, { target: { value: 'severity_desc' } });
+
+    await waitFor(() =>
+      expect(getCatalogMock).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ sort: 'severity_desc', page: 1 })
+      )
+    );
+  });
+
+  it('opens pre-filtered to the repository and severity it was given', async () => {
+    getCatalogMock.mockResolvedValue({ page: 1, perPage: 25, total: 0, items: [] });
+    renderView({ initialRepositories: ['open-telemetry/demo'], initialSeverities: ['critical'] });
+    await screen.findByTestId('codeIntelligenceCatalogEmpty');
+
+    expect(getCatalogMock).toHaveBeenCalledTimes(1);
+    expect(getCatalogMock).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ repositories: ['open-telemetry/demo'], severities: ['critical'] })
     );
   });
 });

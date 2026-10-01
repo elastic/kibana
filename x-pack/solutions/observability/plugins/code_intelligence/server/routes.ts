@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { schema, type Type } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 
@@ -13,8 +14,11 @@ import {
   CATALOG_SEVERITY_RANGES,
   CATALOG_SIGNAL_TYPES,
   MAX_CATALOG_REPOSITORY_FILTERS,
+  MAX_CATALOG_SUMMARY_REPOSITORIES,
+  type CatalogRepositorySummary,
   type CatalogSeverity,
   type CatalogSignalType,
+  type CatalogSort,
 } from '../common/catalog_filters';
 import { MAX_BATCH_REPOSITORIES } from '../common/extraction_batch';
 import {
@@ -68,6 +72,24 @@ const severity: Type<CatalogSeverity> = schema.oneOf([
   schema.literal('high'),
   schema.literal('critical'),
 ]);
+const catalogSort: Type<CatalogSort> = schema.oneOf([
+  schema.literal('default'),
+  schema.literal('severity_desc'),
+  schema.literal('severity_asc'),
+]);
+
+const catalogSortClauses = (sort: CatalogSort, searching: boolean): estypes.SortCombinations[] => {
+  const relevance: estypes.SortCombinations[] = searching ? ['_score'] : [];
+  if (sort === 'default') return [...relevance, { updated_at: 'desc' }, '_doc'];
+  return [
+    {
+      severity_score: { order: sort === 'severity_desc' ? 'desc' : 'asc', missing: '_last' },
+    },
+    ...relevance,
+    { updated_at: 'desc' },
+    '_doc',
+  ];
+};
 
 const asArray = <T>(value: T | readonly T[] | undefined): readonly T[] =>
   value === undefined ? [] : Array.isArray(value) ? value : [value as T];
@@ -340,6 +362,7 @@ export const registerRoutes = ({
           kind: schema.maybe(oneOrMany(signalType, CATALOG_SIGNAL_TYPES.length)),
           severity: schema.maybe(oneOrMany(severity, CATALOG_SEVERITIES.length)),
           q: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
+          sort: schema.maybe(catalogSort),
           page: schema.number({ defaultValue: 1, min: 1, max: 100 }),
           perPage: schema.number({ defaultValue: 25, min: 1, max: 100 }),
         }),
@@ -382,10 +405,7 @@ export const registerRoutes = ({
         from: (request.query.page - 1) * request.query.perPage,
         size: request.query.perPage,
         query: { bool: { filter: filters, ...textQuery } },
-        sort:
-          q === undefined
-            ? [{ updated_at: 'desc' }, '_doc']
-            : ['_score', { updated_at: 'desc' }, '_doc'],
+        sort: catalogSortClauses(request.query.sort ?? 'default', q !== undefined),
       });
       return response.ok({
         body: {
@@ -398,6 +418,67 @@ export const registerRoutes = ({
           items: result.hits.hits.map((hit) => ({ id: hit._id, ...hit._source })),
         },
       });
+    }
+  );
+
+  router.get(
+    {
+      path: '/internal/code_intelligence/catalog_summary',
+      options: {
+        access: 'internal',
+        description: 'Counts catalog entries per repository and severity level.',
+      },
+      security: { authz: { enabled: false, reason: 'This private route is feature gated.' } },
+      validate: false,
+    },
+    async (context, _request, response) => {
+      const { elasticsearch } = await context.core;
+      const result = await elasticsearch.client.asCurrentUser.search({
+        index: catalogIndex,
+        // The catalog index does not exist until the first extraction writes to it.
+        ignore_unavailable: true,
+        size: 0,
+        aggs: {
+          repositories: {
+            terms: { field: 'repository', size: MAX_CATALOG_SUMMARY_REPOSITORIES },
+            aggs: {
+              severities: {
+                filters: {
+                  filters: Object.fromEntries(
+                    CATALOG_SEVERITIES.map((level) => [
+                      level,
+                      { range: { severity_score: CATALOG_SEVERITY_RANGES[level] } },
+                    ])
+                  ),
+                },
+              },
+            },
+          },
+        },
+      });
+      const buckets =
+        (
+          result.aggregations?.repositories as
+            | {
+                buckets?: Array<{
+                  key: string;
+                  doc_count: number;
+                  severities?: { buckets?: Partial<Record<string, { doc_count?: number }>> };
+                }>;
+              }
+            | undefined
+        )?.buckets ?? [];
+      const repositories: CatalogRepositorySummary[] = buckets.map((bucket) => ({
+        repository: bucket.key,
+        total: bucket.doc_count,
+        severities: {
+          low: bucket.severities?.buckets?.low?.doc_count ?? 0,
+          medium: bucket.severities?.buckets?.medium?.doc_count ?? 0,
+          high: bucket.severities?.buckets?.high?.doc_count ?? 0,
+          critical: bucket.severities?.buckets?.critical?.doc_count ?? 0,
+        },
+      }));
+      return response.ok({ body: { repositories } });
     }
   );
 

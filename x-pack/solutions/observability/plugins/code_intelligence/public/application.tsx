@@ -13,6 +13,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
+import type { CatalogSeverity } from '../common/catalog_filters';
 import type { Repository } from './api';
 import { getRepositories } from './api';
 import { CatalogView } from './catalog_view';
@@ -27,7 +28,17 @@ const Application = ({ core }: { core: CoreStart }) => {
   const [error, setError] = useState<string>();
   const [requestSequence, setRequestSequence] = useState(0);
 
+  /** Filters the Catalog tab opens with; set when drilling down from a repository. */
+  const [catalogPreset, setCatalogPreset] = useState<{
+    repository: string;
+    severity?: CatalogSeverity;
+  }>();
+
   const reload = useCallback(() => setRequestSequence((value) => value + 1), []);
+  const viewCatalog = useCallback((repository: string, severity?: CatalogSeverity) => {
+    setCatalogPreset({ repository, ...(severity === undefined ? {} : { severity }) });
+    setTab('catalog');
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -74,7 +85,10 @@ const Application = ({ core }: { core: CoreStart }) => {
           },
           {
             isSelected: tab === 'catalog',
-            onClick: () => setTab('catalog'),
+            onClick: () => {
+              setCatalogPreset(undefined);
+              setTab('catalog');
+            },
             label: i18n.translate('xpack.codeIntelligence.catalogTab', {
               defaultMessage: 'Catalog',
             }),
@@ -89,14 +103,26 @@ const Application = ({ core }: { core: CoreStart }) => {
             loading={loading}
             error={error}
             reload={reload}
+            onViewCatalog={viewCatalog}
           />
         ) : (
           <CatalogView
+            key={
+              catalogPreset === undefined
+                ? 'all'
+                : `${catalogPreset.repository}:${catalogPreset.severity ?? ''}`
+            }
             http={core.http}
             repositories={repositories}
             repositoriesLoading={loading}
             repositoriesError={error}
             reloadRepositories={reload}
+            initialRepositories={
+              catalogPreset === undefined ? undefined : [catalogPreset.repository]
+            }
+            initialSeverities={
+              catalogPreset?.severity === undefined ? undefined : [catalogPreset.severity]
+            }
           />
         )}
       </EuiPageTemplate.Section>

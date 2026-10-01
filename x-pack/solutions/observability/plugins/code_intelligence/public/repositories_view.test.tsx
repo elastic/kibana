@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { HttpSetup } from '@kbn/core/public';
 import React from 'react';
 
 import type { ExtractionBatchStatus, Repository } from './api';
-import { deleteRepository, getBatch, saveRepository, startBatch } from './api';
+import { deleteRepository, getBatch, getCatalogSummary, saveRepository, startBatch } from './api';
 import { RepositoriesView } from './repositories_view';
 
 jest.mock('./api', () => ({
   deleteRepository: jest.fn(),
   getBatch: jest.fn(),
+  getCatalogSummary: jest.fn(),
   saveRepository: jest.fn(),
   startBatch: jest.fn(),
 }));
 
+const getCatalogSummaryMock = getCatalogSummary as jest.MockedFunction<typeof getCatalogSummary>;
 const startBatchMock = startBatch as jest.MockedFunction<typeof startBatch>;
 const getBatchMock = getBatch as jest.MockedFunction<typeof getBatch>;
 const saveRepositoryMock = saveRepository as jest.MockedFunction<typeof saveRepository>;
@@ -76,15 +78,17 @@ const renderView = (
   ],
   reload = jest.fn()
 ) => {
+  const onViewCatalog = jest.fn();
   render(
     <RepositoriesView
       http={{} as HttpSetup}
       repositories={repositories}
       loading={false}
       reload={reload}
+      onViewCatalog={onViewCatalog}
     />
   );
-  return { reload };
+  return { reload, onViewCatalog };
 };
 
 const runButton = () => screen.getByTestId('codeIntelligenceRunBatchButton');
@@ -94,6 +98,64 @@ const openAddFlyout = () =>
 describe('RepositoriesView', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    // Pending, so tests that ignore the counts finish without a state update outside act().
+    getCatalogSummaryMock.mockReturnValue(new Promise(() => {}));
+  });
+
+  it('does not show the remote URL column', () => {
+    renderView();
+
+    expect(screen.queryByRole('columnheader', { name: /Remote URL/ })).toBeNull();
+    expect(screen.queryByText('https://github.com/elastic/one.git')).toBeNull();
+  });
+
+  it('shows catalog counts per severity and drills down into the catalog', async () => {
+    getCatalogSummaryMock.mockResolvedValue([
+      {
+        repository: 'elastic/one',
+        total: 12,
+        severities: { low: 5, medium: 0, high: 4, critical: 2 },
+      },
+    ]);
+    const { onViewCatalog } = renderView();
+
+    const total = await screen.findByTestId('codeIntelligenceViewCatalog-elastic/one');
+    expect(total).toHaveTextContent('12 entries');
+    expect(
+      screen.getByTestId('codeIntelligenceSeverityCount-elastic/one-critical')
+    ).toHaveTextContent('Critical 2');
+    expect(screen.getByTestId('codeIntelligenceSeverityCount-elastic/one-low')).toHaveTextContent(
+      'Low 5'
+    );
+    expect(screen.queryByTestId('codeIntelligenceSeverityCount-elastic/one-medium')).toBeNull();
+    expect(screen.queryByTestId('codeIntelligenceViewCatalog-elastic/two')).toBeNull();
+    expect(screen.getByText('None')).toBeInTheDocument();
+
+    fireEvent.click(total);
+    expect(onViewCatalog).toHaveBeenLastCalledWith('elastic/one');
+    fireEvent.click(screen.getByTestId('codeIntelligenceSeverityCount-elastic/one-high'));
+    expect(onViewCatalog).toHaveBeenLastCalledWith('elastic/one', 'high');
+  });
+
+  it('reloads the catalog counts when a batch finishes and again once writes are searchable', async () => {
+    jest.useFakeTimers();
+    try {
+      getCatalogSummaryMock.mockResolvedValue([]);
+      startBatchMock.mockResolvedValue({ id: 'running-id' });
+      getBatchMock.mockResolvedValue({ ...runningBatch, status: 'completed' });
+      renderView();
+      await waitFor(() => expect(getCatalogSummaryMock).toHaveBeenCalledTimes(1));
+
+      fireEvent.click(runButton());
+
+      await waitFor(() => expect(getCatalogSummaryMock).toHaveBeenCalledTimes(2));
+      act(() => {
+        jest.advanceTimersByTime(3000);
+      });
+      await waitFor(() => expect(getCatalogSummaryMock).toHaveBeenCalledTimes(3));
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('runs every enabled repository when nothing is selected and shows per-repository status', async () => {
