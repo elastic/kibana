@@ -37,6 +37,7 @@ describe('useSignificantEventsUrlState', () => {
       expect(result.current.statusFilter).toEqual(['open']);
       expect(result.current.severityFilter).toEqual(['80-critical', '60-high']);
       expect(result.current.streamFilter).toEqual([]);
+      expect(result.current.serviceFilter).toEqual([]);
     });
 
     it('treats an empty param as an empty selection', () => {
@@ -48,12 +49,18 @@ describe('useSignificantEventsUrlState', () => {
     });
 
     it('accepts single and repeated values', () => {
-      mockQuery = { status: 'closed', severity: ['20-low', '40-medium'], stream: 'logs' };
+      mockQuery = {
+        status: 'closed',
+        severity: ['20-low', '40-medium'],
+        stream: 'logs',
+        service: ['svc-a', 'svc-b'],
+      };
       const { result } = renderHook(() => useSignificantEventsUrlState());
 
       expect(result.current.statusFilter).toEqual(['closed']);
       expect(result.current.severityFilter).toEqual(['40-medium', '20-low']);
       expect(result.current.streamFilter).toEqual(['logs']);
+      expect(result.current.serviceFilter).toEqual(['svc-a', 'svc-b']);
     });
 
     it('drops unknown values and canonicalises the order', () => {
@@ -125,6 +132,19 @@ describe('useSignificantEventsUrlState', () => {
       expect(lastReplaceQuery()).not.toHaveProperty('stream');
     });
 
+    it('writes the service param, keeps it on unrelated edits and removes it when cleared', () => {
+      const { result } = renderHook(() => useSignificantEventsUrlState());
+
+      act(() => result.current.setFilters({ service: ['svc-a'] }));
+      expect(lastReplaceQuery()).toMatchObject({ service: ['svc-a'] });
+
+      act(() => result.current.setFilters({ stream: ['logs'] }));
+      expect(lastReplaceQuery()).toMatchObject({ service: ['svc-a'], stream: ['logs'] });
+
+      act(() => result.current.setFilters({ service: [] }));
+      expect(lastReplaceQuery()).not.toHaveProperty('service');
+    });
+
     it('keeps selectedEvent and the openEvent written by deep-link normalization', () => {
       // Deep-link arrival: the mount effect writes openEvent = selectedEvent. A filter adaptation
       // issued in the same flush must build on that write, not on the stale render snapshot.
@@ -167,6 +187,7 @@ describe('useSignificantEventsUrlState', () => {
         status: 'closed',
         severity: '',
         stream: ['logs'],
+        service: ['svc-a'],
         selectedEvent: 'event-1',
         openEvent: 'event-1',
       };

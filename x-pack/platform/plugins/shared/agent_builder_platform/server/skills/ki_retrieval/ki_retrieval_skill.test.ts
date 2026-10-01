@@ -29,17 +29,31 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('queries the esql_target from the AI index tools instead of a hardcoded pattern', () => {
-    expect(kiRetrievalSkill.content).toContain('FROM <esql_target>');
-    expect(kiRetrievalSkill.content).not.toContain('ai-index-*');
+  it('queries the AI index targets in content', () => {
+    expect(kiRetrievalSkill.content).toContain('FROM <targets> METADATA _id, _index, _score');
+    expect(kiRetrievalSkill.content).not.toContain('FROM ai-index-*');
+    expect(kiRetrievalSkill.content).not.toContain('v-ai-index-');
   });
 
-  it('reads AI indices only through the dedicated tools', () => {
-    expect(kiRetrievalSkill.content).toContain('platform.context_engine.query_ai_indices');
+  it('routes every AI-index query through the space-scoped query tool', () => {
     expect(kiRetrievalSkill.content).toContain(
-      'Never read an AI Index with `platform.core.execute_esql`'
+      `every AI-index query below through\n\`${contextEngineAiIndexTools.queryAiIndices}\``
     );
-    expect(kiRetrievalSkill.content).not.toContain('platform.core.list_indices');
+    expect(kiRetrievalSkill.content).not.toContain('"filter"');
+  });
+
+  it('opens every template with the lifecycle filters the query tool also applies', () => {
+    const templates = kiRetrievalSkill.content.match(
+      /FROM <targets> METADATA _id, _index, _score\n/g
+    );
+    const withLifecycle = kiRetrievalSkill.content.match(
+      /FROM <targets> METADATA _id, _index, _score\n\| WHERE governance\.lifecycle\.status IS NULL OR governance\.lifecycle\.status == "active"\n\| WHERE expires_at IS NULL OR expires_at > NOW\(\)\n/g
+    );
+
+    expect(templates?.length).toBeGreaterThan(0);
+    expect(withLifecycle?.length).toBe(templates?.length);
+    expect(kiRetrievalSkill.content).toContain('and `DROP governance.*`');
+    expect(kiRetrievalSkill.content).toContain('switches off its default only');
   });
 
   it('keeps retrieval to the AI indices assigned to the agent', () => {
@@ -47,22 +61,13 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.content).toContain('`assigned_to_agent: true`');
   });
 
-  it('leaves space scoping to the server', () => {
-    expect(kiRetrievalSkill.content).toContain('Never write a space');
-    expect(kiRetrievalSkill.content).not.toContain('"filter"');
-  });
-
   it('has no referencedContent', () => {
     expect(kiRetrievalSkill.referencedContent).toHaveLength(0);
   });
 
-  it('binds the three AI index tools', async () => {
+  it('binds the Context Engine AI index tools', async () => {
     const toolIds = (await kiRetrievalSkill.getRegistryTools?.()) ?? [];
 
-    expect(toolIds).toEqual([
-      contextEngineAiIndexTools.listAiIndices,
-      contextEngineAiIndexTools.describeAiIndex,
-      contextEngineAiIndexTools.queryAiIndices,
-    ]);
+    expect(toolIds).toEqual(Object.values(contextEngineAiIndexTools));
   });
 });

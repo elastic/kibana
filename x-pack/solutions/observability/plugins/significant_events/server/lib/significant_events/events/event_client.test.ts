@@ -68,7 +68,7 @@ const createSearchClient = ({
   total: number;
   createdAt?: string;
 }) => {
-  const query = jest.fn(async (request: { query: string }) => {
+  const query = jest.fn(async (request: EsqlRequest) => {
     const { query: q } = request;
     if (q.includes('STATS total')) {
       return countResponse(total);
@@ -85,6 +85,31 @@ const createSearchClient = ({
     query,
   };
 };
+
+interface EsqlRequest {
+  query: string;
+  params?: Array<Record<string, string>>;
+}
+
+/** Returns the pipe commands and bound params of the page query (not the total count query). */
+const getPageRequest = ({ mock }: ReturnType<typeof createSearchClient>['query']) => {
+  const [pageRequest] = mock.calls
+    .map(([request]) => request)
+    .filter((request) => !request.query.includes('STATS total'));
+  return { commands: pageRequest.query.split(' | '), params: pageRequest.params };
+};
+
+const LATEST_VERSION_PER_EVENT = [
+  'FROM .significant_events-events METADATA _id, _source',
+  'WHERE `kibana.space_ids` == "default" OR `kibana.space_ids` IS NULL',
+  'INLINE STATS created_at = MIN(@timestamp) BY event_id',
+  'INLINE STATS latest_ts = MAX(@timestamp) BY event_id',
+  'WHERE @timestamp == latest_ts',
+  'INLINE STATS tiebreaker_id = MAX(_id) BY event_id',
+  'WHERE _id == tiebreaker_id',
+];
+
+const FIRST_PAGE = ['SORT @timestamp DESC, _id ASC', 'LIMIT 25', 'KEEP _source, created_at'];
 
 describe('EventClient', () => {
   describe('legacy signal verdict normalization', () => {
@@ -350,6 +375,43 @@ describe('EventClient', () => {
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
       expect(dataQuery).toContain('TO_LOWER(event_id) == TO_LOWER("checkout-failure")');
+    });
+
+    it('keeps events active during the time range, in their latest state', async () => {
+      const { client, query } = createSearchClient({ hits: [], total: 0 });
+
+      await client.findLatestByCurrentStatePaginated({
+        from: '2026-01-02T00:00:00.000Z',
+        to: '2026-01-02T23:59:59.999Z',
+        status: ['closed'],
+      });
+
+      const { commands, params } = getPageRequest(query);
+      expect(commands).toEqual([
+        ...LATEST_VERSION_PER_EVENT,
+        // Created before the range ends, and still open or updated after it starts.
+        'WHERE created_at <= TO_DATETIME(?overlapToIso)',
+        'WHERE (status IN ("open")) OR @timestamp >= TO_DATETIME(?overlapFromIso)',
+        'WHERE status IN ("closed")',
+        ...FIRST_PAGE,
+      ]);
+      expect(params).toEqual([
+        { overlapToIso: '2026-01-02T23:59:59.999Z' },
+        { overlapFromIso: '2026-01-02T00:00:00.000Z' },
+      ]);
+    });
+
+    it('matches free-text search against the latest version of each event', async () => {
+      const { client, query } = createSearchClient({ hits: [], total: 0 });
+
+      await client.findLatestByCurrentStatePaginated({ search: 'checkout' });
+
+      const { commands } = getPageRequest(query);
+      expect(commands).toEqual([
+        ...LATEST_VERSION_PER_EVENT,
+        'WHERE TO_LOWER(title) LIKE "*checkout*" OR TO_LOWER(summary) LIKE "*checkout*" OR TO_LOWER(symptom_hypothesis) LIKE "*checkout*" OR TO_LOWER(event_id) == TO_LOWER("checkout")',
+        ...FIRST_PAGE,
+      ]);
     });
   });
 

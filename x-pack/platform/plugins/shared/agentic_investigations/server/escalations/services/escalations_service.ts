@@ -150,10 +150,13 @@ export class EscalationsService {
       exclude: [ESCALATION_LINKED_INVESTIGATIONS_FIELD, 'status', 'close_reason'],
     });
 
+    // Dedupe
+    const assignees = [...new Set(body.assignees)];
+
     const metadata = {
       ...filteredMetadata,
       [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [body.linked_investigation_id],
-      ...(body.assignees?.length ? { [ESCALATION_ASSIGNEES_FIELD]: body.assignees } : {}),
+      [ESCALATION_ASSIGNEES_FIELD]: assignees,
     };
 
     const accessControl =
@@ -161,7 +164,7 @@ export class EscalationsService {
         ? { access_mode: ConversationAccessControlMode.Public }
         : {
             access_mode: ConversationAccessControlMode.Private,
-            entries: body.collaborators.map((id) => ({
+            entries: assignees.map((id) => ({
               type: 'user' as const,
               id,
               role: ConversationAccessControlRole.Member,

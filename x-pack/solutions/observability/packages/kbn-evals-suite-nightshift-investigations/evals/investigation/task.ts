@@ -8,6 +8,7 @@
 import { setTimeout } from 'timers/promises';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { EvalConnector } from '@kbn/evals';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type {
   StartInvestigationResponse,
@@ -54,7 +55,8 @@ const boundOutput = (output: InvestigationTaskOutput): InvestigationTaskOutput =
 /** Runs a manual investigation and retains a bounded report with references to its full evidence. */
 export const runInvestigation = async (
   fetch: HttpHandler,
-  example: InvestigationExample
+  example: InvestigationExample,
+  connector: Pick<EvalConnector, 'id'>
 ): Promise<InvestigationTaskOutput> => {
   const started = Date.now();
   const output: InvestigationTaskOutput = {
@@ -67,7 +69,11 @@ export const runInvestigation = async (
       '/internal/nightshift/investigations',
       {
         method: 'POST',
-        body: JSON.stringify({ subject: { type: 'manual' }, message: example.input.question }),
+        body: JSON.stringify({
+          subject: { type: 'manual' },
+          message: example.input.question,
+          connector_id: connector.id,
+        }),
       }
     );
     output.investigation_id = investigationId;
@@ -107,22 +113,13 @@ export const runInvestigation = async (
           output.execution_error;
       }
     }
-    const {
-      summary,
-      conclusion,
-      severity,
-      hypotheses,
-      recommendations,
-      blind_spots: blindSpots,
-      impact,
-    } = investigation;
+    const { summary, conclusion, severity, hypotheses, recommendations, impact } = investigation;
     output.structured_report = {
       summary,
       conclusion,
       severity,
       hypotheses,
       recommendations,
-      blind_spots: blindSpots,
       impact,
     };
     if (output.conversation_id) {
