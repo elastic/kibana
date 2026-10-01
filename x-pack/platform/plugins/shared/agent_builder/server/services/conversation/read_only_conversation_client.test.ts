@@ -94,6 +94,17 @@ describe('createConversationPublicClient', () => {
     expect(result).toEqual(conversations);
   });
 
+  it('delegates getByOrigin() to the internal conversation client', async () => {
+    const conversation = createEmptyConversation({ id: 'conv-1' });
+    internalClient.getByOrigin.mockResolvedValue(conversation);
+    const origin = { external_conversation_id: 'team:T1/channel:C1/thread:1712345678.000100' };
+
+    const result = await publicClient.getByOrigin(origin);
+
+    expect(internalClient.getByOrigin).toHaveBeenCalledWith(origin);
+    expect(result).toEqual(conversation);
+  });
+
   describe('create()', () => {
     beforeEach(() => {
       internalClient.exists.mockResolvedValue(false);
@@ -129,6 +140,16 @@ describe('createConversationPublicClient', () => {
       });
     });
 
+    it('passes origin through to the internal client', async () => {
+      const origin = { external_conversation_id: 'team:T1/channel:C1/thread:1712345678.000100' };
+
+      await publicClient.create({ id: 'conv-1', origin });
+
+      expect(internalClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'conv-1', origin })
+      );
+    });
+
     it('validates agent access before writing', async () => {
       agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'bad-agent' }));
 
@@ -158,6 +179,7 @@ describe('createConversationPublicClient', () => {
       expect.arrayContaining([
         'get',
         'bulkGet',
+        'getByOrigin',
         'list',
         'search',
         'create',
