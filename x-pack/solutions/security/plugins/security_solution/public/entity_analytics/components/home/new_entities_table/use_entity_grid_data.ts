@@ -28,9 +28,9 @@ import {
   esqlResponseToRows,
   ENTITY_ID_FIELD,
   GROUP_SIZE_FIELD,
+  enrichEntityRows,
 } from './common';
-import { ALL_COLUMNS_LIST } from './columns/registry';
-import { enrichEntityRows } from './enrich_entity_rows';
+import { ALL_COLUMNS_LIST, ENRICH_FNS } from './columns/registry';
 
 const GRID_QUERY_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.queryError',
@@ -253,7 +253,7 @@ export const useEntityGridData = ({
         entityExpression,
       };
 
-      return enrichEntityRows(rows, args, skip, { runQuery, http });
+      return enrichEntityRows(rows, args, skip, { runQuery, http }, ENRICH_FNS);
     },
     {
       enabled: !!concreteEntityIndexName && shellQuery.isSuccess && shellRows != null,

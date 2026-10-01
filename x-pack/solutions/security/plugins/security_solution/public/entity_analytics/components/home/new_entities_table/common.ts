@@ -343,3 +343,16 @@ export interface EntityGridResponse {
   next_cursor: string | null;
   total: number | null;
 }
+
+/** Runs all page enrichers on a shallow copy of `rows` (enrichers mutate in place). */
+export const enrichEntityRows = async (
+  rows: Row[],
+  args: QueryArgs,
+  skip: Set<string>,
+  ctx: RunContext,
+  enrichFns: EnrichFn[]
+): Promise<Row[]> => {
+  const copy = rows.map((row) => ({ ...row }));
+  await Promise.all(enrichFns.map((fn) => fn(copy, args, skip, ctx)));
+  return copy;
+};

@@ -156,7 +156,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
     ...filters.watchlists
       .filter((id) => !watchlistNames.has(id))
       .map((id) => ({ id, name: id, count: counts.watchlists[id] ?? 0 })),
-  ];
+  ].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
