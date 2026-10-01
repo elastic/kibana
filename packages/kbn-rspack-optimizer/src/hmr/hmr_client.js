@@ -382,6 +382,14 @@ if (window.__kbnHmrActive__ && module.hot) {
         }
 
         if (data.reload) {
+          // Replay of a reload this page already applied would loop. sessionStorage
+          // survives the reload, so the new EventSource can recognize the same id.
+          if (data.id && window.sessionStorage.getItem('__kbnHmrReloadId__') === data.id) {
+            return;
+          }
+          if (data.id) {
+            window.sessionStorage.setItem('__kbnHmrReloadId__', data.id);
+          }
           console.log(LOG_PREFIX + ' Shared bundles updated, reloading page...');
           window.location.reload();
           return;

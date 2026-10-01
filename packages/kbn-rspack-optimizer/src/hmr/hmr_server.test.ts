@@ -140,7 +140,25 @@ describe('HmrServer', () => {
     server.broadcastReload(['src/shared.ts']);
     await new Promise((r) => setTimeout(r, 50));
 
-    expect(data.join('')).toContain('"reload":true,"files":["src/shared.ts"]');
+    const payload = data.join('');
+    expect(payload).toContain('"reload":true');
+    expect(payload).toContain('"files":["src/shared.ts"]');
+    expect(payload).toMatch(/"id":"[0-9a-f-]{36}"/);
+    res.destroy();
+  });
+
+  it('replays a reload with the same id so the client can ignore it', async () => {
+    server = new HmrServer();
+    const port = await server.start();
+
+    server.broadcastReload(['src/shared.ts']);
+
+    const { res, data } = await connectClient(port);
+    await new Promise((r) => setTimeout(r, 50));
+
+    const payload = data.join('');
+    expect(payload).toContain('"replay":true');
+    expect(payload).toMatch(/"reload":true,"id":"[0-9a-f-]{36}"/);
     res.destroy();
   });
 

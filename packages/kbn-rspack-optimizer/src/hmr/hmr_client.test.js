@@ -108,6 +108,7 @@ describe('hmr_client', () => {
     document.getElementById('__kbn_hmr_error_overlay__')?.remove();
     document.body.replaceChildren();
     document.head.querySelectorAll('style').forEach((n) => n.remove());
+    window.sessionStorage.clear();
   });
 
   it('constructs EventSource against localhost and HMR port', () => {
@@ -169,6 +170,32 @@ describe('hmr_client', () => {
       expect.stringContaining('Shared bundles updated, reloading page')
     );
     expect(hot.check).not.toHaveBeenCalled();
+  });
+
+  it('ignores a replayed reload id this page already applied', async () => {
+    loadHmrClient();
+    const source = eventSourceInstances[0];
+
+    source.onmessage({
+      data: JSON.stringify({ reload: true, id: 'reload-1', files: ['src/shared.ts'] }),
+    });
+    expect(console.log).toHaveBeenCalledWith(
+      expect.stringContaining('Shared bundles updated, reloading page')
+    );
+
+    console.log.mockClear();
+
+    source.onmessage({
+      data: JSON.stringify({
+        reload: true,
+        id: 'reload-1',
+        files: ['src/shared.ts'],
+        replay: true,
+      }),
+    });
+    expect(console.log).not.toHaveBeenCalledWith(
+      expect.stringContaining('Shared bundles updated, reloading page')
+    );
   });
 
   it('handles errors SSE: logs, shows overlay when not replay, sets error state', async () => {

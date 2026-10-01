@@ -246,6 +246,7 @@ async function runWatchBuild(
     let hasResolvedFirstBuild = false;
     let isShuttingDown = false;
     const previousAssetSizes = new Map<string, number>();
+    const previousSharedHashes = new Map<string, string>();
     let previousBuildHash: string | undefined;
     let resolveDone: () => void;
     const done = new Promise<void>((r) => {
@@ -352,6 +353,8 @@ async function runWatchBuild(
           for (const asset of result.assets ?? []) {
             previousAssetSizes.set(asset.name, asset.size);
           }
+          // Seed hashes so a later Kibana-only rebuild is not treated as a shared rebuild.
+          sharedCompilersChanged(childCompilerHashes(stats), previousSharedHashes);
           log?.debug(`Bundles ready at ${BUNDLES_SUBDIR}/`);
           const kibanaStats = findKibanaStats(stats);
           if (kibanaStats.hash && hmrServer) {
@@ -409,8 +412,9 @@ async function runWatchBuild(
                 .map((file) => file.replace(repoRoot + '/', ''))
             : []
         );
-        const sharedCompilerChanged = stats.stats.some(
-          ({ compilation }) => compilation.name !== KIBANA_COMPILER
+        const sharedCompilerChanged = sharedCompilersChanged(
+          childCompilerHashes(stats),
+          previousSharedHashes
         );
         if (hmrServer) {
           if (sharedCompilerChanged) {
@@ -497,6 +501,31 @@ function processMultiStats(
   }
 
   return processStats(findKibanaStats(stats), log, options);
+}
+
+export function sharedCompilersChanged(
+  children: ReadonlyArray<{ name?: string | null; hash?: string | null }>,
+  previousHashes: Map<string, string>
+): boolean {
+  let changed = false;
+  for (const child of children) {
+    if (!child.name || child.name === KIBANA_COMPILER) {
+      continue;
+    }
+    const hash = child.hash ?? '';
+    if (previousHashes.get(child.name) !== hash) {
+      changed = true;
+    }
+    previousHashes.set(child.name, hash);
+  }
+  return changed;
+}
+
+function childCompilerHashes(stats: MultiStats): Array<{ name?: string; hash?: string }> {
+  return stats.stats.map((child) => ({
+    name: child.compilation.name,
+    hash: child.hash,
+  }));
 }
 
 function findKibanaStats(stats: MultiStats): Stats {
