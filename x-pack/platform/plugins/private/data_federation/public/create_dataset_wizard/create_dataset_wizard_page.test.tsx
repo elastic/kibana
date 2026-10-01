@@ -1332,4 +1332,177 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetWizardAdditionalStep')).toBeInTheDocument();
     expect(getByText(createDatasetWizardStrings.settingsDelimiterInvalid)).toBeInTheDocument();
   });
+
+  describe('create mode step navigation', () => {
+    const clickStep = async (
+      getByTestId: ReturnType<typeof render>['getByTestId'],
+      stepId: string
+    ) => {
+      await act(async () => {
+        fireEvent.click(getByTestId(`createDatasetWizardStep-${stepId}`));
+      });
+    };
+
+    const fillDatasetStep = async ({
+      getByTestId,
+      findByTestId,
+    }: Pick<ReturnType<typeof render>, 'getByTestId' | 'findByTestId'>) => {
+      fireEvent.click(getByTestId('createDatasetDataSource'));
+      fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+      fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+      fireEvent.change(getByTestId('createDatasetResource'), {
+        target: { value: 's3://bucket/*' },
+      });
+      selectFormat(getByTestId, 'csv');
+      // Let the format popover finish closing before asserting.
+      await act(async () => {});
+    };
+
+    it('allows skipping the optional Additional settings step but not the Mapping step', async () => {
+      const { getByTestId, findByTestId, queryByTestId } = renderWizard();
+      await fillDatasetStep({ getByTestId, findByTestId });
+
+      expect(getByTestId('createDatasetWizardStep-mapping')).toBeEnabled();
+      expect(getByTestId('createDatasetWizardStep-review')).toBeDisabled();
+
+      await clickStep(getByTestId, 'mapping');
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardMappingStep'))
+      ).toBeInTheDocument();
+      expect(queryByTestId('createDatasetWizardAdditionalStep')).toBeNull();
+
+      fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
+        target: { value: 'event_time' },
+      });
+      await clickStep(getByTestId, 'dataset');
+      expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
+      expect(getByTestId('createDatasetWizardStep-review')).toBeEnabled();
+
+      await clickStep(getByTestId, 'review');
+      expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
+    });
+
+    it('does not allow skipping Additional settings once it was left invalid', async () => {
+      const { getByTestId, findByTestId } = renderWizard();
+      await fillDatasetStep({ getByTestId, findByTestId });
+
+      await clickNext(getByTestId);
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+      ).toBeInTheDocument();
+      const advancedAccordion = getByTestId('createDatasetWizardAdvancedSettings');
+      fireEvent.click(within(advancedAccordion).getByRole('button', { expanded: false }));
+      fireEvent.change(getByTestId('createDatasetSettingsEscape'), { target: { value: '\\a' } });
+      await clickBack(getByTestId);
+      expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
+
+      expect(getByTestId('createDatasetWizardStep-mapping')).toBeDisabled();
+      expect(getByTestId('createDatasetWizardStep-settings')).toBeEnabled();
+    });
+  });
+
+  describe('edit mode step navigation', () => {
+    const renderEditWizard = (initialDataSet: DataSetWithName) => {
+      const add = jest.fn().mockResolvedValue(undefined);
+      const view = render(
+        <EuiProvider>
+          <I18nProvider>
+            <MockAppHeaderProvider>
+              <Router
+                history={createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] })}
+              >
+                <KibanaContextProvider
+                  services={{
+                    docLinks: docLinksMock,
+                    datasetsClient: { add, delete: jest.fn() },
+                    dataSourcesClient: { add: jest.fn() },
+                  }}
+                >
+                  <CreateDatasetWizardPage
+                    dataSources={dataSources}
+                    existingDataSetNames={['logs-dataset']}
+                    loadDataSets={jest.fn().mockResolvedValue(undefined)}
+                    loadDataSources={jest.fn().mockResolvedValue(undefined)}
+                    initialDataSet={initialDataSet}
+                  />
+                </KibanaContextProvider>
+              </Router>
+            </MockAppHeaderProvider>
+          </I18nProvider>
+        </EuiProvider>
+      );
+      return { ...view, add };
+    };
+
+    const clickStep = async (
+      getByTestId: ReturnType<typeof render>['getByTestId'],
+      stepId: string
+    ) => {
+      await act(async () => {
+        fireEvent.click(getByTestId(`createDatasetWizardStep-${stepId}`));
+      });
+    };
+
+    it('does not allow skipping a step that has not passed validation', async () => {
+      const { getByTestId, queryByTestId, add } = renderEditWizard({
+        name: 'logs-dataset',
+        data_source: 'source-1',
+        resource: 's3://bucket/*',
+        settings: { format: 'csv', delimiter: 'ab' },
+      });
+
+      expect(getByTestId('createDatasetWizardStep-review')).toBeDisabled();
+      await clickStep(getByTestId, 'review');
+      expect(queryByTestId('createDatasetWizardReviewStep')).toBeNull();
+      expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
+      expect(add).not.toHaveBeenCalled();
+    });
+
+    it('does not allow skipping a step that was left invalid via Back', async () => {
+      const { getByTestId, queryByTestId, add } = renderEditWizard({
+        name: 'logs-dataset',
+        data_source: 'source-1',
+        resource: 's3://bucket/*',
+        settings: { format: 'csv' },
+      });
+
+      // Validate every step once so jumping ahead is allowed.
+      await clickNext(getByTestId);
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+      ).toBeInTheDocument();
+      await clickNext(getByTestId);
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardMappingStep'))
+      ).toBeInTheDocument();
+      await clickNext(getByTestId);
+      expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
+      await clickStep(getByTestId, 'dataset');
+      expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
+      expect(getByTestId('createDatasetWizardStep-review')).toBeEnabled();
+
+      // Make Additional settings invalid, then leave it via Back without fixing it.
+      await clickNext(getByTestId);
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+      ).toBeInTheDocument();
+      const advancedAccordion = getByTestId('createDatasetWizardAdvancedSettings');
+      fireEvent.click(within(advancedAccordion).getByRole('button', { expanded: false }));
+      fireEvent.change(getByTestId('createDatasetSettingsEscape'), { target: { value: '\\a' } });
+      await clickBack(getByTestId);
+      expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
+
+      expect(getByTestId('createDatasetWizardStep-review')).toBeDisabled();
+      expect(getByTestId('createDatasetWizardStep-mapping')).toBeDisabled();
+      await clickStep(getByTestId, 'review');
+      expect(queryByTestId('createDatasetWizardReviewStep')).toBeNull();
+      expect(add).not.toHaveBeenCalled();
+
+      // The invalid step itself can still be reached and fixed.
+      await clickStep(getByTestId, 'settings');
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+      ).toBeInTheDocument();
+    });
+  });
 });

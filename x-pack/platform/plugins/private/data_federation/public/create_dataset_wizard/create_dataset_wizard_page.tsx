@@ -46,6 +46,7 @@ const STEPS: Array<{ id: DatasetWizardStepId; label: string }> = [
 const LAST_STEP_INDEX = STEPS.length - 1;
 const INITIAL_STEP_CONTENT: DatasetWizardStepContent = { validate: async () => true };
 const NARROW_STEPS: DatasetWizardStepId[] = ['dataset'];
+const OPTIONAL_STEP_IDS: DatasetWizardStepId[] = ['settings'];
 
 const MAX_WIDTH_NARROW_PX = 600;
 const MAX_WIDTH_WIDE_PX = 1024;
@@ -82,10 +83,29 @@ export function CreateDatasetWizardPage({
 
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [stepContent, setStepContent] = useState(INITIAL_STEP_CONTENT);
+  // Field rules only run while their step is mounted, so a step can only be skipped over once it
+  // has passed validation, and its result is re-recorded whenever it is left in either direction.
+  // A new dataset's optional steps hold defaults that always pass; saved values may not.
+  const [validatedStepIds, setValidatedStepIds] = useState<ReadonlySet<DatasetWizardStepId>>(
+    () => new Set(isEditMode ? [] : OPTIONAL_STEP_IDS)
+  );
+
+  const skipsUnvalidatedStep = (index: number) =>
+    STEPS.slice(activeStepIndex + 1, index).some(({ id }) => !validatedStepIds.has(id));
 
   const goToStep = async (index: number) => {
     if (index === activeStepIndex) return;
-    if (index > activeStepIndex && !(await stepContent.validate())) return;
+    const isForward = index > activeStepIndex;
+    if (isForward && skipsUnvalidatedStep(index)) return;
+    const isActiveStepValid = await stepContent.validate();
+    if (isForward && !isActiveStepValid) return;
+    const activeId = STEPS[activeStepIndex].id;
+    setValidatedStepIds((prev) => {
+      const next = new Set(prev);
+      if (isActiveStepValid) next.add(activeId);
+      else next.delete(activeId);
+      return next;
+    });
     setStepContent(INITIAL_STEP_CONTENT);
     setActiveStepIndex(index);
   };
@@ -135,8 +155,7 @@ export function CreateDatasetWizardPage({
   const isLastStep = activeStepIndex === LAST_STEP_INDEX;
 
   const isStepDisabled = (index: number) =>
-    index > activeStepIndex &&
-    (stepContent.isValid === false || (!isEditMode && index > activeStepIndex + 1));
+    index > activeStepIndex && (stepContent.isValid === false || skipsUnvalidatedStep(index));
 
   const apiError = useMemo(
     () =>
