@@ -40,7 +40,8 @@ const createSetupDeps = ({
 } = {}) =>
   ({
     streams: {
-      registerKnowledgeIndicatorClientProvider: jest.fn(),
+      getAttachmentClient: jest.fn(),
+      getStreamsClient: jest.fn(),
     },
     nightshiftSources: { onSourceChange },
     ...(registerInvestigationQuota
