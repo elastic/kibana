@@ -60,12 +60,13 @@ export const hypothesesAttachment = defineInvestigationAttachment<
   type: HYPOTHESES_ATTACHMENT_TYPE,
   storageSettings: hypothesesStorageSettings,
   schema: investigationHypothesesSchema,
+  // The investigation overview shows hypotheses; the chat does not.
+  hiddenInConversation: true,
   format: formatHypothesesForAgent,
   describe: () => 'Hypotheses',
   agentDescription:
     'Investigation hypotheses are the candidate causes the investigation considered, each investigating, dismissed, or confirmed, with a confidence and the evidence it rests on.\n\n' +
     'Rules:\n' +
     '- Update them with the `investigations.set_hypotheses` tool, sending the full list every time.\n' +
-    '- Whenever you discuss the hypotheses in your response, render them inline with ' +
-    '`<render_attachment id="ATTACHMENT_ID" />` (replace ATTACHMENT_ID with the actual id).',
+    "- The investigation's overview shows the hypotheses, not the chat; do not render them inline.",
 });

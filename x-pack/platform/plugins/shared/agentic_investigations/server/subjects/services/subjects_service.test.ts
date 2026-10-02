@@ -54,11 +54,11 @@ const createAttachmentClient = (definition: AttachmentTypeDefinition) => {
     getTypeDefinition: (type) => (type === SUBJECT_ATTACHMENT_TYPE ? definition : undefined),
   });
   const client = {
-    create: jest.fn(async ({ id, type, data, origin }) => {
+    create: jest.fn(async ({ id, type, data, origin, hidden }) => {
       if (id && manager.getAttachmentRecord(id)) {
         throw createAttachmentAlreadyExistsError({ attachmentId: id });
       }
-      return manager.add({ id, type, data, origin }, ATTACHMENT_REF_ACTOR.user, undefined, {
+      return manager.add({ id, type, data, origin, hidden }, ATTACHMENT_REF_ACTOR.user, undefined, {
         request,
       });
     }),
@@ -134,8 +134,17 @@ describe('SubjectsService', () => {
       origin: alertId,
       readonly: true,
       active: true,
+      hidden: true,
     });
     expect(manager.getActive()).toHaveLength(2);
+    expect(manager.drainChanges()).toEqual([]);
+  });
+
+  it('is hidden in the conversation and not rendered inline', async () => {
+    const { definition } = setup();
+
+    expect(subjectAttachment.hiddenInConversation).toBe(true);
+    expect(await definition.getAgentDescription?.()).not.toContain('render_attachment');
   });
 
   it('keeps fields a later write leaves out and merges Slack fields', async () => {
