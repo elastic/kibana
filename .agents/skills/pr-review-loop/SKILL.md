@@ -84,6 +84,8 @@ For each reviewer:
 
 When a round pushed only a merge commit (see step 3), skip this step: the reviewers don't review merges. Go to the [Final CI wait](#final-ci-wait).
 
+If no reviewer is active, skip this step and the thread collection in step 2. The loop then only handles CI and merge conflicts.
+
 ### 2. Collect
 
 For each active reviewer:
@@ -94,7 +96,7 @@ pr.sh threads <pr> --reviewer <libra|claude>
 
 This also returns older threads that were never answered, so nothing gets lost between rounds. Threads with `followUp: true` are the reviewer answering a reply. Its answer is in `latestBody`, and `otherReplies` counts the replies already posted. Handle them in step 4 under "Follow-ups", not as new findings. Each reference says where else that reviewer reports findings, such as Libra's review body.
 
-Then take a CI snapshot of the PR head:
+If CI is active, take a snapshot of the PR head:
 
 ```bash
 pr.sh wait <pr> --for ci --timeout 0
@@ -102,7 +104,7 @@ pr.sh wait <pr> --for ci --timeout 0
 
 If it reports `failed`, collect the failures as described in [references/ci.md](references/ci.md). If it's `pending` or `passed`, there's nothing to collect from CI this round.
 
-If every reviewer was `clean` or had no review, `threads` printed nothing for any of them, CI hasn't failed, and the PR isn't conflicting, go to the [Final CI wait](#final-ci-wait).
+If no active reviewer has findings or unanswered threads, CI is off or hasn't failed, and the PR isn't conflicting, go to the [Final CI wait](#final-ci-wait).
 
 ### 3. Sync with the base branch
 
@@ -203,13 +205,13 @@ Write the replies for human reviewers: short, plain sentences, with no restateme
 
 If steps 3 or 8 made a commit, `git push` to the branch's upstream. If the push is rejected because kibanamachine pushed in the meantime, run `git pull --rebase` (`--rebase=merges` if there's a merge commit), push again, and edit the replies to quote the new SHA (`gh api -X PATCH repos/elastic/kibana/pulls/comments/<reply-id> -F body=@<file>`). Never force-push. Note the pushed SHA with `git rev-parse HEAD`, then resolve the threads of valid findings as each reference describes. Go back to step 1 with `--sha <pushed-sha>`.
 
-After round 5, run only `wait` on the pushed SHA and, if it reports findings, step 2's collection, so the final report can give each reviewer's state on that commit and link its new findings. Then do the final CI wait and stop.
+After round 5, if any reviewer is active, run only `wait` on the pushed SHA and, if it reports findings, step 2's collection, so the final report can give each reviewer's state on that commit and link its new findings. Then do the final CI wait and stop.
 
 If nothing was committed, there's no push and the reviewers won't review again. Go to the final CI wait.
 
 ## Final CI wait
 
-When the reviewers have nothing left, or the loop is out of rounds or has stopped without a push, wait for CI on the PR head:
+When the reviewers have nothing left, or the loop is out of rounds or has stopped without a push, wait for CI on the PR head. If CI is off, skip the wait, say in the final report that CI is off and why (from `signals`), and stop.
 
 ```bash
 pr.sh wait <pr> --for ci
