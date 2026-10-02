@@ -7,12 +7,7 @@
 
 import type { GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
-import {
-  getEndpointArtifactsApiService,
-  PUBLIC_API_HEADERS,
-  tags,
-  type KbnClient,
-} from '@kbn/scout-security';
+import { PUBLIC_API_HEADERS, tags, type KbnClient } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
@@ -109,11 +104,11 @@ apiTest.describe(
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse | undefined;
     let packagePolicyId = '';
+    let createdItemId = '';
     let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ kbnClient, esClient, log, requestAuth }) => {
+    apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {
       apiTest.setTimeout(SUITE_TIMEOUT_MS);
-      const endpointArtifacts = getEndpointArtifactsApiService({ kbnClient, esClient, log });
       const adminApiCredentials = await requestAuth.getApiKey('admin');
       headers = {
         ...adminApiCredentials.apiKeyHeader,
@@ -121,26 +116,42 @@ apiTest.describe(
         ...PUBLIC_API_HEADERS,
       };
       await setupFleetForEndpoint(kbnClient, log);
-      await endpointArtifacts.deleteList(TRUSTED_APPS_LIST_ID);
       indexedPolicy = await createScoutEndpointPolicy(
         kbnClient,
         log,
         `scout-artifact-revision-${Date.now()}`
       );
       packagePolicyId = getCreatedPackagePolicy(indexedPolicy).id;
-      // Create the empty list before the baseline read. A later item write is
-      // what should dispatch a new artifact manifest.
-      await endpointArtifacts.createList({
-        listId: TRUSTED_APPS_LIST_ID,
-        type: ExceptionListTypeEnum.ENDPOINT,
+      // Ensure the shared list exists without deleting it. createList wipes
+      // every item for this list id, and other specs on this stack may own some.
+      await kbnClient.request({
+        method: 'POST',
+        path: '/api/exception_lists',
+        headers: PUBLIC_API_HEADERS,
+        ignoreErrors: [409],
+        retries: 0,
+        body: {
+          name: TRUSTED_APPS_LIST_ID,
+          description: 'Scout endpoint artifact list',
+          list_id: TRUSTED_APPS_LIST_ID,
+          type: ExceptionListTypeEnum.ENDPOINT,
+          namespace_type: 'agnostic',
+        },
       });
       await waitForStableRevision(() => readPackagePolicyRevision(kbnClient, packagePolicyId));
     });
 
-    apiTest.afterAll(async ({ kbnClient, esClient, log }) => {
-      await getEndpointArtifactsApiService({ kbnClient, esClient, log }).deleteList(
-        TRUSTED_APPS_LIST_ID
-      );
+    apiTest.afterAll(async ({ kbnClient, log }) => {
+      if (createdItemId) {
+        await kbnClient.request({
+          method: 'DELETE',
+          path: '/api/exception_lists/items',
+          query: { item_id: createdItemId, namespace_type: 'agnostic' },
+          headers: PUBLIC_API_HEADERS,
+          ignoreErrors: [404],
+          retries: 0,
+        });
+      }
       if (indexedPolicy) {
         await deleteScoutEndpointPolicy(kbnClient, log, indexedPolicy);
       }
@@ -178,10 +189,16 @@ apiTest.describe(
           },
         });
         expect(createResponse).toHaveStatusCode(200);
+        const itemId = (createResponse.body as { item_id: string }).item_id;
+        expect(typeof itemId).toBe('string');
+        expect(itemId.length).toBeGreaterThan(0);
+        createdItemId = itemId;
         await waitForRevision(read, baseline + 1);
 
         const deleteResponse = await apiClient.delete(
-          `/api/exception_lists?list_id=${TRUSTED_APPS_LIST_ID}&namespace_type=agnostic`,
+          `/api/exception_lists/items?item_id=${encodeURIComponent(
+            itemId
+          )}&namespace_type=agnostic`,
           { headers, responseType: 'json' }
         );
         expect(deleteResponse).toHaveStatusCode(200);
