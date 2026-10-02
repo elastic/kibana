@@ -41,7 +41,10 @@
     "@kbn/i18n-react",
     "@kbn/ui-callout",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/proposals-ui"
+    "@kbn/proposals-ui",
+    "@kbn/charts-theme",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/visualization-utils"
   ],
   "exclude": ["target/**/*"]
 }

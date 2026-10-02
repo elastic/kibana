@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
+import type { InvestigationEvidence } from '../../../common/evidence';
 import type { User } from '../../../common/user';
 import {
   MAX_ENTITY_IDS,
@@ -13,6 +13,13 @@ import {
   MAX_IMPACT_ID_LENGTH,
 } from '../../../common/impact/constants';
 import type { AttachImpactRequest, Impact, ImpactEntity } from '../../../common/impact/impact';
+import {
+  hashInvestigationAttachmentId,
+  InvestigationAttachmentConflictError,
+  type InvestigationAttachmentDocService,
+  type WrittenInvestigationAttachment,
+} from '../../investigation_attachments';
+import { impactAttachment } from '../attachments/impact_attachment_type';
 import { ImpactConflictError, ImpactInvalidRequestError, ImpactNotFoundError } from './errors';
 import type { ImpactDocument, ImpactStorageClient } from '../storage/impact_storage';
 
@@ -20,19 +27,19 @@ interface ImpactServiceDeps {
   storage: ImpactStorageClient;
 }
 
-/** Two writers converge on the retry; the third attempt is spare. */
-const MAX_ATTACH_ATTEMPTS = 3;
+/** Document indexed by `attach` or `set`, plus the body that write overwrote. */
+export type WrittenAttach = WrittenInvestigationAttachment<ImpactDocument>;
 
-interface VersionedImpact extends Impact {
-  seqNo: number;
-  primaryTerm: number;
-}
-
-/** Document indexed by `attach`, plus the body that index overwrote. */
-export interface WrittenAttach {
-  written: Impact;
-  /** Absent when this attempt created the document. */
-  previous?: Impact;
+/**
+ * What the agent reports through `investigations.set_impact`. Each field that is present
+ * replaces the stored one; an absent field keeps what is stored. `null` removes `summary` or
+ * `evidence`, and `entities: []` removes the entities.
+ */
+export interface SetImpactParams {
+  conversationId: string;
+  summary?: string | null;
+  evidence?: InvestigationEvidence | null;
+  entities?: ImpactEntity[];
 }
 
 /**
@@ -41,8 +48,18 @@ export interface WrittenAttach {
  * hydrate-by-conversationId plus filtering on `entities.id` requires.
  */
 export class ImpactService {
-  constructor(private readonly deps: ImpactServiceDeps) {}
+  private readonly documents: InvestigationAttachmentDocService<ImpactDocument>;
 
+  constructor(deps: ImpactServiceDeps) {
+    this.documents = impactAttachment.createServiceFromStorage(deps.storage);
+  }
+
+  /** The generic store, for the Agent Builder attachment type's resolve and staleness checks. */
+  getDocumentService(): InvestigationAttachmentDocService<ImpactDocument> {
+    return this.documents;
+  }
+
+  /** Route and workflow step write: unions `entities` by id onto the stored document. */
   async attach(
     params: AttachImpactRequest,
     { spaceId, user }: { spaceId: string; user?: User }
@@ -51,33 +68,91 @@ export class ImpactService {
     if (entities.length === 0) {
       throw new ImpactInvalidRequestError('entities must contain at least one entity');
     }
-    if (entities.length > MAX_ENTITY_IDS) {
-      throw new ImpactInvalidRequestError(
-        `entities may not exceed ${MAX_ENTITY_IDS} unique ids for a conversation`
-      );
-    }
+    assertEntityCeiling(entities);
     assertBoundedId(spaceId, 'spaceId');
     assertBoundedId(params.conversationId, 'conversationId');
 
-    const id = impactDocumentId(spaceId, params.conversationId);
-    for (let attempt = 0; attempt < MAX_ATTACH_ATTEMPTS; attempt++) {
-      const attached = await this.writeAttach(id, params.conversationId, spaceId, entities, user);
-      if (attached) {
-        return attached;
+    return this.write(params.conversationId, spaceId, (existing) => {
+      const now = new Date().toISOString();
+      if (!existing) {
+        return {
+          spaceId,
+          conversationId: params.conversationId,
+          entities,
+          createdAt: now,
+          createdBy: user,
+          updatedAt: now,
+        };
       }
+      const merged = unionEntities([...(existing.entities ?? []), ...entities]);
+      assertEntityCeiling(merged);
+      return { ...withoutId(existing), entities: merged, updatedAt: now };
+    });
+  }
+
+  /**
+   * Agent write: a partial snapshot. Present fields replace the stored ones (entities as a
+   * whole list, deduped by id) and `null` removes them; absent fields are kept, so a route
+   * attach is not undone by an agent report that only touches the summary.
+   */
+  async set(
+    params: SetImpactParams,
+    { spaceId, user }: { spaceId: string; user?: User }
+  ): Promise<WrittenAttach> {
+    assertBoundedId(spaceId, 'spaceId');
+    assertBoundedId(params.conversationId, 'conversationId');
+    const entities = params.entities === undefined ? undefined : unionEntities(params.entities);
+    if (entities) {
+      assertEntityCeiling(entities);
     }
 
-    throw new ImpactConflictError(params.conversationId);
+    return this.write(params.conversationId, spaceId, (existing) => {
+      const now = new Date().toISOString();
+      const next: ImpactDocument = existing
+        ? { ...withoutId(existing), updatedAt: now }
+        : {
+            spaceId,
+            conversationId: params.conversationId,
+            createdAt: now,
+            createdBy: user,
+            updatedAt: now,
+          };
+      if (params.summary === null) {
+        delete next.summary;
+      } else if (params.summary !== undefined) {
+        next.summary = params.summary;
+      }
+      if (params.evidence === null) {
+        delete next.evidence;
+      } else if (params.evidence !== undefined) {
+        next.evidence = params.evidence;
+      }
+      if (entities !== undefined) {
+        if (entities.length > 0) {
+          next.entities = entities;
+        } else {
+          delete next.entities;
+        }
+      }
+      return next;
+    });
   }
 
   async getByConversationId(conversationId: string, spaceId: string): Promise<Impact> {
     assertBoundedId(spaceId, 'spaceId');
     assertBoundedId(conversationId, 'conversationId');
-    const existing = await this.findById(impactDocumentId(spaceId, conversationId));
+    const existing = await this.documents.get(impactDocumentId(spaceId, conversationId), spaceId);
     if (!existing) {
       throw new ImpactNotFoundError(conversationId);
     }
-    return withoutVersion(existing);
+    return existing;
+  }
+
+  /** Like {@link getByConversationId}, but undefined when the conversation has no impact. */
+  async findByConversationId(conversationId: string, spaceId: string): Promise<Impact | undefined> {
+    assertBoundedId(spaceId, 'spaceId');
+    assertBoundedId(conversationId, 'conversationId');
+    return this.documents.get(impactDocumentId(spaceId, conversationId), spaceId);
   }
 
   /** Loads an Impact document by id for by-reference attachment resolve. */
@@ -87,11 +162,11 @@ export class ImpactService {
       throw new ImpactNotFoundError(id);
     }
 
-    const existing = await this.findById(id);
-    if (!existing || existing.spaceId !== spaceId) {
+    const existing = await this.documents.get(id, spaceId);
+    if (!existing) {
       throw new ImpactNotFoundError(id);
     }
-    return withoutVersion(existing);
+    return existing;
   }
 
   /**
@@ -99,46 +174,8 @@ export class ImpactService {
    * document this call created, or restores `previous`, only while the stored
    * body is still the one `attach` wrote. `previous` is the body that write overwrote.
    */
-  async revertAttach({ written, previous }: { written: Impact; previous?: Impact }): Promise<void> {
-    const current = await this.findById(written.id);
-    if (!current || !sameImpactBody(current, written)) {
-      return;
-    }
-
-    if (!previous) {
-      try {
-        await this.deps.storage.delete({
-          id: written.id,
-          if_seq_no: current.seqNo,
-          if_primary_term: current.primaryTerm,
-        });
-      } catch (error) {
-        if (!isVersionConflict(error)) {
-          throw error;
-        }
-      }
-      return;
-    }
-
-    const document: ImpactDocument = {
-      spaceId: previous.spaceId,
-      conversationId: previous.conversationId,
-      entities: previous.entities,
-      createdAt: previous.createdAt,
-      createdBy: previous.createdBy,
-    };
-    try {
-      await this.deps.storage.index({
-        id: written.id,
-        document,
-        if_seq_no: current.seqNo,
-        if_primary_term: current.primaryTerm,
-      });
-    } catch (error) {
-      if (!isVersionConflict(error)) {
-        throw error;
-      }
-    }
+  async revertAttach(written: WrittenAttach): Promise<void> {
+    await this.documents.revert(written);
   }
 
   /**
@@ -147,7 +184,7 @@ export class ImpactService {
    * route: a capped in-process read is not a contract worth exposing.
    */
   async listByConversationIds(conversationIds: string[], spaceId: string): Promise<Impact[]> {
-    const ids = uniqueIds(conversationIds);
+    const ids = [...new Set(conversationIds)];
     if (ids.length === 0) {
       return [];
     }
@@ -161,127 +198,32 @@ export class ImpactService {
       assertBoundedId(conversationId, 'conversationId');
     }
 
-    const response = await this.deps.storage.search({
-      track_total_hits: false,
-      size: ids.length,
-      query: {
-        bool: {
-          filter: [{ term: { spaceId } }, { terms: { conversationId: ids } }],
-        },
-      },
-    });
-
     // The id is one document per space and conversation. A second hit is ignored.
     const byConversationId = new Map<string, Impact>();
-    for (const hit of response.hits.hits) {
-      if (hit._id === undefined || !hit._source) {
-        continue;
-      }
-      const impact = toImpact(hit._id, hit._source as ImpactDocument);
+    for (const impact of await this.documents.listByConversationIds(ids, spaceId)) {
       if (!byConversationId.has(impact.conversationId)) {
         byConversationId.set(impact.conversationId, impact);
       }
     }
-
     return [...byConversationId.values()];
   }
 
-  /**
-   * Returns the indexed document and the body it overwrote, or undefined when a
-   * concurrent attach won the version check and the caller should re-read and union again.
-   */
-  private async writeAttach(
-    id: string,
+  private async write(
     conversationId: string,
     spaceId: string,
-    entities: ImpactEntity[],
-    user?: User
-  ): Promise<WrittenAttach | undefined> {
-    const existing = await this.findById(id);
-    if (!existing) {
-      const document: ImpactDocument = {
-        spaceId,
-        conversationId,
-        entities,
-        createdAt: new Date().toISOString(),
-        createdBy: user,
-      };
-      try {
-        await this.deps.storage.index({ id, document, op_type: 'create' });
-        return { written: toImpact(id, document) };
-      } catch (error) {
-        if (isVersionConflict(error)) {
-          return undefined;
-        }
-        throw error;
-      }
-    }
-
-    const merged = unionEntities([...existing.entities, ...entities]);
-    if (merged.length > MAX_ENTITY_IDS) {
-      throw new ImpactInvalidRequestError(
-        `entities may not exceed ${MAX_ENTITY_IDS} unique ids for a conversation`
-      );
-    }
-
-    const document: ImpactDocument = {
-      spaceId: existing.spaceId,
-      conversationId: existing.conversationId,
-      entities: merged,
-      createdAt: existing.createdAt,
-      createdBy: existing.createdBy,
-    };
+    mutate: (existing: Impact | undefined) => ImpactDocument
+  ): Promise<WrittenAttach> {
     try {
-      await this.deps.storage.index({
-        id,
-        document,
-        if_seq_no: existing.seqNo,
-        if_primary_term: existing.primaryTerm,
+      return await this.documents.upsert({
+        id: impactDocumentId(spaceId, conversationId),
+        mutate,
       });
-      return { written: toImpact(id, document), previous: withoutVersion(existing) };
     } catch (error) {
-      if (isVersionConflict(error)) {
-        return undefined;
+      if (error instanceof InvestigationAttachmentConflictError) {
+        throw new ImpactConflictError(conversationId);
       }
       throw error;
     }
-  }
-
-  /**
-   * Versioned read for optimistic concurrency. Storage `get` is a search that
-   * does not request `_seq_no` / `_primary_term`, and a search hit omits them
-   * unless asked. This read asks, so a later attach can merge instead of
-   * failing closed on a document that is already there.
-   */
-  private async findById(id: string): Promise<VersionedImpact | undefined> {
-    const response = await this.deps.storage.search({
-      track_total_hits: false,
-      size: 1,
-      terminate_after: 1,
-      seq_no_primary_term: true,
-      query: {
-        bool: {
-          filter: [{ term: { _id: id } }],
-        },
-      },
-    });
-    const hit = response.hits.hits[0];
-    if (!hit) {
-      return undefined;
-    }
-    if (
-      hit._id === undefined ||
-      !hit._source ||
-      hit._seq_no === undefined ||
-      hit._primary_term === undefined
-    ) {
-      throw new Error(`Impact document [${id}] is missing concurrency metadata`);
-    }
-    return {
-      ...toImpact(hit._id, hit._source),
-      seqNo: hit._seq_no,
-      primaryTerm: hit._primary_term,
-    };
   }
 }
 
@@ -291,9 +233,7 @@ export class ImpactService {
  * length-prefixed pair.
  */
 export const impactDocumentId = (spaceId: string, conversationId: string): string =>
-  createHash('sha256')
-    .update(`${spaceId.length}:${spaceId}\0${conversationId.length}:${conversationId}`)
-    .digest('hex');
+  hashInvestigationAttachmentId(spaceId, conversationId);
 
 const assertBoundedId = (value: string, field: string): void => {
   if (value.length < 1 || value.length > MAX_IMPACT_ID_LENGTH) {
@@ -303,18 +243,15 @@ const assertBoundedId = (value: string, field: string): void => {
   }
 };
 
-const uniqueIds = (ids: string[]): string[] => {
-  const seen = new Set<string>();
-  const unique: string[] = [];
-  for (const id of ids) {
-    if (seen.has(id)) {
-      continue;
-    }
-    seen.add(id);
-    unique.push(id);
+const assertEntityCeiling = (entities: ImpactEntity[]): void => {
+  if (entities.length > MAX_ENTITY_IDS) {
+    throw new ImpactInvalidRequestError(
+      `entities may not exceed ${MAX_ENTITY_IDS} unique ids for a conversation`
+    );
   }
-  return unique;
 };
+
+const withoutId = ({ id: _id, ...document }: Impact): ImpactDocument => document;
 
 const definedEntity = (entity: ImpactEntity): ImpactEntity => {
   const stored: ImpactEntity = { id: entity.id };
@@ -322,10 +259,11 @@ const definedEntity = (entity: ImpactEntity): ImpactEntity => {
   if (entity.type !== undefined) stored.type = entity.type;
   if (entity.featureId !== undefined) stored.featureId = entity.featureId;
   if (entity.streamName !== undefined) stored.streamName = entity.streamName;
+  if (entity.evidence !== undefined) stored.evidence = entity.evidence;
   return stored;
 };
 
-/** First write wins the id. A later write fills only the fields it actually sends. */
+/** First write wins the id. A later write fills or replaces only the fields it actually sends. */
 const unionEntities = (entities: ImpactEntity[]): ImpactEntity[] => {
   const byId = new Map<string, ImpactEntity>();
   for (const entity of entities) {
@@ -342,30 +280,9 @@ const unionEntities = (entities: ImpactEntity[]): ImpactEntity[] => {
         type: entity.type ?? current.type,
         featureId: entity.featureId ?? current.featureId,
         streamName: entity.streamName ?? current.streamName,
+        evidence: entity.evidence ?? current.evidence,
       })
     );
   }
   return [...byId.values()];
 };
-
-const toImpact = (id: string, document: ImpactDocument): Impact => ({ id, ...document });
-
-const sameImpactBody = (left: Impact, right: Impact): boolean =>
-  left.spaceId === right.spaceId &&
-  left.conversationId === right.conversationId &&
-  left.createdAt === right.createdAt &&
-  JSON.stringify(left.createdBy ?? null) === JSON.stringify(right.createdBy ?? null) &&
-  JSON.stringify(left.entities) === JSON.stringify(right.entities);
-
-const withoutVersion = ({
-  seqNo: _seqNo,
-  primaryTerm: _primaryTerm,
-  ...impact
-}: VersionedImpact): Impact => impact;
-
-const statusCodeOf = (error: unknown): number | undefined => {
-  const candidate = error as { statusCode?: number; meta?: { statusCode?: number } };
-  return candidate.statusCode ?? candidate.meta?.statusCode;
-};
-
-const isVersionConflict = (error: unknown): boolean => statusCodeOf(error) === 409;

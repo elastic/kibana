@@ -66,7 +66,7 @@ export const getAttachImpactStepDefinition = ({
         return {
           output: {
             id: impact.id,
-            entities: impact.entities,
+            entities: impact.entities ?? [],
           },
         };
       } catch (error) {

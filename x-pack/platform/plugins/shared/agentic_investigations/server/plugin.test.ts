@@ -13,6 +13,8 @@ import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
 } from '../common/escalations/constants';
+import { IMPACT_ATTACHMENT_TYPE } from '../common/impact/attachment';
+import { SET_IMPACT_TOOL_ID } from '../common/impact/constants';
 import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
 import { ReopenInvestigationStepId } from '../common/investigations/step_types';
 import { registerImpactRoutes } from './impact/routes/register_routes';
@@ -54,7 +56,10 @@ const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = 
   const features = { registerKibanaFeature: jest.fn() };
 
   const workflowsExtensions = { registerStepDefinition: jest.fn() };
-  const agentBuilder = { attachments: { registerType: jest.fn() } };
+  const agentBuilder = {
+    attachments: { registerType: jest.fn() },
+    tools: { register: jest.fn() },
+  };
 
   plugin.setup(
     coreSetup as never,
@@ -194,6 +199,9 @@ describe('AgenticInvestigationsPlugin', () => {
       const { workflowsExtensions, agentBuilder } = setupPlugin();
 
       expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({ id: IMPACT_ATTACHMENT_TYPE, isReadonly: true })
+      );
 
       const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(
         ([definition]) => definition.id
@@ -203,6 +211,15 @@ describe('AgenticInvestigationsPlugin', () => {
         GetImpactStepId,
         ReopenInvestigationStepId,
       ]);
+    });
+
+    it('registers the set_impact agent tool during setup', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: SET_IMPACT_TOOL_ID })
+      );
     });
 
     it('does not resolve the authorization service until a step actually runs', () => {
