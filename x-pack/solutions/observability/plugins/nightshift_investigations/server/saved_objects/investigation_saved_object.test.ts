@@ -39,6 +39,9 @@ describe('nightshift investigation saved object model version 4', () => {
 
   it('registers a schema-only model version without data or mapping changes', () => {
     expect(modelVersion4?.changes).toEqual([]);
+    expect(Object.keys(modelVersions)).toEqual(['1', '2', '3', '4']);
+    expect(modelVersion4?.schemas?.create).toBeDefined();
+    expect(modelVersion4?.schemas?.forwardCompatibility).toBeDefined();
   });
 
   it('accepts an impact with a top-level summary and evidence and no entities on create', () => {
@@ -75,25 +78,11 @@ describe('nightshift investigation saved object model version 4', () => {
       })
     ).toThrow();
   });
-});
 
-describe('nightshift investigation saved object model version 5', () => {
-  const modelVersions = nightshiftInvestigationSavedObjectType.modelVersions as unknown as Record<
-    number,
-    SavedObjectsFullModelVersion
-  >;
-  const modelVersion5 = modelVersions[5];
-
-  it('registers a schema-only model version without data changes', () => {
-    expect(modelVersion5?.changes).toEqual([]);
-    expect(modelVersion5?.schemas?.create).toBeDefined();
-    expect(modelVersion5?.schemas?.forwardCompatibility).toBeDefined();
-  });
-
-  it('accepts immutable destinations and separate delivery attempts', () => {
-    const create = modelVersion5?.schemas?.create as { validate: (value: unknown) => unknown };
-    expect(() =>
-      create.validate({
+  it.each(['create', 'forwardCompatibility'] as const)(
+    'preserves immutable destinations and separate delivery attempts in the %s schema',
+    (schemaName) => {
+      const attributes = {
         title: 'Checkout latency',
         status: 'completed',
         subject_type: 'alert',
@@ -120,7 +109,11 @@ describe('nightshift investigation saved object model version 5', () => {
             sent_at: '2026-09-30T00:05:00.000Z',
           },
         ],
-      })
-    ).not.toThrow();
-  });
+      };
+      const attributesSchema = modelVersion4?.schemas?.[schemaName] as {
+        validate: (value: unknown) => unknown;
+      };
+      expect(attributesSchema.validate(attributes)).toEqual(attributes);
+    }
+  );
 });

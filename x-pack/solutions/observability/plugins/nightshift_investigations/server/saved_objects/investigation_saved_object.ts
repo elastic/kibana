@@ -96,8 +96,7 @@ const investigationAttributesSchemaV3 = investigationAttributesSchemaBase.extend
   title: schema.string({ maxLength: MAX_TITLE_LENGTH }),
 });
 
-// Adds the impact summary and evidence, makes impact entities optional, and drops blind spots.
-// None of these are queried beyond the existing flattened `impact` mapping.
+// Adds impact details and optional notification state without new mappings, and drops blind spots.
 const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends({
   blind_spots: undefined,
   impact: schema.maybe(
@@ -111,9 +110,6 @@ const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends(
       ),
     })
   ),
-});
-
-const investigationAttributesSchemaV5 = investigationAttributesSchemaV4.extends({
   notificationDestinations: opaqueArray(MAX_INVESTIGATION_NOTIFICATIONS),
   notifications: opaqueArray(MAX_INVESTIGATION_NOTIFICATIONS),
 });
@@ -170,13 +166,6 @@ export const nightshiftInvestigationSavedObjectType: SavedObjectsType<Investigat
       schemas: {
         create: investigationAttributesSchemaV4,
         forwardCompatibility: investigationAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
-      },
-    },
-    5: {
-      changes: [],
-      schemas: {
-        create: investigationAttributesSchemaV5,
-        forwardCompatibility: investigationAttributesSchemaV5.extends({}, { unknowns: 'ignore' }),
       },
     },
   },
