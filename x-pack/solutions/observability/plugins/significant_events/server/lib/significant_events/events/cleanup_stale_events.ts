@@ -20,7 +20,7 @@ const EVENT_STATUS_UPDATE_CONCURRENCY = 10;
 export const STALE_EVENT_ASSESSMENT_NOTE = i18n.translate(
   'xpack.significantEvents.staleEventCleanup.assessmentNoteDescription',
   {
-    defaultMessage: 'Automatically closed because none of its backing rules exist.',
+    defaultMessage: 'Automatically marked inactive because none of its backing rules exist.',
   }
 );
 
@@ -39,7 +39,7 @@ const getBackingRuleIds = (event: SignificantEventResponse): string[] => [
   ),
 ];
 
-const iterateOpenEventBatches = async function* ({
+const iterateActiveEventBatches = async function* ({
   eventClient,
   ruleUuids,
 }: {
@@ -50,7 +50,7 @@ const iterateOpenEventBatches = async function* ({
 
   while (true) {
     const result = await eventClient.findLatestByCurrentStateBatch({
-      status: ['open'],
+      status: ['active'],
       ruleUuids,
       afterEventId,
       batchSize: EVENTS_BATCH_SIZE,
@@ -101,7 +101,7 @@ export const cleanupStaleEvents = async ({
   let skipped = 0;
   const updateLimit = pLimit(EVENT_STATUS_UPDATE_CONCURRENCY);
 
-  for await (const events of iterateOpenEventBatches({
+  for await (const events of iterateActiveEventBatches({
     eventClient,
     ruleUuids: uniqueCandidateRuleIds,
   })) {
@@ -118,7 +118,7 @@ export const cleanupStaleEvents = async ({
       continue;
     }
 
-    // Resolve a batch before writing it so a lookup failure cannot close events from that batch.
+    // Resolve a batch before writing it so a lookup failure cannot mark events from that batch inactive.
     const existingRuleIds = new Set(await rulesClient.findExistingRuleIds(allRuleIds));
     const staleEvents = eventsWithRuleIds.filter(
       ({ ruleIds }) => ruleIds.length > 0 && ruleIds.every((ruleId) => !existingRuleIds.has(ruleId))
@@ -129,7 +129,7 @@ export const cleanupStaleEvents = async ({
           updateSignificantEventStatus({
             eventClient,
             eventId: event.event_id,
-            status: 'closed',
+            status: 'inactive',
             assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
             alertEventsClient,
             logger,

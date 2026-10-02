@@ -257,17 +257,16 @@ describe('preserveStableNarrative', () => {
   const makeLatest = (ruleUuids: string[]): SignificantEvent =>
     ({
       '@timestamp': TS_EARLIER,
-      event_uuid: 'event-uuid',
       event_id: 'event-id',
-      status: 'open',
-      severity: '60-high',
+      status: 'active',
+      severity: 'high',
       stream_names: ['logs.app'],
       signals: ruleUuids.map(makeDetection),
       title: 'Stored title',
       symptom_hypothesis: 'Stored hypothesis',
       summary: 'Stored summary',
       confidence: 0.8,
-    } as SignificantEvent);
+    } satisfies SignificantEvent);
 
   it('returns undefined when latestEvent is missing', () => {
     expect(preserveStableNarrative(['rule-1'], undefined, ['rule-1'])).toBeUndefined();
@@ -318,16 +317,15 @@ describe('preserveStableNarrative', () => {
   it('omits symptom_hypothesis from freeze when stored event has none', () => {
     const latest = {
       '@timestamp': TS_EARLIER,
-      event_uuid: 'event-uuid',
       event_id: 'event-id',
-      status: 'open' as const,
-      severity: '60-high' as const,
+      status: 'active' as const,
+      severity: 'high' as const,
       stream_names: ['logs.app'],
       signals: [makeDetection('rule-1')],
       title: 'Stored title',
       summary: 'Stored summary',
       confidence: 0.8,
-    } as SignificantEvent;
+    } satisfies SignificantEvent;
 
     const result = preserveStableNarrative(
       ['rule-1'],
