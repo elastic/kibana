@@ -185,6 +185,16 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).not.toContain('entity-profile-template');
     });
 
+    it('describes the targeted KI writer as it is: kis passed to the install, verified on createKi', () => {
+      const prose = content.replace(/\s+/g, ' ');
+
+      expect(prose).not.toMatch(/edit the `kis` array in the workflow's `consts` block/);
+      expect(prose).not.toMatch(/each through `verifyKi` and `createKi`/);
+      expect(prose).toMatch(
+        /the KIs are written verbatim from the `kis` array passed to the install, each through `createKi` with its verifiers and a stable `ki_id`/
+      );
+    });
+
     it('describes the unit profile automation as the three strategy answers and pagination', () => {
       expect(content).toMatch(/how units are found and refreshed/);
       expect(content).toMatch(/a re-run regenerates every unit/);
@@ -270,7 +280,7 @@ describe('aiIndexAutomationsSkill', () => {
       );
     });
 
-    it('states the full-run time estimate from the pilot before the save, as a floor', () => {
+    it('states the full-run time estimate from the pilot before the save, as a rough figure', () => {
       expect(content).toMatch(
         /\*\*State the time estimate from the pilot in the same message\.\*\*/
       );
@@ -278,7 +288,9 @@ describe('aiIndexAutomationsSkill', () => {
         /divide to get a per-unit time, and multiply by the\s+number of units the saved run will write/
       );
       expect(content).toMatch(/units, not rows/);
-      expect(content).toMatch(/Say \*at least\*/);
+      expect(content).toMatch(/Say \*roughly\*/);
+      expect(content).toMatch(/neither a\s+floor nor a ceiling/);
+      expect(content).not.toMatch(/Say \*at least\*|a straight-line projection is a floor/);
       expect(content).toMatch(/Show the three numbers, not only the result/);
     });
 
@@ -287,7 +299,7 @@ describe('aiIndexAutomationsSkill', () => {
         /\*\*When the projection exceeds one hour, put the estimate in bold between 🚨 markers\*\*/
       );
       expect(content).toMatch(
-        /"🚨 \*\*The full run over 100 units will take at least 80 minutes\*\* 🚨"/
+        /"🚨 \*\*The full run over 100 units will take roughly 80 minutes\*\* 🚨"/
       );
       expect(content).toMatch(/Under an hour, write it in plain text/);
     });
@@ -617,12 +629,27 @@ describe('aiIndexAutomationsSkill', () => {
   describe('piloting a template install', () => {
     const prose = aiIndexAutomationsSkill.content.replace(/\s+/g, ' ');
 
-    it('pilots a document or unit-profile install with pilotSize before the full run', () => {
+    it('pilots any template install that writes more than 5 items, with a pilot of 5', () => {
       expect(prose).toMatch(
-        /\*\*Pilot a document or unit-profile install before its full run\.\*\*/
+        /\*\*Pilot a template install that writes more than 5 items before its full run\.\*\*/
       );
-      expect(prose).toMatch(/`run_automation` with `pilotSize: 3`/);
-      expect(prose).toMatch(/`run_automation` with `pilotSize: 3` first/);
+      expect(prose).toMatch(
+        /documents \(up to `maxDocuments`\), units \(up to `maxUnits`\) or sources for Index\/Table Metadata/
+      );
+      expect(prose).toMatch(/`run_automation` with `pilotSize: 5` first/);
+      expect(prose).not.toMatch(/pilotSize: 3/);
+    });
+
+    it('runs a Targeted KI writer without a pilot, through execute_workflow', () => {
+      expect(prose).toMatch(
+        /A Targeted KI writer has no pilot: it makes no model call, and it runs through `platform\.core\.execute_workflow` as described above/
+      );
+    });
+
+    it('sizes the pilot to one batch of the template loop, which runs five at a time', () => {
+      expect(prose).toMatch(
+        /Every template's loop runs five items at a time, so a pilot of 5 is one batch of the full run/
+      );
     });
 
     it('projects the full run from the pilot, states it, then starts the full run', () => {
@@ -631,6 +658,9 @@ describe('aiIndexAutomationsSkill', () => {
       );
       expect(prose).toMatch(/Then call `run_automation` again without `pilotSize`/);
       expect(prose).toMatch(/The full run replaces the pilot's indicators/);
+      expect(prose).toMatch(
+        /on an AI index backed by a data stream it adds a newer revision of each instead/
+      );
       expect(prose).toMatch(
         /If the user declines it, the pilot's indicators stay in the index: say so/
       );
@@ -651,12 +681,12 @@ describe('aiIndexAutomationsSkill', () => {
       );
     });
 
-    it('skips the pilot where it measures nothing worth measuring', () => {
+    it('skips the pilot only when the run writes 5 items or fewer, and says why', () => {
       expect(prose).toMatch(
-        /Skip the pilot for Index\/Table Metadata, which makes one model call per source/
+        /\*\*With 5 items or fewer, skip the pilot\*\*: it would be the full run\. Say the run covers only that many items, so there is no time estimate, and start it/
       );
-      expect(prose).toMatch(/for a Targeted KI writer/);
-      expect(prose).toMatch(/when the run writes no more units than the pilot would/);
+      expect(prose).not.toMatch(/Skip the pilot for Index\/Table Metadata/);
+      expect(prose).not.toMatch(/which writes indicators that were already agreed/);
     });
 
     it('handles a pilot that did not complete without starting the full run', () => {
