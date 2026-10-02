@@ -45,7 +45,7 @@ export async function copySourceMappings({
       await copyMetricMappings({ esClient, log, dataStream, sources });
     } catch (error) {
       log.warning(
-        `Could not copy metric mappings to ${dataStream}; its metric fields will be mapped dynamically: ${getErrorMessage(
+        `Could not copy all metric mappings to ${dataStream}; metric fields not copied will be mapped dynamically: ${getErrorMessage(
           error
         )}`
       );
