@@ -27,7 +27,7 @@ const { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } = testData;
  * The director runs after the executor has produced a batch of breach/recovery
  * alert events.
  */
-apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
+apiTest.describe('Director', { tag: tags.stateful.all }, () => {
   const SOURCE_INDEX = 'test-alerting-v2-director-source';
 
   apiTest.beforeAll(async ({ apiServices }) => {

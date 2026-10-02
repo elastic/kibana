@@ -18,7 +18,7 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe('Get rule template API', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('Get rule template API', { tag: tags.stateful.all }, () => {
   let adminHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {

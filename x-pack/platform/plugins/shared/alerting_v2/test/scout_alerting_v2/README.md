@@ -8,13 +8,13 @@ Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can sc
 
 | Namespace | API | UI | Notes |
 |---|---|---|---|
-| `rules` | Rule HTTP CRUD, rule-template read APIs, error-envelope contract, matcher-value suggestions | Rules list, builder, Discover flyout | Mostly local-only (`@local-stateful-classic`); the rule-template specs are `tags.deploymentAgnostic` |
-| `action_policies` | Action-policy HTTP CRUD | Policy create/edit and privileges | Local-only |
-| `alerts` | Alert actions, execution history, rule-event field suggestions | Alert episodes, Discover compose, execution-history smoke | Local-only |
-| `engine` | End-to-end, telemetry, implicit index privileges, SML types access, **rule history** | — | `tags.stateful.classic` (local **and** cloud). API-only. |
-| `engine_director` | Director | — | Split out of `engine` to cut CI wall-time. `tags.stateful.classic`. API-only. |
-| `engine_dispatcher` | Dispatcher | — | Split out of `engine` to cut CI wall-time. `tags.stateful.classic`. API-only. |
-| `engine_executor` | Rule executor | — | Split out of `engine` to cut CI wall-time (heaviest suite). `tags.stateful.classic`. API-only. |
+| `rules` | Rule HTTP CRUD, rule-template read APIs, error-envelope contract, matcher-value suggestions | Rules list, builder, Discover flyout | API: `tags.stateful.all`, except the custom-role-auth suites (`find_rules`, `match_rules`, `matcher_value_suggestions`), which stay `@local-stateful-classic` until ECH supports custom roles. Scout cannot run custom server configs on serverless, so `scout_alerting_v2` is stateful-only. |
+| `action_policies` | Action-policy HTTP CRUD | Policy create/edit and privileges | API: `tags.stateful.all` |
+| `alerts` | Alert actions, execution history, rule-event field suggestions | Alert episodes, Discover compose, execution-history smoke | API: `tags.stateful.all`, except the custom-role-auth suites (`create_ack_episode_action`, `create_tag_episode_action`, `rule_event_fields_suggestions`, `user_profiles_suggestions`), which stay `@local-stateful-classic` until ECH supports custom roles. |
+| `engine` | End-to-end, telemetry, implicit index privileges, SML types access, **rule history** | — | `tags.stateful.all` (local **and** cloud). API-only. |
+| `engine_director` | Director | — | Split out of `engine` to cut CI wall-time. `tags.stateful.all`. API-only. |
+| `engine_dispatcher` | Dispatcher | — | Split out of `engine` to cut CI wall-time. `tags.stateful.all`. API-only. |
+| `engine_executor` | Rule executor | — | Split out of `engine` to cut CI wall-time (heaviest suite). `tags.stateful.all`. API-only. |
 | `management` | — | `management_required_privileges` | `tags.deploymentAgnostic`. UI-only. |
 
 `common/` is shared utilities and Playwright fixtures. It is **not** a namespace (no `playwright.config.ts`).
@@ -33,7 +33,7 @@ manifest lists it.
 
 ### Why `rule_history` lives in `engine`
 
-Rule-change history is a rules concern, but the spec is tagged `tags.stateful.classic`. Config-level scheduling unions every tag in the config, so putting those 8 tests in `rules` would schedule the entire rules CRUD suite on cloud-stateful-classic. Keep it in the `engine*` namespaces (currently `engine`) until that tag is dropped.
+Rule-change history is a rules concern, but the spec is tagged `tags.stateful.all`, which includes cloud-stateful-classic. Config-level scheduling unions every tag in the config, so putting those 8 tests in `rules` would schedule the entire rules CRUD suite on cloud-stateful-classic. Keep it in the `engine*` namespaces (currently `engine`) until that tag is dropped.
 
 ## Layout
 

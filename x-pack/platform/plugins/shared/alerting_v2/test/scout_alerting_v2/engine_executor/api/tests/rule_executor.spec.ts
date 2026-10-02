@@ -54,11 +54,9 @@ const forceEsqlResponseFormat = (responseFormat: EsqlResponseFormat) => ({
  *
  */
 const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
-  const isArrow = responseFormat === 'arrow';
-
   apiTest.describe(
     `Rule executor (${responseFormat} ES|QL response format)`,
-    { tag: isArrow ? '@local-stateful-classic' : tags.stateful.classic },
+    { tag: tags.stateful.all },
     () => {
       const SOURCE_INDEX = `test-alerting-v2-rule-executor-source-${responseFormat}`;
       /**

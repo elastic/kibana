@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALERTING_V2_RULES_ALL_ROLE,
@@ -28,7 +29,7 @@ const tagsUrl = (params: Record<string, string | undefined> = {}): string => {
   return qs ? `${TAGS_URL}?${qs}` : TAGS_URL;
 };
 
-apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Get rule tags API', { tag: tags.stateful.all }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
 

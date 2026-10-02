@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
@@ -22,162 +23,155 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe(
-  'List action policy execution history API',
-  { tag: '@local-stateful-classic' },
-  () => {
-    let readerCredentials: RoleApiCredentials;
-    let readerHeaders: Record<string, string>;
+apiTest.describe('List action policy execution history API', { tag: tags.stateful.all }, () => {
+  let readerCredentials: RoleApiCredentials;
+  let readerHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      readerCredentials = await requestAuth.getApiKeyForCustomRole(
-        ALERTING_V2_EXECUTION_HISTORY_READ_ROLE
-      );
-      readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
+  apiTest.beforeAll(async ({ requestAuth }) => {
+    readerCredentials = await requestAuth.getApiKeyForCustomRole(
+      ALERTING_V2_EXECUTION_HISTORY_READ_ROLE
+    );
+    readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
+  });
+
+  apiTest('validation: rejects page=0', async ({ apiClient }) => {
+    const response = await apiClient.get(getListExecutionHistoryUrl({ page: 0 }), {
+      headers: readerHeaders,
     });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
 
-    apiTest('validation: rejects page=0', async ({ apiClient }) => {
-      const response = await apiClient.get(getListExecutionHistoryUrl({ page: 0 }), {
-        headers: readerHeaders,
-      });
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
+  apiTest('validation: accepts perPage=0 (count-only read)', async ({ apiClient }) => {
+    const response = await apiClient.get(getListExecutionHistoryUrl({ per_page: 0 }), {
+      headers: readerHeaders,
     });
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.per_page).toBe(0);
+    expect(response.body.items).toStrictEqual([]);
+  });
 
-    apiTest('validation: accepts perPage=0 (count-only read)', async ({ apiClient }) => {
-      const response = await apiClient.get(getListExecutionHistoryUrl({ per_page: 0 }), {
-        headers: readerHeaders,
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.per_page).toBe(0);
-      expect(response.body.items).toStrictEqual([]);
+  apiTest('validation: accepts perPage at the maximum', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      getListExecutionHistoryUrl({ per_page: EXECUTION_HISTORY_MAX_PER_PAGE }),
+      { headers: readerHeaders }
+    );
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.per_page).toBe(EXECUTION_HISTORY_MAX_PER_PAGE);
+  });
+
+  apiTest('validation: rejects perPage above the maximum', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      getListExecutionHistoryUrl({ per_page: EXECUTION_HISTORY_MAX_PER_PAGE + 1 }),
+      { headers: readerHeaders }
+    );
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('validation: rejects page * perPage above the result window', async ({ apiClient }) => {
+    const perPage = EXECUTION_HISTORY_MAX_PER_PAGE;
+    const page = Math.floor(EXECUTION_HISTORY_MAX_RESULT_WINDOW / perPage) + 1;
+    const response = await apiClient.get(getListExecutionHistoryUrl({ page, per_page: perPage }), {
+      headers: readerHeaders,
     });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
 
-    apiTest('validation: accepts perPage at the maximum', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        getListExecutionHistoryUrl({ per_page: EXECUTION_HISTORY_MAX_PER_PAGE }),
-        { headers: readerHeaders }
-      );
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.per_page).toBe(EXECUTION_HISTORY_MAX_PER_PAGE);
+  apiTest('validation: rejects an unknown sort field', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?sort=started_at`,
+      { headers: readerHeaders }
+    );
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('returns the schema defaults for page, per_page and total', async ({ apiClient }) => {
+    const response = await apiClient.get(getListExecutionHistoryUrl(), {
+      headers: readerHeaders,
     });
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.page).toBe(1);
+    expect(response.body.per_page).toBe(EXECUTION_HISTORY_DEFAULT_PER_PAGE);
+    expect(typeof response.body.total).toBe('number');
+  });
 
-    apiTest('validation: rejects perPage above the maximum', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        getListExecutionHistoryUrl({ per_page: EXECUTION_HISTORY_MAX_PER_PAGE + 1 }),
-        { headers: readerHeaders }
-      );
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    });
+  apiTest('validation: accepts a `to` upper bound', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      getListExecutionHistoryUrl({ to: '2026-01-02T00:00:00.000Z' }),
+      { headers: readerHeaders }
+    );
+    expect(response).toHaveStatusCode(200);
+  });
 
-    apiTest('validation: rejects page * perPage above the result window', async ({ apiClient }) => {
-      const perPage = EXECUTION_HISTORY_MAX_PER_PAGE;
-      const page = Math.floor(EXECUTION_HISTORY_MAX_RESULT_WINDOW / perPage) + 1;
-      const response = await apiClient.get(
-        getListExecutionHistoryUrl({ page, per_page: perPage }),
-        {
-          headers: readerHeaders,
-        }
-      );
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    });
+  apiTest('validation: accepts an outcomes array filter', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      getListExecutionHistoryUrl({ outcomes: ['success', 'throttled'] }),
+      { headers: readerHeaders }
+    );
+    expect(response).toHaveStatusCode(200);
+  });
 
-    apiTest('validation: rejects an unknown sort field', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?sort=started_at`,
-        { headers: readerHeaders }
-      );
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    });
+  apiTest('validation: rejects an unknown outcome value', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?outcomes=nope`,
+      { headers: readerHeaders }
+    );
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
 
-    apiTest('returns the schema defaults for page, per_page and total', async ({ apiClient }) => {
+  apiTest('validation: rejects non-numeric perPage', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?per_page=banana`,
+      { headers: readerHeaders }
+    );
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('validation: rejects non-numeric page', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?page=banana`,
+      { headers: readerHeaders }
+    );
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest(
+    'authorization: 200 with alerting_v2_execution_history read privilege',
+    async ({ apiClient }) => {
       const response = await apiClient.get(getListExecutionHistoryUrl(), {
         headers: readerHeaders,
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.page).toBe(1);
-      expect(response.body.per_page).toBe(EXECUTION_HISTORY_DEFAULT_PER_PAGE);
-      expect(typeof response.body.total).toBe('number');
-    });
+    }
+  );
 
-    apiTest('validation: accepts a `to` upper bound', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        getListExecutionHistoryUrl({ to: '2026-01-02T00:00:00.000Z' }),
-        { headers: readerHeaders }
+  apiTest(
+    'authorization: 200 with alerting_v2_execution_history all privilege',
+    async ({ apiClient, requestAuth }) => {
+      const writerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE
       );
+      const response = await apiClient.get(getListExecutionHistoryUrl(), {
+        headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
+      });
       expect(response).toHaveStatusCode(200);
-    });
+    }
+  );
 
-    apiTest('validation: accepts an outcomes array filter', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        getListExecutionHistoryUrl({ outcomes: ['success', 'throttled'] }),
-        { headers: readerHeaders }
-      );
-      expect(response).toHaveStatusCode(200);
-    });
-
-    apiTest('validation: rejects an unknown outcome value', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?outcomes=nope`,
-        { headers: readerHeaders }
-      );
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    });
-
-    apiTest('validation: rejects non-numeric perPage', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?per_page=banana`,
-        { headers: readerHeaders }
-      );
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    });
-
-    apiTest('validation: rejects non-numeric page', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?page=banana`,
-        { headers: readerHeaders }
-      );
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
-    });
-
-    apiTest(
-      'authorization: 200 with alerting_v2_execution_history read privilege',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(getListExecutionHistoryUrl(), {
-          headers: readerHeaders,
-        });
-        expect(response).toHaveStatusCode(200);
-      }
-    );
-
-    apiTest(
-      'authorization: 200 with alerting_v2_execution_history all privilege',
-      async ({ apiClient, requestAuth }) => {
-        const writerCredentials = await requestAuth.getApiKeyForCustomRole(
-          ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE
-        );
-        const response = await apiClient.get(getListExecutionHistoryUrl(), {
-          headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
-        });
-        expect(response).toHaveStatusCode(200);
-      }
-    );
-
-    apiTest(
-      'authorization: 403 without any alerting_v2 privileges',
-      async ({ apiClient, requestAuth }) => {
-        const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-        const response = await apiClient.get(getListExecutionHistoryUrl(), {
-          headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-        });
-        expect(response).toHaveStatusCode(403);
-      }
-    );
-  }
-);
+  apiTest(
+    'authorization: 403 without any alerting_v2 privileges',
+    async ({ apiClient, requestAuth }) => {
+      const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
+      const response = await apiClient.get(getListExecutionHistoryUrl(), {
+        headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
+      });
+      expect(response).toHaveStatusCode(403);
+    }
+  );
+});

@@ -35,7 +35,7 @@ const RESOURCES = [
 
 apiTest.describe(
   'Alerting v2 data stream ingest timestamp pipeline',
-  { tag: tags.stateful.classic },
+  { tag: tags.stateful.all },
   () => {
     apiTest.afterAll(async ({ esClient }) => {
       for (const { definition, markerField } of RESOURCES) {

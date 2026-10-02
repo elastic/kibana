@@ -17,6 +17,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import type { ListPolicyExecutionHistoryResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEvent } from '../../../../../server/resources/datastreams/alert_events';
@@ -51,7 +52,7 @@ const buildSeedEvent = (ruleId: string): AlertEvent =>
 
 apiTest.describe(
   'List execution history — tolerates missing rule ids',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.all },
   () => {
     let readerCredentials: RoleApiCredentials;
     let readerHeaders: Record<string, string>;

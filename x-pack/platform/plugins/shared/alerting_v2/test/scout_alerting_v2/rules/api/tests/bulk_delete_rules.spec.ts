@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import {
@@ -18,7 +19,7 @@ import {
 
 const BULK_DELETE_URL = `${testData.RULE_API_PATH}/_bulk_delete`;
 
-apiTest.describe('Bulk delete rules by IDs API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Bulk delete rules by IDs API', { tag: tags.stateful.all }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 

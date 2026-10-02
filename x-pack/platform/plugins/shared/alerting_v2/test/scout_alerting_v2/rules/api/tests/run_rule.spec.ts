@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALERTING_V2_RULES_ALL_ROLE,
@@ -17,7 +18,7 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe('Run rule API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Run rule API', { tag: tags.stateful.all }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 

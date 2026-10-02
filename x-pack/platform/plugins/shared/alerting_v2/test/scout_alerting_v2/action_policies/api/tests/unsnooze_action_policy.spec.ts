@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
@@ -19,7 +20,7 @@ import {
   getSnoozeDate,
 } from '../fixtures';
 
-apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Unsnooze action policy API', { tag: tags.stateful.all }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 

@@ -21,7 +21,7 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe('Get rule template tags API', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('Get rule template tags API', { tag: tags.stateful.all }, () => {
   let adminHeaders: Record<string, string>;
   const createdTemplateIds = new Set<string>();
   const templateNamespace = `rule-template-tags-${randomUUID()}`;
