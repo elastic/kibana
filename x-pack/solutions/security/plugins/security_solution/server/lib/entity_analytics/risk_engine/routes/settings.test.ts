@@ -13,6 +13,7 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { riskEngineDataClientMock } from '../risk_engine_data_client.mock';
+import { getDefaultRiskEngineConfiguration } from '../utils/saved_object_configuration';
 
 describe('risk engine settings route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -36,12 +37,12 @@ describe('risk engine settings route', () => {
 
   it('returns the saved configuration when the risk engine is configured', async () => {
     mockRiskEngineDataClient.getConfiguration.mockResolvedValue({
+      ...getDefaultRiskEngineConfiguration({ namespace: 'default' }),
+      enabled: true,
       range: { start: 'now-7d', end: 'now' },
       excludeAlertStatuses: [],
       enableResetToZero: false,
       filters: [{ entity_types: ['host'], filter: 'host.name: *' }],
-      // @ts-expect-error the route only reads the attributes asserted below
-      enabled: true,
     });
 
     const response = await server.inject(buildRequest(), context);
@@ -69,7 +70,7 @@ describe('risk engine settings route', () => {
     });
   });
 
-  it('returns a 500 when reading the configuration fails', async () => {
+  it('returns a 500 when the risk engine data client rejects', async () => {
     mockRiskEngineDataClient.getConfiguration.mockRejectedValue(new Error('something went wrong'));
 
     const response = await server.inject(buildRequest(), context);
