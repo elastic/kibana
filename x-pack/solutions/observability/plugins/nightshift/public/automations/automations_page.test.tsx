@@ -85,7 +85,7 @@ describe('AutomationsPage', () => {
             isEnabled: true,
             trigger: { rows: [{ kind: 'alert' }] },
             runtime: { dailyDispatchLimit: 20 },
-            author: { username: 'alice' },
+            author: 'alice',
           },
           {
             id: 'automation-2',
@@ -93,7 +93,7 @@ describe('AutomationsPage', () => {
             isEnabled: false,
             trigger: { rows: [{ kind: 'schedule' }] },
             runtime: { dailyDispatchLimit: 20 },
-            author: { username: 'bob' },
+            author: 'bob',
           },
         ],
       },
@@ -148,7 +148,7 @@ describe('AutomationsPage', () => {
       runtime: { dailyDispatchLimit: 20 },
       createdAt: '2026-10-01T00:00:00.000Z',
       updatedAt: '2026-10-01T00:00:00.000Z',
-      author: { username: 'elastic' },
+      author: 'elastic',
       ...overrides,
     });
     const automations = [
@@ -157,7 +157,7 @@ describe('AutomationsPage', () => {
         name: 'Triage incoming alerts',
         tags: ['triage', 'alerts'],
         runtime: { dailyDispatchLimit: 20 },
-        author: { username: 'Emily Clarke' },
+        author: 'Emily Clarke',
       }),
       buildAutomation({
         id: 'report',
@@ -165,7 +165,7 @@ describe('AutomationsPage', () => {
         isEnabled: false,
         trigger: { rows: [{ kind: 'schedule' }] },
         runtime: { dailyDispatchLimit: 5 },
-        author: { username: 'Daniel Hughes' },
+        author: 'Daniel Hughes',
       }),
     ];
     const totals: Record<string, { range: number; today: number }> = {
