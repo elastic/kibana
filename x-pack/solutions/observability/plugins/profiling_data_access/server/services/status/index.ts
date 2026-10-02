@@ -7,6 +7,7 @@
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
+  EnabledProfilingSchemasStatus,
   ProfilingSchemasStatus,
   UniversalProfilingSchemaStatus,
   UniversalProfilingStatus,
@@ -34,14 +35,12 @@ const toUniversalProfilingSchemaStatus = ({
   hasLegacyData,
 });
 
-const createUnavailableUniversalProfilingSchemaStatus = (
-  isAvailable: boolean
-): UniversalProfilingSchemaStatus => ({
-  isAvailable,
+const UNAVAILABLE_UNIVERSAL_PROFILING_SCHEMA_STATUS: UniversalProfilingSchemaStatus = {
+  isAvailable: false,
   hasSetup: false,
   hasData: false,
   hasLegacyData: false,
-});
+};
 
 export function createGetProfilingStatusService(params: RegisterServicesParams) {
   const { buildFlavor, createProfilingEsClient, logger } = params;
@@ -59,13 +58,7 @@ export function createGetProfilingStatusService(params: RegisterServicesParams) 
     const { profiling } = await client.universalProfiling.status();
 
     if (!profiling.enabled) {
-      return {
-        isEnabled: false,
-        otel: { isAvailable: true, hasData: false },
-        universalProfiling: createUnavailableUniversalProfilingSchemaStatus(
-          isUniversalProfilingAvailable
-        ),
-      };
+      return { isEnabled: false };
     }
 
     const [otel, universalProfiling] = await Promise.all([
@@ -74,10 +67,10 @@ export function createGetProfilingStatusService(params: RegisterServicesParams) 
         ? getUniversalProfilingStatus({ esClient, soClient, spaceId, abortSignal }).then(
             toUniversalProfilingSchemaStatus
           )
-        : createUnavailableUniversalProfilingSchemaStatus(false),
+        : UNAVAILABLE_UNIVERSAL_PROFILING_SCHEMA_STATUS,
     ]);
 
-    const status = { isEnabled: true, otel, universalProfiling };
+    const status: EnabledProfilingSchemasStatus = { isEnabled: true, otel, universalProfiling };
     logger.debug(() => `Profiling status: ${JSON.stringify(status, null, 2)}`);
     return status;
   };

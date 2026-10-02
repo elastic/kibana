@@ -39,7 +39,7 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
   } = useProfilingDependencies();
   const { data } = useProfilingStatus();
 
-  if (!hasBackNavigation(pathname)) {
+  if (!hasBackNavigation(pathname) || !data?.isEnabled) {
     return undefined;
   }
 
@@ -48,7 +48,7 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
   // With data from before 8.9.1, going back would only redirect to this page again.
   if (
     pathname === '/add-data-instructions' &&
-    (!hasProfilingData(data) || data?.universalProfiling.hasLegacyData)
+    (!hasProfilingData(data) || data.universalProfiling.hasLegacyData)
   ) {
     return undefined;
   }

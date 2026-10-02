@@ -8,4 +8,4 @@
 import type { ProfilingStatus } from '@kbn/profiling-utils';
 
 export const hasProfilingData = (status?: ProfilingStatus): boolean =>
-  Boolean(status?.otel.hasData || status?.universalProfiling.hasData);
+  status?.isEnabled === true && (status.otel.hasData || status.universalProfiling.hasData);

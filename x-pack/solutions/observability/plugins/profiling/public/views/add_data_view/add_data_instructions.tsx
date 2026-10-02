@@ -31,7 +31,7 @@ import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { hasProfilingData } from '../../utils/has_profiling_data';
-import { useProfilingStatus } from '../../components/contexts/profiling_status/use_profiling_status';
+import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
 import type { AddDataTab } from './types';
 import { AddDataTabs } from './types';
 
@@ -42,7 +42,7 @@ export function AddDataInstructions() {
   const { selectedTab } = query;
   const profilingRouter = useProfilingRouter();
   const routePath = useProfilingRoutePath();
-  const { data: profilingStatus } = useProfilingStatus();
+  const { data: profilingStatus } = useEnabledProfilingStatus();
   const [selectedSubTabKey, setSelectedSubTabKey] = useState<string | undefined>();
 
   const {

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import { useProfilingStatus } from '../../components/contexts/profiling_status/use_profiling_status';
+import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { useAutoAbortedHttpClient } from '../../hooks/use_auto_aborted_http_client';
 
@@ -17,12 +17,12 @@ export function UniversalProfilingSetupPrompt() {
     start: { core },
     services: { postSetupResources },
   } = useProfilingDependencies();
-  const { data, refresh } = useProfilingStatus();
+  const { data, refresh } = useEnabledProfilingStatus();
   const http = useAutoAbortedHttpClient([]);
   const [postSetupLoading, setPostSetupLoading] = useState(false);
 
   const { docLinks, notifications } = core;
-  const canSetup = data?.universalProfiling.canSetup === true;
+  const { canSetup } = data.universalProfiling;
 
   return (
     <ProfilingAppPageTemplate

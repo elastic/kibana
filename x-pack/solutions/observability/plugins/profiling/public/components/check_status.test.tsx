@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { ProfilingStatus } from '@kbn/profiling-utils';
+import type { EnabledProfilingStatus, ProfilingStatus } from '@kbn/profiling-utils';
 
 jest.mock('react-router-dom', () => ({ useLocation: jest.fn() }));
 jest.mock('../hooks/use_profiling_router');
@@ -39,16 +39,16 @@ const createHttpFetchError = (status: number, body?: object) =>
     body,
   });
 
+const disabledStatus: ProfilingStatus = { isEnabled: false };
+
 const makeStatus = ({
-  isEnabled = true,
   otel = {},
   universalProfiling = {},
 }: {
-  isEnabled?: boolean;
-  otel?: Partial<ProfilingStatus['otel']>;
-  universalProfiling?: Partial<ProfilingStatus['universalProfiling']>;
-} = {}): ProfilingStatus => ({
-  isEnabled,
+  otel?: Partial<EnabledProfilingStatus['otel']>;
+  universalProfiling?: Partial<EnabledProfilingStatus['universalProfiling']>;
+} = {}): EnabledProfilingStatus => ({
+  isEnabled: true,
   otel: { isAvailable: true, hasData: false, ...otel },
   universalProfiling: {
     isAvailable: true,
@@ -177,7 +177,7 @@ describe('CheckStatus', () => {
   });
 
   it('redirects to the not enabled page when profiling is disabled in Elasticsearch', () => {
-    mockStatus({ data: makeStatus({ isEnabled: false }) });
+    mockStatus({ data: disabledStatus });
 
     renderCheckStatus();
 

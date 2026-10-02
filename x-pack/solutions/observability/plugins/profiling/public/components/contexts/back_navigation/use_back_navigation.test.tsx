@@ -235,6 +235,14 @@ describe('useBackNavigation', () => {
       expect(result.current.back).toEqual(pluginRootTarget);
     });
 
+    it('returns undefined when profiling is disabled in Elasticsearch', () => {
+      const { result } = renderBackNavigation({
+        initialEntry: '/add-data-instructions',
+        initialStatus: { isEnabled: false },
+      });
+      expect(result.current.back).toBeUndefined();
+    });
+
     it('returns undefined when there is data from before 8.9.1', () => {
       // Going back would only be redirected to the deletion instructions on this page again.
       const { result } = renderBackNavigation({
