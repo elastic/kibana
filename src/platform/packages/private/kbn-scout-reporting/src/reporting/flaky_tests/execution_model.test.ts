@@ -46,7 +46,7 @@ describe('buildExecutionModels', () => {
     expect(models).toHaveLength(1);
     expect(models[0].frameworks).toEqual(['playwright']);
     expect(models[0].runFilter).toBe(
-      '(event.action == "test-outcome" AND reporter.type IN ("playwright") AND (test.attempts IS NULL OR test.attempts > 0))'
+      '(event.action == "test-outcome" AND reporter.type IN ("playwright") AND test.attempts > 0)'
     );
     expect(models[0].executionFilter).toContain(
       'test.outcome IN ("expected", "unexpected", "flaky")'

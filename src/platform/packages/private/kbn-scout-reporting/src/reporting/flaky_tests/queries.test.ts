@@ -139,7 +139,7 @@ describe('buildBranchStatsQuery', () => {
     const query = buildBranchStatsQuery(scope, ['playwright'], ['p1']);
 
     expect(query).toContain(
-      '(event.action == "test-outcome" AND reporter.type IN ("playwright") AND (test.attempts IS NULL OR test.attempts > 0)) AND test.id IN ("p1")'
+      '(event.action == "test-outcome" AND reporter.type IN ("playwright") AND test.attempts > 0) AND test.id IN ("p1")'
     );
     expect(query).toContain(
       'is_execution = CASE((event.action == "test-outcome" AND reporter.type IN ("playwright") AND test.outcome IN ("expected", "unexpected", "flaky")), 1, 0)'
