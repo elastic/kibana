@@ -7,7 +7,7 @@
 
 import path from 'node:path';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -56,11 +56,13 @@ export interface EntityStoreStatusResponseBody {
   engines: StatusEngine[];
 }
 
-const querySchema = z.object({
-  include_components: BooleanFromString.optional()
-    .default(false)
-    .describe('If true, returns a detailed status of each engine including all its components.'),
-});
+const querySchema = lazySchema(() =>
+  z.object({
+    include_components: BooleanFromString.optional()
+      .default(false)
+      .describe('If true, returns a detailed status of each engine including all its components.'),
+  })
+);
 export type StatusRequestQuery = z.infer<typeof querySchema>;
 
 function toPublicEngine(

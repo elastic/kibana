@@ -6,7 +6,7 @@
  */
 
 import path from 'node:path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
@@ -22,18 +22,20 @@ const hasHistorySnapshotUpdate = (
   historySnapshot: { frequency?: string; retentionDays?: number } | undefined
 ): boolean => historySnapshot?.frequency != null || historySnapshot?.retentionDays != null;
 
-export const UpdateBodySchema = z
-  .object({
-    logExtraction: LogExtractionUpdateSchema.optional(),
-    historySnapshot: HistorySnapshotConfigSchema.optional().refine(
-      (value) => value === undefined || hasHistorySnapshotUpdate(value),
-      { message: 'frequency or retentionDays is required' }
-    ),
-  })
-  .refine(
-    (body) => body.logExtraction !== undefined || hasHistorySnapshotUpdate(body.historySnapshot),
-    { message: 'logExtraction or historySnapshot is required' }
-  );
+export const UpdateBodySchema = lazySchema(() =>
+  z
+    .object({
+      logExtraction: LogExtractionUpdateSchema.optional(),
+      historySnapshot: HistorySnapshotConfigSchema.optional().refine(
+        (value) => value === undefined || hasHistorySnapshotUpdate(value),
+        { message: 'frequency or retentionDays is required' }
+      ),
+    })
+    .refine(
+      (body) => body.logExtraction !== undefined || hasHistorySnapshotUpdate(body.historySnapshot),
+      { message: 'logExtraction or historySnapshot is required' }
+    )
+);
 
 export function registerUpdate(router: EntityStorePluginRouter) {
   router.versioned
