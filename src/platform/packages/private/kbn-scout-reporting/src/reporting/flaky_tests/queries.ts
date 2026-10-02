@@ -407,8 +407,7 @@ export const fetchBranchStats = async (
     )
   );
 
-  // A setup is a pipeline + config + Scout target. Only a branch whose newest run is a skip can
-  // have every setup skip the test.
+  // Setup: pipeline + config + Scout target. Only tests whose latest run is a skip are checked
   const candidates = new Set(
     results
       .flat()
