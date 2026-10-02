@@ -28,6 +28,8 @@ export {
   attachmentDeletedTriggerCommonDefinition,
   attachmentTriggerCommonDefinitions,
 } from './attachments';
+export { conversationUpdatedTriggerCommonDefinition } from './conversation_updated';
+export type { ConversationUpdatedTriggerEvent } from '@kbn/agent-builder-common';
 
 const conversationMetadataUpdatedEventSchema = z.object({
   conversationId: z.string().meta({

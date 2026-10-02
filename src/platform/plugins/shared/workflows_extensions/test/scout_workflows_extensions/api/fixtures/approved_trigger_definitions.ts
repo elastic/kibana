@@ -55,6 +55,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '3ddfb053989618f32071989376a39b001b3ed1bead0e81bf9f48c20253a53c57',
   },
   {
+    id: 'ai.conversation.updated',
+    schemaHash: '2da588b573d007973847504e14a363d64009aa21ba034b146d215aa7dab5dd93',
+  },
+  {
     id: 'alerting.episodeAcked',
     schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
   },
