@@ -629,9 +629,9 @@ describe('CommentsLayer', () => {
     ]);
     const getSnapshot = jest.spyOn(api, 'getSnapshot').mockRejectedValueOnce(new Error('offline'));
     const controller = await renderLayer({ api });
-    enter(controller);
+    act(() => controller.setActive(true));
     act(() => controller.openThread('a'));
-    const thread = await screen.findByRole('dialog', { name: 'Comment thread' });
+    const thread = await screen.findByTestId('devCommentsThread');
 
     fireEvent.click(within(thread).getByTestId('devCommentsShowSnapshot'));
     expect(
@@ -642,15 +642,16 @@ describe('CommentsLayer', () => {
 
     fireEvent.click(within(thread).getByTestId('devCommentsShowSnapshot'));
     fireEvent.click(within(thread).getByTestId('devCommentsShowSnapshot'));
-    expect(
-      await within(thread).findByRole('img', { name: /Screenshot of the UI/ })
-    ).toHaveAttribute('src', 'data:image/jpeg;base64,AAAA');
+    expect(await within(thread).findByAltText(/Screenshot of the UI/)).toHaveAttribute(
+      'src',
+      'data:image/jpeg;base64,AAAA'
+    );
     expect(getSnapshot).toHaveBeenCalledTimes(2);
 
     // Loaded, it is kept: hiding and showing it again asks for nothing.
     fireEvent.click(within(thread).getByTestId('devCommentsShowSnapshot'));
     fireEvent.click(within(thread).getByTestId('devCommentsShowSnapshot'));
-    expect(within(thread).getByRole('img', { name: /Screenshot of the UI/ })).toBeInTheDocument();
+    expect(within(thread).getByAltText(/Screenshot of the UI/)).toBeInTheDocument();
     expect(getSnapshot).toHaveBeenCalledTimes(2);
     // The thread's popover repositions to the content, a tick later.
     await act(flush);
