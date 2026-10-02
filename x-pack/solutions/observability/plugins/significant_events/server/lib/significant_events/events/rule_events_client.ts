@@ -64,7 +64,7 @@ interface RuleEventSourceRow {
   '@timestamp': string;
   [GROUP_HASH_FIELD]: string;
   severity?: AlertEventSeverity;
-  episode?: { status?: AlertEpisodeStatus };
+  alert?: { status?: AlertEpisodeStatus };
   data_json: string;
 }
 
@@ -88,7 +88,7 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
     SignificantEvent,
     '@timestamp' | 'status' | 'severity'
   >;
-  const episodeStatus = row.episode?.status ?? ALERT_EPISODE_STATUS.ACTIVE;
+  const episodeStatus = row.alert?.status ?? ALERT_EPISODE_STATUS.ACTIVE;
   const severity = row.severity ?? 'medium';
   return {
     ...data,
@@ -148,8 +148,8 @@ const buildFreeTextWhere = (search: string | undefined): ESQLAstExpression | und
 };
 
 const activeStatusWhere = (): ESQLAstExpression =>
-  esql.exp`${esql.col('episode.status')} IN(${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map(
-    (status) => esql.str(status)
+  esql.exp`${esql.col('alert.status')} IN(${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) =>
+    esql.str(status)
   )})`;
 
 const eventIdEquals = (eventId: string): ESQLAstExpression =>
@@ -241,7 +241,7 @@ export class RuleEventsClient implements SignificantEventsReadClient {
     });
 
     if (options.status?.length) {
-      query = query.where`${esql.col('episode.status')} IN (${options.status.map((status) =>
+      query = query.where`${esql.col('alert.status')} IN (${options.status.map((status) =>
         esql.str(status)
       )})`;
     }
@@ -346,7 +346,7 @@ export class RuleEventsClient implements SignificantEventsReadClient {
    * Returns the latest version per `group_hash` for all active ("open") events within the given
    * time range, optionally narrowed to candidate stream/rule identities so the scan stays
    * proportional to the write batch instead of the whole space. Mirrors `EventClient`'s
-   * `findLatestActive`, but filters on the nested `episode.status` column (via
+   * `findLatestActive`, but filters on the nested `alert.status` column (via
    * `SIGNIFICANT_EVENTS_STATUS_MAP`, see `buildLatestByCurrentStateQuery`'s status branch) instead
    * of a top-level `status` column, and reads `stream_names` / `signals.metadata.rule_uuid`
    * through `FIELD_EXTRACT` since both live in the flattened `data` column.
