@@ -41,6 +41,7 @@ import { FlyoutMetadataCard } from '../../../../components/flyout_components/fly
 import { FlyoutToolbarHeader } from '../../../../components/flyout_components/flyout_toolbar_header';
 import type { StreamQueryStats } from '../../../../hooks/use_fetch_query_occurrence_stats';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { InfoPanel } from '../../../../components/info_panel';
 import { SparkPlot } from '../../../../components/spark_plot';
@@ -81,6 +82,7 @@ export function QueryDetailsFlyout({
   } = useKibana();
   const canManage = getNightshiftCapabilities(nightshift).canManage;
   const { timeState } = useTimefilter();
+  const { getSourceTitle } = useSourcesById();
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'queryDetailsFlyoutTitle',
@@ -181,8 +183,8 @@ export function QueryDetailsFlyout({
             </EuiFlexItem>
             <EuiFlexItem>
               <FlyoutMetadataCard title={STREAM_LABEL}>
-                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                  {item.stream_name}
+                <EuiBadge color="hollow" iconType="database" iconSide="left">
+                  {getSourceTitle(item.stream_name)}
                 </EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>
@@ -317,9 +319,10 @@ function getQueryInputValue(item: StreamQueryStats) {
   return item.query.esql?.query ?? '';
 }
 
-const STREAM_LABEL = i18n.translate('xpack.significantEventsApp.queryDetailsFlyout.streamLabel', {
-  defaultMessage: 'Stream',
-});
+const STREAM_LABEL = i18n.translate(
+  'xpack.significantEventsApp.sources.queryDetailsFlyout.sourceLabel',
+  { defaultMessage: 'Source' }
+);
 
 const GENERAL_INFORMATION_TITLE = i18n.translate(
   'xpack.significantEventsApp.queryDetailsFlyout.generalInformationTitle',

@@ -70,7 +70,7 @@ export const createKiIdentificationStartTool = ({
     - Get a direct Kibana path to track background task progress in the Significant Events UI
 
     Returns:
-    - On success: \`{ slug, title, view_name, kibanaPath: "${SIGNIFICANT_EVENTS_APP_ROUTE}/knowledge_indicators?stream=<source id>" }\`
+    - On success: \`{ slug, title, view_name, kibanaPath: "${SIGNIFICANT_EVENTS_APP_ROUTE}/knowledge_indicators?source=<source id>" }\`
     - On failure: an error result with \`message\`, \`slug\`, \`operation\`, and \`likely_cause\`
   `,
   schema: onboardingStartSchema,

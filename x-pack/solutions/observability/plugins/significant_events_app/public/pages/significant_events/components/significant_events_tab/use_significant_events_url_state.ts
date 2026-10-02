@@ -57,9 +57,9 @@ const encodeListParam = (values: string[]): string | string[] => (values.length 
 /**
  * URL state for the significant events tab.
  *
- * - `status` / `severity` / `stream` / `service`: the list filters. The URL is the single source of
+ * - `status` / `severity` / `source` / `service`: the list filters. The URL is the single source of
  *   truth so they survive a reload and follow browser history. Absent `status`/`severity` means the
- *   default selection; `stream` and `service` are omitted when empty.
+ *   default selection; `source` and `service` are omitted when empty.
  * - `selectedEvent`: deep-link context (e.g. from a notification). Filters the list to just
  *   that event and adapts the filter controls to its properties.
  * - `openEvent`: the single source of truth for flyout visibility — the flyout is open iff
@@ -90,7 +90,12 @@ export const useSignificantEventsUrlState = () => {
       parseListParam(query?.severity, SEVERITY_OPTIONS, DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER),
     [query?.severity]
   );
-  const streamFilter = useMemo(() => parseValuesParam(query?.stream), [query?.stream]);
+  // `stream` is the name this param had before sources; locator links and bookmarks still carry it.
+  // Writes always use `source`, so the old name leaves the URL on the first filter edit.
+  const streamFilter = useMemo(
+    () => parseValuesParam(query?.source ?? query?.stream),
+    [query?.source, query?.stream]
+  );
   const serviceFilter = useMemo(() => parseValuesParam(query?.service), [query?.service]);
 
   /**
@@ -122,17 +127,18 @@ export const useSignificantEventsUrlState = () => {
       { keepSelectedEvent = false } = {}
     ) => {
       const {
-        stream: currentStream,
+        source: currentSource,
+        stream: legacyStream,
         service: currentService,
         ...rest
       } = keepSelectedEvent ? queryRef.current ?? {} : omitSelectedEvent(queryRef.current);
-      const nextStream = stream ?? parseValuesParam(currentStream);
+      const nextStream = stream ?? parseValuesParam(currentSource ?? legacyStream);
       const nextService = service ?? parseValuesParam(currentService);
       write('replace', {
         ...rest,
         ...(status ? { status: encodeListParam(status) } : {}),
         ...(severity ? { severity: encodeListParam(severity) } : {}),
-        ...(nextStream.length ? { stream: nextStream } : {}),
+        ...(nextStream.length ? { source: nextStream } : {}),
         ...(nextService.length ? { service: nextService } : {}),
       });
     },
@@ -144,6 +150,7 @@ export const useSignificantEventsUrlState = () => {
     const {
       status: _status,
       severity: _severity,
+      source: _source,
       stream: _stream,
       service: _service,
       ...rest

@@ -39,12 +39,13 @@ export function useSourcesApi() {
   const queryClient = useQueryClient();
 
   const invalidateSources = () => queryClient.invalidateQueries({ queryKey: SOURCES_QUERY_KEY });
-  // Lists that span sources include the changed one: mark every knowledge query stale without
-  // refetching, so each reloads the next time it is shown.
-  const markKnowledgeStale = () =>
+  // Lists that span sources include the changed one: mark every knowledge query stale. Mounted
+  // queries refetch only when `refetchType` is `active`; with `none`, each reloads the next time
+  // it is shown.
+  const markKnowledgeStale = (refetchType: 'active' | 'none' = 'none') =>
     Promise.all(
       SOURCE_KNOWLEDGE_QUERY_KEYS.map((queryKey) =>
-        queryClient.invalidateQueries({ queryKey, refetchType: 'none' })
+        queryClient.invalidateQueries({ queryKey, refetchType })
       )
     );
 
@@ -79,8 +80,9 @@ export function useSourcesApi() {
     onSuccess: (source) => {
       toasts.addSuccess({ title: getSourceSavedToastTitle(source.title) });
     },
-    // A changed query retires the source's knowledge, so what is cached for it goes stale too.
-    onSettled: () => Promise.all([invalidateSources(), markKnowledgeStale()]),
+    // A changed query retires the source's knowledge. The source stays in the mounted Sources
+    // table with the same id and onboarding status, so its count queries must refetch in place.
+    onSettled: () => Promise.all([invalidateSources(), markKnowledgeStale('active')]),
   });
 
   const setSourceEnabled = useMutation<

@@ -28,7 +28,7 @@ import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
-import type { Streams } from '@kbn/streams-schema';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
@@ -56,7 +56,7 @@ import { durabilityMenuItem } from '../durability_menu_item';
 import { useBlocksNewActivity } from '../../../hooks/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
-import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSourceId } from '../utils/get_knowledge_indicator_source_id';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 import { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_query_details_content';
 
@@ -65,7 +65,8 @@ interface Props {
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
   features: Feature[];
-  stream?: Streams.all.Definition;
+  /** Source of the knowledge indicator; absent while the source list loads or if it was deleted. */
+  source?: NightshiftSource;
   pageIndex?: number;
   pageCount?: number;
   onSelectPage?: (pageIndex: number) => void;
@@ -76,7 +77,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   occurrencesByQueryId,
   onClose,
   features,
-  stream,
+  source,
   pageIndex,
   pageCount,
   onSelectPage,
@@ -97,18 +98,18 @@ export function KnowledgeIndicatorDetailsFlyout({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
-  const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
+  const streamName = getKnowledgeIndicatorSourceId(knowledgeIndicator);
 
   const featureFilter =
     knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const openFeatureInDiscover = useMemo(() => {
-    if (!featureFilter || !discoverLocator || !stream) {
+    if (!featureFilter || !discoverLocator || !source) {
       return undefined;
     }
     return () =>
-      discoverLocator.navigate(buildFeatureDiscoverParams(stream, featureFilter, timeState));
-  }, [discoverLocator, featureFilter, stream, timeState]);
+      discoverLocator.navigate(buildFeatureDiscoverParams(source, featureFilter, timeState));
+  }, [discoverLocator, featureFilter, source, timeState]);
 
   const streamFeatures = useMemo(
     () => features.filter((f) => f.stream_name === streamName),
@@ -400,8 +401,8 @@ export function KnowledgeIndicatorDetailsFlyout({
             )}
             <EuiFlexItem>
               <FlyoutMetadataCard title={STREAM_LABEL}>
-                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                  {streamName}
+                <EuiBadge color="hollow" iconType="database" iconSide="left">
+                  {source?.title ?? streamName}
                 </EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>
@@ -475,9 +476,9 @@ const TYPE_LABEL = i18n.translate(
 );
 
 const STREAM_LABEL = i18n.translate(
-  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.streamLabel',
+  'xpack.significantEventsApp.sources.knowledgeIndicatorDetailsFlyout.sourceLabel',
   {
-    defaultMessage: 'Stream',
+    defaultMessage: 'Source',
   }
 );
 

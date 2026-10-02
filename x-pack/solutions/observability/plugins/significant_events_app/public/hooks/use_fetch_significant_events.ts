@@ -12,7 +12,7 @@ import type {
   SignificantEventStatus,
   Severity,
 } from '@kbn/significant-events-schema';
-import type { PaginatedResponse } from '@kbn/streams-plugin/common';
+import type { PaginatedResponse } from '@kbn/significant-events-plugin/common';
 import { useKibana } from './use_kibana';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 

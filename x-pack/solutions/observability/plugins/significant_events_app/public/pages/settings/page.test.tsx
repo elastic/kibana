@@ -9,11 +9,32 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { useKibana } from '../../hooks/use_kibana';
+import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
 import { SettingsPage } from './page';
 
 jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_significant_events_availability');
+jest.mock('../../hooks/use_significant_events_app_params', () => ({
+  useSignificantEventsAppParams: jest.fn(),
+}));
+jest.mock('../../hooks/use_significant_events_app_router', () => ({
+  useSignificantEventsAppRouter: () => ({
+    link: (_path: string, params: { path: { tab: string } }) =>
+      `/app/significant_events/${params.path.tab}`,
+  }),
+}));
+jest.mock('../../components/page_template', () => ({
+  SignificantEventsAppHeader: ({ back }: { back: { href: string; label: string } }) => (
+    <a data-test-subj="settingsPageBackLink" href={back.href}>
+      {back.label}
+    </a>
+  ),
+  SignificantEventsAppLoading: () => null,
+  SignificantEventsAppPageTemplate: {
+    Body: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  },
+}));
 jest.mock('../significant_events/components/settings/tab', () => ({
   SettingsTab: () => null,
 }));
@@ -21,6 +42,9 @@ jest.mock('../significant_events/components/settings/tab', () => ({
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSignificantEventsAvailability =
   useSignificantEventsAvailability as jest.MockedFunction<typeof useSignificantEventsAvailability>;
+const mockUseSignificantEventsAppParams = useSignificantEventsAppParams as jest.MockedFunction<
+  typeof useSignificantEventsAppParams
+>;
 
 const getUrlForApp = jest.fn().mockReturnValue('/app/nightshift');
 const navigateToApp = jest.fn();
@@ -43,6 +67,7 @@ describe('SettingsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setCapabilities(true);
+    mockUseSignificantEventsAppParams.mockReturnValue({ query: {} } as never);
     mockUseSignificantEventsAvailability.mockReturnValue({
       availability: { available: true },
       isLoading: false,

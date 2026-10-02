@@ -64,8 +64,9 @@ export function KnowledgeIndicatorSelectableFilter({
       const value = getValue(ki);
       if (value) values.add(value);
     }
-    return Array.from(values).sort((a, b) => a.localeCompare(b));
-  }, [knowledgeIndicators, filterCriteria, getValue]);
+    // Sorted by what the user reads: source values are ids, whose order means nothing.
+    return Array.from(values).sort((a, b) => getLabel(a).localeCompare(getLabel(b)));
+  }, [knowledgeIndicators, filterCriteria, getValue, getLabel]);
 
   const valueCounts = useMemo(() => {
     const counts: Record<string, number> = {};

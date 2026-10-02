@@ -139,12 +139,12 @@ describe('useKnowledgeIndicatorsUrlState', () => {
       expect(result.current.selectedSubtypes).toEqual(['sub1']);
     });
 
-    it('initializes stream from query', () => {
+    it('initializes the source filter from query', () => {
       const knowledgeIndicators = [
         makeFeatureKI({ uuid: 'f1', stream_name: 's1' }),
         makeFeatureKI({ uuid: 'f2', stream_name: 's2' }),
       ];
-      mockQuery = { stream: ['s1', 's2'] };
+      mockQuery = { source: ['s1', 's2'] };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
       );
@@ -214,7 +214,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
         status: 'excluded',
         type: ['entity'],
         subtype: ['sub1'],
-        stream: ['logs'],
+        source: ['logs'],
         showComputed: 'true',
         rangeFrom: 'now-15m',
         rangeTo: 'now',
@@ -229,7 +229,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
           status: 'excluded',
           type: ['entity'],
           subtype: ['sub1'],
-          stream: ['logs'],
+          source: ['logs'],
           showComputed: 'true',
           rangeFrom: 'now-15m',
           rangeTo: 'now',
@@ -413,7 +413,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
 
     it('preserves stream filters from URL when no indicators exist for that stream yet', () => {
       const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 'logs' })];
-      mockQuery = { stream: ['logs', 'metrics'] };
+      mockQuery = { source: ['logs', 'metrics'] };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
       );
@@ -424,7 +424,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
 
     it('prunes stream filters that no longer match any indicator and were not in the initial URL', () => {
       const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 'logs' })];
-      mockQuery = { stream: ['logs'] };
+      mockQuery = { source: ['logs'] };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
       );

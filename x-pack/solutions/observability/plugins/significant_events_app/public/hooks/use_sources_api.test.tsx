@@ -130,7 +130,7 @@ describe('useSourcesApi knowledge invalidation', () => {
     }
   });
 
-  it('marks knowledge stale after an update, which can change the query', async () => {
+  it('refetches mounted knowledge after an update, which can change the query', async () => {
     const { result, invalidateQueries } = setup();
 
     act(() => result.current.updateSource.mutate({ sourceId: 'source-1', body: UPDATE_BODY }));
@@ -138,7 +138,7 @@ describe('useSourcesApi knowledge invalidation', () => {
     await waitFor(() => expect(result.current.updateSource.isSuccess).toBe(true));
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: SOURCES_QUERY_KEY });
     for (const queryKey of KNOWLEDGE_PREFIXES) {
-      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey, refetchType: 'none' });
+      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey, refetchType: 'active' });
     }
   });
 

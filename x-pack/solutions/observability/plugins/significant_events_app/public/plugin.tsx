@@ -70,6 +70,15 @@ export class SignificantEventsAppPlugin
       ],
       deepLinks: [
         {
+          id: 'sources' satisfies SignificantEventsLinkId,
+          title: i18n.translate('xpack.significantEventsApp.sourcesDeepLinkTitle', {
+            defaultMessage: 'Significant Events / Sources',
+          }),
+          path: '/sources',
+          visibleIn: [],
+          keywords: ['sources', 'esql', 'significant events', 'sig events', 'sig events sources'],
+        },
+        {
           id: 'knowledge_indicators' satisfies SignificantEventsLinkId,
           title: i18n.translate('xpack.significantEventsApp.kiDeepLinkTitle', {
             defaultMessage: 'Significant Events / KIs',

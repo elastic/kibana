@@ -31,9 +31,9 @@ import {
   KiGenerationProvider,
 } from './components/knowledge_indicators_table';
 import { SignificantEventsPageProvider } from './context/significant_events_page_context';
-import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
+import { ONBOARDING_FAILURE_TITLE } from './components/sources_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
-import { StreamsView } from './components/streams_view/streams_view';
+import { SourcesView } from './components/sources_view/sources_view';
 import { CortexTab } from './components/cortex/tab';
 import { useCortexEnabled } from './components/cortex/use_cortex';
 import { DecisionTreesTab } from './components/decision_trees/tab';
@@ -43,7 +43,7 @@ import { SignificantEventsTab } from './components/significant_events_tab';
 import { RunLimitsBanner } from './components/run_limits_banner';
 
 const significantEventsTabs = [
-  'streams',
+  'sources',
   'knowledge_indicators',
   'queries',
   'detections',
@@ -107,6 +107,8 @@ export function SignificantEventsPage() {
     defaultMessage: 'Settings',
   });
   const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
+  // Settings also opens from Nightshift; `fromTab` makes its Back link return to this tab.
+  const settingsHref = router.link('/settings', { query: { fromTab: tab } });
 
   const menu = useMemo<AppHeaderMenu | undefined>(
     () =>
@@ -118,13 +120,13 @@ export function SignificantEventsPage() {
                 order: 1,
                 label: settingsLabel,
                 iconType: 'gear',
-                href: router.link('/settings'),
+                href: settingsHref,
                 testId: 'significantEventsSettingsLink',
               },
             ],
           }
         : undefined,
-    [canConfigure, router, settingsLabel]
+    [canConfigure, settingsHref, settingsLabel]
   );
 
   useEffect(() => {
@@ -140,12 +142,12 @@ export function SignificantEventsPage() {
   const allTabs = useMemo(
     () => [
       {
-        id: 'streams',
-        label: i18n.translate('xpack.significantEventsApp.streamsTab', {
-          defaultMessage: 'Streams',
+        id: 'sources',
+        label: i18n.translate('xpack.significantEventsApp.sourcesTab', {
+          defaultMessage: 'Sources',
         }),
-        href: router.link('/{tab}', { path: { tab: 'streams' } }),
-        isSelected: tab === 'streams',
+        href: router.link('/{tab}', { path: { tab: 'sources' } }),
+        isSelected: tab === 'sources',
       },
       {
         id: 'knowledge_indicators',
@@ -231,8 +233,13 @@ export function SignificantEventsPage() {
     return <RedirectTo path="/{tab}" params={{ path: { tab: SIGNIFICANT_EVENTS_TAB } }} />;
   }
 
+  // The Streams tab was replaced by Sources; the Nightshift app and bookmarks still link here.
+  if (tab === 'streams') {
+    return <RedirectTo path="/{tab}" params={{ path: { tab: 'sources' } }} />;
+  }
+
   if (!isValidSignificantEventsTab(tab) || !tabs.some((item) => item.id === tab)) {
-    return <RedirectTo path="/{tab}" params={{ path: { tab: tabs[0]?.id ?? 'streams' } }} />;
+    return <RedirectTo path="/{tab}" params={{ path: { tab: tabs[0]?.id ?? 'sources' } }} />;
   }
 
   return (
@@ -284,7 +291,7 @@ export function SignificantEventsPage() {
                 </p>
                 {canManage && canConfigure && (
                   <EuiButton
-                    href={router.link('/settings')}
+                    href={settingsHref}
                     color="danger"
                     size="s"
                     data-test-subj="significantEventsStatusErrorBannerSettingsLink"
@@ -330,7 +337,7 @@ export function SignificantEventsPage() {
                 )}
                 {canManage && canConfigure && (
                   <EuiButton
-                    href={router.link('/settings')}
+                    href={settingsHref}
                     color="warning"
                     size="s"
                     data-test-subj="significantEventsPausedBannerSettingsLink"
@@ -344,10 +351,10 @@ export function SignificantEventsPage() {
               <EuiSpacer />
             </>
           )}
-          <RunLimitsBanner />
+          <RunLimitsBanner manageHref={settingsHref} />
           {canShow && (
             <KiGenerationProvider onFailed={onOnboardingFailed}>
-              {tab === 'streams' && <StreamsView />}
+              {tab === 'sources' && <SourcesView />}
               {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
               {tab === 'queries' && <QueriesTable />}
             </KiGenerationProvider>
