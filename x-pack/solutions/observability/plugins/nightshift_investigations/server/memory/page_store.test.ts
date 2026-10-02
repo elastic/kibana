@@ -298,7 +298,7 @@ describe('createMemoryPageStore', () => {
     }
   });
 
-  it('scopes the archived count to the selected keywords, like the total', async () => {
+  it('leaves the archived count at the Space, whatever the keywords select', async () => {
     const search = jest.fn(({ size }: { size?: number }) =>
       Promise.resolve(
         size === 0
@@ -321,11 +321,15 @@ describe('createMemoryPageStore', () => {
     expect(result.stats).toEqual({ total: 2, archived: 1 });
     expect(search.mock.calls).toHaveLength(2);
     const statsQuery = search.mock.calls[1][0] as unknown as {
+      query: unknown;
       aggs: { archived: { aggs: { inScope: { filter: unknown } } } };
     };
-    // The keyword's spellings reach the archived count too, so an archived
-    // memory written before tags were canonicalized is still counted.
-    expect(JSON.stringify(statsQuery.aggs.archived.aggs.inScope.filter)).toContain(
+    // The keyword narrows the listing the total counts...
+    expect(JSON.stringify(statsQuery.query)).toContain('"tags":"invoke-agent"');
+    // ...and nothing else. The header's archived number describes the sidebar's
+    // Archived list, which the client does not filter by keyword, so narrowing
+    // this count would describe a list nobody is looking at.
+    expect(JSON.stringify(statsQuery.aggs.archived.aggs.inScope.filter)).not.toContain(
       '"tags":"invoke-agent"'
     );
   });
