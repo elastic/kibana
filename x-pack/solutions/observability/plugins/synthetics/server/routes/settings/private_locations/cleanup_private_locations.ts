@@ -20,8 +20,6 @@ export const cleanupPrivateLocationRoute: SyntheticsRestApiRouteFactory = () => 
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_CLEANUP,
   validate: {
     query: z.strictObject({
-      // Kept for API compatibility; the clean up no longer keeps a latch to reset.
-      hasAlreadyDoneCleanup: queryBoolean.optional(),
       // Stops the daily removal of leftover package policies until a call without it.
       disable: queryBoolean.optional(),
     }),

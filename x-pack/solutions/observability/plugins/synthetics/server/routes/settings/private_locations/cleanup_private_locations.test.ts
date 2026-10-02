@@ -52,13 +52,6 @@ describe('cleanupPrivateLocationRoute', () => {
     );
   });
 
-  it('still schedules leftover cleanup when hasAlreadyDoneCleanup is true in the query', async () => {
-    const { result } = await callRoute({ hasAlreadyDoneCleanup: true });
-
-    expect(result).toEqual(expect.objectContaining({ success: true }));
-    expect(runCleanUpTaskNowMock).toHaveBeenCalledWith(server);
-  });
-
   it('disables the daily clean up without running it when disable is true', async () => {
     const { result } = await callRoute({ disable: true });
 
