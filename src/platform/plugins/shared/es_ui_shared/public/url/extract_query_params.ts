@@ -8,7 +8,7 @@
  */
 
 import type { ParsedQuery } from 'query-string';
-import { parse } from 'query-string';
+import qs from 'query-string';
 
 export function extractQueryParams(queryString: string = ''): ParsedQuery<string> {
   const hrefSplit = queryString.split('?');
@@ -16,5 +16,5 @@ export function extractQueryParams(queryString: string = ''): ParsedQuery<string
     return {};
   }
 
-  return parse(hrefSplit[1], { sort: false });
+  return qs.parse(hrefSplit[1], { sort: false });
 }
