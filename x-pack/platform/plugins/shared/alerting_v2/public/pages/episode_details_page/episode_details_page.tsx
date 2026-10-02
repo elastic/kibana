@@ -399,7 +399,7 @@ export function EpisodeDetailsPage() {
     <KibanaPageTemplate
       paddingSize="none"
       bottomBorder={false}
-      data-test-subj="alertingV2EpisodeDetailsPage"
+      data-test-subj="alertingV2AlertDetailsPage"
       minHeight={0}
       grow={false}
       css={css`

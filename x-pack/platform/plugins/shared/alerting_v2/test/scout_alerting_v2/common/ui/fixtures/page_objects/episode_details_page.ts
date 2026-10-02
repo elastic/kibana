@@ -23,7 +23,7 @@ export class EpisodeDetailsPage {
   public readonly filteredEmptyPrompt: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.pageContainer = this.page.testSubj.locator('alertingV2EpisodeDetailsPage');
+    this.pageContainer = this.page.testSubj.locator('alertingV2AlertDetailsPage');
     this.actionPolicyHistoryTab = this.page.testSubj.locator(
       'alertingV2EpisodeDetailsMainTabActionPolicyHistory'
     );
@@ -38,7 +38,7 @@ export class EpisodeDetailsPage {
   }
 
   async goto(episodeId: string, spaceId?: string) {
-    const appPath = `management/alertingV2/episodes/${encodeURIComponent(episodeId)}`;
+    const appPath = `management/alertingV2/alerts/${encodeURIComponent(episodeId)}`;
     await this.page.goto(
       spaceId ? this.kbnUrl.app(appPath, { space: spaceId }) : this.kbnUrl.app(appPath)
     );
