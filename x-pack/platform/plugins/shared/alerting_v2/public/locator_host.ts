@@ -18,7 +18,7 @@ import {
 export interface AlertingV2HostApp {
   rules: LocatorHost;
   ruleLibrary: LocatorHost;
-  episodes: LocatorHost;
+  alerts: LocatorHost;
   actionPolicies: LocatorHost;
   executionHistory: LocatorHost;
 }
@@ -34,7 +34,7 @@ export const MANAGEMENT_HOST: AlertingV2HostApp = {
     app: MANAGEMENT_APP_ID,
     pathPrefix: `/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULE_LIBRARY_APP_ID}`,
   },
-  episodes: {
+  alerts: {
     app: MANAGEMENT_APP_ID,
     pathPrefix: `/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`,
   },
@@ -56,14 +56,14 @@ export const createAlertingV2HostApp = (
   pagePathPrefixes: {
     rules: string;
     ruleLibrary: string;
-    episodes: string;
+    alerts: string;
     actionPolicies: string;
     executionHistory: string;
   }
 ): AlertingV2HostApp => ({
   rules: { app: appId, pathPrefix: pagePathPrefixes.rules },
   ruleLibrary: { app: appId, pathPrefix: pagePathPrefixes.ruleLibrary },
-  episodes: { app: appId, pathPrefix: pagePathPrefixes.episodes },
+  alerts: { app: appId, pathPrefix: pagePathPrefixes.alerts },
   actionPolicies: { app: appId, pathPrefix: pagePathPrefixes.actionPolicies },
   executionHistory: { app: appId, pathPrefix: pagePathPrefixes.executionHistory },
 });

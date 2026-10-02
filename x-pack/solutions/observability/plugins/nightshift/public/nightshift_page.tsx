@@ -51,10 +51,9 @@ export function NightshiftPage(): React.ReactElement | null {
   );
 
   // The secrets API is disabled (404) unless the nightshift.enabled flag is on.
+  const nightshiftEnabled = featureFlags.useBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
   const canManageSandboxSecrets =
-    canManage &&
-    nightshiftInvestigations?.investigationsClient != null &&
-    featureFlags.getBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
+    canManage && nightshiftInvestigations?.investigationsClient != null && nightshiftEnabled;
   const [isSandboxSecretsFlyoutOpen, setIsSandboxSecretsFlyoutOpen] = useState(false);
   const openSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(true), []);
   const closeSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(false), []);

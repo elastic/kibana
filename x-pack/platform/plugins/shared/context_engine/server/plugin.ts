@@ -341,6 +341,7 @@ export class ContextEnginePlugin
       managedBootstrap: {
         isManaged: (id) => this.aiIndexRegistry.has(id),
         getManagedIds: () => this.aiIndexRegistry.getManagedIds(),
+        getRegistration: (id) => this.aiIndexRegistry.get(id),
         ensure: ensureAiIndex,
       },
     });

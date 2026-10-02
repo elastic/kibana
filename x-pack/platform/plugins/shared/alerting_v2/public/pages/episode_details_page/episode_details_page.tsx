@@ -213,6 +213,8 @@ export function EpisodeDetailsPage() {
           expressions: services.expressions,
           spaces: services.spaces,
           queryClient,
+          isRuleAvailable: (selectedRuleId) =>
+            isRuleLoaded(ruleState) && ruleState.rule.id === selectedRuleId,
           getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
             getDiscoverHrefForRuleAndEpisodeTimestamp({
               share: services.share,
@@ -397,7 +399,7 @@ export function EpisodeDetailsPage() {
     <KibanaPageTemplate
       paddingSize="none"
       bottomBorder={false}
-      data-test-subj="alertingV2EpisodeDetailsPage"
+      data-test-subj="alertingV2AlertDetailsPage"
       minHeight={0}
       grow={false}
       css={css`
