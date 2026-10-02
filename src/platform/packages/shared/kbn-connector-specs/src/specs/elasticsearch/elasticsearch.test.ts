@@ -400,11 +400,19 @@ describe('Elasticsearch connector', () => {
     it.each([
       [{ size: 10_000, from: 0 }, true],
       [{ size: 0, from: 10_000 }, true],
-      [{ size: 5_000, from: 5_000 }, true],
+      [{ size: 500, from: 9_900 }, true],
       [{ size: 10_001, from: 0 }, false],
-      [{ size: 5_000, from: 5_001 }, false],
-    ])('bounds from + size by the 10000 result window: %j valid=%s', (window, expected) => {
-      expect(SearchInputSchema.safeParse({ index: 'logs-*', ...window }).success).toBe(expected);
+      [{ size: 0, from: 10_001 }, false],
+    ])(
+      'caps from and size separately, leaving from + size to the index result window: %j valid=%s',
+      (window, expected) => {
+        expect(SearchInputSchema.safeParse({ index: 'logs-*', ...window }).success).toBe(expected);
+      }
+    );
+
+    it('rejects an index that cannot be URL-encoded instead of throwing', () => {
+      expect(SearchInputSchema.safeParse({ index: '\ud800' }).success).toBe(false);
+      expect(SearchInputSchema.safeParse({ index: ['logs', '\ud800'] }).success).toBe(false);
     });
 
     it.each([
@@ -474,6 +482,10 @@ describe('Elasticsearch connector', () => {
       expect(RequestInputSchema.safeParse({ path: `/${'é'.repeat(700)}/_doc/1` }).success).toBe(
         false
       );
+    });
+
+    it('rejects an unparsable path instead of throwing', () => {
+      expect(RequestInputSchema.safeParse({ path: ':bad' }).success).toBe(false);
     });
   });
 

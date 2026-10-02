@@ -596,9 +596,29 @@ describe('OpenSearch (AWS OpenSearch Service) connector', () => {
   });
 
   describe('input bounds', () => {
-    const { acknowledgeAlert, indexDocument, updateMonitor } =
+    const { acknowledgeAlert, createMonitor, indexDocument, updateMonitor } =
       OpensearchAwsOpensearchService.actions;
     const ids = (count: number) => Array.from({ length: count }, (_, i) => `id-${i}`);
+    const triggers = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({ name: `trigger-${i}`, severity: '1' }));
+
+    it.each([
+      [50, true],
+      [51, false],
+    ])('monitors accept up to 50 triggers: %d valid=%s', (count, expected) => {
+      expect(
+        createMonitor.input.safeParse({
+          name: 'high-cpu',
+          monitorType: 'query_level_monitor',
+          schedule: { period: { interval: 5, unit: 'MINUTES' } },
+          inputs: [{ search: { indices: ['metrics-*'], query: { size: 0 } } }],
+          triggers: triggers(count),
+        }).success
+      ).toBe(expected);
+      expect(
+        updateMonitor.input.safeParse({ monitorId: 'm1', triggers: triggers(count) }).success
+      ).toBe(expected);
+    });
 
     it.each([
       [1000, true],

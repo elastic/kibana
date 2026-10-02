@@ -986,6 +986,10 @@ describe('AwsEks', () => {
       ['labelsToRemove', { labelsToRemove: keys(1001) }, false],
       ['taint key', { taintsToAdd: taint(taintKey(253)) }, true],
       ['taint key', { taintsToAdd: taint(taintKey(254)) }, false],
+      ['maxSize', { maxSize: 1 }, true],
+      ['maxSize', { maxSize: 0 }, false],
+      ['minSize', { minSize: 0 }, true],
+      ['desiredSize', { desiredSize: 0 }, true],
     ])('%s at the boundary', (_field, input, expected) => {
       expect(isValid(input)).toBe(expected);
     });
