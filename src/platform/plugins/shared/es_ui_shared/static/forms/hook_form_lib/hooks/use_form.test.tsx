@@ -249,6 +249,58 @@ describe('useForm() hook', () => {
     });
   });
 
+  describe('removing fields', () => {
+    const TestComp = ({
+      fieldPaths,
+      fieldKey = '',
+    }: {
+      fieldPaths: string[];
+      fieldKey?: string;
+    }) => {
+      const { form } = useForm();
+
+      useEffect(() => {
+        onFormHook(form);
+      }, [form]);
+
+      return (
+        <Form form={form}>
+          {fieldPaths.map((path) => (
+            <UseField key={`${path}${fieldKey}`} path={path} defaultValue={path} />
+          ))}
+        </Form>
+      );
+    };
+
+    test('should update the form data once when many fields are removed at once', async () => {
+      const fieldPaths = Array.from({ length: 10 }, (_, i) => `field${i}`);
+      const { rerender } = render(<TestComp fieldPaths={fieldPaths} />);
+      const onFormDataChange = jest.fn();
+      const subscription = formHook!.__getFormData$().subscribe(onFormDataChange);
+      onFormDataChange.mockClear();
+
+      await act(async () => {
+        rerender(<TestComp fieldPaths={['field0']} />);
+      });
+
+      expect(onFormDataChange).toHaveBeenCalledTimes(1);
+      expect(formHook!.__getFormData$().value).toEqual({ field0: 'field0' });
+
+      subscription.unsubscribe();
+    });
+
+    test('should keep the form data of a field added back with the same path', async () => {
+      const { rerender } = render(<TestComp fieldPaths={['foo']} fieldKey="initial" />);
+
+      await act(async () => {
+        rerender(<TestComp fieldPaths={['foo']} fieldKey="remounted" />);
+      });
+
+      expect(formHook!.__getFormData$().value).toEqual({ foo: 'foo' });
+      expect(formHook!.getFormData()).toEqual({ foo: 'foo' });
+    });
+  });
+
   describe('config.defaultValue', () => {
     test('should set the default value of a field ', () => {
       const defaultValue = {

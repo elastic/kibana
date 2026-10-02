@@ -138,6 +138,11 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
    */
   const formData$ = useRef<Subject<FormData> | null>(null);
 
+  /**
+   * Paths of the fields removed since the last form data update, see removeField()
+   */
+  const fieldNamesToRemoveFromFormData = useRef<string[]>([]);
+
   // ----------------------------------
   // -- HELPERS
   // ----------------------------------
@@ -317,16 +322,36 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   const removeField: FormHook<T, I>['__removeField'] = useCallback(
     (_fieldNames) => {
       const fieldNames = Array.isArray(_fieldNames) ? _fieldNames : [_fieldNames];
-      const updatedFormData = { ...getFormData$().value };
+      const isFormDataUpdateScheduled = fieldNamesToRemoveFromFormData.current.length > 0;
 
       fieldNames.forEach((name) => {
         fieldsRemovedRefs.current[name] = fieldsRefs.current[name];
         updateFieldErrorMessage(name, null);
         delete fieldsRefs.current[name];
-        delete updatedFormData[name];
+        fieldNamesToRemoveFromFormData.current.push(name);
       });
 
-      updateFormData$(updatedFormData);
+      /**
+       * Every <UseField /> calls removeField() when it unmounts. Copying the form data and
+       * notifying subscribers for each field is O(n^2) when many fields unmount at once,
+       * so we batch the removals and update the form data once. We use a resolved Promise
+       * instead of "queueMicrotask()" as the latter is mocked by Jest fake timers.
+       */
+      if (!isFormDataUpdateScheduled) {
+        Promise.resolve().then(() => {
+          const updatedFormData = { ...getFormData$().value };
+
+          for (const name of fieldNamesToRemoveFromFormData.current) {
+            // The field might have been added back in the meantime (e.g. an array item path was reused)
+            if (fieldsRefs.current[name] === undefined) {
+              delete updatedFormData[name];
+            }
+          }
+
+          fieldNamesToRemoveFromFormData.current = [];
+          updateFormData$(updatedFormData);
+        });
+      }
 
       /**
        * After removing a field, the form validity might have changed
