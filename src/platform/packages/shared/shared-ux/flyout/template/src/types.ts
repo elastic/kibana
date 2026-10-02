@@ -10,6 +10,7 @@
 import type { CSSProperties, MouseEventHandler, ReactNode } from 'react';
 import type {
   DataAttributeProps,
+  DistributiveOmit,
   EuiBadgeProps,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
@@ -96,11 +97,17 @@ export type FlyoutHeaderMetaBlockProps = Omit<MetaBlock, BlockPartOwnedProps> &
   };
 
 /**
- * Props for the declarative `FlyoutTemplate.Header.Badge` part. Intersects the full `EuiBadgeProps`
- * (rather than `Omit`-ing it) to keep the `ExclusiveUnion` intact, so `onClick`/`href` stay
- * available and a badge can act as a label or a control.
+ * A badge's icon is decorative here, so it gets no separate click target. Offering one would also
+ * put a second control inside the badge, which the tab-stop handling in the header does not expect.
  */
-export type FlyoutHeaderBadgeProps = EuiBadgeProps &
+type BadgeIconActionProps = 'iconOnClick' | 'iconOnClickAriaLabel';
+
+/**
+ * Props for the declarative `FlyoutTemplate.Header.Badge` part. `DistributiveOmit` keeps
+ * `EuiBadgeProps`' `ExclusiveUnion` intact (a plain `Omit` would collapse it and drop
+ * `onClick`/`href`), so a badge can still act as a label or a whole-badge control.
+ */
+export type FlyoutHeaderBadgeProps = DistributiveOmit<EuiBadgeProps, BadgeIconActionProps> &
   DataAttributeProps & {
     /** Optional explicit instance id; auto-generated when omitted. */
     id?: string;

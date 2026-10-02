@@ -32,12 +32,16 @@ Three declarative parts add secondary content to the header. Declare them as `He
 ```
 
 - **`Header.MetaBlock`** — a compact key/value pair, rendered through `@kbn/flyout-meta-blocks`. `title` is the key, rendered bold. `children` is the value, and can hold rich content such as links. The rest of the `MetaBlock` props are also accepted. Use meta blocks for provenance, such as timestamps, owners, or authors.
-- **`Header.Badge`** — a status label, rendered through `EuiBadge`. `children` is the label, and the rest of `EuiBadgeProps` is accepted except the control props (`onClick`, `onClickAriaLabel`, `iconOnClick`, `iconOnClickAriaLabel`, `href`, `target`, `rel`). Badges are labels, not controls. Labels wider than 200px are truncated with an ellipsis.
+- **`Header.Badge`** — a status label, rendered through `EuiBadge`. `children` is the label, and the rest of `EuiBadgeProps` is accepted except `iconOnClick` and `iconOnClickAriaLabel`: the icon is decorative, so the badge is a single target rather than two. Labels wider than 200px are truncated with an ellipsis.
 - **`Header.InfoBlock`** — a titled value in a responsive grid, rendered through `@kbn/flyout-info-blocks`. `title` is a plain string label and `children` is the value. The rest of the `InfoBlockItem` props are also accepted, including `size` and `color` for emphasizing a headline figure. The number of columns depends on the number of blocks.
 
 All three also take an optional `id`. It identifies the part internally, is generated when omitted, and is not rendered as a DOM id. `data-test-subj` and any `data-*` attributes are passed through to the rendered element.
 
 **Badge overflow.** Up to five badges render inline. With more than five, the first four render inline and the rest collapse behind a `+N more` badge, which opens them in a popover.
+
+**Badges as labels or controls.** A badge is a label by default. Pass `href` (with `target`/`rel`) or `onClick` with `onClickAriaLabel` to make the whole badge navigate or act, which EUI renders as an `<a>` or a `<button>`.
+
+**Badge tooltips.** `toolTipContent` wraps the badge in an `EuiToolTip`, positioned by `toolTipPosition`. Because a tooltip also opens on keyboard focus, a tooltipped badge that is neither a link nor a button gets a tab stop so keyboard users can reach it; give those badges an `aria-label`, and `role="img"` when the label is purely visual.
 
 All three groups live in the header's collapsible region. They animate away when the header collapses on scroll, and they never show when `collapsed` is set. Put content that must stay visible in the title or the tab bar.
 
