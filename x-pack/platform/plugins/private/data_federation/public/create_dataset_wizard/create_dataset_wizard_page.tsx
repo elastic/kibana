@@ -92,8 +92,14 @@ export function CreateDatasetWizardPage({
     () => new Set(isEditMode ? getValidStepIds(formDefaultValues) : OPTIONAL_STEP_IDS)
   );
 
-  const skipsUnvalidatedStep = (index: number) =>
-    STEPS.slice(activeStepIndex + 1, index).some(({ id }) => !validatedStepIds.has(id));
+  // Rules can depend on values from other steps (e.g. CSV character defaults on the format), so a
+  // validated step must also still pass for the current values to be skipped over.
+  const skipsUnvalidatedStep = (index: number) => {
+    const validStepIds = getValidStepIds(methods.getValues());
+    return STEPS.slice(activeStepIndex + 1, index).some(
+      ({ id }) => !validatedStepIds.has(id) || !validStepIds.includes(id)
+    );
+  };
 
   const goToStep = async (index: number) => {
     if (index === activeStepIndex) return;

@@ -61,6 +61,20 @@ describe('getValidStepIds', () => {
     });
   });
 
+  describe('WHEN a delimiter matches the default quote of only one format', () => {
+    it('SHOULD include the settings step for TSV', () => {
+      expect(getValidStepIds(buildValues({ settings: { format: 'tsv', delimiter: '"' } }))).toEqual(
+        ['settings', 'mapping']
+      );
+    });
+
+    it('SHOULD exclude the settings step for CSV', () => {
+      expect(getValidStepIds(buildValues({ settings: { format: 'csv', delimiter: '"' } }))).toEqual(
+        ['mapping']
+      );
+    });
+  });
+
   describe('WHEN a Mapping rule fails', () => {
     it.each<[string, Partial<CreateDatasetFormValues['mappings']>]>([
       [

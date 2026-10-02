@@ -1584,5 +1584,39 @@ describe('CreateDatasetWizardPage', () => {
         await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
       ).toBeInTheDocument();
     });
+
+    it('does not allow skipping Additional settings once a format change makes them invalid', async () => {
+      const { getByTestId, queryByTestId, add } = renderEditWizard({
+        name: 'logs-dataset',
+        data_source: 'source-1',
+        resource: 's3://bucket/*',
+        settings: { format: 'tsv', delimiter: '"' },
+      });
+
+      expect(getByTestId('createDatasetWizardStep-review')).toBeEnabled();
+
+      // CSV's default quote is also `"`, so the saved delimiter now conflicts with it.
+      selectFormat(getByTestId, 'csv');
+      await act(async () => {});
+
+      await clickStep(getByTestId, 'review');
+      expect(queryByTestId('createDatasetWizardReviewStep')).toBeNull();
+      expect(getByTestId('createDatasetWizardDatasetStep')).toBeInTheDocument();
+      await clickStep(getByTestId, 'mapping');
+      expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
+      expect(add).not.toHaveBeenCalled();
+
+      await clickStep(getByTestId, 'settings');
+      expect(
+        await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+      ).toBeInTheDocument();
+      await clickNext(getByTestId);
+      expect(queryByTestId('createDatasetWizardMappingStep')).toBeNull();
+      expect(
+        getByTestId('createDatasetWizardAdditionalStep').textContent?.includes(
+          createDatasetWizardStrings.settingsCsvCharactersNotDistinct
+        )
+      ).toBe(true);
+    });
   });
 });
