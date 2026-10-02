@@ -141,15 +141,19 @@ describe('evals.suites.json specModelGroups', () => {
 
   it('lists every weekly model in at least one spec once every spec has an override', () => {
     // When each spec pins its own models, a weekly model that no spec lists is provisioned and
-    // requested every week but never gets a step. Keep the weekly list honest.
+    // requested every week but never gets a step. Keep the weekly list honest. A files-only entry
+    // runs the whole weekly list, so a suite with one can have no idle model and is skipped.
     const problems = suitesWithSpecModelGroups.flatMap((suite) => {
-      const listedFiles = new Set(suite.specModelGroups.flatMap((spec) => spec.files ?? []));
+      const pinned = suite.specModelGroups.filter(
+        (spec) => Array.isArray(spec.models) && spec.models.length > 0
+      );
+      const pinnedFiles = new Set(pinned.flatMap((spec) => spec.files ?? []));
       const runnableFiles = (suite.shards ?? []).flatMap((shard) => shard.specFiles ?? []);
-      const everySpecHasOverride =
-        runnableFiles.length > 0 && runnableFiles.every((file) => listedFiles.has(file));
-      if (!everySpecHasOverride) return [];
+      const everySpecIsPinned =
+        runnableFiles.length > 0 && runnableFiles.every((file) => pinnedFiles.has(file));
+      if (!everySpecIsPinned) return [];
 
-      const usedModels = new Set(suite.specModelGroups.flatMap((spec) => spec.models ?? []));
+      const usedModels = new Set(pinned.flatMap((spec) => spec.models));
       return (suite.weeklyEisModelGroups ?? [])
         .filter((model) => !usedModels.has(model))
         .map((model) => `${suite.id}: weekly model "${model}" is not listed by any spec`);
