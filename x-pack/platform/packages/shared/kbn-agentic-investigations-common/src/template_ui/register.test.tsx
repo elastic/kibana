@@ -193,17 +193,31 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     );
   });
 
-  it('shows the severity and the running state in the header', async () => {
+  it("shows the conversation's severity in the header without a live state", async () => {
+    const { contract } = createFakeService();
+    register(contract);
+    const Header = getSlot(contract, 'investigation', 'header');
+
+    renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
+
+    expect(await screen.findByTestId('investigationFlyoutSeverity')).toHaveTextContent('High');
+  });
+
+  it('leaves the severity to the live state, passing it the conversation severity', async () => {
     const { contract } = createFakeService();
     register(contract, {
-      renderRunningState: ({ conversationId }) => <span>running {conversationId}</span>,
+      renderLiveState: ({ conversationId, severity }) => (
+        <span>
+          live {conversationId} {severity}
+        </span>
+      ),
     });
     const Header = getSlot(contract, 'investigation', 'header');
 
     renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
 
-    expect(await screen.findByText('running conversation-1')).toBeInTheDocument();
-    expect(screen.getByTestId('investigationFlyoutSeverity')).toHaveTextContent('High');
+    expect(await screen.findByText('live conversation-1 high')).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationFlyoutSeverity')).not.toBeInTheDocument();
   });
 
   it('registers the brief card when supplied', () => {

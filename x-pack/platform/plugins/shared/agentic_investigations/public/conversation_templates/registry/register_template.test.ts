@@ -102,7 +102,7 @@ describe('registerTemplate', () => {
     const { investigation } = register();
 
     expect(investigation.renderOverview).toEqual(expect.any(Function));
-    expect(investigation.renderRunningState).toEqual(expect.any(Function));
+    expect(investigation.renderLiveState).toEqual(expect.any(Function));
     expect(investigation.briefCard).toEqual(expect.any(Function));
   });
 
