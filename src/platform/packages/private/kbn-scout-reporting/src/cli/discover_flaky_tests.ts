@@ -28,9 +28,9 @@ import {
 } from '../reporting/flaky_tests';
 import { DEFAULT_TERMINAL_WIDTH, displaySummary, terminalWidth } from './flaky_tests_summary';
 
-// The per-framework aggregations scan hundreds of millions of documents; the client default of
-// 60s is not enough for them.
-const ES_REQUEST_TIMEOUT_MS = 300_000;
+// The 28-day history and detail queries scan hundreds of millions of documents and can exceed
+// five minutes; keep requests bounded within the pipeline's 30-minute step budget.
+const ES_REQUEST_TIMEOUT_MS = 600_000;
 
 const defaults = DEFAULT_FLAKY_TEST_REPORT_OPTIONS;
 
