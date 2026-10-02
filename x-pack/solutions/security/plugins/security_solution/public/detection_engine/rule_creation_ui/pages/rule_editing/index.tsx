@@ -28,6 +28,7 @@ import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/h
 import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useAsyncActionWithLoading } from '../../../../common/hooks/use_async_action_with_loading';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../components/rule_preview';
 import type {
@@ -709,16 +710,11 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         </EuiFlexItem>
 
                         <EuiFlexItem grow={false}>
-                          <EuiButton
-                            data-test-subj="ruleEditSubmitButton"
-                            fill
-                            onClick={onSubmit}
-                            iconType="save"
+                          <SaveRuleButton
+                            onSubmit={onSubmit}
                             isLoading={isLoading}
                             isDisabled={loading}
-                          >
-                            {i18n.SAVE_CHANGES}
-                          </EuiButton>
+                          />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </MaxWidthEuiFlexItem>
@@ -759,3 +755,31 @@ const EditRulePageWrapper: FC = () => {
 };
 
 export const EditRulePage = memo(EditRulePageWrapper);
+
+interface SaveRuleButtonProps {
+  onSubmit: () => Promise<void>;
+  isLoading: boolean;
+  isDisabled: boolean;
+}
+
+/* Keeps the submitting state local, so toggling it doesn't re-render the whole page */
+const SaveRuleButton = memo(function SaveRuleButton({
+  onSubmit,
+  isLoading,
+  isDisabled,
+}: SaveRuleButtonProps): JSX.Element {
+  const [isSubmitting, submit] = useAsyncActionWithLoading(onSubmit);
+
+  return (
+    <EuiButton
+      data-test-subj="ruleEditSubmitButton"
+      fill
+      onClick={submit}
+      iconType="save"
+      isLoading={isSubmitting || isLoading}
+      isDisabled={isDisabled}
+    >
+      {i18n.SAVE_CHANGES}
+    </EuiButton>
+  );
+});

@@ -15,6 +15,7 @@ import {
   FieldFinalSideMode,
   useFieldUpgradeContext,
 } from '../../rule_upgrade/field_upgrade_context';
+import { useAsyncActionWithLoading } from '../../../../../../../common/hooks/use_async_action_with_loading';
 import { useFieldEditFormContext } from '../context/field_edit_form_context';
 import { FieldFinalSideHelpInfo } from './field_final_side_help_info';
 import * as i18n from './translations';
@@ -34,6 +35,7 @@ export function FieldFinalSideHeader(): JSX.Element {
     [finalDiffableRule, fieldName, setRuleFieldResolvedValue]
   );
   const handleSave = useCallback(() => form?.submit(), [form]);
+  const [isSaving, save] = useAsyncActionWithLoading(handleSave);
 
   switch (rightSideMode) {
     case FieldFinalSideMode.Readonly:
@@ -61,7 +63,8 @@ export function FieldFinalSideHeader(): JSX.Element {
               iconType="checkCircleFill"
               size="s"
               disabled={!form?.isValid}
-              onClick={handleSave}
+              isLoading={isSaving}
+              onClick={save}
               data-test-subj="prebuilt-rule-upgrade-flyout-field-save"
             >
               {hasConflict ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}
