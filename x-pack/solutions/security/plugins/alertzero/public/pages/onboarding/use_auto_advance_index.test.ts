@@ -67,6 +67,31 @@ describe('useAutoAdvanceIndex', () => {
     expect(result.current.activeIndex).toBe(2);
   });
 
+  it('keeps hover and focus pauses independent', () => {
+    const { result } = renderHook(() => useAutoAdvanceIndex(3, 1000));
+
+    act(() => result.current.pauseProps.onFocus());
+    act(() => result.current.pauseProps.onMouseEnter());
+    act(() => result.current.pauseProps.onMouseLeave());
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+    expect(result.current.activeIndex).toBe(0);
+
+    act(() => result.current.pauseProps.onMouseEnter());
+    act(() => result.current.pauseProps.onBlur());
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+    expect(result.current.activeIndex).toBe(0);
+
+    act(() => result.current.pauseProps.onMouseLeave());
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(result.current.activeIndex).toBe(1);
+  });
+
   it('stops rotating for good once an index is selected', () => {
     const { result } = renderHook(() => useAutoAdvanceIndex(3, 1000));
 

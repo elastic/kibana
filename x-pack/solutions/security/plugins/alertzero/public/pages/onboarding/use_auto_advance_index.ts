@@ -30,7 +30,9 @@ export const useAutoAdvanceIndex = (
 } => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [autoAdvance, setAutoAdvance] = useState(() => !prefersReducedMotion());
-  const [isPaused, setIsPaused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const isPaused = isHovered || isFocused;
 
   useEffect(() => {
     if (!autoAdvance || isPaused) return;
@@ -45,10 +47,10 @@ export const useAutoAdvanceIndex = (
 
   const pauseProps = useMemo(
     () => ({
-      onMouseEnter: () => setIsPaused(true),
-      onMouseLeave: () => setIsPaused(false),
-      onFocus: () => setIsPaused(true),
-      onBlur: () => setIsPaused(false),
+      onMouseEnter: () => setIsHovered(true),
+      onMouseLeave: () => setIsHovered(false),
+      onFocus: () => setIsFocused(true),
+      onBlur: () => setIsFocused(false),
     }),
     []
   );
