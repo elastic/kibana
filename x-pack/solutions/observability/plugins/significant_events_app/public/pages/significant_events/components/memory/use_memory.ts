@@ -8,6 +8,10 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
+import {
+  toFeatureAvailability,
+  type FeatureAvailability,
+} from '../../../../util/feature_availability';
 import type { MemoryFilter, MemoryListResult } from './types';
 
 const memoryKeys = {
@@ -42,19 +46,22 @@ const useMemoryClient = () => {
  * Reports whether `xpack.nightshift_investigations.memory.enabled` is on. The
  * flag defaults to false, so a failed request means "off" and the tab is hidden
  * rather than shown empty.
+ *
+ * The loading state is part of the answer: the page cannot tell a hidden tab from
+ * an unanswered query, and treats an unknown tab as a bad URL.
  */
-export const useMemoryEnabled = (): boolean => {
+export const useMemoryEnabled = (): FeatureAvailability => {
   const client = useMemoryClient();
 
-  const { data } = useQuery({
-    queryKey: memoryKeys.availability,
-    queryFn: ({ signal }) =>
-      client!.fetch('GET /internal/nightshift/memory/availability', { signal: signal ?? null }),
-    enabled: client !== undefined,
-    retry: false,
-  });
-
-  return data?.enabled ?? false;
+  return toFeatureAvailability(
+    useQuery({
+      queryKey: memoryKeys.availability,
+      queryFn: ({ signal }) =>
+        client!.fetch('GET /internal/nightshift/memory/availability', { signal: signal ?? null }),
+      enabled: client !== undefined,
+      retry: false,
+    })
+  );
 };
 
 /** How many rows the sidebar asks for per request. */

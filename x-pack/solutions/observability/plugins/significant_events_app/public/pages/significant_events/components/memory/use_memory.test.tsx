@@ -266,7 +266,7 @@ describe('useMemoryEnabled', () => {
 
     const { result } = renderHook(() => useMemoryEnabled(), { wrapper });
 
-    await waitFor(() => expect(result.current).toBe(false));
+    await waitFor(() => expect(result.current).toEqual({ isEnabled: false, isLoading: false }));
   });
 
   it('stays disabled, and issues no request, when the client is absent', async () => {
@@ -275,7 +275,28 @@ describe('useMemoryEnabled', () => {
 
     const { result } = renderHook(() => useMemoryEnabled(), { wrapper });
 
-    await waitFor(() => expect(result.current).toBe(false));
+    await waitFor(() => expect(result.current).toEqual({ isEnabled: false, isLoading: false }));
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  // The loading state is the whole reason this hook returns more than a boolean: a
+  // page that cannot tell "off" from "not known yet" redirects a tab that is about
+  // to appear. It must be loading first and settled after, whatever the flag says.
+  it('separates "off" from "not answered yet" while the query is in flight', async () => {
+    let resolveFetch: (value: { enabled: boolean }) => void = () => {};
+    fetchMock.mockReturnValue(
+      new Promise<{ enabled: boolean }>((resolve) => {
+        resolveFetch = resolve;
+      })
+    );
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useMemoryEnabled(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    expect(result.current.isEnabled).toBe(false);
+
+    resolveFetch({ enabled: true });
+    await waitFor(() => expect(result.current).toEqual({ isEnabled: true, isLoading: false }));
   });
 });

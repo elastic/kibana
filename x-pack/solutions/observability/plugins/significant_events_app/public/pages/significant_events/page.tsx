@@ -15,6 +15,7 @@ import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { getFormattedError } from '../../util/errors';
+import type { FeatureAvailability } from '../../util/feature_availability';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
@@ -81,9 +82,32 @@ export function SignificantEventsPage() {
   const { isDeveloperMode } = useDeveloperMode();
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  const isCortexEnabled = useCortexEnabled();
-  const isDecisionTreesEnabled = useDecisionTreesEnabled();
-  const isMemoryEnabled = useMemoryEnabled();
+  const cortexAvailability = useCortexEnabled();
+  const decisionTreesAvailability = useDecisionTreesEnabled();
+  const memoryAvailability = useMemoryEnabled();
+  const isCortexEnabled = cortexAvailability.isEnabled;
+  const isDecisionTreesEnabled = decisionTreesAvailability.isEnabled;
+  const isMemoryEnabled = memoryAvailability.isEnabled;
+
+  /**
+   * The availability query that decides whether each gated tab is in the header.
+   *
+   * All three read as "off" until their query answers, so on the first render a tab
+   * named in the URL is not in the list. The page reacts to an unknown tab by
+   * redirecting to the first one, which used to bounce a direct link to a working
+   * tab before the query came back — and a refresh never came back to it at all.
+   * The tab's own gate is the thing that has to settle first, so the page waits for
+   * that one rather than for all of them, and redirects only once it has settled and
+   * the tab is still absent.
+   *
+   * The Detections tab is not here: `useDeveloperMode` reads a settings value with a
+   * synchronous default, so it is known on the first render.
+   */
+  const availabilityGateByTab: Partial<Record<SignificantEventsTabId, FeatureAvailability>> = {
+    cortex: cortexAvailability,
+    memory: memoryAvailability,
+    decision_trees: decisionTreesAvailability,
+  };
   const {
     isBlocked,
     isLoading: isMaintenanceStatusLoading,
@@ -245,6 +269,12 @@ export function SignificantEventsPage() {
   // Legacy alias from an earlier tab name; keep until bookmarks are gone.
   if (tab === 'discoveries') {
     return <RedirectTo path="/{tab}" params={{ path: { tab: SIGNIFICANT_EVENTS_TAB } }} />;
+  }
+
+  // The tab the route names may simply not have answered yet. Redirecting now would
+  // send it to the first tab and lose the URL the person asked for, so wait.
+  if (availabilityGateByTab[tab as SignificantEventsTabId]?.isLoading) {
+    return <SignificantEventsAppLoading />;
   }
 
   if (!isValidSignificantEventsTab(tab) || !tabs.some((item) => item.id === tab)) {

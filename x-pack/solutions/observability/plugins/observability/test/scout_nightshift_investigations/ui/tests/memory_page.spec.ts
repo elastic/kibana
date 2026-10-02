@@ -20,11 +20,11 @@ import {
   MEMORY_READER_ROLE,
   memoryPath,
   minutesAgo,
-  openMemoryTab,
+  memoryHeaderTab,
+  memoryUrl,
   OTHER_SPACE_ID,
   seedMemory,
   SEEDED_AGENT_ID,
-  significantEventsUrl,
   sidebarPageIds,
   storedMemoryId,
   telemetryPercent,
@@ -207,21 +207,35 @@ test.describe(
       await apiServices.spaces.delete(OTHER_SPACE_ID);
     });
 
+    /**
+     * Opens the Memory page by loading its route, the way a bookmark or a pasted
+     * link does.
+     *
+     * That used to bounce to Streams: the page builds its tab list from an
+     * availability query that is still pending on the first render, so `memory` was
+     * briefly not one of its tabs and an unknown tab is redirected to the first
+     * one. Loading the route directly and staying on it is the assertion.
+     */
     const gotoMemory = async (page: ScoutPage, kbnUrl: KibanaUrl, spaceId?: string) => {
-      await page.goto(significantEventsUrl(kbnUrl, spaceId));
-      await openMemoryTab(page);
+      await page.goto(memoryUrl(kbnUrl, spaceId));
       await expect.poll(() => page.url(), { timeout: 30_000 }).toContain(memoryPath(spaceId));
       await expect(page.testSubj.locator('nightshiftMemoryTab')).toBeVisible();
     };
 
-    /** After a reload the app lands on its first tab again; reopen Memory. */
-    const reopenMemory = async (page: ScoutPage) => {
+    /** Reload on the Memory route and require it to still be Memory afterwards. */
+    const reloadMemory = async (page: ScoutPage, spaceId?: string) => {
       await page.reload();
-      await openMemoryTab(page);
+      await expect.poll(() => page.url(), { timeout: 30_000 }).toContain(memoryPath(spaceId));
       await expect(page.testSubj.locator('nightshiftMemoryTab')).toBeVisible();
     };
 
-    test('E1 lists the seeded memories on the real route', async ({ page, kbnUrl }, testInfo) => {
+    test('E1 lists the seeded memories on a cold load of the route', async ({
+      page,
+      kbnUrl,
+    }, testInfo) => {
+      // `gotoMemory` asserts the URL survived the load, which is the tab being
+      // mounted: the page redirects anything it does not recognise to its first tab,
+      // so landing on Memory at all means Memory was a tab.
       await gotoMemory(page, kbnUrl);
 
       await expect(page.testSubj.locator(`nightshiftMemoryLink-memory_${MAIN}`)).toBeVisible();
@@ -230,6 +244,19 @@ test.describe(
       // list, so its presence proves a second, larger query answered too.
       await expect(page.testSubj.locator('nightshiftMemoryTreemap')).toBeVisible();
       await attachScreenshot(page, testInfo, 'memory-e1-list');
+    });
+
+    test('E1b keeps the Memory tab in the header once the gate has settled', async ({
+      page,
+      kbnUrl,
+    }) => {
+      await gotoMemory(page, kbnUrl);
+
+      // The header entry is only rendered once the availability query says the flag
+      // is on, so its presence is the gate having settled rather than the page
+      // having defaulted to showing it.
+      await expect(memoryHeaderTab(page)).toBeVisible();
+      await expect(page.testSubj.locator(`nightshiftMemoryLink-memory_${MAIN}`)).toBeVisible();
     });
 
     test('E2 opens one memory and shows its title, content, usefulness and confidence', async ({
@@ -418,7 +445,7 @@ test.describe(
 
       // Reload rather than trust the client cache: the claim is that the write
       // reached Elasticsearch and the read path reports it.
-      await reopenMemory(page);
+      await reloadMemory(page);
       await page.testSubj.locator('nightshiftMemoryFilter-all').click();
       await page.testSubj.locator(`nightshiftMemoryLink-memory_${ARCHIVE_ME}`).click();
       await expect(page.testSubj.locator('nightshiftMemoryArchivedBadge')).toHaveText(
@@ -429,7 +456,7 @@ test.describe(
       await page.testSubj.locator('nightshiftMemoryArchiveToggle').click();
       await expect(page.testSubj.locator('nightshiftMemoryArchivedBadge')).toHaveCount(0);
 
-      await reopenMemory(page);
+      await reloadMemory(page);
       // Unarchive has to clear the reason, not just hide the badge: the Active
       // filter is the `exists archive_reason` query, so a stale reason stays archived.
       await expect(

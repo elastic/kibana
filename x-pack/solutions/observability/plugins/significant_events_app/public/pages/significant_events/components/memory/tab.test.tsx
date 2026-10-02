@@ -33,7 +33,7 @@ const mockUseMemoryTreemapPages = useMemoryTreemapPages as jest.MockedFunction<
   typeof useMemoryTreemapPages
 >;
 
-mockUseMemoryEnabled.mockReturnValue(true);
+mockUseMemoryEnabled.mockReturnValue({ isEnabled: true, isLoading: false });
 
 const summary = (overrides: Partial<MemoryPageSummary> = {}): MemoryPageSummary =>
   ({

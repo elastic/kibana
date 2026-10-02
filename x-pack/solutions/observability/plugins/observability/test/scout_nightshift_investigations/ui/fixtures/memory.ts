@@ -25,42 +25,27 @@ export const SEEDED_AGENT_ID = 'nightshift.investigation';
 export const OTHER_SPACE_ID = `memory-e2e-${randomUUID().slice(0, 8)}`;
 
 /**
- * The Significant Events app root, optionally inside a Space. The Memory page is a
- * tab on this app, so this is where a session starts.
+ * The Memory page route, optionally inside a Space.
  *
  * Built from `kbnUrl` rather than a literal, because Scout configures no Playwright
  * `baseURL` and the app is mounted at its registered `appRoute`
  * (`/app/significant_events`) rather than at its id.
  */
-export const significantEventsUrl = (kbnUrl: KibanaUrl, spaceId?: string): string =>
+export const memoryUrl = (kbnUrl: KibanaUrl, spaceId?: string): string =>
   kbnUrl.get(
     spaceId === undefined
-      ? `app/${SIGNIFICANT_EVENTS_APP_ROUTE}`
-      : `s/${encodeURIComponent(spaceId)}/app/${SIGNIFICANT_EVENTS_APP_ROUTE}`
+      ? `app/${SIGNIFICANT_EVENTS_APP_ROUTE}/memory`
+      : `s/${encodeURIComponent(spaceId)}/app/${SIGNIFICANT_EVENTS_APP_ROUTE}/memory`
   );
 
-/** What the Memory tab's URL must contain once the tab is open. */
+/** What the Memory page's URL must contain once it has loaded. */
 export const memoryPath = (spaceId?: string): string =>
   spaceId === undefined
     ? `/app/${SIGNIFICANT_EVENTS_APP_ROUTE}/memory`
     : `/s/${encodeURIComponent(spaceId)}/app/${SIGNIFICANT_EVENTS_APP_ROUTE}/memory`;
 
-/**
- * Opens the Memory tab the way a person does: by clicking it in the header.
- *
- * Navigating straight to `/app/significant_events/memory` does not stick on a cold
- * load. The page builds its tab list from `useMemoryEnabled()`, which is still
- * pending on the first render, so `memory` is briefly absent from the tabs and the
- * page redirects to its first tab; the tab appears a moment later, on Streams.
- * Waiting for the tab and clicking it is both the real path and the only one that
- * survives the redirect. It also makes the "tab is mounted at all" assertion of E1
- * literal: the header only renders the tab once the flag query says it is enabled.
- */
-export const openMemoryTab = async (page: ScoutPage): Promise<void> => {
-  const tab = page.getByRole('tab', { name: 'Memory' });
-  await tab.waitFor({ state: 'visible' });
-  await tab.click();
-};
+/** The header entry that Memory renders once its availability gate has settled on. */
+export const memoryHeaderTab = (page: ScoutPage) => page.getByRole('tab', { name: 'Memory' });
 
 /**
  * The "Manage engines" sub-feature privilege of the Nightshift feature, which is
