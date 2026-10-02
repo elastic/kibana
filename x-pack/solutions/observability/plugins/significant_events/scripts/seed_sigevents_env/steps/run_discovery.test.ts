@@ -112,11 +112,11 @@ describe('runDiscovery', () => {
     jest.mocked(log.info).mockClear();
   });
 
-  it('adds post-detection evidence and verifies an open event for the critical rule', async () => {
+  it('adds post-detection evidence and verifies an active event for the critical rule', async () => {
     const esClient = createEsClient();
     mockCompletedWorkflows({
       title: 'Fraud gateway timeouts',
-      status: 'open',
+      status: 'active',
       signals: [{ metadata: { rule_uuid: 'primary-rule' } }],
     });
 
@@ -150,12 +150,12 @@ describe('runDiscovery', () => {
     const esClient = createEsClient();
     mockCompletedWorkflows({
       title: 'Fraud gateway timeouts',
-      status: 'dismissed',
+      status: 'inactive',
       signals: [{ metadata: { rule_uuid: 'primary-rule' } }],
     });
 
     await expect(runDiscovery(ctx, seededQueries, esClient, config, log)).rejects.toThrow(
-      'with status dismissed, expected open'
+      'with status inactive, expected active'
     );
   });
 });

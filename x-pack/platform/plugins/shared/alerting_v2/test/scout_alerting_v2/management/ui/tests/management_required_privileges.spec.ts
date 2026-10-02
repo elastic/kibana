@@ -13,6 +13,7 @@ import {
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   ALERTING_V2_ALERTS_READ_ROLE,
   ALERTING_V2_EXECUTION_HISTORY_READ_ROLE,
+  ALERTING_V2_RULES_ALL_ROLE,
   ALERTING_V2_RULES_READ_ROLE,
   ALL_ROLE,
   NO_ACCESS_ROLE,
@@ -62,8 +63,11 @@ test.describe('Management pages - required privileges', { tag: tags.deploymentAg
   test('user with full access can view every management page', accessTestBody(ALL_ROLE, ALL_APPS));
 
   test(
-    'user with read-only access can view every management page',
-    accessTestBody(READ_ROLE, ALL_APPS)
+    'user with read-only access can view every management page except Rule library',
+    accessTestBody(
+      READ_ROLE,
+      ALL_APPS.filter((app) => app !== 'ruleLibrary')
+    )
   );
 
   test(
@@ -72,8 +76,13 @@ test.describe('Management pages - required privileges', { tag: tags.deploymentAg
   );
 
   test(
-    'user with rules read-only role can view the Rules and Rule library pages',
-    accessTestBody(ALERTING_V2_RULES_READ_ROLE, ['rules', 'ruleLibrary'])
+    'user with rules read-only role can view the Rules page but not Rule library',
+    accessTestBody(ALERTING_V2_RULES_READ_ROLE, ['rules'])
+  );
+
+  test(
+    'user with rules write role can view the Rules and Rule library pages',
+    accessTestBody(ALERTING_V2_RULES_ALL_ROLE, ['rules', 'ruleLibrary'])
   );
 
   test(
