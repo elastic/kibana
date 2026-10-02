@@ -7,6 +7,9 @@
 
 import {
   EuiBadge,
+  EuiAccordion,
+  EuiButtonEmpty,
+  useGeneratedHtmlId,
   EuiCodeBlock,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -15,11 +18,14 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
 import { COMPUTED_FEATURE_TYPES } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { SeverityBadge } from '../../../pages/significant_events/components/severity_badge/severity_badge';
+import { RuleControls } from '../../../pages/detection/rule_controls';
 import { InfoPanel } from '../../info_panel';
 import { SparkPlot } from '../../spark_plot';
 
@@ -29,13 +35,19 @@ interface Props {
   query: StreamQuery;
   occurrences?: Array<{ x: number; y: number }>;
   streamFeatures?: Feature[];
+  streamName?: string;
+  onUpdated?: () => void;
 }
 
 export function KnowledgeIndicatorQueryDetailsContent({
   query,
   occurrences,
   streamFeatures = [],
+  streamName,
+  onUpdated,
 }: Props) {
+  const { core } = useKibana();
+  const queryId = useGeneratedHtmlId({ prefix: 'ruleQuery' });
   const featureIdSet = useMemo(() => new Set(streamFeatures.map((f) => f.id)), [streamFeatures]);
 
   const inferredFeatureIds = useMemo(
@@ -53,14 +65,6 @@ export function KnowledgeIndicatorQueryDetailsContent({
       description: <EuiBadge color="hollow">{QUERY_BADGE_LABEL}</EuiBadge>,
     },
     {
-      title: DETAILS_QUERY_LABEL,
-      description: (
-        <EuiCodeBlock language="esql" paddingSize="none" transparentBackground>
-          {query.esql?.query ?? EMPTY_VALUE}
-        </EuiCodeBlock>
-      ),
-    },
-    {
       title: DETAILS_DESCRIPTION_LABEL,
       description: <EuiText size="s">{query.description || EMPTY_VALUE}</EuiText>,
     },
@@ -72,6 +76,9 @@ export function KnowledgeIndicatorQueryDetailsContent({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem>
+        <RuleControls query={query} streamName={streamName} onSaved={onUpdated} />
+      </EuiFlexItem>
       <EuiFlexItem>
         <InfoPanel title={GENERAL_INFORMATION_LABEL}>
           {listItems.map((item, index) => (
@@ -87,13 +94,32 @@ export function KnowledgeIndicatorQueryDetailsContent({
           ))}
         </InfoPanel>
       </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiAccordion id={queryId} buttonContent={DETAILS_QUERY_LABEL} paddingSize="m">
+          <EuiCodeBlock language="esql" fontSize="s" isCopyable>
+            {query.esql?.query ?? EMPTY_VALUE}
+          </EuiCodeBlock>
+        </EuiAccordion>
+      </EuiFlexItem>
       {hasFeatureIds && (
         <EuiFlexItem>
           <InfoPanel title={SOURCE_FEATURES_LABEL}>
             <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
               {inferredFeatureIds.map((featureId) => (
                 <EuiFlexItem grow={false} key={featureId}>
-                  <EuiBadge color="hollow">{featureId}</EuiBadge>
+                  <EuiButtonEmpty
+                    data-test-subj="significantEventsAppKnowledgeIndicatorQueryDetailsContentButton"
+                    size="xs"
+                    iconType="documents"
+                    href={core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+                      path: `/knowledge?${new URLSearchParams({
+                        knowledgeId: featureId,
+                        ...(streamName ? { stream: streamName } : {}),
+                      })}`,
+                    })}
+                  >
+                    {streamFeatures.find((feature) => feature.id === featureId)?.title || featureId}
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
@@ -134,9 +160,9 @@ const DETAILS_TYPE_LABEL = i18n.translate(
 );
 
 const DETAILS_QUERY_LABEL = i18n.translate(
-  'xpack.significantEventsApp.knowledgeIndicatorDetails.queryLabel',
+  'xpack.significantEventsApp.knowledgeIndicatorDetails.seeQueryLabel',
   {
-    defaultMessage: 'Query',
+    defaultMessage: 'See query',
   }
 );
 
@@ -177,5 +203,5 @@ const EMPTY_VALUE = i18n.translate(
 
 const SOURCE_FEATURES_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorDetails.sourceFeaturesLabel',
-  { defaultMessage: 'Source KI features' }
+  { defaultMessage: 'Knowledge behind this rule' }
 );

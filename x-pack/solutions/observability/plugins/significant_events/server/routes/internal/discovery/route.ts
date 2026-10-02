@@ -11,6 +11,8 @@ import {
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { StatusError } from '../../../lib/errors/status_error';
+import { consumeDiscoveryBudget, releaseDiscoveryBudget } from '../../../lib/engine_preferences';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
@@ -68,28 +70,40 @@ const discoveryExecuteRoute = createServerRoute({
 
     if (body.action === 'trigger') {
       await assertNotPaused({ maintenanceService, request });
-      const { executionId, isNew } = await significantEventsDiscoveryClient.run({
-        request,
-        spaceId,
-        agentBuilder: server.agentBuilder,
-        connectorId: body.connector_id,
-        resolveModel: (requestedId) =>
-          resolveNightshiftModelForRequest({
-            request,
-            inference: server.inference,
-            savedObjects: server.core.savedObjects,
-            uiSettings: server.core.uiSettings,
-            step: 'discovery',
-            requestedId,
-          }),
-      });
-      if (isNew) {
-        telemetry.trackSignificantEventsDiscoveryTriggered({
-          execution_id: executionId,
-          space_id: spaceId,
+      const budget = await consumeDiscoveryBudget(server, spaceId);
+      if (!budget.allowed)
+        throw new StatusError(
+          'Discovery is paused or has reached its daily limit. Review Detection settings.',
+          409
+        );
+      let keepReservation = false;
+      try {
+        const { executionId, isNew } = await significantEventsDiscoveryClient.run({
+          request,
+          spaceId,
+          agentBuilder: server.agentBuilder,
+          connectorId: body.connector_id,
+          resolveModel: (requestedId) =>
+            resolveNightshiftModelForRequest({
+              request,
+              inference: server.inference,
+              savedObjects: server.core.savedObjects,
+              uiSettings: server.core.uiSettings,
+              step: 'discovery',
+              requestedId,
+            }),
         });
+        keepReservation = isNew;
+        if (isNew) {
+          telemetry.trackSignificantEventsDiscoveryTriggered({
+            execution_id: executionId,
+            space_id: spaceId,
+          });
+        }
+        return { executionId };
+      } finally {
+        if (!keepReservation) await releaseDiscoveryBudget(server, spaceId, budget.day);
       }
-      return { executionId };
     }
 
     const executionId = await significantEventsDiscoveryClient.cancel({ request, spaceId });

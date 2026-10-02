@@ -9,6 +9,8 @@ import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,8 +27,11 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { useQuery } from '@kbn/react-query';
+import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/significant-events-schema';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { FlyoutMetadataCard } from '../../../../components/flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../../components/flyout_components/flyout_toolbar_header';
 import { InfoPanel } from '../../../../components/info_panel';
@@ -59,6 +64,30 @@ interface DetectionFlyoutProps {
 }
 
 export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) => {
+  const { core, dependencies } = useKibana();
+  const eventQuery = useQuery({
+    queryKey: ['detectionEventEvidence', detection.detection_id],
+    queryFn: ({ signal }) =>
+      dependencies.start.significantEvents.significantEventsRepositoryClient.fetch(
+        'GET /internal/significant_events/events',
+        {
+          signal: signal ?? null,
+          params: { query: { from: detection['@timestamp'], page: 1, perPage: 1000 } },
+        }
+      ),
+    refetchInterval: detection.processed ? false : 10000,
+  });
+  const related =
+    eventQuery.data?.hits.filter((event) =>
+      event.signals?.some((signal) => signal.metadata.detection_id === detection.detection_id)
+    ) ?? [];
+  const ruleHref = core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+    path: `/detection?${new URLSearchParams({
+      view: 'rules',
+      ruleId: detection.rule_uuid,
+      stream: detection.stream_name,
+    })}`,
+  });
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'detectionFlyoutTitle' });
   const { data: historyData, isLoading: isHistoryLoading } = useFetchDetectionHistory(
     detection.rule_uuid
@@ -152,6 +181,70 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        <EuiButtonEmpty
+          data-test-subj="significantEventsAppDetectionFlyoutOpenRuleAndItsKnowledgeButton"
+          size="s"
+          iconType="visLine"
+          href={ruleHref}
+        >
+          {i18n.translate('xpack.significantEventsApp.detectionFlyout.rule', {
+            defaultMessage: 'Open rule and its knowledge',
+          })}
+        </EuiButtonEmpty>
+        <EuiSpacer size="m" />
+        <InfoPanel
+          title={i18n.translate('xpack.significantEventsApp.detectionFlyout.triage', {
+            defaultMessage: 'Triage outcome',
+          })}
+        >
+          {!detection.processed && (
+            <EuiText size="s">
+              <p>
+                {i18n.translate('xpack.significantEventsApp.detectionFlyout.awaiting', {
+                  defaultMessage:
+                    'This detection is awaiting discovery. No decision has been made yet.',
+                })}
+              </p>
+            </EuiText>
+          )}
+          {eventQuery.isLoading && <EuiLoadingSpinner size="s" />}
+          {eventQuery.isError && (
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              title={i18n.translate('xpack.significantEventsApp.detectionFlyout.evidenceError', {
+                defaultMessage: 'Could not load linked events',
+              })}
+            />
+          )}
+          {related.map((event) => (
+            <DetectionOutcomeRow
+              key={event.event_id}
+              title={event.title}
+              verdict={
+                event.signals?.find(
+                  (signal) => signal.metadata.detection_id === detection.detection_id
+                )?.verdict || ''
+              }
+              href={core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+                path: `/detection?view=events&eventId=${encodeURIComponent(event.event_id)}`,
+              })}
+            />
+          ))}
+          {detection.processed && !eventQuery.isLoading && !related.length && (
+            <EuiText size="xs" color="subdued">
+              <p>
+                {i18n.translate('xpack.significantEventsApp.detectionFlyout.noRecordedOutcome', {
+                  defaultMessage:
+                    'Discovery consumed this detection. No linked event was found in the loaded records; this does not establish a noise verdict.',
+                })}
+              </p>
+            </EuiText>
+          )}
+        </InfoPanel>
+        <EuiSpacer size="l" />
+
         <InfoPanel title={GENERAL_INFORMATION_TITLE}>
           {generalInfoItems.map((listItem, index) => (
             <React.Fragment key={listItem.title}>
@@ -281,4 +374,27 @@ const STATUS_PENDING_LABEL = i18n.translate(
   {
     defaultMessage: 'Pending',
   }
+);
+
+const DetectionOutcomeRow = ({
+  title,
+  verdict,
+  href,
+}: {
+  title: string;
+  verdict: string;
+  href: string;
+}): React.ReactElement => (
+  <div>
+    <EuiButtonEmpty
+      data-test-subj="significantEventsAppDetectionOutcomeRowButton"
+      size="s"
+      href={href}
+    >
+      {title}
+    </EuiButtonEmpty>
+    <EuiText size="xs" color="subdued">
+      <p>{verdict.replace(/_/g, ' ')}</p>
+    </EuiText>
+  </div>
 );

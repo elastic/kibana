@@ -201,6 +201,7 @@ export const listAllFeaturesRoute = createServerRoute({
           .describe('Free-text query for semantic/keyword search'),
         search_mode: searchModeSchema.optional(),
         include_excluded: BooleanFromString.optional(),
+        include_expired: BooleanFromString.optional(),
       })
       .optional(),
   }),
@@ -227,10 +228,11 @@ export const listAllFeaturesRoute = createServerRoute({
       query,
       search_mode: searchMode,
       include_excluded: includeExcluded,
+      include_expired: includeExpired,
     } = params?.query ?? {};
     const { hits: features } = query
       ? await kiClient.findFeatures(streamNames, query, { searchMode, includeExcluded })
-      : await kiClient.getFeatures(streamNames, { includeExcluded });
+      : await kiClient.getFeatures(streamNames, { includeExcluded, includeExpired });
 
     return { features };
   },

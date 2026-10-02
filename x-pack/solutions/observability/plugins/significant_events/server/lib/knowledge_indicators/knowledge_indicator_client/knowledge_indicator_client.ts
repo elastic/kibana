@@ -23,6 +23,7 @@ import {
   type KnowledgeIndicatorDataStreamClient,
   type RuleUnbackedFilter,
 } from './types';
+import { readKnowledgeActivity } from './activity_reader';
 import { RevisionReader } from './revision_reader';
 import { IndicatorWriter } from './indicator_writer';
 import { IndicatorReader } from './indicator_reader';
@@ -44,6 +45,7 @@ export class KnowledgeIndicatorClient {
   private readonly searcher: IndicatorSearcher;
   private readonly orchestrator: QueryRuleOrchestrator;
   private readonly ttlDays: number;
+  private readonly esClient: KnowledgeIndicatorClientDeps['esClient'];
 
   constructor(
     deps: KnowledgeIndicatorClientDeps,
@@ -54,6 +56,7 @@ export class KnowledgeIndicatorClient {
       'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
     > = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
   ) {
+    this.esClient = deps.esClient;
     const revisionReader = new RevisionReader(deps.esClient, deps.logger);
     this.ttlDays = config.feature_ttl_days;
     this.writer = new IndicatorWriter(
@@ -71,6 +74,10 @@ export class KnowledgeIndicatorClient {
       this.writer,
       this.reader
     );
+  }
+
+  getActivity(streams: string[], from: string, to: string) {
+    return readKnowledgeActivity(this.esClient, streams, from, to);
   }
 
   bulk(stream: string, operations: KIBulkOperation[]) {

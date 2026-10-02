@@ -37,6 +37,7 @@ import {
   NIGHTSHIFT_ENABLED_FLAG,
   SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
 } from '@kbn/nightshift-shared';
+import { enginePreferencesSavedObjectType } from './lib/engine_preferences';
 import {
   getRelayAppConnectionSavedObjectType,
   RELAY_APP_CONNECTION_SO_TYPE,
@@ -167,6 +168,7 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
+    core.savedObjects.registerType(enginePreferencesSavedObjectType);
 
     plugins.nightshiftInvestigations?.registerInvestigationQuota(async () => {
       if (!this.server?.core) {

@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { consumeDiscoveryBudget, releaseDiscoveryBudget } from '../../../lib/engine_preferences';
 import {
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
@@ -165,10 +166,23 @@ const consumeRoute = createServerRoute({
   handler: async ({ params, request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
-    return consumeRunQuota({
-      internalRepository: createRunQuotaInternalRepository(server),
-      group: params.body.group,
-    });
+    const repository = createRunQuotaInternalRepository(server);
+    if (params.body.group !== 'detection')
+      return consumeRunQuota({ internalRepository: repository, group: params.body.group });
+    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? 'default';
+    const reservation = await consumeDiscoveryBudget(server, spaceId);
+    if (!reservation.allowed) return { allowed: false };
+    let admitted = false;
+    try {
+      const globalQuota = await consumeRunQuota({
+        internalRepository: repository,
+        group: 'detection',
+      });
+      admitted = globalQuota.allowed;
+      return globalQuota;
+    } finally {
+      if (!admitted) await releaseDiscoveryBudget(server, spaceId, reservation.day);
+    }
   },
 });
 

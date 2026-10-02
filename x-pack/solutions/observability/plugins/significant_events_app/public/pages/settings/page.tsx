@@ -17,7 +17,7 @@ import {
 import { SignificantEventsNotEnabledPrompt } from '../../components/not_enabled_prompt';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
-import { SettingsTab } from '../significant_events/components/settings/tab';
+import { SettingsWorkspace } from './settings_workspace';
 
 const settingsTitle = i18n.translate('xpack.significantEventsApp.settingsPage.title', {
   defaultMessage: 'Settings',
@@ -84,7 +84,7 @@ export function SettingsPage() {
         back={{ href: nightshiftHref, label: nightshiftLabel }}
       />
       <SignificantEventsAppPageTemplate.Body grow>
-        <SettingsTab />
+        <SettingsWorkspace />
       </SignificantEventsAppPageTemplate.Body>
     </>
   );

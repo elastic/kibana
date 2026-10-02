@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { type EuiFlyoutMenuCustomAction } from '@elastic/eui';
+import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { InvestigationDetailFlyout as SharedInvestigationDetailFlyout } from '@kbn/nightshift-investigations-plugin/public';
 import { useInvestigationState } from '@kbn/investigation-output';
@@ -27,7 +28,7 @@ export function InvestigationDetailFlyout({
   investigationId,
   onClose,
 }: InvestigationDetailFlyoutProps): React.ReactElement {
-  const { http, agentBuilder } = useKibana().services;
+  const { http, agentBuilder, application } = useKibana().services;
   const { data: investigation, isLoading, error } = useFetchInvestigationById(investigationId);
 
   // Nothing is persisted on the record until the run ends, so a live run is followed through the
@@ -75,6 +76,15 @@ export function InvestigationDetailFlyout({
     <>
       <SharedInvestigationDetailFlyout
         investigation={investigation ?? null}
+        eventHref={
+          investigation?.subject.type === 'significant_event'
+            ? application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+                path: `/detection?view=events&eventId=${encodeURIComponent(
+                  investigation.subject.id
+                )}`,
+              })
+            : undefined
+        }
         isLoading={isLoading}
         error={error ?? null}
         progress={progress}

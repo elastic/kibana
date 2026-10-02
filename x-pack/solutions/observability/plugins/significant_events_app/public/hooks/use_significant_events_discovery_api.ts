@@ -6,6 +6,7 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
+import { useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 
@@ -13,11 +14,12 @@ export const useSignificantEventsDiscoveryApi = () => {
   const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
 
   const { signal } = useAbortController();
+  const queryClient = useQueryClient();
 
   return useMemo(
     () => ({
-      triggerSignificantEventsDiscovery: () =>
-        significantEventsRepositoryClient.fetch(
+      triggerSignificantEventsDiscovery: async () => {
+        const result = await significantEventsRepositoryClient.fetch(
           'POST /internal/streams/significant_events/discovery/_execute',
           {
             // No abort signal: aborting a fire-and-track mutation would silently
@@ -25,9 +27,12 @@ export const useSignificantEventsDiscoveryApi = () => {
             params: { body: { action: 'trigger' as const } },
             signal: null,
           }
-        ),
-      cancelSignificantEventsDiscovery: () =>
-        significantEventsRepositoryClient.fetch(
+        );
+        void queryClient.invalidateQueries({ queryKey: ['detectionEngineActivity'] });
+        return result;
+      },
+      cancelSignificantEventsDiscovery: async () => {
+        const result = await significantEventsRepositoryClient.fetch(
           'POST /internal/streams/significant_events/discovery/_execute',
           {
             // No abort signal: cancel is fire-and-forget — aborting mid-flight
@@ -35,13 +40,16 @@ export const useSignificantEventsDiscoveryApi = () => {
             params: { body: { action: 'cancel' as const } },
             signal: null,
           }
-        ),
+        );
+        void queryClient.invalidateQueries({ queryKey: ['detectionEngineActivity'] });
+        return result;
+      },
       getSignificantEventsDiscoveryStatus: () =>
         significantEventsRepositoryClient.fetch(
           'GET /internal/streams/significant_events/discovery/_status',
           { params: {}, signal }
         ),
     }),
-    [signal, significantEventsRepositoryClient]
+    [signal, significantEventsRepositoryClient, queryClient]
   );
 };
