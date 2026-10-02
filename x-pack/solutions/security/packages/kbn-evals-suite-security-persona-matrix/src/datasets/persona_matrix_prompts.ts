@@ -67,8 +67,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     description: 'Single alert triage and disposition',
     input: {
       question:
-        "Take a look at this alert and tell me what's going on. " +
-        "Is it something I should worry about, and what's your recommended disposition?",
+        "Take a look at this alert and tell me what's going on. Is it something I should worry " +
+        "about, and what's your recommended disposition?",
       attachment:
         'Alert Details:\n' +
         '  Rule: Suspicious BluetoothService Side-Load\n' +
@@ -108,7 +108,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     input: {
       question:
         "We've got alerts firing on srv-win-defend-01. Triage what's in the alert queue " +
-        'for that host — are these related to the same incident, and which entities do they share? ' +
+        'for that host - are these related to the same incident, and which entities do they share? ' +
         'Give me a disposition.',
     },
     output: {
@@ -204,9 +204,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     description: 'Gap closure with research grounding',
     input: {
       question:
-        "We've confirmed a threat where BluetoothService.exe on srv-win-defend-01 " +
-        'side-loads log.dll (sha256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f) ' +
-        'from C:\\Users\\Public\\. Help me close the detection gap — create a rule ' +
+        "Now that we've confirmed this threat, help me close the detection gap - create a rule " +
         'so we catch this automatically next time, and ground it in the relevant Security Labs research.',
     },
     output: {
@@ -229,7 +227,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     description: 'Host risk and behavior profile',
     input: {
       question:
-        'Show me what we know about the host srv-win-defend-01 — its risk score, ' +
+        'Show me what we know about the host srv-win-defend-01 - its risk score, ' +
         'asset criticality, and any unusual behavior tied to it.',
     },
     output: {
@@ -273,7 +271,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     input: {
       question:
         "The SYSTEM user on srv-win-defend-01 keeps coming up. What's this entity's history " +
-        'and risk profile — should I be escalating based on the entity itself?',
+        'and risk profile - should I be escalating based on the entity itself?',
     },
     output: {
       reference:
@@ -295,9 +293,10 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     description: 'Triaged alert → threat-intel grounding → escalation summary',
     input: {
       question:
-        'Analyze this alert. If it involves a file hash, look into whether it is a known-bad indicator. ' +
-        'Then tell me whether this warrants escalation, and summarize your findings ' +
-        '(verdict, IOCs, and recommended next step).',
+        'Analyze this alert. If it involves a file hash, verify the hash on VirusTotal. ' +
+        'Then check who is on call, and create a Slack channel with the on-call analyst that includes ' +
+        'your findings from this alert (verdict, IOCs, and the on-call owner). ' +
+        'Walk me through each step as you go.',
       attachment:
         'Alert Details:\n' +
         '  Rule: Suspicious BluetoothService Side-Load\n' +
@@ -333,11 +332,11 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     description: 'Full incident response: case creation with grounded findings',
     input: {
       question:
-        "There's a confirmed Chrysalis incident on srv-win-defend-01 — BluetoothService.exe " +
-        'is side-loading log.dll (sha256: 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f). ' +
-        'Run the full response: ' +
-        'ground this in any known research on the technique, open a critical Security case documenting ' +
-        'the incident, and report what you did at each step.',
+        "There's a confirmed Chrysalis incident on srv-win-defend-01. Run the full response: " +
+        'verify the loader hash 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f ' +
+        'on VirusTotal, check the on-call schedule, open a critical Security case, then spin up a ' +
+        'Slack incident channel with the on-call responder and post the case summary and top IOCs. ' +
+        'Report what you did at each step.',
     },
     output: {
       reference:
@@ -361,9 +360,10 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     input: {
       question:
         'Triage srv-win-defend-01 end-to-end: pull the alerts for that host, hunt for the ' +
-        'Chrysalis IOCs (BluetoothService.exe, log.dll, C2 domains) to confirm, and ' +
-        "if it's a true positive, tell me who/what to escalate to and summarize the confirmed findings " +
-        "and recommended actions. Don't escalate if it's benign.",
+        'Chrysalis IOCs (BluetoothService.exe, log.dll, C2 domains) to confirm, ' +
+        "check who's on call, and if it's a true positive, create a Slack channel with the on-call " +
+        'analyst summarizing the confirmed findings and recommended actions. ' +
+        "Don't escalate if it's benign.",
     },
     output: {
       reference:
@@ -413,7 +413,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     description: 'IOA-based Chrysalis hunt on specific host',
     input: {
       question:
-        'Hunt for signs of the Chrysalis backdoor on srv-win-defend-01 — look for BluetoothService.exe ' +
+        'Hunt for signs of the Chrysalis backdoor on srv-win-defend-01 - look for BluetoothService.exe ' +
         'execution, suspicious DLL loads, and any C2 network or DNS activity. Walk me through what you discover.',
     },
     output: {
@@ -460,7 +460,9 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       question:
         'Use the workflow authoring skill to author a runnable Elastic workflow (YAML) that posts ' +
         "a Chrysalis triage summary to Slack. Give it a manual trigger and a 'message' input, " +
-        'and use an http step against the existing Slack connector with id d7306385-cbe6-4541-9726-49afdff59ba5.',
+        'and use an http step against the existing Slack connector with id ' +
+        "d7306385-cbe6-4541-9726-49afdff59ba5, calling POST /chat.postMessage with channel '#general' " +
+        'and the message text. Output the complete, valid workflow YAML.',
     },
     output: {
       reference:
@@ -483,8 +485,10 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     input: {
       question:
         'Author an Elastic workflow in YAML that, on a manual trigger, posts a fixed one-line message ' +
-        "'Chrysalis hunt complete — see case for details' to Slack channel #general. " +
-        'Use an http step targeting the Slack connector.',
+        "'Chrysalis hunt complete - see case for details' to Slack channel #general. " +
+        'Use an http step targeting the Slack connector d7306385-cbe6-4541-9726-49afdff59ba5 ' +
+        "with path /chat.postMessage. Make sure it's a complete, valid, enabled workflow I can save " +
+        'and run as-is. Show me the YAML.',
     },
     output: {
       reference:
@@ -509,7 +513,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       question:
         'I want to automate Chrysalis incident notifications. Author a workflow (YAML) with a manual trigger ' +
         "that takes a 'summary' string input and posts it to Slack #general via an http step on connector " +
-        'd7306385-cbe6-4541-9726-49afdff59ba5.',
+        'd7306385-cbe6-4541-9726-49afdff59ba5 (POST /chat.postMessage). Validate the structure and give me ' +
+        'the final runnable YAML.',
     },
     output: {
       reference:
@@ -532,7 +537,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     input: {
       question:
         'The Chrysalis loader hash is 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f. ' +
-        'Check this hash against VirusTotal and tell me the verdict.',
+        'Check this hash against VirusTotal and tell me the verdict - how many engines flagged it ' +
+        'and what threat name.',
     },
     output: {
       reference:
@@ -555,7 +561,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     input: {
       question:
         'Who is currently on call to own a Chrysalis incident response? Look up the on-call schedule and ' +
-        'tell me the primary responder.',
+        'tell me the primary responder and their contact.',
     },
     output: {
       reference:
@@ -577,7 +583,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     input: {
       question:
         'Open a Security case for the confirmed Chrysalis incident on srv-win-defend-01. ' +
-        "Title it 'Chrysalis backdoor — srv-win-defend-01', set severity to critical, " +
+        "Title it 'Chrysalis backdoor - srv-win-defend-01', set severity to critical, " +
         'and put a short summary of the side-loading activity in the description.',
     },
     output: {
