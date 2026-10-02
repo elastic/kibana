@@ -1,5 +1,5 @@
 {
-  "sha1": "3f3f9a61f2ae4ce4f46fd9fd32b3a967b5ce5402",
+  "sha1": "9fbcf55b8f81cca53f2c65dc9d63e3f683b797fc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -728,7 +728,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 162,
+        "line": 169,
+        "column": 11
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-8d81a4f3934d1b0",
+      "title": "context engine KI lifecycle filter keeps the filters when a query only displays a lifecycle field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 176,
         "column": 27
       }
     },
@@ -742,8 +756,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 176,
-        "column": 5
+        "line": 203,
+        "column": 4
       }
     },
     {
@@ -756,8 +770,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 197,
-        "column": 12
+        "line": 221,
+        "column": 72
       }
     },
     {
@@ -770,8 +784,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 211,
-        "column": 73
+        "line": 234,
+        "column": 11
       }
     },
     {
@@ -784,8 +798,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 220,
-        "column": 73
+        "line": 338,
+        "column": 27
       }
     },
     {
@@ -798,7 +812,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 341,
+        "line": 355,
         "column": 27
       }
     },
@@ -812,7 +826,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 350,
+        "line": 364,
         "column": 27
       }
     },
@@ -826,7 +840,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 361,
+        "line": 375,
         "column": 27
       }
     }
