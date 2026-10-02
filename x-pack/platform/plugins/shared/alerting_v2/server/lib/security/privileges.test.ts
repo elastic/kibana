@@ -139,11 +139,12 @@ describe('registerFeaturePrivileges', () => {
       [ALERTING_V2_FEATURES.executionHistory.id, [ALERTING_V2_EXECUTION_HISTORY_APP_ID]],
     ])('gates the "%s" feature behind the %j management app(s)', (featureId, expectedApps) => {
       const registered = getRegisteredFeature(featureId);
-      const expectedManagement = { [ALERTING_V2_SECTION_ID]: expectedApps };
+      const ownedManagement = { [ALERTING_V2_SECTION_ID]: expectedApps };
+      const readManagement = { [ALERTING_V2_SECTION_ID]: [expectedApps[0]] };
 
-      expect(registered.management).toEqual(expectedManagement);
-      expect(registered.privileges?.all.management).toEqual(expectedManagement);
-      expect(registered.privileges?.read.management).toEqual(expectedManagement);
+      expect(registered.management).toEqual(ownedManagement);
+      expect(registered.privileges?.all.management).toEqual(ownedManagement);
+      expect(registered.privileges?.read.management).toEqual(readManagement);
     });
 
     it.each(Object.values(ALERTING_V2_FEATURES).map((f) => [f.id, f.managementApp]))(

@@ -11,15 +11,11 @@ import {
   createWorkflowStepAttachmentClientMock,
 } from '../../test_utils/workflow_steps';
 
-const experimentalEnabled = jest.fn().mockResolvedValue(true);
-const experimentalDisabled = jest.fn().mockResolvedValue(false);
-
 describe('updateAttachmentStepDefinition', () => {
   it('creates the expected step definition structure', () => {
     const { getAttachmentClient } = createWorkflowStepAttachmentClientMock();
     const definition = updateAttachmentStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalEnabled,
     });
 
     expect(definition.id).toBe('ai.attachment.update');
@@ -38,7 +34,6 @@ describe('updateAttachmentStepDefinition', () => {
 
     const definition = updateAttachmentStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalEnabled,
     });
 
     const result = await definition.handler(
@@ -71,7 +66,6 @@ describe('updateAttachmentStepDefinition', () => {
     });
     const definition = updateAttachmentStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalEnabled,
     });
 
     expect(
@@ -92,26 +86,6 @@ describe('updateAttachmentStepDefinition', () => {
     expect(update).toHaveBeenCalledWith(expect.objectContaining({ render_inline: true }));
   });
 
-  it('returns an error when experimental is disabled', async () => {
-    const { getAttachmentClient } = createWorkflowStepAttachmentClientMock();
-    const definition = updateAttachmentStepDefinition({
-      getAttachmentClient,
-      isExperimentalEnabled: experimentalDisabled,
-    });
-
-    const result = await definition.handler(
-      createStepHandlerContext({
-        input: { conversation_id: 'conv-1', attachment_id: 'att-1' },
-      })
-    );
-
-    expect(result).toEqual({
-      error: expect.objectContaining({
-        message: expect.stringContaining('experimental features'),
-      }),
-    });
-  });
-
   it('returns an error when the client throws', async () => {
     const { getAttachmentClient } = createWorkflowStepAttachmentClientMock({
       update: jest.fn().mockRejectedValue(new Error('not found')),
@@ -119,7 +93,6 @@ describe('updateAttachmentStepDefinition', () => {
 
     const definition = updateAttachmentStepDefinition({
       getAttachmentClient,
-      isExperimentalEnabled: experimentalEnabled,
     });
 
     const result = await definition.handler(

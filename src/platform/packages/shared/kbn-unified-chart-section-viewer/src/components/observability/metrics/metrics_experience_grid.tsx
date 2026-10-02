@@ -11,7 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
-import { DiscoverFlyouts, openAfterDismissingOtherFlyouts } from '@kbn/discover-utils';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import useToggle from 'react-use/lib/useToggle';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
@@ -66,9 +66,8 @@ export const MetricsExperienceGrid = ({
 
   const onOpenGridSettings = useCallback(() => {
     onFlyoutStateChange(undefined);
-    openAfterDismissingOtherFlyouts(DiscoverFlyouts.metricGridSettings, () =>
-      toggleGridSettingsFlyout(true)
-    );
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricGridSettings);
+    toggleGridSettingsFlyout(true);
   }, [onFlyoutStateChange, toggleGridSettingsFlyout]);
 
   const onCloseGridSettings = useCallback(() => {
@@ -213,6 +212,7 @@ export const MetricsExperienceGrid = ({
           histogramCss={histogramCss}
           isDiscoverLoading={isDiscoverLoading}
           isTabSelected={isTabSelected}
+          isComponentVisible={isComponentVisible}
         />
       </ChartsGrid>
       {isGridSettingsFlyoutOpen && (

@@ -48,6 +48,28 @@ export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as cons
 export const ALERTZERO_INVESTIGATIONS_COUNT_URL =
   `${ALERTZERO_INTERNAL_URL}/investigations/count` as const;
 
+// --- Hunt services ---
+// Exported here, not just from the alertzero plugin's own common/constants.ts, so the
+// platform-level kbn-workflows managed-definitions tests can assert Hunt Watch's managed
+// YAML never references a route path string that isn't one of these, without reaching into
+// a private solution plugin's server modules.
+
+/** Internal route namespace for the hunt services. */
+export const HUNT_INTERNAL_ROUTE_BASE = '/internal/alertzero/hunt' as const;
+
+/** The hunt scope for the space: the default data view Tier 1 searches and what resolved in it. */
+export const HUNT_INDEX_SCOPE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/index_scope` as const;
+
+/** Candidate report selection for the tagged Worker's scheduled sweep and manual trigger. */
+export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
+
+/** Two-tier hunt pipeline for a single report, called by the hunt child (`hunt.yaml`). */
+export const HUNT_COORDINATOR_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_coordinator` as const;
+
+/** Mints or verifies the Hunt Watch Investigation for a report, called by its own child workflow. */
+export const FIND_OR_CREATE_INVESTIGATION_URL =
+  `${HUNT_INTERNAL_ROUTE_BASE}/find_or_create_investigation` as const;
+
 /** Failed managed scans in the trailing 24 hours, folded onto Workers. */
 export const ALERTZERO_SCAN_FAILURES_URL = `${ALERTZERO_INTERNAL_URL}/scan-failures` as const;
 
@@ -63,9 +85,6 @@ export interface ScanFailuresResponse {
 
 /** Agent Builder builtin tool wrapping the action catalog API. */
 export const ALERTZERO_ACTIONS_LIST_TOOL_ID = 'security.alertzero.actions.list' as const;
-
-/** Agent Builder builtin tool that appends a revision to a proposal chain — see elastic/security-team#19289. */
-export const ALERTZERO_PROPOSALS_REVISE_TOOL_ID = 'security.alertzero.proposals.revise' as const;
 
 /**
  * Shared thin AlertZero agent for all Worker `ai.agent` steps.
@@ -179,17 +198,26 @@ export const SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID =
   'system-security-hunt-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
   'system-security-detection-rule-tuning' as const;
-export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
-  'system-security-detection-rule-creation' as const;
+export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID =
+  'system-security-detection-rule-coverage' as const;
 
 export const SYSTEM_SECURITY_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
 ] as const;
+
+/**
+ * Hunt Watch's two feature children (tagged `security` + `continuous-threat-hunt`),
+ * dispatched by the tagged Worker above. `find_or_create_investigation` and the hunt
+ * child itself stay untagged Worker-branch plumbing and have no id here.
+ */
+export const SYSTEM_SECURITY_HUNT_PACKAGE_REPORT_ID =
+  'system-security-hunt-package-report' as const;
+export const SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID = 'system-security-hunt-proposal-gate' as const;
 
 /**
  * Static Worker catalog: Watch membership and display names for not-yet-installed Workers.
@@ -221,8 +249,8 @@ export const SYSTEM_SECURITY_WORKER_CATALOG = [
     watchTag: WATCH_DETECTION_TAG,
   },
   {
-    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
-    name: 'Rule Creation',
+    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+    name: 'Rule Coverage',
     watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
     watchTag: WATCH_DETECTION_TAG,
   },
