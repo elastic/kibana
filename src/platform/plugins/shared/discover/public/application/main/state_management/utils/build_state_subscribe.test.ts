@@ -230,6 +230,74 @@ describe('buildStateSubscribe', () => {
     resolveSpy.mockRestore();
   });
 
+  it('requests the fetch and loading state before the ES|QL source is resolved', async () => {
+    type ResolveResult = Awaited<ReturnType<typeof resolveEsqlSourceModule.resolveEsqlSource>>;
+    let resolveSource: (result: ResolveResult) => void = () => {};
+    const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource').mockReturnValue(
+      new Promise<ResolveResult>((resolve) => {
+        resolveSource = resolve;
+      })
+    );
+    dataState.data$.main$.next({ fetchStatus: FetchStatus.COMPLETE });
+
+    const subscribeResult = getSubscribeFn()(
+      getNextState({
+        appState: {
+          dataSource: { type: DataSourceType.Esql },
+          query: { esql: 'FROM logs' },
+        },
+      })
+    );
+
+    expect(dataState.refetch$.next).toHaveBeenCalled();
+    expect(dataState.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+    expect(internalStateActions.assignNextDataView).not.toHaveBeenCalled();
+
+    resolveSource({ esqlSource: {} as ResolveResult['esqlSource'], dataView: dataViewMock });
+    await subscribeResult;
+
+    expect(internalStateActions.assignNextDataView).toHaveBeenCalledWith(
+      expect.objectContaining({ dataView: dataViewMock })
+    );
+    resolveSpy.mockRestore();
+  });
+
+  it('ignores an ES|QL source resolution replaced by a newer query', async () => {
+    type ResolveResult = Awaited<ReturnType<typeof resolveEsqlSourceModule.resolveEsqlSource>>;
+    const resolvers: Array<(result: ResolveResult) => void> = [];
+    const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource').mockImplementation(
+      () =>
+        new Promise<ResolveResult>((resolve) => {
+          resolvers.push(resolve);
+        })
+    );
+    dataState.data$.main$.next({ fetchStatus: FetchStatus.COMPLETE });
+    const subscribe = getSubscribeFn();
+    const esqlSource = {} as ResolveResult['esqlSource'];
+
+    const first = subscribe(
+      getNextState({
+        appState: { dataSource: { type: DataSourceType.Esql }, query: { esql: 'FROM first' } },
+      })
+    );
+    const second = subscribe(
+      getNextState({
+        appState: { dataSource: { type: DataSourceType.Esql }, query: { esql: 'FROM second' } },
+      })
+    );
+
+    resolvers[1]({ esqlSource, dataView: dataViewWithTimefieldMock });
+    await second;
+    resolvers[0]({ esqlSource, dataView: dataViewMock });
+    await first;
+
+    expect(internalStateActions.assignNextDataView).toHaveBeenCalledTimes(1);
+    expect(internalStateActions.assignNextDataView).toHaveBeenCalledWith(
+      expect.objectContaining({ dataView: dataViewWithTimefieldMock })
+    );
+    resolveSpy.mockRestore();
+  });
+
   it('should fetch when switching to ES|QL after data has been loaded', async () => {
     dataState.data$.main$.next({ fetchStatus: FetchStatus.COMPLETE });
 

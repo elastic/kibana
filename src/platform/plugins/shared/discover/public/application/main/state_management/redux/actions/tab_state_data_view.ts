@@ -39,6 +39,7 @@ import {
 import { addLog } from '../../../../../utils/add_log';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
 import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
+import { sendLoadingMsg } from '../../../hooks/use_saved_search_messages';
 import { fetchData } from './tab_state';
 
 /**
@@ -106,9 +107,17 @@ export const applyEsqlControlVariables: InternalStateThunkActionCreator<
     dispatch(internalStateSlice.actions.setEsqlVariables({ tabId, esqlVariables }));
 
     const query = selectTab(getState(), tabId).appState.query;
-    if (isOfAggregateQueryType(query) && query.esql.trim() !== '') {
-      const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-      const previousSource = currentDataSource$.getValue();
+    if (!isOfAggregateQueryType(query) || query.esql.trim() === '') {
+      dispatch(fetchData({ tabId }));
+      return;
+    }
+
+    const { currentDataSource$, dataStateContainer$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
+    const previousSource = currentDataSource$.getValue();
+    const resolveSource = async (isLatest: () => boolean = () => true) => {
       const { dataView } = await resolveEsqlSource({
         esql: query.esql,
         services,
@@ -116,10 +125,24 @@ export const applyEsqlControlVariables: InternalStateThunkActionCreator<
         timeRange: services.data.query.timefilter.timefilter.getTime(),
         previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
       });
-      dispatch(assignNextDataView({ tabId, dataView }));
+      if (isLatest()) {
+        dispatch(assignNextDataView({ tabId, dataView }));
+      }
+    };
+
+    const dataStateContainer = dataStateContainer$.getValue();
+    if (!dataStateContainer) {
+      await resolveSource();
+      dispatch(fetchData({ tabId }));
+      return;
     }
 
+    // The fetch is held until the source is resolved, triggering it now shows the loading state
+    const sourceResolution = dataStateContainer.runSourceResolution(resolveSource);
+    const { documents$ } = dataStateContainer.data$;
+    sendLoadingMsg(documents$, documents$.getValue());
     dispatch(fetchData({ tabId }));
+    await sourceResolution;
   };
 
 /**
