@@ -9,7 +9,9 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import { registerInvestigationPublicStepDefinitions } from './investigations/step_types';
-import { registerInvestigationTemplateUI } from './template_ui/register_template_ui';
+import { registerTemplate } from './conversation_templates/registry/register_template';
+import { escalationTemplate } from './conversation_templates/templates/escalation/register';
+import { investigationTemplate } from './conversation_templates/templates/investigation/register';
 import type {
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
@@ -47,7 +49,11 @@ export class AgenticInvestigationsPublicPlugin
     const { agentBuilder } = startDeps;
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder);
-      registerInvestigationTemplateUI({ core, startDeps: { ...startDeps, agentBuilder } });
+      registerTemplate({
+        core,
+        startDeps: { ...startDeps, agentBuilder },
+        templates: [investigationTemplate, escalationTemplate],
+      });
     }
     return {};
   }

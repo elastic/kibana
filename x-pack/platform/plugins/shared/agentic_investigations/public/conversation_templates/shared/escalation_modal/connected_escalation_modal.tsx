@@ -27,22 +27,22 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import { useCurrentUserProfile, useSuggestUserProfiles } from '../../user_profiles';
+import { useCurrentUserProfile, useSuggestUserProfiles } from '../../../user_profiles';
 import {
   useListEscalations,
   useCreateEscalation,
   useAttachToEscalation,
   useEscalationsForInvestigation,
-} from '../../escalations/hooks/use_escalations_api';
+} from '../../../escalations/hooks/use_escalations_api';
 import {
   ESCALATION_MODAL_TRANSLATIONS,
   ESCALATION_ERRORS,
   ESCALATION_SUCCESS,
 } from './escalation_modal_translations';
 import { AddToExistingEscalationForm } from './add_to_existing_escalation_form';
-import { useOpenInChat } from '../../hooks/use_open_in_chat';
+import { useOpenInChat } from '../../../hooks/use_open_in_chat';
 import { CreateEscalationForm } from './create_escalation_form';
-import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
+import { useAgenticInvestigationsCapabilities } from '../../../hooks/use_agentic_investigations_capabilities';
 
 const T = ESCALATION_MODAL_TRANSLATIONS;
 

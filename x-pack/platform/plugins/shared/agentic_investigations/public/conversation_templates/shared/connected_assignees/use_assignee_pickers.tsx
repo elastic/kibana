@@ -11,7 +11,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { AssignToUsers } from '@kbn/agentic-investigations-common';
-import { useUserProfiles, useSuggestUserProfiles } from '../../user_profiles';
+import { useUserProfiles, useSuggestUserProfiles } from '../../../user_profiles';
 import { assigneeSignal } from './assignee_overrides';
 import { useAssigneeSignal } from './use_assignee_signal';
 import { indexProfiles, toSelectedProfiles } from './to_selected_profiles';

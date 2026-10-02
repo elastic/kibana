@@ -11,7 +11,7 @@ let _queryClientPromise: Promise<QueryClientType> | undefined;
 
 /**
  * One `QueryClient` shared by a solution's queue page and the investigation flyout's
- * "Proposed actions" slot (registered by `registerInvestigationTemplateUI`) — see
+ * "Proposed actions" slot (registered by the `investigation` template) — see
  * https://github.com/elastic/kibana/pull/292946#discussion_r4092473937. Both surfaces read and
  * decide the same proposals; a queue decision must invalidate the flyout's cache and vice versa,
  * which only a client both actually share can do directly.

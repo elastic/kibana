@@ -12,13 +12,13 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
-import { useUserProfiles, useSuggestUserProfiles } from '../../user_profiles';
+import { useUserProfiles, useSuggestUserProfiles } from '../../../user_profiles';
 import { assigneeSignal } from './assignee_overrides';
 import { AssignToUsers } from '@kbn/agentic-investigations-common';
 import { useAssigneePickers, type AssigneePickerProps } from './use_assignee_pickers';
 
-jest.mock('../../user_profiles', () => ({
-  ...jest.requireActual('../../user_profiles'),
+jest.mock('../../../user_profiles', () => ({
+  ...jest.requireActual('../../../user_profiles'),
   useUserProfiles: jest.fn(),
   useSuggestUserProfiles: jest.fn(),
 }));

@@ -7,11 +7,11 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { AssignToUsers, type AssigneesSlotRenderProps } from '@kbn/agentic-investigations-common';
-import { useAssignEscalation } from '../../escalations/hooks/use_escalations_api';
-import { useAssignInvestigation } from '../../investigations/hooks/use_investigations_api';
+import { useAssignEscalation } from '../../../escalations/hooks/use_escalations_api';
+import { useAssignInvestigation } from '../../../investigations/hooks/use_investigations_api';
 import { CONNECTED_ASSIGNEES_LABELS } from './translations';
 import { useAssigneePickers } from './use_assignee_pickers';
-import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
+import { useAgenticInvestigationsCapabilities } from '../../../hooks/use_agentic_investigations_capabilities';
 
 /**
  * Connected assignee picker for the investigation and escalation flyout headers.

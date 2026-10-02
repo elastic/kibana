@@ -27,7 +27,7 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton } from '@kbn/agentic-investigations-common';
-import { useCurrentUserProfile } from '../../user_profiles';
+import { useCurrentUserProfile } from '../../../user_profiles';
 import { decisionErrorMessage } from './decision_errors';
 import {
   PROPOSED_ACTIONS_EMPTY_LABEL,

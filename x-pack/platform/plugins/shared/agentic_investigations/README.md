@@ -34,8 +34,10 @@ public/
   impact/                browser step definitions and flyout attachment UI
   escalations/           browser hooks
   user_profiles/         browser hooks
-  template_ui/           investigation and escalation conversation template UI registration
-  components/            connected components the template UI renders (assignees, status, modals, proposed actions)
+  conversation_templates/  investigation and escalation conversation template UI
+    registry/            `TemplateDefinition` and `registerTemplate`, called once from `plugin.ts`
+    shared/              connected components shared by the templates and exported to solutions (assignees, status, close confirmation, escalation modal, proposed actions)
+    templates/           one directory per template: its `register.ts` and its own flyout parts
   hooks/                 capability and open-in-chat hooks
 ```
 
@@ -76,7 +78,7 @@ An **Impact** record is the set of entities (users, hosts, services) an investig
 
 ## Template UI and gating
 
-The public plugin registers the conversation template UI for `investigation` and `escalation` once in `start`, in `public/template_ui/register_template_ui.ts`. Solutions do not register these templates themselves; Agent Builder throws on a second registration.
+The public plugin registers the conversation template UI for `investigation` and `escalation` once in `start`, through `registerTemplate` in `public/conversation_templates/registry/register_template.ts`, with one `TemplateDefinition` per template in `public/conversation_templates/templates/<template>/register.ts`. Solutions do not register these templates themselves; Agent Builder throws on a second registration.
 
 - **Registration** depends only on Agent Builder being available. It does not read any solution setting or capability, so a user who reaches an investigation through any solution (for example Nightshift) gets the same flyout.
 - **Write actions** are gated on this plugin's UI capabilities, read once at start:

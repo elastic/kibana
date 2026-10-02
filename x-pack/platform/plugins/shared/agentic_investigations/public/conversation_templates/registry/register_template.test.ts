@@ -12,7 +12,9 @@ import {
   registerEscalationTemplateUI,
 } from '@kbn/agentic-investigations-common';
 import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
-import { registerInvestigationTemplateUI } from './register_template_ui';
+import { escalationTemplate } from '../templates/escalation/register';
+import { investigationTemplate } from '../templates/investigation/register';
+import { registerTemplate } from './register_template';
 
 jest.mock('@kbn/agentic-investigations-common', () => ({
   ...jest.requireActual('@kbn/agentic-investigations-common'),
@@ -35,9 +37,10 @@ const register = ({
     ...core.application.capabilities,
     agenticInvestigations: capabilities,
   };
-  registerInvestigationTemplateUI({
+  registerTemplate({
     core,
     startDeps: { agentBuilder: agentBuilderMocks.createStart(), proposals },
+    templates: [investigationTemplate, escalationTemplate],
   });
   return {
     investigation: mockRegisterInvestigation.mock.calls[0][0],
@@ -45,7 +48,7 @@ const register = ({
   };
 };
 
-describe('registerInvestigationTemplateUI', () => {
+describe('registerTemplate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

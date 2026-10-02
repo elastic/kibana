@@ -16,17 +16,17 @@ import type { StatusSlotRenderProps } from '@kbn/agentic-investigations-common';
 import {
   useSetInvestigationStatus,
   useInvestigationClosePreview,
-} from '../../investigations/hooks/use_investigations_api';
+} from '../../../investigations/hooks/use_investigations_api';
 import {
   useSetEscalationStatus,
   useEscalationClosePreview,
-} from '../../escalations/hooks/use_escalations_api';
-import { escalationQueryKeys } from '../../escalations/query_keys';
+} from '../../../escalations/hooks/use_escalations_api';
+import { escalationQueryKeys } from '../../../escalations/query_keys';
 import type {
   InvestigationClosePreviewResponse,
   EscalationClosePreviewResponse,
-} from '../../../common';
-import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
+} from '../../../../common';
+import { useAgenticInvestigationsCapabilities } from '../../../hooks/use_agentic_investigations_capabilities';
 import { statusSignal } from './status_signal';
 import { getCloseErrorCode, isKnownCloseError, isPartialCloseError } from './close_error_codes';
 import { CloseInvestigationModal } from '../close_confirmation/close_investigation_modal';
