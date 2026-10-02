@@ -206,7 +206,8 @@ export function RequestFlyoutFailedCalls() {
         }
         return truncated !== topError ? (
           <EuiToolTip content={topError}>
-            <EuiText size="s">{truncated}</EuiText>
+            {/* tabIndex makes the non-interactive EuiText focusable for a11y */}
+            <EuiText size="s" tabIndex={0}>{truncated}</EuiText>
           </EuiToolTip>
         ) : (
           <EuiText size="s">{topError}</EuiText>
@@ -282,6 +283,7 @@ export function RequestFlyoutFailedCalls() {
             actions={menuActions}
             dataTestSubjPrefix="requestFlyoutFailedCallsActions"
             button={
+              // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap
               <EuiButtonIcon
                 data-test-subj="requestFlyoutFailedCallsActionsButton"
                 aria-label={i18n.translate(
@@ -376,6 +378,10 @@ export function RequestFlyoutFailedCalls() {
                     defaultMessage: 'No failed calls found for this connection.',
                   })
             }
+            tableCaption={i18n.translate(
+              'xpack.apm.requestFlyout.failedCalls.tableCaption',
+              { defaultMessage: 'Failed calls broken down by where they failed' }
+            )}
             data-test-subj="requestFlyoutFailedCallsTable"
           />
         </>

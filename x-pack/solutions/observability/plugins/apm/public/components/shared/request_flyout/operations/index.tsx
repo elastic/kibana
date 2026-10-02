@@ -172,6 +172,7 @@ export function RequestFlyoutOperations() {
             actions={menuActions}
             dataTestSubjPrefix="requestFlyoutOperationActions"
             button={
+              // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap
               <EuiButtonIcon
                 data-test-subj="requestFlyoutOperationActionsButton"
                 aria-label={i18n.translate('xpack.apm.requestFlyout.operations.actions.ariaLabel', {
@@ -214,6 +215,10 @@ export function RequestFlyoutOperations() {
             setPageSize(page.size);
           }
         }}
+        tableCaption={i18n.translate(
+          'xpack.apm.requestFlyout.operations.tableCaption',
+          { defaultMessage: 'Exit span operations from source to target service' }
+        )}
         data-test-subj="requestFlyoutOperationsTable"
       />
     </section>

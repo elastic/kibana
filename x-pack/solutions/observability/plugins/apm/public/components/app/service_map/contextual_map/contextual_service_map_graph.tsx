@@ -413,7 +413,6 @@ function ContextualGraphInner({
             </ReactFlow>
             <MapPopover
               selectedNode={selectedNodeForPopover}
-              selectedEdge={null}
               focusedServiceName={focalServiceId}
               environment={environment}
               kuery={kuery}
@@ -440,9 +439,9 @@ function ContextualGraphInner({
                 key={selectedEdgeForFlyout?.id}
                 deps={{ core, share, lens, dataViews }}
                 connection={edgeFlyoutConnection}
-                initialEnvironment={environment}
-                initialRangeFrom={start}
-                initialRangeTo={end}
+                environment={environment}
+                rangeFrom={start}
+                rangeTo={end}
                 onClose={handlePopoverClose}
               />
             )}

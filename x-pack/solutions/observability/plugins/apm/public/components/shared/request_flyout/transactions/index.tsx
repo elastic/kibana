@@ -171,6 +171,7 @@ export function RequestFlyoutAffectedEndpoints({
             actions={menuActions}
             dataTestSubjPrefix="requestFlyoutTransactionActions"
             button={
+              // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap
               <EuiButtonIcon
                 data-test-subj="requestFlyoutTransactionActionsButton"
                 aria-label={i18n.translate(
@@ -237,6 +238,10 @@ export function RequestFlyoutAffectedEndpoints({
           rowProps={(item) => ({
             'data-test-subj': `affectedEndpointRow-${item.name}`,
           })}
+          tableCaption={i18n.translate(
+            'xpack.apm.requestFlyout.affectedEndpoints.tableCaption',
+            { defaultMessage: 'Transactions from source service that call the target' }
+          )}
           data-test-subj="requestFlyoutAffectedEndpointsTable"
         />
       </section>
