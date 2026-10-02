@@ -18,6 +18,7 @@ import {
   applyWorkerSettingsWrite,
   diffWorkerSettings,
   getCompleteWorkerSettingsSchema,
+  isWorkerEnableBlocked,
 } from '@kbn/alertzero-common';
 import { useUpdateWorker } from './use_workers_api';
 
@@ -34,11 +35,18 @@ interface WorkerDraftOverlay {
   error?: string;
 }
 
+/** A pending switch-on is void while the Worker can't be switched on, so Save never sends it. */
+const draftEnabled = (worker: Worker, overlay: WorkerDraftOverlay | undefined) =>
+  overlay?.enabled === true && !worker.enabled && isWorkerEnableBlocked(worker.blockingReasons)
+    ? undefined
+    : overlay?.enabled;
+
 const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined): boolean => {
   if (!overlay) {
     return false;
   }
-  const enabledDirty = overlay.enabled !== undefined && overlay.enabled !== worker.enabled;
+  const enabled = draftEnabled(worker, overlay);
+  const enabledDirty = enabled !== undefined && enabled !== worker.enabled;
   const settingsDirty =
     overlay.settings !== undefined && !isEqual(overlay.settings.draft, overlay.settings.baseline);
   return enabledDirty || settingsDirty;
@@ -62,7 +70,7 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
     (worker: Worker) => {
       const overlay = overlays[worker.id];
       return {
-        enabled: overlay?.enabled ?? worker.enabled,
+        enabled: draftEnabled(worker, overlay) ?? worker.enabled,
         settings: overlay?.settings?.draft ?? worker.settings,
         error: overlay?.error,
         dirty: isWorkerDirty(worker, overlay),
@@ -109,8 +117,8 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
     setOverlays({});
   }, []);
 
-  /** Resolves with the ids of the Workers that were written; a failed Worker keeps its draft. */
-  const save = useCallback(async (): Promise<string[]> => {
+  /** Resolves with each written Worker as the server returned it; a failed Worker keeps its draft. */
+  const save = useCallback(async (): Promise<Worker[]> => {
     const outstanding = workers.filter((worker) => isWorkerDirty(worker, overlays[worker.id]));
     if (outstanding.length === 0) {
       return [];
@@ -124,7 +132,7 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
       throw new Error('invalid');
     }
 
-    const savedWorkerIds: string[] = [];
+    const savedWorkers: Worker[] = [];
     setIsSaving(true);
     try {
       for (const worker of outstanding) {
@@ -141,8 +149,8 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
         };
 
         try {
-          await mutateAsync({ workerId: worker.id, patch });
-          savedWorkerIds.push(worker.id);
+          const { worker: savedWorker } = await mutateAsync({ workerId: worker.id, patch });
+          savedWorkers.push(savedWorker);
           setOverlays((current) => {
             const { [worker.id]: _removed, ...rest } = current;
             return rest;
@@ -166,7 +174,7 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
     } finally {
       setIsSaving(false);
     }
-    return savedWorkerIds;
+    return savedWorkers;
   }, [mutateAsync, overlays, resolve, workers]);
 
   return {

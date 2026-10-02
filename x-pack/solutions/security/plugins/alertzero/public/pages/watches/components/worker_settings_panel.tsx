@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import {
   getAllowedAutonomyLevels,
+  isWorkerEnableBlocked,
   type Worker,
   type WorkerSettings,
   type WorkerSettingsWrite,
@@ -100,8 +101,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
   const controlsDisabled = settingsLocked || isSaving || !canWrite;
-  // The stored value still shows; it is kept and never flips on by itself when a model appears.
-  const enabledBlocked = worker.blockingReasons.includes('no_model');
+  const isEnableBlocked = isWorkerEnableBlocked(worker.blockingReasons);
   const executionsHref = worker.workflowId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
@@ -243,7 +243,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       compressed
       label={settingsI18n.ENABLED_SWITCH_LABEL}
       checked={enabled}
-      disabled={controlsDisabled || enabledBlocked}
+      disabled={controlsDisabled || (isEnableBlocked && !worker.enabled)}
       onChange={(event) => onEnabledChange(event.target.checked)}
       data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
     />

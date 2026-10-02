@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -40,26 +40,43 @@ const createWorker = (workflowId: string | null): Worker => ({
   },
 });
 
+const FEATURE_SETTINGS_URL = '/app/management/modelManagement/model_settings';
+const featureSettingsLocator = {
+  getUrl: jest.fn(async () => FEATURE_SETTINGS_URL),
+  navigate: jest.fn(async () => undefined),
+};
+
 const renderPanel = (
   workflowId: string | null,
   isAccordion: boolean,
-  blockingReasons: Worker['blockingReasons'] = []
+  {
+    blockingReasons = [],
+    enabled = true,
+  }: Pick<Partial<Worker>, 'blockingReasons' | 'enabled'> = {}
 ) => {
-  const worker: Worker = { ...createWorker(workflowId), blockingReasons };
+  const worker: Worker = { ...createWorker(workflowId), enabled, blockingReasons };
   const core = coreMock.createStart();
+  const share = {
+    url: {
+      locators: {
+        get: (id: string) =>
+          id === 'SEARCH_INFERENCE_ENDPOINTS' ? featureSettingsLocator : undefined,
+      },
+    },
+  };
   core.application.getUrlForApp.mockImplementation(
     (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
   );
 
   render(
     <I18nProvider>
-      <KibanaContextProvider services={core}>
+      <KibanaContextProvider services={{ ...core, share }}>
         <WorkerSettingsPanel
           worker={worker}
           isAccordion={isAccordion}
           isExpanded
           onToggle={jest.fn()}
-          enabled
+          enabled={enabled}
           settings={createWorker(workflowId).settings}
           warningReasons={getModelWarningReasons(worker)}
           settingsLocked={false}
@@ -115,24 +132,36 @@ describe('WorkerSettingsPanel view executions link', () => {
 });
 
 describe('WorkerSettingsPanel models and no-model block', () => {
-  it('points the Models row at Feature settings', () => {
-    const core = renderPanel(WORKFLOW_ID, false);
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('points the Models row at Feature settings', async () => {
+    renderPanel(WORKFLOW_ID, false);
 
     expect(screen.getByTestId(`alertZeroModelsRow-${WORKER_ID}`)).toHaveTextContent(
       'This Worker uses models configured in Feature settings.'
     );
-    const link = screen.getByTestId(`alertZeroModelsLink-${WORKER_ID}`);
-    expect(link).toHaveAttribute('href', '/app/management/modelManagement/model_settings');
+    const link = await screen.findByTestId(`alertZeroModelsLink-${WORKER_ID}`);
+    expect(link).toHaveAttribute('href', FEATURE_SETTINGS_URL);
 
     fireEvent.click(link);
 
-    expect(core.application.navigateToApp).toHaveBeenCalledWith('management', {
-      path: '/modelManagement/model_settings',
+    expect(featureSettingsLocator.navigate).toHaveBeenCalledWith({});
+  });
+
+  it('leaves a modified click to the browser so the page can open in a new tab', async () => {
+    renderPanel(WORKFLOW_ID, false);
+
+    fireEvent.click(await screen.findByTestId(`alertZeroModelsLink-${WORKER_ID}`), {
+      metaKey: true,
     });
+
+    expect(featureSettingsLocator.navigate).not.toHaveBeenCalled();
   });
 
   it('leaves the switch usable and shows no warning when nothing blocks the Worker', () => {
-    renderPanel(WORKFLOW_ID, false);
+    renderPanel(WORKFLOW_ID, false, { enabled: false });
 
     expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`)).toBeEnabled();
     expect(screen.queryByTestId(`alertZeroWorkerWarningIcon-${WORKER_ID}`)).not.toBeInTheDocument();
@@ -142,23 +171,26 @@ describe('WorkerSettingsPanel models and no-model block', () => {
     ['accordion', true],
     ['single-Worker', false],
   ])(
-    'disables the switch, keeps its stored value, and explains why when the space has no model (%s)',
+    'locks the switch of a blocked Worker that is off and explains why (%s)',
     async (_layout, isAccordion) => {
-      renderPanel(WORKFLOW_ID, isAccordion, ['no_model']);
+      renderPanel(WORKFLOW_ID, isAccordion, { blockingReasons: ['no_model'], enabled: false });
 
       const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`);
       expect(enabledSwitch).toBeDisabled();
-      expect(enabledSwitch).toHaveAttribute('aria-checked', 'true');
+      expect(enabledSwitch).toHaveAttribute('aria-checked', 'false');
 
       fireEvent.mouseOver(screen.getByTestId(`alertZeroWorkerWarningIcon-${WORKER_ID}`));
-      const tooltip = await screen.findByRole('tooltip');
-
-      expect(tooltip).toHaveTextContent(
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
         'Some AI-powered steps in this Worker may not be configured. Check Feature settings.'
       );
-      expect(
-        within(tooltip).getByTestId(`alertZeroWorkerNoModelLink-${WORKER_ID}`)
-      ).toHaveAttribute('href', '/app/management/modelManagement/model_settings');
     }
   );
+
+  it('lets a blocked Worker that is on be switched off', () => {
+    renderPanel(WORKFLOW_ID, false, { blockingReasons: ['no_model'], enabled: true });
+
+    const enabledSwitch = screen.getByTestId(`alertZeroWorkerEnabledSwitch-${WORKER_ID}`);
+    expect(enabledSwitch).toBeEnabled();
+    expect(enabledSwitch).toHaveAttribute('aria-checked', 'true');
+  });
 });

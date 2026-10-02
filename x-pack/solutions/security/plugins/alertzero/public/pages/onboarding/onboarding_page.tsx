@@ -25,13 +25,20 @@ import {
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ALERTZERO_FEATURE_ID, SYSTEM_SECURITY_WORKER_CATALOG } from '@kbn/alertzero-common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import {
+  ALERTZERO_FEATURE_ID,
+  SYSTEM_SECURITY_WORKER_CATALOG,
+  isWorkerEnableBlocked,
+} from '@kbn/alertzero-common';
 import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useWorkers } from '../../hooks/use_workers_api';
+import { FeatureSettingsLink } from '../watches/components/feature_settings_link';
 import { workerName } from '../watches/workers/translations';
 import { useEnableWorkers } from './use_enable_workers';
 import * as i18n from './translations';
@@ -71,6 +78,10 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   const availableWorkerIds = useMemo(
     () => onboardingWorkers.map(({ id }) => id),
     [onboardingWorkers]
+  );
+  // Every Worker gets the same reasons, so any one of them says whether enabling would be refused.
+  const isEnableBlocked = (workersData?.workers ?? []).some((worker) =>
+    isWorkerEnableBlocked(worker.blockingReasons)
   );
 
   const history = useHistory();
@@ -124,6 +135,28 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
 
       <ScanFailureCallout />
 
+      {isEnableBlocked ? (
+        <>
+          <KbnWarningCallout
+            title={i18n.NO_MODEL_TITLE}
+            data-test-subj="alertZeroOnboardingNoModel"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.alertzero.onboarding.noModel.body"
+                defaultMessage="Workers need an AI model to run, and none is available to you in this space. Configure one in {featureSettingsLink}, or ask an administrator for access to connectors."
+                values={{
+                  featureSettingsLink: (
+                    <FeatureSettingsLink data-test-subj="alertZeroOnboardingNoModelLink" />
+                  ),
+                }}
+              />
+            </p>
+          </KbnWarningCallout>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+
       <EuiPanel hasBorder hasShadow={false} paddingSize="none">
         {onboardingWorkers.length === 0 ? (
           <div
@@ -170,7 +203,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                         label={workerName(id, name)}
                         showLabel={false}
                         checked={checked}
-                        disabled={isLastEnabled || isSaving}
+                        disabled={isLastEnabled || isSaving || isEnableBlocked}
                         onChange={(e) => handleToggle(id, e.target.checked)}
                         data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
                         aria-describedby={
@@ -221,7 +254,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           <EuiButton
             fill
             isLoading={isSaving}
-            disabled={availableWorkerIds.length === 0 || enabledCount === 0}
+            disabled={availableWorkerIds.length === 0 || enabledCount === 0 || isEnableBlocked}
             onClick={handleEnableAndContinue}
             data-test-subj="alertZeroOnboardingEnableButton"
           >

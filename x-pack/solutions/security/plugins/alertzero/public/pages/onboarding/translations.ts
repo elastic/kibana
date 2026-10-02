@@ -120,3 +120,7 @@ const ONBOARDING_WORKER_DESCRIPTIONS: Record<string, string> = {
 
 export const onboardingWorkerDescription = (workerId: string): string | undefined =>
   ONBOARDING_WORKER_DESCRIPTIONS[workerId];
+
+export const NO_MODEL_TITLE = i18n.translate('xpack.alertzero.onboarding.noModel.title', {
+  defaultMessage: 'Set up an AI model before enabling Workers',
+});

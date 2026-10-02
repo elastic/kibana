@@ -7,18 +7,15 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Worker } from '@kbn/alertzero-common';
+import { isWorkerEnableBlocked, type Worker } from '@kbn/alertzero-common';
 import { FeatureSettingsLink } from './feature_settings_link';
 import type { WorkerWarningReason } from './worker_warning_content';
 
-/**
- * Warning reasons for a Worker the space cannot run, listed ahead of dependency reasons because
- * no model stops the Worker outright.
- */
+/** Warning reasons for a Worker the user has no model for. */
 export const getModelWarningReasons = (
-  worker: Pick<Worker, 'id' | 'blockingReasons'> | undefined
+  worker: Pick<Worker, 'id' | 'blockingReasons'>
 ): WorkerWarningReason[] =>
-  worker?.blockingReasons.includes('no_model')
+  isWorkerEnableBlocked(worker.blockingReasons)
     ? [
         {
           id: 'no_model',

@@ -7,26 +7,31 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useLocatorUrl } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import * as settingsI18n from '../settings_translations';
 
-const MANAGEMENT_APP_ID = 'management';
-/** The Search Inference Endpoints `model_settings` app, titled "Feature Settings". */
-const FEATURE_SETTINGS_PATH = '/modelManagement/model_settings';
+/** Registered by `searchInferenceEndpoints`; resolves to the "Feature Settings" page. */
+const FEATURE_SETTINGS_LOCATOR_ID = 'SEARCH_INFERENCE_ENDPOINTS';
 
 interface FeatureSettingsLinkProps {
   'data-test-subj'?: string;
 }
 
-/** Link to Stack Management > Feature Settings, where each AlertZero model tier is picked. */
+/** Link to Stack Management > Feature Settings; plain text when that page has no locator. */
 export const FeatureSettingsLink: React.FC<FeatureSettingsLinkProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const {
-    services: { application },
-  } = useKibana<CoreStart>();
-  const href = application.getUrlForApp(MANAGEMENT_APP_ID, { path: FEATURE_SETTINGS_PATH });
+    services: { share },
+  } = useKibana<{ share?: SharePluginStart }>();
+  const locator = share?.url.locators.get(FEATURE_SETTINGS_LOCATOR_ID);
+  const href = useLocatorUrl(locator, {});
+
+  if (!locator || !href) {
+    return <>{settingsI18n.FEATURE_SETTINGS_LINK}</>;
+  }
 
   return (
     <EuiLink
@@ -36,7 +41,7 @@ export const FeatureSettingsLink: React.FC<FeatureSettingsLinkProps> = ({
           return;
         }
         event.preventDefault();
-        void application.navigateToApp(MANAGEMENT_APP_ID, { path: FEATURE_SETTINGS_PATH });
+        void locator.navigate({});
       }}
       data-test-subj={dataTestSubj}
     >

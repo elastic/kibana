@@ -168,22 +168,45 @@ describe('useWatchSettingsDraft', () => {
     });
   });
 
-  it('resolves with only the Workers that were written', async () => {
+  it('resolves with only the Workers that were written, as the server returned them', async () => {
+    const written: Worker = { ...ruleCoverage, enabled: true, blockingReasons: ['no_model'] };
     mutateAsync
       .mockRejectedValueOnce(new Error('patch failed'))
-      .mockResolvedValueOnce({ worker: ruleCoverage });
+      .mockResolvedValueOnce({ worker: written });
     const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCoverage]));
 
     act(() => {
       result.current.updateEnabled(ruleTuning, true);
       result.current.updateEnabled(ruleCoverage, true);
     });
-    let savedWorkerIds: string[] = [];
+    let savedWorkers: Worker[] = [];
     await act(async () => {
-      savedWorkerIds = await result.current.save();
+      savedWorkers = await result.current.save();
     });
 
-    expect(savedWorkerIds).toEqual([SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]);
+    expect(savedWorkers).toEqual([written]);
+  });
+
+  it('voids a pending switch-on once the Worker can no longer be switched on', async () => {
+    const { result, rerender } = renderHook(
+      ({ workers }: { workers: Worker[] }) => useWatchSettingsDraft(workers),
+      { initialProps: { workers: [ruleTuning] } }
+    );
+
+    act(() => {
+      result.current.updateEnabled(ruleTuning, true);
+    });
+    expect(result.current.isDirty).toBe(true);
+
+    const blocked: Worker = { ...ruleTuning, blockingReasons: ['no_model'] };
+    rerender({ workers: [blocked] });
+
+    expect(result.current.resolve(blocked)).toMatchObject({ enabled: false, dirty: false });
+    expect(result.current.isDirty).toBe(false);
+    await act(async () => {
+      await result.current.save();
+    });
+    expect(mutateAsync).not.toHaveBeenCalled();
   });
 
   it('sends a null revision for a Worker that has not been installed yet', async () => {
