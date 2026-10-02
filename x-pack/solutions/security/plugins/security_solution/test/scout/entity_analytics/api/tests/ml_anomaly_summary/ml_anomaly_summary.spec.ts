@@ -100,6 +100,14 @@ apiTest.describe(
         body: {},
       });
 
+      // The suite indexes its own entity docs, so no extraction or maintainer task needs to run.
+      log.debug(`Stopping entity store engines...`);
+      await apiClient.put(ENTITY_STORE_ROUTES.public.STOP, {
+        headers: { ...defaultHeaders, ...PUBLIC_API_HEADERS },
+        responseType: 'json',
+        body: {},
+      });
+
       // Install PAD integration to create the necessary ML job and anomaly index.
       log.debug(`Setting up agent policy for PAD integration...`);
       const agentPolicyRes = await apiClient.post('/api/fleet/agent_policies', {
