@@ -84,13 +84,13 @@ const CREATE_WITH_AGENT_OPTION_DESCRIPTION = i18n.translate(
 
 const INSTALL_TEMPLATES_OPTION_TITLE = i18n.translate(
   'xpack.alertingV2.actionPolicyCreateOptionsPanel.installTemplatesTitle',
-  { defaultMessage: 'Install templates' }
+  { defaultMessage: 'Use policy templates' }
 );
 const INSTALL_TEMPLATES_OPTION_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.actionPolicyCreateOptionsPanel.installTemplatesDescription',
   {
     defaultMessage:
-      'Add disabled example policies that send alert episodes to a placeholder workflow which logs to the console.',
+      'Add preconfigured action policies that route alert episodes to a sample workflow. Policies are created disabled so you can review them first.',
   }
 );
 

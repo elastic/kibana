@@ -28,7 +28,7 @@ export const useInstallActionPolicyTemplates = () => {
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.actionPolicy.installTemplates.success', {
           defaultMessage:
-            '{created, plural, =0 {No new template action policies were created} one {# template action policy created} other {# template action policies created}}. Template policies are disabled until you enable them.',
+            '{created, plural, =0 {All policy templates are already installed.} one {Added # action policy from templates. Review and enable it when ready.} other {Added # action policies from templates. Review and enable them when ready.}}',
           values: { created },
         })
       );
@@ -36,7 +36,7 @@ export const useInstallActionPolicyTemplates = () => {
     onError: (error) => {
       toasts.addError(error, {
         title: i18n.translate('xpack.alertingV2.actionPolicy.installTemplates.error', {
-          defaultMessage: 'Failed to install template action policies',
+          defaultMessage: 'Unable to add action policies from templates',
         }),
       });
     },

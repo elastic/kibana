@@ -19,14 +19,13 @@ const MISSING_ACTION_POLICIES_PRIVILEGES_REASON = i18n.translate(
 const MISSING_WORKFLOWS_PRIVILEGES_REASON = i18n.translate(
   'xpack.alertingV2.actionPolicy.installTemplates.missingWorkflowsPrivilegesTooltip',
   {
-    defaultMessage:
-      'To install templates, you need permission to create and read workflows, because templates dispatch to a workflow.',
+    defaultMessage: 'Using policy templates requires permission to create and read workflows.',
   }
 );
 
 const LICENSE_REQUIRED_REASON = i18n.translate(
   'xpack.alertingV2.actionPolicy.installTemplates.licenseRequiredTooltip',
-  { defaultMessage: 'An active Enterprise license is required to install templates.' }
+  { defaultMessage: 'An active Enterprise license is required to use policy templates.' }
 );
 
 /**

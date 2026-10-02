@@ -25,8 +25,8 @@ const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const MISSING_ACTION_POLICIES_PRIVILEGES_REASON =
   'You do not have permission to create action policies';
 const MISSING_WORKFLOWS_PRIVILEGES_REASON =
-  'To install templates, you need permission to create and read workflows, because templates dispatch to a workflow.';
-const LICENSE_REQUIRED_REASON = 'An active Enterprise license is required to install templates.';
+  'Using policy templates requires permission to create and read workflows.';
+const LICENSE_REQUIRED_REASON = 'An active Enterprise license is required to use policy templates.';
 
 interface Scenario {
   canWriteActionPolicies: boolean;
