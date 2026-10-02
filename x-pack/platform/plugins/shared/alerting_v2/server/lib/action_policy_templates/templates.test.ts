@@ -6,7 +6,8 @@
  */
 
 import { createActionPolicyDataSchema } from '@kbn/alerting-v2-schemas';
-import { buildConsoleLogWorkflowYaml } from './console_log_workflow';
+import { parse } from 'yaml';
+import { buildConsoleLogWorkflowYaml, CONSOLE_LOG_WORKFLOW_NAME } from './console_log_workflow';
 import { ACTION_POLICY_TEMPLATES } from './templates';
 
 describe('ACTION_POLICY_TEMPLATES', () => {
@@ -33,11 +34,14 @@ describe('ACTION_POLICY_TEMPLATES', () => {
 });
 
 describe('buildConsoleLogWorkflowYaml', () => {
-  it('defines a console step receiving the notification group payload', () => {
-    const yaml = buildConsoleLogWorkflowYaml();
+  it('produces YAML that parses back to the workflow definition', () => {
+    const workflow = parse(buildConsoleLogWorkflowYaml());
 
-    expect(yaml).toContain('type: console');
-    expect(yaml).toContain('type: manual');
-    expect(yaml).toContain('payload');
+    expect(workflow).toMatchObject({
+      name: CONSOLE_LOG_WORKFLOW_NAME,
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [{ name: 'log_notification_group', type: 'console' }],
+    });
   });
 });
