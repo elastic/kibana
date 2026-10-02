@@ -23,3 +23,6 @@ export const getInvalidActionPolicyDataMessage = (
   context: ActionPolicyValidationContext,
   zodError: string
 ): string => `Error validating ${context} action policy data - ${zodError}`;
+
+export const getActionPolicyTemplatesWorkflowsUnavailableMessage = (): string =>
+  'Action policy templates require Workflows, which is not available in this environment';

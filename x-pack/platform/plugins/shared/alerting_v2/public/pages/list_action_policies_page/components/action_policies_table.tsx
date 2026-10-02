@@ -33,6 +33,8 @@ import {
 } from '../../../hooks/use_are_agent_builder_skills_available';
 import { useNavigateToAgentBuilder } from '../../../hooks/use_navigate_to_agent_builder';
 import { useAlertingV2ExperimentalFeatures } from '../../../hooks/use_alerting_v2_experimental_features';
+import { useInstallActionPolicyTemplates } from '../../../hooks/use_install_action_policy_templates';
+import { useInstallActionPolicyTemplatesDisabledReason } from '../../../hooks/use_install_action_policy_templates_disabled_reason';
 import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_policies_license_valid';
 import { useSnoozeActionPolicy } from '../../../hooks/use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from '../../../hooks/use_unsnooze_action_policy';
@@ -79,6 +81,18 @@ const CREATE_WITH_AGENT_OPTION_DESCRIPTION = i18n.translate(
   { defaultMessage: 'Set up an action policy with the help of the AI Agent.' }
 );
 
+const INSTALL_TEMPLATES_OPTION_TITLE = i18n.translate(
+  'xpack.alertingV2.actionPolicyCreateOptionsPanel.installTemplatesTitle',
+  { defaultMessage: 'Install templates' }
+);
+const INSTALL_TEMPLATES_OPTION_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.actionPolicyCreateOptionsPanel.installTemplatesDescription',
+  {
+    defaultMessage:
+      'Add disabled example policies that send alert episodes to a placeholder workflow which logs to the console.',
+  }
+);
+
 export const ActionPoliciesTable = () => {
   const refetchRef = useRef<() => void>(() => {});
   const onRefetchReady = useCallback((refetchFn: () => void) => {
@@ -98,12 +112,15 @@ export const ActionPoliciesTable = () => {
   const showExperimentalFeatures = useAlertingV2ExperimentalFeatures();
   const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(abSkillRequirements);
   const isLicenseValid = useIsActionPoliciesLicenseValid();
+  const installTemplatesDisabledReason = useInstallActionPolicyTemplatesDisabledReason();
 
   const navigateToCreate = useCallback(() => {
     actionPolicyLocators.navigateSync({ page: 'create' });
   }, [actionPolicyLocators]);
 
   const { mutate: createActionPolicy } = useCreateActionPolicy();
+  const { mutate: installTemplates, isLoading: isInstallingTemplates } =
+    useInstallActionPolicyTemplates();
   const { mutate: deleteActionPolicy, isLoading: isDeleting } = useDeleteActionPolicy();
   const {
     mutate: enablePolicyMutate,
@@ -194,6 +211,16 @@ export const ActionPoliciesTable = () => {
         tooltipText: isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
         'data-test-subj': 'createActionPolicyCard',
       },
+      {
+        id: 'install-templates',
+        iconType: 'copy',
+        title: INSTALL_TEMPLATES_OPTION_TITLE,
+        description: INSTALL_TEMPLATES_OPTION_DESCRIPTION,
+        onClick: () => installTemplates(),
+        disabled: installTemplatesDisabledReason !== undefined || isInstallingTemplates,
+        tooltipText: installTemplatesDisabledReason,
+        'data-test-subj': 'installActionPolicyTemplatesCard',
+      },
       ...(showExperimentalFeatures
         ? [
             {
@@ -226,6 +253,9 @@ export const ActionPoliciesTable = () => {
     [
       navigateToCreate,
       navigateToAgentBuilder,
+      installTemplates,
+      installTemplatesDisabledReason,
+      isInstallingTemplates,
       isLicenseValid,
       areAgentBuilderSkillsAvailable,
       createWithAgentTooltipText,

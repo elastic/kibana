@@ -20,6 +20,7 @@ const mockNavigateToApp = jest.fn();
 const mockGetUrlForApp = jest.fn();
 const mockFindItems = jest.fn();
 const mockCreateActionPolicy = jest.fn();
+const mockInstallTemplates = jest.fn();
 const mockDeleteActionPolicy = jest.fn();
 const mockEnableActionPolicy = jest.fn();
 const mockDisableActionPolicy = jest.fn();
@@ -36,6 +37,11 @@ let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockIsLicenseValid = true;
+let mockWorkflowsCapabilities: Record<string, boolean> = {
+  createWorkflow: true,
+  readWorkflow: true,
+};
+let mockIsInstallingTemplates = false;
 
 jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
   useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
@@ -57,6 +63,7 @@ jest.mock('@kbn/core-di-browser', () => {
           getUrlForApp: mockGetUrlForApp,
           capabilities: {
             agentBuilder: { show: mockAgentBuilderShow },
+            workflowsManagement: mockWorkflowsCapabilities,
           },
         };
       }
@@ -90,6 +97,13 @@ jest.mock('@kbn/core-di-browser', () => {
 
 jest.mock('../../../hooks/use_create_action_policy', () => ({
   useCreateActionPolicy: () => ({ mutate: mockCreateActionPolicy }),
+}));
+
+jest.mock('../../../hooks/use_install_action_policy_templates', () => ({
+  useInstallActionPolicyTemplates: () => ({
+    mutate: mockInstallTemplates,
+    isLoading: mockIsInstallingTemplates,
+  }),
 }));
 
 jest.mock('../../../hooks/use_delete_action_policy', () => ({
@@ -206,6 +220,8 @@ describe('ActionPoliciesTable', () => {
     mockExperimentalFeaturesEnabled = true;
     mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockIsLicenseValid = true;
+    mockWorkflowsCapabilities = { createWorkflow: true, readWorkflow: true };
+    mockIsInstallingTemplates = false;
 
     mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
@@ -597,6 +613,57 @@ describe('ActionPoliciesTable', () => {
 
       await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
       expect(screen.queryByTestId('createActionPolicyWithAgentCard')).not.toBeInTheDocument();
+    });
+
+    it('installs the template action policies from the empty state install-templates card', async () => {
+      const user = userEvent.setup();
+      renderTable();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('installActionPolicyTemplatesCard')).toBeInTheDocument()
+      );
+      await user.click(screen.getByTestId('installActionPolicyTemplatesCard'));
+
+      expect(mockInstallTemplates).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      {
+        scenario: 'the user cannot create workflows',
+        arrange: () => {
+          mockWorkflowsCapabilities = { createWorkflow: false, readWorkflow: true };
+        },
+      },
+      {
+        scenario: 'the user cannot read workflows',
+        arrange: () => {
+          mockWorkflowsCapabilities = { createWorkflow: true, readWorkflow: false };
+        },
+      },
+      {
+        scenario: 'the license does not allow action policies',
+        arrange: () => {
+          mockIsLicenseValid = false;
+        },
+      },
+      {
+        scenario: 'the templates are being installed',
+        arrange: () => {
+          mockIsInstallingTemplates = true;
+        },
+      },
+    ])('disables the install-templates card when $scenario', async ({ arrange }) => {
+      arrange();
+      renderTable();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('installActionPolicyTemplatesCard')).toBeInTheDocument()
+      );
+      const card = screen.getByTestId('installActionPolicyTemplatesCard');
+      expect(card).toHaveAttribute('aria-disabled', 'true');
+
+      fireEvent.click(card);
+      expect(mockInstallTemplates).not.toHaveBeenCalled();
     });
 
     it('navigates to the create form from the empty state create-policy card', async () => {
