@@ -115,6 +115,14 @@ describe('RulesTableAppHeader', () => {
     }
   });
 
+  it('disables the Add Elastic rules and Import rules actions while loading', async () => {
+    renderHeader({ isLoading: true });
+    await openAppMenuOverflow();
+
+    expect(await screen.findByTestId('addElasticRulesButton')).toBeDisabled();
+    expect(await screen.findByTestId('rules-import-modal-button')).toBeDisabled();
+  });
+
   it('hides rule settings when the user cannot access them', async () => {
     renderHeader({ canAccessRuleSettings: false });
     await openAppMenuOverflow();
