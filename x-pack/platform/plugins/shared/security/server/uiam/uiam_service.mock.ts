@@ -35,13 +35,36 @@ export const uiamServiceMock = {
     exchangeServiceAccountToken: jest
       .fn()
       .mockResolvedValue({ token: 'essu_mock-service-account-token' }),
+    authenticateAsKibana: jest.fn().mockResolvedValue({
+      type: 'project',
+      project_id: 'mock-project-id',
+      project_type: 'elasticsearch',
+      organization_id: 'mock-organization-id',
+      token: 'essu_mock-kibana-token',
+    }),
     createServiceAccount: jest.fn().mockResolvedValue({
       id: 'mock-service-account-id',
-      type: 'project' as const,
+      type: 'organization' as const,
+      scope: 'project' as const,
       name: 'mock-service-account-name',
       organization_id: 'mock-organization-id',
+      project_type: 'elasticsearch',
+      project_id: 'mock-project-id',
       role_assignments: {},
       assumable_by: [],
+    }),
+    listServiceAccounts: jest.fn().mockResolvedValue({ service_accounts: [] }),
+    getServiceAccount: jest.fn().mockResolvedValue({
+      id: 'mock-service-account-id',
+      type: 'organization' as const,
+      scope: 'project' as const,
+      name: 'mock-service-account-name',
+      organization_id: 'mock-organization-id',
+      project_type: 'elasticsearch',
+      project_id: 'mock-project-id',
+      role_assignments: {},
+      assumable_by: [],
+      creator: { type: 'user' as const, id: 'mock-user-id', first_name: 'Mock', last_name: 'User' },
     }),
     createOAuthClient: jest.fn().mockResolvedValue({
       id: 'mock-client-id',

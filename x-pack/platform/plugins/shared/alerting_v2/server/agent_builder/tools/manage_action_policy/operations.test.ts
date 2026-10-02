@@ -112,12 +112,12 @@ describe('executeActionPolicyOperations', () => {
 
     it('applies set_matcher', () => {
       const ops: ActionPolicyOperation[] = [
-        { operation: 'set_matcher', matcher: { expression: 'rule.name: "test"' } },
+        { operation: 'set_matcher', matcher: { expression: 'episode_status: "active"' } },
       ];
 
       const result = executeActionPolicyOperations({}, ops);
 
-      expect(result.matcher).toEqual({ expression: 'rule.name: "test"' });
+      expect(result.matcher).toEqual({ expression: 'episode_status: "active"' });
     });
 
     it('applies set_grouping', () => {

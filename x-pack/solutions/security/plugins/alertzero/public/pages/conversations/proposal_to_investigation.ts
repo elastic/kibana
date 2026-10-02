@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ProposalConfidence, ProposalImpact } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalConfidence, ProposalImpact } from '@kbn/proposals-common';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
@@ -15,16 +15,11 @@ import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
  * Category an action declares → queue bucket. Keyed loosely because a category is an
  * arbitrary keyword (`actionCategorySchema` is a bounded string, not an enum), so an
  * action can declare one this page has never heard of.
- *
- * `tune` is retained for back-compatibility only: the shipped catalog now declares
- * `configure` directly, but proposals created before that snapshot their category at
- * creation and are never re-scored.
  */
 const CATEGORY_TO_BUCKET: Record<string, RecommendedAction> = {
   respond: 'respond',
   investigate: 'investigate',
   configure: 'configure',
-  tune: 'configure',
 };
 
 /**
@@ -62,8 +57,8 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * - `watch_id`         fabricated `''`; no equivalent on a proposal.
  * - `watch_execution_id` fabricated `''`; no equivalent.
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
- * - `affectedSurface`  `undefined`; BlastRadius self-hides (returns null) with no surfaces.
- * - `assignee`         `null`; `decidedBy` is the decider, not an owner.
+ * - `affectedSurface`  first Impact entity id, when hydrated; otherwise undefined.
+ * - `entityIds`        from the conversation's Impact document; omitted when none.
  * - `status`           deliberately `undefined`. A proposal's own statuses (`'pending'`,
  *                      `'succeeded'`, …) are not investigation statuses, and mapping them
  *                      across would be inventing a meaning. The bucket carries the part
@@ -77,6 +72,21 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * - `confidence`, `origin`, `dismissReason`, `rationale`, `executionError`,
  *   `workflowExecutionId`, `decidedBy`, `expiresAt` — no destination in Investigation.
  */
+/**
+ * Past-tense label for a proposal whose false-positive close actually ran, identified by the
+ * close action's input contract. Undefined for anything else (dismissed, expired, failed, or
+ * another action) so the caller falls back to the proposal title.
+ */
+const closedActionLabel = (proposal: ProposalItem): string | undefined => {
+  if (proposal.status !== 'succeeded') return undefined;
+  const { alertIds, reason } = proposal.actionInput ?? {};
+  if (!Array.isArray(alertIds) || reason !== 'false_positive') return undefined;
+  return i18n.translate('xpack.alertzero.conversationQueue.alertsClosedAsFalsePositiveLabel', {
+    defaultMessage: '{count, plural, one {# alert} other {# alerts}} closed as false positive',
+    values: { count: alertIds.length },
+  });
+};
+
 export const proposalToInvestigation = (proposal: ProposalItem): Investigation => {
   // Closed detection mirrors groupProposals() server-side: decidedAt wins over category.
   const isClosed = Boolean(proposal.decidedAt);
@@ -107,16 +117,26 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // severity collapse: 4-level impact → 3-level severity string.
     // 'critical' maps to 'high' so helpers.tsx's === 'high' check still fires.
     severity: proposal.impact === 'critical' ? 'high' : proposal.impact,
-    // Synthetic priority score restores impact ranking that listByWindow's
-    // createdAt-asc sort loses. Max: 4*20 + 3*5 = 95.
+    // Synthetic priority score drives impact-first ordering in the queue.
+    // The server sorts by createdAt, so this re-ranks client-side. Max: 4*20 + 3*5 = 95.
     priorityScore: impactRank * 20 + confidenceRank * 5,
     // recordId is repurposed to carry the proposal id into the ⋮ modal system.
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
-    summary: proposal.comment,
-    primaryActionLabel: proposal.action?.name,
-    assignee: null,
+    conversationId: proposal.conversationId,
+    // The title, not the comment: the card renders this as plain text, so the
+    // comment's markdown came through as literal asterisks and headings.
+    summary: proposal.title,
+    primaryActionLabel: closedActionLabel(proposal) ?? proposal.title,
+    // `conversationAssignees` is an array but `Investigation.assignee` is singular,
+    // because the flyout header renders one avatar. First entry wins, as in the
+    // conversation adapter.
+    assignee: proposal.conversationAssignees[0] ?? null,
+    assignees: proposal.conversationAssignees,
     events: [],
-    // affectedSurface left undefined → BlastRadius self-hides (returns null).
+    entityIds: proposal.entityIds,
+    // First id feeds the flyout Overview "Compromised" row until that surface
+    // reads `entityIds` directly. Pills and the queue filter use `entityIds`.
+    affectedSurface: proposal.entityIds?.[0],
   };
 };

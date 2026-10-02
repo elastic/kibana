@@ -8,11 +8,23 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { TestProviders } from '../../../../common/mock';
 import { MitreAttack } from './mitre_attack';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
+jest.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => ({
+  useMitreConfiguration: jest.fn().mockReturnValue({
+    tactics: [],
+    techniques: [],
+    subtechniques: [],
+    frameworkVersion: undefined,
+    isLoading: false,
+    isError: false,
+  }),
 }));
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
@@ -23,7 +35,12 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
     isAnchor: false,
   } as DataTableRecord);
 
-const renderMitreAttack = (hit: DataTableRecord) => render(<MitreAttack hit={hit} />);
+const renderMitreAttack = (hit: DataTableRecord) =>
+  render(
+    <TestProviders>
+      <MitreAttack hit={hit} />
+    </TestProviders>
+  );
 
 describe('<MitreAttack />', () => {
   it('should render mitre attack information (in array form)', () => {

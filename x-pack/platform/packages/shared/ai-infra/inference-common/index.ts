@@ -57,6 +57,7 @@ export {
   type ChatCompletionToolNotFoundError,
   type ChatCompletionToolValidationError,
   type ChatCompletionTokenLimitReachedError,
+  isContextLengthExceededError,
   isToolValidationError,
   isOutputTokenLimitReachedError,
   isToolNotFoundError,
@@ -158,10 +159,12 @@ export {
 } from './src/connectors';
 export {
   defaultInferenceEndpoints,
+  INFERENCE_ENDPOINT_INTERNAL_API_VERSION,
   InferenceEndpointProvider,
   elasticModelIds,
   type EisInferenceEndpointMetadata,
   type CspRegion,
+  type InferenceEndpointRequestBody,
 } from './src/inference_endpoints';
 
 export {
@@ -169,6 +172,16 @@ export {
   type ApiInferenceConnector,
   type InferenceConnectorsApiResponseBody,
 } from './src/inference_connectors_api';
+
+export {
+  FieldType,
+  type ConfigValue,
+  SERVICE_SETTINGS,
+  TASK_SETTINGS,
+  type ConfigProperties,
+  type FieldsConfiguration,
+  type InferenceProvider,
+} from './src/inference_services_api';
 
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
 

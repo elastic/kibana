@@ -8,18 +8,17 @@
 import type {
   ActionPolicyResponse,
   CreateActionPolicyDataInput,
-  MatchedActionPolicy,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 
 export interface UpdateActionPolicyParams {
   data: UpdateActionPolicyData;
-  options: { id: string; version: string };
+  options: { id: string };
 }
 
 export interface CreateActionPolicyParams {
   data: CreateActionPolicyDataInput;
-  options?: { id?: string };
+  options?: { id?: string; enabled?: boolean };
 }
 
 export interface SnoozeActionPolicyParams {
@@ -60,11 +59,6 @@ export interface FindActionPoliciesResponse {
   perPage: number;
 }
 
-export interface MatchActionPoliciesForRuleParams {
+export interface MatchActionPoliciesParams {
   ruleTags?: string[];
-}
-
-export interface MatchActionPoliciesForRuleResponse {
-  items: MatchedActionPolicy[];
-  total: number;
 }

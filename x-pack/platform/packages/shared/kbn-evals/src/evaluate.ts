@@ -18,7 +18,7 @@ import { createCriteriaEvaluator } from './evaluators/criteria';
 import { getGitMetadata } from './utils/git_metadata';
 import { buildExecutionId } from './utils/build_execution_id';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
-import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
+import { createConnectorFixture } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
 import { createAgentBuilderClient } from './utils/agent_builder_client';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
@@ -35,6 +35,7 @@ import { EvalsClient } from './utils/evals_client';
 import { EvaluatorApiClient } from './utils/evaluator_api_client';
 import { getBuildkiteCiMetadataFromEnv } from './utils/ci_metadata';
 import { getSpaceIdsFromEnv } from './utils/space_ids';
+import { DEFAULT_EXPERIMENT_CONCURRENCY, getConcurrencyFromEnv } from './utils/concurrency';
 import { buildIngestRequest, toScoreModel } from './utils/build_ingest_request';
 import { buildModelFromConnector } from './utils/build_model_from_connector';
 import type {
@@ -138,13 +139,13 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
   ],
   evaluationConnector: [
-    async ({ fetch, log, connector, evaluationConnectorParam }, use) => {
+    async ({ fetch, log, connector, connectorParam, evaluationConnectorParam }, use) => {
       if (!evaluationConnectorParam) {
         throw new Error(
           'The `evaluationConnectorParam` option must be set per-project in the Playwright config.'
         );
       }
-      if (resolveConnectorId(evaluationConnectorParam.id) !== connector.id) {
+      if (evaluationConnectorParam.id !== connectorParam?.id) {
         await createConnectorFixture({
           predefinedConnector: evaluationConnectorParam,
           fetch,
@@ -286,6 +287,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         connector,
         evaluationConnector,
         repetitions,
+        concurrency,
         reportModelScore,
         workerExecutionId,
         workerExperimentId,
@@ -314,6 +316,8 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         model,
         executionId,
         repetitions,
+        concurrency,
+        requestedConcurrency: getConcurrencyFromEnv(),
         upsertDataset: async (dataset: EvaluationDataset) =>
           evalsClient.upsertDataset({
             name: dataset.name,
@@ -497,4 +501,5 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   connectorParam: [undefined, { option: true, scope: 'worker' }],
   evaluationConnectorParam: [undefined, { option: true, scope: 'worker' }],
   repetitions: [1, { option: true, scope: 'worker' }],
+  concurrency: [DEFAULT_EXPERIMENT_CONCURRENCY, { option: true, scope: 'worker' }],
 });

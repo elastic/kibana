@@ -69,7 +69,6 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
         name: policyName,
         description: 'Scout execution history UI smoke policy',
         destinations: [{ type: 'workflow', id: workflowId }],
-        matcher: { expression: `rule.id: "${ruleId}"` },
       })
     );
 
@@ -78,11 +77,8 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
       buildCreateRuleData({
         metadata: { name: ruleName },
         schedule: { every: '1d' },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
-        },
-        state_transition: { pending_count: 0, recovering_count: 0 },
+        query: { base: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
+        state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
       })
     );
     await apiServices.alertingV2.rules.bulkDisable({ ids: [ruleId] });
@@ -91,7 +87,7 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: `${ruleId}-series`,
-        episode: { id: `${ruleId}-episode`, status: 'active' },
+        alert: { id: `${ruleId}-episode`, status: 'active' },
         status: 'breached',
         source: 'internal',
         '@timestamp': new Date().toISOString(),
