@@ -115,9 +115,9 @@ describe('InProcessClassificationWorkflowClient', () => {
         {
           id: 'c2',
           keep: false,
-          findingType: 'odd',
-          findingTitle: 'Debug print in production path',
-          findingSummary: 'A bare print statement remains in request handling code.',
+          findingType: 'sensitive-data',
+          findingTitle: 'Session token printed',
+          findingSummary: 'A bare print statement writes the session token to stdout.',
         },
       ],
     });
@@ -125,7 +125,7 @@ describe('InProcessClassificationWorkflowClient', () => {
     const result = await client.classifyLogging({
       candidates: [
         loggingCandidate('c1', 'log.warn "Generated admin credentials: admin / $password"'),
-        loggingCandidate('c2', 'print(value)'),
+        loggingCandidate('c2', 'print(session.token)'),
       ],
     });
 
@@ -143,9 +143,9 @@ describe('InProcessClassificationWorkflowClient', () => {
         {
           id: 'c2',
           keep: false,
-          findingType: 'odd',
-          findingTitle: 'Debug print in production path',
-          findingSummary: 'A bare print statement remains in request handling code.',
+          findingType: 'sensitive-data',
+          findingTitle: 'Session token printed',
+          findingSummary: 'A bare print statement writes the session token to stdout.',
         },
       ],
     });
@@ -208,7 +208,13 @@ describe('InProcessClassificationWorkflowClient', () => {
   it('drops a result whose finding is left incomplete after blank text is removed', async () => {
     const client = clientReturning({
       results: [
-        { id: 'c1', keep: true, findingType: 'odd', findingTitle: ' ', findingSummary: 'x' },
+        {
+          id: 'c1',
+          keep: true,
+          findingType: 'sensitive-data',
+          findingTitle: ' ',
+          findingSummary: 'x',
+        },
         { id: 'c2', keep: true },
       ],
     });

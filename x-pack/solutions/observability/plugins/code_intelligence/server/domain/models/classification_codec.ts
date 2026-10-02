@@ -129,8 +129,8 @@ export const MAX_FINDING_TITLE_LENGTH = 160;
 /** Maximum length of a reviewer-facing finding summary returned by a classifier. */
 export const MAX_FINDING_SUMMARY_LENGTH = 600;
 
-/** Restricts findings to the 2 review categories a classifier may file. */
-export const findingTypeRt = t.keyof({ 'sensitive-data': null, odd: null });
+/** Restricts findings to the single review category a classifier may file. */
+export const findingTypeRt = t.keyof({ 'sensitive-data': null });
 export type FindingType = t.TypeOf<typeof findingTypeRt>;
 
 /** Bounds a finding title so a reviewer list stays readable. */

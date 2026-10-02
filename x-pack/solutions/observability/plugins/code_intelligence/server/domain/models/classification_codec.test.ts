@@ -55,10 +55,10 @@ describe.each([
     expect(isRight(codec.decode({ id: 'src/app.ts:1', keep: true, ...partial }))).toBe(false);
   });
 
-  it('rejects an unknown finding type', () => {
-    expect(
-      isRight(codec.decode({ id: 'src/app.ts:1', keep: true, ...finding, findingType: 'bug' }))
-    ).toBe(false);
+  it.each(['bug', 'odd'])('rejects the %s finding type', (findingType) => {
+    expect(isRight(codec.decode({ id: 'src/app.ts:1', keep: true, ...finding, findingType }))).toBe(
+      false
+    );
   });
 
   it.each([
@@ -76,7 +76,7 @@ describe.each([
         codec.decode({
           id: 'src/app.ts:1',
           keep: true,
-          findingType: 'odd',
+          findingType: 'sensitive-data',
           findingTitle: 'a'.repeat(MAX_FINDING_TITLE_LENGTH),
           findingSummary: 'a'.repeat(MAX_FINDING_SUMMARY_LENGTH),
         })
