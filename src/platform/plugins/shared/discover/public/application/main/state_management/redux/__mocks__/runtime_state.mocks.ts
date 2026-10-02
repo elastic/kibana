@@ -15,9 +15,11 @@ import type { ScopedProfilesManager } from '../../../../../context_awareness';
 import type { DiscoverDataStateContainer } from '../../discover_data_state_container';
 import {
   createRuntimeStateManager,
+  type DiscoverHistogramOverlaySelection,
   type ReactiveTabRuntimeState,
   type RuntimeStateManager,
 } from '../runtime_state';
+import type { UnifiedHistogramOverlaySeriesResult } from '@kbn/unified-histogram';
 import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
 
 export function getTabRuntimeStateMock(
@@ -36,6 +38,12 @@ export function getTabRuntimeStateMock(
     ),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
     unsubscribeFn$: new BehaviorSubject<(() => void) | undefined>(undefined),
+    histogramOverlaySelection$: new BehaviorSubject<DiscoverHistogramOverlaySelection | undefined>(
+      undefined
+    ),
+    histogramOverlayResult$: new BehaviorSubject<UnifiedHistogramOverlaySeriesResult | undefined>(
+      undefined
+    ),
     ...attrs,
   };
 }

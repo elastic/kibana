@@ -109,4 +109,75 @@ describe('toExpression', () => {
       dataType: 'date',
     });
   });
+
+  it('stacks a histogram series before mapping columns on the live query path', () => {
+    const expression = toExpression(
+      {
+        ...baseState,
+        layers: {
+          a: {
+            ...baseState.layers.a,
+            histogramOverlay: {
+              label: 'pattern',
+              values: [1],
+              from: '2020-01-01T00:00:00.000Z',
+              to: '2020-01-01T01:00:00.000Z',
+              isSampled: false,
+              timeColumn: 'timestamp',
+              totalColumn: 'results',
+              overlayColumn: 'overlay',
+              remainderColumn: 'remainder',
+            },
+          },
+        },
+      },
+      'a'
+    );
+    const stackIndex = expression?.chain.findIndex(
+      (fn) => fn.function === 'lens_stack_histogram_series'
+    );
+    const mapIndex = expression?.chain.findIndex((fn) => fn.function === 'lens_map_to_columns');
+
+    expect(stackIndex).toBeGreaterThanOrEqual(0);
+    expect(mapIndex).toBeGreaterThan(stackIndex ?? -1);
+  });
+
+  it('omits the stack function when the layer has no overlay', () => {
+    const expression = toExpression(baseState, 'a');
+
+    expect(expression?.chain.some((fn) => fn.function === 'lens_stack_histogram_series')).toBe(
+      false
+    );
+  });
+
+  it('omits the stack function when the layer uses a static table', () => {
+    const expression = toExpression(
+      {
+        ...baseState,
+        layers: {
+          a: {
+            ...baseState.layers.a,
+            table: { type: 'datatable', columns: [], rows: [] },
+            histogramOverlay: {
+              label: 'pattern',
+              values: [1],
+              from: '2020-01-01T00:00:00.000Z',
+              to: '2020-01-01T01:00:00.000Z',
+              isSampled: false,
+              timeColumn: 'timestamp',
+              totalColumn: 'results',
+              overlayColumn: 'overlay',
+              remainderColumn: 'remainder',
+            },
+          },
+        },
+      },
+      'a'
+    );
+
+    expect(expression?.chain[0].function).toBe('var');
+    expect(expression?.chain.some((fn) => fn.function === 'lens_stack_histogram_series')).toBe(
+      false
+    );
+  });
 });

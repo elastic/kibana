@@ -36,6 +36,7 @@ import {
   hasOnlySourceCommand,
   hasTimeseriesInfoCommand,
   getSparklineColumns,
+  getCountSparkline,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -1365,6 +1366,62 @@ describe('esql query helpers', () => {
           VariableNamePrefix.VALUE
         )
       ).toEqual(['os']);
+    });
+  });
+
+  describe('getCountSparkline', () => {
+    const countSparkline =
+      'FROM logs | STATS Sparkline = SPARKLINE(COUNT(*), @timestamp, 40, ?_tstart, ?_tend) BY Pattern = CATEGORIZE(message)';
+
+    it('returns one count sparkline', () => {
+      expect(getCountSparkline(countSparkline)).toEqual({
+        column: 'Sparkline',
+        timeField: '@timestamp',
+        from: { kind: 'param', value: '_tstart' },
+        to: { kind: 'param', value: '_tend' },
+        isSampled: false,
+      });
+    });
+
+    it('returns a literal sample probability', () => {
+      expect(
+        getCountSparkline(
+          'FROM logs | SAMPLE 0.25 | STATS Sparkline = SPARKLINE(COUNT(*), @timestamp, 40, ?_tstart, ?_tend) BY Pattern = CATEGORIZE(message)'
+        )
+      ).toMatchObject({ isSampled: true, sampleProbability: 0.25 });
+    });
+
+    it('drops sample scaling after an earlier stats aggregation', () => {
+      const sparkline = getCountSparkline(
+        'FROM logs | SAMPLE 0.1 | STATS count = COUNT(*) | STATS Sparkline = SPARKLINE(COUNT(*), @timestamp, 40, ?_tstart, ?_tend) BY Pattern = CATEGORIZE(message)'
+      );
+
+      expect(sparkline?.isSampled).toBe(true);
+      expect(sparkline?.sampleProbability).toBeUndefined();
+    });
+
+    it('keeps sampling through inline stats', () => {
+      expect(
+        getCountSparkline(
+          'FROM logs | SAMPLE 0.1 | INLINE STATS avg_bytes = AVG(bytes) | STATS Sparkline = SPARKLINE(COUNT(*), @timestamp, 40, ?_tstart, ?_tend) BY Pattern = CATEGORIZE(message)'
+        )
+      ).toMatchObject({ isSampled: true, sampleProbability: 0.1 });
+    });
+
+    it('rejects a non-positive bucket target', () => {
+      expect(
+        getCountSparkline(
+          'FROM logs | STATS Sparkline = SPARKLINE(COUNT(*), @timestamp, 0, ?_tstart, ?_tend)'
+        )
+      ).toBeUndefined();
+    });
+
+    it('returns no match when more than one count sparkline is present', () => {
+      expect(
+        getCountSparkline(
+          'FROM logs | STATS sparkline = SPARKLINE(COUNT(*), timestamp, 50, ?_tstart, ?_tend), SPARKLINE(COUNT(*), timestamp, 50, ?_tstart, ?_tend)'
+        )
+      ).toBeUndefined();
     });
   });
 });

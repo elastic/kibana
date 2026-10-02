@@ -34,6 +34,8 @@ import {
   useInternalStateSelector,
   useInternalStateDispatch,
   useRuntimeState,
+  publishHistogramOverlayResult,
+  useCurrentTabRuntimeState,
   useCurrentTabSelector,
   useCurrentTabAction,
   useRuntimeStateManager,
@@ -183,6 +185,14 @@ const ChartsWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) => {
 
 const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) => {
   const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState();
+  const runtimeStateManager = useRuntimeStateManager();
+  const overlaySeries = useCurrentTabRuntimeState((tab) => tab.histogramOverlaySelection$);
+  const onOverlaySeriesResult = useCallback(
+    (result: Parameters<typeof publishHistogramOverlayResult>[2]) => {
+      publishHistogramOverlayResult(runtimeStateManager, currentTabId, result);
+    },
+    [currentTabId, runtimeStateManager]
+  );
 
   const { setUnifiedHistogramApi } = unifiedHistogramProps;
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
@@ -205,6 +215,8 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
     <UnifiedHistogramChart
       {...unifiedHistogram.chartProps}
       renderToggleActions={renderToggleActions}
+      overlaySeries={overlaySeries}
+      onOverlaySeriesResult={onOverlaySeriesResult}
     />
   );
 };

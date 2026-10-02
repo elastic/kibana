@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './chart';
-export type {
-  UnifiedHistogramOverlaySeries,
-  UnifiedHistogramOverlaySeriesResult,
-} from './histogram_overlay';
-export { checkChartAvailability } from './utils/check_chart_availability';
-export { ChartSectionTemplate, type ChartSectionTemplateProps } from './chart_section_template';
+export {
+  buildHistogramOverlaySeries,
+  readSparklineValues,
+  resolveHistogramOverlayPublication,
+} from './histogram_overlay_series';
+export {
+  getPatternComparisonMessageState,
+  PatternComparisonMessage,
+  type PatternComparisonMessageState,
+} from './pattern_comparison_message';
+export {
+  useRegularGridPatternComparison,
+  type RegularGridPatternComparison,
+} from './use_regular_grid_pattern_comparison';

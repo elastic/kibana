@@ -11,7 +11,11 @@ import React, { type PropsWithChildren, createContext, useContext, useMemo } fro
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
-import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
+import type {
+  UnifiedHistogramOverlaySeries,
+  UnifiedHistogramOverlaySeriesResult,
+  UnifiedHistogramPartialLayoutProps,
+} from '@kbn/unified-histogram';
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { ConnectedCustomizationService } from '../../../../customizations';
@@ -39,6 +43,11 @@ export interface UnifiedHistogramConfig {
   layoutPropsMap: Record<string, UnifiedHistogramPartialLayoutProps | undefined>;
 }
 
+/** Pattern series plus the Discover row that produced it. */
+export interface DiscoverHistogramOverlaySelection extends UnifiedHistogramOverlaySeries {
+  nodeId: string;
+}
+
 interface TabRuntimeState {
   dataStateContainer?: DiscoverDataStateContainer;
   customizationService?: ConnectedCustomizationService;
@@ -48,6 +57,8 @@ interface TabRuntimeState {
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
   currentDataView: DataView;
   unsubscribeFn: (() => void) | undefined;
+  histogramOverlaySelection: DiscoverHistogramOverlaySelection;
+  histogramOverlayResult: UnifiedHistogramOverlaySeriesResult;
 }
 
 type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
@@ -56,7 +67,10 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
   >;
 };
 
-export type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataView'>;
+export type ReactiveTabRuntimeState = ReactiveRuntimeState<
+  TabRuntimeState,
+  'currentDataView' | 'histogramOverlaySelection' | 'histogramOverlayResult'
+>;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
   tabs: { byId: Record<string, ReactiveTabRuntimeState> };
@@ -117,7 +131,88 @@ export const createTabRuntimeState = ({
     cascadedDocumentsFetcher$: new BehaviorSubject(cascadedDocumentsFetcher),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
+    histogramOverlaySelection$: new BehaviorSubject<DiscoverHistogramOverlaySelection | undefined>(
+      undefined
+    ),
+    histogramOverlayResult$: new BehaviorSubject<UnifiedHistogramOverlaySeriesResult | undefined>(
+      undefined
+    ),
   };
+};
+
+const sameHistogramOverlaySelection = (
+  current: DiscoverHistogramOverlaySelection | undefined,
+  next: DiscoverHistogramOverlaySelection | undefined
+): boolean => {
+  if (current === next) {
+    return true;
+  }
+
+  if (!current || !next) {
+    return false;
+  }
+
+  return (
+    current.nodeId === next.nodeId &&
+    current.key === next.key &&
+    current.label === next.label &&
+    current.timeField === next.timeField &&
+    current.from === next.from &&
+    current.to === next.to &&
+    current.sourceQuery === next.sourceQuery &&
+    current.sourceTimeRange.from === next.sourceTimeRange.from &&
+    current.sourceTimeRange.to === next.sourceTimeRange.to &&
+    current.isSampled === next.isSampled &&
+    current.sampleProbability === next.sampleProbability &&
+    current.values.length === next.values.length &&
+    current.values.every((value, index) => value === next.values[index])
+  );
+};
+
+/** Publishes the selected pattern series. No-ops when the tab runtime is already gone. */
+export const publishHistogramOverlaySelection = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string,
+  selection: DiscoverHistogramOverlaySelection | undefined
+): void => {
+  const tabRuntime = runtimeStateManager.tabs.byId[tabId];
+
+  if (!tabRuntime) {
+    return;
+  }
+
+  if (sameHistogramOverlaySelection(tabRuntime.histogramOverlaySelection$.getValue(), selection)) {
+    return;
+  }
+
+  tabRuntime.histogramOverlaySelection$.next(selection);
+  tabRuntime.histogramOverlayResult$.next(undefined);
+};
+
+/** Records whether the active comparison was applied and if it is approximate. Ignores a stale key. */
+export const publishHistogramOverlayResult = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string,
+  result: UnifiedHistogramOverlaySeriesResult
+): void => {
+  const tabRuntime = runtimeStateManager.tabs.byId[tabId];
+  const selection = tabRuntime?.histogramOverlaySelection$.getValue();
+
+  if (!tabRuntime || !selection || selection.key !== result.key) {
+    return;
+  }
+
+  const current = tabRuntime.histogramOverlayResult$.getValue();
+
+  if (
+    current?.key === result.key &&
+    current.applied === result.applied &&
+    current.approximate === result.approximate
+  ) {
+    return;
+  }
+
+  tabRuntime.histogramOverlayResult$.next(result);
 };
 
 export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>

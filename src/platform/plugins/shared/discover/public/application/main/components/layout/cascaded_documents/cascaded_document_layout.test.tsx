@@ -19,6 +19,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import type { DataCascade, DataCascadeImplRef } from '@kbn/shared-ux-document-data-cascade';
 import type { ESQLDataGroupNode } from './blocks/types';
+import { FetchStatus } from '../../../../types';
 import { DiscoverToolkitTestProvider } from '../../../../../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
@@ -63,6 +64,7 @@ jest.mock('@kbn/shared-ux-document-data-cascade', () => {
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLStatsQueryMeta: jest.fn(),
+  getCountSparkline: jest.fn(),
 }));
 
 jest.mock('@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils', () => ({
@@ -84,6 +86,7 @@ jest.mock('@kbn/esql-language', () => {
 });
 
 const mockGetESQLStatsQueryMeta = jest.requireMock('@kbn/esql-utils').getESQLStatsQueryMeta;
+const mockGetCountSparkline = jest.requireMock('@kbn/esql-utils').getCountSparkline as jest.Mock;
 
 const defaultQueryMeta: ESQLStatsQueryMeta = {
   groupByFields: [{ field: 'category', type: 'column' }],
@@ -131,6 +134,8 @@ const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
     cascadedColumnsMeta: {},
     esqlQuery,
     esqlVariables: undefined,
+    documentsFetchStatus: FetchStatus.PARTIAL,
+    documentsQuery: esqlQuery.esql,
     timeRange: undefined,
     esqlApproximation: false,
     renderViewModeToggle: undefined,
@@ -191,7 +196,9 @@ describe('CascadedDocumentsLayout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDataCascadeProps.length = 0;
+    mockGetUISnapshotStore.mockReturnValue(null);
     mockGetESQLStatsQueryMeta.mockReturnValue(defaultQueryMeta);
+    mockGetCountSparkline.mockReturnValue(undefined);
   });
 
   describe('when persistedCascadeUiState does not exist (getDataCascadeUiState returns undefined)', () => {
@@ -266,5 +273,43 @@ describe('CascadedDocumentsLayout', () => {
         })
       );
     });
+  });
+
+  it('reuses the parsed sparkline across snapshot notifications', async () => {
+    const listeners = new Set<() => void>();
+    mockGetUISnapshotStore.mockReturnValue({
+      getSnapshot: () => ({
+        expanded: { row: true },
+        rowSelection: {},
+        connectedChildren: {},
+      }),
+      subscribe: (listener: () => void) => {
+        listeners.add(listener);
+        return () => {
+          listeners.delete(listener);
+        };
+      },
+    });
+    mockGetCountSparkline.mockReturnValue({
+      column: 'Sparkline',
+      timeField: 'timestamp',
+      from: { kind: 'date', value: '2020-01-01T00:00:00.000Z' },
+      to: { kind: 'date', value: '2020-01-02T00:00:00.000Z' },
+      isSampled: false,
+    });
+    const { Wrapper } = await createWrapper();
+
+    render(
+      <Wrapper>
+        <CascadedDocumentsLayout {...defaultLayoutProps} />
+      </Wrapper>
+    );
+
+    const parsesAfterRender = mockGetCountSparkline.mock.calls.length;
+    expect(parsesAfterRender).toBeGreaterThan(0);
+    listeners.forEach((listener) => listener());
+    listeners.forEach((listener) => listener());
+
+    expect(mockGetCountSparkline).toHaveBeenCalledTimes(parsesAfterRender);
   });
 });

@@ -137,6 +137,23 @@ export interface TextBasedField {
   field: string;
 }
 
+/**
+ * Runtime-only series aligned onto a live date histogram.
+ * Persisted attributes must not keep this value.
+ */
+export interface TextBasedHistogramOverlay {
+  label: string;
+  values: number[];
+  from: string;
+  to: string;
+  isSampled: boolean;
+  sampleProbability?: number;
+  timeColumn: string;
+  totalColumn: string;
+  overlayColumn: string;
+  remainderColumn: string;
+}
+
 export interface TextBasedLayer {
   index?: string;
   query?: AggregateQuery | undefined;
@@ -145,6 +162,7 @@ export interface TextBasedLayer {
   timeField?: string;
   errors?: Error[];
   ignoreGlobalFilters?: boolean;
+  histogramOverlay?: TextBasedHistogramOverlay;
 }
 
 export interface TextBasedPersistedState {

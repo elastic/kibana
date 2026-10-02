@@ -91,6 +91,7 @@ import {
 } from '../../state_management/redux';
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
+import { useRegularGridPatternComparison } from './histogram_overlay';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
 import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
 
@@ -127,6 +128,7 @@ function DiscoverDocumentsComponent({
   const [
     dataSource,
     query,
+    hideChart,
     sort,
     rowHeight,
     headerRowHeight,
@@ -141,6 +143,7 @@ function DiscoverDocumentsComponent({
     return [
       state.dataSource,
       state.query,
+      state.hideChart,
       state.sort,
       state.rowHeight,
       state.headerRowHeight,
@@ -156,6 +159,16 @@ function DiscoverDocumentsComponent({
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
   const expandedDocOwner = useCurrentTabSelector((state) => state.expandedDocOwner);
   const isEsqlMode = useIsEsqlMode();
+  const getChartSectionConfiguration = useProfileAccessor('getChartSectionConfiguration');
+  const defaultHistogramAvailable = useMemo(() => {
+    if (!isEsqlMode) {
+      return false;
+    }
+
+    return !getChartSectionConfiguration(() => ({
+      replaceDefaultChart: false,
+    }))().replaceDefaultChart;
+  }, [getChartSectionConfiguration, isEsqlMode]);
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
   const isWarningCalloutDismissed = useCurrentTabSelector(
@@ -470,21 +483,6 @@ function DiscoverDocumentsComponent({
 
   const approximationApplied = documentState.approximationApplied;
 
-  const renderCustomToolbarWithElements = useMemo(
-    () =>
-      getRenderCustomToolbarWithElements({
-        saveToDashboardButton,
-        leftSide: isDataGridFullScreen ? undefined : renderViewModeToggle(),
-        bottomSection: (
-          <>
-            {callouts}
-            {loadingIndicator}
-          </>
-        ),
-      }),
-    [renderViewModeToggle, callouts, loadingIndicator, isDataGridFullScreen, saveToDashboardButton]
-  );
-
   const [expandedDoc$] = useState(() => new BehaviorSubject(expandedDoc));
   const [expandedDocOwner$] = useState(() => new BehaviorSubject(expandedDocOwner));
 
@@ -529,6 +527,10 @@ function DiscoverDocumentsComponent({
       cascadedColumnsMeta,
       esqlQuery: query,
       esqlVariables,
+      documentsFetchStatus: documentState.fetchStatus,
+      documentsQuery: isOfAggregateQueryType(documentState.query)
+        ? documentState.query.esql
+        : undefined,
       timeRange: requestParams.timeRangeAbsolute,
       esqlApproximation,
       renderViewModeToggle,
@@ -553,6 +555,8 @@ function DiscoverDocumentsComponent({
     cascadedDocumentsFetcher,
     cascadedColumnsMeta,
     dispatch,
+    documentState.fetchStatus,
+    documentState.query,
     esqlVariables,
     expandedDoc$,
     expandedDocOwner$,
@@ -570,6 +574,60 @@ function DiscoverDocumentsComponent({
     setSelectedCascadeGroups,
     renderViewModeToggle,
   ]);
+
+  const cascadeLayoutActive = Boolean(
+    cascadedDocumentsContext && cascadedDocumentsContext.selectedCascadeGroups.length > 0
+  );
+  const documentsQuery = isOfAggregateQueryType(documentState.query)
+    ? documentState.query.esql
+    : undefined;
+  const { message, publisher, rowAdditionalLeadingControls } = useRegularGridPatternComparison({
+    active: !cascadeLayoutActive,
+    rows,
+    query,
+    rowsQuery: documentsQuery,
+    fetchStatus: documentState.fetchStatus,
+    timeRange: requestParams.timeRangeAbsolute,
+    rowsTimeRange: documentState.requestContext?.timeRange,
+    currentEsqlVariables: esqlVariables,
+    rowsEsqlVariables: documentState.requestContext?.esqlVariables,
+    timeFieldName: dataView.timeFieldName,
+    chartHidden: Boolean(hideChart),
+    defaultHistogramAvailable,
+  });
+  const renderCustomToolbarWithElements = useMemo(
+    () =>
+      getRenderCustomToolbarWithElements({
+        saveToDashboardButton,
+        leftSide: isDataGridFullScreen ? undefined : renderViewModeToggle(),
+        centerContent: message,
+        bottomSection: (
+          <>
+            {callouts}
+            {loadingIndicator}
+          </>
+        ),
+      }),
+    [
+      callouts,
+      message,
+      isDataGridFullScreen,
+      loadingIndicator,
+      renderViewModeToggle,
+      saveToDashboardButton,
+    ]
+  );
+  const externalAdditionalControls = useMemo(() => {
+    if (!approximationApplied) {
+      return undefined;
+    }
+
+    return (
+      <span style={{ marginRight: 4 }}>
+        <ApproximationBadge isApproximationApplied data-test-subj="discoverApproximationApplied" />
+      </span>
+    );
+  }, [approximationApplied]);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -597,6 +655,7 @@ function DiscoverDocumentsComponent({
       </EuiScreenReaderOnly>
       <div className="unifiedDataTable" css={styles.dataTable}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
+          {publisher}
           <DiscoverGrid
             ariaLabelledBy="documentsAriaLabel"
             cascadedDocumentsContext={cascadedDocumentsContext}
@@ -639,16 +698,8 @@ function DiscoverDocumentsComponent({
             configRowHeight={configRowHeight}
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-            externalAdditionalControls={
-              approximationApplied ? (
-                <span style={{ marginRight: 4 }}>
-                  <ApproximationBadge
-                    isApproximationApplied
-                    data-test-subj="discoverApproximationApplied"
-                  />
-                </span>
-              ) : undefined
-            }
+            externalAdditionalControls={externalAdditionalControls}
+            rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}

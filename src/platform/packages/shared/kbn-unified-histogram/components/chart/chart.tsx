@@ -10,7 +10,7 @@
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { EuiDelayRender, EuiProgress, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ApproximationBadge } from '@kbn/esql-browser';
 import type {
@@ -26,6 +26,10 @@ import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { useStableCallback } from '@kbn/react-hooks';
+import {
+  TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META,
+  TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META,
+} from '@kbn/lens-common';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramBucketInterval,
@@ -50,6 +54,11 @@ import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table'
 import { useLensProps } from './hooks/use_lens_props';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { ChartSectionTemplate } from './chart_section_template';
+import {
+  useHistogramOverlayAttributes,
+  type UnifiedHistogramOverlaySeries,
+  type UnifiedHistogramOverlaySeriesResult,
+} from './histogram_overlay';
 
 export interface UnifiedHistogramChartProps {
   isChartAvailable: boolean;
@@ -77,6 +86,12 @@ export interface UnifiedHistogramChartProps {
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   withLensActions?: boolean;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
+  /**
+   * Optional time-aligned subset drawn as a stacked series on the live histogram.
+   * Omitted, the chart is unchanged.
+   */
+  overlaySeries?: UnifiedHistogramOverlaySeries;
+  onOverlaySeriesResult?: (result: UnifiedHistogramOverlaySeriesResult) => void;
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -101,9 +116,12 @@ export function UnifiedHistogramChart({
   onTotalHitsChange,
   onChartLoad,
   onApiAvailable: consumerOnApiAvailable,
+  overlaySeries,
+  onOverlaySeriesResult,
   withLensActions = true,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
+  const { euiTheme } = useEuiTheme();
   const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
   const visContext = lensVisServiceState.visContext;
   const currentSuggestion = lensVisServiceCurrentSuggestionContext?.suggestion;
@@ -162,6 +180,18 @@ export function UnifiedHistogramChart({
     isPlainRecord &&
       lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
   );
+  const overlayAttributes = useHistogramOverlayAttributes({
+    attributes: visContext?.attributes,
+    suggestionType: visContext?.suggestionType,
+    fetchParams,
+    overlaySeries,
+    remainderColor: euiTheme.colors.vis.euiColorVis0,
+    overlayColor: euiTheme.colors.vis.euiColorVis8,
+    remainderLabel: i18n.translate('unifiedHistogram.overlaySeries.remainderLabel', {
+      defaultMessage: 'Other documents',
+    }),
+  });
+  const overlayApplied = overlayAttributes !== undefined;
 
   useTotalHits({
     services,
@@ -187,6 +217,13 @@ export function UnifiedHistogramChart({
       const response = json?.rawResponse;
 
       if (requestFailed) {
+        if (overlaySeries) {
+          onOverlaySeriesResult?.({
+            key: overlaySeries.key,
+            applied: false,
+            approximate: false,
+          });
+        }
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
         onChartLoad?.({ adapters: adapters ?? {} });
         return;
@@ -194,6 +231,21 @@ export function UnifiedHistogramChart({
 
       const adapterTables = adapters?.tables?.tables;
       const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
+
+      if (overlaySeries && !isLoading) {
+        const tables = Object.values(adapterTables ?? {});
+        const applied =
+          overlayApplied &&
+          tables.some((table) => table.meta?.[TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META] === true);
+        const approximate = tables.some(
+          (table) => table.meta?.[TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META] === true
+        );
+        onOverlaySeriesResult?.({
+          key: overlaySeries.key,
+          applied,
+          approximate: applied && approximate,
+        });
+      }
 
       if (response?._shards?.failed || response?.timed_out) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
@@ -224,6 +276,13 @@ export function UnifiedHistogramChart({
     fetch$,
     onLoad,
   });
+  const overlayLensProps = useMemo(
+    () =>
+      lensPropsContext && overlayAttributes
+        ? { ...lensPropsContext.lensProps, attributes: overlayAttributes }
+        : undefined,
+    [lensPropsContext, overlayAttributes]
+  );
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 
@@ -397,6 +456,7 @@ export function UnifiedHistogramChart({
                   abortController={abortController}
                   {...histogramProps}
                   {...lensPropsContext}
+                  {...(overlayLensProps ? { lensProps: overlayLensProps } : undefined)}
                   onApiAvailable={onApiAvailable}
                 />
               )}

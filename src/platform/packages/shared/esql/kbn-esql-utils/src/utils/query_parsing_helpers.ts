@@ -12,6 +12,7 @@ import {
   Parser,
   isFunctionExpression,
   isColumn,
+  isLiteral,
   WrappingPrettyPrinter,
   BasicPrettyPrinter,
   isStringLiteral,
@@ -609,6 +610,222 @@ export const getSparklineColumns = (esql: string): string[] => {
 
   // If there is a rename command, we need to check if the column is renamed
   return replaceColumnNamesIfRenamed(root, columns);
+};
+
+export interface CountSparklineBound {
+  kind: 'param' | 'date';
+  value: string;
+}
+
+export interface CountSparkline {
+  column: string;
+  timeField: string;
+  from: CountSparklineBound;
+  to: CountSparklineBound;
+  isSampled: boolean;
+  sampleProbability?: number;
+}
+
+const isNumericLiteral = (
+  item: ESQLAstItem
+): item is ESQLAstItem & { type: 'literal'; value: number } =>
+  !Array.isArray(item) &&
+  isLiteral(item) &&
+  typeof item.value === 'number' &&
+  Number.isFinite(item.value);
+
+const flattenAstItems = (items: ESQLAstItem[]): ESQLSingleAstItem[] => {
+  const flattened: ESQLSingleAstItem[] = [];
+
+  for (const item of items) {
+    if (Array.isArray(item)) {
+      flattened.push(...flattenAstItems(item));
+    } else {
+      flattened.push(item);
+    }
+  }
+
+  return flattened;
+};
+
+const readSampleProbability = (args: ESQLAstItem[]): number | undefined => {
+  const [probability] = flattenAstItems(args);
+
+  if (!probability || !isNumericLiteral(probability)) {
+    return undefined;
+  }
+
+  return probability.value > 0 && probability.value <= 1 ? probability.value : undefined;
+};
+
+interface SampleState {
+  isSampled: boolean;
+  sampleProbability?: number;
+}
+
+const combineSample = (state: SampleState, args: ESQLAstItem[]): SampleState => {
+  const probability = readSampleProbability(args);
+
+  if (probability === undefined || (state.isSampled && state.sampleProbability === undefined)) {
+    return { isSampled: true };
+  }
+
+  return {
+    isSampled: true,
+    sampleProbability:
+      state.sampleProbability === undefined ? probability : state.sampleProbability * probability,
+  };
+};
+
+const readSparklineBound = (item: ESQLAstItem | undefined): CountSparklineBound | undefined => {
+  if (!item || Array.isArray(item) || !isLiteral(item)) {
+    return undefined;
+  }
+
+  if (
+    item.literalType === 'param' &&
+    item.paramType === 'named' &&
+    typeof item.value === 'string'
+  ) {
+    return { kind: 'param', value: item.value };
+  }
+
+  if (item.literalType === 'keyword' && item.valueUnquoted) {
+    return { kind: 'date', value: item.valueUnquoted };
+  }
+
+  return undefined;
+};
+
+const isCountStar = (item: ESQLAstItem | undefined): boolean => {
+  if (!item || Array.isArray(item) || !isFunctionExpression(item) || item.name !== 'count') {
+    return false;
+  }
+
+  return item.args.length === 1 && isColumn(item.args[0]) && item.args[0].name === '*';
+};
+
+const readCountSparklineCall = (
+  sparkline: ESQLFunction,
+  column: string
+): Omit<CountSparkline, 'isSampled' | 'sampleProbability'> | undefined => {
+  const [, timeField, bucketCount, from, to] = sparkline.args;
+
+  if (!isCountStar(sparkline.args[0]) || !isColumn(timeField) || !isNumericLiteral(bucketCount)) {
+    return undefined;
+  }
+
+  if (!Number.isInteger(bucketCount.value) || bucketCount.value <= 0) {
+    return undefined;
+  }
+
+  const fromBound = readSparklineBound(from);
+  const toBound = readSparklineBound(to);
+
+  if (!fromBound || !toBound) {
+    return undefined;
+  }
+
+  return {
+    column,
+    timeField: timeField.name,
+    from: fromBound,
+    to: toBound,
+  };
+};
+
+const readCountSparklineArg = (
+  arg: ESQLAstItem,
+  esql: string
+): Omit<CountSparkline, 'isSampled' | 'sampleProbability'> | undefined => {
+  if (Array.isArray(arg) || !isFunctionExpression(arg)) {
+    return undefined;
+  }
+
+  if (arg.name === 'where') {
+    return arg.args[0] ? readCountSparklineArg(arg.args[0], esql) : undefined;
+  }
+
+  if (arg.name === 'sparkline') {
+    return readCountSparklineCall(arg, esql.substring(arg.location.min, arg.location.max + 1));
+  }
+
+  if (arg.name !== '=' || !isColumn(arg.args[0])) {
+    return undefined;
+  }
+
+  const sparkline = Walker.match(arg, { type: 'function', name: 'sparkline' });
+
+  if (!sparkline || !isFunctionExpression(sparkline)) {
+    return undefined;
+  }
+
+  return readCountSparklineCall(sparkline, arg.args[0].name);
+};
+
+/**
+ * Returns the only `SPARKLINE(COUNT(*), timeField, buckets, from, to)` in the query.
+ */
+export const getCountSparkline = (esql: string): CountSparkline | undefined => {
+  let root: ESQLAstQueryExpression;
+
+  try {
+    root = Parser.parse(esql).root;
+  } catch {
+    return undefined;
+  }
+
+  let sampleState: SampleState = { isSampled: false };
+  let aggregated = false;
+  const matches: CountSparkline[] = [];
+
+  for (const command of root.commands) {
+    if (command.name === 'sample') {
+      sampleState = aggregated ? { isSampled: true } : combineSample(sampleState, command.args);
+      continue;
+    }
+
+    if (command.name !== 'stats' && command.name !== 'inline stats') {
+      continue;
+    }
+
+    for (const arg of command.args) {
+      if (!Array.isArray(arg) && (arg as ESQLCommandOption).type === 'option') {
+        continue;
+      }
+
+      const match = readCountSparklineArg(arg, esql);
+
+      if (match) {
+        matches.push({
+          ...match,
+          isSampled: sampleState.isSampled,
+          ...(sampleState.sampleProbability !== undefined
+            ? { sampleProbability: sampleState.sampleProbability }
+            : {}),
+        });
+      }
+    }
+
+    if (command.name === 'stats') {
+      aggregated = true;
+      if (sampleState.isSampled) {
+        sampleState = { isSampled: true };
+      }
+    }
+  }
+
+  if (matches.length !== 1) {
+    return undefined;
+  }
+
+  const [match] = matches;
+  const [column] = replaceColumnNamesIfRenamed(root, [match.column]);
+
+  return {
+    ...match,
+    column,
+  };
 };
 
 /**

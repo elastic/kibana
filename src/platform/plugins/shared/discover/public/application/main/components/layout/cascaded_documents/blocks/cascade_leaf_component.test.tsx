@@ -20,6 +20,7 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { createChildVirtualizerController } from '@kbn/shared-ux-document-data-cascade/src/lib/core/virtualizer/child_virtualizer_controller';
+import { FetchStatus } from '../../../../../types';
 import { createDiscoverServicesMock } from '../../../../../../__mocks__/services';
 import { DiscoverTestProvider } from '../../../../../../__mocks__/test_provider';
 import { dataViewWithTimefieldMock } from '../../../../../../__mocks__/data_view_with_timefield';
@@ -145,6 +146,8 @@ const createContextValue = ({
     cascadedColumnsMeta,
     esqlQuery,
     esqlVariables: undefined,
+    documentsFetchStatus: FetchStatus.PARTIAL,
+    documentsQuery: esqlQuery.esql,
     timeRange: undefined,
     esqlApproximation: false,
     renderViewModeToggle: undefined,

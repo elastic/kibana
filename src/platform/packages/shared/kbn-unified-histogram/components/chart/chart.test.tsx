@@ -10,9 +10,16 @@
 import type { Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
+import {
+  TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META,
+  TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META,
+} from '@kbn/lens-common';
 import type { UnifiedHistogramFetchStatus } from '../../types';
-import React from 'react';
+import type { UnifiedHistogramOverlaySeries } from './histogram_overlay';
+import React, { useState } from 'react';
 import { act, screen } from '@testing-library/react';
+import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { RequestStatus } from '@kbn/inspector-plugin/public';
 import { allSuggestionsMock } from '../../__mocks__/suggestions';
 import { checkChartAvailability } from './utils/check_chart_availability';
 import { dataViewMock } from '../../__mocks__/data_view';
@@ -45,6 +52,9 @@ interface MountComponentProps {
   isChartLoading?: boolean;
   isTransformationalESQL?: boolean;
   mockEditVisualization?: jest.Mock | undefined;
+  overlaySeries?: UnifiedHistogramOverlaySeries;
+  onOverlaySeriesResult?: jest.Mock;
+  rerenderParent?: boolean;
   withLensActions?: boolean;
 }
 
@@ -62,6 +72,9 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     hasDashboardPermissions,
     isChartLoading,
     isTransformationalESQL,
+    overlaySeries,
+    onOverlaySeriesResult,
+    rerenderParent,
     withLensActions,
   } = mountProps;
 
@@ -146,9 +159,24 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     fetchParams,
     dataLoading$: undefined,
     lensAdapters: undefined,
+    overlaySeries,
+    onOverlaySeriesResult,
   };
 
-  renderWithI18n(<UnifiedHistogramChart {...props} />);
+  const ChartParent = () => {
+    const [, setNonce] = useState(0);
+
+    return (
+      <>
+        <button type="button" onClick={() => setNonce((nonce) => nonce + 1)}>
+          Rerender chart
+        </button>
+        <UnifiedHistogramChart {...props} />
+      </>
+    );
+  };
+
+  renderWithI18n(rerenderParent ? <ChartParent /> : <UnifiedHistogramChart {...props} />);
 
   act(() => {
     props.fetch$?.next({
@@ -417,5 +445,122 @@ describe('Chart', () => {
       | undefined;
     expect(firstCall).toBeDefined();
     expect(firstCall![0].initialInput.attributes.title).toBe('');
+  });
+
+  it('keeps the overlay result through loading and reports completed or failed loads', async () => {
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent as jest.Mock;
+    embeddable.mockClear();
+    const onOverlaySeriesResult = jest.fn();
+    const sourceQuery = 'from logs | limit 10';
+    const sourceTimeRange = {
+      from: '2025-10-07T22:00:00.000Z',
+      to: '2025-11-07T15:56:36.264Z',
+    };
+    const overlaySeries: UnifiedHistogramOverlaySeries = {
+      key: 'pattern',
+      label: 'Selected pattern',
+      values: [1],
+      timeField: 'timestamp',
+      from: sourceTimeRange.from,
+      to: sourceTimeRange.to,
+      sourceQuery,
+      sourceTimeRange,
+      isSampled: true,
+    };
+
+    await mountComponent({
+      allSuggestions: [],
+      isPlainRecord: true,
+      noBreakdown: true,
+      overlaySeries,
+      onOverlaySeriesResult,
+    });
+
+    const lensProps = embeddable.mock.calls.at(-1)?.[0] as
+      | {
+          attributes?: {
+            state?: { visualization?: { layers?: Array<{ accessors?: string[] }> } };
+          };
+          onLoad?: (
+            isLoading: boolean,
+            adapters: ReturnType<typeof createDefaultInspectorAdapters> | undefined
+          ) => void;
+        }
+      | undefined;
+    const onLoad = lensProps?.onLoad;
+
+    expect(lensProps?.attributes?.state?.visualization?.layers?.[0].accessors).toEqual([
+      'remainder',
+      'overlay',
+    ]);
+    expect(onLoad).toBeDefined();
+
+    onLoad?.(true, undefined);
+    expect(onOverlaySeriesResult).not.toHaveBeenCalled();
+
+    const adapters = createDefaultInspectorAdapters();
+    adapters.tables.tables.layer = {
+      type: 'datatable',
+      columns: [],
+      rows: [],
+      meta: {
+        [TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META]: true,
+        [TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META]: true,
+      },
+    };
+    onLoad?.(false, adapters);
+
+    expect(onOverlaySeriesResult).toHaveBeenLastCalledWith({
+      key: 'pattern',
+      applied: true,
+      approximate: true,
+    });
+
+    const failedAdapters = createDefaultInspectorAdapters();
+    jest
+      .spyOn(failedAdapters.requests, 'getRequests')
+      .mockReturnValue([{ status: RequestStatus.ERROR } as never]);
+    onLoad?.(true, failedAdapters);
+
+    expect(onOverlaySeriesResult).toHaveBeenLastCalledWith({
+      key: 'pattern',
+      applied: false,
+      approximate: false,
+    });
+  });
+
+  it('keeps the Lens embeddable mounted when the parent rerenders an active overlay', async () => {
+    const user = userEvent.setup();
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent as jest.Mock;
+    embeddable.mockClear();
+    const sourceTimeRange = {
+      from: '2025-10-07T22:00:00.000Z',
+      to: '2025-11-07T15:56:36.264Z',
+    };
+
+    await mountComponent({
+      allSuggestions: [],
+      isPlainRecord: true,
+      noBreakdown: true,
+      rerenderParent: true,
+      overlaySeries: {
+        key: 'pattern',
+        label: 'Selected pattern',
+        values: [1],
+        timeField: 'timestamp',
+        from: sourceTimeRange.from,
+        to: sourceTimeRange.to,
+        sourceQuery: 'from logs | limit 10',
+        sourceTimeRange,
+        isSampled: false,
+      },
+    });
+
+    const callsAfterMount = embeddable.mock.calls.length;
+    expect(callsAfterMount).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole('button', { name: 'Rerender chart' }));
+
+    expect(embeddable).toHaveBeenCalledTimes(callsAfterMount);
   });
 });

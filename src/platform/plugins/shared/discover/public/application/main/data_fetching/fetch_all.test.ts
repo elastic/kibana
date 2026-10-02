@@ -275,6 +275,10 @@ describe('test fetchAll', () => {
         result: documents,
         esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
         query,
+        requestContext: {
+          timeRange: undefined,
+          esqlVariables: [],
+        },
       },
     ]);
   });

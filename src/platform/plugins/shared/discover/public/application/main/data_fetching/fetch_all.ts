@@ -186,6 +186,14 @@ export function fetchAll(
             interceptedWarnings,
             approximationApplied,
             query,
+            ...(isEsqlQuery
+              ? {
+                  requestContext: {
+                    timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+                    esqlVariables: currentTab.esqlVariables,
+                  },
+                }
+              : {}),
           });
 
           checkHitCount(dataSubjects.main$, records.length);
