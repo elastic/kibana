@@ -291,6 +291,49 @@ describe('replaySnapshot', () => {
     expect(nginxCall[0].script).toBeUndefined();
   });
 
+  it('reads the clock once and shares it between the pipeline and inline-script reindexes', async () => {
+    const esClient = createFullMockEsClient();
+    (esClient.snapshot.get as unknown as jest.Mock).mockResolvedValue({
+      snapshots: [
+        {
+          snapshot: 'test-snap',
+          indices: ['logs.otel', 'logs-nginx-default'],
+          start_time: '2024-01-01T00:00:00.000Z',
+          end_time: '2024-01-01T01:00:00.000Z',
+          state: 'SUCCESS',
+        },
+      ],
+    });
+    (esClient.snapshot.restore as unknown as jest.Mock).mockResolvedValue({
+      snapshot: {
+        indices: ['snapshot-loader-temp-logs.otel', 'snapshot-loader-temp-logs-nginx-default'],
+      },
+    });
+    let clock = Date.parse('2024-01-15T13:00:00.000Z');
+    const dateNow = jest.spyOn(Date, 'now').mockImplementation(() => (clock += 1000));
+
+    try {
+      await replaySnapshot({
+        esClient,
+        log,
+        repository: mockRepo,
+        snapshotName: 'test-snap',
+        patterns: ['logs*'],
+        shouldUseInlineScript: (destIndex) => destIndex === 'logs.otel',
+      });
+    } finally {
+      dateNow.mockRestore();
+    }
+
+    const pipelineNow = (esClient.ingest.putPipeline as jest.Mock).mock.calls[0][0].processors[0]
+      .script.params.now_ms;
+    const inlineCall = (esClient.reindex as unknown as jest.Mock).mock.calls.find(
+      ([req]: [{ dest: { index: string } }]) => req.dest.index === 'logs.otel'
+    );
+    expect(typeof pipelineNow).toBe('number');
+    expect(inlineCall[0].script.params.now_ms).toBe(pipelineNow);
+  });
+
   it('uses explicit pipeline when shouldUseInlineScript is not provided', async () => {
     const esClient = createFullMockEsClient();
 
