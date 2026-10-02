@@ -27,12 +27,12 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import type { IAsyncSearchOptions } from '@kbn/data-plugin/common';
 import type { SpaceId } from '@kbn/core-spaces-common';
-import type { AsyncDomainEventBus } from '../lib/events/event_bus';
+import type { EventBus } from '../lib/events/event_bus';
 import type {
   AlertingDomainEvent,
   AlertingPublisherContext,
 } from '../lib/workflow_extensions/events';
-import type { AlertStatusChangedV1Payload } from '../common/workflows/triggers';
+import type { AlertStatusChangedV1Payload } from '../../common/workflows/triggers';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { Alert } from '../alert';
 import type { AlertsService } from '../alerts_service/alerts_service';
@@ -265,7 +265,7 @@ export interface TaskRunnerContext {
    * Rule executions publish `alert.status.changed` events on this bus;
    * the workflow subscriber attaches in plugin.start and forwards them.
    */
-  alertingEventBus?: AsyncDomainEventBus<AlertingDomainEvent, AlertingPublisherContext>;
+  alertingEventBus?: EventBus<AlertingDomainEvent, AlertingPublisherContext>;
 }
 
 export interface AsyncSearchClient<T extends AsyncSearchParams> {
