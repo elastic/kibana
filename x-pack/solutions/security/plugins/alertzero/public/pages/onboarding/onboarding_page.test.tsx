@@ -67,7 +67,7 @@ const renderPage = ({
     http: { ...coreStart.http, get: httpGet, patch: httpPatch },
     ...(security ? { security } : {}),
   };
-  const history = createMemoryHistory();
+  const history = createMemoryHistory({ initialEntries: ['/onboarding'] });
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
@@ -133,13 +133,13 @@ describe('OnboardingPage', () => {
       await waitFor(() => expect(screen.getByText(/test@example\.com/)).toBeInTheDocument());
     });
 
-    it('calls the API for all workers and navigates to /watches when Enable and continue is clicked', async () => {
+    it('calls the API for all workers and navigates to the main page when Enable and continue is clicked', async () => {
       const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
       const { history } = renderPage({ canWrite: true, httpPatch });
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
 
-      await waitFor(() => expect(history.location.pathname).toBe('/watches'));
+      await waitFor(() => expect(history.location.pathname).toBe('/'));
       expect(httpPatch).toHaveBeenCalledTimes(6);
     });
 
@@ -190,7 +190,7 @@ describe('OnboardingPage', () => {
           'disabled'
         )
       );
-      expect(history.location.pathname).toBe('/');
+      expect(history.location.pathname).toBe('/onboarding');
     });
 
     it('renders the Not now link', () => {
@@ -306,7 +306,7 @@ describe('OnboardingPage', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
 
-      await waitFor(() => expect(history.location.pathname).toBe('/watches'));
+      await waitFor(() => expect(history.location.pathname).toBe('/'));
       // Only the 5 present workers should be PATCHed — not the skill-gated absent one.
       expect(httpPatch).toHaveBeenCalledTimes(5);
       expect(httpPatch).not.toHaveBeenCalledWith(

@@ -351,6 +351,48 @@ describe('ConversationsPage scan failures', () => {
   });
 });
 
+describe('ConversationsPage background work state', () => {
+  it('shows the background work state with no open and no closed proposals', () => {
+    mockProposals({});
+    mockOpenCount(0);
+
+    renderPage('/');
+
+    expect(screen.getByTestId('alertzeroBackgroundWorkState')).toBeInTheDocument();
+    expect(screen.getByText('Workers are running in the background')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Closed/ })).not.toBeInTheDocument();
+  });
+
+  it('keeps the queue sections when proposals are open', () => {
+    mockProposals({ respond: [proposal] });
+    mockOpenCount(1);
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertzeroBackgroundWorkState')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Closed/ })).toBeInTheDocument();
+  });
+
+  it('keeps the queue sections when only closed proposals exist in the window', () => {
+    mockProposals({ closed: [{ ...proposal, id: 'prop-2', decidedAt: '2024-01-02T00:00:00Z' }] });
+    mockOpenCount(0);
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertzeroBackgroundWorkState')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Closed/ })).toBeInTheDocument();
+  });
+
+  it('does not claim background work while the counts are loading', () => {
+    mockProposals({});
+    mockUseProposalChartsSummary.mockReturnValue({ data: undefined, isLoading: true });
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertzeroBackgroundWorkState')).not.toBeInTheDocument();
+  });
+});
+
 describe('ConversationsPage details flyout', () => {
   beforeEach(() => {
     mockProposals({ investigate: [proposal] });
