@@ -136,6 +136,17 @@ describe('OnboardingPage', () => {
       expect(link).toHaveAttribute('href', ONBOARDING_READ_MORE_URL_PLACEHOLDER);
     });
 
+    it('links to Watch settings from the intro', () => {
+      const { history } = renderPage({ canWrite: true });
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingWatchSettingsLink'));
+      expect(history.location.pathname).toBe('/watches');
+    });
+
+    it('recommends keeping all Watches enabled', () => {
+      renderPage({ canWrite: true });
+      expect(screen.getByText(/We recommend keeping all Watches enabled/)).toBeInTheDocument();
+    });
+
     it('shows the watch and trigger badges for each worker', () => {
       renderPage({ canWrite: true });
       expect(

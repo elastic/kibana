@@ -23,10 +23,14 @@ export const ONBOARDING_INTRO_HEADING = i18n.translate('xpack.alertzero.onboardi
   defaultMessage: 'Watches are how AlertZero works for you',
 });
 
-export const ONBOARDING_SUBTITLE = i18n.translate('xpack.alertzero.onboarding.subtitle', {
-  defaultMessage:
-    'A Watch is a small team of Workers on one job. Each Worker runs on its own trigger, opens investigations, and proposes actions for you to approve. Turn on the Workers you want now — every one of them can be tuned later in Watch settings.',
+export const WATCH_SETTINGS = i18n.translate('xpack.alertzero.onboarding.watchSettings', {
+  defaultMessage: 'Watch settings',
 });
+
+export const ONBOARDING_KEEP_ALL_ENABLED_NOTE = i18n.translate(
+  'xpack.alertzero.onboarding.keepAllEnabledNote',
+  { defaultMessage: 'We recommend keeping all Watches enabled.' }
+);
 
 export const ONBOARDING_WORKERS_FOOTNOTE = i18n.translate(
   'xpack.alertzero.onboarding.workersFootnote',
@@ -108,27 +112,45 @@ export const ONBOARDING_READ_ONLY_BODY = i18n.translate('xpack.alertzero.onboard
 const ONBOARDING_WORKER_DESCRIPTIONS: Record<string, string> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.attackDiscovery',
-    { defaultMessage: 'Correlates alerts into candidate attacks and opens investigations' }
+    {
+      defaultMessage:
+        'Finds candidate attacks on its schedule, opens an Investigation for each, and sends true positives to forensics.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.alertTriage',
-    { defaultMessage: 'Investigates each alert; recommends close or escalate' }
+    {
+      defaultMessage:
+        'Classifies each batch of alerts a rule execution generates, and reduces the noise Attack Discovery has to analyze.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.ruleTuning',
-    { defaultMessage: 'Learns from your close decisions; proposes rule tuning' }
+    {
+      defaultMessage:
+        'Diagnoses noisy or under-covering rules and produces a tuning proposal with a backtest.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.endpointAnalysis',
-    { defaultMessage: 'Drafts response actions for your approval' }
+    {
+      defaultMessage:
+        'Runs deeper forensics on the hosts from a promoted attack and proposes response actions.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.continuousThreatHunt',
-    { defaultMessage: 'Scheduled hunts against your data; surfaces leads' }
+    {
+      defaultMessage:
+        'Hunts previously ingested threat reports for matching and related activity, and opens an Investigation for anything it finds.',
+    }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.ruleCoverage',
-    { defaultMessage: 'Finds coverage gaps; drafts, installs or enables rules on approval' }
+    {
+      defaultMessage:
+        'Assesses detection gaps surfaced by Hunt Watch and proposes new or existing rules to close them.',
+    }
   ),
 };
 

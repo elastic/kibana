@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ALERTZERO_FEATURE_ID,
@@ -141,7 +142,22 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText>
-          <p>{i18n.ONBOARDING_SUBTITLE}</p>
+          <p>
+            <FormattedMessage
+              id="xpack.alertzero.onboarding.subtitle"
+              defaultMessage="A Watch is a small team of Workers on one job. Each Worker runs on its own trigger, opens investigations, and proposes actions for you to approve. Turn on the Workers you want now — every one of them can be tuned later in {watchSettingsLink}."
+              values={{
+                watchSettingsLink: (
+                  <EuiLink
+                    onClick={() => history.push('/watches')}
+                    data-test-subj="alertZeroOnboardingWatchSettingsLink"
+                  >
+                    {i18n.WATCH_SETTINGS}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
           <p>
             <EuiLink
               href={ONBOARDING_READ_MORE_URL_PLACEHOLDER}
@@ -250,7 +266,9 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
                 `}
               >
                 <EuiText size="xs" color="subdued">
-                  <p>{i18n.ONBOARDING_WORKERS_FOOTNOTE}</p>
+                  <p>
+                    {i18n.ONBOARDING_KEEP_ALL_ENABLED_NOTE} {i18n.ONBOARDING_WORKERS_FOOTNOTE}
+                  </p>
                 </EuiText>
               </div>
             </>
