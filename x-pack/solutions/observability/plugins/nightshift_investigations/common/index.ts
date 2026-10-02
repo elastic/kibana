@@ -279,6 +279,13 @@ export {
 } from './memory';
 
 export {
+  canonicalizeTag,
+  canonicalizeTags,
+  MAX_MEMORY_TAG_LENGTH,
+  MAX_MEMORY_TAGS_PER_PAGE,
+} from './memory_tags';
+
+export {
   INVESTIGATION_STARTED_TRIGGER_ID,
   INVESTIGATION_COMPLETED_TRIGGER_ID,
   INVESTIGATION_FAILED_TRIGGER_ID,
