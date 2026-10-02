@@ -12,7 +12,10 @@ import { installEntityStoreSuiteWithKbnClient } from '../../../common/fixtures/h
 globalSetupHook(
   'Install Entity Store once for logs extraction API suite',
   async ({ kbnClient }) => {
-    await installEntityStoreSuiteWithKbnClient({ kbnClient });
+    await installEntityStoreSuiteWithKbnClient({
+      kbnClient,
+      suiteId: 'logs_extraction',
+    });
 
     const startResponse = await kbnClient.request({
       method: 'PUT',
