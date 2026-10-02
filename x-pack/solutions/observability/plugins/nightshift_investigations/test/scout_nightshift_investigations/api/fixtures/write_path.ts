@@ -61,6 +61,7 @@ export interface SharedInvestigationSubject {
 export interface SharedInvestigation {
   id: string;
   title: string;
+  title_pending: boolean;
   agent_id: string;
   in_progress: boolean;
   metadata: { status: string };

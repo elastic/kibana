@@ -26,7 +26,10 @@ const inputSchema = z.object({
     .string()
     .min(1)
     .max(MAX_TITLE_LENGTH)
-    .describe('Human-readable headline for the investigation, e.g. the event title or rule name'),
+    .optional()
+    .describe(
+      'Accepted for compatibility; not used as the investigation title, which Agent Builder generates from the first round'
+    ),
   trigger_type: z
     .enum(INVESTIGATION_TRIGGER_TYPES)
     .optional()

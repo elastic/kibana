@@ -54,6 +54,12 @@ The start then runs the `system-nightshift-investigation` workflow with `investi
 
 Until `_ensure` has run, the shared GET for a new investigation returns 404. That gap is usually a few seconds.
 
+### Titles
+
+Agent Builder titles the investigation. `_ensure` creates the conversation without a title, so it carries Agent Builder's `New conversation` placeholder, and Agent Builder generates the title from the first round's message when that round ends. Until then the shared API reports `title_pending: true`, and the shared UI names the investigation after its first subject (an alert's rule name, the question, a Slack thread's question), or else "New investigation".
+
+The `title` of the start route, the `nightshift.triggerInvestigation` step, and the investigation workflow is still accepted for compatibility, but it is not stored as the title. The start passes it on as the workflow's `title` input only. The `_slack_thread` route's `title` is the generated title, or until then a headline from the thread's question.
+
 The workflow's concurrency key is `investigation:<id>` with a `queue` strategy, so runs of one investigation never overlap. The key also registers the workflow as a driver workflow, so the investigation reads as in progress while a run is queued or running.
 
 ### One identity per investigation

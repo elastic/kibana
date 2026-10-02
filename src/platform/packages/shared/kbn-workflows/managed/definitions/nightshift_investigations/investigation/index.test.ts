@@ -113,7 +113,9 @@ describe('Nightshift investigation workflow', () => {
       expect.arrayContaining(['investigation_id', 'subjects', 'context'])
     );
     expect(inputs.properties).not.toHaveProperty('concurrency_key');
-    expect(inputs.required).toEqual(['message', 'title']);
+    // Agent Builder titles the investigation from its first round; `title` is still accepted.
+    expect(inputs.required).toEqual(['message']);
+    expect(inputs.properties).toHaveProperty('title');
   });
 
   it('lets the agent record its findings: no output schema, no conversation of its own', () => {

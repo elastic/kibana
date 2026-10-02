@@ -28,8 +28,8 @@ triggers:
           type: string
           maxLength: 512
           description: >
-            Short human-readable headline for the investigation (for example, an event title or
-            alert rule name). Never an ID or UUID.
+            Accepted for compatibility and not stored. Agent Builder generates the investigation's
+            title from its first round.
         stream_names:
           type: array
           items:
@@ -59,7 +59,6 @@ triggers:
             it; a run without it starts a new investigation whose id is the workflow execution ID.
       required:
         - message
-        - title
       additionalProperties: false
 
 steps:
