@@ -57,24 +57,32 @@ const buildAllowedEntitySet = (result: HuntCoordinatorCoreResult): Set<string> =
 };
 
 /**
- * A separator-joined identifier (`GHOST-HOST99`, `10.0.0.5`) whose digits sit where a real
- * asset/IOC name's do: mixed into the same segment as letters (`HOST99`), in every segment
- * (an IP), or absent entirely with the whole token in caps. Plain hyphenated prose
- * (`real-time`, `well-known`) has none of those shapes, so it doesn't match — and neither
- * does a numeric quantity (`24-hour`, `5-minute`): its digits sit in their own segment, next
- * to a plain word, not mixed into one. Same spirit as `report_grounding.ts`'s `SINGLE_TOKEN`
- * check: a narrow whitelist that only ever chooses which direction to be wrong in, not a full
- * simulation of every way a model might phrase a name.
+ * A separator-joined identifier (`GHOST-HOST99`, `ghost-host-99`, `10.0.0.5`) that carries a
+ * digit anywhere, or is all-uppercase with none. Plain hyphenated prose (`real-time`,
+ * `well-known`) has neither, so it doesn't match. Same spirit as `report_grounding.ts`'s
+ * `SINGLE_TOKEN` check: a narrow whitelist that only ever chooses which direction to be
+ * wrong in, not a full simulation of every way a model might phrase a name.
  */
 const SEPARATOR_JOINED = /^[A-Za-z0-9]+([._-][A-Za-z0-9]+)+$/;
+
+/**
+ * The one shape worth carving out of "any digit means entity": a bare number followed by a
+ * single plain-English unit word (`24-hour`, `5-minute`, `2-factor`) is a quantity, not a
+ * name. This codebase's own asset-naming convention always suffixes the digits
+ * (`WIN-ANALYST01`, `GHOST-HOST99`) rather than leading with them, so number-first is a safe
+ * signal — and it stays narrow on purpose: a hostname with its digits in their own segment
+ * anywhere else (`ghost-host-99`, `server-01`, three or more segments) still falls through to
+ * the broad digit check below, rather than being swept into the same exemption.
+ */
+const isNumericQuantityPhrase = (segments: string[]): boolean =>
+  segments.length === 2 && /^\d+$/.test(segments[0]) && /^[A-Za-z]+$/.test(segments[1]);
 
 const looksLikeEntity = (token: string): boolean => {
   if (!SEPARATOR_JOINED.test(token)) return false;
   const segments = token.split(/[._-]/);
+  if (isNumericQuantityPhrase(segments)) return false;
   const bare = segments.join('');
-  if (bare === bare.toUpperCase()) return true;
-  if (segments.every((segment) => /^\d+$/.test(segment))) return true;
-  return segments.some((segment) => /[A-Za-z]/.test(segment) && /\d/.test(segment));
+  return /\d/.test(bare) || bare === bare.toUpperCase();
 };
 
 /**

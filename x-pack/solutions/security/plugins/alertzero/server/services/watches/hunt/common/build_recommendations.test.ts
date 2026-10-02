@@ -246,6 +246,36 @@ describe('generateRecommendations', () => {
     expect(lines).toEqual(['Review sign-in activity over a 24-hour window.']);
   });
 
+  it('drops a lowercase, numeric-suffixed hostname the quantity exemption must not cover', async () => {
+    // Libra P2 (follow-up): the "24-hour" exemption must stay narrow to the
+    // number-first, exactly-two-segment shape. A hostname whose digits sit in their
+    // own segment elsewhere (three segments here, suffix rather than prefix) is not a
+    // quantity and must still be caught even though it's lowercase and no segment
+    // mixes letters with digits.
+    const invoke = jest.fn().mockResolvedValue({
+      recommendations: [
+        {
+          text: 'Rotate the credential for WIN-ANALYST01.',
+          entities_referenced: ['WIN-ANALYST01'],
+        },
+        {
+          text: 'Isolate ghost-host-99 immediately.',
+          entities_referenced: [],
+        },
+      ],
+    });
+    const model = {
+      chatModel: { withStructuredOutput: () => ({ invoke }) },
+    } as unknown as ScopedModel;
+    const lines = await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'irrelevant',
+    });
+    expect(lines).toEqual(['Rotate the credential for WIN-ANALYST01.']);
+  });
+
   it('drops a hallucinated entity wrapped in Markdown code formatting', async () => {
     // Libra P2: backticks/asterisks were never stripped, so a formatted name reached
     // `looksLikeEntity` with the wrapping still attached and failed to match — the same
