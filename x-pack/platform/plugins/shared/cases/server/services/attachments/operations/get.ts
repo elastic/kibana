@@ -62,7 +62,7 @@ import {
 } from '../../so_references';
 import { partitionByCaseAssociation } from '../../../common/partitioning';
 import { getCaseReferenceId } from '../../../common/references';
-import { toUnifiedAttributes } from './utils';
+import { toUnifiedAttributes, type ModeTransformedAttributes } from './utils';
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
@@ -144,17 +144,23 @@ export class AttachmentGetter {
         const injectedSo = injectAttachmentAttributesAndHandleErrors(
           so as SavedObject<AttachmentPersistedAttributes>
         ) as SavedObject<AttachmentAttributesV2>;
-        const transformed = toUnifiedAttributes({
-          attributes: injectedSo.attributes,
-        });
-        if (transformed.isUnified) {
+        let transformed: ModeTransformedAttributes | undefined;
+        let decodeError: unknown;
+        try {
+          transformed = toUnifiedAttributes({
+            attributes: injectedSo.attributes,
+          });
+        } catch (error) {
+          decodeError = error;
+        }
+        if (transformed?.isUnified) {
           validatedAttachments.push(
             Object.assign(injectedSo, {
               attributes: transformed.attributes,
             }) as AttachmentSavedObjectTransformedV2
           );
         } else {
-          validatedAttachments.push(this.toUnrecognizedTypeError(injectedSo));
+          validatedAttachments.push(this.toUnrecognizedTypeError(injectedSo, decodeError));
         }
       }
     }
@@ -167,11 +173,16 @@ export class AttachmentGetter {
   // Only `bulkGet` has an errors channel; get/getFileAttachments/flatten fall back to legacy instead.
   // A unified cross-path policy (+ registry-derived gating) is tracked follow-up, not this narrowing.
   private toUnrecognizedTypeError(
-    injectedSo: SavedObject<AttachmentAttributesV2>
+    injectedSo: SavedObject<AttachmentAttributesV2>,
+    decodeError?: unknown
   ): OptionalAttributes<AttachmentAttributesV2> {
     const attachmentType = getAttachmentTypeFromAttributes(injectedSo.attributes);
+    const reason =
+      decodeError === undefined
+        ? 'has no unified mapping'
+        : `failed unified decode: ${decodeError}`;
     this.context.log.warn(
-      `Attachment ${injectedSo.id} has attachment type "${attachmentType}" (owner: "${injectedSo.attributes.owner}"), which is not in MIGRATED_ATTACHMENT_TYPES. Returning it as an error instead of a legacy fallback.`
+      `Attachment ${injectedSo.id} has attachment type "${attachmentType}" (owner: "${injectedSo.attributes.owner}"), which ${reason}. Returning it as an error instead of a legacy fallback.`
     );
 
     return {
