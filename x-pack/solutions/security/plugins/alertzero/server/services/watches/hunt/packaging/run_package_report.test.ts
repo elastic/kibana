@@ -200,6 +200,10 @@ describe('runPackageReport', () => {
     expect(result.expectedProposalCount).toBe(0);
     expect(result.closureSummary).toContain('no confirmed hits');
     expect(result.mintSuppression).toBe('none');
+    // The coordinator never emits an SSE for a clean run, so this is the real clean path --
+    // not the synthetic clean-with-SSE case below -- and it must still write coverage.
+    expect(result.coverage.written.length).toBeGreaterThan(0);
+    expect(result.coverage.skipped).toEqual([]);
   });
 
   // A hunt that did not complete may leave its report eligible, in which case a later sweep
