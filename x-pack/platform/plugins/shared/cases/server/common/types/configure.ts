@@ -13,14 +13,11 @@ import type {
   CaseCustomFields,
   CaseSeverity,
   ConfigurationAttributes,
-  ExternalSyncFieldRule,
-  ExternalSyncSettings,
 } from '../../../common/types/domain';
 import {
   ConfigurationActivityFieldsRt,
   ConfigurationAttributesRt,
   ConfigurationBasicWithoutOwnerRt,
-  ConfigurationOptionalFieldsRt,
 } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { User, UserProfile } from './user';
@@ -37,8 +34,6 @@ export interface ConfigurationPersistedAttributes {
   templates?: PersistedTemplatesConfiguration;
   observableTypes?: PersistedObservableTypesConfiguration;
   extractObservables?: boolean;
-  externalSync?: ExternalSyncSettings;
-  externalSyncFields?: ExternalSyncFieldRule[];
   legacyTemplatesMigrated?: boolean;
   legacyCustomFieldsMigrated?: boolean;
   /**
@@ -94,7 +89,6 @@ export const ConfigurationPartialAttributesRt = rt.intersection([
       owner: rt.string,
     })
   ),
-  ConfigurationOptionalFieldsRt,
 ]);
 
 export const ConfigurationTransformedAttributesRt = ConfigurationAttributesRt;

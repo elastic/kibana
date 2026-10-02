@@ -118,6 +118,24 @@ describe('useGetExternalFieldCatalog', () => {
     expect(result.current.data?.get('description')?.label).toBe('Description');
   });
 
+  it('reports an error when the connector itself fails instead of an empty catalog', async () => {
+    jest.spyOn(jiraApi, 'getFields').mockResolvedValue({
+      status: 'error',
+      actionId: 'jira-1',
+      message: 'Unable to get fields',
+      serviceMessage: '401 Unauthorized',
+    });
+
+    const { result } = renderHook(
+      () =>
+        useGetExternalFieldCatalog({ connectorId: 'jira-1', connectorType: ConnectorTypes.jira }),
+      { wrapper: TestProviders }
+    );
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.data).toBeUndefined();
+  });
+
   it('does not call the connector without the actions read privilege', async () => {
     useApplicationCapabilitiesMock.mockReturnValue({ actions: { crud: false, read: false } });
     const spy = jest.spyOn(jiraApi, 'getFields');

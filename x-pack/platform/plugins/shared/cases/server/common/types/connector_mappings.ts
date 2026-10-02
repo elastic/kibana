@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import type { SavedObject } from '@kbn/core/server';
-import type { ConnectorMappingsAttributes } from '../../../common/types/domain';
-import { ConnectorMappingsAttributesRt } from '../../../common/types/domain';
+import type {
+  ConnectorMappingsAttributes,
+  ExternalSyncFieldRule,
+  ExternalSyncSettings,
+} from '../../../common/types/domain';
+import {
+  ConnectorMappingsAttributesPartialRt,
+  ConnectorMappingsAttributesRt,
+} from '../../../common/types/domain';
 
 export interface ConnectorMappingsPersistedAttributes {
   mappings: Array<{
@@ -17,6 +23,8 @@ export interface ConnectorMappingsPersistedAttributes {
     target: string;
   }>;
   owner: string;
+  externalSync?: ExternalSyncSettings;
+  externalSyncFields?: ExternalSyncFieldRule[];
 }
 
 export const ConnectorMappingsAttributesTransformedRt = ConnectorMappingsAttributesRt;
@@ -25,6 +33,4 @@ export type ConnectorMappingsAttributesTransformed = ConnectorMappingsAttributes
 export type ConnectorMappingsSavedObjectTransformed =
   SavedObject<ConnectorMappingsAttributesTransformed>;
 
-export const ConnectorMappingsAttributesPartialRt = rt.exact(
-  rt.partial(ConnectorMappingsAttributesRt.type.props)
-);
+export { ConnectorMappingsAttributesPartialRt };

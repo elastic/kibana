@@ -200,6 +200,16 @@ const FieldSyncTableComponent: React.FC<FieldSyncTableProps> = ({
                 <EuiLoadingSpinner size="s" data-test-subj="external-sync-field-catalog-loading" />
               </EuiFlexItem>
             )}
+            {catalog.isError && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="warning"
+                  color="subdued"
+                  content={i18n.FIELD_SYNC_CATALOG_ERROR(connector.name)}
+                  iconProps={{ 'data-test-subj': 'external-sync-field-catalog-error' }}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         ),
         render: (_: unknown, row: Row) => renderExternalField(row),
@@ -258,7 +268,15 @@ const FieldSyncTableComponent: React.FC<FieldSyncTableProps> = ({
         },
       },
     ],
-    [catalog.isLoading, catalogAvailable, connector.name, disabled, renderExternalField, update]
+    [
+      catalog.isError,
+      catalog.isLoading,
+      catalogAvailable,
+      connector.name,
+      disabled,
+      renderExternalField,
+      update,
+    ]
   );
 
   return (

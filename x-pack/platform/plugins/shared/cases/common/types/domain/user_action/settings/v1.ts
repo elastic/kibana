@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { ExternalSyncSettingsRt } from '../../case/v1';
+import { ExternalSyncSettingsRt } from '../../external_sync/v1';
 import { UserActionTypes } from '../action/v1';
 
 // Settings payload accepts one or both settings

@@ -37,7 +37,7 @@ properties:
     $ref: 'external_sync_settings.yaml'
   externalSyncFields:
     type: array
-    description: Technical preview. Per-field sync directions and conflict rules for the space.
+    description: Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
     items:
       $ref: 'external_sync_field_rule.yaml'
   templates:

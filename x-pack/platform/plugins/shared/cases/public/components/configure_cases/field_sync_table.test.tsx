@@ -105,6 +105,20 @@ describe('FieldSyncTable', () => {
     expect(screen.getByTestId('external-sync-field-missing-description')).toBeInTheDocument();
   });
 
+  it('shows a warning in the header and no missing-field flags when the catalog failed', () => {
+    useGetExternalFieldCatalogMock.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isSuccess: false,
+      isError: true,
+    });
+
+    renderWithTestingProviders(<FieldSyncTable {...defaultProps} />);
+
+    expect(screen.getByTestId('external-sync-field-catalog-error')).toBeInTheDocument();
+    expect(screen.queryByTestId('external-sync-field-missing-title')).not.toBeInTheDocument();
+  });
+
   it('shows a spinner in the header while the catalog loads', () => {
     useGetExternalFieldCatalogMock.mockReturnValue({
       data: undefined,

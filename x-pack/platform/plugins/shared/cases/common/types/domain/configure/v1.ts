@@ -13,11 +13,8 @@ import {
   CustomFieldToggleTypeRt,
   CustomFieldNumberTypeRt,
 } from '../custom_field/v1';
-import {
-  CaseBaseOptionalFieldsRt,
-  ExternalSyncConflictStrategyRt,
-  ExternalSyncSettingsRt,
-} from '../case/v1';
+import { CaseBaseOptionalFieldsRt } from '../case/v1';
+import { ExternalSyncFieldRulesRt, ExternalSyncSettingsRt } from '../external_sync/v1';
 import { CaseObservableTypeRt } from '../observable/v1';
 
 export const ClosureTypeRt = rt.union([
@@ -138,47 +135,13 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
   extractObservables: rt.boolean,
 });
 
-export const ExternalSyncFieldRt = rt.union([
-  rt.literal('title'),
-  rt.literal('description'),
-  rt.literal('status'),
-  rt.literal('tags'),
-  rt.literal('comments'),
-]);
-
-export const ExternalSyncDirectionRt = rt.union([
-  rt.literal('both'),
-  rt.literal('push'),
-  rt.literal('pull'),
-  rt.literal('off'),
-]);
-
-export const ExternalSyncFieldRuleRt = rt.intersection([
-  rt.strict({
-    field: ExternalSyncFieldRt,
-    direction: ExternalSyncDirectionRt,
-  }),
-  rt.exact(
-    rt.partial({
-      /**
-       * Overrides the case's conflict strategy for this field
-       */
-      conflictStrategy: ExternalSyncConflictStrategyRt,
-    })
-  ),
-]);
-
-export const ExternalSyncFieldRulesRt = rt.array(ExternalSyncFieldRuleRt);
-
+/**
+ * Sync settings of the configuration's connector (technical preview). Stored on the
+ * connector mappings, surfaced on the configuration for the settings page.
+ */
 export const ConfigurationOptionalFieldsRt = rt.exact(
   rt.partial({
-    /**
-     * Default external sync settings for new cases (technical preview)
-     */
     externalSync: ExternalSyncSettingsRt,
-    /**
-     * Per-field sync directions and conflict rules for the space (technical preview)
-     */
     externalSyncFields: ExternalSyncFieldRulesRt,
   })
 );
@@ -191,7 +154,6 @@ export const CasesConfigureBasicRt = rt.intersection([
      */
     owner: rt.string,
   }),
-  ConfigurationOptionalFieldsRt,
 ]);
 
 export const ConfigurationActivityFieldsRt = rt.strict({
@@ -215,6 +177,7 @@ export const ConfigurationRt = rt.intersection([
     owner: rt.string,
     mappings: ConnectorMappingsRt,
   }),
+  ConfigurationOptionalFieldsRt,
 ]);
 
 export const ConfigurationsRt = rt.array(ConfigurationRt);
@@ -229,7 +192,3 @@ export type Configuration = rt.TypeOf<typeof ConfigurationRt>;
 export type Configurations = rt.TypeOf<typeof ConfigurationsRt>;
 export type ObservableTypesConfiguration = rt.TypeOf<typeof ObservableTypesConfigurationRt>;
 export type ObservableTypeConfiguration = rt.TypeOf<typeof CaseObservableTypeRt>;
-export type ExternalSyncField = rt.TypeOf<typeof ExternalSyncFieldRt>;
-export type ExternalSyncDirection = rt.TypeOf<typeof ExternalSyncDirectionRt>;
-export type ExternalSyncFieldRule = rt.TypeOf<typeof ExternalSyncFieldRuleRt>;
-export type ExternalSyncFieldRules = rt.TypeOf<typeof ExternalSyncFieldRulesRt>;

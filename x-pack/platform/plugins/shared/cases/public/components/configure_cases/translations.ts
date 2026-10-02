@@ -315,14 +315,25 @@ export const BACK_TO_CASES = i18n.translate('xpack.cases.settings.backToCases', 
   defaultMessage: 'Cases',
 });
 
-export const EXTERNAL_SYNC_TITLE = i18n.translate('xpack.cases.configureCases.externalSyncTitle', {
-  defaultMessage: 'Sync with the external system',
-});
+export const EXTERNAL_SYNC_TITLE = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.externalSyncTitle', {
+    values: { connectorName },
+    defaultMessage: 'Sync with {connectorName}',
+  });
 
-export const EXTERNAL_SYNC_DESC = i18n.translate('xpack.cases.configureCases.externalSyncDesc', {
-  defaultMessage:
-    'Defaults for new cases that have a connector. Each case can override them in its Connectors panel.',
-});
+export const EXTERNAL_SYNC_DESC = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.externalSyncDesc', {
+    values: { connectorName },
+    defaultMessage:
+      'Defaults for new cases that use {connectorName}. Each case can override them in its Connectors panel. Changes made in {connectorName} are applied when you select Sync from {connectorName} on a case.',
+  });
+
+export const EXTERNAL_SYNC_NO_CONNECTOR = i18n.translate(
+  'xpack.cases.configureCases.externalSyncNoConnector',
+  {
+    defaultMessage: 'Select a connector to configure sync.',
+  }
+);
 
 export const FIELD_SYNC_TITLE = i18n.translate('xpack.cases.configureCases.fieldSyncTitle', {
   defaultMessage: 'Field sync',
@@ -334,13 +345,6 @@ export const FIELD_SYNC_DESC = (connectorName: string): string =>
     defaultMessage:
       'Choose how each field moves between the case and {connectorName}. Conflict rules here override the default above for fields that pull.',
   });
-
-export const FIELD_SYNC_NO_CONNECTOR = i18n.translate(
-  'xpack.cases.configureCases.fieldSyncNoConnector',
-  {
-    defaultMessage: 'Select a connector above to choose which fields sync.',
-  }
-);
 
 export const FIELD_SYNC_CAPTION = (connectorName: string): string =>
   i18n.translate('xpack.cases.configureCases.fieldSyncCaption', {
@@ -430,6 +434,13 @@ export const FIELD_SYNC_EXTERNAL_NOT_MAPPED = i18n.translate(
     defaultMessage: 'Not mapped',
   }
 );
+
+export const FIELD_SYNC_CATALOG_ERROR = (connectorName: string): string =>
+  i18n.translate('xpack.cases.configureCases.fieldSyncCatalogError', {
+    values: { connectorName },
+    defaultMessage:
+      '{connectorName} did not return its fields. Check the connector and its credentials.',
+  });
 
 export const FIELD_SYNC_EXTERNAL_MISSING = (connectorName: string): string =>
   i18n.translate('xpack.cases.configureCases.fieldSyncExternalMissing', {

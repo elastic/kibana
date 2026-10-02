@@ -602,20 +602,20 @@ describe('ConfigureCasesRedesign', () => {
         },
       }));
 
-    it('renders the section with a technical preview badge and the defaults', async () => {
+    it('renders the sync block for the selected connector with a technical preview badge and the defaults', async () => {
       enableExternalSync();
-      useGetCaseConfigurationMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        data: {
-          ...useCaseConfigureResponse.data,
-          externalSync: { autoPush: true, conflictStrategy: 'kibana' },
-        },
-      }));
+      withConnector({ externalSync: { autoPush: true, conflictStrategy: 'kibana' } });
 
       renderWithTestingProviders(<ConfigureCasesRedesign />);
 
       expect(await screen.findByTestId('cases-redesign-external-sync-section')).toBeInTheDocument();
       expect(screen.getByTestId('external-sync-tech-preview-badge')).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('cases-redesign-external-incident-management-section')).getByRole(
+          'heading',
+          { name: 'Sync with My SN connector' }
+        )
+      ).toBeInTheDocument();
       expect(screen.getByTestId('connector-auto-push-switch')).toHaveAttribute(
         'aria-checked',
         'true'
@@ -625,6 +625,7 @@ describe('ConfigureCasesRedesign', () => {
 
     it('persists the external sync defaults when a control changes', async () => {
       enableExternalSync();
+      withConnector();
 
       renderWithTestingProviders(<ConfigureCasesRedesign />);
 
@@ -641,6 +642,7 @@ describe('ConfigureCasesRedesign', () => {
 
     it('disables the controls when the user lacks settings permissions', async () => {
       enableExternalSync();
+      withConnector();
 
       renderWithTestingProviders(<ConfigureCasesRedesign />, {
         wrapperProps: { permissions: noCasesSettingsPermission() },
@@ -690,22 +692,14 @@ describe('ConfigureCasesRedesign', () => {
       );
     });
 
-    it('replaces the table with a hint when no connector is selected', async () => {
+    it('replaces the sync controls with a hint when no connector is selected', async () => {
       enableExternalSync();
-      useGetCaseConfigurationMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        data: {
-          ...useCaseConfigureResponse.data,
-          connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
-        },
-      }));
 
       renderWithTestingProviders(<ConfigureCasesRedesign />);
 
-      expect(
-        await screen.findByTestId('external-sync-field-table-no-connector')
-      ).toBeInTheDocument();
+      expect(await screen.findByTestId('external-sync-no-connector')).toBeInTheDocument();
       expect(screen.queryByTestId('external-sync-field-table')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('connector-auto-push-switch')).not.toBeInTheDocument();
     });
 
     it('disables the field sync controls when the user lacks settings permissions', async () => {

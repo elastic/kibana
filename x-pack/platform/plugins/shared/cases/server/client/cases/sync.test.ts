@@ -44,6 +44,15 @@ const incident = {
   sys_updated_by: 'admin',
 };
 
+// Shape returned by connectorMappingsService.find for the case connector.
+const connectorMappingsFound = (attributes?: Record<string, unknown>) =>
+  ({
+    saved_objects: attributes != null ? [{ id: 'mapping-1', attributes }] : [],
+    total: attributes != null ? 1 : 0,
+    page: 1,
+    per_page: 1,
+  } as never);
+
 const userActionsResponse = (types: string[]) =>
   [
     { type: UserActionTypes.pushed, payload: { externalService } },
@@ -55,7 +64,7 @@ describe('sync', () => {
   const usageCounter = usageCollectionPluginMock.createSetupContract().createUsageCounter('cases');
   const clientArgs = { ...createCasesClientMockArgs(), usageCounter };
   const { actionsClient, authorization } = clientArgs;
-  const { licensingService, userActionService } = clientArgs.services;
+  const { licensingService, userActionService, connectorMappingsService } = clientArgs.services;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -63,7 +72,7 @@ describe('sync', () => {
     casesClient.userActions.getAll.mockResolvedValue(userActionsResponse([]));
     authorization.ensureAuthorized.mockResolvedValue(undefined);
     licensingService.isAtLeastEnterprise.mockResolvedValue(true);
-    casesClient.configure.get = jest.fn().mockResolvedValue([]);
+    connectorMappingsService.find.mockResolvedValue(connectorMappingsFound());
     actionsClient.execute.mockResolvedValue({ status: 'ok', data: incident, actionId: 'sn-1' });
   });
 
@@ -168,14 +177,14 @@ describe('sync', () => {
   });
 
   it('skips fields whose direction does not pull from the external system', async () => {
-    casesClient.configure.get = jest.fn().mockResolvedValue([
-      {
+    connectorMappingsService.find.mockResolvedValue(
+      connectorMappingsFound({
         externalSyncFields: [
           { field: 'title', direction: 'push' },
           { field: 'status', direction: 'off' },
         ],
-      },
-    ]);
+      })
+    );
 
     await sync({ caseId: theCase.id }, clientArgs, casesClient);
 
@@ -194,11 +203,11 @@ describe('sync', () => {
 
   it('applies a per-field conflict rule over the case default', async () => {
     // Case default keeps the external value; the title rule keeps the Kibana value.
-    casesClient.configure.get = jest
-      .fn()
-      .mockResolvedValue([
-        { externalSyncFields: [{ field: 'title', direction: 'both', conflictStrategy: 'kibana' }] },
-      ]);
+    connectorMappingsService.find.mockResolvedValue(
+      connectorMappingsFound({
+        externalSyncFields: [{ field: 'title', direction: 'both', conflictStrategy: 'kibana' }],
+      })
+    );
     casesClient.userActions.getAll.mockResolvedValue(userActionsResponse(['title', 'status']));
 
     await sync({ caseId: theCase.id }, clientArgs, casesClient);
@@ -225,6 +234,16 @@ describe('sync', () => {
     await sync({ caseId: theCase.id }, clientArgs, casesClient);
 
     expect(casesClient.userActions.getAll).not.toHaveBeenCalled();
+  });
+
+  it('reads the field rules of the case connector', async () => {
+    await sync({ caseId: theCase.id }, clientArgs, casesClient);
+
+    expect(connectorMappingsService.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ hasReference: { type: 'action', id: 'sn-1' } }),
+      })
+    );
   });
 
   it('does not update the case when the incident matches it', async () => {

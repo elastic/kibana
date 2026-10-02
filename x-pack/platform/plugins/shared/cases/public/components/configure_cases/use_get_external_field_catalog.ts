@@ -7,6 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ConnectorTypes } from '../../../common/types/domain';
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { casesQueriesKeys } from '../../containers/constants';
@@ -34,6 +35,15 @@ export const hasExternalFieldCatalog = (connectorType: string): boolean =>
 const toCatalog = (entries: ExternalFieldCatalogEntry[]): ExternalFieldCatalog =>
   new Map(entries.map((entry) => [entry.key, entry]));
 
+// The execute route answers 200 with `status: 'error'` when the external system rejects
+// the call (bad credentials, network); that must read as "no catalog", not "no fields".
+const unwrap = <T>(res: ActionTypeExecutorResult<T>): T | undefined => {
+  if (res.status === 'error') {
+    throw new Error(res.serviceMessage ?? res.message ?? 'The connector returned an error');
+  }
+  return res.data;
+};
+
 const fetchCatalog = async ({
   http,
   connectorId,
@@ -47,25 +57,25 @@ const fetchCatalog = async ({
 }): Promise<ExternalFieldCatalog> => {
   switch (connectorType) {
     case ConnectorTypes.jira: {
-      const res = await getJiraFields({ http, connectorId, signal });
+      const fields = unwrap(await getJiraFields({ http, connectorId, signal }));
       return toCatalog(
-        Object.entries(res.data ?? {}).map(([key, field]) => ({ key, label: field.name ?? key }))
+        Object.entries(fields ?? {}).map(([key, field]) => ({ key, label: field.name ?? key }))
       );
     }
     case ConnectorTypes.serviceNowITSM:
     case ConnectorTypes.serviceNowSIR: {
-      const res = await getServiceNowFields({ http, connectorId, signal });
+      const fields = unwrap(await getServiceNowFields({ http, connectorId, signal }));
       return toCatalog(
-        (res.data ?? []).map((field) => ({
+        (fields ?? []).map((field) => ({
           key: field.element,
           label: field.column_label || field.element,
         }))
       );
     }
     case ConnectorTypes.resilient: {
-      const res = await getResilientFields({ http, connectorId, signal });
+      const fields = unwrap(await getResilientFields({ http, connectorId, signal }));
       return toCatalog(
-        (res.data ?? []).map((field) => ({ key: field.name, label: field.text || field.name }))
+        (fields ?? []).map((field) => ({ key: field.name, label: field.text || field.name }))
       );
     }
     default:

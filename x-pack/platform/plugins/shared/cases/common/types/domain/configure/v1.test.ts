@@ -152,36 +152,17 @@ describe('configure', () => {
       });
     });
 
-    it('has expected attributes in request with externalSync', () => {
-      const request = {
+    it('does not keep sync settings on the configuration attributes', () => {
+      const query = ConfigurationAttributesRt.decode({
         ...defaultRequest,
         externalSync: { autoPush: true, conflictStrategy: 'external' },
-      };
-      const query = ConfigurationAttributesRt.decode(request);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          ...request,
-          customFields: [textCustomField, toggleCustomField, numberCustomField],
-        },
+        externalSyncFields: [{ field: 'title', direction: 'pull' }],
       });
-    });
-
-    it('has expected attributes in request with externalSyncFields', () => {
-      const request = {
-        ...defaultRequest,
-        externalSyncFields: [
-          { field: 'title', direction: 'pull', conflictStrategy: 'kibana' },
-          { field: 'comments', direction: 'off' },
-        ],
-      };
-      const query = ConfigurationAttributesRt.decode(request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
-          ...request,
+          ...defaultRequest,
           customFields: [textCustomField, toggleCustomField, numberCustomField],
         },
       });
@@ -260,6 +241,17 @@ describe('configure', () => {
       ],
       extractObservables: true,
     };
+
+    it('keeps the connector sync settings on the configuration response', () => {
+      const response = {
+        ...defaultRequest,
+        externalSync: { autoPush: true, conflictStrategy: 'external' },
+        externalSyncFields: [{ field: 'title', direction: 'pull', conflictStrategy: 'kibana' }],
+      };
+      const query = ConfigurationRt.decode(response);
+
+      expect(query).toStrictEqual({ _tag: 'Right', right: response });
+    });
 
     it('has expected attributes in request', () => {
       const query = ConfigurationRt.decode(defaultRequest);

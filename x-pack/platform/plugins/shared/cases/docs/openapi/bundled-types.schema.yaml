@@ -373,7 +373,7 @@ paths:
                       $ref: '#/components/schemas/external_sync_settings'
                     externalSyncFields:
                       type: array
-                      description: Technical preview. Per-field sync directions and conflict rules for the space.
+                      description: Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
                       items:
                         $ref: '#/components/schemas/external_sync_field_rule'
                     owner:
@@ -570,7 +570,7 @@ paths:
                     $ref: '#/components/schemas/external_sync_settings'
                   externalSyncFields:
                     type: array
-                    description: Technical preview. Per-field sync directions and conflict rules for the space.
+                    description: Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
                     items:
                       $ref: '#/components/schemas/external_sync_field_rule'
                   owner:
@@ -769,7 +769,7 @@ paths:
                     $ref: '#/components/schemas/external_sync_settings'
                   externalSyncFields:
                     type: array
-                    description: Technical preview. Per-field sync directions and conflict rules for the space.
+                    description: Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
                     items:
                       $ref: '#/components/schemas/external_sync_field_rule'
                   owner:
@@ -2805,7 +2805,7 @@ components:
     external_sync_settings:
       type: object
       description: |
-        Technical preview. Controls automatic synchronization between the case and the external incident created by its connector. When `autoPush` is true, changes to the case are pushed to the external system without a manual push. `conflictStrategy` decides which side wins when a field changed on both sides since the last push: `external` applies the external value, `kibana` keeps the case value.
+        Technical preview. Controls automatic synchronization between the case and the external incident created by its connector. On a configuration these are the defaults of the configuration's connector and apply to new cases that use it. When `autoPush` is true, changes to the case are pushed to the external system without a manual push. `conflictStrategy` decides which side wins when a field changed on both sides since the last push: `external` applies the external value, `kibana` keeps the case value.
       required:
         - autoPush
         - conflictStrategy
@@ -3933,7 +3933,7 @@ components:
           $ref: '#/components/schemas/external_sync_settings'
         externalSyncFields:
           type: array
-          description: Technical preview. Per-field sync directions and conflict rules for the space.
+          description: Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
           items:
             $ref: '#/components/schemas/external_sync_field_rule'
         owner:
@@ -4019,7 +4019,7 @@ components:
           $ref: '#/components/schemas/external_sync_settings'
         externalSyncFields:
           type: array
-          description: Technical preview. Per-field sync directions and conflict rules for the space.
+          description: Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
           items:
             $ref: '#/components/schemas/external_sync_field_rule'
         templates:

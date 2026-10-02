@@ -7,7 +7,11 @@
 
 import * as rt from 'io-ts';
 import { ExternalServiceRt } from '../../domain/external_service/v1';
-import { CaseConnectorRt, ConnectorMappingsRt } from '../../domain/connector/v1';
+import {
+  CaseConnectorRt,
+  ConnectorMappingsRt,
+  ConnectorSyncSettingsRt,
+} from '../../domain/connector/v1';
 
 const PushDetailsRt = rt.strict({
   latestUserActionPushDate: rt.string,
@@ -53,11 +57,14 @@ const ActionConnectorResultRt = rt.intersection([
 
 export const FindActionConnectorResponseRt = rt.array(ActionConnectorResultRt);
 
-export const ConnectorMappingResponseRt = rt.strict({
-  id: rt.string,
-  version: rt.string,
-  mappings: ConnectorMappingsRt,
-});
+export const ConnectorMappingResponseRt = rt.intersection([
+  rt.strict({
+    id: rt.string,
+    version: rt.string,
+    mappings: ConnectorMappingsRt,
+  }),
+  ConnectorSyncSettingsRt,
+]);
 
 export type ConnectorMappingResponse = rt.TypeOf<typeof ConnectorMappingResponseRt>;
 export type GetCaseConnectorsResponse = rt.TypeOf<typeof GetCaseConnectorsResponseRt>;

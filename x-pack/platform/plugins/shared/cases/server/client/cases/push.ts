@@ -54,6 +54,7 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
+import { getConnectorSyncSettings } from '../configure/get_connector_sync_settings';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 import { decodeOrThrow } from '../../common/runtime_types';
 import type { ExternalServiceResponse } from '../../../common/types/api';
@@ -183,14 +184,13 @@ export const push = async (
     });
 
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
-    const [alerts, profiles, myCaseConfigure] = await Promise.all([
+    const [alerts, profiles, myCaseConfigure, connectorSync] = await Promise.all([
       getAlerts(alertsInfo, clientArgs),
       getProfiles(theCase, securityStartPlugin),
       caseConfigureService.find({ unsecuredSavedObjectsClient, options: { filter: ownerFilter } }),
+      getConnectorSyncSettings({ connectorId }, clientArgs),
     ]);
-    const fieldRules = resolveExternalSyncFieldRules(
-      myCaseConfigure.saved_objects[0]?.attributes.externalSyncFields
-    );
+    const fieldRules = resolveExternalSyncFieldRules(connectorSync.externalSyncFields);
 
     const externalServiceIncident = await createIncident({
       theCase,

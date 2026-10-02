@@ -27,12 +27,8 @@ import {
   CustomFieldNumberTypeRt,
 } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
-import {
-  ConfigurationBasicWithoutOwnerRt,
-  ClosureTypeRt,
-  ExternalSyncFieldRulesRt,
-} from '../../domain/configure/v1';
-import { ExternalSyncSettingsRt } from '../../domain/case/v1';
+import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
+import { ExternalSyncFieldRulesRt, ExternalSyncSettingsRt } from '../../domain/external_sync/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseBaseOptionalFieldsRequestRt } from '../case/v1';
 import {

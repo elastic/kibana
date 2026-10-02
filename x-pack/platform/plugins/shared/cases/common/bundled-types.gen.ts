@@ -379,7 +379,7 @@ export type OwnerEnum = typeof Owner.enum;
 export const OwnerEnum = Owner.enum;
 
 /**
-  * Technical preview. Controls automatic synchronization between the case and the external incident created by its connector. When `autoPush` is true, changes to the case are pushed to the external system without a manual push. `conflictStrategy` decides which side wins when a field changed on both sides since the last push: `external` applies the external value, `kibana` keeps the case value.
+  * Technical preview. Controls automatic synchronization between the case and the external incident created by its connector. On a configuration these are the defaults of the configuration's connector and apply to new cases that use it. When `autoPush` is true, changes to the case are pushed to the external system without a manual push. `conflictStrategy` decides which side wins when a field changed on both sides since the last push: `external` applies the external value, `kibana` keeps the case value.
 
   */
 export const ExternalSyncSettings = lazySchema(() =>
@@ -1332,12 +1332,14 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       ),
     externalSync: ExternalSyncSettings.optional(),
     /**
-     * Technical preview. Per-field sync directions and conflict rules for the space.
+     * Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
      */
     externalSyncFields: z
       .array(ExternalSyncFieldRule)
       .optional()
-      .describe('Technical preview. Per-field sync directions and conflict rules for the space.'),
+      .describe(
+        "Technical preview. Per-field sync directions and conflict rules of the configuration's connector."
+      ),
     owner: Owner,
     templates: Templates.optional(),
   })
@@ -1449,12 +1451,14 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       ),
     externalSync: ExternalSyncSettings.optional(),
     /**
-     * Technical preview. Per-field sync directions and conflict rules for the space.
+     * Technical preview. Per-field sync directions and conflict rules of the configuration's connector.
      */
     externalSyncFields: z
       .array(ExternalSyncFieldRule)
       .optional()
-      .describe('Technical preview. Per-field sync directions and conflict rules for the space.'),
+      .describe(
+        "Technical preview. Per-field sync directions and conflict rules of the configuration's connector."
+      ),
     templates: Templates.optional(),
     /**
       * The version of the connector. To retrieve the version value, use the get configuration API.

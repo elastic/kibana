@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -175,56 +176,52 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                       updateConnectorDisabled={updateConnectorDisabled || !permissions.settings}
                       onAddNewConnector={onAddNewConnector}
                     />
+                    {isExternalSyncEnabled && (
+                      <div data-test-subj="cases-redesign-external-sync-section">
+                        <EuiSpacer size="l" />
+                        {connector.type !== ConnectorTypes.none ? (
+                          <>
+                            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                              <EuiFlexItem grow={false}>
+                                <EuiTitle size="xs">
+                                  <h3>{configureCasesI18n.EXTERNAL_SYNC_TITLE(connector.name)}</h3>
+                                </EuiTitle>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <ExperimentalBadge data-test-subj="external-sync-tech-preview-badge" />
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                            <EuiSpacer size="xs" />
+                            <EuiText size="s" color="subdued">
+                              <p>{configureCasesI18n.EXTERNAL_SYNC_DESC(connector.name)}</p>
+                            </EuiText>
+                            <EuiSpacer size="m" />
+                            <SyncSettings
+                              value={externalSync}
+                              disabled={syncControlsDisabled}
+                              onChange={onChangeExternalSync}
+                            />
+                            <EuiSpacer size="l" />
+                            <FieldSyncTable
+                              connector={connector}
+                              mappings={mappings}
+                              rules={externalSyncFields}
+                              disabled={syncControlsDisabled}
+                              onChange={onChangeExternalSyncFields}
+                            />
+                          </>
+                        ) : (
+                          <EuiText
+                            size="s"
+                            color="subdued"
+                            data-test-subj="external-sync-no-connector"
+                          >
+                            {configureCasesI18n.EXTERNAL_SYNC_NO_CONNECTOR}
+                          </EuiText>
+                        )}
+                      </div>
+                    )}
                   </SettingsSection>
-                )}
-
-                {hasMinimumLicensePermissions && isExternalSyncEnabled && (
-                  <>
-                    <EuiHorizontalRule margin="l" />
-                    <SettingsSection
-                      data-test-subj="cases-redesign-external-sync-section"
-                      title={
-                        <EuiFlexGroup
-                          component="span"
-                          alignItems="center"
-                          gutterSize="s"
-                          responsive={false}
-                        >
-                          <EuiFlexItem component="span" grow={false}>
-                            {configureCasesI18n.EXTERNAL_SYNC_TITLE}
-                          </EuiFlexItem>
-                          <EuiFlexItem component="span" grow={false}>
-                            <ExperimentalBadge data-test-subj="external-sync-tech-preview-badge" />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      }
-                      description={configureCasesI18n.EXTERNAL_SYNC_DESC}
-                    >
-                      <SyncSettings
-                        value={externalSync}
-                        disabled={syncControlsDisabled}
-                        onChange={onChangeExternalSync}
-                      />
-                      <EuiSpacer size="l" />
-                      {connector.type !== ConnectorTypes.none ? (
-                        <FieldSyncTable
-                          connector={connector}
-                          mappings={mappings}
-                          rules={externalSyncFields}
-                          disabled={syncControlsDisabled}
-                          onChange={onChangeExternalSyncFields}
-                        />
-                      ) : (
-                        <EuiText
-                          size="s"
-                          color="subdued"
-                          data-test-subj="external-sync-field-table-no-connector"
-                        >
-                          {configureCasesI18n.FIELD_SYNC_NO_CONNECTOR}
-                        </EuiText>
-                      )}
-                    </SettingsSection>
-                  </>
                 )}
 
                 {hasMinimumLicensePermissions && <EuiHorizontalRule margin="l" />}

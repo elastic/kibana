@@ -87,11 +87,20 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(theCase.settings.externalSync).to.eql(externalSync);
     });
 
-    it('applies the configuration external sync defaults to a new case', async () => {
+    it('applies the connector sync defaults to a new case that uses the connector', async () => {
       const externalSync = { autoPush: true, conflictStrategy: 'kibana' as const };
-      await createConfiguration(
+      // The helper creates the configuration and its case concurrently, so the defaults are
+      // checked on a case created afterwards with the same connector.
+      const { postedCase, connector } = await createCaseWithConnector({
+        supertest: supertestWithoutAuth,
+        serviceNowSimulatorURL,
+        actionsRemover,
+        auth: authSpace1,
+        configureReq: { externalSync },
+      });
+      const laterCase = await createCase(
         supertestWithoutAuth,
-        getConfigurationRequest({ overrides: { externalSync } }),
+        { ...postCaseReq, connector: postedCase.connector },
         200,
         authSpace1
       );
@@ -100,10 +109,13 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest: supertestWithoutAuth,
         auth: authSpace1,
       });
-      const theCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      // A case on a different connector (here none) does not inherit them.
+      const otherCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
 
+      expect(configuration.connector.id).to.eql(connector.id);
       expect(configuration.externalSync).to.eql(externalSync);
-      expect(theCase.settings.externalSync).to.eql(externalSync);
+      expect(laterCase.settings.externalSync).to.eql(externalSync);
+      expect(otherCase.settings.externalSync).to.eql(undefined);
     });
 
     it('persists the per-field sync rules on the configuration and rejects unsupported directions', async () => {

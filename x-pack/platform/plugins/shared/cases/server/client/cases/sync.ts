@@ -30,6 +30,7 @@ import {
   SYNC_CASE_NO_CHANGES_COUNTER,
 } from '../usage_counters';
 import { getLatestPushInfo } from './utils';
+import { getConnectorSyncSettings } from '../configure/get_connector_sync_settings';
 import * as i18n from './translations';
 
 export interface SyncParams {
@@ -194,8 +195,11 @@ export const sync = async (
     }
 
     const snapshot = parseIncident(res.data as Record<string, unknown>);
-    const [configuration] = await casesClient.configure.get({ owner: theCase.owner });
-    const fieldRules = resolveExternalSyncFieldRules(configuration?.externalSyncFields);
+    const connectorSync = await getConnectorSyncSettings(
+      { connectorId: theCase.connector.id },
+      clientArgs
+    );
+    const fieldRules = resolveExternalSyncFieldRules(connectorSync.externalSyncFields);
     const defaultStrategy = theCase.settings.externalSync?.conflictStrategy ?? 'external';
     const changedInKibana = keepsKibanaValueForAnyField(fieldRules, defaultStrategy)
       ? await getFieldsChangedSinceLastPush(caseId, theCase.connector.id, casesClient)
