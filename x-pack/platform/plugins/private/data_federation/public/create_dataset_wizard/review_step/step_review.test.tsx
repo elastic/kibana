@@ -54,7 +54,7 @@ const renderStepReview = (overrides: Partial<CreateDatasetFormValues> = {}) => {
 
 describe('StepReview', () => {
   it('summarizes the dataset, settings and mappings', () => {
-    const { getByText, getByTestId } = renderStepReview({
+    const { getByText, getByTestId, queryByTestId } = renderStepReview({
       settings: {
         ...emptyDatasetFormValues().settings,
         format: 'parquet',
@@ -78,18 +78,89 @@ describe('StepReview', () => {
     expect(getByTestId('createDatasetWizardReview-schema_resolution')).toHaveTextContent(
       'First file winsCustom'
     );
-    expect(getByTestId('createDatasetWizardReview-error_mode')).toHaveTextContent(
-      'Fail fastDefault'
-    );
+    expect(queryByTestId('createDatasetWizardReview-error_mode')).toBeNull();
 
     expect(getByTestId('createDatasetWizardReview-schema_mapping_mode')).toHaveTextContent(
-      'Inferred from datasetDefault'
+      'Infer unmapped fieldsDefault'
     );
-    expect(getByTestId('createDatasetWizardReview-dynamic_fields')).toHaveTextContent('OnDefault');
+  });
+
+  it('lists each value in the column of the step where it is set', () => {
+    const { getByTestId } = renderStepReview({
+      settings: {
+        ...emptyDatasetFormValues().settings,
+        format: 'parquet',
+        schema_resolution: 'strict',
+        error_mode: 'skip_row',
+      },
+    });
+    const summary = getByTestId('createDatasetWizardReviewSummaryTab');
+    const [datasetColumn, settingsColumn, mappingColumn] = Array.from(summary.children);
+
+    expect(datasetColumn).toContainElement(getByTestId('createDatasetWizardReview-format'));
+    expect(settingsColumn).toContainElement(getByTestId('createDatasetWizardReview-error_mode'));
+    expect(getByTestId('createDatasetWizardReview-error_mode')).toHaveTextContent('Skip rowCustom');
+    expect(getByTestId('createDatasetWizardReview-schema_resolution')).toHaveTextContent(
+      'StrictCustom'
+    );
+    expect(mappingColumn).toContainElement(
+      getByTestId('createDatasetWizardReview-schema_resolution')
+    );
+  });
+
+  it('marks only the preselected mapping options as defaults in the untouched wizard', () => {
+    const { getByTestId, queryByTestId, queryAllByText } = renderStepReview({
+      mappings: emptyDatasetFormValues().mappings,
+    });
+
+    expect(getByTestId('createDatasetWizardReview-timestamp_mapping')).toHaveTextContent(
+      'OnDefault'
+    );
+    expect(getByTestId('createDatasetWizardReview-timestamp_type')).toHaveTextContent(
+      'DateDefault'
+    );
+    expect(getByTestId('createDatasetWizardReview-schema_mapping_mode')).toHaveTextContent(
+      'Infer unmapped fieldsDefault'
+    );
+    expect(queryByTestId('createDatasetWizardReview-schema_resolution')).toBeNull();
+    expect(queryByTestId('createDatasetWizardReview-timestamp_format')).toBeNull();
+    expect(queryByTestId('createDatasetWizardReview-error_mode')).toBeNull();
+    expect(queryAllByText('Default')).toHaveLength(3);
+  });
+
+  it('lists the mapping in the order of the step', () => {
+    const { getByTestId } = renderStepReview({
+      settings: {
+        ...emptyDatasetFormValues().settings,
+        format: 'parquet',
+        schema_resolution: 'strict',
+      },
+      mappings: {
+        dynamic: true,
+        fields: [{ id: '0', name: '@timestamp', path: 'ts', type: 'date', format: '' }],
+      },
+    });
+    const [, , mappingColumn] = Array.from(
+      getByTestId('createDatasetWizardReviewSummaryTab').children
+    );
+    const keys = Array.from(
+      mappingColumn.querySelectorAll('[data-test-subj^="createDatasetWizardReview-"]')
+    ).map((element) =>
+      element.getAttribute('data-test-subj')?.replace('createDatasetWizardReview-', '')
+    );
+
+    expect(keys).toEqual([
+      'timestamp_mapping',
+      'timestamp_path',
+      'timestamp_type',
+      'schema_mapping_mode',
+      'schema_resolution',
+      'mapped_fields',
+    ]);
   });
 
   it('reports declared mappings as custom', () => {
-    const { getByTestId } = renderStepReview({
+    const { getByTestId, queryByTestId } = renderStepReview({
       mappings: {
         dynamic: false,
         fields: [{ id: '0', name: 'message', path: 'msg', type: 'keyword', format: '' }],
@@ -97,10 +168,12 @@ describe('StepReview', () => {
     });
 
     expect(getByTestId('createDatasetWizardReview-schema_mapping_mode')).toHaveTextContent(
-      'Declared in wizardCustom'
+      'Use mapped fields onlyCustom'
     );
-    expect(getByTestId('createDatasetWizardReview-dynamic_fields')).toHaveTextContent('OffCustom');
-    expect(getByTestId('createDatasetWizardReview-mapped_fields')).toHaveTextContent('1');
+    expect(queryByTestId('createDatasetWizardReview-schema_resolution')).toBeNull();
+    expect(getByTestId('createDatasetWizardReview-mapped_fields')).toHaveTextContent(
+      '1 fieldCustom'
+    );
   });
 
   it('ignores a dynamic toggle that no declared field carries into the request', () => {
@@ -110,9 +183,8 @@ describe('StepReview', () => {
 
     // Without declared fields the request has no `mappings`, so the summary must not
     // claim the toggle was applied.
-    expect(getByTestId('createDatasetWizardReview-dynamic_fields')).toHaveTextContent('OnDefault');
     expect(getByTestId('createDatasetWizardReview-schema_mapping_mode')).toHaveTextContent(
-      'Inferred from datasetDefault'
+      'Infer unmapped fieldsDefault'
     );
     expect(queryByTestId('createDatasetWizardReview-mapped_fields')).toBeNull();
 
@@ -142,12 +214,15 @@ describe('StepReview', () => {
     expect(getByTestId('createDatasetWizardReview-timestamp_path')).toHaveTextContent(
       'event_timeCustom'
     );
+    expect(getByTestId('createDatasetWizardReview-timestamp_type')).toHaveTextContent(
+      'Date nanosCustom'
+    );
     expect(getByTestId('createDatasetWizardReview-timestamp_format')).toHaveTextContent(
       'iso8601Custom'
     );
   });
 
-  it('falls back to the logical name and hides the format when neither is set', () => {
+  it('falls back to the logical name and default type, and hides an unset format', () => {
     const { getByTestId, queryByTestId } = renderStepReview({
       mappings: {
         dynamic: true,
@@ -156,6 +231,9 @@ describe('StepReview', () => {
     });
 
     expect(getByTestId('createDatasetWizardReview-timestamp_path')).toHaveTextContent('@timestamp');
+    expect(getByTestId('createDatasetWizardReview-timestamp_type')).toHaveTextContent(
+      'DateDefault'
+    );
     expect(queryByTestId('createDatasetWizardReview-timestamp_format')).toBeNull();
   });
 
@@ -173,6 +251,40 @@ describe('StepReview', () => {
     expect(queryByTestId('createDatasetWizardReview-timestamp_path')).toBeNull();
   });
 
+  it('says so when no additional settings are configured', () => {
+    const { getByTestId } = renderStepReview();
+    const [, settingsColumn] = Array.from(
+      getByTestId('createDatasetWizardReviewSummaryTab').children
+    );
+
+    expect(settingsColumn).toContainElement(getByTestId('createDatasetWizardReviewEmptyColumn'));
+    expect(settingsColumn).toHaveTextContent('No additional settings configured.');
+  });
+
+  it('hides the empty message once a setting is configured', () => {
+    const { queryByTestId } = renderStepReview({
+      settings: { ...emptyDatasetFormValues().settings, format: 'parquet', error_mode: 'skip_row' },
+    });
+
+    expect(queryByTestId('createDatasetWizardReviewEmptyColumn')).toBeNull();
+  });
+
+  it('pluralizes the mapped field count', () => {
+    const { getByTestId } = renderStepReview({
+      mappings: {
+        dynamic: false,
+        fields: [
+          { id: '0', name: 'message', path: '', type: 'keyword', format: '' },
+          { id: '1', name: 'status', path: '', type: 'integer', format: '' },
+        ],
+      },
+    });
+
+    expect(getByTestId('createDatasetWizardReview-mapped_fields')).toHaveTextContent(
+      '2 fieldsCustom'
+    );
+  });
+
   it('skips mapping rows the user left incomplete', () => {
     const { getByTestId } = renderStepReview({
       mappings: {
@@ -185,7 +297,9 @@ describe('StepReview', () => {
       },
     });
 
-    expect(getByTestId('createDatasetWizardReview-mapped_fields')).toHaveTextContent('1');
+    expect(getByTestId('createDatasetWizardReview-mapped_fields')).toHaveTextContent(
+      '1 fieldCustom'
+    );
   });
 
   it('shows the request that will be sent', () => {

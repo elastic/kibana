@@ -90,7 +90,7 @@ const TestWrapper = ({ actions }: TestWrapperProps) => {
           onClose={() => setIsOpen(false)}
           actions={actions}
           episodes={mockEpisodes}
-          viewDetailsHref="/app/management/alertingV2/episodes/ep-1"
+          viewDetailsHref="/app/management/alertingV2/alerts/ep-1"
           onSuccess={mockOnSuccess}
         />
       )}
@@ -169,7 +169,7 @@ describe('EpisodeFooterActionMenu', () => {
 
     expect(screen.getByTestId('alertingV2EpisodeTakeAction-viewDetails')).toHaveAttribute(
       'href',
-      '/app/management/alertingV2/episodes/ep-1'
+      '/app/management/alertingV2/alerts/ep-1'
     );
   });
 
@@ -204,7 +204,11 @@ describe('EpisodeFooterActionMenu', () => {
 
     const ownEntry = await screen.findByTestId('ownEntry');
     expect(renderMenuItem).toHaveBeenCalledWith(
-      expect.objectContaining({ episodes: mockEpisodes, onSuccess: mockOnSuccess })
+      expect.objectContaining({
+        episodes: mockEpisodes,
+        onSuccess: mockOnSuccess,
+        surface: 'details_flyout',
+      })
     );
     // The default descriptor item is bypassed, so `execute` never fires on click.
     expect(
