@@ -6,88 +6,47 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { InvestigationState, SignificantEvent } from '@kbn/significant-events-schema';
-import type { InvestigationStatus } from '@kbn/investigation-output';
-import { EventInvestigation } from './event_investigation';
+import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
+import { EventInvestigation, type EventInvestigationProps } from './event_investigation';
 
-const mockOpenChat = jest.fn();
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
-}));
+const mockOpenConversationDetails = jest.fn();
+let mockAgentBuilder: { openConversationDetails: jest.Mock } | undefined;
 
 jest.mock('../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      agentBuilder: { openChat: mockOpenChat },
-    },
-  }),
+  useKibana: () => ({ services: { agentBuilder: mockAgentBuilder } }),
 }));
 
-const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
-  '@timestamp': '2026-07-10T12:00:00Z',
-  event_id: 'evt-001',
-  event_uuid: 'evt-uuid-001',
-  status: 'open',
-  stream_names: ['logs.web-frontend'],
+const details: Investigation = {
+  id: 'conv-1',
   title: 'Latency spike on web-frontend',
-  summary: 'Summary',
-  severity: '60-high',
-  confidence: 0.9,
-  causal_features: [],
-  ...overrides,
-});
-
-const completeState: InvestigationState = {
-  summary: 'Investigate latency spike on web-frontend.',
-  hypotheses: [
-    {
-      candidate: 'Deployment regression in checkout service',
-      confidence: 0.92,
-      status: 'confirmed',
-    },
-  ],
-  conclusion: 'Checkout deploy introduced a regression.',
-  recommendations: [
-    {
-      title: 'Roll back checkout deployment',
-      confidence: 0.95,
-      description: 'Revert commit abc123 and monitor error rate.',
-    },
-  ],
+  title_pending: false,
+  created_at: '2026-07-10T12:00:00Z',
+  updated_at: '2026-07-10T12:05:00Z',
+  agent_id: 'nightshift.investigation',
+  metadata: { status: 'open', summary: 'Checkout deploy introduced a regression.' },
+  in_progress: false,
+  subjects: [],
+  proposals: [],
 };
 
-const renderInvestigation = (
-  event: SignificantEvent,
-  {
-    investigation,
-    status = 'complete',
-    state = completeState,
-    error,
-    conversationId = 'conv-123',
-  }: {
-    investigation?: NonNullable<SignificantEvent['investigations']>[number];
-    status?: InvestigationStatus;
-    state?: InvestigationState;
-    error?: string;
-    conversationId?: string;
-  } = {}
-) =>
+const recorded = {
+  workflow_execution_id: 'conv-1',
+  started_at: '2026-07-10T12:00:00Z',
+  completed_at: '2026-07-10T12:05:00Z',
+};
+
+const renderInvestigation = (props: Partial<EventInvestigationProps> = {}) =>
   render(
     <I18nProvider>
       <EuiProvider>
         <EventInvestigation
-          event={event}
-          investigation={investigation}
-          status={status}
-          state={state}
-          error={error}
-          conversationId={conversationId}
+          investigation={recorded}
+          status="complete"
+          details={details}
+          {...props}
         />
       </EuiProvider>
     </I18nProvider>
@@ -95,13 +54,13 @@ const renderInvestigation = (
 
 describe('EventInvestigation', () => {
   beforeEach(() => {
-    mockOpenChat.mockClear();
+    mockOpenConversationDetails.mockClear();
+    mockAgentBuilder = { openConversationDetails: mockOpenConversationDetails };
   });
 
-  it('renders the empty state when there is no investigation', () => {
-    renderInvestigation(mockEvent());
+  it('shows an empty state without an investigation', () => {
+    renderInvestigation({ investigation: undefined, details: undefined });
 
-    expect(screen.getByText('Investigation')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftInvestigationEmptyState')).toHaveTextContent(
       'No investigation yet.'
     );
@@ -110,316 +69,33 @@ describe('EventInvestigation', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('renders the latest investigation summary and opens the flyout', () => {
-    renderInvestigation(mockEvent(), {
-      investigation: {
-        workflow_execution_id: 'exec-latest',
-        started_at: '2026-07-10T12:00:00Z',
-        completed_at: '2026-07-10T12:05:00Z',
-      },
-    });
+  it('renders the investigation output from the shared API', () => {
+    renderInvestigation();
 
-    expect(screen.getByTestId('nightshiftInvestigationSummaryCard')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftInvestigationStatusIcon')).toHaveTextContent('Complete');
-    expect(screen.getByTestId('nightshiftInvestigationHeadline')).toHaveTextContent(
-      'Deployment regression in checkout service'
-    );
-    expect(screen.getByTestId('nightshiftInvestigationTimeLabel')).toHaveTextContent(
-      `${moment('2026-07-10T12:00:00Z').format('HH:mm')} (5 min)`
-    );
-
-    const showDetailsButton = screen.getByTestId('nightshiftInvestigationShowDetailsButton');
-    expect(showDetailsButton).toHaveAttribute('data-ebt-action', 'viewInvestigation');
-    expect(showDetailsButton).toHaveAttribute(
-      'data-ebt-element',
-      'nightshiftEventFlyoutInvestigation'
-    );
-    expect(showDetailsButton).toHaveAttribute('data-ebt-detail', 'complete');
-    fireEvent.click(showDetailsButton);
-    expect(screen.getByTestId('nightshiftInvestigationFlyout')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftInvestigationFlyoutCompleteBadge')).toHaveTextContent(
-      'Complete'
-    );
-    expect(screen.getByTestId('nightshiftInvestigationFlyoutConclusion')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftInvestigationFlyoutTab-recommendations')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
-    expect(screen.getByText('95%')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses'));
-    expect(screen.getByText('92%')).toBeInTheDocument();
-
-    const chatButton = screen.getByTestId('nightshiftInvestigationFlyoutChatButton');
-    expect(chatButton).toHaveAttribute('data-ebt-action', 'openInChat');
-    expect(chatButton).toHaveAttribute('data-ebt-detail', 'existingConversation');
-    fireEvent.click(chatButton);
-    expect(mockOpenChat).toHaveBeenCalledWith({ conversationId: 'conv-123' });
+    expect(screen.getByText('Investigation complete')).toBeInTheDocument();
+    expect(screen.getByText('Checkout deploy introduced a regression.')).toBeInTheDocument();
   });
 
-  it('opens the flyout when More recommendations is clicked', () => {
-    renderInvestigation(mockEvent(), {
-      investigation: {
-        workflow_execution_id: 'exec-latest',
-        started_at: '2026-07-10T12:00:00Z',
-        completed_at: '2026-07-10T12:05:00Z',
-      },
-    });
-
-    const moreRecommendationsLink = screen.getByTestId(
-      'nightshiftInvestigationMoreRecommendationsLink'
-    );
-    expect(moreRecommendationsLink).toHaveAttribute('data-ebt-action', 'viewInvestigation');
-    expect(moreRecommendationsLink).toHaveAttribute(
-      'data-ebt-element',
-      'nightshiftInvestigationSummary'
-    );
-    fireEvent.click(moreRecommendationsLink);
-    expect(screen.getByTestId('nightshiftInvestigationFlyout')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftInvestigationFlyoutTab-recommendations')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
-  });
-
-  it('switches to the recommendations tab when More recommendations is clicked while open', () => {
-    renderInvestigation(mockEvent(), {
-      investigation: {
-        workflow_execution_id: 'exec-latest',
-        started_at: '2026-07-10T12:00:00Z',
-        completed_at: '2026-07-10T12:05:00Z',
-      },
-    });
+  it("opens the investigation's conversation details flyout", () => {
+    renderInvestigation();
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationShowDetailsButton'));
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses'));
-    expect(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationMoreRecommendationsLink'));
-    expect(screen.getByTestId('nightshiftInvestigationFlyout')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftInvestigationFlyoutTab-recommendations')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+    expect(mockOpenConversationDetails).toHaveBeenCalledWith({ conversationId: 'conv-1' });
   });
 
-  it('shows the markdown evidence and chart behind a hypothesis', () => {
-    renderInvestigation(mockEvent(), {
-      investigation: {
-        workflow_execution_id: 'exec-latest',
-        started_at: '2026-07-10T12:00:00Z',
-        completed_at: '2026-07-10T12:05:00Z',
-      },
-      state: {
-        ...completeState,
-        hypotheses: [
-          {
-            ...completeState.hypotheses[0],
-            reason: 'Pool utilization jumped to 100% at the deploy timestamp.',
-            evidence: [
-              {
-                description: 'Pool utilization saturates at the **deploy** timestamp.',
-                chart: {
-                  type: 'line',
-                  title: 'Pool utilization',
-                  x_axis: { type: 'time' },
-                  y_axis: { unit: 'percent' },
-                  series: [
-                    {
-                      name: 'orders-api',
-                      points: [
-                        { x: '2026-07-10T11:55:00Z', y: 40 },
-                        { x: '2026-07-10T12:00:00Z', y: 100 },
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        ],
-      },
-    });
-
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationShowDetailsButton'));
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses'));
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutHypothesis-0Toggle'));
-
-    expect(screen.getByText('deploy').tagName).toBe('STRONG');
-    expect(screen.getByTestId('investigationEvidenceChart')).toHaveTextContent('Pool utilization');
-  });
-
-  it('shows ongoing investigation content when the hook reports running status', () => {
-    renderInvestigation(mockEvent(), {
-      investigation: {
-        workflow_execution_id: 'exec-running',
-        started_at: '2026-07-10T12:00:00Z',
-      },
-      status: 'running',
-      state: {
-        summary: 'Determine whether the deploy caused the spike.',
-        hypotheses: [
-          {
-            candidate: 'Checkout deploy regression',
-            confidence: 0.55,
-            status: 'investigating',
-          },
-        ],
-      },
-      conversationId: undefined,
-    });
-
-    expect(screen.getByText('In progress')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftInvestigationGoalPreview')).toHaveTextContent(
-      'Determine whether the deploy caused the spike.'
-    );
-    expect(
-      screen.queryByTestId('nightshiftInvestigationGoalPreviewToggle')
-    ).not.toBeInTheDocument();
-  });
-
-  it('truncates long in-progress goal text with Show more', () => {
-    const longGoal = `${'Determine whether the deploy caused the spike. '.repeat(12)}End.`;
-
-    renderInvestigation(mockEvent(), {
-      investigation: {
-        workflow_execution_id: 'exec-running',
-        started_at: '2026-07-10T12:00:00Z',
-      },
-      status: 'running',
-      state: {
-        summary: longGoal,
-        hypotheses: [
-          {
-            candidate: 'Checkout deploy regression',
-            confidence: 0.55,
-            status: 'investigating',
-          },
-        ],
-      },
-    });
-
-    expect(screen.getByTestId('nightshiftInvestigationGoalPreviewToggle')).toHaveTextContent(
-      'Show more'
-    );
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationGoalPreviewToggle'));
-    expect(screen.getByTestId('nightshiftInvestigationGoalPreviewToggle')).toHaveTextContent(
-      'Show less'
-    );
-    expect(screen.getByTestId('nightshiftInvestigationGoalPreview')).toHaveTextContent('End.');
-  });
-
-  it('truncates long completed conclusion text with Show more', () => {
-    const longConclusionBody = `${'Checkout deploy introduced a regression. '.repeat(12)}End.`;
-
-    renderInvestigation(mockEvent(), {
-      investigation: {
-        workflow_execution_id: 'exec-latest',
-        started_at: '2026-07-10T12:00:00Z',
-        completed_at: '2026-07-10T12:05:00Z',
-      },
-      state: {
-        ...completeState,
-        conclusion: longConclusionBody,
-      },
-    });
-
-    expect(screen.getByTestId('nightshiftInvestigationConclusionPreviewToggle')).toHaveTextContent(
-      'Show more'
-    );
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationConclusionPreviewToggle'));
-    expect(screen.getByTestId('nightshiftInvestigationConclusionPreviewToggle')).toHaveTextContent(
-      'Show less'
-    );
-    expect(screen.getByTestId('nightshiftInvestigationConclusionPreview')).toHaveTextContent(
-      'End.'
-    );
-  });
-
-  it('truncates long try next recommendation description with Show more', () => {
-    const longRecommendationDescription = `${'Monitor error rate after rollback. '.repeat(15)}End.`;
-
-    renderInvestigation(mockEvent(), {
-      investigation: {
-        workflow_execution_id: 'exec-latest',
-        started_at: '2026-07-10T12:00:00Z',
-        completed_at: '2026-07-10T12:05:00Z',
-      },
-      state: {
-        ...completeState,
-        recommendations: [
-          {
-            title: 'Roll back checkout deployment',
-            confidence: 0.95,
-            description: longRecommendationDescription,
-          },
-        ],
-      },
-    });
-
-    expect(screen.getByTestId('nightshiftInvestigationTryNextPreviewToggle')).toHaveTextContent(
-      'Show more'
-    );
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationTryNextPreviewToggle'));
-    expect(screen.getByTestId('nightshiftInvestigationTryNextPreviewToggle')).toHaveTextContent(
-      'Show less'
-    );
-    expect(screen.getByTestId('nightshiftInvestigationTryNextPreview')).toHaveTextContent('End.');
-  });
-
-  it('shows a warning when the investigation lacks workflow details', () => {
-    renderInvestigation(mockEvent(), {
-      investigation: {
-        workflow_execution_id: '',
-        started_at: '2026-07-10T12:00:00Z',
-      },
-    });
-
-    expect(screen.getByTestId('nightshiftInvestigationMissingWorkflowCallout')).toBeInTheDocument();
+  it('offers no details without Agent Builder or before the investigation is read', () => {
+    mockAgentBuilder = undefined;
+    const { unmount } = renderInvestigation();
     expect(
       screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
     ).not.toBeInTheDocument();
-  });
+    unmount();
 
-  it.each<InvestigationStatus>(['running', 'loading', 'failed', 'unavailable'])(
-    'does not offer the investigation flyout when the status is %s',
-    (status) => {
-      renderInvestigation(mockEvent(), {
-        investigation: {
-          workflow_execution_id: 'exec-latest',
-          started_at: '2026-07-10T12:00:00Z',
-          completed_at: '2026-07-10T12:05:00Z',
-        },
-        status,
-      });
-
-      expect(
-        screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
-      ).not.toBeInTheDocument();
-      expect(screen.queryByTestId('nightshiftInvestigationFlyout')).not.toBeInTheDocument();
-    }
-  );
-
-  it.each<[InvestigationStatus, string]>([
-    ['failed', 'Failed'],
-    ['unavailable', 'Unavailable'],
-  ])('marks a %s investigation with its terminal status and error detail', (status, label) => {
-    renderInvestigation(mockEvent(), {
-      investigation: {
-        workflow_execution_id: 'exec-latest',
-        started_at: '2026-07-10T12:00:00Z',
-        completed_at: '2026-07-10T12:05:00Z',
-      },
-      status,
-      error: 'The investigation did not complete.',
-    });
-
-    expect(screen.getByTestId('nightshiftInvestigationFailedStatusIcon')).toHaveTextContent(label);
-    expect(screen.getByTestId('nightshiftInvestigationError')).toHaveTextContent(
-      'The investigation did not complete.'
-    );
-    expect(screen.queryByTestId('nightshiftInvestigationStatusIcon')).not.toBeInTheDocument();
+    mockAgentBuilder = { openConversationDetails: mockOpenConversationDetails };
+    renderInvestigation({ status: 'loading', details: undefined });
+    expect(
+      screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
+    ).not.toBeInTheDocument();
   });
 });

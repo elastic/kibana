@@ -168,6 +168,7 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/global-search-plugin",
     "@kbn/nightshift-investigations-plugin",
+    "@kbn/agentic-investigations-plugin",
     "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]

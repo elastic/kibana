@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
@@ -32,55 +32,55 @@ jest.mock('../investigation/start_investigation_panel', () => ({
   ),
 }));
 
-jest.mock('../investigation/investigation_detail_flyout', () => ({
-  InvestigationDetailFlyout: ({
-    investigationId,
-    onClose,
-  }: {
-    investigationId: string;
-    onClose: () => void;
-  }) => (
-    <div>
-      <span>{`Flyout: ${investigationId}`}</span>
-      <button onClick={onClose} type="button">
-        Close
-      </button>
-    </div>
-  ),
-}));
-
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
 
-const investigation: ListInvestigationItem = {
-  investigation_id: 'investigation-1',
-  title: 'Checkout errors',
-  status: 'running',
+const makeInvestigation = (
+  id: string,
+  title: string,
+  overrides: Partial<InvestigationSummary> = {}
+): InvestigationSummary => ({
+  id,
+  title,
+  title_pending: false,
   created_at: '2026-09-11T09:00:00.000Z',
-  subject: { type: 'significant_event', id: 'event-1', summary: 'Investigate checkout errors' },
-  summary: 'Checkout errors are elevated',
-};
+  updated_at: '2026-09-11T09:00:00.000Z',
+  agent_id: 'nightshift.investigation',
+  metadata: { status: 'open' },
+  in_progress: false,
+  subjects: [],
+  ...overrides,
+});
 
-const criticalInvestigation: ListInvestigationItem = {
-  investigation_id: 'investigation-critical',
-  title: 'Critical checkout outage',
-  status: 'completed',
-  created_at: '2026-09-11T09:00:00.000Z',
-  subject: { type: 'significant_event', id: 'event-2', summary: 'Critical checkout outage' },
-  summary: 'Checkout is down',
-  severity: '80-critical',
-};
+const investigation = makeInvestigation('investigation-1', 'Checkout errors', {
+  in_progress: true,
+  metadata: { status: 'open', summary: 'Checkout errors are elevated' },
+});
 
-const highInvestigation: ListInvestigationItem = {
-  investigation_id: 'investigation-high',
-  title: 'High latency',
-  status: 'completed',
-  created_at: '2026-09-11T09:00:00.000Z',
-  subject: { type: 'significant_event', id: 'event-3', summary: 'High latency' },
-  summary: 'Latency is high',
-  severity: '60-high',
-};
+const criticalInvestigation = makeInvestigation('investigation-critical', 'Critical checkout', {
+  metadata: { status: 'open', severity: 'critical', summary: 'Checkout is down' },
+});
+
+const highInvestigation = makeInvestigation('investigation-high', 'High latency', {
+  metadata: { status: 'open', severity: 'high', summary: 'Latency is high' },
+});
+
+/** Stands in for the shared card the agentic investigations plugin provides. */
+const InvestigationCard = ({
+  investigation: item,
+  onClick,
+}: {
+  investigation: InvestigationSummary;
+  onClick?: (item: InvestigationSummary) => void;
+}) => (
+  <button type="button" onClick={() => onClick?.(item)}>
+    {item.metadata.summary ?? item.title}
+  </button>
+);
+
+const closeConversationDetails = jest.fn();
+const openConversationDetails = jest.fn();
 
 const refetchAll = jest.fn();
 
@@ -152,7 +152,7 @@ function defaultSections(
     makeSection('60-high', overrides['60-high']),
     makeSection('40-medium', overrides['40-medium']),
     makeSection('20-low', overrides['20-low']),
-    makeSection('failed', overrides.failed),
+    makeSection('not-rated', overrides['not-rated']),
   ];
 }
 
@@ -183,8 +183,13 @@ describe('NightshiftApp', () => {
           getUrlForApp: () => '/app/significant_events/significant_events',
         },
         nightshiftInvestigations: { investigationsClient: {} },
+        agenticInvestigations: { InvestigationCard },
+        agentBuilder: { openConversationDetails },
+        notifications: { toasts: { addSuccess: jest.fn() } },
       },
     });
+    openConversationDetails.mockReset().mockImplementation(async () => closeConversationDetails);
+    closeConversationDetails.mockReset();
     setSections({
       sections: defaultSections({
         'in-progress': { investigations: [investigation], total: 1 },
@@ -221,6 +226,7 @@ describe('NightshiftApp', () => {
           capabilities: { nightshift: manageCapabilities },
           getUrlForApp: () => '/app/significant_events/significant_events',
         },
+        notifications: { toasts: { addSuccess: jest.fn() } },
       },
     });
     setSections({ sections: defaultSections() });
@@ -241,7 +247,7 @@ describe('NightshiftApp', () => {
         '60-high': { isInitialLoading: true },
         '40-medium': { isInitialLoading: true },
         '20-low': { isInitialLoading: true },
-        failed: { isInitialLoading: true },
+        'not-rated': { isInitialLoading: true },
       }),
       isInitialLoading: true,
     });
@@ -262,7 +268,7 @@ describe('NightshiftApp', () => {
         '60-high': { error },
         '40-medium': { error },
         '20-low': { error },
-        failed: { error },
+        'not-rated': { error },
       }),
     });
 
@@ -326,7 +332,9 @@ describe('NightshiftApp', () => {
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-80-critical')
     ).not.toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftInvestigationSection-failed')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('nightshiftInvestigationSection-not-rated')
+    ).not.toBeInTheDocument();
   });
 
   it('shows a single empty state when there are no investigations', () => {
@@ -384,18 +392,35 @@ describe('NightshiftApp', () => {
     expect(screen.queryByTestId('nightshiftSeverityTileCount-80-critical')).not.toBeInTheDocument();
   });
 
-  it('opens and closes the selected investigation from the URL', () => {
+  it("opens the selected investigation's conversation details flyout and clears the URL on close", async () => {
     renderApp();
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationListItem'));
-    expect(screen.getByText('Flyout: investigation-1')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Checkout errors are elevated' }));
     expect(screen.getByTestId('locationProbe')).toHaveTextContent(
       '?investigationId=investigation-1'
     );
+    await waitFor(() =>
+      expect(openConversationDetails).toHaveBeenCalledWith(
+        expect.objectContaining({
+          conversationId: 'investigation-1',
+          trailingActions: [expect.objectContaining({ iconType: 'link' })],
+        })
+      )
+    );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
-    expect(screen.queryByText('Flyout: investigation-1')).not.toBeInTheDocument();
-    expect(screen.getByTestId('locationProbe')).toHaveTextContent('');
+    const [{ onClose }] = openConversationDetails.mock.calls[0];
+    onClose();
+    await waitFor(() => expect(screen.getByTestId('locationProbe')).toHaveTextContent(''));
+  });
+
+  it('opens the conversation details flyout from an investigation locator link', async () => {
+    renderApp({ initialEntries: ['/?investigationId=conversation-9'] });
+
+    await waitFor(() =>
+      expect(openConversationDetails).toHaveBeenCalledWith(
+        expect.objectContaining({ conversationId: 'conversation-9' })
+      )
+    );
   });
 
   it('opens and closes the start investigation panel from the header', () => {
@@ -420,6 +445,9 @@ describe('NightshiftApp', () => {
           getUrlForApp: () => '/app/significant_events/significant_events',
         },
         nightshiftInvestigations: { investigationsClient: {} },
+        agenticInvestigations: { InvestigationCard },
+        agentBuilder: { openConversationDetails },
+        notifications: { toasts: { addSuccess: jest.fn() } },
       },
     });
 

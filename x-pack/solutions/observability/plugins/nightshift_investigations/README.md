@@ -46,6 +46,8 @@ If any of those subjects is part of an open investigation that the caller owns, 
 
 If none match, the start claims the subjects for a new investigation id. That way, of two concurrent starts for one subject, the second continues the first. Closed investigations never match. One start always lands on exactly one investigation.
 
+The daily quota for automatic starts (`trigger_type: automatic`) only counts starts that open a new investigation. It is checked after the subject matching and before the claim, so a follow-up on an open investigation is never denied, and a denied start claims nothing.
+
 The start then runs the `system-nightshift-investigation` workflow with `investigation_id` and the new subjects, and returns `{ investigation_id }`. It does not write to the investigation itself. The workflow's `_ensure` step does all of that:
 
 - creates the conversation;
@@ -62,13 +64,19 @@ The `title` of the start route, the `nightshift.triggerInvestigation` step, and 
 
 The workflow's concurrency key is `investigation:<id>` with a `queue` strategy, so runs of one investigation never overlap. The key also registers the workflow as a driver workflow, so the investigation reads as in progress while a run is queued or running.
 
+### Reading and deleting investigations
+
+Readers use the shared query API: the Nightshift landing page (list, severity counts, cards from `agenticInvestigations.InvestigationCard`, Agent Builder's conversation details flyout for one investigation), the significant-event flyout (`@kbn/investigation-output`), the alert "Investigate" action (list by `subject_id=<alert id>`), and significant events' investigation status route.
+
+`deleteAllInvestigations()` on the start contract deletes the legacy saved objects in every space and, through `agenticInvestigations.deleteSubjectInvestigationDataAcrossSpaces()`, the subjects, claims, impact, and hypotheses of every investigation with subjects. The Agent Builder conversations stay; Agent Builder has no cross-space delete.
+
 ### One identity per investigation
 
 Agent Builder lets only the conversation owner write subjects, metadata, and attachments. So one identity must create and continue an investigation. Use a service account for the investigation workflow, its automations, and the Slack thread workflow.
 
 A start will not continue an investigation it does not own. It opens a new one instead and logs a warning.
 
-The start judges ownership by Agent Builder's owner check, and also by username. The username check is there because one identity can resolve with a user profile id in one context and without one in another: an HTTP call made from a workflow step has the profile id, the step handler itself does not. If a run reaches an investigation it does not own anyway, the agent still works in the conversation, but subjects and the reopen are skipped. Cross-identity follow-ups need converse-access writes in Agent Builder.
+The start judges ownership by Agent Builder's owner check. (Agent Builder resolves the user profile id of an API key's creator for fake requests too, so a workflow step and the HTTP calls it makes count as the same owner.) If a run reaches an investigation it does not own anyway, the agent still works in the conversation, but subjects and the reopen are skipped. Cross-identity follow-ups need converse-access writes in Agent Builder.
 
 ### Slack threads
 

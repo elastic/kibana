@@ -13,25 +13,28 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { InvestigationHypothesis } from '@kbn/significant-events-schema';
+import type { Hypothesis, HypothesisStatus } from '@kbn/agentic-investigations-plugin/common';
 import { EvidenceList } from './evidence_list';
 
-const HYPOTHESIS_STATUS_ICON: Record<InvestigationHypothesis['status'], string> = {
+const HYPOTHESIS_STATUS_ICON: Record<HypothesisStatus, string> = {
   investigating: 'clock',
   dismissed: 'dashedCircle',
   confirmed: 'checkCircle',
 };
 
-export const HypothesisRow: React.FC<{
-  hypothesis: InvestigationHypothesis;
-}> = ({ hypothesis }) => {
-  const { candidate, confidence, status, reason, evidence } = hypothesis;
+/**
+ * One hypothesis: its status, candidate, and confidence, expanding to the reasoning and the
+ * evidence it rests on (charts and descriptions).
+ */
+export const HypothesisRow: React.FC<{ hypothesis: Hypothesis }> = ({ hypothesis }) => {
+  const { candidate, confidence, status, reason, evidence = [] } = hypothesis;
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationHypothesis' });
 
   return (
@@ -78,21 +81,26 @@ export const HypothesisRow: React.FC<{
         </EuiBadge>
       }
     >
-      <EuiText size="s">
-        <p>
-          {reason ??
-            i18n.translate('xpack.investigationOutput.noReasonRecordedDescription', {
+      {reason?.trim() ? (
+        <EuiMarkdownFormat textSize="xs" color="subdued">
+          {reason}
+        </EuiMarkdownFormat>
+      ) : (
+        <EuiText size="xs" color="subdued">
+          <p>
+            {i18n.translate('xpack.investigationOutput.noReasonRecordedDescription', {
               defaultMessage: 'No reasoning recorded yet.',
             })}
-        </p>
-      </EuiText>
+          </p>
+        </EuiText>
+      )}
 
-      {evidence?.length ? (
+      {evidence.length > 0 && (
         <>
           <EuiSpacer size="s" />
           <EvidenceList evidence={evidence} />
         </>
-      ) : null}
+      )}
     </EuiAccordion>
   );
 };

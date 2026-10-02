@@ -92,19 +92,16 @@ const makeConversation = ({
   title = 'Latency is too high',
   status,
   owner = true,
-  username = 'automation',
   templateId = 'investigation',
 }: {
   id: string;
   title?: string;
   status?: 'open' | 'closed';
   owner?: boolean;
-  username?: string;
   templateId?: string;
 }) => ({
   id,
   title,
-  user: { username },
   template_id: templateId,
   metadata: status ? { status } : {},
   permissions: { rename: owner, delete: owner, update_access_control: owner },
@@ -975,7 +972,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
-    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
   });
 
   it('throws InvestigationUnavailableError when the workflow is not installed', async () => {
@@ -1410,6 +1406,40 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     expect(inputs.message).not.toContain('Latency is 2.5s for alert-1');
   });
 
+  it('does not charge the automatic quota for a start that continues an open investigation', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+    withConversations(makeConversation({ id: 'inv-1' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([makeStoredSubject()]);
+    // Exhausted: a new investigation would be denied, a follow-up is not.
+    investigationQuotaCallback.mockResolvedValue({ allowed: false });
+
+    await expect(startAlerts('alert-1', 'alert-2')).resolves.toEqual({ investigation_id: 'inv-1' });
+
+    expect(investigationQuotaCallback).not.toHaveBeenCalled();
+    expect(runInputs().subjects).toEqual([expect.objectContaining({ id: 'alert-2' })]);
+  });
+
+  it('charges the automatic quota after matching and before claiming a new investigation', async () => {
+    await startAlerts('alert-1');
+
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
+    expect(agenticInvestigationsClient.findOpenBySubjects.mock.invocationCallOrder[0]).toBeLessThan(
+      investigationQuotaCallback.mock.invocationCallOrder[0]
+    );
+    expect(investigationQuotaCallback.mock.invocationCallOrder[0]).toBeLessThan(
+      subjectsClient.claimSubjects.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('denies a new automatic investigation over quota without claiming its subjects', async () => {
+    investigationQuotaCallback.mockResolvedValue({ allowed: false });
+
+    await expect(startAlerts('alert-1')).rejects.toThrow(InvestigationQuotaDeniedError);
+
+    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+  });
+
   it('describes the alerts again when every alert is already part of the investigation', async () => {
     agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
     withConversations(makeConversation({ id: 'inv-1' }));
@@ -1454,20 +1484,6 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('inv-theirs'));
     expect(runInputs().message).not.toContain('This continues the investigation');
-  });
-
-  it("continues an investigation owned by the caller's username when profile ids differ", async () => {
-    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-mine' }]);
-    withConversations(makeConversation({ id: 'inv-mine', owner: false, username: 'automation' }));
-
-    await expect(
-      makeClient({ getCallerUsername: () => 'automation' }).start({
-        title: 'Latency is too high',
-        subject: { type: 'alert', id: 'alert-1' },
-        trigger_type: 'automatic',
-        context: { alerts: [makeAlert('alert-1')] },
-      })
-    ).resolves.toEqual({ investigation_id: 'inv-mine' });
   });
 
   it('opens a new investigation rather than continue one without room for the new subjects', async () => {

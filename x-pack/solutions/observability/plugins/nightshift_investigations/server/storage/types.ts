@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DeleteInvestigationDataResult } from '@kbn/agentic-investigations-plugin/server';
 import type {
   InvestigationStatus,
   InvestigationStructuredOutput,
@@ -144,4 +145,6 @@ export interface DeleteAllInvestigationsFailure {
 export interface DeleteAllInvestigationsResult {
   deleted: number;
   failures: DeleteAllInvestigationsFailure[];
+  /** Shared investigation documents removed, per index. Absent without agentic investigations. */
+  investigationData?: DeleteInvestigationDataResult;
 }

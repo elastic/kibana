@@ -79,6 +79,7 @@ import {
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createSandboxSecretsClient } from './sandbox_secrets';
+import { deleteAllInvestigations } from './lib/delete_all_investigations';
 import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
 import {
   registerInvestigationReconciliationTask,
@@ -505,7 +506,11 @@ export class NightshiftInvestigationsPlugin
 
     return {
       getInvestigationsClient: this.getInvestigationsClient,
-      deleteAllInvestigations: () => investigationSweepRepository.deleteAllAcrossSpaces(),
+      deleteAllInvestigations: () =>
+        deleteAllInvestigations({
+          sweepRepository: investigationSweepRepository,
+          agenticInvestigations: this.agenticInvestigations,
+        }),
       isInvestigationAvailable: (request) =>
         isInvestigationRunAvailable({
           request,
@@ -564,7 +569,6 @@ export class NightshiftInvestigationsPlugin
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
       agenticInvestigations: this.agenticInvestigations,
-      getCallerUsername: () => this.security?.authc.getCurrentUser(request)?.username,
       agentAvailability: this.getInvestigationAvailability(),
       investigationQuotaCallback: this.investigationQuotaCallback,
       investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
