@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { calculateContrast, calculateLuminance, EuiProvider, hexToRgb } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { euiPaletteColorBlind } from '@elastic/eui';
 import {
+  CONFIDENCE_BANDS,
   formatCellLabelValue,
   MAX_TREEMAP_CELLS,
   MemoryUsefulnessTreemap,
@@ -67,11 +68,41 @@ const summary = (overrides: Partial<MemorySummary> = {}): MemorySummary =>
     ...overrides,
   } as MemorySummary);
 
-const renderTreemap = (pages: MemorySummary[], onSelectPage = jest.fn()) =>
+const renderTreemap = (
+  pages: MemorySummary[],
+  onSelectPage = jest.fn(),
+  colorMode: 'light' | 'dark' = 'light'
+) =>
   render(
-    <I18nProvider>
-      <MemoryUsefulnessTreemap pages={pages} onSelectPage={onSelectPage} />
-    </I18nProvider>
+    <EuiProvider colorMode={colorMode}>
+      <I18nProvider>
+        <MemoryUsefulnessTreemap pages={pages} onSelectPage={onSelectPage} />
+      </I18nProvider>
+    </EuiProvider>
+  );
+
+/** The colours the component actually handed to the chart, per confidence band. */
+const bandColors = (): Record<string, string> => {
+  const [layer] = partitionProps.mock.calls[0][0].layers as [
+    { shape: { fillColor: (key: string) => string } }
+  ];
+  return {
+    low: layer.shape.fillColor('memory_low'),
+    medium: layer.shape.fillColor('memory_medium'),
+    high: layer.shape.fillColor('memory_high'),
+  };
+};
+
+/**
+ * The chart's `fillLabel.textColor` defaults to adaptive: it picks black or white
+ * per cell by contrast. Whichever it picks has to be readable on the band colour,
+ * so the assertion is on the better of the two, which is the best case the chart
+ * can achieve.
+ */
+const bestTextContrast = (fill: string): number =>
+  Math.max(
+    calculateContrast(hexToRgb(fill), [0, 0, 0]),
+    calculateContrast(hexToRgb(fill), [255, 255, 255])
   );
 
 beforeEach(() => {
@@ -215,17 +246,74 @@ describe('MemoryUsefulnessTreemap', () => {
   it('colours a cell by its confidence band', () => {
     renderTreemap([
       summary({ id: 'memory_low', confidence: 0.1 }),
+      summary({ id: 'memory_medium', confidence: 0.5 }),
       summary({ id: 'memory_high', confidence: 0.9 }),
     ]);
 
-    const [layer] = partitionProps.mock.calls[0][0].layers as [
-      { shape: { fillColor: (key: string) => string } }
-    ];
-    const [low, medium, high] = euiPaletteColorBlind();
-    expect(layer.shape.fillColor('memory_low')).toBe(low);
-    expect(layer.shape.fillColor('memory_high')).toBe(high);
-    expect(medium).not.toBe(low);
+    const colors = bandColors();
+    expect(colors.low).not.toBe(colors.medium);
+    expect(colors.medium).not.toBe(colors.high);
+    expect(colors.low).not.toBe(colors.high);
   });
+
+  it.each(['light', 'dark'] as const)(
+    'orders the confidence bands as one hue, light to dark, in %s mode',
+    (colorMode) => {
+      renderTreemap(
+        [
+          summary({ id: 'memory_low', confidence: 0.1 }),
+          summary({ id: 'memory_medium', confidence: 0.5 }),
+          summary({ id: 'memory_high', confidence: 0.9 }),
+        ],
+        jest.fn(),
+        colorMode
+      );
+
+      const { low, medium, high } = bandColors();
+      const luminances = CONFIDENCE_BANDS.map((band) =>
+        calculateLuminance(...hexToRgb(bandColors()[band]))
+      );
+
+      // The bands are ordinal, so the drawing has to say which is stronger: a
+      // categorical palette gave three unrelated hues and no order at all.
+      expect(luminances[0]).toBeGreaterThan(luminances[1]);
+      expect(luminances[1]).toBeGreaterThan(luminances[2]);
+      // A monotone ramp that never moves is not a scale; these must be visibly
+      // distinct steps, not three shades of one value.
+      for (const [lighter, darker] of [
+        [luminances[0], luminances[1]],
+        [luminances[1], luminances[2]],
+      ]) {
+        expect(lighter).toBeGreaterThan(darker * 1.1);
+      }
+      // One hue: the three steps differ in lightness, not in hue family, which is
+      // what makes the scale read as "more" rather than "different".
+      expect(hexToRgb(low)[2]).toBeGreaterThan(hexToRgb(low)[0]);
+      expect(hexToRgb(medium)[2]).toBeGreaterThan(hexToRgb(medium)[0]);
+      expect(hexToRgb(high)[2]).toBeGreaterThan(hexToRgb(high)[0]);
+    }
+  );
+
+  it.each(['light', 'dark'] as const)(
+    'keeps a cell label readable on every band in %s mode',
+    (colorMode) => {
+      renderTreemap(
+        [
+          summary({ id: 'memory_low', confidence: 0.1 }),
+          summary({ id: 'memory_medium', confidence: 0.5 }),
+          summary({ id: 'memory_high', confidence: 0.9 }),
+        ],
+        jest.fn(),
+        colorMode
+      );
+
+      for (const band of CONFIDENCE_BANDS) {
+        // WCAG AA for normal-size text. The chart picks whichever of black or
+        // white contrasts better, so this is the contrast it will actually draw.
+        expect(bestTextContrast(bandColors()[band])).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  );
 
   it('sizes the cell by the floored usefulness, so a day-one memory is still visible', () => {
     renderTreemap([summary({ usefulness: 0 })]);

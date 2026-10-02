@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  euiPaletteColorBlind,
+  useEuiPaletteCool,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
@@ -155,11 +155,22 @@ interface MemoryUsefulnessTreemapProps {
 export function MemoryUsefulnessTreemap({ pages, onSelectPage }: MemoryUsefulnessTreemapProps) {
   const cells = useMemo(() => toTreemapData(pages), [pages]);
   const cellsById = useMemo(() => new Map(cells.map((cell) => [cell.id, cell])), [cells]);
+  // The three bands are ordinal, so they get a sequential scale: one hue, light to
+  // dark, low to high. The colour-blind palette is categorical — its first three
+  // entries are three unrelated hues, so nothing in the drawing said which band was
+  // stronger. `useEuiPaletteCool` also re-derives on a theme change, where reading
+  // `EUI_VIS_COLOR_STORE` once at mount froze the light-theme colours into dark mode.
+  //
+  // The chart's own `fillLabel.textColor` is left at its default adaptive value,
+  // which picks black or white per cell; on this scale that resolves to black on
+  // all three steps in both themes (8:1 or better), so the labels stay readable.
+  const bandPalette = useEuiPaletteCool(CONFIDENCE_BANDS.length);
   const colors = useMemo<Record<ConfidenceBand, string>>(() => {
-    const palette = euiPaletteColorBlind();
-    const [low = '', medium = '', high = ''] = CONFIDENCE_BANDS.map((_, index) => palette[index]);
+    const [low = '', medium = '', high = ''] = CONFIDENCE_BANDS.map(
+      (_, index) => bandPalette[index]
+    );
     return { low, medium, high };
-  }, []);
+  }, [bandPalette]);
   const chartBaseTheme = useElasticChartsTheme();
 
   const onElementClick = useCallback<ElementClickListener>(
