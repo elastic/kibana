@@ -622,6 +622,20 @@ test.describe(
       await page.mouse.click(x, y);
     };
 
+    /**
+     * The memory count in the home header, as a number.
+     *
+     * Polled rather than read once: the count follows the filtered query, so it
+     * reads zero for as long as that query is in flight.
+     */
+    const expectHeaderTotal = async (page: ScoutPage, expected: number) => {
+      const read = async () => {
+        const text = await page.testSubj.locator('nightshiftMemoryHomeStats').innerText();
+        return Number.parseInt(text, 10);
+      };
+      await expect.poll(read, { timeout: 30_000 }).toBe(expected);
+    };
+
     /** The memory count in the home header, as a number. */
     const headerTotal = async (page: ScoutPage): Promise<number> => {
       const text = await page.testSubj.locator('nightshiftMemoryHomeStats').innerText();
@@ -662,7 +676,7 @@ test.describe(
       // The header count comes from the server, which had to match all three
       // spellings against the index: seven of the eight seeded memories carry
       // one of them.
-      expect(await headerTotal(page)).toBe(KEYWORD_DOCS_WITH_INVOKE_AGENT.length);
+      await expectHeaderTotal(page, KEYWORD_DOCS_WITH_INVOKE_AGENT.length);
       const oneKeywordRows = await homeRowIds(page);
       for (const key of KEYWORD_DOCS_WITH_INVOKE_AGENT) {
         expect(oneKeywordRows).toContain(`memory_${slug(key)}`);
@@ -680,7 +694,7 @@ test.describe(
       await expect(
         page.testSubj.locator(`nightshiftMemoryKeywordChip-${CHECKOUT_KEYWORD}`)
       ).toBeVisible();
-      expect(await headerTotal(page)).toBe(KEYWORD_DOCS_WITH_BOTH.length);
+      await expectHeaderTotal(page, KEYWORD_DOCS_WITH_BOTH.length);
       const bothRows = await homeRowIds(page);
       for (const key of KEYWORD_DOCS_WITH_BOTH) {
         expect(bothRows).toContain(`memory_${slug(key)}`);
@@ -692,12 +706,12 @@ test.describe(
       await expect(
         page.testSubj.locator(`nightshiftMemoryKeywordChip-${CHECKOUT_KEYWORD}`)
       ).toHaveCount(0);
-      expect(await headerTotal(page)).toBe(KEYWORD_DOCS_WITH_INVOKE_AGENT.length);
+      await expectHeaderTotal(page, KEYWORD_DOCS_WITH_INVOKE_AGENT.length);
 
       // "Clear all" puts the store back the way it was.
       await page.testSubj.locator('nightshiftMemoryClearKeywords').click();
       await expect(page.testSubj.locator('nightshiftMemoryKeywordFilters')).toHaveCount(0);
-      expect(await headerTotal(page)).toBe(unfilteredTotal);
+      await expectHeaderTotal(page, unfilteredTotal);
       await attachScreenshot(page, testInfo, 'memory-e13-keyword-cleared');
     });
 
