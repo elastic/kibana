@@ -104,8 +104,6 @@ export interface MemoryPage {
 export interface MemoryStats {
   total: number;
   archived: number;
-  decayed_conversions: number;
-  decayed_impressions: number;
 }
 
 export interface MemoryPageSummary extends Omit<MemoryPage, 'content'> {

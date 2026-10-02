@@ -9,7 +9,12 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryTab } from './tab';
-import { useMemoryEnabled, useMemoryPages, useMemoryPage } from './use_memory';
+import {
+  useMemoryEnabled,
+  useMemoryPage,
+  useMemoryPages,
+  useMemoryTreemapPages,
+} from './use_memory';
 import type { MemoryListResult, MemoryPageSummary } from './types';
 
 jest.mock('./use_memory');
@@ -24,6 +29,9 @@ jest.mock('../../../../hooks/use_kibana', () => ({
 const mockUseMemoryPages = useMemoryPages as jest.MockedFunction<typeof useMemoryPages>;
 const mockUseMemoryPage = useMemoryPage as jest.MockedFunction<typeof useMemoryPage>;
 const mockUseMemoryEnabled = useMemoryEnabled as jest.MockedFunction<typeof useMemoryEnabled>;
+const mockUseMemoryTreemapPages = useMemoryTreemapPages as jest.MockedFunction<
+  typeof useMemoryTreemapPages
+>;
 
 mockUseMemoryEnabled.mockReturnValue(true);
 
@@ -59,10 +67,14 @@ const listResult = (pages: MemoryPageSummary[]): MemoryListResult => ({
   stats: {
     total: pages.length,
     archived: 0,
-    decayed_impressions: 10,
-    decayed_conversions: 5,
   },
 });
+
+// The home view's treemap asks for its own wider slice of live memories, so it
+// has to be given one even though the tab's list query drives the rest of the view.
+mockUseMemoryTreemapPages.mockReturnValue({
+  data: listResult([]),
+} as unknown as ReturnType<typeof useMemoryTreemapPages>);
 
 const asQueryResult = (overrides: Record<string, unknown>) =>
   ({
@@ -108,7 +120,7 @@ describe('MemoryTab', () => {
     mockUseMemoryPages.mockReturnValue(
       asQueryResult({
         rows: [summary(), summary({ id: 'memory_old', title: 'Retired memory', archived: true })],
-        stats: { total: 2, archived: 1, decayed_impressions: 10, decayed_conversions: 5 },
+        stats: { total: 2, archived: 1 },
       })
     );
     renderTab();

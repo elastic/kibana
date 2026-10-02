@@ -438,37 +438,9 @@ export const createMemoryPageStore = ({
     return { ...rest, usefulness: display.conversionRate, confidence: display.confidence };
   };
 
-  const emptyStats = (): MemoryStats => ({
-    total: 0,
-    archived: 0,
-    decayed_impressions: 0,
-    decayed_conversions: 0,
-  });
+  const emptyStats = (): MemoryStats => ({ total: 0, archived: 0 });
 
-  /**
-   * Sum a counter held inside the flattened `attributes` object.
-   *
-   * `attributes` is mapped `flattened`, so every leaf is indexed as a keyword and
-   * Elasticsearch refuses `sum` on it outright (`not supported for aggregation
-   * [sum]`). A script sum is the supported way to total those values. The values
-   * are written as JSON numbers and come back as strings, so they are parsed
-   * rather than coerced, and the loop covers a document that somehow carries
-   * several values for the key.
-   */
-  const counterSum = (field: string): estypes.AggregationsAggregationContainer => ({
-    sum: {
-      script: {
-        source:
-          'double total = 0.0; ' +
-          `def values = doc['${field}']; ` +
-          'if (values.size() != 0) { for (def value : values) { ' +
-          'total += Double.parseDouble(value); } } ' +
-          'return total;',
-      },
-    },
-  });
-
-  /** Counter totals over the whole filtered set, independent of the page slice. */
+  /** Counts over the whole filtered set, independent of the page slice. */
   const aggregateStats = async (filter: MemoryFilter): Promise<MemoryStats> => {
     try {
       const response = await esClient.search<StoredMemoryPage>(
@@ -479,8 +451,6 @@ export const createMemoryPageStore = ({
           track_total_hits: true,
           aggs: {
             archived: { filter: ARCHIVED_CLAUSE },
-            impressions: counterSum('attributes.impressions'),
-            conversions: counterSum('attributes.conversions'),
           },
         },
         { signal }
@@ -488,8 +458,6 @@ export const createMemoryPageStore = ({
       const aggs = response.aggregations as
         | {
             archived?: { doc_count?: number };
-            impressions?: { value?: number | null };
-            conversions?: { value?: number | null };
           }
         | undefined;
       return {
@@ -498,8 +466,6 @@ export const createMemoryPageStore = ({
             ? response.hits.total
             : response.hits.total?.value ?? 0,
         archived: aggs?.archived?.doc_count ?? 0,
-        decayed_impressions: aggs?.impressions?.value ?? 0,
-        decayed_conversions: aggs?.conversions?.value ?? 0,
       };
     } catch (err) {
       if (isIndexNotFoundError(err)) return emptyStats();
@@ -543,22 +509,12 @@ export const createMemoryPageStore = ({
           { signal }
         );
         const pages = hitsToPages(response.hits.hits);
-        const nowSec = now();
-        let decayedImpressions = 0;
-        let decayedConversions = 0;
-        for (const page of pages) {
-          const display = toMemoryDisplayTelemetry(page, nowSec);
-          decayedImpressions += display.impressions;
-          decayedConversions += display.conversions;
-        }
 
         return {
           pages: pages.map(toSummary),
           stats: {
             total: pages.length,
             archived: pages.filter((page) => page.archived).length,
-            decayed_impressions: decayedImpressions,
-            decayed_conversions: decayedConversions,
           },
         };
       } catch (err) {

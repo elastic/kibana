@@ -11,10 +11,12 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import {
   MEMORY_PAGE_SIZE,
+  MEMORY_TREEMAP_SIZE,
   useDeleteMemoryPage,
   useMemoryEnabled,
   useMemoryPage,
   useMemoryPages,
+  useMemoryTreemapPages,
   useSetMemoryArchived,
 } from './use_memory';
 import type { MemoryListResult } from './types';
@@ -46,7 +48,7 @@ const listResult = (ids: string[], cursor?: string): MemoryListResult => ({
   pages: ids.map(summary),
   total: ids.length,
   cursor,
-  stats: { total: ids.length, archived: 0, decayed_impressions: 1, decayed_conversions: 0 },
+  stats: { total: ids.length, archived: 0 },
 });
 
 /** Retries are off so a rejected request fails the assertion rather than the run. */
@@ -127,7 +129,7 @@ describe('useMemoryPages', () => {
   it('reports the server totals rather than counting the loaded rows', async () => {
     // The header numbers come from the server's whole-set aggregation. Counting the
     // loaded slice here would make them shrink as the operator pages.
-    const stats = { total: 42, archived: 7, decayed_impressions: 900, decayed_conversions: 300 };
+    const stats = { total: 42, archived: 7 };
     fetchMock.mockResolvedValue({ ...listResult(['memory_a']), total: 42, stats });
     const { wrapper } = createWrapper();
 
@@ -143,6 +145,30 @@ describe('useMemoryPages', () => {
     const { wrapper } = createWrapper();
 
     const { result } = renderHook(() => useMemoryPages('active'), { wrapper });
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('useMemoryTreemapPages', () => {
+  it('asks the list route for one wide page of live memories', async () => {
+    // The tab's own list is a 25-row slice, which would describe a quarter of
+    // the store; the chart asks for its own wider page rather than a new route.
+    fetchMock.mockResolvedValue(listResult(['memory_a']));
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useMemoryTreemapPages(), { wrapper });
+
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(1));
+    expect(listQueries()[0]).toEqual({ filter: 'active', size: MEMORY_TREEMAP_SIZE });
+  });
+
+  it('stays disabled, and issues no request, when the client is absent', async () => {
+    givenNoClient();
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useMemoryTreemapPages(), { wrapper });
 
     expect(result.current.fetchStatus).toBe('idle');
     expect(fetchMock).not.toHaveBeenCalled();

@@ -97,8 +97,7 @@ describe('createMemoryPageStore', () => {
       last_impression_time: T0_ISO,
     });
     expect(result.stats.total).toBe(1);
-    expect(result.stats.decayed_impressions).toBeCloseTo(5, 10);
-    expect(result.stats.decayed_conversions).toBeCloseTo(1.5, 10);
+    expect(result.stats.archived).toBe(0);
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         query: {
@@ -275,8 +274,6 @@ describe('createMemoryPageStore', () => {
           hits: { total: { value: 3, relation: 'eq' }, hits: [] },
           aggregations: {
             archived: { doc_count: 1 },
-            impressions: { value: 30 },
-            conversions: { value: 12 },
           },
         });
       }
@@ -371,8 +368,6 @@ describe('createMemoryPageStore', () => {
               hits: { total: { value: 137, relation: 'eq' }, hits: [] },
               aggregations: {
                 archived: { doc_count: 12 },
-                impressions: { value: 900 },
-                conversions: { value: 300 },
               },
             }
           : {
@@ -397,36 +392,7 @@ describe('createMemoryPageStore', () => {
     expect(result.stats).toEqual({
       total: 137,
       archived: 12,
-      decayed_impressions: 900,
-      decayed_conversions: 300,
     });
-  });
-
-  it('sums the counters with a script, because sum is rejected on a flattened field', async () => {
-    // `attributes` is mapped `flattened`, so Elasticsearch refuses
-    // `sum: { field: 'attributes.impressions' }` with an illegal_argument_exception
-    // and the whole list route 500s. A script sum is the supported form.
-    const search = jest.fn().mockResolvedValue({
-      hits: { total: { value: 0, relation: 'eq' }, hits: [] },
-      aggregations: { archived: { doc_count: 0 } },
-    });
-    const store = createMemoryPageStore({
-      esClient: { search } as never,
-      logger,
-      spaceId: 'space-a',
-      now: () => T0,
-    });
-
-    await store.listPaginated();
-
-    const statsQuery = search.mock.calls[1][0];
-    expect(statsQuery.aggs.impressions).toEqual({
-      sum: { script: { source: expect.stringContaining("doc['attributes.impressions']") } },
-    });
-    expect(statsQuery.aggs.conversions).toEqual({
-      sum: { script: { source: expect.stringContaining("doc['attributes.conversions']") } },
-    });
-    expect(JSON.stringify(statsQuery.aggs)).not.toContain('"field":"attributes.impressions"');
   });
 
   it('reports empty stats rather than failing when the index does not exist yet', async () => {
@@ -447,7 +413,7 @@ describe('createMemoryPageStore', () => {
     // Elasticsearch rather than an error the operator should see.
     await expect(store.listPaginated()).resolves.toEqual({
       pages: [],
-      stats: { total: 0, archived: 0, decayed_impressions: 0, decayed_conversions: 0 },
+      stats: { total: 0, archived: 0 },
       total: 0,
     });
   });

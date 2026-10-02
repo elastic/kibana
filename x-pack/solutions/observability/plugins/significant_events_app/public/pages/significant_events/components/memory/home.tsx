@@ -9,6 +9,8 @@ import React, { useMemo } from 'react';
 import { EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MemoryPageRow } from './page_row';
+import { MemoryUsefulnessTreemap } from './usefulness_treemap';
+import { useMemoryTreemapPages } from './use_memory';
 import type { MemoryStats, MemorySummary } from './types';
 
 interface MemoryHomeProps {
@@ -22,6 +24,11 @@ const RECENT_COUNT = 8;
 const MOST_USEFUL_COUNT = 3;
 
 export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
+  // The tab's own list is one page of the store, so the chart asks for its own
+  // wider slice rather than describing whichever 25 rows happen to be loaded.
+  const { data: treemapResult } = useMemoryTreemapPages();
+  const treemapPages = useMemo(() => treemapResult?.pages ?? [], [treemapResult]);
+
   const recentlyUpdated = useMemo(
     () =>
       [...pages].sort((a, b) => b.updated_at.localeCompare(a.updated_at)).slice(0, RECENT_COUNT),
@@ -75,17 +82,10 @@ export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
           defaultMessage="{count} archived"
           values={{ count: archived }}
         />
-        {stats?.decayed_impressions !== undefined && stats.decayed_impressions > 0 && (
-          <>
-            {' · '}
-            <FormattedMessage
-              id="xpack.significantEventsApp.memory.stats.recallLabel"
-              defaultMessage="{count, plural, one {recalled once} other {recalled # times}}"
-              values={{ count: Math.round(stats.decayed_impressions) }}
-            />
-          </>
-        )}
       </EuiText>
+
+      <EuiSpacer size="l" />
+      <MemoryUsefulnessTreemap pages={treemapPages} onSelectPage={onSelectPage} />
 
       {mostUseful.length > 0 && (
         <>

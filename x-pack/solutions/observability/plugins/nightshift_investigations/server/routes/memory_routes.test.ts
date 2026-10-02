@@ -86,7 +86,7 @@ describe('listMemoryPagesRoute', () => {
       pages: [],
       total: 137,
       cursor: 'next-page',
-      stats: { total: 137, archived: 12, decayed_impressions: 900, decayed_conversions: 300 },
+      stats: { total: 137, archived: 12 },
     };
     const listPaginated = jest.fn().mockResolvedValue(result);
 

@@ -19,6 +19,7 @@ const memoryKeys = {
       'pages',
       MemoryFilter
     ],
+  treemap: ['nightshift', 'memory', 'treemap'] as const,
   page: (id: string) => ['nightshift', 'memory', 'page', id] as const,
 };
 
@@ -103,6 +104,29 @@ export const useMemoryPages = (filter: MemoryFilter = 'all') => {
     stats: first?.stats,
     total: first?.total ?? 0,
   };
+};
+
+/**
+ * The live memories the usefulness × confidence treemap draws.
+ *
+ * The tab's own list is a cursor-paginated slice, so sizing the chart from it
+ * would describe 25 memories rather than the store. This asks the list route
+ * for one larger page instead of adding a route.
+ */
+export const MEMORY_TREEMAP_SIZE = 40;
+
+export const useMemoryTreemapPages = () => {
+  const client = useMemoryClient();
+
+  return useQuery({
+    queryKey: memoryKeys.treemap,
+    queryFn: ({ signal }) =>
+      client!.fetch('GET /internal/nightshift/memory/pages', {
+        signal: signal ?? null,
+        params: { query: { filter: 'active', size: MEMORY_TREEMAP_SIZE } },
+      }) as Promise<MemoryListResult>,
+    enabled: client !== undefined,
+  });
 };
 
 export const useMemoryPage = (id: string | undefined) => {
