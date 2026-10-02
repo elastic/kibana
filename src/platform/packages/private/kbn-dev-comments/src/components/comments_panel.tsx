@@ -343,7 +343,7 @@ const PanelRow = ({
   }, [active]);
 
   const notVisibleLabel = i18n.translate('devComments.panel.notVisible', {
-    defaultMessage: 'Comment not visible on this page',
+    defaultMessage: 'Comment not visible',
   });
   const replies = comment.replies.length;
 
@@ -407,6 +407,7 @@ const PanelRow = ({
           flex: 1 1 auto;
           min-width: 0;
           text-align: left;
+          padding-inline-start: ${euiTheme.size.xs};
           /* The whole row is the button's target; the actions sit above it. */
           &::after {
             content: '';
@@ -453,7 +454,7 @@ const PanelRow = ({
                   anchorProps={{
                     css: css`
                       position: relative;
-                      z-index: 1;
+                      z-index: ${Number(euiTheme.levels.content) + 1};
                     `,
                   }}
                 />
