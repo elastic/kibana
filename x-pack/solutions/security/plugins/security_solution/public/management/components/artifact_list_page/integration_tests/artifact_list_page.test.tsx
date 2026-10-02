@@ -206,6 +206,51 @@ describe('When using the ArtifactListPage component', () => {
         expect(getByTestId('testPage-simpleTable-cardDeleteAction')).toBeInTheDocument();
       });
 
+      it('should open an empty view flyout when the name is clicked', async () => {
+        const { getAllByTestId, getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          allowCardEditAction: false,
+          allowCardCreateAction: false,
+          allowCardDeleteAction: false,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
+        expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+        expect(queryByTestId('formMock')).not.toBeInTheDocument();
+        expect(history.location.search).toMatch(/show=view/);
+        expect(history.location.search).toMatch(/itemId=/);
+      });
+
+      it('should open the view flyout from the show=view URL without the edit form', async () => {
+        history.push('somepage?show=view&itemId=123');
+
+        const { getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
+        expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+        expect(queryByTestId('formMock')).not.toBeInTheDocument();
+      });
+
+      it('should close the view flyout and clear the view URL params', async () => {
+        history.push('somepage?show=view&itemId=123');
+
+        const { getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getByTestId('euiFlyoutCloseButton'));
+
+        await waitFor(() => {
+          expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+        });
+        expect(history.location.search).not.toMatch(/show=view/);
+        expect(history.location.search).not.toMatch(/itemId=/);
+      });
+
       it('should display the Edit flyout when table edit action is clicked', async () => {
         const { getByTestId, getAllByTestId } = await renderWithListData({
           showAsSimpleTable: true,

@@ -17,6 +17,7 @@ import {
   EuiBadge,
   EuiBadgeGroup,
   EuiBasicTable,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -42,7 +43,7 @@ const EMPTY_SORTABLE_FIELDS: readonly string[] = [];
 
 const getOsTitle = (os: OsType): string => OS_TITLES[os as OperatingSystem] ?? os;
 
-export type ArtifactSimpleTableActionType = 'edit' | 'delete';
+export type ArtifactSimpleTableActionType = 'edit' | 'delete' | 'view';
 
 export interface ArtifactSimpleTableProps {
   items: MaybeImmutable<ExceptionListItemSchema[]>;
@@ -139,16 +140,20 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
           field: 'name',
           name: labels.tableColumnNameLabel,
           truncateText: true,
-          render: (name: string) => (
+          render: (name: string, artifact: ExceptionListItemSchema) => (
             <EuiToolTip content={name} anchorClassName="eui-textTruncate">
-              <EuiText
-                size="s"
+              <EuiButtonEmpty
                 className="eui-textTruncate"
-                tabIndex={0}
+                color="primary"
+                size="s"
+                flush="both"
+                onClick={() => {
+                  onAction({ type: 'view', item: artifact });
+                }}
                 data-test-subj={getTestId('columnName')}
               >
                 {name}
-              </EuiText>
+              </EuiButtonEmpty>
             </EuiToolTip>
           ),
         },

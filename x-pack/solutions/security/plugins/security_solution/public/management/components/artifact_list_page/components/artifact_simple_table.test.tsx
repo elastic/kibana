@@ -108,10 +108,19 @@ describe('ArtifactSimpleTable', () => {
     ]);
   });
 
-  it('renders the artifact name', () => {
+  it('renders the artifact name as a button', () => {
     render();
 
+    expect(renderResult.getByRole('button', { name: 'YARA rule one' })).toBeInTheDocument();
     expect(renderResult.getByTestId('testTable-columnName')).toHaveTextContent('YARA rule one');
+  });
+
+  it('invokes onAction when the name is clicked', () => {
+    render({ allowCardEditAction: false, allowCardDeleteAction: false });
+
+    fireEvent.click(renderResult.getByTestId('testTable-columnName'));
+
+    expect(onAction).toHaveBeenCalledWith({ type: 'view', item });
   });
 
   it('renders operating system badges with human-readable labels', () => {

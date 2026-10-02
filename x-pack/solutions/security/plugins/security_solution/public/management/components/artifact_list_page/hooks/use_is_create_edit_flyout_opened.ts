@@ -11,7 +11,7 @@ import type { ArtifactListPageUrlParams } from '../types';
 
 const SHOW_VALUES: readonly string[] = ['create', 'edit'];
 
-export const useIsFlyoutOpened = (
+export const useIsCreateEditFlyoutOpened = (
   allowEdit: boolean = true,
   allowCreate: boolean = true
 ): boolean => {
