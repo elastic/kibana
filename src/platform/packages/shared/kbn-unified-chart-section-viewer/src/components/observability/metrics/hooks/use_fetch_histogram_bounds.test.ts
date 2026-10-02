@@ -31,7 +31,7 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import type { ParsedMetricItem } from '../../../../types';
 import { useFeatureFlag } from '../../../../hooks';
-import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { executeEsqlQuery, type ExecuteEsqlResult } from '../utils/execute_esql_query';
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
 import { useFetchHistogramBounds } from './use_fetch_histogram_bounds';
 
@@ -40,14 +40,24 @@ const mockUseFeatureFlag = useFeatureFlag as jest.MockedFunction<typeof useFeatu
 
 type BoundsRow = Record<string, number | string | null>;
 
-const resolved = (documents: BoundsRow[]) =>
-  Promise.resolve({ documents, rawResponse: {}, requestParams: { query: '' } });
+const emptyRawResponse: ExecuteEsqlResult<BoundsRow>['rawResponse'] = {
+  columns: [],
+  values: [],
+  requestParams: { query: '' },
+};
+
+const resolved = (documents: BoundsRow[]): Promise<ExecuteEsqlResult<BoundsRow>> =>
+  Promise.resolve({ documents, rawResponse: emptyRawResponse, requestParams: { query: '' } });
 
 const deferred = () => {
   let resolve: (rows: BoundsRow[]) => void = () => {};
   const promise = new Promise<Awaited<ReturnType<typeof resolved>>>((resolvePromise) => {
     resolve = (rows) =>
-      resolvePromise({ documents: rows, rawResponse: {}, requestParams: { query: '' } });
+      resolvePromise({
+        documents: rows,
+        rawResponse: emptyRawResponse,
+        requestParams: { query: '' },
+      });
   });
   return { promise, resolve };
 };
