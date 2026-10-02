@@ -104,7 +104,7 @@ export class DataFederationPage {
   }
 
   async filterDataSets(dataSetName: string): Promise<void> {
-    await this.page.testSubj.locator('dataSetsSetsSearch').fill(`"${dataSetName}"`);
+    await this.page.testSubj.typeWithDelay('dataSetsSetsSearch', `"${dataSetName}"`);
     await this.getDataSetRow(dataSetName).waitFor({ state: 'visible' });
   }
 
