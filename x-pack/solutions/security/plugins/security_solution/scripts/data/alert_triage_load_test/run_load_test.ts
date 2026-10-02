@@ -234,6 +234,8 @@ const finalizeReport = async ({
     childWorkflowIds: manifest.childWorkflowIds,
     dispatches,
     runStartedAt: manifest.startedAt,
+    // The report counts what this run's Worker executions started, not other Workers' or runs'.
+    scopeChildrenToRun: true,
   });
 
   const stepExecutions = Object.fromEntries(

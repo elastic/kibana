@@ -6,9 +6,14 @@
  */
 
 import type { KbnClient } from '@kbn/test';
-import { formatError } from '../../lib/type_guards';
+import { formatError, getStatusCode } from '../../lib/type_guards';
 import type { WorkflowExecutionSummary, WorkflowStepExecutionSummary } from './kibana_api';
-import { listExecutionsByIds, listExecutionsStartedAfter, listStepExecutions } from './kibana_api';
+import {
+  listChildExecutions,
+  listExecutionsByIds,
+  listExecutionsStartedAfter,
+  listStepExecutions,
+} from './kibana_api';
 import type { DispatchRecord } from './types';
 
 export const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
@@ -49,11 +54,14 @@ export const REPORTED_STEP_IDS = [
 
 export type DispatchPhase = 'dispatch_failed' | 'not_visible' | 'running' | 'parked' | 'finished';
 
+/** What the report needs of a child execution; a listing by parent cannot return more. */
+export type ChildExecution = Pick<WorkflowExecutionSummary, 'id' | 'status' | 'usage'>;
+
 export interface ProgressSnapshot {
   takenAt: string;
   workerExecutions: WorkflowExecutionSummary[];
   workDoneSteps: WorkflowStepExecutionSummary[];
-  childExecutions: Record<string, WorkflowExecutionSummary[]>;
+  childExecutions: Record<string, ChildExecution[]>;
   /**
    * Child workflows whose executions could not be listed, by workflow id. Their entry in
    * `childExecutions` is empty, which must not be read as "nothing ran".
@@ -114,10 +122,108 @@ export const classifyDispatches = ({
 export const isSettled = (phase: DispatchPhase): boolean =>
   phase === 'dispatch_failed' || phase === 'parked' || phase === 'finished';
 
-interface ChildListing {
-  executions: WorkflowExecutionSummary[];
-  error?: string;
+interface ChildListings {
+  executions: Record<string, ChildExecution[]>;
+  errors: Record<string, string>;
 }
+
+/** Runs `task` over `items`, at most `limit` at a time, keeping the order of `items`. */
+const mapWithConcurrency = async <T, R>(
+  items: T[],
+  limit: number,
+  task: (item: T) => Promise<R>
+): Promise<R[]> => {
+  const results: R[] = [];
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await task(items[index]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
+};
+
+const CHILD_LOOKUP_CONCURRENCY = 10;
+
+/**
+ * Every execution of the child workflows started since `startedAfter`, whoever started it. Cheap, so
+ * the collector uses it on every poll, but it also counts executions of other Workers and runs.
+ */
+const listChildExecutionsInWindow = async ({
+  kbnClient,
+  childWorkflowIds,
+  startedAfter,
+}: {
+  kbnClient: KbnClient;
+  childWorkflowIds: string[];
+  startedAfter: string;
+}): Promise<ChildListings> => {
+  const listings = await Promise.all(
+    childWorkflowIds.map((workflowId) =>
+      listExecutionsStartedAfter({ kbnClient, workflowId, startedAfter }).then(
+        (executions) => ({ workflowId, executions, error: undefined }),
+        (error) => ({ workflowId, executions: [], error: formatError(error) })
+      )
+    )
+  );
+  return {
+    executions: Object.fromEntries(
+      listings.map(({ workflowId, executions }) => [workflowId, executions])
+    ),
+    errors: Object.fromEntries(
+      listings.flatMap(({ workflowId, error }) => (error ? [[workflowId, error]] : []))
+    ),
+  };
+};
+
+/**
+ * The child executions the dispatched Worker runs started themselves. One request per Worker run,
+ * so this is meant for the final report, not for every poll. A run the API does not know (404) has
+ * no children; any other failure is reported for every child workflow, because a failed lookup
+ * cannot say which workflow's executions are missing.
+ */
+const listChildExecutionsOfRuns = async ({
+  kbnClient,
+  childWorkflowIds,
+  executionIds,
+}: {
+  kbnClient: KbnClient;
+  childWorkflowIds: string[];
+  executionIds: string[];
+}): Promise<ChildListings> => {
+  const lookups = await mapWithConcurrency(executionIds, CHILD_LOOKUP_CONCURRENCY, (executionId) =>
+    listChildExecutions({ kbnClient, executionId }).then(
+      (children) => ({ children, error: undefined }),
+      (error) =>
+        getStatusCode(error) === 404
+          ? { children: [], error: undefined }
+          : { children: [], error: formatError(error) }
+    )
+  );
+
+  const failures = lookups.flatMap(({ error }) => (error ? [error] : []));
+  const message =
+    failures.length > 0
+      ? `${failures.length} of ${executionIds.length} child lookups failed: ${failures[0]}`
+      : undefined;
+  const children = lookups.flatMap((lookup) => lookup.children);
+
+  return {
+    executions: Object.fromEntries(
+      childWorkflowIds.map((workflowId) => [
+        workflowId,
+        children
+          .filter((child) => child.workflowId === workflowId)
+          .map(({ executionId, status }) => ({ id: executionId, status })),
+      ])
+    ),
+    errors: message
+      ? Object.fromEntries(childWorkflowIds.map((workflowId) => [workflowId, message]))
+      : {},
+  };
+};
 
 export const fetchProgress = async ({
   kbnClient,
@@ -125,18 +231,24 @@ export const fetchProgress = async ({
   childWorkflowIds,
   dispatches,
   runStartedAt,
+  scopeChildrenToRun = false,
 }: {
   kbnClient: KbnClient;
   workerWorkflowId: string;
   childWorkflowIds: string[];
   dispatches: DispatchRecord[];
   runStartedAt: string;
+  /**
+   * Count only the child executions the dispatched Worker runs started, instead of every one since
+   * `runStartedAt`. Costs a request per Worker run, so leave it off for polling.
+   */
+  scopeChildrenToRun?: boolean;
 }): Promise<ProgressSnapshot> => {
   const wantedIds = new Set(
     dispatches.flatMap(({ executionId }) => (executionId ? [executionId] : []))
   );
 
-  const [workerExecutions, workDoneSteps, ...children] = await Promise.all([
+  const [workerExecutions, workDoneSteps, children] = await Promise.all([
     wantedIds.size > 0
       ? listExecutionsByIds({ kbnClient, workflowId: workerWorkflowId, wantedIds })
       : Promise.resolve([]),
@@ -146,26 +258,16 @@ export const fetchProgress = async ({
       stepId: WORK_DONE_STEP_ID,
       startedAfter: runStartedAt,
     }),
-    ...childWorkflowIds.map((workflowId) =>
-      listExecutionsStartedAfter({ kbnClient, workflowId, startedAfter: runStartedAt }).then(
-        (executions): ChildListing => ({ executions }),
-        (error): ChildListing => ({ executions: [], error: formatError(error) })
-      )
-    ),
+    scopeChildrenToRun
+      ? listChildExecutionsOfRuns({ kbnClient, childWorkflowIds, executionIds: [...wantedIds] })
+      : listChildExecutionsInWindow({ kbnClient, childWorkflowIds, startedAfter: runStartedAt }),
   ]);
 
   return {
     takenAt: new Date().toISOString(),
     workerExecutions,
     workDoneSteps,
-    childExecutions: Object.fromEntries(
-      childWorkflowIds.map((workflowId, index) => [workflowId, children[index].executions])
-    ),
-    childExecutionErrors: Object.fromEntries(
-      childWorkflowIds.flatMap((workflowId, index) => {
-        const { error } = children[index];
-        return error ? [[workflowId, error]] : [];
-      })
-    ),
+    childExecutions: children.executions,
+    childExecutionErrors: children.errors,
   };
 };

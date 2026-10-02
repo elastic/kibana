@@ -8,7 +8,12 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import { createKbnClient } from '../../lib/clients';
 import type { WorkflowExecutionSummary, WorkflowStepExecutionSummary } from './kibana_api';
-import { listExecutionsByIds, listExecutionsStartedAfter, listStepExecutions } from './kibana_api';
+import {
+  listChildExecutions,
+  listExecutionsByIds,
+  listExecutionsStartedAfter,
+  listStepExecutions,
+} from './kibana_api';
 import type { ProgressSnapshot } from './progress';
 import {
   REPORTED_STEP_IDS,
@@ -20,6 +25,7 @@ import {
 import type { DispatchRecord } from './types';
 
 jest.mock('./kibana_api', () => ({
+  listChildExecutions: jest.fn(),
   listExecutionsByIds: jest.fn(),
   listExecutionsStartedAfter: jest.fn(),
   listStepExecutions: jest.fn(),
@@ -169,6 +175,7 @@ describe('fetchProgress', () => {
     auth: { type: 'basic', username: 'elastic', password: 'changeme' },
     log: new ToolingLog(),
   });
+  const listChildExecutionsMock = jest.mocked(listChildExecutions);
   const listExecutionsByIdsMock = jest.mocked(listExecutionsByIds);
   const listExecutionsStartedAfterMock = jest.mocked(listExecutionsStartedAfter);
   const listStepExecutionsMock = jest.mocked(listStepExecutions);
@@ -186,6 +193,7 @@ describe('fetchProgress', () => {
     listExecutionsByIdsMock.mockReset().mockResolvedValue([buildExecution()]);
     listStepExecutionsMock.mockReset().mockResolvedValue([]);
     listExecutionsStartedAfterMock.mockReset();
+    listChildExecutionsMock.mockReset();
   });
 
   it('lists the executions of every child workflow', async () => {
@@ -208,5 +216,104 @@ describe('fetchProgress', () => {
     expect(snapshot.childExecutions.analysis).toHaveLength(1);
     expect(snapshot.childExecutions.proposal).toEqual([]);
     expect(snapshot.childExecutionErrors).toEqual({ proposal: expect.stringContaining('403') });
+  });
+
+  describe('scoped to the run', () => {
+    const dispatches = [
+      buildDispatch({ batchId: 'batch-0', executionId: 'execution-1' }),
+      buildDispatch({ batchId: 'batch-1', executionId: 'execution-2' }),
+    ];
+
+    const fetchScoped = () =>
+      fetchProgress({
+        kbnClient,
+        workerWorkflowId: 'worker',
+        childWorkflowIds: ['analysis', 'proposal'],
+        dispatches,
+        runStartedAt: '2026-09-30T12:00:00.000Z',
+        scopeChildrenToRun: true,
+      });
+
+    it('counts only the children of the dispatched Worker runs, grouped by workflow', async () => {
+      listChildExecutionsMock.mockImplementation(async ({ executionId }) =>
+        executionId === 'execution-1'
+          ? [
+              { executionId: 'a-1', workflowId: 'analysis', status: 'completed' },
+              { executionId: 'p-1', workflowId: 'proposal', status: 'waiting_for_input' },
+            ]
+          : [
+              { executionId: 'a-2', workflowId: 'analysis', status: 'running' },
+              { executionId: 'other-1', workflowId: 'unrelated-workflow', status: 'completed' },
+            ]
+      );
+
+      const snapshot = await fetchScoped();
+
+      expect(listChildExecutionsMock).toHaveBeenCalledTimes(2);
+      expect(snapshot.childExecutions).toEqual({
+        analysis: [
+          { id: 'a-1', status: 'completed' },
+          { id: 'a-2', status: 'running' },
+        ],
+        proposal: [{ id: 'p-1', status: 'waiting_for_input' }],
+      });
+      expect(snapshot.childExecutionErrors).toEqual({});
+    });
+
+    it('does not list every execution since the run started', async () => {
+      listChildExecutionsMock.mockResolvedValue([]);
+
+      await fetchScoped();
+
+      expect(listExecutionsStartedAfterMock).not.toHaveBeenCalled();
+    });
+
+    it('treats a Worker run the API does not know as having no children', async () => {
+      listChildExecutionsMock.mockRejectedValue(
+        Object.assign(new Error('Not Found'), { response: { status: 404 } })
+      );
+
+      const snapshot = await fetchScoped();
+
+      expect(snapshot.childExecutions).toEqual({ analysis: [], proposal: [] });
+      expect(snapshot.childExecutionErrors).toEqual({});
+    });
+
+    it('reports a failed lookup for every child workflow instead of undercounting silently', async () => {
+      listChildExecutionsMock
+        .mockResolvedValueOnce([
+          { executionId: 'a-1', workflowId: 'analysis', status: 'completed' },
+        ])
+        .mockRejectedValueOnce(new Error('500 Internal Server Error'));
+
+      const snapshot = await fetchScoped();
+
+      expect(snapshot.childExecutionErrors).toEqual({
+        analysis: expect.stringContaining('1 of 2 child lookups failed'),
+        proposal: expect.stringContaining('500 Internal Server Error'),
+      });
+    });
+
+    it('does not look anything up when no batch was dispatched', async () => {
+      const snapshot = await fetchProgress({
+        kbnClient,
+        workerWorkflowId: 'worker',
+        childWorkflowIds: ['analysis'],
+        dispatches: [buildDispatch({ executionId: undefined })],
+        runStartedAt: '2026-09-30T12:00:00.000Z',
+        scopeChildrenToRun: true,
+      });
+
+      expect(listChildExecutionsMock).not.toHaveBeenCalled();
+      expect(snapshot.childExecutions).toEqual({ analysis: [] });
+    });
+  });
+
+  it('does not look up children per Worker run when polling', async () => {
+    listExecutionsStartedAfterMock.mockResolvedValue([]);
+
+    await fetch();
+
+    expect(listChildExecutionsMock).not.toHaveBeenCalled();
   });
 });

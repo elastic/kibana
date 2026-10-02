@@ -215,6 +215,31 @@ export const listExecutionsStartedAfter = async ({
     return data;
   });
 
+export interface ChildExecutionSummary {
+  executionId: string;
+  workflowId: string;
+  status: string;
+}
+
+/**
+ * The executions another workflow started from `executionId` with a `workflow.execute` step. This
+ * is the only listing that ties a child run to its parent: the executions list carries no parent.
+ */
+export const listChildExecutions = async ({
+  kbnClient,
+  executionId,
+}: {
+  kbnClient: KbnClient;
+  executionId: string;
+}): Promise<ChildExecutionSummary[]> => {
+  const { data } = await kbnClient.request<ChildExecutionSummary[]>({
+    method: 'GET',
+    path: `/api/workflows/executions/${encodeURIComponent(executionId)}/children`,
+    headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+  });
+  return data;
+};
+
 /** Every execution of one step of a workflow started at or after `startedAfter`. */
 export const listStepExecutions = async ({
   kbnClient,

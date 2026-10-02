@@ -23,6 +23,8 @@ export interface MetricsSample {
   /** Batches per phase; `parked` and `finished` are the settled ones. */
   batchesByPhase: Partial<Record<DispatchPhase, number>>;
   workerExecutionsByStatus: Record<string, number>;
+  /** Every execution of the child workflows since the run started, including other Workers'. */
+  /** Every execution of the child workflows since the run started, including other Workers'. */
   childExecutionsByStatus: Record<string, Record<string, number>>;
   /** Child workflows whose executions could not be listed in this sample, by workflow id. */
   childExecutionErrors?: Record<string, string>;
