@@ -20,7 +20,7 @@ import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlis
 import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
-import { formatEntityIdsForPrompt } from './entity_ids_preview';
+import { formatEntityIdsForPrompt } from '../shared/entity_ids_preview';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
 const MAX_ENTITIES_PER_CALL = 100;

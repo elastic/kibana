@@ -22,7 +22,7 @@ import {
  * - inspecting a resolution group (security.get_resolution_group)
  * - linking / unlinking entities (security.link_entities / security.unlink_entities)
  * - enumerating and toggling the managed resolution rules (security.list_resolution_rules,
- *   security.enable_resolution_rule, security.disable_resolution_rule)
+ *   security.set_resolution_rules)
  */
 
 // Fresh, never-linked pair — used by the link-flow eval. Mirrors the skill's own example flow.
@@ -221,7 +221,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: enable / disable resolution rule',
             description:
-              'Questions asking to enable/disable a named resolution rule route to the matching mutation tool with a HITL confirmation. Listing rules is covered by the enumerate example; these examples do not require another list call.',
+              'Questions asking to enable/disable one or more named resolution rules route to security.set_resolution_rules with a HITL confirmation. Listing rules is covered by the enumerate example; these examples do not require another list call.',
             examples: [
               {
                 input: {
@@ -229,13 +229,15 @@ evaluate.describe(
                 },
                 output: {
                   criteria: [
-                    `Call security.disable_resolution_rule with ruleId "${DISABLE_TEST_RULE_ID}".`,
+                    `Call security.set_resolution_rules with ruleId "${DISABLE_TEST_RULE_ID}" set to disabled.`,
                     'Surface the confirmation step rather than claiming the rule was already disabled.',
                   ],
                   toolCalls: [
                     {
-                      id: 'security.disable_resolution_rule',
-                      criteria: [`The tool is called with ruleId "${DISABLE_TEST_RULE_ID}".`],
+                      id: 'security.set_resolution_rules',
+                      criteria: [
+                        `The tool is called with rules containing { ruleId: "${DISABLE_TEST_RULE_ID}", enabled: false }.`,
+                      ],
                     },
                   ],
                 },
@@ -247,17 +249,39 @@ evaluate.describe(
                 },
                 output: {
                   criteria: [
-                    `Call security.enable_resolution_rule with ruleId "${ENABLE_TEST_RULE_ID}".`,
+                    `Call security.set_resolution_rules with ruleId "${ENABLE_TEST_RULE_ID}" set to enabled.`,
                     'Surface the confirmation step rather than claiming the rule was already enabled.',
                   ],
                   toolCalls: [
                     {
-                      id: 'security.enable_resolution_rule',
-                      criteria: [`The tool is called with ruleId "${ENABLE_TEST_RULE_ID}".`],
+                      id: 'security.set_resolution_rules',
+                      criteria: [
+                        `The tool is called with rules containing { ruleId: "${ENABLE_TEST_RULE_ID}", enabled: true }.`,
+                      ],
                     },
                   ],
                 },
                 metadata: { query_intent: 'Resolution Rule Enable' },
+              },
+              {
+                input: {
+                  question: `Disable the Windows SID bridge rule and enable the email exact-match rule.`,
+                },
+                output: {
+                  criteria: [
+                    'Call security.set_resolution_rules once with both rule changes, rather than one call per rule.',
+                    'Surface a single confirmation step covering both changes rather than claiming either already changed.',
+                  ],
+                  toolCalls: [
+                    {
+                      id: 'security.set_resolution_rules',
+                      criteria: [
+                        `The tool is called once with rules containing both { ruleId: "${DISABLE_TEST_RULE_ID}", enabled: false } and { ruleId: "${ENABLE_TEST_RULE_ID}", enabled: true }.`,
+                      ],
+                    },
+                  ],
+                },
+                metadata: { query_intent: 'Resolution Rule Batch Toggle' },
               },
             ],
           },

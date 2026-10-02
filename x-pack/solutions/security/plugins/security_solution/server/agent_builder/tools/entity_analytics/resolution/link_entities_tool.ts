@@ -13,12 +13,13 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { IdentifierType } from '../../../../../common/api/entity_analytics/common/common.gen';
+import { RESOLUTION_GROUP_UPDATED_TOOL_EVENT } from '../../../../../common/entity_analytics/tool_events';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { securityTool } from '../../constants';
 import { requireResolvedEntity } from '../entity_resolution';
 import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { checkResolutionAccess } from './check_resolution_access';
-import { formatEntityIdsForPrompt } from './entity_ids_preview';
+import { formatEntityIdsForPrompt } from '../shared/entity_ids_preview';
 import { resolveEntityIdsForResolution, type UnresolvedEntityResult } from './resolve_entity_ids';
 import { getResolutionToolAvailability } from './resolution_availability';
 
@@ -63,7 +64,7 @@ export const linkEntitiesTool = (
 
 Use when the user asks to merge, link, or resolve entities together (e.g. "link these two accounts", "merge host:laptop-a into host:laptop-b", "these are the same user, resolve them"). Entity references are resolved to canonical EUIDs automatically — pass names or ids as the user gave them.
 
-Entity references that don't resolve to a canonical id are excluded from the batch and reported back, not treated as an error. Beyond that, the call is all-or-nothing: a validation failure on a resolved entity rejects the whole batch with an error (the message states why). Entities already linked to this exact target are reported as \`skipped\`, not an error.`,
+Entity references that don't resolve to a canonical id are excluded from the batch and reported back, not treated as an error. Beyond that, the call is all-or-nothing: a validation failure on a resolved entity rejects the whole batch with an error (the message states why). Entities already linked to this exact target are reported as \`skipped\`, not an error. This tool only changes resolution-group membership — it does not itself recalculate risk scores (that happens separately, next time scoring runs).`,
     schema,
     tags: ['security', 'entity-store', 'entity-analytics', 'resolution'],
     annotations: {
@@ -78,7 +79,10 @@ Entity references that don't resolve to a canonical id are excluded from the bat
       handler: async ({ request, spaceId }: ToolAvailabilityContext) =>
         getResolutionToolAvailability({ core, request, spaceId, experimentalFeatures, logger }),
     },
-    handler: async (params, { spaceId, esClient, prompts, callContext, request, stateManager }) => {
+    handler: async (
+      params,
+      { spaceId, esClient, prompts, callContext, request, stateManager, events }
+    ) => {
       logger.debug(
         `${SECURITY_LINK_ENTITIES_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
@@ -145,6 +149,7 @@ Entity references that don't resolve to a canonical id are excluded from the bat
           const unresolved = saved.unresolved ?? [];
 
           telemetryTracker.recordResultCount(result.linked.length);
+          events.sendUiEvent(RESOLUTION_GROUP_UPDATED_TOOL_EVENT, {});
           return {
             results: [
               {

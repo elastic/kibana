@@ -133,13 +133,13 @@ evaluate.describe(
     );
 
     evaluate(
-      'risk engine — scoring config & re-score intents redirect to the Risk Score tab',
+      'risk engine — scoring config intents redirect to the Risk Score tab',
       async ({ evaluateDataset }) => {
         await evaluateDataset({
           dataset: {
             name: 'entity-analytics-v2: UI navigation — risk engine',
             description:
-              'Risk-scoring configuration and re-score-now intents redirect to the Risk Score management tab via security.build_redirect_url with the risk_score tab path.',
+              'Risk-scoring configuration intents redirect to the Risk Score management tab via security.build_redirect_url with the risk_score tab path.',
             examples: [
               {
                 input: { question: 'Change the alert filters used by risk scoring.' },
@@ -157,22 +157,6 @@ evaluate.describe(
                   ],
                 },
                 metadata: { query_intent: 'Nav Risk Engine Config' },
-              },
-              {
-                input: { question: 'Re-score all entities now.' },
-                output: {
-                  criteria: [
-                    'The agent does not itself run a re-score and calls NO mutating tool.',
-                    `The reply links to a path ending with \`${RISK_SCORE_TAB_PATH}\` and mentions the Run button to trigger a re-score.`,
-                  ],
-                  toolCalls: [
-                    {
-                      id: LINK_TOOL_ID,
-                      criteria: [`The tool is called with path '${RISK_SCORE_TAB_PATH}'.`],
-                    },
-                  ],
-                },
-                metadata: { query_intent: 'Nav Risk Engine Re-score' },
               },
             ],
           },

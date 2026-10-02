@@ -33,8 +33,7 @@ import {
   linkEntitiesTool,
   unlinkEntitiesTool,
   listResolutionRulesTool,
-  enableResolutionRuleTool,
-  disableResolutionRuleTool,
+  setResolutionRulesTool,
 } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
@@ -103,8 +102,7 @@ export const registerTools = (
   agentBuilder.tools.register(linkEntitiesTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(unlinkEntitiesTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(listResolutionRulesTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(enableResolutionRuleTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(disableResolutionRuleTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(setResolutionRulesTool(core, logger, experimentalFeatures));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));

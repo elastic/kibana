@@ -22,9 +22,9 @@ import type { ExperimentalFeatures } from '../../../../../common';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
 import { getResolutionToolAvailability } from './resolution_availability';
 import {
-  disableResolutionRuleTool,
-  SECURITY_DISABLE_RESOLUTION_RULE_TOOL_ID,
-} from './disable_resolution_rule_tool';
+  setResolutionRulesTool,
+  SECURITY_SET_RESOLUTION_RULES_TOOL_ID,
+} from './set_resolution_rules_tool';
 
 const mockSetEnabled = jest.fn();
 
@@ -46,7 +46,7 @@ const buildHandlerContextWithPrompts = (
   } = {}
 ) => {
   const ctx = createToolHandlerContext(base.mockRequest, base.mockEsClient, base.mockLogger);
-  ctx.callContext = { ...ctx.callContext, toolCallId: 'tool-call-disable' };
+  ctx.callContext = { ...ctx.callContext, toolCallId: 'tool-call-set-rules' };
   ctx.prompts = {
     ...ctx.prompts,
     checkConfirmationStatus: jest.fn().mockReturnValue({
@@ -65,13 +65,9 @@ const buildHandlerContextWithPrompts = (
   return ctx;
 };
 
-describe('disableResolutionRuleTool', () => {
+describe('setResolutionRulesTool', () => {
   const mocks = createToolTestMocks();
-  const tool = disableResolutionRuleTool(
-    mocks.mockCore,
-    mocks.mockLogger,
-    mockExperimentalFeatures
-  );
+  const tool = setResolutionRulesTool(mocks.mockCore, mocks.mockLogger, mockExperimentalFeatures);
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
@@ -107,60 +103,141 @@ describe('disableResolutionRuleTool', () => {
   });
 
   describe('schema', () => {
-    it('accepts a known rule id', () => {
-      expect(tool.schema.safeParse({ ruleId: 'windows_sid_bridge' }).success).toBe(true);
+    it('accepts a batch of known rule ids', () => {
+      expect(
+        tool.schema.safeParse({
+          rules: [
+            { ruleId: 'email_exact_match', enabled: true },
+            { ruleId: 'windows_sid_bridge', enabled: false },
+          ],
+        }).success
+      ).toBe(true);
     });
 
     it('rejects an unknown rule id', () => {
-      expect(tool.schema.safeParse({ ruleId: 'made_up_rule' }).success).toBe(false);
+      expect(
+        tool.schema.safeParse({ rules: [{ ruleId: 'made_up_rule', enabled: true }] }).success
+      ).toBe(false);
+    });
+
+    it('rejects an empty rules array', () => {
+      expect(tool.schema.safeParse({ rules: [] }).success).toBe(false);
     });
   });
 
   describe('handler', () => {
     describe('HITL', () => {
-      it('on unprompted: confirmation message names the rule and uses a danger color', async () => {
+      it('on unprompted: a single-rule enable uses a primary color and names the rule', async () => {
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.unprompted,
         });
 
-        await tool.handler({ ruleId: 'windows_sid_bridge' }, ctx);
+        await tool.handler({ rules: [{ ruleId: 'email_exact_match', enabled: true }] }, ctx);
 
         expect(mockSetEnabled).not.toHaveBeenCalled();
         const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
         expect(askArgs).toMatchObject({
-          id: 'resolution.disable_resolution_rule.tool-call-disable',
-          title: 'Disable resolution rule',
-          confirm_text: 'Disable',
+          id: 'resolution.set_resolution_rules.tool-call-set-rules',
+          title: 'Update resolution rules',
+          confirm_text: 'Confirm',
           cancel_text: 'Cancel',
-          color: 'danger',
+          color: 'primary',
         });
-        expect(askArgs.message).toContain('windows_sid_bridge');
+        expect(askArgs.message).toContain('**Enable:** email_exact_match');
       });
 
-      it('on accept: disables the rule and returns its new state', async () => {
-        mockSetEnabled.mockResolvedValueOnce({ id: 'windows_sid_bridge', enabled: false });
+      it('on unprompted: a single-rule disable uses a danger color', async () => {
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ rules: [{ ruleId: 'windows_sid_bridge', enabled: false }] }, ctx);
+
+        const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+        expect(askArgs.color).toBe('danger');
+        expect(askArgs.message).toContain('**Disable:** windows_sid_bridge');
+      });
+
+      it('on unprompted: a mixed batch states which rules are enabled vs disabled and uses a danger color', async () => {
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler(
+          {
+            rules: [
+              { ruleId: 'email_exact_match', enabled: true },
+              { ruleId: 'windows_sid_bridge', enabled: false },
+            ],
+          },
+          ctx
+        );
+
+        const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+        expect(askArgs.color).toBe('danger');
+        expect(askArgs.message).toContain('**Enable:** email_exact_match');
+        expect(askArgs.message).toContain('**Disable:** windows_sid_bridge');
+      });
+
+      it('on accept: updates each rule and returns their new states', async () => {
+        mockSetEnabled.mockImplementation((ruleId: string, enabled: boolean) =>
+          Promise.resolve({ id: ruleId, enabled })
+        );
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.accepted,
         });
 
         const result = (await tool.handler(
-          { ruleId: 'windows_sid_bridge' },
+          {
+            rules: [
+              { ruleId: 'email_exact_match', enabled: true },
+              { ruleId: 'windows_sid_bridge', enabled: false },
+            ],
+          },
           ctx
         )) as ToolHandlerStandardReturn;
 
+        expect(mockSetEnabled).toHaveBeenCalledWith('email_exact_match', true);
         expect(mockSetEnabled).toHaveBeenCalledWith('windows_sid_bridge', false);
         const other = result.results[0] as OtherResult;
         expect(other.type).toBe(ToolResultType.other);
-        expect(other.data).toEqual({ rule: { id: 'windows_sid_bridge', enabled: false } });
+        expect(other.data).toEqual({
+          rules: [
+            { id: 'email_exact_match', enabled: true },
+            { id: 'windows_sid_bridge', enabled: false },
+          ],
+        });
       });
 
-      it('on reject: returns an error result without disabling', async () => {
+      it('on accept: a duplicate ruleId only applies the last requested state', async () => {
+        mockSetEnabled.mockImplementation((ruleId: string, enabled: boolean) =>
+          Promise.resolve({ id: ruleId, enabled })
+        );
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+
+        await tool.handler(
+          {
+            rules: [
+              { ruleId: 'email_exact_match', enabled: true },
+              { ruleId: 'email_exact_match', enabled: false },
+            ],
+          },
+          ctx
+        );
+
+        expect(mockSetEnabled).toHaveBeenCalledTimes(1);
+        expect(mockSetEnabled).toHaveBeenCalledWith('email_exact_match', false);
+      });
+
+      it('on reject: returns an error result without updating any rule', async () => {
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.rejected,
         });
 
         const result = (await tool.handler(
-          { ruleId: 'windows_sid_bridge' },
+          { rules: [{ ruleId: 'email_exact_match', enabled: true }] },
           ctx
         )) as ToolHandlerStandardReturn;
 
@@ -171,14 +248,14 @@ describe('disableResolutionRuleTool', () => {
       });
     });
 
-    it('returns an error result when the user lacks permission to disable resolution rules', async () => {
+    it('returns an error result when the user lacks permission to update resolution rules', async () => {
       mocks.mockCheckPrivileges.mockResolvedValueOnce({ hasAllRequested: false });
       const ctx = buildHandlerContextWithPrompts(mocks, {
         checkStatus: ConfirmationStatus.accepted,
       });
 
       const result = (await tool.handler(
-        { ruleId: 'windows_sid_bridge' },
+        { rules: [{ ruleId: 'email_exact_match', enabled: true }] },
         ctx
       )) as ToolHandlerStandardReturn;
 
@@ -195,7 +272,7 @@ describe('disableResolutionRuleTool', () => {
       });
 
       const result = (await tool.handler(
-        { ruleId: 'windows_sid_bridge' },
+        { rules: [{ ruleId: 'email_exact_match', enabled: true }] },
         ctx
       )) as ToolHandlerStandardReturn;
 
@@ -205,18 +282,18 @@ describe('disableResolutionRuleTool', () => {
     });
 
     describe('telemetry', () => {
-      it('reports success=true after disabling', async () => {
-        mockSetEnabled.mockResolvedValueOnce({ id: 'windows_sid_bridge', enabled: false });
+      it('reports success=true after updating', async () => {
+        mockSetEnabled.mockResolvedValueOnce({ id: 'email_exact_match', enabled: true });
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.accepted,
         });
 
-        await tool.handler({ ruleId: 'windows_sid_bridge' }, ctx);
+        await tool.handler({ rules: [{ ruleId: 'email_exact_match', enabled: true }] }, ctx);
 
         expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           expect.objectContaining({
-            toolId: SECURITY_DISABLE_RESOLUTION_RULE_TOOL_ID,
+            toolId: SECURITY_SET_RESOLUTION_RULES_TOOL_ID,
             actionType: 'mutation',
             success: true,
           })

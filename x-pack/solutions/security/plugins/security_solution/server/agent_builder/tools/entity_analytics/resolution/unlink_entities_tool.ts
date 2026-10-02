@@ -12,12 +12,12 @@ import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
+import { RESOLUTION_GROUP_UPDATED_TOOL_EVENT } from '../../../../../common/entity_analytics/tool_events';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { securityTool } from '../../constants';
 import { requireResolvedEntity } from '../entity_resolution';
 import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { checkResolutionAccess } from './check_resolution_access';
-import { formatUnlinkTargetsForPrompt } from './entity_ids_preview';
 import {
   resolveEntityIdsForResolution,
   type ResolvedEntityResult,
@@ -73,7 +73,7 @@ Use when the user asks to unmerge, unlink, or split entities that were previousl
 
 When the user names what to unlink *from* ("unlink bob.temp from bob.admin"), pass it as \`groupEntityId\` so every entity in the batch is verified to be in that group first. If any of them turns out not to be in that group — either because it belongs to a different one or because it is not linked to anything — nothing is unlinked and those entities are reported back in \`groupMismatches\`, each with the \`reason\` it did not match, so you can check with the user. One call handles one group — to unlink from several groups, make a separate call per group.
 
-Entity references that don't resolve to a canonical id are excluded from the batch and reported back, not treated as an error. Beyond that, the call is all-or-nothing: an unlinking failure rejects the whole batch with an error (the message states why). Entities that are not currently an alias of anything (i.e. not linked) are reported as \`skipped\`, not an error; if none of the entities are linked there is nothing to unlink, so that is reported back immediately without asking for confirmation. This tool only unlinks — it does not affect any other members remaining in the group.`,
+Entity references that don't resolve to a canonical id are excluded from the batch and reported back, not treated as an error. Beyond that, the call is all-or-nothing: an unlinking failure rejects the whole batch with an error (the message states why). Entities that are not currently an alias of anything (i.e. not linked) are reported as \`skipped\`, not an error; if none of the entities are linked there is nothing to unlink, so that is reported back immediately without asking for confirmation. This tool only unlinks — it does not affect any other members remaining in the group, and it does not itself recalculate risk scores (that happens separately, next time scoring runs).`,
     schema,
     tags: ['security', 'entity-store', 'entity-analytics', 'resolution'],
     annotations: {
@@ -88,7 +88,10 @@ Entity references that don't resolve to a canonical id are excluded from the bat
       handler: async ({ request, spaceId }: ToolAvailabilityContext) =>
         getResolutionToolAvailability({ core, request, spaceId, experimentalFeatures, logger }),
     },
-    handler: async (params, { spaceId, esClient, prompts, callContext, request, stateManager }) => {
+    handler: async (
+      params,
+      { spaceId, esClient, prompts, callContext, request, stateManager, events }
+    ) => {
       logger.debug(
         `${SECURITY_UNLINK_ENTITIES_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
@@ -157,6 +160,7 @@ Entity references that don't resolve to a canonical id are excluded from the bat
           });
 
           telemetryTracker.recordResultCount(result.unlinked.length);
+          events.sendUiEvent(RESOLUTION_GROUP_UPDATED_TOOL_EVENT, {});
           return {
             results: [
               {
@@ -317,4 +321,27 @@ Entity references that don't resolve to a canonical id are excluded from the bat
       }
     },
   };
+};
+
+const ENTITY_PREVIEW_LIMIT = 10;
+/**
+ * Render EUIDs alongside the resolution group target each one is currently linked to,
+ * so the user confirms against the group actually being modified rather than the alias
+ * name alone. Entities without a `resolvedTo` are not aliases and are marked as such —
+ * they will be skipped by the unlink.
+ */
+const formatUnlinkTargetsForPrompt = (entities: readonly ResolvedEntityResult[]): string => {
+  const shown = entities.slice(0, ENTITY_PREVIEW_LIMIT);
+  const lines = shown.map((entity) => {
+    const target = entity.resolvedTo;
+    return target
+      ? `- \`${entity.euid}\` — currently linked to \`${target}\``
+      : `- \`${entity.euid}\` — not currently linked to anything (will be skipped)`;
+  });
+
+  const remaining = entities.length - shown.length;
+  if (remaining > 0) {
+    lines.push(`- … and ${remaining} more`);
+  }
+  return lines.join('\n');
 };

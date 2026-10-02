@@ -164,8 +164,13 @@ describe('unlinkEntitiesTool', () => {
           confirm_text: 'Unlink',
           cancel_text: 'Cancel',
         });
-        expect(askArgs.message).toContain('host:server2');
-        expect(askArgs.message).toContain('currently linked to `host:server1`');
+        expect(askArgs.message).toBe(
+          [
+            'Unlink 1 entity from its resolution group?',
+            '',
+            '- `host:server2` — currently linked to `host:server1`',
+          ].join('\n')
+        );
         expect(ctx.stateManager.setState).toHaveBeenCalledWith({
           resolved: [{ euid: 'host:server2', resolvedTo: 'host:server1' }],
           unresolved: [],
@@ -187,8 +192,38 @@ describe('unlinkEntitiesTool', () => {
         await tool.handler({ entityIds: ['server2', 'server3'] }, ctx);
 
         const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
-        expect(askArgs.message).toContain('currently linked to `host:server1`');
-        expect(askArgs.message).toContain('not currently linked to anything');
+        expect(askArgs.message).toBe(
+          [
+            'Unlink 2 entities from their resolution groups?',
+            '',
+            '- `host:server2` — currently linked to `host:server1`',
+            '- `host:server3` — not currently linked to anything (will be skipped)',
+          ].join('\n')
+        );
+      });
+
+      it('on unprompted: truncates the confirmation list beyond the preview cap', async () => {
+        const resolved = Array.from({ length: 12 }, (_, i) => ({
+          euid: `user:u${i}`,
+          resolvedTo: 'user:target',
+        }));
+        mockResolveEntityIdsForResolution.mockResolvedValueOnce({
+          resolved,
+          unresolved: [],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ entityIds: resolved.map((entity) => entity.euid) }, ctx);
+
+        const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+        const lines = askArgs.message.split('\n');
+        expect(lines[0]).toBe('Unlink 12 entities from their resolution groups?');
+        expect(lines[2]).toBe('- `user:u0` — currently linked to `user:target`');
+        expect(lines[11]).toBe('- `user:u9` — currently linked to `user:target`');
+        expect(lines[12]).toBe('- … and 2 more');
+        expect(askArgs.message).not.toContain('user:u10');
       });
 
       it('on unprompted: does not ask for confirmation when no entity is linked to anything', async () => {

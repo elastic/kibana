@@ -28,7 +28,7 @@ const ENTITY_ANALYTICS_HOME_PAGE_BASE = `${APP_PATH}${ENTITY_ANALYTICS_HOME_PAGE
 export const ENTITY_ANALYTICS_UI_PATHS = {
   /** Management page — global enable/disable + clear all entity data controls. */
   settings: ENTITY_ANALYTICS_MANAGEMENT_BASE,
-  /** Risk Score management tab — scoring config + re-score Run button. */
+  /** Risk Score management tab — scoring config only */
   riskScore: `${ENTITY_ANALYTICS_MANAGEMENT_BASE}/risk_score`,
   /** Asset Criticality management tab — CSV / bulk criticality. */
   assetCriticality: `${ENTITY_ANALYTICS_MANAGEMENT_BASE}/asset_criticality`,
@@ -191,16 +191,14 @@ Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.s
 
 Example reply: "I can't enable or disable Entity Analytics from chat — that's the switch at the top of the [Entity Analytics management page](<url from build_redirect_url>), where you can also clear all entity data."
 
-### Risk engine — scoring configuration & re-score
+### Risk engine — scoring configuration
 
 Redirect when the user asks to:
 
 - **configure** / **change settings** for risk scoring (alert filters, retainment, schedule, closed-alert handling, etc.)
-- **re-score now** / **force a re-score** / **run the risk engine** — the tab has a **Run** button that triggers the risk engine on demand
-
 Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.riskScore}'\` and render the returned \`url\`.
 
-Example reply: "I can't change the risk scoring settings from chat — that's managed on the Risk Score page. Open the [Risk Score settings](<url from build_redirect_url>) to reconfigure scoring or trigger a re-score via the Run button."
+Example reply: "I can't change the risk scoring settings from chat — that's managed on the Risk Score page. Open the [Risk Score settings](<url from build_redirect_url>) to reconfigure scoring."
 
 ### Asset criticality — bulk / CSV operations
 

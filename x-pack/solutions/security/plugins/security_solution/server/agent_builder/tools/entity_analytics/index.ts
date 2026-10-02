@@ -49,8 +49,6 @@ export {
   SECURITY_UNLINK_ENTITIES_TOOL_ID,
   listResolutionRulesTool,
   SECURITY_LIST_RESOLUTION_RULES_TOOL_ID,
-  enableResolutionRuleTool,
-  SECURITY_ENABLE_RESOLUTION_RULE_TOOL_ID,
-  disableResolutionRuleTool,
-  SECURITY_DISABLE_RESOLUTION_RULE_TOOL_ID,
+  setResolutionRulesTool,
+  SECURITY_SET_RESOLUTION_RULES_TOOL_ID,
 } from './resolution';

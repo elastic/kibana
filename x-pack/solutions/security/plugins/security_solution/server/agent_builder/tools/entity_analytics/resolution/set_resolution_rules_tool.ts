@@ -25,30 +25,41 @@ const RULE_ID_VALUES = Object.values(RESOLUTION_RULE_IDS) as [
 ];
 
 const schema = z.object({
-  ruleId: z
-    .enum(RULE_ID_VALUES)
-    .describe(
-      'The stable id of the entity resolution rule to disable. Use `security.list_resolution_rules` if needed to see the available ids and their current state.'
-    ),
+  rules: z
+    .array(
+      z.object({
+        ruleId: z
+          .enum(RULE_ID_VALUES)
+          .describe(
+            'The stable id of the entity resolution rule. Use `security.list_resolution_rules` if needed to see the available ids and their current state.'
+          ),
+        enabled: z.boolean().describe('true to enable the rule, false to disable it.'),
+      })
+    )
+    .min(1)
+    .max(RULE_ID_VALUES.length)
+    .describe('One or more resolution rules to enable or disable.'),
 });
 
-export const SECURITY_DISABLE_RESOLUTION_RULE_TOOL_ID = securityTool('disable_resolution_rule');
+export const SECURITY_SET_RESOLUTION_RULES_TOOL_ID = securityTool('set_resolution_rules');
 
-export const disableResolutionRuleTool = (
+export const setResolutionRulesTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures
 ): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: SECURITY_DISABLE_RESOLUTION_RULE_TOOL_ID,
+    id: SECURITY_SET_RESOLUTION_RULES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Disable a managed entity resolution rule in the current space. Requires user confirmation before the change is applied.
+    description: `Enable or disable one or more managed entity resolution rules in the current space. Requires a single user confirmation, covering every rule in the request, before any change is applied.
 
-Use when the user asks to turn off or disable an automated resolution rule (e.g. "disable the email matching rule", "stop the Windows SID bridge from running"). Resolve the rule id first when the user named the rule rather than gave its id.`,
+Use when the user asks to turn on/off, enable/disable, or re-enable automated resolution rules — including requests covering several rules at once (e.g. "enable all the resolution rules", "turn off the Windows SID and Entra GUID bridges", "disable email matching but turn on the UPN one"). Resolve each rule id first when the user named the rule rather than gave its id (use \`security.list_resolution_rules\`).
+
+This tool only changes which resolution rules are enabled — it does not trigger a re-run of entity resolution or affect risk scoring.`,
     schema,
     tags: ['security', 'entity-store', 'entity-analytics', 'resolution'],
     annotations: {
-      title: 'Disable Resolution Rule',
+      title: 'Set Resolution Rules',
       readOnlyHint: false,
       destructiveHint: false,
       idempotentHint: true,
@@ -61,14 +72,14 @@ Use when the user asks to turn off or disable an automated resolution rule (e.g.
     },
     handler: async (params, { spaceId, savedObjectsClient, prompts, callContext, request }) => {
       logger.debug(
-        `${SECURITY_DISABLE_RESOLUTION_RULE_TOOL_ID} tool called with parameters ${JSON.stringify(
+        `${SECURITY_SET_RESOLUTION_RULES_TOOL_ID} tool called with parameters ${JSON.stringify(
           params
         )}`
       );
 
       const telemetryTracker = createToolTelemetryTracker({
         core,
-        toolId: SECURITY_DISABLE_RESOLUTION_RULE_TOOL_ID,
+        toolId: SECURITY_SET_RESOLUTION_RULES_TOOL_ID,
         spaceId,
         actionType: 'mutation',
       });
@@ -79,26 +90,39 @@ Use when the user asks to turn off or disable an automated resolution rule (e.g.
         const accessResult = await checkResolutionAccess({
           request,
           security,
-          action: 'disable entity resolution rules',
+          action: 'enable or disable entity resolution rules',
         });
         if (!accessResult.allowed) {
           telemetryTracker.recordFailure(accessResult.result.data.message);
           return { results: [accessResult.result] };
         }
 
-        const promptId = `resolution.disable_resolution_rule.${callContext.toolCallId}`;
+        // Later entries win when the same ruleId is given more than once.
+        const changes = new Map<ResolutionRuleId, boolean>();
+        for (const { ruleId, enabled } of params.rules) {
+          changes.set(ruleId, enabled);
+        }
+        const requestedRules = Array.from(changes, ([ruleId, enabled]) => ({ ruleId, enabled }));
+
+        const promptId = `resolution.set_resolution_rules.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
         telemetryTracker.recordConfirmationStatus(status);
 
         if (status === ConfirmationStatus.unprompted) {
           telemetryTracker.recordAwaitingConfirmation();
+          const noun = requestedRules.length === 1 ? 'rule' : 'rules';
+          const anyDisabled = requestedRules.some((rule) => !rule.enabled);
           return prompts.askForConfirmation({
             id: promptId,
-            title: 'Disable resolution rule',
-            message: `Disable the resolution rule "${params.ruleId}" in this space?`,
-            confirm_text: 'Disable',
+            title: 'Update resolution rules',
+            message: [
+              `Update ${requestedRules.length} resolution ${noun} in this space?`,
+              '',
+              formatRuleChangesForPrompt(requestedRules),
+            ].join('\n'),
+            confirm_text: 'Confirm',
             cancel_text: 'Cancel',
-            color: 'danger',
+            color: anyDisabled ? 'danger' : 'primary',
           });
         }
 
@@ -108,22 +132,24 @@ Use when the user asks to turn off or disable an automated resolution rule (e.g.
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
-                data: { message: 'User declined to disable the resolution rule.' },
+                data: { message: 'User declined to update the resolution rules.' },
               },
             ],
           };
         }
 
         const rulesClient = entityStore.createResolutionRulesClient(savedObjectsClient, spaceId);
-        const rule = await rulesClient.setEnabled(params.ruleId, false);
+        const rules = await Promise.all(
+          requestedRules.map(({ ruleId, enabled }) => rulesClient.setEnabled(ruleId, enabled))
+        );
 
-        telemetryTracker.recordResultCount(1);
+        telemetryTracker.recordResultCount(rules.length);
         return {
           results: [
             {
               tool_result_id: getToolResultId(),
               type: ToolResultType.other,
-              data: { rule },
+              data: { rules },
             },
           ],
         };
@@ -135,7 +161,7 @@ Use when the user asks to turn off or disable an automated resolution rule (e.g.
             {
               tool_result_id: getToolResultId(),
               type: ToolResultType.error,
-              data: { message: `Error disabling resolution rule: ${errorMessage}` },
+              data: { message: `Error updating resolution rules: ${errorMessage}` },
             },
           ],
         };
@@ -144,4 +170,20 @@ Use when the user asks to turn off or disable an automated resolution rule (e.g.
       }
     },
   };
+};
+
+const formatRuleChangesForPrompt = (
+  changes: readonly { ruleId: ResolutionRuleId; enabled: boolean }[]
+): string => {
+  const toEnable = changes.filter((change) => change.enabled).map((change) => change.ruleId);
+  const toDisable = changes.filter((change) => !change.enabled).map((change) => change.ruleId);
+
+  const lines: string[] = [];
+  if (toEnable.length > 0) {
+    lines.push(`**Enable:** ${toEnable.join(', ')}`);
+  }
+  if (toDisable.length > 0) {
+    lines.push(`**Disable:** ${toDisable.join(', ')}`);
+  }
+  return lines.join('\n');
 };

@@ -16,10 +16,6 @@ export {
   SECURITY_LIST_RESOLUTION_RULES_TOOL_ID,
 } from './list_resolution_rules_tool';
 export {
-  enableResolutionRuleTool,
-  SECURITY_ENABLE_RESOLUTION_RULE_TOOL_ID,
-} from './enable_resolution_rule_tool';
-export {
-  disableResolutionRuleTool,
-  SECURITY_DISABLE_RESOLUTION_RULE_TOOL_ID,
-} from './disable_resolution_rule_tool';
+  setResolutionRulesTool,
+  SECURITY_SET_RESOLUTION_RULES_TOOL_ID,
+} from './set_resolution_rules_tool';

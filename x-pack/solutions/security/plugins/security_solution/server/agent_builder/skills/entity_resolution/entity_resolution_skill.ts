@@ -12,8 +12,7 @@ import {
   SECURITY_LINK_ENTITIES_TOOL_ID,
   SECURITY_UNLINK_ENTITIES_TOOL_ID,
   SECURITY_LIST_RESOLUTION_RULES_TOOL_ID,
-  SECURITY_ENABLE_RESOLUTION_RULE_TOOL_ID,
-  SECURITY_DISABLE_RESOLUTION_RULE_TOOL_ID,
+  SECURITY_SET_RESOLUTION_RULES_TOOL_ID,
   SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
   SECURITY_GET_ENTITY_TOOL_ID,
 } from '../../tools';
@@ -28,7 +27,9 @@ This skill exposes tools to **manage** entity resolution in the current space �
 Use when the user asks to **link** / **merge** / **resolve** entities together, **unlink** / **unmerge** / **split** them apart, **inspect** a resolution group (what aliases an entity has, which entities are linked to it, what it resolves to), or **list** / **enable** / **disable** resolution rules. Trigger phrases: "merge these two accounts", "link host:laptop-a to host:laptop-b", "these are the same user, resolve them", "unlink this alias", "split these apart", "who is this entity resolved with", "what aliases does X have", "which entities are linked to X", "what does X resolve to", "show the resolution group for X", "what resolution rules do we have", "is the email matching rule enabled", "disable the Windows SID bridge rule".
 
 Do **NOT** use this skill for:
-- **Resolution-group risk score trend** (not group membership) — that's a *scoring* concern, not a *linking* one; use \`security.get_entity_risk_score_history\` with \`scoreType: 'resolution'\` (entity-analytics skill).
+- **Resolution-group risk score trend** (not group membership) — that's a *scoring* concern, not a *linking* one; use \`security.get_entity_risk_score_history\` with \`scoreType: 'resolution'\` (entity-analytics skill). This is a historical chart only — it does not recalculate anything.
+
+**\`security.link_entities\` and \`security.unlink_entities\` don't recalculate risk scores.** They only change resolution-group membership. Changing group membership *can* eventually change an entity's risk score, but only the next time scoring runs on its own schedule in the background. Don't say or imply that linking/unlinking itself changed or will change a risk score.
 
 ## Available tools
 
@@ -36,8 +37,7 @@ Do **NOT** use this skill for:
 - **\`security.link_entities\`** — **requires confirmation**: Link one or more entities to a target, creating/extending a resolution group. All entities must be the same type.
 - **\`security.unlink_entities\`** — **requires confirmation**: Unlink one or more entities from their resolution group, making each standalone again.
 - **\`security.list_resolution_rules\`**: List the managed resolution rules and their effective enabled state. Use this first to resolve a rule name to its stable id.
-- **\`security.enable_resolution_rule\`** — **requires confirmation**: Enable a resolution rule by its stable \`ruleId\`.
-- **\`security.disable_resolution_rule\`** — **requires confirmation**: Disable a resolution rule by its stable \`ruleId\`.
+- **\`security.set_resolution_rules\`** — **requires confirmation**: Enable and/or disable one or more resolution rules by their stable \`ruleId\`s in a single call — pass every rule the user asked about (e.g. "enable all the rules", "turn off A and turn on B").
 
 ${RESOLUTION_UI_NAVIGATION_CONTENT}
 
@@ -66,9 +66,9 @@ User: "Unlink jsmith.contractor from that group."
 User: "What resolution rules do we have, and can you turn off/on the Windows SID one?"
 
 1. Call \`security.list_resolution_rules\` (no arguments). Summarize each rule's id, description, and enabled state — use a short markdown table when there are several.
-2. Identify the matching rule id from the list (e.g. \`windows_sid_bridge\`) — never guess an id the tool didn't return.
-3. Call \`security.disable_resolution_rule\`/\`security.enable_resolution_rule\` with \`{ ruleId: 'windows_sid_bridge' }\`.
-4. The tool handles user confirmation. Ask the user to confirm. Do not say you will enable or disable the rule, and do not say that it already changed. On accept, report the rule's new \`enabled\` state from the tool result. On reject, state that no change was made.
+2. Identify the matching rule id(s) from the list (e.g. \`windows_sid_bridge\`) — never guess an id the tool didn't return.
+3. Call \`security.set_resolution_rules\` with \`{ rules: [{ ruleId: 'windows_sid_bridge', enabled: false }] }\`. For a request touching several rules (e.g. "enable all of them", "disable A and enable B"), pass every rule in the same \`rules\` array so there's one confirmation, not one call per rule.
+4. The tool handles user confirmation. Do not say you will enable or disable the rule(s), and do not say they already changed. On accept, report each rule's new \`enabled\` state from the tool result. On reject, state that no change was made.
 
 ## Best Practices
 - Always resolve entity references before linking/unlinking — pass whatever the user gave you (name or EUID); the tools resolve it internally. If a reference is ambiguous or not found, relay the tool's message and candidate ids rather than guessing.
@@ -89,8 +89,7 @@ export const entityResolutionSkill = defineSkillType({
     SECURITY_LINK_ENTITIES_TOOL_ID,
     SECURITY_UNLINK_ENTITIES_TOOL_ID,
     SECURITY_LIST_RESOLUTION_RULES_TOOL_ID,
-    SECURITY_ENABLE_RESOLUTION_RULE_TOOL_ID,
-    SECURITY_DISABLE_RESOLUTION_RULE_TOOL_ID,
+    SECURITY_SET_RESOLUTION_RULES_TOOL_ID,
     SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
     SECURITY_GET_ENTITY_TOOL_ID,
   ],
