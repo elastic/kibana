@@ -11,9 +11,6 @@ import { installEntityStoreSuiteWithKbnClient } from '../../../common/fixtures/h
 globalSetupHook(
   'Install Entity Store once for CRUD and resolution API suite',
   async ({ kbnClient }) => {
-    await installEntityStoreSuiteWithKbnClient({
-      kbnClient,
-      suiteId: 'crud_and_resolution',
-    });
+    await installEntityStoreSuiteWithKbnClient({ kbnClient });
   }
 );
