@@ -27,15 +27,15 @@ export interface EmbeddableEditorState {
   originatingApp: string;
   /**
    * The path within the originating app to navigate back to when the user saves or cancels.
-   * 
+   *
    * When provided, editors must show a "Save and return" button.
-   * 
+   *
    * On save, the editor
    * navigates back using stateTransfer.navigateToWithEmbeddablePackages(originatingApp, {
    *   path: originatingPath,
    *   state: [{ embeddableId, type, serializedState }],
    * }), carrying the updated embeddable state so the originating app can update the panel.
-   * 
+   *
    * On cancel, the editor navigates back with no embeddable state via
    * application.navigateToApp(originatingApp, { path: originatingPath }).
    */
