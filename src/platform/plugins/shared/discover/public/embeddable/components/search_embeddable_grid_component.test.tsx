@@ -34,6 +34,7 @@ import { createContextAwarenessMocks } from '../../context_awareness/__mocks__';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../context_awareness';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 import { SearchEmbeddableGridComponent } from './search_embeddable_grid_component';
+import type { EsqlSource } from '@kbn/data-source';
 
 const mockDiscoverGridEmbeddableProps = jest.fn();
 
@@ -148,6 +149,7 @@ describe('SearchEmbeddableGridComponent', () => {
     savedObjectId,
     panelFilters,
     services: servicesOverride = services,
+    esqlSource$,
   }: {
     isEsql: boolean;
     columns?: string[];
@@ -163,6 +165,7 @@ describe('SearchEmbeddableGridComponent', () => {
     savedObjectId?: string;
     panelFilters?: Filter[];
     services?: ReturnType<typeof createDiscoverServicesMock>;
+    esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
   }) => {
     const savedSearch = createSavedSearch({ isEsql, columns, query });
     const api = createApi(savedSearch, { parentApi, savedObjectId, panelFilters });
@@ -202,6 +205,7 @@ describe('SearchEmbeddableGridComponent', () => {
         <SearchEmbeddableGridComponent
           api={api}
           dataView={dataViewMock}
+          esqlSource$={esqlSource$}
           stateManager={stateManager}
           enableDocumentViewer={true}
           autoApplyDiscoverColumnDefaults={autoApplyDiscoverColumnDefaults}
@@ -267,6 +271,29 @@ describe('SearchEmbeddableGridComponent', () => {
       expect(stateManager.density.getValue()).toBeUndefined();
       onUpdateDataGridDensity(DataGridDensity.COMPACT);
       expect(stateManager.density.getValue()).toBe(DataGridDensity.COMPACT);
+    });
+  });
+
+  describe('dataSource', () => {
+    it('passes the EsqlSource through to DiscoverGrid', async () => {
+      const esqlSource = {
+        kind: 'esql',
+        id: 'esql-test',
+        getColumns: () => [],
+        getColumn: () => undefined,
+      } as unknown as EsqlSource;
+
+      await renderComponent({
+        isEsql: true,
+        esqlSource$: new BehaviorSubject<EsqlSource | undefined>(esqlSource),
+      });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+      expect(lastCallProps?.dataSource).toBe(esqlSource);
     });
   });
 

@@ -167,6 +167,24 @@ describe('useWatchSettingsDraft', () => {
     });
   });
 
+  it('resolves with only the Workers that were written', async () => {
+    mutateAsync
+      .mockRejectedValueOnce(new Error('patch failed'))
+      .mockResolvedValueOnce({ worker: ruleCoverage });
+    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCoverage]));
+
+    act(() => {
+      result.current.updateEnabled(ruleTuning, true);
+      result.current.updateEnabled(ruleCoverage, true);
+    });
+    let savedWorkerIds: string[] = [];
+    await act(async () => {
+      savedWorkerIds = await result.current.save();
+    });
+
+    expect(savedWorkerIds).toEqual([SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]);
+  });
+
   it('sends a null revision for a Worker that has not been installed yet', async () => {
     const uninstalled: Worker = { ...ruleCoverage, settingsRevision: null };
     mutateAsync.mockResolvedValue({ worker: uninstalled });

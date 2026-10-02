@@ -12,6 +12,7 @@ import type { FleetCardsValue } from './fleet_cards_provider';
 import { useFleetCards } from './fleet_cards_provider';
 import { createRenderResultCard } from './render_result_card';
 import { useAddDataResultItems } from './use_add_data_result_items';
+import { useTrackTileClick } from './use_track_tile_click';
 
 interface Props {
   searchTerm: string;
@@ -58,9 +59,10 @@ const LoadedResults = ({
  */
 export const ObservabilitySearchResults = ({ searchTerm, onOpenCollection }: Props) => {
   const fleetCards: FleetCardsValue = useFleetCards();
+  const trackTileClick = useTrackTileClick();
   const renderCard = useMemo(
-    () => createRenderResultCard({ onOpenCollection }),
-    [onOpenCollection]
+    () => createRenderResultCard({ onOpenCollection, trackTileClick }),
+    [onOpenCollection, trackTileClick]
   );
 
   const { useLocalSearch, allCards, isLoading, error, retry } = fleetCards;

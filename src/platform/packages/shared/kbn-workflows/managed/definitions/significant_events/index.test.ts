@@ -11,6 +11,7 @@ import { parse } from 'yaml';
 import {
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
+  SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW,
 } from '.';
 import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
@@ -21,6 +22,8 @@ interface WorkflowStep {
   condition?: string;
   'product-solution'?: string;
   'product-feature'?: string;
+  'connector-id'?: string;
+  'connector-id-by-feature'?: string;
   'on-failure'?: { continue?: boolean };
   steps?: WorkflowStep[];
   with?: {
@@ -32,12 +35,18 @@ interface WorkflowStep {
     message?: string;
     stream_names?: string;
     written_rule_uuids?: string;
+    inputs?: Record<string, string>;
   };
   foreach?: string;
 }
 
 interface ParsedWorkflow {
   steps: WorkflowStep[];
+  triggers?: Array<{
+    inputs?: {
+      properties?: Record<string, { type?: string; maxLength?: number }>;
+    };
+  }>;
 }
 
 const findStep = (steps: WorkflowStep[], name: string): WorkflowStep | undefined => {
@@ -55,6 +64,7 @@ const requireStep = (workflow: ParsedWorkflow, name: string): WorkflowStep => {
 };
 
 const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWorkflow;
+const orchestrator = parse(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.yaml) as ParsedWorkflow;
 const queriesGeneration = parse(
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
 ) as ParsedWorkflow;
@@ -65,7 +75,35 @@ const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(22);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(23);
+    expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
+  });
+
+  it('bounds and forwards discovery model overrides', () => {
+    expect(discovery.triggers?.[0].inputs?.properties?.connector_id).toEqual(
+      expect.objectContaining({ type: 'string', maxLength: 255 })
+    );
+    expect(orchestrator.triggers?.[0].inputs?.properties?.connector_id).toEqual(
+      expect.objectContaining({ type: 'string', maxLength: 255 })
+    );
+    expect(requireStep(orchestrator, 'discover').with?.inputs).toEqual({
+      connector_id: '{{ inputs.connector_id }}',
+    });
+  });
+
+  it('resolves the discovery model without the inference feature registry', () => {
+    expect(requireStep(discovery, 'resolve_model')).toMatchObject({
+      type: 'significantEvents.resolveModel',
+      with: {
+        connector_id: '{{ inputs.connector_id }}',
+      },
+    });
+    expect(requireStep(discovery, 'run_discovery_agent')).toMatchObject({
+      'connector-id': '{{ steps.resolve_model.output.connector_id }}',
+    });
+    expect(
+      requireStep(discovery, 'run_discovery_agent')['connector-id-by-feature']
+    ).toBeUndefined();
   });
 
   it('bootstraps per-space cleanup before discovery work', () => {
@@ -100,7 +138,7 @@ describe('significant events persistence workflow contracts', () => {
 
     const renderedMessage = createWorkflowLiquidEngine().parseAndRenderSync(message, {
       steps: {
-        resolve_open_event: {
+        resolve_active_event: {
           output: {
             hits: [
               {
@@ -124,6 +162,8 @@ describe('significant events persistence workflow contracts', () => {
 
   it('attributes discovery agent calls to Nightshift', () => {
     expect(requireStep(discovery, 'run_discovery_agent')).toMatchObject({
+      'plugin-id': 'nightshift_discovery',
+      'aggregate-by': 'nightshift',
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
@@ -146,7 +186,7 @@ describe('significant events persistence workflow contracts', () => {
 
   it('does not launch investigations without resolved event details', () => {
     expect(requireStep(discovery, 'guard_resolved_event').condition).toContain(
-      'steps.resolve_open_event.output.hits[0] != null'
+      'steps.resolve_active_event.output.hits[0] != null'
     );
   });
 
@@ -163,7 +203,7 @@ describe('significant events persistence workflow contracts', () => {
     const template = `{% if ${inner} %}true{% else %}false{% endif %}`;
 
     const makeContext = (investigations: unknown[]) => ({
-      steps: { resolve_open_event: { output: { hits: [{ investigations }] } } },
+      steps: { resolve_active_event: { output: { hits: [{ investigations }] } } },
     });
 
     // Empty investigations → condition is true → investigation should be triggered.

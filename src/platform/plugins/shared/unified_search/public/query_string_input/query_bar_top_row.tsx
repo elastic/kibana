@@ -29,7 +29,7 @@ import {
   ESQLLangEditor,
   QuickSearchVisor,
   type ESQLEditorProps,
-  type RestorableStateProviderApi,
+  type ESQLEditorApi,
 } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
@@ -374,7 +374,9 @@ export const QueryBarTopRow = React.memo(
       }
     }, [props.isLoading]);
 
-    const esqlEditorRef = useRef<RestorableStateProviderApi>(null);
+    const esqlEditorRef = useRef<ESQLEditorApi>(null);
+
+    const focusEsqlEditor = useCallback(() => esqlEditorRef.current?.focus(), []);
 
     // Temporary, the empty page will change and we wont need to control it
     useEffect(() => {
@@ -1444,7 +1446,9 @@ export const QueryBarTopRow = React.memo(
                     }
                     onNlResult={visorNlResultHandlerReady ? onVisorNlResult : undefined}
                     onUpdateAndSubmitQuery={onVisorUpdateAndSubmit}
-                    isDisabled={isSubmitDisabled}
+                    isDisabled={Boolean(isDateRangeInvalid || props.isDisabled)}
+                    disableSubmitAction={Boolean(props.disableSubmitAction)}
+                    onKqlSubmitted={focusEsqlEditor}
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}

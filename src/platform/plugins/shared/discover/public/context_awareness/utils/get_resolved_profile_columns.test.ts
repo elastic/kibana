@@ -8,6 +8,7 @@
  */
 
 import { fieldList } from '@kbn/data-views-plugin/common';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { getResolvedProfileColumns } from './get_resolved_profile_columns';
@@ -69,6 +70,30 @@ describe('getResolvedProfileColumns', () => {
       })
     ).toEqual({
       columns: ['foo', 'bar'],
+      grid: {
+        columns: {
+          foo: { width: 300 },
+        },
+      },
+    });
+  });
+
+  it('validates ES|QL columns through the data source', () => {
+    expect(
+      getResolvedProfileColumns({
+        profileColumns: [
+          { name: 'foo', width: 300 },
+          { name: 'missing', width: 400 },
+          { name: '_source' },
+        ],
+        fallbackColumns: ['bar', 'absent'],
+        dataSource: createMockEsqlSource([
+          { name: 'foo', type: 'string', source: 'esql-result' },
+          { name: 'bar', type: 'string', source: 'esql-result' },
+        ]),
+      })
+    ).toEqual({
+      columns: ['foo', '_source', 'bar'],
       grid: {
         columns: {
           foo: { width: 300 },

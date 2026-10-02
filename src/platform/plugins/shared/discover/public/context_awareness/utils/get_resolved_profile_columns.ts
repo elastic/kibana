@@ -8,27 +8,37 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { uniqBy } from 'lodash';
 import type { DefaultAppStateColumn } from '../types';
 
+type ResolvedProfileColumnSource =
+  | {
+      dataView: DataView;
+      esqlQueryColumns?: Array<{ name: string }>;
+      dataSource?: undefined;
+    }
+  | {
+      dataSource: DataSource;
+      dataView?: undefined;
+      esqlQueryColumns?: undefined;
+    };
+
 export const getResolvedProfileColumns = ({
   profileColumns = [],
   fallbackColumns = [],
-  dataView,
-  esqlQueryColumns,
+  ...columnSource
 }: {
   profileColumns?: DefaultAppStateColumn[];
   fallbackColumns?: string[];
-  dataView: DataView;
-  esqlQueryColumns?: Array<{ name: string }>;
-}): {
+} & ResolvedProfileColumnSource): {
   columns: string[];
   grid: DiscoverGridSettings | undefined;
 } => {
   const mappedFallbackColumns = fallbackColumns.map((name) => ({ name }));
-  const isValidColumn = getIsValidColumn(dataView, esqlQueryColumns);
+  const isValidColumn = getIsValidColumn(columnSource);
   const validColumns = uniqBy(
     profileColumns.concat(mappedFallbackColumns).filter(isValidColumn),
     'name'
@@ -55,11 +65,15 @@ export const getResolvedProfileColumns = ({
 };
 
 const getIsValidColumn =
-  (dataView: DataView, esqlQueryColumns: Array<{ name: string }> | undefined) =>
+  ({ dataView, esqlQueryColumns, dataSource }: ResolvedProfileColumnSource) =>
   (column: DefaultAppStateColumn) => {
-    // Summary is a synthetic column; allow it even when absent from the data view / ES|QL result
+    // Summary is a synthetic column; allow it even when absent from the source
     if (column.name === SOURCE_COLUMN) {
       return true;
+    }
+
+    if (dataSource) {
+      return Boolean(dataSource.getColumn(column.name));
     }
 
     const isValid = esqlQueryColumns

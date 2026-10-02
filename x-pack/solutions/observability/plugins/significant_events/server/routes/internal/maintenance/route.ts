@@ -109,6 +109,36 @@ const resumeRoute = createServerRoute({
   },
 });
 
+const resetRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/maintenance/_reset',
+  options: {
+    access: 'internal',
+    summary: 'Reset Significant Events activity and data',
+    description:
+      'Cancels Significant Events activity and permanently deletes generated data across every Kibana space. The operation is best-effort, irreversible, and idempotent. ' +
+      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization requires the caller’s space-scoped Nightshift manage and configure privileges; there is no separate cluster-level privilege today. As with pause, the workflow and settings sweep covers the spaces visible to the caller. ' +
+      'Data streams are refreshed and deleted as the calling user and recreated by the Kibana system user, so the caller also needs the Elasticsearch `delete_index` and `maintenance` index privileges on `.significant_events-*`; missing privileges are reported in `partialFailures` rather than as an error status.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    server,
+    getScopedClients,
+    maintenanceService,
+  }): Promise<SignificantEventsMaintenanceSummary> => {
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
+    return maintenanceService.reset({ request, updatedBy });
+  },
+});
+
 const statusRoute = createServerRoute({
   endpoint: 'GET /internal/significant_events/maintenance/_status',
   options: {
@@ -140,5 +170,6 @@ export const internalMaintenanceRoutes = {
   ...bootstrapCleanupRoute,
   ...pauseRoute,
   ...resumeRoute,
+  ...resetRoute,
   ...statusRoute,
 };

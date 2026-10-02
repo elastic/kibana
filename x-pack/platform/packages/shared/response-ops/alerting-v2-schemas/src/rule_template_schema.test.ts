@@ -583,7 +583,7 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "properties": Object {
                 "count": Object {
-                  "description": "Consecutive matches required before the alert episode becomes \`active\`. Set to \`0\` to open it on the first match.",
+                  "description": "Consecutive matches the alert episode spends in \`pending\` before it becomes \`active\` on the next match. For example, \`2\` opens it on the third consecutive match. Set to \`0\` to open it on the first match.",
                   "maximum": 1000,
                   "minimum": 0,
                   "type": "integer",
@@ -608,7 +608,7 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "properties": Object {
                 "count": Object {
-                  "description": "Consecutive recoveries required before the alert episode becomes \`inactive\`. Set to \`0\` to close it on the first recovery.",
+                  "description": "Consecutive recoveries the alert episode spends in \`recovering\` before it becomes \`inactive\` on the next recovery. For example, \`2\` closes it on the third consecutive recovery. Set to \`0\` to close it on the first recovery.",
                   "maximum": 1000,
                   "minimum": 0,
                   "type": "integer",

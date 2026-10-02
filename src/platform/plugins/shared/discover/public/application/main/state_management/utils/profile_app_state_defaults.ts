@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import {
   type DiscoverAppState,
   PROFILE_APP_STATE_DEFAULT_FIELDS,
@@ -18,18 +19,17 @@ import {
 import type { ScopedProfilesManager } from '../../../../context_awareness';
 import { getMergedAccessor } from '../../../../context_awareness';
 import { getResolvedProfileColumns } from '../../../../context_awareness/utils/get_resolved_profile_columns';
-import type { DataDocumentsMsg } from '../discover_data_state_container';
 
 export const getProfileAppStateDefaults = ({
   scopedProfilesManager,
   profileAppStateDefaults,
-  dataView,
+  dataSource,
 }: {
   scopedProfilesManager: ScopedProfilesManager;
   profileAppStateDefaults: TabState['profileAppStateDefaults'];
-  dataView: DataView;
+  dataSource: DataSource;
 }) => {
-  const defaultState = getDefaultState(scopedProfilesManager, dataView);
+  const defaultState = getDefaultState(scopedProfilesManager, dataSource);
 
   return {
     /**
@@ -43,7 +43,7 @@ export const getProfileAppStateDefaults = ({
       if (
         shouldResetProfileAppStateDefaultField(profileAppStateDefaults, 'breakdownField') &&
         defaultState.breakdownField !== undefined &&
-        dataView.fields.getByName(defaultState.breakdownField)
+        dataSource.getColumn(defaultState.breakdownField)
       ) {
         stateUpdate.breakdownField = defaultState.breakdownField;
       }
@@ -79,10 +79,10 @@ export const getProfileAppStateDefaults = ({
      */
     getPostFetchState: ({
       defaultColumns,
-      esqlQueryColumns,
+      dataSource: postFetchDataSource = dataSource,
     }: {
       defaultColumns: string[];
-      esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns'];
+      dataSource?: DataSource;
     }) => {
       const stateUpdate: DiscoverAppState = {};
 
@@ -90,8 +90,7 @@ export const getProfileAppStateDefaults = ({
         const { columns, grid } = getResolvedProfileColumns({
           profileColumns: defaultState.columns,
           fallbackColumns: defaultState.columns === undefined ? [] : defaultColumns,
-          dataView,
-          esqlQueryColumns,
+          dataSource: postFetchDataSource,
         });
 
         if (columns.length) {
@@ -130,14 +129,14 @@ export const getFieldsToReset = (
   return [firstField, ...restFields];
 };
 
-const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView: DataView) => {
+const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataSource: DataSource) => {
   const getDefaultAppState = getMergedAccessor(
     scopedProfilesManager.getProfiles(),
     'getDefaultAppState',
     () => ({})
   );
 
-  return getDefaultAppState({ dataView });
+  return getDefaultAppState({ dataView: toProfileDataView(dataSource) });
 };
 
 export const shouldResetProfileAppStateDefaultField = (
@@ -147,3 +146,19 @@ export const shouldResetProfileAppStateDefaultField = (
   profileAppStateDefaults.fieldsToReset === 'all' ||
   (profileAppStateDefaults.fieldsToReset !== 'none' &&
     profileAppStateDefaults.fieldsToReset.includes(field));
+
+/**
+ * `getDefaultAppState` still takes a DataView. DataViewSource already wraps one;
+ * EsqlSource only needs time-field identity for current profile accessors.
+ */
+const toProfileDataView = (dataSource: DataSource): DataView => {
+  if (dataSource.kind === 'index-pattern') {
+    return dataSource.getDataView();
+  }
+
+  return {
+    isTimeBased: () => dataSource.isTimeBased(),
+    timeFieldName: dataSource.timeFieldName,
+    getIndexPattern: () => dataSource.title,
+  } as DataView;
+};
