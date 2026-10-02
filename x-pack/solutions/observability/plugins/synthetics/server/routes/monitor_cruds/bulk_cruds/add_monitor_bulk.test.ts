@@ -186,6 +186,50 @@ describe('syncNewMonitorBulk', () => {
     );
   });
 
+  it('synchronizes only monitors whose Saved Objects were created successfully', async () => {
+    mockRouteContext.spaceId = 'default';
+    const normalizedMonitors = [
+      {
+        name: 'Created monitor',
+        [ConfigKey.NAMESPACE]: 'default',
+        [ConfigKey.LOCATIONS]: [{ id: 'public-location', isServiceManaged: true }],
+      },
+      {
+        name: 'Rejected monitor',
+        [ConfigKey.NAMESPACE]: 'default',
+        [ConfigKey.LOCATIONS]: [{ id: 'public-location', isServiceManaged: true }],
+      },
+    ] as any;
+    mockMonitorConfigRepository.createBulk.mockResolvedValue([
+      { id: 'monitor-1', attributes: { [ConfigKey.CONFIG_ID]: 'monitor-1' } },
+      {
+        id: 'monitor-2',
+        error: { statusCode: 409, error: 'Conflict', message: 'Monitor already exists' },
+      },
+    ]);
+    mockSyntheticsMonitorClient.addMonitors.mockResolvedValue([{ created: [], failed: [] }, []]);
+
+    const result = await syncNewMonitorBulk({
+      routeContext: mockRouteContext,
+      normalizedMonitors,
+      privateLocations: [],
+      spaceId: 'default',
+    });
+
+    expect(mockSyntheticsMonitorClient.addMonitors).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          id: 'monitor-1',
+          monitor: expect.objectContaining({ [ConfigKey.CONFIG_ID]: 'monitor-1' }),
+        }),
+      ],
+      [],
+      'default',
+      undefined
+    );
+    expect(result.newMonitors).toHaveLength(2);
+  });
+
   it('retains the input ordering when a private-location synchronization fails', async () => {
     mockRouteContext.spaceId = 'default';
     const normalizedMonitors = [

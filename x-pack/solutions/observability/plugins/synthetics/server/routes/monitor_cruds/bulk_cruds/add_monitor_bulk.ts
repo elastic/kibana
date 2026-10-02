@@ -73,18 +73,25 @@ export const syncNewMonitorBulk = async ({
   });
 
   try {
-    const [createdMonitors, [policiesResult, syncErrors]] = await Promise.all([
-      monitorConfigRepository.createBulk({
-        monitors: monitorsToCreate,
-        savedObjectType: query.savedObjectType,
-      }),
-      syntheticsMonitorClient.addMonitors(
-        monitorsToCreate,
-        privateLocations,
-        spaceId,
-        maintenanceWindows
-      ),
-    ]);
+    const createdMonitors = await monitorConfigRepository.createBulk({
+      monitors: monitorsToCreate,
+      savedObjectType: query.savedObjectType,
+    });
+    const createdMonitorIds = new Set(
+      createdMonitors
+        .filter((monitor) => !isSavedObjectErrorResult(monitor))
+        .map((monitor) => monitor.id)
+    );
+    const monitorsToSync = monitorsToCreate.filter(({ id }) => createdMonitorIds.has(id));
+    const [policiesResult, syncErrors] =
+      monitorsToSync.length > 0
+        ? await syntheticsMonitorClient.addMonitors(
+            monitorsToSync,
+            privateLocations,
+            spaceId,
+            maintenanceWindows
+          )
+        : [{ created: [], failed: [] }, []];
 
     let failedMonitors: FailedMonitorConfig[] = [];
 
