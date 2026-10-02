@@ -170,17 +170,6 @@ export type { SignificantEventsWorkflowStatusResult } from './src/workflows';
 
 export { SignificantEventsWorkflowStatus } from './src/workflows';
 
-export {
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-  SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-} from './src/inference_feature_ids';
-
 export { NightshiftModelBlockedError } from './src/nightshift_model_blocked_error';
 export { NightshiftModelNotFoundError } from './src/nightshift_model_not_found_error';
 
