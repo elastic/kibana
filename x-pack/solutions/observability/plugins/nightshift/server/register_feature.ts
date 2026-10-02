@@ -46,6 +46,7 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
           PROPOSALS_API_PRIVILEGE_MANAGE,
         ],
         ui: [NIGHTSHIFT_UI_PRIVILEGES.show, NIGHTSHIFT_UI_PRIVILEGES.manage],
+        alerts: { read: true },
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
         savedObject: { all: [NIGHTSHIFT_SOURCE_SO_TYPE], read: [] },
       },
@@ -56,6 +57,8 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         // TODO(ns-1619 s3): grant the read investigations API privilege added by the query API.
         api: [NIGHTSHIFT_API_PRIVILEGES.read, PROPOSALS_API_PRIVILEGE_READ],
         ui: [NIGHTSHIFT_UI_PRIVILEGES.show],
+        // Significant events are read from `.rule-events`, which is gated by `alerts:read`.
+        alerts: { read: true },
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
         savedObject: { all: [], read: [NIGHTSHIFT_SOURCE_SO_TYPE] },
       },
