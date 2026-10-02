@@ -41,6 +41,7 @@ export const useConfigurableRiskEngineSettings = () => {
     toggleSelectedClosedAlertsSetting,
     saveSelectedSettingsMutation,
     isLoadingRiskEngineSettings,
+    isErrorLoadingRiskEngineSettings: isError ?? false,
     toggleScoreRetainment,
     setAlertFilters,
     getUIAlertFilters,

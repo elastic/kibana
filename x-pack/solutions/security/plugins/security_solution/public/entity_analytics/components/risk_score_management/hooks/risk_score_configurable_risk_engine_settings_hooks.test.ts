@@ -115,6 +115,7 @@ describe('useConfigurableRiskEngineSettings', () => {
       toggleSelectedClosedAlertsSetting: mockStateResult.toggleSelectedClosedAlertsSetting,
       saveSelectedSettingsMutation: mockMutationsResult.saveSelectedSettingsMutation,
       isLoadingRiskEngineSettings: mockQueryResult.isLoadingRiskEngineSettings,
+      isErrorLoadingRiskEngineSettings: mockQueryResult.isError,
       toggleScoreRetainment: mockStateResult.toggleScoreRetainment,
       setAlertFilters: mockStateResult.setAlertFilters,
       getUIAlertFilters: mockStateResult.getUIAlertFilters,
@@ -174,5 +175,6 @@ describe('useConfigurableRiskEngineSettings', () => {
     });
 
     expect(result.current.savedRiskEngineSettings).toBeUndefined();
+    expect(result.current.isErrorLoadingRiskEngineSettings).toBe(true);
   });
 });

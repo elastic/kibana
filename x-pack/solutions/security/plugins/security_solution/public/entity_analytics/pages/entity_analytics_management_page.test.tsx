@@ -254,6 +254,7 @@ const buildConfig = (overrides: Record<string, unknown> = {}) => {
       isLoading: false,
     },
     isLoadingRiskEngineSettings: false,
+    isErrorLoadingRiskEngineSettings: false,
     setSelectedDateSetting: () => {},
     toggleSelectedClosedAlertsSetting: mockToggleSelectedClosedAlertsSetting,
     toggleScoreRetainment: mockToggleScoreRetainment,
@@ -351,6 +352,23 @@ describe('EntityAnalyticsManagementPage', () => {
       })
     );
     rerender(pageComponent());
+    expect(screen.getByTestId('riskScoreSaveButton')).toBeInTheDocument();
+  });
+
+  it('shows the save bar and an error callout when the saved settings could not be loaded', () => {
+    mockUseConfigurableRiskEngineSettings.mockReturnValue(
+      buildConfig({
+        isErrorLoadingRiskEngineSettings: true,
+        savedRiskEngineSettings: undefined,
+        selectedSettingsMatchSavedSettings: false,
+        selectedRiskEngineSettings: {
+          includeClosedAlerts: true,
+        },
+      })
+    );
+    render(pageComponent());
+
+    expect(screen.getByTestId('riskScoreSettingsError')).toBeInTheDocument();
     expect(screen.getByTestId('riskScoreSaveButton')).toBeInTheDocument();
   });
 
