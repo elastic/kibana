@@ -231,7 +231,6 @@ export function RequestFlyoutFailedCalls() {
         defaultMessage: 'Actions',
       }),
       align: 'right' as const,
-      width: '40px',
       render: (item: FailedCallBucket) => {
         const discoverHref = buildDiscoverHref(item);
         const traceHref = item.sampleTraceId

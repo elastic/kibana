@@ -143,7 +143,6 @@ export function RequestFlyoutAffectedEndpoints({
         defaultMessage: 'Actions',
       }),
       align: 'right' as const,
-      width: '40px',
       render: (item: ConnectionTransactionGroup) => {
         const discoverHref = buildDiscoverHref(item);
         if (!discoverHref) return null;

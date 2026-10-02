@@ -149,7 +149,6 @@ export function RequestFlyoutOperations() {
         defaultMessage: 'Actions',
       }),
       align: 'right' as const,
-      width: '40px',
       render: (item: DependencyOperation) => {
         const discoverHref = buildDiscoverHref(item);
         if (!discoverHref) return null;
