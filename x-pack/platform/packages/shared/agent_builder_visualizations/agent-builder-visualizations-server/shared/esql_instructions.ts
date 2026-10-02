@@ -46,11 +46,12 @@ Use human-readable column aliases in STATS/EVAL (e.g. \`Unique Visitors\` not \`
 
 Use the event-time field. Do not hardcode times or \`now()\` ranges. On a time series, omit \`LIMIT\`, \`SORT\`, and \`DATE_TRUNC\`.
 
-\`@timestamp\` — \`TBUCKET(100)\` only. No timestamp \`WHERE\`, no \`?_tstart\` / \`?_tend\`, no \`TRANGE\`:
+### FROM
+
+\`@timestamp\` — \`TBUCKET(100)\` only. No timestamp \`WHERE\`, no \`?_tstart\` / \`?_tend\`:
 
 \`\`\`esql
 FROM logs | STATS count = COUNT() BY bucket = TBUCKET(100)
-TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(100)
 \`\`\`
 
 Any other date field:
@@ -60,6 +61,16 @@ FROM orders | STATS count = COUNT() BY bucket = BUCKET(order_date, 100, ?_tstart
 \`\`\`
 
 Charts that do not group by time: \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`.
+
+### TS
+
+The visualization framework automatically adds the \`@timestamp\` range for \`TS\` time series, so do not add \`TRANGE\` or pass \`?_tstart\` / \`?_tend\` to \`TBUCKET\`.
+
+\`\`\`esql
+TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(100)
+\`\`\`
+
+Also omit \`LIMIT\` and \`SORT\` (same reasons as with FROM).
 
 ${seriesStatisticsEsqlGuidance}
 
