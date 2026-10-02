@@ -387,9 +387,9 @@ test.describe(
       await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)).toBeVisible({
         timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
       });
-      await expect(
-        nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)
-      ).toHaveText(V1_ALERTS_NAV_TITLE);
+      await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)).toHaveText(
+        V1_ALERTS_NAV_TITLE
+      );
 
       await nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK).click();
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
