@@ -101,6 +101,7 @@ describe('Import rules route', () => {
       successes: [
         {
           rule_id: rule.rule_id,
+          outcome: 'created',
           telemetry: { id: 'id-1', type: 'query', rule_source: { type: 'internal' } },
         },
       ],
@@ -158,6 +159,7 @@ describe('Import rules route', () => {
     expect(response.body).toEqual({
       success: true,
       success_count: 1,
+      unchanged_count: 0,
       rules_count: 1,
       errors: [],
       exceptions_errors: [],
@@ -237,6 +239,7 @@ describe('Import rules route', () => {
         successes: [
           {
             rule_id: 'rule-0',
+            outcome: 'created',
             telemetry: { id: 'id-0', type: 'query', rule_source: { type: 'internal' } },
           },
         ],
@@ -246,6 +249,7 @@ describe('Import rules route', () => {
         successes: [
           {
             rule_id: `rule-${RULE_IMPORT_BATCH_SIZE}`,
+            outcome: 'created',
             telemetry: { id: 'id-last', type: 'query', rule_source: { type: 'internal' } },
           },
         ],
@@ -293,7 +297,13 @@ describe('Import rules route', () => {
       successes: [
         {
           rule_id: 'rule-b',
+          outcome: 'updated',
           telemetry: { id: 'id-rule-b', type: 'query', rule_source: { type: 'internal' } },
+        },
+        {
+          rule_id: 'rule-d',
+          outcome: 'unchanged',
+          telemetry: { id: 'id-rule-d', type: 'query', rule_source: { type: 'internal' } },
         },
       ],
       errors: [
@@ -310,7 +320,8 @@ describe('Import rules route', () => {
 
     expect(response.status).toEqual(200);
     expect(response.body.success).toEqual(false);
-    expect(response.body.success_count).toEqual(1);
+    expect(response.body.success_count).toEqual(2);
+    expect(response.body.unchanged_count).toEqual(1);
     expect(response.body.errors).toEqual([
       { rule_id: 'rule-a', error: { status_code: 400, message: 'boom' } },
       { rule_id: 'rule-c', error: { status_code: 409, message: 'conflict' } },

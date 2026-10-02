@@ -13,6 +13,7 @@ export function mockImportResponse(
   return {
     success: true,
     success_count: 1,
+    unchanged_count: 0,
     rules_count: 1,
     errors: [],
     exceptions_success: true,

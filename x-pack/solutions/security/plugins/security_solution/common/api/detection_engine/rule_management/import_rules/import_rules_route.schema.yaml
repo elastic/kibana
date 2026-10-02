@@ -14,7 +14,7 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
         > warn
-        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the created or updated rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
@@ -55,7 +55,7 @@ paths:
         - name: overwrite
           in: query
           required: false
-          description: Determines whether existing rules with the same `rule_id` are overwritten.
+          description: Determines whether existing rules with the same `rule_id` are overwritten. Rules with no changes are left as they are and counted in the response's `unchanged_count`.
           schema:
             type: boolean
             default: false
@@ -95,6 +95,7 @@ paths:
                   - rules_count
                   - success
                   - success_count
+                  - unchanged_count
                   - errors
                   - action_connectors_errors
                   - action_connectors_warnings
@@ -118,6 +119,10 @@ paths:
                   success_count:
                     type: integer
                     minimum: 0
+                  unchanged_count:
+                    type: integer
+                    minimum: 0
+                    description: Number of successfully imported rules that had no changes and were not written. Included in `success_count`.
                   errors:
                     type: array
                     items:
@@ -141,6 +146,7 @@ paths:
                   value:
                     success: true
                     success_count: 1
+                    unchanged_count: 0
                     rules_count: 1
                     errors: []
                     exceptions_errors: []

@@ -115,6 +115,7 @@ describe('detectionRulesClient.importRules', () => {
     expect(successes).toEqual([
       expect.objectContaining({
         rule_id: ruleToImport.rule_id,
+        outcome: 'created',
         telemetry: expect.objectContaining({
           type: 'query',
           rule_source: { type: 'internal' },
@@ -257,6 +258,95 @@ describe('detectionRulesClient.importRules', () => {
         expect.objectContaining({ rule_id: 'existing-rule' }),
         expect.objectContaining({ rule_id: 'new-rule' }),
       ])
+    );
+  });
+
+  it('skips unchanged overwrite rules without writing or toggling their state', async () => {
+    const existingRule = {
+      ...getRulesSchemaMock(),
+      rule_id: 'existing-rule',
+      exceptions_list: [],
+    };
+    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+      'existing-rule': existingRule,
+    });
+
+    const result = await subject.importRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: true,
+      rules: [{ ...existingRule }],
+    });
+
+    expect(result).toEqual({
+      successes: [
+        expect.objectContaining({
+          rule_id: 'existing-rule',
+          outcome: 'unchanged',
+          telemetry: expect.objectContaining({ id: existingRule.id }),
+        }),
+      ],
+      errors: [],
+    });
+    expect(rulesClient.bulkUpdateRules).not.toHaveBeenCalled();
+    expect(rulesClient.bulkEnableRules).not.toHaveBeenCalled();
+    expect(rulesClient.bulkDisableRules).not.toHaveBeenCalled();
+    expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analytics.reportEvent).toHaveBeenCalledWith(DETECTION_RULE_IMPORT_EVENT.eventType, {
+      ruleId: existingRule.id,
+      ruleType: 'query',
+      isPrebuilt: false,
+      isCustomized: false,
+      outcome: 'unchanged',
+    });
+  });
+
+  it('only sends changed overwrite rules to bulkUpdateRules', async () => {
+    const unchanged = {
+      ...getRulesSchemaMock(),
+      id: 'unchanged-id',
+      rule_id: 'unchanged-rule',
+      exceptions_list: [],
+    };
+    const changed = {
+      ...getRulesSchemaMock(),
+      id: 'changed-id',
+      rule_id: 'changed-rule',
+      exceptions_list: [],
+    };
+    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+      'unchanged-rule': unchanged,
+      'changed-rule': changed,
+    });
+    rulesClient.bulkUpdateRules.mockResolvedValueOnce({
+      successfulIds: [changed.id],
+      errors: [],
+      total: 1,
+    });
+
+    const result = await subject.importRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: true,
+      rules: [{ ...unchanged }, { ...changed, name: 'Changed name' }],
+    });
+
+    expect(rulesClient.bulkUpdateRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rules: [expect.objectContaining({ id: changed.id })],
+      })
+    );
+    const outcomes = Object.fromEntries(
+      result.successes.map(({ rule_id: ruleId, outcome }) => [ruleId, outcome])
+    );
+    expect(outcomes).toEqual({ 'changed-rule': 'updated', 'unchanged-rule': 'unchanged' });
+    expect(result.errors).toEqual([]);
+    expect(analytics.reportEvent).toHaveBeenCalledTimes(2);
+    expect(analytics.reportEvent).toHaveBeenCalledWith(
+      DETECTION_RULE_IMPORT_EVENT.eventType,
+      expect.objectContaining({ ruleId: changed.id, outcome: 'updated' })
+    );
+    expect(analytics.reportEvent).toHaveBeenCalledWith(
+      DETECTION_RULE_IMPORT_EVENT.eventType,
+      expect.objectContaining({ ruleId: unchanged.id, outcome: 'unchanged' })
     );
   });
 
@@ -513,6 +603,7 @@ describe('detectionRulesClient.importRules', () => {
     expect(successes).toEqual([
       expect.objectContaining({
         rule_id: 'existing-rule',
+        outcome: 'updated',
         telemetry: {
           id: getRulesSchemaMock().id,
           type: 'query',
@@ -610,6 +701,7 @@ describe('detectionRulesClient.importRules', () => {
       ruleType: 'query',
       isPrebuilt: false,
       isCustomized: false,
+      outcome: 'created',
     });
   });
 
@@ -636,6 +728,7 @@ describe('detectionRulesClient.importRules', () => {
       ruleType: 'query',
       isPrebuilt: false,
       isCustomized: false,
+      outcome: 'updated',
     });
   });
 
@@ -713,7 +806,12 @@ describe('detectionRulesClient.importRules', () => {
   });
 
   it('overwrite branch: enable-only flip calls bulkEnableRules after a successful write', async () => {
-    const existingRule = { ...getRulesSchemaMock(), rule_id: 'existing-rule', enabled: false };
+    const existingRule = {
+      ...getRulesSchemaMock(),
+      rule_id: 'existing-rule',
+      enabled: false,
+      exceptions_list: [],
+    };
     (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
       'existing-rule': existingRule,
     });
@@ -726,11 +824,12 @@ describe('detectionRulesClient.importRules', () => {
     const { successes, errors } = await subject.importRules({
       allowMissingConnectorSecrets: false,
       overwriteRules: true,
-      rules: [{ ...getImportRulesSchemaMock(), rule_id: 'existing-rule', enabled: true }],
+      rules: [{ ...existingRule, enabled: true }],
     });
 
     expect(errors).toEqual([]);
     expect(successes).toEqual([expect.objectContaining({ rule_id: 'existing-rule' })]);
+    expect(rulesClient.bulkUpdateRules).toHaveBeenCalledTimes(1);
     expect(rulesClient.bulkEnableRules).toHaveBeenCalledWith({ ids: [existingRule.id] });
     expect(rulesClient.bulkDisableRules).not.toHaveBeenCalled();
   });

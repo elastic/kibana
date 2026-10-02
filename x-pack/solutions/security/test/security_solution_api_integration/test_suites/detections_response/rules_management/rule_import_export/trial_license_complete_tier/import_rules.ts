@@ -62,6 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(importResponse).toEqual({
         success: true,
         success_count: 1,
+        unchanged_count: 0,
         rules_count: 1,
         errors: [],
         exceptions_success: true,
