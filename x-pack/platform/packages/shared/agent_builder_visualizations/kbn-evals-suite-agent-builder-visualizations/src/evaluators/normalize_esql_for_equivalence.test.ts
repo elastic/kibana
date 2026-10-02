@@ -25,10 +25,10 @@ describe('normalizeEsqlForEquivalence', () => {
   it('strips TS-source gold WHERE the same way', () => {
     const withWhere = `TS metrics-hostmetricsreceiver.otel-default
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-| STATS x = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)) BY \`Time Bucket\` = TBUCKET(100, ?_tstart, ?_tend)`;
+| STATS x = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)) BY \`Time Bucket\` = TBUCKET(100)`;
 
     const withoutWhere = `TS metrics-hostmetricsreceiver.otel-default
-| STATS x = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)) BY \`Time Bucket\` = TBUCKET(100, ?_tstart, ?_tend)`;
+| STATS x = AVG(AVG_OVER_TIME(\`system.cpu.load_average.1m\`)) BY \`Time Bucket\` = TBUCKET(100)`;
 
     expect(normalizeEsqlForEquivalence(withWhere)).toBe(withoutWhere);
   });

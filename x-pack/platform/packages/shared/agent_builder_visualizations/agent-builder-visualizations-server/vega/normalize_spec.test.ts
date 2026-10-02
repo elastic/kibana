@@ -88,9 +88,10 @@ describe('normalizeVegaSpec', () => {
   });
 
   it('falls back to a date result column only when no source field is in the query', () => {
-    // Time-aware via TBUCKET, which takes no field argument, so nothing to extract.
+    // TBUCKET(100) takes no field and no bounds. The bind param is elsewhere, so
+    // there is no source field to extract and the date result column is used.
     const tbucketEsql =
-      'TS metrics-* | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)';
+      'TS metrics-* | STATS count = COUNT() BY bucket = TBUCKET(100) | EVAL start = ?_tstart';
 
     const result = normalizeVegaSpec({
       spec: { mark: 'line' },
@@ -107,10 +108,11 @@ describe('normalizeVegaSpec', () => {
   });
 
   it('defaults %timefield% to @timestamp when no source field or date column is available', () => {
-    // Time-aware (TBUCKET binds the params) but no field to extract and no date
-    // result column, so the conservative @timestamp default is used.
+    // TBUCKET(100) takes no bounds. The query is still time-aware through a bind
+    // param that names no source field, and there is no date result column, so
+    // the conservative @timestamp default is used.
     const timeAwareEsql =
-      'TS metrics-* | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)';
+      'TS metrics-* | STATS count = COUNT() BY bucket = TBUCKET(100) | EVAL start = ?_tstart';
 
     const result = normalizeVegaSpec({
       spec: { mark: 'bar' },

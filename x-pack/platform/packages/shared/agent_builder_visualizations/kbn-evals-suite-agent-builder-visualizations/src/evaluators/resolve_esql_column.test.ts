@@ -69,7 +69,7 @@ describe('columnsReferToSameExpression', () => {
     const gold = `FROM kibana_sample_data_logs
 | STATS bytes = SUM(bytes) BY \`Time Bucket\` = BUCKET(@timestamp, 100, ?_tstart, ?_tend)`;
     const actual = `FROM kibana_sample_data_logs
-| STATS bytes = SUM(bytes) BY ts = TBUCKET(100, ?_tstart, ?_tend)`;
+| STATS bytes = SUM(bytes) BY ts = TBUCKET(100)`;
 
     expect(columnsReferToSameExpression('Time Bucket', gold, 'ts', actual)).toBe(true);
   });
