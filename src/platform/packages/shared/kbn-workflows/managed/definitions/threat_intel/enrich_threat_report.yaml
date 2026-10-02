@@ -4,16 +4,21 @@ version: "1"
 # LLM steps sequentially; partial drain per pass is intentional.
 # Installed once globally: enrichment is content-only and space-blind, so it
 # selects all pending reports regardless of `space_id` (analyst-paste and
-# future custom-source reports included). The `kibana.request` steps below
-# call the enrich routes with no `/s/{id}/` prefix, so every request resolves
-# to the `default` space, including the per-space LLM connector each route
-# reads via Stack Management > Model Settings. That means every report in the
-# deployment is enriched using only the `default` space's Model Settings
-# regardless of which space it's tagged to. Accepted MVP simplification
-# (sources are global-only for now too), not an oversight: once reports need
-# distinct model config per owning space, these calls have to resolve a space
-# per report inside `extract_each_report`, from that report's own `space_id`
+# future custom-source reports included). The LLM-calling steps below carry no
+# `/s/{id}/` prefix, so they resolve to the `default` space, including the
+# per-space LLM connector each route reads via Stack Management > Model
+# Settings. That means every report in the deployment is enriched using only
+# the `default` space's Model Settings regardless of which space it's tagged
+# to. Accepted MVP simplification (sources are global-only for now too), not an
+# oversight: once reports need distinct model config per owning space, those
+# calls have to resolve a space per report, from that report's own `space_id`
 # (already stamped by the ingest adapters).
+#
+# The `persist_*` write steps are the exception: they already address the
+# report through its own `space_id`, because `persist_report_fields` writes as
+# the internal user and uses the request's space to reject an id from another
+# space. Space-blind *selection* with space-pinned *writes* is deliberate --
+# dropping those prefixes would break enrichment outside the default space.
 name: Enrich threat report
 description: Extract IOCs, taxonomy, severity, and Diamond from pending reports
 tags:
@@ -37,8 +42,11 @@ steps:
       index: .kibana-threat-reports
       size: 50
       # Fingerprints only. Fetch bodies per item after the dedup skip (10 MB step cap).
+      # `space_id` rides along because the `persist_*` steps address the report through its own
+      # space, which is what lets the write route reject a cross-space id.
       _source:
         - content_fingerprint
+        - space_id
       query:
         bool:
           must:
@@ -133,7 +141,12 @@ steps:
         if: "variables.gate_is_intelligence: false"
         with:
           method: POST
-          path: "/internal/threat_intel/persist_report_fields"
+          # Prefixed with the report's *own* space so `persist_report_fields` can reject an id from
+          # another space server-side. Selection stays space-blind (see the header comment); only
+          # the write is pinned. Global (`*`) reports have no addressable space, so they go through
+          # `default` -- the route accepts the global sentinel from any space, since a global report
+          # is every space's to enrich.
+          path: "/s/{{ foreach.item._source.space_id | default: 'default' | replace: '*', 'default' }}/internal/threat_intel/persist_report_fields"
           headers:
             elastic-api-version: "1"
           body:
@@ -243,7 +256,12 @@ steps:
         if: "variables.diamond_suitable: true"
         with:
           method: POST
-          path: "/internal/threat_intel/persist_report_fields"
+          # Prefixed with the report's *own* space so `persist_report_fields` can reject an id from
+          # another space server-side. Selection stays space-blind (see the header comment); only
+          # the write is pinned. Global (`*`) reports have no addressable space, so they go through
+          # `default` -- the route accepts the global sentinel from any space, since a global report
+          # is every space's to enrich.
+          path: "/s/{{ foreach.item._source.space_id | default: 'default' | replace: '*', 'default' }}/internal/threat_intel/persist_report_fields"
           headers:
             elastic-api-version: "1"
           body:
@@ -323,7 +341,12 @@ steps:
         if: "${{ steps.enrich_report_core.error == null }}"
         with:
           method: POST
-          path: "/internal/threat_intel/persist_report_fields"
+          # Prefixed with the report's *own* space so `persist_report_fields` can reject an id from
+          # another space server-side. Selection stays space-blind (see the header comment); only
+          # the write is pinned. Global (`*`) reports have no addressable space, so they go through
+          # `default` -- the route accepts the global sentinel from any space, since a global report
+          # is every space's to enrich.
+          path: "/s/{{ foreach.item._source.space_id | default: 'default' | replace: '*', 'default' }}/internal/threat_intel/persist_report_fields"
           headers:
             elastic-api-version: "1"
           # `${{ }}` keeps arrays, numbers, and dates typed. `{{ }}` stringifies them.
@@ -381,7 +404,12 @@ steps:
         if: "steps.enrich_report_core.output.severity.level : *"
         with:
           method: POST
-          path: "/internal/threat_intel/persist_report_fields"
+          # Prefixed with the report's *own* space so `persist_report_fields` can reject an id from
+          # another space server-side. Selection stays space-blind (see the header comment); only
+          # the write is pinned. Global (`*`) reports have no addressable space, so they go through
+          # `default` -- the route accepts the global sentinel from any space, since a global report
+          # is every space's to enrich.
+          path: "/s/{{ foreach.item._source.space_id | default: 'default' | replace: '*', 'default' }}/internal/threat_intel/persist_report_fields"
           headers:
             elastic-api-version: "1"
           body:

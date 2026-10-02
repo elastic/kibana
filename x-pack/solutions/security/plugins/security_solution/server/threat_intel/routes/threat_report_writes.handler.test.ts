@@ -125,6 +125,7 @@ describe('threat report write routes', () => {
       const { router, ...rest } = buildDeps();
       registerPersistReportFieldsRoute({ router, ...rest } as never);
       const { core, esClient } = buildContext();
+      esClient.search.mockResolvedValue(visibleReport as never);
       const response = buildResponse();
 
       await getHandler(router, PERSIST_REPORT_FIELDS_API_PATH)(
@@ -141,10 +142,61 @@ describe('threat report write routes', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
     });
 
+    /**
+     * Enrichment selects reports space-blind but addresses each write through the report's own
+     * space, so the request's space is the report's space for the real caller. A call from any other
+     * space is someone who got hold of an id.
+     */
+    it('404s without writing when the report is not visible in the request space', async () => {
+      const { router, ...rest } = buildDeps({ spaceId: 'space-a' });
+      registerPersistReportFieldsRoute({ router, ...rest } as never);
+      const { core, esClient } = buildContext();
+      esClient.search.mockResolvedValue(noVisibleReport as never);
+      const response = buildResponse();
+
+      await getHandler(router, PERSIST_REPORT_FIELDS_API_PATH)(
+        { core },
+        httpServerMock.createKibanaRequest({ body: validBody }),
+        response
+      );
+
+      expect(response.notFound).toHaveBeenCalled();
+      expect(esClient.update).not.toHaveBeenCalled();
+    });
+
+    // Global reports are written through `default` because `*` is not an addressable space, so the
+    // check has to keep accepting the global sentinel or feed-sourced reports stop being enriched.
+    it('checks visibility against the request space plus the global catalog', async () => {
+      const { router, ...rest } = buildDeps({ spaceId: 'space-a' });
+      registerPersistReportFieldsRoute({ router, ...rest } as never);
+      const { core, esClient } = buildContext();
+      esClient.search.mockResolvedValue(visibleReport as never);
+
+      await getHandler(router, PERSIST_REPORT_FIELDS_API_PATH)(
+        { core },
+        httpServerMock.createKibanaRequest({ body: validBody }),
+        buildResponse()
+      );
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { ids: { values: ['report-1'] } },
+                { terms: { space_id: ['space-a', '*'] } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
     it('returns 500 when the merge fails', async () => {
       const { router, ...rest } = buildDeps();
       registerPersistReportFieldsRoute({ router, ...rest } as never);
       const { core, esClient } = buildContext();
+      esClient.search.mockResolvedValue(visibleReport as never);
       esClient.update.mockRejectedValue(new Error('version conflict'));
       const response = buildResponse();
 

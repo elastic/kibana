@@ -11,7 +11,8 @@ import {
   persistReportFieldsBodySchema,
   persistReportFieldsResponseSchema,
 } from '../../../common/threat_intel';
-import { persistReportFields } from '../services';
+import { isReportVisibleInSpace, persistReportFields } from '../services';
+import { resolveCurrentSpaceId } from '../lib/space_filter';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 import { rejectUntilBootstrapped } from './lib/bootstrap_ready';
 import type { RouteRegistrationDeps } from '.';
@@ -26,19 +27,23 @@ import type { RouteRegistrationDeps } from '.';
  * caller, since an internal-user write with an open index parameter would otherwise let anyone
  * holding this route's privilege write to any index, not only this one.
  *
- * The boundary this route enforces is *what* may be written, not *which* report it is written to.
- * `persistReportFieldsBodySchema` allowlists the enrichment sections, so a write can only land on
- * derived content: a report's `space_id` and every space's `evidence` are out of reach. Adding a
- * space check on top is not available to this route -- enrichment is installed once globally and is
- * space-blind by design, draining pending reports from every space through an unprefixed path that
- * always resolves to `default`, so scoping to the request's space would skip every report outside
- * it. Enriching a report the caller cannot read is accepted on that basis, and is one of the two
- * cases https://github.com/elastic/security-team/issues/19859 carries; the allowlist is what keeps
- * it to content.
+ * Two bounds, because an internal-user write has neither by default. *What* may be written is held
+ * to the enrichment sections by `persistReportFieldsBodySchema`, so a report's `space_id` and every
+ * space's `evidence` are out of reach. *Which* report may be written is held to the request's space
+ * (plus the global catalog, which is every space's to enrich) by the visibility check below.
+ *
+ * The second bound needs the caller's cooperation and is worth understanding before changing either
+ * side: enrichment selects pending reports space-blind, from every space at once, but addresses each
+ * `persist_*` write through that report's own space (`/s/{space}/...`). So the request's space is the
+ * report's space for the real caller, while a hand-crafted call from some other space resolves to
+ * that space and gets a 404 here. Dropping the `/s/{space}/` prefix from
+ * `enrich_threat_report.yaml` would therefore not loosen this check, it would break enrichment for
+ * every report outside the default space.
  */
 export const registerPersistReportFieldsRoute = ({
   router,
   logger,
+  getSpacesService,
   getBootstrapReady,
 }: RouteRegistrationDeps): void => {
   router.versioned
@@ -67,7 +72,16 @@ export const registerPersistReportFieldsRoute = ({
 
         const core = await context.core;
         const esClient = core.elasticsearch.client.asInternalUser;
+        const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         try {
+          const visible = await isReportVisibleInSpace(esClient, {
+            spaceId,
+            reportId: request.body.id,
+          });
+          if (!visible) {
+            return response.notFound({ body: { message: `Report ${request.body.id} not found` } });
+          }
+
           await persistReportFields(esClient, {
             index: request.body.index,
             id: request.body.id,

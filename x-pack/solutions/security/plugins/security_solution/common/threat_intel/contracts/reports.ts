@@ -114,12 +114,9 @@ const enrichmentSectionSchema = schema.object({}, { unknowns: 'allow' });
  * `persist_diamond_fields` / `persist_extractions` / `persist_classified_severity`) makes both
  * unreachable by construction rather than by review.
  *
- * Which report may be enriched is deliberately not part of this contract. Enrichment is installed
- * once globally and is space-blind by design -- it drains pending reports from every space through a
- * route with no `/s/{id}/` prefix -- so `persist_report_fields` cannot scope writes to the request's
- * space the way `attribute_alerts_evidence` does. The allowlist is what makes that acceptable: the
- * widest a cross-space write can reach is derived enrichment content, never a report's ownership or
- * another space's evidence. Tracked in https://github.com/elastic/security-team/issues/19859.
+ * Which report may be enriched is enforced separately, in the route: enrichment addresses each write
+ * through the report's own space, so the handler can reject an id belonging to another space. This
+ * allowlist and that check are independent bounds -- neither one makes the other redundant.
  */
 export const persistReportFieldsBodySchema = schema.object({
   index: schema.string({
