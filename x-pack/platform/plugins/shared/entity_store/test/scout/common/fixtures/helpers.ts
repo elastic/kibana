@@ -265,7 +265,9 @@ export const installEntityStoreSuiteWithKbnClient = async ({
   expect(enableEmailRuleResponse.status).toBe(200);
   const enableSidRuleResponse = await kbnClient.request({
     method: 'PUT',
-    path: ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE),
+    path: ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(
+      RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE
+    ),
     headers: publicHeaders,
   });
   expect(enableSidRuleResponse.status).toBe(200);
