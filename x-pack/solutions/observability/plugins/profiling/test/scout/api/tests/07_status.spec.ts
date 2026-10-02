@@ -13,6 +13,7 @@ import {
   esArchiversPath,
   esResourcesEndpoint,
   internalApiHeaders,
+  OTEL_PROFILING_EVENTS_DATA_STREAM,
   profilingApiEndpoints,
 } from '../../common/fixtures/constants';
 
@@ -29,52 +30,66 @@ const get = async (
   return res.body;
 };
 
-apiTest.describe(
-  'Profiling status with Universal Profiling data',
-  { tag: tags.stateful.classic },
-  () => {
-    let adminApiCredentials: RoleApiCredentials;
-    let viewerApiCredentials: RoleApiCredentials;
+apiTest.describe('Profiling status', { tag: tags.stateful.classic }, () => {
+  let adminApiCredentials: RoleApiCredentials;
+  let viewerApiCredentials: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ requestAuth, profilingHelper, profilingSetup }) => {
-      let status = await profilingSetup.checkStatus();
+  apiTest.beforeAll(async ({ requestAuth, profilingHelper, profilingSetup, esClient }) => {
+    let status = await profilingSetup.checkStatus();
 
-      if (!status.has_setup) {
-        await profilingHelper.installPolicies();
-        await profilingSetup.setupResources();
-      }
+    if (!status.has_setup) {
+      await profilingHelper.installPolicies();
+      await profilingSetup.setupResources();
+    }
 
-      if (!status.has_data) {
-        await profilingSetup.loadData(esArchiversPath);
-      }
+    if (!status.has_data) {
+      await profilingSetup.loadData(esArchiversPath);
+    }
 
-      status = await profilingSetup.checkStatus();
-      expect(status.has_setup).toBe(true);
-      expect(status.has_data).toBe(true);
+    status = await profilingSetup.checkStatus();
+    expect(status.has_setup).toBe(true);
+    expect(status.has_data).toBe(true);
 
-      adminApiCredentials = await requestAuth.getApiKey('admin');
-      viewerApiCredentials = await requestAuth.getApiKey('viewer');
+    await esClient.index({
+      index: OTEL_PROFILING_EVENTS_DATA_STREAM,
+      op_type: 'create',
+      refresh: true,
+      document: {
+        '@timestamp': new Date().toISOString(),
+        'stacktrace.id': 'S07KmaoGhvNte78xwwRbZQ',
+        count: 1,
+      },
     });
 
-    apiTest('matches the Universal Profiling setup status', async ({ apiClient }) => {
-      for (const credentials of [adminApiCredentials, viewerApiCredentials]) {
-        const [status, setupStatus] = await Promise.all([
-          get(apiClient, profilingApiEndpoints.status, credentials),
-          get(apiClient, esResourcesEndpoint, credentials),
-        ]);
+    adminApiCredentials = await requestAuth.getApiKey('admin');
+    viewerApiCredentials = await requestAuth.getApiKey('viewer');
+  });
 
-        expect(status).toStrictEqual({
-          isEnabled: setupStatus.profiling_enabled,
-          otel: { isAvailable: true, hasData: false },
-          universalProfiling: {
-            isAvailable: true,
-            hasSetup: setupStatus.has_setup,
-            hasData: setupStatus.has_data,
-            hasLegacyData: setupStatus.pre_8_9_1_data,
-            canSetup: setupStatus.has_required_role,
-          },
-        });
-      }
-    });
-  }
-);
+  apiTest('matches the Universal Profiling setup status', async ({ apiClient }) => {
+    for (const credentials of [adminApiCredentials, viewerApiCredentials]) {
+      const [status, setupStatus] = await Promise.all([
+        get(apiClient, profilingApiEndpoints.status, credentials),
+        get(apiClient, esResourcesEndpoint, credentials),
+      ]);
+
+      expect(status).toStrictEqual({
+        isEnabled: setupStatus.profiling_enabled,
+        otel: status.otel, // We don't care about OTEL values in this test, so just pass them through
+        universalProfiling: {
+          isAvailable: true,
+          hasSetup: setupStatus.has_setup,
+          hasData: setupStatus.has_data,
+          hasLegacyData: setupStatus.pre_8_9_1_data,
+          canSetup: setupStatus.has_required_role,
+        },
+      });
+    }
+  });
+
+  apiTest('reports OTel data', async ({ apiClient }) => {
+    const status = await get(apiClient, profilingApiEndpoints.status, adminApiCredentials);
+
+    expect(status.isEnabled).toBe(true);
+    expect(status.otel).toStrictEqual({ isAvailable: true, hasData: true });
+  });
+});
