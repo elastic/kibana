@@ -90,7 +90,7 @@ export const AlertAnalysisVerdict = z.object({
   rationale: z.string().max(500),
   // Required by the ai.agent schema; at most 3 short phrases naming the strongest signals.
   contributing_factors: z.array(z.string().max(100)).max(3),
-  // Entity fields carried for Worker grouping / security.impact; defaulted to "__missing__"
+  // Entity fields carried for Worker grouping / impact entities; defaulted to "__missing__"
   // in YAML when the alert document has no host/user name (avoids colliding with a real
   // ECS name "unknown").
   host_name: z.string().max(512),
@@ -99,14 +99,9 @@ export const AlertAnalysisVerdict = z.object({
 export type AlertAnalysisVerdict = z.infer<typeof AlertAnalysisVerdict>;
 
 export const AlertAnalysisImpactedEntity = z.object({
-  entity_type: z.enum(['host', 'user']),
+  id: z.string().max(256),
   name: z.string().max(512),
-  alert_count: z.number().int().min(0),
-  verdicts: z.object({
-    true_positive: z.number().int().min(0),
-    false_positive: z.number().int().min(0),
-    inconclusive: z.number().int().min(0),
-  }),
+  type: z.enum(['host', 'user']),
 });
 export type AlertAnalysisImpactedEntity = z.infer<typeof AlertAnalysisImpactedEntity>;
 
@@ -128,9 +123,7 @@ export const AlertAnalysisWorkflowOutputFields = z.object({
   generated_summary: z.string().max(2000),
   connector_id: z.string().max(512),
   agent_id: z.string().max(64),
-  impacted_entities: z.array(AlertAnalysisImpactedEntity).max(50),
-  // YAML Liquid emits the boolean as a string ("true" / "false").
-  impacted_entities_truncated: z.enum(['true', 'false']),
+  impacted_entities: z.array(AlertAnalysisImpactedEntity).max(100),
   // Alert ids from the analyzed set with no matching agent verdict. Empty when
   // every alert was reconciled; non-empty means a partial (still completed) result.
   missing_alert_ids: z.array(z.string().max(512)).max(1000),
