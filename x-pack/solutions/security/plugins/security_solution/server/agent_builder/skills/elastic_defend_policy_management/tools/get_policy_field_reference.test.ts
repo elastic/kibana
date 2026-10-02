@@ -150,14 +150,34 @@ describe('createGetPolicyFieldReferenceTool', () => {
     expect(entries.every((row) => row.documentationAvailability === 'absent')).toBe(true);
   });
 
-  it('keeps a wrong-OS exact path unknown instead of falling through to the remainder', async () => {
+  it('resolves linux.ransomware.mode as a first-class writable protection field', async () => {
     const result = await getResult('linux.ransomware.mode');
+
+    expect(result.type).toBe(ToolResultType.other);
+    expect(result.data).toEqual({
+      found: true,
+      match: 'exact',
+      path: 'linux.ransomware.mode',
+      documentationAvailability: 'absent',
+      longFormGuidance: 'not_retrieved_by_this_tool',
+      entry: expect.objectContaining({
+        path: 'linux.ransomware.mode',
+        kind: 'protection',
+        tier: 1,
+        userEditable: true,
+        source: 'factory',
+      }),
+    });
+  });
+
+  it('keeps a wrong-OS exact path unknown instead of falling through to the remainder', async () => {
+    const result = await getResult('linux.antivirus_registration.enabled');
 
     expect(result.type).toBe(ToolResultType.other);
     expect(result.data).toEqual({
       found: false,
       match: 'none',
-      path: 'linux.ransomware.mode',
+      path: 'linux.antivirus_registration.enabled',
       reason: 'unknown_path',
     });
   });
@@ -181,21 +201,27 @@ describe('createGetPolicyFieldReferenceTool', () => {
       }>;
     };
     expect(entries.map((row) => row.entry.path)).toEqual([
-      'windows.ransomware.mode',
       'mac.ransomware.mode',
+      'linux.ransomware.mode',
+      'windows.ransomware.mode',
     ]);
     expect(entries[0]).toEqual({
-      documentationAvailability: 'absent',
-      entry: expect.objectContaining({ path: 'windows.ransomware.mode' }),
-    });
-    expect(entries[0]?.entry).not.toHaveProperty('documentation');
-    expect(entries[1]).toEqual({
       documentationAvailability: 'present',
       entry: expect.objectContaining({
         path: 'mac.ransomware.mode',
         documentation: expect.stringContaining('Enable ransomware protection for macOS'),
       }),
     });
+    expect(entries[1]).toEqual({
+      documentationAvailability: 'absent',
+      entry: expect.objectContaining({ path: 'linux.ransomware.mode' }),
+    });
+    expect(entries[1]?.entry).not.toHaveProperty('documentation');
+    expect(entries[2]).toEqual({
+      documentationAvailability: 'absent',
+      entry: expect.objectContaining({ path: 'windows.ransomware.mode' }),
+    });
+    expect(entries[2]?.entry).not.toHaveProperty('documentation');
   });
 
   it('rejects extra keys instead of silently ignoring them', () => {

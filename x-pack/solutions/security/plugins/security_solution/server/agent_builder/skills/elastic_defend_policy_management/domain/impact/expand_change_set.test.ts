@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
 } from '../../../../../../common/endpoint/models/policy_config';
 import * as policyConfigHelpers from '../../../../../../common/endpoint/models/policy_config_helpers';
 import { DeviceControlAccessLevel, ProtectionModes } from '../../../../../../common/endpoint/types';
+import type { RansomwareLinuxContext } from './expand_change_set';
 import { expandChangeSet } from './expand_change_set';
 import type { ExplicitPolicyChange } from './policy_change_operation';
 import {
@@ -21,6 +23,11 @@ import {
   nonWritablePathMessage,
   unknownCurrentValueMessage,
 } from './policy_change_operation';
+
+const ransomwareLinuxContext: RansomwareLinuxContext = {
+  linuxRansomwareProtection: true,
+  licenseInformation: null,
+};
 
 const pathsOf = (changes: readonly ExplicitPolicyChange[]): string[] =>
   changes.map((change) => change.path);
@@ -55,7 +62,8 @@ describe('expandChangeSet', () => {
     behaviorPolicy.linux.behavior_protection.reputation_service = true;
     const behavior = expandChangeSet(
       [{ op: 'set_protection_enabled', protection: 'behavior_protection', enabled: false }],
-      behaviorPolicy
+      behaviorPolicy,
+      ransomwareLinuxContext
     );
     expect(
       changeAt(behavior.explicitChanges, 'linux.behavior_protection.reputation_service')?.to
@@ -73,7 +81,8 @@ describe('expandChangeSet', () => {
           mode: ProtectionModes.detect,
         },
       ],
-      behaviorPolicy
+      behaviorPolicy,
+      ransomwareLinuxContext
     );
     expect(pathsOf(behavior.explicitChanges)).not.toContain(
       'windows.behavior_protection.reputation_service'
@@ -87,7 +96,8 @@ describe('expandChangeSet', () => {
       () =>
         expandChangeSet(
           [{ op: 'set_field', path: 'windows.device_control.enabled', value: 'false' }],
-          policy
+          policy,
+          ransomwareLinuxContext
         ),
       POLICY_CHANGE_PREPARATION_ERROR_CODE.invalid_input,
       invalidSetFieldValueMessage('windows.device_control.enabled')
@@ -100,7 +110,8 @@ describe('expandChangeSet', () => {
     const policy = policyFactory();
     const before = structuredClone(policy);
     expectPreparationError(
-      () => expandChangeSet([{ op: 'set_field', path, value: true }], policy),
+      () =>
+        expandChangeSet([{ op: 'set_field', path, value: true }], policy, ransomwareLinuxContext),
       POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
       DEVICE_POPUP_ENABLED_UNSUPPORTED_MESSAGE
     );
@@ -113,7 +124,8 @@ describe('expandChangeSet', () => {
         { op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.detect },
         { op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.off },
       ],
-      policyFactory()
+      policyFactory(),
+      ransomwareLinuxContext
     );
     expect(laterWins.explicitChanges).toEqual([
       {
@@ -129,7 +141,8 @@ describe('expandChangeSet', () => {
         { op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.detect },
         { op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.prevent },
       ],
-      policyFactory()
+      policyFactory(),
+      ransomwareLinuxContext
     );
     expect(reverted.explicitChanges).toEqual([]);
   });
@@ -141,7 +154,8 @@ describe('expandChangeSet', () => {
         { op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.detect },
         { op: 'set_field', path: 'mac.malware.mode', value: ProtectionModes.detect },
       ],
-      policyFactory()
+      policyFactory(),
+      ransomwareLinuxContext
     );
 
     expect(changeAt(prepared.explicitChanges, 'windows.malware.mode')?.to).toBe(
@@ -158,7 +172,8 @@ describe('expandChangeSet', () => {
             { op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.detect },
             { op: 'set_field', path: 'mac.malware.mode', value: ProtectionModes.prevent },
           ],
-          policyFactory()
+          policyFactory(),
+          ransomwareLinuxContext
         ),
       POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
       'Conflicting values for coupled policy field: malware.mode'
@@ -176,7 +191,7 @@ describe('expandChangeSet', () => {
     ];
 
     expectPreparationError(
-      () => expandChangeSet(operations, policyFactory()),
+      () => expandChangeSet(operations, policyFactory(), ransomwareLinuxContext),
       POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
       'Conflicting values for coupled policy field: malware.mode'
     );
@@ -189,7 +204,7 @@ describe('expandChangeSet', () => {
     ];
 
     expectPreparationError(
-      () => expandChangeSet(operations, policyFactory()),
+      () => expandChangeSet(operations, policyFactory(), ransomwareLinuxContext),
       POLICY_CHANGE_PREPARATION_ERROR_CODE.unsupported_operation,
       'Linux tty_io cannot be enabled while session_data is disabled.'
     );
@@ -200,7 +215,7 @@ describe('expandChangeSet', () => {
       { op: 'set_field' as const, path: 'windows.device_control.enabled', value: false },
       { op: 'set_field' as const, path: 'windows.device_control.usb_storage', value: 'deny_all' },
     ];
-    const prepared = expandChangeSet(operations, policyFactory());
+    const prepared = expandChangeSet(operations, policyFactory(), ransomwareLinuxContext);
 
     expect(prepared.proposedConfig.windows.device_control?.enabled).toBe(false);
     expect(prepared.proposedConfig.mac.device_control?.enabled).toBe(false);
@@ -218,7 +233,11 @@ describe('expandChangeSet', () => {
       },
     ];
 
-    const prepared = expandChangeSet(enableThenUsb, policyFactoryWithoutPaidFeatures());
+    const prepared = expandChangeSet(
+      enableThenUsb,
+      policyFactoryWithoutPaidFeatures(),
+      ransomwareLinuxContext
+    );
     const requestedUsb = changeAt(prepared.explicitChanges, 'windows.device_control.usb_storage');
     const siblingUsb = changeAt(prepared.explicitChanges, 'mac.device_control.usb_storage');
 
@@ -246,7 +265,8 @@ describe('expandChangeSet', () => {
           value: DeviceControlAccessLevel.deny_all,
         },
       ],
-      policy
+      policy,
+      ransomwareLinuxContext
     );
 
     expect(prepared.proposedConfig.windows.device_control?.enabled).toBe(false);
@@ -267,7 +287,8 @@ describe('expandChangeSet', () => {
 
     const prepared = expandChangeSet(
       [{ op: 'set_field', path: 'windows.malware.mode', value: ProtectionModes.detect }],
-      policy
+      policy,
+      ransomwareLinuxContext
     );
 
     expect(changeAt(prepared.explicitChanges, 'windows.malware.mode')?.to).toBe(
@@ -295,7 +316,8 @@ describe('expandChangeSet', () => {
           value: DeviceControlAccessLevel.read_only,
         },
       ],
-      missingSibling
+      missingSibling,
+      ransomwareLinuxContext
     );
 
     expect(prepared.proposedConfig.windows.device_control?.usb_storage).toBe(
@@ -307,12 +329,72 @@ describe('expandChangeSet', () => {
     expect(prepared.proposedConfig.mac.device_control?.enabled).toBe(true);
   });
 
+  it('backfills a Platinum-valid linux.ransomware.supported when the mode is set on a policy that lacks it', () => {
+    const policy = policyFactory();
+    delete policy.linux.ransomware;
+    const platinum = licenseMock.createLicense({ license: { type: 'platinum' } });
+
+    const prepared = expandChangeSet(
+      [{ op: 'set_protection_level', protection: 'ransomware', mode: ProtectionModes.prevent }],
+      policy,
+      { linuxRansomwareProtection: true, licenseInformation: platinum }
+    );
+
+    expect(prepared.proposedConfig.linux.ransomware).toEqual({
+      mode: ProtectionModes.prevent,
+      supported: true,
+    });
+    expect(prepared.proposedConfig.linux.popup).not.toHaveProperty('ransomware');
+  });
+
+  it('backfills supported false below Platinum when linux.ransomware is materialized', () => {
+    const policy = policyFactory();
+    delete policy.linux.ransomware;
+    const gold = licenseMock.createLicense({ license: { type: 'gold' } });
+
+    const prepared = expandChangeSet(
+      [{ op: 'set_protection_level', protection: 'ransomware', mode: ProtectionModes.prevent }],
+      policy,
+      { linuxRansomwareProtection: true, licenseInformation: gold }
+    );
+
+    expect(prepared.proposedConfig.linux.ransomware).toEqual({
+      mode: ProtectionModes.prevent,
+      supported: false,
+    });
+  });
+
+  it('never touches linux.ransomware for a card-level operation while the flag is off', () => {
+    const policy = policyFactory();
+    policy.windows.ransomware.mode = ProtectionModes.off;
+    policy.mac.ransomware.mode = ProtectionModes.off;
+    delete policy.linux.ransomware;
+
+    const prepared = expandChangeSet(
+      [{ op: 'set_protection_level', protection: 'ransomware', mode: ProtectionModes.prevent }],
+      policy,
+      { linuxRansomwareProtection: false, licenseInformation: null }
+    );
+
+    expect(prepared.proposedConfig.linux.ransomware).toBeUndefined();
+    expect(changeAt(prepared.explicitChanges, 'windows.ransomware.mode')?.to).toBe(
+      ProtectionModes.prevent
+    );
+    expect(
+      pathsOf(prepared.explicitChanges).some((path) => path.startsWith('linux.ransomware'))
+    ).toBe(false);
+  });
+
   it('refuses unknown, excluded, derived, and other non-writable direct paths', () => {
     const unknownPolicy = policyFactory();
     const unknownBefore = structuredClone(unknownPolicy);
     expectPreparationError(
       () =>
-        expandChangeSet([{ op: 'set_field', path: 'not.a.real.path', value: true }], unknownPolicy),
+        expandChangeSet(
+          [{ op: 'set_field', path: 'not.a.real.path', value: true }],
+          unknownPolicy,
+          ransomwareLinuxContext
+        ),
       POLICY_CHANGE_PREPARATION_ERROR_CODE.non_writable_path,
       nonWritablePathMessage('not.a.real.path')
     );
@@ -328,7 +410,8 @@ describe('expandChangeSet', () => {
       () =>
         expandChangeSet(
           [{ op: 'set_field', path: 'global_manifest_version', value: '2024-01-01' }],
-          policy
+          policy,
+          ransomwareLinuxContext
         ),
       POLICY_CHANGE_PREPARATION_ERROR_CODE.unknown_current_value,
       unknownCurrentValueMessage('global_manifest_version')

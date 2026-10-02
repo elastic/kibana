@@ -111,7 +111,7 @@ const createListItem = (id: string) => ({
       behavior: 'prevent',
     },
     macProtectionModes: { malware: 'prevent', behavior: 'prevent' },
-    linuxProtectionModes: { malware: 'prevent', behavior: 'prevent' },
+    linuxProtectionModes: { malware: 'prevent', ransomware: 'prevent', behavior: 'prevent' },
     globalTelemetryEnabled: false,
   },
 });

@@ -153,7 +153,7 @@ Example queries (search vocabulary, not a field catalog):
 - Elastic Defend Windows event collection Malicious Behavior Protection file hashing
 - Elastic Defend macOS event collection DNS event collection VPN clients policy lever
 - Elastic Defend Linux fanotify event pipeline session lineage terminal I/O
-- Elastic Defend ransomware protection Windows macOS
+- Elastic Defend ransomware protection Windows macOS Linux
 - Elastic Defend memory threat protection coverage versus scan cost
 
 Stay in package-policy nouns. Do not add troubleshooting nouns such as Trusted Application,

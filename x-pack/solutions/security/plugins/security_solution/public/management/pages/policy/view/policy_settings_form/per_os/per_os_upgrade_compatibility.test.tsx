@@ -84,6 +84,9 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
   // A missing macOS ransomware mode must not check the master switch while both rows read Disable.
   it('leaves the master switch unchecked when Windows ransomware is off and macOS mode is missing', () => {
     policy.windows.ransomware.mode = ProtectionModes.off;
+    // Isolates this case to the Windows/macOS interaction under test: Linux ransomware defaults
+    // to on for new policies, which would otherwise also check the master switch.
+    policy.linux.ransomware = { mode: ProtectionModes.off, supported: true };
     // @ts-expect-error reproducing a policy stored without the field
     delete policy.mac.ransomware.mode;
 
@@ -233,6 +236,9 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
     const onChange = jest.fn();
     policy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
     policy.windows.ransomware.mode = ProtectionModes.off;
+    // Linux ransomware defaults to on for new policies, which would otherwise also check the
+    // master switch and flip it off (rather than on) when clicked below.
+    policy.linux.ransomware = { mode: ProtectionModes.off, supported: true };
     // @ts-expect-error reproducing the shape the advanced settings field writes
     policy.mac.ransomware = { mode: ProtectionModes.off };
 
@@ -254,5 +260,48 @@ describe('per-OS form upgrade compatibility with 9.4 policies', () => {
       policyFactoryWithSupportedFeatures().mac.ransomware.supported
     );
     expect(isEndpointPolicyValidForLicense(updatedPolicy, Platinum)).toBe(true);
+  });
+
+  // A policy stored before Linux ransomware existed (or one saved while the
+  // `linuxRansomwareProtection` flag was off) has no `ransomware` object at all. Rendering must
+  // survive it, and setting a mode has to create the branch rather than throw.
+  it('renders and writes a mode when the whole Linux ransomware branch is absent', async () => {
+    const onChange = jest.fn();
+    policy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
+    // Windows and macOS must be off, otherwise the master toggle short-circuits on them and
+    // never reads Linux.
+    policy.windows.ransomware.mode = ProtectionModes.off;
+    policy.mac.ransomware.mode = ProtectionModes.off;
+    delete policy.linux.ransomware;
+
+    renderResult = mockedContext.render(
+      <PerOsRansomwareProtectionCard
+        policy={policy}
+        onChange={onChange}
+        mode="edit"
+        data-test-subj={testSubjects.perOsRansomware.card}
+      />
+    );
+
+    expect(
+      renderResult.getByTestId(testSubjects.perOsRansomware.linux.modeSelect)
+    ).toHaveTextContent(/^Disable$/);
+
+    await selectOsControlOption(
+      renderResult,
+      testSubjects.perOsRansomware.linux.modeSelect,
+      /^Detect$/
+    );
+
+    const { updatedPolicy } = onChange.mock.calls.at(-1)![0];
+    expect(updatedPolicy.linux.ransomware).toEqual({
+      mode: ProtectionModes.detect,
+      // Without `supported` the server rejects the save with a license error, so the recreated
+      // branch has to carry the same value the license default does.
+      supported: policyFactoryWithSupportedFeatures().linux.ransomware?.supported,
+    });
+    expect(isEndpointPolicyValidForLicense(updatedPolicy, Platinum)).toBe(true);
+    // Linux has no ransomware popup: the endpoint's notification code never reads it.
+    expect(updatedPolicy.linux.popup).not.toHaveProperty('ransomware');
   });
 });

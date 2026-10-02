@@ -66,8 +66,9 @@ describe(
     });
 
     // The other three Cypress cases live in RTL: per_os/per_os_malware_protections_card.test.tsx
-    // (cross-OS isolation) and per_os/per_os_ransomware_protection_card.test.tsx (no Linux row).
-    // This one stays because save-plus-reload persistence needs a real stack.
+    // (cross-OS isolation) and per_os/per_os_ransomware_protection_card.test.tsx (Linux row
+    // shown/hidden behind the linuxRansomwareProtection flag). This one stays because
+    // save-plus-reload persistence needs a real stack.
     it('persists Windows Detect across save and reload without changing other OSs', () => {
       loadSettingsUrl(policy.id);
       cy.getByTestSubj(perOsMalware.mac.modeSelect)

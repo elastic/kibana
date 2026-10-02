@@ -48,13 +48,18 @@ function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: I
 }
 
 function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
+  // Linux ransomware is optional: a policy that predates it, or where it is gated off, has none.
+  const linuxRansomware = policy.linux.ransomware;
+
   if (isAtLeast(license, 'platinum')) {
     const defaults = policyFactoryWithSupportedFeatures();
 
     // only platinum or higher may enable ransomware protection
     if (
       policy.windows.ransomware.supported !== defaults.windows.ransomware.supported ||
-      policy.mac.ransomware.supported !== defaults.mac.ransomware.supported
+      policy.mac.ransomware.supported !== defaults.mac.ransomware.supported ||
+      (linuxRansomware !== undefined &&
+        linuxRansomware.supported !== defaults.linux.ransomware?.supported)
     ) {
       return false;
     }
@@ -68,14 +73,17 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
 
   if (
     policy.windows.ransomware.supported !== defaults.windows.ransomware.supported ||
-    policy.mac.ransomware.supported !== defaults.mac.ransomware.supported
+    policy.mac.ransomware.supported !== defaults.mac.ransomware.supported ||
+    (linuxRansomware !== undefined &&
+      linuxRansomware.supported !== defaults.linux.ransomware?.supported)
   ) {
     return false;
   }
 
   if (
     policy.windows.ransomware.mode !== defaults.windows.ransomware.mode ||
-    policy.mac.ransomware.mode !== defaults.mac.ransomware.mode
+    policy.mac.ransomware.mode !== defaults.mac.ransomware.mode ||
+    (linuxRansomware !== undefined && linuxRansomware.mode !== defaults.linux.ransomware?.mode)
   ) {
     return false;
   }

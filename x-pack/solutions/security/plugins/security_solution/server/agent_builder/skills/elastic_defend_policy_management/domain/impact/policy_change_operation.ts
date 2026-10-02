@@ -129,6 +129,7 @@ export interface EligibilityContext {
   readonly deviceControlReason: DeviceControlEligibilityReason;
   readonly customYaraSignaturesStripped: PolicyConfig;
   readonly customYaraSignaturesReason: CustomYaraSignaturesEligibilityReason;
+  readonly linuxRansomwareStripped: PolicyConfig;
   readonly endpointProtectionUpdates: boolean;
   readonly serverless: boolean;
 }
