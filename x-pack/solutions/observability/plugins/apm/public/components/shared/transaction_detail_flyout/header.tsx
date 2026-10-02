@@ -17,8 +17,11 @@ import {
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { AlertsBadge } from '../badge/alerts_badge';
 import { TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
+import { useTransactionDetailFlyoutAlertsBadge } from './hooks/use_transaction_detail_flyout_alerts_badge';
 import { useTransactionDetailFlyoutLinks } from './hooks/use_transaction_detail_flyout_links';
+import { useTransactionDetailFlyoutContext } from './transaction_detail_flyout_context';
 
 const FILTERS_PENDING_ARIA_LABEL = i18n.translate(
   'xpack.apm.transactionDetailFlyout.filtersPendingAriaLabel',
@@ -43,8 +46,13 @@ export function TransactionDetailFlyoutHeader({
   isFiltersPending = false,
 }: TransactionDetailFlyoutHeaderProps) {
   const {
+    filters: { serviceName },
+  } = useTransactionDetailFlyoutContext();
+  const {
     apm: { transactionDetailsHref },
   } = useTransactionDetailFlyoutLinks();
+  const { show: showAlertsBadge, count: alertsCount, href: alertsHref } =
+    useTransactionDetailFlyoutAlertsBadge();
 
   return (
     <EuiFlyoutHeader>
@@ -71,6 +79,20 @@ export function TransactionDetailFlyoutHeader({
             </h2>
           </EuiTitle>
         </EuiFlexItem>
+        {showAlertsBadge ? (
+          <EuiFlexItem grow={false}>
+            <AlertsBadge
+              count={alertsCount}
+              serviceName={serviceName}
+              href={alertsHref}
+              data-test-subj="transactionDetailFlyoutAlertsBadge"
+              ebt={{
+                action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
+                element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.ALERTS_BADGE,
+              }}
+            />
+          </EuiFlexItem>
+        ) : null}
         {isFiltersPending ? (
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner

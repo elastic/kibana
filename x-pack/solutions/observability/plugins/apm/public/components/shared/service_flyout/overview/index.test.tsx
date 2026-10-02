@@ -476,6 +476,72 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     ).toBe(true);
   });
 
+  it('passes alertsCount from the clicked transaction to TransactionDetailFlyout', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+        alertsCount: 3,
+      });
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alertsCount: 3,
+      })
+    );
+  });
+
+  it('updates alertsCount on TransactionDetailFlyout when the transactions list resettles', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+        alertsCount: 2,
+      });
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ alertsCount: 2 })
+    );
+
+    act(() => {
+      transactionsSectionProps!.onTransactionsChange!(
+        [
+          {
+            name: 'GET /api/orders',
+            transactionType: 'request',
+            latency: { value: 1 },
+            throughput: { value: 1 },
+            errorRate: { value: 0 },
+            alertsCount: 5,
+          },
+        ],
+        {
+          isLoading: false,
+          filters: PRODUCTION_LIST_FILTERS,
+          isSearchFiltered: false,
+        }
+      );
+    });
+
+    expect(mockTransactionDetailFlyoutProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ alertsCount: 5 })
+    );
+  });
+
   it('closes TransactionDetailFlyout when the same transaction is clicked again', () => {
     mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
     renderOverview();
