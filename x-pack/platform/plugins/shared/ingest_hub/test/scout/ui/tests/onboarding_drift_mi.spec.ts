@@ -683,7 +683,11 @@ test.describe(
       await miPutPromise;
 
       // Failed PUT: hook surfaces hasFailed=true, isDeploying becomes false.
-      await expect(page.testSubj.locator('managedIntegrationsSection-retryButton')).toBeVisible();
+      await expect(
+        page.testSubj
+          .locator('managedIntegrationsSection-errorCallout__content')
+          .locator('[data-test-subj="managedIntegrationsSection-retryButton"]')
+      ).toBeVisible();
       // isDirty remains true — a failed deploy does not clear it.
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
       // isMiDone is false — Next stays blocked until a successful redeploy.
@@ -734,7 +738,10 @@ test.describe(
           req.method() === 'PUT' &&
           /\/api\/fleet\/managed_integrations\/mock-mi-policy-id$/.test(new URL(req.url()).pathname)
       );
-      await page.testSubj.locator('managedIntegrationsSection-retryButton').click();
+      await page.testSubj
+        .locator('managedIntegrationsSection-errorCallout__content')
+        .locator('[data-test-subj="managedIntegrationsSection-retryButton"]')
+        .click();
       await retryMiPutPromise;
       // Successful retry: drift flag cleared, callout disappears, Next enables.
       await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeHidden();
