@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { Parser, isAssignment, isColumn, isOptionNode, singleItems } from '@elastic/esql';
+import {
+  BasicPrettyPrinter,
+  Parser,
+  isAssignment,
+  isColumn,
+  isOptionNode,
+  singleItems,
+} from '@elastic/esql';
 import type { ESQLAstItem, ESQLColumn, ESQLSingleAstItem } from '@elastic/esql/types';
 
 // Anywhere in the expression, so `count_distinct(url.keyword)` matches `count_distinct(url)`.
@@ -54,24 +61,24 @@ function buildAliasMap(query: string): Map<string, string> {
       continue;
     }
     for (const arg of command.args) {
-      addFields(aliases, arg, query);
+      addFields(aliases, arg);
     }
   }
 
   return aliases;
 }
 
-function addFields(aliases: Map<string, string>, arg: ESQLAstItem, query: string): void {
+function addFields(aliases: Map<string, string>, arg: ESQLAstItem): void {
   if (Array.isArray(arg)) {
     for (const item of arg) {
-      addFields(aliases, item, query);
+      addFields(aliases, item);
     }
     return;
   }
 
   if (isOptionNode(arg) && arg.name === 'by') {
     for (const grouping of arg.args) {
-      addFields(aliases, grouping, query);
+      addFields(aliases, grouping);
     }
     return;
   }
@@ -79,7 +86,7 @@ function addFields(aliases: Map<string, string>, arg: ESQLAstItem, query: string
   if (isAssignment(arg)) {
     const [left, right] = [...singleItems(arg.args)];
     if (isColumn(left) && right && !Array.isArray(right)) {
-      recordAlias(aliases, columnName(left), sourceOf(right, query));
+      recordAlias(aliases, columnName(left), printExpression(right));
     }
     return;
   }
@@ -102,8 +109,9 @@ function columnName(column: ESQLColumn): string {
   return column.parts.length > 0 ? column.parts.join('.') : column.name;
 }
 
-function sourceOf(node: ESQLSingleAstItem, query: string): string {
-  return query.slice(node.location.min, node.location.max + 1);
+// Printed from the AST rather than sliced from the query, so `SUM( bytes )` and `SUM(bytes)` match.
+function printExpression(node: ESQLSingleAstItem): string {
+  return BasicPrettyPrinter.expression(node);
 }
 
 function expressionsEquivalent(left: string, right: string): boolean {
@@ -116,7 +124,14 @@ function expressionsEquivalent(left: string, right: string): boolean {
 }
 
 function normalizeExpression(value: string): string {
-  let normalized = value.replace(/`/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  let normalized = value
+    .replace(/`/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/\(\s+/g, '(')
+    .replace(/\s+\)/g, ')')
+    .replace(/\s*,\s*/g, ', ')
+    .trim()
+    .toLowerCase();
   normalized = normalized.replace(/\bcount\s*\(\s*\)/g, 'count(*)');
   normalized = normalized.replace(
     /\bdate_extract\s*\(\s*["']hour_of_day["']\s*,\s*([^)]+)\)/g,
