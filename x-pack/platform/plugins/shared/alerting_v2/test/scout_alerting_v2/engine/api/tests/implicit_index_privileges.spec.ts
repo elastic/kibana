@@ -21,10 +21,9 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { EsClient, KibanaRole } from '@kbn/scout';
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import { apiTest, buildAlertEvent } from '../fixtures';
+import { apiTest, buildAlertEvent, testData } from '../fixtures';
 
 // The two index patterns the provider grants read on; also what a search must target so an
 // unauthorized identity resolves to "no index" (empty) rather than a 403.
@@ -226,289 +225,309 @@ const seenSpaceIds = async (
   return [...new Set(spaceIds)].sort();
 };
 
-apiTest.describe('Alerting v2 alerts implicit index privileges', { tag: tags.stateful.all }, () => {
-  apiTest.beforeAll(async ({ esClient, kbnClient, apiServices }) => {
-    // Pre-create spaces.
-    for (const id of EXTRA_SPACES) {
-      await apiServices.spaces.create({ id });
-    }
-
-    // Pre-create custom roles.
-    for (const key of PERSONA_KEYS) {
-      const { role } = PERSONAS[key];
-
-      // Reserved role, nothing to create.
-      if (typeof role === 'string') {
-        continue;
+apiTest.describe(
+  'Alerting v2 alerts implicit index privileges',
+  { tag: testData.API_ENGINE_TAG },
+  () => {
+    apiTest.beforeAll(async ({ esClient, kbnClient, apiServices }) => {
+      // Pre-create spaces.
+      for (const id of EXTRA_SPACES) {
+        await apiServices.spaces.create({ id });
       }
 
-      const { status } = await kbnClient.request({
-        method: 'PUT',
-        path: `/api/security/role/${key}`,
-        body: role,
-      });
-      expect(status).toBe(204);
-    }
+      // Pre-create custom roles.
+      for (const key of PERSONA_KEYS) {
+        const { role } = PERSONAS[key];
 
-    // Pre-create native users with the role assigned.
-    for (const key of PERSONA_KEYS) {
-      const { user } = PERSONAS[key];
-      await esClient.security.putUser({
-        username: user,
-        password: NATIVE_USER_PASSWORD,
-        roles: [roleNameOf(key)],
-        full_name: user,
-      });
-    }
+        // Reserved role, nothing to create.
+        if (typeof role === 'string') {
+          continue;
+        }
 
-    // Seed one alert event + one alert action per space, so both implicitly-granted
-    // index patterns carry DLS-filterable documents to assert against.
-    const now = new Date().toISOString();
-    await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.ruleEvents.seed(
-      SEEDED_SPACES.map((space) =>
-        buildAlertEvent({
-          space_id: space,
-          source: TEST_SOURCE,
-          rule: { id: `impl-priv-${space}`, version: 1 },
+        const { status } = await kbnClient.request({
+          method: 'PUT',
+          path: `/api/security/role/${key}`,
+          body: role,
+        });
+        expect(status).toBe(204);
+      }
+
+      // Pre-create native users with the role assigned.
+      for (const key of PERSONA_KEYS) {
+        const { user } = PERSONAS[key];
+        await esClient.security.putUser({
+          username: user,
+          password: NATIVE_USER_PASSWORD,
+          roles: [roleNameOf(key)],
+          full_name: user,
+        });
+      }
+
+      // Seed one alert event + one alert action per space, so both implicitly-granted
+      // index patterns carry DLS-filterable documents to assert against.
+      const now = new Date().toISOString();
+      await apiServices.alertingV2.ruleEvents.cleanUp();
+      await apiServices.alertingV2.ruleEvents.seed(
+        SEEDED_SPACES.map((space) =>
+          buildAlertEvent({
+            space_id: space,
+            source: TEST_SOURCE,
+            rule: { id: `impl-priv-${space}`, version: 1 },
+            group_hash: `impl-priv-${space}`,
+          })
+        )
+      );
+      await apiServices.alertingV2.alertActionsEvents.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.seed(
+        SEEDED_SPACES.map((space) => ({
+          '@timestamp': now,
+          last_series_event_timestamp: now,
+          actor: { type: 'user' },
+          action_type: 'ack',
+          rule_id: `impl-priv-${space}`,
           group_hash: `impl-priv-${space}`,
-        })
-      )
-    );
-    await apiServices.alertingV2.alertActionsEvents.cleanUp();
-    await apiServices.alertingV2.alertActionsEvents.seed(
-      SEEDED_SPACES.map((space) => ({
-        '@timestamp': now,
-        last_series_event_timestamp: now,
-        actor: { type: 'user' },
-        action_type: 'ack',
-        rule_id: `impl-priv-${space}`,
-        group_hash: `impl-priv-${space}`,
-        source: TEST_SOURCE,
-        space_id: space,
-      }))
-    );
-  });
+          source: TEST_SOURCE,
+          space_id: space,
+        }))
+      );
+    });
 
-  apiTest.afterAll(async ({ esClient, apiServices }) => {
-    await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActionsEvents.cleanUp();
+    apiTest.afterAll(async ({ esClient, apiServices }) => {
+      await apiServices.alertingV2.ruleEvents.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.cleanUp();
 
-    // Delete custom user and roles.
-    for (const key of PERSONA_KEYS) {
-      const { user, role } = PERSONAS[key];
-      await esClient.security.deleteUser({ username: user }, { ignore: [404] });
-      if (typeof role !== 'string') {
-        await esClient.security.deleteRole({ name: key }, { ignore: [404] });
+      // Delete custom user and roles.
+      for (const key of PERSONA_KEYS) {
+        const { user, role } = PERSONAS[key];
+        await esClient.security.deleteUser({ username: user }, { ignore: [404] });
+        if (typeof role !== 'string') {
+          await esClient.security.deleteRole({ name: key }, { ignore: [404] });
+        }
       }
-    }
 
-    // Delete custom spaces.
-    for (const id of EXTRA_SPACES) {
-      await apiServices.spaces.delete(id);
-    }
-  });
+      // Delete custom spaces.
+      for (const id of EXTRA_SPACES) {
+        await apiServices.spaces.delete(id);
+      }
+    });
 
-  // --- Built-in roles: implicit read across all spaces (no DLS) --------------
-  apiTest('viewer: get-role surfaces read on both patterns with no DLS', async ({ esClient }) => {
-    expect(
-      summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('viewer')))
-    ).toStrictEqual(FULL_GRANT);
-  });
-
-  apiTest('viewer: reads .rule-events and .alert-actions in every space', async ({ esClient }) => {
-    expect(
-      await seenSpaceIds(esClient, PERSONAS.viewer.user, ALERT_EVENTS_INDEX_PATTERN)
-    ).toStrictEqual(ALL_SEEN);
-    expect(
-      await seenSpaceIds(esClient, PERSONAS.viewer.user, ALERT_ACTIONS_INDEX_PATTERN)
-    ).toStrictEqual(ALL_SEEN);
-  });
-
-  apiTest('editor: get-role surfaces read on both patterns with no DLS', async ({ esClient }) => {
-    expect(
-      summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('editor')))
-    ).toStrictEqual(FULL_GRANT);
-  });
-
-  apiTest('editor: reads .rule-events and .alert-actions in every space', async ({ esClient }) => {
-    expect(
-      await seenSpaceIds(esClient, PERSONAS.editor.user, ALERT_EVENTS_INDEX_PATTERN)
-    ).toStrictEqual(ALL_SEEN);
-    expect(
-      await seenSpaceIds(esClient, PERSONAS.editor.user, ALERT_ACTIONS_INDEX_PATTERN)
-    ).toStrictEqual(ALL_SEEN);
-  });
-
-  apiTest(
-    'kibana_admin: get-role surfaces read on both patterns with no DLS',
-    async ({ esClient }) => {
+    // --- Built-in roles: implicit read across all spaces (no DLS) --------------
+    apiTest('viewer: get-role surfaces read on both patterns with no DLS', async ({ esClient }) => {
       expect(
-        summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('admin')))
+        summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('viewer')))
       ).toStrictEqual(FULL_GRANT);
-    }
-  );
+    });
 
-  apiTest(
-    'kibana_admin: reads .rule-events and .alert-actions in every space',
-    async ({ esClient }) => {
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.admin.user, ALERT_EVENTS_INDEX_PATTERN)
-      ).toStrictEqual(ALL_SEEN);
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.admin.user, ALERT_ACTIONS_INDEX_PATTERN)
-      ).toStrictEqual(ALL_SEEN);
-    }
-  );
+    apiTest(
+      'viewer: reads .rule-events and .alert-actions in every space',
+      async ({ esClient }) => {
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.viewer.user, ALERT_EVENTS_INDEX_PATTERN)
+        ).toStrictEqual(ALL_SEEN);
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.viewer.user, ALERT_ACTIONS_INDEX_PATTERN)
+        ).toStrictEqual(ALL_SEEN);
+      }
+    );
 
-  // --- Custom role: alerts privilege across ALL spaces (no DLS) --------------
-  apiTest('custom alerts:read in "*": get-role surfaces read with no DLS', async ({ esClient }) => {
-    expect(
-      summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('readAllSpaces')))
-    ).toStrictEqual(FULL_GRANT);
-  });
+    apiTest('editor: get-role surfaces read on both patterns with no DLS', async ({ esClient }) => {
+      expect(
+        summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('editor')))
+      ).toStrictEqual(FULL_GRANT);
+    });
 
-  apiTest(
-    'custom alerts:read in "*": reads .rule-events and .alert-actions in every space',
-    async ({ esClient }) => {
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.readAllSpaces.user, ALERT_EVENTS_INDEX_PATTERN)
-      ).toStrictEqual(ALL_SEEN);
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.readAllSpaces.user, ALERT_ACTIONS_INDEX_PATTERN)
-      ).toStrictEqual(ALL_SEEN);
-    }
-  );
+    apiTest(
+      'editor: reads .rule-events and .alert-actions in every space',
+      async ({ esClient }) => {
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.editor.user, ALERT_EVENTS_INDEX_PATTERN)
+        ).toStrictEqual(ALL_SEEN);
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.editor.user, ALERT_ACTIONS_INDEX_PATTERN)
+        ).toStrictEqual(ALL_SEEN);
+      }
+    );
 
-  apiTest('custom alerts:all in "*": get-role surfaces read with no DLS', async ({ esClient }) => {
-    expect(
-      summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('allAllSpaces')))
-    ).toStrictEqual(FULL_GRANT);
-  });
+    apiTest(
+      'kibana_admin: get-role surfaces read on both patterns with no DLS',
+      async ({ esClient }) => {
+        expect(
+          summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('admin')))
+        ).toStrictEqual(FULL_GRANT);
+      }
+    );
 
-  apiTest(
-    'custom alerts:all in "*": reads .rule-events and .alert-actions in every space',
-    async ({ esClient }) => {
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.allAllSpaces.user, ALERT_EVENTS_INDEX_PATTERN)
-      ).toStrictEqual(ALL_SEEN);
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.allAllSpaces.user, ALERT_ACTIONS_INDEX_PATTERN)
-      ).toStrictEqual(ALL_SEEN);
-    }
-  );
+    apiTest(
+      'kibana_admin: reads .rule-events and .alert-actions in every space',
+      async ({ esClient }) => {
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.admin.user, ALERT_EVENTS_INDEX_PATTERN)
+        ).toStrictEqual(ALL_SEEN);
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.admin.user, ALERT_ACTIONS_INDEX_PATTERN)
+        ).toStrictEqual(ALL_SEEN);
+      }
+    );
 
-  // --- Custom role: alerts privilege scoped to a single space (DLS) ----------
-  apiTest(
-    'custom alerts:read in marketing: get-role DLS is scoped to marketing',
-    async ({ esClient }) => {
-      expect(
-        summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('readMarketing')))
-      ).toStrictEqual(spaceScopedGrant(['marketing']));
-    }
-  );
+    // --- Custom role: alerts privilege across ALL spaces (no DLS) --------------
+    apiTest(
+      'custom alerts:read in "*": get-role surfaces read with no DLS',
+      async ({ esClient }) => {
+        expect(
+          summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('readAllSpaces')))
+        ).toStrictEqual(FULL_GRANT);
+      }
+    );
 
-  apiTest(
-    'custom alerts:read in marketing: reads .rule-events and .alert-actions only in marketing',
-    async ({ esClient }) => {
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.readMarketing.user, ALERT_EVENTS_INDEX_PATTERN)
-      ).toStrictEqual(['marketing']);
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.readMarketing.user, ALERT_ACTIONS_INDEX_PATTERN)
-      ).toStrictEqual(['marketing']);
-    }
-  );
+    apiTest(
+      'custom alerts:read in "*": reads .rule-events and .alert-actions in every space',
+      async ({ esClient }) => {
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.readAllSpaces.user, ALERT_EVENTS_INDEX_PATTERN)
+        ).toStrictEqual(ALL_SEEN);
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.readAllSpaces.user, ALERT_ACTIONS_INDEX_PATTERN)
+        ).toStrictEqual(ALL_SEEN);
+      }
+    );
 
-  apiTest(
-    'custom alerts:all in marketing: get-role DLS is scoped to marketing',
-    async ({ esClient }) => {
-      expect(
-        summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('allMarketing')))
-      ).toStrictEqual(spaceScopedGrant(['marketing']));
-    }
-  );
+    apiTest(
+      'custom alerts:all in "*": get-role surfaces read with no DLS',
+      async ({ esClient }) => {
+        expect(
+          summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('allAllSpaces')))
+        ).toStrictEqual(FULL_GRANT);
+      }
+    );
 
-  apiTest(
-    'custom alerts:all in marketing: reads .rule-events and .alert-actions only in marketing',
-    async ({ esClient }) => {
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.allMarketing.user, ALERT_EVENTS_INDEX_PATTERN)
-      ).toStrictEqual(['marketing']);
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.allMarketing.user, ALERT_ACTIONS_INDEX_PATTERN)
-      ).toStrictEqual(['marketing']);
-    }
-  );
+    apiTest(
+      'custom alerts:all in "*": reads .rule-events and .alert-actions in every space',
+      async ({ esClient }) => {
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.allAllSpaces.user, ALERT_EVENTS_INDEX_PATTERN)
+        ).toStrictEqual(ALL_SEEN);
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.allAllSpaces.user, ALERT_ACTIONS_INDEX_PATTERN)
+        ).toStrictEqual(ALL_SEEN);
+      }
+    );
 
-  // --- Custom role: alerts privilege scoped to multiple spaces (DLS union) ---
-  apiTest(
-    'custom alerts:read in marketing+finance: get-role DLS covers both spaces',
-    async ({ esClient }) => {
-      expect(
-        summarizeImplicitGrant(
-          await fetchRoleWithImplicit(esClient, roleNameOf('readMarketingFinance'))
-        )
-      ).toStrictEqual(spaceScopedGrant(['marketing', 'finance']));
-    }
-  );
+    // --- Custom role: alerts privilege scoped to a single space (DLS) ----------
+    apiTest(
+      'custom alerts:read in marketing: get-role DLS is scoped to marketing',
+      async ({ esClient }) => {
+        expect(
+          summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('readMarketing')))
+        ).toStrictEqual(spaceScopedGrant(['marketing']));
+      }
+    );
 
-  apiTest(
-    'custom alerts:read in marketing+finance: reads .rule-events and .alert-actions in both spaces',
-    async ({ esClient }) => {
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.readMarketingFinance.user, ALERT_EVENTS_INDEX_PATTERN)
-      ).toStrictEqual(['finance', 'marketing']);
-      expect(
-        await seenSpaceIds(
-          esClient,
-          PERSONAS.readMarketingFinance.user,
-          ALERT_ACTIONS_INDEX_PATTERN
-        )
-      ).toStrictEqual(['finance', 'marketing']);
-    }
-  );
+    apiTest(
+      'custom alerts:read in marketing: reads .rule-events and .alert-actions only in marketing',
+      async ({ esClient }) => {
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.readMarketing.user, ALERT_EVENTS_INDEX_PATTERN)
+        ).toStrictEqual(['marketing']);
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.readMarketing.user, ALERT_ACTIONS_INDEX_PATTERN)
+        ).toStrictEqual(['marketing']);
+      }
+    );
 
-  // --- Custom role WITHOUT the alerts privilege: no implicit grant -----------
-  apiTest(
-    'custom alerting_v2 rules only: get-role surfaces no implicit grant',
-    async ({ esClient }) => {
-      expect(
-        summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('rulesOnly')))
-      ).toStrictEqual(NO_GRANT);
-    }
-  );
+    apiTest(
+      'custom alerts:all in marketing: get-role DLS is scoped to marketing',
+      async ({ esClient }) => {
+        expect(
+          summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('allMarketing')))
+        ).toStrictEqual(spaceScopedGrant(['marketing']));
+      }
+    );
 
-  apiTest(
-    'custom alerting_v2 rules only: cannot read .rule-events or .alert-actions',
-    async ({ esClient }) => {
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.rulesOnly.user, ALERT_EVENTS_INDEX_PATTERN)
-      ).toStrictEqual([]);
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.rulesOnly.user, ALERT_ACTIONS_INDEX_PATTERN)
-      ).toStrictEqual([]);
-    }
-  );
+    apiTest(
+      'custom alerts:all in marketing: reads .rule-events and .alert-actions only in marketing',
+      async ({ esClient }) => {
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.allMarketing.user, ALERT_EVENTS_INDEX_PATTERN)
+        ).toStrictEqual(['marketing']);
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.allMarketing.user, ALERT_ACTIONS_INDEX_PATTERN)
+        ).toStrictEqual(['marketing']);
+      }
+    );
 
-  apiTest(
-    'custom role with no alerting_v2 privilege: get-role surfaces no implicit grant',
-    async ({ esClient }) => {
-      expect(
-        summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('noAlertingV2')))
-      ).toStrictEqual(NO_GRANT);
-    }
-  );
+    // --- Custom role: alerts privilege scoped to multiple spaces (DLS union) ---
+    apiTest(
+      'custom alerts:read in marketing+finance: get-role DLS covers both spaces',
+      async ({ esClient }) => {
+        expect(
+          summarizeImplicitGrant(
+            await fetchRoleWithImplicit(esClient, roleNameOf('readMarketingFinance'))
+          )
+        ).toStrictEqual(spaceScopedGrant(['marketing', 'finance']));
+      }
+    );
 
-  apiTest(
-    'custom role with no alerting_v2 privilege: cannot read .rule-events or .alert-actions',
-    async ({ esClient }) => {
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.noAlertingV2.user, ALERT_EVENTS_INDEX_PATTERN)
-      ).toStrictEqual([]);
-      expect(
-        await seenSpaceIds(esClient, PERSONAS.noAlertingV2.user, ALERT_ACTIONS_INDEX_PATTERN)
-      ).toStrictEqual([]);
-    }
-  );
-});
+    apiTest(
+      'custom alerts:read in marketing+finance: reads .rule-events and .alert-actions in both spaces',
+      async ({ esClient }) => {
+        expect(
+          await seenSpaceIds(
+            esClient,
+            PERSONAS.readMarketingFinance.user,
+            ALERT_EVENTS_INDEX_PATTERN
+          )
+        ).toStrictEqual(['finance', 'marketing']);
+        expect(
+          await seenSpaceIds(
+            esClient,
+            PERSONAS.readMarketingFinance.user,
+            ALERT_ACTIONS_INDEX_PATTERN
+          )
+        ).toStrictEqual(['finance', 'marketing']);
+      }
+    );
+
+    // --- Custom role WITHOUT the alerts privilege: no implicit grant -----------
+    apiTest(
+      'custom alerting_v2 rules only: get-role surfaces no implicit grant',
+      async ({ esClient }) => {
+        expect(
+          summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('rulesOnly')))
+        ).toStrictEqual(NO_GRANT);
+      }
+    );
+
+    apiTest(
+      'custom alerting_v2 rules only: cannot read .rule-events or .alert-actions',
+      async ({ esClient }) => {
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.rulesOnly.user, ALERT_EVENTS_INDEX_PATTERN)
+        ).toStrictEqual([]);
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.rulesOnly.user, ALERT_ACTIONS_INDEX_PATTERN)
+        ).toStrictEqual([]);
+      }
+    );
+
+    apiTest(
+      'custom role with no alerting_v2 privilege: get-role surfaces no implicit grant',
+      async ({ esClient }) => {
+        expect(
+          summarizeImplicitGrant(await fetchRoleWithImplicit(esClient, roleNameOf('noAlertingV2')))
+        ).toStrictEqual(NO_GRANT);
+      }
+    );
+
+    apiTest(
+      'custom role with no alerting_v2 privilege: cannot read .rule-events or .alert-actions',
+      async ({ esClient }) => {
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.noAlertingV2.user, ALERT_EVENTS_INDEX_PATTERN)
+        ).toStrictEqual([]);
+        expect(
+          await seenSpaceIds(esClient, PERSONAS.noAlertingV2.user, ALERT_ACTIONS_INDEX_PATTERN)
+        ).toStrictEqual([]);
+      }
+    );
+  }
+);

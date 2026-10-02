@@ -13,10 +13,9 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import { getAlertActionsResourceDefinition } from '../../../../../server/resources/datastreams/alert_actions';
 import { getAlertEventsResourceDefinition } from '../../../../../server/resources/datastreams/alert_events';
-import { apiTest } from '../fixtures';
+import { apiTest, testData } from '../fixtures';
 
 const MARKER = 'scout-final-pipeline';
 
@@ -35,7 +34,7 @@ const RESOURCES = [
 
 apiTest.describe(
   'Alerting v2 data stream ingest timestamp pipeline',
-  { tag: tags.stateful.all },
+  { tag: testData.API_ENGINE_TAG },
   () => {
     apiTest.afterAll(async ({ esClient }) => {
       for (const { definition, markerField } of RESOURCES) {

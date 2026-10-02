@@ -6,7 +6,6 @@
  */
 
 import { randomUUID } from 'crypto';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { MAX_TAG_LENGTH, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/constants';
@@ -21,7 +20,7 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe('Get rule template tags API', { tag: tags.stateful.all }, () => {
+apiTest.describe('Get rule template tags API', { tag: testData.API_ENGINE_TAG }, () => {
   let adminHeaders: Record<string, string>;
   const createdTemplateIds = new Set<string>();
   const templateNamespace = `rule-template-tags-${randomUUID()}`;

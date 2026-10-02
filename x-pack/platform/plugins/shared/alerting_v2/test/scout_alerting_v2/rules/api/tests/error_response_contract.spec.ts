@@ -31,7 +31,6 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALERTING_V2_RULES_ALL_ROLE,
@@ -42,7 +41,7 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe('Alerting v2 error response contract', { tag: tags.stateful.all }, () => {
+apiTest.describe('Alerting v2 error response contract', { tag: testData.API_ENGINE_TAG }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
   let writerHeaders: Record<string, string>;

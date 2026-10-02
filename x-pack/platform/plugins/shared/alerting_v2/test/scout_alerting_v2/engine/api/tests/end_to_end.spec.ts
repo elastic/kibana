@@ -25,7 +25,6 @@
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
 const { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } = testData;
@@ -35,7 +34,7 @@ const ACTION_POLICY_ID = 'end-to-end-policy';
 
 apiTest.describe(
   'End-to-end (executor -> director -> dispatcher)',
-  { tag: tags.stateful.all },
+  { tag: testData.API_ENGINE_TAG },
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
       await apiServices.alertingV2.alertActionsEvents.cleanUp();

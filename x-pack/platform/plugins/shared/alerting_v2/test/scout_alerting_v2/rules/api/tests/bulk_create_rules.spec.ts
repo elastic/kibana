@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import {
@@ -20,7 +19,7 @@ import {
 
 const BULK_CREATE_URL = `${testData.RULE_API_PATH}/_bulk_create`;
 
-apiTest.describe('Bulk create rules API', { tag: tags.stateful.all }, () => {
+apiTest.describe('Bulk create rules API', { tag: testData.API_ENGINE_TAG }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 

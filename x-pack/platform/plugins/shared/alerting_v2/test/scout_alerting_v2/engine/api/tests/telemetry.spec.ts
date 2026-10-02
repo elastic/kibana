@@ -17,15 +17,14 @@
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { NameValuePair } from '../../../../../server/lib/usage/types';
 import { AGENT_BUILDER_TAG } from '../../../../../server/agent_builder/common/constants';
-import { apiTest, buildCreateActionPolicyData, buildCreateRuleData } from '../fixtures';
+import { apiTest, buildCreateActionPolicyData, buildCreateRuleData, testData } from '../fixtures';
 
 const sortByName = (buckets: NameValuePair[] | undefined): NameValuePair[] =>
   [...(buckets ?? [])].sort((a, b) => a.name.localeCompare(b.name));
 
-apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.all }, () => {
+apiTest.describe('Alerting V2 Telemetry', { tag: testData.API_ENGINE_TAG }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
     await Promise.all([
       apiServices.alertingV2.rules.cleanUp(),

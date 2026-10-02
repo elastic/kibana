@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import {
@@ -20,7 +19,7 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe('Bulk unsnooze action policies API', { tag: tags.stateful.all }, () => {
+apiTest.describe('Bulk unsnooze action policies API', { tag: testData.API_ENGINE_TAG }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 

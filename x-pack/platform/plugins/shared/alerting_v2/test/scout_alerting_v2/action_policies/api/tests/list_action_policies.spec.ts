@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ACTION_POLICY_PER_PAGE_MAX,
@@ -46,7 +45,7 @@ const createActionPolicies = async (apiServices: AlertingApiServicesFixture) => 
   return { alpha, beta, gamma };
 };
 
-apiTest.describe('List action policies API', { tag: tags.stateful.all }, () => {
+apiTest.describe('List action policies API', { tag: testData.API_ENGINE_TAG }, () => {
   let readerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {

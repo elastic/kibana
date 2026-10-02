@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   ALERTING_V2_RULES_READ_ROLE,
@@ -18,7 +17,7 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe('Get rule template API', { tag: tags.stateful.all }, () => {
+apiTest.describe('Get rule template API', { tag: testData.API_ENGINE_TAG }, () => {
   let adminHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {

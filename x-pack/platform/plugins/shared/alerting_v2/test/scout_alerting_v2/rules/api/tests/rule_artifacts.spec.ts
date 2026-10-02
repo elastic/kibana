@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   DASHBOARD_ARTIFACT_TYPE,
@@ -39,7 +38,7 @@ const dashboardReference = (dashboardId: string, artifactId = 'db-1') => ({
   id: dashboardId,
 });
 
-apiTest.describe('Rule artifacts API', { tag: tags.stateful.all }, () => {
+apiTest.describe('Rule artifacts API', { tag: testData.API_ENGINE_TAG }, () => {
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {

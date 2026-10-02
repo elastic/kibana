@@ -17,7 +17,6 @@
 import { setTimeout as wait } from 'timers/promises';
 import { keyBy } from 'lodash';
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { AlertEvent } from '../../../../../server/resources/datastreams/alert_events';
 import { ESQL_RESPONSE_FORMAT_FEATURE_FLAG } from '../../../../../common/feature_flags';
 import { apiTest, buildCreateRuleData, testData } from '../fixtures';
@@ -56,7 +55,7 @@ const forceEsqlResponseFormat = (responseFormat: EsqlResponseFormat) => ({
 const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
   apiTest.describe(
     `Rule executor (${responseFormat} ES|QL response format)`,
-    { tag: tags.stateful.all },
+    { tag: testData.API_ENGINE_TAG },
     () => {
       const SOURCE_INDEX = `test-alerting-v2-rule-executor-source-${responseFormat}`;
       /**

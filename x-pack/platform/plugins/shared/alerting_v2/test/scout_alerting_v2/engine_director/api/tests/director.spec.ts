@@ -16,7 +16,6 @@
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
 const { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } = testData;
@@ -27,7 +26,7 @@ const { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } = testData;
  * The director runs after the executor has produced a batch of breach/recovery
  * alert events.
  */
-apiTest.describe('Director', { tag: tags.stateful.all }, () => {
+apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
   const SOURCE_INDEX = 'test-alerting-v2-director-source';
 
   apiTest.beforeAll(async ({ apiServices }) => {

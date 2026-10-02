@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   ALERTING_V2_RULES_READ_ROLE,
@@ -27,7 +26,7 @@ const getTemplateNames = (items: Array<{ rule: { metadata: { name: string } } }>
  * Rule templates are installed by Fleet packages, so the specs seed the saved
  * objects directly rather than going through a write API.
  */
-apiTest.describe('Find rule templates API', { tag: tags.stateful.all }, () => {
+apiTest.describe('Find rule templates API', { tag: testData.API_ENGINE_TAG }, () => {
   let adminHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {

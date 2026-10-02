@@ -18,11 +18,10 @@
 import type { ChangeHistoryDocument } from '@kbn/change-history';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import { isUndefined, omitBy } from 'lodash';
 import { RuleChangesHistoryAction } from '../../../../../server/lib/rule_changes_history/audit_actions';
 import type { RuleChangesHistorySnapshot } from '../../../../../server/lib/rule_changes_history/types';
-import { apiTest, buildCreateRuleData } from '../fixtures';
+import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
 const expectSnapshotShape = (doc: ChangeHistoryDocument, expectedRule: RuleResponse): void => {
   const snapshot = doc.object.snapshot as RuleChangesHistorySnapshot;
@@ -63,7 +62,7 @@ const expectSequenceMatchesRuleVersion = (doc: ChangeHistoryDocument, rule: Rule
   expect(doc.object.sequence).toBe(rule.version);
 };
 
-apiTest.describe('Rule change history', { tag: tags.stateful.all }, () => {
+apiTest.describe('Rule change history', { tag: testData.API_ENGINE_TAG }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.ruleChangesHistory.cleanUp();

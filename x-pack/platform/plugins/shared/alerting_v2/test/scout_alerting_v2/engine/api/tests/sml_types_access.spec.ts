@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import type { ApiClientFixture, KbnClient, KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { platformCoreTools } from '@kbn/agent-builder-common';
@@ -21,7 +21,7 @@ import {
   ALERTING_V2_FEATURES,
   ALERTING_V2_UI_CAPABILITIES,
 } from '../../../../../common/feature_privileges';
-import { COMMON_HEADERS } from '../../../common/constants';
+import { COMMON_HEADERS, API_ENGINE_TAG } from '../../../common/constants';
 
 const TOOLS_EXECUTE_API = '/api/agent_builder/tools/_execute';
 const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
@@ -126,7 +126,7 @@ const runSmlCrawlerSoon = async (kbnClient: KbnClient, typeId: string): Promise<
 // Failing: See https://github.com/elastic/kibana/issues/289954
 apiTest.describe.skip(
   'Agent Builder — alerting V2 SML type access',
-  { tag: tags.stateful.all },
+  { tag: API_ENGINE_TAG },
   () => {
     const searchRunId = randomUUID();
     const searchToken = `alertingv2sml${searchRunId.replaceAll('-', '')}`;

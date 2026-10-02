@@ -16,7 +16,6 @@
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { AlertEvent } from '../../../../../server/resources/datastreams/alert_events';
 import type { AlertAction } from '../../../../../server/resources/datastreams/alert_actions';
 import { OVERLAP_WINDOW_MINUTES } from '../../../../../server/lib/dispatcher/constants';
@@ -153,7 +152,7 @@ const expectStableCount = async (
   return actions;
 };
 
-apiTest.describe('Dispatcher', { tag: tags.stateful.all }, () => {
+apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
     await apiServices.alertingV2.actionPolicies.cleanUp();

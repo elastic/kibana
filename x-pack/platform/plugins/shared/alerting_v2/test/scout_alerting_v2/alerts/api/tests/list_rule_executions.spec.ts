@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE,
@@ -20,7 +19,7 @@ import {
 
 const OTHER_SPACE_ID = 'cross-space-execution-history';
 
-apiTest.describe('List rule executions API', { tag: tags.stateful.all }, () => {
+apiTest.describe('List rule executions API', { tag: testData.API_ENGINE_TAG }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
 

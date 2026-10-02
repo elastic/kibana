@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
+
+/**
+ * Scout tag for every API and engine suite in `scout_alerting_v2` (not UI suites).
+ * Scout cannot run this custom server config set on serverless, so the value is
+ * stateful-only for now; centralized here since it may change later.
+ */
+export const API_ENGINE_TAG = tags.stateful.all;
+
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',

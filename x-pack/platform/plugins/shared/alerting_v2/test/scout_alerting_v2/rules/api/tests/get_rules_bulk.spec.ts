@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import {
@@ -19,7 +18,7 @@ import {
   getBulkRulesUrl,
 } from '../fixtures';
 
-apiTest.describe('Bulk get rules API', { tag: tags.stateful.all }, () => {
+apiTest.describe('Bulk get rules API', { tag: testData.API_ENGINE_TAG }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
 

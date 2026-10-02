@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { MAX_KQL_LENGTH, MAX_SEARCH_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
@@ -20,7 +19,7 @@ import {
 
 const DELETE_BY_QUERY_URL = `${testData.RULE_API_PATH}/_delete_by_query`;
 
-apiTest.describe('Delete rules by query API', { tag: tags.stateful.all }, () => {
+apiTest.describe('Delete rules by query API', { tag: testData.API_ENGINE_TAG }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 

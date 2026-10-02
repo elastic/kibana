@@ -6,13 +6,12 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ALERTING_V2_ACTION_POLICIES_READ_ROLE, apiTest, testData } from '../fixtures';
 
 const MATCH_ACTION_POLICIES_URL = testData.INTERNAL_ACTION_POLICY_MATCH_API_PATH;
 
-apiTest.describe('Match action policies API', { tag: tags.stateful.all }, () => {
+apiTest.describe('Match action policies API', { tag: testData.API_ENGINE_TAG }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
 

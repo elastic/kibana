@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   ACTION_POLICY_MAX_DESTINATIONS,
@@ -28,7 +27,7 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe('Create action policy API', { tag: tags.stateful.all }, () => {
+apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 
