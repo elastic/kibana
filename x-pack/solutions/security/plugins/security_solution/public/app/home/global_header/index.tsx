@@ -23,6 +23,7 @@ import {
   isDashboardViewPath,
   isDetectionsPath,
   isRuleChangesHistoryPath,
+  isRulesAddPath,
   isRulesManagementPath,
 } from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -64,6 +65,7 @@ export const GlobalHeader = React.memo(() => {
   const dashboardViewPath = isDashboardViewPath(pathname);
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
   const rulesManagementPath = isRulesManagementPath(pathname);
+  const rulesAddPath = isRulesAddPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -72,9 +74,9 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    // The Rules page app header renders its own actions (ML job settings, Add integrations),
+    // The Rules and Add Elastic rules page app headers render their own actions (ML job settings, Add integrations),
     // so clear the global header action menu there to avoid duplicating them.
-    if (changesHistoryPath || rulesManagementPath) {
+    if (changesHistoryPath || rulesManagementPath || rulesAddPath) {
       setHeaderActionMenu(undefined);
       return;
     }
@@ -103,6 +105,7 @@ export const GlobalHeader = React.memo(() => {
     dashboardViewPath,
     changesHistoryPath,
     rulesManagementPath,
+    rulesAddPath,
   ]);
 
   return (
