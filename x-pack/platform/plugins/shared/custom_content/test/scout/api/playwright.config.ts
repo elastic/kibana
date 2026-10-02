@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { refreshEpisodeTool, refreshEpisodeToolId } from './refresh_episode';
-export type { RefreshEpisodeToolParams } from './refresh_episode';
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
