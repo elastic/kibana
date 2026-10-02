@@ -80,10 +80,7 @@ const createServices = (canReadConnectors = true) => {
   return services;
 };
 
-const renderWithProviders = (
-  ui: React.ReactElement,
-  services = createServices()
-) => {
+const renderWithProviders = (ui: React.ReactElement, services = createServices()) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <I18nProvider>
