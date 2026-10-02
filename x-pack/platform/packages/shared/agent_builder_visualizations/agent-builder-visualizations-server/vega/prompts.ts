@@ -40,7 +40,6 @@ export const createAuthorVegaSpecPrompt = ({
   existingSpec,
   chartType,
   referenceExamples,
-  additionalContext,
 }: {
   nlQuery: string;
   esqlQuery: string;
@@ -49,7 +48,6 @@ export const createAuthorVegaSpecPrompt = ({
   chartType?: SupportedChartType;
   /** Pre-selected, pre-loaded reference-example block (see `reference_examples`). */
   referenceExamples?: string;
-  additionalContext?: string;
 }): BaseMessageLike[] => {
   const esqlQueryJson = JSON.stringify(esqlQuery);
   const chartTypeHint = chartType
@@ -134,9 +132,7 @@ IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. Use this 
     // Vega-Lite v6 specification
   }
 }
-\`\`\`
-
-${additionalContext ?? ''}`,
+\`\`\``,
     ],
     // Human message required for Bedrock to work properly
     ['human', 'Author the visualization specification.'],

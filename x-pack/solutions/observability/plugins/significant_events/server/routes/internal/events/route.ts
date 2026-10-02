@@ -111,6 +111,10 @@ const eventsSearchRoute = createServerRoute({
       search: z.string().max(500).optional(),
       event_id: z.string().max(255).optional(),
       severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
+      // Same cap as the agent `event_search` tool; the UI lets users select any number of services.
+      topology_feature_id: z
+        .union([z.string().max(255), z.array(z.string().max(255)).max(100)])
+        .optional(),
     }),
   }),
   handler: async ({
@@ -131,6 +135,7 @@ const eventsSearchRoute = createServerRoute({
       from,
       to,
       event_id: eventId,
+      topology_feature_id: topologyFeatureId,
       ...rest
     } = params.query ?? {};
 
@@ -142,6 +147,7 @@ const eventsSearchRoute = createServerRoute({
       status: toArray(status),
       stream: toArray(stream),
       severity: toArray(severity),
+      topologyFeatureIds: toArray(topologyFeatureId),
       search: search || undefined,
       ...(eventId ? { eventIds: [eventId] } : {}),
     });
@@ -242,12 +248,14 @@ const eventsAttachInvestigationRoute = createServerRoute({
     body: significantEventInvestigationSchema.required({ completed_at: true }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
-    const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });
+    const { getEventClient, getEventSearchClient, getAlertEventsClient, licensing } =
+      await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     return attachInvestigationToEvent({
       eventClient: await getEventClient(),
+      eventSearchClient: await getEventSearchClient(),
       eventId: params.path.id,
       investigation: params.body,
       alertEventsClient: await getAlertEventsClient(),
