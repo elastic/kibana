@@ -338,7 +338,7 @@ describe('ConnectedEscalationModal', () => {
 
     expect(screen.queryByTestId('escalationModalCreateEscalation')).not.toBeInTheDocument();
     expect(
-      screen.getByText('Your user profile is unavailable. Private escalations cannot be created.')
+      screen.getByText('Your user profile is unavailable. Escalations cannot be created.')
     ).toBeInTheDocument();
   });
 
