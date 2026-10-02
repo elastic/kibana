@@ -23,6 +23,7 @@ import { InvestigationNotFoundError } from './errors';
 export interface InvestigationConversation {
   /** The investigation id, which is the conversation id. */
   id: string;
+  /** Agent Builder's placeholder until Agent Builder titles it on the first round. */
   title: string;
   /** `metadata.status`; a missing status reads as open. */
   status: 'open' | 'closed';
@@ -108,16 +109,17 @@ export const findInvestigationConversation = async (
  * investigation is a public `investigation` template conversation on the Nightshift investigation
  * agent, so it is shared with everyone who can see Nightshift investigations. Concurrent callers
  * agree on one conversation, because the id is chosen by the caller.
+ *
+ * The conversation is created without a title, so Agent Builder stores its placeholder and
+ * generates the title from the investigation's first round.
  */
 export const getOrCreateInvestigationConversation = async ({
   conversations,
   id,
-  title,
   origin,
 }: {
   conversations: ConversationPublicClient;
   id: string;
-  title: string;
   /** External key the conversation can later be found by, such as a Slack thread. */
   origin?: ConversationOrigin;
 }): Promise<InvestigationConversation> => {
@@ -129,7 +131,6 @@ export const getOrCreateInvestigationConversation = async ({
   try {
     const created = await conversations.create({
       id,
-      title,
       agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
       templateId: INVESTIGATION_TEMPLATE_ID,
       accessControl: { access_mode: ConversationAccessControlMode.Public },

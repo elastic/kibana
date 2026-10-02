@@ -27,18 +27,11 @@ const startInvestigationModel = {
   connector_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
 };
 
-/** Headline shown in the list and flyout from the moment the record exists. */
-const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
-
-/** Keeps a derived title to one readable line, since it is rendered as a list headline. */
-const MAX_DERIVED_TITLE_LENGTH = 200;
-
 /**
- * A manual investigation is defined by its question, so when the caller names no title the
- * question stands in for it, collapsed to one line the way the client derives the subject summary.
+ * Accepted for compatibility but not stored as the investigation's title: Agent Builder generates
+ * that from the investigation's first round.
  */
-const deriveTitleFromMessage = (message: string): string =>
-  message.replace(/\s+/g, ' ').trim().slice(0, MAX_DERIVED_TITLE_LENGTH);
+const titleSchema = z.string().min(1).max(MAX_TITLE_LENGTH);
 
 // A union rather than one object with a loose `context`, so that an alert investigation is
 // always backed by alert data: the alert branch accepts no caller context — the handler loads
@@ -51,14 +44,12 @@ const startInvestigationBodySchema = z.union([
       type: z.literal('alert'),
       ...subjectIdAndSummary,
     }),
-    // Optional here only: the handler derives it from the alert's rule name when omitted.
     title: titleSchema.optional(),
     ...startInvestigationMessage,
     ...startInvestigationModel,
   }),
   // A manual investigation is defined by its question, so `message` is required and the
-  // subject id is optional: there is no entity to point at, only the prompt. The title is
-  // optional for the same reason: the handler derives it from the question when omitted.
+  // subject id is optional: there is no entity to point at, only the prompt.
   z.object({
     subject: z.object({
       type: z.literal('manual'),
@@ -119,18 +110,14 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         const snapshot = await fetchAlertSnapshot(alertsClient, body.subject.id);
         return await client.start({
           subject: body.subject,
-          title: body.title ?? snapshot.rule_name,
+          title: body.title,
           context: { alerts: [snapshot] },
           trigger_type: 'manual',
           message: body.message,
           ...(body.connector_id ? { connector_id: body.connector_id } : {}),
         });
       }
-      return await client.start({
-        ...body,
-        title: body.title ?? deriveTitleFromMessage(body.message),
-        trigger_type: 'manual',
-      });
+      return await client.start({ ...body, trigger_type: 'manual' });
     } catch (error) {
       rethrowInvestigationClientError(error);
     }
