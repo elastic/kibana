@@ -69,9 +69,9 @@ export function StepAdditional() {
     // so errors shown after a Next attempt would otherwise not clear until Next is clicked again.
     // Any settings change is watched because some rules depend on other settings (e.g. CSV mode).
     // The combo box validity flags are watched because unresolved typed text fails their rules.
-    if (!hasAttemptedValidation) return;
+    if (!hasAttemptedValidation && !hasFieldErrors) return;
     trigger(ADDITIONAL_STEP_FIELDS);
-  }, [settings, comboBoxValidity, hasAttemptedValidation, trigger]);
+  }, [settings, comboBoxValidity, hasAttemptedValidation, hasFieldErrors, trigger]);
 
   return (
     <div data-test-subj="createDatasetWizardAdditionalStep">
