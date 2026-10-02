@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { StateGraph, Annotation } from '@langchain/langgraph';
+import { ToolMessage, type BaseMessage, type BaseMessageLike } from '@langchain/core/messages';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -28,12 +29,18 @@ import {
   isValidateConfigAction,
 } from './actions_lens';
 import { createGenerateConfigPrompt } from './prompts';
+import {
+  createLoadSchemaSectionsTool,
+  filterSchemaSections,
+  getFailingSchemaSections,
+  renderSchemaSections,
+} from './schema_sections';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
 
 const REPAIR_INSTRUCTIONS =
-  'Return the complete corrected response in the same JSON format ("authoring_note" and "config"). Change only what is needed to fix the error.';
+  'Return the complete corrected response in the same minified JSON format ("authoring_note" and "config"). Change only what is needed to fix the error.';
 
 const parseConfigAuthoringResponse = (
   responseText: string
@@ -107,7 +114,6 @@ const VisualizationStateAnnotation = Annotation.Root({
   nlQuery: Annotation<string>(),
   index: Annotation<string | undefined>(),
   chartType: Annotation<SupportedChartType>(),
-  schema: Annotation<object>(),
   existingConfig: Annotation<string | undefined>(),
   parsedExistingConfig: Annotation<VisualizationConfig | null>(),
   /**
@@ -118,6 +124,15 @@ const VisualizationStateAnnotation = Annotation.Root({
   applyChartRules: Annotation<boolean>(),
   // internal
   esqlQuery: Annotation<string>(),
+  /** The tool exchange that loaded schema sections, replayed on every later attempt. */
+  schemaSectionMessages: Annotation<BaseMessage[]>({
+    reducer: (_, newValue) => newValue,
+    default: () => [],
+  }),
+  loadedSchemaSections: Annotation<string[]>({
+    reducer: (_, newValue) => newValue,
+    default: () => [],
+  }),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
   actions: Annotation<Action[]>({
     reducer: (a, b) => [...a, ...b],
@@ -130,6 +145,17 @@ const VisualizationStateAnnotation = Annotation.Root({
 });
 
 type VisualizationState = typeof VisualizationStateAnnotation.State;
+
+type LoadedSchemaSections = Pick<
+  VisualizationState,
+  'schemaSectionMessages' | 'loadedSchemaSections'
+>;
+
+interface ConfigAuthorResult {
+  response: BaseMessage;
+  /** Present when the model loaded schema sections. */
+  schemaSections?: LoadedSchemaSections;
+}
 
 export const createVisualizationGraph = async (
   modelProvider: ModelProvider,
@@ -170,6 +196,7 @@ export const createVisualizationGraph = async (
           type: 'generate_esql',
           success: true,
           query: generated.query,
+          columns: generated.columns,
         };
       }
     } catch (error) {
@@ -187,6 +214,54 @@ export const createVisualizationGraph = async (
     };
   };
 
+  // Offers the schema-section tool once. When the model calls it, the sections are
+  // returned and the model is asked again with tool use disabled, so it must write
+  // the config. Every call binds the same tool so the prompt prefix stays cacheable.
+  const invokeConfigAuthor = async ({
+    chartType,
+    prompt,
+    offerSchemaSections,
+  }: {
+    chartType: SupportedChartType;
+    prompt: BaseMessageLike[];
+    offerSchemaSections: boolean;
+  }): Promise<ConfigAuthorResult> => {
+    const tool = createLoadSchemaSectionsTool(chartType);
+    const writer = defaultModel.chatModel.bindTools([tool], { tool_choice: 'none' });
+    if (!offerSchemaSections) {
+      return { response: await writer.invoke(prompt) };
+    }
+
+    const firstResponse = await defaultModel.chatModel
+      .bindTools([tool], { tool_choice: 'auto' })
+      .invoke(prompt);
+    const toolCalls = firstResponse.tool_calls ?? [];
+    if (toolCalls.length === 0) {
+      return { response: firstResponse };
+    }
+
+    const requestedSections = toolCalls.map(({ args }) =>
+      filterSchemaSections(chartType, Array.isArray(args.sections) ? args.sections : [])
+    );
+    const loadedSchemaSections = filterSchemaSections(chartType, requestedSections.flat());
+    logger.debug(
+      `Loaded ${chartType} schema sections: ${loadedSchemaSections.join(', ') || 'none'}`
+    );
+
+    const schemaSectionMessages: BaseMessage[] = [
+      firstResponse,
+      ...toolCalls.map(
+        ({ id }, index) =>
+          new ToolMessage({
+            tool_call_id: id ?? '',
+            content: renderSchemaSections(chartType, requestedSections[index]),
+          })
+      ),
+    ];
+    const response = await writer.invoke([...prompt, ...schemaSectionMessages]);
+    return { response, schemaSections: { schemaSectionMessages, loadedSchemaSections } };
+  };
+
   // Node: Generate configuration
   const generateConfigNode = async (state: VisualizationState) => {
     const attempt = state.currentAttempt + 1;
@@ -201,18 +276,20 @@ export const createVisualizationGraph = async (
       .pop();
     const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
 
-    // On retries, replay the raw failed responses (without the injected data_source) and their errors.
+    // On retries, replay the loaded schema sections, then the raw failed responses
+    // (without the injected data_source) and their errors.
     const prompt = [
       ...createGenerateConfigPrompt({
         nlQuery: state.nlQuery,
         esqlQuery,
+        columns: lastGenerateEsqlAction?.columns,
         chartType: state.chartType,
-        schema: state.schema,
         existingConfig: state.existingConfig,
         parsedExistingConfig: state.parsedExistingConfig,
         preserveESQL: state.preserveESQL,
         applyChartRules: state.applyChartRules,
       }),
+      ...state.schemaSectionMessages,
       ...formatRepairMessages({
         authored: state.actions.filter(isGenerateConfigAction),
         validated: state.actions.filter(isValidateConfigAction),
@@ -222,9 +299,15 @@ export const createVisualizationGraph = async (
 
     let action: GenerateConfigAction;
     let responseText: string | undefined;
+    let schemaSections: Partial<LoadedSchemaSections> = {};
     try {
-      // Invoke model without schema validation
-      const response = await defaultModel.chatModel.invoke(prompt);
+      const result = await invokeConfigAuthor({
+        chartType: state.chartType,
+        prompt,
+        offerSchemaSections: attempt === 1,
+      });
+      const { response } = result;
+      schemaSections = result.schemaSections ?? {};
       responseText = extractTextFromMessage(response);
       const { config: configResponse, authoringNote } = parseConfigAuthoringResponse(responseText);
 
@@ -270,6 +353,7 @@ export const createVisualizationGraph = async (
     return {
       currentAttempt: attempt,
       actions: [action],
+      ...schemaSections,
     };
   };
 
@@ -324,11 +408,23 @@ export const createVisualizationGraph = async (
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.warn(`Configuration validation failed: ${errorMessage}`);
 
+      // Show the schema of the failing sections the model has not loaded yet.
+      const failingSections = getFailingSchemaSections(state.chartType, error).filter(
+        (section) => !state.loadedSchemaSections.includes(section)
+      );
       action = {
         type: 'validate_config',
         success: false,
         attempt,
         error: errorMessage,
+        ...(failingSections.length > 0
+          ? {
+              repairContext: `Schema of the failing config sections:\n\`\`\`json\n${renderSchemaSections(
+                state.chartType,
+                failingSections
+              )}\n\`\`\``,
+            }
+          : {}),
       };
     }
 

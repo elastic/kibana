@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { VisualizationConfig } from './types';
 
 export interface GenerateEsqlAction {
   type: 'generate_esql';
   success: boolean;
   query?: string;
+  /** Result columns of the generated query, used to pick the config example. */
+  columns?: EsqlEsqlColumnInfo[];
   error?: string;
 }
 
@@ -32,6 +35,8 @@ export interface ValidateConfigAction {
   authoringNote?: string;
   attempt: number;
   error?: string;
+  /** Schema of the sections the validation error points at, shown on the retry. */
+  repairContext?: string;
 }
 
 export type Action = GenerateEsqlAction | GenerateConfigAction | ValidateConfigAction;
