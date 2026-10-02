@@ -195,7 +195,7 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 | `service.type`       | `kibana`.                                      |
 | `service.version`    | Version of Kibana that emitted the event.      |
 
-When events are shipped through an `otel` appender, only `service.name` and `service.type` are emitted, and they are carried on the OTel resource rather than on each record. To override the detected `service.name`, use the appender `attributes` setting; values set there take precedence:
+When events are shipped through an `otel` appender, only `service.name` and `service.type` are emitted, and they are carried on the OTel resource rather than on each record. To override the detected `service.name`, use the appender `attributes` setting, values set there take precedence:
 
 ```yaml
 user_activity:
