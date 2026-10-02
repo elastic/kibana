@@ -38,7 +38,7 @@ import {
 } from '../../components/alerts_table/timeline_actions/use_run_workflow_selection';
 import type { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useSignalIndexName } from '../../../data_view_manager/hooks/use_signal_index_name';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 import { combineQueries } from '../../../common/lib/kuery';
 import { useKibana } from '../../../common/lib/kibana';
@@ -118,7 +118,13 @@ export const useBulkRunAlertWorkflowPanel = ({
   const { uiSettings } = useKibana().services;
   const { dataView } = useDataView(scopeId);
   const browserFields = useBrowserFields(dataView);
-  const selectedPatterns = useSelectedPatterns(dataView);
+  // The page's data view also covers raw event indices, which the alerts table never shows. Search
+  // the alerts index alone so a "select all" cannot pick up events the table did not count.
+  const signalIndexName = useSignalIndexName();
+  const alertIndexNames = useMemo(
+    () => (signalIndexName ? [signalIndexName] : []),
+    [signalIndexName]
+  );
   const runtimeMappings = useMemo(
     () => dataView.getRuntimeMappings() as RunTimeMappings,
     [dataView]
@@ -151,14 +157,14 @@ export const useBulkRunAlertWorkflowPanel = ({
   const selectionScope: RunWorkflowSelectionScope = useMemo(
     () => ({
       dataViewId,
-      indexNames: selectedPatterns,
+      indexNames: alertIndexNames,
       filterQuery,
       from,
       to,
       runtimeMappings,
       queryId: `${tableId}-${RUN_WORKFLOW_SELECTION_QUERY_ID}`,
     }),
-    [dataViewId, selectedPatterns, filterQuery, from, to, runtimeMappings, tableId]
+    [dataViewId, alertIndexNames, filterQuery, from, to, runtimeMappings, tableId]
   );
 
   const searchAlertIds = useRunWorkflowSelectionSearch(selectionScope);
