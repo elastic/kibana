@@ -100,5 +100,12 @@ export function registerAutoPushListener({
     schedule(event.request, event.payload.caseId);
   });
 
-  casesEventBus.onAttachmentsAdded((event) => schedule(event.request, event.payload.caseId));
+  casesEventBus.onAttachmentsAdded((event) => {
+    // Comments imported from the external incident must not be pushed straight back.
+    if (event.payload.origin === 'external_sync') {
+      return;
+    }
+
+    schedule(event.request, event.payload.caseId);
+  });
 }

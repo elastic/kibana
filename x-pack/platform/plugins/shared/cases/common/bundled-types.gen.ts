@@ -1107,7 +1107,7 @@ export type ConnectorTypesEnum = typeof ConnectorTypes.enum;
 export const ConnectorTypesEnum = ConnectorTypes.enum;
 
 /**
-  * Technical preview. How one case field moves between the case and the external incident. `direction` is `both`, `push` (case to external only), `pull` (external to case only), or `off`. `status` supports only `pull` and `off`; `tags` and `comments` support only `push` and `off`. `conflictStrategy` overrides the case's conflict strategy for this field when both sides changed.
+  * Technical preview. How one case field moves between the case and the external incident. `direction` is `both`, `push` (case to external only), `pull` (external to case only), or `off`. `status` supports only `pull` and `off`. Pulling `tags` and `comments` requires a connector that exposes them (Jira); other connectors leave them unchanged. `conflictStrategy` overrides the case's conflict strategy for this field when both sides changed.
 
   */
 export const ExternalSyncFieldRule = lazySchema(() =>

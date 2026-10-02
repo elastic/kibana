@@ -241,7 +241,11 @@ const FieldSyncTableComponent: React.FC<FieldSyncTableProps> = ({
         field: 'conflictStrategy',
         name: i18n.FIELD_SYNC_COL_CONFLICT,
         render: (conflictStrategy: ExternalSyncConflictStrategy | undefined, row: Row) => {
-          if (!EXTERNAL_SYNC_FIELD_DIRECTIONS[row.field].some(pullsFromExternal)) {
+          // Comments are appended, never overwritten, so there is nothing to resolve.
+          if (
+            row.field === 'comments' ||
+            !EXTERNAL_SYNC_FIELD_DIRECTIONS[row.field].some(pullsFromExternal)
+          ) {
             return (
               <EuiText size="s" color="subdued" aria-label={i18n.FIELD_SYNC_NOT_APPLICABLE}>
                 {'—'}

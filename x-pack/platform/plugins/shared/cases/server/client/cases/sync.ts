@@ -18,10 +18,12 @@ import {
   pullsFromExternal,
   resolveExternalSyncFieldRules,
 } from '../../../common/utils/external_sync_fields';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, MAX_COMMENT_LENGTH } from '../../../common/constants';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { getExternalSyncCommentMetadata } from '../../../common/utils/external_sync_comments';
 import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import type { ExternalIncidentSnapshot } from '../../connectors';
+import type { ExternalIncidentComment, ExternalIncidentSnapshot } from '../../connectors';
 import { casesConnectors } from '../../connectors';
 import { createCaseError } from '../../common/error';
 import {
@@ -37,17 +39,58 @@ export interface SyncParams {
   caseId: string;
 }
 
-export const SYNCED_FIELDS = ['title', 'description', 'status'] as const;
+export const SYNCED_FIELDS = ['title', 'description', 'status', 'tags'] as const;
 
 interface SyncPatch {
   title?: string;
   description?: string;
   status?: CaseStatuses;
+  tags?: string[];
 }
 
 // Push appends "Added by …" (and the case link) to the description; drop it so a
 // round trip compares equal and auto-push does not append it again.
 const ADDED_BY_PREFIX = i18n.ADDED_BY('').trimEnd();
+
+/** Push appends the same footer to every comment it sends; a body carrying it came from Kibana. */
+export const isPushedFromKibana = (body: string): boolean =>
+  body.includes(`\n\n${ADDED_BY_PREFIX}`);
+
+const sameValue = (a: unknown, b: unknown): boolean => {
+  if (Array.isArray(a) && Array.isArray(b)) {
+    const left = [...a].sort();
+    const right = [...b].sort();
+    return left.length === right.length && left.every((value, index) => value === right[index]);
+  }
+  return a === b;
+};
+
+/**
+ * External comments that are not on the case yet: skips the ones already imported (same
+ * external id), the ones Kibana pushed (footer), and bodies the case cannot store.
+ */
+export const selectCommentsToImport = (
+  theCase: Case,
+  comments: ExternalIncidentComment[] | undefined
+): ExternalIncidentComment[] => {
+  if (comments == null || comments.length === 0) {
+    return [];
+  }
+
+  const imported = new Set(
+    (theCase.comments ?? [])
+      .map((comment) => getExternalSyncCommentMetadata(comment)?.externalId)
+      .filter((externalId): externalId is string => externalId != null)
+  );
+
+  return comments.filter(
+    (comment) =>
+      !imported.has(comment.externalId) &&
+      !isPushedFromKibana(comment.body) &&
+      comment.body.trim().length > 0 &&
+      comment.body.length <= MAX_COMMENT_LENGTH
+  );
+};
 
 export const stripKibanaInformationFromDescription = (description: string): string => {
   const footerStart = description.lastIndexOf(`\n\n${ADDED_BY_PREFIX}`);
@@ -80,7 +123,7 @@ export const buildSyncPatch = (
         ? stripKibanaInformationFromDescription(snapshot.description)
         : snapshot[field];
 
-    if (value != null && value !== theCase[field]) {
+    if (value != null && !sameValue(value, theCase[field])) {
       const strategy = fieldRules[field].conflictStrategy ?? defaultStrategy;
       if (strategy === 'kibana' && changedInKibana.has(field)) {
         conflictedFields.push(field);
@@ -216,6 +259,31 @@ export const sync = async (
         { cases: [{ id: caseId, version: theCase.version, ...patch }] },
         { origin: 'external_sync' }
       );
+    }
+
+    const commentsToImport = pullsFromExternal(fieldRules.comments.direction)
+      ? selectCommentsToImport(theCase, snapshot.comments)
+      : [];
+
+    if (commentsToImport.length > 0) {
+      await casesClient.attachments.bulkCreate({
+        caseId,
+        origin: 'external_sync',
+        attachments: commentsToImport.map((comment) => ({
+          type: COMMENT_ATTACHMENT_TYPE,
+          owner: theCase.owner,
+          data: { content: comment.body },
+          metadata: {
+            externalSync: {
+              externalId: comment.externalId,
+              connectorName: externalService.connector_name,
+              ...(comment.author != null ? { actor: comment.author } : {}),
+              ...(comment.createdAt != null ? { externalCreatedAt: comment.createdAt } : {}),
+            },
+          },
+        })),
+      });
+      updatedFields.push('comments');
     }
 
     await userActionService.creator.createUserAction({

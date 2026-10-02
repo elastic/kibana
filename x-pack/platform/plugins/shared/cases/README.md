@@ -56,7 +56,7 @@ Kibana does not poll Jira. To apply Jira edits without pressing **Sync from Jira
          connector_id: "<jira-connector-id>"
    ```
 
-The step resolves the case from the incident id recorded at push time, applies the incident according to the connector's field rules, and records a `sync` entry in the case activity. Cases that were never pushed are skipped. The workflow runs as the user who last saved the inbound webhook connector, so that user needs push access to the cases.
+The step resolves the case from the incident id recorded at push time, applies the incident according to the connector's field rules (title, description, status, and, for Jira, labels as tags and new comments attributed to their Jira author), and records a `sync` entry in the case activity. Cases that were never pushed are skipped. The workflow runs as the user who last saved the inbound webhook connector, so that user needs push access to the cases.
 
 ## Cases UI
 

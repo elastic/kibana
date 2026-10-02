@@ -48,6 +48,8 @@ export interface AttachmentsAddedEventPayload extends BaseCaseEventPayload {
   readonly caseId: string;
   readonly attachmentIds: string[];
   readonly attachmentType: string;
+  /** Set when the attachments were imported from an external incident rather than added by a user. */
+  readonly origin?: CaseUpdateOrigin;
 }
 
 /**

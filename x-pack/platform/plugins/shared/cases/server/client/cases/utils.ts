@@ -62,6 +62,7 @@ import {
   pushesToExternal,
   resolveExternalSyncFieldRules,
 } from '../../../common/utils/external_sync_fields';
+import { isExternalSyncComment } from '../../../common/utils/external_sync_comments';
 
 interface CreateIncidentArgs {
   theCase: Case;
@@ -318,8 +319,12 @@ export const formatComments = ({
   );
 
   const commentsToBeUpdated = theCase.comments?.filter(
-    // Push only user-authored comments — legacy `user` and unified `comment`.
-    (comment) => isCommentAttachmentType(comment.type) && commentsIdsToBeUpdated.has(comment.id)
+    // Push only user-authored comments — legacy `user` and unified `comment` — and never
+    // send back a comment that was imported from the external incident.
+    (comment) =>
+      isCommentAttachmentType(comment.type) &&
+      commentsIdsToBeUpdated.has(comment.id) &&
+      !isExternalSyncComment(comment)
   );
 
   let comments: ExternalServiceComment[] = [];

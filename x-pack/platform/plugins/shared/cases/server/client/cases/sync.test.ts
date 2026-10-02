@@ -14,7 +14,14 @@ import { mockCases } from '../../mocks';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SYNC_CASE_APPLIED_COUNTER, SYNC_CASE_NO_CHANGES_COUNTER } from '../usage_counters';
 import { resolveExternalSyncFieldRules } from '../../../common/utils/external_sync_fields';
-import { buildSyncPatch, stripKibanaInformationFromDescription, sync } from './sync';
+import {
+  buildSyncPatch,
+  isPushedFromKibana,
+  selectCommentsToImport,
+  stripKibanaInformationFromDescription,
+  sync,
+} from './sync';
+import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
 const externalService = {
   connector_id: 'sn-1',
@@ -346,6 +353,151 @@ describe('stripKibanaInformationFromDescription', () => {
 
   it('leaves a description without a footer untouched', () => {
     expect(stripKibanaInformationFromDescription('body\n\nmore body')).toBe('body\n\nmore body');
+  });
+});
+
+describe('sync from Jira (tags and comments)', () => {
+  const casesClient = createCasesClientMock();
+  const usageCounter = usageCollectionPluginMock.createSetupContract().createUsageCounter('cases');
+  const clientArgs = { ...createCasesClientMockArgs(), usageCounter };
+  const { actionsClient, authorization } = clientArgs;
+  const { licensingService, connectorMappingsService } = clientArgs.services;
+
+  const jiraCase: Case = {
+    ...theCase,
+    connector: { id: 'sn-1', name: 'Jira', type: ConnectorTypes.jira, fields: null },
+    tags: ['defacement'],
+    comments: [
+      {
+        id: 'imported-1',
+        type: 'comment',
+        owner: theCase.owner,
+        data: { content: 'Already imported' },
+        metadata: { externalSync: { externalId: '20002', connectorName: 'ServiceNow' } },
+        created_at: '2026-09-30T00:00:00.000Z',
+        created_by: { username: 'elastic', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+        version: 'v1',
+      },
+    ],
+  };
+
+  const jiraIncident = {
+    id: '123',
+    key: 'RJ-1',
+    summary: theCase.title,
+    labels: ['phishing', 'soc-l2'],
+    comment: {
+      comments: [
+        { id: '20001', body: 'Looking into it', author: { displayName: 'Jane Smith' } },
+        { id: '20002', body: 'Already imported' },
+        { id: '20003', body: 'Pushed from the case\n\nAdded by elastic.' },
+      ],
+    },
+  };
+
+  const rules = (externalSyncFields: unknown) =>
+    ({
+      saved_objects: [{ id: 'mapping-1', attributes: { externalSyncFields } }],
+      total: 1,
+      page: 1,
+      per_page: 1,
+    } as never);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    casesClient.cases.get.mockResolvedValue(jiraCase);
+    casesClient.userActions.getAll.mockResolvedValue(userActionsResponse([]));
+    authorization.ensureAuthorized.mockResolvedValue(undefined);
+    licensingService.isAtLeastEnterprise.mockResolvedValue(true);
+    connectorMappingsService.find.mockResolvedValue(rules([]));
+    actionsClient.execute.mockResolvedValue({ status: 'ok', data: jiraIncident, actionId: 'sn-1' });
+  });
+
+  it('applies the labels as tags when tags pull', async () => {
+    connectorMappingsService.find.mockResolvedValue(rules([{ field: 'tags', direction: 'pull' }]));
+
+    await sync({ caseId: theCase.id }, clientArgs, casesClient);
+
+    expect(casesClient.cases.bulkUpdate).toHaveBeenCalledWith(
+      {
+        cases: [{ id: theCase.id, version: theCase.version, tags: ['phishing', 'soc-l2'] }],
+      },
+      { origin: 'external_sync' }
+    );
+  });
+
+  it('leaves tags alone by default (push only)', async () => {
+    await sync({ caseId: theCase.id }, clientArgs, casesClient);
+
+    expect(casesClient.cases.bulkUpdate).not.toHaveBeenCalled();
+    expect(casesClient.attachments.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('imports only the external comments that are new and not pushed from Kibana', async () => {
+    connectorMappingsService.find.mockResolvedValue(
+      rules([{ field: 'comments', direction: 'both' }])
+    );
+
+    await sync({ caseId: theCase.id }, clientArgs, casesClient);
+
+    expect(casesClient.attachments.bulkCreate).toHaveBeenCalledWith({
+      caseId: theCase.id,
+      origin: 'external_sync',
+      attachments: [
+        {
+          type: 'comment',
+          owner: theCase.owner,
+          data: { content: 'Looking into it' },
+          metadata: {
+            externalSync: {
+              externalId: '20001',
+              connectorName: 'ServiceNow',
+              actor: { name: 'Jane Smith' },
+            },
+          },
+        },
+      ],
+    });
+    expect(clientArgs.services.userActionService.creator.createUserAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userAction: expect.objectContaining({
+          payload: { sync: expect.objectContaining({ updated_fields: ['comments'] }) },
+        }),
+      })
+    );
+    expect(usageCounter.incrementCounter).toHaveBeenCalledWith(
+      expect.objectContaining({ counterName: SYNC_CASE_APPLIED_COUNTER })
+    );
+    // The case is re-read so the response includes the imported comments.
+    expect(casesClient.cases.get).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('selectCommentsToImport', () => {
+  it('returns nothing when the incident carries no comments', () => {
+    expect(selectCommentsToImport(theCase, undefined)).toEqual([]);
+    expect(selectCommentsToImport(theCase, [])).toEqual([]);
+  });
+
+  it('drops empty bodies and bodies the case cannot store', () => {
+    expect(
+      selectCommentsToImport(theCase, [
+        { externalId: '1', body: '   ' },
+        { externalId: '2', body: 'a'.repeat(MAX_COMMENT_LENGTH + 1) },
+        { externalId: '3', body: 'ok' },
+      ])
+    ).toEqual([{ externalId: '3', body: 'ok' }]);
+  });
+});
+
+describe('isPushedFromKibana', () => {
+  it('recognises the footer push appends to comments', () => {
+    expect(isPushedFromKibana('Hello\n\nAdded by elastic.')).toBe(true);
+    expect(isPushedFromKibana('Hello from Jira')).toBe(false);
   });
 });
 

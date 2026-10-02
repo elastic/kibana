@@ -21,8 +21,8 @@ export const EXTERNAL_SYNC_FIELDS: readonly ExternalSyncField[] = [
   'comments',
 ];
 
-// Status is only read back from the incident and tags/comments are only pushed, so the
-// other directions would be dead settings for those fields.
+// Status is only read back from the incident (pushing it needs the connector's status
+// transitions), so the other directions would be dead settings for it.
 export const EXTERNAL_SYNC_FIELD_DIRECTIONS: Record<
   ExternalSyncField,
   readonly ExternalSyncDirection[]
@@ -30,8 +30,8 @@ export const EXTERNAL_SYNC_FIELD_DIRECTIONS: Record<
   title: ['both', 'push', 'pull', 'off'],
   description: ['both', 'push', 'pull', 'off'],
   status: ['pull', 'off'],
-  tags: ['push', 'off'],
-  comments: ['push', 'off'],
+  tags: ['both', 'push', 'pull', 'off'],
+  comments: ['both', 'push', 'pull', 'off'],
 };
 
 export const DEFAULT_EXTERNAL_SYNC_FIELD_RULES: Record<ExternalSyncField, ExternalSyncFieldRule> = {

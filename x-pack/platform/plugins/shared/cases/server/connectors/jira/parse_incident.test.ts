@@ -39,7 +39,45 @@ describe('jira parseIncident', () => {
       title: undefined,
       description: undefined,
       status: undefined,
+      tags: undefined,
+      comments: undefined,
       updatedAt: undefined,
     });
+  });
+
+  it('maps labels to tags, keeping only strings', () => {
+    expect(parseIncident({ labels: ['phishing', 7, 'soc-l2'] }).tags).toEqual([
+      'phishing',
+      'soc-l2',
+    ]);
+  });
+
+  it('maps the comments with their author and timestamps', () => {
+    expect(
+      parseIncident({
+        comment: {
+          comments: [
+            {
+              id: '20001',
+              body: 'Looking into it',
+              author: { displayName: 'Jane Smith', emailAddress: 'jane@example.com' },
+              created: '2026-10-01T10:00:00.000+0000',
+              updated: '2026-10-01T10:05:00.000+0000',
+            },
+            { id: '20002', body: 'No author' },
+            { id: 3, body: 'bad id is dropped' },
+          ],
+        },
+      }).comments
+    ).toEqual([
+      {
+        externalId: '20001',
+        body: 'Looking into it',
+        author: { name: 'Jane Smith', email: 'jane@example.com' },
+        createdAt: '2026-10-01T10:00:00.000+0000',
+        updatedAt: '2026-10-01T10:05:00.000+0000',
+      },
+      { externalId: '20002', body: 'No author' },
+    ]);
   });
 });

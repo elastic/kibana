@@ -97,6 +97,19 @@ describe('registerAutoPushListener', () => {
     expect(casesClient.cases.push).not.toHaveBeenCalled();
   });
 
+  it('does not push comments that were imported from the external incident', async () => {
+    eventBus.emitAttachmentsAdded(request, {
+      caseId: theCase.id,
+      owner: 'securitySolution',
+      attachmentIds: ['c-1'],
+      attachmentType: 'comment',
+      origin: 'external_sync',
+    });
+    await flush();
+
+    expect(casesClient.cases.push).not.toHaveBeenCalled();
+  });
+
   it('does not push when auto-push is off', async () => {
     casesClient.cases.get.mockResolvedValue({
       ...theCase,

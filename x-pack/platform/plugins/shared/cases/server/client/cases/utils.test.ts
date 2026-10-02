@@ -825,6 +825,38 @@ describe('utils', () => {
   });
 
   describe('formatComments', () => {
+    it('does not push comments that were imported from the external incident', () => {
+      const importedComment = {
+        id: 'comment-user-1',
+        type: 'comment',
+        owner: SECURITY_SOLUTION_OWNER,
+        data: { content: 'From Jira' },
+        metadata: { externalSync: { externalId: '20001', connectorName: 'Jira' } },
+        created_at: '2019-11-25T21:55:00.177Z',
+        created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+        version: 'WzEsMV0=',
+      };
+      const theCase = {
+        ...flattenCaseSavedObject({ savedObject: mockCases[0] }),
+        comments: [importedComment as unknown as (typeof allComments)[number]],
+        totalComments: 1,
+      };
+
+      expect(
+        formatComments({
+          userActions,
+          theCase,
+          latestPushInfo: getLatestPushInfo('not-exists', userActions),
+          userProfiles: userProfilesMap,
+          spaceId: 'default',
+        })
+      ).toEqual([]);
+    });
+
     it('formats comments correctly', () => {
       const theCase = {
         ...flattenCaseSavedObject({

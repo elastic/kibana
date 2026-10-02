@@ -436,10 +436,18 @@ describe('validators', () => {
       expect(() =>
         validateExternalSyncFieldsInRequest([
           { field: 'status', direction: 'push' },
-          { field: 'comments', direction: 'both' },
+          { field: 'status', direction: 'both' },
         ])
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid externalSyncFields: \\"status\\" cannot sync with direction \\"push\\" (allowed: pull, off); \\"comments\\" cannot sync with direction \\"both\\" (allowed: push, off)"`
+        `"Invalid value \\"status\\" supplied to \\"externalSyncFields\\": a field may appear only once"`
+      );
+    });
+
+    it('reports every unsupported direction', () => {
+      expect(() =>
+        validateExternalSyncFieldsInRequest([{ field: 'status', direction: 'both' }])
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid externalSyncFields: \\"status\\" cannot sync with direction \\"both\\" (allowed: pull, off)"`
       );
     });
   });

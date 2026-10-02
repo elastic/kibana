@@ -73,8 +73,8 @@ describe('FieldSyncTable', () => {
       .map((option) => option.getAttribute('value'));
 
     expect(statusOptions).toEqual(['pull', 'off']);
-    expect(commentsOptions).toEqual(['push', 'off']);
-    expect(screen.queryByTestId('external-sync-conflict-tags')).not.toBeInTheDocument();
+    expect(commentsOptions).toEqual(['both', 'push', 'pull', 'off']);
+    expect(screen.getByTestId('external-sync-conflict-tags')).toBeInTheDocument();
     expect(screen.queryByTestId('external-sync-conflict-comments')).not.toBeInTheDocument();
   });
 

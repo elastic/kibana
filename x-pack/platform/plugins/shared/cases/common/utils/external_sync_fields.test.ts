@@ -46,6 +46,15 @@ describe('external_sync_fields', () => {
         resolveExternalSyncFieldRules([{ field: 'status', direction: 'push' }]).status
       ).toEqual({ direction: 'pull' });
     });
+
+    it('lets tags and comments pull as well as push', () => {
+      const resolved = resolveExternalSyncFieldRules([
+        { field: 'tags', direction: 'both' },
+        { field: 'comments', direction: 'pull' },
+      ]);
+      expect(resolved.tags).toEqual({ direction: 'both' });
+      expect(resolved.comments).toEqual({ direction: 'pull' });
+    });
   });
 
   it('classifies directions', () => {
