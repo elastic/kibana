@@ -24,7 +24,7 @@ import type {
   RenderStatus,
   RenderLinkedInvestigations,
   RenderOverview,
-  RenderRunningState,
+  RenderLiveState,
 } from './types';
 
 /**
@@ -77,14 +77,14 @@ export const OverviewSlot = ({
 export interface HeaderSlotProps extends InvestigationSlotProps {
   renderAssignees?: RenderAssignees;
   renderStatus?: RenderStatus;
-  renderRunningState?: RenderRunningState;
+  renderLiveState?: RenderLiveState;
 }
 
 export const HeaderSlot = ({
   conversation,
   renderAssignees,
   renderStatus,
-  renderRunningState,
+  renderLiveState,
   refetchConversation,
 }: HeaderSlotProps) => {
   const investigation = conversationToInvestigation(conversation);
@@ -110,7 +110,10 @@ export const HeaderSlot = ({
       investigation={investigation}
       assigneesNode={assigneesNode}
       statusNode={statusNode}
-      runningNode={renderRunningState?.({ conversationId: conversation.id })}
+      liveStateNode={renderLiveState?.({
+        conversationId: conversation.id,
+        severity: investigation.severity,
+      })}
     />
   );
 };

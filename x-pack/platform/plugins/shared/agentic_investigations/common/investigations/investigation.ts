@@ -172,7 +172,7 @@ export interface InvestigationSummary {
   subjects: InvestigationSubjectResponse[];
   impact?: InvestigationImpactResponse;
   /**
-   * Proposed actions waiting for a decision. Absent when the proposals plugin is unavailable or
+   * Proposed actions waiting for a decision (pending and not past their deadline). Absent when the proposals plugin is unavailable or
    * the caller may not read proposals.
    */
   pending_proposal_count?: number;

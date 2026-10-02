@@ -92,8 +92,8 @@ export {
   type LinkedInvestigationsSlotRenderProps,
   type RenderOverview,
   type OverviewSlotRenderProps,
-  type RenderRunningState,
-  type RunningStateSlotRenderProps,
+  type RenderLiveState,
+  type LiveStateSlotRenderProps,
 } from './src/template_ui/types';
 export {
   LinkedInvestigationsList,

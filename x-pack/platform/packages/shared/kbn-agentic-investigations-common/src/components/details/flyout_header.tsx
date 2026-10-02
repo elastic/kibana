@@ -21,10 +21,11 @@ import type { Investigation } from '../../types';
 import { ConversationHeaderBlocks } from './header_blocks';
 import { SEVERITY_LABELS } from './overview_translations';
 
+// Same colors as the investigation card's severity dot (agenticInvestigations).
 const SEVERITY_COLORS: Readonly<Record<string, EuiBadgeProps['color']>> = {
-  low: 'hollow',
-  medium: 'warning',
-  high: 'danger',
+  low: 'success',
+  medium: 'primary',
+  high: 'warning',
   critical: 'danger',
 };
 
@@ -37,8 +38,11 @@ export interface ConversationDetailsFlyoutHeaderProps {
    * Falls back to a read-only badge when absent.
    */
   statusNode?: React.ReactNode;
-  /** Optional pre-rendered running state (for example "Investigating…") from the consuming plugin. */
-  runningNode?: React.ReactNode;
+  /**
+   * Optional pre-rendered live state (severity and "Investigating…") from the consuming plugin.
+   * When present, it replaces the severity badge read from the conversation.
+   */
+  liveStateNode?: React.ReactNode;
 }
 
 /**
@@ -49,7 +53,7 @@ export const ConversationDetailsFlyoutHeader = ({
   investigation,
   assigneesNode,
   statusNode,
-  runningNode,
+  liveStateNode,
 }: ConversationDetailsFlyoutHeaderProps) => {
   const { title, createdAt, severity } = investigation;
 
@@ -65,7 +69,8 @@ export const ConversationDetailsFlyoutHeader = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-            {severity && (
+            {/* A live state node renders the severity itself, from fresher data. */}
+            {severity && liveStateNode === undefined && (
               <EuiFlexItem grow={false}>
                 <EuiBadge
                   color={SEVERITY_COLORS[severity] ?? 'hollow'}
@@ -87,7 +92,7 @@ export const ConversationDetailsFlyoutHeader = ({
                 />
               </EuiText>
             </EuiFlexItem>
-            {runningNode && <EuiFlexItem grow={false}>{runningNode}</EuiFlexItem>}
+            {liveStateNode && <EuiFlexItem grow={false}>{liveStateNode}</EuiFlexItem>}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

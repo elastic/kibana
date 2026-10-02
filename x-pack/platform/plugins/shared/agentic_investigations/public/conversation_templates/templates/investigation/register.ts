@@ -13,7 +13,7 @@ import {
   type CloseInvestigationModalRenderProps,
   type EscalationModalRenderProps,
   type OverviewSlotRenderProps,
-  type RunningStateSlotRenderProps,
+  type LiveStateSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
@@ -24,6 +24,11 @@ import type { TemplateDefinition } from '../../registry/types';
 const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
   'xpack.agenticInvestigations.conversationTemplate.investigation.name',
   { defaultMessage: 'Investigation' }
+);
+
+const OVERVIEW_LOADING_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.detailsFlyout.overview.loading',
+  { defaultMessage: 'Loading investigation…' }
 );
 
 /**
@@ -114,12 +119,12 @@ export const investigationTemplate: TemplateDefinition = {
       }
     );
 
-    const LazyInvestigationRunningState = makeLazyWithSharedClient<RunningStateSlotRenderProps>(
+    const LazyInvestigationLiveState = makeLazyWithSharedClient<LiveStateSlotRenderProps>(
       async () => {
-        const { InvestigationRunningState } = await import(
-          '../../../investigations/components/investigation_running_state'
+        const { InvestigationLiveState } = await import(
+          '../../../investigations/components/investigation_live_state'
         );
-        return InvestigationRunningState;
+        return InvestigationLiveState;
       }
     );
 
@@ -180,15 +185,15 @@ export const investigationTemplate: TemplateDefinition = {
       renderCloseInvestigationModal,
       renderOverview: (props) =>
         React.createElement(
-          ProposedActionsBoundary,
-          null,
+          EscalationModalBoundary,
+          { loadingLabel: OVERVIEW_LOADING_LABEL },
           React.createElement(LazyInvestigationOverview, props)
         ),
-      renderRunningState: (props) =>
+      renderLiveState: (props) =>
         React.createElement(
           React.Suspense,
           { fallback: null },
-          React.createElement(LazyInvestigationRunningState, props)
+          React.createElement(LazyInvestigationLiveState, props)
         ),
       briefCard: InvestigationBriefCardWithFallback,
       // Without escalations the footer has no "Open escalation" button.
