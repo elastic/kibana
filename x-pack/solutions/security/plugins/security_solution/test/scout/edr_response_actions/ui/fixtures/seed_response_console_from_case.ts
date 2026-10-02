@@ -17,7 +17,6 @@ import {
   METADATA_DATASTREAM,
   POLICY_RESPONSE_INDEX,
 } from '../../../../../common/endpoint/constants';
-import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import {
   deleteIndexedHostsAndAlerts,
   indexHostsAndAlerts,
@@ -34,8 +33,6 @@ import {
 } from '../../../../../scripts/endpoint/common/constants';
 import { createSystemIndicesEsClient } from './system_indices_es_client';
 import { scopeKbnClientToSpace } from './scope_kbn_client_to_space';
-
-const ALERT_INDEX = `${DEFAULT_ALERTS_INDEX}-default`;
 
 export interface SeededResponseConsoleCase {
   readonly caseId: string;
@@ -88,6 +85,10 @@ export const seedResponseConsoleFromCase = async ({
   let host: IndexedHostsAndAlertsResponse | undefined;
   let alerts: IndexedEndpointRuleAlerts | undefined;
   let caseId: string | undefined;
+  // Worker-space data views do not include `.alerts-security.alerts-default`.
+  // `endgame-*` is in the security default index pattern, so the flyout can load this alert.
+  const alertIndex = `endgame-scout-response-console-${spaceId.toLowerCase()}`;
+  let alertIndexCreated = false;
   let cleanupStarted = false;
 
   const cleanup = async (): Promise<void> => {
@@ -111,6 +112,11 @@ export const seedResponseConsoleFromCase = async ({
     }
     if (host) {
       deletions.push(deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, host));
+    }
+    if (alertIndexCreated) {
+      deletions.push(
+        systemEsClient.indices.delete({ index: alertIndex, ignore_unavailable: true })
+      );
     }
 
     const results = await Promise.allSettled(deletions);
@@ -162,14 +168,29 @@ export const seedResponseConsoleFromCase = async ({
       throw new Error('Indexed endpoint host is missing an agent id');
     }
 
+    await systemEsClient.indices.create({
+      index: alertIndex,
+      settings: {
+        mapping: {
+          total_fields: {
+            limit: 10000,
+          },
+        },
+      },
+    });
+    alertIndexCreated = true;
+
     alerts = await indexEndpointRuleAlerts({
       esClient: systemEsClient,
       kbnClient,
       endpointAgentId: agentId,
       count: 1,
+      index: alertIndex,
     });
-    const alertId = alerts.alerts[0]?._id;
-    if (!alertId) {
+    const indexedAlert = alerts.alerts[0];
+    const alertId = indexedAlert?._id;
+    const indexedAlertIndex = indexedAlert?._index;
+    if (!alertId || !indexedAlertIndex) {
       throw new Error('Failed to index an endpoint rule alert');
     }
 
@@ -193,7 +214,7 @@ export const seedResponseConsoleFromCase = async ({
       {
         type: 'alert',
         alertId,
-        index: ALERT_INDEX,
+        index: indexedAlertIndex,
         rule: { id: null, name: 'Endpoint Security' },
         owner: 'securitySolution',
       },
