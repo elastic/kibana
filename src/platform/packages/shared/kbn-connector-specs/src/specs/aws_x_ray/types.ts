@@ -15,6 +15,8 @@ const INSIGHT_ID_PATTERN =
 // X-Ray trace IDs look like "1-58fb9b6b-b19c04eaa851f22a02e4b4ac"; bound the
 // character set since the value flows directly into a JSON request body.
 const TRACE_ID_PATTERN = /^[0-9a-zA-Z-]{1,35}$/;
+const INSIGHT_ID_LENGTH = 36;
+const TRACE_ID_MAX_LENGTH = 35;
 
 const startTimeField = z
   .number()
@@ -44,7 +46,10 @@ const groupNameField = z
   .describe(
     'Name of the X-Ray group to scope the query to (case-sensitive). Use getGroups to look up a group name. Provide either groupArn or groupName, not both.'
   );
-const traceIdField = z.string().regex(TRACE_ID_PATTERN, 'Must be a valid X-Ray trace ID.');
+const traceIdField = z
+  .string()
+  .max(TRACE_ID_MAX_LENGTH)
+  .regex(TRACE_ID_PATTERN, 'Must be a valid X-Ray trace ID.');
 
 export const GetInsightSummariesInputSchema = lazySchema(() =>
   z
@@ -83,6 +88,7 @@ export const GetInsightInputSchema = lazySchema(() =>
   z.object({
     insightId: z
       .string()
+      .max(INSIGHT_ID_LENGTH)
       .regex(INSIGHT_ID_PATTERN, 'Must be a valid insight ID (UUID format).')
       .describe(
         'The insight\u2019s unique identifier, returned by getInsightSummaries. Example: "sample-insight-1"-style UUID.'
@@ -153,6 +159,7 @@ export const GetInsightImpactGraphInputSchema = lazySchema(() =>
   z.object({
     insightId: z
       .string()
+      .max(INSIGHT_ID_LENGTH)
       .regex(INSIGHT_ID_PATTERN, 'Must be a valid insight ID (UUID format).')
       .describe('The insight\u2019s unique identifier, returned by getInsightSummaries.'),
     startTime: startTimeField.describe(
@@ -170,6 +177,7 @@ export const GetInsightEventsInputSchema = lazySchema(() =>
   z.object({
     insightId: z
       .string()
+      .max(INSIGHT_ID_LENGTH)
       .regex(INSIGHT_ID_PATTERN, 'Must be a valid insight ID (UUID format).')
       .describe('The insight\u2019s unique identifier, returned by getInsightSummaries.'),
     maxResults: z

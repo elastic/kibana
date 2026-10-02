@@ -91,7 +91,7 @@ describe('getSettingsReviewItems', () => {
 
     expect(valueOf('format')).toBe('CSV');
     expect(valueOf('schema_resolution')).toBe('Union by name');
-    expect(valueOf('header_row')).toBe('No');
+    expect(valueOf('header_row')).toBe('False');
     expect(valueOf('trim_spaces')).toBe('True');
     expect(valueOf('delimiter')).toBe('Semicolon (;)');
     expect(valueOf('file_exclusions')).toBe('**/skip/*');

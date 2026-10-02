@@ -10,16 +10,33 @@ import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eu
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import type { DatasetBooleanFormValue } from '../../../create_dataset_form_state';
+import { DescribedOptionDisplay } from '../../../components/described_option_display';
 
-type HeaderRowOption = EuiComboBoxOptionOption<string> & { value: DatasetBooleanFormValue };
+type HeaderRowOption = EuiComboBoxOptionOption<string> & {
+  value: DatasetBooleanFormValue;
+  description: string;
+  'data-test-subj': string;
+};
+
+const renderHeaderRowOption = (option: EuiComboBoxOptionOption<string>) => {
+  const opt = option as HeaderRowOption;
+  return <DescribedOptionDisplay title={opt.label} description={opt.description} />;
+};
 
 const OPTIONS: HeaderRowOption[] = [
   {
     value: 'true',
-    label: createDatasetWizardStrings.settingsHeaderRowTrue,
+    label: createDatasetWizardStrings.trueLabel,
+    description: createDatasetWizardStrings.settingsHeaderRowTrueDescription,
+    'data-test-subj': 'createDatasetSettingsHeaderRowOption-true',
     append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
   },
-  { value: 'false', label: createDatasetWizardStrings.settingsHeaderRowFalse },
+  {
+    value: 'false',
+    label: createDatasetWizardStrings.falseLabel,
+    description: createDatasetWizardStrings.settingsHeaderRowFalseDescription,
+    'data-test-subj': 'createDatasetSettingsHeaderRowOption-false',
+  },
 ];
 
 export const getHeaderRowDisplayLabel = (value: boolean): string =>
@@ -35,16 +52,8 @@ export function HeaderRow({
   onBlur: () => void;
 }) {
   const selectedOptions = useMemo(() => {
-    if (!value) return [];
     const option = OPTIONS.find((o) => o.value === value);
-    return option
-      ? ([
-          {
-            value: option.value,
-            label: option.label,
-          },
-        ] as HeaderRowOption[])
-      : ([{ value, label: value } as HeaderRowOption] as HeaderRowOption[]);
+    return option ? [{ value: option.value, label: option.label }] : [];
   }, [value]);
 
   return (
@@ -56,6 +65,8 @@ export function HeaderRow({
       aria-label={createDatasetWizardStrings.settingsHeaderRowLabel}
       singleSelection={{ asPlainText: true }}
       isClearable
+      rowHeight="auto"
+      renderOption={renderHeaderRowOption}
       selectedOptions={selectedOptions}
       onChange={(nextSelectedOptions) => {
         const next = nextSelectedOptions?.[0] as HeaderRowOption | undefined;
