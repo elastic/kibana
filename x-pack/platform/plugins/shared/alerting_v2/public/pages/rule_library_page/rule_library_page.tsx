@@ -8,8 +8,10 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
+import { ALERTING_V2_RULE_LIBRARY_APP_ID } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
 import { experimentalBadge } from '../../components/experimental_badge';
+import { EsqlRulesOnlyCallout, esqlRulesOnlyBadge } from '../../components/esql_rules_only_notice';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
@@ -18,6 +20,13 @@ import { RuleLibraryList } from './rule_library_list';
 const RULE_LIBRARY_PAGE_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.pageTitle', {
   defaultMessage: 'Rule library',
 });
+
+const ESQL_RULES_ONLY_CALLOUT_BODY = i18n.translate(
+  'xpack.alertingV2.ruleLibrary.esqlRulesOnlyCalloutBody',
+  {
+    defaultMessage: 'Browse templates for ES|QL rules and create new rules from them.',
+  }
+);
 
 export const RuleLibraryPage = () => {
   useBreadcrumbs('rule_library_list');
@@ -29,10 +38,14 @@ export const RuleLibraryPage = () => {
       <AppHeader
         sticky={false}
         title={RULE_LIBRARY_PAGE_TITLE}
-        badges={[experimentalBadge]}
+        badges={[esqlRulesOnlyBadge, experimentalBadge]}
         spacing="bleed"
       />
       <EuiSpacer size="m" />
+      <EsqlRulesOnlyCallout
+        appId={ALERTING_V2_RULE_LIBRARY_APP_ID}
+        description={ESQL_RULES_ONLY_CALLOUT_BODY}
+      />
       <RuleLibraryList />
       {flyout}
     </div>

@@ -89,7 +89,7 @@ export class ObservabilityAlertingPlugin
         {
           id: OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
           title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV1Title', {
-            defaultMessage: 'Rules (v1)',
+            defaultMessage: 'Standard rules',
           }),
           path: OBSERVABILITY_ALERTING_RULES_V1_PATH,
           visibleIn: [],
@@ -98,7 +98,7 @@ export class ObservabilityAlertingPlugin
         {
           id: OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
           title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV2Title', {
-            defaultMessage: 'Rules',
+            defaultMessage: 'ES|QL rules',
           }),
           path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
           visibleIn: [],

@@ -43,6 +43,7 @@ import { AlertEpisodeMetadataSection } from './metadata_section';
 import { DOC_VIEWER_FLEX_HEIGHT_SENTINEL } from './metadata_layout';
 import { EpisodeFooterActionMenu } from './footer_action_menu';
 import { EMPTY_VALUE } from '../../constants';
+import { useEpisodeSource } from '../../source_labels';
 import { formatDateTime } from '../../utils/format_date_time';
 import { formatMetadataListDuration } from './translations';
 import type { EpisodeAction } from '../../actions/types';
@@ -158,6 +159,7 @@ const SnoozedBadgeLabel = ({
 export interface AlertEpisodeDetailsFlyoutProps {
   episodeId: string;
   groupHash: string | undefined;
+  sourceId?: string;
   onClose: () => void;
   services: AlertEpisodeDetailsServices;
   actions?: EpisodeAction[];
@@ -168,6 +170,7 @@ export interface AlertEpisodeDetailsFlyoutProps {
 export const AlertEpisodeDetailsFlyout = ({
   episodeId,
   groupHash,
+  sourceId,
   onClose,
   services,
   actions,
@@ -188,6 +191,7 @@ export const AlertEpisodeDetailsFlyout = ({
     groupAction,
     isFlapping,
   } = useEpisodeDetailsHeaderData({ episodeId, groupHash, services });
+  const { label: sourceLabel } = useEpisodeSource(sourceId);
 
   const showRuleDependentTabs = isRuleLoaded(ruleState);
   const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
@@ -304,6 +308,12 @@ export const AlertEpisodeDetailsFlyout = ({
         onTabChange={handleTabChange}
       >
         <FlyoutTemplate.Header title={titleNode} description={descriptionNode}>
+          <FlyoutTemplate.Header.Badge
+            color="hollow"
+            data-test-subj="alertingV2EpisodeFlyoutSourceBadge"
+          >
+            {sourceLabel}
+          </FlyoutTemplate.Header.Badge>
           {/* Status badge */}
           {status && (
             <FlyoutTemplate.Header.Badge color={EPISODE_STATUS_BADGE_COLORS[status]}>

@@ -65,7 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Cases\nAll\nRead\nNone',
         'Machine Learning\nAll\nRead\nNone',
         'SLOs\nAll\nRead\nNone',
-        'Observability Alerts\nAll\nRead\nNone',
+        'Kibana standard alerting\nAll\nRead\nNone',
         'Workflows\nAll\nRead\nNone',
         'Observability AI Assistant\nAll\nNone',
         'Nightshift\nAll\nRead\nNone',

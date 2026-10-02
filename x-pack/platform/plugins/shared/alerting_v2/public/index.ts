@@ -192,7 +192,9 @@ const pluginModule = new ContainerModule(({ bind }) => {
     share.url.locators.create(AlertingV2ExecutionHistoryLocatorDefinition);
     const alertingSection = management.sections.register({
       id: ALERTING_V2_SECTION_ID,
-      title: 'Alerting V2 Preview',
+      title: i18n.translate('xpack.alertingV2.management.sectionTitle', {
+        defaultMessage: 'Kibana ES|QL alerting',
+      }),
       tip: 'Start exploring our latest alerts experience',
       order: 1,
     });

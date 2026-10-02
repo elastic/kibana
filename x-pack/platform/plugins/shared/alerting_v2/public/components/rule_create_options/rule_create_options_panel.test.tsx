@@ -56,7 +56,7 @@ describe('RuleCreateOptionsPanel', () => {
     renderPanel();
 
     expect(
-      screen.getByRole('heading', { level: 2, name: /no rules yet\. let's get started!/i })
+      screen.getByRole('heading', { level: 2, name: /no es\|ql rules yet\. let's get started!/i })
     ).toBeInTheDocument();
   });
 

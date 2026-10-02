@@ -48,11 +48,11 @@ const TITLE_CASE_GLOSSARY = [
   'TLS certificates',
   'Cloud Connect',
   'SIEM Readiness',
-  'V2 Alerting Preview',
   'Ingest Hub',
   'Elastic Inference',
   'ES|QL Data Federation',
   'ES|QL Views',
+  'Kibana ES|QL alerting',
   'AlertZero',
 ] as const;
 

@@ -53,6 +53,13 @@ export const EPISODES_LIST_COLUMN_ASSIGNEES = i18n.translate(
   }
 );
 
+export const EPISODES_LIST_COLUMN_SOURCE = i18n.translate(
+  'xpack.alertingV2.episodes.columns.source',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
 export const EPISODES_LIST_ITEM_COUNT = (count: number) =>
   i18n.translate('xpack.alertingV2.episodes.itemCount', {
     defaultMessage: 'Showing {count, plural, one {# episode} other {# episodes}}',
@@ -228,7 +235,7 @@ export const EPISODES_KPIS_ERROR = i18n.translate('xpack.alertingV2.episodes.kpi
 export const CLASSIC_ALERT_DETAILS_TITLE = i18n.translate(
   'xpack.alertingV2.episodes.classicAlertDetails.title',
   {
-    defaultMessage: 'Classic alert',
+    defaultMessage: 'Standard rule alert',
   }
 );
 

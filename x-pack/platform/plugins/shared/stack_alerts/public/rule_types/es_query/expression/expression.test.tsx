@@ -20,6 +20,7 @@ import { SearchType } from '../types';
 import { EsQueryRuleTypeExpression } from './expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Subject } from 'rxjs';
+import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
@@ -154,6 +155,12 @@ const dataViewsMock = {
 };
 const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();
+const applicationMock = {
+  capabilities: { alerting_v2_rules: { read: true } },
+  navigateToUrl: jest.fn(),
+};
+const mockIsAlertingV2Enabled = jest.fn(() => true);
+const settingsMock = { globalClient: { get: mockIsAlertingV2Enabled } };
 
 (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
   Promise.resolve(searchSourceMock)
@@ -226,11 +233,13 @@ const setup = (
     | EsQueryRuleParams<SearchType.searchSource>
     | EsQueryRuleParams<SearchType.esQuery>
     | EsQueryRuleParams<SearchType.esqlQuery>,
-  metadata?: EsQueryRuleMetaData
+  metadata?: EsQueryRuleMetaData,
+  tabs?: Array<{ id: string; href: string }>
 ) => {
   return renderWithI18n(
     <KibanaContextProvider
       services={{
+        tabs,
         data: dataMock,
         dataViews: dataViewsMock,
         uiSettings: uiSettingsMock,
@@ -239,6 +248,8 @@ const setup = (
         unifiedSearch: unifiedSearchMock,
         dataViewEditor: dataViewEditorMock,
         notifications: notificationsMock,
+        application: applicationMock,
+        settings: settingsMock,
       }}
     >
       <Wrapper ruleParams={ruleParams} metadata={metadata} />
@@ -251,11 +262,13 @@ describe('EsQueryRuleTypeExpression', () => {
     jest.clearAllMocks();
 
     uiSettingsMock.get.mockReturnValue(true);
+    mockIsAlertingV2Enabled.mockReturnValue(true);
   });
 
   test('should render options by default', () => {
     setup({} as EsQueryRuleParams<SearchType.esQuery>);
     expect(screen.getByTestId('queryFormTypeChooserTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
     expect(screen.getByTestId('queryFormType_searchSource')).toBeInTheDocument();
     expect(screen.getByTestId('queryFormType_esQuery')).toBeInTheDocument();
     expect(screen.getByTestId('queryFormType_esqlQuery')).toBeInTheDocument();
@@ -281,6 +294,11 @@ describe('EsQueryRuleTypeExpression', () => {
     });
     expect(screen.getByTestId('queryJsonEditor')).toBeInTheDocument();
     expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
+    expect(screen.getAllByTestId('esQueryEsqlRulesBannerLink')[0]).toHaveAttribute(
+      'href',
+      '/app/management/alertingV2/rules'
+    );
 
     await userEvent.click(screen.getByTestId('queryFormTypeChooserCancel'));
 
@@ -298,6 +316,7 @@ describe('EsQueryRuleTypeExpression', () => {
       expect(screen.queryByTestId('queryFormTypeChooserTitle')).not.toBeInTheDocument();
     });
     expect(screen.getByTestId('selectDataViewExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('queryFormTypeChooserCancel'));
 
@@ -315,6 +334,7 @@ describe('EsQueryRuleTypeExpression', () => {
       expect(screen.queryByTestId('queryFormTypeChooserTitle')).not.toBeInTheDocument();
     });
     expect(screen.getByTestId('queryEsqlEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('queryFormTypeChooserCancel'));
 
@@ -332,6 +352,40 @@ describe('EsQueryRuleTypeExpression', () => {
     });
     expect(screen.queryByTestId('queryFormTypeChooserCancel')).not.toBeInTheDocument();
     expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
+  });
+
+  test('should not render the ES|QL rules banner when editing a rule', async () => {
+    setup(defaultEsQueryRuleParams, { adHocDataViewList: [], isEdit: true });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('esQueryEsqlRulesBanner')).not.toBeInTheDocument();
+  });
+
+  test('should link the ES|QL rules banner to the host-provided ES|QL rules tab', async () => {
+    setup(defaultEsQueryRuleParams, { adHocDataViewList: [] }, [
+      { id: ALERTING_V2_RULES_TAB_ID, href: '/obs/rules/v2' },
+    ]);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('esQueryEsqlRulesBanner')).toBeInTheDocument();
+    });
+    expect(screen.getAllByTestId('esQueryEsqlRulesBannerLink')[0]).toHaveAttribute(
+      'href',
+      '/obs/rules/v2'
+    );
+  });
+
+  test('should not render the ES|QL rules banner when the user cannot access ES|QL rules', async () => {
+    mockIsAlertingV2Enabled.mockReturnValue(false);
+    setup(defaultEsQueryRuleParams, { adHocDataViewList: [] });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('esQueryEsqlRulesBanner')).not.toBeInTheDocument();
   });
 
   test('should render KQL and Lucene view without the form type chooser', async () => {

@@ -13,6 +13,7 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { useContentListPhase } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { canAccessTriggersActionsRules, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import { useHostTabs } from '../../application/tabs_context';
 import { experimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
@@ -142,35 +143,35 @@ export const RulesListHeader = ({
   );
 
   const defaultTabs = useMemo<AppHeaderTab[]>(() => {
-    const headerTabs: AppHeaderTab[] = [
-      {
-        id: 'v2Rules',
-        label: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabTitle', {
-          defaultMessage: 'V2 rules',
-        }),
-        isSelected: true,
-        href: basePath.prepend(paths.ruleList),
-        badge: {
-          iconType: 'dot',
-          tooltip: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabNewBadgeTooltip', {
-            defaultMessage: 'New',
-          }),
-        },
-        'data-test-subj': 'v2RulesTab',
-      },
-    ];
+    const headerTabs: AppHeaderTab[] = [];
 
     if (canAccessTriggersActionsRules(application.capabilities)) {
       headerTabs.push({
         id: 'v1Rules',
         label: i18n.translate('xpack.alertingV2.rulesList.v1RulesTabTitle', {
-          defaultMessage: 'V1 rules',
+          defaultMessage: 'Standard rules',
         }),
         isSelected: false,
         href: basePath.prepend(triggersActionsRoute),
         'data-test-subj': 'v1RulesTab',
       });
     }
+
+    headerTabs.push({
+      id: ALERTING_V2_RULES_TAB_ID,
+      label: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabTitle', {
+        defaultMessage: 'ES|QL rules',
+      }),
+      isSelected: true,
+      href: basePath.prepend(paths.ruleList),
+      badge: {
+        iconType: 'dot',
+        tooltip: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabNewBadgeTooltip', {
+          defaultMessage: 'New',
+        }),
+      },
+      'data-test-subj': 'v2RulesTab',
+    });
 
     // A one-item tablist is not a tablist — omit tabs unless both surfaces are shown.
     return headerTabs.length > 1 ? headerTabs : [];
