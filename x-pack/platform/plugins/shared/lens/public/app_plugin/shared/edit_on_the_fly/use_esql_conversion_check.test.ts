@@ -126,7 +126,7 @@ describe('useEsqlConversionCheck', () => {
     esAggsIdMap: {},
     partialRows: false,
   };
-  const esqlFormulaFailure = { success: false, reasons: ['formula_not_supported'] };
+  const esqlFormulaFailure = { success: false, reason: 'formula_not_supported' };
 
   const makeFormBasedLayer = () => ({
     indexPatternId: 'dv1',

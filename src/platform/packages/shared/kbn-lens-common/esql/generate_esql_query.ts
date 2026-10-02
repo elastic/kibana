@@ -27,7 +27,7 @@ import { resolveTimeShift } from './time_shift';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { buildOuterTopNFilter } from './build_outer_top_n_filter';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
-import { getTermsConversionFailures } from './get_terms_conversion_failure';
+import { getTermsConversionFailure } from './get_terms_conversion_failure';
 import { getToEsqlFn, getEsqlOperationMeta } from './operations/registry';
 import {
   AUTO_INTERVAL,
@@ -68,8 +68,7 @@ interface EsqlQuerySuccess {
 
 interface EsqlQueryFailure {
   success: false;
-  /** One or more conversion blockers, in check order. */
-  reasons: EsqlConversionFailureReason[];
+  reason: EsqlConversionFailureReason;
   operationType?: string;
 }
 
@@ -91,14 +90,10 @@ export const isEsqlQueryFailure = (result: unknown): result is EsqlQueryFailure 
  * Helper function to create a consistent failure result for ES|QL query generation.
  */
 function getEsqlQueryFailedResult(
-  reasons: EsqlConversionFailureReason | EsqlConversionFailureReason[],
+  reason: EsqlConversionFailureReason,
   operationType?: string
 ): EsqlQueryFailure {
-  return {
-    success: false,
-    reasons: Array.isArray(reasons) ? reasons : [reasons],
-    ...(operationType !== undefined ? { operationType } : {}),
-  };
+  return operationType ? { success: false, reason, operationType } : { success: false, reason };
 }
 
 /**
@@ -397,7 +392,7 @@ export function generateEsqlQuery(
     const metricError = metricsResult.find(isEsqlQueryFailure);
     if (isEsqlQueryFailure(metricError)) {
       return getEsqlQueryFailedResult(
-        metricError.reasons,
+        metricError.reason,
         'operationType' in metricError ? metricError.operationType : undefined
       );
     }
@@ -412,15 +407,13 @@ export function generateEsqlQuery(
     hasDateHistogram,
     termsBucketCount: termsBuckets.length,
   };
-  // Collect every Top values blocker before other bucket failures so the tooltip
-  // can list them together; metric failures above still take precedence.
-  const termsFailureReasons = [
-    ...new Set(
-      termsBuckets.flatMap(({ col }) => getTermsConversionFailures(col, termsConversionContext))
-    ),
-  ];
-  if (termsFailureReasons.length > 0) {
-    return getEsqlQueryFailedResult(termsFailureReasons);
+  // Prefer Top values blockers before other bucket failures; metric failures
+  // above still take precedence. One reason per terms column; take the first.
+  const termsFailureReason = termsBuckets
+    .map(({ col }) => getTermsConversionFailure(col, termsConversionContext))
+    .find((reason): reason is EsqlConversionFailureReason => reason !== undefined);
+  if (termsFailureReason) {
+    return getEsqlQueryFailedResult(termsFailureReason);
   }
 
   const resolvedBucketExprs = new Map<number, string>();
@@ -550,7 +543,7 @@ export function generateEsqlQuery(
     const bucketError = bucketsResult.find(isEsqlQueryFailure);
     if (isEsqlQueryFailure(bucketError)) {
       return getEsqlQueryFailedResult(
-        bucketError.reasons,
+        bucketError.reason,
         'operationType' in bucketError ? bucketError.operationType : undefined
       );
     }

@@ -23,8 +23,8 @@ export interface TermsConversionContext {
 }
 
 /**
- * Returns every conversion failure reason for a terms dimension, in priority order
- * (first entry is what the Convert tooltip shows when only one reason is displayed):
+ * Returns the highest-priority conversion failure reason for a terms dimension,
+ * or `undefined` when the column is eligible. Check order:
  * 1. Other bucket (default-on; also covers missing values — the UI only enables
  *    "Include documents without the selected field" when Other is on, and
  *    toEsAggsFn forces missingBucket = otherBucket && missingBucket)
@@ -37,11 +37,14 @@ export interface TermsConversionContext {
  *
  * Callers may combine eligible terms with other convertible categorical
  * buckets via `LIMIT n BY` (non-time-series). Date histogram remains unsupported.
+ *
+ * All blockers are evaluated so the priority list stays authoritative, but only
+ * the first reason is returned — Convert tooltips show a single reason for now.
  */
-export const getTermsConversionFailures = (
+export const getTermsConversionFailure = (
   { params }: TermsIndexPatternColumn,
   { hasDateHistogram, termsBucketCount }: TermsConversionContext
-): EsqlConversionFailureReason[] => {
+): EsqlConversionFailureReason | undefined => {
   const reasons: EsqlConversionFailureReason[] = [];
 
   // unset/false = Other off (UI / toEsAggsFn Boolean).
@@ -75,14 +78,7 @@ export const getTermsConversionFailures = (
     reasons.push('terms_order_by_not_supported');
   }
 
-  return reasons;
+  // Keep evaluating every gate above for a stable priority order, but surface
+  // only the highest-priority blocker until multi-reason tooltips are enabled.
+  return reasons[0];
 };
-
-/**
- * Returns the first conversion failure reason for a terms dimension, or
- * `undefined` when the column is eligible.
- */
-export const getTermsConversionFailure = (
-  column: TermsIndexPatternColumn,
-  context: TermsConversionContext
-): EsqlConversionFailureReason | undefined => getTermsConversionFailures(column, context)[0];

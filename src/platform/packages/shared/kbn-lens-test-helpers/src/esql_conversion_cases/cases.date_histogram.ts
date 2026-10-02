@@ -144,7 +144,7 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
         col2: count(),
       },
       columnOrder: ['col1', 'col2'],
-      expected: { success: false, reasons: ['drop_partials_not_supported'] },
+      expected: { success: false, reason: 'drop_partials_not_supported' },
     },
     {
       group: 'date_histogram',
@@ -155,7 +155,7 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
         col2: count(),
       },
       columnOrder: ['col1', 'col2'],
-      expected: { success: false, reasons: ['include_empty_rows_not_supported'] },
+      expected: { success: false, reason: 'include_empty_rows_not_supported' },
     },
     {
       group: 'date_histogram',

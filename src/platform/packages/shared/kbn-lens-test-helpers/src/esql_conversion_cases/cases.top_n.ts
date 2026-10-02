@@ -126,7 +126,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: false,
-        reasons: ['terms_rank_metric_not_supported'],
+        reason: 'terms_rank_metric_not_supported',
       },
     },
     {
@@ -140,7 +140,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: false,
-        reasons: ['terms_order_by_not_supported'],
+        reason: 'terms_order_by_not_supported',
       },
     },
     {
@@ -154,7 +154,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: false,
-        reasons: ['terms_other_bucket_not_supported'],
+        reason: 'terms_other_bucket_not_supported',
       },
     },
     {
@@ -169,13 +169,13 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2', 'col3'],
       expected: {
         success: false,
-        reasons: ['terms_date_histogram_not_supported'],
+        reason: 'terms_date_histogram_not_supported',
       },
     },
     {
       group: 'top_n',
       dataset: logs,
-      description: 'terms with accuracy mode and other bucket lists both blockers',
+      description: 'terms with accuracy mode and other bucket reports the highest-priority blocker',
       columns: {
         col1: terms('host.keyword', { accuracyMode: true, otherBucket: true }),
         col2: metric('average', 'bytes'),
@@ -183,7 +183,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: false,
-        reasons: ['terms_other_bucket_not_supported', 'terms_accuracy_mode_not_supported'],
+        reason: 'terms_other_bucket_not_supported',
       },
     },
     {
@@ -199,7 +199,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2', 'col3', 'col4'],
       expected: {
         success: false,
-        reasons: ['terms_multi_level_not_supported'],
+        reason: 'terms_multi_level_not_supported',
       },
     },
     // Multi-terms parity has three parts: the outer dimension keeps only its top values,

@@ -206,7 +206,7 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
 
 export interface EsqlFailureTooltip {
   title?: string;
-  messages: string[];
+  message: string;
 }
 
 const resolveMessage = (reason: EsqlConversionFailureReason): string =>
@@ -215,40 +215,29 @@ const resolveMessage = (reason: EsqlConversionFailureReason): string =>
 
 /**
  * Builds tooltip content for a conversion failure. Top values reasons use a shared
- * title plus sentence-only bodies; other reasons keep a single full message.
- * Pass `{ showAllReasons: true }` to list every blocker; otherwise only the first is shown.
+ * title plus a sentence-only body; other reasons keep a single full message.
  */
 export const getFailureTooltip = (
-  reasons: EsqlConversionFailureReason[] | undefined,
-  { showAllReasons = false }: { showAllReasons?: boolean } = {}
+  reason: EsqlConversionFailureReason | undefined
 ): EsqlFailureTooltip => {
-  const allReasons =
-    reasons && reasons.length > 0 ? reasons : (['unknown'] as EsqlConversionFailureReason[]);
-  const reasonList = showAllReasons ? allReasons : [allReasons[0]];
+  const resolvedReason = reason ?? 'unknown';
 
-  if (reasonList.some(isTermsEsqlConversionFailureReason)) {
+  if (isTermsEsqlConversionFailureReason(resolvedReason)) {
     return {
       title: esqlConversionFailureTitle,
-      messages: reasonList.map(resolveMessage),
+      message: resolveMessage(resolvedReason),
     };
   }
 
   return {
-    messages: [resolveMessage(reasonList[0])],
+    message: resolveMessage(resolvedReason),
   };
 };
 
 /** Plain-text form of {@link getFailureTooltip} for aria-labels and string-only call sites. */
 export const getFailureTooltipPlainText = (
-  reasons: EsqlConversionFailureReason[] | undefined,
-  { showAllReasons = false }: { showAllReasons?: boolean } = {}
+  reason: EsqlConversionFailureReason | undefined
 ): string => {
-  const { title, messages } = getFailureTooltip(reasons, { showAllReasons });
-  if (!title) {
-    return messages[0];
-  }
-  if (messages.length === 1) {
-    return `${title}: ${messages[0]}`;
-  }
-  return `${title}: ${messages.join(' ')}`;
+  const { title, message } = getFailureTooltip(reason);
+  return title ? `${title}: ${message}` : message;
 };
