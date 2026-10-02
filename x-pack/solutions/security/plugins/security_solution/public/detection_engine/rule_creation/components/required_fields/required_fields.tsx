@@ -18,6 +18,7 @@ import { OptionalFieldLabel } from '../optional_field_label';
 import { RequiredFieldRow } from './required_fields_row';
 import type { RequiredFieldRowView, RequiredFieldWarnings } from './required_fields_row';
 import { getFlattenedArrayFieldNames } from '../utils';
+import { MAX_UNFOLDED_REQUIRED_FIELDS } from './constants';
 import * as i18n from './translations';
 
 interface RequiredFieldsComponentProps {
@@ -262,8 +263,6 @@ const RequiredFieldsList = ({
 
 export const RequiredFields = React.memo(RequiredFieldsComponent);
 
-const MAX_UNFOLDED_ROWS = 15;
-
 /* Newly added rows are always fully rendered so the user can fill them in */
 const getRowView = ({
   item,
@@ -274,7 +273,7 @@ const getRowView = ({
   index: number;
   isExpanded: boolean;
 }): RequiredFieldRowView => {
-  if (index < MAX_UNFOLDED_ROWS || item.isNew) {
+  if (index < MAX_UNFOLDED_REQUIRED_FIELDS || item.isNew) {
     return 'full';
   }
 
