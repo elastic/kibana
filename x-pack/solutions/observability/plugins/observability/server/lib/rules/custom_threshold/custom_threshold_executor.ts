@@ -13,6 +13,7 @@ import {
   ALERT_REASON,
   ALERT_GROUP,
   ALERT_GROUPING,
+  ALERT_RULE_PARAMETERS,
   ALERT_SEVERITY,
   ALERT_SEVERITY_CRITICAL,
   ALERT_SEVERITY_WARNING,
@@ -387,6 +388,16 @@ export const createCustomThresholdExecutor = ({
       const grouping = recoveredAlert.hit?.[ALERT_GROUPING];
       const alertHits = recoveredAlert.hit;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
+      const recoveredParams = alertHits?.[ALERT_RULE_PARAMETERS] as
+        | CustomThresholdRuleTypeParams
+        | undefined;
+      const recoveredSearchConfiguration = recoveredParams?.searchConfiguration;
+      const recoveredCriteria = recoveredParams?.criteria ?? params.criteria;
+      const recoveredDataViewIdTitle = recoveredSearchConfiguration
+        ? typeof recoveredSearchConfiguration.index === 'string'
+          ? recoveredSearchConfiguration.index
+          : recoveredSearchConfiguration.index?.title
+        : undefined;
 
       const context = {
         alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
@@ -394,14 +405,14 @@ export const createCustomThresholdExecutor = ({
         grouping,
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getViewInAppUrl({
-          dataViewId,
+          dataViewId: recoveredDataViewIdTitle ?? dataViewId,
           groups: group,
           logsLocator,
-          metrics: params.criteria.flatMap((criterion) => criterion.metrics ?? []),
-          searchConfiguration: params.searchConfiguration,
+          metrics: recoveredCriteria.flatMap((criterion) => criterion.metrics ?? []),
+          searchConfiguration: recoveredSearchConfiguration ?? params.searchConfiguration,
           startedAt: indexedStartedAt,
-          timeSize: params.criteria[0]?.timeSize,
-          timeUnit: params.criteria[0]?.timeUnit,
+          timeSize: recoveredCriteria[0]?.timeSize,
+          timeUnit: recoveredCriteria[0]?.timeUnit,
         }),
         reason: alertHits?.[ALERT_REASON],
         ...additionalContext,
