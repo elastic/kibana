@@ -654,8 +654,9 @@ describe('CreateDatasetWizardPage', () => {
     });
   });
 
-  const renderEditWizard = (initialDataSet: DataSetWithName) =>
-    render(
+  const renderEditWizard = (initialDataSet: DataSetWithName) => {
+    const add = jest.fn().mockResolvedValue(undefined);
+    const view = render(
       <EuiProvider>
         <I18nProvider>
           <MockAppHeaderProvider>
@@ -665,7 +666,7 @@ describe('CreateDatasetWizardPage', () => {
               <KibanaContextProvider
                 services={{
                   docLinks: docLinksMock,
-                  datasetsClient: { add: jest.fn(), delete: jest.fn() },
+                  datasetsClient: { add, delete: jest.fn() },
                   dataSourcesClient: { add: jest.fn() },
                 }}
               >
@@ -682,6 +683,8 @@ describe('CreateDatasetWizardPage', () => {
         </I18nProvider>
       </EuiProvider>
     );
+    return { ...view, add };
+  };
 
   it('shows a Tab delimiter picked in the form as the separator in the summary', async () => {
     const { getByTestId, findByTestId } = renderWizard();
@@ -1568,38 +1571,6 @@ describe('CreateDatasetWizardPage', () => {
   });
 
   describe('edit mode step navigation', () => {
-    const renderEditWizard = (initialDataSet: DataSetWithName) => {
-      const add = jest.fn().mockResolvedValue(undefined);
-      const view = render(
-        <EuiProvider>
-          <I18nProvider>
-            <MockAppHeaderProvider>
-              <Router
-                history={createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] })}
-              >
-                <KibanaContextProvider
-                  services={{
-                    docLinks: docLinksMock,
-                    datasetsClient: { add, delete: jest.fn() },
-                    dataSourcesClient: { add: jest.fn() },
-                  }}
-                >
-                  <CreateDatasetWizardPage
-                    dataSources={dataSources}
-                    existingDataSetNames={['logs-dataset']}
-                    loadDataSets={jest.fn().mockResolvedValue(undefined)}
-                    loadDataSources={jest.fn().mockResolvedValue(undefined)}
-                    initialDataSet={initialDataSet}
-                  />
-                </KibanaContextProvider>
-              </Router>
-            </MockAppHeaderProvider>
-          </I18nProvider>
-        </EuiProvider>
-      );
-      return { ...view, add };
-    };
-
     const clickStep = async (
       getByTestId: ReturnType<typeof render>['getByTestId'],
       stepId: string
