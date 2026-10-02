@@ -1156,6 +1156,10 @@ describe('updateRuleDataSchema', () => {
     expect(result.metadata?.tags).toEqual(['prod', 'infra']);
   });
 
+  it('rejects schedule set to null (a schedule cannot be cleared)', () => {
+    expect(updateRuleDataSchema.safeParse({ schedule: null }).success).toBe(false);
+  });
+
   it('accepts metadata.tags set to null (clear all tags)', () => {
     const result = updateRuleDataSchema.parse({ metadata: { tags: null } });
     expect(result.metadata?.tags).toBeNull();
@@ -1807,44 +1811,44 @@ describe('bulkCreateRulesRequestSchema', () => {
   const validItem = validCreateData;
 
   it('accepts a single item and defaults enabled to true', () => {
-    const result = bulkCreateRulesRequestSchema.parse({ rules: [validItem] });
-    expect(result.rules).toHaveLength(1);
-    expect(result.rules[0].enabled).toBe(true);
-    expect(result.rules[0].id).toBeUndefined();
+    const result = bulkCreateRulesRequestSchema.parse({ items: [validItem] });
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].enabled).toBe(true);
+    expect(result.items[0].id).toBeUndefined();
   });
 
   it('accepts client-supplied id and enabled: false', () => {
     const result = bulkCreateRulesRequestSchema.parse({
-      rules: [{ ...validItem, id: 'rule-1', enabled: false }],
+      items: [{ ...validItem, id: 'rule-1', enabled: false }],
     });
-    expect(result.rules[0].id).toBe('rule-1');
-    expect(result.rules[0].enabled).toBe(false);
+    expect(result.items[0].id).toBe('rule-1');
+    expect(result.items[0].enabled).toBe(false);
   });
 
   it('accepts up to MAX_BULK_ITEMS items', () => {
-    const rules = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => ({
+    const items = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => ({
       ...validItem,
       metadata: { name: `rule-${i}` },
     }));
-    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).not.toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ items })).not.toThrow();
   });
 
-  it('rejects an empty rules array', () => {
-    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [] })).toThrow();
+  it('rejects an empty items array', () => {
+    expect(() => bulkCreateRulesRequestSchema.parse({ items: [] })).toThrow();
   });
 
   it('rejects more than MAX_BULK_ITEMS items', () => {
-    const rules = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => ({
+    const items = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => ({
       ...validItem,
       metadata: { name: `rule-${i}` },
     }));
-    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ items })).toThrow();
   });
 
   it('rejects duplicate client-supplied ids', () => {
     expect(() =>
       bulkCreateRulesRequestSchema.parse({
-        rules: [
+        items: [
           { ...validItem, id: 'same-id' },
           { ...validItem, metadata: { name: 'other' }, id: 'same-id' },
         ],
@@ -1852,18 +1856,18 @@ describe('bulkCreateRulesRequestSchema', () => {
     ).toThrow();
   });
 
-  it('rejects a missing rules field', () => {
+  it('rejects a missing items field', () => {
     expect(() => bulkCreateRulesRequestSchema.parse({})).toThrow();
   });
 
   it('rejects unknown top-level fields (strict)', () => {
-    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [validItem], foo: 'bar' })).toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ items: [validItem], foo: 'bar' })).toThrow();
   });
 
   it('rejects an item that fails create-rule refinements', () => {
     expect(() =>
       bulkCreateRulesRequestSchema.parse({
-        rules: [{ ...validSignalCreateData, recovery: { strategy: 'no_breach' } }],
+        items: [{ ...validSignalCreateData, recovery: { strategy: 'no_breach' } }],
       })
     ).toThrow();
   });

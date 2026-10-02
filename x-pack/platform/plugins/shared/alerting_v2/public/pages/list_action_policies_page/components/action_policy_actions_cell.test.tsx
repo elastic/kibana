@@ -25,7 +25,7 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   matcher: null,
   group_by: null,
   grouping_mode: null,
-  throttle: { strategy: undefined, interval: null },
+  throttle: { strategy: null, interval: null },
   snoozed_until: null,
   created_by: { profile_uid: 'elastic_uid' },
   created_at: '2026-01-01T00:00:00.000Z',

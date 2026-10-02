@@ -40,7 +40,7 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
     const response = await apiClient.post(BULK_CREATE_URL, {
       headers: writerHeaders,
       body: {
-        rules: [
+        items: [
           buildCreateRuleData({ metadata: { name: 'bulk-a' } }),
           buildCreateRuleData({ metadata: { name: 'bulk-b' } }),
         ],
@@ -65,7 +65,7 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
       const response = await apiClient.post(BULK_CREATE_URL, {
         headers: writerHeaders,
         body: {
-          rules: [
+          items: [
             {
               ...buildCreateRuleData({ metadata: { name: 'collision' } }),
               id: 'existing-bulk-id',
@@ -86,16 +86,25 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
     }
   );
 
-  apiTest('validation: should reject an empty rules array', async ({ apiClient }) => {
+  apiTest('validation: should reject an empty items array', async ({ apiClient }) => {
     const response = await apiClient.post(BULK_CREATE_URL, {
       headers: writerHeaders,
-      body: { rules: [] },
+      body: { items: [] },
     });
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: should reject a body with no rules field', async ({ apiClient }) => {
+  apiTest('validation: should reject the former rules key', async ({ apiClient }) => {
+    const response = await apiClient.post(BULK_CREATE_URL, {
+      headers: writerHeaders,
+      body: { rules: [buildCreateRuleData({ metadata: { name: 'legacy-key' } })] },
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('validation: should reject a body with no items field', async ({ apiClient }) => {
     const response = await apiClient.post(BULK_CREATE_URL, {
       headers: writerHeaders,
       body: {},
@@ -105,12 +114,12 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
   });
 
   apiTest('validation: should reject arrays longer than MAX_BULK_ITEMS', async ({ apiClient }) => {
-    const rules = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) =>
+    const items = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) =>
       buildCreateRuleData({ metadata: { name: `rule-${i}` } })
     );
     const response = await apiClient.post(BULK_CREATE_URL, {
       headers: writerHeaders,
-      body: { rules },
+      body: { items },
     });
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
@@ -122,7 +131,7 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
       const response = await apiClient.post(BULK_CREATE_URL, {
         headers: writerHeaders,
         body: {
-          rules: [buildCreateRuleData({ metadata: { name: 'writer-can-bulk-create' } })],
+          items: [buildCreateRuleData({ metadata: { name: 'writer-can-bulk-create' } })],
         },
       });
       expect(response).toHaveStatusCode(200);
@@ -139,7 +148,7 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
       const response = await apiClient.post(BULK_CREATE_URL, {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: {
-          rules: [buildCreateRuleData({ metadata: { name: 'reader-cannot-bulk-create' } })],
+          items: [buildCreateRuleData({ metadata: { name: 'reader-cannot-bulk-create' } })],
         },
       });
       expect(response).toHaveStatusCode(403);
@@ -155,7 +164,7 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
       const response = await apiClient.post(BULK_CREATE_URL, {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: {
-          rules: [buildCreateRuleData({ metadata: { name: 'noaccess-cannot-bulk-create' } })],
+          items: [buildCreateRuleData({ metadata: { name: 'noaccess-cannot-bulk-create' } })],
         },
       });
       expect(response).toHaveStatusCode(403);

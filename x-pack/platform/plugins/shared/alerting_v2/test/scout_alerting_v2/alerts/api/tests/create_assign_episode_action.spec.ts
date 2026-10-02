@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
+import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_ALERTS_ALL_ROLE,
   ALERTING_V2_ALERTS_READ_ROLE,
@@ -174,10 +175,22 @@ apiTest.describe('Create assign episode action API', { tag: '@local-stateful-cla
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('schema: rejects assignee_uid over 256 chars with 400', async ({ apiClient }) => {
+  apiTest(
+    `schema: rejects assignee_uid over ${ID_MAX_LENGTH} chars with 400`,
+    async ({ apiClient }) => {
+      const response = await apiClient.post(getAssignEpisodeActionUrl('any-episode'), {
+        headers: writerHeaders,
+        body: { assignee_uid: 'a'.repeat(ID_MAX_LENGTH + 1) },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest('schema: rejects an empty assignee_uid with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getAssignEpisodeActionUrl('any-episode'), {
       headers: writerHeaders,
-      body: { assignee_uid: 'a'.repeat(257) },
+      body: { assignee_uid: '' },
     });
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');

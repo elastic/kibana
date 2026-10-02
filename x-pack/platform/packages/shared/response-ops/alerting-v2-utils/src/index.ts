@@ -25,4 +25,7 @@ export {
 } from './episode_mappers';
 export { resolveEpisodeLabel, type ResolveEpisodeLabelParams } from './resolve_episode_label';
 export { buildRulePayload } from './rule_mappers';
-export { attachmentDataToActionPolicyPayload } from './action_policy_mappers';
+export {
+  attachmentDataToActionPolicyPayload,
+  throttleResponseToRequest,
+} from './action_policy_mappers';

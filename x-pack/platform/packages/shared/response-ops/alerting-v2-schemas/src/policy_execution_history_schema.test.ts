@@ -362,8 +362,10 @@ describe('policy_execution_history_schema', () => {
         expect(listPolicyExecutionHistoryRequestSchema.parse({ per_page: '25' }).per_page).toBe(25);
       });
 
-      it('accepts per_page=0 for a count-only read', () => {
-        expect(listPolicyExecutionHistoryRequestSchema.parse({ per_page: 0 }).per_page).toBe(0);
+      it('rejects per_page=0', () => {
+        expect(listPolicyExecutionHistoryRequestSchema.safeParse({ per_page: 0 }).success).toBe(
+          false
+        );
       });
 
       it('rejects negative per_page', () => {
@@ -415,15 +417,6 @@ describe('policy_execution_history_schema', () => {
         expect(
           listPolicyExecutionHistoryRequestSchema.safeParse({ page: boundaryPage + 1 }).success
         ).toBe(false);
-      });
-
-      it('never trips the guard for a count-only read (per_page=0)', () => {
-        expect(
-          listPolicyExecutionHistoryRequestSchema.safeParse({
-            page: EXECUTION_HISTORY_MAX_RESULT_WINDOW,
-            per_page: 0,
-          }).success
-        ).toBe(true);
       });
     });
 
@@ -568,7 +561,7 @@ describe('policy_execution_history_schema', () => {
       expect(parsed.items).toHaveLength(1);
     });
 
-    it('accepts per_page=0 for a count-only read', () => {
+    it('rejects per_page=0', () => {
       expect(
         listPolicyExecutionHistoryResponseSchema.safeParse({
           items: [],
@@ -577,7 +570,7 @@ describe('policy_execution_history_schema', () => {
           total: 42,
           search_matches: null,
         }).success
-      ).toBe(true);
+      ).toBe(false);
     });
 
     it('rejects page below 1', () => {

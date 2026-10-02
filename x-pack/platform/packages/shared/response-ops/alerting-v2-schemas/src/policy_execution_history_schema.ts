@@ -69,11 +69,9 @@ export const listPolicyExecutionHistoryRequestSchema = z
     page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
       .default(1)
       .describe('Page number (1-indexed). Defaults to 1.'),
-    per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE })
+    per_page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_PER_PAGE })
       .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
-      .describe(
-        `Number of events per page. Defaults to ${EXECUTION_HISTORY_DEFAULT_PER_PAGE}. Pass 0 for a count-only read.`
-      ),
+      .describe(`Number of events per page. Defaults to ${EXECUTION_HISTORY_DEFAULT_PER_PAGE}.`),
     from: z.iso
       .datetime()
       .optional()
@@ -181,7 +179,7 @@ export const listPolicyExecutionHistoryResponseSchema = z
   .object({
     items: z.array(policyExecutionHistoryItemSchema),
     page: z.number().int().min(1),
-    per_page: z.number().int().min(0),
+    per_page: z.number().int().min(1),
     total: z
       .number()
       .int()

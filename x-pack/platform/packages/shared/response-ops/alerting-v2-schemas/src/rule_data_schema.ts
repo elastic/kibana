@@ -781,7 +781,7 @@ export const updateRuleDataSchema = z
       .max(MAX_FIELD_NAME_LENGTH)
       .optional()
       .describe(TIME_FIELD_UPDATE_DESCRIPTION),
-    schedule: scheduleSchema.partial().optional().nullable(),
+    schedule: scheduleSchema.partial().optional(),
     query: querySchema.optional(),
     recovery: recoverySchema.optional(),
     no_data: noDataSchema.optional(),
@@ -933,7 +933,7 @@ export type BulkCreateRuleItem = z.infer<typeof bulkCreateRuleItemSchema>;
  */
 export const bulkCreateRulesRequestSchema = z
   .object({
-    rules: z
+    items: z
       .array(bulkCreateRuleItemSchema)
       .min(1)
       .max(MAX_BULK_ITEMS)
@@ -942,12 +942,12 @@ export const bulkCreateRulesRequestSchema = z
   .strict()
   .refine(
     (data) => {
-      const ids = data.rules
+      const ids = data.items
         .map((rule) => rule.id)
         .filter((id): id is string => id != null && id.length > 0);
       return new Set(ids).size === ids.length;
     },
-    { message: 'Duplicate rule identifiers in the request.', path: ['rules'] }
+    { message: 'Duplicate rule identifiers in the request.', path: ['items'] }
   )
   .meta({ id: 'alerting_bulk_create_rules_request' });
 
