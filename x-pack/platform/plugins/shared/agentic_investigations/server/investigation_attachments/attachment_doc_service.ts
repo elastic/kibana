@@ -21,6 +21,7 @@ import {
   isVersionConflict,
 } from './errors';
 import { sameInvestigationAttachmentDocument } from './same_document';
+import { withTransientSearchRetry } from './search_with_transient_retry';
 
 /** Two writers converge on the retry; the third attempt is spare. */
 export const MAX_INVESTIGATION_ATTACHMENT_WRITE_ATTEMPTS = 3;
@@ -75,9 +76,12 @@ export interface InvestigationAttachmentDocServiceOptions<
  */
 export class InvestigationAttachmentDocService<TStored extends StoredInvestigationAttachment> {
   private readonly maxDocumentsPerConversation: number;
+  /** Every read of the index: a missing index has no hits, unallocated shards are retried. */
+  private readonly search: InvestigationAttachmentStorage<TStored>['search'];
 
   constructor(private readonly options: InvestigationAttachmentDocServiceOptions<TStored>) {
     this.maxDocumentsPerConversation = options.maxDocumentsPerConversation ?? 1;
+    this.search = withTransientSearchRetry<TStored>((...args) => options.storage.search(...args));
   }
 
   /** The document by id, or undefined when it is missing or belongs to another space. */
@@ -161,7 +165,7 @@ export class InvestigationAttachmentDocService<TStored extends StoredInvestigati
     }
     assertBoundedId(spaceId, 'spaceId');
 
-    const response = await this.options.storage.search({
+    const response = await this.search({
       track_total_hits: false,
       size: Math.min(ids.length * this.maxDocumentsPerConversation, MAX_RESULT_WINDOW),
       query: {
@@ -196,7 +200,7 @@ export class InvestigationAttachmentDocService<TStored extends StoredInvestigati
       );
     }
 
-    const response = await this.options.storage.search({
+    const response = await this.search({
       track_total_hits: false,
       size: Math.min(size * this.maxDocumentsPerConversation, MAX_RESULT_WINDOW),
       _source: ['conversationId'],
@@ -237,7 +241,7 @@ export class InvestigationAttachmentDocService<TStored extends StoredInvestigati
     // Each page is deleted before the next search, so the loop drains the matches. The cap
     // bounds the work if documents are written faster than they are removed.
     for (let page = 0; page < MAX_DELETE_PAGES; page++) {
-      const response = await this.options.storage.search({
+      const response = await this.search({
         track_total_hits: false,
         size: MAX_INVESTIGATION_ATTACHMENT_CONVERSATION_IDS,
         _source: false,
@@ -291,7 +295,7 @@ export class InvestigationAttachmentDocService<TStored extends StoredInvestigati
    * `_seq_no` / `_primary_term`, and a search hit omits them unless asked. This read asks.
    */
   private async findVersioned(id: string): Promise<VersionedDocument<TStored> | undefined> {
-    const response = await this.options.storage.search({
+    const response = await this.search({
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
