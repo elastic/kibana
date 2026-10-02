@@ -434,6 +434,16 @@ describe('analyzeAndImproveSkill', () => {
     });
   });
 
+  it.each([
+    ['analyze-and-improve', analyzeAndImproveSkill.content],
+    ['strategy_catalog', strategyCatalogReference.content],
+    ['ki_shapes', kiShapesReference.content],
+  ])('keeps the %s examples outside customer support', (_name, text) => {
+    expect(text).not.toMatch(
+      /raw-cases|case_number|support case|case records|hosts, cases|articles, cases|resolved cases|host, case\)|Loyalty Number|flight_activity/i
+    );
+  });
+
   describe('ki_shapes reference', () => {
     const shapes = kiShapesReference.content;
 

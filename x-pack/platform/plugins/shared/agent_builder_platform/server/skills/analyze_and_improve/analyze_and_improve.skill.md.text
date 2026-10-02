@@ -139,10 +139,10 @@ Access patterns live in the KI's `content`, and any ES|QL among them is mirrored
 
 ```
 Access patterns:
-  Q: Status of a specific support case
-  ESQL: FROM raw-cases-all | WHERE case_number == ?case_number | KEEP status, priority | LIMIT 1
-  params: case_number (keyword, e.g. "02115676")
-  returns: status, priority for one case
+  Q: Status of a specific order
+  ESQL: FROM orders | WHERE order_id == ?order_id | KEEP status, updated_at | LIMIT 1
+  params: order_id (keyword, e.g. "A-20481")
+  returns: status, updated_at for one order
 ```
 
 **Connector — `execute_connector_sub_action` call:**
@@ -256,7 +256,7 @@ is a hallucination wearing a number.
 
 **Evidence discipline.** Two to five short, specific evidence lines quoting real observed values —
 `service.name=checkout`, `error.type=timeout (312 of 1,204)`,
-`customer_flight_activity.Loyalty Number: 0 of 31,901 populated`. When derived from specific
+`inventory.supplier_id: 0 of 31,901 populated`. When derived from specific
 documents, record the minimal covering set of source ids: enough to trace every claim, no more.
 
 ## Ground the proposal in the data before writing it
