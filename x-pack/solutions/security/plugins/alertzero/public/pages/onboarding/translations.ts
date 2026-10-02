@@ -16,12 +16,16 @@ import {
 } from '@kbn/alertzero-common';
 
 export const ONBOARDING_TITLE = i18n.translate('xpack.alertzero.onboarding.title', {
-  defaultMessage: 'Enable your workers',
+  defaultMessage: "Let's turn on the Watches?",
+});
+
+export const ONBOARDING_INTRO_HEADING = i18n.translate('xpack.alertzero.onboarding.introHeading', {
+  defaultMessage: 'Watches are how AlertZero works for you',
 });
 
 export const ONBOARDING_SUBTITLE = i18n.translate('xpack.alertzero.onboarding.subtitle', {
   defaultMessage:
-    'Choose the workers you need — each covers a job. New workers default to the lowest autonomy; previously configured workers keep their saved settings.',
+    'A Watch is a small team of Workers on one job. Each Worker runs on its own trigger, opens investigations, and proposes actions for you to approve. Turn on the Workers you want now — every one of them can be tuned later in Watch settings.',
 });
 
 export const ONBOARDING_WORKERS_FOOTNOTE = i18n.translate(
@@ -76,9 +80,19 @@ export const BEFORE_YOU_ENABLE_AUTONOMY = i18n.translate(
   }
 );
 
-export const ENABLE_AND_CONTINUE = i18n.translate('xpack.alertzero.onboarding.enableAndContinue', {
-  defaultMessage: 'Enable and continue',
+export const ENABLE_AND_RUN = i18n.translate('xpack.alertzero.onboarding.enableAndRun', {
+  defaultMessage: 'Enable and run',
 });
+
+export const READ_MORE = i18n.translate('xpack.alertzero.onboarding.readMore', {
+  defaultMessage: 'Read more about Watches in the documentation',
+});
+
+export const workersSelectedCount = (selected: number, total: number) =>
+  i18n.translate('xpack.alertzero.onboarding.workersSelectedCount', {
+    defaultMessage: '{selected} of {total} Workers selected',
+    values: { selected, total },
+  });
 
 export const NOT_NOW = i18n.translate('xpack.alertzero.onboarding.notNow', {
   defaultMessage: 'Not now — explore Security without AlertZero',
@@ -120,3 +134,18 @@ const ONBOARDING_WORKER_DESCRIPTIONS: Record<string, string> = {
 
 export const onboardingWorkerDescription = (workerId: string): string | undefined =>
   ONBOARDING_WORKER_DESCRIPTIONS[workerId];
+
+// Workers without a schedule interval are event-driven; schedule-driven ones use the cadence label.
+const ONBOARDING_WORKER_EVENT_TRIGGERS: Record<string, string> = {
+  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
+    'xpack.alertzero.onboarding.workerTrigger.alertTriage',
+    { defaultMessage: 'On new alerts' }
+  ),
+  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
+    'xpack.alertzero.onboarding.workerTrigger.endpointAnalysis',
+    { defaultMessage: 'On Attack Discovery promotion' }
+  ),
+};
+
+export const onboardingWorkerEventTrigger = (workerId: string): string | undefined =>
+  ONBOARDING_WORKER_EVENT_TRIGGERS[workerId];
