@@ -140,18 +140,6 @@ describe('CreateAutomationFlyout', () => {
     expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   });
 
-  it('ignores duplicate tags and removes tags', () => {
-    renderFlyout();
-    addTag('oncall');
-    addTag('OnCall');
-
-    expect(screen.getAllByTestId('euiComboBoxPill').map((pill) => pill.textContent)).toEqual([
-      'oncall',
-    ]);
-    fireEvent.click(screen.getByLabelText(/Remove oncall/));
-    expect(screen.queryByTestId('euiComboBoxPill')).not.toBeInTheDocument();
-  });
-
   it('closes a pristine form without confirmation', () => {
     renderFlyout();
 

@@ -7,23 +7,16 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButton,
   EuiConfirmModal,
-  EuiComboBox,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
   EuiFormRow,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTextArea,
   EuiTitle,
-  EuiToolTip,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -35,10 +28,10 @@ import {
 import { AutomationActionsSection } from '../form/actions/automation_actions_section';
 import { AutomationInstructions } from '../form/instructions/automation_instructions';
 import { AutomationTriggerSection } from '../form/triggers/trigger_section';
+import { AutomationTagsField, tagLabels } from '../form/tags_field';
+import { CreateFlyoutFooter } from './create_flyout_footer';
 import { toAutomationRequestBody } from '../form/to_automation_request';
 import { canSaveAutomation, getSaveBlocker, isTriggerValid } from '../form/validation';
-
-const MAX_TAG_LENGTH = 32;
 
 const labels = {
   untitled: i18n.translate('xpack.nightshift.automations.flyout.untitled', {
@@ -53,16 +46,6 @@ const labels = {
   namePlaceholder: i18n.translate('xpack.nightshift.automations.flyout.namePlaceholder', {
     defaultMessage: 'Name this automation',
   }),
-  tags: i18n.translate('xpack.nightshift.automations.flyout.tagsLabel', {
-    defaultMessage: 'Tags',
-  }),
-  addTags: i18n.translate('xpack.nightshift.automations.flyout.addTags', {
-    defaultMessage: 'Add tags',
-  }),
-  addTagOption: i18n.translate('xpack.nightshift.automations.flyout.addTagOption', {
-    defaultMessage: 'Add {searchValue} as a tag',
-    values: { searchValue: '{searchValue}' },
-  }),
   description: i18n.translate('xpack.nightshift.automations.descriptionLabel', {
     defaultMessage: 'Description',
   }),
@@ -72,19 +55,6 @@ const labels = {
   descriptionPlaceholder: i18n.translate('xpack.nightshift.automations.descriptionPlaceholder', {
     defaultMessage: 'What does this automation do?',
   }),
-  enabled: i18n.translate('xpack.nightshift.automations.flyout.enabled', {
-    defaultMessage: 'Enabled',
-  }),
-  disabled: i18n.translate('xpack.nightshift.automations.flyout.disabled', {
-    defaultMessage: 'Disabled',
-  }),
-  savesAsDisabled: i18n.translate('xpack.nightshift.automations.flyout.savesAsDisabled', {
-    defaultMessage: 'Saves as disabled',
-  }),
-  enablesWhenSaved: i18n.translate('xpack.nightshift.automations.flyout.enablesWhenSaved', {
-    defaultMessage: 'Enables when saved',
-  }),
-  save: i18n.translate('xpack.nightshift.automations.flyout.save', { defaultMessage: 'Save' }),
   discardTitle: i18n.translate('xpack.nightshift.automations.flyout.discardTitle', {
     defaultMessage: 'Discard this automation?',
   }),
@@ -102,39 +72,6 @@ const getDiscardBody = (name: string) =>
     values: { name },
   });
 
-const AutomationTagsField = ({
-  tags,
-  suggestions,
-  onChange,
-}: {
-  tags: string[];
-  suggestions: string[];
-  onChange: (tags: string[]) => void;
-}) => {
-  const addTag = (tag: string) => {
-    const trimmed = tag.trim().slice(0, MAX_TAG_LENGTH);
-    if (trimmed && !tags.some((existing) => existing.toLowerCase() === trimmed.toLowerCase())) {
-      onChange([...tags, trimmed]);
-    }
-  };
-
-  return (
-    <EuiComboBox
-      fullWidth
-      compressed
-      aria-label={labels.tags}
-      placeholder={labels.addTags}
-      customOptionText={labels.addTagOption}
-      options={suggestions.map((label) => ({ label }))}
-      selectedOptions={tags.map((label) => ({ label }))}
-      onCreateOption={addTag}
-      onChange={(selected) => onChange(selected.map(({ label }) => label))}
-      inputRef={(input) => input?.setAttribute('maxLength', String(MAX_TAG_LENGTH))}
-      data-test-subj="automationTagInput"
-    />
-  );
-};
-
 export const CreateAutomationFlyout = ({
   onClose,
   tagSuggestions = [],
@@ -148,7 +85,6 @@ export const CreateAutomationFlyout = ({
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
   const titleId = useGeneratedHtmlId();
   const createAutomation = useCreateAutomation();
-  const { euiTheme } = useEuiTheme();
   const update = (changes: Partial<AutomationFormValues>) =>
     setValues((current) => ({ ...current, ...changes }));
   const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues);
@@ -168,19 +104,6 @@ export const CreateAutomationFlyout = ({
       onSuccess: onClose,
     });
   };
-
-  const saveButton = (
-    <EuiButton
-      fill
-      size="s"
-      isDisabled={!canSave}
-      isLoading={createAutomation.isLoading}
-      onClick={save}
-      data-test-subj="submitAutomation"
-    >
-      {labels.save}
-    </EuiButton>
-  );
 
   return (
     <EuiFlyoutResizable
@@ -212,7 +135,7 @@ export const CreateAutomationFlyout = ({
         </EuiFormRow>
         <EuiFormRow
           fullWidth
-          label={labels.tags}
+          label={tagLabels.tags}
           labelAppend={
             <EuiText size="xs" color="subdued">
               {labels.optional}
@@ -267,48 +190,14 @@ export const CreateAutomationFlyout = ({
           onSlackActionChange={(slackAction) => update({ slackAction })}
         />
       </EuiFlyoutBody>
-      <footer
-        css={{
-          flexShrink: 0,
-          padding: euiTheme.size.m,
-          backgroundColor: euiTheme.colors.backgroundBasePlain,
-          borderBlockStart: euiTheme.border.thin,
-        }}
-      >
-        <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  compressed
-                  label={values.isEnabled ? labels.enabled : labels.disabled}
-                  checked={values.isEnabled}
-                  onChange={(event) => update({ isEnabled: event.target.checked })}
-                  data-test-subj="automationEnabledSwitch"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-                css={{
-                  paddingInlineEnd: euiTheme.size.m,
-                  borderInlineEnd: euiTheme.border.thin,
-                }}
-              >
-                <EuiText size="xs" color="subdued">
-                  {values.isEnabled ? labels.enablesWhenSaved : labels.savesAsDisabled}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {saveBlocker ? (
-                  <EuiToolTip content={saveBlocker}>{saveButton}</EuiToolTip>
-                ) : (
-                  saveButton
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </footer>
+      <CreateFlyoutFooter
+        isEnabled={values.isEnabled}
+        canSave={canSave}
+        isSaving={createAutomation.isLoading}
+        saveBlocker={saveBlocker}
+        onEnabledChange={(isEnabled) => update({ isEnabled })}
+        onSave={save}
+      />
       {isDiscardOpen && (
         <EuiConfirmModal
           aria-label={labels.discardTitle}
