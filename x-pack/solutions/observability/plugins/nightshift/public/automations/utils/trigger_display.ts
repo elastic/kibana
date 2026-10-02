@@ -53,3 +53,9 @@ export const getTriggerDisplay = (
   }
   return { label: triggerTypeLabels.alertTriggered, icon: 'logoElastic' };
 };
+
+export const getTriggerIcon = (label: string): string => {
+  if (label === triggerTypeLabels.alertTriggered) return 'logoElastic';
+  if (label === triggerTypeLabels.scheduled) return 'calendar';
+  return 'logoSlack';
+};
