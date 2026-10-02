@@ -131,29 +131,6 @@ const waitForSuccessfulAction = async (
     .toBe('successful');
 };
 
-const sendAction = async (
-  apiClient: ApiClientFixture,
-  headers: Record<string, string>,
-  agentId: string,
-  command: 'isolate' | 'unisolate'
-): Promise<string> => {
-  const response = await apiClient.post(ACTION_ROUTES[command], {
-    headers,
-    responseType: 'json',
-    body: {
-      endpoint_ids: [agentId],
-      agent_type: 'endpoint',
-    },
-  });
-
-  expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
-  const action = (response.body as ActionDetailsBody).data;
-  expect(action.command).toBe(command);
-  expect(action.agents).toContain(agentId);
-
-  return action.id;
-};
-
 apiTest.describe('Real agent host isolation', { tag: ['@local-stateful-classic'] }, () => {
   let requestHeaders: Record<string, string>;
 
@@ -175,13 +152,31 @@ apiTest.describe('Real agent host isolation', { tag: ['@local-stateful-classic']
       apiTest.setTimeout(TEST_TIMEOUT_MS);
       const { agentId } = enrolledEndpoint;
 
+      const sendAction = async (command: 'isolate' | 'unisolate'): Promise<string> => {
+        const response = await apiClient.post(ACTION_ROUTES[command], {
+          headers: requestHeaders,
+          responseType: 'json',
+          body: {
+            endpoint_ids: [agentId],
+            agent_type: 'endpoint',
+          },
+        });
+
+        expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
+        const action = (response.body as ActionDetailsBody).data;
+        expect(action.command).toBe(command);
+        expect(action.agents).toContain(agentId);
+
+        return action.id;
+      };
+
       await waitForIsolation(apiClient, requestHeaders, agentId, false);
 
-      const isolateActionId = await sendAction(apiClient, requestHeaders, agentId, 'isolate');
+      const isolateActionId = await sendAction('isolate');
       await waitForSuccessfulAction(apiClient, requestHeaders, isolateActionId);
       await waitForIsolation(apiClient, requestHeaders, agentId, true);
 
-      const unisolateActionId = await sendAction(apiClient, requestHeaders, agentId, 'unisolate');
+      const unisolateActionId = await sendAction('unisolate');
       await waitForSuccessfulAction(apiClient, requestHeaders, unisolateActionId);
       await waitForIsolation(apiClient, requestHeaders, agentId, false);
     }
