@@ -10,10 +10,14 @@ import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { keyBy } from 'lodash';
+import { escapeQuotes } from '@kbn/es-query';
 import { set } from '@kbn/safer-lodash-set';
 import { doesActionHaveFileAccess } from '../../../routes/actions/utils';
 import { catchAndWrapError } from '../../../utils';
-import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../endpoint_app_context_services';
 import type { FetchActionResponsesResult } from '../..';
 import type {
   ResponseActionAgentType,
@@ -592,20 +596,36 @@ export const formatEndpointActionResults = (
 };
 
 /**
+ * Linked-project agents per metadata lookup. One search for a whole fan-out
+ * exceeds Elasticsearch's 10,000-result window for large actions; the search
+ * is then rejected and every linked-project hostname is dropped.
+ */
+const HOSTNAME_LOOKUP_BATCH_SIZE = 500;
+
+/**
  * Retrieves the hosts name for each agent ID provided on input.
  * Note that if any ID provided is not a fleet agent ID (ex. 3rd party EDR agent id),
  * then no host name will be returned for agent.
+ *
+ * Fleet is read on the origin cluster only. When `scoped` is a CPS read, ids
+ * Fleet could not resolve (agents enrolled in a linked project) fall back to the
+ * request-scoped Defend metadata index; origin-resolved names are kept as-is.
+ * Without `scoped`, linked-project agents keep an empty name.
  * @param agentIds
- * @param metadataService
+ * @param endpointService
+ * @param spaceId
+ * @param scoped
  */
 export const getAgentHostNamesWithIds = async ({
   agentIds,
   endpointService,
   spaceId,
+  scoped,
 }: {
   spaceId: string;
   endpointService: EndpointAppContextService;
   agentIds: string[];
+  scoped?: ScopedEndpointServices;
 }): Promise<{ [agentId: string]: string }> => {
   if (agentIds.length === 0) {
     return {};
@@ -617,13 +637,62 @@ export const getAgentHostNamesWithIds = async ({
     .catch(catchAndWrapError);
   const agentDocById = keyBy(agentFound, 'id');
 
-  return agentIds.reduce((acc, id) => {
+  const hostNames = agentIds.reduce((acc, id) => {
     const agentHostInfo = agentDocById[id]?.local_metadata?.host;
 
     acc[id] = agentHostInfo?.name || agentHostInfo?.hostname || '';
 
     return acc;
   }, {} as { [agentId: string]: string });
+
+  if (!scoped?.isCpsRead()) {
+    return hostNames;
+  }
+
+  const unresolvedAgentIds = agentIds.filter((id) => !hostNames[id]);
+  const hostnameByAgentId = new Map<string, string>();
+
+  for (let offset = 0; offset < unresolvedAgentIds.length; offset += HOSTNAME_LOOKUP_BATCH_SIZE) {
+    const batch = unresolvedAgentIds.slice(offset, offset + HOSTNAME_LOOKUP_BATCH_SIZE);
+    const kuery = `united.agent.agent.id: (${batch
+      .map((id) => `"${escapeQuotes(id)}"`)
+      .join(' OR ')})`;
+    // Best-effort: a failed batch leaves names empty rather than failing the whole read
+    const metadata = await endpointService
+      .getEndpointMetadataService(spaceId)
+      .getHostMetadataList({ page: 0, pageSize: batch.length, kuery }, scoped)
+      .catch((error) => {
+        endpointService
+          .createLogger('getAgentHostNamesWithIds')
+          .warn(`Failed to resolve linked-project hostnames: ${error.message}`);
+        return undefined;
+      });
+
+    // Index the metadata rows by agent id once: a `.find()` per unresolved
+    // agent is quadratic in the fan-out size. Match on the Fleet agent id (the
+    // id the action and the kuery key on), falling back to the endpoint's own
+    // `agent.id` only when it is missing, mirroring
+    // `EndpointMetadataService.getEnrichedHostMetadata()`.
+    for (const entry of metadata?.data ?? []) {
+      const agentId = entry.metadata?.elastic?.agent?.id || entry.metadata?.agent?.id;
+      const hostname = entry.metadata?.host?.hostname;
+
+      // First row wins when a backend returns more than one row for an agent id.
+      if (agentId && hostname && !hostnameByAgentId.has(agentId)) {
+        hostnameByAgentId.set(agentId, hostname);
+      }
+    }
+  }
+
+  for (const id of unresolvedAgentIds) {
+    const hostname = hostnameByAgentId.get(id);
+
+    if (hostname) {
+      hostNames[id] = hostname;
+    }
+  }
+
+  return hostNames;
 };
 
 export const createActionDetailsRecord = <T extends ActionDetails = ActionDetails>(

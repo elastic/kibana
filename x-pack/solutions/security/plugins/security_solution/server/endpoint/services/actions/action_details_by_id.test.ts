@@ -337,6 +337,51 @@ describe('When using `getActionDetailsById()', () => {
     expect(Object.keys(details.hosts)).toHaveLength(501);
   });
 
+  it('keeps origin Fleet names and queries the scoped index only for agents Fleet could not resolve', async () => {
+    const agentIds = ['agent-a', 'agent-b'];
+    actionRequests = createActionRequestsEsSearchResultsMock(agentIds);
+    applyActionsEsSearchMock(esClient, actionRequests, actionResponses);
+
+    const getHostMetadataList = jest.fn().mockResolvedValue({
+      data: [
+        {
+          metadata: {
+            agent: { id: 'agent-b' },
+            elastic: { agent: { id: 'agent-b' } },
+            host: { hostname: 'linked-host-b' },
+          },
+        },
+      ],
+      total: 1,
+    });
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+      getHostMetadataList,
+    });
+    // Fleet on origin resolves agent-a only; agent-b lives in a linked project.
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockResolvedValue([
+      new FleetAgentGenerator('seed').generate({
+        id: 'agent-a',
+        local_metadata: { host: { name: 'Host-agent-a' } },
+      }),
+    ]);
+
+    const details = await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      scoped: buildScoped(true),
+    });
+
+    expect(getHostMetadataList).toHaveBeenCalledTimes(1);
+    expect(getHostMetadataList).toHaveBeenCalledWith(
+      expect.objectContaining({ kuery: 'united.agent.agent.id: ("agent-b")' }),
+      expect.anything()
+    );
+    expect(details.hosts).toEqual({
+      'agent-a': { name: 'Host-agent-a' },
+      'agent-b': { name: 'linked-host-b' },
+    });
+  });
+
   it('does not query the scoped metadata index when the read is origin-only', async () => {
     const getHostMetadataList = jest.fn();
     (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
