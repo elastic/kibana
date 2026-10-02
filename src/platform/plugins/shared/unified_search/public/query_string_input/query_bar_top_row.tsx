@@ -29,7 +29,7 @@ import {
   ESQLLangEditor,
   QuickSearchVisor,
   type ESQLEditorProps,
-  type RestorableStateProviderApi,
+  type ESQLEditorApi,
 } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
@@ -369,15 +369,9 @@ export const QueryBarTopRow = React.memo(
       }
     }, [props.isLoading]);
 
-    const esqlEditorRef = useRef<RestorableStateProviderApi>(null);
+    const esqlEditorRef = useRef<ESQLEditorApi>(null);
 
-    const focusEsqlEditor = useCallback(() => {
-      setTimeout(() => {
-        document
-          .querySelector<HTMLTextAreaElement>('[data-test-subj="ESQLEditor"] textarea.inputarea')
-          ?.focus();
-      }, 0);
-    }, []);
+    const focusEsqlEditor = useCallback(() => esqlEditorRef.current?.focus(), []);
 
     // Temporary, the empty page will change and we wont need to control it
     useEffect(() => {
