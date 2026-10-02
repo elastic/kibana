@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
@@ -60,13 +61,34 @@ import { filterMetadataToTemplateFields } from './filter_template_metadata';
  *
  * Uses `metadata.status` (the template field), not the bare `status` field
  * (which tracks round execution state).
+ *
+ * When `linked_investigation_id` is provided, only escalations that include
+ * that id in their `metadata.linked_investigations` array are returned.
+ * `metadata` is a flattened field, so a KQL keyword term match against
+ * `metadata.linked_investigations` tests array membership.
  */
-const buildEscalationsFilter = (status: ListEscalationsQuery['status']): string => {
+const buildEscalationsFilter = (
+  query: Pick<ListEscalationsQuery, 'status' | 'linked_investigation_id'>
+): string => {
   const base = `template_id: "${ESCALATION_TEMPLATE_ID}"`;
-  if (status === 'all') return base;
-  if (status === 'closed') return `${base} and metadata.status: "closed"`;
-  // 'open' — fall through. "not closed" instead of "open" for the reason above.
-  return `${base} and not (metadata.status: "closed")`;
+
+  let filter: string;
+  if (query.status === 'all') {
+    filter = base;
+  } else if (query.status === 'closed') {
+    filter = `${base} and metadata.status: "closed"`;
+  } else {
+    // 'open' — fall through. "not closed" instead of "open" for the reason above.
+    filter = `${base} and not (metadata.status: "closed")`;
+  }
+
+  if (query.linked_investigation_id) {
+    filter = `${filter} and metadata.${ESCALATION_LINKED_INVESTIGATIONS_FIELD}: "${escapeQuotes(
+      query.linked_investigation_id
+    )}"`;
+  }
+
+  return filter;
 };
 
 const ESCALATIONS_LIST_SORT: ConversationSearchSort = { field: 'updated_at', order: 'desc' };
@@ -128,10 +150,13 @@ export class EscalationsService {
       exclude: [ESCALATION_LINKED_INVESTIGATIONS_FIELD, 'status', 'close_reason'],
     });
 
+    // Dedupe
+    const assignees = [...new Set(body.assignees)];
+
     const metadata = {
       ...filteredMetadata,
       [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [body.linked_investigation_id],
-      ...(body.assignees?.length ? { [ESCALATION_ASSIGNEES_FIELD]: body.assignees } : {}),
+      [ESCALATION_ASSIGNEES_FIELD]: assignees,
     };
 
     const accessControl =
@@ -139,7 +164,7 @@ export class EscalationsService {
         ? { access_mode: ConversationAccessControlMode.Public }
         : {
             access_mode: ConversationAccessControlMode.Private,
-            entries: body.collaborators.map((id) => ({
+            entries: assignees.map((id) => ({
               type: 'user' as const,
               id,
               role: ConversationAccessControlRole.Member,
@@ -394,7 +419,7 @@ export class EscalationsService {
     const client = await this.getConversationClient(request);
 
     const { results, total } = await client.search({
-      filter: buildEscalationsFilter(query.status),
+      filter: buildEscalationsFilter(query),
       sort: ESCALATIONS_LIST_SORT,
       page: query.page,
       perPage: query.per_page,

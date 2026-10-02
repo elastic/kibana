@@ -27,49 +27,65 @@ const PopoverContentsDiv = styled.div`
 
 PopoverContentsDiv.displayName = 'PopoverContentsDiv';
 
-export const UpgradeContentsComponent = () => (
-  <PopoverContentsDiv data-test-subj="ml-popover-upgrade-contents">
-    <EuiPopoverTitle>{i18n.UPGRADE_TITLE}</EuiPopoverTitle>
-    <EuiText size="s">
-      <FormattedMessage
-        id="xpack.securitySolution.components.mlPopup.upgradeDescription"
-        defaultMessage="To access SIEM’s anomaly detection features, you must update your license to Platinum, start a free 30-day trial, or spin up a {cloudLink} on AWS, GCP, or Azure. You can then run Machine Learning jobs and view anomalies."
-        values={{
-          cloudLink: (
-            <EuiLink href={`https://www.elastic.co/cloud/`} target="_blank">
-              <FormattedMessage
-                id="xpack.securitySolution.components.mlPopup.cloudLink"
-                defaultMessage="cloud deployment"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    </EuiText>
-    <EuiSpacer />
-    <EuiFlexGroup gutterSize="s" wrap={true}>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          href="https://www.elastic.co/subscriptions"
-          iconType="external"
-          iconSide="right"
-          target="_blank"
-        >
-          {i18n.UPGRADE_BUTTON}
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          href={`${useBasePath()}/app/management/stack/license_management`}
-          iconType="gear"
-          target="_blank"
-        >
-          {i18n.LICENSE_BUTTON}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </PopoverContentsDiv>
-);
+export interface UpgradeContentsProps {
+  /** Popover title and fixed width. The flyout passes false. */
+  popover?: boolean;
+}
+
+export const UpgradeContentsComponent = ({ popover = true }: UpgradeContentsProps) => {
+  const basePath = useBasePath();
+  const body = (
+    <>
+      {popover && <EuiPopoverTitle>{i18n.UPGRADE_TITLE}</EuiPopoverTitle>}
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.securitySolution.components.mlPopup.upgradeDescription"
+          defaultMessage="To access SIEM’s anomaly detection features, you must update your license to Platinum, start a free 30-day trial, or spin up a {cloudLink} on AWS, GCP, or Azure. You can then run Machine Learning jobs and view anomalies."
+          values={{
+            cloudLink: (
+              <EuiLink href={`https://www.elastic.co/cloud/`} target="_blank">
+                <FormattedMessage
+                  id="xpack.securitySolution.components.mlPopup.cloudLink"
+                  defaultMessage="cloud deployment"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+      <EuiSpacer />
+      <EuiFlexGroup gutterSize="s" wrap={true}>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            href="https://www.elastic.co/subscriptions"
+            iconType="external"
+            iconSide="right"
+            target="_blank"
+          >
+            {i18n.UPGRADE_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            href={`${basePath}/app/management/stack/license_management`}
+            iconType="gear"
+            target="_blank"
+          >
+            {i18n.LICENSE_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+
+  if (!popover) {
+    return <div data-test-subj="ml-popover-upgrade-contents">{body}</div>;
+  }
+
+  return (
+    <PopoverContentsDiv data-test-subj="ml-popover-upgrade-contents">{body}</PopoverContentsDiv>
+  );
+};
 
 export const UpgradeContents = React.memo(UpgradeContentsComponent);
 

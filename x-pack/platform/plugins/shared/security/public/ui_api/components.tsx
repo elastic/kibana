@@ -19,14 +19,21 @@ import type { CoreStart } from '@kbn/core/public';
  * available through the index file.
  */
 import { getChangePasswordComponent } from './change_password/change_password_async';
+import { getCreateServiceAccountComponent } from './create_service_account';
 import { LazyWrapper } from './lazy_wrapper';
 import { getPersonalInfoComponent } from './personal_info/personal_info_async';
 
 export interface GetComponentsOptions {
   core: CoreStart;
+  isServerless?: boolean;
+  roleManagementEnabled?: boolean;
 }
 
-export const getComponents = ({ core }: GetComponentsOptions) => {
+export const getComponents = ({
+  core,
+  isServerless = false,
+  roleManagementEnabled = true,
+}: GetComponentsOptions) => {
   /**
    * Returns a function that creates a lazy-loading version of a component.
    */
@@ -37,6 +44,9 @@ export const getComponents = ({ core }: GetComponentsOptions) => {
   }
 
   return {
+    getCreateServiceAccount: wrapLazy(() =>
+      getCreateServiceAccountComponent(core, isServerless, roleManagementEnabled)
+    ),
     getPersonalInfo: wrapLazy(getPersonalInfoComponent),
     getChangePassword: wrapLazy(() => getChangePasswordComponent(core)),
   };

@@ -63,9 +63,9 @@ spec:
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
       schedules:
-        Daily flaky tests (on-merge and Elastic Cloud):
+        Daily flaky tests (Kibana on-merge and Elastic Cloud testing pipelines):
           cronline: 0 6 * * * America/New_York
-          message: Daily flaky test report for kibana-on-merge and the Elastic Cloud pipelines
+          message: Daily flaky test report for the on-merge and Elastic Cloud testing pipelines
           branch: main
       tags:
         - kibana

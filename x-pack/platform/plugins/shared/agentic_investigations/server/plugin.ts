@@ -21,6 +21,7 @@ import { createImpactPrivilegesChecker } from './impact/services/check_impact_pr
 import { createImpactClient } from './impact/services/impact_client';
 import { ImpactService } from './impact/services/impact_service';
 import { registerImpactStepDefinitions } from './impact/step_types';
+import { registerInvestigationStepDefinitions } from './investigations/step_types';
 import { createImpactStorageClient } from './impact/storage/impact_storage';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
@@ -110,6 +111,12 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
       getAssignmentsService: () => this.requireAssignmentsService(),
       getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+    });
+
+    registerInvestigationStepDefinitions({
+      workflowsExtensions,
+      getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+      getConversationClient: (request) => this.getConversationClient(request),
     });
 
     return {};

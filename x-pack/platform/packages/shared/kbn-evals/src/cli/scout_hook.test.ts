@@ -42,6 +42,16 @@ describe('runScoutHook', () => {
     expect(() => runScoutHook(repoRoot, writeHook('exit 3'), {})).toThrow('exited with code 3');
   });
 
+  it('uses the hook exit code and output when it exits without reading the config', () => {
+    const configLargerThanPipeBuffer = { value: 'x'.repeat(256 * 1024) };
+    expect(
+      runScoutHook(repoRoot, writeHook(`echo '{"env":{"A":"1"}}'`), configLargerThanPipeBuffer)
+    ).toEqual({ A: '1' });
+    expect(() => runScoutHook(repoRoot, writeHook('exit 3'), configLargerThanPipeBuffer)).toThrow(
+      'exited with code 3'
+    );
+  });
+
   it('fails when the hook prints something other than the expected shape', () => {
     expect(() => runScoutHook(repoRoot, writeHook(`echo nope`), {})).toThrow('did not print JSON');
     expect(() => runScoutHook(repoRoot, writeHook(`echo '{"env":{"A":1}}'`), {})).toThrow(

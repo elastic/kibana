@@ -106,6 +106,7 @@
     "ai.attachment.update",
     "ai.classify",
     "ai.conversation.add_event",
+    "ai.conversation.add_user_message",
     "ai.conversation.create",
     "ai.conversation.metadata.patch",
     "ai.conversation.metadata.read",
@@ -601,9 +602,14 @@
     "new_relic.runNrqlQuery",
     "new_relic.unacknowledgeIssue",
     "new_relic.updateMutingRule",
+    "nightshift.composeHydrateNotifications",
     "nightshift.cortexHydrate",
     "nightshift.cortexOptimize",
     "nightshift.ensureInvestigationAgent",
+    "nightshift.memoryMaterializeToSandbox",
+    "nightshift.memoryOptimize",
+    "nightshift.obtainSandbox",
+    "nightshift.resolveModel",
     "nightshift.triggerInvestigation",
     "notion.getDataSource",
     "notion.getPage",
@@ -795,6 +801,7 @@
     "shodan.getHostInfo",
     "shodan.getServices",
     "shodan.searchHosts",
+    "significantEvents.resolveModel",
     "slack",
     "slack2.createConversation",
     "slack2.getConversationHistory",
@@ -982,11 +989,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "fca1c69b855d962dd241495e129c72a9932ddebf9085547f63f93d290b784d91"
+      "sha256": "848b08242faedd069aec9d52d8d6f8508f22bd314a3520bc2cfc38f8d9980205"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "50fb3cca457a8a3bcf2db9546bca8f0fdf72b4c530cb74ef26bda68bb4e3edae"
+      "sha256": "76c451e82518bfc3912bc3f90b0f67c46f6e3624e2a9a8c815ca60598c6ac601"
     }
   }
 }

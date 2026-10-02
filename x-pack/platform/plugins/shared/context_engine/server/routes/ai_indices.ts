@@ -67,7 +67,6 @@ import {
   deleteAutomationResources,
   deleteBackingStoreResource,
 } from '../ai_indices/delete_resources';
-import { deleteKiView } from '../ai_indices/ki_view';
 import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { GetAiIndexDataReadServiceParams } from '../types';
@@ -840,13 +839,6 @@ export const registerAiIndexRoutes = ({
           // From here on, failures are best-effort: the AI index entry is already gone (the primary
           // goal), so any failure is reported back to the caller as a partial-failure
           const errors: string[] = [];
-
-          const viewError = await deleteKiView({
-            esClient: core.elasticsearch.client.asInternalUser,
-            logger,
-            aiIndexId,
-          });
-          if (viewError) errors.push(viewError);
 
           if (deleteKnowledgeIndicators) {
             const err = await deleteBackingStoreResource({
