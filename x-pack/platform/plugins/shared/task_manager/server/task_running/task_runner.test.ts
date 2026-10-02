@@ -1456,9 +1456,9 @@ describe('TaskManagerRunner', () => {
       expect(instance.retryAt?.getTime()).toBeLessThan(minutesFromDate(now, 6.5).getTime());
     });
 
-    test('stops the interval and cancels the task if there is 409 error updating retryAt for long running tasks', async () => {
+    test('stops the interval and cancels the task if the retryAt conflict is caused by a reclaim by another Kibana', async () => {
       let wasCancelled = false;
-      const { runner, store, logger } = await readyToRunStageSetup({
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
         instance: {
           status: TaskStatus.Running,
           startedAt: new Date(),
@@ -1485,8 +1485,11 @@ describe('TaskManagerRunner', () => {
       store.partialUpdate.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object [type/id] conflict'))
       );
+      // The doc was reclaimed by another Kibana (ownerId changed).
+      store.get.mockResolvedValue({ ...instance, ownerId: 'another-kibana-node' });
       await runner.run();
 
+      expect(store.get).toHaveBeenCalledWith('foo');
       expect(store.partialUpdate).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
         'Conflict error trying to update retryAt for a long-running task. Cancelling task: foo',
@@ -1495,6 +1498,124 @@ describe('TaskManagerRunner', () => {
         }
       );
       expect(wasCancelled).toBeTruthy();
+    });
+
+    test('does not revert a schedule that was updated while the task was running', async () => {
+      let wasCancelled = false;
+      const runAt = new Date();
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          status: TaskStatus.Running,
+          runAt,
+          startedAt: new Date(),
+          enabled: true,
+          schedule: { interval: '1h' },
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `365d`,
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 60000));
+                jest.advanceTimersByTime(60000);
+                await promise;
+                return { state: {} };
+              },
+              async cancel() {
+                wasCancelled = true;
+              },
+            }),
+          },
+        },
+      });
+
+      // Another writer (e.g. bulkUpdateSchedules with includeRunningTasks) changed the schedule
+      // to 3h and bumped the version while the task was running. `runAt` is left untouched for
+      // running tasks, so it still reflects when this execution was due.
+      const currentTask = {
+        ...instance,
+        version: 'WzIsMV0=',
+        schedule: { interval: '3h' },
+      };
+      store.partialUpdate.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object [type/id] conflict'))
+      );
+      store.get.mockResolvedValue(currentTask);
+
+      await runner.run();
+
+      expect(store.partialUpdate).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ version: 'WzEsMV0=', retryAt: expect.any(Date) }),
+        expect.anything()
+      );
+      expect(store.get).toHaveBeenCalledWith('foo');
+      expect(wasCancelled).toBe(false);
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        'Conflict error trying to update retryAt for a long-running task. Cancelling task: foo',
+        expect.anything()
+      );
+      // Completion persists the externally-updated 3h schedule, not the runner's stale 1h schedule,
+      // and the next runAt is one 3h interval from this run's due time.
+      expect(store.partialUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          schedule: { interval: '3h' },
+          runAt: new Date(runAt.getTime() + 3 * 60 * 60 * 1000),
+        }),
+        expect.objectContaining({ validate: expect.any(Boolean) })
+      );
+    });
+
+    test('prefers a schedule updated while the task was running over the schedule returned by the task runner', async () => {
+      const runAt = new Date();
+      const { runner, store, instance } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          status: TaskStatus.Running,
+          runAt,
+          startedAt: new Date(),
+          enabled: true,
+          schedule: { interval: '1h' },
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: `365d`,
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 60000));
+                jest.advanceTimersByTime(60000);
+                await promise;
+                // The runner echoes back the schedule it was claimed with, which is now stale.
+                return { state: {}, schedule: { interval: '1h' } };
+              },
+            }),
+          },
+        },
+      });
+
+      store.partialUpdate.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object [type/id] conflict'))
+      );
+      store.get.mockResolvedValue({
+        ...instance,
+        version: 'WzIsMV0=',
+        schedule: { interval: '3h' },
+      });
+
+      await runner.run();
+
+      expect(store.partialUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          schedule: { interval: '3h' },
+          runAt: new Date(runAt.getTime() + 3 * 60 * 60 * 1000),
+        }),
+        expect.objectContaining({ validate: expect.any(Boolean) })
+      );
     });
 
     test('does not run heartbeat updates while processing recurring task result', async () => {
@@ -3307,7 +3428,7 @@ describe('TaskManagerRunner', () => {
     test('handles a version conflict gracefully when an expired recurring task is reclaimed while running and schedule is greater than timeout', async () => {
       const id = _.random(1, 20).toString();
       const onTaskEvent = jest.fn();
-      const { runner, store, logger } = await readyToRunStageSetup({
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
         onTaskEvent,
         instance: {
           id,
@@ -3339,6 +3460,7 @@ describe('TaskManagerRunner', () => {
           reason: `[task:${id}]: version conflict, required seqNo [1], primary term [1]. current document has seqNo [64000] and primary term [1]`,
         },
       });
+      store.get.mockResolvedValue({ ...instance, ownerId: 'another-kibana-node' });
 
       const promise = runner.run();
       await Promise.resolve();
@@ -3346,15 +3468,75 @@ describe('TaskManagerRunner', () => {
       await promise;
 
       expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.get).toHaveBeenCalledWith(id);
 
       const frameworkErrorLogs = logger.error.mock.calls.filter(([, meta]) =>
         ((meta as { tags?: string[] })?.tags ?? []).includes('task-run-failed')
       );
       expect(frameworkErrorLogs).toEqual([]);
 
+      expect(logger.error).toHaveBeenCalledWith(
+        `Skipping resolving task document version conflict after task run: Unable to resolve task document conflicts for task "bar:${id}": task has been claimed by another worker`,
+        { tags: [id, 'bar', 'task-doc-resolve-conflict'] }
+      );
+    });
+
+    test('resolves a version conflict on an expired recurring task when the schedule was updated while running and the task was not reclaimed', async () => {
+      const id = 'expired-schedule-updated';
+      const runAt = moment().subtract(5, 'm').toDate();
+      const { runner, store, logger, instance } = await readyToRunStageSetup({
+        instance: {
+          id,
+          runAt,
+          startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { interval: '1h' },
+          ownerId: 'kibana-node-1',
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '15s',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 20000));
+                jest.advanceTimersByTime(20000);
+                await promise;
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+
+      // bulkUpdateSchedules with includeRunningTasks bumped the version but did not reclaim the task
+      const currentTask = {
+        ...instance,
+        version: 'WzIsMV0=',
+        schedule: { interval: '3h' },
+      };
+      store.partialUpdate
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object conflict'))
+        )
+        .mockResolvedValueOnce(currentTask);
+      store.get.mockResolvedValue(currentTask);
+
+      await runner.run();
+
       expect(logger.warn).toHaveBeenCalledWith(
-        `Skipping the update of expired/cancelled task bar:${id} because it was reclaimed by another Kibana while running.`,
-        { tags: [id, 'bar'] }
+        `Resolved task document version conflict after task run for task "bar:${id}"`,
+        { tags: [id, 'bar', 'task-doc-resolve-conflict'] }
+      );
+      expect(store.partialUpdate).toHaveBeenCalledTimes(2);
+      expect(store.partialUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          version: 'WzIsMV0=',
+          status: TaskStatus.Idle,
+          schedule: { interval: '3h' },
+          runAt: new Date(runAt.getTime() + 3 * 60 * 60 * 1000),
+        }),
+        { validate: false, doc: currentTask }
       );
     });
 
@@ -3417,6 +3599,62 @@ describe('TaskManagerRunner', () => {
           schedule: { interval: '5m' },
           runAt: currentTask.runAt,
           state: { foo: 'bar' },
+        }),
+        { validate: false, doc: currentTask }
+      );
+    });
+
+    test('recomputes runAt from the updated schedule when resolving a version conflict caused by a schedule-only change', async () => {
+      const id = 'conflict-schedule-only';
+      const runAt = new Date();
+      const { runner, store, instance } = await readyToRunStageSetup({
+        instance: {
+          id,
+          schedule: { interval: '1h' },
+          runAt,
+          startedAt: new Date(),
+          ownerId: 'kibana-node-1',
+          version: 'WzEsMV0=',
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+
+      // bulkUpdateSchedules with includeRunningTasks changed only the schedule, runAt is untouched
+      const currentTask = {
+        ...instance,
+        version: 'WzIsMV0=',
+        schedule: { interval: '3h' },
+      };
+
+      store.partialUpdate
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.decorateConflictError(new Error('Saved object conflict'))
+        )
+        .mockResolvedValueOnce(currentTask);
+      store.get.mockResolvedValue(currentTask);
+
+      await runner.run();
+
+      // the runner's runAt was derived from the stale 1h schedule
+      expect(store.partialUpdate).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ runAt: new Date(runAt.getTime() + 60 * 60 * 1000) }),
+        expect.anything()
+      );
+      expect(store.partialUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          version: 'WzIsMV0=',
+          schedule: { interval: '3h' },
+          runAt: new Date(runAt.getTime() + 3 * 60 * 60 * 1000),
         }),
         { validate: false, doc: currentTask }
       );

@@ -630,13 +630,16 @@ export class Plugin {
 
 #### bulkUpdateSchedules
 
-Use `bulkUpdatesSchedules` to instruct TaskManger to update the schedule interval of tasks that are in `idle` status
-(for the tasks which have `running` status, `schedule` and `runAt` will be recalculated after task run finishes).
+Use `bulkUpdatesSchedules` to instruct TaskManger to update the schedule interval of tasks that are in `idle` status.
 When the interval is updated, new `runAt` will be computed and task will be updated with that value, using the formula
 
 ```
 newRunAt = scheduledAt + newInterval
 ```
+
+By default tasks in `running` or `claiming` status are skipped. Pass `includeRunningTasks: true` in the options to
+update them as well: only `schedule` (and API keys, if requested) is written in place, `runAt` is left untouched and
+the next `runAt` is computed from the new schedule when the current run finishes.
 
 Example:
 
