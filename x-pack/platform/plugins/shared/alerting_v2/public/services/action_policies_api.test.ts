@@ -32,10 +32,10 @@ describe('ActionPoliciesApi', () => {
   });
 
   describe('listActionPolicies', () => {
-    it('forwards the filter and search query params', async () => {
+    it('sends the filter and search query params to the internal list path', async () => {
       await api.listActionPolicies({ page: 2, filter: 'enabled: true', search: 'cpu' });
 
-      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/action_policies', {
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/action_policies', {
         query: {
           page: 2,
           per_page: undefined,
@@ -50,7 +50,7 @@ describe('ActionPoliciesApi', () => {
     it('omits empty filter and search values', async () => {
       await api.listActionPolicies({ filter: '', search: '' });
 
-      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/action_policies', {
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/action_policies', {
         query: expect.objectContaining({ filter: undefined, search: undefined }),
       });
     });
