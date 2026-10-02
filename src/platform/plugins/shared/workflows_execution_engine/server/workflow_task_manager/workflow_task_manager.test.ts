@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
+import { CLOUD_SERVICE_ACCOUNT_REALM_TYPE } from '@kbn/core-security-common';
+import type { CoreServiceAccountsService } from '@kbn/core-security-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -22,6 +24,7 @@ import {
   getWorkflowWakeTaskId,
   WorkflowTaskManager,
 } from './workflow_task_manager';
+import { SERVICE_ACCOUNT_BEARER_TYPE } from '../service_account_bearer';
 import { withWorkflowExecutionIdentity } from '../service_account_execution';
 import { generateExecutionTaskScope } from '../utils';
 
@@ -83,7 +86,10 @@ describe('WorkflowTaskManager', () => {
     } as any;
     fakeRequest = jest.mocked({} as KibanaRequest);
 
-    workflowTaskManager = new WorkflowTaskManager(mockTaskManager);
+    workflowTaskManager = new WorkflowTaskManager(mockTaskManager, {
+      elasticsearch: {} as IClusterClient,
+      serviceAccounts: {} as CoreServiceAccountsService,
+    });
   });
 
   afterEach(() => {
@@ -154,6 +160,54 @@ describe('WorkflowTaskManager', () => {
       }
     }
   );
+
+  it('stores the service account id and does not clone an API key for an exchange bearer', async () => {
+    const authenticate = jest.fn().mockResolvedValue({
+      username: 'account-id',
+      authentication_realm: { type: CLOUD_SERVICE_ACCOUNT_REALM_TYPE },
+    });
+    const serviceAccounts = {
+      isEnabled: jest.fn().mockReturnValue(true),
+      getWorkloadBinding: jest.fn().mockResolvedValue(null),
+      bindWorkload: jest.fn(),
+    };
+    const manager = new WorkflowTaskManager(mockTaskManager, {
+      elasticsearch: {
+        asScoped: () => ({ asCurrentUser: { security: { authenticate } } }),
+      } as unknown as IClusterClient,
+      serviceAccounts: serviceAccounts as unknown as CoreServiceAccountsService,
+    });
+    const request = httpServerMock.createKibanaRequest({
+      headers: { authorization: 'Bearer essu_exchange_token' },
+    });
+    mockTaskManager.schedule.mockResolvedValue({ id: 'resume-task' } as any);
+
+    await manager.scheduleResumeTask({
+      workflowExecution: createMockWorkflowExecution(),
+      resumeAt: new Date('2025-11-17T12:00:00.000Z'),
+      fakeRequest: request,
+    });
+
+    expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          workflowRunId: 'test-execution-id',
+          spaceId: 'default',
+          serviceAccountId: 'account-id',
+        }),
+      }),
+      undefined
+    );
+    expect(mockTaskManager.schedule.mock.calls[0][1]).toBeUndefined();
+    expect(serviceAccounts.bindWorkload).toHaveBeenCalledWith(
+      request,
+      expect.objectContaining({
+        workloadType: SERVICE_ACCOUNT_BEARER_TYPE,
+        workloadId: 'test-execution-id',
+        serviceAccountId: 'account-id',
+      })
+    );
+  });
 
   describe('scheduleResumeTask', () => {
     it('should schedule a resume task with correct parameters', async () => {

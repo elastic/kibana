@@ -35,7 +35,7 @@ import type {
 } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
-import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import { workflowTaskManagerFor } from '../workflow_task_manager/workflow_task_manager';
 
 export interface RunWorkflowResult {
   /** Dormant queued `workflow:run` tasks must be deleted by Task Manager after handling. */
@@ -294,7 +294,10 @@ export const runWorkflow = async (
   if (isTerminalStatus(execution.status)) {
     await completeIdentityFailureCleanup(execution, {
       ...params,
-      workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+      workflowTaskManager: workflowTaskManagerFor(
+        params.dependencies.taskManager,
+        params.dependencies.coreStart
+      ),
       cloudSetup: params.dependencies.cloudSetup,
     });
     return;
@@ -332,7 +335,10 @@ export const runWorkflow = async (
       }
       await completeIdentityFailureCleanup(failedExecution, {
         ...params,
-        workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+        workflowTaskManager: workflowTaskManagerFor(
+          params.dependencies.taskManager,
+          params.dependencies.coreStart
+        ),
         cloudSetup: params.dependencies.cloudSetup,
       });
     }

@@ -31,7 +31,7 @@ import {
   ensureWorkflowIdleTimeoutResumeAfterLoop,
   getIdleTimeoutResumeDeadlineMs,
 } from '../workflow_execution_loop/handle_execution_delay';
-import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import { workflowTaskManagerFor } from '../workflow_task_manager/workflow_task_manager';
 
 async function resumeWorkflowWithRequest({
   workflowRunId,
@@ -198,7 +198,10 @@ export const resumeWorkflow = async (
   if (isTerminalStatus(execution.status)) {
     await completeIdentityFailureCleanup(execution, {
       ...params,
-      workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+      workflowTaskManager: workflowTaskManagerFor(
+        params.dependencies.taskManager,
+        params.dependencies.coreStart
+      ),
       cloudSetup: params.dependencies.cloudSetup,
     });
     return {};
@@ -236,7 +239,10 @@ export const resumeWorkflow = async (
       }
       await completeIdentityFailureCleanup(failedExecution, {
         ...params,
-        workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+        workflowTaskManager: workflowTaskManagerFor(
+          params.dependencies.taskManager,
+          params.dependencies.coreStart
+        ),
         cloudSetup: params.dependencies.cloudSetup,
       });
     }

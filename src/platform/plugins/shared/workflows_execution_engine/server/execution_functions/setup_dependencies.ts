@@ -37,7 +37,7 @@ import { WorkflowExecutionState } from '../workflow_context_manager/workflow_exe
 import { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
 
 import { WorkflowEventLoggerFactory, WorkflowEventQueue } from '../workflow_event_logger';
-import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import { workflowTaskManagerFor } from '../workflow_task_manager/workflow_task_manager';
 
 export async function setupDependencies(
   workflowRunId: string,
@@ -195,7 +195,7 @@ export async function setupDependencies(
   const esClient: ElasticsearchClient =
     coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
 
-  const workflowTaskManager = new WorkflowTaskManager(taskManager);
+  const workflowTaskManager = workflowTaskManagerFor(taskManager, coreStart);
 
   const enhancedDependencies: ContextDependencies = {
     ...dependencies,

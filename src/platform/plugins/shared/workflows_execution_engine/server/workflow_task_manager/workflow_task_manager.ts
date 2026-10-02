@@ -8,7 +8,12 @@
  */
 
 import { v4 } from 'uuid';
-import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  type IClusterClient,
+  type KibanaRequest,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
+import type { CoreServiceAccountsService } from '@kbn/core-security-server';
 import {
   TaskAlreadyRunningError,
   type TaskManagerStartContract,
@@ -19,6 +24,7 @@ import { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams, StartWorkflowExecutionParams } from './types';
 import { resolveQueueTtlMs } from '../concurrency/queue_concurrency_utils';
+import { scheduleForCaller } from '../schedule_for_caller';
 import { getWorkflowOriginalRequest } from '../service_account_execution';
 import { generateExecutionTaskScope } from '../utils';
 
@@ -41,8 +47,53 @@ export const getWorkflowWakeTaskId = (executionId: string): string =>
 
 export const WORKFLOW_WAKE_POLL_INTERVAL_MS = 30_000;
 
+export interface ServiceAccountBearerScheduling {
+  elasticsearch: IClusterClient;
+  serviceAccounts: CoreServiceAccountsService;
+}
+
+export const workflowTaskManagerFor = (
+  taskManager: TaskManagerStartContract,
+  core: {
+    elasticsearch: { client: IClusterClient };
+    security: { serviceAccounts: CoreServiceAccountsService };
+  }
+): WorkflowTaskManager =>
+  new WorkflowTaskManager(taskManager, {
+    elasticsearch: core.elasticsearch.client,
+    serviceAccounts: core.security.serviceAccounts,
+  });
+
 export class WorkflowTaskManager {
-  constructor(private taskManager: TaskManagerStartContract) {}
+  constructor(
+    private taskManager: TaskManagerStartContract,
+    private readonly serviceAccountBearer: ServiceAccountBearerScheduling
+  ) {}
+
+  /**
+   * A UIAM exchange bearer is stored on the task and exchanged when it runs.
+   * Any other caller keeps the API-key clone. `run_as` unwraps to the triggering request first.
+   */
+  private scheduleWithCaller<T extends { params?: object }, R>(
+    request: KibanaRequest,
+    executionId: string,
+    spaceId: string | undefined,
+    taskInstance: T,
+    schedule: (
+      taskInstance: T,
+      options?: { request: KibanaRequest; cloneApiKey: true }
+    ) => Promise<R>
+  ): Promise<R> {
+    return scheduleForCaller({
+      elasticsearch: this.serviceAccountBearer.elasticsearch,
+      serviceAccounts: this.serviceAccountBearer.serviceAccounts,
+      request: getWorkflowOriginalRequest(request),
+      executionId,
+      spaceId,
+      taskInstance,
+      schedule,
+    });
+  }
 
   /**
    * Schedules or updates a single `workflow:resume` at the earliest idle deadline (HITL /
@@ -98,7 +149,10 @@ export class WorkflowTaskManager {
 
     await this.taskManager.removeIfExists(taskId);
 
-    const task = await this.taskManager.schedule(
+    const task = await this.scheduleWithCaller(
+      fakeRequest,
+      workflowExecution.id,
+      workflowExecution.spaceId,
       {
         id: taskId,
         taskType: WORKFLOW_RESUME_TASK_TYPE,
@@ -111,7 +165,7 @@ export class WorkflowTaskManager {
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
       },
-      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+      (taskInstance, options) => this.taskManager.schedule(taskInstance, options)
     );
 
     return {
@@ -129,7 +183,10 @@ export class WorkflowTaskManager {
     resumeAt: Date;
     fakeRequest: KibanaRequest;
   }): Promise<{ taskId: string }> {
-    const task = await this.taskManager.schedule(
+    const task = await this.scheduleWithCaller(
+      fakeRequest,
+      workflowExecution.id,
+      workflowExecution.spaceId,
       {
         id: v4(),
         taskType: WORKFLOW_RESUME_TASK_TYPE,
@@ -142,7 +199,7 @@ export class WorkflowTaskManager {
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
       },
-      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+      (taskInstance, options) => this.taskManager.schedule(taskInstance, options)
     );
 
     return {
@@ -173,7 +230,10 @@ export class WorkflowTaskManager {
 
     await this.taskManager.removeIfExists(taskId);
 
-    const task = await this.taskManager.schedule(
+    const task = await this.scheduleWithCaller(
+      request,
+      workflowExecution.id,
+      workflowExecution.spaceId,
       {
         id: taskId,
         taskType: WORKFLOW_RUN_TASK_TYPE,
@@ -190,7 +250,7 @@ export class WorkflowTaskManager {
         scope: generateExecutionTaskScope(workflowExecution),
         enabled: true,
       },
-      { request: getWorkflowOriginalRequest(request), cloneApiKey: true }
+      (taskInstance, options) => this.taskManager.schedule(taskInstance, options)
     );
 
     return { taskId: task.id };
@@ -256,18 +316,24 @@ export class WorkflowTaskManager {
     fakeRequest?: KibanaRequest;
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowImmediateResumeTaskId(executionId);
-    await this.taskManager.ensureScheduled(
-      {
-        id: taskId,
-        taskType: WORKFLOW_RESUME_TASK_TYPE,
-        params: { workflowRunId: executionId, spaceId } satisfies ResumeWorkflowExecutionParams,
-        state: {},
-        scope: [`workflow:execution:${executionId}`],
-      },
-      fakeRequest
-        ? { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
-        : undefined
-    );
+    const taskInstance = {
+      id: taskId,
+      taskType: WORKFLOW_RESUME_TASK_TYPE,
+      params: { workflowRunId: executionId, spaceId } satisfies ResumeWorkflowExecutionParams,
+      state: {},
+      scope: [`workflow:execution:${executionId}`],
+    };
+    if (!fakeRequest) {
+      await this.taskManager.ensureScheduled(taskInstance, undefined);
+    } else {
+      await this.scheduleWithCaller(
+        fakeRequest,
+        executionId,
+        spaceId,
+        taskInstance,
+        (task, options) => this.taskManager.ensureScheduled(task, options)
+      );
+    }
     return { taskId };
   }
 
@@ -317,19 +383,25 @@ export class WorkflowTaskManager {
     fakeRequest?: KibanaRequest;
     runAt?: Date;
   }): Promise<void> {
-    await this.taskManager.ensureScheduled(
-      {
-        id: getWorkflowWakeTaskId(params.executionId),
-        taskType: WORKFLOW_RESUME_TASK_TYPE,
-        timeoutOverride: '1m',
-        params: { workflowRunId: params.executionId, spaceId: params.spaceId },
-        state: {},
-        runAt: params.runAt ?? new Date(Date.now() + 1000),
-        scope: [`workflow:execution:${params.executionId}`],
-      },
-      params.fakeRequest
-        ? { request: getWorkflowOriginalRequest(params.fakeRequest), cloneApiKey: true }
-        : undefined
+    const taskInstance = {
+      id: getWorkflowWakeTaskId(params.executionId),
+      taskType: WORKFLOW_RESUME_TASK_TYPE,
+      timeoutOverride: '1m',
+      params: { workflowRunId: params.executionId, spaceId: params.spaceId },
+      state: {},
+      runAt: params.runAt ?? new Date(Date.now() + 1000),
+      scope: [`workflow:execution:${params.executionId}`],
+    };
+    if (!params.fakeRequest) {
+      await this.taskManager.ensureScheduled(taskInstance, undefined);
+      return;
+    }
+    await this.scheduleWithCaller(
+      params.fakeRequest,
+      params.executionId,
+      params.spaceId,
+      taskInstance,
+      (task, options) => this.taskManager.ensureScheduled(task, options)
     );
   }
 
