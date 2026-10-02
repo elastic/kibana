@@ -9,7 +9,6 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const MAX_ANNOTATION_BODY_BYTES = 1024 * 1024;
 const MAX_ANNOTATION_CONTEXT_LENGTH = 100;
 const MAX_META_DATA_VALUE_BYTES = 100_000;

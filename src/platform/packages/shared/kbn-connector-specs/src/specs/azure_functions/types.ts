@@ -15,7 +15,6 @@ import { z } from '@kbn/zod/v4';
  * call, so the payload is bounded here to keep one call from allocating an
  * arbitrarily large string on the Kibana server.
  */
-// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const MAX_INVOKE_BODY_BYTES = 1024 * 1024;
 
 /**
