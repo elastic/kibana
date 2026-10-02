@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const config = getService('config');
   const browser = getService('browser');
+  const elasticChart = getService('elasticChart');
 
   function getTranslationFr(term: string, field?: string) {
     switch (term) {
@@ -195,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await lens.closeDimensionEditor();
 
-      await lens.waitForVisualization();
+      await elasticChart.waitForRenderComplete('xyVisChart');
 
       // Two Y axes that are both valid
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
