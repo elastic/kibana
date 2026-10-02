@@ -121,7 +121,7 @@ export const runAutomationHandler = async ({
         started: false,
         reason:
           `Workflow '${workflowId}' does not declare the ${PILOT_SIZE_INPUT} input, so it cannot ` +
-          `run as a pilot. Only document_orchestration or unit_profile automations can; one ` +
+          `run as a pilot. Document, unit-profile and index-metadata automations can; one ` +
           `installed before pilot mode existed gains it when reinstalled with the same name.`,
       };
     }

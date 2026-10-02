@@ -40,9 +40,10 @@ const runAutomationSchema = z.object({
     .max(MAX_PILOT_SIZE)
     .optional()
     .describe(
-      'Run a pilot over only this many documents or units instead of the full corpus, and wait ' +
-        'for it to finish so the result reports its duration. Works on automations installed ' +
-        'from the document_orchestration or unit_profile template. Omit for a full run.'
+      'Run a pilot over only this many items (documents, units or sources) instead of the full ' +
+        'corpus, and wait for it to finish so the result reports its duration. Works on ' +
+        'automations installed from the document_orchestration, unit_profile or index_metadata ' +
+        'template. Omit for a full run.'
     ),
 });
 
@@ -69,7 +70,7 @@ export const createRunAutomationTool = ({
   },
   description: dedent`
     Run a saved Context Engine workflow automation over the full corpus, or as a pilot over a few
-    documents or units with pilotSize.
+    items with pilotSize.
     A full run starts asynchronously and returns an execution id — the run continues after this
     call returns. Use platform.core.get_workflow_execution_status to check progress. A pilot waits
     for the run and returns its status, durationMs and kisWritten, or an execution id to poll if it
@@ -90,8 +91,8 @@ export const createRunAutomationTool = ({
       const confirmText = pilotSize !== undefined ? 'Run pilot' : 'Run automation';
       const describeRun = (label: string): string =>
         pilotSize !== undefined
-          ? `Run a pilot of ${label} over ${pilotSize} documents or units? This costs a model call per item and writes up to ${pilotSize} knowledge indicators.`
-          : `Run ${label} over the full corpus? This costs a model call per document.`;
+          ? `Run a pilot of ${label} over ${pilotSize} items? It writes up to ${pilotSize} knowledge indicators.`
+          : `Run ${label} over the full corpus?`;
 
       if (!workflowId) {
         return {

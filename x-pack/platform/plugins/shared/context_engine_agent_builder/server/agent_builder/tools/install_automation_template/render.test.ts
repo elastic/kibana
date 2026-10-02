@@ -148,7 +148,9 @@ describe('automation template rendering', () => {
     it('loops over the sources, reading each one from the loop item rather than a single const', () => {
       const yaml = renderIndexMetadataTemplate(twoSources);
 
-      expect(yaml).toContain('foreach: "{{ consts.sources | json }}"');
+      expect(yaml).toContain(
+        'foreach: "{{ consts.sources | chunk: inputs.pilot_size | first | json }}"'
+      );
       expect(yaml).not.toMatch(/consts\.source_index|consts\.category_field/);
       expect(yaml).toContain('path: /{{ steps.source_context.output.index }}/_mapping');
     });
@@ -321,6 +323,89 @@ describe('automation template rendering', () => {
         expect(renderUnitQuery(yaml(), step, { pilot_size: budget + 5 })).toMatch(
           new RegExp(`\\| LIMIT ${budget}\\s*(\\||$)`)
         );
+      }
+    );
+
+    const indexMetadataValues = {
+      aiIndexId: 'airline-loyalty',
+      automationName: 'loyalty-index-metadata',
+      sources: ['a', 'b', 'c', 'd', 'e', 'f', 'g'].map((index) => ({
+        index,
+        categoryField: 'tier',
+      })),
+    };
+    const listTemplates = [
+      {
+        name: 'index metadata',
+        yaml: () => renderIndexMetadataTemplate(indexMetadataValues),
+        listLength: indexMetadataValues.sources.length,
+      },
+    ];
+
+    /** Renders the loop's `foreach` the way the engine does, returning the items it fans out over. */
+    const loopItems = (yaml: string, inputs: Record<string, number> = {}): unknown[] => {
+      const definition = parse(yaml);
+      const [loop] = definition.steps;
+      return JSON.parse(
+        createWorkflowLiquidEngine().parseAndRenderSync(loop.foreach, {
+          consts: definition.consts,
+          inputs,
+        })
+      );
+    };
+
+    it.each(listTemplates)(
+      'declares a bounded pilot_size input on the manual trigger of the $name template',
+      ({ yaml }) => {
+        const [trigger] = parse(yaml()).triggers;
+
+        expect(trigger.type).toBe('manual');
+        expect(trigger.inputs.properties.pilot_size).toEqual(
+          expect.objectContaining({ type: 'integer', minimum: 1, maximum: 10 })
+        );
+      }
+    );
+
+    it.each(listTemplates)(
+      'loops over only the first pilot_size entries in a pilot of the $name template',
+      ({ yaml }) => {
+        expect(loopItems(yaml(), { pilot_size: 5 })).toEqual(loopItems(yaml()).slice(0, 5));
+      }
+    );
+
+    it.each(listTemplates)(
+      'loops over every entry when the $name template runs without a pilot size',
+      ({ yaml, listLength }) => {
+        expect(loopItems(yaml())).toHaveLength(listLength);
+      }
+    );
+
+    it.each(listTemplates)(
+      'loops over every entry when a pilot of the $name template asks for more than there are',
+      ({ yaml, listLength }) => {
+        expect(loopItems(yaml(), { pilot_size: 10 })).toHaveLength(listLength);
+      }
+    );
+
+    it('declares no pilot input on the targeted KI writer, which runs without a pilot', () => {
+      const [trigger] = parse(
+        renderTargetedKiWriterTemplate({ aiIndexId: 'a', kis: '- ki_id: a\n  ki: {}' })
+      ).triggers;
+
+      expect(trigger).toEqual({ type: 'manual' });
+    });
+
+    it.each([
+      ['document', () => renderDocumentOrchestrationTemplate(documentValues)],
+      ['unit profile', () => renderUnitProfileTemplate(unitValues)],
+      ['index metadata', () => renderIndexMetadataTemplate(indexMetadataValues)],
+    ])(
+      'runs the %s loop five at a time, matching the pilot size of 5 the automations skill names',
+      (_name, render) => {
+        const loops = allSteps(parse(render()).steps).filter((step) => step.type === 'parallel');
+
+        expect(loops).not.toHaveLength(0);
+        loops.forEach((loop) => expect(loop.concurrency).toBe(5));
       }
     );
 

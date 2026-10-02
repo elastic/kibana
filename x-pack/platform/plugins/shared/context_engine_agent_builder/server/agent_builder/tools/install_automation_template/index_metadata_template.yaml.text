@@ -33,15 +33,24 @@ tags:
 
 triggers:
   - type: manual
+    inputs:
+      properties:
+        pilot_size:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Profiles only this many sources, to measure a run before the full one.
+      additionalProperties: false
 
 steps:
   # One profile per source. Profiling a source costs a model call, and no source's profile depends
   # on another's, so five run at a time. A parallel branch cannot hold an `if` or an `on-failure`,
   # so verification runs inside `create_ki` rather than as a gate. `sources` is capped at 100, the
-  # engine's fan-out limit.
+  # engine's fan-out limit. A pilot takes the first `pilot_size` sources, so the full run replaces
+  # its KIs; without the input `chunk` returns the whole list as one group.
   - name: loop_sources
     type: parallel
-    foreach: "{{ consts.sources | json }}"
+    foreach: "{{ consts.sources | chunk: inputs.pilot_size | first | json }}"
     concurrency: 5
     # One source that fails to profile should not cost the rest: `settled` runs every branch to a
     # terminal state, where the default `fail-fast` stops scheduling on the first failure.

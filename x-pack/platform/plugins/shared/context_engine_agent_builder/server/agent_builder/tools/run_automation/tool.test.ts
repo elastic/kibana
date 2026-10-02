@@ -189,16 +189,33 @@ describe('run_automation tool', () => {
         createConfirmationContext({ workflowId: 'wf-1', pilotSize: 3 })
       );
 
-      expect(confirmation?.message).toMatch(/Run a pilot of "Nightly Enrichment" over 3 /);
-      expect(confirmation?.message).not.toContain('full corpus');
+      expect(confirmation?.message).toMatch(/Run a pilot of "Nightly Enrichment" over 3 items\?/);
+      expect(confirmation?.message).toMatch(/writes up to 3 knowledge indicators/);
+      expect(confirmation?.message).not.toMatch(/full corpus|documents or units|model call/);
       expect(confirmation?.confirm_text).toBe('Run pilot');
     });
 
-    it('describes pilot mode without telling the agent when to use it', () => {
+    it('makes no per-document model-call claim for a full run, which not every template makes', async () => {
+      getWorkflowMock.mockResolvedValue({ id: 'wf-1', name: 'Nightly Enrichment', enabled: true });
+
+      const confirmation = await createTool().confirmation?.getConfirmation?.(
+        createConfirmationContext({ workflowId: 'wf-1' })
+      );
+
+      expect(confirmation?.message).toMatch(/Run "Nightly Enrichment" over the full corpus\?/);
+      expect(confirmation?.message).not.toMatch(/model call per document/);
+    });
+
+    it('describes pilot mode for the templates that have it without telling the agent when to use it', () => {
       const { description, schema } = createTool();
       const pilotDescription = schema.shape.pilotSize.description ?? '';
 
-      expect(pilotDescription).toMatch(/document_orchestration|unit_profile/);
+      expect(pilotDescription).toMatch(
+        /Works on automations installed from the document_orchestration, unit_profile or index_metadata template/
+      );
+      expect(`${description} ${pilotDescription}`).not.toMatch(
+        /documents or units|document_orchestration or unit_profile/
+      );
       expect(`${description} ${pilotDescription}`).not.toMatch(/before the full run|always pilot/i);
     });
   });
