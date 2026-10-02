@@ -28,7 +28,7 @@ const createMockLocator = (): LocatorPublic<AlertingV2RulesLocatorParams> =>
 const SEARCH_HOST = createAlertingV2HostApp('search', {
   rules: '/alerting',
   ruleLibrary: '/alerting/library',
-  episodes: '/alerting/inbox',
+  alerts: '/alerting/inbox',
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
 });
@@ -36,7 +36,7 @@ const SEARCH_HOST = createAlertingV2HostApp('search', {
 const OBSERVABILITY_HOST = createAlertingV2HostApp('observability', {
   rules: '/alerting',
   ruleLibrary: '/alerting/library',
-  episodes: '/alerting/inbox',
+  alerts: '/alerting/inbox',
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
 });
@@ -106,7 +106,7 @@ describe('bindLocatorsToHost', () => {
       undefined
     );
     expect(locators.episodesLocators.navigateSync).toHaveBeenCalledWith(
-      { host: SEARCH_HOST.episodes },
+      { host: SEARCH_HOST.alerts },
       undefined
     );
   });

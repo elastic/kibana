@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/293924
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: "Wrap markdown table cells in Security AI Assistant instead of truncating them"
+description: Fixes an issue where long text in table cells in the Security AI Assistant was cut off or caused the whole conversation to scroll horizontally.
