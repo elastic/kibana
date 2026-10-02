@@ -405,7 +405,7 @@ describe('EventClient', () => {
       await client.findLatestByCurrentStatePaginated({
         from: '2026-01-02T00:00:00.000Z',
         to: '2026-01-02T23:59:59.999Z',
-        status: ['closed'],
+        status: ['inactive'],
       });
 
       const { commands, params } = getPageRequest(query);
