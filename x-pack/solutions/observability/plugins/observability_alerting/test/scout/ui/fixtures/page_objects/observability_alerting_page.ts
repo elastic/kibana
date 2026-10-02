@@ -83,7 +83,7 @@ export class ObservabilityAlertingPage {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.appNotFoundPageContent = this.page.testSubj.locator('appNotFoundPageContent');
     this.requiredPrivilegesPrompt = this.page.testSubj.locator('alertingRequiredPrivilegesPrompt');
-    this.episodesListPage = this.page.testSubj.locator('alertingV2EpisodesListPage');
+    this.episodesListPage = this.page.testSubj.locator('alertingV2AlertsListPage');
     this.episodesKpisAlertsPanel = this.page.testSubj.locator('episodesKpisAlertsPanel');
     this.episodesKpisAlertActionsPanel = this.page.testSubj.locator(
       'episodesKpisAlertActionsPanel'
@@ -99,7 +99,7 @@ export class ObservabilityAlertingPage {
     this.tagsFilterSearch = this.page.getByPlaceholder('Search alert tags…');
     this.v1RulesTab = this.page.testSubj.locator('v1RulesTab');
     this.v2RulesTab = this.page.testSubj.locator('v2RulesTab');
-    this.inboxPage = this.page.testSubj.locator('alertingV2EpisodesListPage');
+    this.inboxPage = this.page.testSubj.locator('alertingV2AlertsListPage');
     this.expandRowButton = this.page.testSubj.locator('docTableExpandToggleColumn');
     this.episodeFlyout = this.page.testSubj.locator('alertingV2EpisodeFlyout');
     this.takeActionButton = this.page.testSubj.locator('alertingV2EpisodeFlyoutTakeActionButton');
@@ -107,7 +107,7 @@ export class ObservabilityAlertingPage {
     this.viewRuleDetailsLink = this.page.testSubj.locator(
       'alertingV2EpisodeDetailsViewRuleDetailsButton'
     );
-    this.episodeDetailsPage = this.page.testSubj.locator('alertingV2EpisodeDetailsPage');
+    this.episodeDetailsPage = this.page.testSubj.locator('alertingV2AlertDetailsPage');
     this.ruleDetailLayout = this.page.testSubj.locator('ruleDetailLayout');
     this.toasts = this.page.components.toast().toasts;
   }
@@ -146,7 +146,7 @@ export class ObservabilityAlertingPage {
 
   async gotoInboxFilteredByRule(ruleId: string): Promise<void> {
     const search = new URLSearchParams({
-      _a: `(episodesList:(ruleId:'${ruleId}'))`,
+      _a: `(alertsList:(ruleId:'${ruleId}'))`,
     });
     await this.goto(`${OBSERVABILITY_ALERTING_INBOX_PATH}?${search.toString()}`);
     await this.inboxPage.waitFor({ state: 'visible' });

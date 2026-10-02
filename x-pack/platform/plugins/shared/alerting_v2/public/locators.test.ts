@@ -25,7 +25,7 @@ import {
 const OBSERVABILITY_HOST: AlertingV2HostApp = createAlertingV2HostApp('observabilityAlerting', {
   rules: '/rules/v2',
   ruleLibrary: '/rule-library',
-  episodes: '/inbox',
+  alerts: '/inbox',
   actionPolicies: '/action-policies',
   executionHistory: '/execution-history',
 });
@@ -33,7 +33,7 @@ const OBSERVABILITY_HOST: AlertingV2HostApp = createAlertingV2HostApp('observabi
 const SEARCH_HOST: AlertingV2HostApp = createAlertingV2HostApp('search', {
   rules: '/alerting',
   ruleLibrary: '/alerting/library',
-  episodes: '/alerting/inbox',
+  alerts: '/alerting/inbox',
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
 });
@@ -146,24 +146,24 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
     it('resolves list', async () => {
       expect(await locator.getLocation({})).toMatchObject({
         app: 'management',
-        path: '/alertingV2/episodes',
+        path: '/alertingV2/alerts',
       });
     });
 
     it('resolves episode details', async () => {
       expect(await locator.getLocation({ episodeId: 'ep-1' })).toMatchObject({
-        path: '/alertingV2/episodes/ep-1',
+        path: '/alertingV2/alerts/ep-1',
       });
     });
 
     it('encodes episodeId', async () => {
       const loc = await locator.getLocation({ episodeId: 'ep/special chars' });
-      expect(loc.path).toBe('/alertingV2/episodes/ep%2Fspecial%20chars');
+      expect(loc.path).toBe('/alertingV2/alerts/ep%2Fspecial%20chars');
     });
 
     it('resolves list with filters', async () => {
       const loc = await locator.getLocation({ filters: { ruleId: 'r-1', status: 'active' } });
-      expect(loc.path).toContain('/alertingV2/episodes?');
+      expect(loc.path).toContain('/alertingV2/alerts?');
       expect(loc.path).toContain('_a=');
     });
 
@@ -176,12 +176,12 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
 
     it('ignores empty filters', async () => {
       const loc = await locator.getLocation({ filters: {} });
-      expect(loc.path).toBe('/alertingV2/episodes');
+      expect(loc.path).toBe('/alertingV2/alerts');
     });
 
     it('ignores empty groupingValues', async () => {
       const loc = await locator.getLocation({ filters: { groupingValues: {} } });
-      expect(loc.path).toBe('/alertingV2/episodes');
+      expect(loc.path).toBe('/alertingV2/alerts');
     });
   });
 
@@ -189,7 +189,7 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
     const locator = AlertingV2EpisodesLocatorDefinition;
 
     it('resolves list', async () => {
-      expect(await locator.getLocation({ host: OBSERVABILITY_HOST.episodes })).toMatchObject({
+      expect(await locator.getLocation({ host: OBSERVABILITY_HOST.alerts })).toMatchObject({
         app: 'observabilityAlerting',
         path: '/inbox',
       });
@@ -197,7 +197,7 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
 
     it('resolves episode details', async () => {
       expect(
-        await locator.getLocation({ episodeId: 'ep-1', host: OBSERVABILITY_HOST.episodes })
+        await locator.getLocation({ episodeId: 'ep-1', host: OBSERVABILITY_HOST.alerts })
       ).toMatchObject({
         app: 'observabilityAlerting',
         path: '/inbox/ep-1',
@@ -298,13 +298,13 @@ describe('createAlertingV2HostApp', () => {
     const host = createAlertingV2HostApp('myApp', {
       rules: '/r',
       ruleLibrary: '/rl',
-      episodes: '/e',
+      alerts: '/e',
       actionPolicies: '/ap',
       executionHistory: '/eh',
     });
 
     expect(host.rules).toEqual({ app: 'myApp', pathPrefix: '/r' });
-    expect(host.episodes).toEqual({ app: 'myApp', pathPrefix: '/e' });
+    expect(host.alerts).toEqual({ app: 'myApp', pathPrefix: '/e' });
   });
 });
 

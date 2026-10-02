@@ -48,8 +48,13 @@ const clockTime = (iso: string) =>
   formatDateLocally(iso, { hour: 'numeric', minute: '2-digit', second: '2-digit' });
 
 /** The element of a piece of HTML, to add to the page as it is (`renderPage` would take the layer's containers away). */
-const parse = (html: string): Element =>
-  new DOMParser().parseFromString(html, 'text/html').body.firstElementChild!;
+const parse = (html: string): HTMLElement => {
+  const element = new DOMParser().parseFromString(html, 'text/html').body.firstElementChild;
+  if (!(element instanceof HTMLElement)) {
+    throw new Error('Expected an HTML element');
+  }
+  return element;
+};
 
 describe('CommentsLayer', () => {
   mockLayout();
@@ -312,7 +317,7 @@ describe('CommentsLayer', () => {
     // The element is not on the page: the row says so, and Enter starts the guide to it.
     const goneRow = screen.getByTestId('devCommentsPanelItem-gone');
     const row = within(goneRow).getByRole('button', { name: /Where did it go/ });
-    expect(row).toHaveAccessibleName(expect.stringContaining('Comment not visible on this page'));
+    expect(row).toHaveAccessibleName(expect.stringContaining('Comment not visible'));
     act(() => row.focus());
     await user.keyboard('{Enter}');
     expect(controller.store.getState().guide).toEqual({ id: 'gone', navigating: false });
@@ -1044,6 +1049,84 @@ describe('CommentsLayer', () => {
     });
     await screen.findByTestId('devCommentsPin-onTip');
     await screen.findByRole('dialog', { name: 'Comment thread' });
+  });
+
+  it('opens the screenshot of a tooltip comment full screen without the tooltip, and the comment, going', async () => {
+    const { levels } = renderHook(() => useEuiTheme(), { wrapper: EuiThemeProvider }).result.current
+      .euiTheme;
+    renderPage(
+      `<button id="save" type="button" aria-describedby="tip" data-rect="0,0,80,20">Save</button>`
+    );
+    const tip = parse(`<div id="tip" role="tooltip" data-rect="0,30,120,20">Saves the rule</div>`);
+    const onTip = createComment('onTip', {
+      anchor: {
+        locators: [{ type: 'text', tag: '[role="tooltip"]', value: 'Saves the rule' }],
+        relativeX: 0.5,
+        relativeY: 0.5,
+      },
+      snapshot: { mimeType: 'image/jpeg', width: 800, height: 600, image: 'AAAA' },
+    });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([onTip]) });
+    enter(controller);
+    await act(async () => {
+      document.body.append(tip);
+    });
+    // As EUI draws it: above the screenshot's mask, which sits under the toasts.
+    tip.style.zIndex = String(levels.toast);
+
+    // As EUI does: the tooltip goes when the pointer leaves the button.
+    const save = query('#save');
+    const left = jest.fn(() => tip.remove());
+    save.addEventListener('mouseleave', left);
+    const leaveTowardTip = (type: string) =>
+      save.dispatchEvent(
+        new MouseEvent(type, {
+          bubbles: type === 'mouseout',
+          clientX: 40,
+          clientY: 25,
+          relatedTarget: tip,
+        })
+      );
+    leaveTowardTip('mouseout');
+    leaveTowardTip('mouseleave');
+    expect(left).not.toHaveBeenCalled();
+
+    fireEvent.click(await screen.findByTestId('devCommentsPin-onTip'));
+    const thread = await screen.findByRole('dialog', { name: 'Comment thread' });
+    fireEvent.click(within(thread).getByTestId('devCommentsShowSnapshot'));
+    fireEvent.click(await within(thread).findByTestId('activateFullScreenButton'));
+
+    expect(await screen.findByTestId('fullScreenOverlayMask')).toBeInTheDocument();
+    expect(screen.getByTestId('devCommentsThread')).toBeInTheDocument();
+    expect(tip.isConnected).toBe(true);
+    expect(left).not.toHaveBeenCalled();
+    // Under the mask, so it does not cover the screenshot; still showing, so the comment stays.
+    expect(Number(tip.style.zIndex)).toBeLessThan(Number(levels.mask));
+
+    // The pointer wanders across the screenshot, far from the tooltip.
+    act(() => {
+      document.body.dispatchEvent(
+        new MouseEvent('pointermove', { bubbles: true, clientX: 900, clientY: 500 })
+      );
+    });
+    expect(left).not.toHaveBeenCalled();
+    expect(screen.getByTestId('devCommentsThread')).toBeInTheDocument();
+
+    // Closed, the comment is still there; once the pointer is off, the tooltip goes and the pin with it.
+    fireEvent.click(screen.getByTestId('deactivateFullScreenButton'));
+    expect(screen.queryByTestId('fullScreenOverlayMask')).not.toBeInTheDocument();
+    expect(screen.getByTestId('devCommentsThread')).toBeInTheDocument();
+    expect(left).not.toHaveBeenCalled();
+    expect(tip.style.zIndex).toBe(String(levels.toast));
+
+    act(() => {
+      document.body.dispatchEvent(
+        new MouseEvent('pointermove', { bubbles: true, clientX: 900, clientY: 500 })
+      );
+    });
+    expect(left).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(screen.queryByTestId('devCommentsThread')).not.toBeInTheDocument());
+    expect(controller.store.getState().activeThreadId).toBe('onTip');
   });
 
   it('marks a comment being written on a tooltip over the tooltip, like its pin will be, and one on the page under the panel', async () => {
