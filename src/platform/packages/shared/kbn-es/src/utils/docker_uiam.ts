@@ -103,11 +103,13 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       'elastic',
 
       // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
-      // when total stack RSS approaches Docker VM limit.
+      // when total stack RSS approaches Docker VM limit. The emulator cold-starts
+      // PostgreSQL with five preloaded extensions, a Rust gateway and a Node
+      // explorer, which does not fit in 1g; this is a ceiling, not a reservation.
       '--memory',
-      '1g',
+      '3g',
       '--memory-swap',
-      '1g',
+      '3g',
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
