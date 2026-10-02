@@ -232,7 +232,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     );
 
     const emptyState = (
-      <EuiPanel>
+      <EuiPanel hasBorder={false} hasShadow={false}>
         <EuiText size="xs" color="subdued">
           {isFiltered
             ? EMPTY_CONVERSATION_QUEUE.emptyQueueWithFilter
