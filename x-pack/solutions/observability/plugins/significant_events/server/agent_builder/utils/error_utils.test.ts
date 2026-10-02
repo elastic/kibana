@@ -53,12 +53,12 @@ describe('classifyError', () => {
 
   it('returns lock contention message for 409 statusCode', () => {
     const err = Object.assign(new Error('conflict'), { statusCode: 409 });
-    expect(classifyError(err)).toContain('Another stream operation is in progress');
+    expect(classifyError(err)).toContain('Another source operation is in progress');
   });
 
   it('returns lock contention message for "Could not acquire lock" in message', () => {
     expect(classifyError(new Error('Could not acquire lock on streams/apply_changes'))).toContain(
-      'Another stream operation is in progress'
+      'Another source operation is in progress'
     );
   });
 

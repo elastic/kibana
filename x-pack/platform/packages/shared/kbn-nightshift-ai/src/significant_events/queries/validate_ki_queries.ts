@@ -260,7 +260,7 @@ export async function validateKIQueries({
             status: 'Failed to add',
             failureReason: 'unknown_features',
             exactDuplicate,
-            error: `feature_ids must reference at least one feature belonging to this stream. Unknown IDs: [${rawFeatureIds.join(
+            error: `feature_ids must reference at least one feature belonging to this source. Unknown IDs: [${rawFeatureIds.join(
               ', '
             )}]`,
           };
@@ -275,7 +275,7 @@ export async function validateKIQueries({
             valid: false,
             status: 'Duplicate',
             exactDuplicate,
-            error: 'This query already exists for this stream.',
+            error: 'This query already exists for this source.',
           };
         }
 

@@ -30,7 +30,7 @@ const readQueryOccurrencesRoute = createServerRoute({
         .max(20)
         .regex(BUCKET_SIZE_PATTERN)
         .describe('Size of time buckets for aggregation'),
-      query: z.string().max(4096).optional().describe('Query string to filter stream queries'),
+      query: z.string().max(4096).optional().describe('Query string to filter source queries'),
       sourceIds: z
         .union([
           z

@@ -125,7 +125,7 @@ export const createSignificantEventDetectionAttachmentType = ({
       }),
     }),
     getAgentDescription: () =>
-      'A Significant Events detection attachment represents a change-point observation from an alerting rule on a stream. Use it as authoritative context about the attached detection when answering questions.',
+      'A Significant Events detection attachment represents a change-point observation from an alerting rule on a source. Use it as authoritative context about the attached detection when answering questions.',
     getTools: () => [],
   };
 };

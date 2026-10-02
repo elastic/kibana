@@ -104,7 +104,7 @@ export const createSignificantEventFeatureAttachmentType = ({
       }),
     }),
     getAgentDescription: () =>
-      'A Significant Events knowledge indicator feature attachment represents a discovered entity or operational pattern on a stream. Use it as authoritative context about the attached feature when answering questions.',
+      'A Significant Events knowledge indicator feature attachment represents a discovered entity or operational pattern on a source. Use it as authoritative context about the attached feature when answering questions.',
     getTools: () => [],
   };
 };

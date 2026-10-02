@@ -269,10 +269,11 @@ export async function searchKnowledgeIndicatorsToolHandler({
       const errorMessage =
         error instanceof Error ? error.stack || error.message : String(error ?? 'Unknown error');
       logger.warn(
-        `ki_search: failed to fetch features for stream "${streamName}": ${errorMessage}`
+        `ki_search: failed to fetch features for source "${streamName}": ${errorMessage}`
       );
     },
     getStreamNames: async () => [...catalog.byId.keys()],
+    getSourceSlug: (sourceId) => catalog.byId.get(sourceId)?.slug,
     getFeatures: async (streamName, { searchText, featureTypes, featureIds }) => {
       if (searchText) {
         return (await kiClient.findFeatures(streamName, searchText, { featureTypes, featureIds }))

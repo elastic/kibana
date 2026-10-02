@@ -321,7 +321,7 @@ async function runInferredIteration({
     buildKnownFeatureIds(allKnownFeatures);
   if (knownFeatureIdsDropped > 0) {
     logger.debug(
-      `known_feature_ids inventory for stream "${sourceId}" exceeded its budget; dropped the ${knownFeatureIdsDropped} stalest ids`
+      `known_feature_ids inventory for source "${sourceId}" exceeded its budget; dropped the ${knownFeatureIdsDropped} stalest ids`
     );
   }
   const excludedSummaries: ExcludedFeatureSummary[] = excludedFeatures

@@ -7,7 +7,6 @@
 
 import { css } from '@emotion/react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import {
   LensConfigBuilder,
@@ -19,7 +18,6 @@ import type { LifecycleDetection } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '../hooks/use_kibana';
-import { useSourcesById } from '../hooks/use_sources_by_id';
 import {
   DETECTION_OCCURRENCE_BUCKET_SIZE,
   getChangePointLabel,
@@ -33,15 +31,6 @@ const DEFAULT_SPACE_ID = 'default';
 const OCCURRENCE_QUERY_LIMIT = 100;
 
 type LensESQLConfig = LensConfig & { dataset: LensESQLDataset };
-
-export const getSourceDataTypeLabel = (esql: string | undefined): string =>
-  esql && getIndexPatternFromESQLQuery(esql).startsWith('metrics')
-    ? i18n.translate('xpack.nightshift.detectionFlyout.trend.metricsLabel', {
-        defaultMessage: '[Metrics]',
-      })
-    : i18n.translate('xpack.nightshift.detectionFlyout.trend.logsLabel', {
-        defaultMessage: '[Logs]',
-      });
 
 export const buildDetectionOccurrencesEsql = ({
   ruleUuid,
@@ -137,10 +126,7 @@ export function ChangePointLensChart({
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { dataViews, lens, spaces } = useKibana().services;
-  const { sourcesById } = useSourcesById();
-  const esql = sourcesById.get(detection.source_id)?.esql;
   const changePointLabel = getChangePointLabel(detection.change_point_type);
-  const title = `${getSourceDataTypeLabel(esql)} ${changePointLabel}`;
   const timeRange = useMemo(() => {
     const range = getDetectionOccurrenceTimeRange(detection['@timestamp']);
     return range
@@ -176,7 +162,7 @@ export function ChangePointLensChart({
       dangerColor: euiTheme.colors.danger,
       esqlQuery,
       timestamp: detection['@timestamp'],
-      title,
+      title: changePointLabel,
     });
     const builder = new LensConfigBuilder(dataViews);
     return builder.build(config, {
@@ -190,7 +176,6 @@ export function ChangePointLensChart({
     euiTheme.colors.vis.euiColorVis0,
     spaces,
     timeRange,
-    title,
   ]);
 
   const LensEmbeddableComponent = lens.EmbeddableComponent;

@@ -28,7 +28,7 @@ const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/features',
   options: {
     access: 'internal',
-    summary: 'Upserts a feature for a stream',
+    summary: 'Upserts a feature for a source',
     description: 'Upserts the specified feature',
   },
   security: {
@@ -87,7 +87,7 @@ const deleteFeatureRoute = createServerRoute({
   endpoint: 'DELETE /internal/streams/{sourceId}/features/{id}',
   options: {
     access: 'internal',
-    summary: 'Deletes a feature for a stream',
+    summary: 'Deletes a feature for a source',
     description: 'Deletes the specified feature',
   },
   security: {
@@ -123,7 +123,7 @@ const deleteFeatureRoute = createServerRoute({
       await kiClient.reconcileStream(params.path.sourceId);
     } catch (err) {
       logger.warn(
-        `reconcileStream after feature delete failed for stream "${params.path.sourceId}": ${
+        `reconcileStream after feature delete failed for source "${params.path.sourceId}": ${
           err instanceof Error ? err.message : String(err)
         }`
       );
@@ -137,8 +137,8 @@ const listFeaturesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{sourceId}/features',
   options: {
     access: 'internal',
-    summary: 'Lists all features for a stream',
-    description: 'Fetches all features for the specified stream',
+    summary: 'Lists all features for a source',
+    description: 'Fetches all features for the specified source',
   },
   security: {
     authz: {
@@ -185,7 +185,7 @@ export const listAllFeaturesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_features',
   options: {
     access: 'internal',
-    summary: 'Lists all features across streams',
+    summary: 'Lists all features across sources',
     description: 'Fetches all features the user has access to',
   },
   security: {
@@ -242,7 +242,7 @@ const bulkFeaturesRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Bulk changes to features',
-    description: 'Add or delete features in bulk for a given stream',
+    description: 'Add or delete features in bulk for a given source',
   },
   security: {
     authz: {
@@ -311,7 +311,7 @@ const bulkFeaturesRoute = createServerRoute({
         await kiClient.reconcileStream(sourceId);
       } catch (err) {
         logger.warn(
-          `reconcileStream after bulk feature ops failed for stream "${sourceId}": ${
+          `reconcileStream after bulk feature ops failed for source "${sourceId}": ${
             err instanceof Error ? err.message : String(err)
           }`
         );
@@ -326,9 +326,9 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/features/_bulk',
   options: {
     access: 'internal',
-    summary: 'Bulk feature operations across streams',
+    summary: 'Bulk feature operations across sources',
     description:
-      'Performs bulk delete / exclude / restore operations on features across multiple streams in a single request. Client sends flat operations keyed by feature UUID; the server resolves stream ownership via featureClient.findFeaturesByUuids and delegates per-stream to featureClient.bulk.',
+      'Performs bulk delete / exclude / restore operations on features across multiple sources in a single request. Client sends flat operations keyed by feature UUID; the server resolves source ownership via featureClient.findFeaturesByUuids and delegates per-source to featureClient.bulk.',
   },
   security: {
     authz: {
@@ -378,7 +378,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     const resolved = await kiClient.findFeaturesByIds(requestedUuids);
     const skippedFromLookup = requestedUuids.length - resolved.length;
 
-    // Group resolved ops by stream.
+    // Group resolved ops by source.
     const byStream = resolved.reduce<Record<string, KIBulkOperation[]>>(
       (acc, { id: featureId, source_id: sourceId }) => {
         const op = opsByUuid.get(featureId);
@@ -414,7 +414,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
         }
       } catch (error) {
         logger.error(
-          `Bulk feature operation failed for stream ${streamName}: ${
+          `Bulk feature operation failed for source ${streamName}: ${
             error instanceof Error ? error.message : String(error)
           }`
         );
@@ -428,7 +428,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
         await kiClient.reconcileStream(streamName);
       } catch (err) {
         logger.warn(
-          `reconcileStream after bulk cross-stream feature ops failed for stream "${streamName}": ${
+          `reconcileStream after bulk cross-source feature ops failed for source "${streamName}": ${
             err instanceof Error ? err.message : String(err)
           }`
         );

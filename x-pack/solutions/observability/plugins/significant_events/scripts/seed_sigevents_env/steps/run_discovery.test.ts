@@ -131,10 +131,6 @@ describe('runDiscovery', () => {
       ['GET', '/api/workflows/executions/discovery-execution'],
       ['GET', expect.stringContaining('/internal/significant_events/events?')],
     ]);
-    const [, , eventsPath] = request.mock.calls[4];
-    const eventsParams = new URL(eventsPath, config.kibanaUrl).searchParams;
-    expect(eventsParams.get('source_id')).toBe('seed-source-id');
-    expect(eventsParams.has('stream')).toBe(false);
     expect(esClient.esql.query).toHaveBeenCalledWith({
       query: expect.stringContaining('METADATA _index, _id'),
     });

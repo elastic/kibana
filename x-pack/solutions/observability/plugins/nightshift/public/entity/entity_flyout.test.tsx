@@ -17,13 +17,6 @@ import {
 import { EntityFlyout } from './entity_flyout';
 
 const mockOpenChat = jest.fn();
-const mockSourceTitles = new Map<string, string>();
-
-jest.mock('../hooks/use_sources_by_id', () => ({
-  useSourcesById: () => ({
-    getSourceTitle: (sourceId: string) => mockSourceTitles.get(sourceId) ?? sourceId,
-  }),
-}));
 
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -38,7 +31,7 @@ jest.mock('../hooks/use_kibana', () => ({
 const mockFeature: Feature = {
   uuid: 'feature-uuid-1',
   id: 'synthetics-task-manager',
-  source_id: 'source-synthetics',
+  source_id: 'logs.synthetics',
   type: 'entity',
   subtype: 'service',
   title: 'synthetics-task-manager',
@@ -60,8 +53,6 @@ const mockFeature: Feature = {
 describe('EntityFlyout', () => {
   beforeEach(() => {
     mockOpenChat.mockClear();
-    mockSourceTitles.clear();
-    mockSourceTitles.set('source-synthetics', 'Synthetics logs');
   });
 
   const renderFlyout = (props: Partial<React.ComponentProps<typeof EntityFlyout>> = {}) =>
@@ -80,7 +71,6 @@ describe('EntityFlyout', () => {
     expect(screen.getByText('Entity')).toBeInTheDocument();
     expect(screen.getByText('Service')).toBeInTheDocument();
     expect(screen.getByText('82% confidence')).toBeInTheDocument();
-    expect(screen.getByText('Synthetics logs')).toBeInTheDocument();
   });
 
   it('does not render the Service badge for non-service entities', () => {

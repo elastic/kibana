@@ -31,13 +31,6 @@ jest.mock('../hooks/use_fetch_stream_features', () => ({
   useFetchStreamFeatures: () => mockStreamFeatures(),
 }));
 
-jest.mock('../hooks/use_sources_by_id', () => ({
-  useSourcesById: () => ({
-    sourcesById: new Map(),
-    getSourceTitle: (sourceId: string) => sourceId,
-  }),
-}));
-
 jest.mock('./change_point_lens_chart', () => ({
   ChangePointLensChart: ({ detection }: { detection: LifecycleDetection }) => (
     <div data-test-subj="nightshiftDetectionLensChart" data-rule-uuid={detection.rule_uuid}>

@@ -15,7 +15,7 @@ const keepAlivePersistentIndicatorsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/knowledge_indicators/_keep_alive',
   options: {
     access: 'internal',
-    summary: 'Keep alive persistent (durable or excluded) knowledge indicators for a stream',
+    summary: 'Keep alive persistent (durable or excluded) knowledge indicators for a source',
   },
   security: {
     authz: {

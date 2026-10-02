@@ -95,22 +95,43 @@ steps:
     on-failure:
       continue: true
 
-  # Lists the space's sources once so every caller can pass plain ids. Capped at one page of 100.
-  - name: list_nightshift_sources
-    type: kibana.request
+  # Reads the whole source catalog so callers can pass plain ids or slugs. The list endpoint returns
+  # at most 100 sources per page, so this pages until a short page comes back. A failed page ends the
+  # loop with what was collected so far: a missing source list must not block the investigation.
+  - name: init_nightshift_sources
+    type: data.set
     with:
-      method: GET
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/sources?per_page=100'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-    on-failure:
-      continue: true
+      nightshift_sources: []
+      nightshift_sources_page: 1
+      nightshift_sources_exhausted: false
+
+  - name: list_nightshift_sources
+    type: while
+    condition: '${{ variables.nightshift_sources_exhausted == false }}'
+    max-iterations: 100
+    steps:
+      - name: fetch_nightshift_sources_page
+        type: kibana.request
+        with:
+          method: GET
+          path: '/s/{{ workflow.spaceId }}/internal/nightshift/sources?per_page=100&page={{ variables.nightshift_sources_page }}'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+        on-failure:
+          continue: true
+
+      - name: add_nightshift_sources_page
+        type: data.set
+        with:
+          nightshift_sources: '${{ variables.nightshift_sources | concat: steps.fetch_nightshift_sources_page.output.sources }}'
+          nightshift_sources_page: '${{ variables.nightshift_sources_page | plus: 1 }}'
+          nightshift_sources_exhausted: '${{ steps.fetch_nightshift_sources_page.output.sources.size != 100 }}'
 
   - name: resolve_investigation_sources
     type: data.set
     with:
       investigation_sources: >-
-        ${{ steps.list_nightshift_sources.output.sources | default: []
+        ${{ variables.nightshift_sources
           | where_exp: 'source', 'inputs.source_ids contains source.id or inputs.source_ids contains source.slug' }}
 
   - name: investigate

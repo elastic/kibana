@@ -32,7 +32,7 @@ import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../
 import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
 import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
-import { sourceToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
+import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
 
@@ -286,7 +286,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       return { ...result, connectorId };
     } catch (error) {
       routeLogger.error(
-        `Inferred feature identification failed for stream [${sourceId}]: ${
+        `Inferred feature identification failed for source [${sourceId}]: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
@@ -327,7 +327,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/features/_identify/computed',
   options: {
     access: 'internal',
-    summary: 'Generate and persist computed KI features for a stream',
+    summary: 'Generate and persist computed KI features for a source',
     timeout: { idleSocket: 300_000 },
   },
   security: {
@@ -408,7 +408,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       };
     } catch (error) {
       routeLogger.error(
-        `Computed feature identification failed for stream [${sourceId}]: ${
+        `Computed feature identification failed for source [${sourceId}]: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
@@ -421,7 +421,7 @@ const shouldIdentifyRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{sourceId}/features/_should_identify',
   options: {
     access: 'internal',
-    summary: 'Check whether KI features identification should run for a stream',
+    summary: 'Check whether KI features identification should run for a source',
   },
   security: {
     authz: {
@@ -440,7 +440,7 @@ const shouldIdentifyRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
     // Intentionally not guarded by assertNotPaused: continuous onboarding
-    // calls this route to decide whether to skip a stream, and a 409 here
+    // calls this route to decide whether to skip a source, and a 409 here
     // would turn a clean skip into a workflow failure.
 
     const { source } = await scopedClients.sourcesClient.get(params.path.sourceId);

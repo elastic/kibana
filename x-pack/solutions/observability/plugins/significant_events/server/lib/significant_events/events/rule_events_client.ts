@@ -208,7 +208,7 @@ const eventIdIn = (eventIds: string[]): ESQLAstExpression =>
  * `FIELD_EXTRACT`'s output for array, scalar-string, and absent-field shapes (verified live
  * against `.rule-events` on nightshift-program#1492) — no extra normalization is needed here.
  */
-const streamNamesIntersects = (values: string[]): ESQLAstExpression =>
+const sourceIdsIntersects = (values: string[]): ESQLAstExpression =>
   esql.exp`MV_INTERSECTS(FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
     'source_ids'
   )}), [${values.map((value) => esql.str(value))}])`;
@@ -301,7 +301,7 @@ export class RuleEventsClient implements SignificantEventsReadClient {
       )})`;
     }
     if (options.sourceIds?.length) {
-      query = query.where`${streamNamesIntersects(options.sourceIds)}`;
+      query = query.where`${sourceIdsIntersects(options.sourceIds)}`;
     }
     if (options.eventIds?.length) {
       query = query.where`${eventIdIn(options.eventIds)}`;
@@ -417,7 +417,7 @@ export class RuleEventsClient implements SignificantEventsReadClient {
     query = query.where`${activeStatusWhere()}`;
 
     if (options.sourceIds?.length) {
-      query = query.where`${streamNamesIntersects(options.sourceIds)}`;
+      query = query.where`${sourceIdsIntersects(options.sourceIds)}`;
     }
     if (options.ruleUuids?.length) {
       query = query.where`${ruleUuidsIntersects(options.ruleUuids)}`;

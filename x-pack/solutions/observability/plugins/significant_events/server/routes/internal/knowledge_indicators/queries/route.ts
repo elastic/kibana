@@ -101,7 +101,7 @@ const promoteUnbackedQueriesRoute = createServerRoute({
     access: 'internal',
     summary: 'Promote unbacked queries',
     description:
-      'Creates Kibana rules for stored queries across streams that do not yet have a backing rule, then marks them as backed.',
+      'Creates Kibana rules for stored queries across sources that do not yet have a backing rule, then marks them as backed.',
   },
   security: {
     authz: {
@@ -213,9 +213,9 @@ const bulkDeleteQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_bulk_delete',
   options: {
     access: 'internal',
-    summary: 'Bulk delete queries across streams',
+    summary: 'Bulk delete queries across sources',
     description:
-      'Hard-deletes stored significant-events queries across multiple streams in a single request. Removes backing Kibana rules for any backed queries.',
+      'Hard-deletes stored significant-events queries across multiple sources in a single request. Removes backing Kibana rules for any backed queries.',
   },
   security: {
     authz: {
@@ -258,7 +258,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
     const foundIds = new Set(queryLinks.map((link) => link.query.id));
     const skipped = params.body.queryIds.filter((id) => !foundIds.has(id)).length;
 
-    // Capture backed rule IDs per stream to log on mid-flight failure.
+    // Capture backed rule IDs per source to log on mid-flight failure.
     const byStream = new Map<string, { queryIds: string[]; backedRuleIds: string[] }>();
     for (const link of queryLinks) {
       const bucket = byStream.get(link.source_id) ?? { queryIds: [], backedRuleIds: [] };
@@ -270,7 +270,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
     }
 
     // Fetch only the sources we actually need. Rejections (the saved object is
-    // gone) fail that source's batch, same as a missing stream used to.
+    // gone) fail that source's batch.
     const streamNames = Array.from(byStream.keys());
     const sourceResults = await Promise.allSettled(
       streamNames.map((name) => sourcesClient.get(name))
@@ -306,7 +306,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
         const orphanContext =
           backedRuleIds.length > 0 ? ` candidateOrphanedRuleIds=[${backedRuleIds.join(',')}]` : '';
         sigEventsLogger.error(
-          `Bulk delete failed for stream ${streamName}: ${errorMessage}. ` +
+          `Bulk delete failed for source ${streamName}: ${errorMessage}. ` +
             `queryIds=[${queryIds.join(',')}]${orphanContext}`
         );
         failed += queryIds.length;
@@ -619,7 +619,7 @@ const generateQueriesRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Generate significant events queries',
-    description: 'Runs a single iteration of KI queries generation for the given stream.',
+    description: 'Runs a single iteration of KI queries generation for the given source.',
     timeout: { idleSocket: 600_000 },
   },
   security: {
@@ -710,7 +710,7 @@ const persistQueriesRoute = createServerRoute({
     access: 'internal',
     summary: 'Persist generated queries with deduplication',
     description:
-      'Persists generated significant event queries for a stream, deduplicating by ES|QL and handling rule-backed replacements.',
+      'Persists generated significant event queries for a source, deduplicating by ES|QL and handling rule-backed replacements.',
   },
   security: {
     authz: {

@@ -137,17 +137,8 @@ async function loadDocsFromSnapshot<T>({
 }
 
 /**
- * Snapshots captured before the source id cutover store the feature key as `stream_name`.
- */
-const toFeatureWithSourceId = ({
-  stream_name: legacySourceId,
-  ...doc
-}: Record<string, unknown>): Feature =>
-  ({ ...doc, source_id: doc.source_id ?? legacySourceId } as Feature);
-
-/**
  * Restores sigevents-captured KI features for the given source and returns all
- * {@link Feature} documents, reading `source_id` or the legacy `stream_name`.
+ * {@link Feature} documents.
  */
 export async function loadKIFeaturesFromSnapshot(
   esClient: Client,
@@ -156,7 +147,7 @@ export async function loadKIFeaturesFromSnapshot(
   gcs: GcsConfig,
   sourceId: string = DEFAULT_LOGS_INDEX
 ): Promise<Feature[]> {
-  const docs = await loadDocsFromSnapshot<Record<string, unknown>>({
+  return loadDocsFromSnapshot<Feature>({
     esClient,
     log,
     snapshotName,
@@ -164,14 +155,8 @@ export async function loadKIFeaturesFromSnapshot(
     index: getSnapshotKIFeaturesIndex(snapshotName),
     tempIndexPrefix: 'sigevents-replay-temp-features',
     label: 'KI feature(s)',
-    query: {
-      bool: {
-        should: [{ term: { source_id: sourceId } }, { term: { stream_name: sourceId } }],
-        minimum_should_match: 1,
-      },
-    },
+    query: { term: { source_id: sourceId } },
   });
-  return docs.map(toFeatureWithSourceId);
 }
 
 /**

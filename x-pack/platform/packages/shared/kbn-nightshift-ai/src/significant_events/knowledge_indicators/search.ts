@@ -77,17 +77,23 @@ function featureMatchesTopology(
   return false;
 }
 
+/** Orders sources by slug, which people read, and falls back to the id for unknown sources. */
+type SourceSortKey = (sourceId: string) => string;
+
 const compareFeatures = (
   current: KnowledgeIndicatorFeature,
-  next: KnowledgeIndicatorFeature
+  next: KnowledgeIndicatorFeature,
+  sourceSortKey: SourceSortKey
 ): number => {
   const byConfidence = (next.feature.confidence ?? 0) - (current.feature.confidence ?? 0);
   if (byConfidence !== 0) {
     return byConfidence;
   }
-  const byStream = current.feature.source_id.localeCompare(next.feature.source_id);
-  if (byStream !== 0) {
-    return byStream;
+  const bySource = sourceSortKey(current.feature.source_id).localeCompare(
+    sourceSortKey(next.feature.source_id)
+  );
+  if (bySource !== 0) {
+    return bySource;
   }
 
   const byId = current.feature.id.localeCompare(next.feature.id);
@@ -96,15 +102,16 @@ const compareFeatures = (
 
 const compareQueries = (
   current: KnowledgeIndicatorQuery,
-  next: KnowledgeIndicatorQuery
+  next: KnowledgeIndicatorQuery,
+  sourceSortKey: SourceSortKey
 ): number => {
   const byScore = (next.query.severity_score ?? -1) - (current.query.severity_score ?? -1);
   if (byScore !== 0) {
     return byScore;
   }
-  const byStream = current.source_id.localeCompare(next.source_id);
-  if (byStream !== 0) {
-    return byStream;
+  const bySource = sourceSortKey(current.source_id).localeCompare(sourceSortKey(next.source_id));
+  if (bySource !== 0) {
+    return bySource;
   }
 
   const byId = current.query.id.localeCompare(next.query.id);
@@ -229,23 +236,29 @@ function filterIndicators(
   });
 }
 
-function sortIndicators(indicators: KnowledgeIndicator[]): KnowledgeIndicator[] {
+function sortIndicators(
+  indicators: KnowledgeIndicator[],
+  sourceSortKey: SourceSortKey
+): KnowledgeIndicator[] {
   return [...indicators].sort((a, b) => {
     if (a.kind !== b.kind) return a.kind === 'feature' ? -1 : 1;
-    if (isFeatureIndicator(a) && isFeatureIndicator(b)) return compareFeatures(a, b);
-    if (isQueryIndicator(a) && isQueryIndicator(b)) return compareQueries(a, b);
+    if (isFeatureIndicator(a) && isFeatureIndicator(b)) return compareFeatures(a, b, sourceSortKey);
+    if (isQueryIndicator(a) && isQueryIndicator(b)) return compareQueries(a, b, sourceSortKey);
     return 0;
   });
 }
 
 export async function searchKnowledgeIndicators({
   getStreamNames,
+  getSourceSlug,
   getFeatures,
   getQueries,
   onFeatureFetchError,
   params,
 }: {
   getStreamNames(): Promise<string[]>;
+  /** Slug of a source id, used to order results. Ids sort as is when it is omitted. */
+  getSourceSlug?(sourceId: string): string | undefined;
   getFeatures(
     sourceId: string,
     options: {
@@ -314,7 +327,10 @@ export async function searchKnowledgeIndicators({
     : [];
 
   // Step 5: Filter defensively, sort deterministically, and paginate.
-  const sorted = sortIndicators(filterIndicators([...features, ...queries], params));
+  const sorted = sortIndicators(
+    filterIndicators([...features, ...queries], params),
+    (sourceId) => getSourceSlug?.(sourceId) ?? sourceId
+  );
   const offset = (normalized.page - 1) * normalized.perPage;
   const knowledgeIndicators = sorted.slice(offset, offset + normalized.perPage);
   const hasMore = normalized.page * normalized.perPage < sorted.length;

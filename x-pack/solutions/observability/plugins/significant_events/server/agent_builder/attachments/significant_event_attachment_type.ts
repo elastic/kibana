@@ -136,7 +136,7 @@ export const createSignificantEventAttachmentType = ({
       }),
     }),
     getAgentDescription: () =>
-      'A significant event attachment represents a durable incident-level Streams event. Rendering it inline displays a read-only event summary card in the conversation UI. Use it as authoritative context for the incident and affected streams.',
+      'A significant event attachment represents a durable incident-level event. Rendering it inline displays a read-only event summary card in the conversation UI. Use it as authoritative context for the incident and affected sources.',
     getTools: () => [],
   };
 };

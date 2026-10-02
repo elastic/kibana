@@ -44,9 +44,9 @@ const onboardingExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/onboarding/_execute',
   options: {
     access: 'internal',
-    summary: 'Onboard stream',
+    summary: 'Onboard source',
     description:
-      'Generate features and queries for a stream as part of the significant events discovery workflow.',
+      'Generate features and queries for a source as part of the significant events discovery workflow.',
   },
   security: {
     authz: {
@@ -65,7 +65,7 @@ const onboardingExecuteRoute = createServerRoute({
           .optional()
           .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
           .describe(
-            'Optional list of steps to perform as part of stream onboarding in the specified sequence. By default it will execute all steps.'
+            'Optional list of steps to perform as part of source onboarding in the specified sequence. By default it will execute all steps.'
           ),
         connectors: z
           .object({
@@ -186,8 +186,8 @@ const onboardingStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{sourceId}/onboarding/_status',
   options: {
     access: 'internal',
-    summary: 'Check the status of stream onboarding',
-    description: 'Check the status of onboarding progress for a stream',
+    summary: 'Check the status of source onboarding',
+    description: 'Check the status of onboarding progress for a source',
   },
   security: {
     authz: {
@@ -231,7 +231,7 @@ const onboardingBulkStatusRoute = createServerRoute({
   endpoint: 'POST /internal/streams/onboarding/_bulk_status',
   options: {
     access: 'internal',
-    summary: 'Check the onboarding status of multiple streams',
+    summary: 'Check the onboarding status of multiple sources',
     description:
       'Check the status of onboarding progress for a list of source ids in a single request.',
   },

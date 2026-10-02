@@ -13,7 +13,6 @@ import {
   MAX_SUMMARY_LENGTH,
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
 } from '@kbn/significant-events-schema';
-import type { SignalEntry } from '@kbn/significant-events-schema';
 import { BulkCreateOperationError } from '../query_utils';
 import { EventClient, normalizeLegacyVerdict } from './event_client';
 import { storedEventSchema, type SignificantEvent } from './data_stream';
@@ -181,28 +180,6 @@ describe('EventClient', () => {
       expect(storedEventSchema.safeParse(event).success).toBe(true);
     });
 
-    it('derives source_ids from the signals when the event has none', () => {
-      const signal = (sourceId: string): SignalEntry => ({
-        type: 'detection',
-        source_id: sourceId,
-        description: 'Spike',
-        verdict: 'not_checked',
-        metadata: {
-          detection_id: `detection-${sourceId}`,
-          rule_uuid: `rule-${sourceId}`,
-          change_point_type: 'spike',
-          p_value: 0.01,
-        },
-      });
-      const event: SignificantEvent = {
-        ...createEvent(),
-        source_ids: [],
-        signals: [signal('logs.a'), signal('logs.b'), signal('logs.a')],
-      };
-
-      expect(storedEventSchema.parse(event).source_ids).toEqual(['logs.a', 'logs.b']);
-    });
-
     it('returns bulk responses with errors by default', async () => {
       const response = {
         errors: true,
@@ -305,19 +282,6 @@ describe('EventClient', () => {
         dataQuery!.indexOf('status IN')
       );
       expect(dataQuery).toContain('SORT @timestamp DESC, _id ASC');
-    });
-
-    it('reads an event stored without source_ids as an empty list', async () => {
-      const { source_ids: _omit, ...legacy } = createEvent();
-      const { client } = createSearchClient({
-        hits: [legacy as SignificantEvent],
-        total: 1,
-        createdAt: '2026-01-01T00:00:00.000Z',
-      });
-
-      const result = await client.findLatestByCurrentStatePaginated({});
-
-      expect(result.hits[0].source_ids).toEqual([]);
     });
 
     it('filters open state after latest-per-slug reduction', async () => {

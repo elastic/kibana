@@ -20,7 +20,7 @@ import {
 import { z } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
-import { sourceToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
+import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import {
   loadSourceCatalog,
   resolveSourcesBySlug,

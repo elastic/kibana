@@ -27,7 +27,6 @@ import {
   inventoryEvent,
   checkoutEvent,
   resolvedPaymentEvent,
-  SAMPLE_SOURCES,
 } from './sample_events';
 
 export type NightshiftStorybookScenario =
@@ -179,7 +178,7 @@ const createServices = ({
           return neverResolve();
         }
         if (streamFeaturesScenario === 'error') {
-          throw new Error('The stream features request failed');
+          throw new Error('The source features request failed');
         }
         if (streamFeaturesScenario === 'empty') {
           return { features: [] };
@@ -233,16 +232,6 @@ const createServices = ({
     },
     lens: {
       EmbeddableComponent: StorybookLensEmbeddable,
-    },
-    nightshiftSources: {
-      getClient: async () => ({
-        fetch: async () => ({
-          sources: SAMPLE_SOURCES,
-          total: SAMPLE_SOURCES.length,
-          page: 1,
-          per_page: 100,
-        }),
-      }),
     },
     notifications: {
       toasts: {

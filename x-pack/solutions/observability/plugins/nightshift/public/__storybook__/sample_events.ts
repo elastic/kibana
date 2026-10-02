@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type {
   EventLifecycleResponse,
   Feature,
@@ -297,30 +296,7 @@ export const streamOnlyEntity: Feature = {
   id: 'logs.checkout-api',
   subtype: 'stream',
   title: 'logs.checkout-api',
-  description: 'The source stream associated with the checkout latency detection.',
+  description: 'The source associated with the checkout latency detection.',
   confidence: 0,
   evidence: [],
 };
-
-const SAMPLE_SOURCE_TIMESTAMP = '2026-07-20T08:00:00.000Z';
-
-const sampleSource = (id: string, slug: string, title: string): NightshiftSource => ({
-  id,
-  title,
-  tags: [],
-  esql: 'FROM logs-*',
-  slug,
-  view_name: `$.nightshift.sources.default.${slug}`,
-  enabled: true,
-  created_by: 'elastic',
-  created_at: SAMPLE_SOURCE_TIMESTAMP,
-  updated_at: SAMPLE_SOURCE_TIMESTAMP,
-  esql_updated_at: SAMPLE_SOURCE_TIMESTAMP,
-});
-
-export const SAMPLE_SOURCES: NightshiftSource[] = [
-  sampleSource('logs.checkout-api', 'checkout-api', 'Checkout API logs'),
-  sampleSource('logs.inventory-service', 'inventory-service', 'Inventory service logs'),
-  sampleSource('logs.payment-gateway', 'payment-gateway', 'Payment gateway logs'),
-  sampleSource('logs.shipping-service', 'shipping-service', 'Shipping service logs'),
-];

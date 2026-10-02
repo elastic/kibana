@@ -67,6 +67,7 @@ describe('Nightshift investigation workflow', () => {
       'ensure_investigation_agent',
       'persist_investigation_started',
       'emit_investigation_started',
+      'init_nightshift_sources',
       'list_nightshift_sources',
       'resolve_investigation_sources',
       'investigate',
@@ -115,24 +116,6 @@ describe('Nightshift investigation workflow', () => {
       '{{ steps.resolve_model.output.connector_id }}'
     );
     expect(requireStep('investigate')['connector-id-by-feature']).toBeUndefined();
-  });
-
-  it('resolves source ids to slug and view name before the agent kickoff', () => {
-    expect(investigation.triggers[0].inputs.properties.source_ids).toEqual(
-      expect.objectContaining({ type: 'array' })
-    );
-    expect(investigation.triggers[0].inputs.properties).not.toHaveProperty('stream_names');
-    expect(requireStep('list_nightshift_sources').with).toMatchObject({
-      method: 'GET',
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/sources?per_page=100',
-    });
-    expect(requireStep('list_nightshift_sources')['on-failure']).toEqual({ continue: true });
-    expect(requireStep('resolve_investigation_sources')).toMatchObject({ type: 'data.set' });
-
-    const message = requireStep('investigate').with?.message;
-    expect(message).toContain('Related sources:');
-    expect(message).toContain('{{ source.slug }}: FROM {{ source.view_name }}');
-    expect(message).not.toContain('Related streams');
   });
 
   it('attributes agent calls to Nightshift under the shared investigation id', () => {

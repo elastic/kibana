@@ -16,7 +16,7 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/knowledge_indicators/_reconcile',
   options: {
     access: 'internal',
-    summary: 'Reconcile knowledge indicators for a stream',
+    summary: 'Reconcile knowledge indicators for a source',
   },
   security: {
     authz: {

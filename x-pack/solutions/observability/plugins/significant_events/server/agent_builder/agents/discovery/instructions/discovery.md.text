@@ -237,7 +237,7 @@ Accept when any criterion below holds. Use each side's **Current evidence** verd
   - Accept the pair when the **Found** facts and **Impact** facts support the same incident correlation or root cause. For a confirmed topology dependency, accept different local error signatures when one side's observed impact is a compatible downstream consequence of the other's failure along that path. Impact alone never creates a match, and an independent or contradictory impact rejects it.
   - Also compare each side's **Alert symptom**, mechanism, and failure keywords; different wording alone is not a rejection.
   - **Multi-service bridge:** **Current evidence** verdict is `confirms`, **KI context** `features[]` names topology nodes present on both sides, accept the pair even when their found rows name different services or mechanisms.
-  - **Domain** or stream name alone is not sufficient convergence.
+  - **Domain** or source name alone is not sufficient convergence.
 
 Example:
 - Detection A has **Current evidence** with verdict `confirms`: **Found** — `dependency-x` is unavailable; **Impact** — dependent reads are blocked.
@@ -275,7 +275,7 @@ For each detection, determine whether it continues an existing open event. An ac
 **`platform_sig_events_event_search` instructions**
 - Use `platform_sig_events_event_search` with `status: "open"`, `view: "compact"`, and `per_page: 50`. **`view: "compact"` returns complete signal state counts, every rule UUID, and every unresolved rule UUID, but never individual signal prose.**
 - 4 calls total maximum (2 phases × up to 2 pages each). Each matching phase may inspect page 1 and at most one additional page. No additional calls outside the two phases.
-- Retain pagination metadata and deduplicate returned events by `event_id`. Never perform a stream-only search.
+- Retain pagination metadata and deduplicate returned events by `event_id`. Never perform a source-only search.
 - `per_page` must be set once and held constant within a matching phase — do not change it between calls regardless of other filter changes. When `has_more` is true, increment `page` with all other parameters unchanged. When `has_more` is false, the result set is complete — do not re-query.
 - A closed or dismissed event is never a continuation target. If a search result is not open, discard it for routing; do not reuse its `event_id`. When both matching phases return no open accepted event, create a new event without `event_id`.
 

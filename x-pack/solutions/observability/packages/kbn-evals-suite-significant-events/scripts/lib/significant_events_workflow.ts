@@ -42,17 +42,15 @@ const RAW_DATA_STREAM_SEARCH_LIMIT = 1000;
 
 /**
  * Features snapshot mapping. `dynamic: false` with `properties`/`meta` as `enabled: false` keeps
- * the index lean and prevents mapping explosions from those free-form objects; `source_id` is a
- * keyword for per-source filtering, and the legacy `stream_name` stays mapped so older snapshots
- * still restore. Not reused from `knowledgeIndicatorsMappings` because features arrive flattened
- * from the features API, not in the raw KI shape that mapping describes.
+ * the index lean and prevents mapping explosions from those free-form objects; `stream_name` is a
+ * keyword for per-stream filtering. Not reused from `knowledgeIndicatorsMappings` because features
+ * arrive flattened from the features API, not in the raw KI shape that mapping describes.
  */
 const FEATURES_SNAPSHOT_MAPPING: MappingTypeMapping = {
   dynamic: false,
   properties: {
     id: { type: 'keyword' },
     source_id: { type: 'keyword' },
-    stream_name: { type: 'keyword' },
     type: { type: 'keyword' },
     subtype: { type: 'keyword' },
     title: { type: 'keyword' },

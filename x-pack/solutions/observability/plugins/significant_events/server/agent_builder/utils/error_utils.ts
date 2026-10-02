@@ -60,7 +60,7 @@ export const classifyError = (err: unknown): string => {
     return 'Significant Events activity is paused. Resume it in Settings before starting new activity.';
   }
   if (statusCode === 409 || message.includes('Could not acquire lock')) {
-    return 'Another stream operation is in progress. Try again in a moment.';
+    return 'Another source operation is in progress. Try again in a moment.';
   }
   return `Unexpected error: ${message.slice(0, 200)}`;
 };

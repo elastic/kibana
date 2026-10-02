@@ -384,7 +384,7 @@ const codeAnalysisGroundingSchema: RootSchema<CodeAnalysisGroundingProps> = {
   repository: {
     type: 'keyword',
     _meta: {
-      description: 'The repository/index selected to ground the stream against',
+      description: 'The repository/index selected to ground the source against',
       optional: true,
     },
   },

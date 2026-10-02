@@ -110,7 +110,7 @@ const resetStreamKnowledgeIndicators = async ({
     const orphanContext =
       ruleIds.length > 0 ? ` candidateOrphanedRuleIds=[${ruleIds.join(',')}]` : '';
     logger.error(
-      `Significant events reset failed for stream ${streamName} during KI cleanup: ${errorMessage}.${orphanContext}`
+      `Significant events reset failed for source ${streamName} during KI cleanup: ${errorMessage}.${orphanContext}`
     );
     throw error;
   }
@@ -153,7 +153,7 @@ export const resetSignificantEvents = async ({
   await deleteLegacyRules(ruleIds);
 
   for (const streamName of streamNames) {
-    logger.info(`Significant events reset: clearing KIs and rules for stream "${streamName}"`);
+    logger.info(`Significant events reset: clearing KIs and rules for source "${streamName}"`);
     await resetStreamKnowledgeIndicators({ streamName, kiClient, ruleIds, logger });
   }
 
