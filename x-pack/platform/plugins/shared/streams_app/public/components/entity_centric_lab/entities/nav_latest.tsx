@@ -16,9 +16,10 @@
  *     Observability nav tree reads to rebuild the filtered panel — the same
  *     store super-short-term uses, safe to share since the lab modes are
  *     mutually exclusive.
- *   - Section action (a "Manage saved views" cog on the "Saved views" section
- *     header, via `getSectionAction` / `__kbnSideNavSectionAction__`): opens a
- *     modal to rename / delete saved views.
+ *   - Section action (via `getSectionAction` / `__kbnSideNavSectionAction__`):
+ *     Show all / Show less (when >5 views) plus a "Manage saved views" cog.
+ *     The expand control is a real EUI button here because chrome nav item
+ *     titles can't carry icons or `[+]` markers (toSentenceCase).
  *
  * Everything here self-gates on `labMode === 'latest'`, so no other mode is
  * affected. The actual slot registration is coordinated in `nav_footer.tsx`
@@ -26,18 +27,22 @@
  * the super-short-term and Latest renderers).
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useSyncExternalStore } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiConfirmModal,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIcon,
   EuiListGroup,
   EuiListGroupItem,
   EuiModal,
@@ -45,6 +50,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiPopover,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -52,10 +58,13 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { DragDropContextProps } from '@elastic/eui';
+import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
+import { BehaviorSubject } from 'rxjs';
 import { setIntegrationsSearch, useIntegrationsSearch } from '@kbn/entity-centric-lab-flyout';
 import type { SavedView } from './use_saved_views';
 import { useSavedViews } from './use_saved_views';
@@ -66,6 +75,77 @@ const LAB_MODE_SETTING = 'discover:labMode';
 const LATEST_MODES = ['latest', 'elasticOn'];
 // Cap matching the Save / SavedViewsBar rename inputs.
 const MAX_VIEW_NAME_LENGTH = 50;
+
+/** Must match observability's `SAVED_VIEWS_COLLAPSED_LIMIT`. */
+const SAVED_VIEWS_COLLAPSED_LIMIT = 5;
+
+// ---------------------------------------------------------------------------
+// Saved-views expand state — mirrors observability's store via the same
+// `globalThis` key so the section-action button and the nav tree stay in sync.
+// ---------------------------------------------------------------------------
+
+const GLOBAL_SAVED_VIEWS_EXPANDED_KEY = '__kbnEntityCentricLab_savedViewsExpanded__' as const;
+
+interface SavedViewsExpandedSnapshot {
+  readonly expanded: boolean;
+  readonly suppressedLoadViewId: string | null;
+}
+
+interface SavedViewsExpandedState {
+  readonly subject: BehaviorSubject<SavedViewsExpandedSnapshot>;
+}
+
+const getExpandedState = (): SavedViewsExpandedState => {
+  const root = globalThis as unknown as Record<string, SavedViewsExpandedState | undefined>;
+  let state = root[GLOBAL_SAVED_VIEWS_EXPANDED_KEY];
+  if (!state) {
+    state = {
+      subject: new BehaviorSubject<SavedViewsExpandedSnapshot>({
+        expanded: false,
+        suppressedLoadViewId: null,
+      }),
+    };
+    root[GLOBAL_SAVED_VIEWS_EXPANDED_KEY] = state;
+  }
+  return state;
+};
+
+const getSavedViewsExpanded = (): boolean => getExpandedState().subject.getValue().expanded;
+
+const setSavedViewsExpanded = (expanded: boolean): void => {
+  const state = getExpandedState();
+  const prev = state.subject.getValue();
+  if (expanded) {
+    if (prev.expanded && prev.suppressedLoadViewId === null) return;
+    state.subject.next({ expanded: true, suppressedLoadViewId: null });
+    return;
+  }
+  const loadViewId =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('loadView')
+      : null;
+  const next: SavedViewsExpandedSnapshot = {
+    expanded: false,
+    suppressedLoadViewId: loadViewId,
+  };
+  if (
+    prev.expanded === next.expanded &&
+    prev.suppressedLoadViewId === next.suppressedLoadViewId
+  ) {
+    return;
+  }
+  state.subject.next(next);
+};
+
+const useSavedViewsExpanded = (): boolean =>
+  useSyncExternalStore(
+    (listener) => {
+      const subscription = getExpandedState().subject.subscribe(() => listener());
+      return () => subscription.unsubscribe();
+    },
+    getSavedViewsExpanded,
+    () => false
+  );
 
 const useLabModeIsLatest = (coreStart: CoreStart): boolean => {
   const labMode = useObservable(
@@ -129,6 +209,11 @@ export const LatestInventoryNavHeader = ({ coreStart }: { coreStart: CoreStart }
  * The "manage saved views" cog, rendered right-aligned on the "Saved views"
  * section header via the chrome side nav's `getSectionAction` slot. Opens a
  * modal listing every saved view with rename / delete. Latest-only.
+ *
+ * Also hosts the Show all / Show less control (real EUI button + icon). Chrome
+ * nav item titles go through `toSentenceCase` and can't reliably carry icons
+ * or `[+]`/`[-]` markers — same trap as the AI/ML glossary — so this lives
+ * in the React section-action slot instead of as a synthetic nav child.
  */
 export const SavedViewsSectionAction = ({
   coreStart,
@@ -141,6 +226,9 @@ export const SavedViewsSectionAction = ({
   const isLatest = useLabModeIsLatest(coreStart);
   const isElasticOn = useLabModeIsElasticOn(coreStart);
   const [isManageOpen, setIsManageOpen] = useState(false);
+  const { views } = useSavedViews();
+  const searchQuery = useIntegrationsSearch();
+  const expanded = useSavedViewsExpanded();
 
   if (!isLatest) return null;
 
@@ -148,18 +236,58 @@ export const SavedViewsSectionAction = ({
     defaultMessage: 'Manage saved views',
   });
 
+  const filteredCount = views.filter((view) => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
+    return view.name.toLowerCase().includes(q);
+  }).length;
+  const needsCollapse = filteredCount > SAVED_VIEWS_COLLAPSED_LIMIT;
+
+  const toggleLabel = expanded
+    ? i18n.translate('xpack.streams.entityCentricLab.savedViews.nav.showLess', {
+        defaultMessage: 'Show less',
+      })
+    : i18n.translate('xpack.streams.entityCentricLab.savedViews.nav.showAll', {
+        defaultMessage: 'Show all',
+      });
+
   return (
     <>
-      <EuiToolTip content={manageLabel} disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="gear"
-          color="text"
-          size="xs"
-          aria-label={manageLabel}
-          onClick={() => setIsManageOpen(true)}
-          data-test-subj="entityCentricLabManageSavedViewsButton"
-        />
-      </EuiToolTip>
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        justifyContent="flexEnd"
+        responsive={false}
+        css={css`
+          margin-left: auto;
+        `}
+      >
+        {needsCollapse ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              flush="both"
+              iconType={expanded ? 'minusInCircle' : 'plusInCircle'}
+              onClick={() => setSavedViewsExpanded(!expanded)}
+              data-test-subj="entityCentricLabSavedViewsExpandToggle"
+            >
+              {toggleLabel}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={manageLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="gear"
+              color="text"
+              size="xs"
+              aria-label={manageLabel}
+              onClick={() => setIsManageOpen(true)}
+              data-test-subj="entityCentricLabManageSavedViewsButton"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {isManageOpen ? (
         <ManageSavedViewsModal
           onClose={() => setIsManageOpen(false)}
@@ -183,6 +311,11 @@ const rowLabelCss = css`
   min-width: 0;
 `;
 
+const dragHandleCss = css`
+  display: inline-flex;
+  cursor: grab;
+`;
+
 const ManageSavedViewsModal = ({
   onClose,
   showDefault = false,
@@ -192,8 +325,16 @@ const ManageSavedViewsModal = ({
   showDefault?: boolean;
   getTime?: () => { from: string; to: string };
 }) => {
-  const { views, renameView, setViewStoreTime, deleteView, defaultViewId, setDefaultView } =
-    useSavedViews();
+  const { euiTheme } = useEuiTheme();
+  const {
+    views,
+    renameView,
+    setViewStoreTime,
+    deleteView,
+    reorderViews,
+    defaultViewId,
+    setDefaultView,
+  } = useSavedViews();
 
   const [renameTarget, setRenameTarget] = useState<SavedView | null>(null);
   const [renameValue, setRenameValue] = useState('');
@@ -237,13 +378,22 @@ const ManageSavedViewsModal = ({
     setDeleteTarget(null);
   }, [deleteTarget, deleteView]);
 
+  const handleDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
+    ({ source, destination }) => {
+      if (!source || !destination || source.index === destination.index) return;
+      reorderViews(source.index, destination.index);
+    },
+    [reorderViews]
+  );
+
+  const canReorder = views.length > 1;
 
   return (
     <>
       <EuiModal
         onClose={onClose}
         aria-labelledby={modalTitleId}
-        maxWidth={480}
+        maxWidth={520}
         data-test-subj="entityCentricLabManageSavedViewsModal"
       >
         <EuiModalHeader>
@@ -282,63 +432,60 @@ const ManageSavedViewsModal = ({
               }
             />
           ) : (
-            <EuiListGroup gutterSize="none" flush maxWidth={false} css={listCss}>
-              {views.map((view) => (
-                <EuiFlexGroup
-                  key={view.id}
-                  alignItems="center"
-                  gutterSize="s"
-                  responsive={false}
-                  data-test-subj={`entityCentricLabManageSavedViewRow-${view.id}`}
-                >
-                  <EuiFlexItem css={rowLabelCss}>
-                    <EuiListGroupItem label={view.name} size="s" showToolTip wrapText />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={i18n.translate(
-                        'xpack.streams.entityCentricLab.savedViews.manageModal.edit',
-                        { defaultMessage: 'Edit' }
+            <>
+              {canReorder ? (
+                <>
+                  <EuiText size="xs" color="subdued">
+                    <p>
+                      {i18n.translate(
+                        'xpack.streams.entityCentricLab.savedViews.manageModal.reorderHelp',
+                        {
+                          defaultMessage:
+                            'Drag to reorder, or open the row menu to move a view up or down.',
+                        }
                       )}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType="pencil"
-                        color="text"
-                        size="xs"
-                        aria-label={i18n.translate(
-                          'xpack.streams.entityCentricLab.savedViews.manageModal.editAria',
-                          { defaultMessage: 'Edit {name}', values: { name: view.name } }
+                    </p>
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                </>
+              ) : null}
+              <div css={listCss}>
+                <EuiDragDropContext onDragEnd={handleDragEnd}>
+                  <EuiDroppable
+                    droppableId="entityCentricLabManageSavedViews"
+                    spacing="s"
+                    data-test-subj="entityCentricLabManageSavedViewsDroppable"
+                  >
+                    {views.map((view, index) => (
+                      <EuiDraggable
+                        key={view.id}
+                        index={index}
+                        draggableId={`entityCentricLabManageSavedView-${view.id}`}
+                        spacing="s"
+                        usePortal
+                        hasInteractiveChildren
+                        customDragHandle
+                        isDragDisabled={!canReorder}
+                      >
+                        {(provided) => (
+                          <ManageSavedViewRow
+                            view={view}
+                            index={index}
+                            total={views.length}
+                            dragHandleProps={provided.dragHandleProps}
+                            dragHandleColor={euiTheme.colors.textSubdued}
+                            onEdit={() => openRename(view)}
+                            onDelete={() => setDeleteTarget(view)}
+                            onMoveUp={() => reorderViews(index, index - 1)}
+                            onMoveDown={() => reorderViews(index, index + 1)}
+                          />
                         )}
-                        onClick={() => openRename(view)}
-                        data-test-subj={`entityCentricLabManageSavedViewEdit-${view.id}`}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={i18n.translate(
-                        'xpack.streams.entityCentricLab.savedViews.manageModal.delete',
-                        { defaultMessage: 'Delete' }
-                      )}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType="trash"
-                        color="danger"
-                        size="xs"
-                        aria-label={i18n.translate(
-                          'xpack.streams.entityCentricLab.savedViews.manageModal.deleteAria',
-                          { defaultMessage: 'Delete {name}', values: { name: view.name } }
-                        )}
-                        onClick={() => setDeleteTarget(view)}
-                        data-test-subj={`entityCentricLabManageSavedViewDelete-${view.id}`}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ))}
-            </EuiListGroup>
+                      </EuiDraggable>
+                    ))}
+                  </EuiDroppable>
+                </EuiDragDropContext>
+              </div>
+            </>
           )}
         </EuiModalBody>
       </EuiModal>
@@ -485,5 +632,167 @@ const ManageSavedViewsModal = ({
         </EuiConfirmModal>
       ) : null}
     </>
+  );
+};
+
+const ManageSavedViewRow = ({
+  view,
+  index,
+  total,
+  dragHandleProps,
+  dragHandleColor,
+  onEdit,
+  onDelete,
+  onMoveUp,
+  onMoveDown,
+}: {
+  readonly view: SavedView;
+  readonly index: number;
+  readonly total: number;
+  readonly dragHandleProps?: DraggableProvidedDragHandleProps | null;
+  readonly dragHandleColor: string;
+  readonly onEdit: () => void;
+  readonly onDelete: () => void;
+  readonly onMoveUp: () => void;
+  readonly onMoveDown: () => void;
+}) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const canReorder = total > 1;
+  const isFirst = index === 0;
+  const isLast = index === total - 1;
+
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      data-test-subj={`entityCentricLabManageSavedViewRow-${view.id}`}
+    >
+      {canReorder ? (
+        <EuiFlexItem grow={false}>
+          <span
+            {...(dragHandleProps ?? {})}
+            aria-label={i18n.translate(
+              'xpack.streams.entityCentricLab.savedViews.manageModal.dragHandleAria',
+              {
+                defaultMessage: 'Drag to reorder {name}',
+                values: { name: view.name },
+              }
+            )}
+            css={css`
+              ${dragHandleCss};
+              color: ${dragHandleColor};
+            `}
+            data-test-subj={`entityCentricLabManageSavedViewDrag-${view.id}`}
+          >
+            <EuiIcon type="grab" aria-hidden={true} />
+          </span>
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem css={rowLabelCss}>
+        <EuiText size="s" truncate>
+          <span title={view.name}>{view.name}</span>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.streams.entityCentricLab.savedViews.manageModal.edit',
+            { defaultMessage: 'Edit' }
+          )}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="pencil"
+            color="text"
+            size="xs"
+            aria-label={i18n.translate(
+              'xpack.streams.entityCentricLab.savedViews.manageModal.editAria',
+              { defaultMessage: 'Edit {name}', values: { name: view.name } }
+            )}
+            onClick={onEdit}
+            data-test-subj={`entityCentricLabManageSavedViewEdit-${view.id}`}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.streams.entityCentricLab.savedViews.manageModal.delete',
+            { defaultMessage: 'Delete' }
+          )}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            size="xs"
+            aria-label={i18n.translate(
+              'xpack.streams.entityCentricLab.savedViews.manageModal.deleteAria',
+              { defaultMessage: 'Delete {name}', values: { name: view.name } }
+            )}
+            onClick={onDelete}
+            data-test-subj={`entityCentricLabManageSavedViewDelete-${view.id}`}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      {canReorder ? (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            isOpen={menuOpen}
+            closePopover={() => setMenuOpen(false)}
+            anchorPosition="downRight"
+            panelPaddingSize="none"
+            button={
+              <EuiButtonIcon
+                iconType="boxesHorizontal"
+                color="text"
+                size="xs"
+                aria-label={i18n.translate(
+                  'xpack.streams.entityCentricLab.savedViews.manageModal.reorderMenuAria',
+                  {
+                    defaultMessage: 'Reorder actions for {name}',
+                    values: { name: view.name },
+                  }
+                )}
+                onClick={() => setMenuOpen((open) => !open)}
+                data-test-subj={`entityCentricLabManageSavedViewActions-${view.id}`}
+              />
+            }
+          >
+            <EuiListGroup gutterSize="none" flush maxWidth={180}>
+              <EuiListGroupItem
+                iconType="sortUp"
+                label={i18n.translate(
+                  'xpack.streams.entityCentricLab.savedViews.manageModal.moveUp',
+                  { defaultMessage: 'Move up' }
+                )}
+                isDisabled={isFirst}
+                onClick={() => {
+                  setMenuOpen(false);
+                  onMoveUp();
+                }}
+                size="s"
+                data-test-subj={`entityCentricLabManageSavedViewMoveUp-${view.id}`}
+              />
+              <EuiListGroupItem
+                iconType="sortDown"
+                label={i18n.translate(
+                  'xpack.streams.entityCentricLab.savedViews.manageModal.moveDown',
+                  { defaultMessage: 'Move down' }
+                )}
+                isDisabled={isLast}
+                onClick={() => {
+                  setMenuOpen(false);
+                  onMoveDown();
+                }}
+                size="s"
+                data-test-subj={`entityCentricLabManageSavedViewMoveDown-${view.id}`}
+              />
+            </EuiListGroup>
+          </EuiPopover>
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
   );
 };

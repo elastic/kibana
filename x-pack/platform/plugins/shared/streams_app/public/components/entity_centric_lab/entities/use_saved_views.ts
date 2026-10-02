@@ -431,6 +431,12 @@ export interface UseSavedViewsResult {
     timeRange?: { from: string; to: string }
   ) => void;
   readonly deleteView: (id: string) => void;
+  /**
+   * Persist a new list order. Used by the Manage modal's drag-and-drop and
+   * move up/down controls; the Latest left-nav "Saved views" section follows
+   * this array order (ElasticOn still surfaces the default view first).
+   */
+  readonly reorderViews: (fromIndex: number, toIndex: number) => void;
   readonly setCurrentViewId: (id: string | null) => void;
   /** Mark a view as the default (`null` clears it). */
   readonly setDefaultView: (id: string | null) => void;
@@ -519,6 +525,23 @@ export const useSavedViews = (): UseSavedViewsResult => {
     if (readDefaultViewId() === id) writeDefaultViewId(null);
   }, []);
 
+  const reorderViews = useCallback((fromIndex: number, toIndex: number) => {
+    const current = readViews();
+    if (
+      fromIndex === toIndex ||
+      fromIndex < 0 ||
+      toIndex < 0 ||
+      fromIndex >= current.length ||
+      toIndex >= current.length
+    ) {
+      return;
+    }
+    const next = [...current];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    writeViews(next);
+  }, []);
+
   const setCurrentViewId = useCallback((id: string | null) => writeCurrentViewId(id), []);
 
   const setDefaultView = useCallback((id: string | null) => writeDefaultViewId(id), []);
@@ -535,6 +558,7 @@ export const useSavedViews = (): UseSavedViewsResult => {
     renameView,
     setViewStoreTime,
     deleteView,
+    reorderViews,
     setCurrentViewId,
     setDefaultView,
   };

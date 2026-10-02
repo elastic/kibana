@@ -194,6 +194,27 @@ export const DASHBOARD_STYLE_DIMENSION: VariationDimension = {
   ],
 };
 
+export type DashboardThumbnailsVariation = 'hide' | 'show';
+
+/** Toggle dashboard preview thumbnails in the flyout Dashboards list tab. */
+export const DASHBOARD_THUMBNAILS_DIMENSION: VariationDimension = {
+  id: 'dashboardThumbnails',
+  label: 'Dashboard thumbnails',
+  defaultOption: 'hide',
+  options: [
+    {
+      id: 'hide',
+      label: 'Hidden',
+      description: 'Dashboards list without thumbnail previews',
+    },
+    {
+      id: 'show',
+      label: 'Shown',
+      description: 'Show hover-to-enlarge thumbnail column in the Dashboards list',
+    },
+  ],
+};
+
 /** All registered dimensions, in display order. */
 export const VARIATION_DIMENSIONS: readonly VariationDimension[] = [
   PHASE_DIMENSION,
@@ -202,4 +223,5 @@ export const VARIATION_DIMENSIONS: readonly VariationDimension[] = [
   DETAIL_DIMENSION,
   TABLE_STYLE_DIMENSION,
   DASHBOARD_STYLE_DIMENSION,
+  DASHBOARD_THUMBNAILS_DIMENSION,
 ];

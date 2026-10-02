@@ -171,6 +171,7 @@ const PageTabContent = ({
   hideOwnership = false,
   hideEvents = false,
   dashboardStyle = 'embedded',
+  showDashboardThumbnails = false,
   onPreviewDashboard,
 }: {
   readonly activeTab: TabId;
@@ -186,6 +187,7 @@ const PageTabContent = ({
   readonly hideOwnership?: boolean;
   readonly hideEvents?: boolean;
   readonly dashboardStyle?: 'embedded' | 'list' | 'listWithPreview';
+  readonly showDashboardThumbnails?: boolean;
   readonly onPreviewDashboard?: (request: DashboardPreviewRequest) => void;
 }) => {
   const { resourceCopy = false, renderTabDashboard: renderDash, renderAlertsTab } =
@@ -242,7 +244,12 @@ const PageTabContent = ({
       );
     case 'dashboards':
       return dashboardStyle === 'list' || dashboardStyle === 'listWithPreview' ? (
-        <DashboardsListTab entityName={entityName} entityType={entityType} onPreviewDashboard={onPreviewDashboard} />
+        <DashboardsListTab
+          entityName={entityName}
+          entityType={entityType}
+          onPreviewDashboard={onPreviewDashboard}
+          showThumbnails={showDashboardThumbnails}
+        />
       ) : (
         <DashboardsTab
           entityName={entityName}
@@ -305,6 +312,7 @@ const EntityDetailPageInner = () => {
   const dataVariation = useVariation('data') as DataVariation;
   const phaseVariation = useVariation('phase');
   const dashboardStyleVariation = useVariation('dashboardStyle') as 'embedded' | 'list' | 'listWithPreview';
+  const showDashboardThumbnails = useVariation('dashboardThumbnails') === 'show';
   const isPhase1 = phaseVariation === 'phase1';
   const [dashboardPreview, setDashboardPreview] = useState<DashboardPreviewRequest | null>(null);
   const [alertDetailRequest, setAlertDetailRequest] =
@@ -1038,6 +1046,7 @@ const EntityDetailPageInner = () => {
               hideOwnership={isPhase1}
               hideEvents={isPhase1}
               dashboardStyle={dashboardStyleVariation}
+              showDashboardThumbnails={showDashboardThumbnails}
               onPreviewDashboard={dashboardStyleVariation === 'listWithPreview' ? setDashboardPreview : undefined}
             />
           </EuiPanel>
@@ -1060,11 +1069,13 @@ const EntityDetailPageInner = () => {
           alertsBadge={isPhase1 ? computeChildAlertsBadge(childEntity) : undefined}
           alertsActiveCount={inventoryAlertsActiveOverride(childEntity)}
           podPhaseBadge={podPhaseBadgeForEntity(childEntity)}
+          timeRange={{ from: rangeFrom, to: rangeTo }}
           hideAiSummary={isPhase1}
           hideOwnership={isPhase1}
           hideEvents={isPhase1}
           hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
           dashboardStyle={dashboardStyleVariation}
+          showDashboardThumbnails={showDashboardThumbnails}
         />
       ) : null}
 

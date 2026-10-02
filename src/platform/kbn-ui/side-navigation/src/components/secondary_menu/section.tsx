@@ -64,6 +64,7 @@ export const SecondaryMenuSectionComponent = ({
     color: ${euiTheme.colors.textSubdued};
     padding: ${euiTheme.size.xs} ${euiTheme.size.s};
     display: block;
+    min-width: 0;
   `;
 
   const headerRowStyles = css`
@@ -71,6 +72,12 @@ export const SecondaryMenuSectionComponent = ({
     align-items: center;
     justify-content: space-between;
     gap: ${euiTheme.size.xs};
+    width: 100%;
+  `;
+
+  const actionStyles = css`
+    margin-left: auto;
+    flex-shrink: 0;
   `;
 
   const listStyles = css`
@@ -89,7 +96,7 @@ export const SecondaryMenuSectionComponent = ({
               {label}
             </EuiText>
           )}
-          {action}
+          {action ? <div css={actionStyles}>{action}</div> : null}
         </div>
       )}
       <ul css={listStyles} role="none">

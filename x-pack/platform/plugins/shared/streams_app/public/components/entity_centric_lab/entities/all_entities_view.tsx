@@ -913,6 +913,7 @@ const AllEntitiesViewInner = ({
     | 'embedded'
     | 'list'
     | 'listWithPreview';
+  const showDashboardThumbnails = useVariation('dashboardThumbnails') === 'show';
   const scenarioVariation = useVariation('scenario');
   const variationCtx = useVariationContext();
 
@@ -1438,6 +1439,8 @@ const AllEntitiesViewInner = ({
   // In Latest the Monitoring/Overview surface is removed entirely, so the
   // page always renders the Inventory surface regardless of the persisted tab.
   const showOverviewTab = !isLatest && categoryTab === 'monitoring';
+  const isCategoryEmptyState =
+    showAddDataEmptyPrompt || (showOverviewTab && isDemoEmptyCategoryPage);
 
   // Latest: apply a saved view opened from the left nav. The nav can only link
   // (no click handler), so it encodes the view id in `?loadView=<id>`. We keep
@@ -2381,6 +2384,7 @@ const AllEntitiesViewInner = ({
                           compact
                           neutral
                           hideBadge
+                          disabled={isCategoryEmptyState}
                         />
                       </EuiTourStep>,
                       <EuiTourStep
@@ -2936,6 +2940,7 @@ const AllEntitiesViewInner = ({
                         isLoadedViewDefault={
                           Boolean(loadedView) && savedViewsApi.defaultViewId === loadedView?.id
                         }
+                        disabled={isCategoryEmptyState}
                       />
                     </EuiFlexItem>
                   ) : null}
@@ -3074,11 +3079,13 @@ const AllEntitiesViewInner = ({
               isPhase1 ? inventoryAlertsActiveOverride(selectedEntity) : undefined
             }
             podPhaseBadge={podPhaseBadgeForEntity(selectedEntity)}
+            timeRange={{ from: rangeFrom, to: rangeTo }}
             hideAiSummary={isPhase1}
             hideOwnership={isPhase1}
             hideEvents={isPhase1}
             hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
             dashboardStyle={dashboardStyleVariation}
+            showDashboardThumbnails={showDashboardThumbnails}
             onAddToFilter={
               showK8sFilters && selectedEntity?.category === 'kubernetes'
                 ? () => handleAddToK8sFilter(selectedEntity)
@@ -3106,11 +3113,13 @@ const AllEntitiesViewInner = ({
                 isPhase1 ? inventoryAlertsActiveOverride(childEntity) : undefined
               }
               podPhaseBadge={podPhaseBadgeForEntity(childEntity)}
+              timeRange={{ from: rangeFrom, to: rangeTo }}
               hideAiSummary={isPhase1}
               hideOwnership={isPhase1}
               hideEvents={isPhase1}
               hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
               dashboardStyle={dashboardStyleVariation}
+              showDashboardThumbnails={showDashboardThumbnails}
             />
           ) : null}
           {alertDetailRequest && renderAlertDetailFlyout ? (

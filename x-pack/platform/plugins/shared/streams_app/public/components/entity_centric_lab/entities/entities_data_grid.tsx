@@ -248,6 +248,11 @@ const DEFAULT_METRICS_BY_BUCKET: Readonly<Record<string, readonly string[]>> = {
   llms: ['metric:latency-p95', 'metric:error-rate', 'metric:token-spend'],
   'llms:openai': ['metric:latency-p95', 'metric:error-rate', 'metric:token-spend'],
   'llms:anthropic': ['metric:latency-p95', 'metric:error-rate', 'metric:token-spend'],
+  // Other (catch-all)
+  other: ['metric:cpu-util', 'metric:memory-util', 'metric:error-rate'],
+  'other:vault': ['metric:cpu-util', 'metric:memory-util', 'metric:error-rate'],
+  'other:jenkins': ['metric:cpu-util', 'metric:memory-util', 'metric:error-rate'],
+  'other:custom worker': ['metric:cpu-util', 'metric:memory-util', 'metric:error-rate'],
   // Cloud
   cloud: ['metric:cpu-util', 'metric:memory-util'],
   'cloud:aws ec2 instance': ['metric:cpu-util', 'metric:memory-util', 'metric:network-out'],

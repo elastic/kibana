@@ -950,6 +950,50 @@ const LLMS_METRICS: readonly MetricDescriptor[] = [
   },
 ];
 
+// Catch-all "Other" — generic health signals for resources that don't
+// map to a specialized category catalog.
+const OTHER_METRICS: readonly MetricDescriptor[] = [
+  {
+    id: 'status',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.status', {
+      defaultMessage: 'Status',
+    }),
+    kind: 'categorical',
+    values: STATUS_VALUES_RUNNING,
+  },
+  {
+    id: 'cpu-util',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.cpuUtil', {
+      defaultMessage: 'CPU utilization',
+    }),
+    kind: 'numeric',
+    unit: '%',
+    range: { min: 5, max: 99 },
+    thresholds: { warn: 70, crit: 90, direction: 'asc' },
+  },
+  {
+    id: 'memory-util',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.memoryUtil', {
+      defaultMessage: 'Memory utilization',
+    }),
+    kind: 'numeric',
+    unit: '%',
+    range: { min: 10, max: 98 },
+    thresholds: { warn: 75, crit: 92, direction: 'asc' },
+  },
+  {
+    id: 'error-rate',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.errorRate', {
+      defaultMessage: 'Error rate',
+    }),
+    kind: 'numeric',
+    unit: '%',
+    precision: 2,
+    range: { min: 0, max: 30 },
+    thresholds: { warn: 2, crit: 8, direction: 'asc' },
+  },
+];
+
 // ---------------------------------------------------------------------------
 // Kubernetes sub-bucket catalogs
 // ---------------------------------------------------------------------------
@@ -1335,6 +1379,7 @@ const CATALOG: Readonly<Record<BucketKey, readonly MetricDescriptor[]>> = {
   networking: NETWORKING_METRICS,
   middlewares: MIDDLEWARES_METRICS,
   llms: LLMS_METRICS,
+  other: OTHER_METRICS,
   // Cloud sub-types — distinct resources (region / compute / function
   // / storage) so each gets its own metric set rather than sharing
   // CLOUD_METRICS via the parent-key fallback.

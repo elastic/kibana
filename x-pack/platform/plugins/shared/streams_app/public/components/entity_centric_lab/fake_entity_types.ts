@@ -326,4 +326,36 @@ export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
     subsetsCount: '1',
     lastUpdate: '2026-05-01',
   },
+  // ---------- Other (catch-all) ----------
+  // Custom / free-form category labels that don't match a canonical nav
+  // section — they surface under "Other" in the left nav. `Vault` /
+  // `Jenkins` use bespoke labels; `Custom worker` uses the canonical
+  // "Other" label directly.
+  {
+    id: 'vault',
+    name: 'Vault',
+    generatedBy: 'User',
+    category: 'Secrets',
+    entitiesCount: '1',
+    subsetsCount: '1',
+    lastUpdate: '2026-05-12',
+  },
+  {
+    id: 'jenkins',
+    name: 'Jenkins',
+    generatedBy: 'User',
+    category: 'CI/CD',
+    entitiesCount: '1',
+    subsetsCount: '1',
+    lastUpdate: '2026-05-12',
+  },
+  {
+    id: 'custom-worker',
+    name: 'Custom worker',
+    generatedBy: 'User',
+    category: 'Other',
+    entitiesCount: '1',
+    subsetsCount: '1',
+    lastUpdate: '2026-05-12',
+  },
 ];

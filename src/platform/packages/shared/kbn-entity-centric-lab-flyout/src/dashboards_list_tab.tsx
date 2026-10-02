@@ -38,7 +38,7 @@ import { css } from '@emotion/react';
 import { getOotbDashboards } from './dashboards_tab';
 import type { DashboardDescriptor } from './dashboards_tab';
 import { entityTypeToKind, inferEntityKind } from './kind_templates';
-
+// Thumbnail assets kept for when the variation toggle re-enables them.
 // @ts-expect-error image import
 import clusterDetailThumb from './assets/dashboard_thumbnails/cluster_detail.jpg';
 // @ts-expect-error image import
@@ -299,12 +299,18 @@ export interface DashboardsListTabProps {
   readonly entityType?: string;
   /** When provided, clicking a dashboard name calls this instead of opening a new tab. */
   readonly onPreviewDashboard?: (request: DashboardPreviewRequest) => void;
+  /**
+   * When true, shows the hover-to-enlarge thumbnail column. Controlled by
+   * the lab's "Dashboard thumbnails" variation; defaults to hidden.
+   */
+  readonly showThumbnails?: boolean;
 }
 
 export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
   entityName,
   entityType,
   onPreviewDashboard,
+  showThumbnails = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const kind = entityTypeToKind(entityType) ?? inferEntityKind(entityName) ?? 'host';
@@ -354,14 +360,18 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
   // --- Managed table columns ---
   const managedColumns = useMemo<Array<EuiBasicTableColumn<DashboardDescriptor>>>(
     () => [
-      {
-        field: 'id',
-        name: '',
-        width: '80px',
-        render: (_: string, item: DashboardDescriptor) => (
-          <ThumbnailCell title={item.title} id={item.id} />
-        ),
-      },
+      ...(showThumbnails
+        ? [
+            {
+              field: 'id',
+              name: '',
+              width: '80px',
+              render: (_: string, item: DashboardDescriptor) => (
+                <ThumbnailCell title={item.title} id={item.id} />
+              ),
+            } satisfies EuiBasicTableColumn<DashboardDescriptor>,
+          ]
+        : []),
       {
         field: 'title',
         name: i18n.translate('entityCentricLabFlyout.dashboardsList.managed.name', {
@@ -405,20 +415,24 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
         ),
       },
     ],
-    [entityName, onPreviewDashboard]
+    [entityName, onPreviewDashboard, showThumbnails]
   );
 
   // --- Custom table columns ---
   const customColumns = useMemo<Array<EuiBasicTableColumn<StoredCustomDashboard>>>(
     () => [
-      {
-        field: 'id',
-        name: '',
-        width: '80px',
-        render: (_: string, item: StoredCustomDashboard) => (
-          <ThumbnailCell title={item.title} id={item.id} />
-        ),
-      },
+      ...(showThumbnails
+        ? [
+            {
+              field: 'id',
+              name: '',
+              width: '80px',
+              render: (_: string, item: StoredCustomDashboard) => (
+                <ThumbnailCell title={item.title} id={item.id} />
+              ),
+            } satisfies EuiBasicTableColumn<StoredCustomDashboard>,
+          ]
+        : []),
       {
         field: 'title',
         name: i18n.translate('entityCentricLabFlyout.dashboardsList.custom.name', {
@@ -493,7 +507,7 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
         ),
       },
     ],
-    [handleRemoveCustom, onPreviewDashboard]
+    [handleRemoveCustom, onPreviewDashboard, showThumbnails]
   );
 
   return (

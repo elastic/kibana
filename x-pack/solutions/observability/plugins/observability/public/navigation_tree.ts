@@ -20,6 +20,9 @@ import {
   getNestedNavEnabled$,
   getIntegrationsSearch$,
   getSavedViews$,
+  getSavedViewsExpanded$,
+  maybeAutoExpandSavedViewsForActiveView,
+  SAVED_VIEWS_COLLAPSED_LIMIT,
   type FavoritesState,
   type IntegrationSummary,
   type NavSavedView,
@@ -68,6 +71,7 @@ function createNavTree({
   installedIntegrations = [],
   integrationsSearchQuery = '',
   savedViews = [],
+  savedViewsExpanded = false,
   toAbsoluteHref = (path: string) => path,
 }: {
   streamsAvailable?: boolean;
@@ -94,6 +98,8 @@ function createNavTree({
   installedIntegrations?: readonly IntegrationSummary[];
   // Latest lab: named entity-inventory views surfaced in the panel.
   savedViews?: readonly NavSavedView[];
+  // Whether the Saved views section is fully expanded (Show all).
+  savedViewsExpanded?: boolean;
   // Free-text nav filter for the super-short-term integrations panel; matches
   // integration names across both the starred and installed lists.
   integrationsSearchQuery?: string;
@@ -486,12 +492,20 @@ function createNavTree({
 
   const savedViewsSection =
     latestEnabled && orderedSavedViews.length > 0
-      ? {
-          id: 'entityCentricLab-savedViews',
-          title: i18n.translate('xpack.observability.obltNav.savedViews', {
-            defaultMessage: 'Saved views',
-          }),
-          children: orderedSavedViews.map((view) => {
+      ? (() => {
+          // Auto-expand when the currently loaded view sits past the collapsed
+          // window (no-ops if the user already chose Show less for that view).
+          queueMicrotask(() =>
+            maybeAutoExpandSavedViewsForActiveView(orderedSavedViews.map((view) => view.id))
+          );
+
+          const needsCollapse = orderedSavedViews.length > SAVED_VIEWS_COLLAPSED_LIMIT;
+          const visibleViews =
+            !needsCollapse || savedViewsExpanded
+              ? orderedSavedViews
+              : orderedSavedViews.slice(0, SAVED_VIEWS_COLLAPSED_LIMIT);
+
+          const viewChildren = visibleViews.map((view) => {
             // Rebuild the exact route the view was saved on. Legacy cloud views
             // may still carry a cloud provider/service sub-scope — keep the
             // route builder for backward compat.
@@ -517,8 +531,20 @@ function createNavTree({
               getIsActive: ({ location }: { location: Location }) =>
                 new URLSearchParams(location.search).get('loadView') === view.id,
             };
-          }),
-        }
+          });
+
+          // Show all / Show less lives in the section-action React slot
+          // (SavedViewsSectionAction) — chrome nav titles can't carry icons
+          // or [+]/[-] markers reliably (toSentenceCase / truncation).
+
+          return {
+            id: 'entityCentricLab-savedViews',
+            title: i18n.translate('xpack.observability.obltNav.savedViews', {
+              defaultMessage: 'Saved views',
+            }),
+            children: viewChildren,
+          };
+        })()
       : null;
 
   // The chrome side-nav renderer can't draw an inline collapsible group, so in
@@ -852,15 +878,14 @@ function createNavTree({
   // mapper renders flat links first and collapsible sub-groups last within a
   // section, so the providers land at the bottom of the category list with no
   // dividers bracketing them.
-  // ElasticOn is infra-first: APM Services is omitted; drop "Other" catch-all.
+  // ElasticOn is infra-first: APM Services is omitted.
   // Cloud services are distributed into Hosts / Functions / Storage.
-  // Explicit order: Hosts, Kubernetes, Databases, Storage, Functions, Networking, Messaging, AI/ML.
+  // Explicit order: Hosts, Kubernetes, Databases, Storage, Functions, Networking,
+  // Messaging, AI/ML, Other (catch-all for resources outside predefined categories).
   const elasticOnCategoryChildren = [
     ...latestCategoryChildrenTop,
     ...latestCategoryChildrenMiddle,
-    ...latestCategoryChildrenBottom.filter(
-      (child) => child.id !== 'entityCentricLab-entitiesOther'
-    ),
+    ...latestCategoryChildrenBottom,
   ];
 
   const entitiesPanelChildren = superShortTermMode
@@ -1800,60 +1825,66 @@ type LabMode =
 export const createDefinition = (
   coreStart: CoreStart,
   pluginsStart: ObservabilityPublicPluginsStart
-): AddSolutionNavigationArg => ({
-  id: 'oblt',
-  title,
-  icon: 'logoObservability',
-  navigationTree$: combineLatest([
-    pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
-    coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
-    pluginsStart.ingestHub?.navigationAvailable$ || of(false),
-    coreStart.settings.client.get$<LabMode>(LAB_MODE_SETTING, 'off'),
-    // Super-short-term lab: rebuild the integrations panel when the user stars,
-    // unstars, or (re)groups an integration, or toggles nested-nav mode (store
-    // lives in @kbn/entity-centric-lab-flyout, mirrored locally).
-    getFavoritesState$(),
-    getNestedNavEnabled$(),
-    getIntegrationsSearch$(),
-    // Latest lab: rebuild the "Saved views" section whenever the user saves,
-    // renames, or deletes a view (store lives in streams_app, mirrored here).
-    getSavedViews$(),
-  ]).pipe(
-    map(
-      ([
-        { status },
-        chatExperience,
-        ingestHubAvailable,
-        labMode,
-        favoritesState,
-        nestedNavEnabled,
-        integrationsSearchQuery,
-        savedViews,
-      ]) =>
-        createNavTree({
-          streamsAvailable: status === 'enabled',
-          showAiAssistant: chatExperience !== AIChatExperience.Agent,
-          isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
-          showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
+): AddSolutionNavigationArg => {
+  return {
+    id: 'oblt',
+    title,
+    icon: 'logoObservability',
+    navigationTree$: combineLatest([
+      pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
+      coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
+      pluginsStart.ingestHub?.navigationAvailable$ || of(false),
+      coreStart.settings.client.get$<LabMode>(LAB_MODE_SETTING, 'off'),
+      // Super-short-term lab: rebuild the integrations panel when the user stars,
+      // unstars, or (re)groups an integration, or toggles nested-nav mode (store
+      // lives in @kbn/entity-centric-lab-flyout, mirrored locally).
+      getFavoritesState$(),
+      getNestedNavEnabled$(),
+      getIntegrationsSearch$(),
+      // Latest lab: rebuild the "Saved views" section whenever the user saves,
+      // renames, or deletes a view (store lives in streams_app, mirrored here).
+      getSavedViews$(),
+      // Collapse / expand the Saved views list (Show all / Show less).
+      getSavedViewsExpanded$(),
+    ]).pipe(
+      map(
+        ([
+          { status },
+          chatExperience,
           ingestHubAvailable,
-          // `latest` (and its `elasticOn` clone) reuse the entity-centric panel
-          // but with Latest-only tweaks (see `latestEnabled` below).
-          entityCentricLabEnabled:
-            labMode === 'entityCentric' || labMode === 'latest' || labMode === 'elasticOn',
-          latestEnabled: labMode === 'latest' || labMode === 'elasticOn',
-          elasticOnEnabled: labMode === 'elasticOn',
-          infraShortTermEnabled: labMode === 'infraShortTerm',
-          superShortTermEnabled: labMode === 'superShortTerm',
+          labMode,
           favoritesState,
           nestedNavEnabled,
           integrationsSearchQuery,
           savedViews,
-          installedIntegrations: getInstalledIntegrations(),
-          // Chrome requires nav `href`s to be absolute URLs; prepend the origin
-          // to the basePath-qualified app path.
-          toAbsoluteHref: (path: string) =>
-            `${window.location.origin}${coreStart.http.basePath.prepend(path)}`,
-        })
-    )
-  ),
-});
+          savedViewsExpanded,
+        ]) =>
+          createNavTree({
+            streamsAvailable: status === 'enabled',
+            showAiAssistant: chatExperience !== AIChatExperience.Agent,
+            isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
+            showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
+            ingestHubAvailable,
+            // `latest` (and its `elasticOn` clone) reuse the entity-centric panel
+            // but with Latest-only tweaks (see `latestEnabled` below).
+            entityCentricLabEnabled:
+              labMode === 'entityCentric' || labMode === 'latest' || labMode === 'elasticOn',
+            latestEnabled: labMode === 'latest' || labMode === 'elasticOn',
+            elasticOnEnabled: labMode === 'elasticOn',
+            infraShortTermEnabled: labMode === 'infraShortTerm',
+            superShortTermEnabled: labMode === 'superShortTerm',
+            favoritesState,
+            nestedNavEnabled,
+            integrationsSearchQuery,
+            savedViews,
+            savedViewsExpanded,
+            installedIntegrations: getInstalledIntegrations(),
+            // Chrome requires nav `href`s to be absolute URLs; prepend the origin
+            // to the basePath-qualified app path.
+            toAbsoluteHref: (path: string) =>
+              `${window.location.origin}${coreStart.http.basePath.prepend(path)}`,
+          })
+      )
+    ),
+  };
+};

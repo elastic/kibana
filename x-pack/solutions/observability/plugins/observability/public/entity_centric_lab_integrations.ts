@@ -375,7 +375,7 @@ const hydrateSavedViewsOnce = (): SavedViewsSharedState => {
   const emit = () => state.subject.next(readSavedViews());
   emit();
   if (typeof window !== 'undefined') {
-    // streams_app dispatches this custom event on every save / rename / delete;
+    // streams_app dispatches this custom event on every save / rename / delete / reorder;
     // the native `storage` event covers writes made in other tabs.
     window.addEventListener(SAVED_VIEWS_CHANGE_EVENT, emit);
     window.addEventListener('storage', (event) => {
@@ -394,3 +394,108 @@ const hydrateSavedViewsOnce = (): SavedViewsSharedState => {
 /** RxJS stream of saved views; drives the Latest nav's "Saved views" section. */
 export const getSavedViews$ = (): Observable<NavSavedView[]> =>
   hydrateSavedViewsOnce().subject.asObservable();
+
+// ---------------------------------------------------------------------------
+// Saved-views section collapse (Show all / Show less)
+// ---------------------------------------------------------------------------
+
+/** Max views shown in the left-nav Saved views section before collapsing. */
+export const SAVED_VIEWS_COLLAPSED_LIMIT = 5;
+
+const GLOBAL_SAVED_VIEWS_EXPANDED_KEY = '__kbnEntityCentricLab_savedViewsExpanded__' as const;
+
+interface SavedViewsExpandedSnapshot {
+  /** Whether the full list is currently shown. */
+  readonly expanded: boolean;
+  /**
+   * When the user clicks "Show less" while a deep `loadView` is active,
+   * we remember that id so auto-expand doesn't immediately undo them.
+   * Cleared when they Show all, or when `loadView` changes.
+   */
+  readonly suppressedLoadViewId: string | null;
+}
+
+interface SavedViewsExpandedState {
+  readonly subject: BehaviorSubject<SavedViewsExpandedSnapshot>;
+  hydrated: boolean;
+}
+
+const INITIAL_EXPANDED_SNAPSHOT: SavedViewsExpandedSnapshot = {
+  expanded: false,
+  suppressedLoadViewId: null,
+};
+
+const getSavedViewsExpandedState = (): SavedViewsExpandedState => {
+  const root = globalThis as unknown as Record<string, SavedViewsExpandedState | undefined>;
+  let state = root[GLOBAL_SAVED_VIEWS_EXPANDED_KEY];
+  if (!state) {
+    state = {
+      subject: new BehaviorSubject<SavedViewsExpandedSnapshot>(INITIAL_EXPANDED_SNAPSHOT),
+      hydrated: false,
+    };
+    root[GLOBAL_SAVED_VIEWS_EXPANDED_KEY] = state;
+  }
+  return state;
+};
+
+const hydrateSavedViewsExpandedOnce = (): SavedViewsExpandedState => {
+  const state = getSavedViewsExpandedState();
+  if (state.hydrated) return state;
+  state.hydrated = true;
+  return state;
+};
+
+export const getSavedViewsExpandedSnapshot = (): SavedViewsExpandedSnapshot =>
+  hydrateSavedViewsExpandedOnce().subject.getValue();
+
+export const getSavedViewsExpanded = (): boolean => getSavedViewsExpandedSnapshot().expanded;
+
+export const setSavedViewsExpanded = (expanded: boolean): void => {
+  const state = hydrateSavedViewsExpandedOnce();
+  const prev = state.subject.getValue();
+  if (expanded) {
+    if (prev.expanded && prev.suppressedLoadViewId === null) return;
+    state.subject.next({ expanded: true, suppressedLoadViewId: null });
+    return;
+  }
+  // Collapsing: if a deep loadView is active, suppress auto-expand for it.
+  const loadViewId =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('loadView')
+      : null;
+  const next: SavedViewsExpandedSnapshot = {
+    expanded: false,
+    suppressedLoadViewId: loadViewId,
+  };
+  if (
+    prev.expanded === next.expanded &&
+    prev.suppressedLoadViewId === next.suppressedLoadViewId
+  ) {
+    return;
+  }
+  state.subject.next(next);
+};
+
+/**
+ * Auto-expand when the active `loadView` sits past the collapsed window.
+ * No-ops when the user has explicitly collapsed while that same view is
+ * loaded (see {@link setSavedViewsExpanded}).
+ */
+export const maybeAutoExpandSavedViewsForActiveView = (
+  orderedViewIds: readonly string[]
+): void => {
+  const loadViewId =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('loadView')
+      : null;
+  if (!loadViewId) return;
+  const activeIndex = orderedViewIds.indexOf(loadViewId);
+  if (activeIndex < SAVED_VIEWS_COLLAPSED_LIMIT) return;
+  const { expanded, suppressedLoadViewId } = getSavedViewsExpandedSnapshot();
+  if (expanded) return;
+  if (suppressedLoadViewId === loadViewId) return;
+  setSavedViewsExpanded(true);
+};
+
+export const getSavedViewsExpanded$ = (): Observable<boolean> =>
+  hydrateSavedViewsExpandedOnce().subject.pipe(map((snapshot) => snapshot.expanded));

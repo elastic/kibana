@@ -82,6 +82,7 @@ interface Props {
   readonly neutral?: boolean;
   /** Hide the inline "Unsaved changes" badge (shown externally instead). */
   readonly hideBadge?: boolean;
+  readonly disabled?: boolean;
 }
 
 export const SaveViewButton = ({
@@ -95,6 +96,7 @@ export const SaveViewButton = ({
   compact = false,
   neutral = false,
   hideBadge = false,
+  disabled = false,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   // When a view is loaded the modal opens on the update/new choice; default to
@@ -176,6 +178,7 @@ export const SaveViewButton = ({
             size={compact ? 's' : 'm'}
             color={neutral ? 'text' : 'primary'}
             onClick={openModal}
+            disabled={disabled}
             data-test-subj="entityCentricLabSaveViewButton"
           >
             {i18n.translate('xpack.streams.entityCentricLab.savedViews.saveViewButton.label', {

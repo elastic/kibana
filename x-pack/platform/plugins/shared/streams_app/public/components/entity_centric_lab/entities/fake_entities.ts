@@ -583,6 +583,15 @@ const LLM_SEED_ROWS: readonly SeedRow[] = [
   { name: 'claude-3-5-sonnet', type: 'Anthropic', health: 'healthy' },
 ];
 
+// Catch-all seeds for resources that don't fit Hosts / K8s / Databases /
+// Networking / Messaging / AI/ML. Names align with `category_signals`
+// (`custom-worker-01`) so overview tiles stay coherent.
+const OTHER_SEED_ROWS: readonly SeedRow[] = [
+  { name: 'vault-prod-eu', type: 'Vault', health: 'healthy' },
+  { name: 'jenkins-ci-01', type: 'Jenkins', health: 'atRisk' },
+  { name: 'custom-worker-01', type: 'Custom worker', health: 'unhealthy' },
+];
+
 const NON_KUBERNETES_SPECS: readonly CategorySpec[] = [
   {
     category: 'hosts',
@@ -625,6 +634,13 @@ const NON_KUBERNETES_SPECS: readonly CategorySpec[] = [
     typeCycle: ['OpenAI', 'Anthropic'],
     seedRows: LLM_SEED_ROWS,
     fallbackName: (index) => `llm-${padIndex(index, 2)}`,
+  },
+  {
+    category: 'other',
+    total: 3,
+    typeCycle: ['Vault', 'Jenkins', 'Custom worker'],
+    seedRows: OTHER_SEED_ROWS,
+    fallbackName: (index) => `other-${padIndex(index, 2)}`,
   },
 ];
 
@@ -1062,6 +1078,10 @@ export const buildFakeEntities = (
         )),
     ...buildCategoryEntitiesWithScenario(
       multiplier > 1 ? scaleSpec(findSpec('llms'), multiplier) : findSpec('llms'),
+      healthFn
+    ),
+    ...buildCategoryEntitiesWithScenario(
+      multiplier > 1 ? scaleSpec(findSpec('other'), multiplier) : findSpec('other'),
       healthFn
     ),
   ]);

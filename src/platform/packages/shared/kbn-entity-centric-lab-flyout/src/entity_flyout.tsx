@@ -212,6 +212,11 @@ interface EntityFlyoutProps {
    */
   readonly dashboardStyle?: 'embedded' | 'list' | 'listWithPreview';
   /**
+   * When true, the Dashboards list tab shows hover-to-enlarge thumbnails.
+   * Controlled by the lab variation switcher; defaults to hidden.
+   */
+  readonly showDashboardThumbnails?: boolean;
+  /**
    * Optional callback fired when the user clicks the "Add to filter" link
    * in the flyout footer. The host wires it to set page-level filters
    * (e.g. K8s resource type + cluster + namespace + node) based on the
@@ -219,6 +224,8 @@ interface EntityFlyoutProps {
    * filtered results. When undefined, the link is hidden.
    */
   readonly onAddToFilter?: () => void;
+  /** Page time range copied into the flyout date picker on open. */
+  readonly timeRange?: { readonly from: string; readonly to: string };
 }
 
 type BuiltInTabId =
@@ -397,7 +404,9 @@ export const EntityFlyout = ({
   hideEvents = false,
   hiddenTabIds,
   dashboardStyle = 'embedded',
+  showDashboardThumbnails = false,
   onAddToFilter,
+  timeRange,
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   // Default tab is the leftmost one in the (possibly reordered) tab list.
@@ -408,8 +417,8 @@ export const EntityFlyout = ({
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const [dashboardPreview, setDashboardPreview] = useState<DashboardPreviewRequest | null>(null);
-  const [dateStart, setDateStart] = useState('now-15m');
-  const [dateEnd, setDateEnd] = useState('now');
+  const [dateStart, setDateStart] = useState(timeRange?.from ?? 'now-15m');
+  const [dateEnd, setDateEnd] = useState(timeRange?.to ?? 'now');
   const handleTimeChange = useCallback(({ start, end }: { start: string; end: string }) => {
     setDateStart(start);
     setDateEnd(end);
@@ -1168,6 +1177,7 @@ export const EntityFlyout = ({
           hideOwnership={hideOwnership}
           hideEvents={hideEvents}
           dashboardStyle={dashboardStyle}
+          showDashboardThumbnails={showDashboardThumbnails}
           onPreviewDashboard={dashboardStyle === 'listWithPreview' ? setDashboardPreview : undefined}
         />
       </EuiFlyoutBody>
@@ -1236,6 +1246,7 @@ const TabContent = ({
   hideOwnership = false,
   hideEvents = false,
   dashboardStyle = 'embedded',
+  showDashboardThumbnails = false,
   onPreviewDashboard,
 }: {
   readonly activeTab: TabId;
@@ -1251,6 +1262,7 @@ const TabContent = ({
   readonly hideOwnership?: boolean;
   readonly hideEvents?: boolean;
   readonly dashboardStyle?: 'embedded' | 'list' | 'listWithPreview';
+  readonly showDashboardThumbnails?: boolean;
   readonly onPreviewDashboard?: (request: DashboardPreviewRequest) => void;
 }) => {
   const { resourceCopy = false, renderTabDashboard, renderAlertsTab } = useEntityFlyoutServices();
@@ -1306,7 +1318,12 @@ const TabContent = ({
       );
     case 'dashboards':
       return dashboardStyle === 'list' || dashboardStyle === 'listWithPreview' ? (
-        <DashboardsListTab entityName={entityName} entityType={entityType} onPreviewDashboard={onPreviewDashboard} />
+        <DashboardsListTab
+          entityName={entityName}
+          entityType={entityType}
+          onPreviewDashboard={onPreviewDashboard}
+          showThumbnails={showDashboardThumbnails}
+        />
       ) : (
         <DashboardsTab
           entityName={entityName}
