@@ -8,11 +8,7 @@
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
 import type { ResolvePanelContent } from './operations/panels';
-import type {
-  ResolveAttachmentPanel,
-  ResolveControlFieldCapabilities,
-  ResolveCustomContentTemplate,
-} from './operations/types';
+import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from './operations/types';
 import type { OperationFailure } from './utils';
 import type { PanelAuthoringNote } from './resolve_panel';
 import {
@@ -30,7 +26,6 @@ interface ExecuteDashboardOperationsParams {
   operations: DashboardOperation[];
   logger: Logger;
   resolvePanelContent?: ResolvePanelContent;
-  resolveCustomContentTemplate?: ResolveCustomContentTemplate;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
 }
@@ -48,7 +43,6 @@ export const executeDashboardOperations = async ({
   operations,
   logger,
   resolvePanelContent,
-  resolveCustomContentTemplate,
   resolveAttachmentPanel,
   resolveControlFieldCapabilities,
 }: ExecuteDashboardOperationsParams): Promise<{
@@ -70,7 +64,6 @@ export const executeDashboardOperations = async ({
     operations,
     logger,
     resolvePanelContent,
-    resolveCustomContentTemplate,
     resolveAttachmentPanel,
     resolveControlFieldCapabilities,
     failures,

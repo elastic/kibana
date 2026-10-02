@@ -42,6 +42,7 @@ export interface MetricsExperienceGridContentProps
   activeDimensions: Dimension[];
   isDiscoverLoading?: boolean;
   isTabSelected: boolean;
+  isComponentVisible: boolean;
 }
 
 export const MetricsExperienceGridContent = ({
@@ -56,6 +57,7 @@ export const MetricsExperienceGridContent = ({
   histogramCss,
   isDiscoverLoading = false,
   isTabSelected,
+  isComponentVisible,
 }: MetricsExperienceGridContentProps) => {
   const { query } = fetchParams;
   const euiThemeContext = useEuiTheme();
@@ -149,6 +151,7 @@ export const MetricsExperienceGridContent = ({
           getUserMessages={getUserMessages}
           getDescription={getDescription}
           isTabSelected={isTabSelected}
+          isComponentVisible={isComponentVisible}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -14,6 +14,14 @@ export type FlyoutForm = 'component' | 'service';
 
 export type ChildLabel = 'A' | 'B';
 
+/** Flyouts in the "Push flyouts" section. */
+export type PushFlyoutLabel =
+  | 'Standalone A'
+  | 'Standalone B'
+  | 'System push C'
+  | 'System push D'
+  | 'System overlay E';
+
 /** The session to use for tests. */
 const DEFAULT_SESSION: Record<FlyoutForm, string> = {
   component: 'Session L',
@@ -27,6 +35,9 @@ const ROOT_SUBJ_STEM: Record<FlyoutForm, string> = {
 };
 
 const subj = (value: string) => `[data-test-subj="${value}"]`;
+
+/** The example derives test subjects from the label without spaces. */
+const pushSubjSuffix = (label: PushFlyoutLabel) => label.replace(/\s+/g, '');
 
 /**
  * Page object for the flyout_system example app.
@@ -277,6 +288,68 @@ export class FlyoutSystemApp {
     const header = this.header(form, session);
     await header.hover();
     await this.page.mouse.wheel(0, deltaY);
+  }
+
+  // Push flyouts section.
+
+  /** Inline `padding-inline-end` on the app scroll container, `(none)` when unset. */
+  pushPagePadding(): Locator {
+    return this.page.testSubj.locator('pushFlyoutPagePadding');
+  }
+
+  /** Width the system push flyouts remember from their last resize, `(none)` before one. */
+  pushStoredWidth(): Locator {
+    return this.page.testSubj.locator('pushFlyoutStoredWidth');
+  }
+
+  pushFlyout(label: PushFlyoutLabel): Locator {
+    return this.page.testSubj.locator(`pushFlyout-${pushSubjSuffix(label)}`);
+  }
+
+  /** Read it inside `expect.poll`, since the width keeps changing while a resize settles. */
+  async pushFlyoutWidth(label: PushFlyoutLabel): Promise<number> {
+    return (await this.pushFlyout(label).boundingBox())?.width ?? 0;
+  }
+
+  private pushToggle(label: PushFlyoutLabel): Locator {
+    return this.page.testSubj.locator(`pushFlyoutToggle-${pushSubjSuffix(label)}`);
+  }
+
+  async openPushFlyout(label: PushFlyoutLabel) {
+    await this.pushToggle(label).click();
+    await this.pushFlyout(label).waitFor({ state: 'visible' });
+  }
+
+  /** Closes from the page toggle, so the flyout itself doesn't need to be on top. */
+  async closePushFlyout(label: PushFlyoutLabel) {
+    await this.pushToggle(label).click();
+    await this.pushFlyout(label).waitFor({ state: 'detached' });
+  }
+
+  /** Closes from the flyout's own close button, for when an overlay mask covers the page toggles. */
+  async closePushFlyoutFromInside(label: PushFlyoutLabel) {
+    await this.pushFlyout(label).locator(subj('euiFlyoutCloseButton')).click();
+    await this.pushFlyout(label).waitFor({ state: 'detached' });
+  }
+
+  /**
+   * Widens the flyout by `presses` keyboard steps of 10px. Unlike a mouse drag, this works while
+   * the flyout sits behind another one.
+   */
+  async widenPushFlyoutByKeyboard(label: PushFlyoutLabel, presses: number) {
+    await this.pushFlyout(label).locator(subj('euiResizableButton')).focus();
+    for (let i = 0; i < presses; i++) {
+      await this.page.keyboard.press('ArrowLeft');
+    }
+  }
+
+  /** Drags the resize handle of a right-side flyout so its left edge lands at `x`. */
+  async dragPushFlyoutEdgeTo(label: PushFlyoutLabel, x: number) {
+    await this.pushFlyout(label).locator(subj('euiResizableButton')).hover();
+    await this.page.mouse.down();
+    // The resize follows document-level mouse moves, so only `x` matters.
+    await this.page.mouse.move(x, 0, { steps: 10 });
+    await this.page.mouse.up();
   }
 
   /** Whether focus currently sits inside the given element. */

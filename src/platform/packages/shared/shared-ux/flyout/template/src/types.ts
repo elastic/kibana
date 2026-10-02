@@ -12,6 +12,7 @@ import type {
   DataAttributeProps,
   DistributiveOmit,
   EuiBadgeProps,
+  EuiButtonPropsForButton,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuProps,
@@ -21,8 +22,6 @@ import type {
   EuiTabsProps,
   EuiToolTipProps,
 } from '@elastic/eui';
-// FIXME: change to import from `@elastic/eui` once https://github.com/elastic/eui/pull/10064 is merged.
-import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 import type { MetaBlock } from '@kbn/flyout-meta-blocks';
 import type {

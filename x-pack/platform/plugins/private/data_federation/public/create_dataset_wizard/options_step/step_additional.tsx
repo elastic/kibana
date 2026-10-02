@@ -6,18 +6,23 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { CreateDatasetFormValues } from '../create_dataset_form_state';
 import { CreateDatasetAdditionalSettings } from './create_dataset_settings';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import type { DatasetWizardContent } from '../types';
+import type { DataFederationKibanaServices } from '../../types';
 
 export function StepAdditional() {
   const { control, getValues, trigger } = useFormContext<CreateDatasetFormValues>();
   const { updateContent } = Forms.useContent<DatasetWizardContent, 'settings'>('settings');
+  const {
+    services: { docLinks },
+  } = useKibana<DataFederationKibanaServices>();
 
   useEffect(() => {
     updateContent({
@@ -46,10 +51,22 @@ export function StepAdditional() {
       </EuiTitle>
       <EuiSpacer size="xs" />
       <EuiText size="s" color="subdued">
-        {createDatasetWizardStrings.additionalStepSubheader}
+        <p>
+          {createDatasetWizardStrings.additionalStepSubheader}{' '}
+          <EuiLink
+            href={docLinks.links.dataFederation.datasetSettings}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-test-subj="createDatasetWizardOptionalSettingsLearnMore"
+          >
+            {createDatasetWizardStrings.learnMore}
+          </EuiLink>
+        </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <CreateDatasetAdditionalSettings control={control} />
+      <div style={{ width: '100%', maxWidth: 600 }}>
+        <CreateDatasetAdditionalSettings control={control} />
+      </div>
     </div>
   );
 }

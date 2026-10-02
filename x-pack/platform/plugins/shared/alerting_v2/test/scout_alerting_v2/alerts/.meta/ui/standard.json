@@ -1,5 +1,5 @@
 {
-  "sha1": "ad7342fc8840ee1dc4be943231eaed8a7a369ff3",
+  "sha1": "dcd6c69d73d4751a2159f34dc727f2f670c87272",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -39,21 +39,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/alerts_privileges.spec.ts",
-        "line": 41,
-        "column": 5
+        "line": 46,
+        "column": 8
       }
     },
     {
-      "id": "1b78832a419cdfb-b9996e6bd3ada37",
-      "title": "Alerts page - read/write privileges read-only user only sees the read-safe open-in-discover action",
+      "id": "1b78832a419cdfb-1072a7a8cd12368",
+      "title": "Alerts page - read/write privileges alerts-only read user does not see episode actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/alerts_privileges.spec.ts",
-        "line": 47,
-        "column": 77
+        "line": 50,
+        "column": 79
       }
     },
     {

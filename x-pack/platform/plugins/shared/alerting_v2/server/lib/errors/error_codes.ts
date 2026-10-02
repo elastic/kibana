@@ -125,7 +125,7 @@ export const ALERTING_ERROR_CODES = {
   ACTION_POLICY_LICENSE_NOT_SUPPORTED: 'ACTION_POLICY_LICENSE_NOT_SUPPORTED',
 
   // ──────────────────────── Alert actions ────────────────────
-  /** No alert event matched the supplied `group_hash` (and `episode_id`). */
+  /** No alert event matched the supplied `group_hash` (and `alert_id`). */
   ALERT_EVENT_NOT_FOUND: 'ALERT_EVENT_NOT_FOUND',
   /**
    * No alert event matched the supplied `group_hash`. Bulk-only refinement of
@@ -134,18 +134,18 @@ export const ALERTING_ERROR_CODES = {
    */
   ALERT_GROUP_NOT_FOUND: 'ALERT_GROUP_NOT_FOUND',
   /**
-   * No alert event matched the supplied `episode_id`. On the legacy bulk
-   * route it also covers a targeted `episode_id` superseded by a newer
+   * No alert event matched the supplied `alert_id`. On the legacy bulk
+   * route it also covers a targeted `alert_id` superseded by a newer
    * episode of the group.
    */
-  ALERT_EPISODE_NOT_FOUND: 'ALERT_EPISODE_NOT_FOUND',
+  ALERT_EPISODE_NOT_FOUND: 'ALERT_NOT_FOUND',
   /**
    * The episode exists but is not the latest episode of its series. Lifecycle
    * actions (`activate` / `deactivate`) only accept the latest episode.
    */
-  ALERT_EPISODE_NOT_LATEST: 'ALERT_EPISODE_NOT_LATEST',
+  ALERT_EPISODE_NOT_LATEST: 'ALERT_NOT_LATEST',
   /** The requested action is incompatible with the episode's current `episode.status`. */
-  INVALID_EPISODE_STATE_TRANSITION: 'INVALID_EPISODE_STATE_TRANSITION',
+  INVALID_EPISODE_STATE_TRANSITION: 'INVALID_ALERT_STATE_TRANSITION',
 
   // ──────────────────── Rule doctor insights ─────────────────
   /** A rule doctor insight with the given identifier does not exist. */
@@ -553,7 +553,7 @@ export const ALERTING_LOG_CODES = {
   RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
 
   // ─────────────────────────── Agent Builder ─────────────────────────
-  /** `refresh_episode` failed; tool returns an error result. */
+  /** `refresh_alert` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
   /** `get_rule` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_GET_RULE_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_FAILED',
@@ -561,9 +561,9 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED: 'AGENT_BUILDER_EPISODE_GET_RULE_EVENTS_FAILED',
   /** `get_rule_events` existence lookup (`get`) failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_LOOKUP_FAILED: 'AGENT_BUILDER_EPISODE_LOOKUP_FAILED',
-  /** Episode attachment resolve failed; returns undefined. */
+  /** Alert attachment resolve failed; returns undefined. */
   AGENT_BUILDER_EPISODE_RESOLVE_FAILED: 'AGENT_BUILDER_EPISODE_RESOLVE_FAILED',
-  /** Episode attachment isStale check failed; returns false. */
+  /** Alert attachment isStale check failed; returns false. */
   AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED: 'AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED',
   /** Rule attachment resolve failed; returns undefined. */
   AGENT_BUILDER_RULE_RESOLVE_FAILED: 'AGENT_BUILDER_RULE_RESOLVE_FAILED',
