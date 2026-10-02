@@ -14,7 +14,6 @@ import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import { createRuleAttachmentDefinition, registerRuleAttachment } from './rule_attachment';
 import { buildRuleActionButtons } from './rule_action_buttons';
-import { getRuleIdFromAttachment } from './helpers';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 
 const validRule = {
@@ -212,28 +211,6 @@ describe('createRuleAttachmentDefinition', () => {
       const label = definition.getLabel(makeAttachment('invalid') as never);
       expect(label).toBe('Security Rule');
     });
-  });
-});
-
-describe('getRuleIdFromAttachment', () => {
-  // A card resolved by rule_id keeps that signature in `origin`, while rule pages expect the
-  // saved-object id, which the resolved snapshot carries.
-  it('prefers the saved-object id in the rule data over origin', () => {
-    expect(
-      getRuleIdFromAttachment({
-        origin: 'rule-signature-id',
-        data: { text: JSON.stringify({ ...validRule, id: 'rule-so-id' }) },
-      })
-    ).toBe('rule-so-id');
-  });
-
-  it('falls back to origin when the rule data has no id', () => {
-    expect(
-      getRuleIdFromAttachment({
-        origin: 'rule-so-id',
-        data: { text: JSON.stringify(validRule) },
-      })
-    ).toBe('rule-so-id');
   });
 });
 

@@ -167,9 +167,11 @@ steps:
         description: "{{ inputs.fp_count }} false-positive alerts on rule {{ steps.fetch_rule.output.name }} in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days"
         workflow_execution_id: "{{ execution.id }}"
 
-  # By-reference security.rule attachment: the framework resolves the rule once
-  # from its rule_id and snapshots it, recording the rule as it was when this
-  # review started. The fixed attachment id makes the refresh below deterministic.
+  # A snapshot of the rule as it was when this review started. The rule card reads
+  # `origin` as the saved-object id for View rule, edit and its saved-rule diff,
+  # and `origin` survives the agent's edits to the card while the ids in `text` do
+  # not. The content is passed by value because resolving by origin looks the rule
+  # up by rule_id. The fixed attachment id makes the refresh below deterministic.
   - name: attach_rule
     type: ai.attachment.add
     if: "${{ steps.create_investigation.output.conversation_id != null }}"
@@ -177,7 +179,10 @@ steps:
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       id: "tuned-rule"
       type: security.rule
-      origin: "{{ steps.fetch_rule.output.rule_id }}"
+      origin: "{{ inputs.rule_uuid }}"
+      data:
+        text: "{{ steps.fetch_rule.output | json }}"
+        attachmentLabel: "{{ steps.fetch_rule.output.name }}"
       description: "Rule under tuning: {{ steps.fetch_rule.output.name }}"
       render_inline: true
     on-failure:
@@ -862,8 +867,8 @@ steps:
       - match: exception
         steps:
           # The proposed item as its own card, laid out the way the Detection Rules
-          # UI lays out an exception. Its name, description and entries must match
-          # the action input below, so the card shows exactly what approving creates.
+          # UI lays out an exception. Its name and entries must match the action
+          # input below, so the card shows exactly what approving creates.
           - name: attach_exception
             type: ai.attachment.add
             with:
@@ -872,7 +877,7 @@ steps:
               type: security.exception
               data:
                 name: "Tuning: {{ steps.fetch_rule.output.name }}"
-                description: "Proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts."
+                description: "Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts."
                 entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
               description: "Proposed exception for rule: {{ steps.fetch_rule.output.name }}"
               render_inline: true
@@ -1020,9 +1025,9 @@ steps:
     on-failure:
       continue: true
 
-  # security.rule attachments resolve once and never refresh, so after the patch
-  # the snapshot would silently show the pre-tuning rule. This writes the patched
-  # rule as version 2; version 1 keeps the before state in the attachment history.
+  # The rule attachment is a snapshot and never refreshes, so after the patch it
+  # would silently show the pre-tuning rule. This writes the patched rule as
+  # version 2; version 1 keeps the before state in the attachment history.
   - name: refresh_rule_attachment
     type: ai.attachment.update
     if: >-

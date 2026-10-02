@@ -913,6 +913,20 @@ describe('detection rule workflows', () => {
         expect(JSON.stringify(refresh.with)).toContain('steps.refetch_rule.output | json');
       });
 
+      // The rule card reads `origin` as the saved-object id, and the agent's edits keep
+      // `origin` but drop the ids from `text`. Resolving by origin looks the rule up by
+      // rule_id, so the content comes by value from the same fetch.
+      it('links the rule attachment by saved-object id and snapshots fetch_rule', () => {
+        const attach = reviewSteps.find(({ name }) => name === 'attach_rule')!;
+
+        expect(attach.with?.type).toBe('security.rule');
+        expect(attach.with?.origin).toBe('{{ inputs.rule_uuid }}');
+        expect(attach.with?.data).toEqual({
+          text: '{{ steps.fetch_rule.output | json }}',
+          attachmentLabel: '{{ steps.fetch_rule.output.name }}',
+        });
+      });
+
       // No agent runs in the investigation to reference an attachment, so without
       // `render_inline` the analyst only finds these in the attachment list.
       it.each(['attach_rule', 'refresh_rule_attachment', 'attach_exception', 'attach_alerts'])(
@@ -944,7 +958,7 @@ describe('detection rule workflows', () => {
         expect(attach.with?.data).toEqual({
           ...exceptionItem,
           description:
-            'Proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts.',
+            'Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts.',
         });
         expect(ruleId).toBe('{{ inputs.rule_uuid }}');
         expect(actionDescription).toBe(

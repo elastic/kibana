@@ -31,14 +31,15 @@ export type RuleAttachment = Attachment<
   }
 >;
 
-interface RuleAttachmentContent {
-  data?: RuleAttachment['data'];
-}
+// `origin` (set after save, persisted server-side) is the source of truth for identity and intent.
+export const getRuleIdFromAttachment = (
+  attachment: Pick<RuleAttachment, 'origin'>
+): string | undefined => attachment.origin ?? undefined;
 
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent =>
   attachment.origin ? 'update' : 'create';
 
-export const parseRuleFromAttachment = (attachment: RuleAttachmentContent): RuleResponse | null => {
+export const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
   const text = attachment?.data?.text;
   if (!text) {
     return null;
@@ -54,12 +55,6 @@ export const parseRuleFromAttachment = (attachment: RuleAttachmentContent): Rule
   }
   return parsed as RuleResponse;
 };
-
-// Existing rule snapshots carry the saved-object id in their data. Fall back to
-// origin for attachments created by flows that only persist identity there.
-export const getRuleIdFromAttachment = (
-  attachment: Pick<RuleAttachment, 'origin'> & RuleAttachmentContent
-): string | undefined => parseRuleFromAttachment(attachment)?.id ?? attachment.origin ?? undefined;
 
 export const getRuleName = (attachment: RuleAttachment): string | undefined => {
   if (attachment?.data?.attachmentLabel) {
