@@ -60,7 +60,7 @@ import {
 } from './hooks/use_automations';
 import { useKibana } from '../hooks/use_kibana';
 import { toCloneRequestBody } from './utils/clone_automation';
-import { getTriggerDisplay, TRIGGER_LABEL_ORDER } from './flyouts/form/triggers/trigger_section';
+import { getTriggerDisplay, TRIGGER_LABEL_ORDER } from './utils/trigger_display';
 import { CreateAutomationFlyout } from './flyouts/create_flyout/create_automation_flyout';
 
 const labels = {

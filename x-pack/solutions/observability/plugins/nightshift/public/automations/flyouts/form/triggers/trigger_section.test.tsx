@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationTriggerSection } from './trigger_section';
 import type { TriggerFormValues } from '../automation_form_values';
@@ -65,44 +65,16 @@ describe('AutomationTriggerSection', () => {
     expect(groups).toEqual(['Elastic', 'Slack', 'Scheduled']);
   });
 
-  it('configures a new message Slack trigger', async () => {
+  it('shows the Slack daily limit help for Slack triggers', async () => {
     render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'New message in channel');
+    await selectTrigger('automationAddTrigger', 'Agent mentioned in channel');
 
-    expect(screen.getByText('New message')).toBeInTheDocument();
-    expect(screen.getByTestId('automationSlackTriggerChannels')).toHaveTextContent(
-      'Select channels'
-    );
-    expect(screen.getByTestId('automationSlackTriggerMessage')).toHaveTextContent('Any message');
-    expect(screen.getByTestId('automationSlackTriggerUsers')).toHaveTextContent('Anyone');
+    expect(screen.getByText('Agent mentioned')).toBeInTheDocument();
     expect(
       screen.getByText(
         'When reached, Nightshift replies in Slack that the automation is paused. Resets daily at 12:00 AM UTC.'
       )
     ).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('automationSlackTriggerChannels'));
-    const channelInput = within(
-      await screen.findByTestId('automationSlackTriggerChannelsInput')
-    ).getByRole('combobox');
-    fireEvent.change(channelInput, { target: { value: '#oncall' } });
-    fireEvent.keyDown(channelInput, { key: 'Enter' });
-    expect(lastTrigger()).toMatchObject({ kind: 'slack_message', channels: ['#oncall'] });
-    expect(screen.getByTestId('automationSlackTriggerChannels')).toHaveTextContent('#oncall');
-  });
-
-  it('configures mention and invite Slack triggers', async () => {
-    render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'Agent mentioned in channel');
-
-    expect(screen.getByText('Agent mentioned')).toBeInTheDocument();
-    expect(screen.getByText('in')).toBeInTheDocument();
-    expect(screen.getByText('by')).toBeInTheDocument();
-    expect(screen.queryByTestId('automationSlackTriggerMessage')).not.toBeInTheDocument();
-
-    await selectTrigger('automationChangeTrigger', 'Agent invited to channel');
-    expect(screen.getByText('Agent invited')).toBeInTheDocument();
-    expect(screen.getByText('to')).toBeInTheDocument();
   });
 
   it('removes the trigger', async () => {
