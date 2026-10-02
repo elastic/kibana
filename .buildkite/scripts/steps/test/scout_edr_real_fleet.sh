@@ -8,7 +8,11 @@ set -euo pipefail
 source .buildkite/scripts/steps/functional/common.sh
 source .buildkite/scripts/steps/functional/ensure_virtualbox.sh
 
-CONFIG_PATH="x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts"
+SUITE_ROOT="x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet"
+CONFIG_PATHS=(
+  "$SUITE_ROOT/ui/playwright.config.ts"
+  "$SUITE_ROOT/api/playwright.config.ts"
+)
 MODE='--arch stateful --domain classic'
 
 upload_events_if_available() {
@@ -41,38 +45,46 @@ upload_events_if_available() {
 }
 
 echo "--- Scout EDR Real Fleet Tests"
-echo "Config: $CONFIG_PATH"
 echo "Mode: $MODE"
 
-start=$(date +%s)
+failed=0
+for CONFIG_PATH in "${CONFIG_PATHS[@]}"; do
+  echo "--- Scout EDR Real Fleet: $CONFIG_PATH"
 
-set +e
-node scripts/scout run-tests --location local $MODE --serverConfigSet edr_real_fleet --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
-EXIT_CODE=$?
-set -e
+  start=$(date +%s)
 
-timeSec=$(($(date +%s)-start))
-if [[ $timeSec -gt 60 ]]; then
-  min=$((timeSec/60))
-  sec=$((timeSec-(min*60)))
-  duration="${min}m ${sec}s"
-else
-  duration="${timeSec}s"
-fi
+  set +e
+  node scripts/scout run-tests --location local $MODE --serverConfigSet edr_real_fleet --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
+  EXIT_CODE=$?
+  set -e
 
-if [[ $EXIT_CODE -eq 2 ]]; then
-  echo "No tests found for EDR Real Fleet"
-  echo "^^^ +++"
+  timeSec=$(($(date +%s)-start))
+  if [[ $timeSec -gt 60 ]]; then
+    min=$((timeSec/60))
+    sec=$((timeSec-(min*60)))
+    duration="${min}m ${sec}s"
+  else
+    duration="${timeSec}s"
+  fi
+
+  upload_events_if_available
+
+  if [[ $EXIT_CODE -eq 2 ]]; then
+    echo "No tests found for $CONFIG_PATH"
+    echo "^^^ +++"
+    failed=1
+  elif [[ $EXIT_CODE -ne 0 ]]; then
+    echo "Scout test exited with code $EXIT_CODE for $CONFIG_PATH (${duration})"
+    echo "^^^ +++"
+    failed=1
+  else
+    echo "Passed $CONFIG_PATH (${duration})"
+  fi
+done
+
+if [[ $failed -ne 0 ]]; then
   exit 10
 fi
 
-upload_events_if_available
-
-if [[ $EXIT_CODE -ne 0 ]]; then
-  echo "Scout test exited with code $EXIT_CODE for EDR Real Fleet (${duration})"
-  echo "^^^ +++"
-  exit 10
-fi
-
-echo "EDR Real Fleet passed (${duration})"
+echo "EDR Real Fleet passed"
 exit 0
