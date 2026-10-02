@@ -138,7 +138,6 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/alerts-ui-shared'
   - '@kbn/es-types'
-  - '@kbn/announcement-banner'
   - '@kbn/app-header'
   - '@kbn/flyout-template'
   - '@kbn/flyout-sections'
