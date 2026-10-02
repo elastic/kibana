@@ -52,6 +52,12 @@ describe('Quick search visor', () => {
   let props: QuickSearchVisorProps;
   beforeEach(() => {
     window.localStorage.clear();
+    window.matchMedia = jest.fn().mockImplementation((query: string) => ({
+      matches: query === '(prefers-reduced-motion: reduce)',
+      media: query,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    }));
     (corePluginMock.http.get as jest.Mock).mockImplementation((url: string) => {
       if (url.includes('/internal/esql/autocomplete/sources/')) {
         return Promise.resolve([
