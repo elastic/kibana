@@ -205,9 +205,16 @@ export function StepMapping() {
 
         <EuiSpacer size="m" />
         <InferSchemaToggle dynamicMode={dynamicMode} onDynamicModeChange={onDynamicModeChange} />
+
+        <EuiSpacer size="m" />
+        <MappingEditor
+          value={{ ...field.value, fields: splitFields.otherFields }}
+          onChange={onEditorChange}
+          reservedFieldNames={isTimeseriesEnabled ? [TIMESTAMP_LOGICAL_FIELD_NAME] : undefined}
+        />
         {mappingStepErrors.length > 0 ? (
           <>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="l" />
             <KbnDangerCallout
               title={createDatasetWizardStrings.mappingStepErrorsTitle}
               data-test-subj="createDatasetWizardMappingStepErrors"
@@ -223,13 +230,6 @@ export function StepMapping() {
             />
           </>
         ) : null}
-
-        <EuiSpacer size="m" />
-        <MappingEditor
-          value={{ ...field.value, fields: splitFields.otherFields }}
-          onChange={onEditorChange}
-          reservedFieldNames={isTimeseriesEnabled ? [TIMESTAMP_LOGICAL_FIELD_NAME] : undefined}
-        />
       </div>
     </div>
   );

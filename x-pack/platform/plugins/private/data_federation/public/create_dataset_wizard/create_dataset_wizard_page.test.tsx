@@ -518,6 +518,17 @@ describe('CreateDatasetWizardPage', () => {
     expect(callout).toHaveClass('euiCallOut--danger');
     expect(callout).toHaveTextContent(createDatasetWizardStrings.saveErrorTitle);
     expect(callout).toHaveTextContent('validation_exception: bad resource');
+    const testSubjsInDocumentOrder = Array.from(
+      document.querySelectorAll(
+        '[data-test-subj="createDatasetWizardReviewStep"], [data-test-subj="createDatasetWizardSaveError"], [data-test-subj="nextButton"]'
+      ),
+      (element) => element.getAttribute('data-test-subj')
+    );
+    expect(testSubjsInDocumentOrder).toEqual([
+      'createDatasetWizardReviewStep',
+      'createDatasetWizardSaveError',
+      'nextButton',
+    ]);
     expect(history.location.pathname).toBe('/datasets/edit/logs-dataset');
   });
 
@@ -641,6 +652,17 @@ describe('CreateDatasetWizardPage', () => {
     // Should stay on mapping step and show the error.
     expect(queryByTestId('createDatasetWizardReviewStep')).toBeNull();
     expect(getByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeInTheDocument();
+    const testSubjsInDocumentOrder = Array.from(
+      document.querySelectorAll(
+        '[data-test-subj="dataFederationMappingEditorAddField"], [data-test-subj="createDatasetWizardMappingStepErrors"], [data-test-subj="nextButton"]'
+      ),
+      (element) => element.getAttribute('data-test-subj')
+    );
+    expect(testSubjsInDocumentOrder).toEqual([
+      'dataFederationMappingEditorAddField',
+      'createDatasetWizardMappingStepErrors',
+      'nextButton',
+    ]);
   });
 
   it('enables timeseries when @timestamp is added via field mappings', async () => {

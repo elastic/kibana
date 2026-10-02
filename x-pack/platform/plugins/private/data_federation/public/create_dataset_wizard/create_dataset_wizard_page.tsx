@@ -169,6 +169,7 @@ export function CreateDatasetWizardPage({
                 onSave={onSave}
                 isSaving={isSaving}
                 apiError={apiError}
+                apiErrorPosition="bottom"
                 texts={{
                   save: isEditMode
                     ? createDatasetWizardStrings.saveButton
