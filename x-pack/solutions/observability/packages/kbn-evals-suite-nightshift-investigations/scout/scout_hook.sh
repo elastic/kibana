@@ -2,11 +2,13 @@
 
 # Scout hook for the nightshift-investigations eval suite (`scoutHook` in evals.suites.json).
 #
-# Reads the evals config JSON on stdin and prints `{"env": {...}}`. Sandbox credentials come from the
-# config's `sandbox` block, falling back to SANDBOX_* already exported in the shell (e.g. a
-# self-hosted sandbox). SANDBOX_KIBANA_CONFIG points the `evals_nightshift_investigations` Scout
-# config set at kibana.sandbox.yml, which reads the credentials from the environment. Without an API
-# key it prints `{}`, so the config set falls back to plain `evals_tracing` and only smoke runs.
+# Reads the evals config JSON on stdin and prints `{"env": {...}}`. The sandbox API key and address
+# come from the config's `sandbox` block (`apiKey`, `url`), falling back to SANDBOX_* already
+# exported in the shell (e.g. a self-hosted sandbox). Client certificates are only read from
+# SANDBOX_*_PATH in the shell: the shared sandbox authenticates by API key over plain TLS.
+# SANDBOX_KIBANA_CONFIG points the `evals_nightshift_investigations` Scout config set at
+# kibana.sandbox.yml, which reads the credentials from the environment. Without an API key it prints
+# `{}`, so the config set falls back to plain `evals_tracing` and only smoke runs.
 
 set -euo pipefail
 
@@ -33,12 +35,34 @@ resolve() {
   printf '%s' "${from_config:-${!env_name:-}}"
 }
 
-host="$(resolve SANDBOX_API_HOST '.sandbox.host')"
-port="$(resolve SANDBOX_API_PORT '.sandbox.port')"
 api_key="$(resolve SANDBOX_API_KEY '.sandbox.apiKey')"
-certificate="$(resolve SANDBOX_CLIENT_CERT_PATH '.sandbox.ssl.certificate')"
-key="$(resolve SANDBOX_CLIENT_KEY_PATH '.sandbox.ssl.key')"
-ca="$(resolve SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
+
+# `sandbox.url` (e.g. `https://sandbox-api.example.com:443`) carries the gRPC address; Kibana always
+# connects over TLS, so the scheme only picks the default port. `host`/`port` are still accepted.
+url="$(resolve SANDBOX_API_URL '.sandbox.url')"
+if [[ -n "$url" ]]; then
+  authority="${url#*://}"
+  authority="${authority%%/*}"
+  host="${authority%:*}"
+  port="${authority##*:}"
+  if [[ "$authority" != *:* ]]; then
+    host="$authority"
+    [[ "$url" == http://* ]] && port=80 || port=443
+  fi
+  if [[ -z "$host" || ! "$port" =~ ^[0-9]+$ ]]; then
+    echo "nightshift-investigations scout hook: sandbox.url must look like https://host[:port]" >&2
+    exit 1
+  fi
+else
+  host="$(resolve SANDBOX_API_HOST '.sandbox.host')"
+  port="$(resolve SANDBOX_API_PORT '.sandbox.port')"
+fi
+
+# Optional mTLS for a self-hosted sandbox, from the shell only. Older evals configs carry PEM
+# contents under `sandbox.ssl`, which Kibana can no longer read, so that block is ignored.
+certificate="${SANDBOX_CLIENT_CERT_PATH:-}"
+key="${SANDBOX_CLIENT_KEY_PATH:-}"
+ca="${SANDBOX_CA_CERT_PATH:-}"
 
 telemetry_url="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL '.nightshift.telemetry.url')"
 telemetry_key="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY '.nightshift.telemetry.apiKey')"
@@ -73,8 +97,8 @@ fi
 # The client certificate is optional (without it Kibana authenticates with the API key only), but
 # the certificate and key only work as a pair.
 if [[ -z "$certificate" && -n "$key" || -n "$certificate" && -z "$key" ]]; then
-  echo "nightshift-investigations scout hook: set both sandbox.ssl.certificate and sandbox.ssl.key" \
-    "(or SANDBOX_CLIENT_CERT_PATH and SANDBOX_CLIENT_KEY_PATH) as PEM file paths, or neither." >&2
+  echo "nightshift-investigations scout hook: set both SANDBOX_CLIENT_CERT_PATH and" \
+    "SANDBOX_CLIENT_KEY_PATH as PEM file paths, or neither." >&2
   exit 1
 fi
 

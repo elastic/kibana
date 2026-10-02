@@ -85,28 +85,23 @@ A profile backed by a local config file (for example `--profile local`, reading
 
 ```json
 "sandbox": {
-  "host": "sandbox-api.example.com",
-  "port": 9090,
   "apiKey": "...",
-  "ssl": {
-    "certificate": "/path/to/tls.crt",
-    "key": "/path/to/tls.key",
-    "certificateAuthorities": "/path/to/ca.crt"
-  }
+  "url": "https://sandbox-api.example.com:443"
 }
 ```
 
-PEM fields hold absolute **file paths**, which Kibana reads at startup (`xpack.sandbox.ssl.*`).
-All three are optional, but `certificate` and `key` go together. Without them, Kibana connects
-without a client certificate and authenticates with the API key only, which works only if
-sandbox-api does not require mTLS. The hook fails early if a referenced file is not readable.
+Kibana connects to `url` over TLS and authenticates with the API key; without a port, `https`
+defaults to 443. Older configs with `host` / `port` still work, and an older `ssl` block is
+ignored.
 
 Alternatively, export the variables yourself, for example to point at a sandbox you run locally:
-`SANDBOX_API_KEY`, optionally `SANDBOX_CLIENT_CERT_PATH` and `SANDBOX_CLIENT_KEY_PATH` for mTLS,
-and for a private CA `SANDBOX_CA_CERT_PATH`. Profile values take precedence over exported ones. `SANDBOX_API_HOST` and `SANDBOX_API_PORT`
-default to `localhost:9090` (the probe port is not the gRPC endpoint). A self-hosted sandbox must
-accept these client certificates and allow sandbox-api to reach its containers; leave
-sandbox-service's `WORKSPACE_SNAPSHOT_*` settings unset for isolated conversations.
+`SANDBOX_API_KEY`, and `SANDBOX_API_URL` or `SANDBOX_API_HOST` / `SANDBOX_API_PORT` (default
+`localhost:9090`; the probe port is not the gRPC endpoint). Profile values take precedence over
+exported ones. If the sandbox requires mTLS, also export `SANDBOX_CLIENT_CERT_PATH` and
+`SANDBOX_CLIENT_KEY_PATH` (together), and `SANDBOX_CA_CERT_PATH` for a private CA, as PEM **file
+paths**. The hook fails early if one is not readable. A self-hosted sandbox must allow sandbox-api
+to reach its containers; leave sandbox-service's `WORKSPACE_SNAPSHOT_*` settings unset for isolated
+conversations.
 
 Set `SANDBOX_MAX_CONCURRENT_SESSIONS` on a self-hosted sandbox-api process to support the run
 (for example, 64 for a 61-example, concurrency-16 run). Its default pool holds only ten active
@@ -272,7 +267,7 @@ URL and key are configured, and requires sandbox credentials for remote investig
 | `NIGHTSHIFT_SANDBOX_READABLE_INDICES` | Optional manifest guidance naming readable index patterns and explicit remote names (up to 10,000 characters). |
 | `NIGHTSHIFT_EXAMPLES_FILE` | The same file format documented above; only questions and stable case IDs are required. |
 
-With those variables and the external sandbox's mTLS settings configured:
+With those variables and the sandbox credentials configured:
 
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.json \
@@ -283,7 +278,7 @@ NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.j
 The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates the preconfigured `nightshift-evals-telemetry` webhook with a secret
 `Authorization` header. The existing credential resolver authorizes connector access and execution,
 checks the agent's allow-list, and exposes the API key only to the requesting sandbox command.
-Remote telemetry and sandbox mTLS credentials are supplied through the hook environment.
+Remote telemetry and sandbox credentials are supplied through the hook environment.
 `/workspace/elastic.md` contains variable names and query guidance, never credential values. Its
 examples bound requests by time and advise using explicit remote names and narrow index patterns.
 These are instructions for the agent; the API key's privileges enforce the read restrictions.
