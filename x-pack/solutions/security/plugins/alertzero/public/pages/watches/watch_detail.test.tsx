@@ -8,10 +8,19 @@
 import React from 'react';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render as renderWithoutProviders,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { I18nProvider } from '@kbn/i18n-react';
 import {
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
@@ -112,6 +121,19 @@ jest.mock('./components/watches_section_layout', () => ({
     );
   },
 }));
+
+const coreStart = coreMock.createStart();
+coreStart.application.getUrlForApp.mockImplementation(
+  (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
+);
+
+const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <I18nProvider>
+    <KibanaContextProvider services={coreStart}>{children}</KibanaContextProvider>
+  </I18nProvider>
+);
+
+const render = (ui: React.ReactElement) => renderWithoutProviders(ui, { wrapper: Providers });
 
 const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
@@ -942,6 +964,59 @@ describe('WatchDetailPage', () => {
         settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
         settingsRevision: null,
       },
+    });
+  });
+
+  describe('no-model block', () => {
+    const blockedDetectionWorkers = detectionWorkers.map(
+      (worker): Worker => ({ ...worker, blockingReasons: ['no_model'] })
+    );
+
+    it('disables every Enabled switch while the space has no model', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, blockedDetectionWorkers);
+
+      for (const worker of blockedDetectionWorkers) {
+        expect(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`)).toBeDisabled();
+        expect(screen.getByTestId(`alertZeroWorkerWarningIcon-${worker.id}`)).toBeInTheDocument();
+        expect(screen.getByTestId(`alertZeroModelsRow-${worker.id}`)).toBeInTheDocument();
+      }
+    });
+
+    it('tells the user after Save that a still-blocked Worker will not run, until acknowledged', async () => {
+      const { mutateAsync } = renderWatch(
+        SYSTEM_SECURITY_WATCH_DETECTION_ID,
+        blockedDetectionWorkers
+      );
+      mutateAsync.mockResolvedValue({ worker: blockedDetectionWorkers[0] });
+      const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+
+      fireEvent.change(field, { target: { value: '7' } });
+      fireEvent.blur(field);
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+      const modal = await screen.findByTestId('alertZeroWorkerBlockedAfterSaveModal');
+      expect(modal).toHaveTextContent("Saved — but Rule Tuning won't run yet");
+      expect(modal).toHaveTextContent(
+        'Some AI-powered steps in this Worker may not be configured. Check Feature settings.'
+      );
+
+      fireEvent.click(screen.getByTestId('alertZeroWorkerBlockedAfterSaveAcknowledge'));
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('alertZeroWorkerBlockedAfterSaveModal')).not.toBeInTheDocument()
+      );
+    });
+
+    it('shows no post-save notice when the saved Worker can run', async () => {
+      const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+      const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+
+      fireEvent.change(field, { target: { value: '7' } });
+      fireEvent.blur(field);
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+      expect(screen.queryByTestId('alertZeroWorkerBlockedAfterSaveModal')).not.toBeInTheDocument();
     });
   });
 

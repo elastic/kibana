@@ -29,10 +29,12 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AutonomyLevelControl } from './autonomy_level_control';
 import { getAutonomyLevelCards } from './autonomy_level_cards_data';
 import { ScheduleIntervalField } from './schedule_interval_field';
 import { SettingRow } from './setting_row';
+import { FeatureSettingsLink } from './feature_settings_link';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
 import { workerDescription, workerName } from '../workers/translations';
@@ -98,6 +100,8 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       ? workerScheduleCadenceLabel(settings.scheduleInterval)
       : undefined;
   const controlsDisabled = settingsLocked || isSaving || !canWrite;
+  // The stored value still shows; it is kept and never flips on by itself when a model appears.
+  const enabledBlocked = worker.blockingReasons.includes('no_model');
   const executionsHref = worker.workflowId
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
@@ -239,7 +243,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
       compressed
       label={settingsI18n.ENABLED_SWITCH_LABEL}
       checked={enabled}
-      disabled={controlsDisabled}
+      disabled={controlsDisabled || enabledBlocked}
       onChange={(event) => onEnabledChange(event.target.checked)}
       data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
     />
@@ -313,6 +317,24 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           />
         </SettingRow>
       ) : null}
+      <SettingRow
+        label={settingsI18n.MODELS_LABEL}
+        data-test-subj={`alertZeroModelsRow-${worker.id}`}
+      >
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="xpack.alertzero.watches.settings.models.description"
+              defaultMessage="This Worker uses models configured in {featureSettingsLink}."
+              values={{
+                featureSettingsLink: (
+                  <FeatureSettingsLink data-test-subj={`alertZeroModelsLink-${worker.id}`} />
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
+      </SettingRow>
       {/* Watch-owned settings for this Worker's `extras`; extras replaces whole-object on save. */}
       {CustomSettings ? (
         <CustomSettings

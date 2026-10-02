@@ -29,6 +29,7 @@ import { useWorkers } from '../../hooks/use_workers_api';
 import { SettingsSection } from './components/settings_section';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import { WorkerSettingsPanel } from './components/worker_settings_panel';
+import { getModelWarningReasons } from './components/worker_model_reasons';
 import {
   getBlockedAfterSaveNotices,
   getDisableConfirmation,
@@ -136,8 +137,24 @@ export const WatchDetailPage: React.FC = () => {
         savedIds.has(workerId) ? enabled : storedEnabledById.get(workerId) ?? enabled,
       ])
     );
+    const workersById = new Map((workersData?.workers ?? []).map((worker) => [worker.id, worker]));
+    const dependencyReasonsById = new Map(
+      getBlockedAfterSaveNotices(storedEnabledById, enabledAfterSave, savedWorkerIds).map(
+        ({ workerId, reasons }) => [workerId, reasons]
+      )
+    );
+    // A dependency notice follows only the save that turns a Worker on; a no-model notice follows
+    // every save of a blocked Worker, since that Worker cannot be turned on at all.
     setBlockedNoticeQueue(
-      getBlockedAfterSaveNotices(storedEnabledById, enabledAfterSave, savedWorkerIds)
+      savedWorkerIds
+        .map((workerId) => ({
+          workerId,
+          reasons: [
+            ...getModelWarningReasons(workersById.get(workerId)),
+            ...(dependencyReasonsById.get(workerId) ?? []),
+          ],
+        }))
+        .filter(({ reasons }) => reasons.length > 0)
     );
   }, [save, hasInvalidDraft, watchId, enabledById, workersData?.workers]);
 
@@ -330,7 +347,10 @@ export const WatchDetailPage: React.FC = () => {
                 enabled={draft.enabled}
                 settings={draft.settings}
                 error={draft.error}
-                warningReasons={getWorkerWarningReasons(worker.id, enabledById)}
+                warningReasons={[
+                  ...getModelWarningReasons(worker),
+                  ...getWorkerWarningReasons(worker.id, enabledById),
+                ]}
                 settingsLocked={worker.state === 'unavailable'}
                 isSaving={isSaving}
                 canWrite={canWrite}

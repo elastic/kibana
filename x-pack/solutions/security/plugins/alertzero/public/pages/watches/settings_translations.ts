@@ -77,6 +77,19 @@ export const WATCH_SETTINGS_INVALID = i18n.translate(
 );
 
 /* -------------------------------------------------------------------------- */
+/* Models                                                                     */
+/* -------------------------------------------------------------------------- */
+
+export const FEATURE_SETTINGS_LINK = i18n.translate(
+  'xpack.alertzero.watches.settings.featureSettingsLink',
+  { defaultMessage: 'Feature settings' }
+);
+
+export const MODELS_LABEL = i18n.translate('xpack.alertzero.watches.settings.models.label', {
+  defaultMessage: 'Models',
+});
+
+/* -------------------------------------------------------------------------- */
 /* Section headings                                                           */
 /* -------------------------------------------------------------------------- */
 
