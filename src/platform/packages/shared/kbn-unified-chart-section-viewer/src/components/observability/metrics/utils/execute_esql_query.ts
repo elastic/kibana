@@ -11,6 +11,7 @@ import type { Filter, TimeRange } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime, getEsQueryConfig } from '@kbn/data-plugin/public';
@@ -40,6 +41,8 @@ export interface ExecuteEsqlParams {
    * error telemetry filterable by the same profile.
    */
   profileId: string;
+  /** Names the request in the APM `page` label. Defaults to the metrics info fetch. */
+  executionContextName?: MetricsExecutionContextName;
 }
 
 export const fetchEsqlResponseOrThrow = async (
@@ -56,7 +59,7 @@ export const fetchEsqlResponseOrThrow = async (
 
 export interface ExecuteEsqlResult<TDocument> {
   documents: TDocument[];
-  rawResponse: object;
+  rawResponse: ESQLSearchResponse & { requestParams: ESQLSearchParams };
   requestParams: { query: string; filter?: object };
 }
 
@@ -74,6 +77,7 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
   variables,
   uiSettings,
   profileId,
+  executionContextName = MetricsExecutionContextName.METRICS_INFO,
 }: ExecuteEsqlParams): Promise<ExecuteEsqlResult<TDocument>> {
   const esQueryConfig = getEsQueryConfig(uiSettings);
   const timeFilter =
@@ -93,11 +97,9 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
     filter,
     timeRange,
     variables,
-    ...getMetricsExecutionContext(
-      MetricsExecutionContextAction.FETCH,
-      MetricsExecutionContextName.METRICS_INFO,
-      { profile_id: profileId }
-    ),
+    ...getMetricsExecutionContext(MetricsExecutionContextAction.FETCH, executionContextName, {
+      profile_id: profileId,
+    }),
   });
 
   return {

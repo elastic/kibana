@@ -111,6 +111,7 @@ describe('MetricsExperienceGridContent', () => {
       },
       histogramCss: { name: '', styles: '' },
       isTabSelected: true,
+      isComponentVisible: true,
     };
 
     useMetricsExperienceStateMock.mockReturnValue({

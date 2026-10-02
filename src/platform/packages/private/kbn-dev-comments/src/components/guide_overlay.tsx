@@ -25,9 +25,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isActionable, isCovered, isIgnored, resolveAnchor } from '../lib/anchor';
+import { isActionable, isCovered, isIgnored, isInTooltip, resolveAnchor } from '../lib/anchor';
 import { isTrailControl } from '../lib/trail';
-import type { Comment } from '../types';
+import type { Comment, TrailStepKind } from '../types';
 import { useComments, useCommentsState } from './comments_context';
 import { useLayerPortal, useLayerZIndex, useLayoutTick } from './hooks';
 import { useResolvedAnchor } from './resolved_anchors';
@@ -39,6 +39,7 @@ interface GuideStep {
   index: number;
   element: Element;
   label: string;
+  kind: TrailStepKind;
 }
 
 interface StepSearch {
@@ -51,13 +52,10 @@ interface StepSearch {
 const NO_STEP: StepSearch = { step: null, covered: null };
 
 /**
- * The click to ask for next, latest first: the one closest to the comment that
- * can be made is the likeliest to bring its element up, and clicks before it
- * that opened and closed other things are left alone. Trails are stored data,
- * so each step is held to the same standard as when recording: a disclosure
- * control on the page itself, and the recorded one. An element that only stands
- * where it stood, with other content, may be any control, so the guide does not
- * ask for a click on it.
+ * The step to ask for next, latest first: the one closest to the comment that
+ * can be made is the likeliest to bring its element up. Trails are stored data:
+ * a click is only asked for on the recorded control, found exactly, and one
+ * that is a disclosure control still; a hover, on any element that can be pointed at.
  */
 const findStep = (
   comment: Comment,
@@ -66,27 +64,25 @@ const findStep = (
 ): StepSearch => {
   let covered: GuideStep | null = null;
   for (let index = comment.trail.length - 1; index >= 0; index -= 1) {
-    const { anchor, label } = comment.trail[index];
+    const { anchor, label, kind = 'click' } = comment.trail[index];
     const resolved = done.has(index) ? null : resolveAnchor(anchor);
     const element = resolved?.exact ? resolved.element : undefined;
-    if (!element || !isTrailControl(element) || isIgnored(element, ignoreSelectors)) {
+    if (
+      !element ||
+      (kind === 'click' && !isTrailControl(element)) ||
+      isIgnored(element, ignoreSelectors)
+    ) {
       continue;
     }
     if (isActionable(element)) {
-      return { step: { index, element, label }, covered };
+      return { step: { index, element, label, kind }, covered };
     }
-    covered ??= isCovered(element) ? { index, element, label } : null;
+    covered ??= isCovered(element) ? { index, element, label, kind } : null;
   }
   return { step: null, covered };
 };
 
-/**
- * The steps done once `index` is: it and the ones before it that were, not the
- * ones after it. A click made before an earlier one is asked for again after
- * that one, as what it brought up may have depended on the state the earlier
- * click put the page in (a flyout showing the selected tab's content) — the
- * author made them in that order.
- */
+/** The steps done once `index` is: it and the earlier ones done. Later ones are asked for again, as the author made them after it. */
 const completing = (done: ReadonlySet<number>, index: number): ReadonlySet<number> =>
   new Set([...done].filter((earlier) => earlier < index).concat(index));
 
@@ -99,19 +95,14 @@ const pulse = keyframes`
   }
 `;
 
-/**
- * Highlights the author's clicks one at a time, most recent first, until the
- * commented element shows, then opens the comment. A click that turns out to
- * need an earlier one is asked for again after it, see `completing`.
- */
+/** Highlights the author's clicks one at a time, most recent first, until the commented element shows, then opens the comment. */
 export const GuideOverlay = ({ comment }: { comment: Comment }) => {
   const controller = useComments();
   const { euiTheme } = useEuiTheme();
   const zIndex = useLayerZIndex();
   const container = useLayerPortal('devCommentsGuide', zIndex.panel);
   const messageId = useGeneratedHtmlId({ prefix: 'devCommentsGuideMessage' });
-  // Another page's DOM could match the anchors by accident, as could this page's
-  // in another state while the host is still opening the comment's one.
+  // Another page's DOM could match the anchors by accident, this page's in another state included.
   const navigating = useCommentsState((state) => state.guide?.navigating ?? false);
   const pageKey = useCommentsState((state) => state.pageKey);
   const onPage = !navigating && pageKey === comment.route.pageKey;
@@ -131,38 +122,44 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
   const stepRef = useRef(step);
   stepRef.current = step;
 
-  // The render window opens anew whenever the scene changes: on arriving at the
-  // page and after each completed step, whose UI may take a moment to appear.
+  // The page gets time to render on arrival and after each step.
   useEffect(() => {
     setSettled(false);
     const timer = setTimeout(() => setSettled(true), SETTLE_MS);
     return () => clearTimeout(timer);
   }, [onPage, done]);
 
-  // Into view as soon as it is found, which is out from under a bar it may have scrolled beneath.
+  // Into view as soon as it is found: out from under a bar it may have scrolled beneath.
   const foundElement = found?.element ?? null;
   useEffect(() => {
     foundElement?.scrollIntoView({ block: 'center', inline: 'nearest' });
   }, [foundElement]);
 
+  // Found. Focusing the pin would blur the element, and a tooltip shown for its focus would go, pin and all.
   useEffect(() => {
     if (target) {
-      controller.stopGuide(true);
+      controller.stopGuide(true, { focusPin: !isInTooltip(target) });
     }
   }, [target, controller]);
 
-  // Focus follows the guide: the control to activate (Enter then repeats the
-  // click), otherwise the guide's own button, described by the message.
   useEffect(() => {
-    if (stepElement) {
-      stepElement.scrollIntoView({ block: 'center', inline: 'nearest' });
-      if (stepElement instanceof HTMLElement) {
-        stepElement.focus({ preventScroll: true });
-      }
+    stepElement?.scrollIntoView({ block: 'center', inline: 'nearest' });
+  }, [stepElement]);
+
+  // Focus follows the guide: the control to click (Enter repeats the click), else
+  // the guide's button. Not an element to hover: the tooltip it shows would go
+  // with the focus. Nor anywhere once the element is found: focus stays where it is.
+  const toClick = step?.kind === 'click' && stepElement instanceof HTMLElement ? stepElement : null;
+  useEffect(() => {
+    if (target || !container) {
+      return;
+    }
+    if (toClick) {
+      toClick.focus({ preventScroll: true });
     } else {
       buttonRef.current?.focus({ preventScroll: true });
     }
-  }, [stepElement]);
+  }, [toClick, target, container]);
 
   // The element cannot be found: the way on is the comment itself, in the panel, with its screenshot.
   const lost = !navigating && settled && !step && found === null && coveredStep === null;
@@ -172,16 +169,28 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
     }
   }, [lost]);
 
-  // Only a real click completes a step: keyboard activation of a control fires one as well.
+  // A click (keyboard activation fires one too) completes a click step; pointing at the element, a hover step.
   useEffect(() => {
-    const onClick = ({ target: activated }: MouseEvent) => {
-      const current = stepRef.current;
-      if (current && activated instanceof Node && current.element.contains(activated)) {
-        setDone((previous) => completing(previous, current.index));
-      }
-    };
+    const complete =
+      (kind: TrailStepKind) =>
+      ({ target: activated }: MouseEvent) => {
+        const current = stepRef.current;
+        if (
+          current?.kind === kind &&
+          activated instanceof Node &&
+          current.element.contains(activated)
+        ) {
+          setDone((previous) => completing(previous, current.index));
+        }
+      };
+    const onClick = complete('click');
+    const onMouseOver = complete('hover');
     document.addEventListener('click', onClick, true);
-    return () => document.removeEventListener('click', onClick, true);
+    document.addEventListener('mouseover', onMouseOver, true);
+    return () => {
+      document.removeEventListener('click', onClick, true);
+      document.removeEventListener('mouseover', onMouseOver, true);
+    };
   }, []);
 
   if (!container || target) {
@@ -195,10 +204,15 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
   const padding = parseInt(euiTheme.size.xs, 10);
 
   const message = step
-    ? i18n.translate('devComments.guide.clickStep', {
-        defaultMessage: 'Click “{label}” to get to the comment',
-        values: { label: step.label },
-      })
+    ? step.kind === 'hover'
+      ? i18n.translate('devComments.guide.hoverStep', {
+          defaultMessage: 'Hover over “{label}” to get to the comment',
+          values: { label: step.label },
+        })
+      : i18n.translate('devComments.guide.clickStep', {
+          defaultMessage: 'Click “{label}” to get to the comment',
+          values: { label: step.label },
+        })
     : searching
     ? i18n.translate('devComments.guide.searching', {
         defaultMessage: 'Looking for the comment…',
@@ -254,7 +268,6 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
         `}
         data-test-subj="devCommentsGuide"
       >
-        {/* The message spans the width, the actions below it, the same in every state so that nothing jumps. */}
         <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
           <EuiFlexItem grow={false}>
             {searching ? (
@@ -292,7 +305,6 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
           </EuiFlexItem>
           {lost && (
             <EuiFlexItem grow={false}>
-              {/* Where the reader is taken instead: the screenshot is what shows the element as it was. */}
               <EuiButton
                 size="s"
                 iconType={comment.snapshot ? 'image' : undefined}
