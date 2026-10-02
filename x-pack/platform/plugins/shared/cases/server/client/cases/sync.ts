@@ -7,8 +7,17 @@
 
 import Boom from '@hapi/boom';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import type { Case, CaseStatuses } from '../../../common/types/domain';
+import type {
+  Case,
+  CaseStatuses,
+  ExternalSyncConflictStrategy,
+} from '../../../common/types/domain';
 import { UserActionTypes } from '../../../common/types/domain';
+import type { ResolvedExternalSyncFieldRules } from '../../../common/utils/external_sync_fields';
+import {
+  pullsFromExternal,
+  resolveExternalSyncFieldRules,
+} from '../../../common/utils/external_sync_fields';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
@@ -44,23 +53,35 @@ export const stripKibanaInformationFromDescription = (description: string): stri
   return footerStart === -1 ? description : description.slice(0, footerStart);
 };
 
+interface BuildSyncPatchOptions {
+  /** Fields edited in Kibana since the baseline; only consulted for fields that keep the Kibana value. */
+  changedInKibana: Set<string>;
+  fieldRules: ResolvedExternalSyncFieldRules;
+  defaultStrategy: ExternalSyncConflictStrategy;
+}
+
 export const buildSyncPatch = (
   theCase: Case,
   snapshot: ExternalIncidentSnapshot,
-  changedInKibana: Set<string>
+  { changedInKibana, fieldRules, defaultStrategy }: BuildSyncPatchOptions
 ): { patch: SyncPatch; updatedFields: string[]; conflictedFields: string[] } => {
   const patch: SyncPatch = {};
   const updatedFields: string[] = [];
   const conflictedFields: string[] = [];
 
-  for (const field of SYNCED_FIELDS) {
+  const pulledFields = SYNCED_FIELDS.filter((field) =>
+    pullsFromExternal(fieldRules[field].direction)
+  );
+
+  for (const field of pulledFields) {
     const value =
       field === 'description' && snapshot.description != null
         ? stripKibanaInformationFromDescription(snapshot.description)
         : snapshot[field];
 
     if (value != null && value !== theCase[field]) {
-      if (changedInKibana.has(field)) {
+      const strategy = fieldRules[field].conflictStrategy ?? defaultStrategy;
+      if (strategy === 'kibana' && changedInKibana.has(field)) {
         conflictedFields.push(field);
       } else {
         Object.assign(patch, { [field]: value });
@@ -71,6 +92,16 @@ export const buildSyncPatch = (
 
   return { patch, updatedFields, conflictedFields };
 };
+
+const keepsKibanaValueForAnyField = (
+  fieldRules: ResolvedExternalSyncFieldRules,
+  defaultStrategy: ExternalSyncConflictStrategy
+): boolean =>
+  SYNCED_FIELDS.some(
+    (field) =>
+      pullsFromExternal(fieldRules[field].direction) &&
+      (fieldRules[field].conflictStrategy ?? defaultStrategy) === 'kibana'
+  );
 
 const getFieldsChangedSinceLastPush = async (
   caseId: string,
@@ -163,17 +194,18 @@ export const sync = async (
     }
 
     const snapshot = parseIncident(res.data as Record<string, unknown>);
-    const strategy = theCase.settings.externalSync?.conflictStrategy ?? 'external';
-    const changedInKibana =
-      strategy === 'kibana'
-        ? await getFieldsChangedSinceLastPush(caseId, theCase.connector.id, casesClient)
-        : new Set<string>();
+    const [configuration] = await casesClient.configure.get({ owner: theCase.owner });
+    const fieldRules = resolveExternalSyncFieldRules(configuration?.externalSyncFields);
+    const defaultStrategy = theCase.settings.externalSync?.conflictStrategy ?? 'external';
+    const changedInKibana = keepsKibanaValueForAnyField(fieldRules, defaultStrategy)
+      ? await getFieldsChangedSinceLastPush(caseId, theCase.connector.id, casesClient)
+      : new Set<string>();
 
-    const { patch, updatedFields, conflictedFields } = buildSyncPatch(
-      theCase,
-      snapshot,
-      changedInKibana
-    );
+    const { patch, updatedFields, conflictedFields } = buildSyncPatch(theCase, snapshot, {
+      changedInKibana,
+      fieldRules,
+      defaultStrategy,
+    });
 
     if (updatedFields.length > 0) {
       await casesClient.cases.bulkUpdate(

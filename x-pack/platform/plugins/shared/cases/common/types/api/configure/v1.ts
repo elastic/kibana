@@ -27,7 +27,11 @@ import {
   CustomFieldNumberTypeRt,
 } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
-import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
+import {
+  ConfigurationBasicWithoutOwnerRt,
+  ClosureTypeRt,
+  ExternalSyncFieldRulesRt,
+} from '../../domain/configure/v1';
 import { ExternalSyncSettingsRt } from '../../domain/case/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseBaseOptionalFieldsRequestRt } from '../case/v1';
@@ -192,6 +196,7 @@ export const ConfigurationRequestRt = rt.intersection([
       observableTypes: ObservableTypesConfigurationRt,
       extractObservables: rt.boolean,
       externalSync: ExternalSyncSettingsRt,
+      externalSyncFields: ExternalSyncFieldRulesRt,
     })
   ),
 ]);
@@ -220,6 +225,7 @@ export const ConfigurationPatchRequestRt = rt.intersection([
       observableTypes: ObservableTypesConfigurationRt,
       extractObservables: ConfigurationBasicWithoutOwnerRt.type.props.extractObservables,
       externalSync: ExternalSyncSettingsRt,
+      externalSyncFields: ExternalSyncFieldRulesRt,
     })
   ),
   rt.strict({ version: rt.string }),

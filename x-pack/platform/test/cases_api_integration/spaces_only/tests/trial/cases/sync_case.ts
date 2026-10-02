@@ -24,8 +24,10 @@ import {
   createConfiguration,
   getConfiguration,
   getConfigurationRequest,
+  createComment,
+  getAllComments,
 } from '../../../../common/lib/api';
-import { postCaseReq } from '../../../../common/lib/mock';
+import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -102,6 +104,71 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(configuration.externalSync).to.eql(externalSync);
       expect(theCase.settings.externalSync).to.eql(externalSync);
+    });
+
+    it('persists the per-field sync rules on the configuration and rejects unsupported directions', async () => {
+      const externalSyncFields = [
+        {
+          field: 'title' as const,
+          direction: 'pull' as const,
+          conflictStrategy: 'kibana' as const,
+        },
+        { field: 'comments' as const, direction: 'off' as const },
+      ];
+      const configuration = await createConfiguration(
+        supertestWithoutAuth,
+        getConfigurationRequest({ overrides: { externalSyncFields } }),
+        200,
+        authSpace1
+      );
+
+      expect(configuration.externalSyncFields).to.eql(externalSyncFields);
+
+      const [fetched] = await getConfiguration({
+        supertest: supertestWithoutAuth,
+        auth: authSpace1,
+      });
+      expect(fetched.externalSyncFields).to.eql(externalSyncFields);
+
+      await createConfiguration(
+        supertestWithoutAuth,
+        getConfigurationRequest({
+          overrides: { externalSyncFields: [{ field: 'status', direction: 'push' }] },
+        }),
+        400,
+        authSpace1
+      );
+    });
+
+    it('does not mark comments as pushed when the comments direction is off', async () => {
+      const { postedCase, connector } = await createCaseWithConnector({
+        supertest: supertestWithoutAuth,
+        serviceNowSimulatorURL,
+        actionsRemover,
+        auth: authSpace1,
+        configureReq: { externalSyncFields: [{ field: 'comments', direction: 'off' }] },
+      });
+      await createComment({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        params: postCommentUserReq,
+        auth: authSpace1,
+      });
+
+      const pushed = await pushCase({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        connectorId: connector.id,
+        auth: authSpace1,
+      });
+
+      expect(pushed.external_service?.external_id).to.eql('123');
+      const comments = await getAllComments({
+        supertest: supertestWithoutAuth,
+        caseId: postedCase.id,
+        auth: authSpace1,
+      });
+      expect(comments.map((comment) => comment.pushed_at)).to.eql([null]);
     });
 
     it('reads the incident back and records a sync user action', async () => {

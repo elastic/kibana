@@ -8,6 +8,7 @@
 import { CustomFieldTypes } from '../../../common/types/domain';
 import {
   validateCustomFieldTypesInRequest,
+  validateExternalSyncFieldsInRequest,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 
@@ -400,6 +401,45 @@ describe('validators', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid duplicated templates[0]'s customFields keys in request: first_key"`
+      );
+    });
+  });
+
+  describe('validateExternalSyncFieldsInRequest', () => {
+    it('accepts an empty or missing list', () => {
+      expect(() => validateExternalSyncFieldsInRequest(undefined)).not.toThrow();
+      expect(() => validateExternalSyncFieldsInRequest([])).not.toThrow();
+    });
+
+    it('accepts supported directions', () => {
+      expect(() =>
+        validateExternalSyncFieldsInRequest([
+          { field: 'title', direction: 'pull', conflictStrategy: 'kibana' },
+          { field: 'status', direction: 'off' },
+          { field: 'comments', direction: 'push' },
+        ])
+      ).not.toThrow();
+    });
+
+    it('throws when a field appears twice', () => {
+      expect(() =>
+        validateExternalSyncFieldsInRequest([
+          { field: 'title', direction: 'both' },
+          { field: 'title', direction: 'off' },
+        ])
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid value \\"title\\" supplied to \\"externalSyncFields\\": a field may appear only once"`
+      );
+    });
+
+    it('throws when a field asks for a direction it does not support', () => {
+      expect(() =>
+        validateExternalSyncFieldsInRequest([
+          { field: 'status', direction: 'push' },
+          { field: 'comments', direction: 'both' },
+        ])
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid externalSyncFields: \\"status\\" cannot sync with direction \\"push\\" (allowed: pull, off); \\"comments\\" cannot sync with direction \\"both\\" (allowed: push, off)"`
       );
     });
   });

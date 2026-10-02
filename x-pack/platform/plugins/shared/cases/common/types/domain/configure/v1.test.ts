@@ -168,6 +168,25 @@ describe('configure', () => {
       });
     });
 
+    it('has expected attributes in request with externalSyncFields', () => {
+      const request = {
+        ...defaultRequest,
+        externalSyncFields: [
+          { field: 'title', direction: 'pull', conflictStrategy: 'kibana' },
+          { field: 'comments', direction: 'off' },
+        ],
+      };
+      const query = ConfigurationAttributesRt.decode(request);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          ...request,
+          customFields: [textCustomField, toggleCustomField, numberCustomField],
+        },
+      });
+    });
+
     it('removes foo:bar attributes from request', () => {
       const query = ConfigurationAttributesRt.decode({ ...defaultRequest, foo: 'bar' });
 

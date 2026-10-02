@@ -13,6 +13,7 @@ import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/m
 import { mockCases } from '../../mocks';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SYNC_CASE_APPLIED_COUNTER, SYNC_CASE_NO_CHANGES_COUNTER } from '../usage_counters';
+import { resolveExternalSyncFieldRules } from '../../../common/utils/external_sync_fields';
 import { buildSyncPatch, stripKibanaInformationFromDescription, sync } from './sync';
 
 const externalService = {
@@ -62,6 +63,7 @@ describe('sync', () => {
     casesClient.userActions.getAll.mockResolvedValue(userActionsResponse([]));
     authorization.ensureAuthorized.mockResolvedValue(undefined);
     licensingService.isAtLeastEnterprise.mockResolvedValue(true);
+    casesClient.configure.get = jest.fn().mockResolvedValue([]);
     actionsClient.execute.mockResolvedValue({ status: 'ok', data: incident, actionId: 'sn-1' });
   });
 
@@ -163,6 +165,66 @@ describe('sync', () => {
       { cases: [{ id: theCase.id, version: theCase.version, status: CaseStatuses.closed }] },
       { origin: 'external_sync' }
     );
+  });
+
+  it('skips fields whose direction does not pull from the external system', async () => {
+    casesClient.configure.get = jest.fn().mockResolvedValue([
+      {
+        externalSyncFields: [
+          { field: 'title', direction: 'push' },
+          { field: 'status', direction: 'off' },
+        ],
+      },
+    ]);
+
+    await sync({ caseId: theCase.id }, clientArgs, casesClient);
+
+    expect(casesClient.cases.bulkUpdate).not.toHaveBeenCalled();
+    expect(userActionService.creator.createUserAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userAction: expect.objectContaining({
+          payload: { sync: expect.objectContaining({ updated_fields: [], conflicted_fields: [] }) },
+        }),
+      })
+    );
+    expect(usageCounter.incrementCounter).toHaveBeenCalledWith(
+      expect.objectContaining({ counterName: SYNC_CASE_NO_CHANGES_COUNTER })
+    );
+  });
+
+  it('applies a per-field conflict rule over the case default', async () => {
+    // Case default keeps the external value; the title rule keeps the Kibana value.
+    casesClient.configure.get = jest
+      .fn()
+      .mockResolvedValue([
+        { externalSyncFields: [{ field: 'title', direction: 'both', conflictStrategy: 'kibana' }] },
+      ]);
+    casesClient.userActions.getAll.mockResolvedValue(userActionsResponse(['title', 'status']));
+
+    await sync({ caseId: theCase.id }, clientArgs, casesClient);
+
+    expect(casesClient.cases.bulkUpdate).toHaveBeenCalledWith(
+      { cases: [{ id: theCase.id, version: theCase.version, status: CaseStatuses.closed }] },
+      { origin: 'external_sync' }
+    );
+    expect(userActionService.creator.createUserAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userAction: expect.objectContaining({
+          payload: {
+            sync: expect.objectContaining({
+              updated_fields: ['status'],
+              conflicted_fields: ['title'],
+            }),
+          },
+        }),
+      })
+    );
+  });
+
+  it('does not read the user actions when no field keeps the Kibana value', async () => {
+    await sync({ caseId: theCase.id }, clientArgs, casesClient);
+
+    expect(casesClient.userActions.getAll).not.toHaveBeenCalled();
   });
 
   it('does not update the case when the incident matches it', async () => {
@@ -269,17 +331,47 @@ describe('stripKibanaInformationFromDescription', () => {
 });
 
 describe('buildSyncPatch', () => {
+  const snapshot = { title: theCase.title, description: 'changed', status: CaseStatuses.closed };
+
   it('ignores missing and unchanged values and reports conflicts', () => {
     expect(
-      buildSyncPatch(
-        theCase,
-        { title: theCase.title, description: 'changed', status: CaseStatuses.closed },
-        new Set(['description'])
-      )
+      buildSyncPatch(theCase, snapshot, {
+        changedInKibana: new Set(['description']),
+        fieldRules: resolveExternalSyncFieldRules(),
+        defaultStrategy: 'kibana',
+      })
     ).toEqual({
       patch: { status: CaseStatuses.closed },
       updatedFields: ['status'],
       conflictedFields: ['description'],
+    });
+  });
+
+  it('applies a Kibana-edited field when its strategy keeps the external value', () => {
+    expect(
+      buildSyncPatch(theCase, snapshot, {
+        changedInKibana: new Set(['description']),
+        fieldRules: resolveExternalSyncFieldRules(),
+        defaultStrategy: 'external',
+      })
+    ).toEqual({
+      patch: { description: 'changed', status: CaseStatuses.closed },
+      updatedFields: ['description', 'status'],
+      conflictedFields: [],
+    });
+  });
+
+  it('skips fields that only push', () => {
+    expect(
+      buildSyncPatch(theCase, snapshot, {
+        changedInKibana: new Set(),
+        fieldRules: resolveExternalSyncFieldRules([{ field: 'description', direction: 'push' }]),
+        defaultStrategy: 'external',
+      })
+    ).toEqual({
+      patch: { status: CaseStatuses.closed },
+      updatedFields: ['status'],
+      conflictedFields: [],
     });
   });
 });

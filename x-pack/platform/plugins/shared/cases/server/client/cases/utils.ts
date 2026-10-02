@@ -40,7 +40,11 @@ import type {
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
-import type { ExternalServiceComment, ExternalServiceIncident } from './types';
+import type {
+  ExternalServiceComment,
+  ExternalServiceIncident,
+  ExternalServiceParams,
+} from './types';
 import type { CasesConnectorsMap } from '../../connectors';
 import { getCaseViewPath } from '../../common/utils';
 import {
@@ -53,6 +57,11 @@ import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { getFieldSnakeKey } from '../../../common/utils/template_fields';
 import * as i18n from './translations';
+import type { ResolvedExternalSyncFieldRules } from '../../../common/utils/external_sync_fields';
+import {
+  pushesToExternal,
+  resolveExternalSyncFieldRules,
+} from '../../../common/utils/external_sync_fields';
 
 interface CreateIncidentArgs {
   theCase: Case;
@@ -63,6 +72,8 @@ interface CreateIncidentArgs {
   spaceId: string;
   userProfiles?: Map<string, UserProfile>;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
+  /** Space-level field directions; defaults push every mapped field. */
+  fieldRules?: ResolvedExternalSyncFieldRules;
 }
 
 export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undefined => {
@@ -206,6 +217,7 @@ export const createIncident = async ({
   userProfiles,
   spaceId,
   publicBaseUrl,
+  fieldRules = resolveExternalSyncFieldRules(),
 }: CreateIncidentArgs): Promise<ExternalServiceIncident> => {
   const latestPushInfo = getLatestPushInfo(connector.id, userActions);
   const externalId = latestPushInfo?.pushedInfo?.external_id ?? null;
@@ -213,7 +225,13 @@ export const createIncident = async ({
   const externalServiceFields =
     casesConnectors.get(connector.actionTypeId)?.format(theCase, alerts) ?? {};
 
-  const connectorMappings = casesConnectors.get(connector.actionTypeId)?.getMapping() ?? [];
+  const connectorMappings = (casesConnectors.get(connector.actionTypeId)?.getMapping() ?? []).map(
+    (mapping) =>
+      (mapping.source === 'title' || mapping.source === 'description') &&
+      !pushesToExternal(fieldRules[mapping.source].direction)
+        ? { ...mapping, target: 'not_mapped' as const }
+        : mapping
+  );
   const descriptionWithKibanaInformation = addKibanaInformationToDescription(
     theCase,
     spaceId,
@@ -221,25 +239,38 @@ export const createIncident = async ({
     publicBaseUrl
   );
 
-  const comments = formatComments({
-    userActions,
-    latestPushInfo,
-    theCase,
-    userProfiles,
-    spaceId,
-    publicBaseUrl,
-  });
+  const comments = pushesToExternal(fieldRules.comments.direction)
+    ? formatComments({
+        userActions,
+        latestPushInfo,
+        theCase,
+        userProfiles,
+        spaceId,
+        publicBaseUrl,
+      })
+    : [];
 
   const mappedIncident = mapCaseFieldsToExternalSystemFields(
     { title: theCase.title, description: descriptionWithKibanaInformation },
     connectorMappings
   );
 
-  const incident = {
+  const incident: ExternalServiceParams = {
     ...mappedIncident,
     ...externalServiceFields,
     externalId,
   };
+
+  // Tags are written by the connector's format(), not the mapping, so they are removed after the fact.
+  const tagsTarget = connectorMappings.find((mapping) => mapping.source === 'tags')?.target;
+  if (
+    tagsTarget != null &&
+    tagsTarget !== 'not_mapped' &&
+    !pushesToExternal(fieldRules.tags.direction)
+  ) {
+    delete incident[tagsTarget];
+  }
+
   return { incident, comments };
 };
 

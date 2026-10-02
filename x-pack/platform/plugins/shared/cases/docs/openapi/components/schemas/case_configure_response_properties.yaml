@@ -66,6 +66,11 @@ extractObservables:
   example: true
 externalSync:
   $ref: 'external_sync_settings.yaml'
+externalSyncFields:
+  type: array
+  description: Technical preview. Per-field sync directions and conflict rules for the space.
+  items:
+    $ref: 'external_sync_field_rule.yaml'
 owner:
   $ref: 'owner.yaml'
 templates:

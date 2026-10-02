@@ -38,6 +38,7 @@ import {
   processObservables,
   enrichCasesWithFieldLabels,
 } from './utils';
+import { resolveExternalSyncFieldRules } from '../../../common/utils/external_sync_fields';
 
 import type {
   AttachmentV2,
@@ -385,6 +386,44 @@ describe('utils', () => {
         },
         comments: [],
       });
+    });
+
+    it('drops the title and tags from the payload when their directions do not push', async () => {
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+        fieldRules: resolveExternalSyncFieldRules([
+          { field: 'title', direction: 'pull' },
+          { field: 'tags', direction: 'off' },
+        ]),
+      });
+
+      expect(res.incident).not.toHaveProperty('summary');
+      expect(res.incident).not.toHaveProperty('labels');
+      expect(res.incident.description).toEqual(
+        'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.'
+      );
+    });
+
+    it('sends no comments when the comments direction is off', async () => {
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          comments: [commentObj],
+        },
+        userActions,
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+        fieldRules: resolveExternalSyncFieldRules([{ field: 'comments', direction: 'off' }]),
+      });
+
+      expect(res.comments).toEqual([]);
     });
 
     it('creates comments correctly', async () => {

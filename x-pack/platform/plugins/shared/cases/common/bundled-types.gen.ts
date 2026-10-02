@@ -1107,6 +1107,19 @@ export type ConnectorTypesEnum = typeof ConnectorTypes.enum;
 export const ConnectorTypesEnum = ConnectorTypes.enum;
 
 /**
+  * Technical preview. How one case field moves between the case and the external incident. `direction` is `both`, `push` (case to external only), `pull` (external to case only), or `off`. `status` supports only `pull` and `off`; `tags` and `comments` support only `push` and `off`. `conflictStrategy` overrides the case's conflict strategy for this field when both sides changed.
+
+  */
+export const ExternalSyncFieldRule = lazySchema(() =>
+  z.object({
+    field: z.enum(['title', 'description', 'status', 'tags', 'comments']),
+    direction: z.enum(['both', 'push', 'pull', 'off']),
+    conflictStrategy: z.enum(['external', 'kibana']).optional(),
+  })
+);
+export type ExternalSyncFieldRule = z.infer<typeof ExternalSyncFieldRule>;
+
+/**
   * The words and phrases that help categorize templates. It can be an empty array.
 
   */
@@ -1318,6 +1331,13 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
         "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.\n"
       ),
     externalSync: ExternalSyncSettings.optional(),
+    /**
+     * Technical preview. Per-field sync directions and conflict rules for the space.
+     */
+    externalSyncFields: z
+      .array(ExternalSyncFieldRule)
+      .optional()
+      .describe('Technical preview. Per-field sync directions and conflict rules for the space.'),
     owner: Owner,
     templates: Templates.optional(),
   })
@@ -1428,6 +1448,13 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
         'Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n'
       ),
     externalSync: ExternalSyncSettings.optional(),
+    /**
+     * Technical preview. Per-field sync directions and conflict rules for the space.
+     */
+    externalSyncFields: z
+      .array(ExternalSyncFieldRule)
+      .optional()
+      .describe('Technical preview. Per-field sync directions and conflict rules for the space.'),
     templates: Templates.optional(),
     /**
       * The version of the connector. To retrieve the version value, use the get configuration API.

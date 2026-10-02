@@ -13,6 +13,7 @@ import type {
   CaseCustomFields,
   CaseSeverity,
   ConfigurationAttributes,
+  ExternalSyncFieldRule,
   ExternalSyncSettings,
 } from '../../../common/types/domain';
 import {
@@ -37,6 +38,7 @@ export interface ConfigurationPersistedAttributes {
   observableTypes?: PersistedObservableTypesConfiguration;
   extractObservables?: boolean;
   externalSync?: ExternalSyncSettings;
+  externalSyncFields?: ExternalSyncFieldRule[];
   legacyTemplatesMigrated?: boolean;
   legacyCustomFieldsMigrated?: boolean;
   /**

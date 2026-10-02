@@ -371,6 +371,11 @@ paths:
                       example: true
                     externalSync:
                       $ref: '#/components/schemas/external_sync_settings'
+                    externalSyncFields:
+                      type: array
+                      description: Technical preview. Per-field sync directions and conflict rules for the space.
+                      items:
+                        $ref: '#/components/schemas/external_sync_field_rule'
                     owner:
                       $ref: '#/components/schemas/owner'
                     templates:
@@ -563,6 +568,11 @@ paths:
                     example: true
                   externalSync:
                     $ref: '#/components/schemas/external_sync_settings'
+                  externalSyncFields:
+                    type: array
+                    description: Technical preview. Per-field sync directions and conflict rules for the space.
+                    items:
+                      $ref: '#/components/schemas/external_sync_field_rule'
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -757,6 +767,11 @@ paths:
                     example: true
                   externalSync:
                     $ref: '#/components/schemas/external_sync_settings'
+                  externalSyncFields:
+                    type: array
+                    description: Technical preview. Per-field sync directions and conflict rules for the space.
+                    items:
+                      $ref: '#/components/schemas/external_sync_field_rule'
                   owner:
                     $ref: '#/components/schemas/owner'
                   templates:
@@ -3723,6 +3738,37 @@ components:
         - .servicenow-sir
         - .swimlane
       example: .none
+    external_sync_field_rule:
+      type: object
+      description: |
+        Technical preview. How one case field moves between the case and the external incident. `direction` is `both`, `push` (case to external only), `pull` (external to case only), or `off`. `status` supports only `pull` and `off`; `tags` and `comments` support only `push` and `off`. `conflictStrategy` overrides the case's conflict strategy for this field when both sides changed.
+      required:
+        - field
+        - direction
+      properties:
+        field:
+          type: string
+          enum:
+            - title
+            - description
+            - status
+            - tags
+            - comments
+          example: title
+        direction:
+          type: string
+          enum:
+            - both
+            - push
+            - pull
+            - 'off'
+          example: both
+        conflictStrategy:
+          type: string
+          enum:
+            - external
+            - kibana
+          example: kibana
     template_tags:
       description: |
         The words and phrases that help categorize templates. It can be an empty array.
@@ -3885,6 +3931,11 @@ components:
             Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
         externalSync:
           $ref: '#/components/schemas/external_sync_settings'
+        externalSyncFields:
+          type: array
+          description: Technical preview. Per-field sync directions and conflict rules for the space.
+          items:
+            $ref: '#/components/schemas/external_sync_field_rule'
         owner:
           $ref: '#/components/schemas/owner'
         templates:
@@ -3966,6 +4017,11 @@ components:
             Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
         externalSync:
           $ref: '#/components/schemas/external_sync_settings'
+        externalSyncFields:
+          type: array
+          description: Technical preview. Per-field sync directions and conflict rules for the space.
+          items:
+            $ref: '#/components/schemas/external_sync_field_rule'
         templates:
           $ref: '#/components/schemas/templates'
         version:

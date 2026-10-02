@@ -55,6 +55,7 @@ import {
 } from '../validators';
 import {
   validateCustomFieldTypesInRequest,
+  validateExternalSyncFieldsInRequest,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
@@ -319,6 +320,8 @@ export async function update(
       requestFields: request.observableTypes,
     });
 
+    validateExternalSyncFieldsInRequest(request.externalSyncFields);
+
     const { version, templates, ...queryWithoutVersion } = request;
 
     const configuration = await caseConfigureService.get({
@@ -479,6 +482,8 @@ export async function create(
     validateDuplicatedObservableTypesInRequest({
       requestFields: validatedConfigurationRequest.observableTypes,
     });
+
+    validateExternalSyncFieldsInRequest(validatedConfigurationRequest.externalSyncFields);
 
     let error = null;
 

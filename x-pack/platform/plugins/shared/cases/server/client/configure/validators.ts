@@ -9,8 +9,10 @@ import Boom from '@hapi/boom';
 import type {
   CustomFieldsConfiguration,
   CustomFieldTypes,
+  ExternalSyncFieldRules,
   TemplatesConfiguration,
 } from '../../../common/types/domain';
+import { EXTERNAL_SYNC_FIELD_DIRECTIONS } from '../../../common/utils/external_sync_fields';
 import { validateDuplicatedKeysInRequest } from '../validators';
 import {
   validateCustomFieldKeysAgainstConfiguration,
@@ -85,4 +87,45 @@ export const validateTemplatesCustomFieldsInRequest = ({
     validateCustomFieldKeysAgainstConfiguration(params);
     validateCaseCustomFieldTypesInRequest(params);
   });
+};
+
+/**
+ * Throws when a field appears twice or asks for a direction the engine cannot honor for it.
+ */
+export const validateExternalSyncFieldsInRequest = (rules?: ExternalSyncFieldRules) => {
+  if (!Array.isArray(rules) || rules.length === 0) {
+    return;
+  }
+
+  const seen = new Set<string>();
+  const duplicated: string[] = [];
+  const unsupported: string[] = [];
+
+  for (const rule of rules) {
+    if (seen.has(rule.field)) {
+      duplicated.push(rule.field);
+    }
+    seen.add(rule.field);
+
+    const allowed = EXTERNAL_SYNC_FIELD_DIRECTIONS[rule.field];
+    if (!allowed.includes(rule.direction)) {
+      unsupported.push(
+        `"${rule.field}" cannot sync with direction "${rule.direction}" (allowed: ${allowed.join(
+          ', '
+        )})`
+      );
+    }
+  }
+
+  if (duplicated.length > 0) {
+    throw Boom.badRequest(
+      `Invalid value "${duplicated.join(
+        ','
+      )}" supplied to "externalSyncFields": a field may appear only once`
+    );
+  }
+
+  if (unsupported.length > 0) {
+    throw Boom.badRequest(`Invalid externalSyncFields: ${unsupported.join('; ')}`);
+  }
 };
