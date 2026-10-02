@@ -38,7 +38,7 @@ test.describe('Roles CRUD with data source privileges', { tag: tags.stateful.cla
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: { cluster: ['manage_security'], indices: [] },
-      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+      kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
     });
   });
 

@@ -21,7 +21,7 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: { cluster: ['manage_security'], indices: [] },
-      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+      kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
     });
     await pageObjects.securityUsers.goto();
   });
@@ -169,6 +169,12 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
       await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
         'Password successfully changed'
       );
+      await page.context().clearCookies();
+      await pageObjects.login.loginWithUsernamePassword(
+        optionalUser.username,
+        'NewOptionalUserPwd'
+      );
+      await expect(page.testSubj.locator('userMenuAvatar')).toBeVisible();
     } finally {
       await esClient.security.deleteUser({ username: optionalUser.username }).catch(() => {});
     }

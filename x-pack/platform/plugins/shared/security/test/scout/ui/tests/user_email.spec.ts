@@ -22,7 +22,7 @@ test.describe('User email and account settings', { tag: tags.stateful.classic },
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: { cluster: ['manage_security'], indices: [] },
-      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+      kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
     });
   });
 

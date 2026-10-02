@@ -57,7 +57,6 @@ test.describe('Document Level Security', { tag: tags.stateful.classic }, () => {
     if (dataViewId) {
       await apiServices.dataViews.delete(dataViewId);
     }
-    await esClient.indices.delete({ index: dataIndex, ignore_unavailable: true });
   });
 
   test('UI-created user and role restrict Discover to EAST documents', async ({
