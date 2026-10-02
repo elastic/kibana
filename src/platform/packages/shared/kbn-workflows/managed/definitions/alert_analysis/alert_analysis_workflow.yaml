@@ -1761,6 +1761,31 @@ steps:
                     {{ variables.batch_inc_count }} inconclusive.
 
       # -----------------------------------------------------------------------
+      # Alert ids the agent never returned a verdict for (Worker path only)
+      # -----------------------------------------------------------------------
+      # Exposed in workflow.output so a Worker can retry or surface a partial Investigation
+      # result instead of treating completed+empty as success. Prefer this over failing the
+      # whole run, which would discard the verdicts that did match. Derived once from the
+      # analyzed set rather than pushed per alert: every data.set persists its full value, so
+      # a per-alert push would store the cumulative list once for each alert. Covers both an
+      # alert the agent skipped and a batch that returned nothing, since neither reaches
+      # all_verdicts. Real alert ids only — never the model's echo.
+      #
+      # Derived before apply_verdicts, not after it: all_verdicts is complete once the batch
+      # loop ends, and on the Worker path apply_verdicts iterates exactly these alerts.
+      - name: collect_verdict_ids
+        type: data.set
+        if: "${{ inputs.calledByWorker == true }}"
+        with:
+          all_verdict_ids: "${{ variables.all_verdicts | map: 'id' }}"
+
+      - name: set_missing_alert_ids
+        type: data.set
+        if: "${{ inputs.calledByWorker == true }}"
+        with:
+          missing_alert_ids: "${{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | reject_exp: 'a', 'variables.all_verdict_ids contains a._id' | map: '_id' }}"
+
+      # -----------------------------------------------------------------------
       # Write the verdicts back to the alerts
       # -----------------------------------------------------------------------
       # Built once outside the loop: a filter expression matching any existing workflow tag
@@ -1770,10 +1795,19 @@ steps:
         with:
           tags_filter_expr: 'tag contains "{{ variables.tag_prefix }}."'
 
+      # Every step of every iteration is recorded in the execution, so the alerts this loop
+      # visits decide how big the execution is. A Worker caller (calledByWorker) writes its own
+      # tags and notes, and runs with auto-close off, so for an alert that has a verdict every
+      # branch below is a no-op; only an alert without one is acted on (log line and error
+      # note). The Worker path therefore iterates the alerts missing a verdict, not all of them,
+      # and drops the same pending alerts set_missing_alert_ids does, so the two lists agree.
+      # A Worker that turns auto-close on keeps the full list, because auto_close_ids is
+      # accumulated per alert inside this loop. The standalone path always visits every
+      # pending alert.
       - name: apply_verdicts
         type: foreach
         foreach: >-
-          {% if inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% endif %}
+          {% if inputs.calledByWorker == true and variables.auto_close_enabled != true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | reject_exp: 'a', 'variables.all_verdict_ids contains a._id' | json }}{% elsif inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% endif %}
         steps:
           - name: select_alert_verdict
             type: data.set
@@ -1954,28 +1988,6 @@ steps:
                     type: data.set
                     with:
                       auto_close_ids: "${{ variables.auto_close_ids | push: foreach.item._id }}"
-
-      # -----------------------------------------------------------------------
-      # Alert ids the agent never returned a verdict for (Worker path only)
-      # -----------------------------------------------------------------------
-      # Exposed in workflow.output so a Worker can retry or surface a partial Investigation
-      # result instead of treating completed+empty as success. Prefer this over failing the
-      # whole run, which would discard the verdicts that did match. Derived once from the
-      # analyzed set rather than pushed per alert: every data.set persists its full value, so
-      # a per-alert push would store the cumulative list once for each alert. Covers both an
-      # alert the agent skipped and a batch that returned nothing, since neither reaches
-      # all_verdicts. Real alert ids only — never the model's echo.
-      - name: collect_verdict_ids
-        type: data.set
-        if: "${{ inputs.calledByWorker == true }}"
-        with:
-          all_verdict_ids: "${{ variables.all_verdicts | map: 'id' }}"
-
-      - name: set_missing_alert_ids
-        type: data.set
-        if: "${{ inputs.calledByWorker == true }}"
-        with:
-          missing_alert_ids: "${{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | reject_exp: 'a', 'variables.all_verdict_ids contains a._id' | map: '_id' }}"
 
       # -----------------------------------------------------------------------
       # Grouped verdict counts, per entity, as a ready-to-render sentence

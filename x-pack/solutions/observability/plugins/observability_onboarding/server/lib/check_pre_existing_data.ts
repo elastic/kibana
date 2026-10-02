@@ -14,13 +14,15 @@ const PRE_CHECK_WINDOW_MS = 300_000;
  * Checks whether data was actively flowing into the given indices
  * in the 5 minutes before `start`. If it was, time-range-based
  * has-data detection is likely to produce false positives.
+ * `filters` narrow the check to the same scope as the has-data probe.
  *
  * Returns `false` on any error so it never blocks the main flow.
  */
 export const checkPreExistingData = async (
   esClient: ElasticsearchClient,
   indices: string[],
-  start: string
+  start: string,
+  filters: estypes.QueryDslQueryContainer[] = []
 ): Promise<boolean> => {
   try {
     const startMs = new Date(start).getTime();
@@ -34,7 +36,7 @@ export const checkPreExistingData = async (
       terminate_after: 1,
       query: {
         bool: {
-          filter: [{ range: { '@timestamp': { gte: windowStart, lt: start } } }],
+          filter: [{ range: { '@timestamp': { gte: windowStart, lt: start } } }, ...filters],
         },
       },
     });
