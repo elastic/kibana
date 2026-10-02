@@ -6,7 +6,7 @@
  */
 
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
-import type { KbnClient } from '@kbn/scout-oblt';
+import type { KbnClient } from '@kbn/scout';
 
 /**
  * Internal route: serverless disables the public `/api/kibana/global_settings`
@@ -17,21 +17,18 @@ const GLOBAL_SETTINGS_PATH = `/internal/kibana/global_settings/${encodeURICompon
 )}`;
 
 /**
- * Toggles the `alerting:v2:enabled` global advanced setting at runtime.
- * Matches the alerting_v2 `test/scout` skill-gating suite: the default Scout
- * server leaves this setting unpinned.
+ * Turns on the `alerting:v2:enabled` global setting, without which every alerting_v2 route returns 503.
  */
-export const setAlertingV2EnabledSetting = async (
-  kbnClient: KbnClient,
-  enabled: boolean
-): Promise<void> => {
-  await kbnClient.uiSettings.updateGlobal({
-    [ALERTING_V2_ENABLED_SETTING_ID]: enabled,
-  });
+export const enableAlertingV2Setting = async (kbnClient: KbnClient): Promise<void> => {
+  await kbnClient.uiSettings.updateGlobal({ [ALERTING_V2_ENABLED_SETTING_ID]: true });
+  // Multi-node deployments serve uiSettings from a per-node cache.
+  await kbnClient.uiSettings.waitForEventualCacheRefresh();
 };
 
-/** DELETE is a no-op when no user value is set. */
-export const unsetAlertingV2EnabledSetting = async (kbnClient: KbnClient): Promise<void> => {
+/**
+ * Removes the user value of `alerting:v2:enabled`; a no-op when none is set.
+ */
+export const unsetAlertingV2Setting = async (kbnClient: KbnClient): Promise<void> => {
   await kbnClient.request({
     description: `unset ${ALERTING_V2_ENABLED_SETTING_ID}`,
     path: GLOBAL_SETTINGS_PATH,

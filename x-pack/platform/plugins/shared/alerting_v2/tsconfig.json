@@ -11,8 +11,7 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "public/**/*",
-    "test/scout/**/*",
-    "test/scout_alerting_v2/**/*"
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/agent-builder-elastic-ai-index-ki-types",

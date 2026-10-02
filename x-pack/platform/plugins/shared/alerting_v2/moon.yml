@@ -174,7 +174,6 @@ fileGroups:
     - server/**/*.json
     - public/**/*
     - test/scout/**/*
-    - test/scout_alerting_v2/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
   jest-config:

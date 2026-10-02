@@ -28,10 +28,8 @@ const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => s
  * `alerting:v2:experimentalFeatures`. This suite exercises all gates before
  * asserting either skill is listed.
  *
- * This is the canonical gating suite because the generic Scout config leaves
- * `alerting:v2:enabled` unpinned, so it can be flipped on and off at runtime.
- * The dedicated `scout_alerting_v2` config forces the feature on and therefore
- * cannot cover the disabled cases.
+ * This config has no global setup, so `alerting:v2:enabled` starts unset and
+ * the disabled cases can be covered. The namespaced configs enable it globally.
  */
 apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
   // Reset both gates after every test. `.unset()` / DELETE are safe no-ops when
