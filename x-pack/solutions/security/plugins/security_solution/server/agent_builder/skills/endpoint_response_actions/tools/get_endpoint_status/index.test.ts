@@ -297,6 +297,47 @@ describe('getEndpointStatusTool', () => {
       );
     });
 
+    it('reports isolated: null, not false, when the metadata has no isolation state', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-789', packages: ['endpoint'] }],
+        }),
+      };
+
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              // `Endpoint.state.isolation` is optional: this endpoint never reported it.
+              metadata: { Endpoint: { state: {} } },
+              last_checkin: '2024-06-01T12:00:00Z',
+              host_status: 'healthy',
+            },
+          ],
+          total: 1,
+        }),
+      };
+
+      jest
+        .spyOn(mockEndpointAppContextService, 'getInternalFleetServices')
+        .mockImplementation((() => ({
+          agent: mockAgentService,
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        })) as unknown as EndpointAppContextService['getInternalFleetServices']);
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+        );
+
+      const result = await tool.handler({ agentId: 'agent-789' }, mockContext);
+
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(true);
+      expect(data.isolated).toBeNull();
+    });
+
     it('returns found: true with non-isolated status when metadata shows isolation is false', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({

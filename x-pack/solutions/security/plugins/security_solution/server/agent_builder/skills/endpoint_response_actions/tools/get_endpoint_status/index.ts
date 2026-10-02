@@ -76,7 +76,7 @@ export const getEndpointStatusTool = (
   return {
     id: GET_ENDPOINT_STATUS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves the current status of a host by its hostname or agent ID, including whether it is isolated, its last seen time, and its status (healthy, unhealthy, updating, offline, inactive, unenrolled; unknown when not yet reported). When several endpoints share the hostname, pass the endpoint's agent ID to select one, or pass the agent ID alone to look a host up by ID.`,
+    description: `Retrieves the current status of a host by its hostname or agent ID, including whether it is isolated (isolated is null when the endpoint has not reported its isolation state), its last seen time, and its status (healthy, unhealthy, updating, offline, inactive, unenrolled; unknown when not yet reported). When several endpoints share the hostname, pass the endpoint's agent ID to select one, or pass the agent ID alone to look a host up by ID.`,
     schema: getEndpointStatusSchema,
     handler: async (params, { logger, request, spaceId }) => {
       try {
@@ -196,6 +196,10 @@ export const getEndpointStatusTool = (
         // could return another endpoint's status as a successful lookup.
         const quotedAgentId = `"${escapeQuotes(agentId)}"`;
         const idKuery = `(united.agent.agent.id: ${quotedAgentId} OR agent.id: ${quotedAgentId})`;
+        // `united.endpoint.host.hostname` is a `keyword` (`strings_as_keyword` dynamic template in
+        // the endpoint package's metrics-metadata-united.json), so the quoted clause compiles to an
+        // exact-value `match_phrase` — `web-01` does not match `web-01-copy`. The agent-side name is
+        // matched on its `.keyword` subfield for the same reason.
         const quotedHostName = hostName ? `"${escapeQuotes(hostName)}"` : undefined;
         const kuery =
           requestedAgentId && quotedHostName
@@ -239,7 +243,10 @@ export const getEndpointStatusTool = (
         const resolvedAgentId =
           (hostMetadata.metadata as { elastic?: { agent?: { id?: string } } } | undefined)?.elastic
             ?.agent?.id ?? agentId;
-        const isolated = Boolean(hostMetadata.metadata.Endpoint?.state?.isolation);
+        // `Endpoint.state.isolation` is optional in `HostMetadata`. A document that never
+        // reported it must not read as `isolated: false` ("known not isolated"): pass the
+        // absence through as `null` (unknown), like `lastSeen`.
+        const isolated = hostMetadata.metadata.Endpoint?.state?.isolation ?? null;
         const lastSeen = hostMetadata.last_checkin || null;
         // The metadata service can return a document with no `host_status`
         // (e.g. a race between enrollment and the first checkin). Reporting a

@@ -156,6 +156,60 @@ describe('listEndpointsTool', () => {
       );
     });
 
+    it('reports isolated: null, not false, for endpoints without a reported isolation state', async () => {
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: {
+                host: { hostname: 'no-state-host', os: { name: 'Ubuntu', version: '22.04' } },
+                agent: { id: 'agent-1' },
+                // `Endpoint.state.isolation` is optional in the metadata
+                Endpoint: { state: {} },
+              },
+              host_status: 'healthy',
+              last_checkin: '2024-01-01T00:00:00Z',
+            },
+            {
+              metadata: {
+                host: { hostname: 'no-endpoint-host' },
+                agent: { id: 'agent-2' },
+              },
+              host_status: 'healthy',
+              last_checkin: '2024-01-01T00:00:00Z',
+            },
+            {
+              metadata: {
+                host: { hostname: 'isolated-host' },
+                agent: { id: 'agent-3' },
+                Endpoint: { state: { isolation: true } },
+              },
+              host_status: 'healthy',
+              last_checkin: '2024-01-01T00:00:00Z',
+            },
+          ],
+          total: 3,
+        }),
+      };
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+        );
+
+      const result = await tool.handler({}, mockContext);
+
+      const data = assertStandardReturn(result)[0].data as {
+        endpoints: Array<{ hostName: string; isolated: boolean | null }>;
+      };
+      expect(data.endpoints.map(({ hostName, isolated }) => [hostName, isolated])).toEqual([
+        ['no-state-host', null],
+        ['no-endpoint-host', null],
+        ['isolated-host', true],
+      ]);
+    });
+
     it('returns empty list when no endpoints exist', async () => {
       const mockMetadataService = {
         getHostMetadataList: jest.fn().mockResolvedValue({

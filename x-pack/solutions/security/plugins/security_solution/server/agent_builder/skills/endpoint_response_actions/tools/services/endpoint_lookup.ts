@@ -395,6 +395,8 @@ export function createEndpointLookupService(
           // The metadata service pages from 0, unlike Fleet's 1-based pages.
           page: page - 1,
           pageSize: LOOKUP_PAGE_SIZE,
+          // `keyword` field (`strings_as_keyword` in metrics-metadata-united.json): the quoted
+          // value is an exact match, so `web-01` cannot match `web-01-copy`.
           kuery: `united.endpoint.host.hostname: "${escapeQuotes(hostName)}"`,
         },
         scopedServices

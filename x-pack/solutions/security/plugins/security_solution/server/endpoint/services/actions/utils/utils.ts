@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { keyBy } from 'lodash';
+import { keyBy, uniq } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
 import { set } from '@kbn/safer-lodash-set';
 import { doesActionHaveFileAccess } from '../../../routes/actions/utils';
@@ -649,7 +649,9 @@ export const getAgentHostNamesWithIds = async ({
     return hostNames;
   }
 
-  const unresolvedAgentIds = agentIds.filter((id) => !hostNames[id]);
+  // `agentIds` repeats an agent once per action in its history; look each one up once
+  // (order preserved) so a long history does not fan out into identical batches.
+  const unresolvedAgentIds = uniq(agentIds.filter((id) => !hostNames[id]));
   const hostnameByAgentId = new Map<string, string>();
 
   for (let offset = 0; offset < unresolvedAgentIds.length; offset += HOSTNAME_LOOKUP_BATCH_SIZE) {

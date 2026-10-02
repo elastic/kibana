@@ -53,7 +53,7 @@ export const listEndpointsTool = (
     id: LIST_ENDPOINTS_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Lists endpoints enrolled with Elastic Defend that response actions can be executed on. Returns hostname, status, isolation state, OS, and last seen time for each endpoint.',
+      'Lists endpoints enrolled with Elastic Defend that response actions can be executed on. Returns hostname, status, isolation state (null when the endpoint has not reported it), OS, and last seen time for each endpoint.',
     schema: listEndpointsSchema,
     handler: async (params, { logger, request, spaceId }) => {
       try {
@@ -146,7 +146,8 @@ export const listEndpointsTool = (
             // 'offline' here would fabricate a down state the metadata never
             // confirmed.
             status: entry.host_status || 'unknown',
-            isolated: Boolean(endpointState?.isolation),
+            // Optional in the metadata: absent means unknown, not "not isolated".
+            isolated: endpointState?.isolation ?? null,
             os: osLabel,
             lastSeen: entry.last_checkin || null,
             // The endpoint's applied integration policy, so the agent can give
