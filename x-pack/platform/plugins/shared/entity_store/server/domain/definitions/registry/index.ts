@@ -16,3 +16,5 @@ export type {
   RegisterResult,
   RegistrationRejection,
 } from './entity_definition_registry';
+export { createEntityDefinitionsClient } from './entity_definitions_client';
+export type { EntityDefinitionsClient } from './entity_definitions_client';

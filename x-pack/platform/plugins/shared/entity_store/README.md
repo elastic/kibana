@@ -101,3 +101,51 @@ Both `run` and `setup` receive a single context argument with:
 - **esClient** - An Elasticsearch client scoped to the current context, using the permissions of the user who triggered the Entity Store plugin installation process.
 
 Consumers implement their maintenance logic in `run` (and optionally in `setup`) using this context and return the updated state so the framework can keep it for the next run.
+
+## Entity definition registry
+
+The Entity Store keeps an in-memory **entity definition registry**: the set of entity types (their fields, identity and source index patterns) known to this Kibana instance. Other plugins can add their own definitions through the setup contract. The registry is not yet read by the store's own extraction code.
+
+### Registering a definition
+
+Call `registerEntityDefinition` during your plugin's `setup` phase:
+
+```ts
+public setup(core: CoreSetup, { entityStore }: MyPluginSetupDeps) {
+  const result = entityStore.registerEntityDefinition({
+    type: 'k8s.pod',
+    name: 'Kubernetes pod',
+    identityField: { singleField: 'kubernetes.pod.uid' },
+    indexPatterns: ['logs-*', 'metrics-*'],
+    fields: [],
+  });
+  if (!result.ok) {
+    // result.reason explains the rejection; it has already been logged.
+  }
+}
+```
+
+- Registration is only possible during setup. The registry is frozen when the Entity Store starts, so later calls are logged and ignored.
+- A rejected definition (invalid schema, invalid or duplicate type name) is logged and skipped. Registration never throws, and Kibana keeps starting.
+- Registered definitions are deep-frozen and cannot be modified afterwards.
+
+### Type names
+
+- Lowercase letters, digits and the separators `.`, `_` and `-`, starting with a letter (`ENTITY_DEFINITION_TYPE_PATTERN`). Separators cannot lead, trail or repeat. Examples: `k8s.pod`, `aws_s3-bucket`.
+- At most 64 characters.
+- Must be unique. `user`, `host`, `service` and `generic` are reserved for the built-in definitions, which the Entity Store registers itself at setup.
+
+### Materialization
+
+The optional `materialization` field says how entities of that type are materialized. The only value today is `'extracted'`: entities are extracted from logs into the entity store. When omitted, the definition is not materialized. The four built-ins are `'extracted'`.
+
+### Reading definitions
+
+The start contract exposes two ways to get an `EntityDefinitionsClient` (`get(type)`, `list()`, `listMaterialized()`, all async):
+
+- `getEntityDefinitionsClient(request)` for request-scoped work. The space is derived from the request.
+- `getEntityDefinitionsClientForSpace(spaceId)` for background work without a request.
+
+`list()` returns the built-ins first (`user`, `host`, `service`, `generic`), then other definitions in registration order. `listMaterialized()` applies the same order to materialized definitions only.
+
+Reading definitions requires no Kibana privilege today, because every definition is plugin code. Authorisation will apply once definitions can be stored and managed outside plugin code; the request parameter exists so that can be added without changing callers.

@@ -44,6 +44,14 @@ import { registerEntityStoreUsageCollector } from './telemetry/usage_collector';
 import { automatedResolutionMaintainerConfig } from './domain/resolution/rules/maintainers/automated_resolution';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 import { subscribeToDualProcessFlag } from './infra/feature_flags';
+import {
+  EntityDefinitionRegistry,
+  createEntityDefinitionsClient,
+} from './domain/definitions/registry';
+import { userEntityDefinition } from '../common/domain/definitions/user';
+import { hostEntityDefinition } from '../common/domain/definitions/host';
+import { serviceEntityDefinition } from '../common/domain/definitions/service';
+import { genericEntityDefinition } from '../common/domain/definitions/generic';
 
 export class EntityStorePlugin
   implements
@@ -57,9 +65,13 @@ export class EntityStorePlugin
   private readonly logger: Logger;
   private readonly isServerless: boolean;
   private readonly stop$ = new Subject<void>();
+  private readonly entityDefinitionRegistry: EntityDefinitionRegistry;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.entityDefinitionRegistry = new EntityDefinitionRegistry(
+      this.logger.get('entity_definition_registry')
+    );
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
@@ -68,6 +80,8 @@ export class EntityStorePlugin
     plugins: EntityStoreSetupPlugins
   ): EntityStoreSetupContract {
     plugins.taskManager.registerCanEncryptedSavedObjects(plugins.encryptedSavedObjects.canEncrypt);
+
+    this.registerBuiltInEntityDefinitions();
 
     this.logger.debug('Registering telemetry events');
     registerTelemetry(core.analytics);
@@ -123,10 +137,13 @@ export class EntityStorePlugin
           core,
           analytics: createReportEvent(core.analytics),
         }),
+      registerEntityDefinition: (definition) => this.entityDefinitionRegistry.register(definition),
     };
   }
 
   public start(core: CoreStart, plugins: EntityStoreStartPlugins): EntityStoreStartContract {
+    // Kibana starts plugins only after every plugin's setup has finished, so no more registrations.
+    this.entityDefinitionRegistry.freeze();
     this.logger.info('Initializing plugin');
 
     plugins.taskManager.registerEncryptedSavedObjectsClient(
@@ -155,7 +172,7 @@ export class EntityStorePlugin
       stop$: this.stop$,
     });
 
-    const logger = this.logger;
+    const { logger, entityDefinitionRegistry } = this;
     return {
       createCRUDClient: (esClient, namespace, getWorkflowsClient) => {
         const emitWorkflowTriggerEvent = getWorkflowsClient
@@ -175,7 +192,31 @@ export class EntityStorePlugin
         new ResolutionClient({ logger, esClient, namespace }),
       getMaintainerStatus: (namespace, ids) =>
         getMaintainerStatus({ taskManager: plugins.taskManager, namespace, logger, ids }),
+      getEntityDefinitionsClient: (request) =>
+        createEntityDefinitionsClient(
+          entityDefinitionRegistry,
+          plugins.spaces.spacesService.getSpaceId(request)
+        ),
+      getEntityDefinitionsClientForSpace: (spaceId) =>
+        createEntityDefinitionsClient(entityDefinitionRegistry, spaceId),
     };
+  }
+
+  private registerBuiltInEntityDefinitions(): void {
+    const builtIns = [
+      userEntityDefinition,
+      hostEntityDefinition,
+      serviceEntityDefinition,
+      genericEntityDefinition,
+    ];
+    builtIns.forEach((definition) => {
+      const result = this.entityDefinitionRegistry.registerBuiltIn(definition);
+      if (!result.ok) {
+        this.logger.error(
+          `Failed to register built-in entity definition '${definition.type}': ${result.reason}`
+        );
+      }
+    });
   }
 
   public stop() {
