@@ -56,6 +56,7 @@ import {
   refreshIndexPatternsList,
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
+import { isSaveAndReturn } from './app_helpers';
 import { changeIndexPattern } from '../state_management/lens_slice';
 import type { ShareableConfiguration } from './share_action';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getLocatorParams, getShareURL } from './share_action';
@@ -648,13 +649,8 @@ export const LensTopNavMenu = ({
 
   const adHocDataViews = indexPatterns.filter((pattern) => !pattern.isPersisted());
 
-  // Opened from a container view (e.g. Dashboard "Edit visualization in Lens"), not from a library listing page.
-  const isComingFromDashboardView = Boolean(
-    incomingState?.originatingApp &&
-      incomingState.originatingApp !== 'visualize' &&
-      incomingState?.originatingPath &&
-      !incomingState.originatingPath.includes('/list/')
-  );
+  const isComingFromDashboardView =
+    isSaveAndReturn(incomingState) && incomingState?.originatingApp !== 'visualize';
 
   const appMenuConfig = useMemo<AppMenuConfig>(() => {
     const contextFromEmbeddable =

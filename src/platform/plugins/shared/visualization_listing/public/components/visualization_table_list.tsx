@@ -69,8 +69,6 @@ export const VisualizationTableList = ({
       .then((currentApp) => {
         const breadcrumbs = currentApp ? getBreadcrumbs?.(currentApp) : undefined;
         closeNewVisModal.current = visualizations.showNewVisModal({
-          originatingApp: currentApp,
-          originatingPath: window.location.hash,
           breadcrumbs,
           outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
         });
@@ -111,7 +109,6 @@ export const VisualizationTableList = ({
           path,
           state: {
             originatingApp: currentApp,
-            originatingPath: window.location.hash,
             breadcrumbs: getBreadcrumbs?.(currentApp),
           },
         });
