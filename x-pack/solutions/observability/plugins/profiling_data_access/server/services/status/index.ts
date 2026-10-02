@@ -61,13 +61,15 @@ export function createGetProfilingStatusService(params: RegisterServicesParams) 
       return { isEnabled: false };
     }
 
+    const universalProfilingPromise = isUniversalProfilingAvailable
+      ? getUniversalProfilingStatus({ esClient, soClient, spaceId, abortSignal }).then(
+          toUniversalProfilingSchemaStatus
+        )
+      : Promise.resolve(UNAVAILABLE_UNIVERSAL_PROFILING_SCHEMA_STATUS);
+
     const [otel, universalProfiling] = await Promise.all([
       getOtelStatus({ esClient, abortSignal }),
-      isUniversalProfilingAvailable
-        ? getUniversalProfilingStatus({ esClient, soClient, spaceId, abortSignal }).then(
-            toUniversalProfilingSchemaStatus
-          )
-        : UNAVAILABLE_UNIVERSAL_PROFILING_SCHEMA_STATUS,
+      universalProfilingPromise,
     ]);
 
     const status: EnabledProfilingSchemasStatus = { isEnabled: true, otel, universalProfiling };
