@@ -22,7 +22,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
 import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
@@ -45,10 +45,23 @@ const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiRespons
 
 interface UseComposeDiscoverFlyoutOptions {
   createSuccessRedirectPath?: string;
+  /**
+   * Shared EUI flyout history key. Pass it only while the option picker is open.
+   * Create-mode flyouts opened without a picker (header ES|QL, empty state, templates)
+   * get a fresh key so they do not join a later picker session.
+   */
+  historyKey?: symbol;
+  /**
+   * Closes a stacked option picker when the authoring flyout is dismissed or a
+   * rule is created. Back does not call this — the picker stays mounted.
+   */
+  onDismiss?: () => void;
 }
 
 export const useComposeDiscoverFlyout = ({
   createSuccessRedirectPath,
+  historyKey: sharedHistoryKey,
+  onDismiss,
 }: UseComposeDiscoverFlyoutOptions = {}) => {
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
@@ -72,15 +85,55 @@ export const useComposeDiscoverFlyout = ({
   const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
-  const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
+  const [flyoutGeneration, setFlyoutGeneration] = useState(0);
+  const [sessionHistoryKey, setSessionHistoryKey] = useState<symbol>(() => Symbol('ruleAuthoring'));
+  const [stackedOnPicker, setStackedOnPicker] = useState(false);
+  const sharedHistoryKeyRef = useRef(sharedHistoryKey);
+  sharedHistoryKeyRef.current = sharedHistoryKey;
+  const closeRequestRef = useRef<(() => void) | null>(null);
 
-  const openInEsql = useCallback((rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
-    setTargetRule(rule);
-    setFlyoutMode(mode);
-    setBuilderType(null);
-    setInitialBuilderState(undefined);
+  const openSession = useCallback((mode: ComposeDiscoverMode) => {
+    const shared = sharedHistoryKeyRef.current;
+    const stacked = mode === 'create' && shared !== undefined;
+    setSessionHistoryKey(stacked ? shared : Symbol('ruleAuthoring'));
+    setStackedOnPicker(stacked);
+    setFlyoutGeneration((generation) => generation + 1);
     setFlyoutOpen(true);
   }, []);
+
+  const hideFlyout = useCallback(() => {
+    setFlyoutOpen(false);
+    setTargetRule(null);
+    setBuilderType(null);
+    setInitialBuilderState(undefined);
+  }, []);
+
+  const requestClose = useCallback(() => {
+    closeRequestRef.current?.();
+  }, []);
+
+  const dismissFlyout = useCallback(() => {
+    hideFlyout();
+    onDismiss?.();
+  }, [hideFlyout, onDismiss]);
+
+  const closeAndRedirect = useCallback(() => {
+    dismissFlyout();
+    if (createSuccessRedirectPath) {
+      application.navigateToUrl(http.basePath.prepend(createSuccessRedirectPath));
+    }
+  }, [application, createSuccessRedirectPath, dismissFlyout, http]);
+
+  const openInEsql = useCallback(
+    (rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
+      setTargetRule(rule);
+      setFlyoutMode(mode);
+      setBuilderType(null);
+      setInitialBuilderState(undefined);
+      openSession(mode);
+    },
+    [openSession]
+  );
 
   const handleConfirmSwitch = useCallback(() => {
     setBuilderType(null);
@@ -130,26 +183,13 @@ export const useComposeDiscoverFlyout = ({
     ]
   );
 
-  const closeFlyout = useCallback(() => {
-    setFlyoutOpen(false);
-    setTargetRule(null);
-    setBuilderType(null);
-    setInitialBuilderState(undefined);
-  }, []);
-
-  const closeAndRedirect = useCallback(() => {
-    setFlyoutOpen(false);
-    if (createSuccessRedirectPath) {
-      application.navigateToUrl(http.basePath.prepend(createSuccessRedirectPath));
-    }
-  }, [application, createSuccessRedirectPath, http]);
-
   const openCreateFlyout = useCallback(() => {
     setTargetRule(null);
     setFlyoutMode('create');
     setBuilderType(null);
-    setFlyoutOpen(true);
-  }, []);
+    setInitialBuilderState(undefined);
+    openSession('create');
+  }, [openSession]);
 
   const openCreateBuilderFlyout = useCallback(
     (type: string) => {
@@ -163,19 +203,16 @@ export const useComposeDiscoverFlyout = ({
             values: { type },
           }),
         });
-        setTargetRule(null);
-        setFlyoutMode('create');
-        setBuilderType(null);
-        setFlyoutOpen(true);
+        openCreateFlyout();
         return;
       }
       setTargetRule(null);
       setFlyoutMode('create');
       setBuilderType(type);
       setInitialBuilderState(undefined);
-      setFlyoutOpen(true);
+      openSession('create');
     },
-    [notifications.toasts]
+    [notifications.toasts, openCreateFlyout, openSession]
   );
 
   const openRuleFlyout = useCallback(
@@ -190,10 +227,10 @@ export const useComposeDiscoverFlyout = ({
         setFlyoutMode(mode);
         setBuilderType(result.builderType);
         setInitialBuilderState(result.initialBuilderState);
-        setFlyoutOpen(true);
+        openSession(mode);
       }
     },
-    [resolveBuilderMode, openInEsql, requestEsqlFallback]
+    [resolveBuilderMode, openInEsql, requestEsqlFallback, openSession]
   );
 
   const openEditFlyout = useCallback(
@@ -215,21 +252,25 @@ export const useComposeDiscoverFlyout = ({
         setFlyoutMode('create');
         setBuilderType(result.builderType);
         setInitialBuilderState(result.initialBuilderState);
-        setFlyoutOpen(true);
+        openSession('create');
       } else {
         openInEsql(syntheticRule, 'create');
       }
     },
-    [resolveBuilderMode, openInEsql]
+    [resolveBuilderMode, openInEsql, openSession]
   );
 
   const flyout = flyoutOpen ? (
     <ComposeDiscoverFlyout
-      historyKey={historyKey}
+      key={flyoutGeneration}
+      historyKey={sessionHistoryKey}
       mode={flyoutMode}
       rule={targetRule ?? undefined}
       ruleId={flyoutMode === 'edit' ? targetRule?.id : undefined}
-      onClose={closeFlyout}
+      onClose={dismissFlyout}
+      onHistoryBack={hideFlyout}
+      closeRequestRef={closeRequestRef}
+      stackedOnPicker={stackedOnPicker}
       services={ruleFormServices}
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
@@ -238,7 +279,7 @@ export const useComposeDiscoverFlyout = ({
         createRuleMutation.mutate({ payload }, { onSuccess: closeAndRedirect })
       }
       onUpdateRule={(id, payload) =>
-        updateRuleMutation.mutate({ id, payload }, { onSuccess: closeFlyout })
+        updateRuleMutation.mutate({ id, payload }, { onSuccess: () => hideFlyout() })
       }
       isSaving={createRuleMutation.isLoading || updateRuleMutation.isLoading}
     />
@@ -252,5 +293,7 @@ export const useComposeDiscoverFlyout = ({
     openCreateFromTemplateFlyout,
     openEditFlyout,
     openCloneFlyout,
+    isOpen: flyoutOpen,
+    requestClose,
   };
 };
