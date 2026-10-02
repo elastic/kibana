@@ -49,8 +49,6 @@ export const KEEP_SEPARATE: Readonly<Record<string, string>> = {
     'tests run on every serverless project type and service_accounts only has configs for two of them',
   ai_value_report:
     'tests also run on serverless security_ease and security_attacks_alignment has no config for it',
-  workflows_extensions:
-    'grows with every plugin gated trigger, merging would load those flags on the Nightshift tests',
 };
 
 /** Config keys core lets tests change at runtime through `/internal/core/_settings`. */
