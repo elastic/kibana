@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/poc-stacked-toast-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "POC for stacked toast notifications (dev only).",
+  "devOnly": true,
+  "plugin": {
+    "id": "pocStackedToast",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": []
+  }
+}

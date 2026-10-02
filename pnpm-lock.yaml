@@ -4456,6 +4456,9 @@ importers:
       fp-ts:
         specifier: 2.16.11
         version: 2.16.11
+      framer-motion:
+        specifier: 11.11.17
+        version: 11.11.17(@emotion/is-prop-valid@1.4.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       get-port:
         specifier: 5.1.1
         version: 5.1.1
@@ -5693,6 +5696,9 @@ importers:
       '@kbn/plugin-helpers':
         specifier: workspace:*
         version: link:packages/kbn-plugin-helpers
+      '@kbn/poc-stacked-toast-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/shared/poc_stacked_toast
       '@kbn/product-doc-artifact-builder':
         specifier: workspace:*
         version: link:x-pack/packages/ai-infra/product-doc-artifact-builder
@@ -8665,6 +8671,8 @@ importers:
   src/platform/plugins/shared/newsfeed: {}
 
   src/platform/plugins/shared/no_data_page: {}
+
+  src/platform/plugins/shared/poc_stacked_toast: {}
 
   src/platform/plugins/shared/presentation_util: {}
 
@@ -19120,6 +19128,20 @@ packages:
 
   fraction.js@4.3.7:
     resolution: {integrity: sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==}
+
+  framer-motion@11.11.17:
+    resolution: {integrity: sha512-O8QzvoKiuzI5HSAHbcYuL6xU+ZLXbrH7C8Akaato4JzQbX2ULNeniqC2Vo5eiCtFktX9XsJ+7nUhxcl2E2IjpA==}
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0
+      react-dom: ^18.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   fresh@0.5.2:
     resolution: {integrity: sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q==}
@@ -37255,6 +37277,14 @@ snapshots:
   fp-ts@2.16.11: {}
 
   fraction.js@4.3.7: {}
+
+  framer-motion@11.11.17(@emotion/is-prop-valid@1.4.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      tslib: 2.8.1
+    optionalDependencies:
+      '@emotion/is-prop-valid': 1.4.0
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
   fresh@0.5.2: {}
 
