@@ -164,7 +164,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 export const SearchInputSchema = lazySchema(() =>
   z.object({
     query: z.string().max(1000).describe('Search query string'),
-    limit: z.number().optional().describe('Maximum results (default: 20)'),
+    limit: z.number().int().min(1).max(100).optional().describe('Maximum results (1–100, default: 20)'),
   })
 );
 export type SearchInput = z.infer<typeof SearchInputSchema>;
@@ -192,6 +192,68 @@ const IpAddressSchema = lazySchema(() => z.union([z.ipv4(), z.ipv6()]));
 `lazySchema` defers building the schema until first use, so loading the connector registry does not
 build every connector's schemas at import time. The spec's `schema` and any inline action `input` are
 wrapped the same way.
+
+### Take every bound from the vendor
+
+Every `.max()` and `.min()` in an input schema should state a limit the vendor enforces. A guessed bound
+is wrong in one of two directions. Below the vendor limit, it rejects valid input: GitHub titles were
+capped at 200 characters when GitHub accepts 256, and Gmail recipients at 50 when the API accepts 500.
+Above the vendor limit, it lets through input the vendor rejects, so the agent gets an opaque vendor 4xx
+instead of a schema error it can correct. `connector_spec_quality_contract.test.ts` only checks that a
+bound exists, not that it is the right one.
+
+For each input field, look up the vendor's limit on string length, item count, entry count, numeric
+range, and payload size. Check the parameter table in the API reference, the OpenAPI `maxLength`,
+`maxItems`, `minimum` and `maximum`, and the vendor's limits or quotas page. Then:
+
+- **Declare one named constant per vendor limit, with its source.** Name it after what the vendor
+  limits, put the doc URL in a comment above it, and use it in every action that takes the field. A
+  title capped at 200 in `createIssue` and 256 in `updateIssue` is wrong in one of the two.
+
+  ```typescript
+  // https://docs.github.com/en/rest/issues/assignees#add-assignees-to-an-issue
+  const GITHUB_MAX_ASSIGNEES = 10;
+  ```
+
+- **When the vendor documents no limit, say so.** Write the gap into the comment
+  (`// GitHub documents no limit on commit messages.`) and pick a bound above any realistic valid
+  value. Do not copy a cap from another field or a neighbouring connector.
+- **Bound numbers at both ends.** A page number, offset, or count needs `.int()` and `.min()` as well
+  as `.max()`, e.g. `pageNumber: z.number().int().min(1)`. Without them, `0`, `-1` and `1.5` reach the
+  vendor.
+- **Add a lower bound where the vendor has one.** Give a string `.min(1)` when the vendor rejects an
+  empty value: required IDs, titles, names, search queries. Use the vendor's minimum when it documents
+  a longer one (OpenAPI `minLength`, e.g. a query of at least 2 characters). Give an array `.min(1)`
+  when the action is meaningless without an item: recipients, assignees, IDs to fetch. Do not add
+  `.min(1)` where an empty value is valid input. On an update action, an empty string often clears the
+  field (`description: ''`), and `.min(1)` makes that impossible. Check the vendor docs for each field
+  rather than applying one rule to every string.
+- **Check limits shared by several fields in a `.refine()` on the object.** GitHub allows 100 requested
+  reviewers across `reviewers` and `teamReviewers` combined, and Gmail 500 recipients across To, Cc and
+  Bcc. Cap each field at the shared limit and add a `.refine()` on the total, because per-field caps
+  alone accept 60 + 60.
+- **Check limits on the whole payload in a `.refine()` too.** GitHub limits all `workflow_dispatch`
+  inputs together to 65,535 characters, so a cap on each value is not enough; check the serialized
+  record as well.
+- **Derive an encoded length from the vendor's raw limit.** When the vendor limits a file in bytes and
+  the input is Base64, declare the byte limit and compute the string bound from it
+  (`Math.ceil(maxBytes / 3) * 4`) rather than writing a round number.
+- **Check a byte limit in bytes.** `.max()` counts characters. When the vendor states the limit in bytes,
+  check `Buffer.byteLength(value, 'utf8')` in a `.refine()` (see "Measure a byte bound in bytes" below).
+- **Do not lower a large vendor limit to fit Kibana.** The actions plugin already rejects any
+  `subActionParams` larger than the configured `server.maxPayload` (default 1 MiB), on every execution
+  path. When a vendor limit is above that default, add the comment
+  `// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).`
+- **Check what a raised bound does to your own code.** Accepting the vendor's full range can break a
+  limit inside the connector. When the Gmail recipient cap went from 50 to 500, the `To` header had to
+  be folded, because a single line of 500 addresses exceeds the 998-octet line limit of RFC 5322.
+- **Give the same number everywhere.** The `.describe()` text, the `skill` text, and the docs page under
+  `docs/reference/connectors-kibana/` must give the limit the schema enforces. When you change a bound,
+  grep for the old number in all three.
+- **Test the boundary through the schema.** For each bound, assert that the limit itself is accepted
+  and one past it is rejected, by calling `Connector.actions.x.input.safeParse(...)`. A test that calls
+  the handler directly skips the schema, so it still passes if the bound is removed. For a shared limit,
+  add a case where each field is within its cap but the total is over.
 
 ## MCP-Native Connector Pattern
 
@@ -800,7 +862,17 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
 - State the unit for numeric fields (`'Maximum number of results to return (1–100, default 20)'`).
 - For ID fields, say where the value comes from (`'The sys_id of the incident, returned by searchIncidents'`).
 - For enum-like strings, list the accepted values inline (`'Filter by state: "new", "in_progress", or "resolved"'`).
-- **Bound user-input strings** — add `.max()` to string fields that accept free-form user input (search queries, AI prompts, natural-language descriptions). Use the service's documented API limit if available; otherwise 2000 for queries and 10000 for AI prompts are safe defaults. Do not bound ID fields or pagination tokens — those have fixed service-side formats.
+- **Bound every input string** — add `.max()` to every string field: free-form user input (search
+  queries, AI prompts, natural-language descriptions) as well as IDs, slugs, and pagination tokens.
+  `connector_spec_quality_contract.test.ts` fails on any unbounded input string that is not an enum or
+  literal. Take the limit from the vendor, as described in
+  [Take every bound from the vendor](#take-every-bound-from-the-vendor). Only when the vendor documents
+  none, 2000 for queries and 10000 for AI prompts are safe defaults, and for IDs and tokens pick a bound
+  well above the longest value the vendor issues (e.g. 255 for an ID, 2000 for an opaque cursor) so a
+  valid value is never rejected. Add a `.min()` as well where the vendor rejects empty or short values;
+  see "Add a lower bound where the vendor has one" in that section.
+- **Bound numeric inputs** — give counts, page numbers, offsets and page sizes
+  `.int().min(...).max(...)` matching the vendor's documented range.
 - **Bound `z.record()` key strings too** — `z.record(z.string(), z.unknown())` (used for flexible/dynamic
   objects like alert-rule conditions or config maps) has the same unbounded-input DoS risk as a bare
   `z.string()`. Apply the same `.max(200)`-style bound to the key type: `z.record(z.string().max(200), z.unknown())`.
@@ -853,7 +925,7 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
 export const SearchInputSchema = lazySchema(() =>
   z.object({
     query: z.string().max(1000).describe('Keyword or natural-language search query'),
-    limit: z.number().optional().describe('Maximum results to return (1–100, default 20)'),
+    limit: z.number().int().min(1).max(100).optional().describe('Maximum results to return (1–100, default 20)'),
     state: z.string().max(50).optional().describe('Filter by state: "new", "in_progress", or "resolved"'),
   })
 );
