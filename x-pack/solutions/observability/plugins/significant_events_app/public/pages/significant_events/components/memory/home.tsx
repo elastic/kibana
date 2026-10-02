@@ -108,7 +108,7 @@ export function MemoryHome({ pages, stats, onSelectPage }: MemoryHomeProps) {
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiText size="xs" color="subdued">
+      <EuiText size="xs" color="subdued" data-test-subj="nightshiftMemoryHomeStats">
         <FormattedMessage
           id="xpack.significantEventsApp.memory.stats.pagesLabel"
           defaultMessage="{count, plural, one {# memory} other {# memories}}"

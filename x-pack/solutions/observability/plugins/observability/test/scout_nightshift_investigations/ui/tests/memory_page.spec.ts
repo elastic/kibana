@@ -53,6 +53,46 @@ const MAIN_TITLE = 'Checkout latency postmortem: consumer lag and DNS';
 /** The `context` E11 searches for: only this memory carries the phrase. */
 const SEARCH_PHRASE = 'ingest-2 queue backlog';
 
+/**
+ * E13's keyword graph.
+ *
+ * `invoke_agent`, `invoke-agent` and `Invoke Agent` are one keyword written three
+ * ways, which is how a real store accumulates tags: the optimizer spells it
+ * differently from one run to the next and nothing rewrites the documents it
+ * already wrote. The treemap has to rank them as one cell, and the server-side
+ * filter has to match all three spellings against a real index rather than
+ * against a mocked one.
+ *
+ * `invoke-agent` is deliberately the most connected keyword and `checkout` the
+ * next, so the two cells E13 clicks are the two largest ones: a treemap draws
+ * its biggest cell as the top strip, which is where the test aims.
+ */
+const KEYWORD_DOCS: { key: string; tags: string[] }[] = [
+  { key: 'checkout-invoke-agent', tags: ['invoke_agent', 'checkout'] },
+  { key: 'dns-invoke-agent', tags: ['invoke-agent', 'dns'] },
+  { key: 'traces-invoke-agent', tags: ['Invoke Agent', 'traces'] },
+  { key: 'cart-cache-invoke-agent', tags: ['invoke_agent', 'cart-cache'] },
+  { key: 'traces-invoke-agent-hub', tags: ['invoke_agent', 'checkout', 'traces'] },
+  { key: 'redis-invoke-agent', tags: ['invoke_agent', 'redis'] },
+  { key: 'checkout-invoke-agent-runbook', tags: ['invoke_agent', 'checkout'] },
+  // The one memory without the keyword: it is what proves the filter filtered.
+  { key: 'checkout-redis-runbook', tags: ['checkout', 'redis'] },
+];
+
+/** The canonical form all three spellings fold to, and the key the chip carries. */
+const INVOKE_AGENT_KEYWORD = 'invoke-agent';
+const CHECKOUT_KEYWORD = 'checkout';
+
+const hasTag = (docTags: string[], keyword: string) =>
+  docTags.some((tag) => tag.toLowerCase().replace(/[\s_]+/g, '-') === keyword);
+
+const KEYWORD_DOCS_WITH_INVOKE_AGENT = KEYWORD_DOCS.filter((doc) =>
+  hasTag(doc.tags, INVOKE_AGENT_KEYWORD)
+).map((doc) => doc.key);
+const KEYWORD_DOCS_WITH_BOTH = KEYWORD_DOCS.filter(
+  (doc) => hasTag(doc.tags, INVOKE_AGENT_KEYWORD) && hasTag(doc.tags, CHECKOUT_KEYWORD)
+).map((doc) => doc.key);
+
 test.describe(
   'Semantic Memory page',
   {
@@ -181,6 +221,19 @@ test.describe(
           impressions: 1,
           conversions: 0,
           updatedAt: minutesAgo(60),
+        });
+      }
+
+      // E13's keyword graph. Recent enough to be inside the sidebar's first page,
+      // so the home lists can be checked as well as the header count.
+      for (const [index, doc] of KEYWORD_DOCS.entries()) {
+        await seedMemory(esClient, {
+          slug: slug(doc.key),
+          title: `Keyword memory ${doc.key}`,
+          tags: doc.tags,
+          impressions: 200,
+          conversions: 150,
+          updatedAt: minutesAgo(index + 1),
         });
       }
 
@@ -540,6 +593,112 @@ test.describe(
       ).toBeVisible();
       await expect(page.testSubj.locator(`nightshiftMemoryLink-memory_${MAIN}`)).toHaveCount(0);
       await attachScreenshot(page, testInfo, 'memory-e12-space-isolation');
+    });
+
+    /**
+     * Clicks the treemap's largest cell and asserts which keyword that was.
+     *
+     * Elastic Charts draws a treemap to canvas, so there is no element per
+     * keyword to click. The squarified layout puts the highest-valued cell in the
+     * top strip spanning the full width, so aiming a quarter of the way down
+     * hits it; the hover tooltip then names the keyword under the cursor, which
+     * is read before the click rather than assumed afterwards.
+     */
+    const clickLargestCell = async (page: ScoutPage, expectedKeyword: string) => {
+      const [canvas] = await page.testSubj
+        .locator('nightshiftMemoryTreemap')
+        .locator('canvas')
+        .all();
+      await expect(canvas).toBeVisible();
+      const box = await canvas.boundingBox();
+      if (box === null) throw new Error('The keyword treemap canvas has no box');
+
+      const x = box.x + box.width / 2;
+      const y = box.y + box.height / 4;
+      await page.mouse.move(x, y);
+      const tooltip = page.testSubj.locator('nightshiftMemoryTreemapTooltip');
+      await expect(tooltip).toBeVisible();
+      await expect(tooltip).toContainText(expectedKeyword);
+      await page.mouse.click(x, y);
+    };
+
+    /** The memory count in the home header, as a number. */
+    const headerTotal = async (page: ScoutPage): Promise<number> => {
+      const text = await page.testSubj.locator('nightshiftMemoryHomeStats').innerText();
+      const parsed = Number.parseInt(text, 10);
+      expect(Number.isNaN(parsed)).toBe(false);
+      return parsed;
+    };
+
+    /** The rows the two home lists show, as page ids, without the section headings. */
+    const homeRowIds = async (page: ScoutPage): Promise<string[]> => {
+      const rows = page.testSubj
+        .locator('nightshiftMemoryHome')
+        .locator('[data-test-subj^="nightshiftMemoryRow-"]');
+      const all = await rows.all();
+      return Promise.all(
+        all.map((row) =>
+          row
+            .getAttribute('data-test-subj')
+            .then((subj) => subj!.replace('nightshiftMemoryRow-', ''))
+        )
+      );
+    };
+
+    test('E13 filters the view by a keyword cell, matching every spelling of it', async ({
+      page,
+      kbnUrl,
+    }, testInfo) => {
+      await gotoMemory(page, kbnUrl);
+      const unfilteredTotal = await headerTotal(page);
+      expect(KEYWORD_DOCS_WITH_INVOKE_AGENT.length).toBeGreaterThan(1);
+
+      // One cell for three spellings: the chart selects the canonical key.
+      await clickLargestCell(page, 'invoke_agent');
+      const chip = page.testSubj.locator(`nightshiftMemoryKeywordChip-${INVOKE_AGENT_KEYWORD}`);
+      await expect(chip).toBeVisible();
+      await expect(page.testSubj.locator('nightshiftMemoryKeywordFilters')).toBeVisible();
+
+      // The header count comes from the server, which had to match all three
+      // spellings against the index: seven of the eight seeded memories carry
+      // one of them.
+      expect(await headerTotal(page)).toBe(KEYWORD_DOCS_WITH_INVOKE_AGENT.length);
+      const oneKeywordRows = await homeRowIds(page);
+      for (const key of KEYWORD_DOCS_WITH_INVOKE_AGENT) {
+        expect(oneKeywordRows).toContain(`memory_${slug(key)}`);
+      }
+      // And nothing that does not: the memory the filter left out, and a memory
+      // from outside the keyword graph entirely.
+      expect(oneKeywordRows).not.toContain(`memory_${slug('checkout-redis-runbook')}`);
+      expect(oneKeywordRows).not.toContain(`memory_${MAIN}`);
+      await attachScreenshot(page, testInfo, 'memory-e13-keyword-one');
+
+      // A second cell is an AND, over the already filtered set. The first keyword
+      // is gone from the chart rather than restyled, which is why the cell under
+      // the cursor is now the runner-up.
+      await clickLargestCell(page, CHECKOUT_KEYWORD);
+      await expect(
+        page.testSubj.locator(`nightshiftMemoryKeywordChip-${CHECKOUT_KEYWORD}`)
+      ).toBeVisible();
+      expect(await headerTotal(page)).toBe(KEYWORD_DOCS_WITH_BOTH.length);
+      const bothRows = await homeRowIds(page);
+      for (const key of KEYWORD_DOCS_WITH_BOTH) {
+        expect(bothRows).toContain(`memory_${slug(key)}`);
+      }
+      await attachScreenshot(page, testInfo, 'memory-e13-keyword-both');
+
+      // A chip removes its own filter.
+      await page.testSubj.locator(`nightshiftMemoryKeywordChip-${CHECKOUT_KEYWORD}`).click();
+      await expect(
+        page.testSubj.locator(`nightshiftMemoryKeywordChip-${CHECKOUT_KEYWORD}`)
+      ).toHaveCount(0);
+      expect(await headerTotal(page)).toBe(KEYWORD_DOCS_WITH_INVOKE_AGENT.length);
+
+      // "Clear all" puts the store back the way it was.
+      await page.testSubj.locator('nightshiftMemoryClearKeywords').click();
+      await expect(page.testSubj.locator('nightshiftMemoryKeywordFilters')).toHaveCount(0);
+      expect(await headerTotal(page)).toBe(unfilteredTotal);
+      await attachScreenshot(page, testInfo, 'memory-e13-keyword-cleared');
     });
 
     test('U2 shows the actions only to the tiers that hold the privilege', async ({
