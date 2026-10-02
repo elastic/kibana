@@ -10,7 +10,7 @@
 import { css as emotionClassName } from '@emotion/css';
 import { css, keyframes } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
-import type { PocToastType } from './poc_toast_types';
+import type { PocToastPlacement, PocToastType } from './poc_toast_types';
 import { POC_TOAST_MAX_CARD_WIDTH, POC_TOAST_STACK_GAP } from './poc_toast_motion';
 
 const SCROLL_SHADOW_ROOM = 16;
@@ -72,14 +72,36 @@ export const pocToastClearAllMotionClassName = emotionClassName`
   flex-shrink: 0;
 `;
 
-export const pocToastAnchorStyles = ({ euiTheme }: UseEuiTheme) => css`
+export const pocToastAnchorStyles = (
+  { euiTheme }: UseEuiTheme,
+  placement: PocToastPlacement
+) => css`
   position: fixed;
   top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  ${placement === 'top-right'
+    ? 'right: 16px;'
+    : `
+    left: 50%;
+    transform: translateX(-50%);
+  `}
   z-index: ${Number(euiTheme.levels.toast ?? 9000) + 1};
   width: max-content;
   max-width: min(calc(100vw - ${euiTheme.size.l}), ${POC_TOAST_MAX_CARD_WIDTH}px);
+`;
+
+export const pocToastControlsStyles = ({ euiTheme }: UseEuiTheme) => css`
+  position: fixed;
+  /* Clears the developer toolbar, which sits along the bottom edge at the same level. */
+  bottom: ${euiTheme.size.xxxl};
+  left: calc(var(--kbn-layout--navigation-width, 0px) + ${euiTheme.size.base});
+  z-index: ${Number(euiTheme.levels.toast ?? 9000) + 1};
+  display: flex;
+  align-items: center;
+  gap: ${euiTheme.size.xs};
+  padding: ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.s};
+  border-radius: ${euiTheme.border.radius.medium};
+  background-color: ${euiTheme.colors.backgroundFilledAccent};
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 `;
 
 const gradientSettle = keyframes`

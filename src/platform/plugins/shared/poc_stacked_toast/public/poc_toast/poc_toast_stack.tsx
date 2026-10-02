@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEuiTheme } from '@elastic/eui';
-import type { PocToast } from './poc_toast_types';
+import type { PocToast, PocToastPlacement } from './poc_toast_types';
 import { PocToastCard } from './poc_toast_card';
 import {
   POC_TOAST_COLLAPSED_Y_STEP,
@@ -27,6 +27,7 @@ import {
 
 export interface PocToastStackProps {
   toasts: PocToast[];
+  placement: PocToastPlacement;
   onDismiss: (id: string) => void;
   onClearAll: () => void;
 }
@@ -34,7 +35,7 @@ export interface PocToastStackProps {
 const COLLAPSED_VISIBLE_TOASTS = 3;
 const clearAllTransition = { layout: pocToastStackTransition };
 
-export const PocToastStack = ({ toasts, onDismiss, onClearAll }: PocToastStackProps) => {
+export const PocToastStack = ({ toasts, placement, onDismiss, onClearAll }: PocToastStackProps) => {
   const euiThemeContext = useEuiTheme();
   const columnRef = useRef<HTMLDivElement>(null);
   // Defined while expanded: the front toast's collapsed width, locked so expanding can't reflow.
@@ -73,7 +74,10 @@ export const PocToastStack = ({ toasts, onDismiss, onClearAll }: PocToastStackPr
   }, [collapse, hasToasts]);
 
   const newestFirst = useMemo(() => toasts.slice().reverse(), [toasts]);
-  const anchorStyles = useMemo(() => pocToastAnchorStyles(euiThemeContext), [euiThemeContext]);
+  const anchorStyles = useMemo(
+    () => pocToastAnchorStyles(euiThemeContext, placement),
+    [euiThemeContext, placement]
+  );
   const clearAllButtonStyles = useMemo(
     () => pocToastClearAllButtonStyles(euiThemeContext),
     [euiThemeContext]

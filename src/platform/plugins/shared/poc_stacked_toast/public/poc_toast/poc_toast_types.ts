@@ -9,6 +9,8 @@
 
 export type PocToastType = 'info' | 'warning' | 'error';
 
+export type PocToastPlacement = 'top-center' | 'top-right';
+
 export interface PocToastCta {
   readonly label: string;
 }
