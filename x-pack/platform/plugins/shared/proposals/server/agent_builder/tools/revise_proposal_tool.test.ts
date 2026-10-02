@@ -6,17 +6,19 @@
  */
 
 import { reviseProposalTool } from './revise_proposal_tool';
-import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import { AGENT_BUILDER_BUILTIN_TOOLS } from '@kbn/agent-builder-server/allow_lists';
+
+type ToolDependencies = Parameters<typeof reviseProposalTool>[0];
 
 const logger = () => ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() });
 
 const requestMock = {} as never;
 
-const agenticWith = (opts: {
+const createDependencies = (opts: {
   assertCanManage?: jest.Mock;
   revise?: jest.Mock;
   getLatestRevision?: jest.Mock;
-}): (() => ProposalsPluginStart) => {
+}): ToolDependencies => {
   const assertCanManage = opts.assertCanManage ?? jest.fn().mockResolvedValue(undefined);
   const revise =
     opts.revise ?? jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 });
@@ -29,26 +31,19 @@ const agenticWith = (opts: {
       status: 'pending',
       decision: undefined,
     }));
-  return () =>
-    ({
-      getProposalPrivileges: () => ({ assertCanManage }),
-      getProposalsService: () => ({ revise, getLatestRevision }),
-    } as unknown as ProposalsPluginStart);
+  return {
+    privileges: { assertCanManage },
+    getProposalsService: () => ({ revise, getLatestRevision }),
+  };
 };
 
-const assertEnabled = jest.fn().mockResolvedValue(undefined);
-
-beforeEach(() => {
-  assertEnabled.mockReset().mockResolvedValue(undefined);
-});
-
 const run = async (
-  getProposals: () => ProposalsPluginStart,
+  dependencies: ToolDependencies,
   // Derived from the tool itself rather than restated: a literal copy drifts
   // from the schema the moment the schema gains a field.
   input: Parameters<ReturnType<typeof reviseProposalTool>['handler']>[0]
 ) => {
-  const tool = reviseProposalTool(getProposals, assertEnabled);
+  const tool = reviseProposalTool(dependencies);
   const result = await tool.handler(input, {
     logger: logger(),
     request: requestMock,
@@ -70,12 +65,11 @@ describe('reviseProposalTool', () => {
       decision: undefined,
     });
     const revise = jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 });
-    await run(agenticWith({ assertCanManage, revise, getLatestRevision }), {
+    await run(createDependencies({ assertCanManage, revise, getLatestRevision }), {
       proposalId: 'proposal-1',
       comment: 'Tightened the match',
     });
 
-    expect(assertEnabled).toHaveBeenCalledWith(requestMock);
     expect(assertCanManage).toHaveBeenCalledWith(requestMock);
     expect(getLatestRevision).toHaveBeenCalledWith('proposal-1', 'default');
     expect(revise).toHaveBeenCalledWith(
@@ -90,7 +84,7 @@ describe('reviseProposalTool', () => {
       .fn()
       .mockResolvedValue({ proposalId: 'proposal-2', revision: 2, status: 'pending' });
     const revise = jest.fn().mockResolvedValue({ proposalId: 'proposal-3', revision: 3 });
-    const result = await run(agenticWith({ getLatestRevision, revise }), {
+    const result = await run(createDependencies({ getLatestRevision, revise }), {
       proposalId: 'proposal-1',
       impact: 'critical',
     });
@@ -109,7 +103,7 @@ describe('reviseProposalTool', () => {
 
   it('returns the new revision id, revision number, status, and the supersedes pointer', async () => {
     const revise = jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 3 });
-    const result = await run(agenticWith({ revise }), { proposalId: 'proposal-1' });
+    const result = await run(createDependencies({ revise }), { proposalId: 'proposal-1' });
 
     expect(result.results[0].data).toMatchObject({
       proposalId: 'proposal-2',
@@ -125,7 +119,7 @@ describe('reviseProposalTool', () => {
    * bypass the route closes.
    */
   it('caps actionInput the same way the HTTP route does', () => {
-    const schema = reviseProposalTool(agenticWith({}), assertEnabled).schema;
+    const schema = reviseProposalTool(createDependencies({})).schema;
 
     expect(
       schema.safeParse({ proposalId: 'proposal-1', actionInput: { ['k'.repeat(257)]: true } })
@@ -144,22 +138,16 @@ describe('reviseProposalTool', () => {
     );
   });
 
-  it('does not access proposals when AlertZero is disabled', async () => {
-    const errorMessage = 'AlertZero is disabled in this space.';
-    assertEnabled.mockRejectedValue(new Error(errorMessage));
-    const getProposals = jest.fn();
-    const result = await run(getProposals, { proposalId: 'proposal-1' });
-
-    expect(assertEnabled).toHaveBeenCalledWith(requestMock);
-    expect(getProposals).not.toHaveBeenCalled();
-    expect(JSON.stringify(result)).toContain(errorMessage);
+  it('is registered in the platform tool allowlist', () => {
+    const tool = reviseProposalTool(createDependencies({}));
+    expect(AGENT_BUILDER_BUILTIN_TOOLS).toContain(tool.id);
   });
 
   it('never calls revise() when the privilege check rejects', async () => {
     const assertCanManage = jest.fn().mockRejectedValue(new Error('missing manage_proposals'));
     const getLatestRevision = jest.fn();
     const revise = jest.fn();
-    const result = await run(agenticWith({ assertCanManage, revise, getLatestRevision }), {
+    const result = await run(createDependencies({ assertCanManage, revise, getLatestRevision }), {
       proposalId: 'proposal-1',
     });
 
@@ -170,14 +158,14 @@ describe('reviseProposalTool', () => {
 
   it('returns an error result instead of throwing when the service rejects (e.g. already superseded)', async () => {
     const revise = jest.fn().mockRejectedValue(new Error('already superseded'));
-    const result = await run(agenticWith({ revise }), { proposalId: 'proposal-1' });
+    const result = await run(createDependencies({ revise }), { proposalId: 'proposal-1' });
 
     expect(JSON.stringify(result.results[0])).toContain('already superseded');
   });
 
   it('declares the documented tool id and write annotations', () => {
-    const tool = reviseProposalTool(agenticWith({}), assertEnabled);
-    expect(tool.id).toBe('security.alertzero.proposals.revise');
+    const tool = reviseProposalTool(createDependencies({}));
+    expect(tool.id).toBe('platform.proposals.revise');
     expect(tool.annotations).toMatchObject({
       readOnlyHint: false,
       destructiveHint: false,

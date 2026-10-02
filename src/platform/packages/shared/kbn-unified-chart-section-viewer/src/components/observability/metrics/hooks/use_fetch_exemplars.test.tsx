@@ -30,7 +30,8 @@ import { act, render, renderHook, waitFor } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Filter } from '@kbn/es-query';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { FEATURE_FLAGS } from '../../../../common/constants';
@@ -81,11 +82,7 @@ const createParams = (
 ): UseFetchExemplarsParams => ({
   fetchParams: getFetchParamsMock({
     query: { esql: 'TS metrics-generic.otel-default' },
-    dataView: {
-      getIndexPattern: () => 'metrics-generic.otel-default',
-      isTimeBased: () => true,
-      timeFieldName: '@timestamp',
-    } as unknown as DataView,
+    dataSource: createMockEsqlSource([], [], '@timestamp', 'TS metrics-generic.otel-default'),
     timeRange: { from: 'now-15m', to: 'now' },
     filters: TEST_FILTERS,
     esqlVariables: TEST_ESQL_VARIABLES,
@@ -146,9 +143,9 @@ describe('useFetchExemplars', () => {
     expect(mockUseFeatureFlag).toHaveBeenCalledWith(FEATURE_FLAGS.IS_EXEMPLARS_ENABLED, false);
   });
 
-  it('does nothing without a data view', async () => {
+  it('does nothing without a data source', async () => {
     const params = createParams();
-    params.fetchParams = { ...params.fetchParams, dataView: null as unknown as DataView };
+    params.fetchParams = { ...params.fetchParams, dataSource: undefined as unknown as DataSource };
 
     const { result } = renderHook(() => useFetchExemplars(params));
 
@@ -255,7 +252,7 @@ describe('useFetchExemplars', () => {
     expect(mockProbe).toHaveBeenCalledWith({
       fetchId: params.fetchParams.lastReloadRequestTime,
       search: params.services.data.search.search,
-      dataView: params.fetchParams.dataView,
+      timeFieldName: '@timestamp',
       timeRange: params.fetchParams.timeRange,
       uiSettings: params.services.uiSettings,
       profileId: TEST_PROFILE_ID,
@@ -265,7 +262,7 @@ describe('useFetchExemplars', () => {
       esqlQuery: TEST_ESQL_QUERY,
       search: params.services.data.search.search,
       signal: expect.any(AbortSignal),
-      dataView: params.fetchParams.dataView,
+      timeFieldName: '@timestamp',
       timeRange: params.fetchParams.timeRange,
       filters: TEST_FILTERS,
       variables: TEST_ESQL_VARIABLES,

@@ -16,6 +16,9 @@ export const PROPOSALS_INDEX_NAME = '.kibana-proposals' as const;
 /** Shared by every route, so a caller versions the whole surface at once. */
 export const PROPOSALS_API_VERSION = '1' as const;
 
+/** Agent Builder tool that appends a revision to a proposal chain. */
+export const PROPOSALS_REVISE_TOOL_ID = 'platform.proposals.revise' as const;
+
 export const PROPOSALS_INTERNAL_URL = '/internal/proposals' as const;
 export const PROPOSAL_BY_ID_URL = `${PROPOSALS_INTERNAL_URL}/{id}` as const;
 export const PROPOSAL_APPROVE_URL = `${PROPOSALS_INTERNAL_URL}/{id}/approve` as const;

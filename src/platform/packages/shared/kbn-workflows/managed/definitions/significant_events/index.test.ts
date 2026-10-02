@@ -162,6 +162,8 @@ describe('significant events persistence workflow contracts', () => {
 
   it('attributes discovery agent calls to Nightshift', () => {
     expect(requireStep(discovery, 'run_discovery_agent')).toMatchObject({
+      'plugin-id': 'nightshift_discovery',
+      'aggregate-by': 'nightshift',
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
