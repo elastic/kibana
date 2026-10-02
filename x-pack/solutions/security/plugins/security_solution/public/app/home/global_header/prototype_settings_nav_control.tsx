@@ -31,7 +31,7 @@ import {
   useActiveMetricsVersion as useActiveMetricsVersionV7,
 } from '../../../entity_analytics/components/home/facelift/v7/active_metrics_version';
 import {
-  getMetricsVersionOptions as getMetricsVersionOptionsV8,
+  METRICS_VERSION_OPTIONS as METRICS_VERSION_OPTIONS_V8,
   useActiveMetricsVersion as useActiveMetricsVersionV8,
   useSimplifiedMetrics,
 } from '../../../entity_analytics/components/home/facelift/v8/active_metrics_version';
@@ -84,7 +84,7 @@ export const PrototypeSettingsNavControl: React.FC = () => {
 
   const metricsOptions =
     faceliftVersion === 'v8'
-      ? getMetricsVersionOptionsV8(simplified)
+      ? METRICS_VERSION_OPTIONS_V8
       : faceliftVersion === 'v7'
       ? METRICS_VERSION_OPTIONS_V7
       : METRICS_VERSION_OPTIONS_V6;

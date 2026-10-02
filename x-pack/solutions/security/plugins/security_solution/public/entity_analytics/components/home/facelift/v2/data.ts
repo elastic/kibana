@@ -67,6 +67,7 @@ export interface FaceliftRawRecord {
 
 export interface FaceliftIdentity {
   id: string;
+  /** Inherited from the group's primary record; the authored value is a placeholder. */
   name: string;
   entityType: EntityType;
   riskScore: number;
@@ -809,9 +810,10 @@ export const lastAlertForRecord = (record: FaceliftRawRecord): string | undefine
 
 /**
  * Records are listed in contribution order within each resolution group: the
- * first record of a group is the one the resolved entity takes its name from,
- * and its criticality is the highest in the group, so the aggregated row in the
- * Resolved entities table always has a visible origin. Group totals (records,
+ * first record of a group carries the highest risk and criticality, so the
+ * aggregated row in the Resolved entities table always has a visible origin.
+ * The group's name comes from its primary record instead — see
+ * {@link primaryRecordForIdentity}. Group totals (records,
  * sources, alerts, cases, anomalies, last seen / last alert) are the sum /
  * union / max of the records below; first seen is the oldest.
  */
@@ -1362,11 +1364,58 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
 export const recordsForIdentity = (identityId: string): FaceliftRawRecord[] =>
   RAW_RECORDS.filter((record) => record.resolvedTo === identityId);
 
+/**
+ * Source precedence behind the primary ("golden") record of a resolution
+ * group: identity providers describe people and service accounts best, agents
+ * describe machines best. Unlisted sources rank last.
+ */
+const PRIMARY_SOURCE_ORDER = {
+  identity: ['Okta', 'Entra ID', 'AD', 'Workday', 'Endpoint', 'CrowdStrike', 'Network'],
+  machine: ['Endpoint', 'CrowdStrike', 'Network', 'AD', 'Entra ID', 'Okta', 'Workday'],
+};
+
+const sourceRank = (record: FaceliftRawRecord): number => {
+  const order =
+    record.entityType === EntityType.user || record.entityType === EntityType.service
+      ? PRIMARY_SOURCE_ORDER.identity
+      : PRIMARY_SOURCE_ORDER.machine;
+  const rank = order.indexOf(record.source);
+  return rank === -1 ? order.length : rank;
+};
+
+/**
+ * The record a resolution group is built around: the one from the most
+ * authoritative source for the entity type, then the most recently seen of
+ * those. Undefined when the identity has no records.
+ */
+export const primaryRecordForIdentity = (identityId: string): FaceliftRawRecord | undefined =>
+  recordsForIdentity(identityId).reduce<FaceliftRawRecord | undefined>((primary, record) => {
+    if (!primary) return record;
+    const bySource = sourceRank(record) - sourceRank(primary);
+    if (bySource < 0) return record;
+    if (bySource === 0 && record.lastSeen > primary.lastSeen) return record;
+    return primary;
+  }, undefined);
+
+/** True when this record is the primary one of the group it resolves into. */
+export const isPrimaryRecord = (record: FaceliftRawRecord): boolean =>
+  record.resolvedTo != null && primaryRecordForIdentity(record.resolvedTo)?.id === record.id;
+
+/**
+ * A resolved entity has no name of its own — it inherits the name of its
+ * primary record, so every name in the Resolved entities table also appears on
+ * a record in the group below it. Applied once here because every view (table,
+ * flyouts, entity store documents, KQL) reads `identity.name`.
+ */
+IDENTITIES.forEach((identity) => {
+  const primary = primaryRecordForIdentity(identity.id);
+  if (primary) {
+    identity.name = primary.name;
+  }
+});
+
 export const casesCountForIdentity = (identityId: string): number =>
-  recordsForIdentity(identityId).reduce(
-    (total, record) => total + casesCountForRecord(record),
-    0
-  );
+  recordsForIdentity(identityId).reduce((total, record) => total + casesCountForRecord(record), 0);
 
 export const anomaliesCountForIdentity = (identity: FaceliftIdentity): number => {
   if (!identity.hasNewAnomalies) return 0;
@@ -1382,10 +1431,7 @@ export const firstSeenForIdentity = (identityId: string): string => {
   return stamps.reduce((earliest, stamp) => (stamp < earliest ? stamp : earliest));
 };
 
-export const lastAlertForIdentity = (
-  identityId: string,
-  alerts: number
-): string | undefined => {
+export const lastAlertForIdentity = (identityId: string, alerts: number): string | undefined => {
   if (alerts <= 0) return undefined;
   const stamps = recordsForIdentity(identityId)
     .map(lastAlertForRecord)
@@ -1832,9 +1878,7 @@ export const getSignalCards = (
       ...card,
       value: count,
       ...(card.delta === undefined ? {} : { delta: Math.round(card.delta * ratio) }),
-      ...(card.trend
-        ? { trend: card.trend.map((value) => Math.round(value * ratio)) }
-        : {}),
+      ...(card.trend ? { trend: card.trend.map((value) => Math.round(value * ratio)) } : {}),
     };
   });
 

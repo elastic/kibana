@@ -144,6 +144,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
           isLoading={isLoading || isFetching}
           isError={isError}
           targetEntityId={targetEntityId}
+          primaryEntityId={group?.primary_entity_id}
           onEntityNameClick={handleEntityNameClick}
           currentEntityId={entityId}
           aliasesOnly

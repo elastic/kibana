@@ -17,9 +17,8 @@ const LABEL = i18n.translate(
 );
 
 /**
- * Compact chrome switch (v.8 only) that picks the metrics track: off = full
- * cards (charts + deltas), on = simplified cards. Each track has its own
- * Metrics version list.
+ * Compact chrome switch (v.8 only) that hides sparkline backgrounds and
+ * period deltas on the currently selected metrics version.
  */
 export const SimplifiedMetricsHeaderControl: React.FC = () => {
   const [simplified, setSimplified] = useSimplifiedMetrics();

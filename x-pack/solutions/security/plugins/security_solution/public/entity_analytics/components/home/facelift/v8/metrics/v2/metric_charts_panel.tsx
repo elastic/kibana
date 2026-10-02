@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import type { ActiveFilter, PageFilters, SignalCardData, SignalCardId, TableView } from '../../../data';
+import type { ActiveFilter, PageFilters, SignalCardData, SignalCardId, TableView } from '../../data';
 import { SignalCards } from './signal_cards';
 
-export interface MetricChartsPanelSimplifiedV1Props {
+export interface MetricChartsPanelV2Props {
   activeFilter: ActiveFilter | null;
   cards: SignalCardData[];
   pageFilters: PageFilters;
@@ -21,18 +21,18 @@ export interface MetricChartsPanelSimplifiedV1Props {
 }
 
 /**
- * Simplified-track metrics v.1 — same Needs-attention tiles as the full-track
- * v.1, without background charts or deltas. Isolated so this look can iterate
- * without changing the full-track cards.
+ * Metrics version v.2 — snapshot of the former v.1 look: sparkline backgrounds,
+ * period deltas, and the attention header. Simplified metrics hides those
+ * charts and deltas in place.
  */
-export const MetricChartsPanelSimplifiedV1: React.FC<MetricChartsPanelSimplifiedV1Props> = ({
+export const MetricChartsPanelV2: React.FC<MetricChartsPanelV2Props> = ({
   activeFilter,
   cards,
   onFilterForCard,
   onFilterOutCard,
   onAddCardToTimeline,
 }) => (
-  <div data-test-subj="eaFaceliftMetricChartsPanel" data-metrics-version="simplified-v1">
+  <div data-test-subj="eaFaceliftMetricChartsPanel" data-metrics-version="v2">
     <SignalCards
       activeFilter={activeFilter}
       cards={cards}

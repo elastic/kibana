@@ -67,6 +67,11 @@ export interface ResolutionGroupTableProps {
    * resolved/target entity row in the full Resolution tab.
    */
   aliasesOnly?: boolean;
+  /**
+   * The record the group is built around. Only used when the target row is
+   * hidden, where it is the row that carries the primary-entity icon.
+   */
+  primaryEntityId?: string;
 }
 
 export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
@@ -80,8 +85,13 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   onEntityNameClick,
   currentEntityId,
   aliasesOnly = false,
+  primaryEntityId,
 }) => {
-  const hasGroup = Boolean(group && (aliasesOnly ? group.aliases.length > 0 : group.group_size > 1));
+  const hasGroup = Boolean(
+    group && (aliasesOnly ? group.aliases.length > 0 : group.group_size > 1)
+  );
+  /** Without a target row, the primary record carries the icon in its place. */
+  const primaryRowEntityId = aliasesOnly ? primaryEntityId : targetEntityId;
 
   const items: TableEntityRow[] = useMemo(() => {
     if (!hasGroup || !group) return [];
@@ -153,7 +163,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
         render: ({ entity }: TableEntityRow) => {
           const name = getEntityName(entity);
           const entityId = getEntityId(entity);
-          const isTarget = entityId === targetEntityId;
+          const isPrimary = primaryRowEntityId != null && entityId === primaryRowEntityId;
           const isCurrentEntity = currentEntityId === entityId;
 
           const nameContent =
@@ -173,7 +183,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
             </EuiToolTip>
           );
 
-          if (isTarget) {
+          if (isPrimary) {
             return (
               <EuiFlexGroup
                 gutterSize="xs"
@@ -231,6 +241,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   }, [
     showActions,
     targetEntityId,
+    primaryRowEntityId,
     onRemoveEntity,
     removingEntityId,
     onEntityNameClick,

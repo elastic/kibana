@@ -31,6 +31,7 @@ import {
   EuiScreenReaderOnly,
   EuiText,
   EuiTextColor,
+  EuiToolTip,
   useEuiTheme,
   type EuiDataGridCellValueElementProps,
   type EuiDataGridColumn,
@@ -116,6 +117,16 @@ const SELECTION_ID = 'select';
 const EXPANDER_WIDTH = 36;
 const SELECTION_WIDTH = 32;
 
+const SHOW_RESOLVED_RECORDS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.expandResolvedRecords',
+  { defaultMessage: 'Show records resolved to this entity' }
+);
+
+const HIDE_RESOLVED_RECORDS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.hideResolvedRecords',
+  { defaultMessage: 'Hide records resolved to this entity' }
+);
+
 /** Expand only when a resolved identity aggregates more than one raw record. */
 const canExpandResolvedRow = (row: ResolvedEntityRow): boolean => row.rawRecords.length > 1;
 
@@ -141,7 +152,7 @@ const detailsCellStyle: CSSProperties = { width: '100%', height: 'auto' };
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-const ROW_TYPE_LABEL = 'entities';
+const ROW_TYPE_LABEL = 'resolved entities';
 const INSPECT_TITLE = 'Entities';
 
 const RESOLVED_GROUPING_ID = 'entity-analytics-facelift-v8-resolved';
@@ -163,10 +174,9 @@ const RESOLVED_GROUPING_OPTIONS: GroupOption[] = [ENTITY_TYPE_GROUP_OPTION];
 /** Individual records: Entity type first, then Resolution. Custom field is offered by the grouping selector. */
 const RAW_GROUPING_OPTIONS: GroupOption[] = [ENTITY_TYPE_GROUP_OPTION, RESOLUTION_GROUP_OPTION];
 
-const ROWS_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.facelift.rowsTitle',
-  { defaultMessage: 'Rows' }
-);
+const ROWS_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.facelift.rowsTitle', {
+  defaultMessage: 'Rows',
+});
 
 const ROW_VIEW_OPTIONS: Array<{
   key: TableView;
@@ -191,10 +201,9 @@ const DEFAULT_GROUP_PAGE_SIZE = 25;
 const DEFAULT_GROUP_PAGE_INDEX = 0;
 
 const entitiesUnit = (totalCount: number) =>
-  totalCount === 1 ? 'entity' : 'entities';
+  totalCount === 1 ? 'resolved entity' : 'resolved entities';
 
-const recordsUnit = (totalCount: number) =>
-  totalCount === 1 ? 'record' : 'records';
+const recordsUnit = (totalCount: number) => (totalCount === 1 ? 'entity record' : 'entity records');
 
 const groupsUnit = (totalCount: number, _selectedGroup: string, hasNullGroup: boolean) => {
   const groupCount = hasNullGroup ? totalCount - 1 : totalCount;
@@ -1019,17 +1028,15 @@ const CustomGridBody = memo<CustomGridBodyProps>(
                 )
               )}
             </div>
-            {expandedIds.includes(row.id) &&
-              'rawRecords' in row &&
-              row.rawRecords.length > 1 && (
-                <div css={styles.details}>
-                  <Cell
-                    colIndex={visibleColumns.length - 1}
-                    visibleRowIndex={rowIndex}
-                    rowHeightsOptions={detailsRowHeightsOptions}
-                  />
-                </div>
-              )}
+            {expandedIds.includes(row.id) && 'rawRecords' in row && row.rawRecords.length > 1 && (
+              <div css={styles.details}>
+                <Cell
+                  colIndex={visibleColumns.length - 1}
+                  visibleRowIndex={rowIndex}
+                  rowHeightsOptions={detailsRowHeightsOptions}
+                />
+              </div>
+            )}
           </div>
         ))}
         {emptyMessage && visibleRows.length === 0 && (
@@ -1226,16 +1233,19 @@ const FaceliftEntitiesDataGrid: React.FC<FaceliftEntitiesDataGridProps> = ({
         if (!row || !canExpandResolvedRow(row)) return null;
 
         const isExpanded = expandedIds.includes(row.id);
+        const expandLabel = isExpanded ? HIDE_RESOLVED_RECORDS : SHOW_RESOLVED_RECORDS;
         return (
-          <EuiButtonIcon
-            size="xs"
-            color="text"
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            aria-label={isExpanded ? `Collapse ${row.name} records` : `Expand ${row.name} records`}
-            aria-expanded={isExpanded}
-            onClick={() => toggleExpanded(row.id)}
-            data-test-subj={`eaFaceliftExpandRow-${row.id}`}
-          />
+          <EuiToolTip content={expandLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              size="xs"
+              color="text"
+              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+              aria-label={expandLabel}
+              aria-expanded={isExpanded}
+              onClick={() => toggleExpanded(row.id)}
+              data-test-subj={`eaFaceliftExpandRow-${row.id}`}
+            />
+          </EuiToolTip>
         );
       },
     };
@@ -1334,7 +1344,7 @@ const FaceliftEntitiesDataGrid: React.FC<FaceliftEntitiesDataGridProps> = ({
               <EuiFlexItem grow={false}>
                 <AdditionalControls
                   total={rows.length}
-                  title={isResolvedView ? ROW_TYPE_LABEL : 'records'}
+                  title={isResolvedView ? ROW_TYPE_LABEL : 'entity records'}
                   columns={visibleColumnIds}
                   onAddColumn={onAddColumn}
                   onRemoveColumn={onRemoveColumn}
@@ -1908,9 +1918,7 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
               )
             : undefined,
         takeActionButtonLabel:
-          levelSelectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION
-            ? TAKE_ACTION_LABEL
-            : undefined,
+          levelSelectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION ? TAKE_ACTION_LABEL : undefined,
       });
     },
     [
@@ -1937,9 +1945,7 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
     <>
       <Global styles={groupingMenuWithoutDividers} />
       {isGrouped ? (
-        <div data-test-subj={gridTestSubj}>
-          {getLevel(0, selectedGroups[0], rows)}
-        </div>
+        <div data-test-subj={gridTestSubj}>{getLevel(0, selectedGroups[0], rows)}</div>
       ) : (
         <FaceliftEntitiesDataGrid
           rows={rows}

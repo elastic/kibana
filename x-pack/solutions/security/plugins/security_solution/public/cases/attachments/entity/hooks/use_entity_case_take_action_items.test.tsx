@@ -11,6 +11,10 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useEntityCaseTakeActionItems } from './use_entity_case_take_action_items';
 import { useEntityCasePermissions } from './use_case_permission';
 import type { EntityToAttach } from '..';
+import {
+  DEFAULT_FACELIFT_VERSION,
+  setActiveFaceliftVersion,
+} from '../../../../entity_analytics/components/home/facelift/active_version';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_experimental_features');
@@ -41,7 +45,11 @@ describe('useEntityCaseTakeActionItems', () => {
       canAddToExistingCase: true,
     });
     mockUseKibana().services.cases.config = { attachmentsEnabled: true };
+    // The facelift v.8 prototype collapses the two actions into one "Add to case".
+    setActiveFaceliftVersion('v1');
   });
+
+  afterAll(() => setActiveFaceliftVersion(DEFAULT_FACELIFT_VERSION));
 
   it('returns both items when the user can add to new and existing cases', () => {
     expect(renderItemKeys()).toEqual(['addToNewCase', 'addToExistingCase']);
@@ -89,5 +97,22 @@ describe('useEntityCaseTakeActionItems', () => {
   it('returns no items when the entity is missing identifying fields', () => {
     expect(renderItemKeys({ ...ENTITY, id: '' })).toEqual([]);
     expect(renderItemKeys({ ...ENTITY, name: '' })).toEqual([]);
+  });
+
+  describe('facelift v.8', () => {
+    beforeEach(() => setActiveFaceliftVersion('v8'));
+
+    it('returns a single "add to case" item', () => {
+      expect(renderItemKeys()).toEqual(['addToCase']);
+    });
+
+    it('returns no items when the user cannot update a case', () => {
+      mockUseEntityCasePermissions.mockReturnValue({
+        canAddToNewCase: true,
+        canAddToExistingCase: false,
+      });
+
+      expect(renderItemKeys()).toEqual([]);
+    });
   });
 });

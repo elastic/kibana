@@ -6,13 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  AreaSeries,
-  Chart,
-  CurveType,
-  ScaleType,
-  Settings,
-} from '@elastic/charts';
+import { AreaSeries, Axis, Chart, CurveType, Position, ScaleType, Settings } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,7 +24,8 @@ import { useSimplifiedMetrics } from '../../active_metrics_version';
 import type { ActiveFilter, SignalCardData, SignalCardId } from '../../data';
 import { useActiveTimeRange } from '../../active_time_range';
 import type { FaceliftTimeRangeId } from '../../time_range';
-import { FACELIFT_TIME_RANGES, expandTrend } from '../../time_range';
+import { FACELIFT_TIME_RANGES } from '../../time_range';
+import { countStepsInWindow } from '../../signal_windows';
 import {
   METRIC_CARD_GAP,
   METRIC_CARD_HEIGHT,
@@ -53,13 +48,13 @@ export interface SignalCardsProps {
  * See `@elastic/charts` `text_measurements.js` + `.echMetricText` CSS.
  */
 const VALUE_FONT_SIZE = 36;
-const TITLE_FONT_SIZE = 16;
-const SUBTITLE_FONT_SIZE = 13;
+const TITLE_FONT_SIZE = 14;
+const SUBTITLE_FONT_SIZE = 12;
 /** Match default EuiBadge content size (`euiFontSize('xs')`). */
 const BADGE_FONT_SIZE = 12;
 /** Match default EuiBadge height (line-height + borders ≈ 20px). */
 const BADGE_HEIGHT = 20;
-const TITLE_SUBTITLE_GAP = 8;
+const TITLE_SUBTITLE_GAP = 6;
 /** No gap between primary value and delta row (v.7). */
 const DELTA_VALUE_GAP = 0;
 /** Gap between secondary metric badge and label (`.echSecondaryMetric`). */
@@ -72,54 +67,13 @@ const CARD_PADDING = 16;
 const SPARKLINE_LINE_WIDTH = 1;
 
 /**
- * Full-track metrics v.1 — same tiles as the former metrics v.8.
- * Most sparklines keep a clear direction; Risk movers and Anomalous use a
- * spike-then-drop shape (unclear trend).
+ * “vs. previous {window}” movement, scaled to the window being compared.
  *
- * One keyframe shape per card per preset window (v.7 KQL-bar button group).
- * Keyframes are stretched to the window's sample count — hourly across 24h,
- * daily across 7d and 30d — so a narrower window reads as a shorter, flatter
- * story rather than the same 30-day curve relabelled. The 30d shapes are the
- * originals, so the default view is unchanged.
+ * This is the only authored input to the sparkline: the tile value is a live
+ * corpus count, and `countStepsInWindow` draws the integer staircase that
+ * opens at `value - delta` and closes at `value`, so the chart, the number and
+ * the badge can never tell three different stories.
  */
-const CARD_TREND_KEYFRAMES: Record<FaceliftTimeRangeId, Record<SignalCardId, number[]>> = {
-  '24h': {
-    untriagedHighRisk: [3, 3, 4, 4, 4, 5, 5],
-    newToCritical: [0, 1, 1, 1, 2, 2, 2],
-    // Spike mid-window, then settle — direction stays unclear at every window.
-    riskMovers: [2, 3, 5, 8, 6, 4, 3],
-    newAndAlerting: [1, 1, 2, 2, 2, 3, 3],
-    // Early spike, then drop.
-    newAnomalies: [4, 6, 9, 7, 5, 4, 3],
-    hiddenRisk: [4, 4, 3, 3, 3, 2, 2],
-  },
-  '7d': {
-    untriagedHighRisk: [5, 6, 6, 7, 7, 8, 8],
-    newToCritical: [1, 1, 2, 2, 2, 3, 3],
-    riskMovers: [4, 6, 9, 14, 10, 7, 6],
-    newAndAlerting: [1, 2, 2, 3, 3, 3, 4],
-    newAnomalies: [16, 22, 30, 24, 19, 17, 16],
-    hiddenRisk: [9, 8, 8, 7, 7, 6, 6],
-  },
-  '30d': {
-    untriagedHighRisk: [6, 7, 7, 8, 8, 9, 10],
-    newToCritical: [2, 3, 3, 4, 5, 5, 6],
-    // Spike mid-window, then fall — still ends +4 vs start (matches delta).
-    riskMovers: [
-      6, 7, 6, 8, 9, 8, 10, 11, 13, 15, 17, 20, 24, 30, 36, 32, 26, 20, 16, 14, 13, 12, 11, 12, 11,
-      11, 10, 10, 10, 10,
-    ],
-    newAndAlerting: [1, 2, 2, 3, 3, 4, 4],
-    // Early spike, then drop — ends −5 vs start (matches delta).
-    newAnomalies: [
-      37, 40, 46, 56, 70, 66, 54, 48, 44, 42, 40, 39, 38, 37, 36, 38, 37, 35, 34, 36, 35, 34, 33,
-      34, 33, 33, 32, 32, 32, 32,
-    ],
-    hiddenRisk: [18, 16, 15, 14, 13, 13, 12],
-  },
-};
-
-/** “vs. previous {window}” movement, scaled to the window being compared. */
 const CARD_DELTAS: Record<FaceliftTimeRangeId, Partial<Record<SignalCardId, number>>> = {
   '24h': {
     untriagedHighRisk: 1,
@@ -147,6 +101,20 @@ const CARD_DELTAS: Record<FaceliftTimeRangeId, Partial<Record<SignalCardId, numb
   },
 };
 
+/**
+ * Mid-window peaks for the two cards whose populations are volatile by
+ * nature: risk scores spike and settle, anomalies fire and clear. The number
+ * is how many entities joined and left again beyond the higher of the window's
+ * opening and closing values, so the series climbs past both and falls back to
+ * the tile value. Net change and badge are unaffected; the peak only shows
+ * that the current number is not the whole story.
+ */
+const CARD_PEAK_OVERSHOOTS: Record<FaceliftTimeRangeId, Partial<Record<SignalCardId, number>>> = {
+  '24h': { riskMovers: 1, newAnomalies: 1 },
+  '7d': { riskMovers: 2, newAnomalies: 1 },
+  '30d': { riskMovers: 2, newAnomalies: 2 },
+};
+
 /** Title overrides (tooltip uses the same string). */
 const V6_CARD_TITLES: Partial<Record<SignalCardId, string>> = {
   untriagedHighRisk: 'Severely alerting',
@@ -167,8 +135,7 @@ const V6_CARD_DESCRIPTIONS: Partial<Record<SignalCardId, string>> = {
   hiddenRisk: 'On a watchlist with at least one alert in this period',
 };
 
-const displayTitleFor = (card: SignalCardData): string =>
-  V6_CARD_TITLES[card.id] ?? card.title;
+const displayTitleFor = (card: SignalCardData): string => V6_CARD_TITLES[card.id] ?? card.title;
 
 const displayDescriptionFor = (card: SignalCardData): string =>
   V6_CARD_DESCRIPTIONS[card.id] ?? card.description;
@@ -242,13 +209,10 @@ const getTrendReversedBadgeColors = (
  * Badge sizing follows default EuiBadge (~20px tall).
  */
 const previousPeriodLabel = (range: FaceliftTimeRangeId) =>
-  i18n.translate(
-    'xpack.securitySolution.entityAnalytics.facelift.signalCards.vsPreviousWindow',
-    {
-      defaultMessage: 'vs. previous {window}',
-      values: { window: range },
-    }
-  );
+  i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCards.vsPreviousWindow', {
+    defaultMessage: 'vs. previous {window}',
+    values: { window: range },
+  });
 
 const MetricTrendBadge: React.FC<{ delta: number; timeRange: FaceliftTimeRangeId }> = ({
   delta,
@@ -420,16 +384,18 @@ const CornerControl: React.FC<{
 /**
  * Decorative area sparkline behind the value: highlighted fill with a 1px
  * peak line on top (`borderBaseDisabled` over `backgroundBaseHighlighted`).
+ *
+ * The series is a headcount, so it is drawn as steps (the count holds until
+ * the next entity arrives or leaves) over a y-axis anchored at zero: a +1 on
+ * top of 3 fills a quarter more of the chart, not the whole of it.
  */
 const Sparkline: React.FC<{ values: number[] }> = ({ values }) => {
   const { euiTheme } = useEuiTheme();
   const chartBaseTheme = useElasticChartsTheme();
   const fill = euiTheme.colors.backgroundBaseHighlighted;
   const stroke = euiTheme.colors.borderBaseDisabled;
-  const data = useMemo(
-    () => values.map((y, x) => ({ x, y })),
-    [values]
-  );
+  const data = useMemo(() => values.map((y, x) => ({ x, y })), [values]);
+  const yDomain = useMemo(() => ({ min: 0, max: Math.max(1, ...values) }), [values]);
 
   if (values.length < 2) {
     return null;
@@ -448,6 +414,14 @@ const Sparkline: React.FC<{ values: number[] }> = ({ values }) => {
           chartPaddings: { left: 0, right: 0, top: SPARKLINE_LINE_WIDTH, bottom: 0 },
         }}
       />
+      {/* Hidden axis only pins the count scale to zero; no ticks, no grid. */}
+      <Axis
+        id="count"
+        position={Position.Left}
+        hide
+        domain={yDomain}
+        gridLine={{ visible: false }}
+      />
       <AreaSeries
         id="trend"
         xScaleType={ScaleType.Linear}
@@ -455,7 +429,7 @@ const Sparkline: React.FC<{ values: number[] }> = ({ values }) => {
         xAccessor="x"
         yAccessors={['y']}
         data={data}
-        curve={CurveType.CURVE_MONOTONE_X}
+        curve={CurveType.CURVE_STEP_AFTER}
         color={stroke}
         areaSeriesStyle={{
           area: { opacity: 1, visible: true, fill },
@@ -509,18 +483,29 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
   const tileBackground = selected ? activeBg : emphasized ? hoverBg : defaultBg;
   const borderColor = selected ? activeBorder : emphasized ? hoverBorder : defaultBorder;
 
-  const delta = CARD_DELTAS[timeRange][card.id] ?? card.delta;
-  const showDelta =
-    !simplified && interactive && !isZero && delta !== undefined && delta !== 0;
+  const authoredDelta = CARD_DELTAS[timeRange][card.id] ?? card.delta ?? 0;
+  const peakOvershoot = CARD_PEAK_OVERSHOOTS[timeRange][card.id] ?? 0;
 
-  const trendKeyframes = useMemo(() => {
-    const keyframes = CARD_TREND_KEYFRAMES[timeRange][card.id] ?? card.trend;
-    return keyframes
-      ? expandTrend(keyframes, FACELIFT_TIME_RANGES[timeRange].trendPoints)
-      : undefined;
-  }, [card.id, card.trend, timeRange]);
-  const showTrend =
-    !simplified && interactive && Boolean(trendKeyframes && trendKeyframes.length > 1);
+  // Running headcount across the window: `value - delta` at the start, `value`
+  // now, one whole step per entity that joined or left in between (with an
+  // authored peak in between for the volatile cards).
+  const trendSteps = useMemo(
+    () =>
+      countStepsInWindow({
+        cardId: card.id,
+        range: timeRange,
+        value: card.value,
+        delta: authoredDelta,
+        samples: FACELIFT_TIME_RANGES[timeRange].trendPoints,
+        peakOvershoot,
+      }),
+    [authoredDelta, card.id, card.value, peakOvershoot, timeRange]
+  );
+  // The badge quotes the movement the chart actually shows (identical to the
+  // authored delta unless the opening value had to be clamped at zero).
+  const delta = trendSteps.length > 0 ? card.value - trendSteps[0] : authoredDelta;
+  const showDelta = !simplified && interactive && !isZero && delta !== 0;
+  const showTrend = !simplified && interactive && trendSteps.length > 1;
   const displayTitle = displayTitleFor(card);
   const displayDescription = displayDescriptionFor(card);
 
@@ -590,7 +575,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
             z-index: 0;
           `}
         >
-          <Sparkline values={trendKeyframes!} />
+          <Sparkline values={trendSteps} />
         </div>
       ) : null}
 
@@ -610,7 +595,12 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
           justifyContent="spaceBetween"
           responsive={false}
         >
-          <EuiFlexItem grow={true} css={css`min-inline-size: 0;`}>
+          <EuiFlexItem
+            grow={true}
+            css={css`
+              min-inline-size: 0;
+            `}
+          >
             <EuiText
               title={displayTitle}
               css={css`
@@ -679,7 +669,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
               >
                 {card.value}
               </EuiText>
-              {showDelta ? <MetricTrendBadge delta={delta!} timeRange={timeRange} /> : null}
+              {showDelta ? <MetricTrendBadge delta={delta} timeRange={timeRange} /> : null}
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -53,7 +53,7 @@ export interface SignalCardsProps {
  * See `@elastic/charts` `text_measurements.js` + `.echMetricText` CSS.
  */
 const VALUE_FONT_SIZE = 36;
-const TITLE_FONT_SIZE = 16;
+const TITLE_FONT_SIZE = 15;
 const SUBTITLE_FONT_SIZE = 13;
 /** Match default EuiBadge content size (`euiFontSize('xs')`). */
 const BADGE_FONT_SIZE = 12;

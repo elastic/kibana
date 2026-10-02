@@ -31,6 +31,7 @@ import {
   firstSeenForIdentity,
   firstSeenForRecord,
   getFaceliftRiskLevel,
+  primaryRecordForIdentity,
   recordsForIdentity,
   sourcesForIdentity,
 } from './data';
@@ -664,5 +665,6 @@ export const getFaceliftResolutionGroup = (entityId: string): ResolutionGroup | 
     target,
     aliases,
     group_size: 1 + aliases.length,
+    primary_entity_id: primaryRecordForIdentity(identityId)?.entityId,
   };
 };

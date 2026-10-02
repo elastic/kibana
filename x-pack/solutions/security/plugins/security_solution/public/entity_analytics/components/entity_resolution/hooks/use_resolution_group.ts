@@ -23,6 +23,8 @@ export interface ResolutionGroup {
   target: Record<string, unknown>;
   aliases: Array<Record<string, unknown>>;
   group_size: number;
+  /** Entity id of the record the group is built around, when the API reports one. */
+  primary_entity_id?: string;
 }
 
 interface UseResolutionGroupOptions {

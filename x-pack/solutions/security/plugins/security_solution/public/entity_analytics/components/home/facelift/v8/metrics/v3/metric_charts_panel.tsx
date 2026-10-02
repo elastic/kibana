@@ -10,7 +10,7 @@ import React from 'react';
 import type { ActiveFilter, PageFilters, SignalCardData, SignalCardId, TableView } from '../../data';
 import { SignalCards } from './signal_cards';
 
-export interface MetricChartsPanelV1Props {
+export interface MetricChartsPanelV3Props {
   activeFilter: ActiveFilter | null;
   cards: SignalCardData[];
   pageFilters: PageFilters;
@@ -21,17 +21,17 @@ export interface MetricChartsPanelV1Props {
 }
 
 /**
- * Metrics version v.1 — sparkline backgrounds and period deltas, without the
- * attention header. Simplified metrics hides those charts and deltas in place.
+ * Metrics version v.3 — v.2 cards with a heading-4 attention header and 2px
+ * smaller card titles. Simplified metrics hides sparklines and deltas in place.
  */
-export const MetricChartsPanelV1: React.FC<MetricChartsPanelV1Props> = ({
+export const MetricChartsPanelV3: React.FC<MetricChartsPanelV3Props> = ({
   activeFilter,
   cards,
   onFilterForCard,
   onFilterOutCard,
   onAddCardToTimeline,
 }) => (
-  <div data-test-subj="eaFaceliftMetricChartsPanel" data-metrics-version="v1">
+  <div data-test-subj="eaFaceliftMetricChartsPanel" data-metrics-version="v3">
     <SignalCards
       activeFilter={activeFilter}
       cards={cards}

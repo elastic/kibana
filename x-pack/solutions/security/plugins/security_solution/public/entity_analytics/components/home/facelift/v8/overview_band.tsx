@@ -15,7 +15,8 @@ import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/u
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
 import type { ActiveFilter, PageFilters, SignalCardId } from './data';
-import { filterIdentities, getSignalCards } from './data';
+import { filterIdentities, getEntitiesNeedingAttentionCount, getSignalCards } from './data';
+import { useActiveMetricsVersion } from './active_metrics_version';
 import { useActiveTimeRange } from './active_time_range';
 import { MetricChartsPanel } from './metric_charts_panel';
 
@@ -46,14 +47,17 @@ export const OverviewBand: React.FC<OverviewBandProps> = ({
   onFilterChange,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [metricsVersion] = useActiveMetricsVersion();
   const [timeRange] = useActiveTimeRange();
+  const showAttentionHeader = metricsVersion === 'v2' || metricsVersion === 'v3';
+  const attentionHeaderIsH4 = metricsVersion === 'v3';
   const cards = useMemo(
     () => getSignalCards(pageFilters, OVERVIEW_TABLE_VIEW, timeRange),
     [pageFilters, timeRange]
   );
   const entitiesNeedingAttention = useMemo(
-    () => cards.reduce((total, card) => total + card.value, 0),
-    [cards]
+    () => getEntitiesNeedingAttentionCount(pageFilters, OVERVIEW_TABLE_VIEW, timeRange),
+    [pageFilters, timeRange]
   );
   const { investigateInTimeline } = useInvestigateInTimeline();
 
@@ -111,22 +115,39 @@ export const OverviewBand: React.FC<OverviewBandProps> = ({
       direction="column"
       gutterSize="none"
       data-test-subj="eaFaceliftOverviewBand"
-      css={css`
-        gap: 12px;
-      `}
+      css={
+        showAttentionHeader
+          ? css`
+              gap: 12px;
+            `
+          : undefined
+      }
     >
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          <h3
-            data-test-subj="eaFaceliftNeedsAttentionTitle"
-            css={css`
-              padding-left: ${euiTheme.size.xs};
-            `}
-          >
-            {needsYourAttentionTitle(entitiesNeedingAttention)}
-          </h3>
-        </EuiTitle>
-      </EuiFlexItem>
+      {showAttentionHeader && (
+        <EuiFlexItem grow={false}>
+          <EuiTitle size={attentionHeaderIsH4 ? 'xs' : 's'}>
+            {attentionHeaderIsH4 ? (
+              <h4
+                data-test-subj="eaFaceliftNeedsAttentionTitle"
+                css={css`
+                  padding-left: ${euiTheme.size.xs};
+                `}
+              >
+                {needsYourAttentionTitle(entitiesNeedingAttention)}
+              </h4>
+            ) : (
+              <h3
+                data-test-subj="eaFaceliftNeedsAttentionTitle"
+                css={css`
+                  padding-left: ${euiTheme.size.xs};
+                `}
+              >
+                {needsYourAttentionTitle(entitiesNeedingAttention)}
+              </h3>
+            )}
+          </EuiTitle>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <MetricChartsPanel
           activeFilter={activeFilter}

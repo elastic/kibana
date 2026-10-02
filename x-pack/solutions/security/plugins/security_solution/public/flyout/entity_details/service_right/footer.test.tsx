@@ -14,6 +14,14 @@ import {
   ADD_TO_EXISTING_CASE_TEST_ID,
 } from '../../../../common/cases/attachments/entity/test_ids';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import {
+  DEFAULT_FACELIFT_VERSION,
+  setActiveFaceliftVersion,
+} from '../../../entity_analytics/components/home/facelift/active_version';
+
+// The facelift v.8 prototype collapses the two case actions into one "Add to case".
+beforeEach(() => setActiveFaceliftVersion('v1'));
+afterAll(() => setActiveFaceliftVersion(DEFAULT_FACELIFT_VERSION));
 
 jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: jest.fn(() => null),
@@ -75,6 +83,9 @@ const renderFooter = (
         config: { attachmentsEnabled },
         helpers: {
           canUseCases: () => ({ create: true, update: true, createComment: true }),
+        },
+        hooks: {
+          useCasesAddToExistingCaseModal: () => ({ open: jest.fn() }),
         },
       },
     },

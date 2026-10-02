@@ -28,6 +28,7 @@ import { TestProviders } from '../../../../../common/mock';
 import { useExpandSection } from '../../../../../flyout_v2/shared/hooks/use_expand_section';
 import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../../../../flyout_v2/shared/components/test_ids';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
+import { setActiveFaceliftVersion } from '../../../../../entity_analytics/components/home/facelift/active_version';
 
 jest.mock('../../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -174,11 +175,13 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should not render the graph preview component if the graph feature is disabled', () => {
+    setActiveFaceliftVersion('v1');
     mockUseExpandSection.mockReturnValue(true);
     mockUseShouldShowGraph.mockReturnValue(false);
 
     const { queryByTestId } = renderVisualizationsSection();
 
     expect(queryByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).not.toBeInTheDocument();
+    setActiveFaceliftVersion('v8');
   });
 });

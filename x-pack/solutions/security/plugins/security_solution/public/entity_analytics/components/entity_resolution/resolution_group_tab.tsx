@@ -259,6 +259,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
           showActions
           onRemoveEntity={handleRemoveEntity}
           targetEntityId={targetEntityId}
+          primaryEntityId={group?.primary_entity_id}
           removingEntityId={removingEntityId}
           onEntityNameClick={handleEntityNameClick}
           currentEntityId={entityId}

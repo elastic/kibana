@@ -14,51 +14,37 @@
  * metrics state, so switching prototypes cannot leave v.8 pointing at a
  * metrics folder it does not contain.
  *
- * The Simplified metrics chrome switch picks a track (`full` vs `simplified`).
- * Each track has its own Metrics version list and selected version so the two
- * looks can iterate independently. Implementations live under
- * `v8/metrics/vN/` (full) and `v8/metrics/simplified/vN/` (simplified).
+ * Metrics version picks the card layout (`v8/metrics/vN/`). Simplified metrics
+ * is a visual overlay on that version: it hides background sparklines and
+ * period deltas without changing which version is selected.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 
-export type MetricsTrack = 'full' | 'simplified';
-export type MetricsVersion = 'v1';
+export type MetricsVersion = 'v1' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6';
 
-export const DEFAULT_METRICS_VERSION: MetricsVersion = 'v1';
+export const DEFAULT_METRICS_VERSION: MetricsVersion = 'v6';
 
-export const FULL_METRICS_VERSION_OPTIONS: Array<{ key: MetricsVersion; label: string }> = [
+export const METRICS_VERSION_OPTIONS: Array<{ key: MetricsVersion; label: string }> = [
   { key: 'v1', label: 'v.1' },
+  { key: 'v2', label: 'v.2' },
+  { key: 'v3', label: 'v.3' },
+  { key: 'v4', label: 'v.4' },
+  { key: 'v5', label: 'v.5' },
+  { key: 'v6', label: 'v.6' },
 ];
 
-export const SIMPLIFIED_METRICS_VERSION_OPTIONS: Array<{
-  key: MetricsVersion;
-  label: string;
-}> = [{ key: 'v1', label: 'v.1' }];
-
-export const getMetricsVersionOptions = (
-  simplified: boolean
-): Array<{ key: MetricsVersion; label: string }> =>
-  simplified ? SIMPLIFIED_METRICS_VERSION_OPTIONS : FULL_METRICS_VERSION_OPTIONS;
+export const getMetricsVersionOptions = (): Array<{ key: MetricsVersion; label: string }> =>
+  METRICS_VERSION_OPTIONS;
 
 let simplifiedMetrics = false;
-const versionByTrack: Record<MetricsTrack, MetricsVersion> = {
-  full: DEFAULT_METRICS_VERSION,
-  simplified: DEFAULT_METRICS_VERSION,
-};
-
-const getTrack = (): MetricsTrack => (simplifiedMetrics ? 'simplified' : 'full');
+let activeMetricsVersion: MetricsVersion = DEFAULT_METRICS_VERSION;
 
 type SimplifiedListener = (simplified: boolean) => void;
 const simplifiedListeners = new Set<SimplifiedListener>();
 
 type MetricsVersionListener = (version: MetricsVersion) => void;
 const versionListeners = new Set<MetricsVersionListener>();
-
-const notifyVersionListeners = (): void => {
-  const version = versionByTrack[getTrack()];
-  versionListeners.forEach((listener) => listener(version));
-};
 
 export const getSimplifiedMetrics = (): boolean => simplifiedMetrics;
 
@@ -68,7 +54,6 @@ export const setSimplifiedMetrics = (next: boolean): void => {
   }
   simplifiedMetrics = next;
   simplifiedListeners.forEach((listener) => listener(next));
-  notifyVersionListeners();
 };
 
 export const subscribeSimplifiedMetrics = (listener: SimplifiedListener): (() => void) => {
@@ -90,15 +75,14 @@ export const useSimplifiedMetrics = (): [boolean, (simplified: boolean) => void]
   return [simplified, setSimplifiedValue];
 };
 
-export const getActiveMetricsVersion = (): MetricsVersion => versionByTrack[getTrack()];
+export const getActiveMetricsVersion = (): MetricsVersion => activeMetricsVersion;
 
 export const setActiveMetricsVersion = (version: MetricsVersion): void => {
-  const track = getTrack();
-  if (version === versionByTrack[track]) {
+  if (version === activeMetricsVersion) {
     return;
   }
-  versionByTrack[track] = version;
-  notifyVersionListeners();
+  activeMetricsVersion = version;
+  versionListeners.forEach((listener) => listener(version));
 };
 
 export const subscribeActiveMetricsVersion = (listener: MetricsVersionListener): (() => void) => {

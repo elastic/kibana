@@ -46,12 +46,10 @@ describe('createFaceliftGroupStatsRenderer', () => {
       'Asset criticality:',
       'Alerts:',
       'Anomalies:',
-      'Cases:',
     ]);
     expect(stats[1].component).toBeDefined();
     expect(stats[3].badge).toEqual({ value: 7, width: 50 });
     expect(stats[4].badge).toEqual({ value: 2, width: 50 });
-    expect(stats[5].badge).toEqual({ value: 1, width: 50 });
   });
 
   it('does not add extras for other group types', () => {

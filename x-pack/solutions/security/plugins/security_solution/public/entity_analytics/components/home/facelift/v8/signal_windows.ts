@@ -60,10 +60,9 @@ const WINDOW_VOLUME_SHARE: Record<FaceliftTimeRangeId, number> = {
  * Much flatter than the volume share: the risk engine weights recent activity,
  * so a score that climbed over a month did most of its climbing lately.
  *
- * Keep it flat enough that every mover in the corpus still clears 20% at 24h —
- * the Risk movers tile promises "+20%" and the table renders the same figure
- * in its Risk score change column, so a steeper curve would have rows
- * contradicting the tile that filtered to them.
+ * The Risk movers tile reads this same narrowed move (see `CARD_PREDICATES`
+ * in `./data`), and the table renders it in its Risk score change column, so
+ * the tile and the rows it filters to always quote the same figure.
  */
 const WINDOW_RISK_MOVE_SHARE: Record<FaceliftTimeRangeId, number> = {
   '24h': 0.75,
@@ -132,3 +131,122 @@ export const countInWindow = (
  */
 export const riskPointsInWindow = (thirtyDayPoints: number, range: FaceliftTimeRangeId): number =>
   range === '30d' ? thirtyDayPoints : Math.round(thirtyDayPoints * WINDOW_RISK_MOVE_SHARE[range]);
+
+export interface CountStepsInWindowArgs {
+  cardId: SignalCardId;
+  range: FaceliftTimeRangeId;
+  /** The tile's current value — the size of the card's population now. */
+  value: number;
+  /** "vs. previous window" movement; the population was `value - delta` at the window start. */
+  delta: number;
+  /** Sparkline samples across the window (hourly for 24h, daily otherwise). */
+  samples: number;
+  /**
+   * Extra entities that joined the population mid-window and left again
+   * before now, on top of the higher of the opening and closing values. Gives
+   * the series a peak the badge cannot show. `0` / omitted means a plain
+   * staircase from `value - delta` to `value`.
+   */
+  peakOvershoot?: number;
+}
+
+/**
+ * Scatter `stepCount` moves of `direction` over `[fromIndex, toIndex]`: the
+ * range is cut into equal slices and each slice gets exactly one step, at a
+ * hashed offset so the cards do not all move in lockstep.
+ */
+const placeSteps = (
+  stepsAt: number[],
+  stepCount: number,
+  direction: number,
+  fromIndex: number,
+  toIndex: number,
+  seed: string
+) => {
+  const span = Math.max(1, toIndex - fromIndex + 1);
+  for (let step = 0; step < stepCount; step++) {
+    const sliceStart = fromIndex + Math.floor((step * span) / stepCount);
+    const sliceEnd = fromIndex + Math.floor(((step + 1) * span) / stepCount) - 1;
+    const width = Math.max(1, sliceEnd - sliceStart + 1);
+    const offset = hashOf(`${seed}:${step}`) % width;
+    stepsAt[Math.min(toIndex, sliceStart + offset)] += direction;
+  }
+};
+
+/**
+ * Running size of a card's population across the window, one sample per
+ * hour/day, for the tile sparkline.
+ *
+ * A tile counts entities, so the series is an integer staircase: it opens at
+ * `value - delta`, closes at `value`, and moves only in whole steps — one per
+ * entity entering (positive delta) or leaving (negative delta) the population.
+ * By default nothing else is drawn: with no per-event timestamps in the corpus
+ * any churn in between would be invented, and it would contradict the delta
+ * badge.
+ *
+ * `peakOvershoot` opts a card into that churn deliberately: the series first
+ * climbs to `max(start, value) + peakOvershoot`, then falls back to `value`.
+ * The net change — and therefore the badge — is unchanged; the chart just
+ * admits that the population was larger at some point than at either end.
+ *
+ * The one invented dimension is *when* each step lands (see `placeSteps`).
+ * The hash is seeded by card and window, so the shape is stable across
+ * re-renders and reloads. The first and last samples are kept flat so both the
+ * opening and closing values are visible as plateaus.
+ *
+ * If `value - delta` would go below zero the opening value is clamped at zero;
+ * read the realised delta back from the returned series when that matters.
+ */
+export const countStepsInWindow = ({
+  cardId,
+  range,
+  value,
+  delta,
+  samples,
+  peakOvershoot = 0,
+}: CountStepsInWindowArgs): number[] => {
+  if (samples <= 0) {
+    return [];
+  }
+
+  const start = Math.max(0, value - delta);
+  const stepsAt = new Array<number>(samples).fill(0);
+
+  // Steps land strictly inside the window: index 0 shows the opening plateau
+  // and the final index the closing one.
+  const firstIndex = 1;
+  const lastIndex = Math.max(firstIndex, samples - 2);
+  const seed = `${cardId}:${range}`;
+
+  if (peakOvershoot > 0) {
+    const peak = Math.max(start, value) + peakOvershoot;
+    const upSteps = peak - start;
+    const downSteps = peak - value;
+    // Split the window between the climb and the fall in proportion to the
+    // number of moves in each, so the steps stay evenly paced throughout.
+    const span = lastIndex - firstIndex + 1;
+    const climbEnd =
+      firstIndex + Math.max(0, Math.round((span * upSteps) / (upSteps + downSteps)) - 1);
+    placeSteps(stepsAt, upSteps, 1, firstIndex, Math.max(firstIndex, climbEnd), `${seed}:up`);
+    placeSteps(
+      stepsAt,
+      downSteps,
+      -1,
+      Math.min(lastIndex, climbEnd + 1),
+      lastIndex,
+      `${seed}:down`
+    );
+  } else {
+    const stepCount = Math.abs(value - start);
+    const direction = Math.sign(value - start);
+    placeSteps(stepsAt, stepCount, direction, firstIndex, lastIndex, seed);
+  }
+
+  const series: number[] = [];
+  let current = start;
+  for (let index = 0; index < samples; index++) {
+    current += stepsAt[index];
+    series.push(current);
+  }
+  return series;
+};

@@ -12,6 +12,9 @@ import {
   type GraphPreviewPanelProps,
 } from '../../../../../flyout_v2/shared/components/graph_preview_panel';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
+import { useActiveFaceliftVersion } from '../../../../../entity_analytics/components/home/facelift/active_version';
+
+const EMPTY_GRAPH = { nodes: [], edges: [] };
 
 export interface EntityGraphPreviewContainerProps
   extends Pick<GraphPreviewPanelProps, 'onShowGraph' | 'showIcon'> {
@@ -21,7 +24,11 @@ export interface EntityGraphPreviewContainerProps
 
 export const EntityGraphPreviewContainer = memo(
   ({ entityId, onShowGraph, showIcon }: EntityGraphPreviewContainerProps) => {
-    const shouldShowGraph = useShouldShowGraph();
+    const graphAvailable = useShouldShowGraph();
+    // Prototype v.8 keeps the section visible with the existing empty state
+    // when the graph feature (license / entity store) is not available.
+    const [faceliftVersion] = useActiveFaceliftVersion();
+    const showEmptyState = faceliftVersion === 'v8' && !graphAvailable;
 
     const { isLoading, isError, data } = useFetchGraphData({
       req: {
@@ -32,7 +39,7 @@ export const EntityGraphPreviewContainer = memo(
         },
       },
       options: {
-        enabled: shouldShowGraph,
+        enabled: graphAvailable,
         refetchOnWindowFocus: false,
       },
     });
@@ -41,10 +48,10 @@ export const EntityGraphPreviewContainer = memo(
       <GraphPreviewPanel
         onShowGraph={onShowGraph}
         showIcon={showIcon}
-        shouldShowGraph={shouldShowGraph}
-        isLoading={isLoading}
-        isError={isError}
-        data={data}
+        shouldShowGraph={graphAvailable || showEmptyState}
+        isLoading={showEmptyState ? false : isLoading}
+        isError={showEmptyState ? false : isError}
+        data={showEmptyState ? EMPTY_GRAPH : data}
       />
     );
   }

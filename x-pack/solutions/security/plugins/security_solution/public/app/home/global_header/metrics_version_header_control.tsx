@@ -18,9 +18,8 @@ import {
   useActiveMetricsVersion as useActiveMetricsVersionV7,
 } from '../../../entity_analytics/components/home/facelift/v7/active_metrics_version';
 import {
-  getMetricsVersionOptions as getMetricsVersionOptionsV8,
+  METRICS_VERSION_OPTIONS as METRICS_VERSION_OPTIONS_V8,
   useActiveMetricsVersion as useActiveMetricsVersionV8,
-  useSimplifiedMetrics,
 } from '../../../entity_analytics/components/home/facelift/v8/active_metrics_version';
 import { FaceliftHeaderVersionSelect } from './facelift_header_version_select';
 
@@ -65,16 +64,15 @@ const MetricsVersionSelectV7: React.FC = () => {
   );
 };
 
-/** Prototype v.8: options follow the Simplified metrics switch track. */
+/** Prototype v.8: one version list; Simplified metrics overlays the selection. */
 const MetricsVersionSelectV8: React.FC = () => {
-  const [simplified] = useSimplifiedMetrics();
   const [metricsVersion, setMetricsVersion] = useActiveMetricsVersionV8();
 
   return (
     <FaceliftHeaderVersionSelect
       label={LABEL}
       ariaLabel={SELECT_ARIA_LABEL}
-      options={getMetricsVersionOptionsV8(simplified)}
+      options={METRICS_VERSION_OPTIONS_V8}
       value={metricsVersion}
       onChange={setMetricsVersion}
       testIdPrefix="eaMetricsVersion"

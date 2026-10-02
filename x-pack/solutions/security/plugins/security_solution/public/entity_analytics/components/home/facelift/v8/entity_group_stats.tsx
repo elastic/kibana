@@ -7,8 +7,8 @@
 
 /**
  * v.8 resolution-group stats: the shared Entities + Risk score (with change
- * beside the badge), then Asset criticality, Alerts (count badge), Anomalies,
- * and Cases.
+ * beside the badge), then Asset criticality, Alerts (count badge), and
+ * Anomalies.
  */
 
 import React from 'react';
@@ -40,11 +40,6 @@ const alertsLabel = i18n.translate(
 const anomaliesLabel = i18n.translate(
   'xpack.securitySolution.entityAnalytics.facelift.group.stat.anomalies',
   { defaultMessage: 'Anomalies:' }
-);
-
-const casesLabel = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.facelift.group.stat.cases',
-  { defaultMessage: 'Cases:' }
 );
 
 const GroupRiskChange = ({ percent }: { percent: number }) => {
@@ -170,10 +165,6 @@ export const createFaceliftGroupStatsRenderer = (targetMetadata: FaceliftTargetM
       {
         title: anomaliesLabel,
         badge: { value: metadata.anomalies, width: 50 },
-      },
-      {
-        title: casesLabel,
-        badge: { value: metadata.cases, width: 50 },
       }
     );
 
