@@ -24,10 +24,9 @@ import type { CoreStart } from '@kbn/core/public';
 
 import {
   generateEsqlQuery,
+  isEsqlQuerySuccess,
   esqlConversionFailureReasonMessages,
   esqlConversionFailureTitle,
-  isEsqlQuerySuccess,
-  isEsqlQueryFailure,
   type EsqlConversionFailureReason,
   type ColumnRoles,
 } from '@kbn/lens-common';
@@ -243,10 +242,7 @@ export const useEsqlConversionCheck = (
       }
 
       if (!isEsqlQuerySuccess(esqlLayer)) {
-        const failure = isEsqlQueryFailure(esqlLayer) ? esqlLayer : undefined;
-        convertibleLayers.push(
-          makeNonConvertibleLayer(layerId, layerTypes.DATA, failure?.reason ?? 'unknown')
-        );
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, esqlLayer.reason));
         continue;
       }
 
@@ -289,9 +285,7 @@ export const useEsqlConversionCheck = (
       (layer) => layer.type === layerTypes.DATA && !layer.isConvertibleToEsql
     );
     if (nonConvertibleDataLayer) {
-      return getEsqlConversionDisabledSettings(
-        nonConvertibleDataLayer.failureReason ?? 'unknown'
-      );
+      return getEsqlConversionDisabledSettings(nonConvertibleDataLayer.failureReason ?? 'unknown');
     }
 
     // Trendline is auto-included in the conversion but not shown in the modal.
@@ -421,10 +415,7 @@ function tryConvertTrendlineLayer(
       columnRoles
     );
     if (!isEsqlQuerySuccess(esqlLayer)) {
-      return {
-        success: false,
-        reason: isEsqlQueryFailure(esqlLayer) ? esqlLayer.reason : undefined,
-      };
+      return { success: false, reason: esqlLayer?.reason };
     }
 
     return {
