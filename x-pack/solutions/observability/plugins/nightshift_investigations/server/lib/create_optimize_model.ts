@@ -10,13 +10,13 @@ import type { AgentBuilderPluginStart, ScopedModel } from '@kbn/agent-builder-se
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { NightshiftModelBlockedError } from '@kbn/significant-events-schema';
 import {
-  NightshiftModelBlockedError,
   NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
   NIGHTSHIFT_USAGE_PARENT_ID,
   NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
   NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-} from '@kbn/significant-events-schema';
+} from '@kbn/nightshift-shared';
 
 /** Attributes Cortex and Semantic Memory optimize LLM calls to Nightshift investigation memory spend. */
 export const createInvestigationMemoryTelemetry = (

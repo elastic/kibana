@@ -18,13 +18,13 @@ import {
   isToolCallEvent,
   isToolResultEvent,
 } from '@kbn/agent-builder-common';
+import type { BaseFeature, IgnoredFeature } from '@kbn/significant-events-schema';
 import {
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_USAGE_PARENT_ID,
   NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
   NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-} from '@kbn/significant-events-schema';
-import type { BaseFeature, IgnoredFeature } from '@kbn/significant-events-schema';
+} from '@kbn/nightshift-shared';
 import {
   EMPTY_TOKENS,
   type InferenceDocument,

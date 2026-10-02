@@ -17,13 +17,13 @@ import {
   isRoundCompleteEvent,
   isToolResultEvent,
 } from '@kbn/agent-builder-common';
+import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
 import {
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
   NIGHTSHIFT_USAGE_PARENT_ID,
   NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
   NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-  type GeneratedSignificantEventQuery,
-} from '@kbn/significant-events-schema';
+} from '@kbn/nightshift-shared';
 import { EMPTY_TOKENS } from '@kbn/nightshift-ai';
 import type { Streams } from '@kbn/streams-schema';
 import type { AnalysisTarget, ExistingQuerySummary } from '@kbn/nightshift-ai';

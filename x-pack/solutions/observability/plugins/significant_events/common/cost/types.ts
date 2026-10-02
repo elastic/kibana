@@ -11,7 +11,7 @@ import {
   NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
-} from '@kbn/significant-events-schema';
+} from '@kbn/nightshift-shared';
 
 export const COST_BUDGET_GROUPS = ['discovery', 'investigation', 'ki_extraction'] as const;
 

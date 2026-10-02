@@ -14,7 +14,7 @@ import {
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
   NIGHTSHIFT_USAGE_PARENT_ID,
-} from '@kbn/significant-events-schema';
+} from '@kbn/nightshift-shared';
 import { FEATURE_ID_TO_COST_BUDGET_GROUP, type TokenTrackingCoverage } from '../../../common/cost';
 import { calculateSignificantEventsCost, createUnavailableCostResponse } from './cost_service';
 import type { PriceMap } from './price_service';

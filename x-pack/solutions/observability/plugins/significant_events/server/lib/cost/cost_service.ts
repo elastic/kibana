@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { NIGHTSHIFT_USAGE_PARENT_ID } from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_USAGE_PARENT_ID } from '@kbn/nightshift-shared';
 import {
   COST_BUDGET_GROUPS,
   FEATURE_ID_TO_COST_BUDGET_GROUP,

@@ -12,7 +12,7 @@ import {
   NIGHTSHIFT_USAGE_PARENT_ID,
   NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
   NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-} from '@kbn/significant-events-schema';
+} from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { NIGHTSHIFT_CORTEX_EDIT_APPLIED_EVENT_TYPE } from '../telemetry';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';

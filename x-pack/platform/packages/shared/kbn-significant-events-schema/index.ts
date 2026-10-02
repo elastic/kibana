@@ -170,16 +170,6 @@ export type { SignificantEventsWorkflowStatusResult } from './src/workflows';
 
 export { SignificantEventsWorkflowStatus } from './src/workflows';
 
-export {
-  NIGHTSHIFT_USAGE_PARENT_ID,
-  NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
-  NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-  NIGHTSHIFT_DISCOVERY_USAGE_ID,
-  NIGHTSHIFT_INVESTIGATION_USAGE_ID,
-  NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
-  NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
-  NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
-} from './src/nightshift_usage_ids';
 
 export { NightshiftModelBlockedError } from './src/nightshift_model_blocked_error';
 export { NightshiftModelNotFoundError } from './src/nightshift_model_not_found_error';

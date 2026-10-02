@@ -11,7 +11,7 @@ import {
   NIGHTSHIFT_USAGE_PARENT_ID,
   NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
   NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
-} from '@kbn/significant-events-schema';
+} from '@kbn/nightshift-shared';
 import { createMemoryStore, loadRoundSteps, runMemoryOptimize } from './register_memory';
 import { optimizeMemory } from './optimize';
 
