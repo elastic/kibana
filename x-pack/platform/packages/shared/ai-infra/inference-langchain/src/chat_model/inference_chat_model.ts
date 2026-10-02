@@ -356,18 +356,18 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   ):
     | Runnable<BaseLanguageModelInput, RunOutput>
     | Runnable<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }> {
-    const schema: InteropZodType<RunOutput> | Record<string, any> = outputSchema;
     const name = config?.name;
     const description =
-      'description' in schema && typeof schema.description === 'string'
-        ? schema.description
+      'description' in outputSchema && typeof outputSchema.description === 'string'
+        ? outputSchema.description
         : 'A function available to call.';
     const includeRaw = config?.includeRaw;
 
     let functionName = name ?? 'extract';
     let tools: ToolDefinition[];
-    const zodSchema = isInteropZodSchema(schema) ? schema : undefined;
-    if (zodSchema) {
+    let schema: InteropZodType<RunOutput> | undefined;
+    if (isInteropZodSchema(outputSchema)) {
+      schema = outputSchema;
       tools = [
         {
           type: 'function',
@@ -375,15 +375,15 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
             name: functionName,
             description,
             parameters:
-              '_zod' in (zodSchema as object)
-                ? z4.toJSONSchema(zodSchema as unknown as z4.ZodType, { io: 'input' })
-                : zodToJsonSchema(zodSchema as unknown as Parameters<typeof zodToJsonSchema>[0]),
+              '_zod' in (schema as object)
+                ? z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' })
+                : zodToJsonSchema(schema as unknown as Parameters<typeof zodToJsonSchema>[0]),
           },
         },
       ];
     } else {
-      if ('name' in schema) {
-        functionName = schema.name;
+      if ('name' in outputSchema) {
+        functionName = outputSchema.name;
       }
       tools = [
         {
@@ -391,7 +391,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
           function: {
             name: functionName,
             description,
-            parameters: schema,
+            parameters: outputSchema,
           },
         },
       ];
@@ -408,10 +408,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
         if (!toolCall) {
           throw new Error(`No tool call found with name ${functionName}.`);
         }
-        if (!zodSchema) {
+        if (!schema) {
           return toolCall.args as RunOutput;
         }
-        const parsed = await interopSafeParseAsync(zodSchema, toolCall.args);
+        const parsed = await interopSafeParseAsync(schema, toolCall.args);
         if (parsed.success) {
           return parsed.data;
         }
