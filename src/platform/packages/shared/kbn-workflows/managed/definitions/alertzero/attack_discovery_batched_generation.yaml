@@ -55,27 +55,22 @@ triggers:
           type: string
 
 steps:
-  # Not `elasticsearch.esql.query`: this step anonymizes each alert and emits
-  # the `_id,<value>` CSV shape the pipeline requires. Raw ES|QL rows would send
-  # real hostnames and usernames to the model, and the gate's `_id` contract
-  # would reject them.
-  - name: retrieve_alerts
-    type: security.attack-discovery.defaultAlertRetrieval
+  # Ids only. Each batch's `security.attack-discovery.run` retrieves and anonymizes
+  # its own slice with an ES|QL query over those ids, so the replacements its
+  # markdown uses are the ones that batch persists. Anonymizing here instead would
+  # hand every batch pre-anonymized alerts with no replacements, which persisted
+  # discoveries that nothing could de-anonymize. This query returns only ids, so no
+  # raw alert field values leave this step.
+  - name: retrieve_alert_ids
+    type: elasticsearch.esql.query
     timeout: "5m"
     with:
-      alerts_index_pattern: ".alerts-security.alerts-{{ workflow.spaceId }}"
-      anonymization_fields: []
-      api_config:
-        connector_id: "{{ inputs.connector_id }}"
-      # Required by the step schema. Ignored on the ES|QL path, where the
-      # ceiling is the query's own LIMIT, so it is kept equal to it.
-      size: "${{ inputs.batch_size | times: 100 | at_most: 10000 }}"
       # The `IS NULL` arm is load-bearing: `!=` alone is null-valued, and so
       # false, for an alert with no closing reason. Kept as its own `| WHERE`
       # pipe (pipes are ANDed) so the `OR` cannot widen the clauses above it.
       #
       # `LIMIT` is derived so the fan-out can never exceed 100 branches.
-      esql_query: |-
+      query: |-
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
           | WHERE @timestamp >= NOW() - {{ inputs.lookback }}
           | WHERE kibana.alert.workflow_status IN ("open", "acknowledged")
@@ -83,6 +78,7 @@ steps:
           | WHERE kibana.alert.workflow_reason IS NULL OR kibana.alert.workflow_reason != "false_positive"
           | SORT @timestamp ASC
           | LIMIT {{ inputs.batch_size | times: 100 | at_most: 10000 }}
+          | KEEP _id
 
   # `mode: settled` is what turns a failed batch into a gap instead of a failed
   # run. Concurrency is the per-run rate-limit exposure against the connector as
@@ -116,7 +112,7 @@ steps:
       max: 2
     branch-timeout: "30m"
     foreach: |-
-      [{%- assign total = steps.retrieve_alerts.output.alerts | size -%}
+      [{%- assign total = steps.retrieve_alert_ids.output.values | size -%}
       {%- if total > 0 -%}
       {%- assign n = total | minus: 1 | divided_by: inputs.batch_size | floor | plus: 1 -%}
       {%- for i in (1..n) -%}{%- unless forloop.first -%},{%- endunless -%}
@@ -126,7 +122,26 @@ steps:
       - name: run_batch
         type: security.attack-discovery.run
         with:
-          alerts: "${{ steps.retrieve_alerts.output.alerts | slice: foreach.item, inputs.batch_size }}"
+          # The run's own ES|QL retrieval anonymizes this batch, and persists the
+          # replacements with its discoveries. Each `retrieve_alert_ids` row is
+          # `[_id]`, so `first` is the id. The other filters already selected these
+          # alerts, so the query only names them.
+          #
+          # `_id` is not searchable in ES|QL, so `_id IN` alone cannot be pushed down
+          # to Lucene and scans the whole alerts index once per batch. A Security
+          # alert's `kibana.alert.uuid` equals its `_id`, so filtering that keyword on
+          # the same ids is pushed down; `_id IN` then keeps the match exact.
+          #
+          # Sorted because each batch used to be a slice of the `@timestamp`-sorted
+          # retrieval, so its alerts reached the model in time order.
+          alert_retrieval_mode: esql
+          esql_query: |-
+            {%- assign ids = steps.retrieve_alert_ids.output.values | slice: foreach.item, inputs.batch_size | map: 'first' | join: '", "' -%}
+            FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
+              | WHERE kibana.alert.uuid IN ("{{ ids }}")
+              | WHERE _id IN ("{{ ids }}")
+              | SORT @timestamp ASC
+              | LIMIT {{ inputs.batch_size }}
           connector_id: "{{ inputs.connector_id }}"
           # Stated on the leaf step rather than threaded down from the Worker: the
           # tier is a property of the call, not of the caller. Only consulted when
@@ -218,8 +233,9 @@ steps:
       # of `fetch_discoveries`. Same local-accumulator shape as `alerts_analyzed`,
       # for the same reason.
       #
-      # The TS definition's version is bumped alongside this output, or an existing
-      # install keeps a definition that emits nothing here.
+      # The TS definition's version was bumped alongside this output as a deliberate
+      # rollout signal; the YAML change alone already rolls out through
+      # `definitionHash`.
       discoveries_generated: |-
         {%- assign generated = 0 -%}
         {%- for result in steps.generate_batches.output.results -%}
