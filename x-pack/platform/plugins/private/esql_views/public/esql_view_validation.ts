@@ -7,9 +7,6 @@
 
 import type { ESQLMessage } from '@kbn/esql-language';
 import type { EditorError } from '@elastic/esql/types';
-import { MAX_ESQL_VIEW_QUERY_LENGTH } from '@kbn/esql-utils';
-
-export { MAX_ESQL_VIEW_QUERY_LENGTH };
 
 const getValidationMessage = (error: ESQLMessage | EditorError): string =>
   'text' in error ? error.text : error.message;

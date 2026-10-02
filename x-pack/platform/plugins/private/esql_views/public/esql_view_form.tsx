@@ -33,11 +33,12 @@ import {
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
   EsqlViewsClientError,
   MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
+  MAX_ESQL_VIEW_QUERY_LENGTH,
   type EsqlViewsClient,
   type EsqlViewNameValidationError,
   validateEsqlViewName,
 } from '@kbn/esql-utils';
-import { getEsqlViewQuerySyntaxError, MAX_ESQL_VIEW_QUERY_LENGTH } from './esql_view_validation';
+import { getEsqlViewQuerySyntaxError } from './esql_view_validation';
 import { translations } from './translations';
 
 interface EsqlViewFormProps {
