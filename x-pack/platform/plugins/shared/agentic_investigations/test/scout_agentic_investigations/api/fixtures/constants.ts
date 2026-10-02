@@ -5,29 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout';
-
-export const COMMON_HEADERS = {
-  'kbn-xsrf': 'true',
-  'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
-} as const;
-
 export const INTERNAL_HEADERS = {
   'kbn-xsrf': 'scout',
   'x-elastic-internal-origin': 'kibana',
   'elastic-api-version': '1',
 } as const;
 
-export const PROPOSALS_MANAGE_ROLE: KibanaRole = {
-  elasticsearch: { cluster: [], indices: [] },
-  kibana: [{ base: [], feature: { agenticInvestigations: ['all'] }, spaces: ['*'] }],
-};
-
-export const PROPOSALS_READ_ONLY_ROLE: KibanaRole = {
-  elasticsearch: { cluster: [], indices: [] },
-  kibana: [{ base: [], feature: { agenticInvestigations: ['read'] }, spaces: ['*'] }],
-};
 /** Headers for the Agent Builder public API (version date, no internal-origin required). */
 export const PUBLIC_HEADERS = {
   'kbn-xsrf': 'scout',
@@ -37,6 +20,12 @@ export const PUBLIC_HEADERS = {
 export const LIST_ESCALATIONS_PATH = 'internal/investigations/escalations';
 export const CREATE_ESCALATION_PATH = 'internal/investigations/escalations';
 export const ESCALATION_BY_ID_PATH = (id: string) => `internal/investigations/escalations/${id}`;
+export const ESCALATION_ASSIGNEES_PATH = (id: string) =>
+  `internal/investigations/escalations/${id}/assignees`;
+
+export const INVESTIGATIONS_INTERNAL_PATH = 'internal/investigations/investigations';
+export const INVESTIGATION_ASSIGNEES_PATH = (id: string) =>
+  `internal/investigations/investigations/${id}/assignees`;
 
 /** Agent Builder public conversations API. */
 export const AB_CONVERSATIONS_PATH = 'api/agent_builder/conversations';

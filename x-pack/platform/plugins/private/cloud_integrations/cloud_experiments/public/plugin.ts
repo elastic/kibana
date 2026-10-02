@@ -11,7 +11,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LaunchDarklyClientProvider } from '@openfeature/launchdarkly-client-provider';
-import { type LDLogLevel, basicLogger } from 'launchdarkly-js-client-sdk';
+import { type LDLogLevel, basicLogger } from '@launchdarkly/js-client-sdk';
 import { initializeMetadata, MetadataService } from '../common/metadata_service';
 
 interface CloudExperimentsPluginSetupDeps {
@@ -119,7 +119,7 @@ export class CloudExperimentsPlugin implements Plugin<
       // Using basicLogger for now because we can't limit the level for now if we're using core's logger.
       logger: basicLogger({ level: ldConfig.client_log_level }),
       streaming: true, // Necessary to react to flag changes
-      application: {
+      applicationInfo: {
         id: 'kibana-browser',
         version:
           this.initializerContext.env.packageInfo.buildFlavor === 'serverless'

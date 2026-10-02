@@ -263,6 +263,21 @@ export class InferencePlugin implements Plugin<
       };
     };
 
+    // uses the internal ES client, like the default connector lookup, so that aliases resolve
+    // the same way regardless of whether the user can list inference endpoints
+    const createConnectorIdResolver = (request: KibanaRequest) => {
+      return async (connectorId: string) => {
+        const connector = await getConnectorById({
+          connectorId,
+          actions: pluginsStart.actions,
+          request,
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.logger,
+        });
+        return connector.connectorId;
+      };
+    };
+
     const createTokenUsageTrackingEnabledCheck = (request: KibanaRequest) => {
       return async () => {
         try {
@@ -288,6 +303,7 @@ export class InferencePlugin implements Plugin<
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
+          resolveConnectorId: createConnectorIdResolver(options.request),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -308,6 +324,7 @@ export class InferencePlugin implements Plugin<
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
+          resolveConnectorId: createConnectorIdResolver(options.request),
         });
       },
 

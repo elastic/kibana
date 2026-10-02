@@ -17,12 +17,18 @@ import { EntryFieldType } from '@kbn/securitysolution-utils';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import type { Logger } from '@kbn/logging';
 import {
+  DISABLED_ARTIFACT_TAG,
   PROCESS_DESCENDANT_EXTRA_ENTRY,
   TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { isProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
+import { MetaArchValue, EndpointArtifactScanContext } from '../../../../common/endpoint/types';
+import type { YaraCompiledRule } from '../libyara';
+import { YaraEngineUnavailableError } from '../libyara';
+import { validateCustomYaraRule } from '../custom_yara_signatures';
 import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
@@ -32,7 +38,9 @@ import type {
   TranslatedEntryMatchWildcardMatcher,
   TranslatedEntryNestedEntry,
   TranslatedExceptionListItem,
+  TranslatedYaraRule,
   WrappedTranslatedExceptionList,
+  WrappedTranslatedYaraRulesList,
   TranslatedEntriesOfProcessDescendants,
   TranslatedEntryTrustDescendants,
 } from '../../schemas';
@@ -44,10 +52,11 @@ import {
   translatedEntryMatchWildcardMatcher,
   translatedEntryNestedEntry,
   wrappedTranslatedExceptionList,
+  wrappedTranslatedYaraRulesList,
 } from '../../schemas';
 
 export async function buildArtifact(
-  exceptions: WrappedTranslatedExceptionList,
+  exceptions: WrappedTranslatedExceptionList | WrappedTranslatedYaraRulesList,
   schemaVersion: string,
   os: string,
   name: string
@@ -74,13 +83,14 @@ export type ArtifactListId =
   | typeof ENDPOINT_ARTIFACT_LISTS.trustedDevices.id
   | typeof ENDPOINT_ARTIFACT_LISTS.eventFilters.id
   | typeof ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id
-  | typeof ENDPOINT_ARTIFACT_LISTS.blocklists.id;
+  | typeof ENDPOINT_ARTIFACT_LISTS.blocklists.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id;
 
 export function convertExceptionsToEndpointFormat(
   exceptions: ExceptionListItemSchema[],
   schemaVersion: string,
   experimentalFeatures: ExperimentalFeatures
-) {
+): WrappedTranslatedExceptionList {
   const translatedExceptions = {
     entries: translateToEndpointExceptions(exceptions, schemaVersion, experimentalFeatures),
   };
@@ -90,6 +100,22 @@ export function convertExceptionsToEndpointFormat(
   }
 
   return validated as WrappedTranslatedExceptionList;
+}
+
+export async function convertYaraRulesToEndpointFormat(
+  exceptions: ExceptionListItemSchema[],
+  schemaVersion: string,
+  logger?: Logger
+): Promise<WrappedTranslatedYaraRulesList> {
+  const translatedYaraRules = {
+    entries: await translateToYaraRules(exceptions, schemaVersion, logger),
+  };
+  const [validated, errors] = validate(translatedYaraRules, wrappedTranslatedYaraRulesList);
+  if (errors != null) {
+    throw new Error(errors);
+  }
+
+  return validated as WrappedTranslatedYaraRulesList;
 }
 
 export async function getFilteredEndpointExceptionListRaw({
@@ -146,6 +172,134 @@ export async function getAllItemsFromEndpointExceptionList({
     filter: osFilter,
     listId,
   });
+}
+
+const DEFAULT_YARA_ARCH_CONTEXT: TranslatedYaraRule['arch_context'] = [
+  MetaArchValue.X86,
+  MetaArchValue.ARM64,
+];
+
+const DEFAULT_YARA_SCAN_CONTEXT: TranslatedYaraRule['scan_context'] = [
+  EndpointArtifactScanContext.MEMORY,
+];
+
+/** Retries per item for transient libyara engine failures while packing artifacts. */
+const YARA_ITEM_VALIDATE_MAX_ATTEMPTS = 3;
+
+/**
+ * Reads `arch_context` from rules that already passed `validateCustomYaraRule`.
+ * Product validation guarantees a non-empty rule list and that `meta.arch` is either
+ * omitted on every rule or set to the same allowed value(s) on every rule.
+ */
+function getArchContextFromCompiledRules(
+  rules: YaraCompiledRule[]
+): TranslatedYaraRule['arch_context'] {
+  const originalArch = rules[0]?.meta.arch;
+  if (originalArch === undefined) {
+    return [...DEFAULT_YARA_ARCH_CONTEXT];
+  }
+
+  return originalArch.split(/, ?/) as TranslatedYaraRule['arch_context'];
+}
+
+const skipYaraItem = (logger: Logger | undefined, itemId: string, reason: string): void => {
+  logger?.warn(
+    `Skipping Custom YARA Signature [${itemId}] while building the endpoint artifact: ${reason}`
+  );
+};
+
+async function validateCustomYaraRuleWithRetries(
+  ruleText: string,
+  osTypes: ExceptionListItemSchema['os_types'],
+  itemId: string,
+  logger?: Logger
+): Promise<Awaited<ReturnType<typeof validateCustomYaraRule>>> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await validateCustomYaraRule(ruleText, osTypes);
+    } catch (error) {
+      if (!(error instanceof YaraEngineUnavailableError)) {
+        throw error;
+      }
+
+      if (attempt >= YARA_ITEM_VALIDATE_MAX_ATTEMPTS) {
+        logger?.error(
+          `libyara engine failed validating Custom YARA Signature [${itemId}] after ${YARA_ITEM_VALIDATE_MAX_ATTEMPTS} attempts; aborting artifact build. ${error.message}`
+        );
+        throw error;
+      }
+
+      logger?.warn(
+        `libyara engine failed validating Custom YARA Signature [${itemId}] on attempt ${attempt}/${YARA_ITEM_VALIDATE_MAX_ATTEMPTS}; retrying. ${error.message}`
+      );
+    }
+  }
+}
+
+async function translateOneYaraException(
+  exception: ExceptionListItemSchema,
+  logger?: Logger
+): Promise<TranslatedYaraRule | undefined> {
+  if ((exception.tags ?? []).includes(DISABLED_ARTIFACT_TAG)) {
+    return undefined;
+  }
+
+  const [entry] = exception.entries;
+  if (entry?.type !== 'match' || typeof entry.value !== 'string') {
+    return undefined;
+  }
+
+  // Full product validation (compile + meta constraints) so invalid arch/scan_type/etc.
+  // are skipped here instead of aborting later schema validation of the whole artifact.
+  // Engine failures are retried per item; exhausted retries propagate so the packager
+  // cannot publish a partial or empty YARA artifact from a flaky/unavailable engine.
+  const result = await validateCustomYaraRuleWithRetries(
+    entry.value,
+    exception.os_types,
+    exception.item_id,
+    logger
+  );
+
+  if (result.errorCount > 0) {
+    skipYaraItem(logger, exception.item_id, `validation reported ${result.errorCount} error(s)`);
+    return undefined;
+  }
+
+  return {
+    yara_rule_data: entry.value,
+    arch_context: getArchContextFromCompiledRules(result.rules),
+    scan_context: [...DEFAULT_YARA_SCAN_CONTEXT],
+    entry_id: exception.id,
+    entry_name: exception.name,
+  };
+}
+
+/**
+ * Translates Custom YARA Signature exception items into the endpoint YARA artifact format.
+ * Items that fail product validation are omitted so one bad entry cannot fail the packager.
+ * Exhausted per-item `YaraEngineUnavailableError` retries propagate so the packager aborts
+ * the manifest build and keeps the previous committed manifest.
+ */
+async function translateToYaraRules(
+  exceptions: ExceptionListItemSchema[],
+  schemaVersion: string,
+  logger?: Logger
+): Promise<TranslatedYaraRule[]> {
+  if (schemaVersion !== 'v1') {
+    throw new Error('unsupported schemaVersion');
+  }
+
+  const translatedItems: TranslatedYaraRule[] = [];
+
+  for (const exception of exceptions) {
+    // Sequential: libyara WASM is a process singleton and is not safe for concurrent ccall.
+    const translatedItem = await translateOneYaraException(exception, logger);
+    if (translatedItem !== undefined) {
+      translatedItems.push(translatedItem);
+    }
+  }
+
+  return translatedItems;
 }
 
 /**

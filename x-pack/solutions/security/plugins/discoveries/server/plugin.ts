@@ -242,9 +242,10 @@ export class DiscoveriesPlugin implements Plugin<
       });
     }
 
-    // Register agent builder attachment types and skills — but only when the
-    // feature flag is ON, so nothing requiring agent-builder-team review is
-    // active while the flag is OFF. Registration is deferred through
+    // Register agent builder attachment types and skills. The
+    // `security.attack_discovery` attachment type is always registered, because
+    // Security Solution's "Add to chat" produces it; everything else is registered
+    // only when the feature flag is ON. Registration is deferred through
     // `getStartServices()` because the request-free feature flags reader
     // (`coreStart.featureFlags`) is only available at start. Attachment types
     // and skills are read lazily at request time, so registering here (rather
@@ -257,6 +258,20 @@ export class DiscoveriesPlugin implements Plugin<
 
       void getStartServices()
         .then(async ({ coreStart }) => {
+          // Registered regardless of the flag: Security Solution's "Add to chat" attaches
+          // discoveries as this type, so it must not depend on the workflows kill switch.
+          // The data client is assigned unconditionally in `setup()` above; the guard
+          // narrows the optional field rather than describing a reachable state.
+          if (adhocAttackDiscoveryDataClient != null) {
+            agentBuilder.attachments.registerType(
+              createAttackDiscoveryAttachmentType({
+                adhocAttackDiscoveryDataClient,
+                esClient: coreStart.elasticsearch.client,
+                logger,
+              })
+            );
+          }
+
           if (!(await isWorkflowsEnabled(coreStart.featureFlags))) {
             logger.debug(
               () =>
@@ -266,14 +281,6 @@ export class DiscoveriesPlugin implements Plugin<
           }
 
           agentBuilder.attachments.registerType(createDiagnosticReportAttachmentType());
-
-          // The data client is assigned unconditionally in `setup()` above; the guard
-          // narrows the optional field rather than describing a reachable state.
-          if (adhocAttackDiscoveryDataClient != null) {
-            agentBuilder.attachments.registerType(
-              createAttackDiscoveryAttachmentType({ adhocAttackDiscoveryDataClient, logger })
-            );
-          }
 
           // By value, so unlike the discovery itself it needs no data client to
           // resolve against.

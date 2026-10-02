@@ -35,12 +35,14 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EvaluatorStats } from '@kbn/evals-common';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { useQueryClient } from '@kbn/react-query';
 import {
   useDatasets,
   useEvaluationExperiment,
   useEvalsTraceFetcher,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
+import { queryKeys } from '../../query_keys';
 import type {
   LaunchedExperimentConfig,
   RunExperimentRequest,
@@ -78,7 +80,7 @@ interface DatasetStatsAccordionProps {
   onDatasetToggle: (datasetId: string, isOpen: boolean) => void;
 }
 
-const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
+export const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   experimentId,
   executionId,
   group,
@@ -92,6 +94,7 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   onDatasetToggle,
 }) => {
   const history = useHistory();
+  const queryClient = useQueryClient();
   const {
     data: datasetExamples,
     isLoading: examplesLoading,
@@ -101,16 +104,47 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
     refetchInterval: isRunning ? RUN_POLL_INTERVAL_MS : false,
     staleTime: isRunning ? 0 : undefined,
   });
+  const { data: datasetExamplePreviews } = useExperimentDatasetExamples(
+    experimentId,
+    isOpen ? group.datasetId : '',
+    executionId,
+    { includePreviews: true }
+  );
+
+  const examplesWithPreviews = useMemo(() => {
+    const previewsByExampleId = new Map(
+      (datasetExamplePreviews?.examples ?? []).map(({ example_id: exampleId, previews }) => [
+        exampleId,
+        previews,
+      ])
+    );
+    return (datasetExamples?.examples ?? []).map((example) => {
+      const previews = previewsByExampleId.get(example.example_id);
+      return previews ? { ...example, previews } : example;
+    });
+  }, [datasetExamplePreviews?.examples, datasetExamples?.examples]);
 
   // When the run settles and polling stops, pull the final example set once in case the last poll
-  // fired just before the last example's scores were indexed.
+  // fired just before the last example's scores were indexed. Previews are not polled, so invalidate
+  // that cache too — including while the accordion is collapsed, where the hook's refetch targets a
+  // disabled query.
   const wasRunningRef = useRef(isRunning);
   useEffect(() => {
-    if (wasRunningRef.current && !isRunning && isOpen) {
-      refetchExamples();
+    if (wasRunningRef.current && !isRunning) {
+      if (isOpen) {
+        refetchExamples();
+      }
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.experiments.datasetExamples(
+          experimentId,
+          group.datasetId,
+          executionId,
+          true
+        ),
+      });
     }
     wasRunningRef.current = isRunning;
-  }, [isRunning, isOpen, refetchExamples]);
+  }, [isRunning, isOpen, refetchExamples, queryClient, experimentId, executionId, group.datasetId]);
 
   return (
     <>
@@ -165,7 +199,10 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
           <EuiLoadingSpinner size="m" />
         ) : (
           <ExampleScoresTable
-            examples={datasetExamples?.examples ?? []}
+            experimentId={experimentId}
+            datasetId={group.datasetId}
+            executionId={executionId}
+            examples={examplesWithPreviews}
             selectedExampleId={selectedExampleId}
             onTraceClick={onTraceClick}
           />

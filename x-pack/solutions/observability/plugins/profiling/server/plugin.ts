@@ -22,7 +22,6 @@ import type {
   ProfilingPluginStartDeps,
   ProfilingRequestHandlerContext,
 } from './types';
-import { createProfilingEsClient } from './utils/create_profiling_es_client';
 
 export class ProfilingPlugin implements Plugin<
   ProfilingPluginSetup,
@@ -44,6 +43,7 @@ export class ProfilingPlugin implements Plugin<
 
     const config = this.initializerContext.config.get();
     const stackVersion = this.initializerContext.env.packageInfo.version;
+    const buildFlavor = this.initializerContext.env.packageInfo.buildFlavor;
 
     const telemetryUsageCounter = deps.usageCollection?.createUsageCounter(
       PROFILING_SERVER_FEATURE_ID
@@ -52,14 +52,6 @@ export class ProfilingPlugin implements Plugin<
     core
       .getStartServices()
       .then(([coreStart, depsStart]) => {
-        const profilingSpecificEsClient = config.elasticsearch
-          ? coreStart.elasticsearch.createClient('profiling', {
-              hosts: [config.elasticsearch.hosts],
-              username: config.elasticsearch.username,
-              password: config.elasticsearch.password,
-            })
-          : undefined;
-
         const esCapabilities = coreStart.elasticsearch.getCapabilities();
 
         registerRoutes({
@@ -70,22 +62,12 @@ export class ProfilingPlugin implements Plugin<
             setup: deps,
             config,
             stackVersion,
+            buildFlavor,
             telemetryUsageCounter,
             esCapabilities,
           },
           services: {
-            createProfilingEsClient: ({
-              request,
-              esClient: defaultEsClient,
-              useDefaultAuth = false,
-            }) => {
-              const esClient =
-                profilingSpecificEsClient && !useDefaultAuth
-                  ? profilingSpecificEsClient.asScoped(request).asInternalUser
-                  : defaultEsClient;
-
-              return createProfilingEsClient({ request, esClient });
-            },
+            createProfilingEsClient: depsStart.profilingDataAccess.createProfilingEsClient,
           },
         });
       })

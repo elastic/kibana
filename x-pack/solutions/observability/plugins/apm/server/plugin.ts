@@ -16,6 +16,7 @@ import type {
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { isEmpty, mapValues } from 'lodash';
+import { firstValueFrom } from 'rxjs';
 import type { APMConfig } from '.';
 import { APM_SERVER_FEATURE_ID } from '.';
 import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
@@ -139,9 +140,8 @@ export class APMPlugin implements Plugin<
     const managedOtlpServiceFeaturePromise = (async () => {
       const coreStart = await getCoreStart();
 
-      return await coreStart.featureFlags.getBooleanValue(
-        'observability.managedOtlpServiceEnabled',
-        false
+      return await firstValueFrom(
+        coreStart.featureFlags.getBooleanValue$('observability.managedOtlpServiceEnabled', false)
       );
     })();
 

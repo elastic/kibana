@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { EuiComboBoxObject, Locator, ScoutPage } from '@kbn/scout';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /** `useDebouncedValue` waits 256ms before committing; add margin for a busy main thread. */
@@ -14,10 +14,12 @@ const FORMAT_PARAM_DEBOUNCE_FLUSH_MS = 500;
 /** Stable test-subj for the dimension time-shift combo (also passed into `waitForFunction`). */
 const TIME_SHIFT_TEST_SUBJ = 'indexPattern-dimension-time-shift';
 
-/** `LensApp` close-editor helpers needed by dimension open/close actions. */
+/** Lens editor helpers needed by dimension actions. */
 interface LensDimensionsDeps {
   closeDimensionEditorButton: Locator;
   closeDimensionEditor: () => Promise<void>;
+  getVisualizationRenderCount: (chartTestSubj: string) => Promise<number | null>;
+  waitForVisualization: (chartTestSubj: string, options?: { afterCount?: number }) => Promise<void>;
 }
 
 /**
@@ -49,6 +51,7 @@ export class LensDimensions {
   readonly formatDecimalsInput;
   readonly dimensionColorPicker;
   readonly dimensionNameInput;
+  private readonly textBasedDimensionFieldCombo: EuiComboBoxObject;
 
   constructor(
     private readonly page: ScoutPage,
@@ -77,13 +80,18 @@ export class LensDimensions {
       'indexPattern-filter-by-input > switchQueryLanguageButton'
     );
     this.luceneLanguageMenuItem = this.page.testSubj.locator('luceneLanguageMenuItem');
+    this.textBasedDimensionFieldCombo = this.page.components.comboBox('text-based-dimension-field');
   }
 
   /**
    * Locator for dimension-trigger buttons inside a panel/group.
+   * Text-based (ES|QL) dimensions render `lns-dimensionTrigger-textBased` instead of
+   * `lns-dimensionTrigger`, so match both via a prefix selector.
    */
   getDimensionTriggersLocator(dimension: string) {
-    return this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
+    return this.page.testSubj
+      .locator(dimension)
+      .locator('[data-test-subj^="lns-dimensionTrigger"]');
   }
 
   /** Returns all dimension-trigger button locators currently rendered in the editor. */
@@ -184,6 +192,13 @@ export class LensDimensions {
   /** Closes the open dimension editor flyout (same as `LensApp.closeDimensionEditor`, kept for FTR parity naming). */
   async closeDimensionEditorPanel() {
     await this.deps.closeDimensionEditor();
+  }
+
+  /** Selects a field for a text-based dimension and closes its editor. */
+  async setTextBasedDimensionField(dimension: string, field: string, layerIndex = 0) {
+    await this.openDimensionEditor(`${dimension} > lns-empty-dimension`, layerIndex);
+    await this.textBasedDimensionFieldCombo.setSelectedOptions([field]);
+    await this.closeDimensionEditorPanel();
   }
 
   /** Clears the dimension field combo box (removes the currently selected field). */
@@ -360,7 +375,22 @@ export class LensDimensions {
 
   /** Changes the axis side of the currently open dimension editor. */
   async changeAxisSide(newSide: 'left' | 'right' | 'auto') {
-    await this.page.testSubj.click(`lnsXY_axisSide_groups_${newSide}`);
+    const chartTestSubj = 'xyVisChart';
+    await this.deps.waitForVisualization(chartTestSubj);
+    const renderCountBeforeChange = await this.deps.getVisualizationRenderCount(chartTestSubj);
+    const axisSideButtonTestSubj = `lnsXY_axisSide_groups_${newSide}`;
+
+    await this.page.testSubj.click(axisSideButtonTestSubj);
+    await this.page.waitForFunction(
+      (testSubj) =>
+        document.querySelector(`[data-test-subj="${testSubj}"]`)?.getAttribute('aria-pressed') ===
+        'true',
+      axisSideButtonTestSubj,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+    await this.deps.waitForVisualization(chartTestSubj, {
+      afterCount: renderCountBeforeChange ?? undefined,
+    });
   }
 
   /** Returns the selected axis side label from an open dimension editor. */

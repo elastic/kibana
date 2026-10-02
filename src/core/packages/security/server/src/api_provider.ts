@@ -12,6 +12,7 @@ import type {
   BindServiceAccountWorkloadParams,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
+  ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
 } from '@kbn/core-security-common';
 
@@ -114,7 +115,7 @@ export interface ServiceAccountsServiceContract extends Pick<
    */
   withScopedRequestForWorkload<T>(
     pluginId: string,
-    params: ServiceAccountWorkloadCoordinates,
+    params: ServiceAccountWorkloadRequestParams,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T>;
 }

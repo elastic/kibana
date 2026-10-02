@@ -32,7 +32,6 @@ import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
-import { registerDataStreamsRoutes } from './routes/data_streams';
 import type {
   FeedbackAnalysisScheduleService,
   WorkflowEnablementApi,
@@ -47,6 +46,7 @@ import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
+import { createVerifyKi } from './step_types/verify_ki';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService } from './telemetry';
 import { isContextEngineEnabledInSpace } from './utils/is_context_engine_enabled_in_space';
@@ -120,12 +120,21 @@ export class ContextEnginePlugin implements Plugin<
       return hasAllRequested;
     };
 
-    setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService, {
+    const verifyKi = createVerifyKi({
+      getAuditLogger: async (request) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return coreStart.security.audit.asScoped(request);
+      },
+      workflowVerifierDeps: {
         getWorkflowsManagement: () => this.workflowsManagementApiPromise,
         checkExecutePrivilege: (request, spaceId) =>
           checkApiPrivileges(request, spaceId, WorkflowsManagementOperationPrivileges.execute),
-      })
+      },
+      analyticsService,
+      logger: this.logger.get('context_steps'),
+    });
+    setupDeps.workflowsExtensions.registerStepDefinition(
+      createVerifyKiStepDefinition(coreSetup, verifyKi)
     );
 
     coreSetup.uiSettings.registerGlobal({
@@ -248,6 +257,7 @@ export class ContextEnginePlugin implements Plugin<
       getAiIndexService,
       isContextEngineEnabled,
       checkWritePrivilege,
+      verifyKi,
       feedbackAnalysis: {
         getAiIndexService,
         getImprovementsService,
@@ -272,9 +282,6 @@ export class ContextEnginePlugin implements Plugin<
       // Reads the current value at request time (assigned in start(), after this setup() runs).
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
-
-    // Read-only internal API backing the AI index trace picker's data stream search.
-    registerDataStreamsRoutes({ router });
 
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
@@ -331,6 +338,7 @@ export class ContextEnginePlugin implements Plugin<
       managedBootstrap: {
         isManaged: (id) => this.aiIndexRegistry.has(id),
         getManagedIds: () => this.aiIndexRegistry.getManagedIds(),
+        getRegistration: (id) => this.aiIndexRegistry.get(id),
         ensure: ensureAiIndex,
       },
     });

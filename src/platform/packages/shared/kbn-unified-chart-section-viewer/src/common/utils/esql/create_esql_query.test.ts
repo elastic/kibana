@@ -14,7 +14,7 @@ const UNMAPPED_FIELDS_NULLIFY_SET_COMMAND = 'SET unmapped_fields = "NULLIFY";';
 
 const createESQLQuery = (params: Parameters<typeof createESQLQueryWithSettings>[0]): string => {
   const query = createESQLQueryWithSettings(params);
-  const expectedPrefix = `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND} `;
+  const expectedPrefix = `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND}\n`;
 
   expect(query.startsWith(expectedPrefix)).toBe(true);
 
@@ -67,7 +67,8 @@ describe('createESQLQuery', () => {
   it('should nullify unmapped fields in generated metric queries', () => {
     expect(createESQLQueryWithSettings({ metricItem: mockMetric })).toBe(
       `
-SET unmapped_fields = "NULLIFY"; TS metrics-*
+SET unmapped_fields = "NULLIFY";
+TS metrics-*
   | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
 `.trim()
     );

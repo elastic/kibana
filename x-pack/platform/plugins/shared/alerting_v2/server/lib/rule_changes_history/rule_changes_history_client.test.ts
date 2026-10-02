@@ -8,6 +8,7 @@
 import type { ChangeHistoryClient, ChangeHistoryDocument } from '@kbn/change-history';
 import {
   getRuleChangeHistoryEventParamsSchema,
+  getRuleChangeHistoryEventQuerySchema,
   listRuleChangeHistoryRequestSchema,
   listRuleChangeHistoryResponseSchema,
   ruleChangeHistoryDetailSchema,
@@ -97,10 +98,28 @@ describe('RuleChangesHistoryClient', () => {
           count: 1,
           summary: { metadata: { name: 'A' } },
         },
-        metadata: { version: 2 },
+        version: 2,
       });
       // Snapshot must not appear on list rows.
       expect(result.items[0]).not.toHaveProperty('snapshot');
+    });
+
+    it('reports an unrecognized stored action as unknown so the row is still returned', async () => {
+      const changeHistory = createChangeHistoryMock();
+      changeHistory.getHistory.mockResolvedValue({
+        items: [createDocument({ id: 'event-1', action: 'rule_archive' })],
+        total: 1,
+      });
+
+      const client = new RuleChangesHistoryClient(
+        changeHistory as unknown as ChangeHistoryClient,
+        'default'
+      );
+
+      const result = await client.listRuleChanges({ ruleId: 'rule-1', page: 1, perPage: 20 });
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].action).toBe('unknown');
     });
 
     it('does not mark items as current on pages after the first', async () => {
@@ -209,10 +228,18 @@ describe('RuleChangesHistoryClient', () => {
 
 describe('rule change history schemas', () => {
   it('parses a valid list query and rejects an oversized result window', () => {
-    expect(listRuleChangeHistoryRequestSchema.parse({})).toEqual({ page: 1, per_page: 20 });
-    expect(listRuleChangeHistoryRequestSchema.safeParse({ page: 501, per_page: 20 }).success).toBe(
+    expect(listRuleChangeHistoryRequestSchema.parse({ rule_id: 'rule-1' })).toEqual({
+      rule_id: 'rule-1',
+      page: 1,
+      per_page: 20,
+    });
+    expect(listRuleChangeHistoryRequestSchema.safeParse({ page: 1, per_page: 20 }).success).toBe(
       false
     );
+    expect(
+      listRuleChangeHistoryRequestSchema.safeParse({ rule_id: 'rule-1', page: 501, per_page: 20 })
+        .success
+    ).toBe(false);
   });
 
   it('parses list and detail response shapes', () => {
@@ -221,7 +248,7 @@ describe('rule change history schemas', () => {
         items: [
           {
             id: 'event-1',
-            timestamp: '2026-01-15T12:00:00.000Z',
+            created_at: '2026-01-15T12:00:00.000Z',
             actor: { name: 'elastic' },
             action: 'rule_create',
           },
@@ -233,7 +260,7 @@ describe('rule change history schemas', () => {
     expect(
       ruleChangeHistoryDetailSchema.safeParse({
         id: 'event-1',
-        timestamp: '2026-01-15T12:00:00.000Z',
+        created_at: '2026-01-15T12:00:00.000Z',
         actor: { name: 'elastic' },
         action: 'rule_create',
         snapshot: { id: 'rule-1', metadata: { name: 'Rule' } },
@@ -241,9 +268,12 @@ describe('rule change history schemas', () => {
     ).toBe(true);
   });
 
-  it('parses detail path params', () => {
-    expect(
-      getRuleChangeHistoryEventParamsSchema.parse({ id: 'rule-1', event_id: 'event-1' })
-    ).toEqual({ id: 'rule-1', event_id: 'event-1' });
+  it('parses detail path params and query', () => {
+    expect(getRuleChangeHistoryEventParamsSchema.parse({ change_id: 'event-1' })).toEqual({
+      change_id: 'event-1',
+    });
+    expect(getRuleChangeHistoryEventQuerySchema.parse({ rule_id: 'rule-1' })).toEqual({
+      rule_id: 'rule-1',
+    });
   });
 });

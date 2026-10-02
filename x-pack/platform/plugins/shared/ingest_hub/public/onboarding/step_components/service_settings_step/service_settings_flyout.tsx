@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -23,6 +24,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AwsServiceMatrixEntry, DataStreamInfo } from '../../aws_service_matrix';
 import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
 import { ServiceFieldsForm } from './service_fields_form';
+import {
+  InstanceNamespaceField,
+  getNamespaceError,
+  supportsNamespace,
+} from './instance_namespace_field';
 import { SignalTypeBadge } from '../services_step/signal_type_badge';
 
 function getDefaultDsInputs(
@@ -45,9 +51,11 @@ interface ServiceSettingsFlyoutProps {
   service: AwsServiceMatrixEntry;
   config: ServiceVars;
   globalRegion: string;
+  isNamespaceLocked?: boolean;
   onApply: (
     varsByDataStream: Record<string, ServiceDataStreamVars>,
-    enabledDataStreams: string[]
+    enabledDataStreams: string[],
+    namespace: string
   ) => void;
   onClose: () => void;
 }
@@ -56,6 +64,7 @@ export function ServiceSettingsFlyout({
   service,
   config,
   globalRegion,
+  isNamespaceLocked = false,
   onApply,
   onClose,
 }: ServiceSettingsFlyoutProps) {
@@ -66,6 +75,9 @@ export function ServiceSettingsFlyout({
   const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
     ...config.varsByDataStream,
   }));
+  const [namespace, setNamespace] = useState(config.namespace ?? '');
+  const showNamespace = supportsNamespace(service);
+  const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
 
   const handleApply = () => {
     const enabledDataStreams = service.dataStreams.filter((dsId) => {
@@ -79,7 +91,7 @@ export function ServiceSettingsFlyout({
         ).length > 0
       );
     });
-    onApply(draftByDs, enabledDataStreams);
+    onApply(draftByDs, enabledDataStreams, namespace);
   };
 
   return (
@@ -103,6 +115,16 @@ export function ServiceSettingsFlyout({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {showNamespace && (
+          <>
+            <InstanceNamespaceField
+              namespace={namespace}
+              onChange={setNamespace}
+              isLocked={isNamespaceLocked}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <ServiceFieldsForm
           service={service}
           varsByDataStream={draftByDs}
@@ -157,7 +179,12 @@ export function ServiceSettingsFlyout({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={handleApply} data-test-subj="serviceSettingsFlyout-saveButton">
+            <EuiButton
+              fill
+              onClick={handleApply}
+              isDisabled={isNamespaceInvalid}
+              data-test-subj="serviceSettingsFlyout-saveButton"
+            >
               <FormattedMessage
                 id="xpack.ingestHub.serviceSettingsStep.flyout.saveButton"
                 defaultMessage="Save"

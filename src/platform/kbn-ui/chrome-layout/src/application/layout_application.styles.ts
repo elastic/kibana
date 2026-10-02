@@ -47,7 +47,7 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
         isFramedAppearance &&
         css`
           background-color: ${euiTheme.colors.backgroundBasePlain};
-          border-radius: ${euiTheme.border.radius.medium};
+          border-radius: ${euiTheme.border.radius.frame};
 
           ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
 

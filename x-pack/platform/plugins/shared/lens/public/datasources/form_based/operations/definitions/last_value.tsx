@@ -138,10 +138,10 @@ function setDefaultShowArrayValues(
   field: IndexPatternField,
   oldParams: LastValueIndexPatternColumn['params']
 ) {
-  return (
+  return Boolean(
     isScriptedField(field) ||
-    (isRuntimeField(field) && field.type !== 'number') ||
-    oldParams?.showArrayValues
+      (isRuntimeField(field) && field.type !== 'number') ||
+      oldParams?.showArrayValues
   );
 }
 

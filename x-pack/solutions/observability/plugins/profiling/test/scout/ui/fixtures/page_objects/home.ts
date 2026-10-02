@@ -53,10 +53,6 @@ export class ProfilingHomePage {
     await this.page.getByText('Top 1').waitFor({ state: 'visible' });
   }
 
-  async expectUserPrivilegeLimitation() {
-    await this.page.getByText('User privilege limitation').waitFor({ state: 'visible' });
-  }
-
   // URL verification methods
   async expectUrlToInclude(path: string) {
     await this.page.waitForURL(`**${path}**`);
@@ -75,9 +71,5 @@ export class ProfilingHomePage {
   // Error state methods
   async getErrorState() {
     return this.page.testSubj.locator('profilingErrorState');
-  }
-
-  async getUnauthorizedMessage() {
-    return this.page.getByText('User privilege limitation');
   }
 }

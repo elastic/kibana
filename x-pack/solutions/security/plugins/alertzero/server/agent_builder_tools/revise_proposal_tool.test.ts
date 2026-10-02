@@ -6,7 +6,7 @@
  */
 
 import { reviseProposalTool } from './revise_proposal_tool';
-import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 
 const logger = () => ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() });
 
@@ -16,7 +16,7 @@ const agenticWith = (opts: {
   assertCanManage?: jest.Mock;
   revise?: jest.Mock;
   getLatestRevision?: jest.Mock;
-}): (() => AgenticInvestigationsPluginStart) => {
+}): (() => ProposalsPluginStart) => {
   const assertCanManage = opts.assertCanManage ?? jest.fn().mockResolvedValue(undefined);
   const revise =
     opts.revise ?? jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 });
@@ -33,16 +33,22 @@ const agenticWith = (opts: {
     ({
       getProposalPrivileges: () => ({ assertCanManage }),
       getProposalsService: () => ({ revise, getLatestRevision }),
-    }) as unknown as AgenticInvestigationsPluginStart;
+    }) as unknown as ProposalsPluginStart;
 };
 
+const assertEnabled = jest.fn().mockResolvedValue(undefined);
+
+beforeEach(() => {
+  assertEnabled.mockReset().mockResolvedValue(undefined);
+});
+
 const run = async (
-  getAgenticInvestigations: () => AgenticInvestigationsPluginStart,
+  getProposals: () => ProposalsPluginStart,
   // Derived from the tool itself rather than restated: a literal copy drifts
   // from the schema the moment the schema gains a field.
   input: Parameters<ReturnType<typeof reviseProposalTool>['handler']>[0]
 ) => {
-  const tool = reviseProposalTool(getAgenticInvestigations);
+  const tool = reviseProposalTool(getProposals, assertEnabled);
   const result = await tool.handler(input, {
     logger: logger(),
     request: requestMock,
@@ -55,7 +61,7 @@ const run = async (
 };
 
 describe('reviseProposalTool', () => {
-  it('checks the manage privilege before revising', async () => {
+  it('requires Proposals Manage without an AlertZero privilege check', async () => {
     const assertCanManage = jest.fn().mockResolvedValue(undefined);
     const getLatestRevision = jest.fn().mockResolvedValue({
       proposalId: 'proposal-1',
@@ -69,11 +75,13 @@ describe('reviseProposalTool', () => {
       comment: 'Tightened the match',
     });
 
+    expect(assertEnabled).toHaveBeenCalledWith(requestMock);
     expect(assertCanManage).toHaveBeenCalledWith(requestMock);
     expect(getLatestRevision).toHaveBeenCalledWith('proposal-1', 'default');
     expect(revise).toHaveBeenCalledWith(
       { id: 'proposal-1', comment: 'Tightened the match' },
-      'default'
+      'default',
+      requestMock
     );
   });
 
@@ -88,7 +96,11 @@ describe('reviseProposalTool', () => {
     });
 
     expect(getLatestRevision).toHaveBeenCalledWith('proposal-1', 'default');
-    expect(revise).toHaveBeenCalledWith({ id: 'proposal-2', impact: 'critical' }, 'default');
+    expect(revise).toHaveBeenCalledWith(
+      { id: 'proposal-2', impact: 'critical' },
+      'default',
+      requestMock
+    );
     expect(result.results[0].data).toMatchObject({
       proposalId: 'proposal-3',
       supersedes: 'proposal-2',
@@ -113,7 +125,7 @@ describe('reviseProposalTool', () => {
    * bypass the route closes.
    */
   it('caps actionInput the same way the HTTP route does', () => {
-    const schema = reviseProposalTool(agenticWith({})).schema;
+    const schema = reviseProposalTool(agenticWith({}), assertEnabled).schema;
 
     expect(
       schema.safeParse({ proposalId: 'proposal-1', actionInput: { ['k'.repeat(257)]: true } })
@@ -130,6 +142,17 @@ describe('reviseProposalTool', () => {
     expect(schema.safeParse({ proposalId: 'proposal-1', actionInput: { name: 'x' } }).success).toBe(
       true
     );
+  });
+
+  it('does not access proposals when AlertZero is disabled', async () => {
+    const errorMessage = 'AlertZero is disabled in this space.';
+    assertEnabled.mockRejectedValue(new Error(errorMessage));
+    const getProposals = jest.fn();
+    const result = await run(getProposals, { proposalId: 'proposal-1' });
+
+    expect(assertEnabled).toHaveBeenCalledWith(requestMock);
+    expect(getProposals).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).toContain(errorMessage);
   });
 
   it('never calls revise() when the privilege check rejects', async () => {
@@ -153,7 +176,7 @@ describe('reviseProposalTool', () => {
   });
 
   it('declares the documented tool id and write annotations', () => {
-    const tool = reviseProposalTool(agenticWith({}));
+    const tool = reviseProposalTool(agenticWith({}), assertEnabled);
     expect(tool.id).toBe('security.alertzero.proposals.revise');
     expect(tool.annotations).toMatchObject({
       readOnlyHint: false,

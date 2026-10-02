@@ -27,11 +27,7 @@ import {
   type Conversation,
 } from '@kbn/agent-builder-common';
 import { getUserDisplayName, type UserProfileWithAvatar } from '@kbn/user-profile-components';
-import {
-  useConversation,
-  useConversationPermissions,
-  useIsUnpersistedConversation,
-} from '../../../../hooks/use_conversation';
+import { useConversation, useConversationPermissions } from '../../../../hooks/use_conversation';
 import { useUpdateConversationAccessControl } from '../../../../hooks/use_conversation_access_control';
 import { useAgentBuilderAgentById } from '../../../../hooks/agents/use_agent_by_id';
 import { useSuggestUsers } from '../../../../hooks/use_suggest_users';
@@ -53,12 +49,11 @@ const POPOVER_HEADER_MIN_HEIGHT = 48;
 export const ConversationShareButton: React.FC = () => {
   const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
   const { conversation } = useConversation();
-  const isUnpersistedConversation = useIsUnpersistedConversation(conversation);
   const accessControl = normalizeConversationAccessControl(conversation?.access_control);
   const canOpenSharePopover =
     canUpdateAccessControl || isPrivatelySharedConversation(accessControl);
 
-  if (!conversation || isUnpersistedConversation || !canOpenSharePopover) {
+  if (!conversation || !canOpenSharePopover) {
     return null;
   }
 

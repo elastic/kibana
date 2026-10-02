@@ -32,7 +32,7 @@ dependsOn:
   - '@kbn/dev-utils'
   - '@kbn/oxfmt'
   - '@kbn/utils'
-  - '@kbn/optimizer'
+  - '@kbn/rspack-optimizer'
   - '@kbn/peggy'
   - '@kbn/swc-config'
   - '@kbn/import-resolver'
@@ -52,7 +52,6 @@ dependsOn:
   - '@kbn/yarn-lock-validator'
   - '@kbn/sort-package-json'
   - '@kbn/swc-register'
-  - '@kbn/rspack-optimizer'
   - '@kbn/dev-validation-runner'
 tags:
   - tooling

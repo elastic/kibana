@@ -443,7 +443,8 @@ export const Host: FC<HostProps> = memo(function Host({
             entityRecord={
               entityStoreV2Enabled ? (observedHost.entityRecord ?? undefined) : undefined
             }
-            skipRiskAndCriticality={noEntityInStore}
+            noEntityInStore={noEntityInStore}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons

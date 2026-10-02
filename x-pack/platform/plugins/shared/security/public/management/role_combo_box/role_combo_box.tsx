@@ -98,6 +98,9 @@ export const RoleComboBox = (props: Props) => {
     <EuiComboBox
       data-test-subj="rolesDropdown"
       id={props.id}
+      fullWidth={props.fullWidth}
+      isInvalid={props.isInvalid}
+      aria-describedby={props['aria-describedby']}
       placeholder={roleComboBoxPlaceholder}
       aria-label={roleComboBoxPlaceholder}
       onChange={onRolesChange}

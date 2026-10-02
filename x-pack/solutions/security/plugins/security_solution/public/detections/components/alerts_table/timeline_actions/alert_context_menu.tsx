@@ -46,7 +46,6 @@ import { useAlertExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { TimelineId } from '../../../../../common/types/timeline';
 import type { Status } from '../../../../../common/api/detection_engine';
-import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { selectTimelineById } from '../../../../timelines/store/selectors';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
@@ -58,8 +57,6 @@ import { AlertRowActionMenu, getAlertRowActionGroups } from './action_menu/alert
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
-  ariaRowindex: number;
-  columnValues: string;
   isRemoteDocument: boolean;
   ecsRowData: Ecs;
   onRuleChange?: () => void;
@@ -69,8 +66,6 @@ interface AlertContextMenuProps {
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   ariaLabel = i18n.MORE_ACTIONS,
-  ariaRowindex,
-  columnValues,
   isRemoteDocument,
   ecsRowData,
   onRuleChange,
@@ -109,7 +104,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     ecsData: ecsRowData,
     nonEcsData: flattenedEcsData,
     onMenuItemClick,
-    ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
     refetch,
   });
 
@@ -255,6 +249,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   } = useRunDocumentWorkflowPanel({
     closePopover,
     documents: documentForWorkflow,
+    originEventId: ecsRowData._id,
   });
 
   const { addToChatActionItems } = useAddToChatAction({

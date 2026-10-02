@@ -23,7 +23,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
       right: ${euiTheme.size.xs};
       padding: var(--paddingAroundAction);
 
-      border-radius: ${euiTheme.border.radius.medium};
+      border-radius: ${euiTheme.border.radius.control};
       border: var(--internalBorderStyle);
       border-width: ${
         euiTheme.border.width.thin
@@ -67,7 +67,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
           background-color: ${euiTheme.colors.backgroundBasePlain};
           ${euiShadow(euiThemeContext, 'xs')}
           padding: var(--paddingAroundAction);
-          border-radius: ${euiTheme.border.radius.medium};
+          border-radius: ${euiTheme.border.radius.control};
         }
 
         // shrink down to single wrapped element with no breakpoint when panel gets small
@@ -100,7 +100,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
 
       display: inline-block;
       container: hoverActionsAnchor / inline-size;
-      border-radius: ${euiTheme.border.radius.medium};
+      border-radius: ${euiTheme.border.radius.control};
       position: relative;
       vertical-align: top;
       width: 100%;

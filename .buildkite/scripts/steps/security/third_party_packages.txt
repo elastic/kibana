@@ -1,4 +1,5 @@
 oxfmt
+@launchdarkly/js-client-sdk
 @eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
 @xterm/xterm
@@ -23,7 +24,6 @@ xml-formatter
 dompurify
 magic-bytes.js
 @opentelemetry/exporter-trace-otlp-grpc
-@ai-sdk/langchain
 ink
 @hey-api/openapi-ts
 vscode-languageserver-textdocument
@@ -71,4 +71,6 @@ mongodb-connection-string-url
 magic-string
 graphql
 @cfworker/json-schema
+oxlint-tsgolint
 bump-cli
+@oxlint/plugins

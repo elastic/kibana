@@ -88,19 +88,31 @@ describe('resolveRuleAPIKey', () => {
   });
 
   describe('cloneApiKeysOnCreate flag', () => {
-    test('clones on create (no existing) regardless of auth type', async () => {
+    test('clones on create (no existing) when the request is API-key-authed', async () => {
       const context = createMockContext({
         cloneApiKeysOnCreate: true,
+        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
       });
 
       const result = await resolveRuleAPIKey(context, 'test-rule', true);
 
       expect(result).toEqual({ createdAPIKey: clonedKey, isAuthTypeApiKey: false });
       expect(context.cloneAPIKey).toHaveBeenCalledWith('test-rule');
-      expect(context.isAuthenticationTypeAPIKey).not.toHaveBeenCalled();
     });
 
-    test('does not apply to regen (existing rule) — falls through to framework-managed logic', async () => {
+    test('is a no-op without API-key auth (nothing to clone): grants as usual', async () => {
+      const context = createMockContext({
+        cloneApiKeysOnCreate: true,
+      });
+
+      const result = await resolveRuleAPIKey(context, 'test-rule', true);
+
+      expect(result).toEqual({ createdAPIKey: grantedKey, isAuthTypeApiKey: false });
+      expect(context.createAPIKey).toHaveBeenCalledWith('test-rule', undefined);
+      expect(context.cloneAPIKey).not.toHaveBeenCalled();
+    });
+
+    test('still clones on regen of a framework-managed rule (apiKeyCreatedByUser === false)', async () => {
       const context = createMockContext({
         cloneApiKeysOnCreate: true,
         isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
@@ -113,6 +125,50 @@ describe('resolveRuleAPIKey', () => {
       expect(result).toEqual({ createdAPIKey: clonedKey, isAuthTypeApiKey: false });
       expect(context.cloneAPIKey).toHaveBeenCalledWith('test-rule');
       expect(context.isAuthenticationTypeAPIKey).toHaveBeenCalled();
+    });
+
+    test('clones on enable of a rule created disabled (null ownership), instead of persisting the borrowed key', async () => {
+      const context = createMockContext({
+        cloneApiKeysOnCreate: true,
+        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+      });
+
+      const result = await resolveRuleAPIKey(context, 'test-rule', true, {
+        apiKeyOwnership: { apiKeyCreatedByUser: null },
+      });
+
+      expect(result).toEqual({ createdAPIKey: clonedKey, isAuthTypeApiKey: false });
+      expect(context.cloneAPIKey).toHaveBeenCalledWith('test-rule');
+      expect(context.getAuthenticationAPIKey).not.toHaveBeenCalled();
+    });
+
+    test('is overridden by an explicitly user-owned key (apiKeyCreatedByUser === true)', async () => {
+      const context = createMockContext({
+        cloneApiKeysOnCreate: true,
+        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+      });
+
+      const result = await resolveRuleAPIKey(context, 'test-rule', true, {
+        apiKeyOwnership: { apiKeyCreatedByUser: true },
+      });
+
+      expect(result).toEqual({ createdAPIKey: userKey, isAuthTypeApiKey: true });
+      expect(context.getAuthenticationAPIKey).toHaveBeenCalledWith('test-rule-user-created');
+      expect(context.cloneAPIKey).not.toHaveBeenCalled();
+    });
+
+    test('is a no-op with null ownership without API-key auth: grants as usual', async () => {
+      const context = createMockContext({
+        cloneApiKeysOnCreate: true,
+      });
+
+      const result = await resolveRuleAPIKey(context, 'test-rule', true, {
+        apiKeyOwnership: { apiKeyCreatedByUser: null },
+      });
+
+      expect(result).toEqual({ createdAPIKey: grantedKey, isAuthTypeApiKey: false });
+      expect(context.createAPIKey).toHaveBeenCalledWith('test-rule', undefined);
+      expect(context.cloneAPIKey).not.toHaveBeenCalled();
     });
   });
 
@@ -171,7 +227,7 @@ describe('resolveRuleAPIKey', () => {
       expect(context.cloneAPIKey).not.toHaveBeenCalled();
     });
 
-    test('does not apply to regen (existing rule): user-managed rules keep the caller credential', async () => {
+    test('is overridden by an explicitly user-owned key: user-managed rules keep the caller credential', async () => {
       const context = createMockContext({
         isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
       });
@@ -184,6 +240,21 @@ describe('resolveRuleAPIKey', () => {
       expect(result).toEqual({ createdAPIKey: userKey, isAuthTypeApiKey: true });
       expect(context.getAuthenticationAPIKey).toHaveBeenCalledWith('test-rule-user-created');
       expect(context.cloneAPIKey).not.toHaveBeenCalled();
+    });
+
+    test('applies to a rule with null ownership (created disabled or legacy): clones', async () => {
+      const context = createMockContext({
+        isAuthenticationTypeAPIKey: jest.fn().mockReturnValue(true),
+      });
+
+      const result = await resolveRuleAPIKey(context, 'test-rule', true, {
+        apiKeyOwnership: { apiKeyCreatedByUser: null },
+        cloneApiKey: true,
+      });
+
+      expect(result).toEqual({ createdAPIKey: clonedKey, isAuthTypeApiKey: false });
+      expect(context.cloneAPIKey).toHaveBeenCalledWith('test-rule');
+      expect(context.getAuthenticationAPIKey).not.toHaveBeenCalled();
     });
 
     test('when not set, an external API-key caller still has its credential persisted', async () => {

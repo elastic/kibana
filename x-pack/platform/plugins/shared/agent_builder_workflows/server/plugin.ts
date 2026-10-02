@@ -70,10 +70,10 @@ export class AgentBuilderWorkflowsPlugin implements Plugin<
     registerGetTriggerDefinitionsTool(agentBuilder, api);
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
-    registerWorkflowExecuteStepTool(agentBuilder, api);
+    registerWorkflowExecuteStepTool(agentBuilder, api, getSecurity);
 
     // Workflow attachment types
-    registerWorkflowYamlAttachment(agentBuilder, api);
+    registerWorkflowYamlAttachment(agentBuilder, api, getSecurity);
     registerWorkflowYamlDiffAttachment(agentBuilder);
 
     // Workflow authoring skill
@@ -85,7 +85,7 @@ export class AgentBuilderWorkflowsPlugin implements Plugin<
     // Platform-level workflow execution tools
     const platformTools: Array<BuiltinToolDefinition<any>> = [
       getWorkflowExecutionStatusTool({ workflowsManagement, getSecurity }),
-      resumeWorkflowExecutionTool({ workflowsManagement }),
+      resumeWorkflowExecutionTool({ workflowsManagement, getSecurity }),
       listWorkflowExecutionsTool({ workflowsManagement, getSecurity }),
       generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
       executeWorkflowTool({ workflowsManagement, getSecurity }),
@@ -101,10 +101,7 @@ export class AgentBuilderWorkflowsPlugin implements Plugin<
   ): AgentBuilderWorkflowsPluginStart {
     this.security = startDeps.security;
     if (this.api) {
-      this.api.setSmlIndexAttachment(
-        startDeps.agentBuilderSml.indexAttachment,
-        this.logger.get('sml')
-      );
+      this.api.setSmlClient(startDeps.agentBuilderSml, this.logger.get('sml'));
     }
     return {};
   }

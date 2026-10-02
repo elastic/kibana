@@ -263,9 +263,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const flyout = await misconfigurationsFlyout.getElement();
         await (await flyout.findByTestSubject('csp:findings-flyout-alert-count')).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(await (await testSubjects.find('header-page-title')).getVisibleText()).to.be(
-          'Alerts'
-        );
+        expect(await (await testSubjects.find('appHeaderTitle')).getVisibleText()).to.be('Alerts');
       });
     });
   });

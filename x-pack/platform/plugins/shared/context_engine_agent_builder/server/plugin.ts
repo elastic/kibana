@@ -13,6 +13,7 @@ import type {
   ContextEngineAgentBuilderStartDependencies,
 } from './types';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
+import { registerContextEngineInferenceFeatures } from './register_inference_features';
 
 export class ContextEngineAgentBuilderPlugin implements Plugin<
   ContextEngineAgentBuilderPluginSetup,
@@ -35,10 +36,17 @@ export class ContextEngineAgentBuilderPlugin implements Plugin<
       workflowsManagement: setupDeps.workflowsManagement.management,
     });
 
+    if (setupDeps.searchInferenceEndpoints) {
+      registerContextEngineInferenceFeatures(setupDeps.searchInferenceEndpoints);
+    }
+
     return {};
   }
 
-  start(_coreStart: CoreStart): ContextEngineAgentBuilderPluginStart {
+  start(
+    _coreStart: CoreStart,
+    _startDeps: ContextEngineAgentBuilderStartDependencies
+  ): ContextEngineAgentBuilderPluginStart {
     return {};
   }
 

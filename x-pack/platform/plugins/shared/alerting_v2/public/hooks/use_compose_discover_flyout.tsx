@@ -10,6 +10,7 @@ import type {
   ComposeDiscoverMode,
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
+import { ESQLMenu, EsqlEditorActionsProvider, EsqlEditorActionsRegister } from '@kbn/esql/public';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
@@ -23,22 +24,23 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
+import { CreateActionPolicyFormFlyout } from '../components/action_policy/form_flyout/create_action_policy_form_flyout';
 import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
+import { useCreateActionPolicyDisabledReason } from './use_create_action_policy_disabled_reason';
 import { useCreateRule } from './use_create_rule';
 import { useUpdateRule } from './use_update_rule';
 
 const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiResponse => ({
   ...template.rule,
+  // `null` is the write-side way to say "no delays"; a rule read back never carries it.
+  state_transition: template.rule.state_transition ?? undefined,
   id: '',
+  version: 1,
   enabled: false,
   created_by: null,
   created_at: new Date().toISOString(),
   updated_by: null,
   updated_at: new Date().toISOString(),
-  metadata: {
-    ...template.rule.metadata,
-    version: 1,
-  },
 });
 
 interface UseComposeDiscoverFlyoutOptions {
@@ -63,6 +65,7 @@ export const useComposeDiscoverFlyout = ({
     | DashboardStart
     | undefined;
   const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
+  const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
@@ -105,6 +108,11 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
+      esqlMenu: ESQLMenu,
+      esqlEditorActionsProvider: EsqlEditorActionsProvider,
+      esqlEditorActionsRegister: EsqlEditorActionsRegister,
+      createActionPolicyFormFlyout: CreateActionPolicyFormFlyout,
+      createActionPolicyDisabledReason,
     }),
     [
       http,
@@ -118,6 +126,7 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
+      createActionPolicyDisabledReason,
     ]
   );
 

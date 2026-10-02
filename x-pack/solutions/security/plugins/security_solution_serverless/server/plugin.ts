@@ -30,6 +30,8 @@ import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
 } from '@kbn/security-solution-navigation';
+import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
+import { isAlertZeroAvailable } from '../common/alertzero_availability';
 import { ProductTier } from '../common/product';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
@@ -102,6 +104,10 @@ export class SecuritySolutionServerlessPlugin implements Plugin<
     // Register telemetry events
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
+    pluginsSetup.alertzero?.setServerlessTierAvailable(
+      isAlertZeroAvailable(this.config.productTypes)
+    );
+
     const projectSettings = [...SECURITY_PROJECT_SETTINGS];
     const isSearchAiLakeTier = this.config.productTypes.some(
       ({ product_tier: productTier }) => productTier === ProductTier.searchAiLake
@@ -122,6 +128,13 @@ export class SecuritySolutionServerlessPlugin implements Plugin<
     // individual settings based on feature flags. The FF is only ever `false` when an
     // administrator disables it globally; in that case the toggle is a harmless noop.
     projectSettings.push(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING);
+
+    // AlertZero registers `securitySolution:enableAlertZero` only when its `xpack.alertzero.enabled`
+    // kill switch is on. Allowlisting a key that was never registered fails startup in dev,
+    // so follow the contract the plugin reports rather than assuming it ran.
+    if (pluginsSetup.alertzero?.isEnabled) {
+      projectSettings.push(ALERTZERO_ENABLED_SETTING_ID);
+    }
 
     // This setting is only registered when `enableAlertsAndAttacksAlignment` is enabled
     if (this.config.experimentalFeatures.enableAlertsAndAttacksAlignment) {

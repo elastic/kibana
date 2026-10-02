@@ -29,6 +29,7 @@ import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
+import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
 import { registerConnectorEventTriggers } from './triggers/register_connector_event_triggers';
@@ -54,6 +55,7 @@ export class WorkflowsPlugin implements Plugin<
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
   private workflowsService: WorkflowsService | null = null;
+  private executionDataViewsBootstrap: ExecutionDataViewsBootstrap | null = null;
   private audit: WorkflowManagementAuditLog | null = null;
   private unregisterHitlLifecycleAuditor: (() => void) | null = null;
 
@@ -120,6 +122,30 @@ export class WorkflowsPlugin implements Plugin<
       workflowsService,
       audit,
     });
+
+    core.http.registerRouteHandlerContext<WorkflowsRequestHandlerContext, 'workflowsManagement'>(
+      'workflowsManagement',
+      async (_context, request) => {
+        const [coreStart, startPlugins] = await core.getStartServices();
+        if (this.executionDataViewsBootstrap === null) {
+          this.executionDataViewsBootstrap = new ExecutionDataViewsBootstrap(
+            startPlugins.dataViews,
+            this.logger.get('executionDataViewsBootstrap')
+          );
+        }
+
+        const spaceId = spaces.getSpaceId(request);
+        const savedObjectsClient = coreStart.savedObjects
+          .getUnsafeInternalClient()
+          .asScopedToNamespace(spaceId);
+
+        this.executionDataViewsBootstrap.ensureForSpaceFireAndForget(
+          spaceId,
+          savedObjectsClient,
+          coreStart.elasticsearch.client.asInternalUser
+        );
+      }
+    );
 
     if (plugins.inbox) {
       this.logger.debug('Workflows Management: registering inbox provider');
@@ -195,7 +221,7 @@ export class WorkflowsPlugin implements Plugin<
     try {
       await this.workflowsService?.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
     } catch (error) {
-      this.logger.warn(
+      this.logger.error(
         'Workflows Management: Failed to complete global orphan cleanup for unregistered workflows',
         { error }
       );

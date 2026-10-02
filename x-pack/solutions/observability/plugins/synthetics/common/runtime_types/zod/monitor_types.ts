@@ -22,11 +22,14 @@
 
 import { z } from '@kbn/zod';
 import { ConfigKey } from '../monitor_management/config_key';
+import { MonitorTypeEnum } from '../monitor_management/monitor_configs';
 import { AlertConfigsCodec } from './alert_config';
 import {
   FormMonitorTypeCodec,
+  KerberosConfigCodec,
   ModeCodec,
   MonitorTypeCodec,
+  NtlmConfigCodec,
   RequestBodyCheckCodec,
   ResponseBodyIndexPolicyCodec,
   ResponseCheckJSONCodec,
@@ -36,7 +39,7 @@ import {
   VerificationModeCodec,
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
-import { MonitorServiceLocationCodec } from './locations';
+import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
 import { PrivateLocationCodec } from './synthetics_private_locations';
 import {
   getNonEmptyStringCodec,
@@ -47,7 +50,7 @@ import {
   TimeoutString,
 } from './common';
 
-const ScheduleCodec = z.looseObject({
+export const ScheduleCodec = z.looseObject({
   number: z.string(),
   unit: ScheduleUnitCodec,
 });
@@ -68,7 +71,7 @@ export const TLSFieldsCodec = z.looseObject(tlsFields);
 export const TLSSensitiveFieldsCodec = z.looseObject(tlsSensitiveFields);
 export const TLSCodec = z.looseObject({ ...tlsFields, ...tlsSensitiveFields });
 
-const MonitorLocationsCodec = nonEmptyArray(
+export const MonitorLocationsCodec = nonEmptyArray(
   z.union([MonitorServiceLocationCodec, PrivateLocationCodec])
 );
 
@@ -209,6 +212,9 @@ const httpSensitiveAdvanced = {
   [ConfigKey.USERNAME]: z.string(),
   [ConfigKey.PROXY_HEADERS]: z.record(z.string(), z.string()).optional(),
   [ConfigKey.RESPONSE_JSON_CHECK]: z.array(ResponseCheckJSONCodec).optional(),
+  // Nested auth blocks (encrypted wholesale via secretKeys).
+  [ConfigKey.KERBEROS]: KerberosConfigCodec.optional(),
+  [ConfigKey.NTLM]: NtlmConfigCodec.optional(),
 };
 
 export const HTTPSimpleFieldsCodec = z.looseObject({
@@ -239,7 +245,7 @@ export const HTTPFieldsCodec = z.looseObject({
   ...tlsSensitiveFields,
 });
 
-const ThrottlingConfigValueCodec = z.looseObject({
+export const ThrottlingConfigValueCodec = z.looseObject({
   download: z.string(),
   upload: z.string(),
   latency: z.string(),
@@ -380,6 +386,8 @@ export const MonitorFieldsCodec = z.looseObject({
   ...browserSensitiveAdvanced,
   ...tlsFields,
   ...tlsSensitiveFields,
+  // Spread order leaves `urls` as `string | null`. The per-type codecs overlap on `string`.
+  [ConfigKey.URLS]: getNonEmptyStringCodec('url'),
 });
 
 export const MonitorFieldsResultCodec = MonitorFieldsCodec.extend({
@@ -415,7 +423,7 @@ export const SyntheticsMonitorWithIdCodec = SyntheticsMonitorCodec.and(
   })
 );
 
-const HeartbeatFieldsCodec = z.looseObject({
+export const HeartbeatFieldsCodec = z.looseObject({
   config_id: z.string(),
   run_once: z.boolean().optional(),
   test_run_id: z.string().optional(),
@@ -441,5 +449,28 @@ export const EncryptedSyntheticsSavedMonitorCodec = EncryptedSyntheticsMonitorCo
     id: z.string(),
     updated_at: z.string(),
     created_at: z.string(),
+  })
+);
+
+export const MonitorDefaultsCodec = z.looseObject({
+  [MonitorTypeEnum.HTTP]: HTTPFieldsCodec,
+  [MonitorTypeEnum.TCP]: TCPFieldsCodec,
+  [MonitorTypeEnum.ICMP]: ICMPSimpleFieldsCodec,
+  [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
+  [MonitorTypeEnum.API]: APIFieldsCodec,
+});
+
+export const MonitorManagementListResultCodec = z.looseObject({
+  monitors: z.array(EncryptedSyntheticsSavedMonitorCodec),
+  page: z.number(),
+  perPage: z.number(),
+  total: z.union([z.number(), z.null()]),
+  absoluteTotal: z.union([z.number(), z.null()]),
+  syncErrors: z.union([ServiceLocationErrors, z.null()]),
+});
+
+export const SyntheticsMonitorWithSecretsCodec = EncryptedSyntheticsMonitorCodec.and(
+  z.looseObject({
+    secrets: z.string(),
   })
 );

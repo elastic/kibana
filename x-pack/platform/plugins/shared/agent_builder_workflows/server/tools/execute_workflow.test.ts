@@ -82,22 +82,37 @@ describe('executeWorkflowTool', () => {
     });
   });
 
-  it('does not execute a saved workflow when the caller lacks execute privilege', async () => {
-    const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: false });
-    const denyingSecurity = () =>
-      ({
-        authz: {
-          actions: { api: { get: (a: string) => `api:${a}` } },
-          checkPrivilegesWithRequest: () => ({ atSpace }),
-        },
-      }) as any;
-    const tool = executeWorkflowTool({ workflowsManagement, getSecurity: denyingSecurity });
+  it.each([{ workflowId: 'wf-1' }, { yaml: 'name: Inline workflow' }, { attachmentId: 'att-1' }])(
+    'does not execute %j when the caller lacks execute privilege',
+    async (input) => {
+      const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: false });
+      const denyingSecurity = () =>
+        ({
+          authz: {
+            actions: { api: { get: (a: string) => `api:${a}` } },
+            checkPrivilegesWithRequest: () => ({ atSpace }),
+          },
+        }) as any;
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity: denyingSecurity });
 
-    const result = await invokeHandler(tool, { workflowId: 'wf-1', inputs: {} }, buildContext());
+      const result = await invokeHandler(
+        tool,
+        input,
+        buildContext({
+          get: jest.fn().mockReturnValue({
+            type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+            data: { data: { yaml: 'name: Attached workflow' } },
+          }),
+        })
+      );
 
-    expect(executeWorkflowMock).not.toHaveBeenCalled();
-    expect(result.results[0]).toEqual(expect.objectContaining({ type: 'error' }));
-  });
+      expect(atSpace).toHaveBeenCalledWith('default', {
+        kibana: ['api:workflowsManagement:execute'],
+      });
+      expect(executeWorkflowMock).not.toHaveBeenCalled();
+      expect(result.results[0]).toEqual(expect.objectContaining({ type: 'error' }));
+    }
+  );
 
   it('executes an inline yaml workflow when only `yaml` is provided', async () => {
     executeWorkflowMock.mockResolvedValueOnce({ success: true, execution: successExecution });

@@ -18,6 +18,10 @@ import { queryClient } from '../../query_client';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
+import {
+  getPackQueryStaleIntervalError,
+  getPackQueryStaleRruleError,
+} from '../../components/schedule_section/translations';
 
 const mockUseRouterNavigate = jest.fn();
 const mockAddDanger = jest.fn();
@@ -45,16 +49,31 @@ jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       notifications: { toasts: { addDanger: mockAddDanger } },
+      application: {
+        getUrlForApp: jest.fn(
+          (appId: string, opts: { path: string }) => `/app/${appId}${opts.path}`
+        ),
+        capabilities: { fleetv2: { agent_policies_read: true } },
+      },
     },
   }),
 }));
 
+const mockUseAgentPolicies = jest.fn();
+
 jest.mock('../../agent_policies', () => ({
-  useAgentPolicies: () => ({
-    data: {
-      agentPoliciesById: {},
-    },
-  }),
+  useAgentPolicies: () => mockUseAgentPolicies(),
+}));
+
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  pagePathGetters: {
+    // Mirrors Fleet pagePathGetters: path segment is `/policies/${id}` (not `/fleet/policies/...`).
+    policy_details: ({ policyId }: { policyId: string }) => ['', `/policies/${policyId}`],
+  },
+}));
+
+jest.mock('@kbn/fleet-plugin/common', () => ({
+  PLUGIN_ID: 'fleet',
 }));
 
 jest.mock('../use_create_pack', () => ({
@@ -94,6 +113,11 @@ describe('PackForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     sessionStorage.clear();
+    mockUseAgentPolicies.mockReturnValue({
+      data: { agentPoliciesById: {} },
+      isFetching: false,
+      isError: false,
+    });
   });
 
   it('should target the Packs list for cancel button navigation in edit mode', async () => {
@@ -517,6 +541,82 @@ describe('PackForm', () => {
       // referenced in the local variable so eslint doesn't flag it.
       expect(savedObjectId).toBe('saved-object-id-b5');
     });
+
+    it('includes selected policy_ids in the create mutate payload', async () => {
+      mockUseAgentPolicies.mockReturnValue({
+        data: {
+          agentPoliciesById: {
+            // agents: 0 so save skips the agent-count confirmation modal
+            'policy-1': { name: 'Alpha Policy', agents: 0, id: 'policy-1', description: '' },
+            'policy-2': { name: 'Beta Policy', agents: 0, id: 'policy-2', description: '' },
+          },
+        },
+        isFetching: false,
+        isError: false,
+      });
+
+      const { getByTestId, getByRole, container } = renderWithContext(
+        <PackForm editMode={false} />
+      );
+
+      const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
+      fireEvent.change(nameInput, { target: { value: 'policy-pack-create' } });
+
+      fireEvent.click(getByRole('checkbox', { name: 'Select policy Alpha Policy' }));
+
+      fireEvent.click(getByTestId('save-pack-button'));
+
+      await waitFor(() => expect(mockCreateAsync).toHaveBeenCalled());
+
+      const submitted = mockCreateAsync.mock.calls[0][0];
+      expect(submitted.policy_ids).toEqual(['policy-1']);
+      expect(submitted).toHaveProperty('schedule_type');
+    });
+
+    it('includes selected policy_ids in the edit mutate payload', async () => {
+      mockUseAgentPolicies.mockReturnValue({
+        data: {
+          agentPoliciesById: {
+            // agents: 0 so save skips the agent-count confirmation modal
+            'policy-1': { name: 'Alpha Policy', agents: 0, id: 'policy-1', description: '' },
+            'policy-2': { name: 'Beta Policy', agents: 0, id: 'policy-2', description: '' },
+          },
+        },
+        isFetching: false,
+        isError: false,
+      });
+
+      const defaultValue = {
+        id: 'pack-policy-edit',
+        saved_object_id: 'saved-policy-edit',
+        name: 'policy-pack-edit',
+        description: '',
+        enabled: true,
+        queries: {},
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        schedule_type: 'interval' as const,
+        interval: 3600,
+      };
+
+      const { getByTestId, getByRole } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} />
+      );
+
+      fireEvent.click(getByRole('checkbox', { name: 'Select policy Beta Policy' }));
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      expect(submitted.policy_ids).toEqual(['policy-2']);
+      expect(submitted.schedule_type).toBe('interval');
+      expect(submitted.interval).toBe(3600);
+    });
   });
 
   describe('interval → rrule edit transition (issue #276903)', () => {
@@ -744,6 +844,53 @@ describe('PackForm', () => {
       expect(getByTestId('update-pack-button')).not.toBeDisabled();
       fireEvent.click(getByTestId('update-pack-button'));
       await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
+      expect(mockAddDanger.mock.calls[0][0].text).toContain(
+        getPackQueryStaleIntervalError('q-stale')
+      );
+      expect(mockUpdateAsync).not.toHaveBeenCalled();
+    });
+
+    // The mirror of the case above. Without it this direction reached the user
+    // only as a 400 from the route, since the client checked one way round.
+    it('shows the backstop error in a toast when a query keeps an rrule override on an interval pack', async () => {
+      const defaultValue = {
+        id: 'pack-stale-rrule-q',
+        saved_object_id: 'saved-stale-rrule-q',
+        name: 'stale-rrule-query-pack',
+        description: '',
+        enabled: true,
+        queries: {
+          'q-stale-rrule': {
+            query: 'SELECT 1;',
+            interval: 3600,
+            ecs_mapping: {},
+            schedule_type: 'rrule' as const,
+            rrule_schedule: {
+              rrule: 'FREQ=DAILY',
+              start_date: '2024-01-01T00:00:00.000Z',
+            },
+          },
+        },
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        schedule_type: 'interval' as const,
+        interval: 3600,
+      };
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} />
+      );
+
+      expect(getByTestId('update-pack-button')).not.toBeDisabled();
+      fireEvent.click(getByTestId('update-pack-button'));
+      await waitFor(() => expect(mockAddDanger).toHaveBeenCalled());
+      expect(mockAddDanger.mock.calls[0][0].text).toContain(
+        getPackQueryStaleRruleError('q-stale-rrule')
+      );
       expect(mockUpdateAsync).not.toHaveBeenCalled();
     });
 
@@ -1066,18 +1213,18 @@ describe('PackForm', () => {
 
     it('emits selected min_osquery_version and result_type on create', async () => {
       mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
-      const { getByTestId, getByRole, container } = renderWithContext(
-        <PackForm editMode={false} />
-      );
+      const { getByTestId, container } = renderWithContext(<PackForm editMode={false} />);
 
       const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
       fireEvent.change(nameInput, { target: { value: 'v5-pack' } });
 
       fireEvent.click(within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput'));
-      fireEvent.click(getByRole('option', { name: '5.0.1' }));
+      fireEvent.click(
+        within(getByTestId('comboBoxOptionsList pack-version-field-optionsList')).getByText('5.0.1')
+      );
 
       fireEvent.click(getByTestId('pack-result-type-field'));
-      fireEvent.click(getByRole('option', { name: /^Differential$/ }));
+      fireEvent.click(getByTestId('result-type-option-differential'));
 
       fireEvent.click(getByTestId('save-pack-button'));
 
@@ -1098,14 +1245,14 @@ describe('PackForm', () => {
           q1: { query: 'SELECT 1;', interval: 60, ecs_mapping: {} },
         },
       };
-      const { getByTestId, getByRole } = renderWithContext(
+      const { getByTestId } = renderWithContext(
         <PackForm editMode={true} defaultValue={packWithDefaults} />
       );
 
       fireEvent.click(getByTestId('comboBoxClearButton'));
 
       fireEvent.click(getByTestId('pack-result-type-field'));
-      fireEvent.click(getByRole('option', { name: /No pack default/ }));
+      fireEvent.click(getByTestId('result-type-option-none'));
 
       fireEvent.click(getByTestId('update-pack-button'));
 

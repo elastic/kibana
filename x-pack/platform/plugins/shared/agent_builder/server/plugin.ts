@@ -201,7 +201,13 @@ export class AgentBuilderPlugin implements Plugin<
         }
         return services.agents.getRegistry({ request });
       },
-      isExperimentalEnabled: this.isExperimentalEnabled,
+      getExecutionService: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Execution service not available — plugin has not started');
+        }
+        return services.execution;
+      },
     });
 
     registerAttachmentWorkflowSteps(setupDeps.workflowsExtensions, {
@@ -220,7 +226,6 @@ export class AgentBuilderPlugin implements Plugin<
           source: 'workflow',
         });
       },
-      isExperimentalEnabled: this.isExperimentalEnabled,
     });
 
     registerAgentBuilderHandlerContext({ coreSetup });
@@ -399,8 +404,6 @@ export class AgentBuilderPlugin implements Plugin<
 
     const modelProviderFactory = createModelProviderFactory({
       inference,
-      uiSettings,
-      savedObjects,
       trackingService: this.trackingService,
       searchInferenceEndpoints,
       logger: this.logger.get('model-provider'),

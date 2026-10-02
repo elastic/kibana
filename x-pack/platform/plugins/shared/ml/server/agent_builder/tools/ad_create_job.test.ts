@@ -21,9 +21,9 @@ const createMlMock = () => ({
   putDatafeed: jest.fn().mockResolvedValue({ datafeed_id: 'datafeed-test-job' }),
 });
 
-const createContext = (mlMock = createMlMock()) =>
+const createContext = (mlMock = createMlMock(), search = jest.fn()) =>
   ({
-    esClient: { asCurrentUser: { ml: mlMock } },
+    esClient: { asCurrentUser: { ml: mlMock, search } },
     request: {},
   }) as any;
 
@@ -126,8 +126,197 @@ describe('adCreateJobTool', () => {
 
       expect(ml.putDatafeed).toHaveBeenCalledWith({
         datafeed_id: 'datafeed-my-job',
-        body: datafeedConfig,
+        body: { ...datafeedConfig, job_id: 'my-job' },
       });
+    });
+
+    it('operation=create_datafeed uses the explicit job_id over datafeed_config.job_id', async () => {
+      const ml = createMlMock();
+      const datafeedConfig = { indices: ['logs-*'], job_id: 'stale-job' };
+
+      await adCreateJobTool.handler(
+        { operation: 'create_datafeed', job_id: 'my-job', datafeed_config: datafeedConfig },
+        createContext(ml)
+      );
+
+      expect(ml.putDatafeed).toHaveBeenCalledWith({
+        datafeed_id: 'datafeed-my-job',
+        body: { indices: ['logs-*'], job_id: 'my-job' },
+      });
+    });
+
+    it('operation=estimate_memory maps detector fields to overall cardinality and all influencers to max-bucket cardinality (including those that also appear as detector split fields)', async () => {
+      const ml = createMlMock();
+      const search = jest
+        .fn()
+        .mockImplementation(async (request: { aggs?: { card?: unknown } }) => {
+          if (request.aggs?.card && !('buckets' in (request.aggs ?? {}))) {
+            return { aggregations: { card: { value: 42 } } };
+          }
+          return { aggregations: { max_bucket_card: { value: 7 } } };
+        });
+      const analysisConfig = {
+        bucket_span: '15m',
+        detectors: [
+          {
+            function: 'rare',
+            by_field_name: 'user.name',
+            over_field_name: 'host.name',
+            partition_field_name: 'event.dataset',
+          },
+        ],
+        influencers: ['host.name', 'source.ip', 'mlcategory'],
+      };
+      const datafeedQuery = { term: { 'event.category': 'network' } };
+
+      await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: analysisConfig,
+            data_description: { time_field: '@timestamp' },
+          },
+          datafeed_config: { indices: ['logs-*'], query: datafeedQuery },
+        },
+        createContext(ml, search)
+      );
+
+      const overallFields = search.mock.calls
+        .filter(([request]) => request.aggs?.card && !request.aggs?.buckets)
+        .map(([request]) => request.aggs.card.cardinality.field);
+      expect(overallFields).toEqual(['user.name', 'host.name', 'event.dataset']);
+
+      const maxBucketFields = search.mock.calls
+        .filter(([request]) => request.aggs?.max_bucket_card)
+        .map(([request]) => request.aggs.buckets.aggs.card.cardinality.field);
+      // host.name is both a detector over_field and an influencer — it must appear
+      // in max_bucket_cardinality even though it is also in overall_cardinality.
+      expect(maxBucketFields).toEqual(['host.name', 'source.ip']);
+
+      for (const [request] of search.mock.calls) {
+        expect(request.query).toEqual(datafeedQuery);
+      }
+
+      expect(ml.estimateModelMemory).toHaveBeenCalledWith({
+        body: {
+          analysis_config: analysisConfig,
+          overall_cardinality: {
+            'user.name': 42,
+            'host.name': 42,
+            'event.dataset': 42,
+          },
+          max_bucket_cardinality: { 'host.name': 7, 'source.ip': 7 },
+        },
+      });
+    });
+
+    it('operation=estimate_memory skips cardinality lookups for mlcategory-only fields', async () => {
+      const ml = createMlMock();
+      const search = jest.fn();
+
+      await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: {
+              detectors: [{ function: 'count', by_field_name: 'mlcategory' }],
+              influencers: ['mlcategory'],
+            },
+          },
+          datafeed_config: { indices: ['logs-*'] },
+        },
+        createContext(ml, search)
+      );
+
+      expect(search).not.toHaveBeenCalled();
+      expect(ml.estimateModelMemory).toHaveBeenCalledWith({
+        body: {
+          analysis_config: {
+            detectors: [{ function: 'count', by_field_name: 'mlcategory' }],
+            influencers: ['mlcategory'],
+          },
+        },
+      });
+    });
+
+    it('operation=estimate_memory returns an error when cardinality lookup fails', async () => {
+      const ml = createMlMock();
+      const search = jest.fn().mockRejectedValue(new Error('index_not_found_exception'));
+      const result = await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: { detectors: [{ function: 'mean', partition_field_name: 'host' }] },
+          },
+          datafeed_config: { indices: ['logs-*'] },
+        },
+        createContext(ml, search)
+      );
+
+      expect(ml.estimateModelMemory).not.toHaveBeenCalled();
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toMatch(
+        'Cannot estimate memory: failed to look up cardinality for field "host"'
+      );
+    });
+
+    it('operation=estimate_memory returns an error when the cardinality aggregation is missing', async () => {
+      const ml = createMlMock();
+      const search = jest.fn().mockResolvedValue({ aggregations: {} });
+      const result = await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: { detectors: [{ function: 'mean', by_field_name: 'host' }] },
+          },
+          datafeed_config: { indices: ['logs-*'] },
+        },
+        createContext(ml, search)
+      );
+
+      expect(ml.estimateModelMemory).not.toHaveBeenCalled();
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toMatch(
+        'cardinality aggregation for field "host" was missing'
+      );
+    });
+
+    it('operation=preview_datafeed_config returns sample documents from preview.body', async () => {
+      const sampleDocuments = [
+        { host: 'web-1', bytes: 100 },
+        { host: 'web-2', bytes: 200 },
+      ];
+      const previewDatafeed = jest.fn().mockResolvedValue({ body: sampleDocuments });
+      const tool = createAdCreateJobTool(
+        resolveMlCapabilities,
+        undefined,
+        undefined,
+        undefined,
+        () => ({ previewDatafeed } as any)
+      );
+
+      const result = await tool.handler(
+        {
+          operation: 'preview_datafeed_config',
+          job_config: { analysis_config: { detectors: [{ function: 'count' }] } },
+          datafeed_config: { indices: ['logs-*'] },
+        },
+        createContext()
+      );
+
+      expect(previewDatafeed).toHaveBeenCalled();
+      const standardResult = result as {
+        results: Array<{ type: string; data: Record<string, unknown> }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.other);
+      expect(standardResult.results[0].data.valid).toBe(true);
+      expect(standardResult.results[0].data.sample_documents).toEqual(sampleDocuments);
     });
 
     it('returns error result when ML client throws', async () => {

@@ -186,6 +186,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       title = schema.title.defaultValue,
       allowHidden = schema.allowHidden.defaultValue,
       type = schema.type.defaultValue,
+      id,
     },
   ] = useFormData<FormInternal>({
     form,
@@ -315,6 +316,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isManaged={isManaged}
       onDuplicate={onDuplicate}
       isDuplicating={isDuplicating}
+      // a custom id can't be guaranteed to be unique, which breaks ad hoc data views sharing an id
+      hasCustomId={!isEditingExisting && !!id}
     />
   );
 

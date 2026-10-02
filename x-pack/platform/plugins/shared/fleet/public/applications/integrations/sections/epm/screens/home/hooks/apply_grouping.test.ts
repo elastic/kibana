@@ -103,6 +103,7 @@ describe('applyGrouping', () => {
     expect(card.isCollectionCard).toBe(true);
     expect(card.name).toBe('nginx');
     expect(card.groupMembers).toHaveLength(2);
+    expect(card.maxCardHeight).toBeUndefined();
   });
 
   it('deduplicates members by name so multi-policy-template packages count as one', () => {

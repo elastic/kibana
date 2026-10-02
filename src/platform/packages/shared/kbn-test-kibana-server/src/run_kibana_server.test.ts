@@ -68,6 +68,20 @@ describe('runKibanaServer()', () => {
     const args = getArgs(procs);
     expect(args[0]).toBe(CODE_GEN_FLAG);
     expect(args[1]).toMatch(/scripts[\\/]kibana$/);
+    expect(args).toContain('--server.rateLimiter.enabled=false');
+  });
+
+  it('does not disable the rate limiter for Scout servers', async () => {
+    const procs = createProcs();
+    delete process.env.KBN_DISALLOW_CODE_GEN_FROM_STRINGS;
+
+    await runKibanaServer({
+      procs,
+      config: createConfig(),
+      uiEphemeralDirPrefix: 'scout',
+    });
+
+    expect(getArgs(procs)).not.toContain('--server.rateLimiter.enabled=false');
   });
 
   it('omits the flag when opted out via the environment', async () => {

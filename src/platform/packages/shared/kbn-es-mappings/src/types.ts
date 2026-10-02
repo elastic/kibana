@@ -13,9 +13,11 @@ import type { UnionKeys, Exact, MissingKeysError, PartialWithArrayValues } from 
 
 export type StrictDynamic = false | 'strict';
 
-type ToStrictMappingProperty<P extends api.MappingProperty> = Omit<P, 'properties'> & {
-  dynamic?: StrictDynamic;
-};
+// Distributes over union members so alias-specific properties like `path` are
+// not lost when P is the full MappingProperty union.
+type ToStrictMappingProperty<P extends api.MappingProperty> = P extends any
+  ? Omit<P, 'properties'> & { dynamic?: StrictDynamic }
+  : never;
 
 export type Strict<P extends api.MappingProperty> = ToStrictMappingProperty<P>;
 
@@ -63,6 +65,7 @@ type SupportedMappingPropertyType = AllMappingPropertyType &
     | 'flattened'
     | 'object'
     | 'flattened'
+    | 'alias'
   );
 
 type MappingPropertyObjectType = Required<ObjectMapping, 'type'>;
@@ -71,10 +74,26 @@ export type MappingProperty =
   | Extract<api.MappingProperty, { type: Exclude<SupportedMappingPropertyType, 'object'> }>
   | MappingPropertyObjectType;
 
+// Alias fields are query-time projections that do not exist in _source, and
+// neither do objects whose declared descendants are all aliases. Excluding them
+// keeps EnsureSubsetOf from requiring keys that _source never contains. Objects
+// without declared properties can still hold _source data, so they are kept.
+type AppearsInSource<P> = [P] extends [{ type: 'alias' }]
+  ? false
+  : [P] extends [{ type: 'object'; properties: infer SubProps }]
+  ? keyof SubProps extends never
+    ? true
+    : true extends { [K in keyof SubProps]: AppearsInSource<SubProps[K]> }[keyof SubProps]
+    ? true
+    : false
+  : true;
+
 export type ToPrimitives<O extends { properties: Record<string, MappingProperty> }> = {} extends O
   ? never
   : {
-      [K in keyof O['properties']]: {} extends O['properties'][K]
+      [K in keyof O['properties'] as AppearsInSource<O['properties'][K]> extends true
+        ? K
+        : never]: {} extends O['properties'][K]
         ? never
         : O['properties'][K] extends { type: infer T }
           ? T extends 'keyword'

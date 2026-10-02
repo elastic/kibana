@@ -16,6 +16,7 @@ import {
   noCreateCasesPermissions,
   noDeleteCasesPermissions,
   readCasesPermissions,
+  buildCasesPermissions,
   renderWithTestingProviders,
 } from '../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
@@ -414,6 +415,18 @@ describe('AllCasesListGeneric', () => {
     });
 
     expect(onRowClick).toHaveBeenCalledWith(undefined, isCreateCase);
+  });
+
+  it('should disable the create case button without create privileges', async () => {
+    renderWithTestingProviders(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />, {
+      wrapperProps: { permissions: noCreateCasesPermissions() },
+    });
+
+    const createCaseButton = await screen.findByTestId('cases-table-add-case-filter-bar');
+    expect(createCaseButton).toBeDisabled();
+
+    await userEvent.click(createCaseButton);
+    expect(onRowClick).not.toHaveBeenCalled();
   });
 
   it('should not render the create new case link when the user does not have create privileges', async () => {
@@ -863,6 +876,55 @@ describe('AllCasesListGeneric', () => {
       it('should disable the checkboxes when the user has read only permissions', async () => {
         renderWithTestingProviders(<AllCasesList />, {
           wrapperProps: { permissions: readCasesPermissions() },
+        });
+
+        expect(await screen.findByTestId('checkboxSelectAll')).toBeDisabled();
+
+        for (const theCase of defaultGetCases.data.cases) {
+          expect(await screen.findByTestId(`checkboxSelectRow-${theCase.id}`)).toBeDisabled();
+        }
+      });
+
+      it('should disable the checkboxes for non-closed cases when the user has only reopenCase permission', async () => {
+        renderWithTestingProviders(<AllCasesList />, {
+          wrapperProps: {
+            permissions: buildCasesPermissions({
+              read: true,
+              reopenCase: true,
+              create: false,
+              update: false,
+              delete: false,
+              push: false,
+              assign: false,
+              createComment: false,
+              manageTemplates: false,
+            }),
+          },
+        });
+
+        // Default mock cases are all open/in-progress, so none are selectable for reopenCase-only users
+        expect(await screen.findByTestId('checkboxSelectAll')).toBeDisabled();
+
+        for (const theCase of defaultGetCases.data.cases) {
+          expect(await screen.findByTestId(`checkboxSelectRow-${theCase.id}`)).toBeDisabled();
+        }
+      });
+
+      it('should disable the checkboxes when the user has read + manageTemplates but no bulk-action permissions', async () => {
+        renderWithTestingProviders(<AllCasesList />, {
+          wrapperProps: {
+            permissions: buildCasesPermissions({
+              read: true,
+              manageTemplates: true,
+              create: false,
+              update: false,
+              delete: false,
+              push: false,
+              assign: false,
+              createComment: false,
+              reopenCase: false,
+            }),
+          },
         });
 
         expect(await screen.findByTestId('checkboxSelectAll')).toBeDisabled();

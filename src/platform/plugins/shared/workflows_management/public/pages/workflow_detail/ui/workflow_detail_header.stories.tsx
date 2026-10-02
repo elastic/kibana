@@ -64,7 +64,12 @@ const StoryWrapper: React.FC<{
   // Execute initialDispatch if provided
   React.useEffect(() => {
     dispatch(setWorkflow(defaultWorkflow));
-    dispatch(_setComputedDataInternal({ workflowDefinition: defaultWorkflow.definition }));
+    dispatch(
+      _setComputedDataInternal({
+        yamlString: undefined,
+        workflowDefinition: defaultWorkflow.definition,
+      })
+    );
     initialDispatch?.(dispatch);
   }, [dispatch, initialDispatch]);
 

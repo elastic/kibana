@@ -10,10 +10,10 @@ import { AppHeaderView } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
+import { useAlertZeroDocumentationLink } from '../../hooks/use_alertzero_documentation_link';
 
 /**
- * Routes that rely on the chrome's application scroll container (`#kbnChromeLayoutApplication`)
- * and render their own header band (Watches nav + compact AppHeader).
+ * Routes that rely on the chrome's application scroll container (`#kbnChromeLayoutApplication`).
  *
  * These must leave `overflow` at `visible`. Any other value makes this element the containing
  * scrollport for `position: sticky` descendants — and because this element sits in a chain of
@@ -21,8 +21,6 @@ import { useLocation } from 'react-router-dom';
  * what kept the Watches subnav scrolling away with the page. The chrome's own stylesheet carries the
  * same warning for `#kibana-body`: "DO NOT ADD ANY OVERFLOW BEHAVIORS HERE / It will break the
  * sticky navigation".
- *
- * The same routes skip the AlertZero app heading so that band is the only header.
  */
 const CHROME_SCROLLED_ROUTES = ['/watches'];
 
@@ -38,6 +36,7 @@ interface AppChromeLayoutProps {
  * and left rail (including Launchpad, Dev Tools, Settings, collapse).
  */
 export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) => {
+  const docLink = useAlertZeroDocumentationLink();
   const { euiTheme } = useEuiTheme();
   const { pathname } = useLocation();
 
@@ -47,7 +46,9 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
 
   return (
     <>
-      {hideAppHeading ? null : <AppHeaderView title="AlertZero" spacing="compact" />}
+      {hideAppHeading ? null : (
+        <AppHeaderView title="AlertZero" spacing="compact" docLink={docLink} />
+      )}
       <div
         css={css`
           display: flex;

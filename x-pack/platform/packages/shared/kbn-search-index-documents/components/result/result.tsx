@@ -72,7 +72,7 @@ export const Result: React.FC<ResultProps> = ({
   return (
     <>
       <EuiSplitPanel.Outer hasBorder={true} data-test-subj="search-index-documents-result">
-        <EuiSplitPanel.Inner paddingSize="m" color="plain" className="resultHeaderContainer">
+        <EuiSplitPanel.Inner paddingSize="s" color="plain" className="resultHeaderContainer">
           <EuiFlexGroup gutterSize="none" alignItems="center">
             <EuiFlexItem>
               {compactCard && (
@@ -80,7 +80,7 @@ export const Result: React.FC<ResultProps> = ({
                   title={
                     metaData.title ??
                     i18n.translate('searchIndexDocuments.result.title.id', {
-                      defaultMessage: 'Document id: {id}',
+                      defaultMessage: 'Document ID: {id}',
                       values: { id: metaData.id },
                     })
                   }
@@ -94,7 +94,7 @@ export const Result: React.FC<ResultProps> = ({
                   title={
                     metaData.title ??
                     i18n.translate('searchIndexDocuments.result.title.id', {
-                      defaultMessage: 'Document id: {id}',
+                      defaultMessage: 'Document ID: {id}',
                       values: { id: metaData.id },
                     })
                   }
@@ -112,7 +112,7 @@ export const Result: React.FC<ResultProps> = ({
                 <EuiButtonIcon
                   size="xs"
                   iconType={isExpanded ? 'fold' : 'unfold'}
-                  color={isExpanded ? 'danger' : 'primary'}
+                  color="text"
                   data-test-subj={isExpanded ? 'documentShowLessFields' : 'documentShowMoreFields'}
                   onClick={(e: React.MouseEvent<HTMLElement>) => {
                     e.stopPropagation();
@@ -129,7 +129,7 @@ export const Result: React.FC<ResultProps> = ({
         {showResultsFields && (
           <>
             <EuiHorizontalRule margin="none" />
-            <EuiSplitPanel.Inner paddingSize="m">
+            <EuiSplitPanel.Inner paddingSize="s">
               <ResultFields
                 documentId={metaData.id}
                 isExpanded={isExpanded}

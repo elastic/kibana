@@ -17,15 +17,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { INGEST_HUB_APP_ID } from '@kbn/deeplinks-observability';
 import type { Observable } from 'rxjs';
-import { catchError, from, map, of, switchMap } from 'rxjs';
+import { catchError, firstValueFrom, from, map, of, switchMap } from 'rxjs';
 import { dynamic } from '@kbn/shared-ux-utility';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type {
   IngestHubSetup,
   IngestHubStart,
   IngestHubStartDependencies,
   IngestFlow,
 } from './types';
-import { INGEST_HUB_ENABLED_FLAG } from '../common/constants';
+import { INGEST_HUB_ENABLED_FLAG } from '../common/core/constants';
 import { registerOnboardingApp } from './onboarding';
 
 const IngestHubApp = dynamic(() =>
@@ -63,14 +64,17 @@ const createNavigationAvailable$ = (
 export class IngestHubPlugin implements Plugin<
   IngestHubSetup,
   IngestHubStart,
-  object,
+  { cloud?: CloudSetup },
   IngestHubStartDependencies
 > {
   private readonly ingestFlows: IngestFlow[] = [];
 
   constructor(private readonly context: PluginInitializerContext) {}
 
-  setup(coreSetup: CoreSetup<IngestHubStartDependencies>): IngestHubSetup {
+  setup(
+    coreSetup: CoreSetup<IngestHubStartDependencies>,
+    deps: { cloud?: CloudSetup } = {}
+  ): IngestHubSetup {
     const startServicesPromise = coreSetup.getStartServices();
 
     coreSetup.application.register({
@@ -94,7 +98,9 @@ export class IngestHubPlugin implements Plugin<
       ),
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await startServicesPromise;
-        const isEnabled = coreStart.featureFlags.getBooleanValue(INGEST_HUB_ENABLED_FLAG, false);
+        const isEnabled = await firstValueFrom(
+          coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ENABLED_FLAG, false)
+        );
         const { element, history } = params;
 
         if (!isEnabled) {
@@ -112,7 +118,12 @@ export class IngestHubPlugin implements Plugin<
       },
     });
 
-    registerOnboardingApp(coreSetup, startServicesPromise, this.context.env.packageInfo.version);
+    registerOnboardingApp(
+      coreSetup,
+      startServicesPromise,
+      this.context.env.packageInfo.version,
+      deps.cloud
+    );
 
     return {};
   }

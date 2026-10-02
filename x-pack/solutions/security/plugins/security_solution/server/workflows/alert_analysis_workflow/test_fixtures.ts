@@ -57,11 +57,13 @@ export const createRule = ({
   actions = [],
   systemActions = [],
   enabled = true,
+  type,
 }: {
   id: string;
   actions?: RuleAlertType['actions'];
   systemActions?: RuleAlertType['systemActions'];
   enabled?: boolean;
+  type?: RuleAlertType['params']['type'];
 }): RuleAlertType =>
   ({
     id,
@@ -71,5 +73,6 @@ export const createRule = ({
     systemActions,
     params: {
       immutable: false,
+      ...(type ? { type } : {}),
     },
   }) as RuleAlertType;
