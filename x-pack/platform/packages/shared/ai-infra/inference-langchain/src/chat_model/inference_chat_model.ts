@@ -366,8 +366,9 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
 
     let functionName = name ?? 'extract';
     let tools: ToolDefinition[];
-    const zodSchema = isInteropZodSchema(schema) ? schema : undefined;
-    if (zodSchema) {
+    let zodSchema: InteropZodType<RunOutput> | undefined;
+    if (isInteropZodSchema(schema)) {
+      zodSchema = schema;
       tools = [
         {
           type: 'function',
