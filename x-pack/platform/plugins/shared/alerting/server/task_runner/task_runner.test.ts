@@ -4559,7 +4559,7 @@ describe('Task Runner', () => {
       mockedRawRuleSO.attributes.enabled = true;
       // Use a rule with no actions so ActionScheduler is a no-op and won't
       // call methods on our minimal alert stubs.
-      mockGetRuleFromRaw.mockReturnValue({ ...mockedRuleTypeSavedObject, actions: [] } as Rule);
+      mockGetRuleFromRaw.mockReturnValue({ ...(mockedRuleTypeSavedObject as Rule), actions: [] });
       alertsService.createAlertsClient.mockImplementation(() => alertsClient);
       alertsClient.getProcessedAlerts.mockReturnValue({});
     });
