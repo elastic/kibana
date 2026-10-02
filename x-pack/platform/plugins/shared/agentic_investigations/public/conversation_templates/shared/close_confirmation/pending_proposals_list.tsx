@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import type { ClosePreviewProposal } from '../../../common';
+import type { ClosePreviewProposal } from '../../../../common';
 import * as i18n from './translations';
 
 const MAX_SHOWN = 10;

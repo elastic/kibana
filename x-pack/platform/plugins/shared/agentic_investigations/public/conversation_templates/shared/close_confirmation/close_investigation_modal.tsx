@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -14,22 +14,20 @@ import {
   EuiLoadingSpinner,
   EuiSelect,
   EuiSpacer,
-  EuiText,
   EuiTextArea,
 } from '@elastic/eui';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { DismissReason } from '@kbn/proposals-common';
 import { DISMISS_REASON_OPTIONS } from '@kbn/proposals-ui';
-import type { EscalationClosePreviewResponse } from '../../../common';
+import type { InvestigationClosePreviewResponse } from '../../../../common';
 import { PendingProposalsList } from './pending_proposals_list';
 import * as i18n from './translations';
 
-export interface CloseEscalationModalProps {
+export interface CloseInvestigationModalProps {
   /**
    * The close preview data from the server. When undefined, the first fetch is still
    * in-flight; the modal shows a spinner and disables confirm until it arrives.
    */
-  preview: EscalationClosePreviewResponse | undefined;
+  preview: InvestigationClosePreviewResponse | undefined;
   /** True while a background refetch is running (data may be about to change). */
   isRefreshing?: boolean;
   /** True when the server rejected the last confirm because proposals changed. */
@@ -47,11 +45,6 @@ export interface CloseEscalationModalProps {
    * - `'escalation_incomplete'`: one or more linked investigations could not be closed.
    */
   closeErrorKind?: 'dismiss_failed' | 'escalation_incomplete';
-  /**
-   * IDs of linked investigations that cannot be resolved (deleted or inaccessible).
-   * When non-empty, the Confirm button is disabled and a blocking danger callout is shown.
-   */
-  unavailableInvestigationIds?: string[];
   /** Number of items that failed (used for the error callout message). */
   closeErrorCount?: number;
   onClose: () => void;
@@ -60,15 +53,16 @@ export interface CloseEscalationModalProps {
 }
 
 /**
- * Confirmation modal shown before closing an escalation.
+ * Confirmation modal shown before closing an investigation.
  *
- * Lists the open linked investigations grouped with their pending proposals. When any
- * have pending proposals, prompts for a dismiss reason. Otherwise shows a simpler
- * warning about chat closure.
+ * When there are pending proposals, prompts for a dismiss reason and an optional
+ * rationale so they can be bulk-dismissed server-side. When there are none, it is a
+ * simple confirm that the investigation (and its chat) will be closed.
  *
- * While the preview is loading, a spinner is shown and confirm is disabled.
+ * While the preview is loading, a spinner is shown and confirm is disabled so the
+ * user can see what they are about to dismiss before committing.
  */
-export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
+export const CloseInvestigationModal: React.FC<CloseInvestigationModalProps> = ({
   preview,
   isRefreshing = false,
   targetsChanged = false,
@@ -76,7 +70,6 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
   onRetry,
   closeErrorKind,
   closeErrorCount = 0,
-  unavailableInvestigationIds = [],
   onClose,
   onConfirm,
   isLoading = false,
@@ -84,48 +77,23 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
   const [dismissReason, setDismissReason] = useState<DismissReason>('no_reason');
   const [rationale, setRationale] = useState('');
 
-  const totalPendingProposals = useMemo(
-    () =>
-      (preview?.open_investigations ?? []).reduce(
-        (sum, inv) => sum + inv.pending_proposal_count,
-        0
-      ),
-    [preview]
-  );
-
-  const hasProposals = totalPendingProposals > 0;
-  const hasOpenInvestigations = (preview?.open_investigations.length ?? 0) > 0;
-  const hasUnavailableLinks = unavailableInvestigationIds.length > 0;
-  const isConfirmDisabled =
-    isLoading || isRefreshing || preview === undefined || hasUnavailableLinks;
+  const hasProposals = (preview?.pending_proposal_count ?? 0) > 0;
+  const isConfirmDisabled = isLoading || isRefreshing || preview === undefined;
 
   return (
     <EuiConfirmModal
-      title={i18n.CLOSE_ESCALATION_TITLE}
-      aria-label={i18n.CLOSE_ESCALATION_TITLE}
+      title={i18n.CLOSE_INVESTIGATION_TITLE}
+      aria-label={i18n.CLOSE_INVESTIGATION_TITLE}
       onCancel={onClose}
       onConfirm={() =>
         onConfirm(hasProposals ? { dismissReason, rationale: rationale || undefined } : {})
       }
       cancelButtonText={i18n.CANCEL_BUTTON}
-      confirmButtonText={i18n.CLOSE_ESCALATION_BUTTON}
+      confirmButtonText={i18n.CLOSE_INVESTIGATION_BUTTON}
       buttonColor="danger"
       confirmButtonDisabled={isConfirmDisabled}
       isLoading={isLoading}
     >
-      {hasUnavailableLinks && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            size="s"
-            title={i18n.LINKED_INVESTIGATION_UNAVAILABLE(unavailableInvestigationIds.length)}
-            data-test-subj="closeEscalationUnavailableLinksCallout"
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
-
       {targetsChanged && (
         <>
           <EuiCallOut
@@ -133,20 +101,7 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
             color="warning"
             size="s"
             title={i18n.CLOSE_TARGETS_CHANGED}
-            data-test-subj="closeEscalationTargetsChangedCallout"
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
-
-      {closeErrorKind === 'escalation_incomplete' && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            size="s"
-            title={i18n.ESCALATION_CLOSE_INCOMPLETE(closeErrorCount)}
-            data-test-subj="closeEscalationIncompleteCallout"
+            data-test-subj="closeInvestigationTargetsChangedCallout"
           />
           <EuiSpacer size="m" />
         </>
@@ -159,7 +114,7 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
             color="danger"
             size="s"
             title={i18n.PROPOSAL_DISMISS_FAILED(closeErrorCount)}
-            data-test-subj="closeEscalationDismissFailedCallout"
+            data-test-subj="closeInvestigationDismissFailedCallout"
           />
           <EuiSpacer size="m" />
         </>
@@ -172,69 +127,34 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
             color="danger"
             size="s"
             title={i18n.PREVIEW_LOAD_ERROR}
-            data-test-subj="closeEscalationPreviewError"
+            data-test-subj="closeInvestigationPreviewError"
           />
           {onRetry && (
             <>
               <EuiSpacer size="s" />
-              <EuiButton size="s" onClick={onRetry} data-test-subj="closeEscalationPreviewRetry">
+              <EuiButton size="s" onClick={onRetry} data-test-subj="closeInvestigationPreviewRetry">
                 {i18n.RETRY_BUTTON}
               </EuiButton>
             </>
           )}
         </>
       ) : preview === undefined ? (
-        <EuiLoadingSpinner size="m" data-test-subj="closeEscalationPreviewLoading" />
+        <EuiLoadingSpinner size="m" data-test-subj="closeInvestigationPreviewLoading" />
       ) : (
         <>
-          {hasOpenInvestigations ? (
-            <>
-              {hasProposals ? (
-                <EuiCallOut
-                  announceOnMount={false}
-                  color="warning"
-                  size="s"
-                  title={i18n.CLOSE_ESCALATION_PROPOSALS_WARNING(totalPendingProposals)}
-                />
-              ) : (
-                <KbnInfoCallout
-                  announceOnMount={false}
-                  size="s"
-                  title={i18n.CLOSE_ESCALATION_NO_PROPOSALS_WARNING}
-                />
-              )}
-              <EuiSpacer size="m" />
-              <EuiText size="s">
-                <p>{i18n.CLOSE_ESCALATION_LINKED_INVESTIGATIONS_LABEL}</p>
-                <ul>
-                  {preview.open_investigations.map((inv) => (
-                    <li key={inv.id}>
-                      {inv.pending_proposal_count > 0
-                        ? `${inv.title} — ${i18n.INVESTIGATION_PROPOSAL_COUNT(
-                            inv.pending_proposal_count
-                          )}`
-                        : inv.title}
-                      {inv.pending_proposals.length > 0 && (
-                        <PendingProposalsList
-                          proposals={inv.pending_proposals}
-                          totalCount={inv.pending_proposal_count}
-                          data-test-subj={`closeEscalationProposalsList-${inv.id}`}
-                        />
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </EuiText>
-            </>
-          ) : null}
-
           {hasProposals ? (
             <>
+              <p>{i18n.CLOSE_INVESTIGATION_PROPOSALS_WARNING(preview.pending_proposal_count)}</p>
+              <PendingProposalsList
+                proposals={preview.pending_proposals}
+                totalCount={preview.pending_proposal_count}
+                data-test-subj="closeInvestigationProposalsList"
+              />
               <EuiSpacer size="m" />
               <EuiFormRow fullWidth label={i18n.DISMISS_REASON_LABEL}>
                 <EuiSelect
                   fullWidth
-                  data-test-subj="closeEscalationDismissReasonSelect"
+                  data-test-subj="closeInvestigationDismissReasonSelect"
                   value={dismissReason}
                   options={DISMISS_REASON_OPTIONS}
                   onChange={(event) => setDismissReason(event.target.value as DismissReason)}
@@ -244,7 +164,7 @@ export const CloseEscalationModal: React.FC<CloseEscalationModalProps> = ({
               <EuiFormRow fullWidth label={i18n.RATIONALE_LABEL}>
                 <EuiTextArea
                   fullWidth
-                  data-test-subj="closeEscalationRationaleInput"
+                  data-test-subj="closeInvestigationRationaleInput"
                   placeholder={i18n.RATIONALE_PLACEHOLDER}
                   value={rationale}
                   onChange={(e) => setRationale(e.target.value)}

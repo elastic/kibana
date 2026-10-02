@@ -12,11 +12,11 @@ import type { CoreStart } from '@kbn/core/public';
 import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import type { DismissReason } from '@kbn/proposals-common';
 import type { CloseInvestigationModalRenderProps } from '@kbn/agentic-investigations-common';
-import { escalationQueryKeys } from '../../escalations/query_keys';
+import { escalationQueryKeys } from '../../../escalations/query_keys';
 import {
   useSetInvestigationStatus,
   useInvestigationClosePreview,
-} from '../../investigations/hooks/use_investigations_api';
+} from '../../../investigations/hooks/use_investigations_api';
 import { statusSignal } from './status_signal';
 import { getCloseErrorCode } from './close_error_codes';
 import { CloseInvestigationModal } from '../close_confirmation/close_investigation_modal';

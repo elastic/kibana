@@ -10,25 +10,25 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useAssignEscalation } from '../../escalations/hooks/use_escalations_api';
-import { useAssignInvestigation } from '../../investigations/hooks/use_investigations_api';
-import { useUserProfiles, useSuggestUserProfiles } from '../../user_profiles';
-import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
+import { useAssignEscalation } from '../../../escalations/hooks/use_escalations_api';
+import { useAssignInvestigation } from '../../../investigations/hooks/use_investigations_api';
+import { useUserProfiles, useSuggestUserProfiles } from '../../../user_profiles';
+import { useAgenticInvestigationsCapabilities } from '../../../hooks/use_agentic_investigations_capabilities';
 import { ConnectedAssignees } from './connected_assignees';
 
-jest.mock('../../hooks/use_agentic_investigations_capabilities');
+jest.mock('../../../hooks/use_agentic_investigations_capabilities');
 const mockUseCapabilities = useAgenticInvestigationsCapabilities as jest.Mock;
 
-jest.mock('../../escalations/hooks/use_escalations_api', () => ({
-  ...jest.requireActual('../../escalations/hooks/use_escalations_api'),
+jest.mock('../../../escalations/hooks/use_escalations_api', () => ({
+  ...jest.requireActual('../../../escalations/hooks/use_escalations_api'),
   useAssignEscalation: jest.fn(),
 }));
-jest.mock('../../investigations/hooks/use_investigations_api', () => ({
-  ...jest.requireActual('../../investigations/hooks/use_investigations_api'),
+jest.mock('../../../investigations/hooks/use_investigations_api', () => ({
+  ...jest.requireActual('../../../investigations/hooks/use_investigations_api'),
   useAssignInvestigation: jest.fn(),
 }));
-jest.mock('../../user_profiles', () => ({
-  ...jest.requireActual('../../user_profiles'),
+jest.mock('../../../user_profiles', () => ({
+  ...jest.requireActual('../../../user_profiles'),
   useUserProfiles: jest.fn(),
   useSuggestUserProfiles: jest.fn(),
 }));

@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 import type { LinkedInvestigationsSlotRenderProps } from '@kbn/agentic-investigations-common';
 import { LinkedInvestigationsList } from '@kbn/agentic-investigations-common';
-import { useLinkedInvestigations } from '../../escalations/hooks/use_escalations_api';
-import { useStatusSignal } from '../connected_status/use_status_signal';
+import { useLinkedInvestigations } from '../../../../escalations/hooks/use_escalations_api';
+import { useStatusSignal } from '../../../shared/connected_status/use_status_signal';
 
 /**
  * Connected component for the escalation details flyout overview tab.

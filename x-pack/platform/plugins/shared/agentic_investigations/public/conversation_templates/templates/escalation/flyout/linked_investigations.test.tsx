@@ -12,12 +12,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
-import { useLinkedInvestigations } from '../../escalations/hooks/use_escalations_api';
-import { statusSignal } from '../connected_status/status_signal';
-import { ConnectedLinkedInvestigations } from './connected_linked_investigations';
+import { useLinkedInvestigations } from '../../../../escalations/hooks/use_escalations_api';
+import { statusSignal } from '../../../shared/connected_status/status_signal';
+import { ConnectedLinkedInvestigations } from './linked_investigations';
 
-jest.mock('../../escalations/hooks/use_escalations_api', () => ({
-  ...jest.requireActual('../../escalations/hooks/use_escalations_api'),
+jest.mock('../../../../escalations/hooks/use_escalations_api', () => ({
+  ...jest.requireActual('../../../../escalations/hooks/use_escalations_api'),
   useLinkedInvestigations: jest.fn(),
 }));
 

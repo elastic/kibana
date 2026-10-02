@@ -16,25 +16,25 @@ import {
   useCreateEscalation,
   useAttachToEscalation,
   useEscalationsForInvestigation,
-} from '../../escalations/hooks/use_escalations_api';
-import { useCurrentUserProfile, useSuggestUserProfiles } from '../../user_profiles';
+} from '../../../escalations/hooks/use_escalations_api';
+import { useCurrentUserProfile, useSuggestUserProfiles } from '../../../user_profiles';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useOpenInChat } from '../../hooks/use_open_in_chat';
+import { useOpenInChat } from '../../../hooks/use_open_in_chat';
 import { ConnectedEscalationModal } from './connected_escalation_modal';
 
-jest.mock('../../escalations/hooks/use_escalations_api', () => ({
+jest.mock('../../../escalations/hooks/use_escalations_api', () => ({
   useListEscalations: jest.fn(),
   useCreateEscalation: jest.fn(),
   useAttachToEscalation: jest.fn(),
   useEscalationsForInvestigation: jest.fn(),
 }));
 
-jest.mock('../../user_profiles', () => ({
+jest.mock('../../../user_profiles', () => ({
   useCurrentUserProfile: jest.fn(),
   useSuggestUserProfiles: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_agentic_investigations_capabilities', () => ({
+jest.mock('../../../hooks/use_agentic_investigations_capabilities', () => ({
   useAgenticInvestigationsCapabilities: jest.fn(() => ({
     showEscalations: true,
     manageEscalations: true,
@@ -46,7 +46,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_open_in_chat', () => ({
+jest.mock('../../../hooks/use_open_in_chat', () => ({
   useOpenInChat: jest.fn(),
 }));
 
@@ -516,7 +516,7 @@ describe('ConnectedEscalationModal', () => {
 
     it('does not fetch escalations when showEscalations is false', () => {
       const { useAgenticInvestigationsCapabilities } = jest.requireMock(
-        '../../hooks/use_agentic_investigations_capabilities'
+        '../../../hooks/use_agentic_investigations_capabilities'
       );
       (useAgenticInvestigationsCapabilities as jest.Mock).mockReturnValueOnce({
         showEscalations: false,
