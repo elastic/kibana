@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FlakyTestBranchStats } from '@kbn/scout-reporting';
 import {
   flakySuiteIssueTitle,
   readFlakySuiteIssueMetadata,
@@ -266,6 +267,55 @@ describe('renderFlakySuiteIssueBody', () => {
         '| 🔴 `main` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
         '| 🔴 `9.2` | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |',
         '| ✅ `9.1` | 0 / 58 |',
+      ].join('\n')
+    );
+  });
+
+  it('marks the branches every setup skips every test on, after the failing ones and with when one last ran', () => {
+    const branch = (
+      name: string,
+      failedBuilds: number,
+      skipped: boolean,
+      overrides: Partial<FlakyTestBranchStats> = {}
+    ): FlakyTestBranchStats => ({
+      branch: name,
+      builds: 100,
+      failedBuilds,
+      buildFailRate: failedBuilds / 100,
+      skipped,
+      ...overrides,
+    });
+    const report = flakyReport([
+      flakyTest({
+        testId: 'a',
+        byBranch: [
+          branch('main', 8, true, {
+            lastFailedAt: new Date('2026-09-05T10:00:00.000Z'),
+            latestExecutionAt: new Date('2026-09-07T14:21:00.000Z'),
+          }),
+          branch('9.5', 3, false, { lastFailedAt: new Date('2026-09-08T10:00:00.000Z') }),
+          branch('9.4', 0, true, { builds: 0 }),
+        ],
+      }),
+      flakyTest({
+        testId: 'b',
+        title: 'another test',
+        byBranch: [
+          branch('main', 0, true, { latestExecutionAt: new Date('2026-09-06T10:00:00.000Z') }),
+          // skipped here, but test a still runs on 9.5
+          branch('9.5', 0, true),
+          branch('8.19', 0, false, { builds: 40 }),
+        ],
+      }),
+    ]);
+    const [suite] = groupIntoSuites(report.flaky, report.files);
+
+    expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
+      [
+        '| 🔴 `9.5` | 3 / 100 (**3%**) | 2026-09-08 10:00 UTC |',
+        '| ⏭️ `main` | 8 / 100 (**8%**) | 2026-09-05 10:00 UTC · skipped, last ran 7 Sep |',
+        '| ⏭️ `9.4` | 0 / 0 | skipped in every run |',
+        '| ✅ `8.19` | 0 / 40 |',
       ].join('\n')
     );
   });

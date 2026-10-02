@@ -41,6 +41,7 @@ export function runReportFlakyTestIssuesCli() {
       const inputPath = Path.resolve(REPO_ROOT, flagsReader.requiredString('input'));
       const summaryPath = Path.resolve(REPO_ROOT, flagsReader.requiredString('summary-path'));
       const dryRun = flagsReader.boolean('dry-run');
+      const omitSkippedTests = flagsReader.boolean('omit-skipped-tests');
       const token = process.env.GITHUB_TOKEN;
       if (!token) {
         throw createFlagError('GITHUB_TOKEN must be set to read and write GitHub issues');
@@ -82,7 +83,8 @@ export function runReportFlakyTestIssuesCli() {
           (tracking
             ? `, and a suite whose every test has one in ${tracking.repo} is skipped`
             : '') +
-          `; at most ${maxNewIssues} new issues`
+          `; at most ${maxNewIssues} new issues` +
+          (omitSkippedTests ? ', flaky tests skipped since are left out' : '')
       );
 
       const summary = await reportFlakySuiteIssues({
@@ -93,6 +95,7 @@ export function runReportFlakyTestIssuesCli() {
         tracking,
         closedSince,
         maxNewIssues,
+        omitSkippedTests,
         dryRun,
       });
 
@@ -102,8 +105,8 @@ export function runReportFlakyTestIssuesCli() {
       const { created, skipped, failed } = summary.counts;
       log.info(
         `${summary.suites} flaky suites: ${created} issues created, ${skipped} skipped, ` +
-          `${failed} failed${dryRun ? ' (dry run, nothing was written)' : ''} ` +
-          `(summary in ${summaryPath})`
+          `${failed} failed, ${summary.omittedTests} skipped tests left out` +
+          `${dryRun ? ' (dry run, nothing was written)' : ''} (summary in ${summaryPath})`
       );
       log.success(`Finished in ${((performance.now() - startedAt) / 1000).toFixed(2)}s`);
       if (failed > 0) {
@@ -118,7 +121,7 @@ export function runReportFlakyTestIssuesCli() {
         closed ones in --github-repo and in --tracking-repo, then matches locally. A suite gets no
         issue when every one of its tests has one in either repository, open or closed, a per-test
         issue about it or an issue about the suite or its file; a single test without one is
-        enough for the suite issue to be filed.
+        enough for the suite issue to be filed. Flaky tests skipped since are left out.
 
         Examples:
           GITHUB_TOKEN=... node scripts/report_flaky_test_issues --input .scout/flaky_tests.json --dry-run
@@ -133,7 +136,7 @@ export function runReportFlakyTestIssuesCli() {
           'closed-since-days',
           'max-new-issues',
         ],
-        boolean: ['dry-run'],
+        boolean: ['dry-run', 'omit-skipped-tests'],
         default: {
           input: DEFAULT_INPUT,
           'summary-path': DEFAULT_SUMMARY_PATH,
@@ -142,6 +145,7 @@ export function runReportFlakyTestIssuesCli() {
           'closed-since-days': String(DEFAULT_CLOSED_SINCE_DAYS),
           'max-new-issues': String(DEFAULT_MAX_NEW_ISSUES),
           'dry-run': false,
+          'omit-skipped-tests': true,
         },
         help: `
           --input               Flaky test report to read [default: ${DEFAULT_INPUT}]
@@ -150,6 +154,7 @@ export function runReportFlakyTestIssuesCli() {
           --tracking-repo       owner/name whose failed-test issues cover a suite once every one of its tests has one; never written to, empty disables [default: ${DEFAULT_TRACKING_REPO}]
           --closed-since-days   Only closed issues updated within this many days count as tracking a suite [default: ${DEFAULT_CLOSED_SINCE_DAYS}]
           --max-new-issues      Issues created per run, worst suites first [default: ${DEFAULT_MAX_NEW_ISSUES}]
+          --no-omit-skipped-tests  Keep flaky tests that were skipped since
           --dry-run             Read issues and log what would be filed without writing
         `,
       },

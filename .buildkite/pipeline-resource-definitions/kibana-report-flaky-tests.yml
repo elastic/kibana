@@ -33,6 +33,8 @@ spec:
         FLAKY_TESTS_GITHUB_REPO: 'elastic/appex-qa-ai'
         # Suite issues created per run, worst suites first
         FLAKY_TESTS_MAX_NEW_ISSUES: '10'
+        # Leave out flaky tests that were skipped since
+        FLAKY_TESTS_OMIT_SKIPPED_TESTS: 'true'
       allow_rebuilds: true
       branch_configuration: main
       cancel_intermediate_builds: true

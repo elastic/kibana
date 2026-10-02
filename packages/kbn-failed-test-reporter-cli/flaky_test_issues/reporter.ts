@@ -28,6 +28,7 @@ import {
   type IssueMatch,
   type MatchedIssue,
 } from './match_issues';
+import { isSkippedTest, skippedBranches } from './skipped';
 import { groupIntoSuites, type FlakySuite } from './suites';
 
 /**
@@ -62,6 +63,8 @@ export interface ReportFlakySuiteIssuesOptions {
   closedSince: Date;
   /** Suite issues created per run, worst suites first; the rest is reported as skipped. */
   maxNewIssues: number;
+  /** Leave out flaky tests that were skipped since (`isSkippedTest`). */
+  omitSkippedTests: boolean;
   dryRun: boolean;
 }
 
@@ -83,7 +86,9 @@ export type SkipReason =
    */
   | 'tracked'
   /** Same, for the tracking repository. */
-  | 'tracked-upstream';
+  | 'tracked-upstream'
+  /** Every flaky test of the suite was skipped since. */
+  | 'all-tests-skipped';
 
 /** The suite an action is about; several suites of one file are told apart by their title. */
 export interface SuiteRef {
@@ -108,6 +113,8 @@ export interface FlakySuiteIssuesSummary {
   dryRun: boolean;
   githubRepo: string;
   suites: number;
+  /** Flaky tests left out as skipped. */
+  omittedTests: number;
   /** `failed-test` issues checked: every open one and the closed ones updated since `closedSince`. */
   issues: IssueCounts & {
     closedSince: Date;
@@ -145,6 +152,9 @@ const coveringIssue = (suite: FlakySuite, index: IssueIndex): MatchedIssue | und
   const distinct = [...new Map(covering.map((match) => [match.issue.number, match])).values()];
   return strongestTracking(distinct.sort(compareMatches));
 };
+
+const sameSuite = (a: FlakySuite, b: FlakySuite): boolean =>
+  a.framework === b.framework && a.filePath === b.filePath && a.suiteTitle === b.suiteTitle;
 
 const suiteRef = ({ filePath, suiteTitle }: FlakySuite): SuiteRef => ({
   filePath,
@@ -222,11 +232,28 @@ export const issueLabels = (suite: FlakySuite, githubRepo: string): string[] => 
 export const reportFlakySuiteIssues = async (
   options: ReportFlakySuiteIssuesOptions
 ): Promise<FlakySuiteIssuesSummary> => {
-  const { report, github, log, githubRepo, closedSince, maxNewIssues, dryRun } = options;
-  const suites = groupIntoSuites(report.flaky, report.files);
-  log.info(
-    `${report.flaky.length} flaky tests in ${suites.length} suites${dryRun ? ' (dry run)' : ''}`
+  const { report, github, log, githubRepo, closedSince, maxNewIssues, omitSkippedTests, dryRun } =
+    options;
+  const omitted = omitSkippedTests ? report.flaky.filter(isSkippedTest) : [];
+  const suites = groupIntoSuites(
+    report.flaky.filter((test) => !omitted.includes(test)),
+    report.files
   );
+  // Suites with no test left
+  const skippedSuites = groupIntoSuites(omitted, report.files).filter(
+    (skipped) => !suites.some((suite) => sameSuite(suite, skipped))
+  );
+  log.info(
+    `${report.flaky.length} flaky tests in ${suites.length + skippedSuites.length} suites` +
+      (omitted.length > 0 ? `, ${omitted.length} of them skipped since and left out` : '') +
+      (dryRun ? ' (dry run)' : '')
+  );
+  for (const test of omitted) {
+    log.info(
+      `omit, skipped since on ${skippedBranches(test).join(', ')}: ${test.filePath}` +
+        `${test.suiteTitle ? ` (${test.suiteTitle})` : ''} › ${test.title}`
+    );
+  }
 
   const target = { github, repo: githubRepo };
   const { issues, open, closed } = await fetchFailedTestIssues(target, closedSince, log);
@@ -248,6 +275,11 @@ export const reportFlakySuiteIssues = async (
     actions.push(action);
     counts[action.action] += 1;
   };
+
+  for (const suite of skippedSuites) {
+    log.info(`skip, every flaky test was skipped since: ${describeSuite(suite)}`);
+    record({ action: 'skipped', ...suiteRef(suite), reason: 'all-tests-skipped' });
+  }
 
   const create = async (suite: FlakySuite, related: MatchedIssue[]) => {
     const ref = suiteRef(suite);
@@ -313,7 +345,8 @@ export const reportFlakySuiteIssues = async (
     generatedAt: report.generatedAt,
     dryRun,
     githubRepo,
-    suites: suites.length,
+    suites: suites.length + skippedSuites.length,
+    omittedTests: omitted.length,
     issues: { open, closed, closedSince, ...(tracking ? { tracking } : {}) },
     counts,
     actions,
