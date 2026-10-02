@@ -15,6 +15,7 @@ import type { Flags } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { runSharedBuild } from '@kbn/rspack-optimizer';
+import type { ToolingLog } from '@kbn/tooling-log';
 import * as constants from './constants';
 
 type StorybookCliOptions = CLIOptions & BuilderOptions & LoadOptions & { mode: 'dev' | 'static' };
@@ -42,12 +43,14 @@ export async function buildStorybook({
   site = false,
   sharedBundlesPrebuilt = false,
   loglevel = 'info',
+  log,
 }: {
   configDir: string;
   name: string;
   site?: boolean;
   sharedBundlesPrebuilt?: boolean;
   loglevel?: StorybookCliOptions['loglevel'];
+  log?: ToolingLog;
 }) {
   const config: StorybookCliOptions = {
     configDir,
@@ -70,6 +73,7 @@ export async function buildStorybook({
         repoRoot: REPO_ROOT,
         dist: site,
         watch: !site,
+        log,
       });
   if (sharedBuild && !sharedBuild.success) {
     await sharedBuild.close?.();
@@ -98,6 +102,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
         site: Boolean(flags.site),
         sharedBundlesPrebuilt: Boolean(flags['shared-bundles-prebuilt']),
         loglevel: getLogLevelFromFlags(flags),
+        log,
       });
 
       // Line is only reached when building the static version
