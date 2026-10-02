@@ -499,7 +499,9 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
               ...generateBlocklistEntryValue(blocklistEntry.value, newOperator),
             },
           ],
-        };
+        } as ArtifactFormComponentProps['item'];
+
+        validateValues(nextItem);
 
         onChange({
           isValid: isValid(errorsRef.current),
@@ -507,7 +509,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           item: nextItem as ArtifactFormComponentOnChangeCallbackProps['item'],
         });
       },
-      [item, blocklistEntry, generateBlocklistEntryValue, onChange]
+      [item, blocklistEntry, generateBlocklistEntryValue, validateValues, onChange]
     );
 
     const handleOnValueTextChange = useCallback(
