@@ -11,7 +11,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly, EuiImage } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiTextColor, EuiImage } from '@elastic/eui';
 import { useKibana } from '../../../context';
 import type { NoDataPageActions } from '../no_data_page';
 import { NO_DATA_RECOMMENDED } from '../no_data_page';
@@ -28,6 +28,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   recommended,
   title,
   href,
+  onClick,
   button,
   layout,
   category,
@@ -83,26 +84,24 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     defaultMessage: 'Add Elastic Agent',
   });
 
+  const resolvedHref = href ?? addBasePath(`/app/integrations/browse${hasCategory}`);
+
+  // The card itself must not be clickable: nesting the button inside a card-level
+  // href/onClick produces invalid, doubly-interactive HTML. The button is the only action.
   const footer =
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
-      // The href and/or onClick are attached to the whole Card, so the button is just for show.
-      // Do not add the behavior here too or else it will propogate through
-      <EuiButton fill>{button || title || defaultCTAtitle}</EuiButton>
+      <EuiButton fill href={resolvedHref} onClick={onClick}>
+        {button || title || defaultCTAtitle}
+      </EuiButton>
     );
 
   return (
     <EuiCard
       paddingSize="l"
       image={image}
-      href={href ?? addBasePath(`/app/integrations/browse${hasCategory}`)}
-      // Bad hack to fix the need for an a11y title even though the button exists
-      title={
-        <EuiScreenReaderOnly>
-          <span>{defaultCTAtitle}</span>
-        </EuiScreenReaderOnly>
-      }
+      title={<EuiTextColor color="default">{defaultCTAtitle}</EuiTextColor>}
       description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
         defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
       })}
