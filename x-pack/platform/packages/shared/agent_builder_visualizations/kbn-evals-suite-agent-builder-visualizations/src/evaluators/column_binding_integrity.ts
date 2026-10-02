@@ -32,7 +32,8 @@ export interface BindingCheck extends ColumnBinding {
 }
 
 // Lens Config API keys whose ES|QL column must be numeric for the chart to render a value.
-const MEASURE_KEYS = new Set(['y', 'metric', 'metrics']);
+// `min` / `max` / `goal` (gauge) and `max_value` (metric background bar) nest inside a measure.
+const MEASURE_KEYS = new Set(['y', 'metric', 'metrics', 'min', 'max', 'goal', 'max_value']);
 // Charts where `x` / `y` are axes (buckets), not series values.
 const AXIS_ONLY_CHART_TYPES = new Set(['heatmap']);
 // Keys that bucket or split the data; any column type is acceptable.
@@ -65,9 +66,9 @@ const stripBackticks = (name: string): string => name.replace(/`/g, '');
 
 /**
  * Every column the config binds to a chart role. Lens bindings are `{ column }`
- * objects under role keys; Vega bindings are `encoding.<channel>.field` on the
- * root view and any layered or concatenated view, with quantitative channels
- * treated as measures.
+ * objects under role keys, including ones nested inside another binding; Vega
+ * bindings are `encoding.<channel>.field` on the root view and any layered or
+ * concatenated view, with quantitative channels treated as measures.
  * Custom content is an HTML template and binds nothing.
  */
 export function collectColumnBindings(visualization: ExtractedVisualization): ColumnBinding[] {
@@ -100,9 +101,9 @@ function walkLens(
   if (!isRecord(value)) {
     return;
   }
+  // A binding can carry further bindings (a gauge metric's `max`), so keep walking.
   if (typeof value.column === 'string' && value.column.trim().length > 0) {
     bindings.push({ path, column: value.column, role });
-    return;
   }
   for (const [key, child] of Object.entries(value)) {
     if (SKIP_KEYS.has(key)) {
