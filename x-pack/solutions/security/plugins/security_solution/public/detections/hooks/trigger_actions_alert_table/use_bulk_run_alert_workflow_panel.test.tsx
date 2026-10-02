@@ -36,8 +36,8 @@ jest.mock('../../../timelines/containers');
 jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: () => ({ dataView: { id: 'data-view-id', getRuntimeMappings: () => ({}) } }),
 }));
-jest.mock('../../../data_view_manager/hooks/use_selected_patterns', () => ({
-  useSelectedPatterns: () => ['.alerts-security.alerts-default'],
+jest.mock('../../../data_view_manager/hooks/use_signal_index_name', () => ({
+  useSignalIndexName: () => '.alerts-security.alerts-default',
 }));
 jest.mock('../../../data_view_manager/hooks/use_browser_fields', () => ({
   useBrowserFields: () => ({}),
@@ -316,6 +316,16 @@ describe('useBulkRunAlertWorkflowPanel', () => {
         })
       );
       expect(NEWEST_FIRST_SORT).toEqual([expect.objectContaining({ direction: 'desc' })]);
+    });
+
+    // The page's data view also covers raw event indices. Searching them could fill the selection
+    // with events the table never counted as alerts.
+    it('resolves the selection from the alerts index, not the data view patterns', () => {
+      renderPanel({ alertItems: [alertItem('alert-1', 'index-1')], isAllSelected: true });
+
+      expect(useTimelineEventsHandlerMock).toHaveBeenCalledWith(
+        expect.objectContaining({ indexNames: ['.alerts-security.alerts-default'] })
+      );
     });
 
     it('searches everything in the time range when no filters apply', () => {
