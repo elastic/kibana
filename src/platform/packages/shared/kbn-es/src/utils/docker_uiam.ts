@@ -104,10 +104,12 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
 
       // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
       // when total stack RSS approaches Docker VM limit.
+      // Keep this at 2g: 1g was below the emulator's extension-creation peak, so
+      // the cgroup OOM-killer reaped its PostgreSQL backend during bootstrap.
       '--memory',
-      '1g',
+      '2g',
       '--memory-swap',
-      '1g',
+      '2g',
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
@@ -553,8 +555,16 @@ async function tryExportLogs(containerName: string, log: ToolingLog) {
     await mkdir(join(REPO_ROOT, '.es'), {
       recursive: true,
     });
-    return writeFile(join(REPO_ROOT, '.es', 'uiam_docker_error.log'), logs);
+    await writeFile(join(REPO_ROOT, '.es', 'uiam_docker_error.log'), logs);
   } catch (err) {
     log.error(`Failed to export logs for container ${containerName}: ${err}`);
+  }
+
+  // Exported separately so a failing `inspect` can never cost us the logs above.
+  try {
+    const { stdout: state } = await execa('docker', ['inspect', containerName]);
+    return writeFile(join(REPO_ROOT, '.es', 'uiam_docker_inspect.log'), state);
+  } catch (err) {
+    log.error(`Failed to export state for container ${containerName}: ${err}`);
   }
 }
