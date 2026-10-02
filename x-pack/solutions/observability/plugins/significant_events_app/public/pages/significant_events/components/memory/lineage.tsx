@@ -17,6 +17,8 @@ interface LineageCrumb {
   title: string;
   usefulness: number;
   archived: boolean;
+  /** 1 for a direct merge source, 2 for one of *its* sources, and so on. */
+  level: number;
 }
 
 /**
@@ -92,21 +94,12 @@ interface MemoryLineageProps {
 export function MemoryLineage({ page, onSelectPage }: MemoryLineageProps) {
   const crumbs = useLineage(page);
 
-  const items = useMemo(
-    () =>
-      crumbs.map((crumb) => (
-        <EuiLink
-          key={crumb.id}
-          onClick={() => onSelectPage(crumb.id)}
-          data-test-subj={`nightshiftMemoryLineageCrumb-${crumb.id}`}
-        >
-          {crumb.title}
-        </EuiLink>
-      )),
-    [crumbs, onSelectPage]
-  );
+  // One row per level. A merge is a fan-in, so rendering the trail as a single
+  // `›` chain would state that each ancestor came from the one before it — a
+  // claim the data does not support.
+  const levels = useMemo(() => groupByLevel(crumbs), [crumbs]);
 
-  if (crumbs.length === 0 || !page) {
+  if (levels.length === 0 || !page) {
     return null;
   }
 
@@ -120,38 +113,90 @@ export function MemoryLineage({ page, onSelectPage }: MemoryLineageProps) {
       <EuiText size="xs" color="subdued">
         <FormattedMessage
           id="xpack.significantEventsApp.memory.lineage.heading"
-          defaultMessage="Merged from"
+          defaultMessage="Merge lineage"
         />
       </EuiText>
       <EuiSpacer size="xs" />
-      <div
-        className={css`
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 4px;
-        `}
-      >
-        {items.map((item, index) => (
-          <React.Fragment key={item.key}>
-            {index > 0 && (
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.significantEventsApp.memory.lineage.separator"
-                  defaultMessage="›"
-                />
-              </EuiText>
-            )}
-            {item}
-            <EuiBadge color="hollow">
+      {levels.map((level, index) => (
+        <div
+          key={level.level}
+          data-test-subj={`nightshiftMemoryLineageLevel-${level.level}`}
+          className={css`
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+            ${index > 0 ? 'margin-top: 4px;' : ''}
+          `}
+        >
+          <EuiText
+            size="xs"
+            color="subdued"
+            className={css`
+              flex-shrink: 0;
+            `}
+          >
+            {index === 0 ? (
               <FormattedMessage
-                id="xpack.significantEventsApp.memory.lineage.mergedBadge"
-                defaultMessage="merged"
+                id="xpack.significantEventsApp.memory.lineage.levelFirst"
+                defaultMessage="Merged from:"
               />
-            </EuiBadge>
-          </React.Fragment>
-        ))}
-      </div>
+            ) : (
+              <FormattedMessage
+                id="xpack.significantEventsApp.memory.lineage.levelDeeper"
+                defaultMessage="which merged from:"
+              />
+            )}
+          </EuiText>
+          {level.crumbs.map((crumb, crumbIndex) => (
+            <React.Fragment key={crumb.id}>
+              {crumbIndex > 0 && (
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="xpack.significantEventsApp.memory.lineage.separator"
+                    defaultMessage=","
+                  />
+                </EuiText>
+              )}
+              <EuiLink
+                onClick={() => onSelectPage(crumb.id)}
+                data-test-subj={`nightshiftMemoryLineageCrumb-${crumb.id}`}
+              >
+                {crumb.title}
+              </EuiLink>
+              <EuiBadge color="hollow">
+                <FormattedMessage
+                  id="xpack.significantEventsApp.memory.lineage.mergedBadge"
+                  defaultMessage="merged"
+                />
+              </EuiBadge>
+            </React.Fragment>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
+
+interface LineageLevel {
+  level: number;
+  crumbs: LineageCrumb[];
+}
+
+/**
+ * Buckets the ancestors the server returned into rows by level, in the order the
+ * server emitted them.
+ *
+ * The server walks `merged_from` breadth-first and reports the level it reached
+ * each ancestor at, so the grouping is the walk's own rather than a guess from
+ * the ancestor list's order.
+ */
+export const groupByLevel = (crumbs: LineageCrumb[]): LineageLevel[] => {
+  const byLevel = new Map<number, LineageCrumb[]>();
+  for (const crumb of crumbs) {
+    byLevel.set(crumb.level, [...(byLevel.get(crumb.level) ?? []), crumb]);
+  }
+  return [...byLevel.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([level, levelCrumbs]) => ({ level, crumbs: levelCrumbs }));
+};

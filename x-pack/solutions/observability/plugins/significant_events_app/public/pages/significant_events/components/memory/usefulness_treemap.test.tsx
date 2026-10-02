@@ -10,9 +10,12 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import {
+  formatCellLabelValue,
   MAX_TREEMAP_CELLS,
   MemoryUsefulnessTreemap,
   MIN_USEFULNESS_AREA,
+  NO_LABEL_VALUE,
+  toCellLabel,
   toTreemapData,
 } from './usefulness_treemap';
 import type { MemorySummary } from './types';
@@ -163,7 +166,50 @@ describe('MemoryUsefulnessTreemap', () => {
     const [layer] = partitionProps.mock.calls[0][0].layers as [
       { nodeLabel: (key: string) => string }
     ];
-    expect(layer.nodeLabel('memory_kafka-lag')).toBe('Kafka consumer lag');
+    // The title plus its usefulness: the label must not report the cell's share of
+    // the chart's total area, which is a different number for the same memory.
+    expect(layer.nodeLabel('memory_kafka-lag')).toBe('50% · Kafka consumer lag');
+  });
+
+  it('labels a cell with the memory title and its own usefulness, never its share of the chart', () => {
+    // A cell's area is its share of the chart total, which for the most useful
+    // memory is a small fraction. Printing that in the cell contradicted the
+    // usefulness the same memory is listed with, so the label reports usefulness.
+    renderTreemap([
+      summary({ id: 'memory_big', usefulness: 0.93 }),
+      summary({ id: 'memory_small', usefulness: 0.04, confidence: 0.5 }),
+    ]);
+
+    const { valueFormatter, layers } = partitionProps.mock.calls[0][0] as {
+      valueFormatter: (value: number) => string;
+      layers: Array<{ nodeLabel: (key: string) => string }>;
+    };
+    const [layer] = layers;
+
+    expect(layer.nodeLabel('memory_big')).toBe('93% · Kafka consumer lag');
+    expect(layer.nodeLabel('memory_small')).toBe('4% · Kafka consumer lag');
+    // The chart's own value row is emptied: it is a separate row that a clipped
+    // long title evicts, which would drop the number first.
+    expect(valueFormatter(0.93)).toBe('');
+  });
+
+  it('formats the cell label percentage from usefulness, not from area', () => {
+    expect(formatCellLabelValue(0.93)).toBe('93%');
+    expect(formatCellLabelValue(0)).toBe('0%');
+    // Out of range on either side: a cell label is a bounded percentage.
+    expect(formatCellLabelValue(-1)).toBe('0%');
+    expect(formatCellLabelValue(1.4)).toBe('100%');
+    expect(formatCellLabelValue(0.935)).toBe('94%');
+  });
+
+  it('builds a cell label from the cell it was given, and nothing for an unknown one', () => {
+    const [cell] = toTreemapData([summary({ usefulness: 0.42 })]);
+    expect(toCellLabel(cell)).toBe('42% · Kafka consumer lag');
+    expect(toCellLabel(undefined)).toBe('');
+  });
+
+  it('leaves the chart value row empty', () => {
+    expect(NO_LABEL_VALUE()).toBe('');
   });
 
   it('colours a cell by its confidence band', () => {

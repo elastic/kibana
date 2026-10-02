@@ -55,6 +55,16 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
       title: string;
       usefulness: number;
       archived: boolean;
+      /**
+       * 1 for a memory the root was merged directly from, 2 for one of *its*
+       * sources, and so on.
+       *
+       * A merge is a fan-in, not a chain: `merged_from` holds several ids, so the
+       * ancestors are a tree. Reporting the level lets a caller draw that tree
+       * level by level instead of flattening it into a list that reads as a
+       * single line of ancestry.
+       */
+      level: number;
     }> = [];
 
     let frontier = (root.merged_from ?? []).filter((id) => !seen.has(id));
@@ -77,6 +87,7 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
           title: page.title,
           usefulness: toMemoryDisplayTelemetry(page, nowSec).conversionRate,
           archived: page.archived,
+          level: depth + 1,
         });
         next.push(...(page.merged_from ?? []));
       }

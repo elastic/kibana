@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { MemoryLineage } from './lineage';
+import { MemoryLineage, groupByLevel } from './lineage';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { MemoryPage } from './types';
 
@@ -41,9 +41,14 @@ const page = (overrides: Partial<MemoryPage> = {}): MemoryPage => ({
  * Answers the lineage endpoint. The server walks the whole chain in one request, so
  * the client resolves with every ancestor at once; the tests only need the set.
  */
-const respondWith = (ancestors: Array<{ id: string; title: string }>) => {
+const respondWith = (ancestors: Array<{ id: string; title: string; level?: number }>) => {
   fetchMock.mockResolvedValue({
-    ancestors: ancestors.map((ancestor) => ({ ...ancestor, usefulness: 0.5, archived: true })),
+    ancestors: ancestors.map((ancestor, index) => ({
+      usefulness: 0.5,
+      archived: true,
+      ...ancestor,
+      level: ancestor.level ?? index + 1,
+    })),
   });
 };
 
@@ -183,5 +188,78 @@ describe('MemoryLineage', () => {
       expect(screen.queryByTestId('nightshiftMemoryLineage')).not.toBeInTheDocument()
     );
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('draws one row per level, so a merge tree is not read as a single chain', async () => {
+    respondWith([
+      { id: 'memory_a', title: 'A', level: 1 },
+      { id: 'memory_b', title: 'B', level: 1 },
+      { id: 'memory_c', title: 'C', level: 2 },
+    ]);
+    renderLineage(page({ merged_from: ['memory_a', 'memory_b'] }));
+
+    await waitFor(() => expect(screen.getByText('C')).toBeInTheDocument());
+
+    // Two rows, not one flat list: a merge is a fan-in, so B is a sibling of A
+    // rather than a descendant of it.
+    expect(screen.getByTestId('nightshiftMemoryLineageLevel-1')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftMemoryLineageLevel-2')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftMemoryLineageLevel-3')).not.toBeInTheDocument();
+    // Only the first row reads as the direct source; deeper rows say whose.
+    expect(screen.getByText('Merged from:')).toBeInTheDocument();
+    expect(screen.getByText('which merged from:')).toBeInTheDocument();
+    // The row separator is a comma, not the `›` that implied linear ancestry.
+    expect(screen.queryByText('›')).not.toBeInTheDocument();
+  });
+
+  it('keeps every crumb in a level navigable', async () => {
+    respondWith([
+      { id: 'memory_a', title: 'A', level: 1 },
+      { id: 'memory_b', title: 'B', level: 1 },
+    ]);
+    const onSelectPage = jest.fn();
+    render(
+      <I18nProvider>
+        <MemoryLineage
+          page={page({ merged_from: ['memory_a', 'memory_b'] })}
+          onSelectPage={onSelectPage}
+        />
+      </I18nProvider>
+    );
+
+    await waitFor(() => expect(screen.getByText('B')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('B'));
+
+    expect(onSelectPage).toHaveBeenCalledWith('memory_b');
+  });
+});
+
+describe('groupByLevel', () => {
+  const crumb = (id: string, level: number) => ({
+    id,
+    title: id,
+    usefulness: 0.5,
+    archived: true,
+    level,
+  });
+
+  it('buckets a fan-in into one bucket per level, keeping the order within a level', () => {
+    expect(
+      groupByLevel([crumb('a', 1), crumb('b', 1), crumb('c', 2), crumb('d', 3)]).map(
+        ({ level, crumbs }) => [level, crumbs.map(({ id }) => id)]
+      )
+    ).toEqual([
+      [1, ['a', 'b']],
+      [2, ['c']],
+      [3, ['d']],
+    ]);
+  });
+
+  it('returns the levels in ascending order however the server emitted them', () => {
+    expect(groupByLevel([crumb('c', 3), crumb('a', 1)]).map(({ level }) => level)).toEqual([1, 3]);
+  });
+
+  it('returns nothing for no ancestors', () => {
+    expect(groupByLevel([])).toEqual([]);
   });
 });

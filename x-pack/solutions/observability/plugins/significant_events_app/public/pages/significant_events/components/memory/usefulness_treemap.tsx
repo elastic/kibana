@@ -7,7 +7,6 @@
 
 import type { ElementClickListener, LayerValue, TooltipInfo } from '@elastic/charts';
 import { Chart, Partition, PartitionLayout, Settings, Tooltip } from '@elastic/charts';
-import { percentValueGetter } from '@elastic/charts/dist/chart_types/partition_chart/layout/config';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import {
   EuiFlexGroup,
@@ -18,7 +17,7 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import React, { useCallback, useMemo } from 'react';
 import type { MemorySummary } from './types';
 
@@ -94,6 +93,38 @@ export const toTreemapData = (pages: MemorySummary[]): TreemapCell[] =>
     });
 
 const asPercent = (value: number): number => Math.round(value * 100);
+
+/** Renders a cell label's usefulness as a whole percentage. */
+export const formatCellLabelValue = (usefulness: number): string =>
+  `${asPercent(asUnit(usefulness))}%`;
+
+/**
+ * The text a cell writes in its own label: its title and its usefulness.
+ *
+ * The chart's default value getter is a fraction of the *total chart area*, which
+ * beside the ranking list reads as "8% useful" for a memory the list calls 93%
+ * useful — two different numbers for one memory. Area share carries no meaning of
+ * its own here, so the label reports usefulness and the tooltip reports both.
+ *
+ * The percentage rides in the label text rather than the chart's separate value
+ * slot, because that slot is a row of its own which a clipped long title evicts:
+ * the number a cell exists to show would be the first thing dropped.
+ */
+export const toCellLabel = (cell: TreemapCell | undefined): string => {
+  if (!cell) return '';
+  // The percentage leads, because the chart clips a label that overflows its cell
+  // from the end: trailing it would drop the number off exactly the small cells
+  // whose usefulness is the thing worth reading.
+  return `${formatCellLabelValue(cell.usefulness)} · ${cell.title}`;
+};
+
+/**
+ * The chart's value slot, emptied.
+ *
+ * An empty string drops the row the chart would otherwise append after the label;
+ * `toCellLabel` carries the percentage instead.
+ */
+export const NO_LABEL_VALUE = (): string => '';
 
 const isLayerValue = (value: unknown): value is LayerValue =>
   typeof value === 'object' && value !== null && 'groupByRollup' in value;
@@ -185,7 +216,7 @@ export function MemoryUsefulnessTreemap({ pages, onSelectPage }: MemoryUsefulnes
         <p>
           <FormattedMessage
             id="xpack.significantEventsApp.memory.treemap.caption"
-            defaultMessage="Cell area is usefulness; cell colour is confidence."
+            defaultMessage="Cell area and label are usefulness; cell colour is confidence."
           />
         </p>
       </EuiText>
@@ -202,7 +233,12 @@ export function MemoryUsefulnessTreemap({ pages, onSelectPage }: MemoryUsefulnes
           data={cells}
           id="nightshift_memory_usefulness_treemap"
           valueAccessor={(cell) => cell.area}
-          valueGetter={percentValueGetter}
+          // Area still drives the geometry. The label value itself is empty on
+          // purpose: the chart appends the value as a separate row that `clipText`
+          // then cuts off a long title to make room for, so the number a cell was
+          // meant to show is the first thing to disappear. The percentage rides in
+          // `nodeLabel` instead, where it wraps with the title it belongs to.
+          valueFormatter={NO_LABEL_VALUE}
           layout={PartitionLayout.treemap}
           layers={[
             {
@@ -210,8 +246,11 @@ export function MemoryUsefulnessTreemap({ pages, onSelectPage }: MemoryUsefulnes
               // that happen to share one, and the click would be ambiguous.
               groupByRollup: (cell: TreemapCell) => cell.id,
               shape: { fillColor: (key) => colors[cellsById.get(key)?.band ?? 'low'] },
-              fillLabel: { fontWeight: 500, minFontSize: 10, maxFontSize: 14 },
-              nodeLabel: (key) => cellsById.get(`${key}`)?.title ?? `${key}`,
+              // `clipText` keeps a long title inside its own cell. Without it the
+              // label runs over the neighbouring cells, so a small cell's title
+              // reads as if it belonged to the cell beside it.
+              fillLabel: { clipText: true, fontWeight: 500, minFontSize: 10, maxFontSize: 14 },
+              nodeLabel: (key) => toCellLabel(cellsById.get(`${key}`)),
             },
           ]}
         />
@@ -253,16 +292,21 @@ function BandEntry({ band, color }: { band: ConfidenceBand; color: string }) {
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
       <EuiFlexItem grow={false}>
+        {/* A painted swatch, not just the band's name: the legend exists to tie a
+            colour to a band, and text alone ties nothing. `className` with
+            `@emotion/css` rather than the `css` prop, which only reaches the DOM
+            through the JSX runtime's pragma and would otherwise emit nothing. */}
         <span
           aria-hidden="true"
           data-test-subj={`nightshiftMemoryTreemapLegend-${band}`}
-          css={css({
-            backgroundColor: color,
-            borderRadius: 2,
-            display: 'block',
-            height: 10,
-            width: 10,
-          })}
+          className={css`
+            background-color: ${color};
+            border-radius: 2px;
+            display: block;
+            flex-shrink: 0;
+            height: 10px;
+            width: 10px;
+          `}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -83,6 +83,25 @@ describe('getMemoryLineageRoute', () => {
     ]);
   });
 
+  it('reports the level each ancestor was reached at, so a fan-in is drawable', async () => {
+    // `memory_root` merged from two memories, one of which was itself merged from
+    // another. The levels are what let the UI show "Merged from: A, B" and
+    // "which merged from: C" instead of one flat chain.
+    const { result } = run(memory('memory_root', ['memory_a', 'memory_b']), {
+      memory_a: ['memory_c'],
+      memory_b: [],
+      memory_c: [],
+    });
+
+    const lineage = await result;
+
+    expect(lineage.ancestors.map((a: { id: string; level: number }) => [a.id, a.level])).toEqual([
+      ['memory_a', 1],
+      ['memory_b', 1],
+      ['memory_c', 2],
+    ]);
+  });
+
   it('reports the cap when the chain is longer than the walk allows', async () => {
     // A chain deeper than the cap must say it stopped at the cap.
     const deep: Record<string, string[]> = {};
