@@ -630,6 +630,7 @@ steps:
       }
     });
   }
+
   apiTest(
     'passes the caller identity through Agent Builder status and execution lists',
     async ({ apiClient, esClient }) => {

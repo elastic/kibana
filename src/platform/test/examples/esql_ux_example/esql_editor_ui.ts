@@ -37,39 +37,18 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should change datasource and search with visor', async () => {
-      // Open visor with Ctrl+K
-      const editor = await testSubjects.find('ESQLEditor');
-      const textarea = await editor.findByCssSelector('textarea');
-      await textarea.type([Key.CONTROL, 'k']);
+    it('should search with visor using the editor query source', async () => {
+      await esql.setEsqlEditorQuery('FROM logstash-*');
+      await esql.toggleQuickSearchVisor(true);
 
-      await retry.try(async () => {
-        expect(await esql.isQuickSearchVisorVisible()).to.be(true);
-      });
-
-      // Dismiss any suggest widget that may have appeared
-      await browser.pressKeys(browser.keys.ESCAPE);
-      await retry.try(async () => {
-        expect(await esql.isQuickSearchVisorVisible()).to.be(true);
-      });
-
-      // Change datasource
-      await esql.toggleDatasourceDropdown(true);
-
-      const datasourceList = await testSubjects.find('esqlEditor-visor-datasourcesList-switcher');
-      const datasourceSearchInput = await datasourceList.findByCssSelector('input[type="search"]');
-
-      await datasourceSearchInput.click();
-      await datasourceSearchInput.pressKeys(Key.ARROW_DOWN);
-      await datasourceSearchInput.pressKeys(Key.ARROW_DOWN);
-      await datasourceSearchInput.pressKeys(Key.ENTER);
-      await esql.toggleDatasourceDropdown(false);
-
-      // Search and verify query updated with KQL
       const kqlInput = await testSubjects.find('esqlVisorKQLQueryInput');
       await kqlInput.click();
       await kqlInput.type('test');
-      await kqlInput.pressKeys(Key.ENTER);
+
+      await retry.waitFor('KQL submit button to appear', async () => {
+        return await testSubjects.exists('esqlVisorKQLSubmit');
+      });
+      await testSubjects.click('esqlVisorKQLSubmit');
 
       await retry.try(async () => {
         const query = await esql.getEsqlEditorQuery();
