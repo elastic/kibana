@@ -225,19 +225,28 @@ steps:
 
   # Reads the later requery and falls back to the first one, rather than reading
   # the retry alone: both calls swallow their own failure, so a transient failure
-  # on the second read would otherwise discard a first read that had succeeded,
-  # collapse a count to 0, and leave `settled` false forever -- an Investigation
-  # that never closes even though every Proposal was decided. The retry exists to
-  # see *more* than the first read, so it must never be able to see less.
-  # `| default:` against another step's output is this package's existing idiom
-  # for that (forensics_run_endpoint_analysis.yaml's host_name chains two step
-  # outputs and a literal the same way).
+  # on the second read would otherwise discard a first read that had succeeded.
+  # The retry exists to see *more* than the first read, so it must never be able
+  # to see less. `| default:` against another step's output is this package's
+  # existing idiom for that (forensics_run_endpoint_analysis.yaml's host_name
+  # chains two step outputs and a literal the same way).
+  #
+  # created_count's trailing `default: 0` is fail-safe on its own: a 0 created
+  # count almost never clears `>= expectedProposalCount`, so a failed pair of
+  # creation reads blocks settlement same as before this requery was split into
+  # three independently-scoped pairs. pending_count/executing_count are the
+  # opposite case -- those gate on being *zero*, so a failed pair collapsing to
+  # literal `0` would read as "nothing pending/executing" and let `resolve_settled`
+  # close the Investigation while a real pending or executing Proposal sits
+  # unobserved because this specific read failed, not because it doesn't exist.
+  # `default: 1` keeps them fail-closed: a failed pair can never look like "none
+  # outstanding," only like "at least one," which is always safe to NOT-close on.
   - name: resolve_settlement_counts
     type: data.set
     with:
       created_count: "${{ steps.requery_created_retry.output.total | default: steps.requery_created.output.total | default: 0 }}"
-      pending_count: "${{ steps.requery_pending_retry.output.total | default: steps.requery_pending.output.total | default: 0 }}"
-      executing_count: "${{ steps.requery_executing_retry.output.total | default: steps.requery_executing.output.total | default: 0 }}"
+      pending_count: "${{ steps.requery_pending_retry.output.total | default: steps.requery_pending.output.total | default: 1 }}"
+      executing_count: "${{ steps.requery_executing_retry.output.total | default: steps.requery_executing.output.total | default: 1 }}"
 
   # Three-term `and` chain with no `or` mixed in, which associates left-to-right
   # and so avoids the mixed and/or precedence hazard create_proposal.yaml warns
