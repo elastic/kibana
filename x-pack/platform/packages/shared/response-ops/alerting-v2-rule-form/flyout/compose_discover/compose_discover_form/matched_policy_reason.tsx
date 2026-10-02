@@ -100,20 +100,6 @@ export const MatchedPolicyReason = ({ category, matcher, ruleTags }: Props) => {
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
-      {matchedTags && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={tagsTooltipContent}>
-            <span
-              css={tagCircleStyles}
-              tabIndex={0}
-              aria-label={tagsTooltipContent}
-              data-test-subj="matchedPolicyReasonTags"
-            >
-              <EuiIcon type="tag" size="s" aria-hidden />
-            </span>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
       {trimmedExpression && (
         <EuiFlexItem grow={false}>
           <EuiToolTip
@@ -134,6 +120,20 @@ export const MatchedPolicyReason = ({ category, matcher, ruleTags }: Props) => {
             >
               {expressionBadgeLabel}
             </EuiBadge>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {matchedTags && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={tagsTooltipContent}>
+            <span
+              css={tagCircleStyles}
+              tabIndex={0}
+              aria-label={tagsTooltipContent}
+              data-test-subj="matchedPolicyReasonTags"
+            >
+              <EuiIcon type="tag" size="s" aria-hidden />
+            </span>
           </EuiToolTip>
         </EuiFlexItem>
       )}

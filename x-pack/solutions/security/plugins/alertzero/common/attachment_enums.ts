@@ -11,3 +11,4 @@ export type SeverityLevel = (typeof SEVERITY_LEVELS)[number];
 
 /** Canonical Diamond Model vertices, in the order the renderer lays the vertex cards out. */
 export const DIAMOND_VERTICES = ['adversary', 'capability', 'infrastructure', 'victim'] as const;
+export type DiamondVertex = (typeof DIAMOND_VERTICES)[number];

@@ -13,10 +13,7 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
 } from '@kbn/management-settings-ids';
 import { parseIndexPatterns } from '@kbn/streams-schema';
-import {
-  MAX_ID_LENGTH,
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-} from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -32,7 +29,6 @@ import {
   type StreamCandidate,
   type StreamClassificationResult,
 } from './classify_streams';
-import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
@@ -46,7 +42,6 @@ export interface EligibleStreamsResponse {
     enabled: boolean;
     intervalHours: number;
   };
-  connectorId: string;
   timeRange: {
     from: string;
     to: string;
@@ -122,19 +117,12 @@ const eligibleStreamsRoute = createServerRoute({
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;
     const lookbackHours = query.lookbackHours ?? DEFAULT_LOOKBACK_HOURS;
 
-    const [connectorId, executions, allStreams, isQueryStreamsEnabled, rawIndexPatterns] =
-      await Promise.all([
-        resolveConnectorForFeature({
-          searchInferenceEndpoints: server.searchInferenceEndpoints,
-          featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-          featureName: 'knowledge indicator extraction',
-          request,
-        }),
-        streamsKIsOnboardingClient.getRecentExecutions(),
-        streamsClient.listStreams(),
-        uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS),
-        uiSettingsClient.get<string>(OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS),
-      ]);
+    const [executions, allStreams, isQueryStreamsEnabled, rawIndexPatterns] = await Promise.all([
+      streamsKIsOnboardingClient.getRecentExecutions(request),
+      streamsClient.listStreams(),
+      uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS),
+      uiSettingsClient.get<string>(OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS),
+    ]);
 
     const indexPatterns = parseIndexPatterns(rawIndexPatterns);
 
@@ -170,7 +158,6 @@ const eligibleStreamsRoute = createServerRoute({
         enabled,
         intervalHours: intervalHoursSetting ?? DEFAULT_EXTRACTION_INTERVAL_HOURS,
       },
-      connectorId,
       timeRange: {
         from: new Date(start).toISOString(),
         to: new Date(now).toISOString(),

@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import type { RouteRegisterParameters } from '.';
@@ -76,6 +77,7 @@ export function registerTopNFunctionsSearchRoute({
         const topNFunctions = await profilingDataAccess.services.fetchESFunctions({
           core,
           esClient,
+          abortSignal: getRequestAbortedSignal(request.events.aborted$),
           query,
           aggregationFields: [SERVICE_NAME],
           totalSeconds,

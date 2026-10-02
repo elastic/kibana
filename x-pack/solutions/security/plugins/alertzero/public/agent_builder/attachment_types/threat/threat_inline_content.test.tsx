@@ -29,6 +29,7 @@ const mockShare = createMockShare();
 
 const defaultNavigation = {
   spaceId: 'default',
+  prependPath: (path: string) => path,
 };
 
 const renderProps = (

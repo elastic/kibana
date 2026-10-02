@@ -66,7 +66,7 @@ export const RuleSummaryFlyoutContainer = ({
   });
 
   if ((!isSourceRule && isLoading) || (isSourceRule && isLoadingSourceRule)) {
-    return <LoadingFlyout type="overlay" onClose={onClose} />;
+    return <LoadingFlyout type="overlay" ownFocus={false} onClose={onClose} />;
   }
 
   if (isSourceRule && sourceRule) {
@@ -84,6 +84,7 @@ export const RuleSummaryFlyoutContainer = ({
     return (
       <EntityNotFoundFlyout
         type="overlay"
+        ownFocus={false}
         title={i18n.translate('xpack.alertingV2.rule.summaryFlyout.notFoundTitle', {
           defaultMessage: 'Rule not found',
         })}
