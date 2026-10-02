@@ -22,7 +22,7 @@ import {
   MAX_KEYWORD_LENGTH,
 } from '../../common';
 import type { InvestigationAttributes } from '../storage/types';
-import { MAX_THREAD_SEEN_EVENT_IDS } from '../storage/types';
+import { MAX_THREAD_SEEN_EVENTS } from '../storage/types';
 
 export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
 
@@ -122,7 +122,11 @@ const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends(
       channel: optionalKeyword,
       thread_ts: optionalKeyword,
       status_message_ts: optionalKeyword,
-      seen_event_ids: schema.maybe(schema.arrayOf(keyword, { maxSize: MAX_THREAD_SEEN_EVENT_IDS })),
+      seen_events: schema.maybe(
+        schema.arrayOf(schema.object({ event_id: keyword, execution_id: keyword }), {
+          maxSize: MAX_THREAD_SEEN_EVENTS,
+        })
+      ),
     })
   ),
 });

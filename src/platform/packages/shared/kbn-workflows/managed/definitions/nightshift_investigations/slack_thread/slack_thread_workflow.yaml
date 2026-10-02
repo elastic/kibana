@@ -4,14 +4,16 @@ description: >
   Keeps one Nightshift investigation per Slack thread. Every human reply in a thread that already
   has an investigation re-runs it in the same conversation. The thread has one status
   message: the first run posts it, and every run edits it with the findings or the failure. A
-  later run leaves it showing the previous findings until its own are ready.
+  later run leaves it showing the previous findings until its own are ready, and leaves it as it
+  was if another run owns the investigation.
 enabled: true
 settings:
   # Longer than the investigation's own timeout, since this run waits for it.
   timeout: '65m'
   # One run per thread at a time, in arrival order, so replies build on each other. The
   # investigation rejects a second concurrent run (409), so this queue is what makes a reply wait
-  # rather than fail. Anything else that runs this thread's investigation must use the same key.
+  # rather than fail. It only orders runs of this workflow: a run of the investigation started
+  # elsewhere is not queued here, and a reply that collides with one leaves the thread as it was.
   concurrency:
     key: 'nightshift-slack-thread-{{ event.connectorId }}-{{ event.channel }}-{{ event.threadId | default: event.messageId }}'
     strategy: queue
@@ -26,15 +28,17 @@ triggers:
   # connector that receives events straight from Slack does not: its posts carry botId, and its
   # edits carry a message_changed subtype that may lack botId. A reply also sent to the channel
   # carries the thread_broadcast subtype, and a reply with attached files the file_share subtype;
-  # only its text is investigated.
+  # only its text is investigated. The thread is looked up by workspace, so an event without one
+  # is ignored.
   - type: slack2.message
     connector-id: elastic-apps-slack
     on:
-      condition: 'event.threadId:* and event.text:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast or event.subtype:file_share)'
+      condition: 'event.threadId:* and event.workspace:* and event.text:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast or event.subtype:file_share)'
 
 steps:
   # A reply only continues an existing investigation; this workflow never creates one. Delivery
-  # is at least once, so the thread records each event and a redelivered one is skipped.
+  # is at least once, so the thread records each event with the execution handling it, and skips
+  # an event another execution already handled. A retry within this execution is not a duplicate.
   - name: find_investigation
     type: kibana.request
     with:
@@ -49,6 +53,7 @@ steps:
         text: '${{ event.text }}'
         create: false
         event_id: '${{ event.correlationKey }}'
+        execution_id: '{{ execution.id }}'
 
   - name: in_investigation_thread
     type: if
@@ -119,23 +124,53 @@ steps:
           headers:
             x-elastic-internal-origin: 'kibana'
 
-      # The record alone cannot tell this run's result: a run that failed before reopening the
-      # investigation leaves the previous run's completed record in place.
+      # A run rejected before it reopened the investigation, for example because another run owns
+      # it, did not act on the event. It gives the event back so that a redelivery is handled.
+      - name: release_event
+        type: kibana.request
+        if: "${{ steps.investigate.error != null and steps.get_investigation.output.status != 'failed' }}"
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_slack_thread'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+          body:
+            workspace: '${{ event.workspace }}'
+            channel: '{{ event.channel }}'
+            thread_ts: '{{ event.threadId | default: event.messageId }}'
+            create: false
+            event_id: '${{ event.correlationKey }}'
+            execution_id: '{{ execution.id }}'
+            release_event: true
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+            strategy: exponential
+          continue: true
+
+      # The record alone cannot tell this run's result: a run rejected before it reopened the
+      # investigation leaves the record as another run left it, completed with the previous findings
+      # or running. Such a run reports nothing, so the status message keeps what it showed. It says
+      # the investigation failed only when the record did, or when the record is still pending,
+      # which means no run ever started it.
       - name: set_result
         type: data.set
         with:
           # This run's own message on the first run, the recorded one on every later run.
           status_message_ts: '${{ steps.post_started.output.ts | default: steps.find_investigation.output.status_message_ts }}'
+          report: "{% if steps.investigate.error == null and steps.get_investigation.output.status == 'completed' %}findings{% elsif steps.get_investigation.output.status == 'failed' %}failure{% elsif steps.investigate.error != null and steps.get_investigation.output.status == 'pending' %}failure{% else %}none{% endif %}"
+          # Slack edits take at most 4,000 characters of text.
           result_text: |
             {% if steps.investigate.error == null and steps.get_investigation.output.status == 'completed' %}{% if steps.get_investigation.output.title %}*{{ steps.get_investigation.output.title }}*
 
-            {% endif %}{{ steps.get_investigation.output.summary }}{% else %}Investigation failed.{% endif %}
+            {% endif %}{{ steps.get_investigation.output.summary | truncate: 3000 }}{% else %}Investigation failed.{% endif %}
 
             <{{ variables.investigation_url }}|View the investigation>
 
       - name: update_result
         type: slack2.updateMessage
-        if: '${{ variables.status_message_ts != null }}'
+        if: "${{ variables.report != 'none' and variables.status_message_ts != null }}"
         connector-id: '{{ event.connectorId }}'
         with:
           channel: '{{ event.channel }}'
@@ -153,7 +188,7 @@ steps:
       # deleted it, so the result goes in a new message that later runs edit instead.
       - name: post_result
         type: slack2.sendMessage
-        if: '${{ steps.update_result.output.ts == null }}'
+        if: "${{ variables.report != 'none' and steps.update_result.output.ts == null }}"
         connector-id: '{{ event.connectorId }}'
         with:
           channel: '{{ event.channel }}'

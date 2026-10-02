@@ -55,7 +55,7 @@ import type {
 import {
   InvestigationAlreadyExistsError,
   InvestigationStaleWriteError,
-  MAX_THREAD_SEEN_EVENT_IDS,
+  MAX_THREAD_SEEN_EVENTS,
 } from '../storage';
 import { buildInvestigationMessage } from './build_investigation_message';
 import {
@@ -148,8 +148,21 @@ export interface SlackThreadInvestigation {
   investigation_id: string;
   title: string;
   status_message_ts?: string;
-  /** The thread already handled this event, so the caller should not act on it again. */
+  /** Another execution already handled this event, so the caller should not act on it again. */
   duplicate?: true;
+}
+
+/** A delivered event and the workflow execution handling it. */
+export interface SlackThreadEvent {
+  eventId: string;
+  executionId: string;
+}
+
+interface SlackThreadActivity {
+  statusMessageTs?: string;
+  event?: SlackThreadEvent;
+  /** Gives `event` back instead of recording it, when this execution was the one that recorded it. */
+  releaseEvent?: boolean;
 }
 
 const toSlackThreadInvestigation = (
@@ -162,24 +175,44 @@ const toSlackThreadInvestigation = (
   ...(duplicate && { duplicate: true }),
 });
 
-/** The thread after it records `eventId` and `statusMessageTs`, or undefined when nothing changes. */
+/** Whether an execution other than the one delivering `event` already handled it. */
+const isDuplicateEvent = (
+  thread: InvestigationThread | undefined,
+  { event, releaseEvent }: SlackThreadActivity
+): boolean =>
+  event !== undefined &&
+  !releaseEvent &&
+  (thread?.seen_events ?? []).some(
+    (seen) => seen.event_id === event.eventId && seen.execution_id !== event.executionId
+  );
+
+/** The thread after it records the activity, or undefined when nothing changes. */
 const nextThreadState = (
   thread: InvestigationThread,
-  { statusMessageTs, eventId }: { statusMessageTs?: string; eventId?: string }
+  { statusMessageTs, event, releaseEvent }: SlackThreadActivity
 ): InvestigationThread | undefined => {
-  const seen = thread.seen_event_ids ?? [];
-  const recordEvent = eventId !== undefined && !seen.includes(eventId);
+  const seen = thread.seen_events ?? [];
+  let seenEvents: InvestigationThread['seen_events'];
+  if (event && releaseEvent) {
+    const kept = seen.filter(
+      (handled) => handled.event_id !== event.eventId || handled.execution_id !== event.executionId
+    );
+    seenEvents = kept.length < seen.length ? kept : undefined;
+  } else if (event && !seen.some((handled) => handled.event_id === event.eventId)) {
+    seenEvents = [...seen, { event_id: event.eventId, execution_id: event.executionId }].slice(
+      -MAX_THREAD_SEEN_EVENTS
+    );
+  }
+  const recordEvents = seenEvents !== undefined;
   const recordStatusMessage =
     statusMessageTs !== undefined && statusMessageTs !== thread.status_message_ts;
-  if (!recordEvent && !recordStatusMessage) {
+  if (!recordEvents && !recordStatusMessage) {
     return undefined;
   }
   return {
     ...thread,
     ...(recordStatusMessage && { status_message_ts: statusMessageTs }),
-    ...(recordEvent && {
-      seen_event_ids: [...seen, eventId].slice(-MAX_THREAD_SEEN_EVENT_IDS),
-    }),
+    ...(recordEvents && { seen_events: seenEvents }),
   };
 };
 
@@ -813,8 +846,10 @@ export class NightshiftInvestigationsClient {
    * The investigation for a Slack thread. Its ids derive from the thread, so concurrent calls for
    * one thread agree on a single record and conversation. Without `create`, a thread that has no
    * investigation yet returns undefined. `statusMessageTs` records the thread's status message
-   * whatever the investigation's status. `eventId` records a delivered event; an event the thread
-   * already recorded comes back marked `duplicate`.
+   * whatever the investigation's status. `event` records a delivered event for the execution
+   * handling it; an event another execution already recorded comes back marked `duplicate`, while
+   * the same execution asking again does not. `releaseEvent` removes this execution's record of
+   * `event`, for a run that ended up not acting on it.
    */
   async findOrCreateSlackThread({
     workspace,
@@ -823,7 +858,8 @@ export class NightshiftInvestigationsClient {
     text,
     create,
     statusMessageTs,
-    eventId,
+    event,
+    releaseEvent,
   }: {
     workspace: string;
     channel: string;
@@ -831,7 +867,8 @@ export class NightshiftInvestigationsClient {
     text?: string;
     create: boolean;
     statusMessageTs?: string;
-    eventId?: string;
+    event?: SlackThreadEvent;
+    releaseEvent?: boolean;
   }): Promise<SlackThreadInvestigation | undefined> {
     // Channel ids are only unique within a workspace.
     const threadKey = `${workspace}/${channel}/${threadTs}`;
@@ -878,18 +915,16 @@ export class NightshiftInvestigationsClient {
       };
     }
 
-    return this.recordSlackThreadActivity(record, { statusMessageTs, eventId });
+    return this.recordSlackThreadActivity(record, { statusMessageTs, event, releaseEvent });
   }
 
   private async recordSlackThreadActivity(
     record: InvestigationRecord,
-    activity: { statusMessageTs?: string; eventId?: string }
+    activity: SlackThreadActivity
   ): Promise<SlackThreadInvestigation> {
     let current = record;
     for (let attempt = 1; ; attempt++) {
-      const duplicate =
-        activity.eventId !== undefined &&
-        (current.thread?.seen_event_ids ?? []).includes(activity.eventId);
+      const duplicate = isDuplicateEvent(current.thread, activity);
       const thread = current.thread && nextThreadState(current.thread, activity);
       if (!thread) {
         return toSlackThreadInvestigation(current, duplicate);

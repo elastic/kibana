@@ -14,8 +14,14 @@ import type {
   Severity,
 } from '../../common';
 
-/** How many handled event ids a thread keeps; the oldest are dropped first. */
-export const MAX_THREAD_SEEN_EVENT_IDS = 50;
+/** How many handled events a thread keeps; the oldest are dropped first. */
+export const MAX_THREAD_SEEN_EVENTS = 50;
+
+/** A delivered event and the workflow execution handling it. */
+export interface InvestigationThreadEvent {
+  event_id: string;
+  execution_id: string;
+}
 
 /** The chat thread an investigation belongs to, when it was started from one. */
 export interface InvestigationThread {
@@ -25,8 +31,8 @@ export interface InvestigationThread {
   thread_ts: string;
   /** The thread's status message; every run edits it in place. */
   status_message_ts?: string;
-  /** Delivery ids of the events already handled, oldest first, so a redelivery runs once. */
-  seen_event_ids?: string[];
+  /** The events already handled, oldest first, so a redelivery runs once. */
+  seen_events?: InvestigationThreadEvent[];
 }
 
 export interface InvestigationAttributes extends InvestigationStructuredOutput {

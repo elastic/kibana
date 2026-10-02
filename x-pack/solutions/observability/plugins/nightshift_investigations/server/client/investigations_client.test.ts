@@ -29,7 +29,7 @@ import type {
 import {
   InvestigationAlreadyExistsError,
   InvestigationStaleWriteError,
-  MAX_THREAD_SEEN_EVENT_IDS,
+  MAX_THREAD_SEEN_EVENTS,
 } from '../storage';
 import {
   InvestigationConflictError,
@@ -2008,20 +2008,27 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     expect(result?.status_message_ts).toBe('1700.0003');
   });
 
-  it('records a new event and marks a redelivered one as a duplicate', async () => {
+  const handled = (eventId: string, executionId = 'exec-1') => ({
+    event_id: eventId,
+    execution_id: executionId,
+  });
+
+  it('records a new event and marks one another execution handled as a duplicate', async () => {
     repository.get.mockResolvedValue(
-      makeRecord({ thread: { ...SLACK_THREAD, seen_event_ids: ['Ev1'] } }, { id: 'inv-9' })
+      makeRecord({ thread: { ...SLACK_THREAD, seen_events: [handled('Ev1')] } }, { id: 'inv-9' })
     );
 
     const fresh = await makeClient().findOrCreateSlackThread({
       ...THREAD,
       create: false,
-      eventId: 'Ev2',
+      event: { eventId: 'Ev2', executionId: 'exec-2' },
     });
     expect(fresh).not.toHaveProperty('duplicate');
     expect(repository.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        patch: { thread: { ...SLACK_THREAD, seen_event_ids: ['Ev1', 'Ev2'] } },
+        patch: {
+          thread: { ...SLACK_THREAD, seen_events: [handled('Ev1'), handled('Ev2', 'exec-2')] },
+        },
       })
     );
 
@@ -2029,30 +2036,80 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     const redelivered = await makeClient().findOrCreateSlackThread({
       ...THREAD,
       create: false,
-      eventId: 'Ev1',
+      event: { eventId: 'Ev1', executionId: 'exec-3' },
     });
     expect(redelivered).toMatchObject({ investigation_id: 'inv-9', duplicate: true });
     expect(repository.update).not.toHaveBeenCalled();
   });
 
-  it('keeps only the most recent event ids', async () => {
-    const seen = Array.from({ length: MAX_THREAD_SEEN_EVENT_IDS }, (_, i) => `Ev${i}`);
+  it('does not treat the execution that handled an event asking again as a duplicate', async () => {
     repository.get.mockResolvedValue(
-      makeRecord({ thread: { ...SLACK_THREAD, seen_event_ids: seen } })
+      makeRecord({ thread: { ...SLACK_THREAD, seen_events: [handled('Ev1')] } }, { id: 'inv-9' })
     );
 
-    await makeClient().findOrCreateSlackThread({ ...THREAD, create: false, eventId: 'EvNew' });
+    const retried = await makeClient().findOrCreateSlackThread({
+      ...THREAD,
+      create: false,
+      event: { eventId: 'Ev1', executionId: 'exec-1' },
+    });
 
-    expect(repository.update.mock.calls[0][0].patch.thread?.seen_event_ids).toEqual([
+    expect(retried).not.toHaveProperty('duplicate');
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('gives an event back only for the execution that handled it', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord(
+        { thread: { ...SLACK_THREAD, seen_events: [handled('Ev0'), handled('Ev1')] } },
+        { id: 'inv-9', version: 'v1' }
+      )
+    );
+
+    const otherExecution = await makeClient().findOrCreateSlackThread({
+      ...THREAD,
+      create: false,
+      event: { eventId: 'Ev1', executionId: 'exec-2' },
+      releaseEvent: true,
+    });
+    expect(otherExecution).not.toHaveProperty('duplicate');
+    expect(repository.update).not.toHaveBeenCalled();
+
+    const released = await makeClient().findOrCreateSlackThread({
+      ...THREAD,
+      create: false,
+      event: { eventId: 'Ev1', executionId: 'exec-1' },
+      releaseEvent: true,
+    });
+    expect(released).not.toHaveProperty('duplicate');
+    expect(repository.update).toHaveBeenCalledWith({
+      id: 'inv-9',
+      patch: { thread: { ...SLACK_THREAD, seen_events: [handled('Ev0')] } },
+      version: 'v1',
+    });
+  });
+
+  it('keeps only the most recent events', async () => {
+    const seen = Array.from({ length: MAX_THREAD_SEEN_EVENTS }, (_, i) => handled(`Ev${i}`));
+    repository.get.mockResolvedValue(
+      makeRecord({ thread: { ...SLACK_THREAD, seen_events: seen } })
+    );
+
+    await makeClient().findOrCreateSlackThread({
+      ...THREAD,
+      create: false,
+      event: { eventId: 'EvNew', executionId: 'exec-1' },
+    });
+
+    expect(repository.update.mock.calls[0][0].patch.thread?.seen_events).toEqual([
       ...seen.slice(1),
-      'EvNew',
+      handled('EvNew'),
     ]);
   });
 
   it('tells exactly one of two concurrent deliveries of an event that it is new', async () => {
     const before = makeRecord({ thread: SLACK_THREAD }, { id: 'inv-9', version: 'v1' });
     const after = makeRecord(
-      { thread: { ...SLACK_THREAD, seen_event_ids: ['Ev1'] } },
+      { thread: { ...SLACK_THREAD, seen_events: [handled('Ev1', 'exec-other')] } },
       { id: 'inv-9', version: 'v2' }
     );
     repository.get.mockResolvedValueOnce(before).mockResolvedValueOnce(after);
@@ -2061,7 +2118,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     const result = await makeClient().findOrCreateSlackThread({
       ...THREAD,
       create: false,
-      eventId: 'Ev1',
+      event: { eventId: 'Ev1', executionId: 'exec-1' },
     });
 
     expect(result).toMatchObject({ duplicate: true });
@@ -2078,13 +2135,13 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     const result = await makeClient().findOrCreateSlackThread({
       ...THREAD,
       create: true,
-      eventId: 'Ev1',
+      event: { eventId: 'Ev1', executionId: 'exec-1' },
     });
 
     expect(result).not.toHaveProperty('duplicate');
     expect(repository.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        patch: { thread: { ...SLACK_THREAD, seen_event_ids: ['Ev1'] } },
+        patch: { thread: { ...SLACK_THREAD, seen_events: [handled('Ev1')] } },
         version: 'v1',
       })
     );

@@ -43,7 +43,7 @@ describe('Nightshift Slack thread workflow', () => {
         'connector-id': 'elastic-apps-slack',
         on: {
           condition:
-            'event.threadId:* and event.text:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast or event.subtype:file_share)',
+            'event.threadId:* and event.workspace:* and event.text:* and not event.botId:* and (not event.subtype:* or event.subtype:thread_broadcast or event.subtype:file_share)',
         },
       },
     ]);
@@ -53,9 +53,10 @@ describe('Nightshift Slack thread workflow', () => {
     });
   });
 
-  it('records each delivered event and skips one the thread already handled', () => {
+  it('records each delivered event for this execution and skips one another execution handled', () => {
     expect(requireStep('find_investigation').with?.body).toMatchObject({
       event_id: '${{ event.correlationKey }}',
+      execution_id: '{{ execution.id }}',
     });
     expect(requireStep('in_investigation_thread').condition).toContain(
       'steps.find_investigation.output.duplicate != true'
@@ -63,6 +64,22 @@ describe('Nightshift Slack thread workflow', () => {
     for (const name of ['record_status_message', 'record_result_message']) {
       expect(requireStep(name).with?.body).not.toHaveProperty('event_id');
     }
+  });
+
+  it('gives the event back when its investigation was not run for it', () => {
+    expect(requireStep('release_event')).toMatchObject({
+      type: 'kibana.request',
+      if: "${{ steps.investigate.error != null and steps.get_investigation.output.status != 'failed' }}",
+      with: {
+        body: {
+          create: false,
+          event_id: '${{ event.correlationKey }}',
+          execution_id: '{{ execution.id }}',
+          release_event: true,
+        },
+      },
+      'on-failure': { retry: { 'max-attempts': 3 }, continue: true },
+    });
   });
 
   it('runs replies in the same thread one at a time, in order', () => {
@@ -84,6 +101,7 @@ describe('Nightshift Slack thread workflow', () => {
       'record_status_message',
       'investigate',
       'get_investigation',
+      'release_event',
       'set_result',
       'update_result',
       'post_result',
@@ -131,10 +149,25 @@ describe('Nightshift Slack thread workflow', () => {
     );
   });
 
+  it('reports a failure only when the record failed or no run ever started it', () => {
+    expect(requireStep('set_result').with?.report).toBe(
+      "{% if steps.investigate.error == null and steps.get_investigation.output.status == 'completed' %}findings" +
+        "{% elsif steps.get_investigation.output.status == 'failed' %}failure" +
+        "{% elsif steps.investigate.error != null and steps.get_investigation.output.status == 'pending' %}failure" +
+        '{% else %}none{% endif %}'
+    );
+  });
+
+  it('keeps the findings within the 4,000 characters Slack takes on an edit', () => {
+    expect(requireStep('set_result').with?.result_text).toContain(
+      '{{ steps.get_investigation.output.summary | truncate: 3000 }}'
+    );
+  });
+
   it('edits the status message with the result, and posts a new one when it cannot', () => {
     expect(requireStep('update_result')).toMatchObject({
       type: 'slack2.updateMessage',
-      if: '${{ variables.status_message_ts != null }}',
+      if: "${{ variables.report != 'none' and variables.status_message_ts != null }}",
       with: { messageTs: '{{ variables.status_message_ts }}', text: '{{ variables.result_text }}' },
       // A transient failure must not leave the thread a second status message.
       'on-failure': { retry: { 'max-attempts': 3 }, continue: true },
@@ -142,7 +175,7 @@ describe('Nightshift Slack thread workflow', () => {
     const postResult = requireStep('post_result');
     expect(postResult).toMatchObject({
       type: 'slack2.sendMessage',
-      if: '${{ steps.update_result.output.ts == null }}',
+      if: "${{ variables.report != 'none' and steps.update_result.output.ts == null }}",
       with: { text: '{{ variables.result_text }}' },
     });
     expect(postResult.with).not.toHaveProperty('messageTs');

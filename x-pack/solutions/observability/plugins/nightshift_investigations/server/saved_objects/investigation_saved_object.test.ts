@@ -101,10 +101,27 @@ describe('nightshift investigation saved object model version 4', () => {
           channel: 'C1',
           thread_ts: '1700.0001',
           status_message_ts: '1700.0002',
-          seen_event_ids: ['Ev1', 'Ev2'],
+          seen_events: [
+            { event_id: 'Ev1', execution_id: 'exec-1' },
+            { event_id: 'Ev2', execution_id: 'exec-2' },
+          ],
         })
       )
     ).not.toThrow();
+  });
+
+  it('rejects a handled event without the execution that handled it', () => {
+    expect(() =>
+      modelVersion4?.schemas?.create?.validate(
+        threadInvestigation({
+          surface: 'slack',
+          workspace: 'T1',
+          channel: 'C1',
+          thread_ts: '1700.0001',
+          seen_events: [{ event_id: 'Ev1' }],
+        })
+      )
+    ).toThrow();
   });
 
   it('rejects a thread from another surface', () => {
