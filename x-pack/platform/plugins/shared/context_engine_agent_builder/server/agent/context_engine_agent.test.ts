@@ -44,15 +44,18 @@ describe('Context Engine agent instructions', () => {
     });
 
     it('names the catalog strategy to the user, followed by what it produces', () => {
-      expect(instructions).toMatch(
-        /Strategy names from the catalog — Index\/Table Metadata, Bottom-Up, Cumulative and the rest — are the user's terms too/
-      );
       expect(instructions).toMatch(/name the strategy, then say in plain words what it produces/);
+      expect(instructions).toMatch(
+        /Index\/Table Metadata, Bottom-Up, Cumulative \/ Wiki-style and the rest — are the user's terms too/
+      );
+    });
+
+    it('uses the catalog names for the template strategies, not variants of them', () => {
+      expect(instructions).not.toMatch(/Cumulative entity-profile|Bottom-Up document/);
     });
 
     it('keeps its examples generic, outside any one domain', () => {
-      expect(instructions).not.toMatch(/tickets/);
-      expect(instructions).toMatch(/I'll check how your records spread across categories/);
+      expect(instructions).not.toMatch(/\b(tickets?|zendesk|invoices?|support cases?)\b/i);
     });
 
     it('keeps the facts the user needs to decide', () => {
@@ -205,7 +208,7 @@ describe('Context Engine agent instructions', () => {
 
     it('lists Targeted KIs with the templates rather than the subagent path', () => {
       expect(instructions).toMatch(
-        /Cumulative entity-profile and Targeted KI automations do not go through a subagent/
+        /Cumulative \/ Wiki-style and Targeted KI automations do not go through a subagent/
       );
     });
 
