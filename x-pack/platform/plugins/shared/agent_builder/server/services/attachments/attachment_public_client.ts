@@ -142,6 +142,8 @@ export const createAttachmentPublicClient = ({
       origin,
       description,
       hidden,
+      readonly,
+      group_id,
       render_inline: renderInline,
     }) {
       const { conversation, conversationClient, stateManager } = await loadState(conversationId);
@@ -160,7 +162,7 @@ export const createAttachmentPublicClient = ({
       let attachment;
       try {
         attachment = await stateManager.add(
-          { id, type, data, origin, description, hidden } as AttachmentInput,
+          { id, type, data, origin, description, hidden, readonly, group_id } as AttachmentInput,
           ATTACHMENT_REF_ACTOR.user,
           resolveContext,
           { request }
@@ -290,6 +292,8 @@ export const createAttachmentPublicClient = ({
               origin: input.origin,
               description: input.description,
               hidden: input.hidden,
+              readonly: input.readonly,
+              group_id: input.group_id,
             } as AttachmentInput,
             ATTACHMENT_REF_ACTOR.user,
             resolveContext,

@@ -32,6 +32,10 @@ export interface CreateAttachmentArgs {
   description?: string;
   /** Whether the attachment should be hidden from the user. */
   hidden?: boolean;
+  /** Whether the attachment is read-only in this conversation. */
+  readonly?: boolean;
+  /** Stable group identifier; shared by attachments submitted together as one logical entity. */
+  group_id?: string;
   /** When true, the UI renders the attachment inline when the conversation is opened. Defaults to false. */
   render_inline?: boolean;
   /**

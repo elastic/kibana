@@ -191,6 +191,49 @@ describe('copyInvestigationAttachments', () => {
     );
   });
 
+  it('copies group_id when present', async () => {
+    const { logger, attachmentsClient } = buildDeps();
+    const att = makeAttachment({ id: 'att1', group_id: 'grp-1' });
+    const investigation = makeConversation('inv-1', [att]);
+    const escalation = makeConversation('esc-1');
+
+    (attachmentsClient.bulkCreate as jest.Mock).mockResolvedValue({ created: [att], errors: [] });
+
+    await copyInvestigationAttachments({ attachmentsClient, escalation, investigation, logger });
+
+    const call = (attachmentsClient.bulkCreate as jest.Mock).mock.calls[0][0];
+    expect(call.attachments[0].group_id).toBe('grp-1');
+  });
+
+  it('copies readonly when present', async () => {
+    const { logger, attachmentsClient } = buildDeps();
+    const att = makeAttachment({ id: 'att1', readonly: true });
+    const investigation = makeConversation('inv-1', [att]);
+    const escalation = makeConversation('esc-1');
+
+    (attachmentsClient.bulkCreate as jest.Mock).mockResolvedValue({ created: [att], errors: [] });
+
+    await copyInvestigationAttachments({ attachmentsClient, escalation, investigation, logger });
+
+    const call = (attachmentsClient.bulkCreate as jest.Mock).mock.calls[0][0];
+    expect(call.attachments[0].readonly).toBe(true);
+  });
+
+  it('omits group_id and readonly when not set on the source', async () => {
+    const { logger, attachmentsClient } = buildDeps();
+    const att = makeAttachment({ id: 'att1' });
+    const investigation = makeConversation('inv-1', [att]);
+    const escalation = makeConversation('esc-1');
+
+    (attachmentsClient.bulkCreate as jest.Mock).mockResolvedValue({ created: [att], errors: [] });
+
+    await copyInvestigationAttachments({ attachmentsClient, escalation, investigation, logger });
+
+    const call = (attachmentsClient.bulkCreate as jest.Mock).mock.calls[0][0];
+    expect(call.attachments[0]).not.toHaveProperty('group_id');
+    expect(call.attachments[0]).not.toHaveProperty('readonly');
+  });
+
   it('logs already-exists errors at debug level (idempotent retry)', async () => {
     const { logger, attachmentsClient } = buildDeps();
     const att = makeAttachment({ id: 'att1' });

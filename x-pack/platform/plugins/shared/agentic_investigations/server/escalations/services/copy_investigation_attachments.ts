@@ -54,6 +54,8 @@ export const copyInvestigationAttachments = async ({
     ...(att.origin !== undefined && { origin: att.origin }),
     ...(att.description !== undefined && { description: att.description }),
     ...(att.hidden !== undefined && { hidden: att.hidden }),
+    ...(att.readonly !== undefined && { readonly: att.readonly }),
+    ...(att.group_id !== undefined && { group_id: att.group_id }),
   }));
 
   const { created, errors } = await attachmentsClient.bulkCreate({
