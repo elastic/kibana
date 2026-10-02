@@ -13,16 +13,9 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 import { App } from './components/app';
 
-export const renderApp = (core: CoreStart, { appBasePath, element }: AppMountParameters) => {
+export const renderApp = (core: CoreStart, { history, element }: AppMountParameters) => {
   ReactDOM.render(
-    core.rendering.addContext(
-      <App
-        // AppDeps
-        basename={appBasePath}
-        overlays={core.overlays}
-        rendering={core.rendering}
-      />
-    ),
+    core.rendering.addContext(<App history={history} overlays={core.overlays} />),
     element
   );
 

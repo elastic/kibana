@@ -19,6 +19,7 @@
  *   on every boot, including when the source index is already populated.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ensureThreatIntelBootstrap } from './bootstrap_threat_intel';
 import * as indexTemplatesModule from './index_templates';
 import * as seedDefaultSourcesModule from './seed_default_sources';
@@ -169,6 +170,22 @@ describe('ensureThreatIntelBootstrap', () => {
         failed: 0,
       });
     });
+  });
+
+  it('skips the semantic_text endpoint check when the reports index does not exist yet', async () => {
+    const esClient = makeEsClient(0);
+    const notFound = new EsErrors.ResponseError({
+      statusCode: 404,
+      meta: {} as never,
+      warnings: [],
+    });
+    (esClient.indices.getFieldMapping as jest.Mock).mockRejectedValue(notFound);
+
+    // Bootstrap must resolve — the 404 is not retried and seeding continues.
+    await expect(
+      ensureThreatIntelBootstrap({ esClient, logger: makeLogger() })
+    ).resolves.toBeDefined();
+    expect(esClient.indices.getFieldMapping).toHaveBeenCalledTimes(1);
   });
 
   it('validates the effective semantic_text endpoint from the installed mapping', async () => {

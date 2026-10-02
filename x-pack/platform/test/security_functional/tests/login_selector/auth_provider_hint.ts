@@ -41,6 +41,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     beforeEach(async () => {
       await browser.get(`${deployment.getHostPort()}/login`);
+      if (!(await testSubjects.waitForExists('loginSelector', { timeout: 2000 }))) {
+        await PageObjects.security.forceLogout();
+        await browser.get(`${deployment.getHostPort()}/login`);
+      }
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
     });
 

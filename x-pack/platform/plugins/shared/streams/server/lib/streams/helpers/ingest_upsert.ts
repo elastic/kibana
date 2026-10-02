@@ -15,8 +15,7 @@ import type { AttachmentClient } from '../attachments/attachment_client';
 
 /**
  * Returns the dashboard and rule attachment ids linked to a stream, partitioned by type.
- * Significant-event queries are not attachments and are not returned here; they are managed
- * through the `/api/streams/{name}/queries` endpoints.
+ * Significant-event queries are not attachments and are not returned here.
  */
 export async function getStreamAttachmentIds({
   name,

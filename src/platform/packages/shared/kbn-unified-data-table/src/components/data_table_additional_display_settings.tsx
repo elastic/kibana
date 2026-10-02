@@ -19,8 +19,13 @@ import { ViewModeSettings } from './view_mode_settings';
 
 export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
 export const MIN_ALLOWED_SAMPLE_SIZE = 1;
-export const RANGE_MIN_SAMPLE_SIZE = 10; // it's necessary to be able to use `step={10}` configuration for EuiRange
+export const RANGE_MIN_SAMPLE_SIZE = 10;
 export const RANGE_STEP_SAMPLE_SIZE = 10;
+export const MAX_DEFAULT_RENDERED_NODES = 200;
+export const DEFAULT_RENDERED_NODES = 50;
+
+export const MIN_RENDERED_NODES = 10;
+export const RENDERED_NODES_STEP = 10;
 
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   rowHeight: RowHeightSettingsProps['rowHeight'];
@@ -149,6 +154,64 @@ const OnOffButtonGroup = ({
   );
 };
 
+const clampRenderedNodes = (value: number) =>
+  Math.min(Math.max(Math.round(value), MIN_RENDERED_NODES), MAX_DEFAULT_RENDERED_NODES);
+
+const LinesShownSetting = ({
+  defaultRenderedNodes,
+  onChangeDefaultRenderedNodes,
+}: {
+  defaultRenderedNodes: number;
+  onChangeDefaultRenderedNodes: (value: number) => void;
+}) => {
+  const [activeValue, setActiveValue] = useState<number | ''>(defaultRenderedNodes);
+
+  const step =
+    activeValue === '' || checkIfValueIsMultipleOfStep(activeValue, RENDERED_NODES_STEP)
+      ? RENDERED_NODES_STEP
+      : 1;
+
+  // Committing re-seeds every JSON cell, so defer it while the slider is being dragged.
+  const debouncedOnChange = useMemo(
+    () => debounce(onChangeDefaultRenderedNodes, 300, { leading: false, trailing: true }),
+    [onChangeDefaultRenderedNodes]
+  );
+
+  const onChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
+    (event) => {
+      if (!('value' in event.target) || event.target.value === '') {
+        setActiveValue(''); // allow clearing the input mid-edit without committing
+        return;
+      }
+      const clamped = clampRenderedNodes(Number(event.target.value));
+      setActiveValue(clamped);
+      debouncedOnChange(clamped);
+    },
+    [debouncedOnChange]
+  );
+
+  const linesShownLabel = i18n.translate('unifiedDataTable.defaultRenderedNodesLabel', {
+    defaultMessage: 'Lines shown',
+  });
+
+  return (
+    <EuiFormRow label={linesShownLabel} display="columnCompressed">
+      <EuiRange
+        compressed
+        fullWidth
+        min={MIN_RENDERED_NODES}
+        max={MAX_DEFAULT_RENDERED_NODES}
+        step={step}
+        showInput
+        showRange
+        value={activeValue}
+        onChange={onChange}
+        data-test-subj="unifiedDataTableRenderedNodesInput"
+      />
+    </EuiFormRow>
+  );
+};
+
 const JsonModeDisplaySettings = ({
   jsonModeSettings,
   onChangeJsonModeSettings,
@@ -158,6 +221,7 @@ const JsonModeDisplaySettings = ({
 }) => {
   const hideNulls = jsonModeSettings.hideNulls ?? false;
   const wrapLines = jsonModeSettings.wrapLines ?? true;
+  const defaultRenderedNodes = jsonModeSettings.defaultRenderedNodes ?? DEFAULT_RENDERED_NODES;
 
   const hideNullsLabel = i18n.translate('unifiedDataTable.hideNullsLabel', {
     defaultMessage: 'Hide nulls',
@@ -169,6 +233,12 @@ const JsonModeDisplaySettings = ({
 
   return (
     <>
+      <LinesShownSetting
+        defaultRenderedNodes={defaultRenderedNodes}
+        onChangeDefaultRenderedNodes={(value) =>
+          onChangeJsonModeSettings?.({ ...jsonModeSettings, defaultRenderedNodes: value })
+        }
+      />
       <OnOffButtonGroup
         label={hideNullsLabel}
         checked={hideNulls}

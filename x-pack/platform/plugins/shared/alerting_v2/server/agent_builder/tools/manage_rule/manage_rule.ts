@@ -17,7 +17,7 @@ import {
   RUNBOOK_ARTIFACT_TYPE,
 } from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import { RULE_ATTACHMENT_TYPE, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import {
   ruleOperationSchema,
   executeRuleOperations,
@@ -92,7 +92,7 @@ ${generateRuleOperationsUsageList()}`,
 
       const dashboards = (updatedData.artifacts ?? [])
         .filter((artifact) => artifact.type === DASHBOARD_ARTIFACT_TYPE)
-        .map((artifact) => artifact.data.dashboardId)
+        .map((artifact) => artifact.data.dashboard_id)
         .filter((dashboardId): dashboardId is string => typeof dashboardId === 'string');
       const runbookAttached = (updatedData.artifacts ?? []).some(
         (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
@@ -137,7 +137,9 @@ ${generateRuleOperationsUsageList()}`,
                 name: updatedData.metadata?.name,
                 kind: updatedData.kind,
                 schedule: updatedData.schedule,
-                query: updatedData.query ? getBreachEsqlQuery(updatedData.query) : undefined,
+                query: updatedData.query,
+                recovery: updatedData.recovery,
+                no_data: updatedData.no_data,
                 ...(dashboards.length > 0 ? { dashboards } : {}),
                 ...(runbookAttached ? { runbookAttached: true } : {}),
               },

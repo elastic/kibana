@@ -1,5 +1,5 @@
 {
-  "sha1": "642eb3b26f9449be6678474d34ac019342dab9f5",
+  "sha1": "008c5f69977cea8dc65cb9ac14853028b810b5ee",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_crud.spec.ts",
-        "line": 42,
+        "line": 44,
         "column": 44
       }
     },
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_crud.spec.ts",
-        "line": 86,
-        "column": 24
+        "line": 89,
+        "column": 41
       }
     },
     {
@@ -68,6 +68,32 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_privileges.spec.ts",
         "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "3e64621cea81372-624163cd0374a5d",
+      "title": "Action Policies - affected rules navigates from the details flyout to the affected rules and back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
+        "line": 45,
+        "column": 23
+      }
+    },
+    {
+      "id": "3e64621cea81372-3f409768cd06e1b",
+      "title": "Action Policies - affected rules hides the link from users who cannot read rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
+        "line": 79,
         "column": 11
       }
     }

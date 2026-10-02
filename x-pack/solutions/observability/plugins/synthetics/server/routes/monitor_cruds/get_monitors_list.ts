@@ -28,15 +28,15 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
   },
   handler: async (routeContext): Promise<any> => {
     const { request, syntheticsMonitorClient, monitorConfigRepository } = routeContext;
+    const queryParams = routeContext.request.query as MonitorsQuery;
     const totalCountQuery = async () => {
-      if (isMonitorsQueryFiltered(request.query)) {
+      if (isMonitorsQueryFiltered(queryParams)) {
         return monitorConfigRepository.find({
           perPage: 0,
           page: 1,
         });
       }
     };
-    const queryParams = routeContext.request.query as MonitorsQuery;
 
     const { filtersStr } = await getMonitorFilters(routeContext);
 

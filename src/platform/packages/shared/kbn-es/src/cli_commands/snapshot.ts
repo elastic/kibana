@@ -16,7 +16,12 @@ import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';
 import { configureMockIdpSamlRealm } from '../utils/configure_mock_idp_saml_realm';
 import { createCliError } from '../errors';
-import { EIS_ES_ARG, resolveCcmApiKey, setCcmApiKey } from '../eis/eis_setup';
+import {
+  assertCcmApiKeyResolved,
+  mergeEisEsArgs,
+  resolveCcmApiKey,
+  setCcmApiKey,
+} from '../eis/eis_setup';
 import type { Command } from './types';
 
 export const snapshot: Command = {
@@ -88,12 +93,7 @@ export const snapshot: Command = {
 
     if (options.eis) {
       options.license = 'trial';
-      const eisUserEsArgs = options.esArgs
-        ? Array.isArray(options.esArgs)
-          ? options.esArgs
-          : [options.esArgs]
-        : [];
-      options.esArgs = [EIS_ES_ARG, ...eisUserEsArgs];
+      options.esArgs = mergeEisEsArgs(options.esArgs);
 
       // Skip key resolution for download-only runs — the key is only needed
       // when starting ES and setting up CCM.
@@ -106,7 +106,7 @@ export const snapshot: Command = {
 
     if (options.docker) {
       throw createCliError(
-        `The --docker flag has been removed from 'es snapshot'. Use 'yarn es docker --snapshot' instead.`
+        `The --docker flag has been removed from 'es snapshot'. Use 'pnpm es docker --snapshot' instead.`
       );
     } else if (options['download-only']) {
       await cluster.downloadSnapshot({
@@ -179,12 +179,6 @@ export const snapshot: Command = {
         });
 
         try {
-          if (!eisApiKey) {
-            throw new Error(
-              'EIS: CCM API key was not resolved before starting Elasticsearch. This is a bug in the --eis flow.'
-            );
-          }
-
           const protocol = options.ssl ? 'https' : 'http';
           const es = {
             baseUrl: `${protocol}://localhost:${options.port || 9200}`,
@@ -192,7 +186,7 @@ export const snapshot: Command = {
             ssl: !!options.ssl,
           };
 
-          await setCcmApiKey(eisApiKey, es, log);
+          await setCcmApiKey(assertCcmApiKeyResolved(eisApiKey), es, log);
           log.success('EIS: CCM API key set in Elasticsearch');
         } catch (error) {
           log.error('EIS setup failed, stopping Elasticsearch...');

@@ -16,14 +16,6 @@ import { EDITOR_SCROLLBAR_WIDTH_PX, FOCUSED_STEP_DECORATION_INSET_PX } from './c
 export const EXECUTION_YAML_SNAPSHOT_CLASS = 'execution-yaml-snapshot';
 
 const editorStyleMap = {
-  actionsMenuPopoverPanel: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      minInlineSize: '600px',
-      maxInlineSize: '600px',
-      maxBlockSize: '520px',
-      borderRadius: euiTheme.border.radius.medium,
-    }),
-
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: 1,
@@ -59,7 +51,7 @@ const editorStyleMap = {
       },
 
       // Before-decoration badges
-      '.connector-name-badge': {
+      '.connector-name-badge, .service-account-name-badge': {
         display: 'inline-block',
         backgroundColor: transparentize(euiTheme.colors.success, 0.1),
         color: euiTheme.colors.successText,
@@ -69,6 +61,15 @@ const editorStyleMap = {
         fontSize: '12px',
         fontWeight: 500,
         lineHeight: '1.4',
+      },
+
+      '.service-account-name-badge-unavailable': {
+        display: 'inline-block',
+        backgroundColor: euiTheme.colors.lightShade,
+        color: euiTheme.colors.textSubdued,
+        padding: `${euiTheme.size.xxs} ${euiTheme.size.xs}`,
+        borderRadius: euiTheme.border.radius.small,
+        marginRight: euiTheme.size.s,
       },
 
       '.workflow-name-badge': {
@@ -195,7 +196,8 @@ const editorStyleMap = {
       minWidth: 0,
       overflowY: 'auto',
       minHeight: 0,
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      paddingLeft: euiTheme.size.xl,
+      backgroundColor: euiTheme.colors.backgroundBaseRecessed,
       [`&.${EXECUTION_YAML_SNAPSHOT_CLASS}`]: {
         backgroundColor: euiTheme.colors.backgroundBasePlain,
       },
@@ -241,6 +243,23 @@ const editorStyleMap = {
     '&::-webkit-scrollbar': { display: 'none' },
   }),
 
+  downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textSubdued,
+      '&:hover': {
+        color: euiTheme.colors.textPrimary,
+      },
+      '&:hover:not(:disabled)::before': {
+        backgroundColor: 'transparent',
+      },
+    }),
+  agentBuilderSectionCss: (euiThemeContext: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      top: euiThemeContext.euiTheme.size.xxs,
+      right: euiThemeContext.euiTheme.size.m,
+      zIndex: 10,
+    }),
   hiddenButtonCss: css({ display: 'none' }),
 };
 

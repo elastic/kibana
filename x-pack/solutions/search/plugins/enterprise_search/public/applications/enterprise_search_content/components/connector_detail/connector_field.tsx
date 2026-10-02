@@ -105,6 +105,11 @@ export const ConnectorField: React.FC<ConnectorFieldProps> = ({ connector, field
         onSave={handleSave}
         onChange={(e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
         onCancel={() => handleCancel(connector[field] || '')}
+        data-test-subj={
+          field === 'description'
+            ? 'enterpriseSearchConnectorDescription'
+            : 'enterpriseSearchConnectorName'
+        }
       />
     </EuiFlexItem>
   );

@@ -49,6 +49,45 @@ describe('formatActionToEnqueue', () => {
     expect(result).not.toHaveProperty('uiamApiKeyExternal');
   });
 
+  test('should include uiamApiKeyId so the invalidation task can see the key is in use', () => {
+    const result = formatActionToEnqueue({
+      action: {
+        id: '1',
+        group: 'default',
+        actionTypeId: 'test',
+        params: {},
+        uuid: '111-111',
+      },
+      apiKey: 'essu_secret',
+      uiamApiKeyId: 'uiam-key-id',
+      executionId: '123',
+      ruleConsumer: 'rule-consumer',
+      ruleId: 'aaa',
+      ruleTypeId: 'security-rule',
+      spaceId: 'default',
+    });
+    expect(result.uiamApiKeyId).toBe('uiam-key-id');
+  });
+
+  test('should omit uiamApiKeyId when the credential is not a framework-granted UIAM key', () => {
+    const result = formatActionToEnqueue({
+      action: {
+        id: '1',
+        group: 'default',
+        actionTypeId: 'test',
+        params: {},
+        uuid: '111-111',
+      },
+      apiKey: 'MTIzOmFiYw==',
+      executionId: '123',
+      ruleConsumer: 'rule-consumer',
+      ruleId: 'aaa',
+      ruleTypeId: 'security-rule',
+      spaceId: 'default',
+    });
+    expect(result).not.toHaveProperty('uiamApiKeyId');
+  });
+
   test('should format a rule action as expected', () => {
     expect(
       formatActionToEnqueue({

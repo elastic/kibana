@@ -8,6 +8,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { DISCOVER_TABS_LOCAL_STORAGE_KEY } from '../constants';
 import type { PaginationLocators } from './pagination';
@@ -44,6 +45,11 @@ export class MetricsExperiencePage {
   public readonly gridSettings: GridSettings;
   public readonly fullscreenButton: Locator;
   public readonly chromeHeader: Locator;
+  /**
+   * The app scroll container carries the inline offset a push flyout applies for as long as it is
+   * open. See `grid_global_app_style` for the rule this resolves against.
+   */
+  public readonly appScrollContainer: Locator;
 
   private readonly page: ScoutPage;
 
@@ -68,6 +74,7 @@ export class MetricsExperiencePage {
     this.gridSettings = createGridSettings(page);
     this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
     this.chromeHeader = page.testSubj.locator('kbnChromeLayoutHeader');
+    this.appScrollContainer = page.locator(`#${APP_MAIN_SCROLL_CONTAINER_ID}`);
   }
 
   public getCardByIndex(index: number): Locator {

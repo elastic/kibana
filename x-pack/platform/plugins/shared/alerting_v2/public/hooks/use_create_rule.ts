@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
-import { paths } from '../constants';
+import { useAlertingLocators } from '../application/locator_context';
 import { ruleKeys } from './query_key_factory';
 import { invalidateRulesContentList } from './invalidate_rules_content_list';
 import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
@@ -40,12 +40,11 @@ class DisableAfterCreateFailedError extends Error {
 export const useCreateRule = () => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
+  const { rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
 
   const viewRuleActionProps = (ruleId: string) => {
-    const href = basePath.prepend(paths.ruleDetails(ruleId));
+    const href = rulesLocators.getRedirectUrl({ ruleId });
     return {
       primary: {
         children: i18n.translate('xpack.alertingV2.hooks.useCreateRule.viewRuleButtonLabel', {
@@ -54,7 +53,7 @@ export const useCreateRule = () => {
         href,
         onClick: (event: MouseEvent) => {
           event.preventDefault();
-          void navigateToUrl(href);
+          rulesLocators.navigateSync({ ruleId });
         },
         'data-test-subj': 'alertingV2ViewRuleToastLink',
       },

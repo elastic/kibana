@@ -28,7 +28,6 @@ dependsOn:
   - '@kbn/core-provider-plugin'
   - '@kbn/test'
   - '@kbn/repo-info'
-  - '@kbn/utils'
   - '@kbn/expect'
   - '@kbn/data-plugin'
   - '@kbn/ftr-common-functional-services'
@@ -69,9 +68,9 @@ dependsOn:
   - '@kbn/ai-assistant-management-plugin'
   - '@kbn/setup-node-env'
   - '@kbn/visualizations-common'
-  - '@kbn/session-notifications-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/deeplinks-analytics'
+  - '@kbn/core-chrome-browser-components'
 tags:
   - test-helper
   - package

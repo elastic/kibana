@@ -5,131 +5,219 @@
  * 2.0.
  */
 
+import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
-import type { PanelContentAttempt } from '../../resolve_panel';
-import type { PanelTypeDefinition } from './panel_type';
+import type { PanelContent, PanelContentAttempt } from '../../resolve_panel';
+import type { ConfigPanelTypeDefinition } from './config_panel_type';
 import {
-  visPanelConfigInputSchema,
-  visPanelDefinition,
   lensPanelRequestSchema,
   vegaPanelRequestSchema,
-  editPanelRequestInputSchema,
+  lensEditPanelRequestSchema,
+  vegaEditPanelRequestSchema,
   type VisPanelResolutionRequest,
 } from './vis';
 import {
   markdownPanelConfigInputSchema,
-  markdownPanelDefinition,
   editMarkdownPanelConfigInputSchema,
+  markdownPanelDefinition,
 } from './markdown';
 import {
-  customContentPanelConfigInputSchema,
-  customContentPanelDefinition,
-  editCustomContentPanelConfigInputSchema,
+  customContentPanelRequestSchema,
+  customContentEditPanelRequestSchema,
+  type CustomContentPanelResolutionRequest,
 } from './custom_content';
+import {
+  anomalyChartsPanelConfigInputSchema,
+  anomalyChartsPanelDefinition,
+  anomalySwimlaneConfigInputSchema,
+  anomalySwimlaneDefinition,
+  editAnomalyChartsPanelConfigInputSchema,
+  editAnomalySwimlaneConfigInputSchema,
+  editSingleMetricViewerConfigInputSchema,
+  singleMetricViewerConfigInputSchema,
+  singleMetricViewerPanelDefinition,
+} from './ml_panels';
+import { attachmentPanelInputSchema } from './attachment_source';
 
 /**
- * Panel registry barrel.
+ * Panel input barrel.
  *
- * Each panel type lives in its own module under `./<type>` and owns its
- * embeddable identity, config contract, input schemas, and by-value behavior
- * (its {@link PanelTypeDefinition}). This barrel combines those per-type pieces
- * into the shapes operations consume — the discriminated input unions, the
- * per-operation item schemas, and the `type` -> definition registry — so adding a
- * panel type means adding its module plus an entry here.
+ * Panel inputs are discriminated by `source`:
+ * - `'request'`: generated server-side, discriminated by `renderer`
+ *   (`lens` — the default when omitted —, `vega`, or `custom_content`).
+ * - `'config'`: authored by value, discriminated by `type` (see `CONFIG_PANEL_TYPES`).
+ * - `'attachment'`: an existing visualization attachment from the conversation.
  *
- * Panel inputs have two orthogonal axes, each carrying a `type`:
- * - `source`: `'config'` (resolved, passed by value) or `'request'` (resolved
- *   asynchronously from a query).
- * - `type`: which panel type — `'vis'`, `'markdown'`, … (maps to an embeddable).
- *
- * Today `source: 'request'` only resolves `type: 'vis'`; adding another
- * resolvable type is additive and needs no operation-handler changes.
+ * Each renderer's module owns its request schemas and resolution-request shape;
+ * this barrel combines them into the per-operation item schemas, the
+ * `ResolvePanelContent` contract, and the renderer-to-embeddable-type mapping.
  */
-export type { PanelRequestInput, EditPanelRequestInput, VisPanelResolutionRequest } from './vis';
-export type { PanelContent } from './panel_type';
-export type { CustomContentPanelConfig } from './custom_content';
-
-/**
- * A `source: 'config'` panel adds a panel from an already-resolved config passed
- * by value, discriminated by `type` (each panel type owns its `config` shape).
- * The tool never reads a store, so the config must be supplied directly rather
- * than as an attachment ID.
- */
-const configPanelInputSchema = z.discriminatedUnion('type', [
-  visPanelConfigInputSchema,
-  markdownPanelConfigInputSchema,
-  customContentPanelConfigInputSchema,
-]);
-
-export type ConfigPanelInput = z.infer<typeof configPanelInputSchema>;
-export type PanelType = ConfigPanelInput['type'];
-
-/** Per-type behavior, keyed by model-facing panel `type`. */
-export const PANEL_TYPE_DEFINITIONS: Record<PanelType, PanelTypeDefinition> = {
-  vis: visPanelDefinition,
-  markdown: markdownPanelDefinition,
-  custom_content: customContentPanelDefinition,
-};
+export { attachmentPanelInputSchema } from './attachment_source';
+export type { AttachmentPanelInput } from './attachment_source';
+export type { VisPanelResolutionRequest } from './vis';
+export type {
+  CustomContentPanelAddRequest,
+  CustomContentPanelEditRequest,
+  CustomContentPanelResolutionRequest,
+} from './custom_content';
 
 const sectionIdField = z
   .string()
   .max(256)
   .optional()
   .describe(
-    'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+    'Existing section id or the key of an add_section earlier in this call. If omitted, panel is added at the top level.'
   );
 
-/** A single panel item accepted by `add_panels` (any panel type, optionally targeting a section). */
-export const addPanelsItemSchema = z.discriminatedUnion('source', [
-  z.discriminatedUnion('type', [
-    visPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
-    markdownPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
-    customContentPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
-  ]),
-  z.discriminatedUnion('renderer', [
-    lensPanelRequestSchema.extend({ sectionId: sectionIdField }),
-    vegaPanelRequestSchema.extend({ sectionId: sectionIdField }),
-  ]),
+const configPanelInputSchema = z.discriminatedUnion('type', [
+  markdownPanelConfigInputSchema,
+  anomalyChartsPanelConfigInputSchema,
+  anomalySwimlaneConfigInputSchema,
+  singleMetricViewerConfigInputSchema,
 ]);
 
-export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
+export type ConfigPanelInput = z.infer<typeof configPanelInputSchema>;
+
+/**
+ * Behavior of every by-value (`source: 'config'`) panel type, keyed by its
+ * model-facing `type`: markdown, the ML anomaly panels (swim lane, anomaly
+ * charts, single metric viewer), and any other panel type whose config the agent
+ * authors directly. Each type registers here, next to its members of the
+ * `config` unions. Panels generated server-side belong in the `request` unions
+ * instead, with a resolver branch in `core/resolvers/panel_resolver.ts`.
+ */
+const CONFIG_PANEL_TYPES: Record<ConfigPanelInput['type'], ConfigPanelTypeDefinition> = {
+  markdown: markdownPanelDefinition,
+  ml_anomaly_charts: anomalyChartsPanelDefinition,
+  ml_anomaly_swimlane: anomalySwimlaneDefinition,
+  ml_single_metric_viewer: singleMetricViewerPanelDefinition,
+};
+
+/** Builds panel content from a by-value panel's `type` and `config`. */
+export const buildConfigPanelContent = (
+  type: ConfigPanelInput['type'],
+  config: AttachmentPanel['config']
+): PanelContent => {
+  const { embeddableType, toEmbeddableConfig } = CONFIG_PANEL_TYPES[type];
+  return { type: embeddableType, config: toEmbeddableConfig ? toEmbeddableConfig(config) : config };
+};
+
+/** Finds the by-value panel type stored as the given embeddable type, if any. */
+export const findConfigPanelType = (
+  embeddableType: string
+): { type: ConfigPanelInput['type']; label: string } | undefined => {
+  const entry = Object.entries(CONFIG_PANEL_TYPES).find(
+    ([, definition]) => definition.embeddableType === embeddableType
+  );
+  return entry && { type: entry[0] as ConfigPanelInput['type'], label: entry[1].label };
+};
+
+/** Returns an error message when a by-value edit targets a panel of a different type. */
+export const getConfigPanelEditError = (
+  type: ConfigPanelInput['type'],
+  existingPanel: AttachmentPanel
+): string | undefined => {
+  const { embeddableType, label } = CONFIG_PANEL_TYPES[type];
+  return existingPanel.type === embeddableType
+    ? undefined
+    : `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as ${label}. Use source: "request" with the panel's renderer for Lens, Vega, or custom content panels.`;
+};
 
 /** A single inline panel item accepted by `add_section` (section-relative, no sectionId). */
 export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
   configPanelInputSchema,
-  z.discriminatedUnion('renderer', [lensPanelRequestSchema, vegaPanelRequestSchema]),
+  z.discriminatedUnion('renderer', [
+    lensPanelRequestSchema,
+    vegaPanelRequestSchema,
+    customContentPanelRequestSchema,
+  ]),
+  attachmentPanelInputSchema,
 ]);
 
 /**
- * A "create a new panel" input — either an already-resolved `source: 'config'`
- * panel or a `source: 'request'` to resolve. The common shape that `add_panels`
- * and `add_section` materialize into panel content (`add_panels` items also carry
- * a `sectionId`, which is assignable to this base).
+ * A "create a new panel" input: a by-value config, a request to resolve, or a
+ * visualization attachment. The common shape that `add_panels` and `add_section`
+ * materialize into panel content (`add_panels` items also carry a `sectionId`,
+ * which is assignable to this base).
  */
 export type NewPanelInput = z.infer<typeof addSectionPanelItemSchema>;
 
+export type PanelRequestInput = Extract<NewPanelInput, { source: 'request' }>;
+
+/** A single panel item accepted by `add_panels` (any panel input, optionally targeting a section). */
+export const addPanelsItemSchema = z.discriminatedUnion('source', [
+  z.discriminatedUnion('type', [
+    markdownPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
+    anomalyChartsPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
+    anomalySwimlaneConfigInputSchema.extend({ sectionId: sectionIdField }),
+    singleMetricViewerConfigInputSchema.extend({ sectionId: sectionIdField }),
+  ]),
+  z.discriminatedUnion('renderer', [
+    lensPanelRequestSchema.extend({ sectionId: sectionIdField }),
+    vegaPanelRequestSchema.extend({ sectionId: sectionIdField }),
+    customContentPanelRequestSchema.extend({ sectionId: sectionIdField }),
+  ]),
+  attachmentPanelInputSchema.extend({ sectionId: sectionIdField }),
+]);
+
+export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
+
 /** A single panel item accepted by `edit_panels` (targets an existing panel by id). */
 export const editPanelItemSchema = z.discriminatedUnion('source', [
-  editPanelRequestInputSchema,
+  z.discriminatedUnion('renderer', [
+    lensEditPanelRequestSchema,
+    vegaEditPanelRequestSchema,
+    customContentEditPanelRequestSchema,
+  ]),
   z.discriminatedUnion('type', [
     editMarkdownPanelConfigInputSchema,
-    editCustomContentPanelConfigInputSchema,
+    editAnomalyChartsPanelConfigInputSchema,
+    editAnomalySwimlaneConfigInputSchema,
+    editSingleMetricViewerConfigInputSchema,
   ]),
 ]);
 
 export type EditPanelItem = z.infer<typeof editPanelItemSchema>;
 
+export type EditPanelRequestInput = Extract<EditPanelItem, { source: 'request' }>;
+
+/** Every panel resolution request the resolver can receive, discriminated by `renderer`. */
+export type PanelResolutionRequest =
+  | VisPanelResolutionRequest
+  | CustomContentPanelResolutionRequest;
+
+/** Engine that renders a `source: 'request'` panel. */
+export type PanelRenderer = NonNullable<PanelResolutionRequest['renderer']>;
+
 /**
- * Every panel resolution request the resolver can receive, discriminated by
- * `type`. Extend this union as more panel types gain inline resolution support;
- * each type contributes its request shape from its own module.
+ * Embeddable type each renderer's panels are stored as. This is the only mapping
+ * between renderers and panel types: `edit_panels` uses it to decide an existing
+ * panel's renderer once, and resolvers trust the `renderer` they receive.
  */
-export type PanelResolutionRequest = VisPanelResolutionRequest;
+export const EMBEDDABLE_TYPE_BY_RENDERER: Readonly<Record<PanelRenderer, string>> = {
+  lens: LENS_EMBEDDABLE_TYPE,
+  vega: VEGA_VIS_TYPE,
+  custom_content: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+};
+
+const RENDERER_BY_EMBEDDABLE_TYPE = new Map(
+  Object.entries(EMBEDDABLE_TYPE_BY_RENDERER).map(([renderer, embeddableType]) => [
+    embeddableType,
+    renderer as PanelRenderer,
+  ])
+);
+
+/** Finds the renderer whose panels are stored as the given embeddable type, if any. */
+export const findPanelRenderer = (embeddableType: string): PanelRenderer | undefined =>
+  RENDERER_BY_EMBEDDABLE_TYPE.get(embeddableType);
 
 /**
  * Contract for inline panel content resolution. The generate core consumes this
  * to turn a panel resolution request into panel content. The default resolver
- * (see `core/resolvers/vis_panel_resolver.ts`) routes each request to the resolver
- * for its `type`; it is injected so tests can supply a fake.
+ * (see `core/resolvers/panel_resolver.ts`) routes each request to the resolver
+ * for its `renderer`; it is injected so tests can supply a fake.
  */
 export type ResolvePanelContent = (request: PanelResolutionRequest) => Promise<PanelContentAttempt>;

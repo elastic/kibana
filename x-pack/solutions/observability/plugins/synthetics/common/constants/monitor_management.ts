@@ -26,6 +26,10 @@ export enum ConfigKey {
   JOURNEY_FILTERS_MATCH = 'filter_journeys.match',
   JOURNEY_FILTERS_TAGS = 'filter_journeys.tags',
   JOURNEY_ID = 'journey_id',
+  // Nested Heartbeat auth blocks. Package vars are the same names (type: text);
+  // private formatters pack each object into a base64 string for Fleet.
+  KERBEROS = 'kerberos',
+  NTLM = 'ntlm',
   MAX_REDIRECTS = 'max_redirects',
   METADATA = '__ui',
   LABELS = 'labels',
@@ -87,6 +91,9 @@ export const secretKeys = [
   ConfigKey.PROXY_HEADERS,
   ConfigKey.PARAMS,
   ConfigKey.PASSWORD,
+  // Whole auth blocks are encrypted (credentials live inside the object).
+  ConfigKey.KERBEROS,
+  ConfigKey.NTLM,
   ConfigKey.REQUEST_BODY_CHECK,
   ConfigKey.REQUEST_HEADERS_CHECK,
   ConfigKey.REQUEST_SEND_CHECK,
@@ -135,3 +142,24 @@ export const MONITOR_STATUS_ENUM = {
   SUCCESS: 'succeeded',
   DISABLED: 'disabled',
 };
+
+export const OVERVIEW_STATUS_FILTER_VALUES = [
+  MONITOR_STATUS_ENUM.UP,
+  MONITOR_STATUS_ENUM.DOWN,
+  MONITOR_STATUS_ENUM.PENDING,
+  MONITOR_STATUS_ENUM.STALE,
+  MONITOR_STATUS_ENUM.DISABLED,
+] as const;
+
+export type OverviewStatusFilter = (typeof OVERVIEW_STATUS_FILTER_VALUES)[number];
+
+export const OVERVIEW_PAGINATION_DEFAULTS = {
+  page: 1,
+  perPage: 20,
+  sortField: 'status',
+  sortOrder: 'asc',
+} as const;
+
+// Route max for `perPage`. Card-view window refresh must clamp to this and
+// request later pages separately — sending `loadedCount` unbounded 400s.
+export const OVERVIEW_STATUS_MAX_PER_PAGE = 500;

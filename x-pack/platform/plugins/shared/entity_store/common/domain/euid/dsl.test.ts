@@ -209,13 +209,26 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
     });
 
-    it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset/iam/entity.id)', () => {
+    it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
       expect(
         getEuidDslFilterBasedOnDocument('user', {
           user: { id: 'user-id-42' },
           event: { module: 'o365' },
         })
       ).toBeUndefined();
+    });
+
+    it('builds a filter for the same doc when it is a detection alert', () => {
+      // The waiver lives in the shared gate, so it reaches the DSL builder too.
+      const result = getEuidDslFilterBasedOnDocument('user', {
+        user: { id: 'user-id-42' },
+        event: { module: 'o365' },
+        'kibana.alert.rule.uuid': 'rule-1',
+      });
+
+      expect(result?.bool?.filter).toEqual(
+        expect.arrayContaining([{ term: { 'user.id': 'user-id-42' } }])
+      );
     });
 
     it('returns undefined when no user id fields are present', () => {

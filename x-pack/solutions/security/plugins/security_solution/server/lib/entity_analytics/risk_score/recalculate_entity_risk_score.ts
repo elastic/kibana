@@ -16,7 +16,7 @@ import { getConfiguration } from '../risk_engine/utils/saved_object_configuratio
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { buildAlertFilters } from './maintainer/steps/build_alert_filters';
 import { getLookupIndexName } from './maintainer/lookup/lookup_index';
-import { scoreBaseEntities } from './maintainer/steps/score_base_entities';
+import { persistZeroBaseScore, scoreBaseEntities } from './maintainer/steps/score_base_entities';
 import { runResolutionScoringStep } from './maintainer/steps/run_resolution_scoring_step';
 import { fetchWatchlistConfigs } from './maintainer/utils/fetch_watchlist_configs';
 import type { RiskEngineDataWriter } from './risk_engine_data_writer';
@@ -85,7 +85,7 @@ export const recalculateEntityRiskScore = async ({
     throw Boom.badRequest(`Entity not found in store: ${entityId}`);
   }
 
-  const { alertFilters, resolutionTargetId } = scoringContext;
+  const { alertFilters, resolutionTargetId, hasExistingBaseScore } = scoringContext;
 
   const { dataViewId } = engineConfig;
   const pageSize = engineConfig.pageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
@@ -98,7 +98,7 @@ export const recalculateEntityRiskScore = async ({
   const calculationRunId = uuidv4();
   const now = new Date().toISOString();
 
-  const { scores: baseScores } = await scoreBaseEntities({
+  const { scores: baseScores, scoresCalculated } = await scoreBaseEntities({
     esClient,
     crudClient,
     logger,
@@ -118,6 +118,28 @@ export const recalculateEntityRiskScore = async ({
     refresh: 'wait_for',
     collectScores,
   });
+
+  // The alerts are filtered down to this one entity, so nothing calculated means it has no alert
+  // in the engine's range. Write a zero score so the entity's current criticality and watchlists
+  // land on a fresh document. Two conditions on purpose:
+  //  - `scoresCalculated`, not the written count, which is also 0 when a write fails. Zeroing
+  //    then would drop the score of an entity that does have alerts.
+  //  - only for entities that already have a score, since writing one for an entity that was
+  //    never scored would put a 0 on screen where there was nothing before.
+  if (scoresCalculated === 0 && hasExistingBaseScore) {
+    await persistZeroBaseScore({
+      crudClient,
+      logger,
+      entityType: identifierType as EntityType,
+      entityId,
+      now,
+      watchlistConfigs,
+      calculationRunId,
+      writer,
+      idBasedRiskScoringEnabled,
+      refresh: 'wait_for',
+    });
+  }
 
   const { scores: resolutionScores } = await runResolutionScoringStep({
     esClient,
@@ -178,5 +200,8 @@ async function buildScoringContext({
   return {
     alertFilters: [...baseAlertFilters, entityIdentityFilter],
     resolutionTargetId: entityDoc?.entity?.relationships?.resolution?.resolved_to ?? entityId,
+    // Risk scoring dual-writes the base score here, so a value means the entity has been scored
+    // before and its score document is worth refreshing.
+    hasExistingBaseScore: typeof entityDoc?.entity?.risk?.calculated_score_norm === 'number',
   };
 }

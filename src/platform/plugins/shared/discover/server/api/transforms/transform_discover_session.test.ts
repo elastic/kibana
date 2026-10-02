@@ -11,57 +11,82 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
+import {
+  discoverSessionApiDataSchema,
+  type DiscoverSessionApiData,
+  type DiscoverSessionApiDataInput,
+  type DiscoverSessionApiClassicTab,
+  type DiscoverSessionApiEsqlTab,
+} from '@kbn/as-code-discover-schema';
+import { ASCODE_FILTER_OPERATOR, ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type {
-  DiscoverSessionApiClassicTab,
-  DiscoverSessionApiData,
-  DiscoverSessionApiEsqlTab,
-} from '../schema';
-import { transformDiscoverSessionIn } from './transform_discover_session_in';
-import { transformDiscoverSessionOut } from './transform_discover_session_out';
+import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
+import { FILTERS, FilterStateStore } from '@kbn/es-query';
+import { cloneDeep } from 'lodash';
+import { type DiscoverSessionTabTypeState, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { fromStoredSearchEmbeddableByValue } from '../../../common/embeddable/transform_utils';
+import { toByValuePanelState } from '../../../common/embeddable/transform_utils.fixtures';
+import {
+  fromStoredSessionSearchAndTable,
+  fromStoredSessionSettings,
+} from '../../../common/session/session_tab_mapping';
+import {
+  transformDiscoverSessionIn,
+  transformInternalDiscoverSessionIn,
+} from './transform_discover_session_in';
+import {
+  transformDiscoverSessionOut,
+  transformInternalDiscoverSessionOut,
+} from './transform_discover_session_out';
+import {
+  discoverSessionInternalDataSchema,
+  type DiscoverSessionInternalData,
+} from '../internal_schema';
 import {
   discoverSessionApiData,
   discoverSessionAttributes,
 } from './transform_discover_session.fixtures';
 
 describe('discover session API transforms', () => {
+  const classicApiTab: DiscoverSessionApiClassicTab = {
+    id: 'tab-classic',
+    label: 'Classic',
+    type: DiscoverTabType.Default,
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'logs-data-view',
+    },
+    query: { language: 'kql', expression: 'service.name : "api"' },
+    filters: [],
+    sort: [{ name: '@timestamp', direction: 'desc' }],
+    view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+    hide_chart: false,
+    hide_table: false,
+    hide_aggregated_preview: true,
+    breakdown_field: 'host.name',
+    chart_interval: 'h',
+    time_range: { from: 'now-15m', to: 'now' },
+    refresh_interval: { pause: true, value: 0 },
+    vis_context: {
+      suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
+      attributes: {
+        visualizationType: 'lnsXY',
+        state: { foo: 'bar' },
+      },
+    },
+  };
+
   const apiData: DiscoverSessionApiData = {
     title: 'Session',
     description: 'Session description',
     tags: ['tag-1', 'tag-2'],
     tabs: [
-      {
-        id: 'tab-classic',
-        label: 'Classic',
-        data_source: {
-          type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-          ref_id: 'logs-data-view',
-        },
-        query: { language: 'kql', expression: 'service.name : "api"' },
-        filters: [],
-        sort: [{ name: '@timestamp', direction: 'desc' }],
-        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-        hide_chart: false,
-        hide_table: false,
-        hide_aggregated_preview: true,
-        breakdown_field: 'host.name',
-        chart_interval: 'h',
-        time_range: { from: 'now-15m', to: 'now' },
-        refresh_interval: { pause: true, value: 0 },
-        vis_context: {
-          suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
-          attributes: {
-            visualizationType: 'lnsXY',
-            state: { foo: 'bar' },
-          },
-        },
-      },
+      classicApiTab,
       {
         id: 'tab-esql',
         label: 'ES|QL',
+        type: DiscoverTabType.Default,
         data_source: {
           type: AS_CODE_ESQL_DATA_SOURCE_TYPE,
           query: 'FROM logs-* | LIMIT 10',
@@ -104,10 +129,257 @@ describe('discover session API transforms', () => {
     },
   };
 
+  it('preserves inline identity, filter references and the chart fingerprint internally', () => {
+    const data: DiscoverSessionInternalData = {
+      ...apiData,
+      tabs: [
+        {
+          ...classicApiTab,
+          column_order: [],
+          data_source: {
+            type: 'data_view_spec',
+            id: 'inline-id',
+            index_pattern: 'logs-*',
+            time_field: '@timestamp',
+          },
+          filters: [
+            {
+              type: 'condition',
+              condition: { field: 'host.name', operator: 'exists' },
+              data_view_id: 'inline-id',
+            },
+            {
+              type: 'condition',
+              condition: { field: 'service.name', operator: 'exists' },
+              data_view_id: 'foreign-id',
+            },
+          ],
+        },
+      ],
+    };
+    const original = cloneDeep(data);
+    const { attributes, references } = transformInternalDiscoverSessionIn(data);
+    const searchSource = injectReferences(
+      parseSearchSourceJSON(attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON),
+      references
+    );
+
+    expect(searchSource.index).toStrictEqual({
+      id: 'inline-id',
+      title: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    expect(searchSource.filter?.map(({ meta }) => meta.index)).toStrictEqual([
+      'inline-id',
+      'foreign-id',
+    ]);
+    expect(attributes.tabs[0].attributes.visContext).toStrictEqual({
+      suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
+      attributes: classicApiTab.vis_context?.attributes,
+      requestData: {
+        dataViewId: 'inline-id',
+        timeField: '@timestamp',
+        timeInterval: 'h',
+        breakdownField: 'host.name',
+      },
+    });
+
+    const storedBeforeRead = cloneDeep({ attributes, references });
+    const internal = transformInternalDiscoverSessionOut(attributes, references);
+
+    expect(internal).toStrictEqual({ sessionState: data, warnings: [] });
+    expect(discoverSessionInternalDataSchema.parse(internal.sessionState)).toStrictEqual(data);
+    expect(transformDiscoverSessionOut(attributes, references).sessionState.tabs[0]).toStrictEqual({
+      ...classicApiTab,
+      column_order: [],
+      data_source: {
+        type: 'data_view_spec',
+        index_pattern: 'logs-*',
+        time_field: '@timestamp',
+      },
+      filters: [
+        { type: 'condition', condition: { field: 'host.name', operator: 'exists' } },
+        {
+          type: 'condition',
+          condition: { field: 'service.name', operator: 'exists' },
+          data_view_id: 'foreign-id',
+        },
+      ],
+    });
+    expect(data).toStrictEqual(original);
+    expect({ attributes, references }).toStrictEqual(storedBeforeRead);
+  });
+
+  it.each([
+    { name: 'public', transform: transformDiscoverSessionOut },
+    { name: 'internal', transform: transformInternalDiscoverSessionOut },
+  ])('keeps the other fields and warning order in the $name response', ({ transform }) => {
+    const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
+    const session = {
+      ...attributes,
+      tabs: attributes.tabs.map((tab) => ({
+        ...tab,
+        attributes: { ...tab.attributes, controlGroupJson: '{' },
+      })),
+    };
+    const original = cloneDeep(session);
+
+    const result = transform(session, references);
+
+    expect(result).toStrictEqual({
+      sessionState: {
+        ...discoverSessionApiData,
+        tabs: discoverSessionApiData.tabs.map(({ control_panels: _controls, ...tab }) => tab),
+      },
+      warnings: discoverSessionApiData.tabs.map(({ id }) => ({
+        type: 'dropped_property',
+        tab_id: id,
+        key: 'control_panels',
+        message: 'Unable to transform control panels. Error: controlGroupJson is not valid JSON',
+      })),
+    });
+    expect(session).toStrictEqual(original);
+  });
+
+  it('does not expose an ES|QL runtime Data View as an inline source internally', () => {
+    const [, esqlTab] = discoverSessionAttributes.tabs;
+    const attributes = { ...discoverSessionAttributes, tabs: [esqlTab] };
+
+    const { sessionState, warnings } = transformInternalDiscoverSessionOut(attributes);
+
+    expect(warnings).toStrictEqual([]);
+    expect(sessionState.tabs[0].data_source).toStrictEqual({
+      type: 'esql',
+      query: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value',
+    });
+  });
+
+  it('converts shared tab fields without handling type settings, vis_context, or controls', () => {
+    const [classicTab, metricsTab] = discoverSessionAttributes.tabs;
+    const tab = {
+      ...classicTab,
+      attributes: {
+        ...classicTab.attributes,
+        tabTypeState: metricsTab.attributes.tabTypeState,
+        visContext: metricsTab.attributes.visContext,
+        controlGroupJson: '{', // Invalid JSON: this mapper must leave control parsing to the caller.
+      },
+    };
+    const originalTab = cloneDeep(tab); // Keep a separate copy to catch changes to nested fields.
+    const {
+      type: _type,
+      vis_context: _visContext,
+      control_panels: _controlPanels,
+      ...expectedFields
+    } = discoverSessionApiData.tabs[0];
+
+    const searchSource = parseSearchSourceJSON(
+      tab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+    );
+    const searchAndTableFields = fromStoredSessionSearchAndTable(tab.attributes, searchSource);
+    const sessionFields = fromStoredSessionSettings(tab.attributes);
+    expect(searchAndTableFields).not.toHaveProperty('hide_chart');
+    expect(sessionFields).not.toHaveProperty('data_source');
+    expect({
+      id: tab.id,
+      label: tab.label,
+      ...searchAndTableFields,
+      ...sessionFields,
+    }).toStrictEqual(expectedFields);
+    expect(tab).toStrictEqual(originalTab);
+  });
+
   describe('transform out', () => {
     it('maps saved object attributes to API data', () => {
       const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes);
       expect(transformed).toEqual(discoverSessionApiData);
+    });
+
+    it.each([
+      {
+        scenario: 'a missing Data View reference',
+        filters: [
+          {
+            meta: { indexRefName: 'missing-filter-view' },
+            query: { exists: { field: 'bytes' } },
+          },
+        ],
+      },
+      { scenario: 'a malformed filter', filters: [null] },
+    ])('ignores unused ES|QL filters with $scenario', ({ filters }) => {
+      const { attributes, references } = transformDiscoverSessionIn(apiData);
+      const esqlTab = attributes.tabs[1];
+      const searchSource = parseSearchSourceJSON(
+        esqlTab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      const searchSourceJSON = JSON.stringify({ ...searchSource, filter: filters });
+      const updatedTab = {
+        ...esqlTab,
+        attributes: {
+          ...esqlTab.attributes,
+          kibanaSavedObjectMeta: { searchSourceJSON },
+        },
+      };
+
+      const { sessionState, warnings } = transformDiscoverSessionOut(
+        { ...attributes, tabs: [updatedTab] },
+        references
+      );
+
+      expect(sessionState.tabs[0].data_source).toStrictEqual(apiData.tabs[1].data_source);
+      expect(sessionState.tabs[0]).not.toHaveProperty('filters');
+      expect(sessionState.tabs[0]).not.toHaveProperty('query');
+      expect(warnings).toStrictEqual([]);
+      expect(updatedTab.attributes.kibanaSavedObjectMeta.searchSourceJSON).toBe(searchSourceJSON);
+      expect(discoverSessionApiDataSchema.parse(sessionState)).toStrictEqual(sessionState);
+    });
+
+    it('still rejects a classic tab with a missing filter reference', () => {
+      const { attributes, references } = transformDiscoverSessionIn(apiData);
+      const classicTab = attributes.tabs[0];
+      const searchSource = parseSearchSourceJSON(
+        classicTab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      const searchSourceJSON = JSON.stringify({
+        ...searchSource,
+        filter: [
+          {
+            meta: { indexRefName: 'missing-filter-view' },
+            query: { exists: { field: 'bytes' } },
+          },
+        ],
+      });
+      const updatedTab = {
+        ...classicTab,
+        attributes: {
+          ...classicTab.attributes,
+          kibanaSavedObjectMeta: { searchSourceJSON },
+        },
+      };
+
+      expect(() =>
+        transformDiscoverSessionOut({ ...attributes, tabs: [updatedTab] }, references)
+      ).toThrow('Could not find reference for missing-filter-view');
+    });
+
+    it('still rejects a classic tab with a missing data source reference', () => {
+      const { attributes } = transformDiscoverSessionIn(apiData);
+      const [classicTab] = attributes.tabs;
+      const searchSourceJSON = JSON.stringify({
+        query: { language: 'kuery', query: '' },
+        indexRefName: 'missing-data-view',
+      });
+      const updatedTab = {
+        ...classicTab,
+        attributes: {
+          ...classicTab.attributes,
+          kibanaSavedObjectMeta: { searchSourceJSON },
+        },
+      };
+
+      expect(() => transformDiscoverSessionOut({ ...attributes, tabs: [updatedTab] })).toThrow(
+        'Could not find reference for missing-data-view'
+      );
     });
 
     it('omits the inline data view ID from self filters and preserves foreign filter IDs', () => {
@@ -127,16 +399,17 @@ describe('discover session API transforms', () => {
           query: { match_phrase: { 'host.name': 'web-01' } },
         },
       ];
+      const storedTabAttributes = {
+        ...classicTab.attributes,
+        kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(searchSource) },
+      };
 
       const { sessionState } = transformDiscoverSessionOut({
         ...discoverSessionAttributes,
         tabs: [
           {
             ...classicTab,
-            attributes: {
-              ...classicTab.attributes,
-              kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(searchSource) },
-            },
+            attributes: storedTabAttributes,
           },
         ],
       });
@@ -145,6 +418,13 @@ describe('discover session API transforms', () => {
 
       expect(selfFilter).not.toHaveProperty('data_view_id');
       expect(foreignFilter).toHaveProperty('data_view_id', 'foreign-data-view-id');
+      // By-value panels do not apply the session policies, so they keep the inline ID.
+      const [panelTab] = fromStoredSearchEmbeddableByValue(
+        toByValuePanelState(storedTabAttributes)
+      ).tabs;
+      expect(panelTab).toMatchObject({
+        filters: [{ data_view_id: inlineDataViewId }, { data_view_id: 'foreign-data-view-id' }],
+      });
 
       const { attributes, references } = transformDiscoverSessionIn(sessionState);
       const roundTrippedSearchSource = injectReferences(
@@ -204,6 +484,24 @@ describe('discover session API transforms', () => {
       });
     });
 
+    it('preserves a refresh_interval with a zero value', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              refreshInterval: { pause: false, value: 0 },
+            },
+          },
+        ],
+      });
+
+      expect(sessionState.tabs[0].refresh_interval).toEqual({ pause: false, value: 0 });
+    });
+
     it('extracts tag IDs from saved object references', () => {
       const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes, [
         { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
@@ -213,21 +511,26 @@ describe('discover session API transforms', () => {
       expect(transformed.tags).toEqual(['tag-1']);
     });
 
-    it('maps esqlApproximation to esql_approximation for ES|QL tabs', () => {
-      const { sessionState } = transformDiscoverSessionOut({
-        ...discoverSessionAttributes,
-        tabs: [
-          {
-            ...discoverSessionAttributes.tabs[1],
-            attributes: {
-              ...discoverSessionAttributes.tabs[1].attributes,
-              esqlApproximation: true,
+    it.each([true, false])(
+      'maps esqlApproximation %s to esql_approximation for ES|QL tabs',
+      (esqlApproximation) => {
+        const { sessionState } = transformDiscoverSessionOut({
+          ...discoverSessionAttributes,
+          tabs: [
+            {
+              ...discoverSessionAttributes.tabs[1],
+              attributes: {
+                ...discoverSessionAttributes.tabs[1].attributes,
+                esqlApproximation,
+              },
             },
-          },
-        ],
-      });
-      expect((sessionState.tabs[0] as DiscoverSessionApiEsqlTab).esql_approximation).toBe(true);
-    });
+          ],
+        });
+        expect((sessionState.tabs[0] as DiscoverSessionApiEsqlTab).esql_approximation).toBe(
+          esqlApproximation
+        );
+      }
+    );
 
     it('omits esql_approximation when esqlApproximation is absent from an ES|QL tab', () => {
       const { sessionState } = transformDiscoverSessionOut({
@@ -308,6 +611,12 @@ describe('discover session API transforms', () => {
               breakdownField: 'transaction.id',
               chartInterval: 'h',
               density: 'compact',
+              documentsDisplayMode: 'json',
+              jsonModeSettings: {
+                hideNulls: true,
+                wrapLines: false,
+                defaultRenderedNodes: 10,
+              },
               controlGroupJson: undefined,
               visContext: undefined,
             },
@@ -344,6 +653,12 @@ describe('discover session API transforms', () => {
               breakdownField: 'transaction.id',
               chartInterval: 'h',
               density: 'compact',
+              documentsDisplayMode: 'json',
+              jsonModeSettings: {
+                hideNulls: true,
+                wrapLines: false,
+                defaultRenderedNodes: 10,
+              },
               visContext: {
                 suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
                 requestData: {
@@ -383,6 +698,14 @@ describe('discover session API transforms', () => {
                   title: 'field_value',
                 },
               }),
+              tabTypeState: {
+                type: DiscoverTabType.Metrics,
+                dimensions: ['host.name'],
+                searchTerm: 'cpu',
+                counterAggregation: 'max',
+                gaugeAggregation: 'min',
+                histogramPercentile: 'p99',
+              },
             },
           },
         ],
@@ -400,33 +723,38 @@ describe('discover session API transforms', () => {
       expect(attributes.tabs[0].attributes.timeRestore).toBe(true);
     });
 
-    it('persists refresh_interval independently when time_range is absent', () => {
-      const [, esqlTab] = apiData.tabs;
-      const { attributes } = transformDiscoverSessionIn({
-        ...apiData,
-        tabs: [
-          {
-            ...esqlTab,
-            refresh_interval: { pause: false, value: 5000 },
-          },
-        ],
-      });
+    it.each([5000, 0])(
+      'persists refresh_interval with value %s independently when time_range is absent',
+      (value) => {
+        const [, esqlTab] = apiData.tabs;
+        const { attributes } = transformDiscoverSessionIn({
+          ...apiData,
+          tabs: [
+            {
+              ...esqlTab,
+              refresh_interval: { pause: false, value },
+            },
+          ],
+        });
 
-      expect(attributes.tabs[0].attributes.timeRestore).toBe(false);
-      expect(attributes.tabs[0].attributes.refreshInterval).toEqual({
-        pause: false,
-        value: 5000,
-      });
-    });
+        expect(attributes.tabs[0].attributes.timeRestore).toBe(false);
+        expect(attributes.tabs[0].attributes.refreshInterval).toEqual({ pause: false, value });
+      }
+    );
 
-    it('maps esql_approximation to esqlApproximation for ES|QL tabs', () => {
-      const [, esqlTab] = apiData.tabs;
-      const { attributes } = transformDiscoverSessionIn({
-        ...apiData,
-        tabs: [{ ...esqlTab, esql_approximation: true } as DiscoverSessionApiEsqlTab],
-      });
-      expect(attributes.tabs[0].attributes.esqlApproximation).toBe(true);
-    });
+    it.each([true, false])(
+      'maps esql_approximation %s to esqlApproximation for ES|QL tabs',
+      (esqlApproximation) => {
+        const [, esqlTab] = apiData.tabs;
+        const { attributes } = transformDiscoverSessionIn({
+          ...apiData,
+          tabs: [
+            { ...esqlTab, esql_approximation: esqlApproximation } as DiscoverSessionApiEsqlTab,
+          ],
+        });
+        expect(attributes.tabs[0].attributes.esqlApproximation).toBe(esqlApproximation);
+      }
+    );
 
     it('omits esqlApproximation when esql_approximation is absent from an ES|QL tab', () => {
       const [, esqlTab] = apiData.tabs;
@@ -453,7 +781,30 @@ describe('discover session API transforms', () => {
     });
 
     it('adds tab-prefixed references for data view reference tabs', () => {
-      const { attributes, references } = transformDiscoverSessionIn(apiData);
+      const [, esqlTab] = apiData.tabs;
+      const input: DiscoverSessionApiData = {
+        ...apiData,
+        tabs: [
+          {
+            ...classicApiTab,
+            filters: [
+              {
+                type: ASCODE_FILTER_TYPE.CONDITION,
+                condition: {
+                  field: 'log.level',
+                  operator: ASCODE_FILTER_OPERATOR.IS,
+                  value: 'error',
+                },
+                data_view_id: 'foreign-data-view',
+              },
+            ],
+          },
+          esqlTab,
+        ],
+      };
+      const originalInput = cloneDeep(input);
+
+      const { attributes, references } = transformDiscoverSessionIn(input);
 
       expect(attributes.tabs[0].attributes.visContext).toEqual({
         suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
@@ -476,6 +827,31 @@ describe('discover session API transforms', () => {
         type: 'index-pattern',
         id: 'logs-data-view',
       });
+      expect(references).toContainEqual({
+        name: 'tab_tab-classic.kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+        type: 'index-pattern',
+        id: 'foreign-data-view',
+      });
+
+      const searchSource = parseSearchSourceJSON(
+        attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      expect(searchSource).toHaveProperty(
+        'indexRefName',
+        'tab_tab-classic.kibanaSavedObjectMeta.searchSourceJSON.index'
+      );
+      expect(searchSource.index).toBeUndefined();
+      expect(searchSource.filter).toMatchObject([
+        {
+          meta: {
+            indexRefName:
+              'tab_tab-classic.kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          },
+          query: { match_phrase: { 'log.level': 'error' } },
+        },
+      ]);
+      expect(searchSource.filter?.[0].meta.index).toBeUndefined();
+      expect(input).toStrictEqual(originalInput);
     });
   });
 
@@ -560,34 +936,6 @@ describe('discover session API transforms', () => {
       });
     });
 
-    it('selects the data view through the layer linkage and falls back on ambiguity', () => {
-      const ambiguous = buildEsqlVisContext({
-        layers: { 'layer-1': { index: 'esql-dv-a' }, 'layer-2': { index: 'esql-dv-b' } },
-        adHocDataViews: {
-          'esql-dv-a': { type: 'esql', timeFieldName: '@timestamp' },
-          'esql-dv-b': { type: 'esql', timeFieldName: '@timestamp' },
-        },
-      });
-
-      expect(
-        getStoredVisContext({ ...esqlTab, breakdown_field: 'host.name', vis_context: ambiguous })
-      ).toEqual(expect.objectContaining({ requestData: { breakdownField: 'host.name' } }));
-
-      const sameDataView = buildEsqlVisContext({
-        layers: { 'layer-1': { index: 'esql-dv' }, 'layer-2': { index: 'esql-dv' } },
-        adHocDataViews: {
-          'unused-esql-dv': { type: 'esql', timeFieldName: 'event.ingested' },
-          'esql-dv': { type: 'esql', timeFieldName: '@timestamp' },
-        },
-      });
-
-      expect(getStoredVisContext({ ...esqlTab, vis_context: sameDataView })).toEqual(
-        expect.objectContaining({
-          requestData: { dataViewId: 'esql-dv', timeField: '@timestamp' },
-        })
-      );
-    });
-
     it('extracts the fingerprint without a time field and omits an empty breakdown field', () => {
       const visContext = buildEsqlVisContext({
         layers: { 'layer-1': { index: 'esql-dv' } },
@@ -596,7 +944,11 @@ describe('discover session API transforms', () => {
 
       expect(
         getStoredVisContext({ ...esqlTab, breakdown_field: '', vis_context: visContext })
-      ).toEqual(expect.objectContaining({ requestData: { dataViewId: 'esql-dv' } }));
+      ).toStrictEqual({
+        suggestionType: visContext.suggestion_type,
+        requestData: { dataViewId: 'esql-dv' },
+        attributes: visContext.attributes,
+      });
     });
 
     it('falls back when the blob is not a recognizable ES|QL chart', () => {
@@ -624,7 +976,11 @@ describe('discover session API transforms', () => {
           breakdown_field: '',
           vis_context: wrongDataViewType,
         })
-      ).toEqual(expect.objectContaining({ requestData: {} }));
+      ).toStrictEqual({
+        suggestionType: wrongDataViewType.suggestion_type,
+        requestData: {},
+        attributes: wrongDataViewType.attributes,
+      });
     });
 
     it('keeps behavior unchanged without a vis_context', () => {
@@ -638,11 +994,163 @@ describe('discover session API transforms', () => {
   });
 
   describe('round-trip', () => {
-    it('round-trips fixture API data through persistence', () => {
-      const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
-      const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
+    it('round-trips legacy pinned filters as app filters', () => {
+      const pinnedFilter = {
+        meta: {
+          index: 'logs-data-view',
+          type: FILTERS.PHRASE,
+          key: 'service.name',
+          disabled: true,
+          negate: true,
+          alias: 'Saved condition',
+        },
+        query: { match_phrase: { 'service.name': 'checkout' } },
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+      };
+      const appFilter = {
+        meta: { index: 'foreign-data-view', type: FILTERS.EXISTS, key: 'bytes' },
+        query: { exists: { field: 'bytes' } },
+        $state: { store: FilterStateStore.APP_STATE },
+      };
+      const searchSourceJSON = JSON.stringify({
+        index: 'logs-data-view',
+        query: { language: 'kuery', query: '' },
+        filter: [pinnedFilter, appFilter],
+      });
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const storedTab = {
+        ...classicTab,
+        attributes: { ...classicTab.attributes, kibanaSavedObjectMeta: { searchSourceJSON } },
+      };
 
-      expect(roundTripped).toEqual(discoverSessionApiData);
+      // The session API keeps both conditions, without exposing the pin marker.
+      const { sessionState, warnings } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [storedTab],
+      });
+      const expectedApiFilters = [
+        {
+          type: 'condition',
+          condition: { field: 'service.name', operator: 'is', value: 'checkout', negate: true },
+          data_view_id: 'logs-data-view',
+          disabled: true,
+          negate: true,
+          label: 'Saved condition',
+        },
+        {
+          type: 'condition',
+          condition: { field: 'bytes', operator: 'exists' },
+          data_view_id: 'foreign-data-view',
+        },
+      ];
+
+      expect(warnings).toEqual([]);
+      expect(sessionState.tabs[0]).toMatchObject({ filters: expectedApiFilters });
+      expect(discoverSessionApiDataSchema.parse(sessionState)).toEqual(sessionState);
+
+      const { attributes, references } = transformDiscoverSessionIn(sessionState);
+      const restoredSearchSource = injectReferences(
+        parseSearchSourceJSON(attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON),
+        references
+      );
+
+      expect(restoredSearchSource.filter).toMatchObject([
+        { meta: pinnedFilter.meta, query: pinnedFilter.query },
+        { meta: appFilter.meta, query: appFilter.query },
+      ]);
+      expect(restoredSearchSource.filter?.map((filter) => filter.$state)).toEqual([
+        undefined,
+        undefined,
+      ]);
+      expect(transformDiscoverSessionOut(attributes, references).sessionState).toEqual(
+        sessionState
+      );
+
+      // Reading the session changes neither the source document nor the by-value panel conversion,
+      // which still drops pinned filters.
+      expect(storedTab.attributes.kibanaSavedObjectMeta.searchSourceJSON).toBe(searchSourceJSON);
+      const [panelTab] = fromStoredSearchEmbeddableByValue(
+        toByValuePanelState(storedTab.attributes)
+      ).tabs;
+      expect(panelTab).toMatchObject({
+        filters: [expectedApiFilters[1]],
+      });
+    });
+
+    it('round-trips validated fixture API data through persistence without warnings', () => {
+      // Include request validation and defaults, as POST and PUT do before calling the service.
+      const request = discoverSessionApiDataSchema.parse(discoverSessionApiData);
+      const { attributes, references } = transformDiscoverSessionIn(request);
+      const { sessionState, warnings } = transformDiscoverSessionOut(attributes, references);
+      const roundTripped = discoverSessionApiDataSchema.parse(sessionState);
+
+      expect(sessionState).toEqual(discoverSessionApiData);
+      expect(roundTripped).toStrictEqual(request);
+      expect(warnings).toEqual([]);
+    });
+
+    it('applies request defaults without changing authored values during persistence', () => {
+      const input: DiscoverSessionApiDataInput = {
+        title: 'Session with omitted defaults',
+        tags: [],
+        tabs: [
+          {
+            id: 'classic',
+            label: 'Classic',
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'logs-data-view' },
+            column_order: ['message'],
+            row_height: 'auto',
+            sample_size: 250,
+            hide_chart: true,
+          },
+          {
+            id: 'esql',
+            label: 'ES|QL',
+            data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+            column_order: [],
+            control_panels: [
+              {
+                id: 'service',
+                type: ESQL_CONTROL,
+                config: {
+                  control_type: 'STATIC_VALUES',
+                  variable_name: 'service',
+                  variable_type: 'values',
+                  available_options: ['api', 'web'],
+                  selected_options: ['web'],
+                  single_select: true,
+                },
+              },
+            ],
+          },
+        ],
+      };
+      const request = discoverSessionApiDataSchema.parse(input);
+      const { attributes, references } = transformDiscoverSessionIn(request);
+      const { sessionState, warnings } = transformDiscoverSessionOut(attributes, references);
+
+      expect(request).toMatchObject({
+        description: '',
+        tabs: [
+          {
+            filters: [],
+            sort: [],
+            view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+            hide_chart: true,
+            hide_table: false,
+          },
+          {
+            sort: [],
+            hide_chart: false,
+            hide_table: false,
+            control_panels: [{ width: 'medium', grow: false }],
+          },
+        ],
+      });
+      expect(sessionState).toStrictEqual(request);
+      expect(discoverSessionApiDataSchema.parse(sessionState)).toStrictEqual(request);
+      expect(attributes.tabs[0].attributes.rowHeight).toBe(-1);
+      expect(warnings).toEqual([]);
     });
 
     it('round-trips fixture saved object attributes through API', () => {
@@ -654,6 +1162,72 @@ describe('discover session API transforms', () => {
       expect(apiDataFromStored).toEqual(discoverSessionApiData);
       expect(roundTripped).toEqual(discoverSessionApiData);
       expect(references).toEqual([]);
+    });
+
+    it('preserves saved metrics tab state through an API read and write', () => {
+      const [, esqlTab] = discoverSessionAttributes.tabs;
+      // Required keeps this test up to date when we add new saved fields, even optional ones.
+      // Give them real values so we catch any fields we forget to map in the transforms.
+      const savedTabTypeState: Required<DiscoverSessionTabTypeState> = {
+        type: DiscoverTabType.Metrics,
+        dimensions: ['host.name', 'service.name'],
+        searchTerm: 'cpu',
+        counterAggregation: 'max',
+        gaugeAggregation: 'min',
+        histogramPercentile: 'p99',
+      };
+      const savedMetricsSession = {
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...esqlTab,
+            attributes: {
+              ...esqlTab.attributes,
+              tabTypeState: savedTabTypeState,
+            },
+          },
+        ],
+      };
+
+      const { sessionState } = transformDiscoverSessionOut(savedMetricsSession);
+
+      expect(sessionState.tabs[0]).toMatchObject({
+        type: DiscoverTabType.Metrics,
+        dimensions: ['host.name', 'service.name'],
+        search_term: 'cpu',
+        counter_aggregation: 'max',
+        gauge_aggregation: 'min',
+        histogram_percentile: 'p99',
+      });
+
+      expect(sessionState.tabs[0]).not.toHaveProperty('tabTypeState');
+
+      const { attributes: writtenBack } = transformDiscoverSessionIn(
+        discoverSessionApiDataSchema.parse(sessionState)
+      );
+
+      expect(writtenBack.tabs[0].attributes.tabTypeState).toEqual(savedTabTypeState);
+    });
+
+    it('rejects saved metrics state on a classic tab instead of dropping it', () => {
+      const [classicTab, metricsTab] = discoverSessionAttributes.tabs;
+
+      expect(() =>
+        transformDiscoverSessionOut({
+          ...discoverSessionAttributes,
+          tabs: [
+            {
+              ...classicTab,
+              attributes: {
+                ...classicTab.attributes,
+                tabTypeState: metricsTab.attributes.tabTypeState,
+              },
+            },
+          ],
+        })
+      ).toThrow(
+        `Metrics tab "${classicTab.label}" with ID "${classicTab.id}" requires an ES|QL data source.`
+      );
     });
 
     it('round-trips fixture saved object attributes preserving API-representable persistence values', () => {

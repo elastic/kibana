@@ -86,12 +86,19 @@ spaceTest.describe('HITL waitForInput resume', { tag: tags.deploymentAgnostic },
         status: ExecutionStatus.WAITING_FOR_INPUT,
         timeout: WAITING_TIMEOUT,
       });
-      expect(findAskStep(paused.stepExecutions)?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      const askStep = findAskStep(paused.stepExecutions);
+      expect(askStep?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      const askStepId = askStep?.id ?? '';
+      expectNonEmptyString(askStepId);
 
-      const resumeResponse = await workflowsApi.rawResume(workflowExecutionId, {
-        approved: true,
-        source: 'happy-path',
-      });
+      const resumeResponse = await workflowsApi.rawResume(
+        workflowExecutionId,
+        {
+          approved: true,
+          source: 'happy-path',
+        },
+        { stepExecutionId: askStepId }
+      );
       expect(resumeResponse.status).toBe(200);
       expect(resumeResponse.data).toMatchObject({
         success: true,
@@ -112,7 +119,7 @@ spaceTest.describe('HITL waitForInput resume', { tag: tags.deploymentAgnostic },
       const lateResume = await workflowsApi.rawResume(
         workflowExecutionId,
         { approved: false, source: 'too-late' },
-        { ignoreErrors: [409] }
+        { ignoreErrors: [409], stepExecutionId: askStepId }
       );
       expect(lateResume.status).toBe(409);
     }
@@ -125,16 +132,18 @@ spaceTest.describe('HITL waitForInput resume', { tag: tags.deploymentAgnostic },
       const workflow = await workflowsApi.create(HITL_WORKFLOW_YAML);
       const { workflowExecutionId } = await workflowsApi.run(workflow.id, {});
 
-      await workflowsApi.waitForStatus({
+      const paused = await workflowsApi.waitForStatus({
         workflowExecutionId,
         status: ExecutionStatus.WAITING_FOR_INPUT,
         timeout: WAITING_TIMEOUT,
       });
+      const askStepId = findAskStep(paused.stepExecutions)?.id ?? '';
+      expectNonEmptyString(askStepId);
 
       const firstInput = { approved: true, source: 'consumer-a' };
       const secondInput = { approved: false, source: 'consumer-b' };
       // The loser may 409 (claim lost) or 500 (resume task already scheduled).
-      const resumeOptions = { ignoreErrors: [409, 500], retries: 0 };
+      const resumeOptions = { ignoreErrors: [409, 500], retries: 0, stepExecutionId: askStepId };
 
       const [firstResume, secondResume] = await Promise.all([
         workflowsApi.rawResume(workflowExecutionId, firstInput, resumeOptions),

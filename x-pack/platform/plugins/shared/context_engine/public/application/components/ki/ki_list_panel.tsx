@@ -11,9 +11,11 @@ import {
   INDEX_MANAGEMENT_LOCATOR_ID,
   type IndexManagementLocatorParams,
 } from '@kbn/index-management-shared-types';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { useLocatorUrl } from '@kbn/share-plugin/public';
 import React, { useMemo, useState } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { isIndexPattern } from '../../../../common/ai_index_dest';
 import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
@@ -63,6 +65,10 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
             values: { typeLabel: getKiListTypeFilterLabel(type), count },
           }),
           'data-test-subj': `contextKiListFilter-${type}`,
+          ...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
+            action: CONTEXT_ENGINE_UI_EBT.action.kiList.FILTER_TYPE,
+          }),
         })
       ),
     [summary.total, summary.countsByType]
@@ -83,7 +89,8 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
     });
   }, [canOpenDiscover, dest.value, share?.url?.locators]);
 
-  const canLinkToIndexManagement = !isIndexPattern(dest.value);
+  const canOpenIndexManagement = application.capabilities.index_management?.monitor === true;
+  const canLinkToIndexManagement = canOpenIndexManagement && !isIndexPattern(dest.value);
   const indexManagementLocator = canLinkToIndexManagement
     ? share.url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID)
     : undefined;
@@ -100,7 +107,7 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
 
   return (
     <div data-test-subj="contextKiListPanel">
-      <EuiText size="s" color="subdued" data-test-subj="contextKiListPanelDescription">
+      <EuiText size="xs" color="subdued" data-test-subj="contextKiListPanelDescription">
         <p>
           {i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.description', {
             defaultMessage: 'The knowledge your agents retrieve.',

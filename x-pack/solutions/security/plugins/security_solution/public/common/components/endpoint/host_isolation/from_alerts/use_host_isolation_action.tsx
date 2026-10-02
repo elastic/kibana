@@ -8,6 +8,11 @@ import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import {
+  ENDPOINT_VERSION_NOT_SUPPORTED,
+  HOST_ISOLATION,
+} from '../../../../../management/common/translations';
+import { useGetEndpointDetails } from '../../../../../management/hooks';
+import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
@@ -20,6 +25,7 @@ import { HOST_ON_LINKED_PROJECT_TOOLTIP, ISOLATE_HOST, UNISOLATE_HOST } from './
 import { useUserPrivileges } from '../../../user_privileges';
 import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
 import { useGetAgentStatus } from '../../../../../management/hooks/agents/use_get_agent_status';
+import { ISOLATE_HOST_ACTION_ID } from '../../../../constants/action_ids';
 
 export type HostIsolationAction = 'isolateHost' | 'unisolateHost';
 
@@ -50,6 +56,17 @@ export const useHostIsolationAction = ({
     enabled: hostSupportsResponseActions,
   });
   const agentStatus = data?.[agentId];
+  const isHostAgentUnEnrolled = useMemo<boolean>(() => {
+    return (
+      !hostSupportsResponseActions ||
+      !agentStatus?.found ||
+      agentStatus.status === HostStatus.UNENROLLED
+    );
+  }, [hostSupportsResponseActions, agentStatus]);
+
+  const { data: hostMetadata } = useGetEndpointDetails(agentId, {
+    enabled: hostSupportsResponseActions && agentType === 'endpoint',
+  });
 
   const doesHostSupportIsolation = useMemo(() => {
     return hostSupportsResponseActions && isolationSupported;
@@ -70,14 +87,6 @@ export const useHostIsolationAction = ({
       }
     }
   }, [closePopover, doesHostSupportIsolation, isHostIsolated, onAddIsolationStatusClick]);
-
-  const isHostAgentUnEnrolled = useMemo<boolean>(() => {
-    return (
-      !hostSupportsResponseActions ||
-      !agentStatus?.found ||
-      agentStatus.status === HostStatus.UNENROLLED
-    );
-  }, [hostSupportsResponseActions, agentStatus]);
 
   // Only meaningful when CPS is on: `cpsManager` is present solely on CPS-enabled deployments. Off
   // CPS (including CCS deployments), an ancestor index can legitimately carry a remote-cluster prefix
@@ -106,7 +115,7 @@ export const useHostIsolationAction = ({
     }
 
     const menuItem: AlertTableContextMenuItem = {
-      key: 'isolate-host-action-item',
+      key: ISOLATE_HOST_ACTION_ID,
       'data-test-subj': 'isolate-host-action-item',
       disabled: isHostAgentUnEnrolled,
       onClick: isolateHostHandler,
@@ -134,6 +143,12 @@ export const useHostIsolationAction = ({
         agentType === 'endpoint'
           ? HOST_ENDPOINT_UNENROLLED_TOOLTIP
           : NOT_FROM_ENDPOINT_HOST_TOOLTIP;
+    } else if (
+      agentType === 'endpoint' &&
+      !hostMetadata?.metadata.Endpoint.capabilities?.includes('isolation')
+    ) {
+      menuItem.disabled = true;
+      menuItem.toolTipContent = ENDPOINT_VERSION_NOT_SUPPORTED(HOST_ISOLATION);
     }
 
     return [menuItem];
@@ -142,12 +157,13 @@ export const useHostIsolationAction = ({
     canUnIsolateHost,
     canIsolateHost,
     isHostAgentUnEnrolled,
+    agentType,
+    hostMetadata?.metadata.Endpoint.capabilities,
     isolateHostHandler,
     isHostFromLinkedProject,
     doesHostSupportIsolation,
     isLoading,
     isFetched,
-    agentType,
     unsupportedReason,
   ]);
 };

@@ -5,25 +5,15 @@
  * 2.0.
  */
 
-import {
-  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-  readEsqlQuery,
-  resolveEsqlQueryEdit,
-  toEsqlQueryState,
-  type CustomContentState,
-} from '@kbn/custom-content-common';
-import type { PanelFailure } from '../utils';
-import { getErrorMessage } from '../utils';
-import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
+import type { OperationFailure } from '../utils';
+import type { InlinePanelOperationType, PanelContent } from '../resolve_panel';
 import type { DashboardOperation } from './registry';
-import type { ResolveCustomContentTemplate } from './types';
+import type { ResolveAttachmentPanel } from './types';
 import {
-  PANEL_TYPE_DEFINITIONS,
-  type AddPanelsItemInput,
-  type CustomContentPanelConfig,
+  buildConfigPanelContent,
   type NewPanelInput,
-  type PanelContent,
   type PanelRequestInput,
+  type PanelResolutionRequest,
   type ResolvePanelContent,
 } from './panels';
 
@@ -34,23 +24,24 @@ export interface MaterializedPanelInput {
   authoringNote?: string;
 }
 
-export type PanelCreationRequest =
-  | {
-      operationType: 'add_section';
-      panelInput: PanelRequestInput;
-      panelInputIndex: number;
-    }
-  | {
-      operationType: 'add_panels';
-      panelInput: Extract<AddPanelsItemInput, { source: 'request' }>;
-      panelInputIndex: number;
-      sectionId?: string;
-    };
+export interface PanelCreationRequest {
+  operationType: 'add_section' | 'add_panels';
+  panelInput: PanelRequestInput;
+  panelInputIndex: number;
+}
 
 export interface ResolvedPanelCreationRequest {
   request: PanelCreationRequest;
   resolvedPanel: ResolvedPanelContent;
 }
+
+const collectRequestInputs = (
+  operationType: PanelCreationRequest['operationType'],
+  panelInputs: NewPanelInput[]
+): PanelCreationRequest[] =>
+  panelInputs.flatMap((panelInput, panelInputIndex) =>
+    panelInput.source === 'request' ? [{ operationType, panelInput, panelInputIndex }] : []
+  );
 
 /**
  * Collect inline panel creation work, keyed by operation index, so it can be
@@ -62,54 +53,33 @@ const collectPanelCreationRequests = (
   const requestsByOperationIndex = new Map<number, PanelCreationRequest[]>();
 
   for (const [operationIndex, operation] of operations.entries()) {
-    switch (operation.operation) {
-      case 'add_section': {
-        if (!operation.panels) {
-          break;
-        }
+    const panelRequests =
+      operation.operation === 'add_section' || operation.operation === 'add_panels'
+        ? collectRequestInputs(operation.operation, operation.panels ?? [])
+        : [];
 
-        const panelRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
-          panelInput.source === 'request'
-            ? [
-                {
-                  operationType: operation.operation,
-                  panelInput,
-                  panelInputIndex,
-                },
-              ]
-            : []
-        );
-
-        if (panelRequests.length > 0) {
-          requestsByOperationIndex.set(operationIndex, panelRequests);
-        }
-        break;
-      }
-      case 'add_panels': {
-        const panelRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
-          panelInput.source === 'request'
-            ? [
-                {
-                  operationType: operation.operation,
-                  panelInput,
-                  panelInputIndex,
-                  sectionId: panelInput.sectionId,
-                },
-              ]
-            : []
-        );
-
-        if (panelRequests.length > 0) {
-          requestsByOperationIndex.set(operationIndex, panelRequests);
-        }
-        break;
-      }
-      default:
-        break;
+    if (panelRequests.length > 0) {
+      requestsByOperationIndex.set(operationIndex, panelRequests);
     }
   }
 
   return requestsByOperationIndex;
+};
+
+/** Maps a new-panel request input onto the resolution request for its renderer. */
+const toCreationResolutionRequest = ({
+  operationType,
+  panelInput,
+}: PanelCreationRequest): PanelResolutionRequest => {
+  const { query, esql } = panelInput;
+  const base = { operationType, identifier: query, nlQuery: query, esql };
+
+  if (panelInput.renderer === 'custom_content') {
+    return { ...base, renderer: panelInput.renderer };
+  }
+
+  const { renderer, index, chartType } = panelInput;
+  return { ...base, renderer, index, chartType };
 };
 
 /**
@@ -143,16 +113,7 @@ export const resolvePanelCreationRequests = async ({
           await Promise.all(
             requests.map(async (request) => ({
               request,
-              resolvedPanel: await resolvePanelContent({
-                type: request.panelInput.type,
-                operationType: request.operationType,
-                identifier: request.panelInput.query,
-                nlQuery: request.panelInput.query,
-                index: request.panelInput.index,
-                chartType: request.panelInput.chartType,
-                esql: request.panelInput.esql,
-                renderer: request.panelInput.renderer,
-              }),
+              resolvedPanel: await resolvePanelContent(toCreationResolutionRequest(request)),
             }))
           ),
         ] as const
@@ -163,49 +124,50 @@ export const resolvePanelCreationRequests = async ({
 };
 
 /**
- * Return the resolved create results for one operation during the apply phase.
- * Returns an empty array for operations with no panel requests.
- */
-const getResolvedPanelCreationRequests = ({
-  resolvedRequestsByOperationIndex,
-  operationIndex,
-}: {
-  resolvedRequestsByOperationIndex: Map<number, ResolvedPanelCreationRequest[]>;
-  operationIndex: number;
-}): ResolvedPanelCreationRequest[] => resolvedRequestsByOperationIndex.get(operationIndex) ?? [];
-
-/**
  * Turns a new-panel input into panel content so operation handlers don't branch
  * on `source`:
- * - `source: 'config'`: built by value from the panel type's registry definition.
+ * - `source: 'config'`: built by value from its panel type's registry entry.
+ * - `source: 'attachment'`: read from the conversation's visualization attachment.
  * - `source: 'request'`: read from the up-front parallel resolution (keyed by
  *   panel input index).
  *
- * Returns `undefined` and records a failure when a panel request didn't resolve.
+ * Returns `undefined` and records a failure when a panel didn't resolve.
  */
 export const createPanelInputMaterializer = ({
   resolvedPanelCreationRequests,
   operationIndex,
   operationType,
   failures,
+  resolveAttachmentPanel,
 }: {
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   operationIndex: number;
-  operationType: DashboardOperation['operation'];
-  failures: PanelFailure[];
+  operationType: InlinePanelOperationType;
+  failures: OperationFailure[];
+  resolveAttachmentPanel?: ResolveAttachmentPanel;
 }): ((item: NewPanelInput, panelInputIndex: number) => MaterializedPanelInput | undefined) => {
   const resolvedRequestByInputIndex = new Map(
-    getResolvedPanelCreationRequests({
-      resolvedRequestsByOperationIndex: resolvedPanelCreationRequests,
-      operationIndex,
-    }).map((resolvedRequest) => [resolvedRequest.request.panelInputIndex, resolvedRequest])
+    (resolvedPanelCreationRequests.get(operationIndex) ?? []).map((resolvedRequest) => [
+      resolvedRequest.request.panelInputIndex,
+      resolvedRequest,
+    ])
   );
 
   return (item, panelInputIndex) => {
     if (item.source === 'config') {
-      return {
-        panelContent: PANEL_TYPE_DEFINITIONS[item.type].buildPanelContent(item.config),
-      };
+      return { panelContent: buildConfigPanelContent(item.type, item.config) };
+    }
+
+    if (item.source === 'attachment') {
+      if (!resolveAttachmentPanel) {
+        throw new Error('Attachment panel resolver is required for attachment-source panels.');
+      }
+      const resolved = resolveAttachmentPanel(item.attachment_id, operationType);
+      if (resolved.type === 'failure') {
+        failures.push(resolved.failure);
+        return undefined;
+      }
+      return { panelContent: resolved.panelContent };
     }
 
     const resolvedRequest = resolvedRequestByInputIndex.get(panelInputIndex);
@@ -227,54 +189,4 @@ export const createPanelInputMaterializer = ({
         : {}),
     };
   };
-};
-
-export const applyCustomContentTemplates = async (
-  materialized: Array<{ panel: MaterializedPanelInput | undefined }>,
-  resolveTemplate: ResolveCustomContentTemplate,
-  failures: PanelFailure[]
-): Promise<void> => {
-  await Promise.all(
-    materialized.map(async (entry) => {
-      const { panel } = entry;
-      if (!panel) return;
-      if (panel.panelContent.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE) return;
-      const { prompt, esqlQuery, ...persistedConfig } = panel.panelContent
-        .config as CustomContentPanelConfig & CustomContentState;
-      if (!prompt || persistedConfig.template) return;
-
-      try {
-        const template = await resolveTemplate({ prompt, esqlQuery });
-        panel.panelContent = {
-          ...panel.panelContent,
-          config: { ...persistedConfig, esql_query: toEsqlQueryState(esqlQuery), template },
-        };
-      } catch (err) {
-        failures.push({
-          type: DASHBOARD_OPERATION_FAILURE_TYPES.addPanels,
-          identifier: prompt,
-          error: getErrorMessage(err),
-        });
-        entry.panel = undefined;
-      }
-    })
-  );
-};
-
-export const mergeAndResolveCustomContentEdit = async (
-  editConfig: { prompt?: string; esqlQuery?: string | null },
-  existing: CustomContentState,
-  resolveTemplate: ResolveCustomContentTemplate
-): Promise<CustomContentState> => {
-  const { query: mergedEsqlQuery, isChanging: isQueryChanging } = resolveEsqlQueryEdit(
-    editConfig.esqlQuery,
-    readEsqlQuery(existing)
-  );
-  const template = await resolveTemplate({
-    prompt: editConfig.prompt ?? '',
-    esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
-    existingTemplate: existing.template,
-    hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
-  });
-  return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
 };

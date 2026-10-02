@@ -8,23 +8,25 @@
 import { z } from '@kbn/zod/v4';
 import {
   createRuleDataSchema,
-  updateRuleBodySchema,
+  updateRuleDataSchema,
   ruleResponseSchema,
   findRulesResponseSchema,
   ruleTagsResponseSchema,
-  bulkGetRulesParamsSchema,
   bulkGetRulesResponseSchema,
+  bulkCreateRuleItemSchema,
+  bulkCreateRulesRequestSchema,
+  bulkCreateRulesResponseSchema,
   querySchema,
-  composedQuerySchema,
-  standaloneQuerySchema,
+  recoverySchema,
+  noDataSchema,
+  stateTransitionSchema,
   scheduleSchema,
   metadataSchema,
-  ruleResponseMetadataSchema,
   groupingSchema,
 } from './rule_data_schema';
 import {
   createActionPolicyDataSchema,
-  updateActionPolicyBodySchema,
+  updateActionPolicyDataSchema,
   bulkSnoozeActionPoliciesBodySchema,
   snoozeActionPolicyBodySchema,
   actionPolicyDestinationSchema,
@@ -35,23 +37,39 @@ import {
   findActionPoliciesResponseSchema,
 } from './action_policy_response_schema';
 import {
-  createAckAlertActionBodySchema,
-  createUnackAlertActionBodySchema,
-  createAssignAlertActionBodySchema,
-  createTagAlertActionBodySchema,
-  createSnoozeAlertActionBodySchema,
-  createUnsnoozeAlertActionBodySchema,
-  createActivateAlertActionBodySchema,
-  createDeactivateAlertActionBodySchema,
-  createAlertActionBodySchema,
-  bulkCreateAlertActionItemBodySchema,
-  bulkCreateAlertActionBodySchema,
+  createAckEpisodeActionBodySchema,
+  createUnackEpisodeActionBodySchema,
+  createAssignEpisodeActionBodySchema,
+  createTagEpisodeActionBodySchema,
+  createSnoozeSeriesActionBodySchema,
+  createUnsnoozeSeriesActionBodySchema,
+  createActivateEpisodeActionBodySchema,
+  createDeactivateEpisodeActionBodySchema,
+  createSeriesAlertActionBodySchema,
+  createEpisodeAlertActionBodySchema,
+  bulkTagEpisodeActionItemSchema,
+  bulkTagEpisodeActionBodySchema,
+  bulkSnoozeSeriesActionItemSchema,
+  bulkSnoozeSeriesActionBodySchema,
+  bulkUnsnoozeSeriesActionItemSchema,
+  bulkUnsnoozeSeriesActionBodySchema,
+  bulkAckEpisodeActionItemSchema,
+  bulkAckEpisodeActionBodySchema,
+  bulkUnackEpisodeActionItemSchema,
+  bulkUnackEpisodeActionBodySchema,
+  bulkAssignEpisodeActionItemSchema,
+  bulkAssignEpisodeActionBodySchema,
+  bulkActivateEpisodeActionItemSchema,
+  bulkActivateEpisodeActionBodySchema,
+  bulkDeactivateEpisodeActionItemSchema,
+  bulkDeactivateEpisodeActionBodySchema,
 } from './alert_action_schema';
 import {
-  matchActionPoliciesForRuleBodySchema,
+  matchActionPoliciesBodySchema,
   matchedActionPolicySchema,
-  matchActionPoliciesForRuleResponseSchema,
-} from './matched_action_policies_response_schema';
+  matchActionPoliciesResponseSchema,
+} from './match_action_policies_schema';
+import { matchRulesBodySchema } from './match_rules_schema';
 import {
   ruleExecutionViewSchema,
   listRuleExecutionsResponseSchema,
@@ -84,22 +102,24 @@ const getMetaId = (schema: z.ZodType): string | undefined => getMeta(schema).id;
 const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   // rules
   [createRuleDataSchema, 'alerting_new_rule'],
-  [updateRuleBodySchema, 'alerting_update_rule'],
+  [updateRuleDataSchema, 'alerting_update_rule'],
   [ruleResponseSchema, 'alerting_rule_response'],
   [findRulesResponseSchema, 'alerting_rule_list_response'],
   [ruleTagsResponseSchema, 'alerting_rule_tags_response'],
-  [bulkGetRulesParamsSchema, 'alerting_bulk_get_rules_request'],
   [bulkGetRulesResponseSchema, 'alerting_bulk_get_rules_response'],
+  [bulkCreateRuleItemSchema, 'alerting_bulk_create_rule_item'],
+  [bulkCreateRulesRequestSchema, 'alerting_bulk_create_rules_request'],
+  [bulkCreateRulesResponseSchema, 'alerting_bulk_create_rules_response'],
   [querySchema, 'alerting_rule_query'],
-  [composedQuerySchema, 'alerting_composed_rule_query'],
-  [standaloneQuerySchema, 'alerting_standalone_rule_query'],
+  [recoverySchema, 'alerting_rule_recovery'],
+  [noDataSchema, 'alerting_rule_no_data'],
+  [stateTransitionSchema, 'alerting_rule_state_transition'],
   [scheduleSchema, 'alerting_rule_schedule'],
   [metadataSchema, 'alerting_rule_metadata'],
-  [ruleResponseMetadataSchema, 'alerting_rule_response_metadata'],
   [groupingSchema, 'alerting_rule_grouping'],
   // action policies
   [createActionPolicyDataSchema, 'alerting_new_action_policy'],
-  [updateActionPolicyBodySchema, 'alerting_update_action_policy'],
+  [updateActionPolicyDataSchema, 'alerting_update_action_policy'],
   [bulkSnoozeActionPoliciesBodySchema, 'alerting_bulk_snooze_action_policies_request'],
   [snoozeActionPolicyBodySchema, 'alerting_snooze_action_policy_request'],
   [actionPolicyDestinationSchema, 'alerting_action_policy_destination'],
@@ -107,21 +127,38 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [actionPolicyResponseSchema, 'alerting_action_policy_response'],
   [findActionPoliciesResponseSchema, 'alerting_action_policy_list_response'],
   // alert actions
-  [createAckAlertActionBodySchema, 'alerting_new_ack_alert_action'],
-  [createUnackAlertActionBodySchema, 'alerting_new_unack_alert_action'],
-  [createAssignAlertActionBodySchema, 'alerting_new_assign_alert_action'],
-  [createTagAlertActionBodySchema, 'alerting_new_tag_alert_action'],
-  [createSnoozeAlertActionBodySchema, 'alerting_new_snooze_alert_action'],
-  [createUnsnoozeAlertActionBodySchema, 'alerting_new_unsnooze_alert_action'],
-  [createActivateAlertActionBodySchema, 'alerting_new_activate_alert_action'],
-  [createDeactivateAlertActionBodySchema, 'alerting_new_deactivate_alert_action'],
-  [createAlertActionBodySchema, 'alerting_alert_action'],
-  [bulkCreateAlertActionItemBodySchema, 'alerting_bulk_create_alert_action_item'],
-  [bulkCreateAlertActionBodySchema, 'alerting_bulk_create_alert_actions_request'],
+  [createAckEpisodeActionBodySchema, 'alerting_new_ack_episode_action'],
+  [createUnackEpisodeActionBodySchema, 'alerting_new_unack_episode_action'],
+  [createAssignEpisodeActionBodySchema, 'alerting_new_assign_episode_action'],
+  [createTagEpisodeActionBodySchema, 'alerting_new_tag_episode_action'],
+  [createSnoozeSeriesActionBodySchema, 'alerting_new_snooze_series_action'],
+  [createUnsnoozeSeriesActionBodySchema, 'alerting_new_unsnooze_series_action'],
+  [createActivateEpisodeActionBodySchema, 'alerting_new_activate_episode_action'],
+  [createDeactivateEpisodeActionBodySchema, 'alerting_new_deactivate_episode_action'],
+  [createSeriesAlertActionBodySchema, 'alerting_series_alert_action'],
+  [createEpisodeAlertActionBodySchema, 'alerting_episode_alert_action'],
+  [bulkTagEpisodeActionItemSchema, 'alerting_bulk_tag_episodes_item'],
+  [bulkTagEpisodeActionBodySchema, 'alerting_bulk_tag_episodes_request'],
+  [bulkSnoozeSeriesActionItemSchema, 'alerting_bulk_snooze_series_item'],
+  [bulkSnoozeSeriesActionBodySchema, 'alerting_bulk_snooze_series_request'],
+  [bulkUnsnoozeSeriesActionItemSchema, 'alerting_bulk_unsnooze_series_item'],
+  [bulkUnsnoozeSeriesActionBodySchema, 'alerting_bulk_unsnooze_series_request'],
+  [bulkAckEpisodeActionItemSchema, 'alerting_bulk_ack_episodes_item'],
+  [bulkAckEpisodeActionBodySchema, 'alerting_bulk_ack_episodes_request'],
+  [bulkUnackEpisodeActionItemSchema, 'alerting_bulk_unack_episodes_item'],
+  [bulkUnackEpisodeActionBodySchema, 'alerting_bulk_unack_episodes_request'],
+  [bulkAssignEpisodeActionItemSchema, 'alerting_bulk_assign_episodes_item'],
+  [bulkAssignEpisodeActionBodySchema, 'alerting_bulk_assign_episodes_request'],
+  [bulkActivateEpisodeActionItemSchema, 'alerting_bulk_activate_episodes_item'],
+  [bulkActivateEpisodeActionBodySchema, 'alerting_bulk_activate_episodes_request'],
+  [bulkDeactivateEpisodeActionItemSchema, 'alerting_bulk_deactivate_episodes_item'],
+  [bulkDeactivateEpisodeActionBodySchema, 'alerting_bulk_deactivate_episodes_request'],
   // matched policies
-  [matchActionPoliciesForRuleBodySchema, 'alerting_match_action_policies_for_rule_request'],
+  [matchActionPoliciesBodySchema, 'alerting_match_action_policies_request'],
   [matchedActionPolicySchema, 'alerting_matched_action_policy'],
-  [matchActionPoliciesForRuleResponseSchema, 'alerting_match_action_policies_for_rule_response'],
+  [matchActionPoliciesResponseSchema, 'alerting_match_action_policies_response'],
+  // matched rules
+  [matchRulesBodySchema, 'alerting_match_rules_request'],
   // execution history
   [ruleExecutionViewSchema, 'alerting_rule_execution'],
   [listRuleExecutionsResponseSchema, 'alerting_rule_executions_response'],
@@ -137,9 +174,11 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
 
 /** Discriminated unions whose every variant must be named for OAS to emit a discriminator mapping. */
 const DISCRIMINATED_UNIONS: ReadonlyArray<readonly [string, z.ZodType]> = [
-  ['querySchema', querySchema],
+  ['recoverySchema', recoverySchema],
+  ['noDataSchema', noDataSchema],
   ['actionPolicyDestinationSchema', actionPolicyDestinationSchema],
-  ['createAlertActionBodySchema', createAlertActionBodySchema],
+  ['createSeriesAlertActionBodySchema', createSeriesAlertActionBodySchema],
+  ['createEpisodeAlertActionBodySchema', createEpisodeAlertActionBodySchema],
 ];
 
 describe('alerting v2 OAS component ids', () => {
@@ -164,7 +203,9 @@ describe('alerting v2 OAS component ids', () => {
     // querySchema is defined as `.describe(...).meta({ id })`; the description must survive
     // the merge so the generated OAS component keeps its documentation.
     const meta = getMeta(querySchema);
-    expect(meta.description).toBe('Detection query configuration.');
+    expect(meta.description).toBe(
+      'ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.'
+    );
     expect(meta.id).toBe('alerting_rule_query');
   });
 

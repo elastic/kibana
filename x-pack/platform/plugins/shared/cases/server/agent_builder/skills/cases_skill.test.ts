@@ -46,6 +46,14 @@ describe('buildCasesSkill', () => {
     it('does not include the extended fields section', () => {
       expect(skill.content).not.toContain('Extended fields');
     });
+
+    it('does not mention find_templates in the skill content', () => {
+      expect(skill.content).not.toContain(platformCoreCasesTools.findTemplates);
+    });
+
+    it('does not include the find-a-template-by-name section', () => {
+      expect(skill.content).not.toContain('Finding a template by name');
+    });
   });
 
   describe('with templates enabled', () => {
@@ -73,6 +81,17 @@ describe('buildCasesSkill', () => {
 
     it('does not include inline tools', () => {
       expect(skill.getInlineTools).toBeUndefined();
+    });
+
+    it('mentions find_templates in the manage tool table and registry tools', () => {
+      expect(skill.content).toContain(platformCoreCasesTools.findTemplates);
+      const tools = skill.getRegistryTools?.() ?? [];
+      expect(tools).toContain(platformCoreCasesTools.findTemplates);
+    });
+
+    it('includes the find-a-template-by-name section', () => {
+      expect(skill.content).toContain('Finding a template by name');
+      expect(skill.content).toContain('create_from_template');
     });
   });
 });

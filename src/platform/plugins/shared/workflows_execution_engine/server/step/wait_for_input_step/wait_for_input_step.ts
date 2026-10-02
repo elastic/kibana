@@ -25,7 +25,11 @@ import {
   invalidateHitlExternalResumeTokenIfPresent,
   mintHitlExternalResumeToken,
 } from './hitl_external_resume_helpers';
-import { hasHitlWaitExpired } from './hitl_timeout_helpers';
+import {
+  getResolvedDynamicTimeout,
+  hasHitlWaitExpired,
+  persistResolvedDynamicTimeout,
+} from './hitl_timeout_helpers';
 import {
   emitHitlWaitingAudit,
   failHitlWaitOnTimeout,
@@ -78,6 +82,11 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
   }
 
   private async enterWait(): Promise<void> {
+    const dynamicTimeout = persistResolvedDynamicTimeout(
+      this.stepExecutionRuntime,
+      this.node.configuration.timeout,
+      DEFAULT_WAIT_FOR_INPUT_TIMEOUT
+    );
     const withConfig = this.node.configuration?.with;
     const ctx = this.stepExecutionRuntime.contextManager;
     const message =
@@ -99,7 +108,9 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
 
     const stepInput: Record<string, unknown> = {
       ...(message.length > 0 && { message }),
-      ...(withConfig.schema !== undefined && { schema: withConfig.schema }),
+      ...(withConfig.schema !== undefined && {
+        schema: ctx.renderValueAccordingToContext(withConfig.schema),
+      }),
     };
 
     const channels = withConfig.channels;
@@ -113,11 +124,10 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
         throw new Error('External input notifications require a space');
       }
 
-      const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_INPUT_TIMEOUT;
       const resumeToken = mintHitlExternalResumeToken({
         stepExecutionRuntime: this.stepExecutionRuntime,
         execution,
-        timeout,
+        timeout: dynamicTimeout,
       });
 
       stepInput[HITL_TOKEN_HASH_INPUT_FIELD] = resumeToken.tokenHash;
@@ -176,7 +186,11 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
     const execution = this.workflowRuntime.getWorkflowExecution();
     const resumeInput = execution.context?.resumeInput as Record<string, unknown> | undefined;
 
-    const timeout = this.node.configuration.timeout ?? DEFAULT_WAIT_FOR_INPUT_TIMEOUT;
+    const timeout = getResolvedDynamicTimeout(
+      this.stepExecutionRuntime,
+      this.node.configuration.timeout,
+      DEFAULT_WAIT_FOR_INPUT_TIMEOUT
+    );
     const startedAt = this.stepExecutionRuntime.stepExecution?.startedAt;
 
     if (resumeInput == null && hasHitlWaitExpired(startedAt, timeout)) {

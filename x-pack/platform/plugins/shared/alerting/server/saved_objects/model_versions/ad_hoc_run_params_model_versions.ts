@@ -12,6 +12,7 @@ import {
   rawAdHocRunParamsSchemaV3,
   rawAdHocRunParamsSchemaV4,
   rawAdHocRunParamsSchemaV5,
+  rawAdHocRunParamsSchemaV6,
 } from '../schemas/raw_ad_hoc_run_params';
 import { backfillInitiator } from '../../../common/constants';
 
@@ -69,6 +70,22 @@ export const adHocRunParamsModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawAdHocRunParamsSchemaV5.extends({}, { unknowns: 'ignore' }),
       create: rawAdHocRunParamsSchemaV5,
+    },
+  },
+  '6': {
+    changes: [
+      {
+        // Unlike `uiamApiKey`, the id is stored unencrypted and has to be searchable so the API
+        // key invalidation task's in-use guard can find ad hoc runs still holding the key.
+        type: 'mappings_addition',
+        addedMappings: {
+          uiamApiKeyId: { type: 'keyword', ignore_above: 1024 },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawAdHocRunParamsSchemaV6.extends({}, { unknowns: 'ignore' }),
+      create: rawAdHocRunParamsSchemaV6,
     },
   },
 };

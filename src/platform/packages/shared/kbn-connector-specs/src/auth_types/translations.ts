@@ -87,8 +87,33 @@ export const OAUTH_LABEL = i18n.translate('connectorSpecs.oauth.label', {
   defaultMessage: 'OAuth Client Credentials',
 });
 
+export const OAUTH_PASSWORD_LABEL = i18n.translate('connectorSpecs.oauthPassword.label', {
+  defaultMessage: 'OAuth 2.0 Password Grant',
+});
+
+export const OAUTH_USERNAME_FIELD_LABEL = i18n.translate(
+  'connectorSpecs.oauthUsernameField.label',
+  {
+    defaultMessage: 'Username field',
+  }
+);
+
+export const OAUTH_REQUEST_BODY_FORMAT_LABEL = i18n.translate(
+  'connectorSpecs.oauthRequestBodyFormat.label',
+  { defaultMessage: 'Token request body format' }
+);
+
+export const OAUTH_HTTPS_TOKEN_URL_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.oauthHttpsTokenUrl.requiredMessage',
+  { defaultMessage: 'Enter an HTTPS token URL without credentials or a fragment.' }
+);
+
 export const OAUTH_TOKEN_URL_LABEL = i18n.translate('connectorSpecs.oauthTokenUrl.label', {
   defaultMessage: 'Token URL',
+});
+
+export const OAUTH_TOKEN_TYPE_LABEL = i18n.translate('connectorSpecs.oauthTokenType.label', {
+  defaultMessage: 'Token type',
 });
 
 export const OAUTH_CLIENT_ID_LABEL = i18n.translate('connectorSpecs.oauthClientId.label', {

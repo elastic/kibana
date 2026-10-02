@@ -19,8 +19,8 @@ import {
   ATTACK_TAGS_CHANGED_TRIGGER_DESCRIPTION,
   ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
   ATTACK_TAGS_CHANGED_TRIGGER_TITLE,
-  TRIGGER_SCHEMA_TAGS_TO_ADD_DESCRIPTION,
-  TRIGGER_SCHEMA_TAGS_TO_REMOVE_DESCRIPTION,
+  TRIGGER_SCHEMA_TAGS_ADDED_DESCRIPTION,
+  TRIGGER_SCHEMA_TAGS_REMOVED_DESCRIPTION,
 } from '../translations';
 
 export const AttackTagsChangedTriggerId = 'security.attackTagsChanged' as const;
@@ -30,7 +30,7 @@ const documentationExample = `## Run when a tag is added to attacks
 triggers:
   - type: security.attackTagsChanged
     on:
-      condition: 'event.tagsToAdd: "escalated"'
+      condition: 'event.tagsAdded: "escalated"'
 \`\`\``;
 
 const attackTagsChangedEventSchema = z.object({
@@ -38,14 +38,14 @@ const attackTagsChangedEventSchema = z.object({
     .array(z.string().min(1).max(MAX_ID_LENGTH))
     .max(MAX_ALERTS_PER_TRIGGER)
     .meta({ description: ATTACK_TAGS_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION }),
-  tagsToAdd: z
+  tagsAdded: z
     .array(z.string().min(1).max(MAX_TAG_LENGTH))
     .max(MAX_TAGS_PER_OPERATION)
-    .meta({ description: TRIGGER_SCHEMA_TAGS_TO_ADD_DESCRIPTION }),
-  tagsToRemove: z
+    .meta({ description: TRIGGER_SCHEMA_TAGS_ADDED_DESCRIPTION }),
+  tagsRemoved: z
     .array(z.string().min(1).max(MAX_TAG_LENGTH))
     .max(MAX_TAGS_PER_OPERATION)
-    .meta({ description: TRIGGER_SCHEMA_TAGS_TO_REMOVE_DESCRIPTION }),
+    .meta({ description: TRIGGER_SCHEMA_TAGS_REMOVED_DESCRIPTION }),
   truncated: z.boolean().meta({ description: ATTACK_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
 });
 

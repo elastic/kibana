@@ -9,7 +9,8 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
-import { EuiCode, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiCode, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -24,6 +25,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/public';
 import { APP_LOGS_COUNT_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { useAppContext } from '../../app_context';
+import { getOverviewBackTarget } from '../../lib/breadcrumbs';
 import { uiMetricService, UIM_KIBANA_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';
 import { DeprecationsPageLoadingError, NoDeprecationsPrompt, DeprecationCount } from '../shared';
 import { KibanaDeprecationsTable } from './kibana_deprecations_table';
@@ -277,17 +279,17 @@ export const KibanaDeprecationsList = ({
 
   return (
     <div data-test-subj="kibanaDeprecations">
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={i18nTexts.pageTitle}
+      <AppHeader
+        title={i18nTexts.pageTitle}
         description={i18nTexts.pageDescription}
-      >
-        <DeprecationCount
-          totalCriticalDeprecations={deprecationsCountByLevel.criticalDeprecations}
-          totalWarningDeprecations={deprecationsCountByLevel.warningDeprecations}
-        />
-      </EuiPageHeader>
-
+        back={getOverviewBackTarget(history)}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
+      <DeprecationCount
+        totalCriticalDeprecations={deprecationsCountByLevel.criticalDeprecations}
+        totalWarningDeprecations={deprecationsCountByLevel.warningDeprecations}
+      />
       <EuiSpacer size="l" />
 
       {(!hasPrivileges || kibanaDeprecationErrors.length > 0) && (
