@@ -200,25 +200,81 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest('filter: by enabled=true and enabled=false', async ({ apiClient, apiServices }) => {
+  apiTest('filter: by enabled: true and enabled: false', async ({ apiClient, apiServices }) => {
     const { alpha } = await createActionPolicies(apiServices);
     await apiServices.alertingV2.actionPolicies.disable(alpha.id);
 
-    const enabledResponse = await apiClient.get(getListActionPoliciesUrl({ enabled: 'true' }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const enabledResponse = await apiClient.get(
+      getListActionPoliciesUrl({ filter: 'enabled: true' }),
+      { headers: { ...testData.COMMON_HEADERS, ...readerHeaders } }
+    );
     expect(enabledResponse).toHaveStatusCode(200);
     expect(enabledResponse.body.total).toBe(2);
     const enabledNames = enabledResponse.body.items.map((item: { name: string }) => item.name);
     expect(enabledNames).not.toContain('Alpha Policy');
 
-    const disabledResponse = await apiClient.get(getListActionPoliciesUrl({ enabled: 'false' }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const disabledResponse = await apiClient.get(
+      getListActionPoliciesUrl({ filter: 'enabled: false' }),
+      { headers: { ...testData.COMMON_HEADERS, ...readerHeaders } }
+    );
     expect(disabledResponse).toHaveStatusCode(200);
     expect(disabledResponse.body.total).toBe(1);
     expect(disabledResponse.body.items[0].name).toBe('Alpha Policy');
   });
+
+  apiTest('filter: by id', async ({ apiClient, apiServices }) => {
+    const { beta } = await createActionPolicies(apiServices);
+
+    const response = await apiClient.get(getListActionPoliciesUrl({ filter: `id: "${beta.id}"` }), {
+      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+    });
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.total).toBe(1);
+    expect(response.body.items[0].id).toBe(beta.id);
+  });
+
+  apiTest(
+    'filter: supports compound expressions with AND/NOT',
+    async ({ apiClient, apiServices }) => {
+      await createActionPolicies(apiServices);
+
+      const response = await apiClient.get(
+        getListActionPoliciesUrl({
+          filter: 'description: "monitors" AND NOT name: "Alpha Policy"',
+        }),
+        { headers: { ...testData.COMMON_HEADERS, ...readerHeaders } }
+      );
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.total).toBe(1);
+      expect(response.body.items[0].name).toBe('Gamma Policy');
+    }
+  );
+
+  apiTest('combined: filter + search', async ({ apiClient, apiServices }) => {
+    const { alpha } = await createActionPolicies(apiServices);
+    await apiServices.alertingV2.actionPolicies.disable(alpha.id);
+
+    const response = await apiClient.get(
+      getListActionPoliciesUrl({ filter: 'enabled: true', search: 'Monitors' }),
+      { headers: { ...testData.COMMON_HEADERS, ...readerHeaders } }
+    );
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.total).toBe(1);
+    expect(response.body.items[0].name).toBe('Gamma Policy');
+  });
+
+  apiTest(
+    'filter: rejects filters that reference unknown fields with a 400',
+    async ({ apiClient, apiServices }) => {
+      await createActionPolicies(apiServices);
+
+      const response = await apiClient.get(getListActionPoliciesUrl({ filter: 'tags: "prod"' }), {
+        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_FILTER_FIELD');
+    }
+  );
 
   apiTest('sort: by name ascending', async ({ apiClient, apiServices }) => {
     await createActionPolicies(apiServices);
@@ -353,8 +409,8 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects unknown enabled value', async ({ apiClient }) => {
-    const response = await apiClient.get(getListActionPoliciesUrl({ enabled: 'maybe' }), {
+  apiTest('validation: rejects the removed enabled param', async ({ apiClient }) => {
+    const response = await apiClient.get(getListActionPoliciesUrl({ enabled: 'true' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
