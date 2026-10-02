@@ -7,7 +7,7 @@
 
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { ConversationEvent } from '@kbn/agent-builder-common';
-import { TimelineEventType } from '@kbn/agent-builder-common';
+import { TimelineEventType, isActivityEvent, isTimelineEvent } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
 import {
   EXECUTION_STREAMING_EVENT_TYPE,
@@ -67,6 +67,9 @@ export const groupTimelineEvents = (
   };
 
   for (const event of events) {
+    if (isActivityEvent(event) && !isTimelineEvent(event)) {
+      continue;
+    }
     if (!isTimelineDisplayEvent(event)) {
       // Whether the type has a UI here is the resolve step's call.
       ordered.push({ kind: 'customEvent', key: event.id, event });

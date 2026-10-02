@@ -46,7 +46,7 @@ import {
   resumeExecutionId,
   roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
-import type { ConversationClient } from '../../conversation';
+import type { ActivityContext, ConversationClient } from '../../conversation';
 import {
   roundToEvents,
   userMessageEvent,
@@ -135,6 +135,7 @@ export const persistUserMessage = async ({
   user,
   additionalEvents = [],
   attachments,
+  activity,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -148,6 +149,8 @@ export const persistUserMessage = async ({
   /** Attachment change events to store in the same write, after the message. */
   additionalEvents?: TimelineEvent[];
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** Attribution of the `conversation_created` activity when this write creates the conversation. */
+  activity?: ActivityContext;
 }): Promise<string> => {
   const event = userMessageEvent(
     {
@@ -170,22 +173,27 @@ export const persistUserMessage = async ({
     const hasResolvedParentUser =
       Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
     try {
-      await conversationClient.create({
-        id: conversation.id,
-        title: DEFAULT_CONVERSATION_TITLE,
-        agent_id: conversation.agent_id,
-        access_control: conversation.access_control,
-        origin: conversation.origin,
-        read_only: conversation.read_only,
-        rounds: [],
-        events,
-        // Nothing is stored yet, so the produced list needs no reconciliation.
-        ...(attachments ? { attachments: attachments.produced } : {}),
-        ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
-        ...(conversation.parent_conversation
-          ? { parent_conversation: conversation.parent_conversation }
-          : {}),
-      });
+      await conversationClient.create(
+        {
+          id: conversation.id,
+          title: DEFAULT_CONVERSATION_TITLE,
+          agent_id: conversation.agent_id,
+          access_control: conversation.access_control,
+          origin: conversation.origin,
+          read_only: conversation.read_only,
+          rounds: [],
+          events,
+          // Nothing is stored yet, so the produced list needs no reconciliation.
+          ...(attachments ? { attachments: attachments.produced } : {}),
+          ...(isPersistentSubagentCreate && hasResolvedParentUser
+            ? { user: conversation.user }
+            : {}),
+          ...(conversation.parent_conversation
+            ? { parent_conversation: conversation.parent_conversation }
+            : {}),
+        },
+        activity ? { activity } : undefined
+      );
       return event.id;
     } catch (error) {
       if (!isConversationAlreadyExistsError(error)) {

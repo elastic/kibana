@@ -8,6 +8,7 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   Conversation,
+  ConversationEvent,
   ConversationRound,
   ConversationRoundStep,
   ConversationAttachmentSummary,
@@ -501,11 +502,13 @@ export const createRequestToEs = ({
   space,
   currentUser,
   creationDate,
+  leadingEvents = [],
 }: {
   conversation: ConversationCreateRequest;
   currentUser: UserIdAndName;
   creationDate: Date;
   space: string;
+  leadingEvents?: ConversationEvent[];
 }): ConversationProperties => {
   // Honor conversation.user override if provided (used for persistent sub-agent
   // creations where ownership is snapshotted from the parent conversation).
@@ -522,10 +525,14 @@ export const createRequestToEs = ({
     rounds: conversation.rounds,
     ...(conversation.origin ? { origin: conversation.origin } : {}),
   };
-  const events =
-    conversation.events && conversation.events.length > 0
+  // `leadingEvents` (the `conversation_created` activity) stay outside the caller-events-else-rounds
+  // choice, so a caller who sent none still gets the rounds projection.
+  const events = [
+    ...leadingEvents,
+    ...(conversation.events && conversation.events.length > 0
       ? conversation.events
-      : roundsToEvents(forEvents);
+      : roundsToEvents(forEvents)),
+  ];
 
   return {
     agent_id: conversation.agent_id,

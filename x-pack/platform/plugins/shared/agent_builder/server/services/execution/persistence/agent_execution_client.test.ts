@@ -127,4 +127,63 @@ describe('AgentExecutionClient', () => {
       });
     });
   });
+
+  describe('peek', () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const peekClient = createAgentExecutionClient({ logger: loggerMock.create(), esClient });
+
+    const stored = (source: Record<string, unknown>) =>
+      esClient.get.mockResolvedValueOnce({ _source: source } as never);
+
+    it('reads only the snapshot fields, including the agent id', async () => {
+      stored({ status: ExecutionStatus.running, event_count: 2 });
+
+      await peekClient.peek('exec-1');
+
+      const [request] = esClient.get.mock.calls[0];
+      expect(request).toMatchObject({ id: 'exec-1' });
+      expect((request as { _source_includes: string[] })._source_includes).toEqual(
+        expect.arrayContaining(['status', 'event_count', 'agent_id', 'owner'])
+      );
+    });
+
+    it('returns the agent id and the owner so a sub-agent can act for, and be attributed to, its parent', async () => {
+      const owner = { id: 'profile-alice', username: 'alice' };
+      stored({
+        status: ExecutionStatus.running,
+        event_count: 3,
+        agent_id: 'parent-agent',
+        agent_params: { conversationId: 'conv-1' },
+        owner,
+      });
+
+      expect(await peekClient.peek('exec-1')).toEqual({
+        status: ExecutionStatus.running,
+        eventCount: 3,
+        agentId: 'parent-agent',
+        conversationId: 'conv-1',
+        owner,
+      });
+    });
+
+    it('omits the optional fields the document lacks', async () => {
+      stored({ status: ExecutionStatus.scheduled });
+
+      expect(await peekClient.peek('exec-1')).toEqual({
+        status: ExecutionStatus.scheduled,
+        eventCount: 0,
+      });
+    });
+
+    it('returns undefined for a missing execution and rethrows other errors', async () => {
+      esClient.get.mockRejectedValueOnce(
+        Object.assign(new Error('not found'), { meta: { statusCode: 404 } })
+      );
+      expect(await peekClient.peek('gone')).toBeUndefined();
+
+      const boom = Object.assign(new Error('boom'), { meta: { statusCode: 500 } });
+      esClient.get.mockRejectedValueOnce(boom);
+      await expect(peekClient.peek('exec-1')).rejects.toBe(boom);
+    });
+  });
 });
