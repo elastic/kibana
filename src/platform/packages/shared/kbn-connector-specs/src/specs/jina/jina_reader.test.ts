@@ -568,6 +568,22 @@ describe('JinaReaderConnector', () => {
   });
 
   describe('fileToRenderedImage action', () => {
+    it.each([
+      ['omitted', undefined, true],
+      ['1', 1, true],
+      ['12', 12, true],
+      ['0', 0, false],
+      ['negative', -1, false],
+      ['fractional', 1.5, false],
+    ])('should validate pageNumber at the schema boundary: %s', (_label, pageNumber, valid) => {
+      expect(
+        JinaReaderConnector.actions.fileToRenderedImage.input.safeParse({
+          file: Buffer.from('test file content').toString('base64'),
+          pageNumber,
+        }).success
+      ).toBe(valid);
+    });
+
     it('should render file to image', async () => {
       const fileContent = Buffer.from('test file content').toString('base64');
       const mockResponse = {
