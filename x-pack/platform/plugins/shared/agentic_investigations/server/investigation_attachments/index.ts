@@ -32,7 +32,10 @@ export {
 export { createInvestigationTool, getToolConversationId } from './create_investigation_tool';
 export { formatEvidenceForAgent } from './format_evidence';
 export { hashInvestigationAttachmentId } from './doc_id';
-export { withTransientSearchRetry } from './search_with_transient_retry';
+export {
+  retryWhileShardUnavailable,
+  withTransientSearchRetry,
+} from './search_with_transient_retry';
 export {
   InvestigationAttachmentConflictError,
   InvestigationAttachmentInvalidRequestError,
