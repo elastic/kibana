@@ -65,15 +65,15 @@ describe('CustomContentComponent', () => {
     expect(onLoadingChange).toHaveBeenCalledWith(true);
   });
 
-  it('renders the template in a fully sandboxed iframe', () => {
+  it('sandboxes the iframe so that only user-initiated top navigation is allowed', () => {
     const { container } = render(<CustomContentComponent {...defaultProps} />);
 
     const iframe = container.querySelector('iframe');
     expect(iframe).not.toBeNull();
-    expect(iframe!.getAttribute('sandbox')).toBe('');
+    expect(iframe!.getAttribute('sandbox')).toBe('allow-top-navigation-by-user-activation');
   });
 
-  it('sandboxes the preview iframe too', () => {
+  it('keeps the preview iframe fully sandboxed so a click cannot navigate away from the editor', () => {
     mockUseCustomContentHtml.mockReturnValue({
       html: '',
       isLoading: false,

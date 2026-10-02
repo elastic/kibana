@@ -70,6 +70,17 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     expect(systemArg).toContain('Output ONLY valid HTML');
     expect(systemArg).not.toContain('Liquid template syntax');
   });
+
+  it('tells the model that only internal /app/ links are allowed', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
+
+    await resolve({ prompt: 'Show a KPI card' });
+
+    const systemArg: string = mockChatComplete.mock.calls[0][0].system;
+    expect(systemArg).toContain('path that starts with /app/');
+    expect(systemArg).toContain('external URLs, is removed at render time');
+    expect(systemArg).not.toContain('Do NOT use <a> anchor tags');
+  });
 });
 
 describe('createCustomContentTemplateResolver — output validation', () => {
