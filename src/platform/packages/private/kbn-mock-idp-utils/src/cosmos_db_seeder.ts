@@ -15,8 +15,12 @@ import {
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS,
   MOCK_IDP_UIAM_COSMOS_DB_NAME,
   MOCK_IDP_UIAM_COSMOS_DB_URL,
-  MOCK_IDP_UIAM_PROJECT_TYPES,
 } from './constants';
+import type {
+  MockIdpUiamOrganizationRoleAssignment,
+  MockIdpUiamProjectRoleAssignment,
+} from './uiam_role_assignments';
+import { buildMockIdpUiamRoleAssignments } from './uiam_role_assignments';
 import { generateCosmosDBApiRequestHeaders } from '..';
 
 /**
@@ -34,7 +38,6 @@ export interface TestUserData {
   firstName: string;
   lastName?: string;
   organizationId: string;
-  roleId: string;
   projectType: string;
   applicationRoles: string[];
 }
@@ -53,19 +56,10 @@ interface PersistableUser {
   }>;
   role_assignments: {
     user: any[];
-    project: Array<{
-      role_id: string;
-      organization_id: string;
-      project_scope: {
-        scope: string;
-        project_ids?: string[];
-      };
-      project_type: string;
-      application_roles: string[];
-    }>;
+    project: MockIdpUiamProjectRoleAssignment[];
     deployment: any[];
     platform: any[];
-    organization: any[];
+    organization: MockIdpUiamOrganizationRoleAssignment[];
     cloudConnected: any[];
   };
   enabled: boolean;
@@ -110,6 +104,11 @@ interface PersistableApiKey {
  */
 function createUserDocument(userData: TestUserData): PersistableUser {
   const currentTime = new Date().toISOString();
+  const { organization, project } = buildMockIdpUiamRoleAssignments({
+    organizationId: userData.organizationId,
+    projectType: userData.projectType,
+    applicationRoles: userData.applicationRoles,
+  });
   return {
     id: userData.userId,
     email: userData.email,
@@ -123,22 +122,10 @@ function createUserDocument(userData: TestUserData): PersistableUser {
     ],
     role_assignments: {
       user: [],
-      // One grant per project type so the test user can reach cross-project (CPS) linked
-      // projects of any type, not just the type of the Kibana instance they logged in to.
-      project: [...new Set([userData.projectType, ...MOCK_IDP_UIAM_PROJECT_TYPES])].map(
-        (projectType) => ({
-          role_id: userData.roleId,
-          organization_id: userData.organizationId,
-          project_scope: {
-            scope: 'all' as const,
-          },
-          project_type: projectType,
-          application_roles: userData.applicationRoles,
-        })
-      ),
+      project,
       deployment: [],
       platform: [],
-      organization: [],
+      organization,
       cloudConnected: [],
     },
     enabled: true,
@@ -164,7 +151,6 @@ function createUserDocument(userData: TestUserData): PersistableUser {
  *   firstName: 'Test',
  *   lastName: 'User',
  *   organizationId: '1234567890',
- *   roleId: 'cloud-role-id',
  *   projectType: 'observability',
  *   applicationRoles: ['viewer', 'editor'],
  * });
@@ -235,7 +221,6 @@ export async function seedTestUser(
  *   firstName: 'Updated',
  *   lastName: 'User',
  *   organizationId: '1234567890',
- *   roleId: 'cloud-role-id',
  *   projectType: 'security',
  *   applicationRoles: ['admin', 'editor'],
  * });

@@ -16,7 +16,10 @@ import {
 const workflow = parse(NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW.yaml) as {
   name: string;
   triggers: Array<{
-    inputs: { properties: Record<string, { type: string; maxLength?: number }> };
+    inputs: {
+      properties: Record<string, { type: string; maxLength?: number }>;
+      additionalProperties?: boolean;
+    };
   }>;
   steps: Array<{
     name: string;
@@ -47,6 +50,25 @@ describe('decision tree reinforce workflow', () => {
     ]);
   });
 
+  // The schema is strict, so any after-execution input Agent Builder sends must be declared here.
+  it('declares every input the after-execution hook sends', () => {
+    const [{ inputs }] = workflow.triggers;
+    expect(inputs.additionalProperties).toBe(false);
+    expect(Object.keys(inputs.properties).sort()).toEqual(
+      [
+        'agent_id',
+        'connector_id',
+        'conversation_id',
+        'prompt',
+        'response',
+        'round_connector_id',
+        'round_id',
+        'tool_calls',
+        'workflow_context',
+      ].sort()
+    );
+  });
+
   // ${{ }} passes the array through. Liquid `{{ }}` stringifies it as
   // "[object Object][object Object]", JSON.parse in preprocess falls back to [],
   // and extractAccessedTreeIds([]) makes every round distill from scratch.
@@ -60,7 +82,8 @@ describe('decision tree reinforce workflow', () => {
     expect(reinforce['agent-id']).toBe('significant-events.decision-tree-reinforcement');
     expect(reinforce).toMatchObject({
       'connector-id': '{{ steps.resolve_model.output.connector_id }}',
-      'plugin-id': 'significant_events_decision_tree_reinforce',
+      'plugin-id': 'nightshift_investigation_memory',
+      'aggregate-by': 'nightshift',
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });

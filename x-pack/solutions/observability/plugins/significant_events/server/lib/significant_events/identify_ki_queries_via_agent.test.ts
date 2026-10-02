@@ -154,8 +154,8 @@ describe('executeKIQueryGenerationAgent', () => {
         abortSignal: executionSignal,
         params: expect.objectContaining({
           telemetryMetadata: {
-            pluginId: 'significant_events_ki_query_generation',
-            aggregateBy: 'significant_events',
+            pluginId: 'nightshift_ki_query_generation',
+            aggregateBy: 'nightshift',
             productSolution: 'observability',
             productFeature: 'nightshift',
             interactionId: 'run-1',
