@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { omit } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import {
   isSavedObjectErrorResult,
@@ -24,19 +25,18 @@ import {
   ruleKindSchema,
   scheduleSchema,
   querySchema,
-  recoveryStrategySchema,
-  noDataStrategySchema,
+  recoverySchema,
+  recoveryStrategy,
+  noDataSchema,
   getRootEsqlQuery,
   groupingSchema,
   stateTransitionSchema,
+  isAbsenceDistinguishableFromBreach,
   isStateTransitionAllowed,
-  isSignalUsingStandaloneFormat,
-  isSignalQueryBreachOnly,
+  isLifecycleConfigAllowedForKind,
+  isRecoveryConditionUsableWithBreach,
   isRecoveryTransitionConsistentWithStrategy,
-  isRecoveryQueryConsistentWithStrategy,
-  isRecoveryQueryProvidedForStrategy,
-  isNoDataQueryConsistentWithStrategy,
-  isNoDataQueryProvidedForStrategy,
+  REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
 } from '@kbn/alerting-v2-schemas';
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
@@ -140,7 +140,6 @@ const toRunbookArtifact = (
 
 export const setMetadataOperationSchema = metadataSchema
   .partial()
-  .omit({ owner: true })
   .extend({ operation: z.literal('set_metadata') })
   .describe(
     'Use `set_metadata` to name the rule and add a description or tags so the user can filter by it later.'
@@ -152,7 +151,7 @@ export const setKindOperationSchema = z
     kind: ruleKindSchema,
   })
   .describe(
-    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`)."
+    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`). Switching to `signal` drops the alert-only `recovery`, `no_data` and `state_transition` settings."
   );
 
 export const setScheduleOperationSchema = scheduleSchema
@@ -166,11 +165,23 @@ export const setQueryOperationSchema = z
   .object({
     operation: z.literal('set_query'),
     query: querySchema,
-    recovery_strategy: recoveryStrategySchema.optional(),
-    no_data_strategy: noDataStrategySchema.optional(),
+  })
+  .describe('Use `set_query` to define the ES|QL condition that should fire the rule.');
+
+export const setRecoveryOperationSchema = z
+  .object({
+    operation: z.literal('set_recovery'),
+    recovery: recoverySchema,
+  })
+  .describe('Use `set_recovery` to control how alert episodes recover. Requires `kind: alert`.');
+
+export const setNoDataOperationSchema = z
+  .object({
+    operation: z.literal('set_no_data'),
+    no_data: noDataSchema,
   })
   .describe(
-    'Use `set_query` to define the ES|QL condition that should fire the rule. Optionally set how recovery is detected and what happens when data stops arriving.'
+    'Use `set_no_data` to control what happens when data stops arriving. Requires `kind: alert`.'
   );
 
 export const setGroupingOperationSchema = groupingSchema
@@ -182,9 +193,6 @@ export const setGroupingOperationSchema = groupingSchema
   );
 
 export const setStateTransitionOperationSchema = stateTransitionSchema
-  .unwrap()
-  .unwrap()
-  .omit({ pending_operator: true, recovering_operator: true })
   .extend({ operation: z.literal('set_state_transition') })
   .describe(
     'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
@@ -234,6 +242,8 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setKindOperationSchema,
   setScheduleOperationSchema,
   setQueryOperationSchema,
+  setRecoveryOperationSchema,
+  setNoDataOperationSchema,
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
   setDashboardsOperationSchema,
@@ -355,7 +365,12 @@ export const executeRuleOperations = async (
       }
 
       case 'set_kind':
-        next = { ...next, kind: op.kind };
+        // An alert draft always carries the alert-only fields and no operation
+        // can remove them, so converting to a signal has to clear them here.
+        next =
+          op.kind === 'signal'
+            ? omit({ ...next, kind: op.kind }, ['recovery', 'no_data', 'state_transition'])
+            : { ...next, kind: op.kind };
         break;
 
       case 'set_schedule': {
@@ -404,36 +419,31 @@ export const executeRuleOperations = async (
           ...next,
           query: op.query,
           ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
-          ...(op.recovery_strategy !== undefined
-            ? { recovery_strategy: op.recovery_strategy }
-            : {}),
-          ...(op.no_data_strategy !== undefined ? { no_data_strategy: op.no_data_strategy } : {}),
         };
+        break;
+      }
 
-        if (!isRecoveryQueryConsistentWithStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'query.recovery is only allowed when recovery_strategy is "query".'
-          );
-        }
-        if (!isRecoveryQueryProvidedForStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'recovery_strategy "query" requires a recovery block in the query ' +
-              '(recovery: { segment } for composed, recovery: { query } for standalone).'
-          );
-        }
-        if (!isNoDataQueryConsistentWithStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.'
-          );
-        }
-        if (!isNoDataQueryProvidedForStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'no_data_strategy (other than "none") requires a no_data block in the query ' +
-              'for standalone-format rules.'
-          );
+      case 'set_recovery': {
+        next = { ...next, recovery: op.recovery };
+
+        // A recovering delay is inert under `manual` and the write API rejects
+        // the pair, and no operation can remove a phase, so switching to manual
+        // has to clear it here.
+        if (
+          next.recovery?.strategy === recoveryStrategy.manual &&
+          next.state_transition?.recovering
+        ) {
+          const stateTransition = omit(next.state_transition, 'recovering');
+          next = Object.keys(stateTransition).length
+            ? { ...next, state_transition: stateTransition }
+            : omit(next, 'state_transition');
         }
         break;
       }
+
+      case 'set_no_data':
+        next = { ...next, no_data: op.no_data };
+        break;
 
       case 'set_grouping': {
         if (lastQueryColumns && lastQueryColumns.length > 0) {
@@ -458,14 +468,8 @@ export const executeRuleOperations = async (
           ...next,
           state_transition: {
             ...next.state_transition,
-            ...(op.pending_count !== undefined ? { pending_count: op.pending_count } : {}),
-            ...(op.pending_timeframe !== undefined
-              ? { pending_timeframe: op.pending_timeframe }
-              : {}),
-            ...(op.recovering_count !== undefined ? { recovering_count: op.recovering_count } : {}),
-            ...(op.recovering_timeframe !== undefined
-              ? { recovering_timeframe: op.recovering_timeframe }
-              : {}),
+            ...(op.pending !== undefined ? { pending: op.pending } : {}),
+            ...(op.recovering !== undefined ? { recovering: op.recovering } : {}),
           },
         };
         break;
@@ -561,19 +565,31 @@ export const executeRuleOperations = async (
     );
   }
 
-  if (!isSignalUsingStandaloneFormat(next)) {
-    throw new RuleOperationValidationError('kind "signal" requires query.format "standalone".');
+  if (!isLifecycleConfigAllowedForKind(next)) {
+    throw new RuleOperationValidationError('Signal rules cannot set recovery or no_data.');
   }
 
-  if (!isSignalQueryBreachOnly(next)) {
+  // `set_query` replaces the query and `set_recovery` replaces the strategy, so
+  // either one can leave `condition` with nothing to contrast against. Judge
+  // the combination after both have been applied — a query-only edit never
+  // enters `set_recovery`.
+  if (!isRecoveryConditionUsableWithBreach(next)) {
     throw new RuleOperationValidationError(
-      'Signal rules cannot set recovery_strategy or no_data_strategy.'
+      'recovery.strategy "condition" requires query.breach. Without a breach segment ' +
+        'every row of the base query breaches, so the rule could never recover.'
+    );
+  }
+
+  if (!isAbsenceDistinguishableFromBreach(next)) {
+    throw new RuleOperationValidationError(
+      `${REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE} Without one, a group that stops breaching ` +
+        'disappears from both queries and is read as no data rather than recovered.'
     );
   }
 
   if (!isRecoveryTransitionConsistentWithStrategy(next)) {
     throw new RuleOperationValidationError(
-      'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).'
+      'state_transition.recovering has no effect when recovery.strategy is "manual".'
     );
   }
 

@@ -19,16 +19,17 @@ common/
   constants.ts           umbrella: plugin id, API version, route base
   user.ts                who acted, shared by every entity
   index.ts               umbrella barrel, re-exports each entity barrel
-  impact/                constants and schemas
+  impact/                constants, schemas, step definitions, attachment type id
   escalations/           constants and schemas
 server/
   plugin.ts config.ts types.ts
   features.ts            umbrella feature and its privileges
   services/              user resolution, shared by every entity
-  impact/                routes, service, storage
+  impact/                routes, service, storage, step handlers, Agent Builder attachment
   escalations/           routes and service
 public/
   plugin.ts index.ts types.ts
+  impact/                browser step definitions and flyout attachment UI
   escalations/           browser hooks
   user_profiles/         browser hooks
 ```
@@ -39,14 +40,18 @@ Adding an entity means adding a directory in each of the three, an entity barrel
 
 One Kibana feature, `agenticInvestigations`.
 
-| Feature privilege | API                                | UI                                 |
-| ----------------- | ---------------------------------- | ---------------------------------- |
-| `all`             | `read_impact`, `manage_impact`     | `showImpact`, `manageImpact`       |
-| `read`            | `read_impact`                      | `showImpact`                       |
+| Feature privilege | API | UI |
+| ----------------- | --- | -- |
+| `all`             | —   | —  |
+| `read`            | —   | —  |
 
 The feature carries `minimumLicense: 'enterprise'`.
 
-Impact rides on the feature itself, because an investigation always has one. Escalations sit in a sub-feature instead, joined to the base levels through `includeIn: 'all'` / `includeIn: 'read'`, which keeps them separable in Role management. Follow the sub-feature pattern for any new entity that is not intrinsic to an investigation.
+Sub-features are registered in this order: **Investigations**, then **Escalations**. That order drives placement in the Roles and Spaces feature pickers.
+
+Impact has no privilege of its own yet. Reads and writes require the investigations sub-feature privilege, `manage_investigations`, which `includeIn: 'all'` joins to the base All level. A dedicated impact privilege can be split out later if read and write need to diverge. Escalation create and update stay `includeIn: 'none'`, so All does not grant them. Escalation view is `includeIn: 'read'`, so base Read and All can list. Follow the sub-feature pattern for any new entity that is not intrinsic to an investigation.
+
+The shared `POST /internal/investigations/_suggest_user_profiles` route accepts either `manage_investigations` or `manage_escalations`, so both investigation and escalation managers can suggest assignees and collaborators without holding the other entity's privilege.
 
 **Note:** `minimal_all` and `minimal_read` are **not** equivalent to `all` and `read`. They only grant sub-features marked `groupType: 'independent'`, and only when the user holds them explicitly.
 
@@ -59,7 +64,10 @@ An **Impact** record is the set of entities (users, hosts, services) an investig
 - AlertZero may attach `{ id }` only. The pill label stays the id until Entity Store hydration. Nightshift attaches `{ id, name, type?, featureId?, streamName? }`.
 - Writes are **upsert/merge**: attaching more entities unions them by `id` onto the existing document rather than appending a new one. A later attach fills in fields the first write omitted. That is load-bearing for hydrate-by-conversationId plus filtering on `entities.id`. The document `_id` is a hash of `(spaceId, conversationId)`. Attach reads that id and retries the union when a concurrent create or update wins the version check, so both writers' entities land on the one record.
 - Evidence is not on this document. Nightshift's current evidence shape cannot represent non-local data, and that format is still open.
-- HTTP: `POST /internal/investigations/impact` (`manage_impact`) and `GET ...?conversationId=` (`read_impact`). Bulk hydrate is in-process via `getImpactClient(request).listByConversationIds()`, which checks `read_impact` and uses the request's space. The raw service stays internal to the routes.
+- HTTP: `POST /internal/investigations/impact` and `GET ...?conversationId=` both require `manage_investigations`. Bulk hydrate is in-process via `getImpactClient(request).listByConversationIds()`, which checks that same privilege and uses the request's space. The raw service stays internal to the routes.
+- Workflow steps: `investigations.attachImpact` and `investigations.getImpact` both require `manage_investigations` and fail the step when it is missing. `getImpact` also fails if none is attached. Same fail-closed privilege check as proposal steps.
+- Agent Builder attachment type `investigation_impact` (`isReadonly: true`) is registered for the investigation flyout (and allow-listed in `@kbn/agent-builder-server`). Attach HTTP and `investigations.attachImpact` call `attachImpactToInvestigation`, which checks conversation owner access, writes the impact document, then puts a by-reference attachment (`origin` = Impact document id). A failed attachment write reverts that index write. `resolve()` loads the current document through `ImpactService`, so a later merge does not leave the flyout on a stale snapshot.
+- `scripts/seed_impact_attachment.sh` creates an investigation conversation, attaches entities through the internal API, and checks that the conversation has one `investigation_impact` attachment.
 
 ## Index naming
 
@@ -83,8 +91,10 @@ The `escalations` sub-feature uses a `mutually_exclusive` privilege group, so a 
 
 | Sub-feature privilege | API | UI |
 | --- | --- | --- |
-| `escalations_all` (included in `all`) | `read_escalations`, `manage_escalations` | `showEscalations`, `manageEscalations` |
-| `escalations_read` (included in `read`) | `read_escalations` | `showEscalations` |
+| `escalations_all` (`includeIn: 'none'`) | `read_escalations`, `manage_escalations` | `showEscalations`, `manageEscalations` |
+| `escalations_read` (`includeIn: 'read'`) | `read_escalations` | `showEscalations` |
+
+`manage_escalations` also grants access to the shared `POST /internal/investigations/_suggest_user_profiles` route (alongside `manage_investigations`). See the Privileges section above.
 
 ### API
 

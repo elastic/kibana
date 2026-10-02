@@ -23,7 +23,7 @@ import { sort } from '../components';
 
 const UNKNOWN_TAG_ID = '__unknown__';
 
-interface UseSearchStateOptions extends Omit<SearchProps, 'basePathUrl'> {
+interface UseSearchStateOptions extends SearchProps {
   /** Called after a result is selected and navigation is triggered. */
   onResultSelect?: () => void;
 }

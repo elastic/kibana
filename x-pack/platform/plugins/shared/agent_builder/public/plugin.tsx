@@ -79,6 +79,7 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { appPaths } from './application/utils/app_paths';
+import { searchParamNames } from './application/search_param_names';
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
@@ -106,7 +107,7 @@ export class AgentBuilderPlugin
     removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private isEarsEnabled = false;
+  private isEarsEnabled = true;
   private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
   private sidebarOpenSubscription?: Subscription;
@@ -248,6 +249,7 @@ export class AgentBuilderPlugin
     const openConversationDetails = async ({
       conversationId,
       onClose,
+      trailingActions,
     }: OpenConversationDetailsOptions): Promise<() => void> => {
       const { openConversationDetailsFlyout } = await import(
         './flyout/open_conversation_details_flyout'
@@ -258,6 +260,7 @@ export class AgentBuilderPlugin
         conversationTemplatesService,
         conversationId,
         onClose,
+        trailingActions,
       });
     };
 
@@ -363,11 +366,13 @@ export class AgentBuilderPlugin
           openSidebarConversation: (conversationId) => {
             openSidebarInternal({ conversationId });
           },
-          openFullscreenConversation: ({ conversationId, agentId }) => {
+          openFullscreenConversation: ({ conversationId, agentId, openDetails }) => {
             agentBuilderSidebar.close();
-            return core.application.navigateToApp(AGENTBUILDER_APP_ID, {
-              path: appPaths.agent.conversations.byId({ agentId, conversationId }),
-            });
+            const basePath = appPaths.agent.conversations.byId({ agentId, conversationId });
+            const path = openDetails
+              ? `${basePath}?${searchParamNames.openConversationDetails}=true`
+              : basePath;
+            return core.application.navigateToApp(AGENTBUILDER_APP_ID, { path });
           },
         },
       }),

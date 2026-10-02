@@ -12,14 +12,15 @@ import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { AiIndexDataReadService } from './data_read_service';
 import { describeAiIndex } from './describe';
-import { AiIndexNotFoundError } from './errors';
-import { filterReadableAiIndices } from './filter_readable_ai_indices';
+import { AiIndexNotFoundError, AiIndexNotReadableError } from './errors';
+import { filterReadableAiIndices, probeAiIndices } from './filter_readable_ai_indices';
 
 jest.mock('./describe');
 jest.mock('./filter_readable_ai_indices');
 
 const describeAiIndexMock = jest.mocked(describeAiIndex);
 const filterReadableAiIndicesMock = jest.mocked(filterReadableAiIndices);
+const probeAiIndicesMock = jest.mocked(probeAiIndices);
 
 const aiIndex: AiIndexHttpItem = {
   id: 'support',
@@ -55,9 +56,14 @@ describe('AiIndexDataReadService', () => {
     aiIndexService.list.mockReset();
     describeAiIndexMock.mockReset();
     filterReadableAiIndicesMock.mockReset();
+    probeAiIndicesMock.mockReset();
   });
 
   describe('query', () => {
+    beforeEach(() => {
+      aiIndexService.list.mockResolvedValue([]);
+    });
+
     it('runs the query in the service space and audit-logs success', async () => {
       esqlQuery.mockResolvedValue({ columns: [], values: [] });
 
@@ -79,6 +85,17 @@ describe('AiIndexDataReadService', () => {
       );
     });
 
+    it('applies the lifecycle pipeline to a registered dest', async () => {
+      esqlQuery.mockResolvedValue({ columns: [], values: [] });
+      aiIndexService.list.mockResolvedValue([aiIndex]);
+
+      await service.query({ query: 'FROM ai-index-idx-support | KEEP title', limit: 10 });
+
+      expect(esqlQuery.mock.calls[0][0].query.replace(/\s+/g, ' ')).toBe(
+        'FROM ai-index-idx-support | WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active" | WHERE expires_at IS NULL OR expires_at > NOW() | DROP governance.* | KEEP title | LIMIT 10'
+      );
+    });
+
     it('audit-logs failure and rethrows', async () => {
       esqlQuery.mockRejectedValue(new Error('boom'));
 
@@ -95,6 +112,10 @@ describe('AiIndexDataReadService', () => {
   });
 
   describe('describe', () => {
+    beforeEach(() => {
+      probeAiIndicesMock.mockResolvedValue([{ aiIndex }]);
+    });
+
     it('resolves the registry entry, describes it as the current user, and audit-logs success', async () => {
       aiIndexService.get.mockResolvedValue(aiIndex);
       describeAiIndexMock.mockResolvedValue(contextBlock);
@@ -103,6 +124,11 @@ describe('AiIndexDataReadService', () => {
 
       expect(result).toEqual({ response: contextBlock });
       expect(aiIndexService.get).toHaveBeenCalledWith('support', 'marketing');
+      expect(probeAiIndicesMock).toHaveBeenCalledWith({
+        esClient,
+        aiIndices: [aiIndex],
+        logger,
+      });
       expect(describeAiIndexMock).toHaveBeenCalledWith({ esClient, aiIndex, spaceId: 'marketing' });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -124,6 +150,45 @@ describe('AiIndexDataReadService', () => {
           message: 'Failed attempt to describe AI index [id=missing]',
           event: expect.objectContaining({ action: 'ai_index_describe', outcome: 'failure' }),
           error: { code: 'AiIndexNotFoundError', message: "AI index 'missing' not found" },
+        })
+      );
+    });
+
+    it('does not describe an entry the caller cannot read', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndex);
+      probeAiIndicesMock.mockResolvedValue([
+        { aiIndex, failure: { reason: 'unauthorized for user', privilege: true } },
+      ]);
+
+      await expect(service.describe('support')).rejects.toThrow(AiIndexNotReadableError);
+
+      expect(describeAiIndexMock).not.toHaveBeenCalled();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'ai_index_describe', outcome: 'failure' }),
+          error: expect.objectContaining({ code: 'AiIndexNotReadableError' }),
+        })
+      );
+    });
+
+    it('reports an entry whose backing index cannot be searched as unavailable', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndex);
+      probeAiIndicesMock.mockResolvedValue([
+        { aiIndex, failure: { reason: 'index_closed_exception', privilege: false } },
+      ]);
+
+      await expect(service.describe('support')).rejects.toThrow(
+        "AI index 'support' is not available: index_closed_exception"
+      );
+
+      expect(describeAiIndexMock).not.toHaveBeenCalled();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'ai_index_describe', outcome: 'failure' }),
+          error: {
+            code: 'Error',
+            message: "AI index 'support' is not available: index_closed_exception",
+          },
         })
       );
     });
