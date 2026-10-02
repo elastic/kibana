@@ -681,7 +681,7 @@ export const generateRuleKindDoc = (): string => {
     const heading = `### ${getRuleKindProductLabel(value)} (\`kind: ${value}\`)`;
     const lines = [heading, description];
     if (value === 'alert') {
-      lines.push(`Episode statuses: ${episodeStatuses}.`);
+      lines.push(`Alert statuses: ${episodeStatuses}.`);
       lines.push(`State transition fields: ${transitionFields}.`);
     }
     return i > 0 ? ['', ...lines] : lines;
@@ -713,17 +713,17 @@ export const generateNotificationsOverviewDoc = (): string => {
   return [
     '# Notifications via Action Policies',
     '',
-    'Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** — space-scoped saved objects that send matched episodes to workflow destinations.',
+    'Notifications are not configured on the rule itself. Alerts are matched and dispatched by **action policies** — space-scoped saved objects that send matched alerts to workflow destinations.',
     '',
     `When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.`,
     '',
     '## Notifications Require Alert Kind',
     '',
-    `Action policies only process ${alertLabel} (\`kind: alert\`). ${signalLabel} (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch. See the [rule-kind reference](./rule-kind.md) and [episode-lifecycle reference](./episode-lifecycle.md).`,
+    `Action policies only process ${alertLabel} (\`kind: alert\`). ${signalLabel} (\`kind: signal\`) do not participate in alert lifecycle or notification dispatch. See the [rule-kind reference](./rule-kind.md) and [alert-lifecycle reference](./alert-lifecycle.md).`,
     '',
     'When a user asks for notifications on a rule that is currently `kind: signal` (or when composing a new rule where the user wants notifications):',
     '',
-    `1. **Explain the difference**: ${signalLabel} (\`kind: signal\`) rules are observation-only and do not trigger notifications. ${alertLabel} (\`kind: alert\`) track episode lifecycle and can dispatch to action policies.`,
+    `1. **Explain the difference**: ${signalLabel} (\`kind: signal\`) rules are observation-only and do not trigger notifications. ${alertLabel} (\`kind: alert\`) track alert lifecycle and can dispatch to action policies.`,
     `2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
     `3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing ${signalLabel} (\`kind: signal\`) rule cannot be converted. Offer to create a new ${alertLabel} (\`kind: alert\`) rule with the same query and schedule, then set up notifications on the new rule.`,
     `4. After ensuring the rule is \`kind: alert\`, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
@@ -768,21 +768,21 @@ export const generateStateTransitionDoc = (): string => {
   ].join('\n');
 };
 
-/** Generates the Episode Lifecycle section with heading, prose, and status table. */
-export const generateEpisodeLifecycleDoc = (): string => {
+/** Generates the Alert Lifecycle section with heading, prose, and status table. */
+export const generateAlertLifecycleDoc = (): string => {
   const table = generateEnumTable({
     header: ['Status', 'Meaning'],
     values: getDescribedEnumValues(alertEpisodeStatusSchema, 'alertEpisodeStatusSchema'),
   });
 
   return [
-    '# Episode Lifecycle',
+    '# Alert Lifecycle',
     '',
-    'Episodes are the unit of alert state. Each unique group (by `group_hash`) has its own episode. Each episode has a status that reflects where it is in the lifecycle:',
+    'Alerts are the unit of problem state. Each unique group (by `group_hash`) has its own alert. Each alert has a status that reflects where it is in the lifecycle:',
     '',
     table,
     '',
-    'Only `kind: alert` rules produce episodes. `kind: signal` rules write raw signal events with no episode tracking.',
+    'Only `kind: alert` rules produce alerts. `kind: signal` rules write raw signal events with no alert tracking.',
   ].join('\n');
 };
 
@@ -793,12 +793,12 @@ export const generateSeverityDoc = (): string => {
   return [
     '# Alert Event Severity',
     '',
-    'Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named `severity` in the ES|QL breach query output.',
+    'Severity is a per-event property on alert events, not a rule-level field. It is extracted at execution time from a column named `severity` in the ES|QL breach query output.',
     '',
     `- **Valid values**: ${values} (case-insensitive).`,
     '- If the breach query does not produce a `severity` column, alert events have no severity.',
     '- Different groups can produce different severities in the same rule execution (the value comes from each row).',
-    '- Action policies can match on `severity` to route high-severity episodes differently (e.g. PagerDuty for critical, email for low).',
+    '- Action policies can match on `severity` to route high-severity alerts differently (e.g. PagerDuty for critical, email for low).',
     '',
     '### Setting Severity in ES|QL',
     '',
@@ -821,7 +821,7 @@ export const generateNoDataStrategyDoc = (): string => {
   return [
     '# No-Data Strategy',
     '',
-    `\`no_data\` is a **top-level rule field** that controls what happens when the rule finds no data for a group. It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour. Every alert rule is stored with one; omit it and the tool saves \`{ strategy: '${noDataStrategy.ignore}' }\`.`,
+    `\`no_data\` is a **top-level rule field** that controls what happens when the rule finds no data for a group. It is set via the \`set_no_data\` operation as an object whose \`strategy\` selects the behaviour. Every alert rule is stored with one; omit it and the tool saves \`{ strategy: '${noDataStrategy.ignore}' }\`.`,
     '',
     table,
     '',
@@ -840,7 +840,7 @@ export const generateRecoveryStrategyDoc = (): string => {
   return [
     '# Recovery Strategy',
     '',
-    `\`recovery\` is a **top-level rule field** (not inside the query). It is set on \`set_query\` as an object whose \`strategy\` selects the behaviour, and it controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Every alert rule is stored with one; omit it and the tool saves \`{ strategy: '${recoveryStrategy.no_breach}' }\`. Signal rules (\`kind: signal\`) cannot set \`recovery\` ([rule-kind reference](./rule-kind.md)).`,
+    `\`recovery\` is a **top-level rule field** (not inside the query). It is set via the \`set_recovery\` operation as an object whose \`strategy\` selects the behaviour, and it controls how alerts transition from active to recovering/inactive (see [alert-lifecycle reference](./alert-lifecycle.md)). Every alert rule is stored with one; omit it and the tool saves \`{ strategy: '${recoveryStrategy.no_breach}' }\`. Signal rules (\`kind: signal\`) cannot set \`recovery\` ([rule-kind reference](./rule-kind.md)).`,
     '',
     list,
     '',
@@ -908,8 +908,8 @@ export const generateMatcherContextDoc = (): string => {
     '|---|---|---|',
     '| set | set | **AND** — rule must have a matching tag and KQL must pass |',
     '| set | absent/null | tag constraint only |',
-    "| absent/null | set | no tag constraint; any rule's episodes may match if KQL passes |",
-    '| absent/null | absent/null | **catch-all** — matches every alert episode in the space |',
+    "| absent/null | set | no tag constraint; any rule's alerts may match if KQL passes |",
+    '| absent/null | absent/null | **catch-all** — matches every alert in the space |',
     '',
     'If `matcher` itself is `null`, or both fields are empty, the policy is a **catch-all**.',
     'A rule with no tags never matches a policy that has `matcher.tags` set.',
@@ -989,11 +989,11 @@ export const generateDispatchFlowDoc = (): string =>
     '',
     'The end-to-end notification path:',
     '',
-    '1. **Rule** (`kind: alert`) evaluates its ES|QL query and writes alert episodes to `.rule-events`.',
-    '2. **Dispatcher** (runs on its own Task Manager schedule) reads episodes from `.rule-events`.',
+    '1. **Rule** (`kind: alert`) evaluates its ES|QL query and writes alerts to `.rule-events`.',
+    '2. **Dispatcher** (runs on its own Task Manager schedule) reads alerts from `.rule-events`.',
     '3. Dispatcher loads **enabled action policies** for the relevant space.',
-    "4. **Matcher evaluation**: each policy's KQL matcher is tested against each episode's context.",
-    "5. **Grouping**: matched episodes are grouped according to the policy's `groupingMode` / `groupBy`.",
+    "4. **Matcher evaluation**: each policy's KQL matcher is tested against each alert's context.",
+    "5. **Grouping**: matched alerts are grouped according to the policy's `groupingMode` / `groupBy`.",
     "6. **Throttling**: groups are filtered based on the policy's throttle strategy and notification history.",
     "7. **Dispatch**: eligible groups are sent to the policy's **workflow destinations** via `scheduleWorkflow`.",
     '8. **Workflow execution**: workflow steps run, using connectors to deliver notifications (email, Slack, etc.).',
@@ -1008,7 +1008,7 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '',
     'Use this path when the user wants notifications for **one specific rule**.',
     '',
-    'Action policies only process alert episodes. If the rule is `kind: signal`, do not',
+    'Action policies only process alerts. If the rule is `kind: signal`, do not',
     'proceed: ask the user (or the rule-management skill) to convert or recreate the',
     'rule as `kind: alert` first.',
     '',
@@ -1070,13 +1070,13 @@ export const generateMultiRuleActionPolicyDoc = (): string =>
     '`set_destinations` (same `workflowId` rule as the single-rule path), a matcher from',
     'the options below, then `set_grouping` / `set_throttle`.',
     '',
-    'A policy matches **episodes**, not a rule object. Policies are space-scoped and are',
+    'A policy matches **alerts**, not a rule object. Policies are space-scoped and are',
     'not bound to a single rule. The matcher supports a `tags` array (matched against rule',
     'tags) and an optional KQL `expression` over',
     '[matcher context fields](./action-policy-matchers.md).',
     '',
     '- **Catch-all**: omit `set_matcher` or set matcher to empty/`null`. Confirm with the',
-    '  user first — this notifies on every `kind: alert` episode in the space, including',
+    '  user first — this notifies on every `kind: alert` alert in the space, including',
     '  rules created later.',
     '- **A family of rules by tag**: `matcher: { tags: ["production"] }`. Matched against the rule\'s tags.',
     '  Prefer this when the set of rules will grow.',
@@ -1090,7 +1090,7 @@ export const generateMultiRuleActionPolicyDoc = (): string =>
     '- **Search first**: run `platform.core.sml_search` for existing policies before adding',
     '  another catch-all or overlapping tag matcher.',
     '- **Grouping**: `per_episode` is still a safe default. `all` batches mixed-rule',
-    '  episodes into a single notification; only use it when the user wants one combined',
+    '  alerts into a single notification; only use it when the user wants one combined',
     '  message.',
     '',
     'Name shared policies by intent (`"Notify production alerts"`, `"Page on critical"`),',
@@ -1156,7 +1156,7 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
   ];
 
   if (episodeTable) {
-    sections.push('', '## Episode Fields (`inputs.payload.episodes[]`)', '', episodeTable);
+    sections.push('', '## Alert Fields (`inputs.payload.episodes[]`)', '', episodeTable);
   }
 
   sections.push(
@@ -1187,7 +1187,7 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '    with:',
     '      to:',
     '        - <user-provided-email>',
-    '      subject: "Alert: {{ inputs.payload.episodes | size }} episode(s)"',
+    '      subject: "Alert: {{ inputs.payload.episodes | size }} alert(s)"',
     '      message: >',
     '        {% for ep in inputs.payload.episodes %}',
     '        - Rule: {{ inputs.payload.rules[ep.rule_id].name | default: "unknown" }}',

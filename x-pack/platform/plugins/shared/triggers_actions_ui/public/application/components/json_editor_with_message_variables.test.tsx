@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
+import type { ActionVariable } from '@kbn/alerting-plugin/common';
 import { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
 import { MockedCodeEditor } from '@kbn/code-editor-mock';
 
@@ -22,6 +22,29 @@ jest.mock('@kbn/code-editor', () => {
     },
   };
 });
+
+jest.mock('./add_message_variables_optional', () => ({
+  AddMessageVariablesOptional: ({
+    messageVariables = [],
+    onSelectEventHandler,
+  }: {
+    messageVariables?: ActionVariable[];
+    onSelectEventHandler: (variable: ActionVariable) => void;
+  }) => (
+    <>
+      {messageVariables.map((variable) => (
+        <button
+          key={variable.name}
+          type="button"
+          data-test-subj={`variableMenuButton-${variable.name}`}
+          onClick={() => onSelectEventHandler(variable)}
+        >
+          {variable.name}
+        </button>
+      ))}
+    </>
+  ),
+}));
 
 describe('JsonEditorWithMessageVariables', () => {
   const onDocumentsChange = jest.fn();
@@ -39,18 +62,17 @@ describe('JsonEditorWithMessageVariables', () => {
 
   beforeEach(() => jest.resetAllMocks());
 
-  test('renders variables with double braces by default', async () => {
+  test('renders variables with double braces by default', () => {
     render(<JsonEditorWithMessageVariables {...props} />);
 
-    await userEvent.click(screen.getByTestId('fooAddVariableButton'));
-    await userEvent.click(screen.getByTestId('variableMenuButton-myVar'));
+    fireEvent.click(screen.getByTestId('variableMenuButton-myVar'));
 
     expect(screen.getByTestId('fooJsonEditor').getAttribute('data-currentvalue')).toEqual(
       '{{myVar}}'
     );
   });
 
-  test('renders variables with triple braces when specified', async () => {
+  test('renders variables with triple braces when specified', () => {
     render(
       <JsonEditorWithMessageVariables
         {...props}
@@ -64,8 +86,7 @@ describe('JsonEditorWithMessageVariables', () => {
       />
     );
 
-    await userEvent.click(screen.getByTestId('fooAddVariableButton'));
-    await userEvent.click(screen.getByTestId('variableMenuButton-myVar'));
+    fireEvent.click(screen.getByTestId('variableMenuButton-myVar'));
 
     expect(screen.getByTestId('fooJsonEditor').getAttribute('data-currentvalue')).toEqual(
       '{{{myVar}}}'

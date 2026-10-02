@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DataViewSource } from '@kbn/data-source';
 import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -837,7 +838,8 @@ describe('LensVisService attributes', () => {
     expect(visContext?.attributes.state.query).toBeUndefined();
     expect(getRepresentativeQuery(visContext?.attributes)).toStrictEqual({
       esql: `from logstash-* | limit 10
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 5 minute)
+| LIMIT 10000`,
     });
     expect(visContext?.requestData).toStrictEqual({
       dataViewId: dataViewWithAtTimefieldMock.id,
@@ -849,7 +851,7 @@ describe('LensVisService attributes', () => {
     const onVisContextChanged = jest.fn();
     lensService.update({
       queryParams: {
-        dataView: dataViewWithAtTimefieldMock,
+        dataSource: new DataViewSource(dataViewWithAtTimefieldMock),
         query: queryEsql,
         filters: [],
         timeRange,
@@ -871,7 +873,8 @@ describe('LensVisService attributes', () => {
   it('should use the correct histogram query when no suggestion passed', async () => {
     const histogramQuery = {
       esql: `from logstash-* | limit 10
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 5 minute)
+| LIMIT 10000`,
     };
     const lensVis = await getLensVisMock({
       filters,
