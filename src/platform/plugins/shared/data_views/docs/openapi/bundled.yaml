@@ -2540,7 +2540,7 @@ components:
               type: string
         override:
           type: boolean
-          description: Override an existing data view if a data view with the provided title already exists.
+          description: Override an existing data view if a data view with the provided title or ID already exists. Existing spaces are preserved unless `namespaces` is provided.
           default: false
     typemeta_response:
       type: object
