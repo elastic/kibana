@@ -96,14 +96,14 @@ export const getRuleEventsTool = ({
 }: GetRuleEventsToolParams): BuiltinAttachmentBoundedTool<typeof getRuleEventsSchema> => ({
   id: getRuleEventsToolId(attachmentId),
   type: ToolType.builtin,
-  description: `Fetch .rule-events rows for alert episode "${episodeId}" (attachment "${attachmentId}"), oldest first. Each event includes @timestamp, episode.status (inactive/pending/active/recovering), severity, source, group_hash, and event data. Call with no arguments to fetch this episode's events. Optionally pass start and end together to narrow the @timestamp window, or status to filter lifecycle state. Returns at most ${TOOL_RESULT_LIMIT} rows. If truncated is true, more events exist after the last returned @timestamp: call again with start set to that timestamp and the same end, and skip the overlapping first row. Do not retry the same window. If truncated is still true for a very small window (the same @timestamp or a sub-second range), stop and use the rows you have; there is no further pagination. This tool is read-only.`,
+  description: `Fetch .rule-events rows for alert "${episodeId}" (attachment "${attachmentId}"), oldest first. Each event includes @timestamp, episode.status (inactive/pending/active/recovering), severity, source, group_hash, and event data. Call with no arguments to fetch this alert's events. Optionally pass start and end together to narrow the @timestamp window, or status to filter lifecycle state. Returns at most ${TOOL_RESULT_LIMIT} rows. If truncated is true, more events exist after the last returned @timestamp: call again with start set to that timestamp and the same end, and skip the overlapping first row. Do not retry the same window. If truncated is still true for a very small window (the same @timestamp or a sub-second range), stop and use the rows you have; there is no further pagination. This tool is read-only.`,
   schema: getRuleEventsSchema,
   handler: async (args, toolContext) => {
     const unauthorized = await ensureToolPrivilege({
       privilegeChecker: getPrivilegeChecker({ request: toolContext.request }),
       feature: 'alerts',
       level: 'read',
-      action: 'fetch rule events for episode',
+      action: 'fetch rule events for alert',
     });
     if (unauthorized) {
       return unauthorized;
@@ -139,7 +139,7 @@ export const getRuleEventsTool = ({
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to fetch rule events for episode "${episodeId}": ${message}`,
+              message: `Failed to fetch rule events for alert "${episodeId}": ${message}`,
             },
           },
         ],
@@ -157,7 +157,7 @@ export const getRuleEventsTool = ({
               {
                 type: ToolResultType.error,
                 data: {
-                  message: `Episode "${episodeId}" not found`,
+                  message: `Alert "${episodeId}" not found`,
                 },
               },
             ],
@@ -179,7 +179,7 @@ export const getRuleEventsTool = ({
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to look up episode "${episodeId}": ${message}`,
+                message: `Failed to look up alert "${episodeId}": ${message}`,
               },
             },
           ],

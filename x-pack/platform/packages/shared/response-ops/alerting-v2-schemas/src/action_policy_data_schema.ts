@@ -52,12 +52,12 @@ export const actionPolicyDestinationSchema = z
 
 export const groupingModeSchema = z
   .union([
-    z.literal('per_episode').describe('one notification per alert episode lifecycle (default).'),
-    z.literal('all').describe('a single notification for all matching episodes.'),
+    z.literal('per_episode').describe('one notification per alert lifecycle (default).'),
+    z.literal('all').describe('a single notification for all matching alerts.'),
     z.literal('per_field').describe('group by specified `groupBy` fields.'),
   ])
   .describe(
-    'The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
+    'The grouping mode: per_episode groups by alert lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
   )
   .meta({ id: 'alerting_action_policy_grouping_mode' });
 
@@ -67,7 +67,7 @@ export const throttleStrategySchema = z
   .union([
     z
       .literal('on_status_change')
-      .describe('notify only on episode status transitions (default for `per_episode`).'),
+      .describe('notify only on alert status transitions (default for `per_episode`).'),
     z.literal('per_status_interval').describe('notify on transitions and at regular intervals.'),
     z
       .literal('time_interval')

@@ -48,7 +48,7 @@ const alertingV2NotificationGroup: JsonSchema = {
   type: 'object',
   title: 'Alerting v2 notification group',
   description:
-    'Notification group dispatched by an alerting v2 policy: group identity, policy reference, and alert episodes.',
+    'Notification group dispatched by an alerting v2 policy: group identity, policy reference, and alerts.',
   properties: {
     id: {
       type: 'string',
@@ -66,48 +66,48 @@ const alertingV2NotificationGroup: JsonSchema = {
     },
     episodes: {
       type: 'array',
-      description: 'Alert episodes included in this notification group',
+      description: 'Alerts included in this notification group',
       items: {
         type: 'object',
         properties: {
           last_event_timestamp: {
             type: 'string',
             format: 'date-time',
-            description: 'Timestamp of the latest event seen for this episode',
+            description: 'Timestamp of the latest event seen for this alert',
           },
           rule_id: {
             type: ['string', 'null'],
-            description: 'Identifier of the rule that produced this episode',
+            description: 'Identifier of the rule that produced this alert',
           },
           source: {
             type: 'string',
-            description: 'Origin of the alert events for this episode (e.g. `internal`)',
+            description: 'Origin of the alert events (e.g. `internal`)',
           },
           space_id: {
             type: 'string',
-            description: 'Identifier of the space the episode belongs to',
+            description: 'Identifier of the space the alert belongs to',
           },
           group_hash: {
             type: 'string',
-            description: 'Hash identifying the alert series/group this episode belongs to',
+            description: 'Hash identifying the alert series/group this alert belongs to',
           },
           episode_id: {
             type: 'string',
-            description: 'Unique identifier of the alert episode',
+            description: 'Unique identifier of the alert',
           },
           episode_status: {
             type: 'string',
-            description: 'Current lifecycle status of the alert episode',
+            description: 'Current lifecycle status of the alert',
             enum: ['inactive', 'pending', 'active', 'recovering'],
           },
           severity: {
             type: 'string',
-            description: 'Severity of the alert episode',
+            description: 'Severity of the alert',
             enum: ['info', 'low', 'medium', 'high', 'critical'],
           },
           data: {
             type: 'object',
-            description: 'Data of the alert episode',
+            description: 'Data of the alert',
             additionalProperties: true,
           },
         },
@@ -126,7 +126,7 @@ const alertingV2NotificationGroup: JsonSchema = {
     rules: {
       type: 'object',
       description:
-        'Rule metadata keyed by rule id. Each value contains rule metadata (e.g. `{ name }`) for a rule referenced by the episodes. Access via `rules[episode.rule_id].name`.',
+        'Rule metadata keyed by rule id. Each value contains rule metadata (e.g. `{ name }`) for a rule referenced by the alerts. Access via `rules[ep.rule_id].name`.',
       additionalProperties: {
         type: 'object',
         properties: {

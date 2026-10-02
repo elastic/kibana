@@ -340,10 +340,10 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('##### `pending`');
       expect(doc).toContain('##### `recovering`');
       expect(doc).toContain(
-        '| `count` | integer | optional | Consecutive matches the alert episode spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match. (min: 0, max: 1000) |'
+        '| `count` | integer | optional | Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match. (min: 0, max: 1000) |'
       );
       expect(doc).toContain(
-        '| `count` | integer | optional | Consecutive recoveries the alert episode spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery. (min: 0, max: 1000) |'
+        '| `count` | integer | optional | Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery. (min: 0, max: 1000) |'
       );
     });
 

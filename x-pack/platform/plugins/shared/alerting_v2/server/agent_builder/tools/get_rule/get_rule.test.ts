@@ -113,7 +113,7 @@ describe('getRuleTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: 'Failed to fetch rule "rule-1" for episode "ep-1": Rule not found',
+              message: 'Failed to fetch rule "rule-1" for alert "ep-1": Rule not found',
             },
           },
         ],
@@ -131,7 +131,7 @@ describe('getRuleTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: 'Failed to fetch rule "rule-1" for episode "ep-1": boom',
+              message: 'Failed to fetch rule "rule-1" for alert "ep-1": boom',
             },
           },
         ],

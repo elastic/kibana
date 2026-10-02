@@ -173,7 +173,7 @@ export const setRecoveryOperationSchema = z
     operation: z.literal('set_recovery'),
     recovery: recoverySchema,
   })
-  .describe('Use `set_recovery` to control how alert episodes recover. Requires `kind: alert`.');
+  .describe('Use `set_recovery` to control how alerts recover. Requires `kind: alert`.');
 
 export const setNoDataOperationSchema = z
   .object({

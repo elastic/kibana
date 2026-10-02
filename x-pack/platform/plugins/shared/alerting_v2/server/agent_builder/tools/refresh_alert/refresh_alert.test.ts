@@ -222,7 +222,7 @@ describe('refreshAlertTool', () => {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: 'Episode "ep-1" not found' },
+            data: { message: 'Alert "ep-1" not found' },
           },
         ],
       });
@@ -237,7 +237,7 @@ describe('refreshAlertTool', () => {
         results: [
           {
             type: ToolResultType.error,
-            data: { message: 'Failed to refresh episode "ep-1": boom' },
+            data: { message: 'Failed to refresh alert "ep-1": boom' },
           },
         ],
       });
