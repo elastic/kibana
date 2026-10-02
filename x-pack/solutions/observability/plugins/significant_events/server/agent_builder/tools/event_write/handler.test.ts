@@ -510,12 +510,13 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
   type ChangePointType = DetectionSignal['metadata']['change_point_type'];
 
   const makeDetectionSignal = (
-    metadata: Partial<DetectionSignal['metadata']> = {}
+    metadata: Partial<DetectionSignal['metadata']> = {},
+    verdict: DetectionSignal['verdict'] = 'confirms'
   ): DetectionSignal => ({
     type: 'detection',
     stream_name: 'logs.checkout',
     description: 'High Latency',
-    verdict: 'confirms',
+    verdict,
     metadata: {
       detection_id: 'det-rule-abc',
       rule_uuid: 'rule-abc',
@@ -575,6 +576,144 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
       reason: 'existing_active_event',
       event_id: 'existing-event-id',
       existing_event_id: 'existing-event-id',
+    });
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('deduplicates confirmed rules without including non-confirming co-signals in the identity', async () => {
+    const confirmedA = makeDetectionSignal({
+      detection_id: 'det-A',
+      rule_uuid: 'A',
+    });
+    const findLatestActive = jest.fn().mockResolvedValue({
+      hits: [makeActiveDedupEvent({ signals: [confirmedA] })],
+    });
+    const eventClient = makeEventClient({
+      findLatestActive,
+      bulkCreate: jest.fn(),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [
+        makeDedupInput({
+          signals: [
+            confirmedA,
+            makeDetectionSignal(
+              {
+                detection_id: 'det-B',
+                rule_uuid: 'B',
+              },
+              'inconclusive'
+            ),
+          ],
+        }),
+      ],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      skipped: true,
+      reason: 'existing_active_event',
+      existing_event_id: 'existing-event-id',
+    });
+    expect(findLatestActive).toHaveBeenCalledWith({
+      streamNames: ['logs.checkout'],
+      ruleUuids: ['A'],
+    });
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it.each<DetectionSignal['verdict']>(['refutes', 'off_topic', 'inconclusive'])(
+    'creates a new event when the candidate confirms a rule the active event marks as %s',
+    async (verdict) => {
+      const ruleA = {
+        detection_id: 'det-A',
+        rule_uuid: 'A',
+      };
+      const eventClient = makeEventClient({
+        findLatestActive: jest.fn().mockResolvedValue({
+          hits: [makeActiveDedupEvent({ signals: [makeDetectionSignal(ruleA, verdict)] })],
+        }),
+      });
+
+      const results = await eventsWriteBulkHandler({
+        eventClient,
+        inputs: [makeDedupInput({ signals: [makeDetectionSignal(ruleA)] })],
+      });
+
+      expect(results[0]).toMatchObject({ written: true });
+      expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it('selects the latest confirming active event deterministically', async () => {
+    const confirmedA = makeDetectionSignal({
+      detection_id: 'det-A',
+      rule_uuid: 'A',
+    });
+    const eventClient = makeEventClient({
+      findLatestActive: jest.fn().mockResolvedValue({
+        hits: [
+          makeActiveDedupEvent({
+            '@timestamp': '2024-01-01T00:00:00.000Z',
+            event_id: 'oldest-confirming',
+            signals: [confirmedA],
+          }),
+          makeActiveDedupEvent({
+            '@timestamp': '2024-01-03T00:00:00.000Z',
+            event_id: 'newest-refuting',
+            signals: [{ ...confirmedA, verdict: 'refutes' }],
+          }),
+          makeActiveDedupEvent({
+            '@timestamp': '2024-01-02T00:00:00.000Z',
+            event_id: 'middle-confirming',
+            signals: [confirmedA],
+          }),
+        ],
+      }),
+      bulkCreate: jest.fn(),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [makeDedupInput({ signals: [confirmedA] })],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      skipped: true,
+      reason: 'existing_active_event',
+      event_id: 'middle-confirming',
+      existing_event_id: 'middle-confirming',
+    });
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('uses all rules for dedup when the candidate has no confirmed rules', async () => {
+    const inconclusiveA = makeDetectionSignal(
+      {
+        detection_id: 'det-A',
+        rule_uuid: 'A',
+      },
+      'inconclusive'
+    );
+    const eventClient = makeEventClient({
+      findLatestActive: jest.fn().mockResolvedValue({
+        hits: [makeActiveDedupEvent({ signals: [inconclusiveA] })],
+      }),
+      bulkCreate: jest.fn(),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [makeDedupInput({ signals: [inconclusiveA] })],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      skipped: true,
+      reason: 'existing_active_event',
     });
     expect(eventClient.bulkCreate).not.toHaveBeenCalled();
   });

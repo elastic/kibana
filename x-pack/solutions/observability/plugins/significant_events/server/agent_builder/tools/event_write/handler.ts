@@ -29,6 +29,8 @@ import {
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 import {
   addsNewDetectionRules,
+  confirmedSignals,
+  extractDedupIdentity,
   extractRuleUuids,
   extractRuleUuidsFromEvents,
   makeIdentity,
@@ -105,6 +107,7 @@ interface DedupCandidate {
   eventId: string;
   /** Retained separately so the dedup scan can narrow by rule identity. */
   ruleUuids: string[];
+  confirmedOnly: boolean;
 }
 
 interface SnapshotCandidate {
@@ -167,7 +170,7 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
     const normalizedEventId = normalizeEventId(input.event_id);
     if (normalizedEventId === undefined) {
       // No event_id → find-or-create: scan active events for identity match before writing.
-      const ruleUuids = extractRuleUuids(input.signals);
+      const { ruleUuids, confirmedOnly } = extractDedupIdentity(input.signals);
       // Normalize event_id to undefined so fetchLatestByEventId does not attempt a lineage lookup.
       const normalizedInput = { ...input, event_id: undefined };
       return {
@@ -176,6 +179,7 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
         input: normalizedInput,
         eventId: uuidv4(),
         ruleUuids,
+        confirmedOnly,
       };
     }
     const normalizedInput = { ...input, event_id: normalizedEventId };
@@ -188,9 +192,9 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
   });
 
 /**
- * Flags candidates that share an in-batch dedup identity (stream+rules exact-set match) or
- * event_id (snapshot mode) as `duplicate_in_batch` errors, keeping the first occurrence. Returns
- * the remainder.
+ * Flags candidates that share an in-batch dedup identity (identity kind plus stream+rules
+ * exact-set match) or event_id (snapshot mode) as `duplicate_in_batch` errors, keeping the first
+ * occurrence. Returns the remainder.
  */
 const markDuplicateKeys = (
   candidates: WriteCandidate[],
@@ -201,10 +205,13 @@ const markDuplicateKeys = (
   for (const candidate of candidates) {
     const key =
       candidate.mode === 'dedup'
-        ? makeIdentity({
-            streamNames: candidate.input.stream_names,
-            ruleUuids: candidate.ruleUuids,
-          })
+        ? [
+            candidate.confirmedOnly ? 'confirmed' : 'all',
+            makeIdentity({
+              streamNames: candidate.input.stream_names,
+              ruleUuids: candidate.ruleUuids,
+            }),
+          ].join('|')
         : candidate.eventId;
     const firstIndex = seenKeys.get(key);
 
@@ -259,12 +266,13 @@ const fetchActiveEventsForDedup = async (
 };
 
 /**
- * Returns true when the candidate's rule set is entirely contained in the active event's rule set
- * and at least one stream name is shared — meaning this detection is already tracked.
+ * Returns true when the candidate's dedup rule set is entirely contained in the corresponding
+ * active-event rule set and at least one stream name is shared — meaning this detection is already
+ * tracked.
  *
- * Subset matching (not exact-set) handles co-detection noise: a candidate carrying rules [A]
- * correctly finds an active event with rules [A, B] rather than creating a duplicate. A new rule C
- * not present in any active event still produces a new event.
+ * Candidates with confirmed rules compare only confirmed rules on both sides. Candidates without
+ * confirmed rules retain all-verdict subset matching. A new identity rule not present in any
+ * active event still produces a new event.
  *
  * Empty-rule candidates only match empty-rule events to avoid false-matching any event on stream
  * overlap alone.
@@ -280,7 +288,9 @@ const isCoveredByActiveEvent = (
   const streamsOverlap = (ev.stream_names ?? []).some((s) => candidateStreamSet.has(s));
   if (!streamsOverlap) return false;
 
-  const eventRuleUuids = extractRuleUuids(ev.signals);
+  const eventRuleUuids = extractRuleUuids(
+    candidate.confirmedOnly ? confirmedSignals(ev.signals) : ev.signals
+  );
   if (candidate.ruleUuids.length === 0) return eventRuleUuids.length === 0;
 
   const eventRuleSet = new Set(eventRuleUuids);
@@ -288,8 +298,9 @@ const isCoveredByActiveEvent = (
 };
 
 /**
- * Marks dedup candidates whose rules are a subset of an active event's rules (with stream overlap)
- * as `existing_active_event` in `results`. Returns the candidates that still need to be written.
+ * Marks dedup candidates whose identity rules are a subset of an active event's corresponding
+ * identity rules (with stream overlap) as `existing_active_event` in `results`. Returns the
+ * candidates that still need to be written.
  */
 const resolveDedupSkips = (
   validCandidates: WriteCandidate[],
@@ -297,11 +308,17 @@ const resolveDedupSkips = (
   results: BulkResults
 ): WriteCandidate[] => {
   const activeStatuses = SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS as readonly string[];
+  const sortedActiveEvents = activeEvents.toSorted((a, b) => {
+    const timestampOrder = b['@timestamp'].localeCompare(a['@timestamp']);
+    return timestampOrder !== 0
+      ? timestampOrder
+      : (b.event_id ?? '').localeCompare(a.event_id ?? '');
+  });
   const toWrite: WriteCandidate[] = [];
 
   for (const candidate of validCandidates) {
     if (candidate.mode === 'dedup') {
-      const duplicate = activeEvents.find((ev) =>
+      const duplicate = sortedActiveEvents.find((ev) =>
         isCoveredByActiveEvent(candidate, ev, activeStatuses)
       );
       if (duplicate) {
@@ -473,8 +490,9 @@ const applyBulkResults = (
  * returned results.
  *
  * Find-or-create items (no `event_id`):
- *  - Scan all currently-active events for one whose rules contain the candidate rules and whose
- *    streams overlap the candidate streams.
+ *  - Scan all currently-active events for one whose confirmed rules contain the candidate's
+ *    confirmed rules and whose streams overlap the candidate streams.
+ *  - If the candidate has no confirmed rules, compare all rules instead.
  *  - If found, skip the write and return the existing event_id (existing_active_event).
  *  - Otherwise write a new event with the caller-supplied status.
  *

@@ -61,11 +61,13 @@ export const eventsWriteItemSchema = significantEventSchema
         dedent`
           ID of an existing event to append a new version to (continuation/snapshot mode).
 
-          Omit to trigger find-or-create: the handler scans all currently-active events for one
-          whose rule set contains the submitted rules (subset match) and shares at least one
-          stream name. If found, the write is skipped and the existing event_id is returned
-          (written: false, reason: existing_active_event). Otherwise a new event is created with
-          a generated event_id.
+          Omit to trigger find-or-create. When the item has confirmed rules, the handler scans
+          all currently-active events for one that confirms every submitted confirmed rule and
+          shares at least one stream name; non-confirming co-signals do not affect the identity.
+          When the item has no confirmed rules, every submitted rule is used instead. If found,
+          the write is skipped and the existing event_id is returned (written: false,
+          reason: existing_active_event). Otherwise a new event is created with a generated
+          event_id.
         `
       ),
   })
@@ -293,10 +295,12 @@ export function createEventsWriteTool({
       rule UUID absent from the current event. When no new rule UUIDs are introduced, title and
       symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
 
-      **Without event_id**: find-or-create. Scans all currently-active events for one whose rule
-      set contains the submitted rules and shares at least one stream name. If found, returns it
-      without writing (written: false, reason: existing_active_event). Otherwise creates a new
-      event with a generated event_id.
+      **Without event_id**: find-or-create. When the item has confirmed rules, scans all
+      currently-active events for one that confirms every submitted confirmed rule and shares at
+      least one stream name; non-confirming co-signals do not affect the identity. When the item
+      has no confirmed rules, every submitted rule is used instead. If found, returns it without
+      writing (written: false, reason: existing_active_event). Otherwise creates a new event with
+      a generated event_id.
     `,
     annotations: {
       title: 'Write Significant Events',
