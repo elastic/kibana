@@ -58,6 +58,7 @@ const CONTAINER_STARTUP_TIMEOUT_MS = 3 * 60 * 1000;
 const MAX_CONTAINER_READY_CHECK_RETRIES = Math.ceil(
   CONTAINER_STARTUP_TIMEOUT_MS / CONTAINER_READY_CHECK_INTERVAL_MS
 );
+const CONTAINER_ERROR_LOG_TAIL_LINES = 30;
 
 const ENV_DEFAULTS = {
   UIAM_COSMOS_DB_PORT: '8081',
@@ -103,11 +104,12 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       'elastic',
 
       // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
-      // when total stack RSS approaches Docker VM limit.
+      // when total stack RSS approaches Docker VM limit. The emulator's startup peak
+      // exceeds 1 GiB, so leave swap headroom above the cap for transient spikes.
       '--memory',
-      '1g',
+      '2g',
       '--memory-swap',
-      '1g',
+      '3g',
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
@@ -417,12 +419,23 @@ export async function runUiamContainer(log: ToolingLog, container: UiamContainer
       ]);
 
       currentStatus = statusRaw.trim();
-      if (currentStatus === 'healthy') {
-        isHealthy = true;
-        break;
-      }
     } catch (err) {
       currentStatus = `error: ${err}`;
+    }
+
+    if (currentStatus === 'healthy') {
+      isHealthy = true;
+      break;
+    }
+
+    // Docker reports `unhealthy` only once the health check has failed
+    // `DOCKER_HEALTHCHECK_RETRIES` times in a row, so waiting any longer cannot help.
+    if (currentStatus === 'unhealthy') {
+      throw await createContainerStartupError(
+        container.name,
+        `The "${container.name}" container became unhealthy during startup.`,
+        log
+      );
     }
 
     log.info(chalk.bold(`Waiting for "${container.name}" container (${currentStatus})…`));
@@ -430,13 +443,12 @@ export async function runUiamContainer(log: ToolingLog, container: UiamContainer
 
     readyCheckRetries++;
     if (readyCheckRetries >= MAX_CONTAINER_READY_CHECK_RETRIES) {
-      await tryExportLogs(container.name, log);
-      throw new Error(
+      throw await createContainerStartupError(
+        container.name,
         `The "${container.name}" container failed to start within ${
           CONTAINER_STARTUP_TIMEOUT_MS / 1000
-        } seconds. Last known status: ${currentStatus}. Check the logs with ${chalk.bold(
-          `docker logs -f ${container.name}`
-        )}`
+        } seconds. Last known status: ${currentStatus}.`,
+        log
       );
     }
   }
@@ -547,13 +559,32 @@ export async function initializeUiamContainers(log: ToolingLog) {
   );
 }
 
-async function tryExportLogs(containerName: string, log: ToolingLog) {
+async function createContainerStartupError(
+  containerName: string,
+  reason: string,
+  log: ToolingLog
+): Promise<Error> {
+  const logs = await tryExportLogs(containerName, log);
+  const logTail = logs
+    ? `\n\nLast ${CONTAINER_ERROR_LOG_TAIL_LINES} lines of the "${containerName}" container logs:\n${logs
+        .split('\n')
+        .slice(-CONTAINER_ERROR_LOG_TAIL_LINES)
+        .join('\n')}`
+    : '';
+
+  return new Error(
+    `${reason} Check the logs with ${chalk.bold(`docker logs -f ${containerName}`)}${logTail}`
+  );
+}
+
+async function tryExportLogs(containerName: string, log: ToolingLog): Promise<string | undefined> {
   try {
     const { stdout: logs } = await execa('docker', ['logs', containerName]);
     await mkdir(join(REPO_ROOT, '.es'), {
       recursive: true,
     });
-    return writeFile(join(REPO_ROOT, '.es', 'uiam_docker_error.log'), logs);
+    await writeFile(join(REPO_ROOT, '.es', 'uiam_docker_error.log'), logs);
+    return logs;
   } catch (err) {
     log.error(`Failed to export logs for container ${containerName}: ${err}`);
   }

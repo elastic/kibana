@@ -83,9 +83,9 @@ describe(`#runUiamContainer()`, () => {
             "--net",
             "elastic",
             "--memory",
-            "1g",
+            "2g",
             "--memory-swap",
-            "1g",
+            "3g",
             "--volume",
             "/some_path/uiam_cosmosdb.pfx:/scripts/certs/uiam_cosmosdb.pfx:z",
             "-p",
@@ -369,11 +369,13 @@ describe(`#runUiamContainer()`, () => {
       .mockResolvedValueOnce({ stdout: `name-${cosmosDbContainer.name}` })
       .mockResolvedValue({ stdout: ` running ` });
 
-    await expect(
-      runUiamContainer(new ToolingLog(), cosmosDbContainer)
-    ).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam-cosmosdb" container failed to start within 180 seconds. Last known status: running. Check the logs with [1mdocker logs -f uiam-cosmosdb[22m]`
-    );
+    await expect(runUiamContainer(new ToolingLog(), cosmosDbContainer)).rejects
+      .toMatchInlineSnapshot(`
+      [Error: The "uiam-cosmosdb" container failed to start within 180 seconds. Last known status: running. Check the logs with [1mdocker logs -f uiam-cosmosdb[22m
+
+      Last 30 lines of the "uiam-cosmosdb" container logs:
+       running ]
+    `);
 
     // Skip the first call to `docker run` as we checked it in the previous test.
     expect(execa.mock.calls.slice(1)).toHaveLength(91);
@@ -385,12 +387,35 @@ describe(`#runUiamContainer()`, () => {
       .mockResolvedValueOnce({ stdout: `name-${uiamContainer.name}` })
       .mockResolvedValue({ stdout: ` running ` });
 
-    await expect(runUiamContainer(new ToolingLog(), uiamContainer)).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam" container failed to start within 180 seconds. Last known status: running. Check the logs with [1mdocker logs -f uiam[22m]`
-    );
+    await expect(runUiamContainer(new ToolingLog(), uiamContainer)).rejects.toMatchInlineSnapshot(`
+      [Error: The "uiam" container failed to start within 180 seconds. Last known status: running. Check the logs with [1mdocker logs -f uiam[22m
+
+      Last 30 lines of the "uiam" container logs:
+       running ]
+    `);
 
     // Skip the first call to `docker run` as we checked it in the previous test.
     expect(execa.mock.calls.slice(1)).toHaveLength(91);
+  });
+
+  test('fails fast if container becomes unhealthy', async () => {
+    const [cosmosDbContainer] = UIAM_CONTAINERS;
+
+    execa
+      .mockResolvedValueOnce({ stdout: `name-${cosmosDbContainer.name}` })
+      .mockResolvedValueOnce({ stdout: ` unhealthy ` })
+      .mockResolvedValue({ stdout: `postgres was killed` });
+
+    await expect(runUiamContainer(new ToolingLog(), cosmosDbContainer)).rejects
+      .toMatchInlineSnapshot(`
+      [Error: The "uiam-cosmosdb" container became unhealthy during startup. Check the logs with [1mdocker logs -f uiam-cosmosdb[22m
+
+      Last 30 lines of the "uiam-cosmosdb" container logs:
+      postgres was killed]
+    `);
+
+    // Only the single `docker inspect` that saw `unhealthy`, plus `docker logs`: no further polling.
+    expect(execa.mock.calls.slice(1)).toHaveLength(2);
   });
 });
 
