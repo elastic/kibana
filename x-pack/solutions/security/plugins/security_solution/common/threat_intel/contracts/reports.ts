@@ -98,18 +98,28 @@ export const ATTRIBUTE_ALERTS_EVIDENCE_MAX_BODY_BYTES = CREATE_THREAT_REPORT_MAX
 // can be large, and Kibana's default body cap is 1 MiB.
 export const PERSIST_REPORT_FIELDS_MAX_BODY_BYTES = CREATE_THREAT_REPORT_MAX_BODY_BYTES;
 
+const enrichmentSectionSchema = schema.object({}, { unknowns: 'allow' });
+
 /**
- * `doc` stays an open object rather than a per-field schema: the four call sites
- * (`enrich_threat_report.yaml`'s `persist_gate_rejection` / `persist_diamond_fields` /
- * `persist_extractions` / `persist_classified_severity`) write genuinely different, partly
- * LLM-shaped payloads (arrays of IOCs, behaviors, artifacts), and the `elasticsearch.update` steps
- * they replace had no schema validation of their own either -- Elasticsearch's own mapping was the
- * only check. Tightening that is a separate concern from the identity fix this route exists for.
- * Same reasoning as `getThreatReportResponseSchema`'s `unknowns: 'allow'`.
+ * Enrichment payloads are partly LLM-shaped (arrays of IOCs, behaviors, artifacts, free-form
+ * model ids), so the *inside* of each section stays open and Elasticsearch's `dynamic: 'strict'`
+ * mapping remains the check on it.
  *
- * The top level itself defaults to `forbid`: every field this route accepts merges into the
- * document via `doc`, so a sibling key at this level (e.g. a misnested `rank_score`) is never
- * ES's `dynamic: 'strict'` mapping catching a typo -- it is silently dropped here instead.
+ * The set of sections does not stay open. `doc` is merged into the stored report by
+ * `esClient.update`, and that is a merge-patch running as the internal user, so any key reachable
+ * here is a key the caller can overwrite on a report in *any* space: `space_id` would re-home the
+ * report, and because a merge-patch replaces arrays wholesale, `evidence: []` would erase every
+ * space's hunt and alert-attribution evidence in a single call. Allowlisting the sections the four
+ * call sites actually write (`enrich_threat_report.yaml`'s `persist_gate_rejection` /
+ * `persist_diamond_fields` / `persist_extractions` / `persist_classified_severity`) makes both
+ * unreachable by construction rather than by review.
+ *
+ * Which report may be enriched is deliberately not part of this contract. Enrichment is installed
+ * once globally and is space-blind by design -- it drains pending reports from every space through a
+ * route with no `/s/{id}/` prefix -- so `persist_report_fields` cannot scope writes to the request's
+ * space the way `attribute_alerts_evidence` does. The allowlist is what makes that acceptable: the
+ * widest a cross-space write can reach is derived enrichment content, never a report's ownership or
+ * another space's evidence. Tracked in https://github.com/elastic/security-team/issues/19859.
  */
 export const persistReportFieldsBodySchema = schema.object({
   index: schema.string({
@@ -119,18 +129,41 @@ export const persistReportFieldsBodySchema = schema.object({
       value.startsWith(THREAT_REPORTS_INDEX) ? undefined : `must target ${THREAT_REPORTS_INDEX}`,
   }),
   id: schema.string({ minLength: 1, maxLength: 512 }),
-  doc: schema.object({}, { unknowns: 'allow' }),
+  // `unknowns: 'forbid'` is the point of this object, not a default: an unrecognized section is a
+  // caller reaching for a field no enrichment step writes, and rejecting the request is better
+  // than merging it. It also keeps a misnested key (e.g. `rank_score` under `doc.severity`) a
+  // loud 400 here instead of a silent drop.
+  doc: schema.object(
+    {
+      extracted: schema.maybe(enrichmentSectionSchema),
+      geography: schema.maybe(enrichmentSectionSchema),
+      lineage: schema.maybe(enrichmentSectionSchema),
+      severity: schema.maybe(enrichmentSectionSchema),
+      // `persist_classified_severity` computes this with a Liquid `times` filter, which the engine
+      // resolves to a number, same as `attributeAlertsEvidenceBodySchema`'s hit counts.
+      rank_score: schema.maybe(schema.number()),
+    },
+    { unknowns: 'forbid' }
+  ),
 });
 
 // ── ingest_threat_report ─────────────────────────────────────────────────────
 
 /**
- * `document` stays an open object, same reasoning as `persistReportFieldsBodySchema`'s `doc`:
- * the shape comes from whichever adapter (RSS, text indicator list, ...) fetched it, and the
- * `elasticsearch.index` step this replaces had no schema validation of its own either.
+ * The document body stays open because its shape comes from whichever adapter (RSS, text indicator
+ * list, ...) fetched it, and Elasticsearch's `dynamic: 'strict'` mapping is the check on it. This
+ * is a `create`, so there is no stored document for an open payload to overwrite.
+ *
+ * `space_id` is called out rather than left among the unknowns because it is the one field that
+ * decides who sees the report, and the route writes as the internal user. The route checks its
+ * value against the request's space (see `registerIngestThreatReportRoute`); declaring it here is
+ * what gives that check a typed field to read instead of an index into an open bag.
  */
 export const ingestThreatReportBodySchema = schema.object({
-  document: schema.object({}, { unknowns: 'allow' }),
+  document: schema.object(
+    { space_id: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })) },
+    { unknowns: 'allow' }
+  ),
 });
 
 export const ingestThreatReportResponseSchema = schema.object({

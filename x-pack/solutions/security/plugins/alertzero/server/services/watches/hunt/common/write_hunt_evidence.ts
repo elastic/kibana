@@ -8,8 +8,38 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { HuntCompleteness } from '@kbn/alertzero-common';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
+import { buildHuntSpaceFilterTerms } from './space_filter';
 
 export type LastHuntStatus = 'hit' | 'clean' | 'incomplete';
+
+/**
+ * Whether `reportId` is reachable from `spaceId`, using the same filter `loadReportHuntContext`
+ * reads through.
+ *
+ * {@link writeHuntEvidence} runs as the internal user, which can reach every space's reports, and
+ * appends a fresh `evidence` element when no element matches the space. So the route's feature
+ * privilege -- which only says the caller may write in the space it called from -- is not enough on
+ * its own: without this check an id from another space would have hunt evidence stamped onto it.
+ */
+export const isReportVisibleToSpace = async (
+  esClient: ElasticsearchClient,
+  { spaceId, reportId }: { spaceId: string; reportId: string }
+): Promise<boolean> => {
+  const response = await esClient.search({
+    index: HUNT_REPORTS_INDEX,
+    size: 1,
+    ignore_unavailable: true,
+    _source: false,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [buildHuntSpaceFilterTerms(spaceId), { ids: { values: [reportId] } }],
+      },
+    },
+  });
+
+  return response.hits.hits.length > 0;
+};
 
 /**
  * Collapses the coordinator's hit/completeness pair to exactly the three statuses

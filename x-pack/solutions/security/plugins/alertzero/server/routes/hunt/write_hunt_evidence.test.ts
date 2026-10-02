@@ -21,7 +21,11 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
     getSpaceId: () => spaceId,
   } as unknown as RouteDependencies);
 
-  const asInternalUser = { update: jest.fn().mockResolvedValue({}) };
+  const asInternalUser = {
+    update: jest.fn().mockResolvedValue({}),
+    // The visibility pre-check; by default the report is reachable from the request's space.
+    search: jest.fn().mockResolvedValue({ hits: { hits: [{ _id: 'report-1' }] } }),
+  };
   const context = {
     alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
     core: Promise.resolve({
@@ -72,7 +76,7 @@ describe('registerWriteHuntEvidenceRoute', () => {
     const gatedContext = {
       ...context,
       core: Promise.resolve({
-        elasticsearch: { client: { asInternalUser: { update: jest.fn() } } },
+        elasticsearch: { client: { asInternalUser: { update: jest.fn(), search: jest.fn() } } },
         uiSettings: { client: { get: jest.fn().mockResolvedValue(false) } },
       }),
     };
@@ -99,6 +103,37 @@ describe('registerWriteHuntEvidenceRoute', () => {
             last_hunt_event_hit_count: 0,
           }),
         }),
+      })
+    );
+  });
+
+  // The write runs as the internal user, which can reach every space's reports, so the route has
+  // to establish that the report belongs to the caller's space before stamping it. The route's
+  // privilege only says the caller may write in the space it called from.
+  it('404s without writing when the report is not visible in the request space', async () => {
+    const { handler, context, asInternalUser } = makeDeps({ spaceId: 'space-a' });
+    asInternalUser.search.mockResolvedValue({ hits: { hits: [] } });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor({ reportId: 'other-space-report' }), response);
+
+    expect(response.notFound).toHaveBeenCalled();
+    expect(asInternalUser.update).not.toHaveBeenCalled();
+  });
+
+  it('checks visibility against the request space plus the global catalog', async () => {
+    const { handler, context, asInternalUser } = makeDeps({ spaceId: 'space-a' });
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(asInternalUser.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: '.kibana-threat-reports',
+        query: {
+          bool: {
+            filter: [{ terms: { space_id: ['space-a', '*'] } }, { ids: { values: ['report-1'] } }],
+          },
+        },
       })
     );
   });

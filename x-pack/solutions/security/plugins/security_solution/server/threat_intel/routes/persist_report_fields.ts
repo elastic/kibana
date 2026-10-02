@@ -25,6 +25,16 @@ import type { RouteRegistrationDeps } from '.';
  * `THREAT_REPORTS_INDEX` (see `persistReportFieldsBodySchema`) rather than trusted from the
  * caller, since an internal-user write with an open index parameter would otherwise let anyone
  * holding this route's privilege write to any index, not only this one.
+ *
+ * The boundary this route enforces is *what* may be written, not *which* report it is written to.
+ * `persistReportFieldsBodySchema` allowlists the enrichment sections, so a write can only land on
+ * derived content: a report's `space_id` and every space's `evidence` are out of reach. Adding a
+ * space check on top is not available to this route -- enrichment is installed once globally and is
+ * space-blind by design, draining pending reports from every space through an unprefixed path that
+ * always resolves to `default`, so scoping to the request's space would skip every report outside
+ * it. Enriching a report the caller cannot read is accepted on that basis, and is one of the two
+ * cases https://github.com/elastic/security-team/issues/19859 carries; the allowlist is what keeps
+ * it to content.
  */
 export const registerPersistReportFieldsRoute = ({
   router,

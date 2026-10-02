@@ -13,7 +13,10 @@ import {
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, WRITE_HUNT_EVIDENCE_URL } from '../../../common/constants';
-import { writeHuntEvidence } from '../../services/watches/hunt/common/write_hunt_evidence';
+import {
+  isReportVisibleToSpace,
+  writeHuntEvidence,
+} from '../../services/watches/hunt/common/write_hunt_evidence';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
@@ -61,6 +64,11 @@ export const registerWriteHuntEvidenceRoute = ({
           const reportsEsClient = core.elasticsearch.client.asInternalUser;
 
           const { reportId, runId, hasConfirmedHit, completeness, totalHits } = request.body;
+
+          const visible = await isReportVisibleToSpace(reportsEsClient, { spaceId, reportId });
+          if (!visible) {
+            return response.notFound({ body: { message: `Report ${reportId} not found` } });
+          }
 
           await writeHuntEvidence(reportsEsClient, {
             spaceId,

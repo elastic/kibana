@@ -11,7 +11,7 @@ import {
   attributeAlertsEvidenceBodySchema,
   attributeAlertsEvidenceResponseSchema,
 } from '../../../common/threat_intel';
-import { writeAttributionEvidence } from '../services';
+import { isReportVisibleInSpace, writeAttributionEvidence } from '../services';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 import { rejectUntilBootstrapped } from './lib/bootstrap_ready';
@@ -60,6 +60,21 @@ export const registerAttributeAlertsEvidenceRoute = ({
         const esClient = core.elasticsearch.client.asInternalUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         try {
+          // The caller's own query already selects on `space_id: [spaceId, '*']`, so this only
+          // rejects a request that did not come from that loop. It is still the route's to make:
+          // the write runs as the internal user, which can reach every space's reports, and the
+          // scripted update appends a fresh `evidence` element when none matches -- so an id from
+          // another space would otherwise have evidence stamped onto it.
+          const visible = await isReportVisibleInSpace(esClient, {
+            spaceId,
+            reportId: request.body.id,
+          });
+          if (!visible) {
+            return response.notFound({
+              body: { message: `Report ${request.body.id} not found` },
+            });
+          }
+
           await writeAttributionEvidence(esClient, {
             index: request.body.index,
             id: request.body.id,
