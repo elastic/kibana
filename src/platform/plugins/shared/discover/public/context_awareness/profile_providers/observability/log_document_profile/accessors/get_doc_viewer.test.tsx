@@ -152,6 +152,13 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
       });
     });
 
+    it.each(['trace.id', 'attributes.trace.id', 'resource.attributes.trace.id'])(
+      'disables the tab when the record has an empty %s',
+      (field) => {
+        expect(getTabEnabled(buildRecord('doc-1', { [field]: [''] }))).toBe(false);
+      }
+    );
+
     it('disables the tab when the record has _ignored but no ignored field values', () => {
       const record = buildDataTableRecord(
         {

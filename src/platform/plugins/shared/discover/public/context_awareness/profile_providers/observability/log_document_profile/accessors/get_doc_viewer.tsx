@@ -47,9 +47,8 @@ const hasLogOverviewContent = (record: DataTableRecord) => {
   const hasMessage = Boolean(getMessageFieldWithFallbacks(flattened).value);
   const hasStacktrace = Object.values(getStacktraceFields(record as LogDocument)).some(Boolean);
   const hasQualityIssues = Object.keys(raw.ignored_field_values ?? {}).length > 0;
-  const hasTrace = Boolean(
-    getFieldValueWithFallback(flattened, fieldConstants.TRACE_ID_FIELD).value
-  );
+  const { value: traceId } = getFieldValueWithFallback(flattened, fieldConstants.TRACE_ID_FIELD);
+  const hasTrace = Boolean(Array.isArray(traceId) ? traceId[0] : traceId);
 
   return hasMessage || hasStacktrace || hasQualityIssues || hasTrace;
 };
