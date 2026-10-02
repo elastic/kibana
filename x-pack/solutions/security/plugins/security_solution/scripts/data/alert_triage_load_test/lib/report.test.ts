@@ -125,6 +125,52 @@ describe('buildReport', () => {
     expect(report.throughput.alertsPerHourTriaged).toBe(2);
   });
 
+  it('keeps the recorded window when every batch was triaged inside it', () => {
+    const { window } = buildReport(buildInput());
+
+    expect(window).toEqual({ startedAt: RUN_START, endedAt: RUN_END, wallClockMs: 3_600_000 });
+  });
+
+  it('extends the window to batches triaged after the run ended, so throughput is not inflated', () => {
+    const report = buildReport(
+      buildInput({
+        runEndedAt: at(60),
+        snapshot: {
+          takenAt: RUN_END,
+          workerExecutions: [buildExecution()],
+          workDoneSteps: [buildStep({ finishedAt: at(1800) })],
+          childExecutionErrors: {},
+          childExecutions: {},
+        },
+      })
+    );
+
+    expect(report.window).toEqual({
+      startedAt: RUN_START,
+      endedAt: at(1800),
+      wallClockMs: 1_800_000,
+    });
+    // 2 alerts over half an hour, not over the recorded minute (which would be 120 per hour)
+    expect(report.throughput.alertsPerHourTriaged).toBe(4);
+  });
+
+  it('does not extend the window for work that was never triaged', () => {
+    const report = buildReport(
+      buildInput({
+        runEndedAt: at(60),
+        snapshot: {
+          takenAt: RUN_END,
+          workerExecutions: [buildExecution({ status: 'running' })],
+          workDoneSteps: [],
+          childExecutionErrors: {},
+          childExecutions: {},
+        },
+      })
+    );
+
+    expect(report.window.endedAt).toBe(at(60));
+  });
+
   it('does not count a run that has not been triaged yet', () => {
     const report = buildReport(
       buildInput({

@@ -160,7 +160,15 @@ export const buildReport = ({
   const runIds = new Set(snapshot.workerExecutions.map(({ id }) => id));
   const triagedProgress = progress.filter(({ workDoneStep }) => workDoneStep?.finishedAt);
 
-  const wallClockMs = diff(runEndedAt, runStartedAt) ?? 0;
+  // A report made after the run ended (`--no-wait`, a settle timeout, `report --run-id`) can score
+  // batches that were triaged later. The window then reaches the last of them, so their count is
+  // not divided by a window that ended before they finished.
+  const lastTriagedMs = Math.max(
+    ...triagedProgress.map(({ workDoneStep }) => Date.parse(workDoneStep?.finishedAt ?? '')),
+    Date.parse(runEndedAt)
+  );
+  const windowEndedAt = new Date(lastTriagedMs).toISOString();
+  const wallClockMs = diff(windowEndedAt, runStartedAt) ?? 0;
   const alertsTriaged = triagedProgress.reduce(
     (sum, { dispatch }) => sum + dispatch.alerts.length,
     0
@@ -210,7 +218,7 @@ export const buildReport = ({
       .reduce((sum, [, count]) => sum + count, 0);
 
   return {
-    window: { startedAt: runStartedAt, endedAt: runEndedAt, wallClockMs },
+    window: { startedAt: runStartedAt, endedAt: windowEndedAt, wallClockMs },
     dispatch: {
       batches: dispatches.length,
       alerts: dispatches.reduce((sum, { alerts }) => sum + alerts.length, 0),
