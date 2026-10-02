@@ -285,6 +285,44 @@ describe('createTooltipHold', () => {
     expect(blurred).toHaveBeenCalledTimes(3);
   });
 
+  it('keeps the pointer hold while suspended, even far from the tooltip, and lets it go once the pointer is off afterwards', () => {
+    const left = jest.fn();
+    query('#save').addEventListener('mouseout', left);
+
+    leaveAt(query('#save'), 100, 35);
+    hold.suspend(true);
+    // Across a full-screen screenshot: the page is told nothing, and gets the move.
+    expect(move(10, 400)).toBe(false);
+    expect(leaveAt(query('#save'), 100, 400)).toBe(true);
+    expect(left).not.toHaveBeenCalled();
+    expect(hold.trigger()).toBe(query('#save'));
+
+    // Still held on resuming, until the pointer is actually off.
+    hold.suspend(false);
+    expect(left).not.toHaveBeenCalled();
+    move(10, 400);
+    expect(left).toHaveBeenCalledTimes(1);
+    expect(hold.trigger()).toBeNull();
+  });
+
+  it('keeps the focus hold while suspended, and lets it go once focus is on the page afterwards', () => {
+    attachThread();
+    const blurred = jest.fn((event: FocusEvent) => event.relatedTarget);
+    query('#save').addEventListener('focusout', blurred);
+
+    focusEvent('focusout', query('#save'), query('#reply'));
+    hold.suspend(true);
+    expect(focusEvent('focusin', query('#far'), query('#reply'))).toBe(false);
+    expect(blurred).not.toHaveBeenCalled();
+    expect(hold.trigger()).toBe(query('#save'));
+
+    hold.suspend(false);
+    expect(blurred).not.toHaveBeenCalled();
+    focusEvent('focusin', query('#far'), query('#reply'));
+    expect(blurred.mock.results.map(({ value }) => value)).toEqual([query('#far')]);
+    expect(hold.trigger()).toBeNull();
+  });
+
   it('ends the holds, the page learning of the pointer and of focus as they are', () => {
     attachThread();
     const left = jest.fn((event: MouseEvent) => event.relatedTarget);

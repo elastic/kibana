@@ -54,7 +54,7 @@ outputs:
     type: number
 consts:
   DETECTIONS_INDEX: '.significant_events-detections'
-  INVESTIGATABLE_SEVERITIES: ['80-critical', '60-high']
+  INVESTIGATABLE_SEVERITIES: ['critical', 'high']
 
 steps:
   - name: bootstrap_cleanup_workflow
@@ -205,10 +205,9 @@ steps:
     type: ai.agent
     agent-id: 'significant-events.discovery'
     connector-id: '{{ steps.resolve_model.output.connector_id }}'
-    # Keep usage attribution IDs in sync with @kbn/significant-events-schema
-    # inference_feature_ids.ts.
-    plugin-id: 'significant_events_discovery'
-    aggregate-by: 'significant_events'
+    # Keep usage attribution IDs in sync with @kbn/significant-events-schema nightshift_usage_ids.ts.
+    plugin-id: 'nightshift_discovery'
+    aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
     create-conversation: true
@@ -237,23 +236,20 @@ steps:
               events_write tool — this is a compact summary only.
           significant_events:
             type: array
-            description: 'Final events_write outcomes from the discovery agent. Successful writes include event_uuid; failed writes have written: false. The workflow uses only successful open items to gate trigger_investigation.'
+            description: 'Final events_write outcomes from the discovery agent. Successful writes have written: true. The workflow uses only successful active items to gate trigger_investigation.'
             items:
               type: object
               properties:
                 event_id:
                   type: string
                   description: 'Echo the event_id verbatim from the discovery. Also returned by events_write. Required for trigger_investigation context.'
-                event_uuid:
-                  type: string
-                  description: 'UUID returned by events_write when written is true. Omit entirely for failed or skipped writes — used in trigger_investigation context when present.'
                 severity:
                   type: string
-                  enum: ['80-critical', '60-high', '40-medium', '20-low']
+                  enum: ['critical', 'high', 'medium', 'low']
                   description: 'Severity of the event as decided by the discovery agent.'
                 status:
                   type: string
-                  enum: [open, dismissed, closed]
+                  enum: [active, inactive]
                   description: 'Status decision.'
                 written:
                   type: boolean
@@ -336,7 +332,7 @@ steps:
               continue: true
 
   # -----------------------------------------------------------------------
-  # Trigger root-cause investigation for newly-opened high-severity events.
+  # Trigger root-cause investigation for newly-active high-severity events.
   # The discovery agent owns the event decision and events_write; deterministic
   # queue advancement stays in the workflow and does not consume agent turns.
   # -----------------------------------------------------------------------
@@ -353,20 +349,20 @@ steps:
 
       # Size must be computed in a separate step — comparison operators cannot follow
       # a filter chain in the same expression (see compute_batch_size above).
-      - name: count_open_events
+      - name: count_active_events
         type: data.set
         with:
-          openCount: >-
+          activeCount: >-
             ${{ steps.store_significant_events.output.significant_events
               | default: []
-              | where: 'status', 'open'
+              | where: 'status', 'active'
               | reject: 'written', false
               | size
               | default: 0 }}
 
       - name: maybe_trigger_investigations
         type: if
-        condition: '${{ steps.count_open_events.output.openCount > 0 }}'
+        condition: '${{ steps.count_active_events.output.activeCount > 0 }}'
         steps:
           - name: foreach_significant_event
             type: foreach
@@ -374,7 +370,7 @@ steps:
               ${{
                 steps.store_significant_events.output.significant_events
                   | default: []
-                  | where: 'status', 'open'
+                  | where: 'status', 'active'
                   | reject: 'written', false
                   | default: [] }}
             iteration-on-failure:
@@ -387,7 +383,7 @@ steps:
                   # Flag-aware read (`getEventSearchClient()`): serves from `.rule-events` when
                   # SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ is on, `.significant_events-events`
                   # otherwise. Returns only the latest current-state version per event_id.
-                  - name: resolve_open_event
+                  - name: resolve_active_event
                     type: kibana.request
                     with:
                       method: GET
@@ -397,9 +393,9 @@ steps:
                     on-failure:
                       continue: true
 
-                  # Fire-and-forget a root-cause investigation for each newly-opened event that
+                  # Fire-and-forget a root-cause investigation for each newly-active event that
                   # has not been investigated before. Async so discovery (45m) never blocks on the
-                  # investigation (60m). concurrency_key per event_id ensures a re-opened event
+                  # investigation (60m). concurrency_key per event_id ensures a reactivated event
                   # cancels the prior in-progress investigation rather than queuing alongside it
                   # (cancel-in-progress / max:1 in the investigation workflow).
                   # Skip the launch when the event lookup fails or misses: the investigation
@@ -407,15 +403,15 @@ steps:
                   - name: guard_resolved_event
                     type: if
                     condition: >-
-                      ${{ steps.resolve_open_event.error == null
-                        and steps.resolve_open_event.output.hits[0] != null }}
+                      ${{ steps.resolve_active_event.error == null
+                        and steps.resolve_active_event.output.hits[0] != null }}
                     steps:
                       # Keep the dedupe condition as a wrapping step so an investigation starts
                       # only after event deduplication.
                       - name: guard_missing_investigation
                         type: if
                         condition: >-
-                          ${{ (steps.resolve_open_event.output.hits[0].investigations | size | default: 0) == 0 }}
+                          ${{ (steps.resolve_active_event.output.hits[0].investigations | size | default: 0) == 0 }}
                         steps:
                           - name: trigger_investigation
                             type: nightshift.triggerInvestigation
@@ -423,22 +419,21 @@ steps:
                               subject_type: significant_event
                               subject_id: '{{ foreach.item.event_id }}'
                               message: |
-                                {{ steps.resolve_open_event.output.hits[0].title | truncate: 512, '' }}
+                                {{ steps.resolve_active_event.output.hits[0].title | truncate: 512, '' }}
 
-                                {{ steps.resolve_open_event.output.hits[0].summary | truncate: 7000, '' }}
+                                {{ steps.resolve_active_event.output.hits[0].summary | truncate: 7000, '' }}
 
-                                Probable cause: {{ steps.resolve_open_event.output.hits[0].symptom_hypothesis | truncate: 2000, '' }}
-                              title: '{{ steps.resolve_open_event.output.hits[0].title }}'
-                              summary: '{{ steps.resolve_open_event.output.hits[0].summary }}'
-                              stream_names: '${{ steps.resolve_open_event.output.hits[0].stream_names | default: [] }}'
+                                Probable cause: {{ steps.resolve_active_event.output.hits[0].symptom_hypothesis | truncate: 2000, '' }}
+                              title: '{{ steps.resolve_active_event.output.hits[0].title }}'
+                              summary: '{{ steps.resolve_active_event.output.hits[0].summary }}'
+                              stream_names: '${{ steps.resolve_active_event.output.hits[0].stream_names | default: [] }}'
                               concurrency_key: '{{ foreach.item.event_id }}'
                               trigger_type: automatic
                               context:
-                                event_uuid: '{{ foreach.item.event_uuid }}'
                                 event_id: '{{ foreach.item.event_id }}'
                                 status: '{{ foreach.item.status }}'
-                                causal_features: '${{ steps.resolve_open_event.output.hits[0].causal_features | default: [] }}'
-                                blast_radius: '${{ steps.resolve_open_event.output.hits[0].blast_radius | default: [] }}'
+                                causal_features: '${{ steps.resolve_active_event.output.hits[0].causal_features | default: [] }}'
+                                blast_radius: '${{ steps.resolve_active_event.output.hits[0].blast_radius | default: [] }}'
                             on-failure:
                               continue: true
 
