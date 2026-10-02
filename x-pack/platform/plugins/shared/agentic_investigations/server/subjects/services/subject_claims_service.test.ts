@@ -201,6 +201,62 @@ describe('SubjectClaimsService', () => {
     ).resolves.toEqual({ claimed: false, heldBy: 'conv-1' });
   });
 
+  it('claims on a fresh cluster whose claim index does not exist yet', async () => {
+    const { service, storage, holderOf } = setup();
+    jest.mocked(storage.search).mockRejectedValueOnce(
+      Object.assign(new Error('no such index'), {
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception' } },
+      })
+    );
+
+    await expect(
+      service.claim({
+        spaceId: SPACE_ID,
+        conversationId: 'conv-1',
+        subjects: [ALERT],
+        isHolderOpen: isOpen(true),
+      })
+    ).resolves.toEqual({ claimed: true });
+    expect(holderOf(ALERT)).toBe('conv-1');
+  });
+
+  it('retries a claim read while the new claim index has no available shard', async () => {
+    jest.useFakeTimers();
+    try {
+      const { service, storage } = setup();
+      await service.claim({
+        spaceId: SPACE_ID,
+        conversationId: 'conv-1',
+        subjects: [ALERT],
+        isHolderOpen: isOpen(true),
+      });
+      jest.mocked(storage.search).mockRejectedValueOnce(
+        Object.assign(new Error('all shards failed'), {
+          statusCode: 503,
+          body: {
+            error: {
+              type: 'search_phase_execution_exception',
+              root_cause: [{ type: 'no_shard_available_action_exception' }],
+            },
+          },
+        })
+      );
+
+      const claim = service.claim({
+        spaceId: SPACE_ID,
+        conversationId: 'conv-2',
+        subjects: [ALERT],
+        isHolderOpen: isOpen(true),
+      });
+      await jest.advanceTimersByTimeAsync(200);
+
+      await expect(claim).resolves.toEqual({ claimed: false, heldBy: 'conv-1' });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('deletes every claim in a space for maintenance', async () => {
     const { service, storage } = setup();
     await service.claim({

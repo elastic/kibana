@@ -13,6 +13,7 @@ import {
   hashInvestigationAttachmentId,
   InvestigationAttachmentConflictError,
   type InvestigationAttachmentStorage,
+  withTransientSearchRetry,
 } from '../../investigation_attachments';
 import { isVersionConflict } from '../../investigation_attachments/errors';
 import {
@@ -83,9 +84,14 @@ type ClaimOneOutcome = { taken: boolean } | { heldBy: string };
  */
 export class SubjectClaimsService {
   private readonly now: () => number;
+  /** Every read of the claim index: a missing index has no hits, unallocated shards are retried. */
+  private readonly search: SubjectClaimStorage['search'];
 
   constructor(private readonly deps: { storage: SubjectClaimStorage; now?: () => number }) {
     this.now = deps.now ?? Date.now;
+    this.search = withTransientSearchRetry<SubjectClaimDocument>((...args) =>
+      deps.storage.search(...args)
+    );
   }
 
   /**
@@ -125,7 +131,7 @@ export class SubjectClaimsService {
   async deleteAllInSpace(spaceId: string): Promise<number> {
     let deleted = 0;
     for (let page = 0; page < MAX_DELETE_PAGES; page++) {
-      const response = await this.deps.storage.search({
+      const response = await this.search({
         track_total_hits: false,
         size: DELETE_PAGE_SIZE,
         _source: false,
@@ -250,7 +256,7 @@ export class SubjectClaimsService {
   }
 
   private async findVersioned(id: string): Promise<VersionedClaim | undefined> {
-    const response = await this.deps.storage.search({
+    const response = await this.search({
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
