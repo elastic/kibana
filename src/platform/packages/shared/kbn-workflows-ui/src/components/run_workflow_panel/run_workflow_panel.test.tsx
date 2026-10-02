@@ -581,7 +581,6 @@ describe('RunWorkflowPanel', () => {
       expect(mockReportEvent).toHaveBeenCalledTimes(1);
       expect(mockReportEvent).toHaveBeenCalledWith(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, {
         origin: 'alert_bulk',
-        workflow_id: 'test-workflow-id',
         workflow_execution_id: 'exec-123',
         item_count: 3,
         succeeded: true,
@@ -601,7 +600,6 @@ describe('RunWorkflowPanel', () => {
       expect(mockReportEvent).toHaveBeenCalledTimes(1);
       expect(mockReportEvent).toHaveBeenCalledWith(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, {
         origin: 'alert_bulk',
-        workflow_id: 'test-workflow-id',
         item_count: 3,
         succeeded: false,
         owner: 'securitySolution',
@@ -716,7 +714,6 @@ describe('RunWorkflowPanel', () => {
       expect(mockReportEvent).toHaveBeenCalledWith(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, {
         origin: 'cases.attachments',
         attachment_type: 'security.alert',
-        workflow_id: 'test-workflow-id',
         workflow_execution_id: 'exec-123',
         item_count: 2,
         succeeded: true,
@@ -735,7 +732,6 @@ describe('RunWorkflowPanel', () => {
 
       expect(mockReportEvent).toHaveBeenCalledWith(RUN_WORKFLOW_EXECUTED_EVENT_TYPE, {
         origin: 'unknown',
-        workflow_id: 'test-workflow-id',
         workflow_execution_id: 'exec-123',
         succeeded: true,
       });

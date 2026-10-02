@@ -30,7 +30,6 @@ export interface RunWorkflowTelemetry {
 export interface RunWorkflowExecutedEvent {
   origin: string;
   attachment_type?: string;
-  workflow_id: string;
   workflow_execution_id?: string;
   item_count?: number;
   succeeded: boolean;
@@ -57,18 +56,11 @@ export const runWorkflowExecutedEventType: EventTypeOpts<RunWorkflowExecutedEven
         optional: true,
       },
     },
-    workflow_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'ID of the workflow that was run',
-        optional: false,
-      },
-    },
     workflow_execution_id: {
       type: 'keyword',
       _meta: {
         description:
-          'ID of the resulting workflow execution; joins to the server-side workflow execution events. Absent when the dispatch failed.',
+          'ID of the resulting workflow execution; joins to the server-side workflow execution events, which carry the workflow ID. Absent when the dispatch failed.',
         optional: true,
       },
     },
