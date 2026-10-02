@@ -12,10 +12,12 @@ import { BehaviorSubject, of } from 'rxjs';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
 import { InitialTabStateService } from '../plugin_imports/initial_tab_state_service';
 import { createInlineDataViewService } from '../services/inline_data_view_service';
+import { DataSourceService } from '@kbn/data-source';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import {
   analyticsServiceMock,
   coreMock,
@@ -55,6 +57,7 @@ import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/moc
 import { createUrlTrackerMock } from './url_tracker.mock';
 import { createBrowserHistory } from 'history';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
+import type { DiscoverSessionService } from '../session';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -195,6 +198,18 @@ export function createDiscoverServicesMock(): DiscoverServices {
   history.push('/');
 
   const { profilesManagerMock } = createContextAwarenessMocks();
+  const savedSearch = savedSearchPluginMock.createStartContract();
+  const discoverSessionService: DiscoverSessionService = {
+    get: jest.fn(async (id: string) => ({
+      session: await savedSearch.getDiscoverSession(id),
+      warnings: [],
+    })),
+    save: jest.fn(async (session: SaveDiscoverSessionParams) => ({
+      ...session,
+      id: session.id ?? 'new-session',
+      managed: false,
+    })),
+  };
 
   return {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
@@ -249,6 +264,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
         if (path.startsWith('/internal/esql/get_timefield')) {
           return Promise.resolve({ timeField: '@timestamp' });
         }
+        if (path.startsWith('/internal/esql/source_info')) {
+          return Promise.resolve({ columns: [] });
+        }
         return Promise.resolve('');
       }),
     },
@@ -279,6 +297,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addWarning: jest.fn(),
       addDanger: jest.fn(),
       addSuccess: jest.fn(),
+      addError: jest.fn(),
     },
     notifications: {
       toasts: notificationServiceMock.createStartContract().toasts,
@@ -290,9 +309,11 @@ export function createDiscoverServicesMock(): DiscoverServices {
         updateTagsReferences: jest.fn(),
       },
     },
-    savedSearch: savedSearchPluginMock.createStartContract(),
+    savedSearch,
+    discoverSessionService,
     dataViews: dataPlugin.dataViews,
     inlineDataViews: createInlineDataViewService({ dataViews: dataPlugin.dataViews }),
+    dataSourceService: new DataSourceService(dataPlugin.dataViews),
     timefilter: dataPlugin.query.timefilter.timefilter,
     lens: {
       EmbeddableComponent: jest.fn(() => null),

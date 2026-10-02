@@ -61,6 +61,7 @@ import {
 } from '../../utils/normalize_inline_data_view_ids';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
 import { translateFilterDataViewIds } from '../../../../../../common/session/inline_data_view_references';
+import { showSessionWarnings } from '../../../../../session';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -435,7 +436,13 @@ export const initializeTabs = createInternalStateAsyncThunk(
         return undefined;
       }
       try {
-        return await services.savedSearch.getDiscoverSession(discoverSessionId);
+        const { session, warnings } = await services.discoverSessionService.get(discoverSessionId);
+
+        if (warnings.length) {
+          showSessionWarnings({ session, warnings, core: services.core });
+        }
+
+        return session;
       } catch (error) {
         if (error instanceof SavedObjectNotFound) {
           forgetDiscoverSession(services.core.http, services.chrome, discoverSessionId);

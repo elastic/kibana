@@ -29,7 +29,10 @@ import type {
   DiscoverSessionApiMetricsTab,
   DiscoverSessionApiTab,
 } from '@kbn/as-code-discover-schema';
-import { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
+import {
+  discoverSessionInternalDataSchema,
+  type DiscoverSessionInternalData,
+} from '../../server/api/internal_schema';
 import type { DiscoverSessionApiResponse } from '../../server';
 import { generateInlineDataViewId } from '../../common/session/inline_data_view';
 import { normalizeInlineDataViewIds } from '../application/main/state_management/utils/normalize_inline_data_view_ids';
@@ -285,6 +288,61 @@ describe('Discover session conversion and UI preparation', () => {
     });
   });
 
+  it('preserves explicit IDs in conversion and normalizes them for the UI', () => {
+    const data: DiscoverSessionInternalData = {
+      ...response.data,
+      tabs: [
+        {
+          ...inlineApiTab,
+          data_source: { ...inlineApiDataView, id: 'stored-inline-id' },
+          filters: [
+            { ...inlineApiTab.filters[0], data_view_id: 'stored-inline-id' },
+            inlineApiTab.filters[1],
+          ],
+          chart_interval: 'h',
+          vis_context: {
+            suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
+            attributes: { visualizationType: 'lnsXY' },
+          },
+        },
+      ],
+    };
+    const originalData = cloneDeep(data);
+
+    const session = fromDiscoverSessionApiResponse({ ...response, data });
+    const [tab] = session.tabs;
+
+    expect(tab.serializedSearchSource.index).toMatchObject({
+      id: 'stored-inline-id',
+      title: 'logs-*',
+    });
+    expect(tab.serializedSearchSource.filter).toMatchObject([
+      { meta: { index: 'stored-inline-id' } },
+      { meta: { index: 'foreign-data-view-id' } },
+    ]);
+    expect(tab.visContext).toStrictEqual({
+      suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
+      attributes: { visualizationType: 'lnsXY' },
+      requestData: {
+        dataViewId: 'stored-inline-id',
+        timeField: '@timestamp',
+        timeInterval: 'h',
+      },
+    });
+    const preparedSession = prepareSessionForUi(session);
+    expect(preparedSession.tabs[0].serializedSearchSource.index).toMatchObject({
+      id: inlineDataViewId,
+      title: 'logs-*',
+    });
+    expect(preparedSession.tabs[0].serializedSearchSource.filter).toMatchObject([
+      { meta: { index: inlineDataViewId } },
+      { meta: { index: 'foreign-data-view-id' } },
+    ]);
+    expect(tab.serializedSearchSource.index).toHaveProperty('id', 'stored-inline-id');
+    expect(mockedUuidv4).not.toHaveBeenCalled();
+    expect(data).toStrictEqual(originalData);
+  });
+
   it('restores an ES|QL chart fingerprint on a classic tab without inheriting its interval', () => {
     const classicTab: DiscoverSessionApiClassicTab = {
       ...inlineApiTab,
@@ -397,10 +455,19 @@ describe('Discover session conversion and UI preparation', () => {
 
     const session = prepareSessionForUi(fromDiscoverSessionApiResponse(apiResponse));
     const data = toDiscoverSessionApiData(session);
+    const inlineSpec = toStoredSearchAndTable(inlineTab).serializedSearchSource.index;
+    if (!inlineSpec || typeof inlineSpec === 'string') {
+      throw new Error('Expected an inline Data View spec');
+    }
+    const expectedInlineDataViewId = generateInlineDataViewId(inlineSpec);
 
     const expectedInlineTab = {
       ...inlineTab,
-      filters: inlineTab.filters.map((filter) => ({ ...filter, disabled: false })),
+      data_source: { ...dataView, id: expectedInlineDataViewId },
+      filters: [
+        { ...inlineTab.filters[0], disabled: false, data_view_id: expectedInlineDataViewId },
+        { ...inlineTab.filters[1], disabled: false },
+      ],
     };
 
     expect(data).toEqual({
@@ -456,7 +523,7 @@ describe('Discover session conversion and UI preparation', () => {
     );
   });
 
-  it('keeps inline IDs runtime-only and preserves filters for other data views', () => {
+  it('preserves inline IDs and filter references without mutating the session', () => {
     const session = prepareSessionForUi(fromDiscoverSessionApiResponse(response));
     const inlineTab = session.tabs[1];
     const pinnedFilter: Filter = {
@@ -498,17 +565,19 @@ describe('Discover session conversion and UI preparation', () => {
     const beforeSave = cloneDeep(session);
     const apiTab = toDiscoverSessionApiData(session).tabs[1];
     const filters = 'filters' in apiTab ? apiTab.filters ?? [] : [];
-    expect(apiTab.data_source).not.toHaveProperty('id');
-    expect(filters[0].data_view_id).toBeUndefined();
+    expect(apiTab.data_source).toStrictEqual({ ...inlineApiDataView, id: inlineDataViewId });
+    expect(filters[0].data_view_id).toBe(inlineDataViewId);
     expect(filters[1].data_view_id).toBe('foreign-data-view-id');
-    // The pinned condition is kept as an app filter; neither filter keeps the inline ID.
+    // Pinned conditions become app filters, while their Data View references stay unchanged.
     expect(filters.slice(2)).toStrictEqual([
       {
         type: 'condition',
         condition: { field: 'service.name', operator: 'is', value: 'checkout' },
+        data_view_id: inlineDataViewId,
       },
       {
         type: 'group',
+        data_view_id: inlineDataViewId,
         group: {
           operator: 'or',
           conditions: [
@@ -549,7 +618,7 @@ describe('Discover session conversion and UI preparation', () => {
 
     const apiTab = toDiscoverSessionApiData(session).tabs[1];
 
-    expect(apiTab.data_source).toStrictEqual(inlineApiDataView);
+    expect(apiTab.data_source).toStrictEqual({ ...inlineApiDataView, id: inlineDataViewId });
     expect(apiTab).toHaveProperty('filters', [
       {
         type: 'condition',
@@ -594,7 +663,7 @@ describe('Discover session conversion and UI preparation', () => {
     session.tabs[0].serializedSearchSource.filter = [pinnedFilter];
     const beforeSave = cloneDeep(session);
 
-    const data = discoverSessionApiDataSchema.parse(toDiscoverSessionApiData(session));
+    const data = discoverSessionInternalDataSchema.parse(toDiscoverSessionApiData(session));
     const apiTab = data.tabs[0];
     const filters = 'filters' in apiTab ? apiTab.filters : undefined;
 
@@ -619,7 +688,7 @@ describe('Discover session conversion and UI preparation', () => {
     expect(session).toStrictEqual(beforeSave);
   });
 
-  it('builds references for preserved filter conditions without including inline IDs', () => {
+  it('builds references for all explicit filter targets, including inline views', () => {
     const session = prepareSessionForUi(fromDiscoverSessionApiResponse(response));
     const inlineTab = session.tabs[1];
     inlineTab.serializedSearchSource.filter = [
@@ -633,7 +702,7 @@ describe('Discover session conversion and UI preparation', () => {
 
     const data = toDiscoverSessionApiData(session);
 
-    const validatedData = discoverSessionApiDataSchema.parse(data);
+    const validatedData = discoverSessionInternalDataSchema.parse(data);
 
     expect(getDiscoverSessionReferences(validatedData)).toStrictEqual([
       { id: 'tag-1', type: 'tag', name: 'tag-ref-tag-1' },
@@ -646,6 +715,11 @@ describe('Discover session conversion and UI preparation', () => {
         id: 'pinned-data-view',
         type: 'index-pattern',
         name: 'tab_classic-inline.kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+      },
+      {
+        id: inlineDataViewId,
+        type: 'index-pattern',
+        name: 'tab_classic-inline.kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index',
       },
       {
         id: 'foreign-data-view-id',

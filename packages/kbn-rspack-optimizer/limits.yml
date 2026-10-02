@@ -6,13 +6,13 @@ pageLoadAssetSize:
   agentBuilderPlatform: 23882
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
-  agentBuilderWorkflows: 1029
+  agentBuilderWorkflows: 1152
   agenticInvestigations: 15406
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 21199
+  alertzero: 23876
   apm: 35746
   apmShared: 2226
   apmSourcesAccess: 1174
@@ -26,7 +26,7 @@ pageLoadAssetSize:
   cloudConnect: 5575
   cloudDataMigration: 2042
   cloudDefend: 3030
-  cloudExperiments: 67356
+  cloudExperiments: 137406
   cloudFullStory: 1642
   cloudLinks: 21894
   cloudSecurityPosture: 14802
@@ -44,7 +44,7 @@ pageLoadAssetSize:
   dashboard: 536
   dashboardMarkdown: 4012
   data: 11798
-  dataFederation: 4838
+  dataFederation: 6000
   dataQuality: 5836
   datasetQuality: 41081
   dataUsage: 4123
@@ -65,7 +65,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
   entityStore: 2252
-  esql: 341
+  esql: 382
   esqlDataGrid: 215
   esqlViews: 1332
   esUiShared: 2284
@@ -174,7 +174,6 @@ pageLoadAssetSize:
   searchHomepage: 4290
   searchInferenceEndpoints: 4743
   searchNavigation: 8037
-  searchNotebooks: 3490
   searchprofiler: 2549
   searchQueryRules: 2461
   searchSynonyms: 2233
@@ -198,7 +197,7 @@ pageLoadAssetSize:
   significantEventsApp: 5212
   slo: 19531
   snapshotRestore: 16909
-  spaces: 22966
+  spaces: 25351
   stackAlerts: 1985
   stackConnectors: 63548
   streams: 4563

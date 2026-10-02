@@ -8,11 +8,11 @@
  */
 
 import { cloneDeep, isPlainObject } from 'lodash';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { extractReferences, type SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionApiTab, DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import {
   deserializeEsqlControls,
   serializeEsqlControls,
@@ -20,7 +20,7 @@ import {
 import {
   applySessionTabTypeState,
   toStoredSessionSettings,
-  fromStoredSessionSearchAndTable,
+  pinnedFiltersToAppFilters,
   fromStoredSessionSettings,
 } from '../../common/session/session_tab_mapping';
 import {
@@ -30,7 +30,12 @@ import {
 } from '../../common/session/search_and_table_mapping';
 import { toStoredTabTypeState } from '../../common/session/tab_type_state';
 import { getVisContextRequestData } from '../../common/session/get_vis_context_request_data';
-import type { DiscoverSessionApiResponse } from '../../server';
+import type {
+  DiscoverSessionInternalData,
+  DiscoverSessionInternalResponse,
+} from '../../server/api/internal_schema';
+import { getInlineDataView } from '../../common/session/inline_data_view';
+import { isDiscoverSessionEsqlTab } from '../../common/session/type_guards';
 import type {
   DiscoverSessionClientRequestData,
   DiscoverSessionClientRequestTab,
@@ -41,11 +46,11 @@ import { fromApiVisContext, toApiVisContext } from '../../common/session/vis_con
 // Converts between API documents and Discover's in-memory sessions, including their references.
 // Shared conversions map the fields directly; this file assembles tabs, references, and metadata.
 // Reads apply filter defaults; writes keep the client chart and control checks.
-// It does not build Saved Object attributes or serialize the SearchSource; tab restoration assigns IDs.
+// It preserves inline IDs for the internal routes; tab restoration normalizes eligible inline views.
 
 /** Builds a Discover session from API data, including filter defaults and URL-resolution metadata. */
 export const fromDiscoverSessionApiResponse = (
-  response: DiscoverSessionApiResponse,
+  response: DiscoverSessionInternalResponse,
   resolve?: DiscoverSessionResolveMetadata
 ): DiscoverSession => {
   const { id, data, meta } = response;
@@ -75,7 +80,7 @@ export const toDiscoverSessionApiData = (
 });
 
 /** Extracts references from tags and search fields without converting the rest of the session. */
-export const getDiscoverSessionReferences = (data: DiscoverSessionApiData) => {
+export const getDiscoverSessionReferences = (data: DiscoverSessionInternalData) => {
   const { references: tagReferences } = toStoredTags({ tags: data.tags });
   const tabReferences = data.tabs.flatMap((tab) => {
     const [, references] = extractReferences(toStoredSearchSource(tab), {
@@ -86,7 +91,7 @@ export const getDiscoverSessionReferences = (data: DiscoverSessionApiData) => {
   return [...tagReferences, ...tabReferences];
 };
 
-const fromApiTabToDiscoverTab = (apiTab: DiscoverSessionApiTab) => {
+const fromApiTabToDiscoverTab = (apiTab: DiscoverSessionInternalData['tabs'][number]) => {
   const { serializedSearchSource, ...tabFields } = toStoredSearchAndTable(apiTab);
   const [, references] = extractReferences(serializedSearchSource, {
     refNamePrefix: `tab_${apiTab.id}`,
@@ -98,7 +103,10 @@ const fromApiTabToDiscoverTab = (apiTab: DiscoverSessionApiTab) => {
     ...tabFields,
     ...toStoredSessionSettings(apiTab),
     serializedSearchSource: normalizeSearchSourceFilters(serializedSearchSource),
-    visContext: fromApiVisContext(apiTab.vis_context, getVisContextRequestData(apiTab)),
+    visContext: fromApiVisContext(
+      apiTab.vis_context,
+      getVisContextRequestData(apiTab, getInlineDataView(serializedSearchSource)?.id)
+    ),
     controlGroupJson: serializeEsqlControls(apiTab.control_panels),
     ...(tabTypeState !== undefined && { tabTypeState }),
   };
@@ -106,9 +114,10 @@ const fromApiTabToDiscoverTab = (apiTab: DiscoverSessionApiTab) => {
 };
 
 const fromDiscoverTabToApiTab = (tab: DiscoverSessionTab): DiscoverSessionClientRequestTab => {
-  const searchAndTableFields = tab.isTextBasedQuery
-    ? fromStoredSearchAndTable(tab, tab.serializedSearchSource)
-    : fromStoredSessionSearchAndTable(tab, tab.serializedSearchSource);
+  const searchSource = tab.isTextBasedQuery
+    ? tab.serializedSearchSource
+    : pinnedFiltersToAppFilters(tab.serializedSearchSource);
+  const searchAndTableFields = fromStoredSearchAndTable(tab, searchSource);
 
   const apiTab = applySessionTabTypeState(
     {
@@ -122,10 +131,24 @@ const fromDiscoverTabToApiTab = (tab: DiscoverSessionTab): DiscoverSessionClient
   const visContext = getApiVisContext(tab.visContext);
   const controlPanels = deserializeEsqlControls(tab.controlGroupJson);
 
-  return {
+  const converted = {
     ...apiTab,
     ...(visContext !== undefined && { vis_context: visContext }),
     ...(controlPanels !== undefined && { control_panels: controlPanels }),
+  };
+  const inlineDataViewId = getInlineDataView(searchSource)?.id;
+
+  if (
+    isDiscoverSessionEsqlTab(converted) ||
+    converted.data_source.type !== AS_CODE_DATA_VIEW_SPEC_TYPE ||
+    inlineDataViewId === undefined
+  ) {
+    return converted;
+  }
+
+  return {
+    ...converted,
+    data_source: { ...converted.data_source, id: inlineDataViewId },
   };
 };
 
