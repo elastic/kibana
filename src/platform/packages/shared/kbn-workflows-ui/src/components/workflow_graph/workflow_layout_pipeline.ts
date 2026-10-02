@@ -199,9 +199,14 @@ export const computeWorkflowLayout = (
   // point and any terminal stub land at the visual centre.
   if (transformed.forkNodeToJoinId.size > 0) {
     const nodePositions = new Map(repairedNodes.map((n) => [n.id, n]));
-    // Build predecessor map from branch edges (all edges, including join edges).
+    // Build predecessor map from all edges: outer edges and inner (foreach group) edges,
+    // so that join nodes for forks inside containers are also re-centred.
     const predecessors = new Map<string, string[]>();
-    for (const e of transformed.edges) {
+    const allEdgesForJoin = [
+      ...transformed.edges,
+      ...transformed.foreachGroups.flatMap((g) => g.innerEdges),
+    ];
+    for (const e of allEdgesForJoin) {
       const existing = predecessors.get(e.target);
       if (existing) {
         existing.push(e.source);
@@ -212,20 +217,63 @@ export const computeWorkflowLayout = (
     const updatedPositions = new Map<string, { x: number; y: number }>();
     for (const [, joinId] of transformed.forkNodeToJoinId) {
       const joinNode = nodePositions.get(joinId);
-      if (!joinNode) continue;
-      const preds = predecessors.get(joinId) ?? [];
-      const predCenters = preds.flatMap((pid) => {
-        const n = nodePositions.get(pid);
-        return n ? [n.x + n.width / 2] : [];
-      });
-      if (predCenters.length === 0) continue;
-      const midpoint = (Math.min(...predCenters) + Math.max(...predCenters)) / 2;
-      const newX = midpoint - joinNode.width / 2;
-      if (Math.abs(newX - joinNode.x) >= 0.001) {
-        updatedPositions.set(joinId, { x: newX, y: joinNode.y });
+      if (joinNode) {
+        const preds = predecessors.get(joinId) ?? [];
+        const predCenters = preds.flatMap((pid) => {
+          const n = nodePositions.get(pid);
+          return n ? [n.x + n.width / 2] : [];
+        });
+        if (predCenters.length > 0) {
+          const midpoint = (Math.min(...predCenters) + Math.max(...predCenters)) / 2;
+          const newX = midpoint - joinNode.width / 2;
+          if (Math.abs(newX - joinNode.x) >= 0.001) {
+            updatedPositions.set(joinId, { x: newX, y: joinNode.y });
+          }
+        }
       }
     }
     if (updatedPositions.size > 0) {
+      // Build a successors map so we can propagate join moves to straight-chain
+      // downstream nodes (nodes with exactly one predecessor in the same graph).
+      // This prevents wire elbows when a join node is re-centred but its sole
+      // successor (e.g. a while-group) keeps its original dagre position.
+      const successors = new Map<string, string[]>();
+      for (const e of allEdgesForJoin) {
+        const existing = successors.get(e.source);
+        if (existing) {
+          existing.push(e.target);
+        } else {
+          successors.set(e.source, [e.target]);
+        }
+      }
+      // Collect deltas for every node moved (joins first, then propagated nodes).
+      const movedDeltas = new Map<string, number>();
+      for (const [joinId, { x: newX }] of updatedPositions) {
+        const joinNode = nodePositions.get(joinId);
+        if (joinNode) {
+          movedDeltas.set(joinId, newX - joinNode.x);
+        }
+      }
+      // BFS: propagate each join's delta to its straight-chain successors.
+      const propagateQueue = [...movedDeltas.keys()];
+      while (propagateQueue.length > 0) {
+        const nodeId = propagateQueue.shift();
+        const delta = nodeId !== undefined ? movedDeltas.get(nodeId) : undefined;
+        if (nodeId === undefined || delta === undefined) {
+          break;
+        }
+        for (const succId of successors.get(nodeId) ?? []) {
+          const succPreds = predecessors.get(succId) ?? [];
+          if (succPreds.length === 1 && !updatedPositions.has(succId)) {
+            const succNode = nodePositions.get(succId);
+            if (succNode) {
+              updatedPositions.set(succId, { x: succNode.x + delta, y: succNode.y });
+              movedDeltas.set(succId, delta);
+              propagateQueue.push(succId);
+            }
+          }
+        }
+      }
       for (let i = 0; i < repairedNodes.length; i++) {
         const updated = updatedPositions.get(repairedNodes[i].id);
         if (updated) {
@@ -235,7 +283,61 @@ export const computeWorkflowLayout = (
     }
   }
 
-  // Post-dagre pass 4: reconcile edge waypoints.
+  // Post-dagre pass 4: refit foreach containers to their actual post-pass content.
+  // Passes 1 and 1b re-centre inner forks and propagate the delta upward through
+  // ancestors. The container size was frozen by layoutCompoundGroup before those
+  // passes ran, so the inner content can drift outside (or be edge-clamped by
+  // React Flow's extent:'parent') if the shift is large. Re-measure the actual
+  // cross-axis bbox of every inner node (including bypass/join nodes) and update
+  // the container's origin and cross size so the content sits centred with proper
+  // padding. Height is left unchanged — passes 1–3 only move nodes on the cross axis.
+  if (crossAxis === 'x' && transformed.foreachGroups.length > 0) {
+    const nodePositionsById = new Map(repairedNodes.map((n) => [n.id, n]));
+    const leftPad = WORKFLOW_COMPOUND_PADDING.left;
+    const rightPad = WORKFLOW_COMPOUND_PADDING.right;
+    for (const g of transformed.foreachGroups) {
+      const allInnerIds = [...g.innerNodes.map((n) => n.id), ...g.bypassLaneNodes.map((n) => n.id)];
+      const innerPositioned = allInnerIds
+        .map((id) => nodePositionsById.get(id))
+        .filter((n): n is DagPositionedNode => n !== undefined);
+      const groupNode = nodePositionsById.get(g.id);
+      if (innerPositioned.length > 0 && groupNode) {
+        const contentMinX = Math.min(...innerPositioned.map((n) => n.x));
+        const contentMaxX = Math.max(...innerPositioned.map((n) => n.x + n.width));
+        const contentWidth = contentMaxX - contentMinX;
+        // Keep the group's dagre-computed center fixed; only widen if content overflows.
+        // Shifting the group itself would break outer-graph centering (e.g. under triggers).
+        const groupCenterX = groupNode.x + groupNode.width / 2;
+        const availableWidth = groupNode.width - leftPad - rightPad;
+        const newGroupWidth =
+          contentWidth > availableWidth ? contentWidth + leftPad + rightPad : groupNode.width;
+        const newGroupX = groupCenterX - newGroupWidth / 2;
+        // Translate inner nodes so their content sits centred with left/right padding.
+        const desiredContentMinX =
+          newGroupX + leftPad + (newGroupWidth - contentWidth - leftPad - rightPad) / 2;
+        const innerDelta = desiredContentMinX - contentMinX;
+        if (Math.abs(innerDelta) > 0.001) {
+          for (const inner of innerPositioned) {
+            const updated = { ...inner, x: inner.x + innerDelta };
+            nodePositionsById.set(inner.id, updated);
+            const idx = repairedNodes.findIndex((n) => n.id === inner.id);
+            if (idx >= 0) repairedNodes[idx] = updated;
+          }
+        }
+        if (
+          Math.abs(newGroupX - groupNode.x) > 0.001 ||
+          Math.abs(newGroupWidth - groupNode.width) > 0.001
+        ) {
+          const updatedGroup = { ...groupNode, x: newGroupX, width: newGroupWidth };
+          nodePositionsById.set(g.id, updatedGroup);
+          const groupIdx = repairedNodes.findIndex((n) => n.id === g.id);
+          if (groupIdx >= 0) repairedNodes[groupIdx] = updatedGroup;
+        }
+      }
+    }
+  }
+
+  // Post-dagre pass 5: reconcile edge waypoints.
   // Translate-or-clear based on how much each endpoint moved since dagLayout.
   // NOTE: dagLayout now moves spine nodes on the main axis (spine push for
   // reserved lanes — see ADR-0012). That push happens INSIDE dagLayout, before

@@ -207,6 +207,34 @@ export function computeWireInsertionControls(args: {
     ? new Map([...forkNodeToJoinId].map(([forkId, joinId]) => [joinId, forkId]))
     : new Map();
 
+  // Pre-compute which targets receive fan-in exclusively from trigger nodes.
+  // These collapse to a single wire control (on the trunk below the bus) instead
+  // of one branch-tail terminal per trigger.
+  const triggerFanInTargets = new Set<string>();
+  {
+    const mergeSourcesByTarget = new Map<string, string[]>();
+    for (const edge of edges) {
+      if (isMergeEdge(edge)) {
+        const existing = mergeSourcesByTarget.get(edge.target);
+        if (existing) {
+          existing.push(edge.source);
+        } else {
+          mergeSourcesByTarget.set(edge.target, [edge.source]);
+        }
+      }
+    }
+    for (const [targetId, sources] of mergeSourcesByTarget) {
+      if (sources.length > 1 && sources.every((sid) => byId.get(sid)?.type === 'trigger')) {
+        triggerFanInTargets.add(targetId);
+      }
+    }
+  }
+  // Tracks max bus-exit position (in the main axis) per trigger fan-in target during the edge loop.
+  const triggerFanInBus = new Map<
+    string,
+    { busPos: number; entry: WireSegmentPoint; insertContext: WorkflowGraphInsertionContext }
+  >();
+
   for (const edge of edges) {
     if (isFailureEdge(edge)) continue;
 
@@ -306,13 +334,21 @@ export function computeWireInsertionControls(args: {
           direction,
         });
       } else if (merge) {
-        // Merge (fan-in) edges: emit a branch-tail terminal just below the branch's
-        // last step (the source of this merge edge). One per non-bypass fan-in edge —
-        // bypass nodes have no insertion ports so they're filtered out naturally.
-        // Always visible (kind: 'terminal'). Context: `after <leaf step>`.
-        // Only emit if the source has an actual step port (non-bypass).
-        if (insertContext.mode === 'after' || insertContext.mode === 'prepend-step') {
-          // Place the terminal just below the leaf (source) node, not on the wire.
+        // Merge (fan-in) edges.
+        if (triggerFanInTargets.has(edge.target)) {
+          // All sources are triggers: collapse to one wire control on the trunk below
+          // the bus. Track the lowest (highest Y for TB) trigger exit during this loop;
+          // emit the single control after the loop completes.
+          const busPos = direction === 'LR' ? start.x : start.y;
+          const existing = triggerFanInBus.get(edge.target);
+          if (!existing || busPos > existing.busPos) {
+            triggerFanInBus.set(edge.target, { busPos, entry: end, insertContext });
+          }
+        } else if (insertContext.mode === 'after' || insertContext.mode === 'prepend-step') {
+          // Non-trigger fan-in: emit a branch-tail terminal just below the branch's
+          // last step (the source of this merge edge). One per non-bypass fan-in edge —
+          // bypass nodes have no insertion ports so they're filtered out naturally.
+          // Always visible (kind: 'terminal'). Context: `after <leaf step>`.
           const tip = terminalTip(start, direction);
           controls.push({
             id: `terminal:branch-tail:${edge.id}`,
@@ -341,6 +377,23 @@ export function computeWireInsertionControls(args: {
         });
       }
     }
+  }
+
+  // Emit single wire controls for trigger fan-in targets (one per multi-trigger fan-in).
+  // Positioned on the trunk segment from the bus (bottom of triggers) to the first step.
+  for (const [targetId, { busPos, entry, insertContext }] of triggerFanInBus) {
+    const busPoint: WireSegmentPoint =
+      direction === 'LR' ? { x: busPos, y: entry.y } : { x: entry.x, y: busPos };
+    controls.push({
+      id: `wire:trigger-fanin:${targetId}`,
+      kind: 'wire',
+      centre: segmentMidpoint(busPoint, entry),
+      segmentStart: busPoint,
+      segmentEnd: entry,
+      insertContext,
+      fallbackStepName: undefined,
+      direction,
+    });
   }
 
   // Pre-compute the branch floor for each fork node (max exit of branch targets).

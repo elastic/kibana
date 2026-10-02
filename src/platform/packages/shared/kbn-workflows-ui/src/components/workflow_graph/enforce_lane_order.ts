@@ -319,16 +319,18 @@ const enforceForkLaneOrderForGraph = (
             // the fork node does not appear visually off-centre.
             const forkNode = mutableNodes.get(source);
             if (forkNode) {
-              const branchEdges = orderedHeads.flatMap((h) => {
+              // Centre on the midpoint of head entry-point centres (the chip columns),
+              // not on the outer box edges. Using box edges shifts the fork by
+              // (widestHead - narrowestHead) / 4 whenever heads have different widths
+              // (e.g. a 300px step vs an 80px bypass lane for an empty default case).
+              const headCentres = orderedHeads.flatMap((h) => {
                 const n = mutableNodes.get(h);
                 if (!n) return [];
                 const span = crossAxis === 'x' ? n.width : n.height;
-                return [{ lo: n[crossAxis], hi: n[crossAxis] + span }];
+                return [n[crossAxis] + span / 2];
               });
-              if (branchEdges.length > 0) {
-                const leftEdge = Math.min(...branchEdges.map((e) => e.lo));
-                const rightEdge = Math.max(...branchEdges.map((e) => e.hi));
-                const midpoint = (leftEdge + rightEdge) / 2;
+              if (headCentres.length > 0) {
+                const midpoint = (Math.min(...headCentres) + Math.max(...headCentres)) / 2;
                 const forkSpan = crossAxis === 'x' ? forkNode.width : forkNode.height;
                 const newForkCross = midpoint - forkSpan / 2;
                 const forkDelta = newForkCross - forkNode[crossAxis];
@@ -801,19 +803,19 @@ export const enforceForkBranchCompoundOrder = (
         // drifts. Correct it here after all branches are in their final positions.
         const forkNode = mutableNodes.get(source);
         if (forkNode) {
-          let headMin = Infinity;
-          let headMax = -Infinity;
+          // Centre on head-entry-point centres (same rationale as pass 1).
+          let centreMin = Infinity;
+          let centreMax = -Infinity;
           for (const head of heads) {
             const n = mutableNodes.get(head);
             if (n) {
-              const lo = n[crossAxis];
-              const hi = lo + n[crossSpan];
-              if (lo < headMin) headMin = lo;
-              if (hi > headMax) headMax = hi;
+              const centre = n[crossAxis] + n[crossSpan] / 2;
+              if (centre < centreMin) centreMin = centre;
+              if (centre > centreMax) centreMax = centre;
             }
           }
-          if (isFinite(headMin) && isFinite(headMax)) {
-            const midpoint = (headMin + headMax) / 2;
+          if (isFinite(centreMin) && isFinite(centreMax)) {
+            const midpoint = (centreMin + centreMax) / 2;
             const newForkCross = midpoint - forkNode[crossSpan] / 2;
             const forkDelta = newForkCross - forkNode[crossAxis];
             if (Math.abs(forkDelta) >= 0.001) {

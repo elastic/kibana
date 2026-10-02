@@ -220,7 +220,7 @@ describe('computeWireInsertionControls', () => {
     expect(elseCtrl!.centre).toEqual({ x: 300, y: expectedPlusY });
   });
 
-  it('places one branch-tail terminal per fan-in source (no shared wire)', () => {
+  it('collapses trigger fan-in to a single wire control on the trunk below the bus', () => {
     const mergeNodes: Node[] = [
       {
         id: 'manual',
@@ -266,23 +266,17 @@ describe('computeWireInsertionControls', () => {
       insertionPoints: mergeInsertion,
       direction: 'TB',
     });
-    // No shared wire control: replaced by per-source branch-tail terminals.
-    const mergeWires = controls.filter((c) => c.kind === 'wire');
-    expect(mergeWires).toHaveLength(0);
-    // Each fan-in source gets a branch-tail terminal below it.
+    // One wire control on the trunk below the bus, centred between bus exit and target entry.
+    // No per-source branch-tail terminals.
     const branchTails = controls.filter((c) => c.id.startsWith('terminal:branch-tail:'));
-    expect(branchTails).toHaveLength(2);
-    // manual exits at (100, 48); tip is TERMINAL_STUB_PX below.
-    expect(branchTails.find((c) => c.id.includes('manual-join'))?.centre).toEqual({
-      x: 100,
-      y: 48 + TERMINAL_STUB_PX,
-    });
-    // alert exits at (320, 48); tip is TERMINAL_STUB_PX below.
-    expect(branchTails.find((c) => c.id.includes('alert-join'))?.centre).toEqual({
-      x: 320,
-      y: 48 + TERMINAL_STUB_PX,
-    });
-    // Both sources are wired — no plain terminal stubs should duplicate them.
+    expect(branchTails).toHaveLength(0);
+    const fanInWires = controls.filter((c) => c.id === 'wire:trigger-fanin:join');
+    expect(fanInWires).toHaveLength(1);
+    // manual exits at y=48; alert exits at y=48. Bus Y = 48. Target entry at (210, 200).
+    // Control centre = midpoint of ({x:210,y:48}, {x:210,y:200}) = {x:210, y:124}.
+    expect(fanInWires[0].centre).toEqual({ x: 210, y: 124 });
+    expect(fanInWires[0].insertContext).toEqual({ mode: 'prepend-step' });
+    // No plain terminal stubs should be added for the trigger sources.
     expect(
       controls.filter(
         (c) =>

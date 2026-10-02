@@ -164,6 +164,11 @@ export function useWorkflowLayout({
       for (const n of g.innerNodes) {
         innerNodeToGroupId.set(n.id, g.id);
       }
+      // Bypass and join nodes for forks inside this group must also be parented
+      // so they render inside the container, not at absolute screen coordinates.
+      for (const n of g.bypassLaneNodes) {
+        innerNodeToGroupId.set(n.id, g.id);
+      }
       // Count only real body nodes, not structural bypass-lane pass-throughs.
       innerNodeCountByGroupId.set(
         g.id,
