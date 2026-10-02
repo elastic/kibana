@@ -15,6 +15,7 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import type { DataSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
@@ -27,6 +28,7 @@ import {
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
+  dataSource?: DataSource;
 }
 
 /**
@@ -37,6 +39,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   ({
     query,
     cascadedDocumentsContext,
+    dataSource,
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
     onFullScreenChange,
@@ -45,8 +48,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     const { dataView } = props;
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
-      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
-    }, [getRowIndicatorProvider, props.dataView]);
+      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView, dataSource });
+    }, [dataSource, getRowIndicatorProvider, props.dataView]);
 
     const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
       'getRowAdditionalLeadingControls'
@@ -131,9 +134,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       <UnifiedDataTable
         showColumnTokens
         renderCustomToolbar={renderCustomToolbar}
-        enableComparisonMode
-        showSummaryColumnToggle
-        getRowIndicator={getRowIndicator}
         rowAdditionalLeadingControls={rowAdditionalLeadingControls}
         paginationMode={paginationModeConfig.paginationMode}
         customGridColumnsConfiguration={customGridColumnsConfiguration}
@@ -158,6 +158,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
               actions: false,
               isResizable: false,
             })}
+        getRowIndicator={getRowIndicator}
       />
     );
   }

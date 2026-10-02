@@ -133,11 +133,11 @@ triggers:
           description: >
             Conversation id of an existing Investigation conversation (created by the
             Worker before calling this sub-workflow). When supplied and calledByWorker
-            is true, progress comments are posted into that conversation so the analyst
-            sees batch-by-batch results without leaving the Investigation. Absent on the
-            standalone path — no comments are posted.
-            Bounded to 1–256 chars to match Agent Builder CONVERSATION_ID_MAX_LENGTH;
-            posted into /api/chat/converse once per batch when present.
+            is true, progress comments are posted into that conversation via
+            `ai.conversation.add_user_message` so the analyst sees batch-by-batch
+            results without leaving the Investigation. Absent on the standalone path —
+            no comments are posted. Bounded to 1–256 chars to match Agent Builder
+            CONVERSATION_ID_MAX_LENGTH.
 
 # Structured output emitted by the `emit_workflow_output` step at the end of each run.
 # Always present, even when analysis is skipped (empty arrays / zero counts).
@@ -1619,29 +1619,17 @@ steps:
                     Alert analysis batch {{ foreach.index }} returned no verdicts for
                     {{ foreach.item | size }} alerts.
 
-              # TODO: replace with ai.conversation.message.add once kibana#291688 merges.
-              # Until then /api/chat/converse + trigger_mode:never appends via appendUserMessage,
-              # so these progress lines are stored as user messages (emoji does not change role).
               - name: post_batch_failure_comment
-                type: kibana.request
+                type: ai.conversation.add_user_message
                 if: "${{ inputs.calledByWorker == true and variables.investigation_conversation_id != '' }}"
                 on-failure:
                   continue: true
                 with:
-                  method: POST
-                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-                  headers:
-                    kbn-xsrf: string
-                    Content-Type: application/json
-                    elastic-api-version: "2023-10-31"
-                  body:
-                    conversation_id: "{{ variables.investigation_conversation_id }}"
-                    trigger_mode: "never"
-                    input: |-
-                      Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} ({{ foreach.item | size }} alert(s)) failed after retries and returned no verdicts. These alerts will not get verdict tags or notes; an error note will record the miss, and a Worker re-run will retry them.
+                  conversation_id: "{{ variables.investigation_conversation_id }}"
+                  message: |-
+                    Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} ({{ foreach.item.size }} alert{% if foreach.item.size != 1 %}s{% endif %}) failed after retries and returned no verdicts. {% if foreach.item.size == 1 %}This alert will not get a verdict tag or note; an error note will record the miss, and a Worker re-run will retry it.{% else %}These alerts will not get verdict tags or notes; an error note will record the miss, and a Worker re-run will retry them.{% endif %}
 
-                      [View execution]({{ execution.url }})
-
+                    [View execution]({{ execution.url }})
             else:
               # The model can echo an id from another batch; select_alert_verdict takes `first`
               # over all_verdicts, so only this batch's ids may enter it (and the progress counts).
@@ -1758,28 +1746,44 @@ steps:
                   batch_fp_count: "${{ variables.batch_verdicts | where: 'classification', 'false_positive' | size }}"
                   batch_inc_count: "${{ variables.batch_verdicts | where: 'classification', 'inconclusive' | size }}"
 
-              # TODO: replace with ai.conversation.message.add once kibana#291688 merges
               - name: post_batch_progress_comment
-                type: kibana.request
+                type: ai.conversation.add_user_message
                 if: "${{ inputs.calledByWorker == true and variables.investigation_conversation_id != '' }}"
                 on-failure:
                   continue: true
                 with:
-                  method: POST
-                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-                  headers:
-                    kbn-xsrf: string
-                    Content-Type: application/json
-                    elastic-api-version: "2023-10-31"
-                  body:
-                    conversation_id: "{{ variables.investigation_conversation_id }}"
-                    trigger_mode: "never"
-                    input: >-
-                      Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} complete
-                      ({{ foreach.item | size }} alert(s)):
-                      {{ variables.batch_tp_count }} true positive,
-                      {{ variables.batch_fp_count }} false positive,
-                      {{ variables.batch_inc_count }} inconclusive.
+                  conversation_id: "{{ variables.investigation_conversation_id }}"
+                  message: >-
+                    Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} complete
+                    ({{ foreach.item.size }} alert{% if foreach.item.size != 1 %}s{% endif %}):
+                    {{ variables.batch_tp_count }} true positive,
+                    {{ variables.batch_fp_count }} false positive,
+                    {{ variables.batch_inc_count }} inconclusive.
+
+      # -----------------------------------------------------------------------
+      # Alert ids the agent never returned a verdict for (Worker path only)
+      # -----------------------------------------------------------------------
+      # Exposed in workflow.output so a Worker can retry or surface a partial Investigation
+      # result instead of treating completed+empty as success. Prefer this over failing the
+      # whole run, which would discard the verdicts that did match. Derived once from the
+      # analyzed set rather than pushed per alert: every data.set persists its full value, so
+      # a per-alert push would store the cumulative list once for each alert. Covers both an
+      # alert the agent skipped and a batch that returned nothing, since neither reaches
+      # all_verdicts. Real alert ids only — never the model's echo.
+      #
+      # Derived before apply_verdicts, not after it: all_verdicts is complete once the batch
+      # loop ends, and on the Worker path apply_verdicts iterates exactly these alerts.
+      - name: collect_verdict_ids
+        type: data.set
+        if: "${{ inputs.calledByWorker == true }}"
+        with:
+          all_verdict_ids: "${{ variables.all_verdicts | map: 'id' }}"
+
+      - name: set_missing_alert_ids
+        type: data.set
+        if: "${{ inputs.calledByWorker == true }}"
+        with:
+          missing_alert_ids: "${{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | reject_exp: 'a', 'variables.all_verdict_ids contains a._id' | map: '_id' }}"
 
       # -----------------------------------------------------------------------
       # Write the verdicts back to the alerts
@@ -1791,10 +1795,19 @@ steps:
         with:
           tags_filter_expr: 'tag contains "{{ variables.tag_prefix }}."'
 
+      # Every step of every iteration is recorded in the execution, so the alerts this loop
+      # visits decide how big the execution is. A Worker caller (calledByWorker) writes its own
+      # tags and notes, and runs with auto-close off, so for an alert that has a verdict every
+      # branch below is a no-op; only an alert without one is acted on (log line and error
+      # note). The Worker path therefore iterates the alerts missing a verdict, not all of them,
+      # and drops the same pending alerts set_missing_alert_ids does, so the two lists agree.
+      # A Worker that turns auto-close on keeps the full list, because auto_close_ids is
+      # accumulated per alert inside this loop. The standalone path always visits every
+      # pending alert.
       - name: apply_verdicts
         type: foreach
         foreach: >-
-          {% if inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% endif %}
+          {% if inputs.calledByWorker == true and variables.auto_close_enabled != true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | reject_exp: 'a', 'variables.all_verdict_ids contains a._id' | json }}{% elsif inputs.calledByWorker == true %}{{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% else %}{{ event.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}{% endif %}
         steps:
           - name: select_alert_verdict
             type: data.set
@@ -1850,66 +1863,66 @@ steps:
               # -------------------------------------------------------------------
               # Write the verdict note to the alert timeline
               # -------------------------------------------------------------------
-              # The Investigation line is what lets another worker reading this alert pick up
-              # the conversation that produced the verdict. Empty on the standalone path,
-              # where no Investigation exists.
-              - name: add_verdict_note_to_alert
-                type: kibana.request
-                on-failure:
-                  retry:
-                    max-attempts: 3
-                    delay: 5s
-                with:
-                  method: PATCH
-                  path: "/s/{{ workflow.spaceId }}/api/note"
-                  body:
-                    note:
-                      eventId: '{{ foreach.item._id }}'
-                      note: |
-                        ✅ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
+              # Standalone path only. A Worker caller writes its own verdict note (with the
+              # Investigation reference), so writing one here would give each alert two.
+              - name: write_standalone_verdict_note
+                type: if
+                condition: "${{ inputs.calledByWorker != true }}"
+                steps:
+                  - name: add_verdict_note_to_alert
+                    type: kibana.request
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
+                    with:
+                      method: PATCH
+                      path: "/s/{{ workflow.spaceId }}/api/note"
+                      body:
+                        note:
+                          eventId: '{{ foreach.item._id }}'
+                          note: |
+                            ✅ [{{workflow.name}}:{{execution.id}}]({{execution.url}})
 
-                        ---
-                        ## Automated Alert Analysis
-                        ### Classification
-                        **{{ variables.alert_verdict.classification }}**
+                            ---
+                            ## Automated Alert Analysis
+                            ### Classification
+                            **{{ variables.alert_verdict.classification }}**
 
-                        ### Confidence Score
-                        {{ variables.alert_verdict.confidence_score }}
+                            ### Confidence Score
+                            {{ variables.alert_verdict.confidence_score }}
 
-                        ### Rationale
-                        {{ variables.alert_verdict.rationale }}
+                            ### Rationale
+                            {{ variables.alert_verdict.rationale }}
 
-                        ### Contributing Factors
-                        {% for factor in variables.alert_verdict.contributing_factors %}
-                        - {{ factor }}
-                        {%- endfor %}
+                            ### Contributing Factors
+                            {% for factor in variables.alert_verdict.contributing_factors %}
+                            - {{ factor }}
+                            {%- endfor %}
 
-                        ### Analysis Details
-                        {% if variables.investigation_conversation_id != '' -%}
-                        - Investigation: [{{ variables.investigation_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.investigation_conversation_id }})
-                        {% endif -%}
-                        - Workflow version: {{ variables.normalized_version }}
-                        - Tag prefix: {{ variables.tag_prefix }}
-                        - Connector: {{ variables.resolved_connector_id | default: variables.connector_id }}
-                        - Analyzed in a batch of up to {{ consts.batch_size }} alerts
-                        {% if variables.auto_close_enabled -%}
-                        - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}
-                        {%- endif %}
+                            ### Analysis Details
+                            - Workflow version: {{ variables.normalized_version }}
+                            - Tag prefix: {{ variables.tag_prefix }}
+                            - Connector: {{ variables.resolved_connector_id | default: variables.connector_id }}
+                            - Analyzed in a batch of up to {{ consts.batch_size }} alerts
+                            {% if variables.auto_close_enabled -%}
+                            - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}
+                            {%- endif %}
 
-                        ### Token Usage
-                        Shared across the {{ variables.pending_alert_count }} alerts of this execution,
-                        classified in {{ variables.batch_llm_calls }} model call(s):
-                        - Input tokens: {{ variables.batch_input_tokens }}
-                        - Output tokens: {{ variables.batch_output_tokens }}
-                        - Total tokens: {{ variables.batch_input_tokens | plus: variables.batch_output_tokens }}
+                            ### Token Usage
+                            Shared across the {{ variables.pending_alert_count }} alerts of this execution,
+                            classified in {{ variables.batch_llm_calls }} model call(s):
+                            - Input tokens: {{ variables.batch_input_tokens }}
+                            - Output tokens: {{ variables.batch_output_tokens }}
+                            - Total tokens: {{ variables.batch_input_tokens | plus: variables.batch_output_tokens }}
 
-                        ### Timestamp
-                        {{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}
+                            ### Timestamp
+                            {{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}
 
-                      timelineId: ''
-                  headers:
-                    kbn-xsrf: string
-                    Content-Type: application/json
+                          timelineId: ''
+                      headers:
+                        kbn-xsrf: string
+                        Content-Type: application/json
 
               # -------------------------------------------------------------------
               # Apply workflow tags to the alert
@@ -1919,43 +1932,50 @@ steps:
               #   <prefix>.version.<ver>            - tracks the workflow version
               #   <prefix>.classification.<cls>     - records the verdict
               #   <prefix>.confidence.<score>       - records the confidence score
-              - name: set_tags
-                type: data.set
-                with:
-                  tags_to_add:
-                    - "{{ variables.tag_prefix }}"
-                    - "{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}"
-                    - "{{ variables.tag_prefix }}.classification.{{ variables.alert_verdict.classification | downcase }}"
-                    - "{{ variables.tag_prefix }}.confidence.{{ variables.alert_verdict.confidence_score }}"
-                  tags_to_remove: "${{ foreach.item.kibana.alert.workflow_tags | where_exp: 'tag', variables.tags_filter_expr }}"
-
-              # Remove stale tags first (if any) to avoid conflicts with the add.
-              - name: has_tags_to_remove
+              #
+              # Standalone path only. A Worker caller writes its own static AlertZero tags, and
+              # bypass_dedup_for_worker means this path never reads these tags back.
+              - name: write_standalone_tags
                 type: if
-                condition: "${{ variables.tags_to_remove | has_exp: 'item', 'true' }}"
+                condition: "${{ inputs.calledByWorker != true }}"
                 steps:
-                  - name: remove_stale_tags
+                  - name: set_tags
+                    type: data.set
+                    with:
+                      tags_to_add:
+                        - "{{ variables.tag_prefix }}"
+                        - "{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}"
+                        - "{{ variables.tag_prefix }}.classification.{{ variables.alert_verdict.classification | downcase }}"
+                        - "{{ variables.tag_prefix }}.confidence.{{ variables.alert_verdict.confidence_score }}"
+                      tags_to_remove: "${{ foreach.item.kibana.alert.workflow_tags | where_exp: 'tag', variables.tags_filter_expr }}"
+
+                  # Remove stale tags first (if any) to avoid conflicts with the add.
+                  - name: has_tags_to_remove
+                    type: if
+                    condition: "${{ variables.tags_to_remove | has_exp: 'item', 'true' }}"
+                    steps:
+                      - name: remove_stale_tags
+                        type: kibana.SetAlertTags
+                        with:
+                          ids:
+                            - '{{ foreach.item._id }}'
+                          tags:
+                            tags_to_remove: "${{ variables.tags_to_remove }}"
+                            tags_to_add: []
+
+                  # Add the new tags for this execution.
+                  - name: add_result_tags
                     type: kibana.SetAlertTags
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
                     with:
                       ids:
                         - '{{ foreach.item._id }}'
                       tags:
-                        tags_to_remove: "${{ variables.tags_to_remove }}"
-                        tags_to_add: []
-
-              # Add the new tags for this execution.
-              - name: add_result_tags
-                type: kibana.SetAlertTags
-                on-failure:
-                  retry:
-                    max-attempts: 3
-                    delay: 5s
-                with:
-                  ids:
-                    - '{{ foreach.item._id }}'
-                  tags:
-                    tags_to_remove: []
-                    tags_to_add: "${{ variables.tags_to_add }}"
+                        tags_to_remove: []
+                        tags_to_add: "${{ variables.tags_to_add }}"
 
               # Accumulate the real alert id (foreach.item._id) — never the model's echo — for
               # the bulk auto-close call below. Using the actual alert id means a fabricated id
@@ -1968,28 +1988,6 @@ steps:
                     type: data.set
                     with:
                       auto_close_ids: "${{ variables.auto_close_ids | push: foreach.item._id }}"
-
-      # -----------------------------------------------------------------------
-      # Alert ids the agent never returned a verdict for (Worker path only)
-      # -----------------------------------------------------------------------
-      # Exposed in workflow.output so a Worker can retry or surface a partial Investigation
-      # result instead of treating completed+empty as success. Prefer this over failing the
-      # whole run, which would discard the verdicts that did match. Derived once from the
-      # analyzed set rather than pushed per alert: every data.set persists its full value, so
-      # a per-alert push would store the cumulative list once for each alert. Covers both an
-      # alert the agent skipped and a batch that returned nothing, since neither reaches
-      # all_verdicts. Real alert ids only — never the model's echo.
-      - name: collect_verdict_ids
-        type: data.set
-        if: "${{ inputs.calledByWorker == true }}"
-        with:
-          all_verdict_ids: "${{ variables.all_verdicts | map: 'id' }}"
-
-      - name: set_missing_alert_ids
-        type: data.set
-        if: "${{ inputs.calledByWorker == true }}"
-        with:
-          missing_alert_ids: "${{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | reject_exp: 'a', 'variables.all_verdict_ids contains a._id' | map: '_id' }}"
 
       # -----------------------------------------------------------------------
       # Grouped verdict counts, per entity, as a ready-to-render sentence
@@ -2024,11 +2022,11 @@ steps:
                 {%- assign tp = for_host | where: 'classification', 'true_positive' | size -%}
                 {%- assign fp = for_host | where: 'classification', 'false_positive' | size -%}
                 {%- assign inc = for_host | where: 'classification', 'inconclusive' | size -%}
-                {%- if tp > 0 %} {{ tp }} alert(s) with {{ host_label }} classified as true positive.{% endif -%}
-                {%- if fp > 0 %} {{ fp }} alert(s) with {{ host_label }} classified as false positive.{% endif -%}
-                {%- if inc > 0 %} {{ inc }} alert(s) with {{ host_label }} were inconclusive.{% endif -%}
+                {%- if tp > 0 %} {{ tp }} alert{% if tp != 1 %}s{% endif %} with {{ host_label }} classified as true positive.{% endif -%}
+                {%- if fp > 0 %} {{ fp }} alert{% if fp != 1 %}s{% endif %} with {{ host_label }} classified as false positive.{% endif -%}
+                {%- if inc > 0 %} {{ inc }} alert{% if inc != 1 %}s{% endif %} with {{ host_label }} {% if inc == 1 %}was{% else %}were{% endif %} inconclusive.{% endif -%}
                 {%- endfor -%}
-                {%- if all_host_names.size > 50 %} ({{ all_host_names.size | minus: 50 }} additional host(s) omitted from summary.){% endif -%}
+                {%- if all_host_names.size > 50 %}{% assign omitted_host_count = all_host_names.size | minus: 50 %} ({{ omitted_host_count }} additional host{% if omitted_host_count != 1 %}s{% endif %} omitted from summary.){% endif -%}
                 {%- endcapture -%}
                 {{- grouped_counts_summary_raw | strip | truncate: 10000, ' [truncated]' -}}
 
@@ -2182,7 +2180,7 @@ steps:
             Alert analysis finished for rule {{ variables.rule_name }}:
             {{ variables.all_verdicts | size }} verdicts for {{ variables.pending_alert_count }} alerts
             in {{ variables.batch_llm_calls }} model call(s);
-            {{ variables.auto_close_ids | size }} alert(s) matched the auto-close thresholds.
+            {{ variables.auto_close_ids.size }} alert{% if variables.auto_close_ids.size != 1 %}s{% endif %} matched the auto-close thresholds.
 
     else:
       # Skipped alerts are unprocessed, so the Worker must not read an empty list as "all reconciled".

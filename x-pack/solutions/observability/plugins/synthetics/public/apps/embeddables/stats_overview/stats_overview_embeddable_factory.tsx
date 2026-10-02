@@ -19,6 +19,7 @@ import type {
   HasEditCapabilities,
   HasSupportedTriggers,
   ViewMode,
+  CanCancelRequests,
 } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
@@ -30,6 +31,7 @@ import {
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
@@ -38,6 +40,7 @@ import {
   SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
 } from '../../../../common/embeddables/stats_overview/constants';
 import type { MonitorFilters, OverviewStatsEmbeddableState } from '../../../../common/types';
+import { RequestCancellationManager } from '../../synthetics/state/request_cancellation_manager';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
@@ -57,7 +60,8 @@ export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState
   PublishesTitle &
   HasEditCapabilities &
   HasDrilldowns &
-  HasSupportedTriggers;
+  HasSupportedTriggers &
+  CanCancelRequests;
 
 export const getStatsOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
@@ -79,6 +83,7 @@ export const getStatsOverviewEmbeddableFactory = (
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
+      const requestCancellationManager = new RequestCancellationManager();
       const filters$ = new BehaviorSubject({
         ...DEFAULT_FILTERS,
         ...(initialState?.filters || {}),
@@ -123,6 +128,7 @@ export const getStatsOverviewEmbeddableFactory = (
         ...stateApi,
         supportedTriggers: () => SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
         defaultTitle$,
+        cancelRequests: (reason?: AbortReason) => requestCancellationManager.cancel(reason),
         getTypeDisplayName: () =>
           i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
             defaultMessage: 'filters',
@@ -154,6 +160,7 @@ export const getStatsOverviewEmbeddableFactory = (
       const fetchSubscription = fetch$(api)
         .pipe()
         .subscribe((next) => {
+          requestCancellationManager.startLoad();
           reload$.next(next.isReload);
         });
 
@@ -178,6 +185,7 @@ export const getStatsOverviewEmbeddableFactory = (
                 reload$={reload$}
                 viewMode={viewMode}
                 filters={filters || DEFAULT_FILTERS}
+                requestCancellationManager={requestCancellationManager}
               />
             </div>
           );

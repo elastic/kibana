@@ -6,7 +6,7 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { generateFilters, type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -61,10 +61,6 @@ import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
 import { FIELD_STATS_EMBEDDABLE_TYPE } from '../../../../../common/embeddables/constants';
 
-export interface EmbeddableFieldStatsChartStartServices {
-  data: DataPublicPluginStart;
-}
-
 const FieldStatisticsWrapper = dynamic(() => import('../grid_embeddable/field_stats_wrapper'));
 
 const ERROR_MSG = {
@@ -77,29 +73,6 @@ const ERROR_MSG = {
       defaultMessage: 'Error updating settings for field statistics.',
     }
   ),
-};
-
-export const getDependencies = async (
-  getStartServices: StartServicesAccessor<
-    DataVisualizerStartDependencies,
-    DataVisualizerPluginStart
-  >
-) => {
-  const [
-    { http, uiSettings, notifications, ...startServices },
-    { lens, data, usageCollection, fieldFormats },
-  ] = await getStartServices();
-
-  return {
-    http,
-    uiSettings,
-    data,
-    notifications,
-    lens,
-    usageCollection,
-    fieldFormats,
-    ...startServices,
-  };
 };
 
 export const getFieldStatsChartEmbeddableFactory = (

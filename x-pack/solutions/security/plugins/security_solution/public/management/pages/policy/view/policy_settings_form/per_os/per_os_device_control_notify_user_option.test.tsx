@@ -118,6 +118,14 @@ describe('PerOsDeviceControlNotifyUserOption', () => {
     expect(renderResult.queryByTestId(testSubj)).not.toBeInTheDocument();
   });
 
+  it('is hidden when device control is disabled on the bound OS', () => {
+    policy[PolicyOperatingSystem.mac].device_control!.enabled = false;
+
+    renderMacOption();
+
+    expect(renderResult.queryByTestId(testSubj)).not.toBeInTheDocument();
+  });
+
   it('changing the macOS checkbox leaves Windows and Linux byte-identical', async () => {
     const windowsBefore = cloneDeep(policy[PolicyOperatingSystem.windows]);
     const linuxBefore = cloneDeep(policy[PolicyOperatingSystem.linux]);

@@ -93,16 +93,6 @@ const hasSomethingToChange = ({
 const atLeastOneChange = { message: 'At least one of prompt or esqlQuery must be provided.' };
 
 /**
- * Edit input for callers that already know which panel they are editing — the dashboard generation
- * tool targets the panel by `panelId`, so no identifier belongs in the config itself.
- */
-export const customContentUpdateSchema = z
-  .object(customContentUpdateFields)
-  .refine(hasSomethingToChange, atLeastOneChange);
-
-export type CustomContentUpdate = z.output<typeof customContentUpdateSchema>;
-
-/**
  * Edit input for the chat tool. A conversation can hold one context attachment per panel, so the
  * target has to be explicit — without it the tool would act on whichever panel was attached first.
  */

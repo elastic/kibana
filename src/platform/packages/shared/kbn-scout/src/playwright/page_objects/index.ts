@@ -20,6 +20,7 @@ import { DataViewsManagementPage } from './data_views_management_page';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover';
 import { FilterBar } from './filter_bar';
+import { InspectorPage } from './inspector';
 import { MapsPage } from './maps_page';
 import { QueryBar } from './query_bar';
 import { Toasts } from './toasts';
@@ -42,6 +43,7 @@ export {
   FilterBar,
   DataGrid,
   DataViewsManagementPage,
+  InspectorPage,
   LensApp,
   QueryBar,
   UnifiedTabs,
@@ -63,6 +65,7 @@ export interface PageObjects {
   discover: DiscoverApp;
   dashboard: DashboardApp;
   filterBar: FilterBar;
+  inspector: InspectorPage;
   listingTable: ListingTable;
   home: HomePage;
   maps: MapsPage;
@@ -93,6 +96,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
+    inspector: createLazyPageObject(InspectorPage, fixtures.page),
     listingTable: createLazyPageObject(ListingTable, fixtures.page),
     home: createLazyPageObject(HomePage, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),

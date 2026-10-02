@@ -50,8 +50,12 @@ import {
   skip,
   switchMap,
 } from 'rxjs';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import {
+  isExecutionTerminalEvent,
+  isToolUiEvent,
+  type ToolUiEvent,
+} from '@kbn/agent-builder-common';
+import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
@@ -66,17 +70,22 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { css } from '@emotion/react';
 import { getServices } from './services';
 import { getTelemetry } from './telemetry';
+import { MAX_PREVIEW_HEIGHT } from '../common/panel_context_attachment';
 import {
-  CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
-  MAX_PREVIEW_HEIGHT,
-} from '../common/panel_context_attachment';
+  CUSTOM_CONTENT_UPDATED_UI_EVENT,
+  type CustomContentUpdatedUiEventData,
+} from '../common/ui_events';
 import {
   buildCustomContentContextAttachment,
   type CustomContentFetchContext,
 } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
-import { readPanelContextData } from '../common/read_panel_context_data';
 import type { CustomContentEmbeddableState } from '../server';
+
+const isCustomContentUpdatedUiEvent = (
+  event: BrowserChatEvent
+): event is ToolUiEvent<typeof CUSTOM_CONTENT_UPDATED_UI_EVENT, CustomContentUpdatedUiEventData> =>
+  isToolUiEvent(event, CUSTOM_CONTENT_UPDATED_UI_EVENT);
 
 const panelMeasureCss = css({
   display: 'flex',
@@ -445,39 +454,25 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               )
             )
             .subscribe((event) => {
-              if (!isRoundCompleteEvent(event)) return;
-              if (isGenerating$.getValue()) {
-                isGenerating$.next(false);
+              if (isExecutionTerminalEvent(event)) {
+                if (isGenerating$.getValue()) isGenerating$.next(false);
+                return;
               }
 
-              // A round can touch several attachments — the dashboard's, and one per custom content
-              // panel. Scan every agent-authored ref instead of only the first, or an unrelated
-              // attachment leading the list would make this panel skip its own update.
-              const agentRefs = event.data.round.input.attachment_refs?.filter(
-                (ref) =>
-                  ref.actor === ATTACHMENT_REF_ACTOR.agent &&
-                  (ref.operation === 'updated' || ref.operation === 'created')
-              );
-              if (!agentRefs?.length) return;
+              if (!isCustomContentUpdatedUiEvent(event)) return;
 
-              for (const ref of agentRefs) {
-                const updatedAttachment = event.data.attachments?.find(
-                  (a) =>
-                    a.id === ref.attachment_id && a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE
-                );
-                if (!updatedAttachment) continue;
+              const {
+                data: { data },
+              } = event.data;
+              if (data.embeddable_id !== uuid) return;
 
-                const data = readPanelContextData(updatedAttachment);
-                if (!data || data.embeddable_id !== uuid) continue;
-
-                template$.next(data.panel_template);
-                esqlQuery$.next(data.esql_query);
-                getTelemetry().trackAgentUpdateApplied({
-                  hasEsqlQuery: Boolean(data.esql_query),
-                  templateSizeBytes: data.panel_template.length,
-                });
-                break;
-              }
+              template$.next(data.panel_template);
+              esqlQuery$.next(data.esql_query);
+              if (isGenerating$.getValue()) isGenerating$.next(false);
+              getTelemetry().trackAgentUpdateApplied({
+                hasEsqlQuery: Boolean(data.esql_query),
+                templateSizeBytes: data.panel_template.length,
+              });
             });
 
           return () => sub.unsubscribe();

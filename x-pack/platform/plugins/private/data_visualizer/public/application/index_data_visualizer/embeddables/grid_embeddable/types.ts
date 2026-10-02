@@ -9,14 +9,12 @@ import type { AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { FieldStatsTableEmbeddableState } from '@kbn/data-visualizer-server-schemas/embeddables/field_stats';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
 import type { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
-import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 import type { DataVisualizerTableItem } from '../../../common/components/stats_table/types';
 import type { FieldStatsComponentType } from '../../constants/field_stats_component_type';
@@ -116,16 +114,6 @@ export type ESQLDataVisualizerGridEmbeddableState = Omit<
   FieldStatisticTableEmbeddableProps,
   'query'
 > & { query?: ESQLQuery };
-
-export type OnAddFilter = (field: DataViewField | string, value: string, type: '+' | '-') => void;
-export interface FieldStatisticsTableEmbeddableParentApi {
-  executionContext?: { value: string };
-  embeddableState$: BehaviorSubject<FieldStatsTableEmbeddableState>;
-  overrideServices?: Partial<DataVisualizerStartDependencies>;
-  onAddFilter?: OnAddFilter;
-}
-
-export type DataVisualizerGridEmbeddableApi = Partial<FieldStatsTableEmbeddableState>;
 
 export type ESQLDefaultLimitSizeOption = '5000' | '10000' | '100000';
 
