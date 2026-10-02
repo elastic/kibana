@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
@@ -32,18 +33,14 @@ jest.mock('./use_create_rule_primary_action', () => ({
   }),
 }));
 
+// "ML job settings" and "Add integrations" come from the shared SecurityAppHeader wrapper and are
+// covered by its own test; stub the wrapper's hooks so this suite stays focused on the Rules items.
 jest.mock('../../../../common/components/app_header/use_ml_job_settings_menu_item', () => ({
-  useMlJobSettingsMenuItem: () => ({
-    item: {
-      id: 'mlJobSettings',
-      label: 'ML job settings',
-      iconType: 'machineLearningApp',
-      overflow: true,
-      testId: 'securityAppHeaderMlJobSettings',
-      run: jest.fn(),
-    },
-    flyout: <div data-test-subj="ml-flyout" />,
-  }),
+  useMlJobSettingsMenuItem: () => ({ item: undefined, flyout: null }),
+}));
+
+jest.mock('../../../../common/components/app_header/use_add_integrations_menu_item', () => ({
+  useAddIntegrationsMenuItem: () => undefined,
 }));
 
 jest.mock('../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status', () => ({
@@ -67,9 +64,11 @@ const defaultProps = {
 const renderHeader = (props: Partial<typeof defaultProps> = {}) =>
   render(
     <TestProviders>
-      <MockAppHeaderProvider>
-        <RulesTableAppHeader {...defaultProps} {...props} />
-      </MockAppHeaderProvider>
+      <MemoryRouter>
+        <MockAppHeaderProvider>
+          <RulesTableAppHeader {...defaultProps} {...props} />
+        </MockAppHeaderProvider>
+      </MemoryRouter>
     </TestProviders>
   );
 
@@ -93,12 +92,6 @@ describe('RulesTableAppHeader', () => {
     expect(screen.getByTestId('create-new-rule')).toBeInTheDocument();
   });
 
-  it('renders the ML job settings flyout slot', () => {
-    renderHeader();
-
-    expect(screen.getByTestId('ml-flyout')).toBeInTheDocument();
-  });
-
   it('shows the Elastic rules count in the add Elastic rules item', async () => {
     renderHeader();
     await openAppMenuOverflow();
@@ -117,7 +110,6 @@ describe('RulesTableAppHeader', () => {
       'rules-settings-button',
       'open-value-lists-modal-button',
       'rules-import-modal-button',
-      'securityAppHeaderMlJobSettings',
     ]) {
       expect(await screen.findByTestId(testId)).toBeInTheDocument();
     }

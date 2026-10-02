@@ -6,12 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import { type AppHeaderMenu } from '@kbn/app-header';
 import { SecurityPageName } from '../../../../app/types';
+import { SecurityAppHeader } from '../../../../common/components/app_header';
 import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
 import { useKibana } from '../../../../common/lib/kibana';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
-import { useMlJobSettingsMenuItem } from '../../../../common/components/app_header/use_ml_job_settings_menu_item';
 import { useCreateRulePrimaryAction } from './use_create_rule_primary_action';
 import { useRulesTableHeaderTabs } from './use_rules_table_header_tabs';
 import * as i18n from './translations';
@@ -52,7 +52,6 @@ export const RulesTableAppHeader = React.memo<RulesTableAppHeaderProps>(
     const rulesToInstallCount = prebuiltRulesStatus?.stats.num_prebuilt_rules_to_install ?? 0;
 
     const tabs = useRulesTableHeaderTabs();
-    const { item: mlJobSettingsMenuItem, flyout: mlJobSettingsFlyout } = useMlJobSettingsMenuItem();
     const primaryActionItem = useCreateRulePrimaryAction({
       isAiRuleCreationAvailable,
       isDisabled: !canEditRules || isLoading,
@@ -102,7 +101,6 @@ export const RulesTableAppHeader = React.memo<RulesTableAppHeaderProps>(
           disableButton: !canEditRules || isLoading,
           testId: 'rules-import-modal-button',
         },
-        ...(mlJobSettingsMenuItem ? [mlJobSettingsMenuItem] : []),
       ];
 
       return { items, primaryActionItem };
@@ -113,7 +111,6 @@ export const RulesTableAppHeader = React.memo<RulesTableAppHeaderProps>(
       getSecuritySolutionUrl,
       isImportValueListDisabled,
       isLoading,
-      mlJobSettingsMenuItem,
       onOpenImportRules,
       onOpenRuleSettings,
       onOpenValueLists,
@@ -122,17 +119,13 @@ export const RulesTableAppHeader = React.memo<RulesTableAppHeaderProps>(
     ]);
 
     return (
-      <>
-        <AppHeader
-          title={i18n.PAGE_TITLE}
-          tabs={tabs}
-          menu={menu}
-          docLink={docLinks.links.securitySolution.manageDetectionRules}
-          showAddIntegrations
-          spacing="flush"
-        />
-        {mlJobSettingsFlyout}
-      </>
+      <SecurityAppHeader
+        title={i18n.PAGE_TITLE}
+        tabs={tabs}
+        menu={menu}
+        docLink={docLinks.links.securitySolution.manageDetectionRules}
+        spacing="largeBleed"
+      />
     );
   }
 );
