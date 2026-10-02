@@ -62,6 +62,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     awsServicesMap,
     deploymentMethod,
     setDeploymentMethod,
+    serviceSettingsMethod,
     detectAndReviewStep,
     updateDetectAndReviewStep,
     removeDeployInstances,
@@ -154,10 +155,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   );
   const settingsOutOfDateServiceNames = useMemo(
     () =>
-      isAgentBased && serviceSettings?.settingsMethod !== 'agent_based'
+      isAgentBased && serviceSettingsMethod !== 'agent_based'
         ? [...ecfCapableServiceIds].map((id) => awsServicesMap?.get(id)?.name ?? id)
         : [],
-    [isAgentBased, serviceSettings?.settingsMethod, ecfCapableServiceIds, awsServicesMap]
+    [isAgentBased, serviceSettingsMethod, ecfCapableServiceIds, awsServicesMap]
   );
   const incompleteAgentSettingsCount = useMemo(
     () =>

@@ -75,6 +75,10 @@ interface PersistedAuthenticateAndDeployStep {
   authMethod?: CloudOnboardingDeploymentAuthMethod;
   accessKeyId?: string;
   deploymentMethod?: DeploymentMethod;
+  // Deployment method the user had selected when they last continued from Step 2. Lives here (not
+  // in the service-settings session key) because this provider stays mounted: react-use's
+  // useSessionStorage persists in an effect, which is lost when Step 2 unmounts on navigation.
+  serviceSettingsMethod?: DeploymentMethod;
   // Agent-based deploy fields — persisted so Back/Next round trips preserve state.
   // Note: agentPolicyId presence doubles as the durable "deploy succeeded" flag (no separate bool).
   agentHostsMode?: 'new' | 'existing';
@@ -135,6 +139,9 @@ interface OnboardingFlowState {
   agentBasedDeployment: AgentBasedDeploymentState;
   deploymentMethod: DeploymentMethod;
   setDeploymentMethod: (method: DeploymentMethod) => void;
+  /** Method Step 2's settings were last confirmed under; undefined until Step 2 is continued. */
+  serviceSettingsMethod: DeploymentMethod | undefined;
+  setServiceSettingsMethod: (method: DeploymentMethod) => void;
   servicesStep: ServicesStepState;
   setSelectedServiceIds: (ids: string[]) => void;
   setDataFormat: (format: DataFormat) => void;
@@ -487,6 +494,15 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [setPersistedAuthenticateAndDeployStep, setDetectAndReviewStep]
   );
 
+  const setServiceSettingsMethod = useCallback(
+    (method: DeploymentMethod) => {
+      const next = { ...persistedAuthStepRef.current, serviceSettingsMethod: method };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
+    },
+    [setPersistedAuthenticateAndDeployStep]
+  );
+
   const authenticateAndDeployStep: AuthenticateAndDeployStepState = {
     connectorId: persistedAuthenticateAndDeployStep?.connectorId,
     connectorName: persistedAuthenticateAndDeployStep?.connectorName,
@@ -525,6 +541,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         agentBasedDeployment,
         deploymentMethod,
         setDeploymentMethod,
+        serviceSettingsMethod: persistedAuthenticateAndDeployStep?.serviceSettingsMethod,
+        setServiceSettingsMethod,
         servicesStep,
         setSelectedServiceIds,
         setDataFormat,

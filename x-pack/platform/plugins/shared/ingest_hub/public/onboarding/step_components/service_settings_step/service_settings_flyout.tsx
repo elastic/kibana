@@ -56,7 +56,7 @@ function withCollectS3Defaults(
   for (const [dsId, dsVars] of Object.entries(draftByDs)) {
     const dsView = makeDsView(service, dsId);
     const varsByInput = { ...dsVars.varsByInput };
-    for (const input of dsVars.enabledInputs) {
+    for (const input of Object.keys(varsByInput)) {
       if (shouldDefaultCollectS3Logs(dsView, input, varsByInput[input])) {
         varsByInput[input] = { ...varsByInput[input], collect_s3_logs: 'true' };
       }
@@ -91,9 +91,10 @@ export function ServiceSettingsFlyout({
 
   const isSingleDs = service.dataStreams.length === 1;
 
-  const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
-    ...config.varsByDataStream,
-  }));
+  // Seed the S3 toggle on open too, so a stored bucket ARN shows the switch on before any save.
+  const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() =>
+    withCollectS3Defaults(service, { ...config.varsByDataStream })
+  );
   const [namespace, setNamespace] = useState(config.namespace ?? '');
   const showNamespace = supportsNamespace(service);
   const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
@@ -155,7 +156,7 @@ export function ServiceSettingsFlyout({
                 enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs, service.defaultEnabledInputs),
                 varsByInput: {},
               };
-              return {
+              return withCollectS3Defaults(service, {
                 ...prev,
                 [dsId]: {
                   ...existing,
@@ -164,7 +165,7 @@ export function ServiceSettingsFlyout({
                     [input]: { ...(existing.varsByInput[input] ?? {}), [fieldName]: value },
                   },
                 },
-              };
+              });
             })
           }
           onInputToggle={(dsId, input, enabled) =>

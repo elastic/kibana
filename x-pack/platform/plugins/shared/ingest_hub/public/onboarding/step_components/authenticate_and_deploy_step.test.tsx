@@ -1102,6 +1102,7 @@ describe('AuthenticateAndDeployStep', () => {
         awsServicesMap: new Map([['cloudtrail', service]]),
         deploymentMethod: 'agent_based',
         setDeploymentMethod: jest.fn(),
+        serviceSettingsMethod: settingsMethod,
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
         updateDetectAndReviewStep: jest.fn(),
         refetchAwsServiceMatrix: jest.fn(),
@@ -1109,7 +1110,6 @@ describe('AuthenticateAndDeployStep', () => {
       mockUseSessionStorage.mockReturnValue([
         {
           globalRegion: 'us-east-1',
-          settingsMethod,
           instances: [
             { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'x', isDuplicate: false },
           ],

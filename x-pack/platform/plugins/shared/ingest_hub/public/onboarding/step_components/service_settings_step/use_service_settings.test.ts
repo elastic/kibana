@@ -434,3 +434,23 @@ describe('getIncompleteInstances — required set follows the matrix view', () =
     expect(getIncompleteInstances(instances, filled, map)).toEqual([]);
   });
 });
+
+describe('useServiceSettings — handleNext', () => {
+  it('records the deployment method the settings were confirmed under, then continues', () => {
+    const setServiceSettingsMethod = jest.fn();
+    const onContinue = jest.fn();
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['guardduty'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: AWS_SERVICES_MAP,
+      deploymentMethod: 'agent_based',
+      setServiceSettingsMethod,
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue }));
+    act(() => result.current.handleNext());
+
+    expect(setServiceSettingsMethod).toHaveBeenCalledWith('agent_based');
+    expect(onContinue).toHaveBeenCalledTimes(1);
+  });
+});

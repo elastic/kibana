@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 
-import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -57,8 +57,6 @@ export interface ServiceSettingsPersistedState {
   serviceVars: Record<string, ServiceVars>;
   /** Absent in old sessions — reconciled on read from selectedServiceIds. */
   instances?: ServiceInstance[];
-  /** Deployment method the user had selected when they last continued from Step 2. */
-  settingsMethod?: DeploymentMethod;
 }
 
 export const SERVICE_SETTINGS_SESSION_KEY = getOnboardingSessionKey('aws', 'serviceSettingsStep');
@@ -182,8 +180,13 @@ export function getIncompleteInstances(
 }
 
 export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
-  const { servicesStep, removeDeployInstance, awsServicesMap, deploymentMethod } =
-    useOnboardingFlow();
+  const {
+    servicesStep,
+    removeDeployInstance,
+    awsServicesMap,
+    deploymentMethod,
+    setServiceSettingsMethod,
+  } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   const [persisted, setPersisted] = useSessionStorage<ServiceSettingsPersistedState>(
@@ -369,10 +372,10 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     setPersisted({
       ...(persisted ?? { globalRegion: '', serviceVars: {} }),
       instances,
-      settingsMethod: deploymentMethod,
     });
+    setServiceSettingsMethod(deploymentMethod);
     onContinue();
-  }, [onContinue, persisted, setPersisted, instances, deploymentMethod]);
+  }, [onContinue, persisted, setPersisted, instances, deploymentMethod, setServiceSettingsMethod]);
 
   // All instance display names — used by the duplicate modal for collision detection.
   const allInstanceNames = useMemo(() => instances.map((i) => i.name), [instances]);
