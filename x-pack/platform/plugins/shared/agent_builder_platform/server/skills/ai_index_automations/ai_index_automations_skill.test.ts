@@ -667,6 +667,27 @@ describe('aiIndexAutomationsSkill', () => {
       );
     });
 
+    it('exempts the Targeted KI writer in the pilot rule itself, before the counting', () => {
+      const rule = prose.slice(prose.indexOf('**Pilot a template install'));
+      expect(rule.indexOf('A Targeted KI writer has no pilot')).toBeLessThan(
+        rule.indexOf('Count the items')
+      );
+    });
+
+    it('says where the item count comes from', () => {
+      expect(prose).toMatch(
+        /take the count from the Unit section of the proposal, or from a count query with the corpus filter when there is no proposal/
+      );
+      expect(prose).toMatch(/for Index\/Table Metadata, the number of `sources`/);
+    });
+
+    it('handles a pilot that did not complete next to the projection, not after the no-pilot case', () => {
+      const skipAt = prose.indexOf('**With 5 items or fewer, skip the pilot**');
+      expect(prose.indexOf('When the pilot ended with any `status` other than')).toBeLessThan(
+        skipAt
+      );
+    });
+
     it('sizes the pilot to one batch of the template loop, which runs five at a time', () => {
       expect(prose).toMatch(
         /Every template's loop runs five items at a time, so a pilot of 5 is one batch of the full run/

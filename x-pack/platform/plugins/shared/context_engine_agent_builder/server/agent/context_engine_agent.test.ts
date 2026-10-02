@@ -179,8 +179,9 @@ describe('Context Engine agent instructions', () => {
 
     it('pilots a template install that writes more than 5 items through the run tool before its full run', () => {
       expect(instructions).toMatch(
-        /a pilot first when a template install writes more than 5 items, then the full run/
+        /a pilot first when a document, unit-profile or index-metadata install writes more than 5 items, then the full run/
       );
+      expect(instructions).not.toMatch(/when a template install writes more than 5 items/);
       expect(instructions).not.toMatch(/a pilot of a document or unit-profile install first/);
       expect(instructions).toMatch(
         /A pilot returns when it finishes, with its duration: state the projected full-run time from it, then start the full run/

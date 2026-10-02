@@ -722,13 +722,21 @@ call returns. Tell the user it has started and that they can ask for a progress 
 
 **Pilot a template install that writes more than 5 items before its full run.** The install tool
 does not run anything, so nothing has measured the automation, and the full-run dialog needs a time
-estimate. Count the items the full run writes: documents (up to `maxDocuments`), units (up to
-`maxUnits`) or sources for Index/Table Metadata. When there are more than 5, call `run_automation`
-with `pilotSize: 5` first. Every template's loop runs five items at a time, so a pilot of 5 is one
+estimate. A Targeted KI writer has no pilot: it makes no model call, and it runs through
+`platform.core.execute_workflow` as described above. Count the items the full run writes: documents
+(up to `maxDocuments`), units (up to `maxUnits`) or sources for Index/Table Metadata. For documents
+and units, take the count from the Unit section of the proposal, or from a count query with the
+corpus filter when there is no proposal; for Index/Table Metadata, the number of `sources`, or 1 for
+`sourceIndex` with `categoryField`. When there are more than 5, call `run_automation` with
+`pilotSize: 5` first. Every template's loop runs five items at a time, so a pilot of 5 is one
 batch of the full run, and the per-unit arithmetic above holds. The pilot runs the automation over
 the first five documents, the five most active units, or the first five sources of the same list the
-full run uses, waits for it, and returns `status`, `durationMs` and `kisWritten`. Project only when `kisWritten` equals the pilot
-size. When it is lower, say how many of the pilot's items wrote a KI and stop: the others failed or
+full run uses, waits for it, and returns `status`, `durationMs` and `kisWritten`. When the pilot
+ended with any `status` other than `completed`, report `errorMessage` and stop: there is no duration
+to project from, and a failed pilot means the full run would fail the same way. When it is still
+`running`, say the time is not yet measured, and check it with
+`platform.core.get_workflow_execution_status` before you start the full run. Project only when
+`kisWritten` equals the pilot size. When it is lower, say how many of the pilot's items wrote a KI and stop: the others failed or
 did not pass verification, and the full run would lose the same share. Then project the full run
 from `durationMs` and `kisWritten` as the time estimate above lays out — the full run writes the
 item count counted above — and state it. When it
@@ -739,13 +747,7 @@ adds a newer revision of each instead. If the user declines it, the pilot's indi
 index: say so.
 
 **With 5 items or fewer, skip the pilot**: it would be the full run. Say the run covers only that
-many items, so there is no time estimate, and start it. A Targeted KI writer has no pilot: it makes
-no model call, and it runs through `platform.core.execute_workflow` as described above. When the
-pilot ended with any `status` other than
-`completed`, report `errorMessage` and stop: there is no duration to project from, and a failed
-pilot means the full run would fail the same way. When it is still `running`, say the time is not
-yet measured, and check it with `platform.core.get_workflow_execution_status` before you start the
-full run.
+many items, so there is no time estimate, and start it.
 
 ## Corpora larger than 10,000 documents
 

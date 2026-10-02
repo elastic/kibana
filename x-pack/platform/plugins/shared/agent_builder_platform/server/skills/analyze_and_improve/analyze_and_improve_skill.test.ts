@@ -354,6 +354,14 @@ describe('analyzeAndImproveSkill', () => {
       );
     });
 
+    it('counts index-metadata model calls per source and points at the pilot rule', () => {
+      const prose = content.replace(/\s+/g, ' ');
+      expect(prose).toMatch(/one per source for index metadata/);
+      expect(prose).toMatch(
+        /`ai-index-automations` says when a template install gets a pilot and how big it is/
+      );
+    });
+
     it('sends the setup case through the grounding queries, with the evidence in the proposal', () => {
       expect(content).toMatch(
         /then the sampling queries, join probes and unit count from "Ground the proposal in the data"/
