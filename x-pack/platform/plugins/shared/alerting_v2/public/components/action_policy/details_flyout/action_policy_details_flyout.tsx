@@ -7,12 +7,10 @@
 
 import type { EuiFlyoutProps } from '@elastic/eui';
 import {
-  EuiBadge,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
-  EuiSpacer,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
@@ -25,6 +23,7 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_policies_license_valid';
+import { UserCapabilities } from '../../../services/user_capabilities';
 import { collectActorUids, resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyActionsMenu } from '../action_policy_actions_menu';
 import { BadgeList } from '../badge_list';
@@ -37,11 +36,14 @@ import {
   getFrequencyLabel,
   getGroupingModeLabel,
 } from '../labels';
+import { AffectedRulesFlyout } from './affected_rules_flyout';
 import { DestinationCard } from './destination_card';
+import { POLICY_SCOPE_LABEL, PolicyScopeSummary, getPolicyScopeKind } from './policy_scope_summary';
 import { Column, SubsectionColumns } from './subsection_columns';
 
 const TAKE_ACTION_BUTTON_ID = 'actionPolicyDetailsFlyoutTakeAction';
 const EMPTY_VALUE = '-';
+const HISTORY_KEY = Symbol('actionPolicyDetailsFlyout');
 
 interface Props {
   policy: ActionPolicyResponse;
@@ -79,11 +81,12 @@ export const ActionPolicyDetailsFlyout = ({
   onUpdateApiKey,
   isStateLoading = false,
   isSnoozeLoading = false,
-  session = 'never',
+  session = 'start',
   ownFocus = false,
   size = 'm',
 }: Props) => {
   const settings = useService(CoreStart('settings'));
+  const canReadRules = useService(UserCapabilities).canRead('rules');
   const dateTimeFormat = settings.client.get<string>('dateFormat');
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
 
@@ -95,33 +98,12 @@ export const ActionPolicyDetailsFlyout = ({
   const snoozedActive = isSnoozed(snoozedUntil);
   const isLicenseValid = useIsActionPoliciesLicenseValid();
   const isEnableBlockedByLicense = !policy.enabled && !isLicenseValid;
+  const scopeKind = getPolicyScopeKind(policy.matcher);
+  const showAffectedRulesLink =
+    canReadRules && (scopeKind === 'tagsOnly' || scopeKind === 'tagsAndExpression');
 
   const [isTakeActionOpen, setIsTakeActionOpen] = useState(false);
-
-  const matcherTags = policy.matcher?.tags?.length ? policy.matcher.tags : null;
-  const matcherExpression = policy.matcher?.expression?.trim() || null;
-
-  const policyScopeSummary =
-    matcherTags && matcherExpression
-      ? i18n.translate(
-          'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tagsAndExpression',
-          {
-            defaultMessage:
-              'This policy matches all alerts from rules with one of the following tags AND the matching query.',
-          }
-        )
-      : matcherTags
-      ? i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.tags', {
-          defaultMessage:
-            'This policy matches all alerts from rules with one of the following tags.',
-        })
-      : matcherExpression
-      ? i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.expression', {
-          defaultMessage: 'This policy matches all alerts matching this query.',
-        })
-      : i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.matchesAll', {
-          defaultMessage: 'This policy matches all alerts.',
-        });
+  const [isAffectedRulesOpen, setIsAffectedRulesOpen] = useState(false);
 
   return (
     <>
@@ -131,6 +113,7 @@ export const ActionPolicyDetailsFlyout = ({
         resizable
         ownFocus={ownFocus}
         session={session}
+        historyKey={HISTORY_KEY}
         onClose={onClose}
         closeButtonProps={{ 'data-test-subj': 'detailsFlyoutCloseIcon' }}
         data-test-subj="actionPolicyDetailsFlyout"
@@ -249,45 +232,35 @@ export const ActionPolicyDetailsFlyout = ({
               <EuiText size="s">{policy.description || EMPTY_VALUE}</EuiText>
             </Body.Section.Subsection>
             <Body.Section.Subsection
-              title={i18n.translate(
-                'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.label',
-                { defaultMessage: 'Policy scope' }
-              )}
+              title={
+                <EuiFlexGroup
+                  component="span"
+                  justifyContent="spaceBetween"
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <EuiFlexItem component="span" grow={false}>
+                    {POLICY_SCOPE_LABEL}
+                  </EuiFlexItem>
+                  {showAffectedRulesLink && (
+                    <EuiFlexItem component="span" grow={false}>
+                      <EuiLink
+                        onClick={() => setIsAffectedRulesOpen(true)}
+                        data-test-subj="actionPolicyDetailsFlyoutSeeAffectedRulesLink"
+                      >
+                        {i18n.translate(
+                          'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.seeAffectedRules',
+                          { defaultMessage: 'See all affected rules' }
+                        )}
+                      </EuiLink>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              }
               data-test-subj="actionPolicyDetailsFlyoutPolicyScopeBlock"
             >
-              <EuiText size="s">{policyScopeSummary}</EuiText>
-              {matcherTags && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" color="subdued">
-                        {i18n.translate(
-                          'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.ruleTags',
-                          { defaultMessage: 'Rule tags:' }
-                        )}
-                      </EuiText>
-                    </EuiFlexItem>
-                    {matcherTags.map((tag) => (
-                      <EuiFlexItem grow={false} key={tag}>
-                        <EuiBadge color="hollow">{tag}</EuiBadge>
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGroup>
-                </>
-              )}
-              {matcherExpression && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiText size="s" color="subdued">
-                    {i18n.translate(
-                      'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.advancedQuery',
-                      { defaultMessage: 'Advanced matching query:' }
-                    )}{' '}
-                    <EuiCode>{matcherExpression}</EuiCode>
-                  </EuiText>
-                </>
-              )}
+              <PolicyScopeSummary matcher={policy.matcher} />
             </Body.Section.Subsection>
           </Body.Section>
           <Body.Section
@@ -360,6 +333,14 @@ export const ActionPolicyDetailsFlyout = ({
           )}
         </Footer>
       </FlyoutTemplate>
+      {isAffectedRulesOpen && (
+        <AffectedRulesFlyout
+          matcher={policy.matcher}
+          historyKey={HISTORY_KEY}
+          ownFocus={ownFocus}
+          onClose={() => setIsAffectedRulesOpen(false)}
+        />
+      )}
       {canWrite && (
         <ActionPolicyActionsMenu
           policy={policy}
