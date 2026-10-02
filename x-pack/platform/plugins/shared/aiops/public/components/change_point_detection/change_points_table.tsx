@@ -128,7 +128,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   );
 
   const isDashboardEmbedding = embeddingOrigin === 'dashboard';
-  const hasActions = fieldConfig.splitField !== undefined && embeddingOrigin !== 'cases';
+  const hasActions =
+    isInteractive && fieldConfig.splitField !== undefined && embeddingOrigin !== 'cases';
 
   const { bucketInterval } = useChangePointDetectionContext();
 

@@ -239,7 +239,7 @@ export const ServiceNode = memo(
                       sloCount={data.sloCount}
                       serviceName={data.label}
                       compactLabelOnNarrowScreens
-                      {...(onSloBadgeClick
+                      {...(isInteractive && onSloBadgeClick
                         ? {
                             onClick: (e) => {
                               e.stopPropagation();

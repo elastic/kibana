@@ -50,6 +50,7 @@ import { fetchFieldCandidates } from '@kbn/aiops-log-rate-analysis/state/log_rat
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
+import { useIsInteractive } from '../../hooks/use_is_interactive';
 
 import {
   getGroupTableItems,
@@ -336,6 +337,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
 
   const isAnalysisControlsDisabled = embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.CASES;
+  const isInteractive = useIsInteractive(parentApi);
 
   return (
     <div data-test-subj="aiopsLogRateAnalysisResults">
@@ -353,7 +355,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       >
         <>
           {embeddingOrigin !== AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (
-            <LogRateAnalysisOptions foundGroups={foundGroups} />
+            <LogRateAnalysisOptions foundGroups={foundGroups} isInteractive={isInteractive} />
           )}
           {embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (
             <EuiFlexItem grow={false}>
@@ -367,6 +369,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
                   data-test-subj="aiopsLogRateAnalysisOptionsButton"
                   iconType="controls"
                   onClick={onEmbeddableOptionsClickHandler}
+                  isDisabled={!isInteractive}
                   aria-label={i18n.translate('xpack.aiops.logRateAnalysis.optionsButtonAriaLabel', {
                     defaultMessage: 'Analysis options',
                   })}
@@ -381,7 +384,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <LogRateAnalysisOptions foundGroups={foundGroups} growFirstItem={true} />
+            <LogRateAnalysisOptions
+              foundGroups={foundGroups}
+              growFirstItem={true}
+              isInteractive={isInteractive}
+            />
           </EuiFlexGroup>
         </>
       )}
