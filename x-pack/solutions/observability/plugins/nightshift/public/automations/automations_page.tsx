@@ -59,7 +59,7 @@ import {
   type Automation,
 } from './hooks/use_automations';
 import { useKibana } from '../hooks/use_kibana';
-import { toCloneAutomationBody } from './flyouts/form/automation_form_values';
+import { toCloneRequestBody } from './utils/clone_automation';
 import { getTriggerDisplay, TRIGGER_LABEL_ORDER } from './flyouts/form/triggers/trigger_section';
 import { CreateAutomationFlyout } from './flyouts/create_flyout/create_automation_flyout';
 
@@ -664,7 +664,7 @@ export const AutomationsPage = (): React.ReactElement => {
             render: (automation: Automation) => (
               <AutomationActions
                 automation={automation}
-                onClone={() => createAutomation.mutate(toCloneAutomationBody(automation))}
+                onClone={() => createAutomation.mutate(toCloneRequestBody(automation))}
                 onDelete={() => setAutomationToDelete(automation)}
               />
             ),

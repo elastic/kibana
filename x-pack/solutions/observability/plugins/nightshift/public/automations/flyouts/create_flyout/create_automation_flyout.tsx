@@ -30,16 +30,13 @@ import { i18n } from '@kbn/i18n';
 import { useCreateAutomation } from '../../hooks/use_automations';
 import {
   createAutomationFormValues,
-  hasDailyLimit,
-  isTriggerValid,
-  isValidCron,
-  isValidDailyLimit,
-  toCreateAutomationBody,
   type AutomationFormValues,
 } from '../form/automation_form_values';
-import { AutomationActionsSection, actionLabels } from '../form/actions/automation_actions_section';
+import { AutomationActionsSection } from '../form/actions/automation_actions_section';
 import { AutomationInstructions } from '../form/instructions/automation_instructions';
 import { AutomationTriggerSection } from '../form/triggers/trigger_section';
+import { toAutomationRequestBody } from '../form/to_automation_request';
+import { canSaveAutomation, getSaveBlocker, isTriggerValid } from '../form/validation';
 
 const MAX_TAG_LENGTH = 32;
 
@@ -88,9 +85,6 @@ const labels = {
     defaultMessage: 'Enables when saved',
   }),
   save: i18n.translate('xpack.nightshift.automations.flyout.save', { defaultMessage: 'Save' }),
-  cronError: i18n.translate('xpack.nightshift.automations.flyout.cronError', {
-    defaultMessage: 'Fix the cron expression to save',
-  }),
   discardTitle: i18n.translate('xpack.nightshift.automations.flyout.discardTitle', {
     defaultMessage: 'Discard this automation?',
   }),
@@ -141,18 +135,6 @@ const AutomationTagsField = ({
   );
 };
 
-const getSaveBlocker = (values: AutomationFormValues): string | undefined => {
-  if (values.trigger?.kind === 'cron' && !isValidCron(values.trigger.cronExpression)) {
-    return labels.cronError;
-  }
-  if (values.slackAction && !values.slackAction.destination.trim()) {
-    return values.slackAction.target === 'channel'
-      ? actionLabels.channelRequired
-      : actionLabels.personRequired;
-  }
-  return undefined;
-};
-
 export const CreateAutomationFlyout = ({
   onClose,
   tagSuggestions = [],
@@ -171,10 +153,7 @@ export const CreateAutomationFlyout = ({
     setValues((current) => ({ ...current, ...changes }));
   const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues);
   const saveBlocker = getSaveBlocker(values);
-  const canSave =
-    isTriggerValid(values.trigger) &&
-    (!hasDailyLimit(values.trigger) || isValidDailyLimit(values.dailyDispatchLimit)) &&
-    !saveBlocker;
+  const canSave = canSaveAutomation(values);
 
   const requestClose = () => (isDirty ? setIsDiscardOpen(true) : onClose());
 
@@ -185,7 +164,9 @@ export const CreateAutomationFlyout = ({
       setIsNameInvalid(true);
       return;
     }
-    createAutomation.mutate(toCreateAutomationBody({ ...values, trigger }), { onSuccess: onClose });
+    createAutomation.mutate(toAutomationRequestBody({ ...values, trigger }), {
+      onSuccess: onClose,
+    });
   };
 
   const saveButton = (

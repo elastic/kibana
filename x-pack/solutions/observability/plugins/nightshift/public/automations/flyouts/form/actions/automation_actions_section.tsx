@@ -68,12 +68,6 @@ export const actionLabels = {
   removeAction: i18n.translate('xpack.nightshift.automations.flyout.removeAction', {
     defaultMessage: 'Remove action',
   }),
-  channelRequired: i18n.translate('xpack.nightshift.automations.flyout.channelRequired', {
-    defaultMessage: 'Choose a Slack channel to post to before saving',
-  }),
-  personRequired: i18n.translate('xpack.nightshift.automations.flyout.personRequired', {
-    defaultMessage: 'Choose who to message in Slack before saving',
-  }),
 };
 
 const useActionRowCss = () => {

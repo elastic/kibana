@@ -207,4 +207,4 @@ export const useDeleteAutomation = () => {
   }, errorToastTitles.delete);
 };
 
-export type { Automation };
+export type { Automation, CreateAutomationBody };

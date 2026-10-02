@@ -39,16 +39,14 @@ import type { Automation } from '../../../hooks/use_automations';
 import { actionLabels } from '../actions/automation_actions_section';
 import {
   createTriggerFormValues,
-  hasDailyLimit,
   isSlackTrigger,
-  isValidCron,
-  isValidDailyLimit,
   type AlertStatus,
   type ScheduleUnit,
   type SlackTriggerFormValues,
   type SlackTriggerKind,
   type TriggerFormValues,
 } from '../automation_form_values';
+import { hasDailyLimit, isValidCron, isValidDailyLimit, validationLabels } from '../validation';
 
 const labels = {
   triggers: i18n.translate('xpack.nightshift.automations.flyout.triggers', {
@@ -172,9 +170,6 @@ const labels = {
   }),
   customCronLead: i18n.translate('xpack.nightshift.automations.flyout.customCronLead', {
     defaultMessage: 'Custom cron',
-  }),
-  cronError: i18n.translate('xpack.nightshift.automations.flyout.cronError', {
-    defaultMessage: 'Fix the cron expression to save',
   }),
   dailyLimit: i18n.translate('xpack.nightshift.automations.dailyLimitLabel', {
     defaultMessage: 'Daily trigger limit',
@@ -825,7 +820,7 @@ const CronTriggerEditor = ({
         data-test-subj="automationCronDescription"
       >
         {isInvalid
-          ? labels.cronError
+          ? validationLabels.cronError
           : `${describeCron(trigger.cronExpression)} (${trigger.timezone})`}
       </EuiText>
     </>
