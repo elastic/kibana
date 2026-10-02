@@ -524,7 +524,8 @@ export function sharedCompilersChanged(
 function childCompilerHashes(stats: MultiStats): Array<{ name?: string; hash?: string }> {
   return stats.stats.map((child) => ({
     name: child.compilation.name,
-    hash: child.hash,
+    // Stats.hash is `Readonly<string | null>`; null means the compiler has no hash yet.
+    hash: child.hash ?? undefined,
   }));
 }
 
