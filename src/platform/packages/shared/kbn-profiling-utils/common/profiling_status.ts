@@ -40,7 +40,7 @@ export interface EnabledProfilingSchemasStatus {
 export type ProfilingSchemasStatus = DisabledProfilingStatus | EnabledProfilingSchemasStatus;
 
 export interface EnabledProfilingStatus extends EnabledProfilingSchemasStatus {
-  universalProfiling: UniversalProfilingSchemaStatus & { canSetup: boolean };
+  universalProfiling: UniversalProfilingSchemaStatus & { canSetup?: boolean };
 }
 
 export type ProfilingStatus = DisabledProfilingStatus | EnabledProfilingStatus;

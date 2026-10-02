@@ -48,19 +48,22 @@ export function registerStatusRoute({ router, logger, dependencies }: RouteRegis
       try {
         const core = await context.core;
 
-        const [status, canSetup] = await Promise.all([
-          start.profilingDataAccess.services.getStatus({
-            esClient: core.elasticsearch.client,
-            soClient: core.savedObjects.client,
-            spaceId: setup.spaces?.spacesService?.getSpaceId(request),
-            abortSignal: getRequestAbortedSignal(request.events.aborted$),
-          }),
-          getCanSetupUniversalProfiling(request),
-        ]);
+        const status = await start.profilingDataAccess.services.getStatus({
+          esClient: core.elasticsearch.client,
+          soClient: core.savedObjects.client,
+          spaceId: setup.spaces?.spacesService?.getSpaceId(request),
+          abortSignal: getRequestAbortedSignal(request.events.aborted$),
+        });
 
         if (!status.isEnabled) {
           return response.ok({ body: status });
         }
+
+        // The setup privileges only matter while Universal Profiling isn't set up, so the check is
+        // skipped once it is.
+        const canSetup = status.universalProfiling.hasSetup
+          ? undefined
+          : await getCanSetupUniversalProfiling(request);
 
         const body: ProfilingStatus = {
           ...status,

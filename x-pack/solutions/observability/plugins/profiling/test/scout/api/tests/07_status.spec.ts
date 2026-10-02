@@ -80,7 +80,6 @@ apiTest.describe('Profiling status', { tag: tags.stateful.classic }, () => {
           hasSetup: setupStatus.has_setup,
           hasData: setupStatus.has_data,
           hasLegacyData: setupStatus.pre_8_9_1_data,
-          canSetup: setupStatus.has_required_role,
         },
       });
     }
