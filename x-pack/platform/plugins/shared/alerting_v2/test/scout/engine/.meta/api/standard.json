@@ -1,637 +1,947 @@
 {
-  "sha1": "2da2feebf1f5805ef02e1d8c39bd67f77b422acb",
+  "sha1": "4491e211e8ba7c2cf64fa3fae939a777d55e7245",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "af81b6bb218cc8d-c5e946cce3fe120",
+      "id": "ea92ea1237e61b0-abc3c97abd88ccf",
+      "title": "Enable alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "a9182844e7706ff-c5e946cce3fe120",
       "title": "Alerting v2 data stream ingest timestamp pipeline .rule-events: installs the managed ingest pipeline",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/datastream_final_pipeline.spec.ts",
         "line": 49,
         "column": 10
       }
     },
     {
-      "id": "af81b6bb218cc8d-4000966590f5848",
+      "id": "a9182844e7706ff-4000966590f5848",
       "title": "Alerting v2 data stream ingest timestamp pipeline .rule-events: index template sets index.final_pipeline at the current version",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/datastream_final_pipeline.spec.ts",
         "line": 54,
         "column": 40
       }
     },
     {
-      "id": "af81b6bb218cc8d-a89788bb7207aef",
+      "id": "a9182844e7706ff-a89788bb7207aef",
       "title": "Alerting v2 data stream ingest timestamp pipeline .rule-events: stamps timestamp on writes that omit it",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/datastream_final_pipeline.spec.ts",
         "line": 60,
         "column": 33
       }
     },
     {
-      "id": "af81b6bb218cc8d-f808b0e5811f97a",
+      "id": "a9182844e7706ff-f808b0e5811f97a",
       "title": "Alerting v2 data stream ingest timestamp pipeline .rule-events: every backing index has index.final_pipeline",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/datastream_final_pipeline.spec.ts",
         "line": 73,
         "column": 17
       }
     },
     {
-      "id": "af81b6bb218cc8d-e3aa73ad9514120",
+      "id": "a9182844e7706ff-e3aa73ad9514120",
       "title": "Alerting v2 data stream ingest timestamp pipeline .alert-actions: installs the managed ingest pipeline",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/datastream_final_pipeline.spec.ts",
         "line": 49,
         "column": 10
       }
     },
     {
-      "id": "af81b6bb218cc8d-acfd1b25206c18e",
+      "id": "a9182844e7706ff-acfd1b25206c18e",
       "title": "Alerting v2 data stream ingest timestamp pipeline .alert-actions: index template sets index.final_pipeline at the current version",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/datastream_final_pipeline.spec.ts",
         "line": 54,
         "column": 40
       }
     },
     {
-      "id": "af81b6bb218cc8d-97fdad4fbe64d37",
+      "id": "a9182844e7706ff-97fdad4fbe64d37",
       "title": "Alerting v2 data stream ingest timestamp pipeline .alert-actions: stamps timestamp on writes that omit it",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/datastream_final_pipeline.spec.ts",
         "line": 60,
         "column": 33
       }
     },
     {
-      "id": "af81b6bb218cc8d-e34b13e4105d8eb",
+      "id": "a9182844e7706ff-e34b13e4105d8eb",
       "title": "Alerting v2 data stream ingest timestamp pipeline .alert-actions: every backing index has index.final_pipeline",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/datastream_final_pipeline.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/datastream_final_pipeline.spec.ts",
         "line": 73,
         "column": 17
       }
     },
     {
-      "id": "80022d138baddea-0f1c065c42b9c1b",
+      "id": "a91706476fab3a1-0f1c065c42b9c1b",
       "title": "End-to-end (executor -> director -> dispatcher) a breaching rule produces a fire action via the full end-to-end",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/end_to_end.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/end_to_end.spec.ts",
         "line": 70,
         "column": 94
       }
     },
     {
-      "id": "80022d138baddea-a4879e8eb660252",
+      "id": "a91706476fab3a1-a4879e8eb660252",
       "title": "End-to-end (executor -> director -> dispatcher) a recovering rule produces a fire action for the inactive transition",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/end_to_end.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/end_to_end.spec.ts",
         "line": 109,
         "column": 27
       }
     },
     {
-      "id": "067e9c797dbeec5-f2ee7078b7d95b9",
+      "id": "ba623469e97668f-f2ee7078b7d95b9",
       "title": "Alerting v2 alerts implicit index privileges viewer: get-role surfaces read on both patterns with no DLS",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 353,
         "column": 16
       }
     },
     {
-      "id": "067e9c797dbeec5-31b66ccc2aa5315",
+      "id": "ba623469e97668f-31b66ccc2aa5315",
       "title": "Alerting v2 alerts implicit index privileges viewer: reads .rule-events and .alert-actions in every space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 358,
         "column": 6
       }
     },
     {
-      "id": "067e9c797dbeec5-6ed7a760dd19297",
+      "id": "ba623469e97668f-6ed7a760dd19297",
       "title": "Alerting v2 alerts implicit index privileges editor: get-role surfaces read on both patterns with no DLS",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 364,
         "column": 11
       }
     },
     {
-      "id": "067e9c797dbeec5-edc4bbda9d981f1",
+      "id": "ba623469e97668f-edc4bbda9d981f1",
       "title": "Alerting v2 alerts implicit index privileges editor: reads .rule-events and .alert-actions in every space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 370,
         "column": 27
       }
     },
     {
-      "id": "067e9c797dbeec5-a7ef8a1e224f557",
+      "id": "ba623469e97668f-a7ef8a1e224f557",
       "title": "Alerting v2 alerts implicit index privileges kibana_admin: get-role surfaces read on both patterns with no DLS",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 375,
         "column": 31
       }
     },
     {
-      "id": "067e9c797dbeec5-920b47b674e476a",
+      "id": "ba623469e97668f-920b47b674e476a",
       "title": "Alerting v2 alerts implicit index privileges kibana_admin: reads .rule-events and .alert-actions in every space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 383,
         "column": 7
       }
     },
     {
-      "id": "067e9c797dbeec5-ef34e7ebe714f4a",
+      "id": "ba623469e97668f-ef34e7ebe714f4a",
       "title": "Alerting v2 alerts implicit index privileges custom alerts:read in \"*\": get-role surfaces read with no DLS",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 392,
         "column": 6
       }
     },
     {
-      "id": "067e9c797dbeec5-eb120af99a4fbd7",
+      "id": "ba623469e97668f-eb120af99a4fbd7",
       "title": "Alerting v2 alerts implicit index privileges custom alerts:read in \"*\": reads .rule-events and .alert-actions in every space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 396,
         "column": 31
       }
     },
     {
-      "id": "067e9c797dbeec5-1b130d4be867897",
+      "id": "ba623469e97668f-1b130d4be867897",
       "title": "Alerting v2 alerts implicit index privileges custom alerts:all in \"*\": get-role surfaces read with no DLS",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 405,
         "column": 16
       }
     },
     {
-      "id": "067e9c797dbeec5-759b5d579df8512",
+      "id": "ba623469e97668f-759b5d579df8512",
       "title": "Alerting v2 alerts implicit index privileges custom alerts:all in \"*\": reads .rule-events and .alert-actions in every space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 410,
         "column": 11
       }
     },
     {
-      "id": "067e9c797dbeec5-cc2b6e36c32bce1",
+      "id": "ba623469e97668f-cc2b6e36c32bce1",
       "title": "Alerting v2 alerts implicit index privileges custom alerts:read in marketing: get-role DLS is scoped to marketing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 418,
         "column": 16
       }
     },
     {
-      "id": "067e9c797dbeec5-6ecab2c2e0d1b1d",
+      "id": "ba623469e97668f-6ecab2c2e0d1b1d",
       "title": "Alerting v2 alerts implicit index privileges custom alerts:read in marketing: reads .rule-events and .alert-actions only in marketing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 427,
         "column": 16
       }
     },
     {
-      "id": "067e9c797dbeec5-edfde7baa7f49bf",
+      "id": "ba623469e97668f-edfde7baa7f49bf",
       "title": "Alerting v2 alerts implicit index privileges custom alerts:all in marketing: get-role DLS is scoped to marketing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 441,
         "column": 11
       }
     },
     {
-      "id": "067e9c797dbeec5-0d0dfc34adf0d40",
+      "id": "ba623469e97668f-0d0dfc34adf0d40",
       "title": "Alerting v2 alerts implicit index privileges custom alerts:all in marketing: reads .rule-events and .alert-actions only in marketing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 450,
         "column": 11
       }
     },
     {
-      "id": "067e9c797dbeec5-6906f8a64321b1c",
+      "id": "ba623469e97668f-6906f8a64321b1c",
       "title": "Alerting v2 alerts implicit index privileges custom alerts:read in marketing+finance: get-role DLS covers both spaces",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 468,
         "column": 6
       }
     },
     {
-      "id": "067e9c797dbeec5-6daacaaeea5dac5",
+      "id": "ba623469e97668f-6daacaaeea5dac5",
       "title": "Alerting v2 alerts implicit index privileges custom alerts:read in marketing+finance: reads .rule-events and .alert-actions in both spaces",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 488,
         "column": 6
       }
     },
     {
-      "id": "067e9c797dbeec5-1d051c53044a278",
+      "id": "ba623469e97668f-1d051c53044a278",
       "title": "Alerting v2 alerts implicit index privileges custom alerting_v2 rules only: get-role surfaces no implicit grant",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 504,
         "column": 11
       }
     },
     {
-      "id": "067e9c797dbeec5-52721214c15902f",
+      "id": "ba623469e97668f-52721214c15902f",
       "title": "Alerting v2 alerts implicit index privileges custom alerting_v2 rules only: cannot read .rule-events or .alert-actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 513,
         "column": 7
       }
     },
     {
-      "id": "067e9c797dbeec5-57c07c9ec575998",
+      "id": "ba623469e97668f-57c07c9ec575998",
       "title": "Alerting v2 alerts implicit index privileges custom role with no alerting_v2 privilege: get-role surfaces no implicit grant",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 519,
         "column": 6
       }
     },
     {
-      "id": "067e9c797dbeec5-e1d82179da16ae7",
+      "id": "ba623469e97668f-e1d82179da16ae7",
       "title": "Alerting v2 alerts implicit index privileges custom role with no alerting_v2 privilege: cannot read .rule-events or .alert-actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/implicit_index_privileges.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/implicit_index_privileges.spec.ts",
         "line": 523,
         "column": 31
       }
     },
     {
-      "id": "134d64c4c7ff58c-7f791e41745c742",
+      "id": "d2d098357d3068e-7f791e41745c742",
       "title": "Rule change history create: logs a rule_create entry with sequence 1 and a RuleResponse-shaped snapshot",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history.spec.ts",
         "line": 69,
         "column": 5
       }
     },
     {
-      "id": "134d64c4c7ff58c-721824a2cb489b8",
+      "id": "d2d098357d3068e-721824a2cb489b8",
       "title": "Rule change history update: logs a rule_update entry with sequence 2 and the post-change snapshot",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history.spec.ts",
         "line": 105,
         "column": 19
       }
     },
     {
-      "id": "134d64c4c7ff58c-076cbd168c53cad",
+      "id": "d2d098357d3068e-076cbd168c53cad",
       "title": "Rule change history upsert (create): logs a rule_create entry when the rule does not yet exist",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history.spec.ts",
         "line": 173,
         "column": 19
       }
     },
     {
-      "id": "134d64c4c7ff58c-cebbf774add38e2",
+      "id": "d2d098357d3068e-cebbf774add38e2",
       "title": "Rule change history upsert (update): logs a rule_update entry when the rule already exists",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history.spec.ts",
         "line": 208,
         "column": 14
       }
     },
     {
-      "id": "134d64c4c7ff58c-d881130ec7f4802",
+      "id": "d2d098357d3068e-d881130ec7f4802",
       "title": "Rule change history disable: logs a rule_disable entry with sequence 2 and enabled: false in the snapshot",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history.spec.ts",
         "line": 272,
         "column": 14
       }
     },
     {
-      "id": "134d64c4c7ff58c-ffa9ead21e78fee",
+      "id": "d2d098357d3068e-ffa9ead21e78fee",
       "title": "Rule change history enable: logs a rule_enable entry with sequence 3 and enabled: true in the snapshot",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history.spec.ts",
         "line": 329,
         "column": 9
       }
     },
     {
-      "id": "134d64c4c7ff58c-2bdb5c3af519adc",
+      "id": "d2d098357d3068e-2bdb5c3af519adc",
       "title": "Rule change history delete: logs a rule_delete entry with a bumped sequence and a pre-delete snapshot",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history.spec.ts",
         "line": 400,
         "column": 80
       }
     },
     {
-      "id": "134d64c4c7ff58c-7466317b0fa1c8e",
+      "id": "d2d098357d3068e-7466317b0fa1c8e",
       "title": "Rule change history HTTP list + detail: returns lean rows with server-side diffs and full snapshots on detail",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history.spec.ts",
         "line": 460,
         "column": 18
       }
     },
     {
-      "id": "2a3330f8808a2d4-14af16ecf5b4c6e",
+      "id": "628e398f81b8b3d-14af16ecf5b4c6e",
       "title": "Agent Builder — alerting V2 SML type access limited privilege user can search alerting v2 rule and action policy SML types",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 264,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
+        "line": 262,
         "column": 6
       }
     },
     {
-      "id": "2a3330f8808a2d4-1f9e47bf5893431",
+      "id": "628e398f81b8b3d-1f9e47bf5893431",
       "title": "Agent Builder — alerting V2 SML type access limited privilege user can filter SML search to the rule type",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 283,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
+        "line": 281,
         "column": 16
       }
     },
     {
-      "id": "2a3330f8808a2d4-8d801d629dbe51a",
+      "id": "628e398f81b8b3d-8d801d629dbe51a",
       "title": "Agent Builder — alerting V2 SML type access limited privilege user can filter SML search to the action policy type",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 298,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
+        "line": 296,
         "column": 16
       }
     },
     {
-      "id": "2a3330f8808a2d4-c9f7c69fdc70c1b",
+      "id": "628e398f81b8b3d-c9f7c69fdc70c1b",
       "title": "Agent Builder — alerting V2 SML type access user with agent builder read but without alerting v2 read cannot see rule or action policy SML hits",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 309,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
+        "line": 307,
         "column": 1
       }
     },
     {
-      "id": "2a3330f8808a2d4-d86c1bdd1fc4b98",
+      "id": "628e398f81b8b3d-d86c1bdd1fc4b98",
       "title": "Agent Builder — alerting V2 SML type access user without alerting v2 read cannot see rule or action policy SML hits on a wildcard search",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 324,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
+        "line": 322,
         "column": 16
       }
     },
     {
-      "id": "2a3330f8808a2d4-ee202b11d867308",
+      "id": "628e398f81b8b3d-ee202b11d867308",
       "title": "Agent Builder — alerting V2 SML type access limited privilege user still sees both types on a wildcard search",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 334,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/sml_types_access.spec.ts",
+        "line": 332,
         "column": 10
       }
     },
     {
-      "id": "6290ee9814ba752-878763af7a4b207",
+      "id": "124af2a13fc41c5-878763af7a4b207",
       "title": "Alerting V2 Telemetry should retrieve telemetry data in the expected format",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/telemetry.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/telemetry.spec.ts",
         "line": 167,
         "column": 12
+      }
+    },
+    {
+      "id": "e7fd43984ecccfc-ebf10327abcc16d",
+      "title": "Unset alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]
