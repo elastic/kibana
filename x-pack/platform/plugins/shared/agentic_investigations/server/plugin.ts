@@ -28,6 +28,7 @@ import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AssignmentsService } from './assignments/assignments_service';
 import { InvestigationStatusService } from './investigations/services/investigation_status_service';
 import { registerInvestigationRoutes } from './investigations/routes/register_routes';
+import { createInvestigationsPrivilegesReader } from './investigations/services/check_investigations_privileges';
 import { createUserResolver } from './services/resolve_user';
 import type { ResolveUser } from './services/resolve_user';
 import type {
@@ -111,6 +112,9 @@ export class AgenticInvestigationsPlugin
       logger: this.logger,
       getAssignmentsService: () => this.requireAssignmentsService(),
       getInvestigationStatusService: () => this.requireInvestigationStatusService(),
+      privileges: createInvestigationsPrivilegesReader({
+        getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+      }),
     });
 
     registerInvestigationStepDefinitions({
