@@ -33,17 +33,17 @@ const classifyStep = (yaml: string): ClassifyStep => {
 
 /** The sentences a classifier needs to file a finding; both workflows must carry them verbatim. */
 const findingSentences = [
-  'Every result states findingType as none, sensitive-data, or odd.',
+  'Every result states findingType as none or sensitive-data.',
   "Use none when nothing about the line needs a reviewer's attention; a finding means a careful engineer should look at this exact source line, regardless of keep.",
   'Use sensitive-data when the line logs or attaches credentials, tokens, secrets, passwords, card data, or personal data such as email addresses.',
-  'Use odd for anything else that looks wrong to a careful engineer: an aggregation over an identifier or flag, debug output left in production code, a level that contradicts the message, or anything you cannot explain.',
+  'Anything else that merely looks wrong, including a questionable aggregation, leftover debug output, or a level that contradicts the message, is not a finding; answer with findingType none.',
   'Being a duplicate, not being a runtime emission, or being an ordinary message is a keep decision, not a finding; answer with keep and findingType none.',
   'When findingType is not none, also return findingTitle and findingSummary; when it is none, omit both.',
   'Never copy a secret, token, or password value into findingTitle or findingSummary; describe what is exposed, not its value.',
 ];
 
 const findingSchema = {
-  findingType: { enum: ['none', 'sensitive-data', 'odd'] },
+  findingType: { enum: ['none', 'sensitive-data'] },
   findingTitle: { type: 'string', minLength: 1, maxLength: 160 },
   findingSummary: { type: 'string', minLength: 1, maxLength: 600 },
 };

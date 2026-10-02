@@ -21,16 +21,8 @@ describe('findingDocumentId', () => {
     expect(findingDocumentId(input)).toMatch(/^[a-f0-9]{64}$/);
   });
 
-  it('differs across finding types for the same candidate', () => {
-    const input = { candidateId: 'src/app.ts:1', repository: 'elastic/example' };
-
-    expect(findingDocumentId({ ...input, findingType: 'sensitive-data' })).not.toBe(
-      findingDocumentId({ ...input, findingType: 'odd' })
-    );
-  });
-
   it('differs across repositories because path-based candidate IDs repeat between them', () => {
-    const input = { candidateId: 'cmd/main.go:12', findingType: 'odd' as const };
+    const input = { candidateId: 'cmd/main.go:12', findingType: 'sensitive-data' as const };
 
     expect(findingDocumentId({ ...input, repository: 'elastic/one' })).not.toBe(
       findingDocumentId({ ...input, repository: 'elastic/two' })
@@ -39,8 +31,10 @@ describe('findingDocumentId', () => {
 
   it('does not collide when the repository and candidate boundary moves', () => {
     expect(
-      findingDocumentId({ candidateId: 'b/c.go:1', findingType: 'odd', repository: 'a' })
-    ).not.toBe(findingDocumentId({ candidateId: 'c.go:1', findingType: 'odd', repository: 'a/b' }));
+      findingDocumentId({ candidateId: 'b/c.go:1', findingType: 'sensitive-data', repository: 'a' })
+    ).not.toBe(
+      findingDocumentId({ candidateId: 'c.go:1', findingType: 'sensitive-data', repository: 'a/b' })
+    );
   });
 });
 
