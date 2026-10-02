@@ -16,32 +16,30 @@ import {
 } from '@kbn/content-management-table-list-view-table';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
-import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   coreServices,
   savedObjectsTaggingService,
   serverlessService,
   usageCollectionService,
-} from '../services/kibana_services';
-import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
-import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import { confirmCreateWithUnsaved } from './confirm_overlays';
-import { getDashboardBackupService } from '../services/dashboard_api_services';
+} from '../../services/kibana_services';
+import { DashboardUnsavedListing } from '../dashboard_unsaved_listing';
+import { useDashboardListingTable } from './use_dashboard_listing_table';
 import type {
   DashboardListingProps,
   DashboardListingTab,
   DashboardSavedObjectUserContent,
-} from './types';
+} from '../types';
 
-type GetDashboardListingTabsParams = Pick<
+type UseTabsParams = Pick<
   DashboardListingProps,
   'goToDashboard' | 'getDashboardUrl' | 'useSessionStorageIntegration' | 'initialFilter' | 'getTabs'
 > & {
   refreshListBouncer?: boolean;
 };
 
-type TabContentProps = Omit<GetDashboardListingTabsParams, 'getTabs'> & {
+type TabContentProps = Omit<UseTabsParams, 'getTabs'> & {
   parentProps: TableListTabParentProps<DashboardSavedObjectUserContent>;
 };
 
@@ -103,14 +101,14 @@ const DashboardsTabContent = ({
   );
 };
 
-export const getDashboardListingTabs = ({
+export const useTabs = ({
   goToDashboard,
   getDashboardUrl,
   useSessionStorageIntegration,
   initialFilter,
   getTabs,
   refreshListBouncer,
-}: GetDashboardListingTabsParams): DashboardListingTab[] => {
+}: UseTabsParams): DashboardListingTab[] => {
   const commonProps = {
     goToDashboard,
     getDashboardUrl,
@@ -119,28 +117,27 @@ export const getDashboardListingTabs = ({
     refreshListBouncer,
   };
 
-  const dashboardsTab: DashboardListingTab = {
-    title: i18n.translate('dashboard.listing.tabs.dashboards.title', {
-      defaultMessage: 'Dashboards',
-    }),
-    id: 'dashboards',
-    getTableList: (parentProps) => (
-      <DashboardsTabContent {...commonProps} parentProps={parentProps} />
-    ),
-    createAction: () => {
-      if (useSessionStorageIntegration && getDashboardBackupService().dashboardHasUnsavedEdits()) {
-        confirmCreateWithUnsaved(() => {
-          getDashboardBackupService().clearState();
-          goToDashboard();
-        }, goToDashboard);
-        return;
-      }
-      goToDashboard();
-    },
-  };
+  return useMemo(() => {
+    const dashboardsTab: DashboardListingTab = {
+      title: i18n.translate('dashboard.listing.tabs.dashboards.title', {
+        defaultMessage: 'Dashboards',
+      }),
+      id: 'dashboards',
+      getTableList: (parentProps) => (
+        <DashboardsTabContent {...commonProps} parentProps={parentProps} />
+      ),
+    };
 
-  // Additional tabs (e.g., visualizations and annotation groups)
-  const additionalTabs = getTabs ? getTabs() : [];
+    const additionalTabs = getTabs ? getTabs() : [];
 
-  return [dashboardsTab, ...additionalTabs];
+    return [dashboardsTab, ...additionalTabs];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    goToDashboard,
+    getDashboardUrl,
+    useSessionStorageIntegration,
+    initialFilter,
+    getTabs,
+    refreshListBouncer,
+  ]);
 };
