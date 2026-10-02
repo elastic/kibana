@@ -1732,6 +1732,43 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('findByWorkflowExecutionId', () => {
+    it('returns the original proposal its gate execution created, within the space', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      const proposal = await service.findByWorkflowExecutionId(EXECUTION_ID, SPACE_ID);
+
+      expect(proposal).toMatchObject({ id: 'proposal-1', workflowExecutionId: EXECUTION_ID });
+      expect(proposal).not.toHaveProperty('ranks');
+      expect(storage.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 1,
+          query: {
+            bool: {
+              filter: [
+                { term: { workflowExecutionId: EXECUTION_ID } },
+                { term: { spaceId: SPACE_ID } },
+              ],
+            },
+          },
+          sort: [{ createdAt: { order: 'asc' } }],
+        })
+      );
+    });
+
+    it('returns undefined before the create step ran, or for a blank id', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await expect(service.findByWorkflowExecutionId(EXECUTION_ID, SPACE_ID)).resolves.toBe(
+        undefined
+      );
+      await expect(service.findByWorkflowExecutionId('', SPACE_ID)).resolves.toBe(undefined);
+      expect(storage.search).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('getLatestRevision', () => {
     it('returns the proposal itself when it is the live revision', async () => {
       const storage = createStorage(baseDocument({ rootProposalId: 'proposal-1', revision: 1 }));

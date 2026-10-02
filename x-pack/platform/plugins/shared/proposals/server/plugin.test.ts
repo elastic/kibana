@@ -14,6 +14,7 @@ import {
   CreateProposalStepId,
   GetLatestRevisionStepId,
   GetProposalStepId,
+  PROPOSALS_CREATE_TOOL_ID,
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
   SettleIncompleteProposalStepId,
@@ -54,6 +55,7 @@ const setupPlugin = () => {
 
   const agentBuilder = {
     attachments: { registerType: jest.fn() },
+    tools: { register: jest.fn() },
   };
 
   plugin.setup(
@@ -132,6 +134,15 @@ describe('ProposalsPlugin', () => {
       const { agentBuilder } = setupPlugin();
 
       expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
+    });
+
+    it('registers the proposals.create agent tool with Agent Builder', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: PROPOSALS_CREATE_TOOL_ID })
+      );
     });
 
     it('registers as a managed workflow owner, or the startup sweep deletes our workflows', () => {
