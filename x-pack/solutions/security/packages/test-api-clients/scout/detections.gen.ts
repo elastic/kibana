@@ -790,10 +790,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/internal/detection_engine/rules/{ruleId}/execution/results',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/internal/detection_engine/rules/{ruleId}/execution/results', encodePathParams(props.params))}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, ReadRuleExecutionResultsResponse>>(
       path,
@@ -840,10 +837,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, RestoreRuleFromHistoryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/internal/detection_engine/rules/{ruleId}/history/{changeId}/_restore',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/internal/detection_engine/rules/{ruleId}/history/{changeId}/_restore', encodePathParams(props.params))}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, RestoreRuleFromHistoryResponse>>(path, {
       headers: {
@@ -912,10 +906,7 @@ the immediately preceding revision in `old_values`.
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, RuleChangesHistoryResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/internal/detection_engine/rules/{ruleId}/history/_list',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/internal/detection_engine/rules/{ruleId}/history/_list', encodePathParams(props.params))}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, RuleChangesHistoryResponse>>(
       `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
