@@ -41,6 +41,10 @@ export const KEEP_SEPARATE: Readonly<Record<string, string>> = {
     'completing the setup is one way, so the UI and API suites need fresh servers',
   initial_solution_setup_api:
     'completing the setup is one way, so the UI and API suites need fresh servers',
+  synthetics_agent_e2e:
+    'the EDR set presets a default Fleet Server and output that would conflict with the ones this suite registers at runtime',
+  search_sessions:
+    'the examples set loads every example plugin, which would change the Data, Dashboard, Discover and Lens UI tests',
   workflows_extensions:
     'grows with every plugin gated trigger, merging would load those flags on the Nightshift tests',
 };
