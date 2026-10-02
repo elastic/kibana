@@ -11,14 +11,14 @@ import { groupHashSchema, tagsSchema } from './common';
 import { ID_MAX_LENGTH, MAX_EPISODE_DATA_LENGTH, MAX_EPISODE_LABEL_LENGTH } from './constants';
 
 /** Namespaced to match `ALERTING_NAMESPACE` in `@kbn/alerting-v2-constants`. */
-export const EPISODE_ATTACHMENT_TYPE = 'platform.alerting.episode' as const;
+export const ALERT_ATTACHMENT_TYPE = 'platform.alerting.alert' as const;
 
-export const episodeAttachmentDataSchema = z
+export const alertAttachmentDataSchema = z
   .object({
     '@timestamp': z.iso.datetime(),
-    'episode.id': z.string().min(1).max(ID_MAX_LENGTH),
-    'episode.label': z.string().min(1).max(MAX_EPISODE_LABEL_LENGTH).optional(),
-    'episode.status': alertEpisodeStatusSchema,
+    'alert.id': z.string().min(1).max(ID_MAX_LENGTH),
+    'alert.label': z.string().min(1).max(MAX_EPISODE_LABEL_LENGTH).optional(),
+    'alert.status': alertEpisodeStatusSchema,
     'rule.id': z.string().min(1).max(ID_MAX_LENGTH),
     group_hash: groupHashSchema,
     first_timestamp: z.iso.datetime(),
@@ -30,9 +30,9 @@ export const episodeAttachmentDataSchema = z
     last_snooze_action: z.enum(['snooze', 'unsnooze']).optional(),
     snoozed_until: z.iso.datetime().optional(),
     last_tags: tagsSchema.optional(),
-    episode_data: z.string().max(MAX_EPISODE_DATA_LENGTH).optional(),
+    alert_data: z.string().max(MAX_EPISODE_DATA_LENGTH).optional(),
     severity: z.string().min(1).max(ID_MAX_LENGTH).optional(),
   })
   .strict();
 
-export type EpisodeAttachmentData = z.infer<typeof episodeAttachmentDataSchema>;
+export type AlertAttachmentData = z.infer<typeof alertAttachmentDataSchema>;

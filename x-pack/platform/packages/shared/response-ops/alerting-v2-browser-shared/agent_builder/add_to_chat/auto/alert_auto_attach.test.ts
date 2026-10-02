@@ -12,11 +12,11 @@ import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
   ALERT_EPISODE_STATUS,
-  EPISODE_ATTACHMENT_TYPE,
+  ALERT_ATTACHMENT_TYPE,
   type AlertEpisode,
 } from '@kbn/alerting-v2-schemas';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
-import { registerEpisodeAutoAttach } from './episode_auto_attach';
+import { registerAlertAutoAttach } from './alert_auto_attach';
 import type { FocusedEpisode } from '../../types';
 
 const createEpisode = (overrides?: Partial<AlertEpisode>): AlertEpisode => ({
@@ -31,7 +31,7 @@ const createEpisode = (overrides?: Partial<AlertEpisode>): AlertEpisode => ({
   ...overrides,
 });
 
-describe('registerEpisodeAutoAttach', () => {
+describe('registerAlertAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
   let focusedEpisode$: BehaviorSubject<FocusedEpisode | undefined>;
@@ -73,7 +73,7 @@ describe('registerEpisodeAutoAttach', () => {
       },
     } as unknown as AgentBuilderPluginStart;
 
-    cleanup = registerEpisodeAutoAttach({
+    cleanup = registerAlertAutoAttach({
       agentBuilder,
       chrome,
       focusedEpisode$,
@@ -106,13 +106,13 @@ describe('registerEpisodeAutoAttach', () => {
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith({
-      id: 'episode:ep-1',
-      type: EPISODE_ATTACHMENT_TYPE,
+      id: 'alert:ep-1',
+      type: ALERT_ATTACHMENT_TYPE,
       origin: 'ep-1',
       data: expect.objectContaining({
-        'episode.id': 'ep-1',
+        'alert.id': 'ep-1',
         last_assignee_uid: undefined,
-        episode_data: undefined,
+        alert_data: undefined,
         severity: undefined,
       }),
     });
@@ -126,7 +126,7 @@ describe('registerEpisodeAutoAttach', () => {
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ 'episode.label': 'Host CPU high alert' }),
+        data: expect.objectContaining({ 'alert.label': 'Host CPU high alert' }),
       })
     );
   });
@@ -175,7 +175,7 @@ describe('registerEpisodeAutoAttach', () => {
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'episode:ep-1', origin: 'ep-1' })
+      expect.objectContaining({ id: 'alert:ep-1', origin: 'ep-1' })
     );
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
@@ -188,7 +188,7 @@ describe('registerEpisodeAutoAttach', () => {
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'episode:ep-2', origin: 'ep-2' })
+      expect.objectContaining({ id: 'alert:ep-2', origin: 'ep-2' })
     );
   });
 
@@ -204,11 +204,11 @@ describe('registerEpisodeAutoAttach', () => {
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ id: 'episode:ep-1', origin: 'ep-1' })
+      expect.objectContaining({ id: 'alert:ep-1', origin: 'ep-1' })
     );
     expect(addAttachment).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ id: 'episode:ep-2', origin: 'ep-2' })
+      expect.objectContaining({ id: 'alert:ep-2', origin: 'ep-2' })
     );
   });
 
