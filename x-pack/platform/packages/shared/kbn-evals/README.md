@@ -226,7 +226,9 @@ fewer models, list it under `specModelGroups` in
 
 - `files` are paths relative to the suite's config directory.
 - A spec without an entry (or without `models`) runs against the whole `weeklyEisModelGroups` list.
-- Every model in `specModelGroups` must also be in `weeklyEisModelGroups`. CI provisions only that list.
+- Every model in `specModelGroups` must be in `weeklyEisModelGroups`, and every model there must
+  be in the weekly step's `EVAL_MODEL_GROUPS` in `llm_evals.yml`. Both are checked in PR CI. The
+  weekly run requests `EVAL_MODEL_GROUPS`; EIS provisions every model it discovers.
 - `shards` are unrelated. They decide which specs share a CI step, not which models run.
 - Only the weekly run (`KBN_EVALS_WEEKLY=1`) applies this. PR and on-demand runs still run every
   model against every spec.
