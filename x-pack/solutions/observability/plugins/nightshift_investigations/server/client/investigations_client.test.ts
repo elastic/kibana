@@ -264,9 +264,9 @@ describe('NightshiftInvestigationsClient.get()', () => {
   });
 
   it('returns the stored severity', async () => {
-    repository.get.mockResolvedValue(makeRecord({ severity: '60-high' }));
+    repository.get.mockResolvedValue(makeRecord({ severity: 'high' }));
     const result = await makeClient().get('inv-1');
-    expect(result.severity).toBe('60-high');
+    expect(result.severity).toBe('high');
   });
 
   it('leaves severity unset when the record has none', async () => {
@@ -383,11 +383,11 @@ describe('NightshiftInvestigationsClient.list()', () => {
 
   it('returns severity on list items when stored', async () => {
     repository.find.mockResolvedValue(
-      findResult([makeRecord({ severity: '80-critical' }, { id: 'inv-42' })])
+      findResult([makeRecord({ severity: 'critical' }, { id: 'inv-42' })])
     );
 
     const result = await makeClient().list({});
-    expect(result.results[0].severity).toBe('80-critical');
+    expect(result.results[0].severity).toBe('critical');
   });
 });
 
