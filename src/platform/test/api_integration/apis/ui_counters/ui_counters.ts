@@ -105,8 +105,6 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           description: 'reported events to be stored into ES',
-          retryDelay: 1500,
-          initialDelay: 3000,
         }
       );
     });
@@ -155,8 +153,6 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           description: 'reported events to be stored into ES',
-          retryDelay: 1500,
-          initialDelay: 3000,
         }
       );
     });
