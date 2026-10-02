@@ -39,6 +39,7 @@ const assertConversationOwner = async (
 const putAttachment = async <TStored extends StoredInvestigationAttachment>(
   client: AttachmentPublicClient,
   type: string,
+  hidden: boolean,
   document: InvestigationAttachmentDocument<TStored>
 ): Promise<void> => {
   const create = () =>
@@ -48,6 +49,7 @@ const putAttachment = async <TStored extends StoredInvestigationAttachment>(
       type,
       origin: document.id,
       data: document,
+      ...(hidden && { hidden: true }),
     });
 
   try {
@@ -93,18 +95,19 @@ const putAttachment = async <TStored extends StoredInvestigationAttachment>(
 const stampCurrentDocument = async <TStored extends StoredInvestigationAttachment>(
   client: AttachmentPublicClient,
   type: string,
+  hidden: boolean,
   read: () => Promise<InvestigationAttachmentDocument<TStored>>
 ): Promise<InvestigationAttachmentDocument<TStored>> => {
   let current = await read();
   for (let attempt = 0; attempt < MAX_STAMP_ATTEMPTS; attempt++) {
-    await putAttachment(client, type, current);
+    await putAttachment(client, type, hidden, current);
     const after = await read();
     if (current.id === after.id && sameInvestigationAttachmentDocument(current, after)) {
       return after;
     }
     current = after;
   }
-  await putAttachment(client, type, current);
+  await putAttachment(client, type, hidden, current);
   return current;
 };
 
@@ -122,6 +125,7 @@ export const attachWithPublicClient = async <TStored extends StoredInvestigation
   read,
   write,
   revert,
+  hidden = false,
 }: {
   type: string;
   conversations: ConversationPublicClient;
@@ -130,12 +134,14 @@ export const attachWithPublicClient = async <TStored extends StoredInvestigation
   read: () => Promise<InvestigationAttachmentDocument<TStored>>;
   write: () => Promise<WrittenInvestigationAttachment<TStored>>;
   revert: (written: WrittenInvestigationAttachment<TStored>) => Promise<void>;
+  /** Creates the attachment hidden from the chat (pills, inline cards, timeline events). */
+  hidden?: boolean;
 }): Promise<InvestigationAttachmentDocument<TStored>> => {
   await assertConversationOwner(conversations, conversationId);
 
   const written = await write();
   try {
-    return await stampCurrentDocument(attachments, type, read);
+    return await stampCurrentDocument(attachments, type, hidden, read);
   } catch (error) {
     await revert(written).catch(() => undefined);
     throw error;

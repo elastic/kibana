@@ -51,6 +51,12 @@ export interface InvestigationAttachmentConfig<
   agentDescription: string;
   /** Conversation attachment label; defaults to none. */
   describe?: (document: InvestigationAttachmentDocument<TStored>) => string;
+  /**
+   * Writes the conversation attachment as `hidden`: the model still gets it, but the chat shows
+   * no pill, inline card or timeline event for it, and Agent Builder records no attachment change
+   * event (so no attachment workflow trigger fires). Solution UIs read the index instead.
+   */
+  hiddenInConversation?: boolean;
   isStale?: (
     stored: InvestigationAttachmentDocument<TStored>,
     current: InvestigationAttachmentDocument<TStored>
@@ -75,6 +81,8 @@ export interface InvestigationAttachmentDefinition<
   TStored extends StoredInvestigationAttachment
 > {
   type: TType;
+  /** Whether the write paths hide the conversation attachment from the chat. */
+  hiddenInConversation: boolean;
   /** Storage and service on the internal user; callers authorize and pass the request's space. */
   createService: (deps: {
     esClient: ElasticsearchClient;
@@ -147,8 +155,11 @@ export const defineInvestigationAttachment = <
       maxContentLength: config.maxContentLength,
     });
 
+  const hidden = config.hiddenInConversation === true;
+
   return {
     type: config.type,
+    hiddenInConversation: hidden,
     createService: ({ esClient, logger }) =>
       createServiceFromStorage(
         new StorageIndexAdapter<TSettings, TStored>(
@@ -191,6 +202,7 @@ export const defineInvestigationAttachment = <
         },
         write: () => service.upsert({ id, mutate }),
         revert: (written: WrittenInvestigationAttachment<TStored>) => service.revert(written),
+        hidden,
       }),
     writeFromTool: ({ service, id, spaceId, mutate, context }) =>
       attachFromTool<TStored>({
@@ -200,6 +212,7 @@ export const defineInvestigationAttachment = <
         write: () => service.upsert({ id, mutate }),
         revert: (result) => service.revert(result),
         describe: config.describe,
+        hidden,
       }),
   };
 };

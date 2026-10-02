@@ -124,7 +124,9 @@ describe('investigations.set_impact', () => {
       origin: IMPACT_ID,
       readonly: true,
       active: true,
+      hidden: true,
     });
+    expect(attachments.drainChanges()).toEqual([]);
   });
 
   it('keeps omitted fields, replaces sent ones, and versions the attachment', async () => {

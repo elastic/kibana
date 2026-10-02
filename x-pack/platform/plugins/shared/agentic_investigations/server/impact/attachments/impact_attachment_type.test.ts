@@ -66,6 +66,11 @@ describe('investigation_impact attachment type', () => {
     expect(definition.isReadonly).toBe(true);
   });
 
+  it('is hidden in the conversation and not rendered inline', async () => {
+    expect(impactAttachment.hiddenInConversation).toBe(true);
+    expect(await attachmentType().getAgentDescription?.()).not.toContain('render_attachment');
+  });
+
   it('accepts documents written before summary and evidence existed and those written after', async () => {
     const definition = attachmentType();
 

@@ -201,6 +201,7 @@ describe('investigations.attachImpact step', () => {
       type: 'investigation_impact',
       origin: 'impact-1',
       data: impact,
+      hidden: true,
     });
   });
 

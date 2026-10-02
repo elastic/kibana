@@ -27,7 +27,8 @@ export interface AttachedFromTool<TStored extends StoredInvestigationAttachment>
  * round ends. The index stays the source of truth if the round fails before that.
  *
  * The state manager's `add` silently replaces a record with the same id, so an existing record
- * is updated instead, and a record the user removed is left removed.
+ * is updated instead, and a record the user removed is left removed. With `hidden`, the attachment
+ * is added hidden from the chat; an update sends only the data.
  */
 export const attachFromTool = async <TStored extends StoredInvestigationAttachment>({
   type,
@@ -36,6 +37,7 @@ export const attachFromTool = async <TStored extends StoredInvestigationAttachme
   write,
   revert,
   describe,
+  hidden = false,
 }: {
   type: string;
   context: Pick<ToolHandlerContext, 'attachments' | 'request'>;
@@ -44,6 +46,8 @@ export const attachFromTool = async <TStored extends StoredInvestigationAttachme
   revert: (written: WrittenInvestigationAttachment<TStored>) => Promise<void>;
   /** Attachment label, set when the attachment is first added. */
   describe?: (document: InvestigationAttachmentDocument<TStored>) => string;
+  /** Adds the attachment hidden from the chat (pills, inline cards, timeline events). */
+  hidden?: boolean;
 }): Promise<AttachedFromTool<TStored>> => {
   const written = await write();
   // A concurrent writer may already have changed the document; attach what is stored now.
@@ -60,6 +64,7 @@ export const attachFromTool = async <TStored extends StoredInvestigationAttachme
           origin: document.id,
           data: document,
           ...(description !== undefined && { description }),
+          ...(hidden && { hidden: true }),
         },
         ATTACHMENT_REF_ACTOR.agent,
         undefined,
