@@ -30,7 +30,8 @@ interface AxisFormatMismatch {
  *
  * The first data series on the group owns the axis: `formatter` is used for ticks, tooltips, and
  * reference-line labels. Duration members are converted from their source unit into
- * `coordinateUnit` (`humanize` / `humanizePrecise` → seconds).
+ * `coordinateUnit` (`humanize` / `humanizePrecise` → seconds). Custom extents are authored in the
+ * owner's source units and converted with that member's factor.
  *
  * Example — seconds (humanizePrecise, 1) + milliseconds (humanizePrecise, 1000) on the left axis:
  *

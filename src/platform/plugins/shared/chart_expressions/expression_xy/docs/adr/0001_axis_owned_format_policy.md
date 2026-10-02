@@ -13,12 +13,13 @@ XY charts currently plot raw numeric coordinates while axis ticks use the first 
 - Use the anchor’s complete effective formatter for axis ticks, series tooltips, and reference-line labels.
 - When the anchor has a valid duration formatter, infer the coordinate unit from its concrete output method. Use seconds when its output is `humanize` or `humanizePrecise`.
 - Convert every valid duration series and reference line from its source unit into the coordinate unit, including the anchor itself.
+- Convert custom Y-axis extents from the axis anchor’s source unit into the coordinate unit using that series’ conversion factor. Persist and author extents in source units.
 - Leave non-duration, unformatted, and malformed values numerically unchanged as axis-relative values. Treat unknown duration input or output values as unformatted.
 - Normalize duration coordinates before percentage stacking; percentage remains the rendered formatter.
 - Recompute the policy immediately when axis assignment, series order, or the anchor formatter changes.
 - Resolve and apply the policy after layer expressions have produced effective datatable metadata. Log original tables to Inspector before creating immutable normalized chart copies.
-- Surface the inferred owner and formatter in Lens axis settings. Mark the anchor with an information icon and warn on follower formats that will be overridden or cannot be normalized safely.
 - Keep policy provenance explicit so a future persisted axis-unit setting can replace inference without changing policy consumers.
+- Defer Lens editor copy: surface the inferred owner and formatter in axis settings, mark the anchor, and warn when follower formats are overridden, cannot be normalized safely, or when custom extents use source units rather than tick units.
 
 ## Considered options
 
@@ -28,13 +29,15 @@ XY charts currently plot raw numeric coordinates while axis ticks use the first 
 
 **A fixed seconds coordinate for every duration axis** was rejected for now because the inferred first-series policy is visible to users and can later become an explicit axis setting. Human-readable duration output still uses seconds because it has no concrete output unit.
 
+**Treating custom extents as tick / coordinate units** was rejected because persisted bounds are the numbers users and auto-prefill wrote against plotted source data. Interpreting those numbers as already-converted axis units would break existing charts whenever the conversion factor is not `1` (for example milliseconds with human-readable output). Conversion at the render seam keeps saved extents stable.
+
 **Normalization during React rendering** was rejected because it repeats row processing during render and couples data semantics to UI lifecycle.
 
 ## Consequences
 
 - The XY render expression functions become the normalization seam because they have evaluated layers and their effective formats before rendering.
-- The shared policy module must own grouping, anchor selection, duration-unit resolution, diagnostics, and immutable one-pass table conversion.
+- The shared policy module must own grouping, anchor selection, duration-unit resolution, diagnostics, immutable one-pass table conversion, and custom-extent conversion.
 - Tooltip and reference-line rendering must consume the resolved axis formatter rather than independently selecting column formatters.
-- Inspector and CSV continue to receive original values.
-- Existing XY charts may change presentation because follower formatters no longer control tooltips or reference-line labels. Existing axis-relative values may change duration meaning when the anchor or its formatter changes; this is intentional and must be explained in the Lens UI.
+- Inspector and CSV continue to receive original values. Saved custom extents stay in source units; only the chart copy of the axis config is scaled.
+- Existing XY charts may change presentation because follower formatters no longer control tooltips or reference-line labels. Existing axis-relative values may change duration meaning when the anchor or its formatter changes; this is intentional and must be explained in the Lens UI as follow-up work.
 - The implementation should preserve object identity for unaffected layers and traverse each affected table only once.

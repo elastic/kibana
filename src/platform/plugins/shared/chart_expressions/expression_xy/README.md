@@ -11,7 +11,7 @@ Expression XY plugin adds a `xy` renderer and function to the expression plugin.
 
 Each left or right Y-axis group uses its first data series as the axis anchor. Axis ticks, detailed tooltips, and reference-line labels use that anchor's effective formatter.
 
-When the anchor is duration-formatted, chart-only layer copies normalize valid duration values from their source units into the anchor's output unit. Human-readable duration output uses seconds as its coordinate unit. Original datatables are logged to Inspector before normalization.
+When the anchor is duration-formatted, chart-only layer copies convert valid duration values from their source units into the coordinate unit. Human-readable duration output uses seconds as its coordinate unit. Custom Y-axis extents are authored in the axis anchor's source units and converted with the same factor. Original datatables are logged to Inspector before normalization.
 
 ---
 

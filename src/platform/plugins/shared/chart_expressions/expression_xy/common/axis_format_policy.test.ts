@@ -19,7 +19,11 @@ import type {
   ReferenceLineLayerConfig,
   YAxisConfig,
 } from './types';
-import { applyAxisFormatPolicies, resolveAxisFormatPolicies } from './axis_format_policy';
+import {
+  applyAxisFormatPolicies,
+  applyYAxisExtentPolicies,
+  resolveAxisFormatPolicies,
+} from './axis_format_policy';
 
 const duration = (
   inputFormat: string,
@@ -490,5 +494,99 @@ describe('axis format policy', () => {
       minutes: 3600,
     });
     expect(converting.table.rows[0]).toEqual({ milliseconds: 1000, minutes: 60 });
+  });
+
+  it('converts custom axis extents from the anchor source unit into the coordinate unit', () => {
+    const layer = dataLayer({
+      layerId: 'first',
+      columns: [column('milliseconds', duration('milliseconds', 'humanizePrecise'))],
+      row: { milliseconds: 1000 },
+      accessors: ['milliseconds'],
+    });
+    const axisConfigs: YAxisConfig[] = [
+      {
+        position: Position.Left,
+        extent: { type: 'axisExtentConfig', mode: 'custom', lowerBound: 0, upperBound: 2000 },
+      },
+    ];
+    const policies = resolveAxisFormatPolicies([layer], axisConfigs);
+    const scaled = applyYAxisExtentPolicies(axisConfigs, policies);
+
+    expect(scaled).not.toBe(axisConfigs);
+    expect(scaled?.[0].extent).toEqual(
+      expect.objectContaining({ mode: 'custom', lowerBound: 0, upperBound: 2 })
+    );
+  });
+
+  it('does not copy axis configs when custom extents already match the coordinate unit', () => {
+    const layer = dataLayer({
+      layerId: 'first',
+      columns: [column('seconds', duration('seconds', 'humanizePrecise'))],
+      row: { seconds: 12 },
+      accessors: ['seconds'],
+    });
+    const axisConfigs: YAxisConfig[] = [
+      {
+        position: Position.Left,
+        extent: { type: 'axisExtentConfig', mode: 'custom', lowerBound: 0, upperBound: 30 },
+      },
+    ];
+    const policies = resolveAxisFormatPolicies([layer], axisConfigs);
+
+    expect(applyYAxisExtentPolicies(axisConfigs, policies)).toBe(axisConfigs);
+  });
+
+  it('converts left and right custom extents independently', () => {
+    const layers = [
+      dataLayer({
+        layerId: 'left',
+        columns: [column('milliseconds', duration('milliseconds', 'asSeconds'))],
+        row: { milliseconds: 1000 },
+        accessors: ['milliseconds'],
+        decorations: [{ forAccessor: 'milliseconds', axisId: 'left-id' }],
+      }),
+      dataLayer({
+        layerId: 'right',
+        columns: [column('minutes', duration('minutes', 'asHours'))],
+        row: { minutes: 60 },
+        accessors: ['minutes'],
+        decorations: [{ forAccessor: 'minutes', axisId: 'right-id' }],
+      }),
+    ];
+    const axisConfigs: YAxisConfig[] = [
+      {
+        id: 'left-id',
+        position: Position.Left,
+        extent: { type: 'axisExtentConfig', mode: 'custom', lowerBound: 0, upperBound: 2000 },
+      },
+      {
+        id: 'right-id',
+        position: Position.Right,
+        extent: { type: 'axisExtentConfig', mode: 'custom', lowerBound: 0, upperBound: 60 },
+      },
+    ];
+    const policies = resolveAxisFormatPolicies(layers, axisConfigs);
+    const scaled = applyYAxisExtentPolicies(axisConfigs, policies);
+
+    expect(scaled?.[0].extent).toEqual(expect.objectContaining({ lowerBound: 0, upperBound: 2 }));
+    expect(scaled?.[1].extent).toEqual(expect.objectContaining({ lowerBound: 0, upperBound: 1 }));
+  });
+
+  it('does not convert custom extents when the axis is not in custom mode', () => {
+    const layer = dataLayer({
+      layerId: 'first',
+      columns: [column('milliseconds', duration('milliseconds', 'humanizePrecise'))],
+      row: { milliseconds: 1000 },
+      accessors: ['milliseconds'],
+    });
+    const axisConfigs: YAxisConfig[] = [
+      {
+        position: Position.Left,
+        extent: { type: 'axisExtentConfig', mode: 'full', lowerBound: 0, upperBound: 2000 },
+      },
+    ];
+    const policies = resolveAxisFormatPolicies([layer], axisConfigs);
+
+    expect(applyYAxisExtentPolicies(axisConfigs, policies)).toBe(axisConfigs);
   });
 });

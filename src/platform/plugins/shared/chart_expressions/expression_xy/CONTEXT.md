@@ -28,6 +28,10 @@ _Avoid_: Display unit, source unit
 The time unit in which a duration-formatted column’s raw numeric values are expressed.
 _Avoid_: Axis unit, output unit
 
+**Custom Extent**:
+The numeric lower and upper Y-axis bounds authored by the user. On a duration-defined axis they are expressed in the axis anchor’s source unit and converted into the coordinate unit with the same factor used for that series.
+_Avoid_: Display bounds, tick-unit bounds, target-unit bounds
+
 **Output Format**:
 The presentation method used to render an axis value, such as seconds, minutes, or human-readable duration text. It does not independently define a raw value’s meaning.
 _Avoid_: Coordinate unit, storage unit

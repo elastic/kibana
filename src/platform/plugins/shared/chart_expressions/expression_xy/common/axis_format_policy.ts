@@ -292,6 +292,63 @@ export const resolveAxisFormatPolicies = (
   return policies;
 };
 
+const getPolicyForAxis = (axis: YAxisConfig, policies: AxisFormatPolicy[]) => {
+  if (axis.id) {
+    return policies.find((policy) => policy.groupId === `axis-${axis.id}`);
+  }
+  if (axis.position === Position.Right) {
+    return policies.find((policy) => policy.groupId === RIGHT_AXIS_GROUP_ID);
+  }
+  return policies.find((policy) => policy.groupId === LEFT_AXIS_GROUP_ID);
+};
+
+const getAxisSourceFactor = (policy?: AxisFormatPolicy): number => {
+  if (!policy?.coordinateUnit) {
+    return 1;
+  }
+  return policy.members.find((member) => member.kind === 'data')?.factor ?? 1;
+};
+
+const scaleExtentBound = (bound: number | undefined, factor: number): number | undefined =>
+  typeof bound === 'number' ? bound * factor : bound;
+
+/**
+ * Custom Y-axis extents are authored in the anchor series' source units. Scale them into the
+ * axis coordinate unit with the same factor used for that series.
+ */
+export const applyYAxisExtentPolicies = <Axis extends YAxisConfig>(
+  yAxisConfigs: Axis[] | undefined,
+  policies: AxisFormatPolicy[]
+): Axis[] | undefined => {
+  if (!yAxisConfigs?.length) {
+    return yAxisConfigs;
+  }
+
+  let changed = false;
+  const scaled = yAxisConfigs.map((axis) => {
+    const factor = getAxisSourceFactor(getPolicyForAxis(axis, policies));
+    if (factor === 1 || axis.extent?.mode !== 'custom') {
+      return axis;
+    }
+    const lowerBound = scaleExtentBound(axis.extent.lowerBound, factor);
+    const upperBound = scaleExtentBound(axis.extent.upperBound, factor);
+    if (lowerBound === axis.extent.lowerBound && upperBound === axis.extent.upperBound) {
+      return axis;
+    }
+    changed = true;
+    return {
+      ...axis,
+      extent: {
+        ...axis.extent,
+        lowerBound,
+        upperBound,
+      },
+    };
+  });
+
+  return changed ? scaled : yAxisConfigs;
+};
+
 /** Layers with only factor 1 are omitted so applyAxisFormatPolicies can return the input array unchanged. */
 const getFactorsByLayer = (policies: AxisFormatPolicy[]) => {
   const factors = new Map<string, Map<string, number>>();

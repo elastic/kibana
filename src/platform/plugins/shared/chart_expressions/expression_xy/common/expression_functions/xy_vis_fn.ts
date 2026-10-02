@@ -39,7 +39,11 @@ import {
   validateMinBarHeight,
 } from './validate';
 import { logDatatable } from '../utils';
-import { applyAxisFormatPolicies, resolveAxisFormatPolicies } from '../axis_format_policy';
+import {
+  applyAxisFormatPolicies,
+  applyYAxisExtentPolicies,
+  resolveAxisFormatPolicies,
+} from '../axis_format_policy';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
   const accessors = getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table);
@@ -115,6 +119,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
   const axisFormatPolicies = resolveAxisFormatPolicies(layers, args.yAxisConfigs);
   const chartLayers = applyAxisFormatPolicies(layers, axisFormatPolicies);
+  const yAxisConfigs = applyYAxisExtentPolicies(args.yAxisConfigs, axisFormatPolicies);
   const chartDataLayers = chartLayers.filter(
     (layer): layer is DataLayerConfig => layer.layerType === LayerTypes.DATA
   );
@@ -122,7 +127,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const hasBar = hasBarLayer(chartDataLayers);
   const hasArea = hasAreaLayer(chartDataLayers);
 
-  validateExtents(chartDataLayers, hasBar || hasArea, args.yAxisConfigs, args.xAxisConfig);
+  validateExtents(chartDataLayers, hasBar || hasArea, yAxisConfigs, args.xAxisConfig);
   validateFillOpacity(args.fillOpacity, hasArea);
   validateAddTimeMarker(chartDataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(chartDataLayers, hasBar, args.minTimeBarInterval);
@@ -134,7 +139,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateLineWidthForChartType(lineWidth, args.seriesType);
   validateShowPointsForChartType(showPoints, args.seriesType);
   validatePointsRadiusForChartType(pointsRadius, args.seriesType);
-  validateAxes(chartDataLayers, args.yAxisConfigs);
+  validateAxes(chartDataLayers, yAxisConfigs);
 
   return {
     type: 'render',
@@ -142,6 +147,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     value: {
       args: {
         ...restArgs,
+        yAxisConfigs,
         layers: chartLayers,
         axisFormatPolicies,
         minBarHeight: args.minBarHeight ?? 1,
