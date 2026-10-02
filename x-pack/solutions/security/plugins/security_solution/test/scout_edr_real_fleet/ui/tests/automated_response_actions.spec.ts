@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
+import { releaseHost } from '../fixtures/process_actions';
 import {
   createEnabledRuleWithAutomatedResponseActions,
   deleteAlertsForRule,
@@ -17,7 +18,8 @@ import { test } from '../fixtures';
 
 const ALERT_TIMEOUT_MS = 180_000;
 const RESPONSE_STATUS_TIMEOUT_MS = 180_000;
-const TEST_TIMEOUT_MS = 15 * 60 * 1000;
+/** Includes up to 120s to release host isolation before the next spec SSHes in. */
+const TEST_TIMEOUT_MS = 18 * 60 * 1000;
 
 test.describe('Automated response actions', { tag: ['@local-stateful-classic'] }, () => {
   test.setTimeout(TEST_TIMEOUT_MS);
@@ -28,7 +30,11 @@ test.describe('Automated response actions', { tag: ['@local-stateful-classic'] }
     await browserAuth.loginAsPlatformEngineer();
   });
 
-  test.afterEach(async ({ kbnClient, esClient }) => {
+  test.afterEach(async ({ kbnClient, esClient, enrolledEndpoint }) => {
+    // This rule isolates the shared VM. The next spec SSHes to that host, which
+    // isolation blocks, so release the host before the worker moves on.
+    await releaseHost(kbnClient, enrolledEndpoint.agentId);
+
     const rule = seededRule;
     seededRule = undefined;
     if (!rule) {

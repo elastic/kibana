@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KbnClientRequesterError } from '@kbn/kbn-client';
 import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import type { KbnClient } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
@@ -13,17 +14,25 @@ import {
   GET_PROCESSES_ROUTE,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
 } from '../../../../common/endpoint/constants';
 import type {
   ActionDetails,
   ActionDetailsApiResponse,
-  GetProcessesActionOutputContent,
+  EndpointActionResponseDataOutput,
   ProcessesEntry,
 } from '../../../../common/endpoint/types';
 import { resolvePathVariables } from '../../../../public/common/utils/resolve_path_variables';
-import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
 
 const ACTION_TIMEOUT_MS = 120_000;
+
+type GetProcessesOutput = Extract<EndpointActionResponseDataOutput, { entries: ProcessesEntry[] }>;
+
+const isTerminalClientError = (error: unknown): error is KbnClientRequesterError =>
+  error instanceof KbnClientRequesterError &&
+  error.status !== undefined &&
+  error.status >= 400 &&
+  error.status < 500;
 
 const createAction = async (
   kbnClient: KbnClient,
@@ -46,11 +55,13 @@ const createAction = async (
   return actionId;
 };
 
-const waitForSuccessfulAction = async (
+const waitForSuccessfulAction = async <
+  TOutput extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+>(
   kbnClient: KbnClient,
   actionId: string
-): Promise<ActionDetails> => {
-  let latest: ActionDetails | undefined;
+): Promise<ActionDetails<TOutput>> => {
+  let latest: ActionDetails<TOutput> | undefined;
 
   await expect
     .poll(
@@ -62,11 +73,15 @@ const waitForSuccessfulAction = async (
             headers: PUBLIC_API_HEADERS,
             retries: 0,
           });
-          latest = data.data;
+          latest = data.data as ActionDetails<TOutput>;
           return latest.isCompleted;
         } catch (error) {
-          // Throwing inside expect.poll aborts polling. Surface the error as the
-          // polled value so a transient failure is retried and shown on timeout.
+          // Throwing inside expect.poll aborts polling. 4xx will not become a
+          // success on retry. 5xx and network errors are returned so the poll
+          // continues and the timeout message includes the last error.
+          if (isTerminalClientError(error)) {
+            throw error;
+          }
           return error instanceof Error ? error.message : String(error);
         }
       },
@@ -85,27 +100,29 @@ const waitForSuccessfulAction = async (
   return latest;
 };
 
-const runAction = async (
+const runAction = async <
+  TOutput extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+>(
   kbnClient: KbnClient,
   path: string,
   body: { endpoint_ids: string[]; parameters?: { pid: number } }
-): Promise<ActionDetails> => {
+): Promise<ActionDetails<TOutput>> => {
   const actionId = await createAction(kbnClient, path, body);
-  return waitForSuccessfulAction(kbnClient, actionId);
+  return waitForSuccessfulAction<TOutput>(kbnClient, actionId);
 };
 
-/** `systemd-run` returns immediately. A bare `sleep` would block `vagrant ssh` for the whole interval. */
-export const startDisposableSleep = async (hostname: string): Promise<void> => {
-  await getHostVmClient(hostname).exec('sudo systemd-run sleep 600');
+/** Clears host isolation so a later spec in this worker can SSH to the VM. */
+export const releaseHost = async (kbnClient: KbnClient, agentId: string): Promise<void> => {
+  await runAction(kbnClient, UNISOLATE_HOST_ROUTE_V2, { endpoint_ids: [agentId] });
 };
 
 export const listRunningProcesses = async (
   kbnClient: KbnClient,
   agentId: string
 ): Promise<ProcessesEntry[]> => {
-  const action = (await runAction(kbnClient, GET_PROCESSES_ROUTE, {
+  const action = await runAction<GetProcessesOutput>(kbnClient, GET_PROCESSES_ROUTE, {
     endpoint_ids: [agentId],
-  })) as ActionDetails<GetProcessesActionOutputContent>;
+  });
   const entries = action.outputs?.[agentId]?.content.entries;
 
   if (!entries) {
