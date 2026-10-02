@@ -143,6 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
             'searchInferenceEndpoints',
             'searchSynonyms',
             'searchQueryRules',
+            'searchPlayground',
             'siemV5',
             'slo',
             'streams',

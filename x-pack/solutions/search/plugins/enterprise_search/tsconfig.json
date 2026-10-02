@@ -60,6 +60,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/es-errors",
     "@kbn/content-connectors-plugin",
+    "@kbn/search-playground",
     "@kbn/index-management-shared-types",
     "@kbn/deeplinks-search",
     "@kbn/react-kibana-context-theme",

@@ -128,7 +128,7 @@ describe('generateSideNavItems', () => {
       },
       {
         deepLink: {
-          link: 'searchSynonyms',
+          link: 'searchPlayground',
         },
         id: 'unit-test-missing',
       },

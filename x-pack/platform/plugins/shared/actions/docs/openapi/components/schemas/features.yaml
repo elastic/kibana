@@ -6,5 +6,6 @@ enum:
   - cases
   - generativeAIForSecurity
   - generativeAIForObservability
+  - generativeAIForSearchPlayground
   - siem
   - uptime

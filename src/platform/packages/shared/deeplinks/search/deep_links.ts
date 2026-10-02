@@ -14,6 +14,7 @@ import type {
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
+  ES_SEARCH_PLAYGROUND_ID,
   SEARCH_HOMEPAGE,
   ES_SEARCH_SYNONYMS_ID,
   SEARCH_QUERY_RULES_ID,
@@ -27,6 +28,7 @@ export type EnterpriseSearchApplicationsApp = typeof ENTERPRISE_SEARCH_APPLICATI
 export type EnterpriseSearchAnalyticsApp = typeof ENTERPRISE_SEARCH_ANALYTICS_APP_ID;
 export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
 export type ServerlessWebCrawlers = typeof SERVERLESS_ES_WEB_CRAWLERS_ID;
+export type SearchPlaygroundId = typeof ES_SEARCH_PLAYGROUND_ID;
 export type SearchSynonymsId = typeof ES_SEARCH_SYNONYMS_ID;
 export type SearchQueryRulesId = typeof SEARCH_QUERY_RULES_ID;
 export type SearchHomepage = typeof SEARCH_HOMEPAGE;
@@ -46,6 +48,7 @@ export type DeepLinkId =
   | EnterpriseSearchAnalyticsApp
   | ConnectorsId
   | ServerlessWebCrawlers
+  | SearchPlaygroundId
   | SearchSynonymsId
   | SearchQueryRulesId
   | SearchHomepage

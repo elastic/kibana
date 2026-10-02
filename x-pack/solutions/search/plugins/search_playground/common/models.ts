@@ -1,0 +1,67 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { elasticModelIds } from '@kbn/inference-common';
+import type { ModelProvider } from './types';
+import { LLMs } from './types';
+
+export const MODELS: ModelProvider[] = [
+  {
+    name: 'OpenAI GPT-4o',
+    model: 'gpt-4o',
+    promptTokenLimit: 128000,
+    provider: LLMs.openai,
+  },
+  {
+    name: 'OpenAI GPT-4 Turbo',
+    model: 'gpt-4-turbo',
+    promptTokenLimit: 128000,
+    provider: LLMs.openai,
+  },
+  {
+    name: 'OpenAI GPT-3.5 Turbo',
+    model: 'gpt-3.5-turbo',
+    promptTokenLimit: 16385,
+    provider: LLMs.openai,
+  },
+  {
+    name: 'Anthropic Claude 3 Haiku',
+    model: 'anthropic.claude-3-haiku-20240307-v1:0',
+    promptTokenLimit: 200000,
+    provider: LLMs.bedrock,
+  },
+  {
+    name: 'Anthropic Claude 3.5 Sonnet',
+    model: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
+    promptTokenLimit: 200000,
+    provider: LLMs.bedrock,
+  },
+  {
+    name: 'Anthropic Claude 3.7 Sonnet',
+    model: 'anthropic.claude-3-7-sonnet-20250219-v1:0',
+    promptTokenLimit: 200000,
+    provider: LLMs.bedrock,
+  },
+  {
+    name: 'Google Gemini 2.5 Pro',
+    model: 'gemini-2.5-pro',
+    promptTokenLimit: 1048576,
+    provider: LLMs.gemini,
+  },
+  {
+    name: 'Google Gemini 2.5 Flash',
+    model: 'gemini-2.5-flash',
+    promptTokenLimit: 1048576,
+    provider: LLMs.gemini,
+  },
+  {
+    name: 'Elastic Managed LLM',
+    model: elasticModelIds.RainbowSprinkles,
+    promptTokenLimit: 200000,
+    provider: LLMs.inference,
+  },
+];
