@@ -11,10 +11,10 @@ import {
 } from '@kbn/workflows';
 import { stringify } from 'yaml';
 
-export const CONSOLE_LOG_WORKFLOW_NAME = 'Action policy template: console log';
+export const CONSOLE_LOG_WORKFLOW_NAME = 'Sample workflow: console log';
 
 /**
- * YAML of the placeholder destination used by the action policy templates. It only logs the
+ * YAML of the sample workflow the sample action policies dispatch to. It only logs the
  * dispatched notification group, so it needs no connector and can be replaced by the user.
  */
 export const buildConsoleLogWorkflowYaml = (): string =>

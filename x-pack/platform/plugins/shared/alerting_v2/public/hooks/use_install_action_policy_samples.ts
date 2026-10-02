@@ -8,35 +8,35 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import type { InstallActionPolicyTemplatesResponse } from '@kbn/alerting-v2-schemas';
+import type { InstallActionPolicySamplesResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import { invalidateMatchedActionPolicies } from './invalidate_matched_action_policies';
 import { actionPolicyKeys } from './query_key_factory';
 
-export const useInstallActionPolicyTemplates = () => {
+export const useInstallActionPolicySamples = () => {
   const actionPoliciesApi = useService(ActionPoliciesApi);
   const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
 
-  return useMutation<InstallActionPolicyTemplatesResponse, Error, void>({
-    mutationFn: () => actionPoliciesApi.installActionPolicyTemplates(),
+  return useMutation<InstallActionPolicySamplesResponse, Error, void>({
+    mutationFn: () => actionPoliciesApi.installActionPolicySamples(),
     onSuccess: ({ policies }) => {
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
       invalidateMatchedActionPolicies(queryClient);
 
       const created = policies.filter(({ status }) => status === 'created').length;
       toasts.addSuccess(
-        i18n.translate('xpack.alertingV2.actionPolicy.installTemplates.success', {
+        i18n.translate('xpack.alertingV2.actionPolicy.installSamples.success', {
           defaultMessage:
-            '{created, plural, =0 {All policy templates are already installed.} one {Added # action policy from templates. Review and enable it when ready.} other {Added # action policies from templates. Review and enable them when ready.}}',
+            '{created, plural, =0 {All sample policies are already installed.} one {Added # sample action policy. Review and enable it when ready.} other {Added # sample action policies. Review and enable them when ready.}}',
           values: { created },
         })
       );
     },
     onError: (error) => {
       toasts.addError(error, {
-        title: i18n.translate('xpack.alertingV2.actionPolicy.installTemplates.error', {
-          defaultMessage: 'Unable to add action policies from templates',
+        title: i18n.translate('xpack.alertingV2.actionPolicy.installSamples.error', {
+          defaultMessage: 'Unable to add sample action policies',
         }),
       });
     },

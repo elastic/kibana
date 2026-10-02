@@ -12,27 +12,27 @@ import { UserCapabilities } from '../services/user_capabilities';
 import { useIsActionPoliciesLicenseValid } from './use_is_action_policies_license_valid';
 
 const MISSING_ACTION_POLICIES_PRIVILEGES_REASON = i18n.translate(
-  'xpack.alertingV2.actionPolicy.installTemplates.missingActionPoliciesPrivilegesTooltip',
+  'xpack.alertingV2.actionPolicy.installSamples.missingActionPoliciesPrivilegesTooltip',
   { defaultMessage: 'You do not have permission to create action policies' }
 );
 
 const MISSING_WORKFLOWS_PRIVILEGES_REASON = i18n.translate(
-  'xpack.alertingV2.actionPolicy.installTemplates.missingWorkflowsPrivilegesTooltip',
+  'xpack.alertingV2.actionPolicy.installSamples.missingWorkflowsPrivilegesTooltip',
   {
-    defaultMessage: 'Using policy templates requires permission to create and read workflows.',
+    defaultMessage: 'Adding sample policies requires permission to create and read workflows.',
   }
 );
 
 const LICENSE_REQUIRED_REASON = i18n.translate(
-  'xpack.alertingV2.actionPolicy.installTemplates.licenseRequiredTooltip',
-  { defaultMessage: 'An active Enterprise license is required to use policy templates.' }
+  'xpack.alertingV2.actionPolicy.installSamples.licenseRequiredTooltip',
+  { defaultMessage: 'An active Enterprise license is required to add sample policies.' }
 );
 
 /**
- * Returns why installing the template action policies is not allowed for the current user, or
+ * Returns why installing the sample action policies is not allowed for the current user, or
  * `undefined` when it is. UI gating only: the server enforces the same requirements.
  */
-export const useInstallActionPolicyTemplatesDisabledReason = (): string | undefined => {
+export const useInstallActionPolicySamplesDisabledReason = (): string | undefined => {
   const canWriteActionPolicies = useService(UserCapabilities).canWrite('actionPolicies');
   const { capabilities } = useService(CoreStart('application'));
   const isLicenseValid = useIsActionPoliciesLicenseValid();

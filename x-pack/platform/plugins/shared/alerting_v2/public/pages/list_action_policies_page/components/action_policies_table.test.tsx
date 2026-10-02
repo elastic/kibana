@@ -20,7 +20,7 @@ const mockNavigateToApp = jest.fn();
 const mockGetUrlForApp = jest.fn();
 const mockFindItems = jest.fn();
 const mockCreateActionPolicy = jest.fn();
-const mockInstallTemplates = jest.fn();
+const mockInstallSamples = jest.fn();
 const mockDeleteActionPolicy = jest.fn();
 const mockEnableActionPolicy = jest.fn();
 const mockDisableActionPolicy = jest.fn();
@@ -41,7 +41,7 @@ let mockWorkflowsCapabilities: Record<string, boolean> = {
   createWorkflow: true,
   readWorkflow: true,
 };
-let mockIsInstallingTemplates = false;
+let mockIsInstallingSamples = false;
 
 jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
   useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
@@ -99,10 +99,10 @@ jest.mock('../../../hooks/use_create_action_policy', () => ({
   useCreateActionPolicy: () => ({ mutate: mockCreateActionPolicy }),
 }));
 
-jest.mock('../../../hooks/use_install_action_policy_templates', () => ({
-  useInstallActionPolicyTemplates: () => ({
-    mutate: mockInstallTemplates,
-    isLoading: mockIsInstallingTemplates,
+jest.mock('../../../hooks/use_install_action_policy_samples', () => ({
+  useInstallActionPolicySamples: () => ({
+    mutate: mockInstallSamples,
+    isLoading: mockIsInstallingSamples,
   }),
 }));
 
@@ -221,7 +221,7 @@ describe('ActionPoliciesTable', () => {
     mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockIsLicenseValid = true;
     mockWorkflowsCapabilities = { createWorkflow: true, readWorkflow: true };
-    mockIsInstallingTemplates = false;
+    mockIsInstallingSamples = false;
 
     mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
@@ -615,29 +615,29 @@ describe('ActionPoliciesTable', () => {
       expect(screen.queryByTestId('createActionPolicyWithAgentCard')).not.toBeInTheDocument();
     });
 
-    it('installs the template action policies from the empty state install-templates card', async () => {
+    it('installs the sample action policies from the empty state install-samples card', async () => {
       const user = userEvent.setup();
       renderTable();
 
       await waitFor(() =>
-        expect(screen.getByTestId('installActionPolicyTemplatesCard')).toBeInTheDocument()
+        expect(screen.getByTestId('installActionPolicySamplesCard')).toBeInTheDocument()
       );
-      await user.click(screen.getByTestId('installActionPolicyTemplatesCard'));
+      await user.click(screen.getByTestId('installActionPolicySamplesCard'));
 
-      expect(mockInstallTemplates).toHaveBeenCalledTimes(1);
+      expect(mockInstallSamples).toHaveBeenCalledTimes(1);
     });
 
-    it('refetches the list after the templates are installed', async () => {
+    it('refetches the list after the samples are installed', async () => {
       const user = userEvent.setup();
       renderTable();
 
       await waitFor(() =>
-        expect(screen.getByTestId('installActionPolicyTemplatesCard')).toBeInTheDocument()
+        expect(screen.getByTestId('installActionPolicySamplesCard')).toBeInTheDocument()
       );
-      await user.click(screen.getByTestId('installActionPolicyTemplatesCard'));
+      await user.click(screen.getByTestId('installActionPolicySamplesCard'));
 
       const findItemsCallsBeforeSuccess = mockFindItems.mock.calls.length;
-      const [, { onSuccess }] = mockInstallTemplates.mock.calls[0];
+      const [, { onSuccess }] = mockInstallSamples.mock.calls[0];
       await act(async () => {
         onSuccess();
       });
@@ -667,23 +667,23 @@ describe('ActionPoliciesTable', () => {
         },
       },
       {
-        scenario: 'the templates are being installed',
+        scenario: 'the samples are being installed',
         arrange: () => {
-          mockIsInstallingTemplates = true;
+          mockIsInstallingSamples = true;
         },
       },
-    ])('disables the install-templates card when $scenario', async ({ arrange }) => {
+    ])('disables the install-samples card when $scenario', async ({ arrange }) => {
       arrange();
       renderTable();
 
       await waitFor(() =>
-        expect(screen.getByTestId('installActionPolicyTemplatesCard')).toBeInTheDocument()
+        expect(screen.getByTestId('installActionPolicySamplesCard')).toBeInTheDocument()
       );
-      const card = screen.getByTestId('installActionPolicyTemplatesCard');
+      const card = screen.getByTestId('installActionPolicySamplesCard');
       expect(card).toHaveAttribute('aria-disabled', 'true');
 
       fireEvent.click(card);
-      expect(mockInstallTemplates).not.toHaveBeenCalled();
+      expect(mockInstallSamples).not.toHaveBeenCalled();
     });
 
     it('navigates to the create form from the empty state create-policy card', async () => {

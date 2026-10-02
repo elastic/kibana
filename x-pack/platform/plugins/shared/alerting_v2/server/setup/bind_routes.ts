@@ -50,7 +50,7 @@ import { BulkSnoozeActionPoliciesRoute } from '../routes/action_policies/bulk_sn
 import { BulkUnsnoozeActionPoliciesRoute } from '../routes/action_policies/bulk_unsnooze_action_policies_route';
 import { BulkUpdateApiKeyActionPoliciesRoute } from '../routes/action_policies/bulk_update_api_key_action_policies_route';
 import { CreateActionPolicyRoute } from '../routes/action_policies/create_action_policy_route';
-import { InstallActionPolicyTemplatesRoute } from '../routes/action_policies/install_action_policy_templates_route';
+import { InstallActionPolicySamplesRoute } from '../routes/action_policies/install_action_policy_samples_route';
 import { DisableActionPolicyRoute } from '../routes/action_policies/disable_action_policy_route';
 import { EnableActionPolicyRoute } from '../routes/action_policies/enable_action_policy_route';
 import { GetActionPolicyRoute } from '../routes/action_policies/get_action_policy_route';
@@ -112,7 +112,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(BulkActivateEpisodeActionRoute);
   bind(Route).toConstantValue(BulkDeactivateEpisodeActionRoute);
   bind(Route).toConstantValue(CreateActionPolicyRoute);
-  bind(Route).toConstantValue(InstallActionPolicyTemplatesRoute);
+  bind(Route).toConstantValue(InstallActionPolicySamplesRoute);
   bind(Route).toConstantValue(GetActionPolicyRoute);
   bind(Route).toConstantValue(UpdateActionPolicyRoute);
   bind(Route).toConstantValue(UpdateActionPolicyApiKeyRoute);

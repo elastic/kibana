@@ -125,10 +125,10 @@ export const ALERTING_ERROR_CODES = {
   ACTION_POLICY_LICENSE_NOT_SUPPORTED: 'ACTION_POLICY_LICENSE_NOT_SUPPORTED',
   /**
    * Workflows is not available in this environment (license or serverless
-   * tier), so the action policy templates, which dispatch to a workflow, cannot
+   * tier), so the sample action policies, which dispatch to a workflow, cannot
    * be installed.
    */
-  ACTION_POLICY_TEMPLATES_WORKFLOWS_UNAVAILABLE: 'ACTION_POLICY_TEMPLATES_WORKFLOWS_UNAVAILABLE',
+  ACTION_POLICY_SAMPLES_WORKFLOWS_UNAVAILABLE: 'ACTION_POLICY_SAMPLES_WORKFLOWS_UNAVAILABLE',
 
   // ──────────────────────── Alert actions ────────────────────
   /** No alert event matched the supplied `group_hash` (and `alert_id`). */

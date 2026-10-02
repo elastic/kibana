@@ -7,20 +7,20 @@
 
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
-import { ALERTING_V2_INTERNAL_ACTION_POLICY_INSTALL_TEMPLATES_API_PATH } from '../constants';
-import { InstallActionPolicyTemplatesRoute } from './install_action_policy_templates_route';
+import { ALERTING_V2_ACTION_POLICY_INSTALL_SAMPLES_API_PATH } from '../constants';
+import { InstallActionPolicySamplesRoute } from './install_action_policy_samples_route';
 
-describe('InstallActionPolicyTemplatesRoute', () => {
+describe('InstallActionPolicySamplesRoute', () => {
   it('is an internal POST route', () => {
-    expect(InstallActionPolicyTemplatesRoute.method).toBe('post');
-    expect(InstallActionPolicyTemplatesRoute.path).toBe(
-      ALERTING_V2_INTERNAL_ACTION_POLICY_INSTALL_TEMPLATES_API_PATH
+    expect(InstallActionPolicySamplesRoute.method).toBe('post');
+    expect(InstallActionPolicySamplesRoute.path).toBe(
+      ALERTING_V2_ACTION_POLICY_INSTALL_SAMPLES_API_PATH
     );
-    expect(InstallActionPolicyTemplatesRoute.routeOptions.access).toBe('internal');
+    expect(InstallActionPolicySamplesRoute.routeOptions.access).toBe('internal');
   });
 
   it('requires write access to action policies and create and read access to workflows', () => {
-    const security = InstallActionPolicyTemplatesRoute.security;
+    const security = InstallActionPolicySamplesRoute.security;
     const requiredPrivileges =
       security && 'authz' in security && 'requiredPrivileges' in security.authz
         ? security.authz.requiredPrivileges

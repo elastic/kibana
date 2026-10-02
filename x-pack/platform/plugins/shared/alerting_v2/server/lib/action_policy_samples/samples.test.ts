@@ -8,11 +8,11 @@
 import { createActionPolicyDataSchema } from '@kbn/alerting-v2-schemas';
 import { parse } from 'yaml';
 import { buildConsoleLogWorkflowYaml, CONSOLE_LOG_WORKFLOW_NAME } from './console_log_workflow';
-import { ACTION_POLICY_TEMPLATES } from './templates';
+import { ACTION_POLICY_SAMPLES } from './samples';
 
-describe('ACTION_POLICY_TEMPLATES', () => {
-  it.each(ACTION_POLICY_TEMPLATES.map((template) => [template.key, template] as const))(
-    'the %s template is a valid action policy once a destination is added',
+describe('ACTION_POLICY_SAMPLES', () => {
+  it.each(ACTION_POLICY_SAMPLES.map((sample) => [sample.key, sample] as const))(
+    'the %s sample is a valid action policy once a destination is added',
     (_, { data }) => {
       const result = createActionPolicyDataSchema.safeParse({
         ...data,
@@ -24,11 +24,11 @@ describe('ACTION_POLICY_TEMPLATES', () => {
   );
 
   it('uses unique keys and names', () => {
-    expect(new Set(ACTION_POLICY_TEMPLATES.map(({ key }) => key)).size).toBe(
-      ACTION_POLICY_TEMPLATES.length
+    expect(new Set(ACTION_POLICY_SAMPLES.map(({ key }) => key)).size).toBe(
+      ACTION_POLICY_SAMPLES.length
     );
-    expect(new Set(ACTION_POLICY_TEMPLATES.map(({ data }) => data.name)).size).toBe(
-      ACTION_POLICY_TEMPLATES.length
+    expect(new Set(ACTION_POLICY_SAMPLES.map(({ data }) => data.name)).size).toBe(
+      ACTION_POLICY_SAMPLES.length
     );
   });
 });

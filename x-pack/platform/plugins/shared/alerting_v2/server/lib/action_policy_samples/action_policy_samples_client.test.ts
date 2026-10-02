@@ -10,23 +10,21 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionPolicyClient } from '../action_policy_client';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import type { LicenseServiceContract } from '../services/license_service/license_service';
-import { ActionPolicyTemplatesClient } from './action_policy_templates_client';
-import { getTemplateActionPolicyId, getTemplateWorkflowId } from './ids';
-import { ACTION_POLICY_TEMPLATES } from './templates';
+import { ActionPolicySamplesClient } from './action_policy_samples_client';
+import { getSampleActionPolicyId, getSampleWorkflowId } from './ids';
+import { ACTION_POLICY_SAMPLES } from './samples';
 
-type WorkflowsManagementApi = ConstructorParameters<typeof ActionPolicyTemplatesClient>[3];
+type WorkflowsManagementApi = ConstructorParameters<typeof ActionPolicySamplesClient>[3];
 
 const SPACE_ID = 'my-space';
-const WORKFLOW_ID = getTemplateWorkflowId(SPACE_ID);
-const POLICY_IDS = ACTION_POLICY_TEMPLATES.map(({ key }) =>
-  getTemplateActionPolicyId(SPACE_ID, key)
-);
+const WORKFLOW_ID = getSampleWorkflowId(SPACE_ID);
+const POLICY_IDS = ACTION_POLICY_SAMPLES.map(({ key }) => getSampleActionPolicyId(SPACE_ID, key));
 
 class WorkflowConflictError extends Error {
   public readonly statusCode = 409;
 }
 
-describe('ActionPolicyTemplatesClient', () => {
+describe('ActionPolicySamplesClient', () => {
   const request = httpServerMock.createKibanaRequest();
 
   let actionPolicyClient: jest.Mocked<
@@ -38,7 +36,7 @@ describe('ActionPolicyTemplatesClient', () => {
     createWorkflow: jest.Mock;
   };
   let licenseService: jest.Mocked<Pick<LicenseServiceContract, 'assertActionPoliciesLicense'>>;
-  let client: ActionPolicyTemplatesClient;
+  let client: ActionPolicySamplesClient;
 
   beforeEach(() => {
     actionPolicyClient = {
@@ -54,7 +52,7 @@ describe('ActionPolicyTemplatesClient', () => {
     };
     licenseService = { assertActionPoliciesLicense: jest.fn().mockResolvedValue(undefined) };
 
-    client = new ActionPolicyTemplatesClient(
+    client = new ActionPolicySamplesClient(
       request,
       SPACE_ID,
       actionPolicyClient as unknown as ActionPolicyClient,
@@ -67,7 +65,7 @@ describe('ActionPolicyTemplatesClient', () => {
     const licenseError = Boom.forbidden('license');
     licenseService.assertActionPoliciesLicense.mockRejectedValue(licenseError);
 
-    await expect(client.installTemplates()).rejects.toBe(licenseError);
+    await expect(client.installSamples()).rejects.toBe(licenseError);
 
     expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
     expect(actionPolicyClient.createActionPolicy).not.toHaveBeenCalled();
@@ -76,10 +74,10 @@ describe('ActionPolicyTemplatesClient', () => {
   it('rejects with a forbidden error when Workflows is not available', async () => {
     workflowsManagement.isWorkflowsAvailable = false;
 
-    await expect(client.installTemplates()).rejects.toMatchObject({
+    await expect(client.installSamples()).rejects.toMatchObject({
       isBoom: true,
       output: { statusCode: 403 },
-      data: { code: ALERTING_ERROR_CODES.ACTION_POLICY_TEMPLATES_WORKFLOWS_UNAVAILABLE },
+      data: { code: ALERTING_ERROR_CODES.ACTION_POLICY_SAMPLES_WORKFLOWS_UNAVAILABLE },
     });
 
     expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
@@ -88,7 +86,7 @@ describe('ActionPolicyTemplatesClient', () => {
 
   describe('on a first install', () => {
     it('creates the workflow with the deterministic id in the request space', async () => {
-      await client.installTemplates();
+      await client.installSamples();
 
       expect(workflowsManagement.createWorkflow).toHaveBeenCalledTimes(1);
       expect(workflowsManagement.createWorkflow).toHaveBeenCalledWith(
@@ -98,13 +96,13 @@ describe('ActionPolicyTemplatesClient', () => {
       );
     });
 
-    it('creates every template as a disabled policy dispatching to the workflow', async () => {
-      await client.installTemplates();
+    it('creates every sample as a disabled policy dispatching to the workflow', async () => {
+      await client.installSamples();
 
       expect(actionPolicyClient.createActionPolicy).toHaveBeenCalledTimes(
-        ACTION_POLICY_TEMPLATES.length
+        ACTION_POLICY_SAMPLES.length
       );
-      ACTION_POLICY_TEMPLATES.forEach(({ data }, index) => {
+      ACTION_POLICY_SAMPLES.forEach(({ data }, index) => {
         expect(actionPolicyClient.createActionPolicy).toHaveBeenCalledWith({
           data: { ...data, destinations: [{ type: 'workflow', id: WORKFLOW_ID }] },
           options: { id: POLICY_IDS[index], enabled: false },
@@ -113,9 +111,9 @@ describe('ActionPolicyTemplatesClient', () => {
     });
 
     it('reports everything as created', async () => {
-      await expect(client.installTemplates()).resolves.toEqual({
+      await expect(client.installSamples()).resolves.toEqual({
         workflow: { id: WORKFLOW_ID, status: 'created' },
-        policies: ACTION_POLICY_TEMPLATES.map(({ data }, index) => ({
+        policies: ACTION_POLICY_SAMPLES.map(({ data }, index) => ({
           id: POLICY_IDS[index],
           name: data.name,
           status: 'created',
@@ -131,34 +129,34 @@ describe('ActionPolicyTemplatesClient', () => {
     });
 
     it('does not create anything and reports everything as skipped', async () => {
-      const result = await client.installTemplates();
+      const result = await client.installSamples();
 
       expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
       expect(actionPolicyClient.createActionPolicy).not.toHaveBeenCalled();
       expect(result.workflow.status).toBe('skipped');
       expect(result.policies.map(({ status }) => status)).toEqual(
-        ACTION_POLICY_TEMPLATES.map(() => 'skipped')
+        ACTION_POLICY_SAMPLES.map(() => 'skipped')
       );
     });
 
     it('does not create the workflow when no policy needs it, even if it was deleted', async () => {
       workflowsManagement.getWorkflowsByIds.mockResolvedValue([]);
 
-      const result = await client.installTemplates();
+      const result = await client.installSamples();
 
       expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
       expect(result.workflow).toEqual({ id: WORKFLOW_ID, status: 'skipped' });
     });
   });
 
-  describe('when some templates were deleted', () => {
+  describe('when some samples were deleted', () => {
     it('recreates only the missing policies and reuses the existing workflow', async () => {
       actionPolicyClient.actionPolicyExists.mockImplementation(
         async ({ id }) => id !== POLICY_IDS[1]
       );
       workflowsManagement.getWorkflowsByIds.mockResolvedValue([{ id: WORKFLOW_ID }]);
 
-      const result = await client.installTemplates();
+      const result = await client.installSamples();
 
       expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
       expect(actionPolicyClient.createActionPolicy).toHaveBeenCalledTimes(1);
@@ -179,7 +177,7 @@ describe('ActionPolicyTemplatesClient', () => {
         .mockRejectedValueOnce(new WorkflowConflictError('conflict'))
         .mockResolvedValueOnce({ id: 'generated-workflow-id' });
 
-      const result = await client.installTemplates();
+      const result = await client.installSamples();
 
       expect(workflowsManagement.createWorkflow).toHaveBeenNthCalledWith(
         2,
@@ -201,7 +199,7 @@ describe('ActionPolicyTemplatesClient', () => {
       const error = new Error('boom');
       workflowsManagement.createWorkflow.mockRejectedValue(error);
 
-      await expect(client.installTemplates()).rejects.toBe(error);
+      await expect(client.installSamples()).rejects.toBe(error);
 
       expect(actionPolicyClient.createActionPolicy).not.toHaveBeenCalled();
     });
@@ -216,7 +214,7 @@ describe('ActionPolicyTemplatesClient', () => {
         return {} as never;
       });
 
-      const result = await client.installTemplates();
+      const result = await client.installSamples();
 
       expect(result.policies.map(({ status }) => status)).toEqual([
         'skipped',
@@ -229,7 +227,7 @@ describe('ActionPolicyTemplatesClient', () => {
       const error = Boom.badImplementation('boom');
       actionPolicyClient.createActionPolicy.mockRejectedValue(error);
 
-      await expect(client.installTemplates()).rejects.toBe(error);
+      await expect(client.installSamples()).rejects.toBe(error);
     });
   });
 });

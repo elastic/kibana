@@ -7,22 +7,22 @@
 
 import {
   errorResponseSchema,
-  installActionPolicyTemplatesResponseSchema,
+  installActionPolicySamplesResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { inject, injectable } from 'inversify';
-import { ActionPolicyTemplatesClient } from '../../lib/action_policy_templates/action_policy_templates_client';
+import { ActionPolicySamplesClient } from '../../lib/action_policy_samples/action_policy_samples_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { ALERTING_V2_INTERNAL_ACTION_POLICY_INSTALL_TEMPLATES_API_PATH } from '../constants';
+import { ALERTING_V2_ACTION_POLICY_INSTALL_SAMPLES_API_PATH } from '../constants';
 import { ACTION_POLICY_LICENSE_FORBIDDEN_DESCRIPTION } from './action_policy_route_descriptions';
 
 @injectable()
-export class InstallActionPolicyTemplatesRoute extends BaseAlertingRoute {
+export class InstallActionPolicySamplesRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = ALERTING_V2_INTERNAL_ACTION_POLICY_INSTALL_TEMPLATES_API_PATH;
+  static path = ALERTING_V2_ACTION_POLICY_INSTALL_SAMPLES_API_PATH;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [
@@ -35,16 +35,16 @@ export class InstallActionPolicyTemplatesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'internal' as const,
-    summary: 'Install action policy templates',
+    summary: 'Install sample action policies',
     description:
-      'Creates, in the space of the request, a placeholder workflow that logs to the console and a set of disabled template action policies that dispatch to it. Resources that already exist are skipped. Requires an active Enterprise license.',
+      'Creates, in the space of the request, a sample workflow that logs to the console and a set of disabled sample action policies that dispatch to it. Resources that already exist are skipped. Requires an active Enterprise license.',
   } as const;
   static schemas = {
     response: {
       200: {
-        body: () => installActionPolicyTemplatesResponseSchema,
+        body: () => installActionPolicySamplesResponseSchema,
         description:
-          'Returns the workflow and the template action policies, each marked as created or skipped.',
+          'Returns the workflow and the sample action policies, each marked as created or skipped.',
       },
       403: {
         body: () => errorResponseSchema,
@@ -53,18 +53,18 @@ export class InstallActionPolicyTemplatesRoute extends BaseAlertingRoute {
     },
   };
 
-  protected readonly routeName = 'install action policy templates';
+  protected readonly routeName = 'install sample action policies';
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
-    @inject(ActionPolicyTemplatesClient)
-    private readonly actionPolicyTemplatesClient: ActionPolicyTemplatesClient
+    @inject(ActionPolicySamplesClient)
+    private readonly actionPolicySamplesClient: ActionPolicySamplesClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const result = await this.actionPolicyTemplatesClient.installTemplates();
+    const result = await this.actionPolicySamplesClient.installSamples();
     return this.ctx.response.ok({ body: result });
   }
 }

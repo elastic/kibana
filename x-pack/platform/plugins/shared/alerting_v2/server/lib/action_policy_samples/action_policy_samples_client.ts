@@ -7,8 +7,8 @@
 
 import Boom from '@hapi/boom';
 import type {
-  InstallActionPolicyTemplatesResponse,
-  InstallActionPolicyTemplateStatus,
+  InstallActionPolicySamplesResponse,
+  InstallActionPolicySampleStatus,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -16,14 +16,14 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../action_policy_client';
 import { WorkflowsManagementApiToken } from '../dispatcher/steps/dispatch_step_tokens';
-import { getActionPolicyTemplatesWorkflowsUnavailableMessage } from '../errors/action_policy_error_messages';
+import { getActionPolicySamplesWorkflowsUnavailableMessage } from '../errors/action_policy_error_messages';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { LicenseServiceToken } from '../services/license_service/tokens';
 import type { LicenseServiceContract } from '../services/license_service/license_service';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import { buildConsoleLogWorkflowYaml } from './console_log_workflow';
-import { getTemplateActionPolicyId, getTemplateWorkflowId } from './ids';
-import { ACTION_POLICY_TEMPLATES, type ActionPolicyTemplate } from './templates';
+import { getSampleActionPolicyId, getSampleWorkflowId } from './ids';
+import { ACTION_POLICY_SAMPLES, type ActionPolicySample } from './samples';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -35,11 +35,11 @@ const hasConflictStatus = (error: unknown): boolean =>
     : (error as { statusCode?: number } | null)?.statusCode === CONFLICT_STATUS_CODE;
 
 /**
- * Installs the template action policies, and the placeholder console log workflow they dispatch to,
+ * Installs the sample action policies, and the sample console log workflow they dispatch to,
  * in the space of the current request. Existing resources are never modified.
  */
 @injectable()
-export class ActionPolicyTemplatesClient {
+export class ActionPolicySamplesClient {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
@@ -49,41 +49,41 @@ export class ActionPolicyTemplatesClient {
     @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract
   ) {}
 
-  public async installTemplates(): Promise<InstallActionPolicyTemplatesResponse> {
+  public async installSamples(): Promise<InstallActionPolicySamplesResponse> {
     await this.licenseService.assertActionPoliciesLicense();
 
     if (!this.workflowsManagement.isWorkflowsAvailable) {
-      throw Boom.forbidden(getActionPolicyTemplatesWorkflowsUnavailableMessage(), {
-        code: ALERTING_ERROR_CODES.ACTION_POLICY_TEMPLATES_WORKFLOWS_UNAVAILABLE,
+      throw Boom.forbidden(getActionPolicySamplesWorkflowsUnavailableMessage(), {
+        code: ALERTING_ERROR_CODES.ACTION_POLICY_SAMPLES_WORKFLOWS_UNAVAILABLE,
       });
     }
 
-    const templates = await this.resolveTemplates();
-    const workflow = await this.ensureWorkflow(templates.some(({ exists }) => !exists));
+    const samples = await this.resolveSamples();
+    const workflow = await this.ensureWorkflow(samples.some(({ exists }) => !exists));
 
-    const policies: InstallActionPolicyTemplatesResponse['policies'] = [];
-    for (const { template, id, exists } of templates) {
-      const { name } = template.data;
+    const policies: InstallActionPolicySamplesResponse['policies'] = [];
+    for (const { sample, id, exists } of samples) {
+      const { name } = sample.data;
       if (exists) {
         policies.push({ id, name, status: 'skipped' });
         continue;
       }
 
-      const status = await this.createPolicy({ template, id, workflowId: workflow.id });
+      const status = await this.createPolicy({ sample, id, workflowId: workflow.id });
       policies.push({ id, name, status });
     }
 
     return { workflow, policies };
   }
 
-  private async resolveTemplates(): Promise<
-    Array<{ template: ActionPolicyTemplate; id: string; exists: boolean }>
+  private async resolveSamples(): Promise<
+    Array<{ sample: ActionPolicySample; id: string; exists: boolean }>
   > {
     return Promise.all(
-      ACTION_POLICY_TEMPLATES.map(async (template) => {
-        const id = getTemplateActionPolicyId(this.spaceId, template.key);
+      ACTION_POLICY_SAMPLES.map(async (sample) => {
+        const id = getSampleActionPolicyId(this.spaceId, sample.key);
         const exists = await this.actionPolicyClient.actionPolicyExists({ id });
-        return { template, id, exists };
+        return { sample, id, exists };
       })
     );
   }
@@ -94,8 +94,8 @@ export class ActionPolicyTemplatesClient {
    */
   private async ensureWorkflow(
     needed: boolean
-  ): Promise<{ id: string; status: InstallActionPolicyTemplateStatus }> {
-    const id = getTemplateWorkflowId(this.spaceId);
+  ): Promise<{ id: string; status: InstallActionPolicySampleStatus }> {
+    const id = getSampleWorkflowId(this.spaceId);
     const [existing] = await this.workflowsManagement.getWorkflowsByIds(
       [id],
       this.spaceId,
@@ -118,7 +118,7 @@ export class ActionPolicyTemplatesClient {
         throw error;
       }
       // Workflow ids are unique across spaces and soft-deleted workflows keep reserving theirs, so a
-      // previously deleted template workflow cannot be recreated under the same id.
+      // previously deleted sample workflow cannot be recreated under the same id.
       const created = await this.workflowsManagement.createWorkflow(
         { yaml },
         this.spaceId,
@@ -129,17 +129,17 @@ export class ActionPolicyTemplatesClient {
   }
 
   private async createPolicy({
-    template,
+    sample,
     id,
     workflowId,
   }: {
-    template: ActionPolicyTemplate;
+    sample: ActionPolicySample;
     id: string;
     workflowId: string;
-  }): Promise<InstallActionPolicyTemplateStatus> {
+  }): Promise<InstallActionPolicySampleStatus> {
     try {
       await this.actionPolicyClient.createActionPolicy({
-        data: { ...template.data, destinations: [{ type: 'workflow', id: workflowId }] },
+        data: { ...sample.data, destinations: [{ type: 'workflow', id: workflowId }] },
         options: { id, enabled: false },
       });
       return 'created';

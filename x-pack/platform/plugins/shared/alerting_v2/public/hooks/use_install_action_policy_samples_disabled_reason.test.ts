@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useService } from '@kbn/core-di-browser';
 import { UserCapabilities } from '../services/user_capabilities';
-import { useInstallActionPolicyTemplatesDisabledReason } from './use_install_action_policy_templates_disabled_reason';
+import { useInstallActionPolicySamplesDisabledReason } from './use_install_action_policy_samples_disabled_reason';
 
 let mockIsLicenseValid = true;
 
@@ -25,8 +25,8 @@ const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const MISSING_ACTION_POLICIES_PRIVILEGES_REASON =
   'You do not have permission to create action policies';
 const MISSING_WORKFLOWS_PRIVILEGES_REASON =
-  'Using policy templates requires permission to create and read workflows.';
-const LICENSE_REQUIRED_REASON = 'An active Enterprise license is required to use policy templates.';
+  'Adding sample policies requires permission to create and read workflows.';
+const LICENSE_REQUIRED_REASON = 'An active Enterprise license is required to add sample policies.';
 
 interface Scenario {
   canWriteActionPolicies: boolean;
@@ -40,7 +40,7 @@ const allowed: Scenario = {
   isLicenseValid: true,
 };
 
-describe('useInstallActionPolicyTemplatesDisabledReason', () => {
+describe('useInstallActionPolicySamplesDisabledReason', () => {
   const scenarios: Array<{
     scenario: string;
     overrides: Partial<Scenario>;
@@ -90,7 +90,7 @@ describe('useInstallActionPolicyTemplatesDisabledReason', () => {
     );
     mockIsLicenseValid = isLicenseValid;
 
-    const { result } = renderHook(() => useInstallActionPolicyTemplatesDisabledReason());
+    const { result } = renderHook(() => useInstallActionPolicySamplesDisabledReason());
 
     expect(result.current).toBe(expected);
   });

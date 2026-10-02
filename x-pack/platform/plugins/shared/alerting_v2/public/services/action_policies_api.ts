@@ -15,13 +15,13 @@ import type {
   ActionPolicyResponse,
   FindActionPoliciesRequest,
   FindActionPoliciesResponse,
-  InstallActionPolicyTemplatesResponse,
+  InstallActionPolicySamplesResponse,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
 import {
   ALERTING_V2_ACTION_POLICY_API_PATH,
-  ALERTING_V2_INTERNAL_ACTION_POLICY_INSTALL_TEMPLATES_API_PATH,
+  ALERTING_V2_ACTION_POLICY_INSTALL_SAMPLES_API_PATH,
 } from '../constants';
 
 /** Re-exported from the shared schemas package. */
@@ -67,9 +67,9 @@ export class ActionPoliciesApi {
     });
   }
 
-  public async installActionPolicyTemplates() {
-    return this.http.post<InstallActionPolicyTemplatesResponse>(
-      ALERTING_V2_INTERNAL_ACTION_POLICY_INSTALL_TEMPLATES_API_PATH
+  public async installActionPolicySamples() {
+    return this.http.post<InstallActionPolicySamplesResponse>(
+      ALERTING_V2_ACTION_POLICY_INSTALL_SAMPLES_API_PATH
     );
   }
 

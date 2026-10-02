@@ -38,8 +38,8 @@ export const ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH =
   '/internal/alerting/v2/action_policies' as const;
 export const ALERTING_V2_INTERNAL_ACTION_POLICY_MATCH_API_PATH =
   `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/_match` as const;
-export const ALERTING_V2_INTERNAL_ACTION_POLICY_INSTALL_TEMPLATES_API_PATH =
-  `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/_install_templates` as const;
+export const ALERTING_V2_ACTION_POLICY_INSTALL_SAMPLES_API_PATH =
+  `${ALERTING_V2_ACTION_POLICY_API_PATH}/_install_samples` as const;
 export const ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH =
   '/api/alerting/v2/execution_history/action_policies' as const;
 export const ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH =

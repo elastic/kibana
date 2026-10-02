@@ -33,8 +33,8 @@ import {
 } from '../../../hooks/use_are_agent_builder_skills_available';
 import { useNavigateToAgentBuilder } from '../../../hooks/use_navigate_to_agent_builder';
 import { useAlertingV2ExperimentalFeatures } from '../../../hooks/use_alerting_v2_experimental_features';
-import { useInstallActionPolicyTemplates } from '../../../hooks/use_install_action_policy_templates';
-import { useInstallActionPolicyTemplatesDisabledReason } from '../../../hooks/use_install_action_policy_templates_disabled_reason';
+import { useInstallActionPolicySamples } from '../../../hooks/use_install_action_policy_samples';
+import { useInstallActionPolicySamplesDisabledReason } from '../../../hooks/use_install_action_policy_samples_disabled_reason';
 import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_policies_license_valid';
 import { useSnoozeActionPolicy } from '../../../hooks/use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from '../../../hooks/use_unsnooze_action_policy';
@@ -82,15 +82,15 @@ const CREATE_WITH_AGENT_OPTION_DESCRIPTION = i18n.translate(
   { defaultMessage: 'Set up an action policy with the help of the AI Agent.' }
 );
 
-const INSTALL_TEMPLATES_OPTION_TITLE = i18n.translate(
-  'xpack.alertingV2.actionPolicyCreateOptionsPanel.installTemplatesTitle',
-  { defaultMessage: 'Use policy templates' }
+const INSTALL_SAMPLES_OPTION_TITLE = i18n.translate(
+  'xpack.alertingV2.actionPolicyCreateOptionsPanel.installSamplesTitle',
+  { defaultMessage: 'Add sample policies' }
 );
-const INSTALL_TEMPLATES_OPTION_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.actionPolicyCreateOptionsPanel.installTemplatesDescription',
+const INSTALL_SAMPLES_OPTION_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.actionPolicyCreateOptionsPanel.installSamplesDescription',
   {
     defaultMessage:
-      'Add preconfigured action policies that route alert episodes to a sample workflow. Policies are created disabled so you can review them first.',
+      'Add preconfigured action policies that route alerts to a sample workflow. Policies are created disabled so you can review them first.',
   }
 );
 
@@ -113,18 +113,18 @@ export const ActionPoliciesTable = () => {
   const showExperimentalFeatures = useAlertingV2ExperimentalFeatures();
   const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(abSkillRequirements);
   const isLicenseValid = useIsActionPoliciesLicenseValid();
-  const installTemplatesDisabledReason = useInstallActionPolicyTemplatesDisabledReason();
+  const installSamplesDisabledReason = useInstallActionPolicySamplesDisabledReason();
 
   const navigateToCreate = useCallback(() => {
     actionPolicyLocators.navigateSync({ page: 'create' });
   }, [actionPolicyLocators]);
 
   const { mutate: createActionPolicy } = useCreateActionPolicy();
-  const { mutate: installTemplates, isLoading: isInstallingTemplates } =
-    useInstallActionPolicyTemplates();
-  const installTemplatesAndRefetch = useCallback(
-    () => installTemplates(undefined, { onSuccess: () => refetchRef.current() }),
-    [installTemplates]
+  const { mutate: installSamples, isLoading: isInstallingSamples } =
+    useInstallActionPolicySamples();
+  const installSamplesAndRefetch = useCallback(
+    () => installSamples(undefined, { onSuccess: () => refetchRef.current() }),
+    [installSamples]
   );
   const { mutate: deleteActionPolicy, isLoading: isDeleting } = useDeleteActionPolicy();
   const {
@@ -217,14 +217,14 @@ export const ActionPoliciesTable = () => {
         'data-test-subj': 'createActionPolicyCard',
       },
       {
-        id: 'install-templates',
+        id: 'install-samples',
         iconType: 'copy',
-        title: INSTALL_TEMPLATES_OPTION_TITLE,
-        description: INSTALL_TEMPLATES_OPTION_DESCRIPTION,
-        onClick: installTemplatesAndRefetch,
-        disabled: installTemplatesDisabledReason !== undefined || isInstallingTemplates,
-        tooltipText: installTemplatesDisabledReason,
-        'data-test-subj': 'installActionPolicyTemplatesCard',
+        title: INSTALL_SAMPLES_OPTION_TITLE,
+        description: INSTALL_SAMPLES_OPTION_DESCRIPTION,
+        onClick: installSamplesAndRefetch,
+        disabled: installSamplesDisabledReason !== undefined || isInstallingSamples,
+        tooltipText: installSamplesDisabledReason,
+        'data-test-subj': 'installActionPolicySamplesCard',
       },
       ...(showExperimentalFeatures
         ? [
@@ -258,9 +258,9 @@ export const ActionPoliciesTable = () => {
     [
       navigateToCreate,
       navigateToAgentBuilder,
-      installTemplatesAndRefetch,
-      installTemplatesDisabledReason,
-      isInstallingTemplates,
+      installSamplesAndRefetch,
+      installSamplesDisabledReason,
+      isInstallingSamples,
       isLicenseValid,
       areAgentBuilderSkillsAvailable,
       createWithAgentTooltipText,
