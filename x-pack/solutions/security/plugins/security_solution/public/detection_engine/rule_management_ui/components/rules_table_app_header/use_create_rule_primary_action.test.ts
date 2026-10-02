@@ -13,14 +13,16 @@ import { useCreateRulePrimaryAction } from './use_create_rule_primary_action';
 const mockOpenChat = jest.fn();
 const mockReportEvent = jest.fn();
 const mockStartSession = jest.fn(() => ({ sessionId: 'session-1' }));
+let mockServices: Record<string, unknown>;
+const resetServices = () => {
+  mockServices = {
+    agentBuilder: { openChat: mockOpenChat },
+    telemetry: { reportEvent: mockReportEvent },
+    aiRuleCreation: { startSession: mockStartSession },
+  };
+};
 jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      agentBuilder: { openChat: mockOpenChat },
-      telemetry: { reportEvent: mockReportEvent },
-      aiRuleCreation: { startSession: mockStartSession },
-    },
-  }),
+  useKibana: () => ({ services: mockServices }),
 }));
 
 const mockGetSecuritySolutionUrl = jest.fn(
@@ -36,6 +38,7 @@ const render = (props: Parameters<typeof useCreateRulePrimaryAction>[0]) =>
 describe('useCreateRulePrimaryAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    resetServices();
   });
 
   describe('when AI rule creation is not available', () => {
@@ -97,6 +100,18 @@ describe('useCreateRulePrimaryAction', () => {
       expect(mockOpenChat).toHaveBeenCalledWith(
         expect.objectContaining({ newConversation: true, sessionTag: 'security' })
       );
+    });
+
+    it('still reports telemetry and does not throw when the agent builder is unavailable', () => {
+      mockServices.agentBuilder = undefined;
+      const aiItem = getAction().items?.[0];
+
+      expect(() => aiItem?.run?.()).not.toThrow();
+      expect(mockReportEvent).toHaveBeenCalledWith(RuleCreationEventTypes.CreationInitialized, {
+        creationSource: 'ai',
+        sessionId: 'session-1',
+      });
+      expect(mockOpenChat).not.toHaveBeenCalled();
     });
   });
 });
