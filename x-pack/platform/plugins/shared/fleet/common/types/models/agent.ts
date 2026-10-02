@@ -39,6 +39,7 @@ export type AgentActionType =
   | 'UNENROLL'
   | 'UPGRADE'
   | 'ROLLBACK'
+  | 'RESTART'
   | 'SETTINGS'
   | 'POLICY_REASSIGN'
   | 'CANCEL'

@@ -43,6 +43,7 @@ import type {
 import {
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
+  SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_REGEX,
@@ -66,6 +67,7 @@ const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
  * unreadable.
  */
 const accountEntrySchema = z.object({
+  description: z.string().max(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH).optional(),
   roles: z
     .array(z.string().min(1).max(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH))
     .max(ES_SERVICE_ACCOUNT_MAX_ROLES),
@@ -80,6 +82,7 @@ interface QueriedServiceAccount {
   username: string;
   roles: string[];
   enabled: boolean;
+  description?: string;
 }
 
 /** An Elasticsearch user-managed service account, as Elasticsearch reports it. */
@@ -89,11 +92,12 @@ interface ElasticsearchServiceAccount {
   namespace: string;
   roles: string[];
   enabled: boolean;
+  description?: string;
 }
 
 /** Narrows an account to the directory entry. */
 const toDirectoryEntry = (
-  { id, name, roles, enabled }: ElasticsearchServiceAccount,
+  { id, name, roles, enabled, description }: ElasticsearchServiceAccount,
   assumable: boolean
 ): ServiceAccountDirectoryEntry => ({
   id,
@@ -101,6 +105,7 @@ const toDirectoryEntry = (
   roles,
   enabled,
   assumable,
+  ...(description !== undefined ? { description } : {}),
 });
 
 export interface EsServiceAccountsOptions {
@@ -211,7 +216,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
-    const { name, roles } = parseCreateServiceAccountParams(params, ES_SERVICE_ACCOUNT_ROLE_LIMITS);
+    const { name, roles, description } = parseCreateServiceAccountParams(
+      params,
+      ES_SERVICE_ACCOUNT_ROLE_LIMITS
+    );
     const serviceAccountId = `${namespace}/${name}`;
 
     const esClient = this.clusterClient.asScoped(request).asCurrentUser;
@@ -230,7 +238,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       await esClient.transport.request({
         method: 'PUT',
         path: `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`,
-        body: { roles },
+        body: { roles, ...(description !== undefined ? { description } : {}) },
         querystring: { refresh: 'wait_for' },
       });
     } catch (e) {
@@ -265,7 +273,12 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
       throw e;
     }
-    return { id: serviceAccountId, name, roles };
+    return {
+      id: serviceAccountId,
+      name,
+      roles,
+      ...(description !== undefined ? { description } : {}),
+    };
   }
 
   /**
@@ -315,17 +328,19 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
     // An account whose principal Kibana cannot split is skipped rather than taken as a reason to
     // refuse the page: an oddity in one account must not make the whole directory unreadable.
-    const accounts = rawAccounts.slice(0, limit).flatMap(({ username, roles, enabled }) => {
-      const principal = parseEsServiceAccountId(username);
-      if (!principal) {
-        this.logger.warn(
-          `Skipping service account [${username}], which Elasticsearch reported with an unrecognized principal`
-        );
-        return [];
-      }
+    const accounts = rawAccounts
+      .slice(0, limit)
+      .flatMap(({ username, roles, enabled, description }) => {
+        const principal = parseEsServiceAccountId(username);
+        if (!principal) {
+          this.logger.warn(
+            `Skipping service account [${username}], which Elasticsearch reported with an unrecognized principal`
+          );
+          return [];
+        }
 
-      return [{ id: username, ...principal, roles, enabled }];
-    });
+        return [{ id: username, ...principal, roles, enabled, description }];
+      });
 
     const credentialled = await this.credentialStore.findExisting(accounts.map(({ id }) => id));
 
@@ -589,6 +604,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       namespace,
       roles: parsed.data.roles,
       enabled: parsed.data.enabled,
+      ...(parsed.data.description !== undefined ? { description: parsed.data.description } : {}),
     };
   }
 
