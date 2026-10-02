@@ -22,7 +22,7 @@ import { File } from '../file';
  */
 export async function getFilesForCommit(gitRef, options = {}) {
   const { includeUntracked = false } = options;
-  const git = new simpleGit(REPO_ROOT);
+  const git = simpleGit(REPO_ROOT);
   const normalizedGitRef = Array.isArray(gitRef) ? gitRef.find(Boolean) : gitRef;
   const gitRefForDiff = normalizedGitRef ? normalizedGitRef : '--cached';
   const output = await git.diff(['--name-status', gitRefForDiff]);
