@@ -45,6 +45,10 @@ export const KEEP_SEPARATE: Readonly<Record<string, string>> = {
     'the EDR set presets a default Fleet Server and output that would conflict with the ones this suite registers at runtime',
   search_sessions:
     'the examples set loads every example plugin, which would change the Data, Dashboard, Discover and Lens UI tests',
+  uiam_local:
+    'tests run on every serverless project type and service_accounts only has configs for two of them',
+  ai_value_report:
+    'tests also run on serverless security_ease and security_attacks_alignment has no config for it',
   workflows_extensions:
     'grows with every plugin gated trigger, merging would load those flags on the Nightshift tests',
 };
