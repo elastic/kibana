@@ -70,11 +70,27 @@ export {
   type ClassificationPartition,
 } from './models/classification_completeness';
 export {
+  findingDocumentId,
+  findingDocumentRt,
+  findingStatusRt,
+  findingsWriteResultRt,
+  findingWriteFailureRt,
+  OPEN_FINDING_STATUS,
+  type FindingDocument,
+  type FindingStatus,
+  type FindingsWriteResult,
+  type FindingWriteFailure,
+} from './models/finding_document_codec';
+export {
   MAX_CLASSIFICATION_CANDIDATES,
   MAX_CLASSIFICATION_EVIDENCE,
   MAX_CLASSIFICATION_EXCERPT_BYTES,
+  MAX_FINDING_SUMMARY_LENGTH,
+  MAX_FINDING_TITLE_LENGTH,
   MAX_WORKFLOW_PATH_LENGTH,
   MAX_WORKFLOW_REQUEST_BYTES,
+  findingTypeRt,
+  hasCompleteFinding,
   logLevelRt,
   loggingClassificationCandidateRt,
   loggingClassificationRequestRt,
@@ -84,6 +100,8 @@ export {
   otelClassificationRt,
   otelSignalMetadataRt,
   severityScoreRt,
+  type ClassificationFindingFields,
+  type FindingType,
   type LoggingClassification,
   type LoggingClassificationCandidate,
   type LoggingClassificationRequest,
@@ -139,6 +157,11 @@ export {
   type CatalogPruneResult,
   type CatalogWriter,
 } from './ports/catalog_writer';
+export {
+  type FindingsPruneRequest,
+  type FindingsPruneResult,
+  type FindingsWriter,
+} from './ports/findings_writer';
 export { type QueryValidator } from './ports/query_validator';
 export { type RepositoryResolver } from './ports/repository_resolver';
 export {

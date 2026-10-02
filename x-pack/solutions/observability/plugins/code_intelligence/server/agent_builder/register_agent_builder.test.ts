@@ -15,6 +15,7 @@ import { createCodeIntelligenceSkill } from './skills/code_intelligence_skill';
 
 const dependencies = {
   catalogIndex: 'catalog',
+  findingsIndex: 'findings',
   settingsIndex: 'settings',
   getServices: () => ({ getSpaceId: () => 'default' }),
 };

@@ -12,6 +12,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { ExtractionBatchStatus } from '../../../common/extraction_batch';
 import type { RepositorySettings } from '../../../common/repository_settings';
 import { ElasticsearchCatalogWriter } from '../../adapters/elasticsearch_catalog';
+import { ElasticsearchFindingsWriter } from '../../adapters/elasticsearch_findings';
 import { ExtractionAlreadyRunningError } from '../../extraction_already_running_error';
 import { ExtractionCapacityExhaustedError } from '../../extraction_capacity_exhausted_error';
 import type { ExtractionService } from '../../extraction_service';
@@ -82,6 +83,7 @@ const context = (client: ReturnType<typeof fakeClient>) =>
 
 const dependencies = (services: Partial<RouteServices> = {}): CodeIntelligenceToolDependencies => ({
   catalogIndex: 'catalog',
+  findingsIndex: 'findings',
   settingsIndex: 'settings',
   getServices: () => ({ getSpaceId: () => 'default', ...services }),
 });
@@ -236,7 +238,10 @@ describe('start_extraction', () => {
       ],
       request,
       'space-a',
-      expect.any(ElasticsearchCatalogWriter)
+      {
+        catalogWriter: expect.any(ElasticsearchCatalogWriter),
+        findingsWriter: expect.any(ElasticsearchFindingsWriter),
+      }
     );
     expect(result).toEqual(
       expect.objectContaining({

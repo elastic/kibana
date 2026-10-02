@@ -10,6 +10,7 @@ import type { RouteServices } from '../../routes';
 /** What every Code Intelligence tool needs; services resolve at call time, after the plugin starts. */
 export interface CodeIntelligenceToolDependencies {
   readonly catalogIndex: string;
+  readonly findingsIndex: string;
   readonly settingsIndex: string;
   readonly getServices: () => RouteServices;
 }

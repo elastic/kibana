@@ -124,12 +124,66 @@ export const logLevelRt = t.keyof({
   warn: null,
 });
 
+/** Maximum length of a reviewer-facing finding title returned by a classifier. */
+export const MAX_FINDING_TITLE_LENGTH = 160;
+/** Maximum length of a reviewer-facing finding summary returned by a classifier. */
+export const MAX_FINDING_SUMMARY_LENGTH = 600;
+
+/** Restricts findings to the 2 review categories a classifier may file. */
+export const findingTypeRt = t.keyof({ 'sensitive-data': null, odd: null });
+export type FindingType = t.TypeOf<typeof findingTypeRt>;
+
+/** Bounds a finding title so a reviewer list stays readable. */
+const findingTitleRt = t.refinement(
+  nonEmptyStringRt,
+  (value) => value.length <= MAX_FINDING_TITLE_LENGTH,
+  'FindingTitle'
+);
+
+/** Bounds a finding summary so a reviewer list stays readable. */
+const findingSummaryRt = t.refinement(
+  nonEmptyStringRt,
+  (value) => value.length <= MAX_FINDING_SUMMARY_LENGTH,
+  'FindingSummary'
+);
+
+/**
+ * Optional finding fields shared by both classifiers. They stay flat because
+ * duplicate answers are compared field by field with strict equality.
+ */
+const classificationFindingFieldsRt = t.partial({
+  findingSummary: findingSummaryRt,
+  findingTitle: findingTitleRt,
+  findingType: findingTypeRt,
+});
+export type ClassificationFindingFields = t.TypeOf<typeof classificationFindingFieldsRt>;
+
+/** A finding is only usable when the classifier supplied its type, title, and summary together. */
+export const hasCompleteFinding = (
+  value: ClassificationFindingFields
+): value is Required<ClassificationFindingFields> =>
+  value.findingType !== undefined &&
+  value.findingTitle !== undefined &&
+  value.findingSummary !== undefined;
+
+/** Rejects answers that carry only some of the finding fields, like any other invalid result. */
+const findingFieldsTogether = (value: ClassificationFindingFields): boolean =>
+  hasCompleteFinding(value) ||
+  (value.findingType === undefined &&
+    value.findingTitle === undefined &&
+    value.findingSummary === undefined);
+
 /** Validates model decisions allowed for a logging candidate. */
-export const loggingClassificationRt = t.exact(
-  t.intersection([
-    t.type({ id: candidateIdRt, keep: t.boolean }),
-    t.partial({ level: logLevelRt, staticMessage: nonEmptyStringRt }),
-  ])
+export const loggingClassificationRt = t.refinement(
+  t.exact(
+    t.intersection([
+      t.type({ id: candidateIdRt, keep: t.boolean }),
+      t.partial({ level: logLevelRt, staticMessage: nonEmptyStringRt }),
+      classificationFindingFieldsRt,
+    ])
+  ),
+  findingFieldsTogether,
+  'LoggingClassification'
 );
 export type LoggingClassification = t.TypeOf<typeof loggingClassificationRt>;
 
@@ -183,14 +237,19 @@ export const severityScoreRt = t.refinement(
   'SeverityScore'
 );
 /** Validates model decisions allowed for an OTel candidate. */
-export const otelClassificationRt = t.exact(
-  t.intersection([
-    t.type({ id: candidateIdRt, keep: t.boolean }),
-    t.partial({
-      description: nonEmptyStringRt,
-      severityScore: severityScoreRt,
-      title: nonEmptyStringRt,
-    }),
-  ])
+export const otelClassificationRt = t.refinement(
+  t.exact(
+    t.intersection([
+      t.type({ id: candidateIdRt, keep: t.boolean }),
+      t.partial({
+        description: nonEmptyStringRt,
+        severityScore: severityScoreRt,
+        title: nonEmptyStringRt,
+      }),
+      classificationFindingFieldsRt,
+    ])
+  ),
+  findingFieldsTogether,
+  'OtelClassification'
 );
 export type OtelClassification = t.TypeOf<typeof otelClassificationRt>;

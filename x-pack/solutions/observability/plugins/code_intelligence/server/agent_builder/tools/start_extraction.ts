@@ -21,6 +21,7 @@ import {
 } from '../../../common/repository_settings';
 import { START_EXTRACTION_ERROR_CODES } from '../../../common/start_extraction_errors';
 import { ElasticsearchCatalogWriter } from '../../adapters/elasticsearch_catalog';
+import { ElasticsearchFindingsWriter } from '../../adapters/elasticsearch_findings';
 import {
   describeStartFailure,
   listExtractableRepositories,
@@ -67,6 +68,7 @@ const refusalResult = ({ code, message, repository, extractionId }: ExtractionRe
 
 export const createStartExtractionTool = ({
   catalogIndex,
+  findingsIndex,
   settingsIndex,
   getServices,
 }: CodeIntelligenceToolDependencies): BuiltinToolDefinition<typeof schema> => ({
@@ -137,12 +139,10 @@ Each repository must already be configured; add it first with the upsert reposit
     );
     if (!selection.ok) return { results: [refusalResult(selection)] };
     try {
-      const id = await extractionService.start(
-        selection.selected,
-        request,
-        spaceId,
-        new ElasticsearchCatalogWriter(client, catalogIndex)
-      );
+      const id = await extractionService.start(selection.selected, request, spaceId, {
+        catalogWriter: new ElasticsearchCatalogWriter(client, catalogIndex),
+        findingsWriter: new ElasticsearchFindingsWriter(client, findingsIndex),
+      });
       return {
         results: [
           createOtherResult({

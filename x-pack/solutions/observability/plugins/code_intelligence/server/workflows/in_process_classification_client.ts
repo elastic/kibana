@@ -18,11 +18,13 @@ import {
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 
 import {
+  hasCompleteFinding,
   loggingClassificationRequestRt,
   loggingClassificationRt,
   MAX_WORKFLOW_REQUEST_BYTES,
   otelClassificationRequestRt,
   otelClassificationRt,
+  type ClassificationFindingFields,
   type LoggingClassification,
   type LoggingClassificationRequest,
   type OtelClassification,
@@ -72,6 +74,18 @@ const withoutBlankText = (value: unknown, textFields: readonly string[]): unknow
 };
 
 /**
+ * The workflow schema makes the model state `findingType: none` explicitly, because an optional
+ * field is filled on nearly every answer. `none` means no finding, so the 3 finding fields are
+ * removed before the domain codec sees the result.
+ */
+const withoutEmptyFinding = (value: unknown): unknown => {
+  const result = record(value);
+  if (result === undefined || result.findingType !== 'none') return value;
+  const { findingType: _type, findingTitle: _title, findingSummary: _summary, ...rest } = result;
+  return rest;
+};
+
+/**
  * Keeps each result that satisfies its contract on its own; an invalid result is dropped so its
  * candidate counts as omitted and joins the caller's retry instead of failing every other result.
  */
@@ -81,7 +95,7 @@ const validResults = <Value>(
   textFields: readonly string[]
 ): readonly Value[] =>
   results.flatMap((result) => {
-    const decoded = codec.decode(withoutBlankText(result, textFields));
+    const decoded = codec.decode(withoutBlankText(withoutEmptyFinding(result), textFields));
     return isLeft(decoded) ? [] : [decoded.right];
   });
 
@@ -97,6 +111,19 @@ const validateRequest = <Value>(codec: t.Type<Value>, value: Value): OperationRe
   return { status: 'success', value: decoded.right };
 };
 
+/**
+ * Finding text is a reviewer-facing description, not a source quote, so a validated finding is
+ * forwarded as-is; the codec already rejected partial or over-long findings.
+ */
+const findingFields = (result: ClassificationFindingFields): ClassificationFindingFields =>
+  hasCompleteFinding(result)
+    ? {
+        findingSummary: result.findingSummary,
+        findingTitle: result.findingTitle,
+        findingType: result.findingType,
+      }
+    : {};
+
 const sourceBackedLoggingResults = (
   request: LoggingClassificationRequest,
   results: readonly LoggingClassification[]
@@ -111,6 +138,7 @@ const sourceBackedLoggingResults = (
       candidate?.excerpt.includes(result.staticMessage) === true
         ? { staticMessage: result.staticMessage }
         : {}),
+      ...findingFields(result),
     };
   });
 
@@ -131,6 +159,7 @@ const sourceBackedOtelResults = (
       ...(result.severityScore === undefined ? {} : { severityScore: result.severityScore }),
       ...(sourceContains(result.title) ? { title: result.title } : {}),
       ...(sourceContains(result.description) ? { description: result.description } : {}),
+      ...findingFields(result),
     };
   });
 
@@ -200,7 +229,7 @@ export class InProcessClassificationWorkflowClient implements ClassificationWork
       CODE_INTELLIGENCE_LOGGING_CLASSIFICATION_WORKFLOW_ID,
       validated.value,
       loggingClassificationRt,
-      ['staticMessage']
+      ['staticMessage', 'findingTitle', 'findingSummary']
     );
     return result.status === 'failure'
       ? result
@@ -216,7 +245,7 @@ export class InProcessClassificationWorkflowClient implements ClassificationWork
       CODE_INTELLIGENCE_OTEL_CLASSIFICATION_WORKFLOW_ID,
       validated.value,
       otelClassificationRt,
-      ['description', 'title']
+      ['description', 'title', 'findingTitle', 'findingSummary']
     );
     return result.status === 'failure'
       ? result
