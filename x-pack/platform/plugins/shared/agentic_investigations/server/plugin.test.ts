@@ -268,7 +268,7 @@ describe('AgenticInvestigationsPlugin', () => {
       );
 
       expect(() =>
-        contract.registerInvestigationWorkflow('nightshift-investigation')
+        contract.registerInvestigationWorkflow('example-investigation-workflow')
       ).not.toThrow();
       expect(() => contract.registerInvestigationWorkflow('')).toThrow();
     });
