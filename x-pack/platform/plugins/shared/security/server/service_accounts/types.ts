@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import type {
   CreateServiceAccountParams,
   ServiceAccount,
@@ -55,17 +56,25 @@ export interface ServiceAccountsBackend {
 
   /**
    * Mints a fake `KibanaRequest` bound to the given service account, for use with `asScoped(...)`
-   * facilities. The credential is transparently replaced when it expires, within the configured
+   * facilities. The credential is transparently replaced after an Elasticsearch token-expiry
+   * failure, within the configured
    * `xpack.security.serviceAccounts.requestLifetime`. Already-issued tokens keep their upstream
-   * expiration. Performs no user authorization: callers must authorize their own users first.
+   * expiration. Kibana self-client calls do not yet trigger renewal (#290877).
+   * Performs no user authorization: callers must authorize their own users first.
    */
   createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest>;
 
   /**
-   * Replaces the credential of a service-account-bound fake request after the ES client reported
-   * a token-expiry 401 for it, returning the auth headers to retry with, or `null` when the request is not
+   * Replaces the credential of a service-account-bound fake request after a 401 was attributed to
+   * an expired token, returning the auth headers to retry with, or `null` when the request is not
    * bound to a service account or a replacement could not be minted. Only meant to be called by
-   * the ES-client unauthorized-error handler.
+   * the two unauthorized-error handlers that own a retry: the Elasticsearch client's, and Core's
+   * HTTP self client's.
+   *
+   * The result is credential-only by design. The Elasticsearch client merges it into the headers
+   * it sends upstream, so nothing that must not reach Elasticsearch — notably the UIAM
+   * internal-caller attestation — belongs here. The self client derives that itself, per attempt,
+   * from whichever credential it is about to send.
    *
    * Only requests minted by this backend are ever refreshed. Fake requests carrying external
    * (user-created) UIAM credentials and real inbound requests that happen to carry a service
@@ -76,10 +85,19 @@ export interface ServiceAccountsBackend {
 
   /**
    * Drops a fake request from the refresh registry: transparent credential replacement is
-   * permanently disabled and the request rides out the remainder of its current short-lived
-   * token. Idempotent, and a no-op for requests this backend did not mint.
+   * permanently disabled and its authorization header is removed. Copies of the issued token
+   * remain valid until upstream expiry; release does not remotely invalidate them. Idempotent,
+   * and a no-op for requests this backend did not mint.
    */
   releaseFakeRequest(request: KibanaRequest): void;
+
+  /**
+   * Describes the service account a fake request minted by this backend is bound to, as an
+   * {@link AuthenticatedPrincipal}, without contacting Elasticsearch. `null` for every other
+   * request: real requests (classified from their authenticated user instead), fake requests this
+   * backend did not mint, and released ones.
+   */
+  getFakeRequestPrincipal(request: KibanaRequest): AuthenticatedPrincipal | null;
 }
 
 /**

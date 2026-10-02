@@ -8,19 +8,10 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import { PlaceholderPage } from './components/placeholder_page';
-import {
-  NAV_ALERTS,
-  NAV_ATTACKS,
-  NAV_STREAMS,
-  NAV_THREAT_HUNT,
-} from './components/app_chrome/translations';
-import { ConversationsPage } from './pages/conversations';
+import { useAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
 import { EscalationsPage } from './pages/escalations';
-import { SettingsPage } from './pages/settings';
 import { WatchesRoutes } from './pages/watches/routes';
+import { LandingPage } from './pages/landing_page';
 
 /**
  * Renders the escalations page only when the current user has the `showEscalations`
@@ -28,10 +19,7 @@ import { WatchesRoutes } from './pages/watches/routes';
  * on a page whose list requests would be rejected with 403.
  */
 const EscalationsRoute: React.FC = () => {
-  const { services } = useKibana<CoreStart>();
-  const showEscalations =
-    services.application.capabilities.agenticInvestigations?.showEscalations === true;
-
+  const { showEscalations } = useAgenticInvestigationsCapabilities();
   return showEscalations ? <EscalationsPage /> : <Redirect to="/" />;
 };
 
@@ -45,13 +33,9 @@ const EscalationsRoute: React.FC = () => {
  */
 export const AlertZeroRoutes: React.FC = () => (
   <Routes>
-    <Route path="/" exact component={ConversationsPage} />
-    <Route path="/escalations" component={EscalationsRoute} />
-    <Route path="/alerts" render={() => <PlaceholderPage title={NAV_ALERTS} />} />
-    <Route path="/attacks" render={() => <PlaceholderPage title={NAV_ATTACKS} />} />
-    <Route path="/threat-hunt" render={() => <PlaceholderPage title={NAV_THREAT_HUNT} />} />
-    <Route path="/streams" render={() => <PlaceholderPage title={NAV_STREAMS} />} />
+    <Route path="/" exact component={LandingPage} />
+    <Route path="/escalations" exact component={EscalationsRoute} />
     <Route path="/watches" component={WatchesRoutes} />
-    <Route path="/settings" component={SettingsPage} />
+    <Redirect to="/" />
   </Routes>
 );

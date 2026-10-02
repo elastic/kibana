@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { z } from '@kbn/zod/v4';
 import type {
   ConversationEventUIDefinition,
   ConversationEventsServiceStartContract,
@@ -16,13 +15,11 @@ import { ConversationEventsService } from './conversation_events_service';
 
 const noteDefinition: ConversationEventUIDefinition = {
   type: 'scratch.note',
-  payloadSchema: z.object({ text: z.string() }),
   render: () => null,
 };
 
 const alertDefinition: ConversationEventUIDefinition = {
   type: 'security.alert_triaged',
-  payloadSchema: z.object({ alert_id: z.string() }),
   render: () => null,
 };
 
@@ -63,31 +60,27 @@ describe('ConversationEventsService', () => {
 
   it('throws when a type contains the id delimiter "::"', () => {
     const service = new ConversationEventsService();
-    expect(() =>
-      service.register({ type: 'bad::type', payloadSchema: z.object({}), render: () => null })
-    ).toThrow('must not contain "::"');
+    expect(() => service.register({ type: 'bad::type', render: () => null })).toThrow(
+      'must not contain "::"'
+    );
   });
 
   it('throws when a type is the reserved word "execution"', () => {
     const service = new ConversationEventsService();
-    expect(() =>
-      service.register({ type: 'execution', payloadSchema: z.object({}), render: () => null })
-    ).toThrow('reserved');
+    expect(() => service.register({ type: 'execution', render: () => null })).toThrow('reserved');
   });
 
   it('throws when a type is the reserved word "step"', () => {
     const service = new ConversationEventsService();
-    expect(() =>
-      service.register({ type: 'step', payloadSchema: z.object({}), render: () => null })
-    ).toThrow('reserved');
+    expect(() => service.register({ type: 'step', render: () => null })).toThrow('reserved');
   });
 
   it('throws for every built-in timeline event type', () => {
     const service = new ConversationEventsService();
     for (const builtInType of BUILT_IN_CONVERSATION_EVENT_TYPES) {
-      expect(() =>
-        service.register({ type: builtInType, payloadSchema: z.object({}), render: () => null })
-      ).toThrow('built-in timeline event type');
+      expect(() => service.register({ type: builtInType, render: () => null })).toThrow(
+        'built-in timeline event type'
+      );
     }
   });
 
@@ -97,14 +90,12 @@ describe('ConversationEventsService', () => {
     expect(service.has('unknown')).toBe(false);
   });
 
-  it('infers z.infer<TSchema> as the payload type for render', () => {
+  it('types event.data in render from the TData parameter', () => {
     const service = new ConversationEventsService();
-    const schema = z.object({ count: z.number() });
 
-    // If schema inference is broken, `event.data.count: number` produces a type error here.
-    const def: ConversationEventUIDefinition<'test.counter', typeof schema> = {
+    // If TData stops reaching render, `event.data.count: number` is a type error here.
+    const def: ConversationEventUIDefinition<'test.counter', { count: number }> = {
       type: 'test.counter',
-      payloadSchema: schema,
       render: (event) => {
         const _count: number = event.data.count;
         return React.createElement('span', null, _count);
@@ -116,22 +107,20 @@ describe('ConversationEventsService', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Compile-time guard: ValidConversationEventType on the PUBLIC contract
-//
-// The service accepts any ConversationEventUIDefinition<TType> and relies on
-// runtime validation. The compile-time guard lives on the public contract's
-// `register` generic. These assertions use `declare` so they produce no runtime
-// code; the @ts-expect-error directives fail CI if the guard is ever removed.
-// ---------------------------------------------------------------------------
+// The service relies on runtime validation; the compile-time guard lives on the public contract's
+// `register` generic. The calls sit in functions that are never invoked, so TypeScript checks them
+// without running them; the @ts-expect-error directives fail CI if the guard is removed.
+describe('ConversationEventsServiceStartContract register', () => {
+  it('rejects invalid type names at compile time', () => {
+    const register: ConversationEventsServiceStartContract['register'] = jest.fn();
+    const rejectedAtCompileTime = [
+      // @ts-expect-error — built-in timeline types are rejected at compile time
+      () => register({ type: 'user_message', render: () => null }),
+      // @ts-expect-error — types containing "::" are rejected at compile time
+      () => register({ type: 'a::b', render: () => null }),
+    ];
 
-declare const register: ConversationEventsServiceStartContract['register'];
-
-// Dead code — TypeScript still checks the types; Jest never executes it.
-if (false) {
-  // @ts-expect-error — built-in timeline types are rejected at compile time
-  register({ type: 'user_message', payloadSchema: z.object({}), render: () => null });
-
-  // @ts-expect-error — types containing "::" are rejected at compile time
-  register({ type: 'a::b', payloadSchema: z.object({}), render: () => null });
-}
+    expect(rejectedAtCompileTime).toHaveLength(2);
+    expect(register).not.toHaveBeenCalled();
+  });
+});

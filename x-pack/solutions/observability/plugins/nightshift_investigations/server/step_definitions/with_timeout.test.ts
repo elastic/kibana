@@ -69,4 +69,42 @@ describe('withTimeout', () => {
     process.off('unhandledRejection', onUnhandled);
     expect(unhandled).toEqual([]);
   });
+
+  it('aborts the work and rejects when the parent signal aborts', async () => {
+    const parent = new AbortController();
+    let observed: AbortSignal | undefined;
+    const pending = withTimeout(
+      (signal) => {
+        observed = signal;
+        return new Promise(() => undefined);
+      },
+      10_000,
+      'timed out',
+      parent.signal
+    );
+
+    parent.abort();
+
+    await expect(pending).rejects.toThrow('Cancelled with the workflow execution');
+    expect(observed?.aborted).toBe(true);
+  });
+
+  it('aborts immediately when the parent signal is already aborted', async () => {
+    const parent = new AbortController();
+    parent.abort();
+    let observed: AbortSignal | undefined;
+
+    await expect(
+      withTimeout(
+        (signal) => {
+          observed = signal;
+          return new Promise(() => undefined);
+        },
+        10_000,
+        'timed out',
+        parent.signal
+      )
+    ).rejects.toThrow('Cancelled with the workflow execution');
+    expect(observed?.aborted).toBe(true);
+  });
 });

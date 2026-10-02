@@ -6,10 +6,11 @@
  */
 
 import React, { memo, useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import { UserAvatar, UserProfilesPopover, UserToolTip } from '@kbn/user-profile-components';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { UserProfilesPopover } from '@kbn/user-profile-components';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ESCALATION_QUEUE_LABELS } from './translations';
+import { AssigneeAvatarStack } from './assignee_avatar_stack';
 
 interface AssignToUsersProps {
   conversationId: string;
@@ -40,6 +41,8 @@ interface AssignToUsersProps {
   onSearchChange: (term: string) => void;
   /** Called with the new full selection when the user makes a change. */
   onChange: (selected: UserProfileWithAvatar[]) => void;
+  /** Size of the `+` button. */
+  buttonIconSize?: 'xs' | 's';
 }
 
 /**
@@ -50,7 +53,7 @@ interface AssignToUsersProps {
  * full replacement selection.
  *
  * Rendering rules:
- * - `canManage: false` → read-only avatar stack (or "Unassigned"), no picker.
+ * - `canManage: false` → read-only avatar stack (empty when unassigned), no picker.
  * - `isProfilesLoading: true` → picker button disabled; prevents a change that
  *   would silently drop unresolved UIDs from the replace-in-full payload.
  */
@@ -65,6 +68,7 @@ export const AssignToUsers = memo<AssignToUsersProps>(
     canManage,
     onSearchChange,
     onChange,
+    buttonIconSize = 'xs',
   }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -78,29 +82,8 @@ export const AssignToUsers = memo<AssignToUsersProps>(
       [onChange]
     );
 
-    const avatarStack =
-      selected.length === 0 ? (
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {ESCALATION_QUEUE_LABELS.unassigned}
-          </EuiText>
-        </EuiFlexItem>
-      ) : (
-        selected.map((profile) => (
-          <EuiFlexItem key={profile.uid} grow={false}>
-            <UserToolTip user={profile.user} avatar={profile.data?.avatar}>
-              <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
-            </UserToolTip>
-          </EuiFlexItem>
-        ))
-      );
-
     if (!canManage) {
-      return (
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          {avatarStack}
-        </EuiFlexGroup>
-      );
+      return <AssigneeAvatarStack profiles={selected} />;
     }
 
     const button = (
@@ -112,13 +95,16 @@ export const AssignToUsers = memo<AssignToUsersProps>(
           onClick={togglePopover}
           isDisabled={isProfilesLoading}
           data-test-subj={`assignToUsersAdd-${conversationId}`}
+          size={buttonIconSize}
         />
       </EuiToolTip>
     );
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-        {avatarStack}
+        <EuiFlexItem grow={false}>
+          <AssigneeAvatarStack profiles={selected} />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <UserProfilesPopover
             isOpen={isPopoverOpen}

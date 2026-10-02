@@ -6,13 +6,21 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { addPanelsItemSchema, addSectionPanelItemSchema, editPanelItemSchema } from '.';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
+import {
+  addPanelsItemSchema,
+  addSectionPanelItemSchema,
+  buildConfigPanelContent,
+  editPanelItemSchema,
+  getConfigPanelEditError,
+} from '.';
+
+const grid = { x: 0, y: 0, w: 12, h: 5 };
 
 const lensRequest = {
   source: 'request' as const,
-  type: 'vis' as const,
   query: 'show total requests',
-  grid: { x: 0, y: 0, w: 12, h: 5 },
+  grid,
 };
 
 describe('panel item schemas', () => {
@@ -34,58 +42,186 @@ describe('panel item schemas', () => {
   ])('requires chartType for a Lens request through the %s schema', (_, schema) => {
     expect(schema.safeParse(lensRequest).success).toBe(false);
   });
-});
 
-const customContentBase = {
-  source: 'config' as const,
-  type: 'custom_content' as const,
-  grid: { x: 0, y: 0, w: 6, h: 4 },
-  config: { prompt: 'Show a KPI card for total errors' },
-};
-
-describe('custom_content panel schemas', () => {
   it.each([
     ['add_panels', addPanelsItemSchema],
     ['add_section', addSectionPanelItemSchema],
-  ])('accepts a minimal custom_content panel (prompt only) through %s', (_, schema) => {
-    expect(schema.safeParse(customContentBase).success).toBe(true);
+  ])('rejects a by-value visualization config through the %s schema', (_, schema) => {
+    expect(
+      schema.safeParse({
+        source: 'config',
+        type: 'vis',
+        grid,
+        config: { type: 'metric' },
+      }).success
+    ).toBe(false);
+  });
+});
+
+describe('custom_content panel schemas', () => {
+  const customContentRequest = {
+    source: 'request' as const,
+    renderer: 'custom_content' as const,
+    grid,
+    query: 'Show a KPI card for total errors',
+  };
+
+  it.each([
+    ['add_panels', addPanelsItemSchema],
+    ['add_section', addSectionPanelItemSchema],
+  ])('accepts a custom_content request with only a query through %s', (_, schema) => {
+    expect(schema.safeParse(customContentRequest).success).toBe(true);
   });
 
   it.each([
     ['add_panels', addPanelsItemSchema],
     ['add_section', addSectionPanelItemSchema],
-  ])('accepts a custom_content panel with template and esqlQuery through %s', (_, schema) => {
+  ])(
+    'keeps esql and drops Lens-only fields on a custom_content request through %s',
+    (_, schema) => {
+      const result = schema.safeParse({
+        ...customContentRequest,
+        esql: 'FROM logs-* | STATS count = COUNT(*) BY service.name',
+        chartType: SupportedChartType.Metric,
+        index: 'logs-*',
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toMatchObject({
+        esql: 'FROM logs-* | STATS count = COUNT(*) BY service.name',
+      });
+      expect(result.data).not.toHaveProperty('chartType');
+      expect(result.data).not.toHaveProperty('index');
+    }
+  );
+
+  it.each([
+    ['add_panels', addPanelsItemSchema],
+    ['add_section', addSectionPanelItemSchema],
+  ])('rejects a custom_content request without a query through %s', (_, schema) => {
+    const { query, ...withoutQuery } = customContentRequest;
+
+    expect(schema.safeParse(withoutQuery).success).toBe(false);
+  });
+
+  it('rejects the former config-source custom_content shape', () => {
     expect(
-      schema.safeParse({
-        ...customContentBase,
-        config: {
-          prompt: 'Error rate by service',
-          template: '<div>{{ row["service.name"].value }}</div>',
-          esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY service.name',
-        },
+      addPanelsItemSchema.safeParse({
+        source: 'config',
+        type: 'custom_content',
+        grid,
+        config: { prompt: 'Show a KPI card' },
       }).success
+    ).toBe(false);
+  });
+});
+
+describe('edit_panels item schema', () => {
+  const customContentEdit = {
+    source: 'request' as const,
+    renderer: 'custom_content' as const,
+    panelId: 'cc-1',
+  };
+
+  it('accepts a Lens edit without renderer', () => {
+    expect(
+      editPanelItemSchema.safeParse({ source: 'request', panelId: 'panel-1', query: 'retitle' })
+        .success
     ).toBe(true);
   });
 
   it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])('rejects a custom_content panel missing prompt through %s', (_, schema) => {
-    expect(
-      schema.safeParse({
-        ...customContentBase,
-        config: {},
-      }).success
-    ).toBe(false);
+    ['a query-only', { query: 'Updated KPI' }],
+    ['an esql-only', { esql: 'FROM logs-* | STATS count = COUNT(*)' }],
+    ['a query-removing', { esql: null }],
+  ])('accepts %s custom_content edit', (_, fields) => {
+    expect(editPanelItemSchema.safeParse({ ...customContentEdit, ...fields }).success).toBe(true);
   });
 
-  it('accepts a custom_content edit_panels item', () => {
+  it('rejects a custom_content edit with nothing to change', () => {
+    expect(editPanelItemSchema.safeParse(customContentEdit).success).toBe(false);
+  });
+
+  it('accepts a markdown config edit', () => {
+    expect(
+      editPanelItemSchema.safeParse({
+        source: 'config',
+        type: 'markdown',
+        panelId: 'md-1',
+        config: { content: 'hello' },
+      }).success
+    ).toBe(true);
+  });
+});
+
+describe('by-value panel type registry', () => {
+  it('builds panel content for the registered embeddable type', () => {
+    expect(buildConfigPanelContent('markdown', { content: 'hello' })).toEqual({
+      type: MARKDOWN_EMBEDDABLE_TYPE,
+      config: { content: 'hello' },
+    });
+  });
+
+  it('allows editing a panel of the same embeddable type', () => {
+    expect(
+      getConfigPanelEditError('markdown', {
+        id: 'md-1',
+        type: MARKDOWN_EMBEDDABLE_TYPE,
+        config: { content: 'old' },
+        grid,
+      })
+    ).toBeUndefined();
+  });
+
+  it('rejects editing a panel of a different embeddable type', () => {
+    expect(
+      getConfigPanelEditError('markdown', { id: 'panel-1', type: 'lens', config: {}, grid })
+    ).toMatch(/Panel "panel-1" with type "lens" cannot be edited as markdown/);
+  });
+});
+
+describe('ML anomaly panel schemas', () => {
+  const chartsBase = {
+    source: 'config' as const,
+    type: 'ml_anomaly_charts' as const,
+    grid: { x: 0, y: 0, w: 24, h: 15 },
+    config: { job_ids: ['job-1'], title: 'Anomaly charts of job-1' },
+  };
+
+  it.each([
+    ['add_panels', addPanelsItemSchema],
+    ['add_section', addSectionPanelItemSchema],
+  ])('accepts an anomaly charts panel with title through %s', (_, schema) => {
+    expect(schema.safeParse(chartsBase).success).toBe(true);
+  });
+
+  it('accepts ML anomaly panel edit_panels items', () => {
     expect(
       editPanelItemSchema.safeParse({
         source: 'config' as const,
-        type: 'custom_content' as const,
-        panelId: 'panel-123',
-        config: { prompt: 'Updated KPI', template: '<div>Updated</div>' },
+        type: 'ml_anomaly_charts' as const,
+        panelId: 'charts-1',
+        config: { job_ids: ['job-1'], severity_threshold: 50 },
+      }).success
+    ).toBe(true);
+    expect(
+      editPanelItemSchema.safeParse({
+        source: 'config' as const,
+        type: 'ml_anomaly_swimlane' as const,
+        panelId: 'swim-1',
+        config: {
+          job_ids: ['job-1'],
+          swimlane_type: 'overall',
+          severity_threshold: 75,
+        },
+      }).success
+    ).toBe(true);
+    expect(
+      editPanelItemSchema.safeParse({
+        source: 'config' as const,
+        type: 'ml_single_metric_viewer' as const,
+        panelId: 'smv-1',
+        config: { job_ids: ['job-1'], selected_entities: { 'host.name': 'web-01' } },
       }).success
     ).toBe(true);
   });

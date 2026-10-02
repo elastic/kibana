@@ -42,6 +42,18 @@ interface EscalationQueueProps {
   onLoadMore?: () => void;
   /** If set, renders an inline error state in place of the item list. */
   error?: Error | null;
+  /**
+   * When provided, each escalation row becomes clickable and calls this callback
+   * with the full escalation item.
+   */
+  onClickCard?: (escalation: EscalationQueueItem) => void;
+  /** Highlights the row whose id matches this value (e.g. the flyout is open for it). */
+  selectedConversationId?: string;
+  /**
+   * When provided, called per card to produce an href for the title link, enabling
+   * Cmd/middle-click to open in a new tab and showing the URL on hover.
+   */
+  getHref?: (escalation: EscalationQueueItem) => string | undefined;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -65,7 +77,17 @@ const StyledAccordion = styled(EuiAccordion)`
  * server total while the list grows one page at a time.
  */
 export const EscalationQueue = memo<EscalationQueueProps>(
-  ({ status, escalations, renderAssignees, totalItemCount, onLoadMore, error }) => {
+  ({
+    status,
+    escalations,
+    renderAssignees,
+    totalItemCount,
+    onLoadMore,
+    error,
+    onClickCard,
+    selectedConversationId,
+    getHref,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const serverTotal = totalItemCount ?? escalations.length;
     const remaining = serverTotal - escalations.length;
@@ -113,6 +135,9 @@ export const EscalationQueue = memo<EscalationQueueProps>(
                     escalation={escalation}
                     hasBorder={i < escalations.length - 1 || showLoadMore}
                     renderAssignees={renderAssignees}
+                    onClickCard={onClickCard}
+                    isSelected={escalation.id === selectedConversationId}
+                    href={getHref?.(escalation)}
                   />
                 </EuiFlexItem>
               ))}

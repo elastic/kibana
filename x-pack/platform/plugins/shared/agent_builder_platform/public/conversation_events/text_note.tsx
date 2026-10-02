@@ -10,7 +10,7 @@ import { EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ConversationEventUIDefinition } from '@kbn/agent-builder-browser';
 import { TEXT_NOTE_EVENT_TYPE } from '../../common/conversation_events/constants';
-import { textNoteEventSchema } from '../../common/conversation_events/text_note';
+import type { TextNoteEventData } from '../../common/conversation_events/text_note';
 
 // Loaded on first render, not at plugin start — keeps EUI panel/text/title out of
 // the startup bundle.
@@ -20,10 +20,9 @@ const TextNoteRenderer = lazy(() =>
 
 export const textNoteEventUiDefinition: ConversationEventUIDefinition<
   typeof TEXT_NOTE_EVENT_TYPE,
-  typeof textNoteEventSchema
+  TextNoteEventData
 > = {
   type: TEXT_NOTE_EVENT_TYPE,
-  payloadSchema: textNoteEventSchema,
   render: (event) => (
     <Suspense fallback={<EuiSkeletonText lines={2} />}>
       <TextNoteRenderer data={event.data} />

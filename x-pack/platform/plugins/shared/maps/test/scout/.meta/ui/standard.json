@@ -1,9 +1,107 @@
 {
-  "sha1": "f19e02a2ed8a8fe577b579a9fc081db4a2aafb63",
+  "sha1": "d49c96022f0379b29aa58bc563f88ff443561de9",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "694730c31f2a6ba-2e1725303013af0",
+      "title": "Maps - auto fit map to bounds - initial location should automatically fit to bounds on initial map load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/auto_fit_to_bounds_initial_location.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "48cc07c8dabdf99-1944fb19c1b92d9",
+      "title": "Maps - auto fit map to bounds - with joins should automatically fit to bounds when query is applied",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/auto_fit_to_bounds_with_joins.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "e2fd6f62df8023c-71b36e1cdb08048",
+      "title": "Maps - auto fit map to bounds - without joins should automatically fit to bounds when query is applied",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/auto_fit_to_bounds_without_joins.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "e2fd6f62df8023c-bdcdf5e6b665853",
+      "title": "Maps - auto fit map to bounds - without joins should sync layers even when there is no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/auto_fit_to_bounds_without_joins.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "f30ebb186a7696e-db1e8a8b3c957b6",
+      "title": "Maps - blended vector layer should request documents when zoomed to smaller regions showing less data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/blended_vector_layer.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "f30ebb186a7696e-b78c10455694b39",
+      "title": "Maps - blended vector layer should request clusters when zoomed to larger regions showing lots of data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/blended_vector_layer.spec.ts",
+        "line": 45,
+        "column": 11
+      }
+    },
+    {
+      "id": "f30ebb186a7696e-c5ac2ffdce36589",
+      "title": "Maps - blended vector layer should request documents when query narrows data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/blended_vector_layer.spec.ts",
+        "line": 48,
+        "column": 15
+      }
+    },
     {
       "id": "f6a280d8279d22c-f971711f1dbaf1d",
       "title": "Maps embedded in dashboard - request cancellation cancels search when navigating away from the dashboard",
@@ -31,6 +129,20 @@
       }
     },
     {
+      "id": "43bc63ddaba86b0-d8548e6b6a91a8d",
+      "title": "Maps - filter by map extent filter by map extent lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/filter_by_map_extent.spec.ts",
+        "line": 39,
+        "column": 37
+      }
+    },
+    {
       "id": "0d46d86b877f63c-caca4780f786cad",
       "title": "Maps Full screen mode",
       "expectedStatus": "passed",
@@ -48,6 +160,48 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/full_screen_mode.spec.ts",
         "line": 18,
         "column": 43
+      }
+    },
+    {
+      "id": "33cd82ee8ea79c8-9c8dbc398b758dd",
+      "title": "Maps - tooltip filter actions apply filter action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/tooltip_filter_actions.spec.ts",
+        "line": 37,
+        "column": 37
+      }
+    },
+    {
+      "id": "33cd82ee8ea79c8-dc9613c55761c90",
+      "title": "Maps - tooltip filter actions dashboard drilldown action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/tooltip_filter_actions.spec.ts",
+        "line": 48,
+        "column": 13
+      }
+    },
+    {
+      "id": "33cd82ee8ea79c8-3a614e041e60734",
+      "title": "Maps - tooltip filter actions url drilldown action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/tooltip_filter_actions.spec.ts",
+        "line": 67,
+        "column": 7
       }
     }
   ]

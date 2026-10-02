@@ -17,14 +17,28 @@ the `kibana-report-flaky-tests` pipeline after the report is generated.
 
 For every suite in the report, worst first: when its tests are not all covered by an issue, a
 suite issue is filed, at most `--max-new-issues` (default 10) per run, titled
-`Flaky <Framework> suite: <suite title>` and labelled `failed-test` plus the owning
-teams' labels (in `elastic/kibana` only). The body carries the per-test numbers with the branch
-each test qualified on, the suite details, the most frequent sampled failures and a collapsed
-breakdown by pipeline; issues that merely mention the file are linked as possibly related. A suite is
+`Flaky <Framework> [UI|API] suite: <suite title>` (the category comes from the config, e.g.
+`Flaky Scout API suite: …`, `Flaky Jest integration suite: …`) and labelled `failed-test` plus the
+owning teams' labels (in `elastic/kibana` only). The body carries the per-test numbers with the
+branch each test qualified on, the suite details including what the config runs, the suite's
+distinct errors with their share of its failures and the pipelines, branches, targets and job each
+was last seen in, and breakdowns by branch (with the ones every setup skips it on marked ⏭️), by Scout target (deployment mode and location, for
+suites that recorded one) and by pipeline naming the branches each failed on; issues that merely
+mention the file are linked as possibly related. A suite is
 skipped, and the issue recorded, when every one of its tests has an issue, open or closed, a
 per-test one or one about the suite or its file; commenting on and reopening
 those issues is left to a later iteration, so is the stale `failed-test` sweep closing the issues
 of suites that drop out of the report.
+
+Flaky tests that were skipped since are left out first (`--no-omit-skipped-tests` keeps them):
+on every branch the test failed on, every setup (pipeline, config, target) that ran it skipped it
+in its latest run. A suite left with no test gets no issue (`all-tests-skipped`).
+
+The body ends with hidden `flaky-test-suite` metadata (`<!-- kibanaCiData = … -->`): the suite's
+file, title, framework and test ids, the branches a test of the suite failed on (`suite.branches`,
+pull requests left out) and the pipelines its file failed on (`suite.pipelines`). Besides the
+matching below, `/skip` and the Slack notifications of `elastic/kibana-operations` (`triage/`)
+read it to find the `describe` block to skip and the branches to skip it on.
 
 A GitHub write that fails is logged and recorded, the run goes on with the next suite and exits
 non-zero at the end. `--dry-run` reads the real issues and logs what would be filed without

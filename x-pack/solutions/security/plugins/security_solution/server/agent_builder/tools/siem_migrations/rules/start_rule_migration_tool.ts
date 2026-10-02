@@ -44,6 +44,7 @@ const schema = StartRuleMigrationRequestBody.extend({
     .object({
       ids: z
         .array(NonEmptyString)
+        .min(1)
         .max(200)
         .describe(
           'REPROCESS only, paired with retry: "selected". The rule item ids to reprocess. Omit for START/RESUME.'

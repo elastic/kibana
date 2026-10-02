@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { CreateExceptionListItemOptions } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { BlocklistValidator } from './blocklist_validator';
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
@@ -35,14 +36,15 @@ describe('Blocklists API validations', () => {
     });
 
     const buildItem = (
-      entries: CreateExceptionListItemOptions['entries']
+      entries: CreateExceptionListItemOptions['entries'],
+      osTypes: string[] = ['windows']
     ): CreateExceptionListItemOptions =>
       ({
         listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
         name: 'Test blocklist',
         description: '',
         namespaceType: 'agnostic',
-        osTypes: ['windows'],
+        osTypes,
         tags: [GLOBAL_ARTIFACT_TAG],
         entries,
       } as unknown as CreateExceptionListItemOptions);
@@ -169,6 +171,37 @@ describe('Blocklists API validations', () => {
         )
       ).rejects.toThrow(/null characters in fields: subject_name/);
     });
+
+    const hashEntries = (count: number): CreateExceptionListItemOptions['entries'] =>
+      Array.from({ length: count }, () => ({
+        field: 'file.hash.sha256',
+        type: 'match_any',
+        operator: 'included',
+        value: ['a'.repeat(64)],
+      }));
+
+    it.each([OperatingSystem.WINDOWS, OperatingSystem.LINUX, OperatingSystem.MAC])(
+      'rejects more than 250 hash entries for %s',
+      async (os) => {
+        await expect(
+          validator.validatePreCreateItem(buildItem(hashEntries(251), [os]))
+        ).rejects.toThrow('array size is [251], but cannot be greater than [250]');
+      }
+    );
+
+    it.each([OperatingSystem.WINDOWS, OperatingSystem.LINUX, OperatingSystem.MAC])(
+      'rejects more than one non-hash entry for %s',
+      async (os) => {
+        const entries: CreateExceptionListItemOptions['entries'] = [
+          ...filePathEntry(['C:\\Program Files\\app-one.exe']),
+          ...filePathEntry(['C:\\Program Files\\app-two.exe']),
+        ];
+
+        await expect(validator.validatePreCreateItem(buildItem(entries, [os]))).rejects.toThrow(
+          'Only one entry is allowed when not using hash field type'
+        );
+      }
+    );
   });
   // -----------------------------------------------------------------------------
   //

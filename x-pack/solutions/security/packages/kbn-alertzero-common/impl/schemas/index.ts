@@ -35,8 +35,18 @@ export {
 
 export {
   AnalysisWindowDays,
+  FpCountThreshold,
+  FpRateThresholdPct,
+  LookbackDays,
+  MaxGapsPerRun,
+  RuleCoverageWorkerExtras,
   RuleTuningWorkerExtras,
 } from './components/detection_watch_settings.gen';
+
+export {
+  AutoCloseConfidenceScoreMinThreshold,
+  AlertTriageWorkerExtras,
+} from './components/floor_watch_settings.gen';
 
 export { ListWatchesResponse } from './watches/list_watches_route.gen';
 export { GetWatchResponse } from './watches/get_watch_route.gen';
@@ -46,3 +56,41 @@ export {
   UpdateWorkerRequestParams,
   UpdateWorkerResponse,
 } from './workers/update_worker_route.gen';
+export {
+  AffectedAsset,
+  HuntCompleteness,
+  HuntForThreatHit,
+  HuntForThreatResult,
+  HuntForThreatStatus,
+  HuntIncompleteness,
+  HuntIncompleteReason,
+  HuntIoc,
+  HuntIocType,
+  HuntScope,
+  HuntScopeResolution,
+  IndexScopeStatus,
+  IndexScopeWindow,
+} from './components/hunt.gen';
+export { HuntForThreatRequestBody, HuntForThreatResponse } from './hunt/hunt_for_threat_route.gen';
+export { HuntIndexScopeResponse } from './hunt/hunt_index_scope_route.gen';
+export {
+  HuntBehaviorArticleContext,
+  HuntBehaviorIoc,
+  HuntBehaviorRequestBody,
+  HuntBehaviorResponse,
+  HuntBehaviorStatus,
+} from './hunt/hunt_behavior_route.gen';
+export {
+  CandidatesRequestBody,
+  CandidatesResponse,
+  CandidateSkipReason,
+} from './hunt/candidates_route.gen';
+export {
+  HuntCoordinatorRequestBody,
+  HuntCoordinatorResponse,
+  HuntCoordinatorStatus,
+} from './hunt/hunt_coordinator_route.gen';
+export {
+  FindOrCreateInvestigationRequestBody,
+  FindOrCreateInvestigationResponse,
+} from './hunt/find_or_create_investigation_route.gen';

@@ -26,6 +26,7 @@ apiTest.describe(
   () => {
     let cookieHeader: Record<string, string>;
     let viewerCookieHeader: Record<string, string>;
+    let adminProfileUid: string;
 
     // Ids seeded in beforeAll, cleaned up in afterAll.
     let openEscalationId: string;
@@ -53,11 +54,19 @@ apiTest.describe(
         responseType: 'json',
       });
       openInvestigationId = expectCreated(invResult, 'open investigation');
+      adminProfileUid = invResult.body.user?.id as string;
+      if (!adminProfileUid) {
+        throw new Error('admin profile uid not found in investigation creation response');
+      }
 
       // Open escalation — must appear in the list.
       const openResult = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-        body: { linked_investigation_id: openInvestigationId, visibility: 'public' },
+        body: {
+          linked_investigation_id: openInvestigationId,
+          visibility: 'public',
+          assignees: [adminProfileUid],
+        },
         responseType: 'json',
       });
       openEscalationId = expectCreated(openResult, 'open escalation');
@@ -102,14 +111,14 @@ apiTest.describe(
       });
       privateInvestigationId = expectCreated(privateInvResult, 'private investigation');
 
-      // Private escalation owned by admin with a collaborator that is neither admin nor
-      // viewer. Viewer (not owner, not a listed collaborator) must NOT see it in the list.
+      // Private escalation owned by admin with an assignee that is neither admin nor
+      // viewer. Viewer (not owner, not a listed assignee) must NOT see it in the list.
       const privateResult = await apiClient.post(CREATE_ESCALATION_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         body: {
           linked_investigation_id: privateInvestigationId,
           visibility: 'private',
-          collaborators: ['u_scout_fake_collaborator_not_viewer'],
+          assignees: ['u_scout_fake_assignee_not_viewer'],
         },
         responseType: 'json',
       });
@@ -218,19 +227,15 @@ apiTest.describe(
       expect(response.body.pagination.per_page).toBe(5);
     });
 
-    apiTest(
-      'viewer (escalations_read via includeIn: read) can list escalations',
-      async ({ apiClient }) => {
-        // With the mutually_exclusive sub-feature, viewer holds escalations_read.
-        // They should be able to list but not create or update.
-        const response = await apiClient.get(LIST_ESCALATIONS_PATH, {
-          headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
-          responseType: 'json',
-        });
+    apiTest('viewer (escalations_read) can list escalations', async ({ apiClient }) => {
+      // Viewer holds escalations_read through base Read (includeIn: 'read'). They can list but not create or update.
+      const response = await apiClient.get(LIST_ESCALATIONS_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...viewerCookieHeader },
+        responseType: 'json',
+      });
 
-        expect(response).toHaveStatusCode(200);
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+    });
 
     apiTest('returns 400 when per_page is 0', async ({ apiClient }) => {
       const response = await apiClient.get(`${LIST_ESCALATIONS_PATH}?page=1&per_page=0`, {

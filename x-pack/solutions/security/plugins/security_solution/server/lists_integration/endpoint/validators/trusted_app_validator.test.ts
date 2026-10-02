@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { CreateExceptionListItemOptions } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
 import { TrustedAppValidator } from './trusted_app_validator';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
@@ -38,14 +39,15 @@ describe('Endpoint Exceptions API validations', () => {
 
     const buildItem = (
       entries: CreateExceptionListItemOptions['entries'],
-      tags: string[] = [GLOBAL_ARTIFACT_TAG]
+      tags: string[] = [GLOBAL_ARTIFACT_TAG],
+      osTypes: string[] = ['windows']
     ): CreateExceptionListItemOptions =>
       ({
         listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
         name: 'Test trusted app',
         description: '',
         namespaceType: 'agnostic',
-        osTypes: ['windows'],
+        osTypes,
         tags,
         entries,
       } as unknown as CreateExceptionListItemOptions);
@@ -182,6 +184,32 @@ describe('Endpoint Exceptions API validations', () => {
         /maximum length of \[1024\]/
       );
     });
+
+    const pathEntries = (count: number): CreateExceptionListItemOptions['entries'] =>
+      Array.from({ length: count }, (_, index) => ({
+        field: 'process.executable.caseless',
+        type: 'match',
+        operator: 'included',
+        value: `C:\\Program Files\\app-${index}\\app.exe`,
+      }));
+
+    it.each([OperatingSystem.WINDOWS, OperatingSystem.LINUX, OperatingSystem.MAC])(
+      'rejects more than 250 entries for %s',
+      async (os) => {
+        await expect(
+          validator.validatePreCreateItem(buildItem(pathEntries(251), [GLOBAL_ARTIFACT_TAG], [os]))
+        ).rejects.toThrow('array size is [251], but cannot be greater than [250]');
+      }
+    );
+
+    it.each([OperatingSystem.WINDOWS, OperatingSystem.LINUX, OperatingSystem.MAC])(
+      'rejects entries that duplicate a field for %s',
+      async (os) => {
+        await expect(
+          validator.validatePreCreateItem(buildItem(pathEntries(2), [GLOBAL_ARTIFACT_TAG], [os]))
+        ).rejects.toThrow('Duplicated entry');
+      }
+    );
   });
   // -----------------------------------------------------------------------------
   //
