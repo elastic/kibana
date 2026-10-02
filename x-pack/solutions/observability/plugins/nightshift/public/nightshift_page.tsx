@@ -45,9 +45,9 @@ export function NightshiftPage(): React.ReactElement | null {
   const managementHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
     path: '/streams',
   });
+  const nightshiftEnabled = featureFlags.useBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
   const canUseAutomations =
-    featureFlags.getBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false) &&
-    nightshiftInvestigations?.investigationsClient != null;
+    nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
   const investigationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/investigations',
   });
@@ -79,7 +79,6 @@ export function NightshiftPage(): React.ReactElement | null {
     : undefined;
 
   // The secrets API is disabled (404) unless the nightshift.enabled flag is on.
-  const nightshiftEnabled = featureFlags.useBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
   const canManageSandboxSecrets =
     canManage && nightshiftInvestigations?.investigationsClient != null && nightshiftEnabled;
   const [isSandboxSecretsFlyoutOpen, setIsSandboxSecretsFlyoutOpen] = useState(false);
