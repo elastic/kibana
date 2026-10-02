@@ -37,6 +37,7 @@ const PASSTHROUGH_ENV_KEYS = [
   'SERVERLESS_TESTS_ONLY',
   'UIAM_DOCKER_IMAGE',
   'UIAM_COSMOSDB_DOCKER_IMAGE',
+  'UIAM_COSMOS_DB_MEMORY',
 ] as const;
 
 const scoutExtraEnv: Record<string, string> = Object.fromEntries(

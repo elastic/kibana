@@ -60,6 +60,7 @@ const MAX_CONTAINER_READY_CHECK_RETRIES = Math.ceil(
 );
 
 const ENV_DEFAULTS = {
+  UIAM_COSMOS_DB_MEMORY: '4g',
   UIAM_COSMOS_DB_PORT: '8081',
   UIAM_COSMOS_DB_UI_PORT: '8082',
   UIAM_SERVICE_PORT: '8443',
@@ -102,12 +103,12 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--net',
       'elastic',
 
-      // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
-      // when total stack RSS approaches Docker VM limit.
+      // Bound a runaway emulator, but stay well clear of its cold-start peak: if the
+      // cgroup OOM-killer reaps PostgreSQL, the container never reports healthy.
       '--memory',
-      '1g',
+      env.UIAM_COSMOS_DB_MEMORY,
       '--memory-swap',
-      '1g',
+      env.UIAM_COSMOS_DB_MEMORY,
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,

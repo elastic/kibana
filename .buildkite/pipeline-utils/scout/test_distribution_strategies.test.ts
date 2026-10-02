@@ -118,6 +118,7 @@ describe('scoutTestDistributionStrategies', () => {
     delete process.env.SERVERLESS_TESTS_ONLY;
     delete process.env.UIAM_DOCKER_IMAGE;
     delete process.env.UIAM_COSMOSDB_DOCKER_IMAGE;
+    delete process.env.UIAM_COSMOS_DB_MEMORY;
   });
 
   afterEach(() => {

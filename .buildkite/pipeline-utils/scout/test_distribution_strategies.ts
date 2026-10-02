@@ -85,6 +85,7 @@ async function distributeScoutTestsOnLanes() {
           'SERVERLESS_TESTS_ONLY',
           'UIAM_DOCKER_IMAGE',
           'UIAM_COSMOSDB_DOCKER_IMAGE',
+          'UIAM_COSMOS_DB_MEMORY',
         ]),
         ...collectEnvFromLabels(),
       };
