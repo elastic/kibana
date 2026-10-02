@@ -35,6 +35,7 @@ const JINA_READER_SEARCH_URL = 'https://s.jina.ai' as const;
 const MAX_URL_LENGTH = 2048;
 const MAX_OPTION_KEY_LENGTH = 200;
 const MAX_FILENAME_LENGTH = 255;
+// Actions also rejects input larger than the configured server.maxPayload (default 1 MiB).
 const MAX_FILE_BASE64_LENGTH = 4 * Math.ceil((10 * 1024 * 1024) / 3);
 
 function mapPluginReturnFormatToReaderReturnFormat(returnFormat?: RETURN_FORMAT): string {
@@ -259,7 +260,12 @@ export const JinaReaderConnector: ConnectorSpec = {
         z.object({
           file: z.string().max(MAX_FILE_BASE64_LENGTH).describe('Base64-encoded file content'),
           filename: z.string().max(MAX_FILENAME_LENGTH).optional().describe('Original filename'),
-          pageNumber: z.number().optional().describe('Page number to render (starting from 1)'),
+          pageNumber: z
+            .number()
+            .int()
+            .min(1)
+            .optional()
+            .describe('Page number to render (starting from 1)'),
           options: z
             .record(z.string().max(MAX_OPTION_KEY_LENGTH), z.any())
             .optional()
